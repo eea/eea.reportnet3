@@ -1,5 +1,6 @@
 package org.eea.validation.controller;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -18,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -303,16 +305,14 @@ public class RulesControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void createNewRuleExceptionTest() throws EEAException {
     Mockito.doThrow(EEAException.class).when(rulesService).createNewRule(Mockito.anyLong(),
         Mockito.any());
-    try {
-      rulesControllerImpl.createNewRule(1L, new RuleVO());
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      throw e;
-    }
+
+    ResponseEntity<?> value = rulesControllerImpl.createNewRule(1L, new RuleVO());
+    assertEquals(null, value.getBody());
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
   }
 
   /**

@@ -68,7 +68,7 @@ const TreeViewExpandableItem = ({
     return !isUndefined(buttons)
       ? buttons.map((button, i) => (
           <Button
-            className={`${
+            className={`${button.className} ${
               !isUndefined(button.disabled) && button.disabled
                 ? styles.defaultExpandableButtonDisable
                 : styles.defaultExpandableButtonEnable

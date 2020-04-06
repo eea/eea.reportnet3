@@ -131,13 +131,32 @@
 
   .status {
     grid-row: 3/4;
-    grid-column: 2/3;
+    grid-column: 3/3;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     p {
       margin: 0px;
       font-weight: bold;
+      span {
+        font-weight: normal;
+      }
+    }
+  }
+
+  .obligation {
+    grid-row: 2/4;
+    grid-column: 2/3;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
+    p {
+      margin: 0;
+      font-weight: bold;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
       span {
         font-weight: normal;
       }

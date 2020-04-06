@@ -13,14 +13,16 @@ import { DataTable } from 'ui/views/_components/DataTable';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const TableView = ({ checkedRow, data, onSelectObl }) => {
+export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagination, pagination }) => {
   const resources = useContext(ResourcesContext);
+
+  const onLoadPagination = event => onChangePagination({ first: event.first, rows: event.rows, page: event.page });
 
   const onLoadCheckButton = row => (
     <div className={styles.checkColum}>
       <Checkbox
         id={`${row.id}_checkbox`}
-        isChecked={checkedRow.title === row.title}
+        isChecked={checkedObligation.id === row.id}
         onChange={() => onSelectObl(row)}
         role="checkbox"
       />
@@ -38,6 +40,8 @@ export const TableView = ({ checkedRow, data, onSelectObl }) => {
     </div>
   );
 
+  const paginatorRightText = `${resources.messages['totalObligations']}: ${data.length}`;
+
   const renderCheckColum = <Column key="checkId" body={row => onLoadCheckButton(row)} />;
 
   const renderColumns = data => {
@@ -51,11 +55,12 @@ export const TableView = ({ checkedRow, data, onSelectObl }) => {
           if (obligation === 'title') template = onLoadTitleTemplate;
           return (
             <Column
+              body={template}
               columnResizeMode="expand"
               field={obligation}
               header={resources.messages[obligation]}
               key={obligation}
-              body={template}
+              sortable={true}
             />
           );
         })
@@ -63,12 +68,16 @@ export const TableView = ({ checkedRow, data, onSelectObl }) => {
     return [renderCheckColum, ...repOblCols];
   };
 
-  return (
+  return isEmpty(data) ? (
+    <h3 className={styles.noObligations}>{resources.messages['noObligationsWithSelectedParameters']}</h3>
+  ) : (
     <DataTable
       autoLayout={true}
-      onRowClick={event => onSelectObl(event.data)}
+      first={pagination.first}
+      getPageChange={onLoadPagination}
       paginator={true}
-      rows={10}
+      paginatorRight={paginatorRightText}
+      rows={pagination.rows}
       rowsPerPageOptions={[5, 10, 15]}
       totalRecords={data.length}
       value={data}>

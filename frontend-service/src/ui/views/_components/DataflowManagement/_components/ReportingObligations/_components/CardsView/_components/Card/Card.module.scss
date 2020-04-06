@@ -1,0 +1,79 @@
+.card {
+  background: var(--card-item-bg);
+  border-radius: 15px;
+  box-shadow: var(--card-item-box-shadow);
+  column-gap: 1.5rem;
+  display: grid;
+  grid-template-columns: 85% calc(15% - 1.5rem);
+  grid-template-rows: 70% calc(30% - 1rem);
+  height: 150px;
+  margin: 0.5rem;
+  padding: 1rem;
+  position: relative;
+  row-gap: 1rem;
+  width: calc(100% / 5.5);
+
+  &::before {
+    content: '';
+    background: url('/assets/img/logo.png');
+    background-size: 50%;
+    background-repeat: no-repeat;
+    background-position: 150% 50%;
+    bottom: 0;
+    left: 0;
+    opacity: 0.2;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    .title {
+      display: -webkit-box;
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+    .subtitle {
+      display: -webkit-box;
+      margin: 0.5rem 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1;
+    }
+  }
+
+  .link {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    z-index: 1;
+    .linkIcon {
+      cursor: pointer;
+    }
+  }
+
+  .date {
+    display: flex;
+    align-items: center;
+
+    .dueDate {
+      font-weight: bold;
+    }
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+  }
+}

@@ -1,2 +1,2 @@
-export const Create = ({ dataflowRepository }) => async (name, description) =>
-  dataflowRepository.create(name, description);
+export const Create = ({ dataflowRepository }) => async (name, description, obligationId) =>
+  dataflowRepository.create(name, description, obligationId);

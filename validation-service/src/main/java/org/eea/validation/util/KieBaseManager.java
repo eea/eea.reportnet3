@@ -1,9 +1,6 @@
 package org.eea.validation.util;
 
 import java.io.FileNotFoundException;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,12 +12,6 @@ import org.drools.template.ObjectDataCompiler;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
-import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
-import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
-import org.eea.validation.persistence.data.domain.DatasetValidation;
-import org.eea.validation.persistence.data.domain.DatasetValue;
-import org.eea.validation.persistence.data.domain.Validation;
-import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
@@ -52,15 +43,9 @@ public class KieBaseManager {
    */
   private static final String REGULATION_TEMPLATE_FILE = "/templateRules.drl";
 
-
-  /** The Constant timeZone. */
-  private static final ZoneId timeZone = ZoneId.of("UTC");
-
-  /** The Constant dateFormatter. */
-  private static final DateTimeFormatter dateFormatter =
-      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
-
-  /** The rules repository. */
+  /**
+   * The rules repository.
+   */
   @Autowired
   private RulesRepository rulesRepository;
   /**
@@ -69,13 +54,11 @@ public class KieBaseManager {
   @Autowired
   private DatasetMetabaseController datasetMetabaseController;
 
-  /** The schemas repository. */
+  /**
+   * The schemas repository.
+   */
   @Autowired
   private SchemasRepository schemasRepository;
-
-  /** The dataset repository. */
-  @Autowired
-  private DatasetRepository datasetRepository;
 
 
   /**
@@ -83,7 +66,9 @@ public class KieBaseManager {
    *
    * @param datasetId the dataset id
    * @param datasetSchema the dataset schema
+   *
    * @return the kie base
+   *
    * @throws FileNotFoundException the file not found exception
    */
   public KieBase reloadRules(Long datasetId, String datasetSchema) throws FileNotFoundException {
@@ -97,9 +82,6 @@ public class KieBaseManager {
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
     ObjectDataCompiler compiler = new ObjectDataCompiler();
     KieServices kieServices = KieServices.Factory.get();
-
-    // we take the dataset value for salve all fail validations
-    DatasetValue datasetValue = datasetRepository.findById(datasetId).orElse(null);
 
     // we bring the datasetschema
     DataSetSchema dataSetSchema =
@@ -182,6 +164,7 @@ public class KieBaseManager {
                       rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
                 default:
+                  expression.append("( !isBlank(value) || ");
                   break;
               }
             }
@@ -192,9 +175,9 @@ public class KieBaseManager {
                   expression.append(whenConditionWithParenthesis).append(")").toString());
             }
         }
-        // that method clear the datas and delete rules who are bad compose(bad syntax)
-        cleanRules(originName, ruleAttributes, compiler, kieServices, datasetValue, rule,
-            schemasDrools, typeValidation);
+        ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
+            rule.getRuleId().toString(), typeValidation, schemasDrools, rule.getWhenCondition(),
+            rule.getThenCondition().get(0), rule.getThenCondition().get(1), originName));
       });
     }
 
@@ -204,70 +187,17 @@ public class KieBaseManager {
   }
 
   /**
-   * Clean rules.
-   *
-   * @param originName the origin name
-   * @param ruleAttributes the rule attributes
-   * @param compiler the compiler
-   * @param kieServices the kie services
-   * @param datasetValue the dataset value
-   * @param rule the rule
-   * @param schemasDrools the schemas drools
-   * @param typeValidation the type validation
-   */
-  private void cleanRules(String originName, List<Map<String, String>> ruleAttributes,
-      ObjectDataCompiler compiler, KieServices kieServices, DatasetValue datasetValue, Rule rule,
-      String schemasDrools, TypeValidation typeValidation) {
-    // Check rules before add to Rules Knowledge DB
-    List<Map<String, String>> ruleAttributesHelper = new ArrayList<>();
-    ruleAttributesHelper.add(passDataToMap(rule.getReferenceId().toString(),
-        rule.getRuleId().toString(), typeValidation, schemasDrools, rule.getWhenCondition(),
-        rule.getThenCondition().get(0), rule.getThenCondition().get(1), originName));
-
-    // that method create another kiebase one by one and verify all rules are correct
-    KieHelper kieHelperTest = kiebaseAssemble(compiler, kieServices, ruleAttributesHelper);
-    Results results = kieHelperTest.verify();
-    // if one rule is not correct he delete it and create a dataset validation about that rule
-    if (results.hasMessages(Message.Level.ERROR)) {
-
-      Validation ruleValidation = new Validation();
-      ruleValidation.setIdRule(rule.getRuleId().toString());
-      ruleValidation.setLevelError(ErrorTypeEnum.BLOCKER);
-      ruleValidation.setMessage("The rule: " + rule.getShortCode()
-          + ", does not meet the required format to validate the data, please review it.");
-      ruleValidation.setValidationDate(ZonedDateTime.now(timeZone).format(dateFormatter));
-      ruleValidation.setTypeEntity(EntityTypeEnum.DATASET);
-      ruleValidation.setOriginName(originName);
-
-      DatasetValidation ruleDSValidation = new DatasetValidation();
-      ruleDSValidation.setValidation(ruleValidation);
-      List<DatasetValidation> ruleDSValidations = new ArrayList<>();
-      ruleDSValidations.add(ruleDSValidation);
-      datasetValue.setDatasetValidations(ruleDSValidations);
-
-      datasetRepository.save(datasetValue);
-
-    } else {
-
-      ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
-          rule.getRuleId().toString(), typeValidation, schemasDrools, rule.getWhenCondition(),
-          rule.getThenCondition().get(0), rule.getThenCondition().get(1), originName));
-
-    }
-  }
-
-  /**
    * Text rule correct and if that rule is ok we can create it.
    *
    * @param datasetSchemaId the dataset schema id
    * @param rule the rule
+   *
    * @return true, if successful
    */
-  public boolean textRuleCorrect(String datasetSchemaId, Rule rule) {
+  public void textRuleCorrect(String datasetSchemaId, Rule rule) {
 
     KieServices kieServices = KieServices.Factory.get();
     ObjectDataCompiler compiler = new ObjectDataCompiler();
-    Boolean correctRules = Boolean.TRUE;
     List<Map<String, String>> ruleAttribute = new ArrayList<>();
     TypeValidation typeValidation = TypeValidation.DATASET;
     String schemasDrools = "";
@@ -320,6 +250,7 @@ public class KieBaseManager {
           whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
           break;
         default:
+          expression.append("( !isBlank(value) || ");
           break;
       }
     }
@@ -332,7 +263,6 @@ public class KieBaseManager {
         typeValidation, schemasDrools, expression.toString(), rule.getThenCondition().get(0),
         rule.getThenCondition().get(1), ""));
 
-
     // We create the same text like in kiebase and with that part we check if the rule is correct
     KieHelper kieHelperTest = kiebaseAssemble(compiler, kieServices, ruleAttribute);
 
@@ -340,9 +270,8 @@ public class KieBaseManager {
     // if one rule is not correct we return a false and the rule
     // will not be created
     if (results.hasMessages(Message.Level.ERROR)) {
-      correctRules = Boolean.FALSE;
+      rule.setEnabled(Boolean.FALSE);
     }
-    return correctRules;
   }
 
   /**
@@ -351,6 +280,7 @@ public class KieBaseManager {
    * @param compiler the compiler
    * @param kieServices the kie services
    * @param ruleAttributesHelper the rule attributes helper
+   *
    * @return the kie helper
    */
   private KieHelper kiebaseAssemble(ObjectDataCompiler compiler, KieServices kieServices,
@@ -377,6 +307,7 @@ public class KieBaseManager {
    * @param message the message
    * @param error the error
    * @param tableSchemaName the table schema name
+   *
    * @return the map
    */
   private Map<String, String> passDataToMap(String idSchema, String idRule,

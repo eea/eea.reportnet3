@@ -186,7 +186,8 @@ export const DataCollection = withRouter(({ match, history }) => {
           tableSchemaNamesList.push(tableSchema.tableSchemaName);
           return {
             id: tableSchema['tableSchemaId'],
-            name: tableSchema['tableSchemaName']
+            name: tableSchema['tableSchemaName'],
+            readOnly: tableSchema['tableSchemaReadOnly']
           };
         })
       );

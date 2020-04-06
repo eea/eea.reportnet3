@@ -3,11 +3,36 @@ import moment from 'moment';
 
 import { apiObligation } from 'core/infrastructure/api/domain/model/Obligation';
 
-import { Organization } from 'core/domain/model/Obligation/Organization/Organization';
 import { Country } from 'core/domain/model/Obligation/Country/Country';
 import { Issue } from 'core/domain/model/Obligation/Issue/Issue';
 import { LegalInstrument } from 'core/domain/model/Obligation/LegalInstrument/LegalInstrument';
 import { Obligation } from 'core/domain/model/Obligation/Obligation';
+import { Organization } from 'core/domain/model/Obligation/Organization/Organization';
+
+const getCountries = async () => {
+  const countriesDTO = await apiObligation.getCountries();
+  return parseCountryList(countriesDTO);
+};
+
+const getIssues = async () => {
+  const issuesDTO = await apiObligation.getIssues();
+  return parseIssueList(issuesDTO);
+};
+
+const getOrganizations = async () => {
+  const clientsDTO = await apiObligation.getOrganizations();
+  return parseOrganizationList(clientsDTO);
+};
+
+const obligationById = async obligationId => {
+  const obligationByIdDTO = await apiObligation.obligationById(obligationId);
+  return parseObligation(obligationByIdDTO);
+};
+
+const opened = async () => {
+  const openedObligationsDTO = await apiObligation.openedObligations();
+  return parseObligationList(openedObligationsDTO);
+};
 
 const parseCountry = countryDTO =>
   new Country({
@@ -27,11 +52,7 @@ const parseCountryList = countriesDTO => {
   return;
 };
 
-const parseIssue = issueDTO =>
-  new Issue({
-    id: issueDTO.id,
-    name: issueDTO.name
-  });
+const parseIssue = issueDTO => new Issue({ id: issueDTO.id, name: issueDTO.name });
 
 const parseIssueList = issuesDTO => {
   if (!isNil(issuesDTO)) {
@@ -39,7 +60,6 @@ const parseIssueList = issuesDTO => {
     issuesDTO.forEach(issueDTO => issues.push(parseIssue(issueDTO)));
     return issues;
   }
-  return;
 };
 
 const parseLegalInstrument = legalInstrumentDTO => {
@@ -58,11 +78,13 @@ const parseObligation = obligationDTO =>
     comment: obligationDTO.comment,
     countries: obligationDTO.countries,
     description: obligationDTO.description,
-    expirationDate: moment.unix(obligationDTO.nextDeadline).format('YYYY-MM-DD'),
+    expirationDate: !isNil(obligationDTO.nextDeadline)
+      ? moment.unix(obligationDTO.nextDeadline / 1000).format('YYYY-MM-DD')
+      : moment(obligationDTO.nextDeadline).format('YYYY-MM-DD'),
     issues: obligationDTO.issues,
     legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),
     obligationId: obligationDTO.obligationId,
-    // organization: parseOrganization(obligationDTO.client),
+    organization: parseOrganization(obligationDTO.client),
     title: obligationDTO.oblTitle,
     validSince: obligationDTO.validSince,
     validTo: obligationDTO.validTo
@@ -99,31 +121,6 @@ const parseOrganizationList = organizationsDTO => {
     return organizations;
   }
   return;
-};
-
-const getCountries = async () => {
-  const countriesDTO = await apiObligation.getCountries();
-  return parseCountryList(countriesDTO);
-};
-
-const getIssues = async () => {
-  const issuesDTO = await apiObligation.getIssues();
-  return parseIssueList(issuesDTO);
-};
-
-const getOrganizations = async () => {
-  const clientsDTO = await apiObligation.getOrganizations();
-  return parseOrganizationList(clientsDTO);
-};
-
-const obligationById = async obligationId => {
-  const obligationByIdDTO = await apiObligation.obligationById(obligationId);
-  return parseObligation(obligationByIdDTO);
-};
-
-const opened = async () => {
-  const openedObligationsDTO = await apiObligation.openedObligations();
-  return parseObligationList(openedObligationsDTO);
 };
 
 export const ApiObligationRepository = {

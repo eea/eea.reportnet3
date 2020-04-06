@@ -36,7 +36,9 @@ public enum RuleOperatorEnum {
   /** Equals for strings. */
   SEQ("equals"),
   /** Equals for string ignoring case. */
-  SEQIC("equalsIgnoreCase");
+  SEQIC("equalsIgnoreCase"),
+  /** Match. */
+  MATCH("matches");
 
   /** Operator's Java representation. */
   private final String label;

@@ -15,6 +15,12 @@ export const reportingObligationReducer = (state, { type, payload }) => {
     case 'FILTER_DATA':
       return { ...state, filteredData: payload.filteredData };
 
+    case 'SEARCHED_DATA':
+      return { ...state, searchedData: payload.data };
+
+    case 'ON_PAGINATE':
+      return { ...state, pagination: payload.pagination };
+
     default:
       return state;
   }

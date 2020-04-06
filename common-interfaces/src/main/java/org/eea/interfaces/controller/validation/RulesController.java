@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -102,9 +103,11 @@ public interface RulesController {
    *
    * @param datasetId the dataset id
    * @param ruleVO the rule VO
+   * @return
    */
   @PutMapping("/createNewRule")
-  void createNewRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO);
+  ResponseEntity<?> createNewRule(@RequestParam("datasetId") long datasetId,
+      @RequestBody RuleVO ruleVO);
 
 
   /**

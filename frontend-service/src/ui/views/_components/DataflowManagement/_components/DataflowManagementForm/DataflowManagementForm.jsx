@@ -16,77 +16,79 @@ import { DataflowService } from 'core/services/Dataflow';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const DataflowManagementForm = ({ dataflowData, isEditForm, onCancel, onCreate, onEdit, onSearch, refresh }) => {
+const DataflowManagementForm = ({
+  data,
+  dataflowId,
+  getData,
+  isEditForm,
+  onCancel,
+  onCreate,
+  onEdit,
+  onSearch,
+  refresh,
+  onResetData
+}) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const [hasErrors, setHasErrors] = useState(false);
   const [isNameDuplicated, setIsNameDuplicated] = useState(false);
+  const [isObligationEmpty, setIsObligationEmpty] = useState(false);
 
   const form = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
-    if (!isNil(inputRef) && refresh) {
-      inputRef.current.focus();
-    }
+    if (!isNil(inputRef) && refresh) inputRef.current.focus();
   }, [hasErrors, inputRef.current, refresh]);
 
   useEffect(() => {
     if (!isNil(form.current) && refresh) {
       form.current.resetForm();
-      setIsNameDuplicated(false);
       setHasErrors(false);
+      setIsNameDuplicated(false);
+      setIsObligationEmpty(false);
     }
   }, [refresh, form.current]);
 
   const dataflowCrudValidation = Yup.object().shape({
     name: Yup.string().required(' '),
-    description: Yup.string()
-      .required()
-      .max(255, resources.messages['dataflowDescriptionValidationMax'])
+    description: Yup.string().required(' ').max(255, resources.messages['dataflowDescriptionValidationMax'])
   });
 
   return (
     <Formik
       ref={form}
       enableReinitialize={true}
-      initialValues={isEditForm ? dataflowData : { name: '', description: '' }}
+      initialValues={data}
       validationSchema={dataflowCrudValidation}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
         try {
           if (isEditForm) {
-            await DataflowService.update(dataflowData.id, values.name, values.description);
-            onEdit(values.name, values.description);
+            await DataflowService.update(dataflowId, values.name, values.description, data.obligation.id);
+            onEdit(values.name, values.description, data.obligation.id);
           } else {
-            await DataflowService.create(values.name, values.description);
+            await DataflowService.create(values.name, values.description, data.obligation.id);
             onCreate();
           }
         } catch (error) {
           setHasErrors(true);
-          if (error.response.data == DataflowConf.errorTypes['dataflowExists']) {
-            setIsNameDuplicated(true);
-            notificationContext.add({
-              type: 'DATAFLOW_NAME_EXISTS'
-            });
-          } else {
-            const notification = isEditForm
-              ? {
-                  type: 'DATAFLOW_UPDATING_ERROR',
-                  content: {
-                    dataflowId: dataflowData.id,
-                    dataflowName: values.name
-                  }
-                }
-              : {
-                  type: 'DATAFLOW_CREATION_ERROR',
-                  content: {
-                    dataflowName: values.name
-                  }
-                };
-            notificationContext.add(notification);
+          if (error.response.data === DataflowConf.errorTypes['dataflowObligationEmpty']) {
+            setIsObligationEmpty(true);
+            notificationContext.add({ type: 'DATAFLOW_OBLIGATION_EMPTY' });
           }
+
+          if (error.response.data === DataflowConf.errorTypes['dataflowExists']) {
+            setIsNameDuplicated(true);
+            notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
+          }
+
+          const notification = isEditForm
+            ? { type: 'DATAFLOW_UPDATING_ERROR', content: { dataflowId: data.id, dataflowName: values.name } }
+            : { type: 'DATAFLOW_CREATION_ERROR', content: { dataflowName: values.name } };
+
+          notificationContext.add(notification);
         } finally {
           setSubmitting(false);
         }
@@ -96,34 +98,43 @@ const DataflowManagementForm = ({ dataflowData, isEditForm, onCancel, onCreate, 
           <fieldset>
             <div className={`formField${(!isEmpty(errors.name) && touched.name) || isNameDuplicated ? ' error' : ''}`}>
               <Field
+                autoComplete="off"
                 innerRef={inputRef}
                 name="name"
                 placeholder={resources.messages['createDataflowName']}
                 onChange={event => {
+                  getData({ ...data, name: event.target.value });
                   handleChange(event);
                   setIsNameDuplicated(false);
                   setHasErrors(false);
                 }}
                 type="text"
-                value={values.name}
+                value={data.name}
               />
               <ErrorMessage className="error" name="name" component="div" />
             </div>
             <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
               <Field
+                autoComplete="off"
                 name="description"
                 component="textarea"
+                onChange={event => getData({ ...data, description: event.target.value })}
                 placeholder={resources.messages['createDataflowDescription']}
-                value={values.description}
+                value={data.description}
               />
               <ErrorMessage className="error" name="description" component="div" />
             </div>
-            <div className={styles.search}>
+            <div
+              className={`formField${
+                (!isEmpty(errors.obligation) && touched.obligation) || isObligationEmpty ? ' error' : ''
+              } ${styles.search}`}>
               <Field
                 className={styles.searchInput}
-                name="associatedObligation"
+                name="obligation"
                 placeholder={resources.messages['associatedObligation']}
+                readOnly={true}
                 type="text"
+                value={data.obligation.title}
               />
               <Button
                 className={styles.searchButton}
@@ -132,6 +143,7 @@ const DataflowManagementForm = ({ dataflowData, isEditForm, onCancel, onCreate, 
                 layout="simple"
                 onClick={onSearch}
               />
+              <ErrorMessage className="error" name="obligation" component="div" />
             </div>
           </fieldset>
           <fieldset>
@@ -151,12 +163,13 @@ const DataflowManagementForm = ({ dataflowData, isEditForm, onCancel, onCreate, 
                 type={isSubmitting ? '' : 'submit'}
               />
               <Button
-                className={`${styles.cancelButton} ${
-                  !isEditForm ? 'p-button-secondary' : 'p-button-danger'
-                }  p-button-animated-blink`}
+                className={`${styles.cancelButton} p-button-secondary p-button-animated-blink`}
                 label={resources.messages['cancel']}
                 icon="cancel"
-                onClick={onCancel}
+                onClick={() => {
+                  onCancel();
+                  onResetData();
+                }}
               />
             </div>
           </fieldset>
