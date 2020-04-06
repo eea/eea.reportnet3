@@ -9,6 +9,8 @@ import { ReportingObligations } from './_components/ReportingObligations';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { dataflowManagementReducer } from './_functions/Reducers/dataflowManagementReducer';
+
 export const DataflowManagement = ({
   dataflowId,
   isEditForm,
@@ -19,32 +21,19 @@ export const DataflowManagement = ({
 }) => {
   const resources = useContext(ResourcesContext);
 
-  const formReducer = (state, { type, payload }) => {
-    switch (type) {
-      case 'INITIAL_LOAD':
-        return { ...state, ...payload };
-
-      case 'ON_LOAD_DATA':
-        return { ...state, name: payload.name, description: payload.description };
-
-      case 'ON_LOAD_OBLIGATION':
-        return { ...state, obligation: { id: payload.id, title: payload.title } };
-
-      case 'RESET_STATE':
-        return (state = payload.initialData);
-
-      default:
-        return state;
-    }
-  };
-
-  const formInitialState = {
+  const dataflowManagementInitialState = {
     name: isEditForm ? state.name : '',
     description: isEditForm ? state.description : '',
-    obligation: isEditForm ? state.obligations : { id: null, title: '' }
+    obligation:
+      isEditForm && state.obligations
+        ? { id: state.obligations.obligationId, title: state.obligations.title }
+        : { id: null, title: '' }
   };
 
-  const [formState, formDispatch] = useReducer(formReducer, formInitialState);
+  const [dataflowManagementState, dataflowManagementDispatch] = useReducer(
+    dataflowManagementReducer,
+    dataflowManagementInitialState
+  );
 
   const isDialogVisible = isEditForm ? 'isEditDialogVisible' : 'isAddDialogVisible';
 
@@ -67,13 +56,17 @@ export const DataflowManagement = ({
     </Fragment>
   );
 
-  const onLoadData = ({ name, description }) => formDispatch({ type: 'ON_LOAD_DATA', payload: { name, description } });
+  const onLoadData = ({ name, description }) =>
+    dataflowManagementDispatch({ type: 'ON_LOAD_DATA', payload: { name, description } });
 
-  const onLoadObligation = ({ id, title }) => formDispatch({ type: 'ON_LOAD_OBLIGATION', payload: { id, title } });
+  const onLoadObligation = ({ id, title }) =>
+    dataflowManagementDispatch({ type: 'ON_LOAD_OBLIGATION', payload: { id, title } });
 
-  const onResetData = () => formDispatch({ type: 'RESET_STATE', payload: { initialData: formInitialState } });
+  const onResetData = () =>
+    dataflowManagementDispatch({ type: 'RESET_STATE', payload: { initialData: dataflowManagementInitialState } });
 
-  const onResetObl = () => formDispatch({ type: 'ON_LOAD_OBLIGATION', payload: formInitialState.obligation });
+  const onResetObl = () =>
+    dataflowManagementDispatch({ type: 'ON_LOAD_OBLIGATION', payload: dataflowManagementInitialState.obligation });
 
   return (
     <Fragment>
@@ -81,9 +74,9 @@ export const DataflowManagement = ({
         footer={dialogFooter}
         header={resources.messages['reportingObligations']}
         onHide={() => onManageDialogs('isRepObDialogVisible', false, isDialogVisible, true)}
-        style={{ width: '80%' }}
+        style={{ width: '95%' }}
         visible={state.isRepObDialogVisible}>
-        <ReportingObligations oblChecked={formState.obligation} getObligation={onLoadObligation} />
+        <ReportingObligations getObligation={onLoadObligation} oblChecked={dataflowManagementState.obligation} />
       </Dialog>
 
       <Dialog
@@ -92,7 +85,7 @@ export const DataflowManagement = ({
         onHide={() => onManageDialogs(isDialogVisible, false)}
         visible={state.isAddDialogVisible || state.isEditDialogVisible}>
         <DataflowManagementForm
-          data={formState}
+          data={dataflowManagementState}
           dataflowId={dataflowId}
           getData={onLoadData}
           isEditForm={isEditForm}
