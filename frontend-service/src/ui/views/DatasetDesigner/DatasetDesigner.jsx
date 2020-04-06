@@ -156,7 +156,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, [validationListDialogVisible]);
 
   useEffect(() => {
-    if (history.location.search !== '') {
+    if (history.location.search !== '' || window.location.search !== '') {
       changeUrl();
     }
   }, [isPreviewModeOn]);
