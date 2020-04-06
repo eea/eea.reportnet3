@@ -105,6 +105,14 @@ const Dataflow = withRouter(({ history, match }) => {
     if (dataflowDataState.isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DESIGN']) {
       leftSideBarContext.addModels([
         {
+          className: 'dataflow-properties-help-step',
+          icon: 'infoCircle',
+          label: 'properties',
+          onClick: () => onManageDialogs('isPropertiesDialogVisible', true),
+          show: true,
+          title: 'properties'
+        },
+        {
           className: 'dataflow-edit-help-step',
           icon: 'edit',
           label: 'edit',
@@ -117,42 +125,34 @@ const Dataflow = withRouter(({ history, match }) => {
           label: 'manageRoles',
           onClick: () => onManageDialogs('isManageRolesDialogVisible', true),
           title: 'manageRoles'
-        },
-        {
-          className: 'dataflow-settings-help-step',
-          icon: 'settings',
-          label: 'settings',
-          onClick: () => onManageDialogs('isPropertiesDialogVisible', true),
-          show: true,
-          title: 'properties'
         }
       ]);
     } else if (dataflowDataState.isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DRAFT']) {
       leftSideBarContext.addModels([
+        {
+          className: 'dataflow-properties-help-step',
+          icon: 'infoCircle',
+          label: 'properties',
+          onClick: () => onManageDialogs('isPropertiesDialogVisible', true),
+          show: true,
+          title: 'properties'
+        },
         {
           className: 'dataflow-manage-roles-help-step',
           icon: 'manageRoles',
           label: 'manageRoles',
           onClick: () => onManageDialogs('isManageRolesDialogVisible', true),
           title: 'manageRoles'
-        },
-        {
-          className: 'dataflow-settings-help-step',
-          icon: 'settings',
-          label: 'settings',
-          onClick: () => onManageDialogs('isPropertiesDialogVisible', true),
-          show: true,
-          title: 'properties'
         }
       ]);
     } else {
       leftSideBarContext.addModels([
         {
-          className: 'dataflow-settings-provider-help-step',
-          icon: 'settings',
-          label: 'settings',
+          className: 'dataflow-properties-provider-help-step',
+          icon: 'infoCircle',
+          label: 'properties',
           onClick: () => onManageDialogs('isPropertiesDialogVisible', true),
-          title: 'settings'
+          title: 'properties'
         }
       ]);
     }
@@ -234,11 +234,11 @@ const Dataflow = withRouter(({ history, match }) => {
       },
       {
         content: <h2>{resources.messages['dataflowHelpStep10']}</h2>,
-        target: '.dataflow-settings-help-step'
+        target: '.dataflow-properties-help-step'
       },
       {
         content: <h2>{resources.messages['dataflowHelpStep11']}</h2>,
-        target: '.dataflow-settings-provider-help-step'
+        target: '.dataflow-properties-provider-help-step'
       }
     ];
 
