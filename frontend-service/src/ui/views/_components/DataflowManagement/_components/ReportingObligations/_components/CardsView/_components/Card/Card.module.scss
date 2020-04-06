@@ -1,7 +1,7 @@
 .card {
   background: var(--card-item-bg);
   border-radius: 15px;
-  box-shadow: var(--card-item-box-shadow);
+  // box-shadow: var(--card-item-box-shadow);
   column-gap: 1.5rem;
   cursor: pointer;
   display: grid;
@@ -14,9 +14,31 @@
   row-gap: 1rem;
   width: calc(100% / 5.5);
 
+  -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  -moz-transition: all 0.25s ease-in-out;
+  -ms-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  -ms-transition: all 0.25s ease-in-out;
+  -o-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  -o-transition: all 0.25s ease-in-out;
+  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  -webkit-transition: all 0.25s ease-in-out;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  transition: all 0.25s ease-in-out;
+
+  &:hover {
+    transform: scale(1.02, 1.02);
+    transition: transform 0.2s ease;
+
+    -webkit-box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+    -moz-box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+    -ms-box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+    -o-box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  }
+
   &::before {
     content: '';
-    background: url('/assets/img/logo.png');
+    background-image: url('/assets/img/logo.png') !important;
     background-size: 50%;
     background-repeat: no-repeat;
     background-position: 150% 50%;
@@ -76,5 +98,44 @@
     justify-content: center;
     align-items: center;
     z-index: 1;
+  }
+}
+
+.checked {
+  position: relative;
+  z-index: 0;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: 2px;
+    top: 2px;
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
+    background: var(--bg);
+    border-radius: 15px;
+    opacity: 1;
+
+    background-image: url('/assets/img/logo.png');
+    background-size: 50%;
+    background-repeat: no-repeat;
+    background-position: 150% 50%;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    z-index: -5;
+    left: -50%;
+    top: -50%;
+    width: 200%;
+    height: 200%;
+    opacity: 0.8;
+    background-color: var(--c-corporate-blue);
+    background-repeat: no-repeat;
+    background-size: 50% 50%, 50% 50%;
+    background-position: 0 0, 100% 0, 100% 100%, 0 100%;
   }
 }
