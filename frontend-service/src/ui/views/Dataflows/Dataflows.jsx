@@ -92,7 +92,6 @@ const Dataflows = withRouter(({ match, history }) => {
   }, [user]);
 
   useEffect(() => {
-    console.log('UserC', UserContext);
     const steps = [
       {
         content: <h2>{resources.messages['dataflowListHelp']}</h2>,

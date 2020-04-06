@@ -12,7 +12,6 @@ const UserDesignOptions = props => {
   const themeContext = useContext(ThemeContext);
   const userContext = useContext(UserContext);
 
-  console.log('props', props);
   return (
     <React.Fragment>
       <div className={styles.userDesignContainer}>

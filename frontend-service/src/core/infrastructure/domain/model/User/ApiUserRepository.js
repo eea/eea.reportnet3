@@ -54,7 +54,7 @@ const parseConfigurationDTO = (userConfigurationDTO) => {
   userConfiguration.dateFormat = userConfigurationDTO.dateFormat[0];
   userConfiguration.defaultRowsNumber = userConfigurationDTO.showLogoutConfirmation[0];
   userConfiguration.defaultLogoutConfirmation = userConfigurationDTO.defaultRowSelected[0];
-  userConfiguration.theme = userConfigurationDTO.defdefaultVisualTheme[0];
+  userConfiguration.theme = userConfigurationDTO.defaultVisualTheme[0];
   return userConfiguration;
 }
 

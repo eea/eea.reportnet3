@@ -27,7 +27,7 @@ const UserObligations = () => {
   }, []);
 
   useEffect(() => {
-    onLoadReportingDataflow();
+    // onLoadReportingDataflow(match);
   }, []);
 
   ////////////////////////////////////////////////////////////////////////////////////
@@ -73,8 +73,7 @@ const UserObligations = () => {
       allDataflows.accepted.forEach(element => {
         dataflowInitialValues[element.id] = { name: element.name, id: element.id, dataset: element.datasets };
       });
-      setInitialValues(dataflowInitialValues);
-      console.log(allDataflows.accepted);
+      setInitialValues(dataflowInitialValues);      
     } catch (error) {
       console.error('dataFetch error: ', error);
     }

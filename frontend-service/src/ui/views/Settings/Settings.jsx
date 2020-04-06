@@ -5,6 +5,7 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import styles from './Settings.module.scss';
 
+import { Spinner } from 'ui/views/_components/Spinner';
 import { routes } from 'ui/routes';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Title } from '../_components/Title/Title';
@@ -42,54 +43,39 @@ const reducer = (state, { type, payload }) => {
 
 const Settings = withRouter(({ history }) => {
   const [userConfiguration, setUserConfiguration] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [visibleUserSectionState, visibleUserSectionDispatch] = useReducer(reducer, initialState);
+  
   const userContext = useContext(UserContext);
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
-  const [visibleUserSectionState, visibleUserSectionDispatch] = useReducer(reducer, initialState);
   const initUserSettingsSection = () => {
     visibleUserSectionDispatch({ type: 'VISIBLE_USER_DESIGN_OPTIONS' });
-  };
-  const [attributes, setAttributes] = useState({});
-
-  useEffect(() => {
-    setAttributes({
-      defaultRowSelected: [userContext.userProps.defaultRowSelected],
-      defaultVisualTheme: [`${userContext.userProps.defaultVisualTheme}`],
-      showLogoutConfirmation: [`${userContext.userProps.showLogoutConfirmation}`],
-      dateFormat: [`${userContext.userProps.dateFormat}`]
-    });
-  }, [userContext]);
-
-  const updateUserConfiguration = async userConfiguration => {
-    try {
-      const updateUserConfiguration = await UserService.updateAttributes(userConfiguration);
-      console.log('updateUserConfiguration', updateUserConfiguration);
-    } catch (error) {
-      console.error(error);
-    }
   };
 
   const getUserConfiguration = async () => {
     try {
-      console.log('awat');
+      console.log('User Configuration: ', userConfiguration);
+      console.log('User Context', userContext);
       const userConfiguration = await UserService.getConfiguration();
-      console.log(userConfiguration);
+      setUserConfiguration(userConfiguration);
       userContext.dateFormat(userConfiguration.dateFormat);
       userContext.defaultRowSelected(parseInt(userConfiguration.defaultRowsNumber));
-      userContext.onToggleLogoutConfirm(userConfiguration.defaultLogoutConfirmation);
-      setUserConfiguration(userConfiguration);
-      console.log('userC', userConfiguration);
+      userContext.onToggleLogoutConfirm(userConfiguration.defaultLogoutConfirmation);      
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     getUserConfiguration();
+    console.log('userConfiguration', userConfiguration);
   }, []);
 
-  /////////////////////////////////////////////////
+
   useEffect(() => {
     userContext.defaultRowSelected(parseInt(userConfiguration.defaultRowSelected));
   }, []);
@@ -160,17 +146,12 @@ const Settings = withRouter(({ history }) => {
     return (
       <>
         {visibleUserSectionState.isVisibleUserDesignOptions && <UserDesignOptions />}
-
         {visibleUserSectionState.isVisibleUserSettingsOptions &&  <UserConfiguration />}
-
         <UserCard />
       </>
     );
   };
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
+  
   const layout = children => {
     return (
       <MainLayout
@@ -184,7 +165,8 @@ const Settings = withRouter(({ history }) => {
     );
   };
 
-  return layout(
+  const userConfigurations = () => 
+  layout(
     <div>
       <div className="rep-row">
         <div className={` rep-col-12 rep-col-sm-12`}>
@@ -200,6 +182,12 @@ const Settings = withRouter(({ history }) => {
         <div className={styles.sectionMainContent}>{toggleUserOptions()}</div>
       </div>
     </div>
+  );
+
+  return (
+    <>
+      {isLoading ? <Spinner className={styles.positioning} /> : userConfigurations()}
+    </>
   );
 });
 
