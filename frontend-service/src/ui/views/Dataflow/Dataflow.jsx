@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
-import isUndefined from 'lodash/isUndefined';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
 
@@ -17,7 +16,7 @@ import { Button } from 'ui/views/_components/Button';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { SettingsDialog } from './_components/SettingsDialog';
+import { PropertiesDialog } from './_components/PropertiesDialog';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { SnapshotsDialog } from './_components/SnapshotsDialog';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -245,16 +244,13 @@ const Dataflow = withRouter(({ history, match }) => {
 
     const loadedClassesSteps = [...dataflowSteps].filter(
       dataflowStep =>
-        !isUndefined(
-          document.getElementsByClassName(dataflowStep.target.substring(1, dataflowStep.target.length))[0]
-        ) || dataflowStep.target === 'body'
+        !isNil(document.getElementsByClassName(dataflowStep.target.substring(1, dataflowStep.target.length))[0]) ||
+        dataflowStep.target === 'body'
     );
     return loadedClassesSteps;
   };
 
-  const handleRedirect = target => {
-    history.push(target);
-  };
+  const handleRedirect = target => history.push(target);
 
   const manageRoleDialogFooter = (
     <Button
@@ -281,6 +277,7 @@ const Dataflow = withRouter(({ history, match }) => {
       type: 'ON_EDIT_DATA',
       payload: { name: newName, description: newDescription, isVisible: false }
     });
+    onLoadReportingDataflow();
   };
 
   const onHideSnapshotDialog = () => setIsActiveReleaseSnapshotDialog(false);
@@ -376,23 +373,17 @@ const Dataflow = withRouter(({ history, match }) => {
     setIsActiveReleaseSnapshotDialog(true);
   };
 
-  const onUpdateData = () => {
-    setIsDataUpdated(!isDataUpdated);
-  };
+  const onUpdateData = () => setIsDataUpdated(!isDataUpdated);
 
   useCheckNotifications(['ADD_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
 
-  const layout = children => {
-    return (
-      <MainLayout leftSideBarConfig={{ isCustodian: dataflowDataState.isCustodian, buttons: [] }}>
-        <div className="rep-container">{children}</div>
-      </MainLayout>
-    );
-  };
+  const layout = children => (
+    <MainLayout leftSideBarConfig={{ isCustodian: dataflowDataState.isCustodian, buttons: [] }}>
+      <div className="rep-container">{children}</div>
+    </MainLayout>
+  );
 
-  if (loading || isNil(dataflowDataState.data)) {
-    return layout(<Spinner />);
-  }
+  if (loading || isNil(dataflowDataState.data)) return layout(<Spinner />);
 
   return layout(
     <div className="rep-row">
@@ -452,7 +443,7 @@ const Dataflow = withRouter(({ history, match }) => {
           </Dialog>
         )}
 
-        <SettingsDialog
+        <PropertiesDialog
           dataflowDataState={dataflowDataState}
           dataflowId={dataflowId}
           history={history}

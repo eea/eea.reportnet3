@@ -325,6 +325,14 @@
         },
         {
           "key": "DELETE_DATASET_SCHEMA_LINK_ERROR"
+        },
+        {
+          "key": "LOAD_OPENED_OBLIGATION_ERROR"
+        },
+        {
+          "key": "DATAFLOW_OBLIGATION_EMPTY",
+          "lifeTime": 5000,
+          "fixed": false
         }
       ]
     },

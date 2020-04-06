@@ -108,7 +108,8 @@ export class DataTable extends Component {
     rowEditorValidator: null,
     onRowEditInit: null,
     onRowEditSave: null,
-    onRowEditCancel: null
+    onRowEditCancel: null,
+    getPageChange: null
   };
 
   static propTypes = {
@@ -196,7 +197,8 @@ export class DataTable extends Component {
     rowEditorValidator: PropTypes.func,
     onRowEditInit: PropTypes.func,
     onRowEditSave: PropTypes.func,
-    onRowEditCancel: PropTypes.func
+    onRowEditCancel: PropTypes.func,
+    getPageChange: PropTypes.func
   };
 
   constructor(props) {
@@ -435,6 +437,8 @@ export class DataTable extends Component {
   onPageChange(event) {
     if (this.props.onPage) this.props.onPage(event);
     else this.setState({ first: event.first, rows: event.rows });
+
+    if (this.props.getPageChange) this.props.getPageChange(event);
 
     if (this.props.onValueChange) {
       this.props.onValueChange();
