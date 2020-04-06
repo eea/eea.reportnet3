@@ -60,11 +60,12 @@ const Dataflow = withRouter(({ history, match }) => {
   const [loading, setLoading] = useState(true);
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
 
-  const [dataflowDataState, dataflowDataDispatch] = useReducer(dataflowDataReducer, {
+  const dataflowInitialState = {
     data: {},
     deleteInput: '',
     description: '',
-    hasRepresentatives: false,
+    formHasRepresentatives: false,
+    hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
     id: dataflowId,
     isCustodian: false,
@@ -75,7 +76,9 @@ const Dataflow = withRouter(({ history, match }) => {
     name: '',
     obligations: {},
     status: ''
-  });
+  };
+
+  const [dataflowDataState, dataflowDataDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
   const [receiptState, receiptDispatch] = useReducer(receiptReducer, {});
 
   useEffect(() => {
@@ -102,6 +105,14 @@ const Dataflow = withRouter(({ history, match }) => {
     if (dataflowDataState.isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DESIGN']) {
       leftSideBarContext.addModels([
         {
+          className: 'dataflow-properties-help-step',
+          icon: 'infoCircle',
+          label: 'properties',
+          onClick: () => onManageDialogs('isPropertiesDialogVisible', true),
+          show: true,
+          title: 'properties'
+        },
+        {
           className: 'dataflow-edit-help-step',
           icon: 'edit',
           label: 'edit',
@@ -114,24 +125,34 @@ const Dataflow = withRouter(({ history, match }) => {
           label: 'manageRoles',
           onClick: () => onManageDialogs('isManageRolesDialogVisible', true),
           title: 'manageRoles'
-        },
+        }
+      ]);
+    } else if (dataflowDataState.isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DRAFT']) {
+      leftSideBarContext.addModels([
         {
-          className: 'dataflow-settings-help-step',
-          icon: 'settings',
-          label: 'settings',
+          className: 'dataflow-properties-help-step',
+          icon: 'infoCircle',
+          label: 'properties',
           onClick: () => onManageDialogs('isPropertiesDialogVisible', true),
           show: true,
           title: 'properties'
+        },
+        {
+          className: 'dataflow-manage-roles-help-step',
+          icon: 'manageRoles',
+          label: 'manageRoles',
+          onClick: () => onManageDialogs('isManageRolesDialogVisible', true),
+          title: 'manageRoles'
         }
       ]);
     } else {
       leftSideBarContext.addModels([
         {
-          className: 'dataflow-settings-provider-help-step',
-          icon: 'settings',
-          label: 'settings',
+          className: 'dataflow-properties-provider-help-step',
+          icon: 'infoCircle',
+          label: 'properties',
           onClick: () => onManageDialogs('isPropertiesDialogVisible', true),
-          title: 'settings'
+          title: 'properties'
         }
       ]);
     }
@@ -142,13 +163,24 @@ const Dataflow = withRouter(({ history, match }) => {
     leftSideBarContext.addHelpSteps('dataflowHelp', steps);
   }, [
     dataflowDataState.data,
-    dataflowDataState.hasRepresentatives,
+    dataflowDataState.formHasRepresentatives,
     dataflowDataState.status,
     dataflowId,
     designDatasetSchemas,
     dataflowDataState.isCustodian,
     isDataSchemaCorrect
   ]);
+
+  useEffect(() => {
+    if (!isEmpty(dataflowDataState.data.representatives)) {
+      const representativesNoDatasets = dataflowDataState.data.representatives.filter(
+        representative => !representative.hasDatasets
+      );
+      //set for the first load
+      setHasRepresentativesWithoutDatasets(!isEmpty(representativesNoDatasets));
+      setFormHasRepresentatives(!isEmpty(representativesNoDatasets));
+    }
+  }, [dataflowDataState.data.representatives]);
 
   useEffect(() => {
     setLoading(true);
@@ -202,11 +234,11 @@ const Dataflow = withRouter(({ history, match }) => {
       },
       {
         content: <h2>{resources.messages['dataflowHelpStep10']}</h2>,
-        target: '.dataflow-settings-help-step'
+        target: '.dataflow-properties-help-step'
       },
       {
         content: <h2>{resources.messages['dataflowHelpStep11']}</h2>,
-        target: '.dataflow-settings-provider-help-step'
+        target: '.dataflow-properties-provider-help-step'
       }
     ];
 
@@ -228,12 +260,17 @@ const Dataflow = withRouter(({ history, match }) => {
       onClick={() => onManageDialogs('isManageRolesDialogVisible', false)}
     />
   );
+  const setHasRepresentativesWithoutDatasets = value =>
+    dataflowDataDispatch({
+      type: 'SET_HAS_REPRESENTATIVES_WITHOUT_DATASETS',
+      payload: { hasRepresentativesWithoutDatasets: value }
+    });
 
   const onConfirmDelete = event =>
     dataflowDataDispatch({ type: 'ON_DELETE_DATAFLOW', payload: { deleteInput: event.target.value } });
 
-  const onCheckRepresentatives = value =>
-    dataflowDataDispatch({ type: 'HAS_REPRESENTATIVES', payload: { hasRepresentatives: value } });
+  const setFormHasRepresentatives = value =>
+    dataflowDataDispatch({ type: 'SET_FORM_HAS_REPRESENTATIVES', payload: { formHasRepresentatives: value } });
 
   const onEditDataflow = (newName, newDescription) => {
     dataflowDataDispatch({
@@ -360,12 +397,12 @@ const Dataflow = withRouter(({ history, match }) => {
 
         <BigButtonList
           dataflowData={dataflowDataState.data}
+          dataflowDataState={dataflowDataState}
           dataflowId={dataflowId}
-          dataflowStatus={dataflowDataState.status}
           dataProviderId={dataProviderId}
           designDatasetSchemas={designDatasetSchemas}
           handleRedirect={handleRedirect}
-          hasRepresentatives={dataflowDataState.hasRepresentatives}
+          formHasRepresentatives={dataflowDataState.formHasRepresentatives}
           hasWritePermissions={dataflowDataState.hasWritePermissions}
           isCustodian={dataflowDataState.isCustodian}
           isDataSchemaCorrect={isDataSchemaCorrect}
@@ -396,9 +433,11 @@ const Dataflow = withRouter(({ history, match }) => {
             visible={dataflowDataState.isManageRolesDialogVisible}>
             <div className={styles.dialog}>
               <RepresentativesList
+                dataflowRepresentatives={dataflowDataState.data.representatives}
                 dataflowId={dataflowId}
                 isActiveManageRolesDialog={dataflowDataState.isManageRolesDialogVisible}
-                setHasRepresentatives={onCheckRepresentatives}
+                setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
+                setFormHasRepresentatives={setFormHasRepresentatives}
               />
             </div>
           </Dialog>

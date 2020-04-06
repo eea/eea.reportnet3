@@ -1,6 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import sortBy from 'lodash/sortBy';
 
 import { RepresentativeService } from 'core/services/Representative';
 
@@ -35,7 +36,7 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId) =>
       });
     } catch (error) {
       console.error('error on RepresentativeService.add', error);
-      if (error.response.status === 404) {
+      if (error.response.status === 400 || error.response.status === 404) {
         formDispatcher({
           type: 'REPRESENTATIVE_HAS_ERROR',
           payload: { representativeIdThatHasError: representatives[representatives.length - 1].representativeId }
@@ -54,6 +55,7 @@ export const createUnusedOptionsList = formDispatcher => {
 export const getAllDataProviders = async (selectedDataProviderGroup, formDispatcher) => {
   try {
     const responseAllDataProviders = await RepresentativeService.allDataProviders(selectedDataProviderGroup);
+
     formDispatcher({
       type: 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID',
       payload: { responseAllDataProviders }
@@ -63,16 +65,32 @@ export const getAllDataProviders = async (selectedDataProviderGroup, formDispatc
   }
 };
 
-const getAllRepresentatives = async (dataflowId, formDispatcher) => {
-  try {
-    const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
-    const representativesByCopy = cloneDeep(responseAllRepresentatives.representatives);
+const getAllRepresentatives = async (dataflowId, formDispatcher, formState) => {
+  if (isEmpty(formState.representatives) && !isEmpty(formState.dataflowRepresentatives)) {
+    const mimicResponse = {
+      group: { dataProviderGroupId: formState.dataflowRepresentatives[0].dataProviderGroupId },
+      representatives: sortBy(formState.dataflowRepresentatives, ['representativeId'])
+    };
+
+    const representativesByCopy = cloneDeep(mimicResponse.representatives);
+
     formDispatcher({
       type: 'INITIAL_LOAD',
-      payload: { response: responseAllRepresentatives, representativesByCopy }
+      payload: { response: mimicResponse, representativesByCopy }
     });
-  } catch (error) {
-    console.error('error on RepresentativeService.allRepresentatives', error);
+  } else {
+    try {
+      const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
+
+      const representativesByCopy = cloneDeep(responseAllRepresentatives.representatives);
+
+      formDispatcher({
+        type: 'INITIAL_LOAD',
+        payload: { response: responseAllRepresentatives, representativesByCopy }
+      });
+    } catch (error) {
+      console.error('error on RepresentativeService.allRepresentatives', error);
+    }
   }
 };
 
@@ -90,7 +108,7 @@ const getProviderTypes = async formDispatcher => {
 
 export const getInitialData = async (formDispatcher, dataflowId, formState) => {
   await getProviderTypes(formDispatcher);
-  await getAllRepresentatives(dataflowId, formDispatcher);
+  await getAllRepresentatives(dataflowId, formDispatcher, formState);
   if (!isEmpty(formState.representatives)) {
     await getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
     createUnusedOptionsList(formDispatcher);
@@ -183,7 +201,7 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
     } catch (error) {
       console.error('error on RepresentativeService.updateProviderAccount', error);
 
-      if (error.response.status === 404) {
+      if (error.response.status === 400 || error.response.status === 404) {
         formDispatcher({
           type: 'REPRESENTATIVE_HAS_ERROR',
           payload: { representativeIdThatHasError: updatedRepresentative.representativeId }
