@@ -347,6 +347,7 @@ export const BigButtonList = ({
         <p>{`${resources.messages['chooseExpirationDate']}: `}</p>
         <Calendar
           className={styles.calendar}
+          disabledDates={[new Date()]}
           inline={true}
           monthNavigator={true}
           minDate={new Date()}

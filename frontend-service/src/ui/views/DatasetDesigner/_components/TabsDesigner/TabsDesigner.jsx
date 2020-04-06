@@ -154,14 +154,9 @@ export const TabsDesigner = withRouter(
       }
     };
 
-    const onTabClicked = event => {
-      console.log(event.index);
-      setActiveIndex(event.index);
-    };
+    const onTabClicked = event => setActiveIndex(event.index);
 
-    const onTabEditingHeader = editing => {
-      setIsEditing(editing);
-    };
+    const onTabEditingHeader = editing => setIsEditing(editing);
 
     const onTableAdd = (header, tabIndex, initialHeader) => {
       if (header !== initialHeader) {
