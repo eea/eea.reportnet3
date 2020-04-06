@@ -239,15 +239,14 @@ public class RulesServiceImpl implements RulesService {
     rule.setType(EntityTypeEnum.FIELD);
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
-
     validateRule(rule);
-
-    // test if the rule is well defined, otherwise it is created but disabled
-    kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
 
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     }
+
+    // test if the rule is well defined, otherwise it is created but disabled
+    kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
   }
 
   /**
@@ -399,13 +398,11 @@ public class RulesServiceImpl implements RulesService {
 
     validateRule(rule);
 
-    // test if the rule is well defined, otherwise it is created but disabled
-    kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
-
-
     if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_UPDATING_RULE);
     }
+    // test if the rule is well defined, otherwise it is created but disabled
+    kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
   }
 
   /**
