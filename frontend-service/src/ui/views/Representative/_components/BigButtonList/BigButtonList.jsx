@@ -93,15 +93,15 @@ export const BigButtonList = ({
         <div className={styles.splitButtonWrapper}>
           <div className={styles.datasetItem}>
             {useBigButtonList({
-              dataflowData: dataflowData,
-              dataflowId: dataflowId,
-              handleRedirect: handleRedirect,
-              hasWritePermissions: hasWritePermissions,
-              isCustodian: isCustodian,
+              dataflowData,
+              dataflowId,
+              handleRedirect,
+              hasWritePermissions,
+              isCustodian,
               onLoadReceiptData: onLoadReceiptData,
-              receiptState: receiptState,
+              receiptState,
               representative,
-              showReleaseSnapshotDialog: showReleaseSnapshotDialog
+              showReleaseSnapshotDialog
             }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <></>))}
           </div>
         </div>

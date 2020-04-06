@@ -302,8 +302,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  // const onTableAdd = ()
-
   const onUpdateDescription = async description => {
     try {
       const response = await DatasetService.updateDatasetDescriptionDesign(datasetId, description);
