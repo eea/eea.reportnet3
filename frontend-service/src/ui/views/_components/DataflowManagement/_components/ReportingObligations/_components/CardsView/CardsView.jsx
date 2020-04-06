@@ -1,18 +1,22 @@
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
+
+import isEmpty from 'lodash/isEmpty';
 
 import styles from './CardsView.module.scss';
 
 import { Card } from './_components/Card';
-import { Pagination } from './_components/Pagination';
-
-import { usePagination } from './_functions/Hooks/usePagination';
 
 import { Paginator } from 'ui/views/_components/DataTable/_components/Paginator';
 
-export const CardsView = ({ checkedObligation, data, onSelectObl }) => {
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+export const CardsView = ({ checkedObligation, data, onChangePagination, onSelectObl, pagination }) => {
+  const resources = useContext(ResourcesContext);
+
   const [cards, setCards] = useState(data);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [cardsPerPage] = useState(8);
+  const [cardsPerPage, setCardsPerPage] = useState(pagination.rows);
+  const [currentPage, setCurrentPage] = useState(pagination.page);
+  const [first, setFirst] = useState(pagination.first);
 
   useEffect(() => {
     onLoadData();
@@ -20,15 +24,27 @@ export const CardsView = ({ checkedObligation, data, onSelectObl }) => {
 
   const onLoadData = () => setCards(data);
 
-  const indexOfLastPost = currentPage * cardsPerPage;
-  const indexOfFirstPost = indexOfLastPost - cardsPerPage;
-  const currentPosts = cards.slice(indexOfFirstPost, indexOfLastPost);
+  const onPaginate = event => {
+    setCardsPerPage(event.rows);
+    setCurrentPage(event.page);
+    setFirst(event.first);
 
-  const paginate = pageNumber => setCurrentPage(pageNumber.page);
+    onChangePagination({ first: event.first, rows: event.rows, page: event.page });
+  };
 
-  return (
+  const begin = Math.max(0, Math.ceil(currentPage * cardsPerPage));
+  const end = begin + cardsPerPage;
+  const currentPosts = cards.slice(begin, end);
+
+  const paginatorRightText = `${resources.messages['totalObligations']}: ${data.length}`;
+
+  return isEmpty(data) ? (
+    <h3 className={styles.noObligations}>{resources.messages['noObligationsWithSelectedParameters']}</h3>
+  ) : (
     <Fragment>
-      <div className={styles.cardWrap}>
+      <div
+        className={styles.cardWrap}
+        style={{ justifyContent: currentPosts.length === cardsPerPage ? 'space-between' : 'flex-start' }}>
         {currentPosts.map(obligation => {
           return (
             <Card
@@ -45,15 +61,14 @@ export const CardsView = ({ checkedObligation, data, onSelectObl }) => {
           );
         })}
       </div>
-      {/* <Pagination cardsPerPage={cardsPerPage} totalPosts={cards.length} paginate={paginate} /> */}
       <Paginator
-        totalRecords={data.length}
         className={'p-paginator-bottom'}
-        onPageChange={paginate}
-        rows={Math.ceil(data.length / 4)}
-        first={currentPage}
-        rowsPerPageOptions={[4, 8, 12]}
-        // pageLinkSize={4}
+        first={first}
+        onPageChange={onPaginate}
+        rightContent={paginatorRightText}
+        rows={cardsPerPage}
+        rowsPerPageOptions={[5, 10, 15]}
+        totalRecords={data.length}
       />
     </Fragment>
   );

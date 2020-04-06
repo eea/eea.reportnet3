@@ -1,0 +1,1 @@
+export { PropertiesDialog } from './PropertiesDialog';

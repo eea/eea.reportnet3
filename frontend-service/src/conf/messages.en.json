@@ -493,7 +493,7 @@
     "help": "Help",
     "legalInstrument": "Legal instrument",
     "dueDate": "Expiration date",
-    "searchAllLabel": "Search all",
+    "searchAllLabel": "Search",
     "update": "update",
     "designSchemaTabNoFields": "No fields yet",
     "reportingObligations": "Reporting Obligations",
@@ -501,6 +501,20 @@
     "obligationDataflowItem": "Obligation",
     "legalInstrumentDataflowItem": "Legal instrument",
     "obligationTitle": "Obligation",
-    "readOnlyTable": "Read only table"
+    "userRoleFunctionality": "functionality",
+    "userRoleType": "type",
+    "readWritePermissions": "Read & write",
+    "onlyReadPermissions": "Read",
+    "copyRestAPIKey": "Copy API-key (API-key access for developers)",
+    "deleteDataflowButton": "Delete this dataflow",
+    "selectedObligation": "Selected obligation",
+    "totalObligations": "Total obligations",
+    "loadOpenedObligationError": "Error loading obligations",
+    "emptyObligationList": "There are no obligations.",
+    "dataflowObligationEmpty": "Obligation is a required field",
+    "readOnlyTable": "Read only table",
+    "dataflowDetails": "Dataflow datails",
+    "restApiKey": "Rest API Key",
+    "viewMore": "View more"
   }
 }
