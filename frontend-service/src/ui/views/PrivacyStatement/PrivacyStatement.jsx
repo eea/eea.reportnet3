@@ -10,10 +10,12 @@ import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContex
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 
 const PrivacyStatement = withRouter(({ history }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const resources = useContext(ResourcesContext);
+  const leftSideBarContext = useContext(LeftSideBarContext);
 
   useEffect(() => {
     breadCrumbContext.add([
@@ -32,6 +34,28 @@ const PrivacyStatement = withRouter(({ history }) => {
     ]);
   }, []);
 
+  useEffect(() => {
+    leftSideBarContext.addModels([
+      {
+        icon: 'userConfig',
+        label: 'userConfigurationOptions',
+        onClick: e => {
+          e.preventDefault();
+          history.push(getUrl(routes['SETTINGS']));
+        },
+        title: 'User Configuration Options'
+      },
+      {
+        icon: 'info',
+        label: 'PRIVACY',
+        onClick: e => {
+          e.preventDefault();
+          history.push(getUrl(routes['PRIVACY_STATEMENT']));
+        },
+        title: 'User Configuration Options'
+      }
+    ]);
+  }, []);
   // const toggleUserOptions = () => {
   //   return (
   //     <>

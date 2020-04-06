@@ -25,6 +25,24 @@ const MainLayout = ({ children }) => {
 
   const [margin, setMargin] = useState('50px');
 
+  const getUserConfiguration = async () => {
+    try {
+      const userConfiguration = await UserService.getConfiguration();
+
+      user.dateFormat(userConfiguration.dateFormat);
+      user.defaultRowSelected(parseInt(userConfiguration.defaultRowsNumber));
+      user.onToggleLogoutConfirm(userConfiguration.defaultLogoutConfirmation);
+      user.defaultVisualTheme(userConfiguration.theme);
+      themeContext.onToggleTheme(userConfiguration.theme);
+      console.log('User Context layout', user);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    getUserConfiguration();
+  }, []);
   useEffect(() => {
     async function fetchData() {
       if (isUndefined(user.id)) {

@@ -49,14 +49,17 @@ const getConfiguration = async () => {
   return userConfiguration;
 };
 
-const parseConfigurationDTO = (userConfigurationDTO) => {
+const parseConfigurationDTO = userConfigurationDTO => {
   const userConfiguration = {};
   userConfiguration.dateFormat = userConfigurationDTO.dateFormat[0];
-  userConfiguration.defaultRowsNumber = userConfigurationDTO.showLogoutConfirmation[0];
-  userConfiguration.defaultLogoutConfirmation = userConfigurationDTO.defaultRowSelected[0];
+  userConfiguration.defaultLogoutConfirmation =
+    userConfigurationDTO.showLogoutConfirmation[0] === 'false'
+      ? (userConfiguration.defaultLogoutConfirmation = false)
+      : (userConfiguration.defaultLogoutConfirmation = true);
+  userConfiguration.defaultRowsNumber = userConfigurationDTO.defaultRowSelected[0];
   userConfiguration.theme = userConfigurationDTO.defaultVisualTheme[0];
   return userConfiguration;
-}
+};
 
 const updateAttributes = async Attributes => {
   const response = await apiUser.updateAttributes(Attributes);

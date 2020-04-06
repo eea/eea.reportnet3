@@ -14,7 +14,7 @@ export const ToggleUserConfirmation = () => {
       <InputSwitch
         checked={userContext.userProps.showLogoutConfirmation}
         style={{ marginRight: '1rem' }}
-        onChange={e => userContext.onToggleLogoutConfirm()}
+        onChange={e => userContext.onToggleLogoutConfirm(e.value)}
         tooltip={
           userContext.userProps.showLogoutConfirmation === true
             ? resources.messages['toogleConfirmationOff']

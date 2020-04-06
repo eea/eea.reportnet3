@@ -14,7 +14,7 @@ const UserImg = () => {
   const imageUploader = React.useRef(null);
   const uploadedImage = React.useRef(undefined);
 
-  isNull(uploadedImage) ? console.log('//// HAY IMAGEN antes del click') : console.log('// HAY ICONO antes del click');
+  //isNull(uploadedImage) ? console.log('//// HAY IMAGEN antes del click') : console.log('// HAY ICONO antes del click');
 
   const handleImageUpload = e => {
     const [file] = e.target.files;
@@ -30,12 +30,11 @@ const UserImg = () => {
 
       userContext.onClickUserIcon(uploadedImage);
 
-      uploadedImage
-        ? console.log('//// HAY IMAGEN después del click')
-        : console.log('// SIGUE ICONO después del click');
+      // uploadedImage
+      //   ? console.log('//// HAY IMAGEN después del click')
+      //   : console.log('// SIGUE ICONO después del click');
     }
   };
-
   return (
     <div>
       <div

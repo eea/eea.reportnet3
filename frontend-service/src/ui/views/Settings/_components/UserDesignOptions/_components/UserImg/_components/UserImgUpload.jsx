@@ -8,6 +8,7 @@ export const UserImgUpload = () => {
   const onUpload = async () => {
     const {} = await UserService.uploadImg();
   };
+  // const onUpload = .toDataURL('base64');
 
-  return <CustomFileUpload fileLimit={4} onUpload={onUpload} />;
+  return <CustomFileUpload fileLimit={1} onUpload={onUpload} name="file" accept="image/*" />;
 };

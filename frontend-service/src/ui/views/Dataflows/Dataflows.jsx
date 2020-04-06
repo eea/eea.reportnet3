@@ -32,21 +32,6 @@ const Dataflows = withRouter(({ match, history }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
-  const getUserData = async () => {
-    try {
-      const response = await UserService.userData();
-      console.log('response', response);
-      user.dateFormat(response.data.dateFormat[0]);
-      user.defaultRowSelected(parseInt(response.data.defaultRowSelected[0]));
-      user.onToggleLogoutConfirm(response.data.showLogoutConfirmation[0]);
-      user.defaultVisualTheme(response.data.defaultVisualTheme[0]);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  useEffect(() => {
-    getUserData();
-  }, []);
 
   const [tabMenuItems] = useState([
     {

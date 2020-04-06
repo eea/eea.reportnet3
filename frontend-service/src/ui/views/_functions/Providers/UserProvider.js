@@ -2,14 +2,15 @@ import React, { useContext, useReducer } from 'react';
 
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 const userSettingsDefaultState = {
   userProps: {
     defaultRowSelected: 10,
     defaultVisualTheme: 'light',
-    showLogoutConfirmation: false,
+    showLogoutConfirmation: true,
     userIconPatch: {},
-    dateFormat: 'YYYY-MM-DD'
+    dateFormat: 'MM-DD-YYYY'
   }
 };
 
@@ -37,7 +38,7 @@ const userReducer = (state, { type, payload }) => {
         ...state,
         userProps: {
           ...state.userProps,
-          showLogoutConfirmation: !state.userProps.showLogoutConfirmation
+          showLogoutConfirmation: payload
         }
       };
     case 'DEFAULT_ROW_SELECTED':
@@ -80,7 +81,7 @@ const userReducer = (state, { type, payload }) => {
 
 export const UserProvider = ({ children }) => {
   const notificationContext = useContext(NotificationContext);
-
+  const themeContext = useContext(ThemeContext);
   //const [state, userDispatcher] = useReducer(userReducer, {});
   const [state, userDispatcher] = useReducer(userReducer, userSettingsDefaultState);
   // const notificationContext = useContext(NotificationContext);
@@ -129,10 +130,10 @@ export const UserProvider = ({ children }) => {
             }
           });
         },
-        onToggleLogoutConfirm: () => {
+        onToggleLogoutConfirm: logoutConf => {
           userDispatcher({
             type: 'TOGGLE_LOGOUT_CONFIRM',
-            payload: {}
+            payload: logoutConf
           });
         },
         defaultVisualTheme: currentTheme => {

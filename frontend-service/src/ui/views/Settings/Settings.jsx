@@ -16,6 +16,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { UserDesignOptions } from './_components/UserDesignOptions';
 import { UserCard } from './_components/UserCard';
 import { UserConfiguration } from './_components/UserConfiguration';
+import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 const initialState = {
   isVisibleUserDesignOptions: true,
@@ -45,9 +46,11 @@ const Settings = withRouter(({ history }) => {
   const [userSettingsConfiguration, setUserSettingsConfiguration] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [visibleUserSectionState, visibleUserSectionDispatch] = useReducer(reducer, initialState);
-  
+  const themeContext = useContext(ThemeContext);
+
   const userContext = useContext(UserContext);
   const breadCrumbContext = useContext(BreadCrumbContext);
+
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
   const initUserSettingsSection = () => {
@@ -65,20 +68,23 @@ const Settings = withRouter(({ history }) => {
       userContext.defaultRowSelected(parseInt(userConfiguration.defaultRowsNumber));
       userContext.onToggleLogoutConfirm(userConfiguration.defaultLogoutConfirmation);
       userContext.defaultVisualTheme(userConfiguration.theme);
-      
-      console.log('User Context', userContext);
+      themeContext.onToggleTheme(userConfiguration.theme);
 
+      console.log('User Context', userContext);
     } catch (error) {
       console.error(error);
     } finally {
       setIsLoading(false);
     }
   };
-
+  useEffect(() => {
+    return () => {
+      console.log('meFui');
+    };
+  }, []);
   useEffect(() => {
     getUserConfiguration();
   }, []);
-
 
   // useEffect(() => {
   //   userContext.defaultRowSelected(parseInt(userConfiguration.defaultRowSelected));
@@ -150,12 +156,12 @@ const Settings = withRouter(({ history }) => {
     return (
       <>
         {visibleUserSectionState.isVisibleUserDesignOptions && <UserDesignOptions />}
-        {visibleUserSectionState.isVisibleUserSettingsOptions &&  <UserConfiguration />}
+        {visibleUserSectionState.isVisibleUserSettingsOptions && <UserConfiguration />}
         <UserCard />
       </>
     );
   };
-  
+
   const layout = children => {
     return (
       <MainLayout
@@ -169,30 +175,26 @@ const Settings = withRouter(({ history }) => {
     );
   };
 
-  const userConfigurations = () => 
-  layout(
-    <div>
-      <div className="rep-row">
-        <div className={` rep-col-12 rep-col-sm-12`}>
-          <Title
-            title={resources.messages['userSettingsTitle']}
-            icon="user-profile"
-            iconSize="4rem"
-            subtitle={resources.messages['userSettingsSubtitle']}
-          />
+  const userConfigurations = () =>
+    layout(
+      <div>
+        <div className="rep-row">
+          <div className={` rep-col-12 rep-col-sm-12`}>
+            <Title
+              title={resources.messages['userSettingsTitle']}
+              icon="user-profile"
+              iconSize="4rem"
+              subtitle={resources.messages['userSettingsSubtitle']}
+            />
+          </div>
+        </div>
+        <div className="rep-row">
+          <div className={styles.sectionMainContent}>{toggleUserOptions()}</div>
         </div>
       </div>
-      <div className="rep-row">
-        <div className={styles.sectionMainContent}>{toggleUserOptions()}</div>
-      </div>
-    </div>
-  );
+    );
 
-  return (
-    <>
-      {isLoading ? <Spinner className={styles.positioning} /> : userConfigurations()}
-    </>
-  );
+  return <>{isLoading ? <Spinner className={styles.positioning} /> : userConfigurations()}</>;
 });
 
 export { Settings };
