@@ -9,7 +9,7 @@ const userSettingsDefaultState = {
     defaultVisualTheme: 'light',
     showLogoutConfirmation: false,
     userIconPatch: {},
-    dateFormat: 'DD/MM/YYYY'
+    dateFormat: 'YYYY-MM-DD'
   }
 };
 

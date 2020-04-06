@@ -85,15 +85,23 @@ const Settings = withRouter(({ history }) => {
     try {
       const response = await UserService.userData();
       console.log('response', response);
-      user.dateFormat(response.data.dateFormat[0]);
-      user.defaultRowSelected(parseInt(response.data.defaultRowSelected[0]));
-      user.onToggleLogoutConfirm(response.data.showLogoutConfirmation[0]);
+
       setUserAttr(response.data);
+      UpdateAttr();
     } catch (error) {
       console.error(error);
     }
   };
 
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  const UpdateAttr = () => {
+    user.dateFormat(UserAttr.dateFormat[0]);
+    user.defaultRowSelected(parseInt(UserAttr.defaultRowSelected));
+    user.onToggleLogoutConfirm(UserAttr.showLogoutConfirmation[0]);
+    user.defaultVisualTheme(UserAttr.defaultVisualTheme[0]);
+  };
+  console.log('UserAttr.defaultRowSelected[0]', parseInt(UserAttr.defaultRowSelected));
+  /////////////////////////////////////////////////
   useEffect(() => {
     getUserData();
   }, []);
@@ -102,7 +110,7 @@ const Settings = withRouter(({ history }) => {
     console.log('object', parseInt(`${UserAttr.defaultRowSelected}`));
     user.defaultRowSelected(parseInt(UserAttr.defaultRowSelected));
   }, []);
-  console.log('UserAttr', UserAttr);
+  useEffect(() => {});
 
   const getRow = UserAttr.defaultRowSelected;
   console.log('getRow', getRow);
@@ -182,6 +190,9 @@ const Settings = withRouter(({ history }) => {
     );
   };
 
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  console.log('UpdateAttr', UpdateAttr);
+  //////////////////////////////////////////////////////////////////////////////////////////////////
   const layout = children => {
     return (
       <MainLayout

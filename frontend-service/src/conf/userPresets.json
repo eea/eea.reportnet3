@@ -28,12 +28,12 @@
         ],
 
         "dateFormat": [{
-                "label": "DD/MM/YYYY",
-                "value": "DD/MM/YYYY"
+                "label": "DD-MM-YYYY",
+                "value": "DD-MM-YYYY"
             },
             {
-                "label": "MM/DD/YYYY",
-                "value": "MM/DD/YYYY"
+                "label": "MM-DD-YYYY",
+                "value": "MM-DD-YYYY"
             },
             {
                 "label": "YYYY-MM-DD",

@@ -328,9 +328,7 @@ const parseDataflowDTO = dataflowDTO =>
     description: dataflowDTO.description,
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: parseDocumentListDTO(dataflowDTO.documents),
-    expirationDate: !isNil(dataflowDTO.deadlineDate)
-      ? moment.unix(dataflowDTO.deadlineDate).format('YYYY-MM-DD')
-      : moment(dataflowDTO.deadlineDate).format('YYYY-MM-DD'),
+    expirationDate: dataflowDTO.deadlineDate,
     id: dataflowDTO.id,
     name: dataflowDTO.name,
     obligation: parseObligationDTO(dataflowDTO.obligation),
