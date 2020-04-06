@@ -42,7 +42,7 @@ const reducer = (state, { type, payload }) => {
 };
 
 const Settings = withRouter(({ history }) => {
-  const [userConfiguration, setUserConfiguration] = useState({});
+  const [userSettingsConfiguration, setUserSettingsConfiguration] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [visibleUserSectionState, visibleUserSectionDispatch] = useReducer(reducer, initialState);
   
@@ -56,13 +56,18 @@ const Settings = withRouter(({ history }) => {
 
   const getUserConfiguration = async () => {
     try {
+      const userConfiguration = await UserService.getConfiguration();
+      setUserSettingsConfiguration(userSettingsConfiguration);
       console.log('User Configuration: ', userConfiguration);
       console.log('User Context', userContext);
-      const userConfiguration = await UserService.getConfiguration();
-      setUserConfiguration(userConfiguration);
+
       userContext.dateFormat(userConfiguration.dateFormat);
       userContext.defaultRowSelected(parseInt(userConfiguration.defaultRowsNumber));
-      userContext.onToggleLogoutConfirm(userConfiguration.defaultLogoutConfirmation);      
+      userContext.onToggleLogoutConfirm(userConfiguration.defaultLogoutConfirmation);
+      userContext.defaultVisualTheme(userConfiguration.theme);
+      
+      console.log('User Context', userContext);
+
     } catch (error) {
       console.error(error);
     } finally {
@@ -72,13 +77,12 @@ const Settings = withRouter(({ history }) => {
 
   useEffect(() => {
     getUserConfiguration();
-    console.log('userConfiguration', userConfiguration);
   }, []);
 
 
-  useEffect(() => {
-    userContext.defaultRowSelected(parseInt(userConfiguration.defaultRowSelected));
-  }, []);
+  // useEffect(() => {
+  //   userContext.defaultRowSelected(parseInt(userConfiguration.defaultRowSelected));
+  // }, []);
 
   useEffect(() => {
     document.querySelectorAll('.userSettingsBtn').forEach(btn => {
