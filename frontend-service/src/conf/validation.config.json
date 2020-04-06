@@ -76,6 +76,11 @@
       "!=": "DIST_DATE"
     }
   },
+  "operatorsTypesFromDTO": [
+    { "operatorType": "number", "operators": [">", "<", ">=", "<=", "=", "!="] },
+    { "operatorType": "string", "operators": ["SEQ", "SEQIC", "MATCH"] },
+    { "operatorType": "date", "operators": ["GT_DATE", "LT_DATE", "GTEQ_DATE", "LTEQ_DATE", "EQ_DATE", "DIST_DATE"] }
+  ],
   "reverseEquivalences": {
     "GT": ">",
     "LT": "<",

@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 import { config } from 'conf';
 
 const getOperatorEquivalence = (operatorType, operatorValue) => {
@@ -15,7 +17,7 @@ export const getExpression = expression => {
   const {
     validations: { nonNumericOperators }
   } = config;
-  if (expression.operatorType == 'LEN') {
+  if (operatorType == 'LEN') {
     return {
       operator: getOperatorEquivalence(operatorType, operatorValue),
       arg1: {
@@ -23,6 +25,13 @@ export const getExpression = expression => {
         arg1: 'VALUE'
       },
       arg2: Number(expressionValue)
+    };
+  }
+  if (operatorType == 'date') {
+    return {
+      arg1: 'VALUE',
+      operator: getOperatorEquivalence(operatorType, operatorValue),
+      arg2: moment(expressionValue).format('YYYY-MM-DD')
     };
   }
   return {

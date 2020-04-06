@@ -1,9 +1,14 @@
 import { config } from 'conf';
 
 export const getExpressionOperatorType = operator => {
-  if (!['SEQ', 'SEQIC', 'MATCH'].includes(operator)) {
-    return config.validations.operatorTypes.number.option.value;
-  } else {
-    return config.validations.operatorTypes.string.option.value;
-  }
+  const {
+    validations: { operatorsTypesFromDTO }
+  } = config;
+  const selectedOperators = operatorsTypesFromDTO.filter(operatorTypeObject => {
+    if (operatorTypeObject.operators.includes(operator)) {
+      return operatorTypeObject;
+    }
+  });
+  const [selectedOperator] = selectedOperators;
+  return selectedOperator.operatorType;
 };

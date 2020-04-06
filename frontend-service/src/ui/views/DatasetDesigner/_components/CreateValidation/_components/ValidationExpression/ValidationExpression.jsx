@@ -136,12 +136,12 @@ const ValidationExpression = ({
             dateFormat="yy-mm-dd"
             monthNavigator={true}
             readOnlyInput={true}
-            onChange={e =>
+            onChange={e => {
               onExpressionFieldUpdate(expressionId, {
                 key: 'expressionValue',
-                value: { value: moment(e.target.value).format('YYYY-MM-DD') }
-              })
-            }
+                value: { value: e.target.value }
+              });
+            }}
             value={expressionValues.expressionValue}
             yearNavigator={true}
             yearRange="2015:2030"></Calendar>
