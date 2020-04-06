@@ -33,8 +33,10 @@ export class Dropdown extends Component {
     filterInputAutoFocus: true,
     filterPlaceholder: null,
     id: null,
+    inputClassName: null,
     inputId: null,
     itemTemplate: null,
+    label: null,
     maxLength: null,
     name: null,
     onChange: null,
@@ -72,8 +74,10 @@ export class Dropdown extends Component {
     filterInputAutoFocus: PropTypes.bool,
     filterPlaceholder: PropTypes.string,
     id: PropTypes.string,
+    inputClassName: PropTypes.string,
     inputId: PropTypes.string,
     itemTemplate: PropTypes.func,
+    label: PropTypes.string,
     lazy: PropTypes.bool,
     maxLength: PropTypes.number,
     name: PropTypes.string,
@@ -283,9 +287,7 @@ export class Dropdown extends Component {
   searchOptionInRange(start, end) {
     for (let i = start; i < end; i++) {
       let opt = this.props.options[i];
-      let label = this.getOptionLabel(opt)
-        .toString()
-        .toLowerCase();
+      let label = this.getOptionLabel(opt).toString().toLowerCase();
       if (label.startsWith(this.searchValue.toLowerCase())) {
         return opt;
       }
@@ -571,7 +573,7 @@ export class Dropdown extends Component {
 
   renderKeyboardHelper() {
     return (
-      <div className="p-hidden-accessible">
+      <div className={`p-hidden-accessible ${this.props.inputClassName}`}>
         <input
           aria-label={this.props.ariaLabel}
           aria-labelledby={this.props.ariaLabelledBy}
@@ -586,6 +588,7 @@ export class Dropdown extends Component {
           tabIndex={this.props.tabIndex}
           type="text"
         />
+        <label htmlFor={this.props.inputId}>{this.props.label}</label>{' '}
       </div>
     );
   }

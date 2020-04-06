@@ -50,6 +50,12 @@
       height: 2.1rem !important;
     }
 
+    .label {
+      clip: auto;
+      height: auto;
+      overflow: visible;
+    }
+
     .multiselectFilter {
       border-bottom: var(--inputtext-border) !important;
       border-left: 0 !important;

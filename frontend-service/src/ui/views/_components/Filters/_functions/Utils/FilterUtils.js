@@ -2,7 +2,6 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
 import moment from 'moment';
-import { cloneElement } from 'react';
 
 const checkDates = (betweenDates, data) => {
   if (!isEmpty(betweenDates)) {
@@ -42,8 +41,8 @@ const checkSelected = (state, data, selectedKeys) => {
   return true;
 };
 
-const getFilterInitialState = (data, input = [], select = [], date = []) => {
-  const filterByGroup = input.concat(select, date);
+const getFilterInitialState = (data, input = [], select = [], date = [], dropDown = []) => {
+  const filterByGroup = input.concat(select, date, dropDown);
   const filterBy = filterByGroup.reduce((obj, key) => Object.assign(obj, { [key]: '' }), {});
   if (select) {
     select.forEach(selectOption => {
@@ -64,27 +63,31 @@ const getFilterInitialState = (data, input = [], select = [], date = []) => {
 
 const getEndOfDay = date => new Date(moment(date).endOf('day').format()).getTime() / 1000;
 
-const getFilterKeys = (state, filter, inputOptions) =>
+const getFilterKeys = (state, filter, inputOptions = []) =>
   Object.keys(state.filterBy).filter(key => key !== filter && inputOptions.includes(key));
 
-const getLabelInitialState = (input = [], select = [], date = []) => {
-  const labelByGroup = input.concat(select, date);
+const getLabelInitialState = (input = [], select = [], date = [], dropDown = []) => {
+  const labelByGroup = input.concat(select, date, dropDown);
   return labelByGroup.reduce((obj, key) => Object.assign(obj, { [key]: false }), {});
 };
 
-const getOptionTypes = (data, option) => {
-  const optionItems = uniq(data.map(item => item[option]));
-  const validOptionItems = optionItems.filter(option => !isNil(option));
-  for (let i = 0; i < validOptionItems.length; i++) {
-    const template = [];
-    validOptionItems.forEach(item => {
-      template.push({ type: item, value: item });
-    });
-    return template;
+const getOptionTypes = (data, option, list) => {
+  if (list) {
+    return list[option].map(item => ({ type: item.acronym ? item.acronym : item.name, value: item.id }));
+  } else {
+    const optionItems = uniq(data.map(item => item[option]));
+    const validOptionItems = optionItems.filter(option => !isNil(option));
+    for (let i = 0; i < validOptionItems.length; i++) {
+      const template = [];
+      validOptionItems.forEach(item => {
+        template.push({ type: item, value: item });
+      });
+      return template;
+    }
   }
 };
 
-const getSelectedKeys = (state, select, selectOptions) =>
+const getSelectedKeys = (state, select, selectOptions = []) =>
   Object.keys(state.filterBy).filter(key => key !== select && selectOptions.includes(key));
 
 const getStartOfDay = date => new Date(moment(date).startOf('day').format()).getTime() / 1000;
@@ -95,7 +98,7 @@ const getYesterdayDate = () => {
   return new Date(yesterdayDate);
 };
 
-const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value, dateOptions, selectOptions) => [
+const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value, dateOptions = [], selectOptions = []) => [
   ...state.data.filter(data => {
     if (selectOptions.includes(filter) && !isNil(data[filter])) {
       return (

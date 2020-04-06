@@ -25,11 +25,14 @@ export const ReportingObligations = (dataflowId, refresh) => {
   const resources = useContext(ResourcesContext);
 
   const [reportingObligationState, reportingObligationDispatch] = useReducer(reportingObligationReducer, {
+    countries: [],
     data: [],
     filteredData: [],
     isLoading: false,
+    issues: [],
     isTableView: true,
-    oblChoosed: {}
+    oblChoosed: {},
+    organizations: []
   });
 
   useEffect(() => {
@@ -38,43 +41,31 @@ export const ReportingObligations = (dataflowId, refresh) => {
 
   const onLoadingData = value => reportingObligationDispatch({ type: 'IS_LOADING', payload: { value } });
 
-  // const onLoadFiltredData = data => {
-  //   reportingObligationDispatch({ type: 'FILTER_DATA', payload: { filteredData: reportingObligationState.data } });
-  // };
-
-  // líneas (hasta la 50) que desaparecen al pasar función por reducer
-  const [filteredData, setFilteredData] = useState([]);
-
-  const onLoadFiltredData = data => {
-    setFilteredData(data);
-  };
-
   const onLoadReportingObligations = async () => {
     onLoadingData(true);
-    const data = await ObligationService.opened();
-    reportingObligationDispatch({
-      type: 'INITIAL_LOAD',
-      payload: { data, filteredData: ReportingObligationUtils.filteredInitialValues(data) }
-    });
-
-    // línea que desaparece al hacer función por reducer
-    onLoadFiltredData(reportingObligationState.data);
-
-    const organizations = await ObligationService.getOrganizations();
-    console.log('organizations', organizations);
-
-    const countries = await ObligationService.getCountries();
-    console.log('countries', countries);
-
-    const issues = await ObligationService.getIssues();
-    console.log('issues', issues);
-
     try {
+      const data = await ObligationService.opened();
+      const countries = await ObligationService.getCountries();
+      const issues = await ObligationService.getIssues();
+      const organizations = await ObligationService.getOrganizations();
+
+      reportingObligationDispatch({
+        type: 'INITIAL_LOAD',
+        payload: {
+          countries,
+          data,
+          filteredData: ReportingObligationUtils.filteredInitialValues(data),
+          issues,
+          organizations
+        }
+      });
     } catch (error) {
     } finally {
       onLoadingData(false);
     }
   };
+
+  const onSendFilters = data => console.log('data', data);
 
   const onSelectObl = rowData => {
     const oblChoosed = { id: rowData.id, title: rowData.title };
@@ -83,6 +74,12 @@ export const ReportingObligations = (dataflowId, refresh) => {
 
   const onToggleView = () =>
     reportingObligationDispatch({ type: 'ON_TOGGLE_VIEW', payload: { view: !reportingObligationState.isTableView } });
+
+  const parsedFilterList = {
+    countries: reportingObligationState.countries,
+    issues: reportingObligationState.issues,
+    organizations: reportingObligationState.organizations
+  };
 
   const renderData = () =>
     reportingObligationState.isTableView ? (
@@ -102,9 +99,9 @@ export const ReportingObligations = (dataflowId, refresh) => {
       <Filters
         data={reportingObligationState.data}
         dateOptions={ObligationConf.filterItems['date']}
-        getFiltredData={onLoadFiltredData}
-        inputOptions={ObligationConf.filterItems['input']}
-        selectOptions={ObligationConf.filterItems['select']}
+        dropDownList={parsedFilterList}
+        dropdownOptions={ObligationConf.filterItems['dropdown']}
+        sendData={onSendFilters}
       />
       {/* <div style={{ display: 'flex' }}>
         <SearchAll />

@@ -31,6 +31,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, title,
         getFiltredData={onLoadFiltredData}
         inputOptions={DataflowConf.filterItems['input']}
         selectOptions={DataflowConf.filterItems['select']}
+        sortable={true}
       />
       {!isEmpty(content) ? (
         !isEmpty(filteredData) ? (
