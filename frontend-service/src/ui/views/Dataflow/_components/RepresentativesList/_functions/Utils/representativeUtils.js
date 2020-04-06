@@ -1,6 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import sortBy from 'lodash/sortBy';
 
 import { RepresentativeService } from 'core/services/Representative';
 
@@ -65,15 +66,19 @@ export const getAllDataProviders = async (selectedDataProviderGroup, formDispatc
 };
 
 const getAllRepresentatives = async (dataflowId, formDispatcher, formState) => {
-  /*  if (isEmpty(formState.representatives) && !isEmpty(formState.dataflowRepresentatives)) {
-    const representativesByCopy = cloneDeep(formState.representatives);
+  if (isEmpty(formState.representatives) && !isEmpty(formState.dataflowRepresentatives)) {
+    const mimicResponse = {
+      group: { dataProviderGroupId: formState.dataflowRepresentatives[0].dataProviderGroupId },
+      representatives: sortBy(formState.dataflowRepresentatives, ['representativeId'])
+    };
+
+    const representativesByCopy = cloneDeep(mimicResponse.representatives);
 
     formDispatcher({
       type: 'INITIAL_LOAD',
-      payload: { response: formState.dataflowRepresentatives, representativesByCopy }
+      payload: { response: mimicResponse, representativesByCopy }
     });
   } else {
-    console.log('called out', formState);
     try {
       const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
 
@@ -86,18 +91,6 @@ const getAllRepresentatives = async (dataflowId, formDispatcher, formState) => {
     } catch (error) {
       console.error('error on RepresentativeService.allRepresentatives', error);
     }
-  } */
-  try {
-    const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
-
-    const representativesByCopy = cloneDeep(responseAllRepresentatives.representatives);
-
-    formDispatcher({
-      type: 'INITIAL_LOAD',
-      payload: { response: responseAllRepresentatives, representativesByCopy }
-    });
-  } catch (error) {
-    console.error('error on RepresentativeService.allRepresentatives', error);
   }
 };
 
@@ -114,7 +107,6 @@ const getProviderTypes = async formDispatcher => {
 };
 
 export const getInitialData = async (formDispatcher, dataflowId, formState) => {
-  // await Promise.all([getProviderTypes(formDispatcher),getAllRepresentatives(dataflowId, formDispatcher, formState)])
   await getProviderTypes(formDispatcher);
   await getAllRepresentatives(dataflowId, formDispatcher, formState);
   if (!isEmpty(formState.representatives)) {
