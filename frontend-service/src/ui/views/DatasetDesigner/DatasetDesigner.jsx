@@ -141,6 +141,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     getDataflowName();
     onLoadDatasetSchemaName();
     callSetMetaData();
+    setIsPreviewModeOn(getUrlParamValue('design'));
   }, []);
 
   useEffect(() => {
@@ -154,8 +155,22 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   }, [validationListDialogVisible]);
 
+  useEffect(() => {
+    if (history.location.search !== '') {
+      changeUrl();
+    }
+  }, [isPreviewModeOn]);
+
   const callSetMetaData = async () => {
     setMetaData(await getMetadata({ datasetId, dataflowId }));
+  };
+
+  const changeUrl = () => {
+    window.history.replaceState(
+      null,
+      null,
+      `?tab=${getUrlParamValue('tab')}${!isUndefined(isPreviewModeOn) ? `&design=${isPreviewModeOn}` : ''}`
+    );
   };
 
   const getDataflowName = async () => {
@@ -177,6 +192,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
+  const getUrlParamValue = param => {
+    let value = '';
+    let queryString = history.location.search;
+    const params = queryString.substring(1, queryString.length).split('&');
+    params.forEach(parameter => {
+      if (parameter.includes(param)) {
+        value = parameter.split('=')[1];
+      }
+    });
+    return param === 'tab' ? Number(value) : value === 'true';
+  };
+
   const renderSwitchView = () => (
     <div className={styles.switchDivInput}>
       <div className={styles.switchDiv}>
@@ -185,9 +212,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           checked={isPreviewModeOn}
           // disabled={true}
           // disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
-          onChange={e => {
-            setIsPreviewModeOn(e.value);
-          }}
+          onChange={e => setIsPreviewModeOn(e.value)}
         />
         <span className={styles.switchTextInput}>{resources.messages['preview']}</span>
       </div>
@@ -439,6 +464,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         <TabsDesigner
           datasetSchemas={datasetSchemas}
           editable={true}
+          history={history}
           isPreviewModeOn={isPreviewModeOn}
           onChangeReference={onChangeReference}
           onLoadTableData={onLoadTableData}

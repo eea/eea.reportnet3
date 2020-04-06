@@ -511,6 +511,7 @@
     "totalObligations": "Total obligations",
     "loadOpenedObligationError": "Error loading obligations",
     "emptyObligationList": "There are no obligations.",
-    "dataflowObligationEmpty": "Obligation is a required field"
+    "dataflowObligationEmpty": "Obligation is a required field",
+    "readOnlyTable": "Read only table"
   }
 }

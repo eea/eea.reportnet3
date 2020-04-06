@@ -15,7 +15,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-export const Tab = ({
+const Tab = ({
   addTab,
   ariaControls,
   checkEditingTabs,
@@ -388,3 +388,5 @@ export const Tab = ({
     </React.Fragment>
   );
 };
+
+export { Tab };
