@@ -52,7 +52,7 @@ const parseCountryList = countriesDTO => {
   return;
 };
 
-const parseIssue = issueDTO => new Issue({ id: issueDTO.id, name: issueDTO.name });
+const parseIssue = issueDTO => new Issue({ id: issueDTO.issueId, name: issueDTO.issueName });
 
 const parseIssueList = issuesDTO => {
   if (!isNil(issuesDTO)) {

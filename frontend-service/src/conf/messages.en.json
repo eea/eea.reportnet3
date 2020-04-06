@@ -520,6 +520,9 @@
     "readOnlyTable": "Read only table",
     "dataflowDetails": "Dataflow datails",
     "restApiKey": "Rest API Key",
-    "viewMore": "View more"
+    "viewMore": "View more",
+    "loadCountriesError": "Error loading countries data",
+    "loadIssuesError": "Error loading issues data",
+    "loadOrganizationsError": "Error loading organizations data"
   }
 }

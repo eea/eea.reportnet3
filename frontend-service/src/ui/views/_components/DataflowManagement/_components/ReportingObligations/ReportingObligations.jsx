@@ -30,7 +30,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     countries: [],
     data: [],
     filteredData: [],
-    isLoading: false,
+    isLoading: true,
     issues: [],
     isTableView: false,
     oblChoosed: {},
@@ -40,6 +40,10 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
   });
 
   useEffect(() => {
+    // isLoading(true);
+    onLoadCountries();
+    onLoadIssues();
+    onLoadOrganizations();
     onLoadReportingObligations();
   }, []);
 
@@ -47,35 +51,52 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     if (getObligation) getObligation(reportingObligationState.oblChoosed);
   }, [reportingObligationState.oblChoosed]);
 
-  const onLoadingData = value => reportingObligationDispatch({ type: 'IS_LOADING', payload: { value } });
+  const isLoading = value => reportingObligationDispatch({ type: 'IS_LOADING', payload: { value } });
 
-  const onLoadReportingObligations = async () => {
-    onLoadingData(true);
+  const onLoadCountries = async () => {
     try {
       const countries = await ObligationService.getCountries();
-      const issues = await ObligationService.getIssues();
-      const organizations = await ObligationService.getOrganizations();
-      const response = await ObligationService.opened();
+      reportingObligationDispatch({ type: 'ON_LOAD_COUNTRIES', payload: { countries } });
+    } catch (error) {
+      notificationContext.add({ type: 'LOAD_COUNTRIES_ERROR' });
+    }
+  };
 
+  const onLoadIssues = async () => {
+    try {
+      const issues = await ObligationService.getIssues();
+      reportingObligationDispatch({ type: 'ON_LOAD_ISSUES', payload: { issues } });
+    } catch (error) {
+      notificationContext.add({ type: 'LOAD_ISSUES_ERROR' });
+    }
+  };
+
+  const onLoadOrganizations = async () => {
+    try {
+      const organizations = await ObligationService.getOrganizations();
+      reportingObligationDispatch({ type: 'ON_LOAD_ORGANIZATIONS', payload: { organizations } });
+    } catch (error) {
+      notificationContext.add({ type: 'LOAD_ORGANIZATIONS_ERROR' });
+    }
+  };
+
+  const onLoadReportingObligations = async filterData => {
+    try {
+      const response = await ObligationService.opened(filterData);
       reportingObligationDispatch({
         type: 'INITIAL_LOAD',
         payload: {
-          countries,
           data: response,
           filteredData: ReportingObligationUtils.filteredInitialValues(response, oblChecked.id),
-          issues,
-          oblChoosed: oblChecked,
-          organizations
+          oblChoosed: oblChecked
         }
       });
     } catch (error) {
       notificationContext.add({ type: 'LOAD_OPENED_OBLIGATION_ERROR' });
     } finally {
-      onLoadingData(false);
+      isLoading(false);
     }
   };
-
-  const onSendFilters = data => console.log('data', data);
 
   const onLoadSearchedData = data => reportingObligationDispatch({ type: 'SEARCHED_DATA', payload: { data } });
 
@@ -119,14 +140,16 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
 
   return (
     <Fragment>
-      <div className={styles.repOblTools}>
+      <div className={styles.filters}>
         <Filters
           data={reportingObligationState.data}
           dateOptions={ObligationConf.filterItems['date']}
           dropDownList={parsedFilterList}
           dropdownOptions={ObligationConf.filterItems['dropdown']}
-          sendData={onSendFilters}
+          sendData={onLoadReportingObligations}
         />
+      </div>
+      <div className={styles.repOblTools}>
         <SearchAll data={reportingObligationState.filteredData} getValues={onLoadSearchedData} />
         {!isEmpty(reportingObligationState.oblChoosed.title) && !isEmpty(reportingObligationState.oblChoosed) ? (
           <span className={styles.selectedObligation}>

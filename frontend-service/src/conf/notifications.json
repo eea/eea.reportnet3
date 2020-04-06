@@ -330,6 +330,15 @@
           "key": "DATAFLOW_OBLIGATION_EMPTY",
           "lifeTime": 5000,
           "fixed": false
+        },
+        {
+          "key": "LOAD_COUNTRIES_ERROR"
+        },
+        {
+          "key": "LOAD_ISSUES_ERROR"
+        },
+        {
+          "key": "LOAD_ORGANIZATIONS_ERROR"
         }
       ]
     },
