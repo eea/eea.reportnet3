@@ -8,6 +8,7 @@ import { Issue } from 'core/domain/model/Obligation/Issue/Issue';
 import { LegalInstrument } from 'core/domain/model/Obligation/LegalInstrument/LegalInstrument';
 import { Obligation } from 'core/domain/model/Obligation/Obligation';
 import { Organization } from 'core/domain/model/Obligation/Organization/Organization';
+import isEmpty from 'lodash/isEmpty';
 
 const getCountries = async () => {
   const countriesDTO = await apiObligation.getCountries();
@@ -29,9 +30,17 @@ const obligationById = async obligationId => {
   return parseObligation(obligationByIdDTO);
 };
 
-const opened = async () => {
-  const openedObligationsDTO = await apiObligation.openedObligations();
-  return parseObligationList(openedObligationsDTO);
+const opened = async filterData => {
+  if (!isEmpty(filterData)) {
+    const organizationId = filterData.organizations.value;
+    const countryId = filterData.countries.value;
+    const issueId = filterData.issues.value;
+    const openedObligationsDTO = await apiObligation.openedObligations(organizationId, issueId, countryId);
+    return parseObligationList(openedObligationsDTO);
+  } else {
+    const openedObligationsDTO = await apiObligation.openedObligations();
+    return parseObligationList(openedObligationsDTO);
+  }
 };
 
 const parseCountry = countryDTO =>

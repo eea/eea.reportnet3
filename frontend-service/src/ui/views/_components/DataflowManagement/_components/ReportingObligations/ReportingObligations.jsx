@@ -80,7 +80,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     }
   };
 
-  const onLoadReportingObligations = async filterData => {
+  const onLoadReportingObligations = async (filterData = '') => {
     try {
       const response = await ObligationService.opened(filterData);
       reportingObligationDispatch({
