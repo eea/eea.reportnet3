@@ -102,7 +102,8 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
         <SearchAll data={reportingObligationState.filteredData} getValues={onLoadSearchedData} />
         {!isEmpty(reportingObligationState.oblChoosed.title) && !isEmpty(reportingObligationState.oblChoosed) ? (
           <span className={styles.selectedObligation}>
-            {`${resources.messages['selectedObligation']}: ${reportingObligationState.oblChoosed.title}`}
+            <span>{`${resources.messages['selectedObligation']}:`}</span>{' '}
+            {`${reportingObligationState.oblChoosed.title}`}
           </span>
         ) : (
           <Fragment />

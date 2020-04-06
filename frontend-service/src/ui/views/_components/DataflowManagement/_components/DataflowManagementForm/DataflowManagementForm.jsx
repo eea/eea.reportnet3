@@ -98,6 +98,7 @@ const DataflowManagementForm = ({
           <fieldset>
             <div className={`formField${(!isEmpty(errors.name) && touched.name) || isNameDuplicated ? ' error' : ''}`}>
               <Field
+                autoComplete="off"
                 innerRef={inputRef}
                 name="name"
                 placeholder={resources.messages['createDataflowName']}
@@ -114,6 +115,7 @@ const DataflowManagementForm = ({
             </div>
             <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
               <Field
+                autoComplete="off"
                 name="description"
                 component="textarea"
                 onChange={event => getData({ ...data, description: event.target.value })}
