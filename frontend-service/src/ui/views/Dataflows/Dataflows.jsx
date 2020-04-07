@@ -1,8 +1,7 @@
-import React, { useContext, useEffect, useState, useReducer } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
-import isUndefined from 'lodash/isUndefined';
 
 import styles from './Dataflows.module.scss';
 
@@ -73,7 +72,7 @@ const Dataflows = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    if (!isUndefined(user.contextRoles)) onLoadPermissions();
+    if (!isNil(user.contextRoles)) onLoadPermissions();
   }, [user]);
 
   useEffect(() => {
@@ -152,8 +151,9 @@ const Dataflows = withRouter(({ match, history }) => {
   const isLoading = value => dataflowsDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onCreateDataflow = () => {
-    onManageDialogs('isAddDialogVisible', false);
     dataFetch();
+    onManageDialogs('isAddDialogVisible', false);
+    onRefreshToken();
   };
 
   const onLoadPermissions = () => {
@@ -163,6 +163,16 @@ const Dataflows = withRouter(({ match, history }) => {
 
   const onManageDialogs = (dialog, value, secondDialog, secondValue, data = {}) =>
     dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value, secondDialog, secondValue, data } });
+
+  const onRefreshToken = async () => {
+    try {
+      const userObject = await UserService.refreshToken();
+      user.onTokenRefresh(userObject);
+    } catch (error) {
+      await UserService.logout();
+      user.onLogout();
+    }
+  };
 
   const layout = children => (
     <MainLayout>

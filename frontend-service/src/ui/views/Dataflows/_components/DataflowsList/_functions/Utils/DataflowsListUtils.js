@@ -5,9 +5,9 @@ const parseDataToFilter = data => {
     id: dataflow.id,
     description: dataflow.description,
     expirationDate: dataflow.expirationDate,
-    legalInstrument: !isNil(dataflow.obligation.legalInstruments) ? dataflow.obligation.legalInstruments.alias : null,
+    legalInstrument: !isNil(dataflow.obligation) ? dataflow.obligation.legalInstruments.alias : null,
     name: dataflow.name,
-    obligationTitle: dataflow.obligation.title,
+    obligationTitle: !isNil(dataflow.obligation) ? dataflow.obligation.title : null,
     status: dataflow.status,
     userRole: dataflow.userRole
   }));

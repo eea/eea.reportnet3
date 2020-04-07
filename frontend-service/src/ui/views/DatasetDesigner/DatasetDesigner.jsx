@@ -52,6 +52,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const user = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
 
+  const getUrlParamValue = param => {
+    let value = '';
+    let queryString = window.location.search;
+    const params = queryString.substring(1, queryString.length).split('&');
+    params.forEach(parameter => {
+      if (parameter.includes(param)) {
+        value = parameter.split('=')[1];
+      }
+    });
+    return param === 'tab' ? Number(value) : value === 'true';
+  };
+
   const [dataflowName, setDataflowName] = useState('');
   const [datasetDescription, setDatasetDescription] = useState('');
   const [datasetHasData, setDatasetHasData] = useState(false);
@@ -61,7 +73,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
   const [isLoading, setIsLoading] = useState(false);
-  const [isPreviewModeOn, setIsPreviewModeOn] = useState(false);
+  const [isPreviewModeOn, setIsPreviewModeOn] = useState(getUrlParamValue('design'));
   const [metaData, setMetaData] = useState({});
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
@@ -141,7 +153,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     getDataflowName();
     onLoadDatasetSchemaName();
     callSetMetaData();
-    setIsPreviewModeOn(getUrlParamValue('design'));
   }, []);
 
   useEffect(() => {
@@ -156,7 +167,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, [validationListDialogVisible]);
 
   useEffect(() => {
-    if (history.location.search !== '') {
+    if (window.location.search !== '') {
       changeUrl();
     }
   }, [isPreviewModeOn]);
@@ -190,18 +201,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         }
       });
     }
-  };
-
-  const getUrlParamValue = param => {
-    let value = '';
-    let queryString = history.location.search;
-    const params = queryString.substring(1, queryString.length).split('&');
-    params.forEach(parameter => {
-      if (parameter.includes(param)) {
-        value = parameter.split('=')[1];
-      }
-    });
-    return param === 'tab' ? Number(value) : value === 'true';
   };
 
   const renderSwitchView = () => (
@@ -301,8 +300,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       setIsLoading(false);
     }
   };
-
-  // const onTableAdd = ()
 
   const onUpdateDescription = async description => {
     try {

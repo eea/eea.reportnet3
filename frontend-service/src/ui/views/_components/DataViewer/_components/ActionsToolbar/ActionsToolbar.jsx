@@ -166,7 +166,7 @@ const ActionsToolbar = ({
       <div className="p-toolbar-group-left">
         <Button
           className={`p-button-rounded p-button-secondary-transparent ${
-            !hasWritePermissions || tableReadOnly || isWebFormMMR ? null : 'p-button-animated-download'
+            !hasWritePermissions || tableReadOnly || isWebFormMMR ? null : 'p-button-animated-blink'
           }`}
           disabled={!hasWritePermissions || tableReadOnly || isWebFormMMR}
           icon={'export'}
@@ -177,7 +177,7 @@ const ActionsToolbar = ({
         <Button
           id="buttonExportTable"
           className={`p-button-rounded p-button-secondary-transparent ${
-            !hasWritePermissions ? null : 'p-button-animated-upload'
+            !hasWritePermissions ? null : 'p-button-animated-blink'
           }`}
           disabled={!hasWritePermissions}
           icon={isLoadingFile ? 'spinnerAnimate' : 'import'}
