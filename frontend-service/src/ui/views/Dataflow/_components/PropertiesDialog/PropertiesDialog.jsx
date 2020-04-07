@@ -48,6 +48,7 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
       const response = await DataflowService.deleteById(dataflowId);
       if (response.status >= 200 && response.status <= 299) {
         history.push(getUrl(routes.DATAFLOWS));
+        notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
       } else {
         throw new Error(`Delete dataflow error with this status: ', ${response.status}`);
       }
