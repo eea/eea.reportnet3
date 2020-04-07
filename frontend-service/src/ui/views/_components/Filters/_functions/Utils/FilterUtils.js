@@ -41,7 +41,9 @@ const checkSelected = (state, data, selectedKeys) => {
   return true;
 };
 
-const getFilterInitialState = (data, input = [], select = [], date = [], dropDown = []) => {
+const getFilterInitialState = (data, input = [], select = [], date = [], dropDown = [], filterByList) => {
+  if (filterByList) return filterByList;
+
   const filterByGroup = input.concat(select, date, dropDown);
   const filterBy = filterByGroup.reduce((obj, key) => Object.assign(obj, { [key]: '' }), {});
   if (select) {
@@ -66,9 +68,9 @@ const getEndOfDay = date => new Date(moment(date).endOf('day').format()).getTime
 const getFilterKeys = (state, filter, inputOptions = []) =>
   Object.keys(state.filterBy).filter(key => key !== filter && inputOptions.includes(key));
 
-const getLabelInitialState = (input = [], select = [], date = [], dropDown = []) => {
+const getLabelInitialState = (input = [], select = [], date = [], dropDown = [], filteredBy) => {
   const labelByGroup = input.concat(select, date, dropDown);
-  return labelByGroup.reduce((obj, key) => Object.assign(obj, { [key]: false }), {});
+  return labelByGroup.reduce((obj, key) => Object.assign(obj, { [key]: !isEmpty(filteredBy[key]) }), {});
 };
 
 const getOptionTypes = (data, option, list) => {

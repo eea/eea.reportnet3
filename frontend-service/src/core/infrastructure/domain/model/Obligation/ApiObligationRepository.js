@@ -32,10 +32,18 @@ const obligationById = async obligationId => {
 
 const opened = async filterData => {
   if (!isEmpty(filterData)) {
-    const organizationId = filterData.organizations.value;
     const countryId = filterData.countries.value;
+    const dateFrom = filterData.expirationDate[0] ? filterData.expirationDate[0].getTime() : '';
+    const dateTo = filterData.expirationDate[1] ? filterData.expirationDate[1].getTime() : '';
     const issueId = filterData.issues.value;
-    const openedObligationsDTO = await apiObligation.openedObligations(organizationId, issueId, countryId);
+    const organizationId = filterData.organizations.value;
+    const openedObligationsDTO = await apiObligation.openedObligations(
+      countryId,
+      dateFrom,
+      dateTo,
+      issueId,
+      organizationId
+    );
     return parseObligationList(openedObligationsDTO);
   } else {
     const openedObligationsDTO = await apiObligation.openedObligations();

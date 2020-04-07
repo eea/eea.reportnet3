@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState, Fragment } from 'react';
+import React, { useContext, useEffect, useReducer, Fragment } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -29,8 +29,9 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
   const [reportingObligationState, reportingObligationDispatch] = useReducer(reportingObligationReducer, {
     countries: [],
     data: [],
+    filterBy: { expirationDate: [], countries: {}, issues: {}, organizations: {} },
     filteredData: [],
-    isLoading: true,
+    isLoading: false,
     issues: [],
     isTableView: false,
     oblChoosed: {},
@@ -40,7 +41,6 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
   });
 
   useEffect(() => {
-    // isLoading(true);
     onLoadCountries();
     onLoadIssues();
     onLoadOrganizations();
@@ -80,7 +80,9 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     }
   };
 
-  const onLoadReportingObligations = async (filterData = '') => {
+  const onLoadReportingObligations = async filterData => {
+    console.log('filterData', filterData);
+    isLoading(true);
     try {
       const response = await ObligationService.opened(filterData);
       reportingObligationDispatch({
@@ -88,7 +90,8 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
         payload: {
           data: response,
           filteredData: ReportingObligationUtils.filteredInitialValues(response, oblChecked.id),
-          oblChoosed: oblChecked
+          oblChoosed: oblChecked,
+          filterBy: filterData
         }
       });
     } catch (error) {
@@ -136,8 +139,6 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
       />
     );
 
-  if (reportingObligationState.isLoading) return <Spinner style={{ top: 0 }} />;
-
   return (
     <Fragment>
       <div className={styles.filters}>
@@ -146,6 +147,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
           dateOptions={ObligationConf.filterItems['date']}
           dropDownList={parsedFilterList}
           dropdownOptions={ObligationConf.filterItems['dropdown']}
+          filterByList={reportingObligationState.filterBy}
           sendData={onLoadReportingObligations}
         />
       </div>
@@ -161,7 +163,9 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
         )}
         <InputSwitch checked={reportingObligationState.isTableView} onChange={() => onToggleView()} />
       </div>
-      {isEmpty(reportingObligationState.data) ? (
+      {reportingObligationState.isLoading ? (
+        <Spinner style={{ top: 0 }} />
+      ) : isEmpty(reportingObligationState.data) ? (
         <h3 className={styles.noObligations}>{resources.messages['emptyObligationList']}</h3>
       ) : (
         renderData()

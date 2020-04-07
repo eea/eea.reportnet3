@@ -26,6 +26,7 @@ export const Filters = ({
   dateOptions,
   dropDownList,
   dropdownOptions,
+  filterByList,
   getFiltredData,
   inputOptions,
   selectList,
@@ -62,14 +63,16 @@ export const Filters = ({
       inputOptions,
       selectOptions,
       dateOptions,
-      dropdownOptions
+      dropdownOptions,
+      filterByList
     );
     const initialFilteredData = cloneDeep(data);
     const initialLabelAnimations = FilterUtils.getLabelInitialState(
       inputOptions,
       selectOptions,
       dateOptions,
-      dropdownOptions
+      dropdownOptions,
+      filterState.filterBy
     );
     const initialOrderBy = SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions, dropdownOptions);
 
@@ -93,10 +96,16 @@ export const Filters = ({
     filterDispatch({
       type: 'CLEAR_ALL',
       payload: {
-        filterBy: FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions),
+        filterBy: FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions, dropdownOptions),
         filteredData: cloneDeep(data),
-        labelAnimations: FilterUtils.getLabelInitialState(inputOptions, selectOptions, dateOptions),
-        orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions)
+        labelAnimations: FilterUtils.getLabelInitialState(
+          inputOptions,
+          selectOptions,
+          dateOptions,
+          dropdownOptions,
+          filterState.filterBy
+        ),
+        orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions, dropdownOptions)
       }
     });
   };
@@ -192,7 +201,6 @@ export const Filters = ({
       <span className="p-float-label">
         <InputText
           className={styles.inputFilter}
-          disabled={property.includes('ROD3')}
           id={property}
           onChange={event => onFilterData(property, event.target.value)}
           value={filterState.filterBy[property]}
@@ -213,7 +221,6 @@ export const Filters = ({
     sortable ? (
       <Button
         className={`p-button-secondary-transparent ${styles.icon}`}
-        disabled={property.includes('ROD3')}
         layout="simple"
         icon={SortUtils.getOrderIcon(filterState.orderBy[property])}
         id={`${property}_sort`}

@@ -47,10 +47,10 @@ export const apiObligation = {
     return response.data;
   },
 
-  openedObligations: async (organizationId = '', issueId = '', countryId = '', dateFrom = '', dateTo = '') => {
+  openedObligations: async (countryId = '', dateFrom = '', dateTo = '', issueId = '', organizationId = '') => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(ObligationConfig.openedObligations, { organizationId, issueId, countryId, dateFrom, dateTo }),
+      url: getUrl(ObligationConfig.openedObligations, { countryId, dateFrom, dateTo, issueId, organizationId }),
       queryString: {},
       headers: { Authorization: `Bearer ${tokens.accessToken}` }
     });
