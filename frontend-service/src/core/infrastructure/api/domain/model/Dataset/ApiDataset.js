@@ -492,7 +492,7 @@ export const apiDataset = {
     });
     return response.status;
   },
-  updateTableDescriptionDesign: async (tableSchemaId, tableSchemaDescription, datasetId) => {
+  updateTableDescriptionDesign: async (tableSchemaId, tableSchemaDescription, tableSchemaIsReadOnly, datasetId) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
@@ -503,7 +503,8 @@ export const apiDataset = {
             }),
         data: {
           idTableSchema: tableSchemaId,
-          description: tableSchemaDescription
+          description: tableSchemaDescription,
+          readOnly: tableSchemaIsReadOnly
         },
         queryString: {},
         headers: {

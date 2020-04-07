@@ -14,7 +14,7 @@ const allRepresentatives = async dataflowId => {
     group: !isEmpty(representativesDTO.data)
       ? { dataProviderGroupId: representativesDTO.data[0].dataProviderGroupId }
       : { dataProviderGroupId: null },
-    representatives: sortBy(representativesList, ['providerAccount'])
+    representatives: sortBy(representativesList, ['representativeId'])
   };
 
   return dataToConsume;

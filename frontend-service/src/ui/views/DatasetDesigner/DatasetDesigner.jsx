@@ -52,6 +52,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const user = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
 
+  const getUrlParamValue = param => {
+    let value = '';
+    let queryString = window.location.search;
+    const params = queryString.substring(1, queryString.length).split('&');
+    params.forEach(parameter => {
+      if (parameter.includes(param)) {
+        value = parameter.split('=')[1];
+      }
+    });
+    return param === 'tab' ? Number(value) : value === 'true';
+  };
+
   const [dataflowName, setDataflowName] = useState('');
   const [datasetDescription, setDatasetDescription] = useState('');
   const [datasetHasData, setDatasetHasData] = useState(false);
@@ -61,7 +73,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
   const [isLoading, setIsLoading] = useState(false);
-  const [isPreviewModeOn, setIsPreviewModeOn] = useState(false);
+  const [isPreviewModeOn, setIsPreviewModeOn] = useState(getUrlParamValue('design'));
   const [metaData, setMetaData] = useState({});
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
@@ -154,8 +166,22 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   }, [validationListDialogVisible]);
 
+  useEffect(() => {
+    if (window.location.search !== '') {
+      changeUrl();
+    }
+  }, [isPreviewModeOn]);
+
   const callSetMetaData = async () => {
     setMetaData(await getMetadata({ datasetId, dataflowId }));
+  };
+
+  const changeUrl = () => {
+    window.history.replaceState(
+      null,
+      null,
+      `?tab=${getUrlParamValue('tab')}${!isUndefined(isPreviewModeOn) ? `&design=${isPreviewModeOn}` : ''}`
+    );
   };
 
   const getDataflowName = async () => {
@@ -185,9 +211,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           checked={isPreviewModeOn}
           // disabled={true}
           // disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
-          onChange={e => {
-            setIsPreviewModeOn(e.value);
-          }}
+          onChange={e => setIsPreviewModeOn(e.value)}
         />
         <span className={styles.switchTextInput}>{resources.messages['preview']}</span>
       </div>
@@ -276,8 +300,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       setIsLoading(false);
     }
   };
-
-  // const onTableAdd = ()
 
   const onUpdateDescription = async description => {
     try {
@@ -439,6 +461,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         <TabsDesigner
           datasetSchemas={datasetSchemas}
           editable={true}
+          history={history}
           isPreviewModeOn={isPreviewModeOn}
           onChangeReference={onChangeReference}
           onLoadTableData={onLoadTableData}

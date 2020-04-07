@@ -9,6 +9,7 @@ import isUndefined from 'lodash/isUndefined';
 import styles from './FieldsDesigner.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
+import { Checkbox } from 'primereact/checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataViewer } from 'ui/views/_components/DataViewer';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -40,6 +41,7 @@ export const FieldsDesigner = ({
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
   const [tableDescriptionValue, setTableDescriptionValue] = useState('');
 
   const resources = useContext(ResourcesContext);
@@ -49,7 +51,8 @@ export const FieldsDesigner = ({
       setFields(table.records[0].fields);
     }
     if (!isUndefined(table)) {
-      setTableDescriptionValue(table.description);
+      setTableDescriptionValue(table.description || '');
+      setIsReadOnlyTable(table.readOnly || false);
     }
   }, []);
 
@@ -124,6 +127,11 @@ export const FieldsDesigner = ({
     }
   };
 
+  const onChangeIsReadOnly = checked => {
+    setIsReadOnlyTable(checked);
+    updateTableDesign(checked);
+  };
+
   const onFieldDragAndDrop = (draggedFieldIdx, droppedFieldName) => {
     reorderField(draggedFieldIdx, droppedFieldName);
   };
@@ -137,7 +145,7 @@ export const FieldsDesigner = ({
       setTableDescriptionValue(initialTableDescription);
     } else if (event.key == 'Enter') {
       event.preventDefault();
-      updateTableDescriptionDesign();
+      updateTableDesign(isReadOnlyTable);
     }
   };
 
@@ -229,6 +237,7 @@ export const FieldsDesigner = ({
           tableHasErrors={table.hasErrors}
           tableId={table.tableSchemaId}
           tableName={table.tableSchemaName}
+          tableReadOnly={false}
           tableSchemaColumns={tableSchemaColumns}
         />
       );
@@ -378,14 +387,15 @@ export const FieldsDesigner = ({
     </div>
   );
 
-  const updateTableDescriptionDesign = async () => {
-    if (isUndefined(tableDescriptionValue)) {
-      return;
-    }
+  const updateTableDesign = async readOnly => {
+    // if (isUndefined(tableDescriptionValue)) {
+    //   return;
+    // }
     try {
       const tableUpdated = await DatasetService.updateTableDescriptionDesign(
         table.tableSchemaId,
         tableDescriptionValue,
+        readOnly,
         datasetId
       );
       if (!tableUpdated) {
@@ -408,7 +418,7 @@ export const FieldsDesigner = ({
           expandableOnClick={true}
           key="tableDescription"
           onChange={e => setTableDescriptionValue(e.target.value)}
-          onBlur={() => updateTableDescriptionDesign()}
+          onBlur={() => updateTableDesign(isReadOnlyTable)}
           onFocus={e => {
             setInitialTableDescription(e.target.value);
           }}
@@ -417,6 +427,17 @@ export const FieldsDesigner = ({
           // style={{ transition: '0.5s' }}
           value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : ''}
         />
+        <div className={styles.switchDiv}>
+          <span className={styles.switchTextInput}>{resources.messages['readOnlyTable']}</span>
+          <Checkbox
+            checked={isReadOnlyTable}
+            // className={styles.checkRequired}
+            inputId={`${table.tableId}_check`}
+            label="Default"
+            onChange={e => onChangeIsReadOnly(e.checked)}
+            style={{ width: '70px' }}
+          />
+        </div>
       </div>
       {!isPreviewModeOn && (
         <div className={styles.fieldsHeader}>

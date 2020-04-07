@@ -282,7 +282,14 @@ export const ThemeProvider = ({ children }) => {
         'chips-token-color': 'var(--white)',
         'listbox-item-highlight-bg': 'var(--c-corporate-blue)',
         'listbox-item-highlight-bg-hover': 'var(--gray-10)',
-        'listbox-item-highlight-color': 'var(--white)'
+        'listbox-item-highlight-color': 'var(--white)',
+        'card-item-bg': 'var(--bg)',
+        'card-item-box-shadow': '14px 14px 20px #d9d9d9, -14px -14px 20px var(--gray-10)',
+        'tooltip-body-bg': 'var(--gray-110)',
+        'tooltip-body-color': 'var(--white)',
+        'tooltip-body-border-color': 'var(--gray-110)',
+        'tooltip-arrow-border-color': 'var(--gray-110)',
+        'tooltip-arrow-bg': 'var(--gray-110)'
       },
       dark: {
         bg: 'var(--c-dark-blue)',
@@ -469,7 +476,7 @@ export const ThemeProvider = ({ children }) => {
         'button-secondary-transparent-color-active': 'var(--white)',
         'button-secondary-transparent-box-shadow-focus': ' 0 0 0 0.2em var(--gray-25)',
         'button-secondary-transparent-border-color-active': 'var(--gray-25)',
-        'toolbar-border': '1px solid var(--c-dark-blue)',
+        'toolbar-border': '1px solid var(--gray-25)',
         'chart-bg': 'var(--bg)',
         'chart-color': 'var(--main-font-color)',
         'multiselect-bg': 'var(--c-dark-blue)',
@@ -535,7 +542,14 @@ export const ThemeProvider = ({ children }) => {
         'chips-token-color': 'var(--white)',
         'listbox-item-highlight-bg': 'var(--c-corporate-yellow)',
         'listbox-item-highlight-bg-hover': 'var(--gray-110)',
-        'listbox-item-highlight-color': 'var(--black)'
+        'listbox-item-highlight-color': 'var(--black)',
+        'card-item-bg': 'var(--c-dark-blue)',
+        'card-item-box-shadow': '14px 14px 20px #22252d, -14px -14px 20px #2e333d',
+        'tooltip-body-bg': 'var(--gray-110)',
+        'tooltip-body-color': 'var(--white)',
+        'tooltip-body-border-color': 'var(--white)',
+        'tooltip-arrow-border-color': 'var(--white)',
+        'tooltip-arrow-bg': 'var(--gray-110)'
       }
     }
   });

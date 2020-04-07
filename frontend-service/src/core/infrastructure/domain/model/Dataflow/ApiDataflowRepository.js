@@ -284,6 +284,7 @@ const getAllSchemas = async dataflowId => {
         tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaDescription: datasetTableDTO.description,
         tableSchemaName: datasetTableDTO.nameTableSchema,
+        tableSchemaReadOnly: datasetTableDTO.readOnly,
         records: records,
         recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null
       });
@@ -422,7 +423,9 @@ const parseObligationDTO = obligationDTO => {
       comment: obligationDTO.comment,
       countries: obligationDTO.countries,
       description: obligationDTO.description,
-      expirationDate: moment.unix(obligationDTO.nextDeadline / 1000).format('YYYY-MM-DD'),
+      expirationDate: !isNil(obligationDTO.nextDeadline)
+        ? moment.unix(obligationDTO.nextDeadline / 1000).format('YYYY-MM-DD')
+        : moment(obligationDTO.nextDeadline).format('YYYY-MM-DD'),
       issues: obligationDTO.issues,
       legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),
       obligationId: obligationDTO.obligationId,
@@ -451,7 +454,8 @@ const parseRepresentativeDTO = representativeDTO => {
     id: representativeDTO.id,
     isReceiptDownloaded: representativeDTO.receiptDownloaded,
     isReceiptOutdated: representativeDTO.receiptOutdated,
-    providerAccount: representativeDTO.provideraccount
+    providerAccount: representativeDTO.providerAccount,
+    hasDatasets: representativeDTO.hasDatasets
   });
 };
 

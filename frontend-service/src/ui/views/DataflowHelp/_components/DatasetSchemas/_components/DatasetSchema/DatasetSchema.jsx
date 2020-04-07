@@ -1,5 +1,6 @@
 import React from 'react';
 
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
@@ -93,15 +94,24 @@ const parseDesignDataset = (design, validationList) => {
       const table = {};
       table.tableSchemaName = tableDTO.tableSchemaName;
       table.tableSchemaDescription = tableDTO.tableSchemaDescription;
+      table.tableSchemaReadOnly = tableDTO.tableSchemaReadOnly;
       if (!isNull(tableDTO.records) && !isNil(tableDTO.records[0].fields) && tableDTO.records[0].fields.length > 0) {
+        const containsCodelists = !isEmpty(
+          tableDTO.records[0].fields.filter(fieldElmt => fieldElmt.type === 'CODELIST')
+        );
         const fields = tableDTO.records[0].fields.map(fieldDTO => {
           const field = {};
-          field.description = !isNull(fieldDTO.description) ? fieldDTO.description : '-';
           field.name = fieldDTO.name;
+          field.description = !isNull(fieldDTO.description) ? fieldDTO.description : '-';
           field.type = fieldDTO.type;
-          if (fieldDTO.type === 'CODELIST') {
-            field.codelistItems = fieldDTO.codelistItems;
+          if (containsCodelists) {
+            if (fieldDTO.type === 'CODELIST') {
+              field.codelistItems = fieldDTO.codelistItems;
+            } else {
+              field.codelistItems = [];
+            }
           }
+          console.log({ field });
           return field;
         });
         table.fields = fields;

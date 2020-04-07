@@ -67,6 +67,7 @@ const DataViewer = withRouter(
     tableHasErrors,
     tableId,
     tableName,
+    tableReadOnly,
     tableSchemaColumns
   }) => {
     const userContext = useContext(UserContext);
@@ -172,7 +173,7 @@ const DataViewer = withRouter(
       cellDataEditor,
       colsSchema,
       columnOptions,
-      hasWritePermissions,
+      hasWritePermissions && !tableReadOnly,
       initialCellValue,
       isDataCollection,
       isWebFormMMR,
@@ -740,7 +741,6 @@ const DataViewer = withRouter(
     };
 
     const requiredTemplate = rowData => {
-      console.log(rowData.value);
       return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           {rowData.field === 'Required' ? (
@@ -824,19 +824,20 @@ const DataViewer = withRouter(
           tableHasErrors={tableHasErrors}
           tableId={tableId}
           tableName={tableName}
+          tableReadOnly={tableReadOnly}
         />
         <ContextMenu model={menu} ref={contextMenuRef} />
         <div className={styles.Table}>
           <DataTable
             // autoLayout={true}
             contextMenuSelection={records.selectedRecord}
-            editable={hasWritePermissions}
+            editable={hasWritePermissions && !tableReadOnly}
             id={tableId}
             first={records.firstPageRecord}
             footer={
-              hasWritePermissions && !isWebFormMMR ? (
+              hasWritePermissions && !tableReadOnly && !isWebFormMMR ? (
                 <Footer
-                  hasWritePermissions={hasWritePermissions}
+                  hasWritePermissions={hasWritePermissions && !tableReadOnly}
                   onAddClick={() => {
                     setIsNewRecord(true);
                     setAddDialogVisible(true);
@@ -848,7 +849,7 @@ const DataViewer = withRouter(
             lazy={true}
             loading={isLoading}
             onContextMenu={
-              hasWritePermissions && !isEditing
+              hasWritePermissions && !tableReadOnly && !isEditing
                 ? e => {
                     datatableRef.current.closeEditingCell();
                     contextMenuRef.current.show(e.originalEvent);

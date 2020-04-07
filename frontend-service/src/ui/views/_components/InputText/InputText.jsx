@@ -149,6 +149,7 @@ export class InputText extends Component {
     return (
       <React.Fragment>
         <input
+          autoComplete="off"
           autoFocus={this.props.autoFocus}
           ref={el => (this.element = el)}
           {...inputProps}

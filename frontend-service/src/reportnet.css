@@ -435,6 +435,13 @@
   --listbox-item-highlight-bg: var(--c-corporate-blue);
   --listbox-item-highlight-bg-hover: var(--gray-10);
   --listbox-item-highlight-color: var(--white);
+
+  /* Tooltip */
+  --tooltip-body-bg: var(--gray-110);
+  --tooltip-body-color: var(--white);
+  --tooltip-body-border-color: var(--gray-110);
+  --tooltip-arrow-border-color: var(--gray-110);
+  --tooltip-arrow-bg: var(--gray-110);
 }
 body {
   margin: 0px;
@@ -2210,7 +2217,7 @@ form .error {
 
 /*Tooltip*/
 .p-tooltip {
-  z-index: 4000 !important;
+  z-index: 5000 !important;
 }
 /*dialog*/
 body .p-dialog.edit-table .p-dialog-content {

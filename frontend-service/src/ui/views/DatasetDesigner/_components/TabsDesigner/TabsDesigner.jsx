@@ -115,6 +115,7 @@ export const TabsDesigner = withRouter(
           table.index = idx;
           table.levelErrorTypes = inmDatasetSchema.levelErrorTypes;
           table.newTab = false;
+          table.readOnly = table.tableSchemaReadOnly;
           table.showContextMenu = false;
         });
         //Add tab Button/Tab
@@ -153,13 +154,9 @@ export const TabsDesigner = withRouter(
       }
     };
 
-    const onTabClicked = event => {
-      setActiveIndex(event.index);
-    };
+    const onTabClicked = event => setActiveIndex(event.index);
 
-    const onTabEditingHeader = editing => {
-      setIsEditing(editing);
-    };
+    const onTabEditingHeader = editing => setIsEditing(editing);
 
     const onTableAdd = (header, tabIndex, initialHeader) => {
       if (header !== initialHeader) {
@@ -178,13 +175,9 @@ export const TabsDesigner = withRouter(
       }
     };
 
-    const onTableDelete = deletedTabIndx => {
-      deleteTable(deletedTabIndx);
-    };
+    const onTableDelete = deletedTabIndx => deleteTable(deletedTabIndx);
 
-    const onTableDragAndDrop = (draggedTabHeader, droppedTabHeader) => {
-      reorderTable(draggedTabHeader, droppedTabHeader);
-    };
+    const onTableDragAndDrop = (draggedTabHeader, droppedTabHeader) => reorderTable(draggedTabHeader, droppedTabHeader);
 
     const onTableDragAndDropStart = draggedTabIdx => {
       if (!isUndefined(draggedTabIdx)) {
@@ -344,8 +337,10 @@ export const TabsDesigner = withRouter(
             activeIndex={activeIndex}
             checkEditingTabs={checkEditingTabs}
             designMode={true}
+            history={history}
             initialTabIndexDrag={initialTabIndexDrag}
             isErrorDialogVisible={isErrorDialogVisible}
+            isPreviewModeOn={isPreviewModeOn}
             onTabAdd={onTabAdd}
             onTabAddCancel={onTabAddCancel}
             onTabBlur={onTableAdd}
