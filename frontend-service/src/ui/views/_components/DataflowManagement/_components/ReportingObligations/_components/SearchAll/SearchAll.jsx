@@ -1,5 +1,7 @@
 import React, { useContext, useEffect, useReducer } from 'react';
 
+import isEmpty from 'lodash/isEmpty';
+
 import styles from './SearchAll.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
@@ -11,7 +13,7 @@ import { searchReducer } from './_functions/Reducers/searchReducer';
 
 import { SearchUtils } from './_functions/Utils/SearchUtils';
 
-export const SearchAll = ({ data, getValues }) => {
+export const SearchAll = ({ data, getValues, searchInitialState }) => {
   const resources = useContext(ResourcesContext);
 
   const [searchState, searchDispatch] = useReducer(searchReducer, {
@@ -28,7 +30,11 @@ export const SearchAll = ({ data, getValues }) => {
     if (getValues) getValues(searchState.searchedData);
   }, [searchState.searchedData]);
 
-  const onLoadInitialState = () => searchDispatch({ type: 'INITIAL_LOAD', payload: { data, searchedData: data } });
+  const onLoadInitialState = () =>
+    searchDispatch({
+      type: 'INITIAL_LOAD',
+      payload: { data, searchedData: isEmpty(searchState.searchBy) ? data : searchInitialState }
+    });
 
   const onSearchData = value => {
     const searchedValues = SearchUtils.onApplySearch(searchState.data, value);

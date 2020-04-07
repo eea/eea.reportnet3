@@ -171,7 +171,11 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
         />
       </div>
       <div className={styles.repOblTools}>
-        <SearchAll data={reportingObligationState.filteredData} getValues={onLoadSearchedData} />
+        <SearchAll
+          data={reportingObligationState.filteredData}
+          getValues={onLoadSearchedData}
+          searchInitialState={reportingObligationState.searchedData}
+        />
         <div className={styles.switchDiv}>
           <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
           <InputSwitch checked={reportingObligationState.isTableView} onChange={() => onToggleView()} />
