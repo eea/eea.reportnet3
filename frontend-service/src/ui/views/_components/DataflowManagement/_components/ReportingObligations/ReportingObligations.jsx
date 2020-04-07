@@ -83,7 +83,6 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
   };
 
   const onLoadReportingObligations = async filterData => {
-    console.log('filterData', filterData);
     isLoading(true);
     try {
       const response = await ObligationService.opened(filterData);

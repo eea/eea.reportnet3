@@ -270,6 +270,7 @@ export const Filters = ({
 
       {sendData ? (
         <Button
+          className="p-button-animated-blink"
           icon="filter"
           onClick={() => sendData(filterState.filterBy)}
           tooltip={resources.messages['applyFilters']}
