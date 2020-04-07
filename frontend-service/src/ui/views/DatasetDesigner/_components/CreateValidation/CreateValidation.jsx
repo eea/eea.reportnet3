@@ -247,8 +247,8 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     const {
       candidateRule: { expressions, allExpressions }
     } = creationFormState;
-    const parsedAllExpressions = deleteExpression(expressionId, allExpressions);
     const parsedExpressions = deleteExpressionRecursivily(expressionId, expressions);
+    const parsedAllExpressions = deleteExpression(expressionId, allExpressions);
     creationFormDispatch({
       type: 'UPDATE_RULES',
       payload: parsedAllExpressions

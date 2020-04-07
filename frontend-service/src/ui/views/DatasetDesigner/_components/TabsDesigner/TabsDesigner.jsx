@@ -155,7 +155,6 @@ export const TabsDesigner = withRouter(
     };
 
     const onTabClicked = event => {
-      console.log(event.index);
       setActiveIndex(event.index);
     };
 

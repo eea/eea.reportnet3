@@ -5,7 +5,8 @@ import uuid from 'uuid';
 import { getExpressionOperatorType } from './getExpressionOperatorType';
 import isNil from 'lodash/isNil';
 
-export const getExpressionFromDTO = (expression, parentUnion) => {
+export const getExpressionFromDTO = (expression, allExpressions, parentUnion) => {
+  console.log('[getExpressionFromDTO]', expression, allExpressions, parentUnion);
   const union = !isNil(parentUnion) ? parentUnion : '';
   const newExpression = {};
   newExpression.expressionId = uuid.v4();
@@ -19,9 +20,12 @@ export const getExpressionFromDTO = (expression, parentUnion) => {
     newExpression.expressionValue = expression.arg1;
   } else {
     newExpression.operatorType = getExpressionOperatorType(expression.operator);
+    console.log('[newEpression]', newExpression);
   }
   if (newExpression.operatorType == 'date') {
     newExpression.expressionValue = new Date(expression.arg2);
   }
+  allExpressions.push(newExpression);
+
   return newExpression;
 };

@@ -77,7 +77,10 @@
     }
   },
   "operatorsTypesFromDTO": [
-    { "operatorType": "number", "operators": [">", "<", ">=", "<=", "=", "!="] },
+    {
+      "operatorType": "number",
+      "operators": ["GT", "LT", "GTEQ", "LTEQ", "EQ", "DIST", "GT", "LT", "LTEQ", "EQ", "DIST", "SEQ"]
+    },
     { "operatorType": "string", "operators": ["SEQ", "SEQIC", "MATCH"] },
     { "operatorType": "date", "operators": ["GT_DATE", "LT_DATE", "GTEQ_DATE", "LTEQ_DATE", "EQ_DATE", "DIST_DATE"] }
   ],

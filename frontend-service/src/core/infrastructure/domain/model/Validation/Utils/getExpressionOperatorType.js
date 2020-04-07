@@ -9,6 +9,8 @@ export const getExpressionOperatorType = operator => {
       return operatorTypeObject;
     }
   });
+  console.log('selectedOperators', selectedOperators);
+
   const [selectedOperator] = selectedOperators;
   return selectedOperator.operatorType;
 };
