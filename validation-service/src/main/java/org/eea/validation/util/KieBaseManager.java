@@ -274,9 +274,6 @@ public class KieBaseManager {
       rule.setEnabled(Boolean.FALSE);
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
 
-    } else {
-      rule.setEnabled(Boolean.TRUE);
-      rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
     }
   }
 
