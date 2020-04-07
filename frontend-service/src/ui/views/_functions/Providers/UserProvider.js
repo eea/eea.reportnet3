@@ -9,7 +9,7 @@ const userSettingsDefaultState = {
     defaultRowSelected: 10,
     defaultVisualTheme: 'light',
     showLogoutConfirmation: true,
-    userIconPatch: {},
+    userImage: [],
     dateFormat: 'MM-DD-YYYY'
   }
 };
@@ -42,6 +42,7 @@ const userReducer = (state, { type, payload }) => {
         }
       };
     case 'DEFAULT_ROW_SELECTED':
+      console.log({ payload });
       return {
         ...state,
         userProps: {
@@ -50,6 +51,7 @@ const userReducer = (state, { type, payload }) => {
         }
       };
     case 'DATE_FORMAT':
+      console.log({ payload });
       return {
         ...state,
         userProps: {
@@ -65,12 +67,12 @@ const userReducer = (state, { type, payload }) => {
           defaultVisualTheme: payload
         }
       };
-    case 'USER_ICON_PATH':
+    case 'USER_AVATAR_IMAGE':
       return {
         ...state,
         userProps: {
           ...state.userProps,
-          userIconPatch: payload
+          userImage: payload
         }
       };
 
@@ -142,10 +144,11 @@ export const UserProvider = ({ children }) => {
             payload: currentTheme
           });
         },
-        onClickUserIcon: path => {
+        onUserFileUpload: base64Image => {
+          console.log(base64Image);
           userDispatcher({
-            type: 'USER_ICON_PATH',
-            payload: path
+            type: 'USER_AVATAR_IMAGE',
+            payload: base64Image
           });
         }
       }}>

@@ -1,15 +1,41 @@
+.imageWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.overlay {
+  // position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+  transition: 0.3s ease;
+  background-color: red;
+  font-weight: 900;
+}
 .userDataIcon {
   font-size: 8rem !important;
-  padding: 0.5rem;
+  // padding: 0.5rem;
   margin: 0.5rem;
-  border-radius: 200px 200px 200px 200px;
-  -moz-border-radius: 200px 200px 200px 200px;
-  -webkit-border-radius: 200px 200px 200px 200px;
+  border-radius: 50%;
+  -moz-border-radius: 50%;
+  -webkit-border-radius: 50%;
   border: 3px solid var(--main-font-color);
   color: var(--main-font-color);
-  width: 12rem;
-  height: 12rem;
+  width: 12.875rem;
+  height: 12.875rem;
+}
+.userDataIcon:hover {
+  // background-color: var(--user-image-bg-hover);
+  opacity: var(--user-image-bg-opacity);
+  border: 3px dashed var(--user-image-bg-hover);
+  cursor: pointer;
 }
 
-.userDataIcon:hover {
+.userDataIcon:hover .overlay {
+  opacity: 1;
 }

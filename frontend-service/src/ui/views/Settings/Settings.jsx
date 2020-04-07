@@ -1,7 +1,5 @@
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
-import { UserService } from 'core/services/User';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import styles from './Settings.module.scss';
 
@@ -13,132 +11,25 @@ import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContex
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { getUrl } from 'core/infrastructure/CoreUtils';
-import { UserDesignOptions } from './_components/UserDesignOptions';
 import { UserCard } from './_components/UserCard';
 import { UserConfiguration } from './_components/UserConfiguration';
-import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
-
-const initialState = {
-  isVisibleUserDesignOptions: true,
-  isVisibleUserSettingsOptions: false
-};
-
-const reducer = (state, { type, payload }) => {
-  switch (type) {
-    case 'VISIBLE_USER_DESIGN_OPTIONS':
-      return {
-        ...state,
-        isVisibleUserDesignOptions: true,
-        isVisibleUserSettingsOptions: false
-      };
-    case 'VISIBLE_USER_SETTINGS_OPTIONS':
-      return {
-        ...state,
-        isVisibleUserSettingsOptions: true,
-        isVisibleUserDesignOptions: false
-      };
-    default:
-      return state;
-  }
-};
 
 const Settings = withRouter(({ history }) => {
-  const [userSettingsConfiguration, setUserSettingsConfiguration] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [visibleUserSectionState, visibleUserSectionDispatch] = useReducer(reducer, initialState);
-  const themeContext = useContext(ThemeContext);
-
-  const userContext = useContext(UserContext);
   const breadCrumbContext = useContext(BreadCrumbContext);
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
-  const initUserSettingsSection = () => {
-    visibleUserSectionDispatch({ type: 'VISIBLE_USER_DESIGN_OPTIONS' });
-  };
-
-  const getUserConfiguration = async () => {
-    try {
-      const userConfiguration = await UserService.getConfiguration();
-      setUserSettingsConfiguration(userSettingsConfiguration);
-      console.log('User Configuration: ', userConfiguration);
-
-      userContext.dateFormat(userConfiguration.dateFormat);
-      userContext.defaultRowSelected(parseInt(userConfiguration.defaultRowsNumber));
-      userContext.onToggleLogoutConfirm(userConfiguration.defaultLogoutConfirmation);
-      userContext.defaultVisualTheme(userConfiguration.theme);
-      themeContext.onToggleTheme(userConfiguration.theme);
-
-      console.log('User Context', userContext);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   // useEffect(() => {
-  //   getUserConfiguration();
-  // }, []);
-
-  // useEffect(() => {
-  //   userContext.defaultRowSelected(parseInt(userConfiguration.defaultRowSelected));
-  // }, []);
-
-  //////////////////////////////////////////////////////////////////////////////////////
-  const [attributes, setAttributes] = useState({});
-
-  // useEffect(() => {
-  //   updateAtributes();
-  // }, []);
-  const updateAtributes = () => {
-    setAttributes({
-      defaultRowSelected: [userContext.userProps.defaultRowSelected],
-      defaultVisualTheme: [`${userContext.userProps.defaultVisualTheme}`],
-      showLogoutConfirmation: [`${userContext.userProps.showLogoutConfirmation}`],
-      dateFormat: [`${userContext.userProps.dateFormat}`]
-    });
-  };
-  // ////////////////////////////////////////////////
-  const Attributes = {
-    defaultRowSelected: [`${userContext.userProps.defaultRowSelected}`],
-    defaultVisualTheme: [`${userContext.userProps.defaultVisualTheme}`],
-    showLogoutConfirmation: [`${userContext.userProps.showLogoutConfirmation}`],
-    dateFormat: [`${userContext.userProps.dateFormat}`]
-  };
-  useEffect(() => {
-    updateUserAttributes(Attributes);
-  }, [Attributes]);
-
-  // useEffect(() => {
+  //   document.querySelectorAll('.userSettingsBtn').forEach(btn => {
+  //     btn.addEventListener('click', initUserSettingsSection);
+  //   });
   //   return () => {
-  //     updateUserAttributes(attributes);
+  //     document.querySelectorAll('.userSettingsBtn').forEach(btn => {
+  //       btn.removeEventListener('click', initUserSettingsSection);
+  //     });
   //   };
   // }, []);
-
-  //funcion
-  const updateUserAttributes = async atts => {
-    try {
-      await UserService.updateAttributes(atts);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
-  //////////////////////////////////////////////////////////////////////////////////////
-
-  useEffect(() => {
-    document.querySelectorAll('.userSettingsBtn').forEach(btn => {
-      btn.addEventListener('click', initUserSettingsSection);
-    });
-    return () => {
-      document.querySelectorAll('.userSettingsBtn').forEach(btn => {
-        btn.removeEventListener('click', initUserSettingsSection);
-      });
-    };
-  }, []);
 
   useEffect(() => {
     breadCrumbContext.add([
@@ -160,26 +51,6 @@ const Settings = withRouter(({ history }) => {
   useEffect(() => {
     leftSideBarContext.addModels([
       {
-        icon: 'palette',
-        label: 'userDesignOptions',
-        onClick: () => {
-          visibleUserSectionDispatch({
-            type: 'VISIBLE_USER_DESIGN_OPTIONS'
-          });
-        },
-        title: 'User Design Options'
-      },
-      {
-        icon: 'userConfig',
-        label: 'userConfigurationOptions',
-        onClick: () => {
-          visibleUserSectionDispatch({
-            type: 'VISIBLE_USER_SETTINGS_OPTIONS'
-          });
-        },
-        title: 'User Configuration Options'
-      },
-      {
         icon: 'info',
         label: 'PRIVACY',
         onClick: e => {
@@ -191,11 +62,10 @@ const Settings = withRouter(({ history }) => {
     ]);
   }, []);
 
-  const toggleUserOptions = () => {
+  const renderUserOptions = () => {
     return (
       <>
-        {visibleUserSectionState.isVisibleUserDesignOptions && <UserDesignOptions />}
-        {visibleUserSectionState.isVisibleUserSettingsOptions && <UserConfiguration />}
+        <UserConfiguration />
         <UserCard />
       </>
     );
@@ -228,12 +98,12 @@ const Settings = withRouter(({ history }) => {
           </div>
         </div>
         <div className="rep-row">
-          <div className={styles.sectionMainContent}>{toggleUserOptions()}</div>
+          <div className={styles.sectionMainContent}>{renderUserOptions()}</div>
         </div>
       </div>
     );
 
-  return <>{isLoading ? <Spinner className={styles.positioning} /> : userConfigurations()}</>;
+  return userConfigurations();
 });
 
 export { Settings };

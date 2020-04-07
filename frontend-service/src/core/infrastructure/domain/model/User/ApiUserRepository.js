@@ -58,12 +58,11 @@ const parseConfigurationDTO = userConfigurationDTO => {
       : (userConfiguration.defaultLogoutConfirmation = true);
   userConfiguration.defaultRowsNumber = userConfigurationDTO.defaultRowSelected[0];
   userConfiguration.theme = userConfigurationDTO.defaultVisualTheme[0];
+  userConfiguration.userImage = userConfigurationDTO.userImage;
   return userConfiguration;
 };
 
-const updateAttributes = async Attributes => {
-  await apiUser.updateAttributes(Attributes);
-};
+const updateAttributes = async attributes => await apiUser.updateAttributes(attributes);
 
 const oldLogin = async (userName, password) => {
   const userDTO = await apiUser.oldLogin(userName, password);

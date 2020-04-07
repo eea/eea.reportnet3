@@ -1,1 +1,0 @@
-export { UserDesignOptions } from './UserDesignOptions';

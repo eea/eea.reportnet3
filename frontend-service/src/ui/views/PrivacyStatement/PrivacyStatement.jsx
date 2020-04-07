@@ -5,7 +5,7 @@ import styles from './PrivacyStatement.module.scss';
 
 import { routes } from 'ui/routes';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { Title } from '../_components/Title/Title';
+import { Title } from 'ui/views/_components/Title';
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -35,34 +35,8 @@ const PrivacyStatement = withRouter(({ history }) => {
   }, []);
 
   useEffect(() => {
-    leftSideBarContext.addModels([
-      {
-        icon: 'userConfig',
-        label: 'userConfigurationOptions',
-        onClick: e => {
-          e.preventDefault();
-          history.push(getUrl(routes['SETTINGS']));
-        },
-        title: 'User Configuration Options'
-      },
-      {
-        icon: 'info',
-        label: 'PRIVACY',
-        onClick: e => {
-          e.preventDefault();
-          history.push(getUrl(routes['PRIVACY_STATEMENT']));
-        },
-        title: 'User Configuration Options'
-      }
-    ]);
+    leftSideBarContext.addModels([]);
   }, []);
-  // const toggleUserOptions = () => {
-  //   return (
-  //     <>
-  //       <UserCard />
-  //     </>
-  //   );
-  // };
 
   const layout = children => {
     return (
@@ -87,80 +61,75 @@ const PrivacyStatement = withRouter(({ history }) => {
           subtitle={resources.messages['PrivacyStatementSubtitle']}
         />
 
-        {/* <ul>
-          <li>user ID(*):</li>
-          <li>First name (*):</li>
-          <li>Last name (*):</li>
-        </ul> */}
-
         <div className={styles.sectionMainContent}>
-          <h2>Example</h2>
-          <h3> Introduction</h3>
+          <h3>{resources.messages['gdprIntroduction']}</h3>
+          <p>{resources.messages['gdprIntroductionMessage']}</p>
+          <h3>{resources.messages['gdprDataCollectedTitle']}</h3>
           <p>
-            Any personal data you submit to the European Environment Agency (EEA) in the context of the Eionet website
-            referred to above will be processed in accordance with Regulation (EU) 2018/1725 of the European Parliament
-            and of the Council on the protection of natural persons with regard to the processing of personal data by
-            the Union institutions, bodies, offices and agencies and on the free movement of such data. Processing
-            operations are under the responsibility of the CAS1 (Networks and Partnerships) group under CAS
-            (Coordination and Strategy) programme of the EEA acting as data controller, regarding the collection and
-            processing of personal data. What personal data do we collect and for what purpose When you visit the
-            website we do not collect any personal information and we do not link or correlate your authenticated
-            session to the collected website usage statistics which are fully anonymized. See "site usage statistics"
-            section for more details. We collect personal information when we create an account in the Eionet User
-            Directory. This is needed in order to grant the user access to various EEA/Eionet's websites that require
-            authentication. Users added to Eionet User Directory include the EEA's own staff, staff of organisations
-            that EEA cooperates with, including the member organisations of the European Environment Information and
-            Observation Network (Eionet) , and EU's institutions, as well as consultants working for EEA.
-            Self-registration is not possible. Registration only occur by invitation of an existing member of the
-            network by contacting the Eionet Helpdesk or by the National Focal Points who maintain the formal Eionet
-            components (NFPs and NRCs) in their countries.
-          </p>
-          <h3> What personal data do we collect and for what purpose</h3>
-          <p>
-            When you visit the website we do not collect any personal information and we do not link or correlate your
-            authenticated session to the collected website usage statistics which are fully anonymized. See "site usage
-            statistics" section for more details. We collect personal information when we create an account in the
-            Eionet User Directory. This is needed in order to grant the user access to various EEA/Eionet's websites
-            that require authentication. Users added to Eionet User Directory include the EEA's own staff, staff of
-            organisations that EEA cooperates with, including the member organisations of the European Environment
-            Information and Observation Network (Eionet) , and EU's institutions, as well as consultants working for
-            EEA. Self-registration is not possible. Registration only occur by invitation of an existing member of the
-            network by contacting the Eionet Helpdesk or by the National Focal Points who maintain the formal Eionet
-            components (NFPs and NRCs) in their countries. The personal data processed in Eionet User Directory is:
+            {resources.messages['gdprDataCollectedMessage']}
             <ul>
-              <li>user ID(*):</li>
-              <li>First name (*):</li>
-              <li>Last name (*):</li>
-              <li>Full name (native language):</li>
-              <li>Reason to create the account (*):</li>
-              <li>Job title</li>
-              <li>E-mail(*)</li>
-              <li>URL</li>
-              <li>Postal address:</li>
-              <li>Telephone number:</li>
-              <li>Mobile telephone number:</li>
-              <li>Fax number:</li>
-              <li>Organisation (*):</li>
-              <li>Deparment</li>
-              (*) These are required fields.
+              <li>
+                {resources.messages['gdprUserId']}
+                {resources.messages['gdprRequiredCharacter']}
+              </li>
+              <li>
+                {resources.messages['gdprFirstName']} {resources.messages['gdprRequiredCharacter']}
+              </li>
+              <li>
+                {resources.messages['gdprLastName']} {resources.messages['gdprRequiredCharacter']}
+              </li>
+              <li>
+                {resources.messages['gdprFullName']} {resources.messages['gdprNativeLanguage']}
+              </li>
+              <li>
+                {resources.messages['gdprReason']} {resources.messages['gdprRequiredCharacter']}
+              </li>
+              <li>{resources.messages['gdprJobTitle']}</li>
+              <li>
+                {resources.messages['gdprEmail']}
+                {resources.messages['gdprRequiredCharacter']}
+              </li>
+              <li>{resources.messages['gdprURL']}</li>
+              <li>{resources.messages['gdprPostalAddress']}</li>
+              <li>{resources.messages['gdprTelephoneNumber']}</li>
+              <li>{resources.messages['gdprMobileTelephoneNumber']}</li>
+              <li>{resources.messages['gdprFaxNumber']}</li>
+              <li>
+                {resources.messages['gdprOrganisation']} {resources.messages['gdprRequiredCharacter']}
+              </li>
+              <li>{resources.messages['gdprDepartment']}</li>
+              {resources.messages['gdprRequiredCharacter']} {resources.messages['gdprRequiredMessage']}
             </ul>
           </p>
-          <h3> Who can see your personal data</h3>
+          <h3>{resources.messages['gdprWhoCanSee']}</h3>
           <p>
-            The Eionet User Directory is only accessible to users of the Eionet User Directory. Following personal data
-            is available for authenticated users:
+            {resources.messages['gdprWhoCanSeeMessage']}
             <ul>
-              <li>Job title (if available)</li>
-              <li>Given Name</li>
-              <li>Surname</li>
-              <li>Organisation</li>
-              <li>User profile picture (if user has uploaded one)</li>
-              <li>Email</li>
-              <li>Department (if available)</li>
-              <li>Telephone (if available)</li>
-              <li>Mobile phone (if available)</li>
-              <li>Fax (if available)</li>
-              <li>Postal address (if available)</li>
+              <li>
+                {resources.messages['gdprJobTitle']} {resources.messages['gdprIfAvailable']}
+              </li>
+              <li>{resources.messages['gdprGivenName']}</li>
+              <li>{resources.messages['gdprSurname']}</li>
+              <li>{resources.messages['gdprOrganisation']}</li>
+              <li>
+                {resources.messages['gdprUserProfilePicture']} {resources.messages['gdprUserProfilePictureMessage']}
+              </li>
+              <li>{resources.messages['gdprEmail']}</li>
+              <li>
+                {resources.messages['gdprDepartment']} {resources.messages['gdprIfAvailable']}
+              </li>
+              <li>
+                {resources.messages['gdprTelephoneNumber']} {resources.messages['gdprIfAvailable']}
+              </li>
+              <li>
+                {resources.messages['gdprMobileTelephoneNumber']} {resources.messages['gdprIfAvailable']}
+              </li>
+              <li>
+                {resources.messages['gdprFaxNumber']} {resources.messages['gdprIfAvailable']}
+              </li>
+              <li>
+                {resources.messages['gdprPostalAddress']} {resources.messages['gdprIfAvailable']}
+              </li>
             </ul>
           </p>
         </div>

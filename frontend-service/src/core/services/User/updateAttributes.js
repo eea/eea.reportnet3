@@ -1,1 +1,1 @@
-export const updateAttributes = ({ userRepository }) => async Attributes => userRepository.updateAttributes(Attributes);
+export const updateAttributes = ({ userRepository }) => async attributes => userRepository.updateAttributes(attributes);

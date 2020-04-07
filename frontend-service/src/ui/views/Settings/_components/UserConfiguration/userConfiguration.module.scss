@@ -1,3 +1,7 @@
+.italicTitle {
+  font-style: italic;
+}
+
 .userconfig {
   position: fixed;
   top: 0px;
@@ -65,4 +69,20 @@
   font-size: 1em;
   font-weight: bold;
   color: var(--main-font-color);
+}
+
+.userUploadImg {
+  margin-top: 4rem;
+}
+
+.userThemeTitle {
+  font-weight: bold;
+  margin-top: 1.4rem;
+  font-size: 1.5em;
+  margin-left: 1rem;
+  color: var(--main-font-color);
+}
+
+.dropdownFieldType {
+  margin-left: 1rem;
 }

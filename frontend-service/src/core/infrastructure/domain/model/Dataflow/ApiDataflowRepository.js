@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -34,6 +35,7 @@ const accepted = async () => {
 
 const all = async userData => {
   const pendingDataflowsDTO = await apiDataflow.all(userData);
+  console.log({ pendingDataflowsDTO, userData, DataflowConf });
   const dataflows = !userData ? pendingDataflowsDTO : [];
   const userRoles = [];
 
@@ -64,11 +66,13 @@ const all = async userData => {
 
   const dataflowsData = groupByUserRequesetStatus(dataflows);
 
-  const allDataflows = DataflowConf.userRequestStatus;
+  const allDataflows = cloneDeep(DataflowConf.userRequestStatus);
+  console.log({ allDataflows });
   Object.keys(dataflowsData).forEach(key => {
+    console.log({ key });
     allDataflows[key.toLowerCase()] = parseDataflowDTOs(dataflowsData[key]);
   });
-
+  console.log({ allDataflows });
   return allDataflows;
 };
 

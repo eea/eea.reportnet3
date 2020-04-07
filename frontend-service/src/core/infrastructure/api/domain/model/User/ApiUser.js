@@ -1,7 +1,22 @@
+import isEmpty from 'lodash/isEmpty';
+
 import { UserConfig } from 'conf/domain/model/User';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
+
+const parseUserConfiguration = userConfiguration => {
+  Object.keys(userConfiguration).forEach(
+    key =>
+      (userConfiguration[key] = !Array.isArray(userConfiguration[key])
+        ? [userConfiguration[key].toString()]
+        : !isEmpty(userConfiguration[key])
+        ? userConfiguration[key]
+        : [])
+  );
+  console.log({ userConfiguration });
+  return userConfiguration;
+};
 
 export const apiUser = {
   login: async code => {
@@ -70,7 +85,7 @@ export const apiUser = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${tokens.accessToken}`
       },
-      data: userConfiguration
+      data: parseUserConfiguration(userConfiguration)
     });
     return response;
   },

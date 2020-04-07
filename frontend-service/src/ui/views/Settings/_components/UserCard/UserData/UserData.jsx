@@ -16,7 +16,7 @@ const UserData = () => {
 
       <div className={styles.userName}>{userContext.preferredUsername}</div>
 
-      <div className={styles.userMail}>datacustodian@reportnet.com</div>
+      <div className={styles.userMail}>{userContext.preferredUsername}@reportnet.net</div>
     </div>
   );
 };
