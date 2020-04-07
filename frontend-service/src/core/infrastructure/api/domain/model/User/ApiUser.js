@@ -61,7 +61,7 @@ export const apiUser = {
     return response.data;
   },
 
-  updateConfiguration: async userConfiguration => {
+  updateAttributes: async userConfiguration => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
       url: getUrl(UserConfig.updateConfiguration),

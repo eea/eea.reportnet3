@@ -62,8 +62,7 @@ const parseConfigurationDTO = userConfigurationDTO => {
 };
 
 const updateAttributes = async Attributes => {
-  const response = await apiUser.updateAttributes(Attributes);
-  return response;
+  await apiUser.updateAttributes(Attributes);
 };
 
 const oldLogin = async (userName, password) => {

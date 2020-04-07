@@ -62,7 +62,6 @@ const Settings = withRouter(({ history }) => {
       const userConfiguration = await UserService.getConfiguration();
       setUserSettingsConfiguration(userSettingsConfiguration);
       console.log('User Configuration: ', userConfiguration);
-      console.log('User Context', userContext);
 
       userContext.dateFormat(userConfiguration.dateFormat);
       userContext.defaultRowSelected(parseInt(userConfiguration.defaultRowsNumber));
@@ -77,18 +76,58 @@ const Settings = withRouter(({ history }) => {
       setIsLoading(false);
     }
   };
-  useEffect(() => {
-    return () => {
-      console.log('meFui');
-    };
-  }, []);
-  useEffect(() => {
-    getUserConfiguration();
-  }, []);
+
+  // useEffect(() => {
+  //   getUserConfiguration();
+  // }, []);
 
   // useEffect(() => {
   //   userContext.defaultRowSelected(parseInt(userConfiguration.defaultRowSelected));
   // }, []);
+
+  //////////////////////////////////////////////////////////////////////////////////////
+  const [attributes, setAttributes] = useState({});
+
+  // useEffect(() => {
+  //   updateAtributes();
+  // }, []);
+  const updateAtributes = () => {
+    setAttributes({
+      defaultRowSelected: [userContext.userProps.defaultRowSelected],
+      defaultVisualTheme: [`${userContext.userProps.defaultVisualTheme}`],
+      showLogoutConfirmation: [`${userContext.userProps.showLogoutConfirmation}`],
+      dateFormat: [`${userContext.userProps.dateFormat}`]
+    });
+  };
+  // ////////////////////////////////////////////////
+  const Attributes = {
+    defaultRowSelected: [`${userContext.userProps.defaultRowSelected}`],
+    defaultVisualTheme: [`${userContext.userProps.defaultVisualTheme}`],
+    showLogoutConfirmation: [`${userContext.userProps.showLogoutConfirmation}`],
+    dateFormat: [`${userContext.userProps.dateFormat}`]
+  };
+  useEffect(() => {
+    updateUserAttributes(Attributes);
+  }, [Attributes]);
+
+  // useEffect(() => {
+  //   return () => {
+  //     updateUserAttributes(attributes);
+  //   };
+  // }, []);
+
+  //funcion
+  const updateUserAttributes = async atts => {
+    try {
+      await UserService.updateAttributes(atts);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  //////////////////////////////////////////////////////////////////////////////////////
 
   useEffect(() => {
     document.querySelectorAll('.userSettingsBtn').forEach(btn => {

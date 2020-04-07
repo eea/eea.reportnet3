@@ -10,7 +10,7 @@ const UserCard = () => {
   return (
     <div className={`${styles.userBoxContainer}`}>
       <UserData />
-      <UserObligations />
+
       <UserLinks />
     </div>
   );
