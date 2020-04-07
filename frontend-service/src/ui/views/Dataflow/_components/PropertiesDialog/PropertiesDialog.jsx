@@ -48,6 +48,7 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
       const response = await DataflowService.deleteById(dataflowId);
       if (response.status >= 200 && response.status <= 299) {
         history.push(getUrl(routes.DATAFLOWS));
+        notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
       } else {
         throw new Error(`Delete dataflow error with this status: ', ${response.status}`);
       }
@@ -106,23 +107,29 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
         visible={dataflowDataState.isPropertiesDialogVisible}>
         <div className={styles.propertiesWrap}>
           {dataflowDataState.description}
-          <div style={{ marginTop: '1rem', marginBottom: '2rem' }}>
-            <TreeViewExpandableItem
-              items={[{ label: resources.messages['reportingObligations'] }]}
-              buttons={[
-                {
-                  className: `p-button-secondary-transparent`,
-                  icon: 'externalLink',
-                  tooltip: resources.messages['viewMore'],
-                  onClick: () =>
-                    window.open(
-                      `http://rod3.devel1dub.eionet.europa.eu/obligations/${dataflowDataState.obligations.obligationId}`
-                    )
-                }
-              ]}>
-              <TreeView property={parsedObligationsData} propertyName={''} />
-            </TreeViewExpandableItem>
-          </div>
+          {parsedObligationsData.map(data => (
+            <div style={{ marginTop: '1rem', marginBottom: '2rem' }}>
+              <TreeViewExpandableItem
+                items={[{ label: PropertiesUtils.camelCaseToNormal(data.label) }]}
+                buttons={
+                  data.label === 'obligation'
+                    ? [
+                        {
+                          className: `p-button-secondary-transparent`,
+                          icon: 'externalLink',
+                          tooltip: resources.messages['viewMore'],
+                          onClick: () =>
+                            window.open(
+                              `http://rod3.devel1dub.eionet.europa.eu/obligations/${dataflowDataState.obligations.obligationId}`
+                            )
+                        }
+                      ]
+                    : []
+                }>
+                <TreeView property={data.data} propertyName={''} />
+              </TreeViewExpandableItem>
+            </div>
+          ))}
 
           <TreeViewExpandableItem items={[{ label: resources.messages['dataflowDetails'] }]}>
             <TreeView property={parsedDataflowData} propertyName={''} />
