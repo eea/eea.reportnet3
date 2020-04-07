@@ -521,6 +521,9 @@
     "readOnlyTable": "Read only table",
     "dataflowDetails": "Dataflow datails",
     "restApiKey": "Rest API Key",
-    "viewMore": "View more"
+    "viewMore": "View more",
+    "magazineView": "Magazine view",
+    "listView": "List view",
+    "dataflowDeleteSuccess": "Dataflow deleted successfully"
   }
 }

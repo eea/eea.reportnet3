@@ -469,6 +469,9 @@
             "section": "DATAFLOW",
             "parameters": ["dataflowId"]
           }
+        },
+        {
+          "key": "DATAFLOW_DELETE_SUCCESS"
         }
       ]
     },

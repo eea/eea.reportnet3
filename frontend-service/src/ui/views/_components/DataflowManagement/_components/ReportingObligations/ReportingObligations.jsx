@@ -97,24 +97,30 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
   if (reportingObligationState.isLoading) return <Spinner style={{ top: 0 }} />;
 
   return (
-    <Fragment>
+    <div className={styles.reportingObligation}>
       <div className={styles.repOblTools}>
         <SearchAll data={reportingObligationState.filteredData} getValues={onLoadSearchedData} />
-        {!isEmpty(reportingObligationState.oblChoosed.title) && !isEmpty(reportingObligationState.oblChoosed) ? (
-          <span className={styles.selectedObligation}>
-            <span>{`${resources.messages['selectedObligation']}:`}</span>{' '}
-            {`${reportingObligationState.oblChoosed.title}`}
-          </span>
-        ) : (
-          <Fragment />
-        )}
-        <InputSwitch checked={reportingObligationState.isTableView} onChange={() => onToggleView()} />
+        <div className={styles.switchDiv}>
+          <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
+          <InputSwitch checked={reportingObligationState.isTableView} onChange={() => onToggleView()} />
+          <label className={styles.switchTextInput}>{resources.messages['listView']}</label>
+        </div>
       </div>
+
       {isEmpty(reportingObligationState.data) ? (
         <h3 className={styles.noObligations}>{resources.messages['emptyObligationList']}</h3>
       ) : (
         renderData()
       )}
-    </Fragment>
+
+      <span className={styles.selectedObligation}>
+        <span>{`${resources.messages['selectedObligation']}:`}</span>{' '}
+        {`${
+          !isEmpty(reportingObligationState.oblChoosed.title) && !isEmpty(reportingObligationState.oblChoosed)
+            ? reportingObligationState.oblChoosed.title
+            : '-'
+        }`}
+      </span>
+    </div>
   );
 };
