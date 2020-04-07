@@ -36,6 +36,9 @@ public enum LockSignature {
   /** DataSetControllerImpl.deleteImportTable(..) */
   DELETE_IMPORT_TABLE("DataSetControllerImpl.deleteImportTable(..)"),
 
+  /** The delete dataset values. */
+  DELETE_DATASET_VALUES("DataSetControllerImpl.deleteImportData(..)"),
+
   /** DataCollectionControllerImpl.updateDataCollection(..) */
   UPDATE_DATA_COLLECTION("DataCollectionControllerImpl.updateDataCollection(..)");
 
