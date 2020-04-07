@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 
 import styles from './UserData.module.scss';
-import { UserImg } from './UserImg/UserImg';
+import { UserImg } from './_components/UserImg';
 
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 

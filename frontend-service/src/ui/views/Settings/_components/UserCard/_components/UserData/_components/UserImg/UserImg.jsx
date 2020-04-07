@@ -19,9 +19,10 @@ const UserImg = () => {
   const uploadedImage = React.useRef();
 
   useEffect(() => {
-    console.log('USER EFFECT');
-    console.log(userContext.userProps.userImage);
-  }, []);
+    if (!isEmpty(userContext.userProps.userImage) && userContext.userProps.userImage.join('') !== '') {
+      onLoadImage();
+    }
+  }, [userContext.userProps.userImage]);
 
   const handleImageUpload = e => {
     const [file] = e.target.files;
@@ -42,15 +43,12 @@ const UserImg = () => {
         canvas.width = iwScaled;
         canvas.height = ihScaled;
         ctx.drawImage(current, 0, 0, iwScaled, ihScaled);
-        // console.log(canvas.toDataURL());
+        updateImage(splitBase64Image(canvas.toDataURL()));
       };
 
       current.src = URL.createObjectURL(e.target.files[0]);
-      console.log('UPDATE IMAGE');
-      updateImage(splitBase64Image(canvas.toDataURL()));
     }
   };
-
   const splitBase64Image = base64Image => base64Image.match(/.{1,250}/g);
 
   const updateImage = async splittedBase64Image => {
@@ -67,6 +65,16 @@ const UserImg = () => {
     }
   };
 
+  const onLoadImage = () => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const { current } = uploadedImage;
+    current.onload = function () {
+      ctx.drawImage(current, 0, 0);
+    };
+    current.src = userContext.userProps.userImage.join('');
+  };
+
   return (
     <div>
       <div className={styles.imageWrapper}>
@@ -79,17 +87,14 @@ const UserImg = () => {
           }}
           type="file"
         />
-
         <img
           ref={uploadedImage}
           icon={<FontAwesomeIcon icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />}
-          src={!isEmpty(userContext.userProps.userImage) ? userContext.userProps.userImage.join('') : null}
+          // src={}
           className={styles.userDataIcon}
           onClick={() => imageUploader.current.click()}
         />
-        <div className={styles.overlay}>
-          <Icon icon="edit" />
-        </div>
+        <Icon icon="edit" className={styles.editIcon} />
       </div>
     </div>
     // <FontAwesomeIcon icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />

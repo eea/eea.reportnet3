@@ -33,7 +33,7 @@ const MainLayout = ({ children }) => {
       user.defaultRowSelected(parseInt(userConfiguration.defaultRowsNumber));
       user.onToggleLogoutConfirm(userConfiguration.defaultLogoutConfirmation);
       user.defaultVisualTheme(userConfiguration.theme);
-      user.userImage(userConfiguration.userImage);
+      user.onUserFileUpload(userConfiguration.userImage);
       themeContext.onToggleTheme(userConfiguration.theme);
       console.log('User Context layout', user);
     } catch (error) {

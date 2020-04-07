@@ -16,7 +16,6 @@ const UserConfiguration = props => {
   const themeContext = useContext(ThemeContext);
 
   const changeUserProperties = async userProperties => {
-    console.log(userProperties);
     try {
       const response = await UserService.updateAttributes(userProperties);
       return response;
@@ -37,7 +36,6 @@ const UserConfiguration = props => {
             const inmUserProperties = { ...userContext.userProps };
             inmUserProperties.defaultVisualTheme = e.value;
             const response = await changeUserProperties(inmUserProperties);
-            console.log({ response });
             if (response.status >= 200 && response.status <= 299) {
               themeContext.onToggleTheme(e.value);
               userContext.defaultVisualTheme(e.value);
@@ -97,7 +95,6 @@ const UserConfiguration = props => {
             const inmUserProperties = { ...userContext.userProps };
             inmUserProperties.dateFormat = e.target.value;
             const response = await changeUserProperties(inmUserProperties);
-            console.log({ response });
             if (response.status >= 200 && response.status <= 299) {
               userContext.dateFormat(e.target.value);
             }

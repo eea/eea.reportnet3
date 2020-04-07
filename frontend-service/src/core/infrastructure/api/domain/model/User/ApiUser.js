@@ -14,7 +14,6 @@ const parseUserConfiguration = userConfiguration => {
         ? userConfiguration[key]
         : [])
   );
-  console.log({ userConfiguration });
   return userConfiguration;
 };
 

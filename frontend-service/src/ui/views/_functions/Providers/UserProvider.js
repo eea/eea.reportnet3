@@ -42,7 +42,6 @@ const userReducer = (state, { type, payload }) => {
         }
       };
     case 'DEFAULT_ROW_SELECTED':
-      console.log({ payload });
       return {
         ...state,
         userProps: {
@@ -51,7 +50,6 @@ const userReducer = (state, { type, payload }) => {
         }
       };
     case 'DATE_FORMAT':
-      console.log({ payload });
       return {
         ...state,
         userProps: {
@@ -145,7 +143,6 @@ export const UserProvider = ({ children }) => {
           });
         },
         onUserFileUpload: base64Image => {
-          console.log(base64Image);
           userDispatcher({
             type: 'USER_AVATAR_IMAGE',
             payload: base64Image

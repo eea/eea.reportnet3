@@ -56,7 +56,7 @@ const UserObligations = () => {
       });
       setUpdatedDatasetSchema(datasetSchemaInfo);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -73,7 +73,7 @@ const UserObligations = () => {
       allDataflows.accepted.forEach(element => {
         dataflowInitialValues[element.id] = { name: element.name, id: element.id, dataset: element.datasets };
       });
-      setInitialValues(dataflowInitialValues);      
+      setInitialValues(dataflowInitialValues);
     } catch (error) {
       console.error('dataFetch error: ', error);
     }
@@ -86,7 +86,6 @@ const UserObligations = () => {
     dataset.datasetSchemaDescription = datasetSchemaDTO.description;
     dataset.datasetSchemaId = datasetSchemaDTO.idDataSetSchema;
     dataset.datasetSchemaName = datasetSchemaDTO.nameDatasetSchema;
-    console.log(dataset.datasetSchemaName);
   };
 
   ////////////////////////////////////////////////////////////////////////////////////

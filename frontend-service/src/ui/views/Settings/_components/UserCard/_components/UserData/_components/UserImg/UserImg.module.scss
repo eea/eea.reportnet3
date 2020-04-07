@@ -1,3 +1,10 @@
+.imageWrapper .editIcon {
+  position: absolute;
+  font-size: 3em;
+  color: var(--main-font-color);
+  opacity: 0;
+  pointer-events: none;
+}
 .imageWrapper {
   display: flex;
   flex-direction: column;
@@ -35,7 +42,6 @@
   border: 3px dashed var(--user-image-bg-hover);
   cursor: pointer;
 }
-
-.userDataIcon:hover .overlay {
+.userDataIcon:hover + .editIcon {
   opacity: 1;
 }
