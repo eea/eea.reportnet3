@@ -7,7 +7,7 @@ import styles from './DataflowsList.module.scss';
 import DataflowConf from 'conf/dataflow.config.json';
 
 import { DataflowsItem } from './_components/DataflowsItem';
-import { Filters } from './_components/Filters';
+import { Filters } from 'ui/views/_components/Filters';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -35,6 +35,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, title,
         getFiltredData={onLoadFiltredData}
         inputOptions={DataflowConf.filterItems['input']}
         selectOptions={DataflowConf.filterItems['select']}
+        sortable={true}
       />
       {!isEmpty(content) ? (
         !isEmpty(filteredData) ? (

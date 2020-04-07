@@ -50,6 +50,12 @@
       height: 2.1rem !important;
     }
 
+    .label {
+      clip: auto;
+      height: auto;
+      overflow: visible;
+    }
+
     .multiselectFilter {
       border-bottom: var(--inputtext-border) !important;
       border-left: 0 !important;
@@ -86,6 +92,29 @@
       .requester {
         background-color: rgba(#c2c8cf, 0.8);
         color: var(--black);
+      }
+    }
+
+    .dropdownFilter {
+      border-bottom: var(--inputtext-border) !important;
+      border-left: 0 !important;
+      border-radius: 0 !important;
+      border-right: 0 !important;
+      border-top: 0 !important;
+      color: var(--floating-label-color) !important;
+      font-size: 10pt !important;
+      height: 2.1rem;
+      padding-left: 0em;
+      width: 75% !important;
+
+      > label {
+        position: absolute;
+        top: 0;
+        margin: 0;
+        width: 95%;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
       }
     }
 
@@ -131,10 +160,13 @@
   }
 }
 
+<<<<<<< HEAD:frontend-service/src/ui/views/Dataflows/_components/DataflowsList/_components/Filters/Filters.module.scss
 :global .p-datepicker {
   // left: -5.5rem !important;
 }
 
+=======
+>>>>>>> feature/SPRINT_14_FE_Integration:frontend-service/src/ui/views/_components/Filters/Filters.module.scss
 :global .p-calendar {
   width: 100% !important;
 }

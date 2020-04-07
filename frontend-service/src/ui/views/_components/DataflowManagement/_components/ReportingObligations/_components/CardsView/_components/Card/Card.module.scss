@@ -3,6 +3,7 @@
   border-radius: 15px;
   box-shadow: var(--card-item-box-shadow);
   column-gap: 1.5rem;
+  cursor: pointer;
   display: grid;
   grid-template-columns: 85% calc(15% - 1.5rem);
   grid-template-rows: 70% calc(30% - 1rem);
@@ -11,11 +12,18 @@
   padding: 1rem;
   position: relative;
   row-gap: 1rem;
+  transition: all 0.25s ease-in-out;
   width: calc(100% / 5.5);
+
+  &:hover {
+    box-shadow: var(--card-item-box-shadow-hover);
+    transform: scale(1.02, 1.02);
+    transition: transform 0.2s ease;
+  }
 
   &::before {
     content: '';
-    background: url('/assets/img/logo.png');
+    background-image: url('/assets/img/logo.png') !important;
     background-size: 50%;
     background-repeat: no-repeat;
     background-position: 150% 50%;
@@ -26,6 +34,7 @@
     right: 0;
     top: 0;
     width: 100%;
+    border-radius: 15px;
   }
 
   .text {
@@ -67,6 +76,7 @@
 
     .dueDate {
       font-weight: bold;
+      padding: 0.3rem;
     }
   }
 
@@ -75,5 +85,44 @@
     justify-content: center;
     align-items: center;
     z-index: 1;
+  }
+}
+
+.checked {
+  position: relative;
+  z-index: 0;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: 2px;
+    top: 2px;
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
+    background: var(--bg);
+    border-radius: 15px;
+    opacity: 1;
+
+    background-image: url('/assets/img/logo.png');
+    background-size: 50%;
+    background-repeat: no-repeat;
+    background-position: 150% 50%;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    z-index: -5;
+    left: -50%;
+    top: -50%;
+    width: 200%;
+    height: 200%;
+    opacity: 0.8;
+    background-color: var(--c-corporate-blue);
+    background-repeat: no-repeat;
+    background-size: 50% 50%, 50% 50%;
+    background-position: 0 0, 100% 0, 100% 100%, 0 100%;
   }
 }
