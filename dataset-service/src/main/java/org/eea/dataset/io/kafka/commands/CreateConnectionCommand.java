@@ -1,11 +1,14 @@
 package org.eea.dataset.io.kafka.commands;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +30,9 @@ public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
+
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Gets the event type.
@@ -63,6 +69,11 @@ public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
           // First insert of the statistics
           datasetService.saveStatistics(idDataset);
 
+
+          Map<String, Object> result = new HashMap<>();
+          result.put("dataset_id", idDataset.toString());
+          result.put("idDatasetSchema", idDatasetSchema);
+          kafkaSenderUtils.releaseKafkaEvent(EventType.SPREAD_DATA_EVENT, result);
         } catch (EEAException e) {
           LOG_ERROR.error(
               "Error executing the processes after creating a new empty dataset. Error message: {}",

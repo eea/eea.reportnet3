@@ -6,6 +6,8 @@ public enum EventType {
   /** The connection created event. */
   CONNECTION_CREATED_EVENT("DATA_REPORTING_TOPIC", "connection_key", true),
 
+  SPREAD_DATA_EVENT("DATA_REPORTING_TOPIC", "connection_key", true),
+
   /** The hello kafka event. */
   HELLO_KAFKA_EVENT("DATA_REPORTING_TOPIC", "hello_kafka_key", true),
 
@@ -167,6 +169,8 @@ public enum EventType {
 
   /** The updated document completed event. */
   UPDATED_DOCUMENT_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "update_document_completed_event", true);
+
+
 
   /** The topic. */
   private String topic;
