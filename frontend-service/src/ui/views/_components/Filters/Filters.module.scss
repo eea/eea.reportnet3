@@ -95,6 +95,24 @@
       }
     }
 
+    .dropdownFilter {
+      border-bottom: var(--inputtext-border) !important;
+      border-left: 0 !important;
+      border-radius: 0 !important;
+      border-right: 0 !important;
+      border-top: 0 !important;
+      color: var(--floating-label-color) !important;
+      font-size: 10pt !important;
+      height: 2.1rem;
+      padding-left: 0em;
+      width: 65% !important;
+
+      > label {
+        position: absolute;
+        top: 0;
+      }
+    }
+
     .selectHeader {
       border-radius: 3px;
       color: var(--black);

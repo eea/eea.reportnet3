@@ -571,12 +571,13 @@ export class Dropdown extends Component {
     );
   }
 
-  renderKeyboardHelper() {
+  renderKeyboardHelper(label) {
     return (
       <div className={`p-hidden-accessible ${this.props.inputClassName}`}>
         <input
           aria-label={this.props.ariaLabel}
           aria-labelledby={this.props.ariaLabelledBy}
+          className={label ? 'p-filled' : ''}
           disabled={this.props.disabled}
           id={this.props.inputId}
           onBlur={this.onInputBlur}
@@ -588,7 +589,7 @@ export class Dropdown extends Component {
           tabIndex={this.props.tabIndex}
           type="text"
         />
-        <label htmlFor={this.props.inputId}>{this.props.label}</label>{' '}
+        <label htmlFor={this.props.inputId}>{this.props.label}</label>
       </div>
     );
   }
@@ -798,7 +799,7 @@ export class Dropdown extends Component {
     let label = selectedOption ? this.getOptionLabel(selectedOption) : null;
 
     let hiddenSelect = this.renderHiddenSelect(selectedOption);
-    let keyboardHelper = this.renderKeyboardHelper();
+    let keyboardHelper = this.renderKeyboardHelper(label);
     let labelElement = this.renderLabel(label, selectedOption);
     let dropdownIcon = this.renderDropdownIcon();
     let items = this.renderItems(selectedOption);

@@ -1,3 +1,4 @@
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import moment from 'moment';
 
@@ -8,7 +9,6 @@ import { Issue } from 'core/domain/model/Obligation/Issue/Issue';
 import { LegalInstrument } from 'core/domain/model/Obligation/LegalInstrument/LegalInstrument';
 import { Obligation } from 'core/domain/model/Obligation/Obligation';
 import { Organization } from 'core/domain/model/Obligation/Organization/Organization';
-import isEmpty from 'lodash/isEmpty';
 
 const getCountries = async () => {
   const countriesDTO = await apiObligation.getCountries();
@@ -32,11 +32,11 @@ const obligationById = async obligationId => {
 
 const opened = async filterData => {
   if (!isEmpty(filterData)) {
-    const countryId = filterData.countries.value;
+    const countryId = !isNil(filterData.countries) ? filterData.countries.value : '';
     const dateFrom = filterData.expirationDate[0] ? filterData.expirationDate[0].getTime() : '';
     const dateTo = filterData.expirationDate[1] ? filterData.expirationDate[1].getTime() : '';
-    const issueId = filterData.issues.value;
-    const organizationId = filterData.organizations.value;
+    const issueId = !isNil(filterData.issues) ? filterData.issues.value : '';
+    const organizationId = !isNil(filterData.organizations) ? filterData.organizations.value : '';
     const openedObligationsDTO = await apiObligation.openedObligations(
       countryId,
       dateFrom,

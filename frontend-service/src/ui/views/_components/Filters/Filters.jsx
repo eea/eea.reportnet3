@@ -179,7 +179,7 @@ export const Filters = ({
     <span className={`${styles.dataflowInput}`}>
       {renderOrderFilter(property)}
       <Dropdown
-        className={styles.multiselectFilter}
+        className={styles.dropdownFilter}
         filter={FilterUtils.getOptionTypes(data, property, dropDownList).length > 10}
         filterPlaceholder={resources.messages[property]}
         id={property}
