@@ -1,29 +1,82 @@
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import moment from 'moment';
 
 import { apiObligation } from 'core/infrastructure/api/domain/model/Obligation';
 
+import { Country } from 'core/domain/model/Obligation/Country/Country';
+import { Issue } from 'core/domain/model/Obligation/Issue/Issue';
 import { LegalInstrument } from 'core/domain/model/Obligation/LegalInstrument/LegalInstrument';
 import { Obligation } from 'core/domain/model/Obligation/Obligation';
 import { Organization } from 'core/domain/model/Obligation/Organization/Organization';
 
-const parseOrganization = organizationDTO => {
-  if (!isNil(organizationDTO)) {
-    return new Organization({
-      acronym: organizationDTO.acronym,
-      address: organizationDTO.address,
-      city: organizationDTO.city,
-      country: organizationDTO.country,
-      description: organizationDTO.description,
-      email: organizationDTO.email,
-      id: organizationDTO.clientId,
-      name: organizationDTO.name,
-      postalCode: organizationDTO.postalCode,
-      shortName: organizationDTO.shortName,
-      url: organizationDTO.url
-    });
+const getCountries = async () => {
+  const countriesDTO = await apiObligation.getCountries();
+  return parseCountryList(countriesDTO);
+};
+
+const getIssues = async () => {
+  const issuesDTO = await apiObligation.getIssues();
+  return parseIssueList(issuesDTO);
+};
+
+const getOrganizations = async () => {
+  const clientsDTO = await apiObligation.getOrganizations();
+  return parseOrganizationList(clientsDTO);
+};
+
+const obligationById = async obligationId => {
+  const obligationByIdDTO = await apiObligation.obligationById(obligationId);
+  return parseObligation(obligationByIdDTO);
+};
+
+const opened = async filterData => {
+  if (!isEmpty(filterData)) {
+    const countryId = !isNil(filterData.countries) ? filterData.countries.value : '';
+    const dateFrom = filterData.expirationDate[0] ? filterData.expirationDate[0].getTime() : '';
+    const dateTo = filterData.expirationDate[1] ? filterData.expirationDate[1].getTime() : '';
+    const issueId = !isNil(filterData.issues) ? filterData.issues.value : '';
+    const organizationId = !isNil(filterData.organizations) ? filterData.organizations.value : '';
+    const openedObligationsDTO = await apiObligation.openedObligations(
+      countryId,
+      dateFrom,
+      dateTo,
+      issueId,
+      organizationId
+    );
+    return parseObligationList(openedObligationsDTO);
+  } else {
+    const openedObligationsDTO = await apiObligation.openedObligations();
+    return parseObligationList(openedObligationsDTO);
+  }
+};
+
+const parseCountry = countryDTO =>
+  new Country({
+    countryCode: countryDTO.twoLetter,
+    countryMember: countryDTO.memberCommunity,
+    id: countryDTO.spatialId,
+    name: countryDTO.name,
+    type: countryDTO.type
+  });
+
+const parseCountryList = countriesDTO => {
+  if (!isNil(countriesDTO)) {
+    const countries = [];
+    countriesDTO.forEach(countryDTO => countries.push(parseCountry(countryDTO)));
+    return countries;
   }
   return;
+};
+
+const parseIssue = issueDTO => new Issue({ id: issueDTO.issueId, name: issueDTO.issueName });
+
+const parseIssueList = issuesDTO => {
+  if (!isNil(issuesDTO)) {
+    const issues = [];
+    issuesDTO.forEach(issueDTO => issues.push(parseIssue(issueDTO)));
+    return issues;
+  }
 };
 
 const parseLegalInstrument = legalInstrumentDTO => {
@@ -62,17 +115,38 @@ const parseObligationList = obligationsDTO => {
   return;
 };
 
-const opened = async () => {
-  const openedObligationsDTO = await apiObligation.openedObligations();
-  return parseObligationList(openedObligationsDTO);
+const parseOrganization = organizationDTO => {
+  if (!isNil(organizationDTO)) {
+    return new Organization({
+      acronym: organizationDTO.acronym,
+      address: organizationDTO.address,
+      city: organizationDTO.city,
+      country: organizationDTO.country,
+      description: organizationDTO.description,
+      email: organizationDTO.email,
+      id: organizationDTO.clientId,
+      name: organizationDTO.name,
+      postalCode: organizationDTO.postalCode,
+      shortName: organizationDTO.shortName,
+      url: organizationDTO.url
+    });
+  }
+  return;
 };
 
-const obligationById = async obligationId => {
-  const obligationByIdDTO = await apiObligation.obligationById(obligationId);
-  return parseObligation(obligationByIdDTO);
+const parseOrganizationList = organizationsDTO => {
+  if (!isNil(organizationsDTO)) {
+    const organizations = [];
+    organizationsDTO.forEach(organizationDTO => organizations.push(parseOrganization(organizationDTO)));
+    return organizations;
+  }
+  return;
 };
 
 export const ApiObligationRepository = {
+  getCountries,
+  getIssues,
+  getOrganizations,
   obligationById,
   opened
 };
