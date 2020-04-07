@@ -9,7 +9,6 @@ import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
-import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
@@ -24,34 +23,51 @@ import org.eea.multitenancy.TenantResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Class SpreadDataCommand.
+ */
 @Component
 public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
 
+  /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
+  /** The design dataset repository. */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
 
-  @Autowired
-  private TableRepository tableRepository;
-
+  /** The record repository. */
   @Autowired
   private RecordRepository recordRepository;
 
+  /** The field repository. */
   @Autowired
   private FieldRepository fieldRepository;
 
+  /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
 
+  /** The Constant DATASET_ID. */
   private static final String DATASET_ID = "dataset_%s";
 
+  /**
+   * Gets the event type.
+   *
+   * @return the event type
+   */
   @Override
   public EventType getEventType() {
     return EventType.SPREAD_DATA_EVENT;
   }
 
+  /**
+   * Execute.
+   *
+   * @param eeaEventVO the eea event VO
+   * @throws EEAException the EEA exception
+   */
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
     if (EventType.SPREAD_DATA_EVENT.equals(eeaEventVO.getEventType())) {
@@ -72,6 +88,13 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
     }
   }
 
+  /**
+   * Spread data.
+   *
+   * @param designs the designs
+   * @param dataset the dataset
+   * @param idDatasetSchema the id dataset schema
+   */
   @Transactional
   private void spreadData(List<DesignDataset> designs, Long dataset, String idDatasetSchema) {
     for (DesignDataset design : designs) {
@@ -82,20 +105,21 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
 
       // get the data from designs datasets
       TenantResolver.setTenantName(String.format(DATASET_ID, design.getId().toString()));
-      List<RecordValue> redordDesignValues = new ArrayList<>();
+      List<RecordValue> recordDesignValues = new ArrayList<>();
 
       for (TableSchema desingTable : listOfTables) {
         TenantResolver.getTenantName();
-        redordDesignValues.addAll(
+        recordDesignValues.addAll(
             recordRepository.findByTableValueAllRecords(desingTable.getIdTableSchema().toString()));
 
       }
-      List<RecordValue> redordDesignValuesList = new ArrayList<>();
+      List<RecordValue> recordDesignValuesList = new ArrayList<>();
 
+      // fill the data
       DatasetValue ds = new DatasetValue();
       ds.setId(dataset);
 
-      for (RecordValue record : redordDesignValues) {
+      for (RecordValue record : recordDesignValues) {
         RecordValue recordAux = new RecordValue();
         recordAux.setTableValue(record.getTableValue());
 
@@ -111,12 +135,12 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
           fieldValuesOnlyValues.add(auxField);
         }
         recordAux.setFields(fieldValuesOnlyValues);
-        redordDesignValuesList.add(recordAux);
+        recordDesignValuesList.add(recordAux);
       }
-      if (!redordDesignValuesList.isEmpty()) {
+      if (!recordDesignValuesList.isEmpty()) {
         // save values
         TenantResolver.setTenantName(String.format(DATASET_ID, dataset));
-        recordRepository.saveAll(redordDesignValuesList);
+        recordRepository.saveAll(recordDesignValuesList);
       }
     }
   }
