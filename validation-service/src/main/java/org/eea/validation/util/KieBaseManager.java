@@ -269,12 +269,14 @@ public class KieBaseManager {
     KieHelper kieHelperTest = kiebaseAssemble(compiler, kieServices, ruleAttribute);
 
     Results results = kieHelperTest.verify();
-    // if one rule is not correct we return a false and the rule
-    // will not be created
+    // if one rule is not correct we return a false and the will be disable if not will be enable
     if (results.hasMessages(Message.Level.ERROR)) {
       rule.setEnabled(Boolean.FALSE);
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
 
+    } else {
+      rule.setEnabled(Boolean.TRUE);
+      rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
     }
   }
 
