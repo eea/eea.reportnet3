@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, Fragment } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -122,43 +122,35 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     organizations: reportingObligationState.organizations
   };
 
-  const renderData = () => (
-    <Fragment>
-      {reportingObligationState.isTableView ? (
-        <TableView
-          checkedObligation={reportingObligationState.oblChoosed}
-          data={reportingObligationState.searchedData}
-          onChangePagination={onChangePagination}
-          onSelectObl={onSelectObl}
-          pagination={reportingObligationState.pagination}
-        />
-      ) : (
-        <CardsView
-          checkedObligation={reportingObligationState.oblChoosed}
-          data={reportingObligationState.searchedData}
-          onChangePagination={onChangePagination}
-          onSelectObl={onSelectObl}
-          pagination={reportingObligationState.pagination}
-        />
-      )}
-
-      <span className={styles.selectedObligation}>
-        <span>{`${resources.messages['selectedObligation']}: `}</span>
-        {`${
-          !isEmpty(reportingObligationState.oblChoosed.title) && !isEmpty(reportingObligationState.oblChoosed)
-            ? reportingObligationState.oblChoosed.title
-            : '-'
-        }`}
-      </span>
-    </Fragment>
-  );
+  const renderData = () =>
+    reportingObligationState.isTableView ? (
+      <TableView
+        checkedObligation={reportingObligationState.oblChoosed}
+        data={reportingObligationState.searchedData}
+        onChangePagination={onChangePagination}
+        onSelectObl={onSelectObl}
+        pagination={reportingObligationState.pagination}
+      />
+    ) : (
+      <CardsView
+        checkedObligation={reportingObligationState.oblChoosed}
+        data={reportingObligationState.searchedData}
+        onChangePagination={onChangePagination}
+        onSelectObl={onSelectObl}
+        pagination={reportingObligationState.pagination}
+      />
+    );
 
   return (
     <div
       className={styles.reportingObligation}
       style={{
         justifyContent:
-          reportingObligationState.isLoading || isEmpty(reportingObligationState.data) ? 'flex-start' : 'space-between'
+          reportingObligationState.isLoading ||
+          isEmpty(reportingObligationState.data) ||
+          isEmpty(reportingObligationState.searchedData)
+            ? 'flex-start'
+            : 'space-between'
       }}>
       <div className={styles.filters}>
         <Filters
@@ -192,6 +184,22 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
         )
       ) : (
         renderData()
+      )}
+
+      {!reportingObligationState.isLoading && (
+        <span
+          className={`${styles.selectedObligation} ${
+            isEmpty(reportingObligationState.data) || isEmpty(reportingObligationState.searchedData)
+              ? styles.filteredSelected
+              : ''
+          }`}>
+          <span>{`${resources.messages['selectedObligation']}: `}</span>
+          {`${
+            !isEmpty(reportingObligationState.oblChoosed.title) && !isEmpty(reportingObligationState.oblChoosed)
+              ? reportingObligationState.oblChoosed.title
+              : '-'
+          }`}
+        </span>
       )}
     </div>
   );
