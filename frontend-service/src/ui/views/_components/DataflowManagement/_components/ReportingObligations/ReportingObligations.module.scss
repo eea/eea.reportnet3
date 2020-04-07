@@ -34,10 +34,16 @@
   }
 
   .selectedObligation {
-    margin: 1.5rem 0;
+    margin: 1.5rem 0.5rem;
+
     > span {
       font-weight: bold;
     }
+  }
+
+  .filteredSelected {
+    position: absolute;
+    bottom: 0;
   }
 
   .noObligations {

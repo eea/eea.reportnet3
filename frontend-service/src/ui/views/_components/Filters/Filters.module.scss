@@ -105,11 +105,16 @@
       font-size: 10pt !important;
       height: 2.1rem;
       padding-left: 0em;
-      width: 65% !important;
+      width: 75% !important;
 
       > label {
         position: absolute;
         top: 0;
+        margin: 0;
+        width: 95%;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
       }
     }
 
@@ -153,10 +158,6 @@
       border-color: transparent !important;
     }
   }
-}
-
-:global .p-datepicker {
-  left: -5.5rem !important;
 }
 
 :global .p-calendar {
