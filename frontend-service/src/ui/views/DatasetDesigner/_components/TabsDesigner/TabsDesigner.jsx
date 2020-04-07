@@ -154,14 +154,9 @@ export const TabsDesigner = withRouter(
       }
     };
 
-    const onTabClicked = event => {
-      console.log(event.index);
-      setActiveIndex(event.index);
-    };
+    const onTabClicked = event => setActiveIndex(event.index);
 
-    const onTabEditingHeader = editing => {
-      setIsEditing(editing);
-    };
+    const onTabEditingHeader = editing => setIsEditing(editing);
 
     const onTableAdd = (header, tabIndex, initialHeader) => {
       if (header !== initialHeader) {
@@ -180,13 +175,9 @@ export const TabsDesigner = withRouter(
       }
     };
 
-    const onTableDelete = deletedTabIndx => {
-      deleteTable(deletedTabIndx);
-    };
+    const onTableDelete = deletedTabIndx => deleteTable(deletedTabIndx);
 
-    const onTableDragAndDrop = (draggedTabHeader, droppedTabHeader) => {
-      reorderTable(draggedTabHeader, droppedTabHeader);
-    };
+    const onTableDragAndDrop = (draggedTabHeader, droppedTabHeader) => reorderTable(draggedTabHeader, droppedTabHeader);
 
     const onTableDragAndDropStart = draggedTabIdx => {
       if (!isUndefined(draggedTabIdx)) {
