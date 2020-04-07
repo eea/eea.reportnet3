@@ -33,10 +33,6 @@ export const Card = ({ checked, date, icon, id, obligation, onCheck, subtitle, t
       <div className={`${styles.date}`}>
         {resources.messages['dueDate']}: <span className={styles.dueDate}>{date}</span>
       </div>
-
-      {/* <div className={`${styles.toolbar}`}>
-        <Checkbox id={`${id}_checkbox`} isChecked={checked.id === id} role="checkbox" />
-      </div> */}
     </div>
   );
 };
