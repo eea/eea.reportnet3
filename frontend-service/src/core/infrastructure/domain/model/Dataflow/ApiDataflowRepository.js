@@ -454,7 +454,8 @@ const parseRepresentativeDTO = representativeDTO => {
     id: representativeDTO.id,
     isReceiptDownloaded: representativeDTO.receiptDownloaded,
     isReceiptOutdated: representativeDTO.receiptOutdated,
-    providerAccount: representativeDTO.provideraccount
+    providerAccount: representativeDTO.providerAccount,
+    hasDatasets: representativeDTO.hasDatasets
   });
 };
 
