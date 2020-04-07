@@ -189,7 +189,7 @@ const Documents = ({
         <Toolbar className={styles.documentsToolbar}>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-upload dataflowHelp-document-upload-help-step`}
+              className={`p-button-rounded p-button-secondary-transparent dataflowHelp-document-upload-help-step`}
               icon={'upload'}
               label={resources.messages['upload']}
               onClick={() => {
