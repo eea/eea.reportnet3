@@ -1,3 +1,4 @@
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 const filteredInitialValues = (data, checkedId) => {
@@ -14,6 +15,14 @@ const filteredInitialValues = (data, checkedId) => {
   }));
 };
 
+const isFiltered = filterByData => {
+  if (!isNil(filterByData)) {
+    const filteredValues = Object.values(filterByData);
+    return filteredValues.every(data => isEmpty(data));
+  }
+  return true;
+};
+
 const onOrderCheckedValue = (data, checkedId) => {
   for (let i = 0; i < data.length; i++) {
     if (data[i].obligationId === checkedId) {
@@ -24,4 +33,4 @@ const onOrderCheckedValue = (data, checkedId) => {
   }
 };
 
-export const ReportingObligationUtils = { filteredInitialValues };
+export const ReportingObligationUtils = { filteredInitialValues, isFiltered };

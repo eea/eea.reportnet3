@@ -75,7 +75,10 @@ const getLabelInitialState = (input = [], select = [], date = [], dropDown = [],
 
 const getOptionTypes = (data, option, list) => {
   if (list) {
-    return list[option].map(item => ({ type: item.acronym ? item.acronym : item.name, value: item.id }));
+    return list[option].map(item => ({
+      type: item.acronym ? `${item.acronym} - ${item.name}` : item.name,
+      value: item.id
+    }));
   } else {
     const optionItems = uniq(data.map(item => item[option]));
     const validOptionItems = optionItems.filter(option => !isNil(option));

@@ -2,16 +2,18 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  min-height: 60vh !important;
 
   .filters {
-    margin: 2rem 1rem;
+    margin: 0rem 1rem;
   }
 
   .repOblTools {
     align-items: center;
     display: flex;
     justify-content: space-between;
-    margin: 2rem 1rem;
+    margin: 0rem 1rem;
+    margin-bottom: 2rem;
 
     .switchDiv {
       display: flex;

@@ -190,6 +190,7 @@ export const Filters = ({
         optionLabel="type"
         options={FilterUtils.getOptionTypes(data, property, dropDownList)}
         showClear={!isEmpty(filterState.filterBy[property])}
+        showFilterClear={true}
         value={filterState.filterBy[property]}
       />
     </span>
@@ -267,15 +268,26 @@ export const Filters = ({
       {dropdownOptions && dropdownOptions.map(option => renderDropdown(option))}
       {dateOptions && dateOptions.map(option => renderCalendarFilter(option))}
 
-      {sendData ? <Button onClick={() => sendData(filterState.filterBy)} /> : <Fragment />}
+      {sendData ? (
+        <Button
+          icon="filter"
+          onClick={() => sendData(filterState.filterBy)}
+          tooltip={resources.messages['applyFilters']}
+          tooltipOptions={{ position: 'bottom' }}
+        />
+      ) : (
+        <Fragment />
+      )}
 
       {(inputOptions || selectOptions || dateOptions) && (
         <Button
-          className={`p-button-rounded p-button-secondary-icon-only p-button-animated-blink`}
+          className={`${
+            sendData ? 'p-button-secondary' : 'p-button-secondary-icon-only'
+          } p-button-rounded  p-button-animated-blink`}
           icon="cancel"
           onClick={() => onClearAllFilters()}
           tooltip={resources.messages['clearFilters']}
-          tooltipOptions={{ position: 'left' }}
+          tooltipOptions={{ position: 'bottom' }}
         />
       )}
     </div>

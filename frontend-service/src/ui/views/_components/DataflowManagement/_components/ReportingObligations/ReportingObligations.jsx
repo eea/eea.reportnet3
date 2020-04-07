@@ -51,6 +51,8 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     if (getObligation) getObligation(reportingObligationState.oblChoosed);
   }, [reportingObligationState.oblChoosed]);
 
+  const isFiltered = ReportingObligationUtils.isFiltered(reportingObligationState.filterBy);
+
   const isLoading = value => reportingObligationDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onLoadCountries = async () => {
@@ -152,7 +154,12 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
   );
 
   return (
-    <div className={styles.reportingObligation}>
+    <div
+      className={styles.reportingObligation}
+      style={{
+        justifyContent:
+          reportingObligationState.isLoading || isEmpty(reportingObligationState.data) ? 'flex-start' : 'space-between'
+      }}>
       <div className={styles.filters}>
         <Filters
           data={reportingObligationState.data}
@@ -174,7 +181,11 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
       {reportingObligationState.isLoading ? (
         <Spinner style={{ top: 0, left: 0 }} />
       ) : isEmpty(reportingObligationState.data) ? (
-        <h3 className={styles.noObligations}>{resources.messages['emptyObligationList']}</h3>
+        isFiltered ? (
+          <h3 className={styles.noObligations}>{resources.messages['emptyObligationList']}</h3>
+        ) : (
+          <h3 className={styles.noObligations}>{resources.messages['noObligationsWithSelectedParameters']}</h3>
+        )
       ) : (
         renderData()
       )}

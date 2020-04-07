@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import isEmpty from 'lodash/isEmpty';
 import { isNull } from 'lodash';
 import uuid from 'uuid';
 
@@ -427,6 +428,9 @@ export class Dropdown extends Component {
       setTimeout(() => {
         this.filterInput.focus();
       }, 200);
+    } else {
+      this.setState({ filter: '' });
+      this.filterInput.focus();
     }
   }
 
@@ -712,7 +716,7 @@ export class Dropdown extends Component {
             type="text"
             value={this.state.filter}
           />
-          {this.props.showFilterClear ? (
+          {this.props.showFilterClear && !isEmpty(this.state.filter) ? (
             <span className="p-dropdown-filter-clear-icon pi pi-times" onClick={this.clearFilter}></span>
           ) : null}
           <span className="p-dropdown-filter-icon pi pi-search"></span>

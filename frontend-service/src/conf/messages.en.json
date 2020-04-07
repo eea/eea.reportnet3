@@ -532,6 +532,7 @@
     "loadOrganizationsError": "Error loading organizations data",
     "magazineView": "Magazine view",
     "listView": "List view",
-    "dataflowDeleteSuccess": "Dataflow deleted successfully"
+    "dataflowDeleteSuccess": "Dataflow deleted successfully",
+    "applyFilters": "Apply filters"
   }
 }
