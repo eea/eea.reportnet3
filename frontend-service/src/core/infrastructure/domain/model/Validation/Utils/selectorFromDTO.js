@@ -2,30 +2,30 @@ import isNil from 'lodash/isNil';
 import isEmpty from 'lodash/isEmpty';
 
 import { getExpressionFromDTO } from './getExpressionFromDTO';
-import { parseExpressionFromDTO } from './parseExpressionFromDTO';
+import { getGroupFromDTO } from './getGroupFromDTO';
 
 const operatorIsAUnion = operator => {
   return operator == 'AND' || operator == 'OR';
 };
 
 export const selectorFromDTO = (expression, expressions, allExpressions, parentOperator = null) => {
-  console.log('[selectorFromDTO]', expression, parentOperator);
-  if (isNil(parentOperator)) {
-    console.log('no parent operator');
-    if (!operatorIsAUnion(expression.operator)) {
-      const union = !isNil(parentOperator) ? parentOperator : null;
-      console.log('union', union);
-
-      expressions.push(getExpressionFromDTO(expression, allExpressions, null));
-    } else {
-      selectorFromDTO(expression.arg1, expressions, allExpressions, null);
-      selectorFromDTO(expression.arg2, expressions, allExpressions, expression.operator);
-    }
+  if (!operatorIsAUnion(expression.operator)) {
+    expressions.push(getExpressionFromDTO(expression, allExpressions, parentOperator));
   } else {
-    if (!operatorIsAUnion(expression.operator)) {
-      expressions.push(getExpressionFromDTO(expression, allExpressions, parentOperator));
+    if (
+      !isNil(expression.arg1.operator) &&
+      !isNil(expression.arg2.operator) &&
+      operatorIsAUnion(parentOperator) &&
+      !operatorIsAUnion(expression.arg1.operator) &&
+      !operatorIsAUnion(expression.arg2.operator)
+    ) {
+      expressions.push(getGroupFromDTO(expression, allExpressions, parentOperator));
     } else {
-      selectorFromDTO(expression.arg1, expressions, allExpressions, parentOperator);
+      if (operatorIsAUnion(expression.arg1.operator)) {
+        expressions.push(getGroupFromDTO(expression.arg1, allExpressions, parentOperator));
+      } else {
+        selectorFromDTO(expression.arg1, expressions, allExpressions, parentOperator);
+      }
       selectorFromDTO(expression.arg2, expressions, allExpressions, expression.operator);
     }
   }
