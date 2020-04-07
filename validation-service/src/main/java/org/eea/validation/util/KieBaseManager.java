@@ -9,9 +9,14 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.drools.template.ObjectDataCompiler;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
@@ -61,6 +66,9 @@ public class KieBaseManager {
   @Autowired
   private SchemasRepository schemasRepository;
 
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Reload rules.
@@ -194,9 +202,10 @@ public class KieBaseManager {
    * @param rule the rule
    *
    * @return true, if successful
+   * @throws EEAException
    */
   @Async
-  public void textRuleCorrect(String datasetSchemaId, Rule rule) {
+  public void textRuleCorrect(String datasetSchemaId, Rule rule) throws EEAException {
 
     KieServices kieServices = KieServices.Factory.get();
     ObjectDataCompiler compiler = new ObjectDataCompiler();
@@ -273,7 +282,10 @@ public class KieBaseManager {
     if (results.hasMessages(Message.Level.ERROR)) {
       rule.setEnabled(Boolean.FALSE);
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
-
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DISABLED_QC_RULE_EVENT, null,
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .datasetSchemaId(datasetSchemaId).error("The QC Rule is disabled")
+              .shortCode(rule.getShortCode()).build());
     }
   }
 

@@ -166,7 +166,10 @@ public enum EventType {
   RELEASE_BLOCKED_EVENT("DATA_REPORTING_TOPIC", "release_blocked_event", true),
 
   /** The updated document completed event. */
-  UPDATED_DOCUMENT_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "update_document_completed_event", true);
+  UPDATED_DOCUMENT_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "update_document_completed_event", true),
+
+  /** The disabled qc rule event. */
+  DISABLED_QC_RULE_EVENT("DATA_REPORTING_TOPIC", "disabled_qc_rule_event", true);
 
   /** The topic. */
   private String topic;
