@@ -67,11 +67,9 @@ const DataflowManagementForm = ({
         setSubmitting(true);
         try {
           if (isEditForm) {
-            setIsObligationEmpty(true);
             await DataflowService.update(dataflowId, values.name, values.description, data.obligation.id);
             onEdit(values.name, values.description, data.obligation.id);
           } else {
-            setIsObligationEmpty(true);
             await DataflowService.create(values.name, values.description, data.obligation.id);
             onCreate();
           }
@@ -127,7 +125,10 @@ const DataflowManagementForm = ({
               />
               <ErrorMessage className="error" name="description" component="div" />
             </div>
-            <div className={`formField${touched.obligation || isObligationEmpty ? ' error' : ''} ${styles.search}`}>
+            <div
+              className={`formField${
+                (!isEmpty(errors.obligation) && touched.obligation) || isObligationEmpty ? ' error' : ''
+              } ${styles.search}`}>
               <Field
                 className={styles.searchInput}
                 name="obligation"

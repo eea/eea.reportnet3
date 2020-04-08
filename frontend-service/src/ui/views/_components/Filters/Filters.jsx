@@ -261,7 +261,7 @@ export const Filters = ({
 
   const selectTemplate = option => {
     if (!isNil(option.value)) {
-      return <span className={`${styles[option.value.toLowerCase()]} ${styles.statusBox}`}>{option.type}</span>;
+      return <span className={`${styles[option.type.toLowerCase()]} ${styles.statusBox}`}>{option.type}</span>;
     }
   };
 
