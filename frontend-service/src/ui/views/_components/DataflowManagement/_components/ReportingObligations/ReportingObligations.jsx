@@ -1,10 +1,13 @@
-import React, { Fragment, useContext, useEffect, useReducer } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
 import styles from './ReportingObligations.module.scss';
 
+import ObligationConf from 'conf/obligation.config.json';
+
 import { CardsView } from './_components/CardsView';
+import { Filters } from 'ui/views/_components/Filters';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { SearchAll } from './_components/SearchAll';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -24,16 +27,23 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
   const resources = useContext(ResourcesContext);
 
   const [reportingObligationState, reportingObligationDispatch] = useReducer(reportingObligationReducer, {
+    countries: [],
     data: [],
+    filterBy: { expirationDate: [], countries: {}, issues: {}, organizations: {} },
     filteredData: [],
     isLoading: false,
+    issues: [],
     isTableView: false,
     oblChoosed: {},
+    organizations: [],
     pagination: { first: 0, rows: 10, page: 0 },
     searchedData: []
   });
 
   useEffect(() => {
+    onLoadCountries();
+    onLoadIssues();
+    onLoadOrganizations();
     onLoadReportingObligations();
   }, []);
 
@@ -41,24 +51,54 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     if (getObligation) getObligation(reportingObligationState.oblChoosed);
   }, [reportingObligationState.oblChoosed]);
 
-  const onLoadingData = value => reportingObligationDispatch({ type: 'IS_LOADING', payload: { value } });
+  const isFiltered = ReportingObligationUtils.isFiltered(reportingObligationState.filterBy);
 
-  const onLoadReportingObligations = async () => {
-    onLoadingData(true);
+  const isLoading = value => reportingObligationDispatch({ type: 'IS_LOADING', payload: { value } });
+
+  const onLoadCountries = async () => {
     try {
-      const response = await ObligationService.opened();
+      const countries = await ObligationService.getCountries();
+      reportingObligationDispatch({ type: 'ON_LOAD_COUNTRIES', payload: { countries } });
+    } catch (error) {
+      notificationContext.add({ type: 'LOAD_COUNTRIES_ERROR' });
+    }
+  };
+
+  const onLoadIssues = async () => {
+    try {
+      const issues = await ObligationService.getIssues();
+      reportingObligationDispatch({ type: 'ON_LOAD_ISSUES', payload: { issues } });
+    } catch (error) {
+      notificationContext.add({ type: 'LOAD_ISSUES_ERROR' });
+    }
+  };
+
+  const onLoadOrganizations = async () => {
+    try {
+      const organizations = await ObligationService.getOrganizations();
+      reportingObligationDispatch({ type: 'ON_LOAD_ORGANIZATIONS', payload: { organizations } });
+    } catch (error) {
+      notificationContext.add({ type: 'LOAD_ORGANIZATIONS_ERROR' });
+    }
+  };
+
+  const onLoadReportingObligations = async filterData => {
+    isLoading(true);
+    try {
+      const response = await ObligationService.opened(filterData);
       reportingObligationDispatch({
         type: 'INITIAL_LOAD',
         payload: {
           data: response,
           filteredData: ReportingObligationUtils.filteredInitialValues(response, oblChecked.id),
-          oblChoosed: oblChecked
+          oblChoosed: oblChecked,
+          filterBy: filterData
         }
       });
     } catch (error) {
       notificationContext.add({ type: 'LOAD_OPENED_OBLIGATION_ERROR' });
     } finally {
-      onLoadingData(false);
+      isLoading(false);
     }
   };
 
@@ -74,6 +114,12 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
 
   const onToggleView = () =>
     reportingObligationDispatch({ type: 'ON_TOGGLE_VIEW', payload: { view: !reportingObligationState.isTableView } });
+
+  const parsedFilterList = {
+    countries: reportingObligationState.countries,
+    issues: reportingObligationState.issues,
+    organizations: reportingObligationState.organizations
+  };
 
   const renderData = () =>
     reportingObligationState.isTableView ? (
@@ -94,27 +140,64 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
       />
     );
 
-  if (reportingObligationState.isLoading) return <Spinner style={{ top: 0 }} />;
-
   return (
-    <Fragment>
+    <div
+      className={styles.reportingObligation}
+      style={{
+        justifyContent:
+          reportingObligationState.isLoading ||
+          isEmpty(reportingObligationState.data) ||
+          isEmpty(reportingObligationState.searchedData)
+            ? 'flex-start'
+            : 'space-between'
+      }}>
       <div className={styles.repOblTools}>
         <SearchAll data={reportingObligationState.filteredData} getValues={onLoadSearchedData} />
-        {!isEmpty(reportingObligationState.oblChoosed.title) && !isEmpty(reportingObligationState.oblChoosed) ? (
-          <span className={styles.selectedObligation}>
-            <span>{`${resources.messages['selectedObligation']}:`}</span>{' '}
-            {`${reportingObligationState.oblChoosed.title}`}
-          </span>
-        ) : (
-          <Fragment />
-        )}
-        <InputSwitch checked={reportingObligationState.isTableView} onChange={() => onToggleView()} />
+        <div className={styles.switchDiv}>
+          <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
+          <InputSwitch checked={reportingObligationState.isTableView} onChange={() => onToggleView()} />
+          <label className={styles.switchTextInput}>{resources.messages['listView']}</label>
+        </div>
       </div>
-      {isEmpty(reportingObligationState.data) ? (
-        <h3 className={styles.noObligations}>{resources.messages['emptyObligationList']}</h3>
+
+      <div className={styles.filters}>
+        <Filters
+          data={reportingObligationState.data}
+          dateOptions={ObligationConf.filterItems['date']}
+          dropDownList={parsedFilterList}
+          dropdownOptions={ObligationConf.filterItems['dropdown']}
+          filterByList={reportingObligationState.filterBy}
+          sendData={onLoadReportingObligations}
+        />
+      </div>
+
+      {reportingObligationState.isLoading ? (
+        <Spinner style={{ top: 0, left: 0 }} />
+      ) : isEmpty(reportingObligationState.data) ? (
+        isFiltered ? (
+          <h3 className={styles.noObligations}>{resources.messages['emptyObligationList']}</h3>
+        ) : (
+          <h3 className={styles.noObligations}>{resources.messages['noObligationsWithSelectedParameters']}</h3>
+        )
       ) : (
         renderData()
       )}
-    </Fragment>
+
+      {!reportingObligationState.isLoading && (
+        <span
+          className={`${styles.selectedObligation} ${
+            isEmpty(reportingObligationState.data) || isEmpty(reportingObligationState.searchedData)
+              ? styles.filteredSelected
+              : ''
+          }`}>
+          <span>{`${resources.messages['selectedObligation']}: `}</span>
+          {`${
+            !isEmpty(reportingObligationState.oblChoosed.title) && !isEmpty(reportingObligationState.oblChoosed)
+              ? reportingObligationState.oblChoosed.title
+              : '-'
+          }`}
+        </span>
+      )}
+    </div>
   );
 };

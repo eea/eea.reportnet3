@@ -66,7 +66,7 @@ export const getAllDataProviders = async (selectedDataProviderGroup, formDispatc
 };
 
 const getAllRepresentatives = async (dataflowId, formDispatcher, formState) => {
-  if (isEmpty(formState.representatives) && !isEmpty(formState.dataflowRepresentatives)) {
+  /*  if (isEmpty(formState.representatives) && !isEmpty(formState.dataflowRepresentatives)) {
     const mimicResponse = {
       group: { dataProviderGroupId: formState.dataflowRepresentatives[0].dataProviderGroupId },
       representatives: sortBy(formState.dataflowRepresentatives, ['representativeId'])
@@ -78,21 +78,21 @@ const getAllRepresentatives = async (dataflowId, formDispatcher, formState) => {
       type: 'INITIAL_LOAD',
       payload: { response: mimicResponse, representativesByCopy }
     });
-  } else {
-    try {
-      const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
+  } else { */
+  try {
+    const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
 
-      const representativesByCopy = cloneDeep(responseAllRepresentatives.representatives);
+    const representativesByCopy = cloneDeep(responseAllRepresentatives.representatives);
 
-      formDispatcher({
-        type: 'INITIAL_LOAD',
-        payload: { response: responseAllRepresentatives, representativesByCopy }
-      });
-    } catch (error) {
-      console.error('error on RepresentativeService.allRepresentatives', error);
-    }
+    formDispatcher({
+      type: 'INITIAL_LOAD',
+      payload: { response: responseAllRepresentatives, representativesByCopy }
+    });
+  } catch (error) {
+    console.error('error on RepresentativeService.allRepresentatives', error);
   }
 };
+/* }; */
 
 const getProviderTypes = async formDispatcher => {
   try {

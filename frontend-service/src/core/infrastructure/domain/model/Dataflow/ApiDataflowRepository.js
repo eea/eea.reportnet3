@@ -67,7 +67,6 @@ const all = async userData => {
   const dataflowsData = groupByUserRequesetStatus(dataflows);
 
   const allDataflows = cloneDeep(DataflowConf.userRequestStatus);
-  console.log({ allDataflows });
   Object.keys(dataflowsData).forEach(key => {
     console.log({ key });
     allDataflows[key.toLowerCase()] = parseDataflowDTOs(dataflowsData[key]);
@@ -333,7 +332,7 @@ const parseDataflowDTO = dataflowDTO =>
     description: dataflowDTO.description,
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: parseDocumentListDTO(dataflowDTO.documents),
-    expirationDate: dataflowDTO.deadlineDate,
+    expirationDate: dataflowDTO.deadlineDate > 0 ? moment.unix(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
     id: dataflowDTO.id,
     name: dataflowDTO.name,
     obligation: parseObligationDTO(dataflowDTO.obligation),

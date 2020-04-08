@@ -1,5 +1,7 @@
 import React, { useContext, useEffect, useReducer } from 'react';
 
+import isEmpty from 'lodash/isEmpty';
+
 import styles from './SearchAll.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
@@ -28,7 +30,11 @@ export const SearchAll = ({ data, getValues }) => {
     if (getValues) getValues(searchState.searchedData);
   }, [searchState.searchedData]);
 
-  const onLoadInitialState = () => searchDispatch({ type: 'INITIAL_LOAD', payload: { data, searchedData: data } });
+  const onLoadInitialState = () =>
+    searchDispatch({
+      type: 'INITIAL_LOAD',
+      payload: { data, searchedData: SearchUtils.onApplySearch(data, searchState.searchBy) }
+    });
 
   const onSearchData = value => {
     const searchedValues = SearchUtils.onApplySearch(searchState.data, value);
