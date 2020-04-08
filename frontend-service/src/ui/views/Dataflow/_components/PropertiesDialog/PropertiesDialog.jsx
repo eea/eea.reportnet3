@@ -107,8 +107,8 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
         visible={dataflowDataState.isPropertiesDialogVisible}>
         <div className={styles.propertiesWrap}>
           {dataflowDataState.description}
-          {parsedObligationsData.map(data => (
-            <div style={{ marginTop: '1rem', marginBottom: '2rem' }}>
+          {parsedObligationsData.map((data, i) => (
+            <div key={i} style={{ marginTop: '1rem', marginBottom: '2rem' }}>
               <TreeViewExpandableItem
                 items={[{ label: PropertiesUtils.camelCaseToNormal(data.label) }]}
                 buttons={

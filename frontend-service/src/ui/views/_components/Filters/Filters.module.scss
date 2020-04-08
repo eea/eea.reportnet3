@@ -21,7 +21,7 @@
       display: flex;
       flex-direction: row;
       justify-content: space-between;
-      width: 65%;
+      width: 70%;
       border-bottom: var(--inputtext-border) !important;
     }
 
@@ -121,11 +121,9 @@
     .selectHeader {
       border-radius: 3px;
       color: var(--black);
-      font-size: 10pt;
+      font-size: 9pt;
       font-weight: 500;
       padding: 4px;
-      background-color: var(--gray-15);
-      text-transform: uppercase;
     }
 
     .labelDown {
@@ -157,6 +155,12 @@
       background-color: transparent !important;
       border-color: transparent !important;
     }
+  }
+
+  .buttonWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
   }
 }
 

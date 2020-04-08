@@ -139,8 +139,8 @@ export const Filters = ({
     });
   };
 
-  const renderCalendarFilter = property => (
-    <span className={styles.dataflowInput} ref={dateRef}>
+  const renderCalendarFilter = (property, i) => (
+    <span key={i} className={styles.dataflowInput} ref={dateRef}>
       {renderOrderFilter(property)}
       <span className="p-float-label">
         <Calendar
@@ -175,8 +175,8 @@ export const Filters = ({
     </span>
   );
 
-  const renderDropdown = property => (
-    <span className={`${styles.dataflowInput}`}>
+  const renderDropdown = (property, i) => (
+    <span key={i} className={`${styles.dataflowInput}`}>
       {renderOrderFilter(property)}
       <Dropdown
         className={styles.dropdownFilter}
@@ -187,6 +187,10 @@ export const Filters = ({
         inputId={property}
         label={resources.messages[property]}
         onChange={event => onFilterData(property, event.value)}
+        onMouseDown={event => {
+          event.preventDefault();
+          event.stopPropagation();
+        }}
         optionLabel="type"
         options={FilterUtils.getOptionTypes(data, property, dropDownList)}
         showClear={!isEmpty(filterState.filterBy[property])}
@@ -196,15 +200,15 @@ export const Filters = ({
     </span>
   );
 
-  const renderInputFilter = property => (
-    <span className={styles.dataflowInput}>
+  const renderInputFilter = (property, i) => (
+    <span key={i} className={styles.dataflowInput}>
       {renderOrderFilter(property)}
       <span className="p-float-label">
         <InputText
           className={styles.inputFilter}
           id={property}
           onChange={event => onFilterData(property, event.target.value)}
-          value={filterState.filterBy[property]}
+          value={filterState.filterBy[property] ? filterState.filterBy[property] : ''}
         />
         {filterState.filterBy[property] && (
           <Button
@@ -234,8 +238,8 @@ export const Filters = ({
       <Fragment />
     );
 
-  const renderSelectFilter = property => (
-    <span className={`${styles.dataflowInput}`}>
+  const renderSelectFilter = (property, i) => (
+    <span key={i} className={`${styles.dataflowInput}`}>
       {renderOrderFilter(property)}
       <MultiSelect
         checkAllHeader={resources.messages['checkAllFilter']}
@@ -257,40 +261,41 @@ export const Filters = ({
 
   const selectTemplate = option => {
     if (!isNil(option.value)) {
-      return <span className={`${styles[option.value.toLowerCase()]} ${styles.statusBox}`}>{option.type}</span>;
+      return <span className={`${styles[option.type.toLowerCase()]} ${styles.statusBox}`}>{option.type}</span>;
     }
   };
 
   return (
     <div className={styles.header}>
-      {inputOptions && inputOptions.map(option => renderInputFilter(option))}
-      {selectOptions && selectOptions.map(option => renderSelectFilter(option))}
-      {dropdownOptions && dropdownOptions.map(option => renderDropdown(option))}
-      {dateOptions && dateOptions.map(option => renderCalendarFilter(option))}
+      {inputOptions && inputOptions.map((option, i) => renderInputFilter(option, i))}
+      {selectOptions && selectOptions.map((option, i) => renderSelectFilter(option, i))}
+      {dropdownOptions && dropdownOptions.map((option, i) => renderDropdown(option, i))}
+      {dateOptions && dateOptions.map((option, i) => renderCalendarFilter(option, i))}
 
-      {sendData ? (
-        <Button
-          className="p-button-animated-blink"
-          icon="filter"
-          onClick={() => sendData(filterState.filterBy)}
-          tooltip={resources.messages['applyFilters']}
-          tooltipOptions={{ position: 'bottom' }}
-        />
-      ) : (
-        <Fragment />
-      )}
+      <div className={styles.buttonWrapper} style={{ width: sendData ? 'inherit' : '' }}>
+        {sendData ? (
+          <Button
+            className={`p-button-animated-blink ${styles.sendButton}`}
+            icon="filter"
+            label={resources.messages['applyFilters']}
+            onClick={() => sendData(filterState.filterBy)}
+          />
+        ) : (
+          <Fragment />
+        )}
 
-      {(inputOptions || selectOptions || dateOptions) && (
-        <Button
-          className={`${
-            sendData ? 'p-button-secondary' : 'p-button-secondary-icon-only'
-          } p-button-rounded  p-button-animated-blink`}
-          icon="cancel"
-          onClick={() => onClearAllFilters()}
-          tooltip={resources.messages['clearFilters']}
-          tooltipOptions={{ position: 'bottom' }}
-        />
-      )}
+        {(inputOptions || selectOptions || dateOptions) && (
+          <Button
+            className={`${
+              sendData ? 'p-button-secondary' : 'p-button-secondary'
+            } p-button-rounded  p-button-animated-blink`}
+            icon="undo"
+            onClick={() => onClearAllFilters()}
+            label={resources.messages['reset']}
+            style={{ marginLeft: sendData ? '1rem' : '' }}
+          />
+        )}
+      </div>
     </div>
   );
 };

@@ -151,6 +151,15 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
             ? 'flex-start'
             : 'space-between'
       }}>
+      <div className={styles.repOblTools}>
+        <SearchAll data={reportingObligationState.filteredData} getValues={onLoadSearchedData} />
+        <div className={styles.switchDiv}>
+          <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
+          <InputSwitch checked={reportingObligationState.isTableView} onChange={() => onToggleView()} />
+          <label className={styles.switchTextInput}>{resources.messages['listView']}</label>
+        </div>
+      </div>
+
       <div className={styles.filters}>
         <Filters
           data={reportingObligationState.data}
@@ -161,18 +170,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
           sendData={onLoadReportingObligations}
         />
       </div>
-      <div className={styles.repOblTools}>
-        <SearchAll
-          data={reportingObligationState.filteredData}
-          getValues={onLoadSearchedData}
-          searchInitialState={reportingObligationState.searchedData}
-        />
-        <div className={styles.switchDiv}>
-          <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
-          <InputSwitch checked={reportingObligationState.isTableView} onChange={() => onToggleView()} />
-          <label className={styles.switchTextInput}>{resources.messages['listView']}</label>
-        </div>
-      </div>
+
       {reportingObligationState.isLoading ? (
         <Spinner style={{ top: 0, left: 0 }} />
       ) : isEmpty(reportingObligationState.data) ? (
