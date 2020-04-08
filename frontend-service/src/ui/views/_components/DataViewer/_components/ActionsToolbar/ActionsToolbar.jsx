@@ -41,7 +41,8 @@ const ActionsToolbar = ({
   showValidationFilter,
   tableHasErrors,
   tableId,
-  tableName
+  tableName,
+  tableReadOnly
 }) => {
   const [exportTableData, setExportTableData] = useState(undefined);
   const [exportTableDataName, setExportTableDataName] = useState('');
@@ -165,9 +166,9 @@ const ActionsToolbar = ({
       <div className="p-toolbar-group-left">
         <Button
           className={`p-button-rounded p-button-secondary-transparent ${
-            !hasWritePermissions || isWebFormMMR ? null : 'p-button-animated-download'
+            !hasWritePermissions || tableReadOnly || isWebFormMMR ? null : 'p-button-animated-blink'
           }`}
-          disabled={!hasWritePermissions || isWebFormMMR}
+          disabled={!hasWritePermissions || tableReadOnly || isWebFormMMR}
           icon={'export'}
           label={resources.messages['import']}
           onClick={() => setImportDialogVisible(true)}
@@ -176,7 +177,7 @@ const ActionsToolbar = ({
         <Button
           id="buttonExportTable"
           className={`p-button-rounded p-button-secondary-transparent ${
-            !hasWritePermissions ? null : 'p-button-animated-upload'
+            !hasWritePermissions ? null : 'p-button-animated-blink'
           }`}
           disabled={!hasWritePermissions}
           icon={isLoadingFile ? 'spinnerAnimate' : 'import'}
@@ -199,11 +200,13 @@ const ActionsToolbar = ({
 
         <Button
           className={`p-button-rounded p-button-secondary-transparent ${
-            !hasWritePermissions || isWebFormMMR || isUndefined(records.totalRecords) || isTableDeleted
+            !hasWritePermissions || tableReadOnly || isWebFormMMR || isUndefined(records.totalRecords) || isTableDeleted
               ? null
               : 'p-button-animated-blink'
           }`}
-          disabled={!hasWritePermissions || isWebFormMMR || isUndefined(records.totalRecords) || isTableDeleted}
+          disabled={
+            !hasWritePermissions || tableReadOnly || isWebFormMMR || isUndefined(records.totalRecords) || isTableDeleted
+          }
           icon={'trash'}
           label={resources.messages['deleteTable']}
           onClick={() => onSetVisible(setDeleteDialogVisible, true)}

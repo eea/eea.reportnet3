@@ -1,19 +1,19 @@
-import React, { useContext, useEffect, useRef, Fragment } from 'react';
+import React, { Fragment, useContext, useEffect, useRef } from 'react';
 
 import isNil from 'lodash/isNil';
 
-import styles from './SettingsDialog.module.scss';
+import styles from './PropertiesDialog.module.scss';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';
-import colors from 'conf/colors.json';
 import DataflowConf from 'conf/dataflow.config.json';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
-// import { TreeView } from 'ui/views/_components/TreeView';
+import { TreeView } from 'ui/views/_components/TreeView';
+import { TreeViewExpandableItem } from 'ui/views/_components/TreeView/_components/TreeViewExpandableItem';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { UserService } from 'core/services/User';
@@ -24,9 +24,10 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { PropertiesUtils } from './_functions/Utils/PropertiesUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
-export const SettingsDialog = ({ dataflowDataState, dataflowId, history, onConfirmDelete, onManageDialogs }) => {
+export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onConfirmDelete, onManageDialogs }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -47,6 +48,7 @@ export const SettingsDialog = ({ dataflowDataState, dataflowId, history, onConfi
       const response = await DataflowService.deleteById(dataflowId);
       if (response.status >= 200 && response.status <= 299) {
         history.push(getUrl(routes.DATAFLOWS));
+        notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
       } else {
         throw new Error(`Delete dataflow error with this status: ', ${response.status}`);
       }
@@ -62,53 +64,77 @@ export const SettingsDialog = ({ dataflowDataState, dataflowId, history, onConfi
     }
   };
 
+  const parsedDataflowData = PropertiesUtils.parseDataflowData(
+    config,
+    dataflowDataState,
+    dataflowId,
+    resources.messages,
+    user,
+    UserService
+  );
+  const parsedObligationsData = PropertiesUtils.parseObligationsData(dataflowDataState);
+
+  const dialogFooter = (
+    <Fragment>
+      <div className="p-toolbar-group-left">
+        {dataflowDataState.isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DESIGN'] && (
+          <Button
+            className="p-button-danger p-button-animated-blink"
+            label={resources.messages['deleteDataflowButton']}
+            icon="trash"
+            onClick={() => onManageDialogs('isDeleteDialogVisible', true, 'isPropertiesDialogVisible', false)}
+          />
+        )}
+      </div>
+      <Button className="p-button-text-only" label="Generate new API-key" disabled />
+      <Button className="p-button-text-only" label="Open Metadata" disabled />
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon="cancel"
+        label={resources.messages['close']}
+        onClick={() => onManageDialogs('isPropertiesDialogVisible', false)}
+      />
+    </Fragment>
+  );
+
   return (
     <Fragment>
       <Dialog
+        className={styles.propertiesDialog}
+        footer={dialogFooter}
         header={resources.messages['properties']}
-        footer={
-          <>
-            <div className="p-toolbar-group-left">
-              {dataflowDataState.isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DESIGN'] && (
-                <Button
-                  className="p-button-text-only"
-                  label="Delete this dataflow"
-                  onClick={() => onManageDialogs('isDeleteDialogVisible', true, 'isPropertiesDialogVisible', false)}
-                  style={{ backgroundColor: colors.errors, borderColor: colors.errors }}
-                />
-              )}
-            </div>
-            <Button className="p-button-text-only" label="Generate new API-key" disabled />
-            <Button className="p-button-text-only" label="Open Metadata" disabled />
-            <Button
-              className="p-button-secondary p-button-animated-blink"
-              icon="cancel"
-              label={resources.messages['close']}
-              onClick={() => onManageDialogs('isPropertiesDialogVisible', false)}
-            />
-          </>
-        }
-        visible={dataflowDataState.isPropertiesDialogVisible}
         onHide={() => onManageDialogs('isPropertiesDialogVisible', false)}
-        style={{ width: '50vw' }}>
-        <div className="description">{dataflowDataState.description}</div>
-        <div className="features">
-          <ul>
-            <li>
-              <strong>
-                {UserService.userRole(user, `${config.permissions.DATAFLOW}${dataflowId}`)} functionality:
-              </strong>
-              {dataflowDataState.hasWritePermissions ? 'read / write' : 'read'}
-            </li>
-            <li>
-              <strong>{UserService.userRole(user, `${config.permissions.DATAFLOW}${dataflowId}`)} type:</strong>
-            </li>
-            <li>
-              <strong>REST API key:</strong> <a>Copy API-key</a> (API-key access for developers)
-            </li>
-          </ul>
+        visible={dataflowDataState.isPropertiesDialogVisible}>
+        <div className={styles.propertiesWrap}>
+          {dataflowDataState.description}
+          {parsedObligationsData.map((data, i) => (
+            <div key={i} style={{ marginTop: '1rem', marginBottom: '2rem' }}>
+              <TreeViewExpandableItem
+                items={[{ label: PropertiesUtils.camelCaseToNormal(data.label) }]}
+                buttons={
+                  data.label === 'obligation'
+                    ? [
+                        {
+                          className: `p-button-secondary-transparent`,
+                          icon: 'externalLink',
+                          tooltip: resources.messages['viewMore'],
+                          onClick: () =>
+                            window.open(
+                              `http://rod3.devel1dub.eionet.europa.eu/obligations/${dataflowDataState.obligations.obligationId}`
+                            )
+                        }
+                      ]
+                    : []
+                }>
+                <TreeView property={data.data} propertyName={''} />
+              </TreeViewExpandableItem>
+            </div>
+          ))}
+
+          <TreeViewExpandableItem items={[{ label: resources.messages['dataflowDetails'] }]}>
+            <TreeView property={parsedDataflowData} propertyName={''} />
+          </TreeViewExpandableItem>
         </div>
-        <div className="actions"></div>
       </Dialog>
 
       <ConfirmDialog

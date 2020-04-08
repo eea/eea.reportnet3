@@ -9,6 +9,7 @@
   },
   "errorTypes": {
     "dataflowExists": "Dataflow name already exists",
+    "dataflowObligationEmpty": "Dataflow Obligation empty",
     "copyWithErrors": "The snapshot contains blocker errors"
   },
   "userRequestStatus": {
@@ -17,7 +18,7 @@
     "pending": []
   },
   "filterItems": {
-    "input": ["name", "description", "obligationTitle", "legalInstrument"],
+    "input": ["name", "description", "legalInstrument", "obligationTitle"],
     "select": ["status", "userRole"],
     "date": ["expirationDate"]
   }

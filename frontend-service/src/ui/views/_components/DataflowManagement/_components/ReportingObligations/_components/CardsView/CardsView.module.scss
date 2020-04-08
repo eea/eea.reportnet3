@@ -1,6 +1,12 @@
+.noObligations {
+  color: var(--button-secondary-transparent-color-hover);
+  font-weight: 450;
+  margin: 2rem 1rem;
+}
+
 .cardWrap {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: space-between;
+  margin-bottom: 2rem;
 }

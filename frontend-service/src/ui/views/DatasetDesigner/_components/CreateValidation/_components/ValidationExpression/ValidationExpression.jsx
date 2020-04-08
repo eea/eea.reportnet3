@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import moment from 'moment';
 
 import styles from './ValidationExpression.module.scss';
 
 import { config } from 'conf/';
 
 import { Button } from 'ui/views/_components/Button';
+import { Calendar } from 'ui/views/_components/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
@@ -26,6 +28,7 @@ const ValidationExpression = ({
   const { expressionId } = expressionValues;
   const [operatorValues, setOperatorValues] = useState([]);
   const [isNumber, setIsNumber] = useState(false);
+  const [inputOptions, setInputOptions] = useState();
   const operatorTypes = config.validations.operatorTypes;
   useEffect(() => {
     if (expressionValues.operatorType) {
@@ -35,18 +38,25 @@ const ValidationExpression = ({
 
   useEffect(() => {
     const { operatorType, expressionValue } = expressionValues;
-    if (operatorType == 'number') {
-      setIsNumber(true);
+    const inputOptions = {
+      keyfilter: ''
+    };
+    if (operatorType == 'number' || operatorType == 'LEN') {
+      inputOptions.keyfilter = 'num';
       if (!Number(expressionValue)) {
         onExpressionFieldUpdate(expressionId, {
           key: 'expressionValue',
           value: { value: '' }
         });
       }
-    } else {
-      setIsNumber(false);
     }
-  }, [expressionValues.operatorType]);
+  }, [expressionValues.operatorType, expressionValues.expressionValue]);
+
+  useEffect(() => {
+    const inputOptions = {};
+    if (isNumber) {
+    }
+  }, [expressionValues.operatorType, isNumber]);
 
   const getOperatorTypeOptions = () => {
     const options = [];
@@ -119,18 +129,38 @@ const ValidationExpression = ({
         />
       </span>
       <span>
-        <InputText
-          disabled={isDisabled}
-          placeholder={resourcesContext.messages.value}
-          value={expressionValues.expressionValue}
-          keyfilter={isNumber ? 'num' : 'alphanum'}
-          onChange={e =>
-            onExpressionFieldUpdate(expressionId, {
-              key: 'expressionValue',
-              value: { value: e.target.value }
-            })
-          }
-        />
+        {expressionValues.operatorType == 'date' ? (
+          <Calendar
+            appendTo={document.body}
+            baseZIndex={6000}
+            dateFormat="yy-mm-dd"
+            monthNavigator={true}
+            readOnlyInput={true}
+            onChange={e => {
+              onExpressionFieldUpdate(expressionId, {
+                key: 'expressionValue',
+                value: { value: e.target.value }
+              });
+            }}
+            value={expressionValues.expressionValue}
+            yearNavigator={true}
+            yearRange="2015:2030"></Calendar>
+        ) : (
+          <InputText
+            disabled={isDisabled}
+            placeholder={resourcesContext.messages.value}
+            value={expressionValues.expressionValue}
+            keyfilter={
+              expressionValues.operatorType == 'LEN' || expressionValues.operatorType == 'number' ? 'num' : 'alphanum'
+            }
+            onChange={e =>
+              onExpressionFieldUpdate(expressionId, {
+                key: 'expressionValue',
+                value: { value: e.target.value }
+              })
+            }
+          />
+        )}
       </span>
       <span>
         <Button

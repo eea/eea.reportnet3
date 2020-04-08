@@ -2550,8 +2550,8 @@ body .p-sidebar .p-sidebar-close:hover {
   color: var(--sidebar-close-icon-color-hover);
 }
 body .p-tooltip .p-tooltip-text {
-  background-color: #404040;
-  color: #ffffff;
+  background-color: var(--tooltip-body-bg);
+  color: var(--tooltip-body-color);
   padding: 0.429em;
   -webkit-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
   -moz-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
@@ -2559,18 +2559,19 @@ body .p-tooltip .p-tooltip-text {
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
+  border: 1px solid var(--tooltip-body-border-color);
 }
 body .p-tooltip.p-tooltip-right .p-tooltip-arrow {
-  border-right-color: #404040;
+  border-right-color: var(--tooltip-body-border-color);
 }
 body .p-tooltip.p-tooltip-left .p-tooltip-arrow {
-  border-left-color: #404040;
+  border-left-color: var(--tooltip-body-border-color);
 }
 body .p-tooltip.p-tooltip-top .p-tooltip-arrow {
-  border-top-color: #404040;
+  border-top-color: var(--tooltip-body-border-color);
 }
 body .p-tooltip.p-tooltip-bottom .p-tooltip-arrow {
-  border-bottom-color: #404040;
+  border-bottom-color: var(--tooltip-body-border-color);
 }
 body .p-lightbox {
   -webkit-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);

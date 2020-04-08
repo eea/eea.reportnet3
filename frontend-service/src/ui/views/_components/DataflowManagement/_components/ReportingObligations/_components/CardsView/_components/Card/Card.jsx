@@ -14,7 +14,9 @@ export const Card = ({ checked, date, icon, id, obligation, onCheck, subtitle, t
   const resources = useContext(ResourcesContext);
 
   return (
-    <div className={styles.card}>
+    <div
+      className={`${styles.card} ${checked.id === id ? styles.checked : undefined}`}
+      onClick={() => onCheck(obligation)}>
       <div className={styles.text}>
         <h3 className={styles.title}>{title}</h3>
         <p className={styles.subtitle}>{subtitle}</p>
@@ -30,15 +32,6 @@ export const Card = ({ checked, date, icon, id, obligation, onCheck, subtitle, t
 
       <div className={`${styles.date}`}>
         {resources.messages['dueDate']}: <span className={styles.dueDate}>{date}</span>
-      </div>
-
-      <div className={`${styles.toolbar}`}>
-        <Checkbox
-          id={`${id}_checkbox`}
-          isChecked={checked.title === title}
-          onChange={() => onCheck(obligation)}
-          role="checkbox"
-        />
       </div>
     </div>
   );

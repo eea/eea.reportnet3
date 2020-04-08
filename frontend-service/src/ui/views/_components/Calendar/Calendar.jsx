@@ -3,6 +3,9 @@ import React from 'react';
 import { Calendar as PrimeCalendar } from 'primereact/calendar';
 
 export const Calendar = ({
+  appendTo,
+  autoZIndex,
+  baseZIndex,
   className,
   dateFormat,
   disabledDates,
@@ -25,6 +28,9 @@ export const Calendar = ({
 }) => {
   return (
     <PrimeCalendar
+      appendTo={appendTo}
+      autoZIndex={autoZIndex}
+      baseZIndex={baseZIndex}
       className={className}
       dateFormat={dateFormat}
       disabledDates={disabledDates}

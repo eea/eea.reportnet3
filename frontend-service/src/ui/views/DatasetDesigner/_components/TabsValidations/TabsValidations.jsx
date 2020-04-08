@@ -264,7 +264,7 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset, onHideValidation
   return (
     <Fragment>
       {validationList()}
-      {isDeleteDialogVisible && deleteValidationDialog}
+      {isDeleteDialogVisible && deleteValidationDialog()}
     </Fragment>
   );
 });

@@ -1,7 +1,7 @@
 .dataflowInput {
   height: 2.5em;
   color: var(--floating-label-color) !important;
-  width: 15%;
+  width: 15.55%;
   display: flex !important;
   flex-direction: row !important;
   font-size: 10pt;
@@ -18,6 +18,10 @@
     &:enabled:focus {
       box-shadow: 0 0 0 0 var(--blue-120) !important;
     }
+
+    &:active {
+      width: 15.55%;
+    }
   }
 
   .searchInput::placeholder {
@@ -27,31 +31,29 @@
 
   .cancelIcon {
     font-size: 12pt !important;
-    height: 2.1rem !important;
-  }
-}
-
-.icon {
-  background-color: transparent;
-  border: none;
-  color: var(--button-secondary-transparent-color-hover);
-  cursor: pointer;
-  font-size: 16pt !important;
-  height: 1.6em !important;
-  opacity: 0.7;
-
-  &:hover {
-    opacity: 1 !important;
+    height: 1.9rem !important;
   }
 
-  &:enabled:focus {
-    box-shadow: 0 0 0 0 var(--white) !important;
-    outline: none;
-  }
+  .icon {
+    background-color: transparent;
+    border: none;
+    color: var(--button-secondary-transparent-color-hover);
+    cursor: pointer;
+    opacity: 0.7;
 
-  &:enabled:active,
-  &:enabled:hover {
-    background-color: transparent !important;
-    border-color: transparent !important;
+    &:hover {
+      opacity: 1 !important;
+    }
+
+    &:enabled:focus {
+      box-shadow: 0 0 0 0 var(--white) !important;
+      outline: none;
+    }
+
+    &:enabled:active,
+    &:enabled:hover {
+      background-color: transparent !important;
+      border-color: transparent !important;
+    }
   }
 }

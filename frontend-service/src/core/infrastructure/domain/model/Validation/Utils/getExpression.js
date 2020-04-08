@@ -1,28 +1,42 @@
+import moment from 'moment';
+
 import { config } from 'conf';
 
+const getOperatorEquivalence = (operatorType, operatorValue) => {
+  const {
+    validations: { operatorEquivalences }
+  } = config;
+  if (operatorEquivalences[operatorType]) {
+    return operatorEquivalences[operatorType][operatorValue];
+  }
+  return operatorEquivalences.default[operatorValue];
+};
+
 export const getExpression = expression => {
-  if (expression.operatorType == 'LEN') {
+  const { operatorType, operatorValue, expressionValue } = expression;
+  const {
+    validations: { nonNumericOperators }
+  } = config;
+  if (operatorType == 'LEN') {
     return {
-      operator: config.validations.operatorEquivalences[expression.operatorValue],
-      arg1: parseInt(expression.expressionValue),
-      arg2: {
+      operator: getOperatorEquivalence(operatorType, operatorValue),
+      arg1: {
         operator: 'LEN',
         arg1: 'VALUE'
-      }
+      },
+      arg2: Number(expressionValue)
     };
   }
-  if (expression.operatorType == 'string') {
+  if (operatorType == 'date') {
     return {
       arg1: 'VALUE',
-      operator: config.validations.stringOperatorsEquivalences[expression.operatorValue],
-      arg2: expression.expressionValue
+      operator: getOperatorEquivalence(operatorType, operatorValue),
+      arg2: moment(expressionValue).format('YYYY-MM-DD')
     };
   }
   return {
     arg1: 'VALUE',
-    operator: config.validations.operatorEquivalences[expression.operatorValue],
-    arg2: !config.validations.nonNumericOperators.includes(expression.operatorType)
-      ? parseInt(expression.expressionValue)
-      : expression.expressionValue
+    operator: getOperatorEquivalence(operatorType, operatorValue),
+    arg2: !nonNumericOperators.includes(operatorType) ? Number(expressionValue) : expressionValue
   };
 };

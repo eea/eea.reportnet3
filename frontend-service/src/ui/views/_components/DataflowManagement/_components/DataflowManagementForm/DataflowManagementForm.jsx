@@ -33,6 +33,7 @@ const DataflowManagementForm = ({
 
   const [hasErrors, setHasErrors] = useState(false);
   const [isNameDuplicated, setIsNameDuplicated] = useState(false);
+  const [isObligationEmpty, setIsObligationEmpty] = useState(false);
 
   const form = useRef(null);
   const inputRef = useRef(null);
@@ -44,15 +45,16 @@ const DataflowManagementForm = ({
   useEffect(() => {
     if (!isNil(form.current) && refresh) {
       form.current.resetForm();
-      setIsNameDuplicated(false);
       setHasErrors(false);
+      setIsNameDuplicated(false);
+      setIsObligationEmpty(false);
     }
   }, [refresh, form.current]);
 
   const dataflowCrudValidation = Yup.object().shape({
     name: Yup.string().required(' '),
-    description: Yup.string().required(' ').max(255, resources.messages['dataflowDescriptionValidationMax'])
-    // associatedObligation: Yup.string().required(' ')
+    description: Yup.string().required(' ').max(255, resources.messages['dataflowDescriptionValidationMax']),
+    obligation: Yup.string().required(' ')
   });
 
   return (
@@ -73,28 +75,21 @@ const DataflowManagementForm = ({
           }
         } catch (error) {
           setHasErrors(true);
-          if (error.response.data == DataflowConf.errorTypes['dataflowExists']) {
-            setIsNameDuplicated(true);
-            notificationContext.add({
-              type: 'DATAFLOW_NAME_EXISTS'
-            });
-          } else {
-            const notification = isEditForm
-              ? {
-                  type: 'DATAFLOW_UPDATING_ERROR',
-                  content: {
-                    dataflowId: data.id,
-                    dataflowName: values.name
-                  }
-                }
-              : {
-                  type: 'DATAFLOW_CREATION_ERROR',
-                  content: {
-                    dataflowName: values.name
-                  }
-                };
-            notificationContext.add(notification);
+          if (error.response.data === DataflowConf.errorTypes['dataflowObligationEmpty']) {
+            setIsObligationEmpty(true);
+            notificationContext.add({ type: 'DATAFLOW_OBLIGATION_EMPTY' });
           }
+
+          if (error.response.data === DataflowConf.errorTypes['dataflowExists']) {
+            setIsNameDuplicated(true);
+            notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
+          }
+
+          const notification = isEditForm
+            ? { type: 'DATAFLOW_UPDATING_ERROR', content: { dataflowId: data.id, dataflowName: values.name } }
+            : { type: 'DATAFLOW_CREATION_ERROR', content: { dataflowName: values.name } };
+
+          notificationContext.add(notification);
         } finally {
           setSubmitting(false);
         }
@@ -104,6 +99,7 @@ const DataflowManagementForm = ({
           <fieldset>
             <div className={`formField${(!isEmpty(errors.name) && touched.name) || isNameDuplicated ? ' error' : ''}`}>
               <Field
+                autoComplete="off"
                 innerRef={inputRef}
                 name="name"
                 placeholder={resources.messages['createDataflowName']}
@@ -120,6 +116,7 @@ const DataflowManagementForm = ({
             </div>
             <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
               <Field
+                autoComplete="off"
                 name="description"
                 component="textarea"
                 onChange={event => getData({ ...data, description: event.target.value })}
@@ -128,13 +125,16 @@ const DataflowManagementForm = ({
               />
               <ErrorMessage className="error" name="description" component="div" />
             </div>
-            <div className={styles.search}>
+            <div
+              className={`formField${
+                (!isEmpty(errors.obligation) && touched.obligation) || isObligationEmpty ? ' error' : ''
+              } ${styles.search}`}>
               <Field
                 className={styles.searchInput}
-                name="associatedObligation"
+                name="obligation"
                 placeholder={resources.messages['associatedObligation']}
-                type="text"
                 readOnly={true}
+                type="text"
                 value={data.obligation.title}
               />
               <Button
@@ -144,6 +144,7 @@ const DataflowManagementForm = ({
                 layout="simple"
                 onClick={onSearch}
               />
+              <ErrorMessage className="error" name="obligation" component="div" />
             </div>
           </fieldset>
           <fieldset>

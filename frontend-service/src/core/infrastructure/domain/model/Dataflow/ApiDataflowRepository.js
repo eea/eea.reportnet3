@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -64,7 +65,7 @@ const all = async userData => {
 
   const dataflowsData = groupByUserRequesetStatus(dataflows);
 
-  const allDataflows = DataflowConf.userRequestStatus;
+  const allDataflows = cloneDeep(DataflowConf.userRequestStatus);
   Object.keys(dataflowsData).forEach(key => {
     allDataflows[key.toLowerCase()] = parseDataflowDTOs(dataflowsData[key]);
   });
@@ -284,6 +285,7 @@ const getAllSchemas = async dataflowId => {
         tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaDescription: datasetTableDTO.description,
         tableSchemaName: datasetTableDTO.nameTableSchema,
+        tableSchemaReadOnly: datasetTableDTO.readOnly,
         records: records,
         recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null
       });
@@ -328,9 +330,7 @@ const parseDataflowDTO = dataflowDTO =>
     description: dataflowDTO.description,
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: parseDocumentListDTO(dataflowDTO.documents),
-    expirationDate: !isNil(dataflowDTO.deadlineDate)
-      ? moment.unix(dataflowDTO.deadlineDate).format('YYYY-MM-DD')
-      : moment(dataflowDTO.deadlineDate).format('YYYY-MM-DD'),
+    expirationDate: dataflowDTO.deadlineDate > 0 ? moment.unix(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
     id: dataflowDTO.id,
     name: dataflowDTO.name,
     obligation: parseObligationDTO(dataflowDTO.obligation),
@@ -424,7 +424,9 @@ const parseObligationDTO = obligationDTO => {
       comment: obligationDTO.comment,
       countries: obligationDTO.countries,
       description: obligationDTO.description,
-      expirationDate: moment.unix(obligationDTO.nextDeadline / 1000).format('YYYY-MM-DD'),
+      expirationDate: !isNil(obligationDTO.nextDeadline)
+        ? moment.unix(obligationDTO.nextDeadline / 1000).format('YYYY-MM-DD')
+        : moment(obligationDTO.nextDeadline).format('YYYY-MM-DD'),
       issues: obligationDTO.issues,
       legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),
       obligationId: obligationDTO.obligationId,
@@ -453,7 +455,8 @@ const parseRepresentativeDTO = representativeDTO => {
     id: representativeDTO.id,
     isReceiptDownloaded: representativeDTO.receiptDownloaded,
     isReceiptOutdated: representativeDTO.receiptOutdated,
-    providerAccount: representativeDTO.provideraccount
+    providerAccount: representativeDTO.providerAccount,
+    hasDatasets: representativeDTO.hasDatasets
   });
 };
 
