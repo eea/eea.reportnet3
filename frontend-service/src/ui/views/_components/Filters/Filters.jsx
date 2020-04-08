@@ -139,8 +139,8 @@ export const Filters = ({
     });
   };
 
-  const renderCalendarFilter = property => (
-    <span className={styles.dataflowInput} ref={dateRef}>
+  const renderCalendarFilter = (property, i) => (
+    <span key={i} className={styles.dataflowInput} ref={dateRef}>
       {renderOrderFilter(property)}
       <span className="p-float-label">
         <Calendar
@@ -175,8 +175,8 @@ export const Filters = ({
     </span>
   );
 
-  const renderDropdown = property => (
-    <span className={`${styles.dataflowInput}`}>
+  const renderDropdown = (property, i) => (
+    <span key={i} className={`${styles.dataflowInput}`}>
       {renderOrderFilter(property)}
       <Dropdown
         className={styles.dropdownFilter}
@@ -200,15 +200,15 @@ export const Filters = ({
     </span>
   );
 
-  const renderInputFilter = property => (
-    <span className={styles.dataflowInput}>
+  const renderInputFilter = (property, i) => (
+    <span key={i} className={styles.dataflowInput}>
       {renderOrderFilter(property)}
       <span className="p-float-label">
         <InputText
           className={styles.inputFilter}
           id={property}
           onChange={event => onFilterData(property, event.target.value)}
-          value={filterState.filterBy[property]}
+          value={filterState.filterBy[property] ? filterState.filterBy[property] : ''}
         />
         {filterState.filterBy[property] && (
           <Button
@@ -238,8 +238,8 @@ export const Filters = ({
       <Fragment />
     );
 
-  const renderSelectFilter = property => (
-    <span className={`${styles.dataflowInput}`}>
+  const renderSelectFilter = (property, i) => (
+    <span key={i} className={`${styles.dataflowInput}`}>
       {renderOrderFilter(property)}
       <MultiSelect
         checkAllHeader={resources.messages['checkAllFilter']}
@@ -267,10 +267,10 @@ export const Filters = ({
 
   return (
     <div className={styles.header}>
-      {inputOptions && inputOptions.map(option => renderInputFilter(option))}
-      {selectOptions && selectOptions.map(option => renderSelectFilter(option))}
-      {dropdownOptions && dropdownOptions.map(option => renderDropdown(option))}
-      {dateOptions && dateOptions.map(option => renderCalendarFilter(option))}
+      {inputOptions && inputOptions.map((option, i) => renderInputFilter(option, i))}
+      {selectOptions && selectOptions.map((option, i) => renderSelectFilter(option, i))}
+      {dropdownOptions && dropdownOptions.map((option, i) => renderDropdown(option, i))}
+      {dateOptions && dateOptions.map((option, i) => renderCalendarFilter(option, i))}
 
       <div className={styles.buttonWrapper} style={{ width: sendData ? 'inherit' : '' }}>
         {sendData ? (
