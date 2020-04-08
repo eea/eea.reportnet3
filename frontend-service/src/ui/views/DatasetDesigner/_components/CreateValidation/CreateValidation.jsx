@@ -272,10 +272,10 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   const onExpressionGroup = (expressionId, field) => {
     const {
       groupCandidate,
-      candidateRule: { expressions }
+      candidateRule: { allExpressions }
     } = creationFormState;
 
-    const [currentExpression] = expressions.filter(expression => expression.expressionId == expressionId);
+    const [currentExpression] = allExpressions.filter(expression => expression.expressionId == expressionId);
     currentExpression[field.key] = field.value;
 
     if (field.value) {
@@ -288,7 +288,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
       payload: {
         groupExpressionsActive: field.value ? 1 : -1,
         groupCandidate,
-        expressions
+        allExpressions
       }
     });
   };

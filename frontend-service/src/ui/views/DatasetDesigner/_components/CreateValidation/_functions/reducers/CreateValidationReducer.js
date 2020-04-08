@@ -111,7 +111,7 @@ export const createValidationReducer = (state, { type, payload }) => {
         groupCandidate: payload.groupCandidate,
         candidateRule: {
           ...state.candidateRule,
-          expressions: payload.expressions
+          allExpressions: payload.allExpressions
         }
       };
     case 'SET_EXPRESSIONS_STRING':
