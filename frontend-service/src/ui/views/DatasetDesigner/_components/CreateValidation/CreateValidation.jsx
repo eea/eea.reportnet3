@@ -484,13 +484,14 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                     creationFormState.groupExpressionsActive,
                     creationFormState.groupCandidate
                   );
-                  creationFormDispatch({
-                    type: 'GROUP_EXPRESSIONS',
-                    payload: {
-                      expressions: groupingResult.expressions,
-                      allExpressions: [...creationFormState.candidateRule.allExpressions, groupingResult.newGroup]
-                    }
-                  });
+                  if (!isNil(groupingResult.newGroup))
+                    creationFormDispatch({
+                      type: 'GROUP_EXPRESSIONS',
+                      payload: {
+                        expressions: groupingResult.expressions,
+                        allExpressions: [...creationFormState.candidateRule.allExpressions, groupingResult.newGroup]
+                      }
+                    });
                 }}
               />
             </div>
