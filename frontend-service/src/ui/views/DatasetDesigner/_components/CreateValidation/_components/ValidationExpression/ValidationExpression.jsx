@@ -69,14 +69,14 @@ const ValidationExpression = ({
   // layouts
   const defaultLayout = (
     <li className={styles.expression}>
-      <span>
+      <span className={styles.group}>
         <Checkbox
           onChange={e => onExpressionGroup(expressionId, { key: 'group', value: e.checked })}
           isChecked={expressionValues.group}
           disabled={isDisabled}
         />
       </span>
-      <span>
+      <span className={styles.union}>
         <Dropdown
           disabled={isDisabled || position == 0}
           appendTo={document.body}
@@ -92,7 +92,7 @@ const ValidationExpression = ({
           value={{ label: expressionValues.union, value: expressionValues.union }}
         />
       </span>
-      <span>
+      <span className={styles.operatorType}>
         <Dropdown
           disabled={isDisabled}
           appendTo={document.body}
@@ -108,7 +108,7 @@ const ValidationExpression = ({
           value={!isEmpty(expressionValues.operatorType) ? operatorTypes[expressionValues.operatorType].option : null}
         />
       </span>
-      <span>
+      <span className={styles.operatorValue}>
         <Dropdown
           disabled={isDisabled}
           appendTo={document.body}
@@ -128,7 +128,7 @@ const ValidationExpression = ({
           }
         />
       </span>
-      <span>
+      <span className={styles.operatorValue}>
         {expressionValues.operatorType == 'date' ? (
           <Calendar
             appendTo={document.body}

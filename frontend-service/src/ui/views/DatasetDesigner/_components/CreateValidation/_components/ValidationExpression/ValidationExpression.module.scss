@@ -1,11 +1,29 @@
 .expression {
   display: flex;
   justify-content: flex-start;
+  .group {
+    margin-right: 2rem;
+  }
+  .union {
+    width: 80px;
+    :global .p-dropdown {
+      width: 100%;
+    }
+  }
+  .operatorType {
+    width: 150px;
+    :global .p-dropdown {
+      width: 100%;
+    }
+  }
+  .operatorValue {
+    width: 150px;
+    :global .p-dropdown {
+      width: 100%;
+    }
+  }
   > span {
     margin-right: 1rem;
-    &:first-of-type {
-      margin-right: 2rem;
-    }
     &:last-of-type {
       margin-right: 0;
     }
