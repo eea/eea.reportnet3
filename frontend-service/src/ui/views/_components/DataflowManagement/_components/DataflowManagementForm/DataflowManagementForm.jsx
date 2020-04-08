@@ -54,7 +54,7 @@ const DataflowManagementForm = ({
   const dataflowCrudValidation = Yup.object().shape({
     name: Yup.string().required(' '),
     description: Yup.string().required(' ').max(255, resources.messages['dataflowDescriptionValidationMax']),
-    obligation: Yup.string().required(' ')
+    obligation: Yup.object({ title: Yup.string().required(' ') })
   });
 
   return (
@@ -75,11 +75,6 @@ const DataflowManagementForm = ({
           }
         } catch (error) {
           setHasErrors(true);
-          if (error.response.data === DataflowConf.errorTypes['dataflowObligationEmpty']) {
-            setIsObligationEmpty(true);
-            notificationContext.add({ type: 'DATAFLOW_OBLIGATION_EMPTY' });
-          }
-
           if (error.response.data === DataflowConf.errorTypes['dataflowExists']) {
             setIsNameDuplicated(true);
             notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
@@ -114,6 +109,7 @@ const DataflowManagementForm = ({
               />
               <ErrorMessage className="error" name="name" component="div" />
             </div>
+
             <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
               <Field
                 autoComplete="off"
@@ -125,13 +121,17 @@ const DataflowManagementForm = ({
               />
               <ErrorMessage className="error" name="description" component="div" />
             </div>
+
             <div
               className={`formField${
-                (!isEmpty(errors.obligation) && touched.obligation) || isObligationEmpty ? ' error' : ''
+                (!isEmpty(errors.obligation) && !isEmpty(touched.obligation) && touched.obligation.title) ||
+                isObligationEmpty
+                  ? ' error'
+                  : ''
               } ${styles.search}`}>
               <Field
                 className={styles.searchInput}
-                name="obligation"
+                name="obligation.title"
                 placeholder={resources.messages['associatedObligation']}
                 readOnly={true}
                 type="text"
@@ -144,7 +144,7 @@ const DataflowManagementForm = ({
                 layout="simple"
                 onClick={onSearch}
               />
-              <ErrorMessage className="error" name="obligation" component="div" />
+              <ErrorMessage className="error" name="obligation.title" component="div" />
             </div>
           </fieldset>
           <fieldset>
