@@ -187,6 +187,10 @@ export const Filters = ({
         inputId={property}
         label={resources.messages[property]}
         onChange={event => onFilterData(property, event.value)}
+        onMouseDown={event => {
+          event.preventDefault();
+          event.stopPropagation();
+        }}
         optionLabel="type"
         options={FilterUtils.getOptionTypes(data, property, dropDownList)}
         showClear={!isEmpty(filterState.filterBy[property])}
