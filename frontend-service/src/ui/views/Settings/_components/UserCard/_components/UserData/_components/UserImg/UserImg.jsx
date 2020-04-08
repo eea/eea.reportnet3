@@ -1,19 +1,28 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
+import { config } from 'conf';
+
 import styles from './UserImg.module.scss';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { Button } from 'ui/views/_components/Button';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Icon } from 'ui/views/_components/Icon';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
+import ReactTooltip from 'react-tooltip';
 
 import { UserService } from 'core/services/User';
 
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const UserImg = () => {
+  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
+
+  const [isAvatarDialogVisible, setIsAvatarDialogVisible] = useState(false);
 
   const imageUploader = React.useRef(null);
   const uploadedImage = React.useRef();
@@ -49,6 +58,21 @@ const UserImg = () => {
       current.src = URL.createObjectURL(e.target.files[0]);
     }
   };
+
+  const listOfImages = () =>
+    config.avatars.map(avatar => (
+      <div className={styles.gridItem}>
+        <img
+          className={styles.gridItem}
+          src={avatar.base64}
+          onClick={() => {
+            updateImage(splitBase64Image(avatar.base64));
+            setIsAvatarDialogVisible(false);
+          }}
+        />
+      </div>
+    ));
+
   const splitBase64Image = base64Image => base64Image.match(/.{1,250}/g);
 
   const updateImage = async splittedBase64Image => {
@@ -88,15 +112,43 @@ const UserImg = () => {
           type="file"
         />
         <img
+          data-tip
+          data-for="addAvatar"
+          data-event="click"
           ref={uploadedImage}
           icon={<FontAwesomeIcon icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />}
           // src={}
           className={styles.userDataIcon}
-          onClick={() => imageUploader.current.click()}
+          // onClick={() => imageUploader.current.click()}
         />
         <Icon icon="edit" className={styles.editIcon} />
       </div>
+      <Dialog
+        header={resources.messages['selectImage']}
+        visible={isAvatarDialogVisible}
+        style={{ width: '80%' }}
+        onHide={e => setIsAvatarDialogVisible(false)}>
+        <div className={styles.gridContainer}>{listOfImages()}</div>
+      </Dialog>
+      <ReactTooltip className={styles.tooltipClass} id="addAvatar" place="top" effect="solid" clickable={true}>
+        <Button
+          className={`p-button-secondary p-button-animated-blink`}
+          // label={isEditForm ? resources.messages['save'] : resources.messages['create']}
+          icon={'add'}
+          label={resources.messages['uploadImage']}
+          onClick={() => imageUploader.current.click()}
+          style={{ marginRight: '1rem' }}
+        />
+        <Button
+          className={`p-button-secondary p-button-animated-blink`}
+          // label={isEditForm ? resources.messages['save'] : resources.messages['create']}
+          icon={'userPlus'}
+          label={resources.messages['selectImage']}
+          onClick={() => setIsAvatarDialogVisible(true)}
+        />
+      </ReactTooltip>
     </div>
+
     // <FontAwesomeIcon icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />
   );
 };

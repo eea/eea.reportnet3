@@ -45,3 +45,27 @@
 .userDataIcon:hover + .editIcon {
   opacity: 1;
 }
+
+.tooltipClass {
+  border: 1px solid var(--main-font-color) !important;
+  &:after {
+    border-top-color: var(--main-font-color) !important;
+  }
+}
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto;
+  padding: 1rem;
+}
+.gridItem {
+  background-color: var(--bg);
+  padding: 10px;
+  text-align: center;
+  transform: scale(0.95);
+}
+.gridItem:hover {
+  cursor: pointer;
+  transform: scale(1);
+  transition: 0.08s ease-in;
+}

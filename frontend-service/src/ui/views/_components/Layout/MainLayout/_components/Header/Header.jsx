@@ -120,6 +120,7 @@ const Header = withRouter(({ history }) => {
   const logout = (
     <div className={styles.logoutWrapper}>
       <FontAwesomeIcon
+        className={styles.logoutButton}
         onClick={async e => {
           e.preventDefault();
           userContext.userProps.showLogoutConfirmation ? setConfirmVisible(true) : userLogout();

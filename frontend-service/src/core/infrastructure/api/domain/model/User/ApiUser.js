@@ -1,4 +1,5 @@
 import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
 
 import { UserConfig } from 'conf/domain/model/User';
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -8,10 +9,12 @@ import { userStorage } from 'core/domain/model/User/UserStorage';
 const parseUserConfiguration = userConfiguration => {
   Object.keys(userConfiguration).forEach(
     key =>
-      (userConfiguration[key] = !Array.isArray(userConfiguration[key])
-        ? [userConfiguration[key].toString()]
-        : !isEmpty(userConfiguration[key])
-        ? userConfiguration[key]
+      (userConfiguration[key] = !isUndefined(userConfiguration[key])
+        ? !Array.isArray(userConfiguration[key])
+          ? [userConfiguration[key].toString()]
+          : !isEmpty(userConfiguration[key])
+          ? userConfiguration[key]
+          : []
         : [])
   );
   return userConfiguration;

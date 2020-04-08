@@ -567,6 +567,8 @@
     "gdprSurname": "Surname",
     "gdprOrganisation": "Organisation",
     "dark": "Dark",
-    "light": "Light"
+    "light": "Light",
+    "uploadImage": "Upload your image",
+    "selectImage": "Select one"
   }
 }
