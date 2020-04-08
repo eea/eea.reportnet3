@@ -69,7 +69,7 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
    * @throws EEAException the EEA exception
    */
   @Override
-  public void execute(EEAEventVO eeaEventVO) throws EEAException {
+  public void execute(EEAEventVO eeaEventVO) {
     if (EventType.SPREAD_DATA_EVENT.equals(eeaEventVO.getEventType())) {
       String stringDataset = (String) eeaEventVO.getData().get("dataset_id");
       String idDatasetSchema = (String) eeaEventVO.getData().get("idDatasetSchema");
@@ -77,13 +77,15 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
       Long dataflowId = dataSetMetabaseRepository.findDataflowIdById(dataset);
       List<DesignDataset> designs = designDatasetRepository.findByDataflowId(dataflowId);
       boolean isdesing = false;
-      for (DesignDataset design : designs) {
-        if (design.getId().equals(dataset)) {
-          isdesing = true;
+      if (!designs.isEmpty()) {
+        for (DesignDataset design : designs) {
+          if (design.getId().equals(dataset)) {
+            isdesing = true;
+          }
         }
-      }
-      if (!isdesing) {
-        spreadData(designs, dataset, idDatasetSchema);
+        if (!isdesing) {
+          spreadData(designs, dataset, idDatasetSchema);
+        }
       }
     }
   }
@@ -108,7 +110,6 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
       List<RecordValue> recordDesignValues = new ArrayList<>();
 
       for (TableSchema desingTable : listOfTables) {
-        TenantResolver.getTenantName();
         recordDesignValues.addAll(
             recordRepository.findByTableValueAllRecords(desingTable.getIdTableSchema().toString()));
 

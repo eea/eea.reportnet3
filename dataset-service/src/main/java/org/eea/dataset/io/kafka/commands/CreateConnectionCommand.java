@@ -69,11 +69,11 @@ public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
           // First insert of the statistics
           datasetService.saveStatistics(idDataset);
 
-
           Map<String, Object> result = new HashMap<>();
           result.put("dataset_id", idDataset.toString());
           result.put("idDatasetSchema", idDatasetSchema);
-          kafkaSenderUtils.releaseKafkaEvent(EventType.SPREAD_DATA_EVENT, result);
+          sendEvent(result);
+
         } catch (EEAException e) {
           LOG_ERROR.error(
               "Error executing the processes after creating a new empty dataset. Error message: {}",
@@ -81,5 +81,15 @@ public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
         }
       }
     }
+  }
+
+  /**
+   * Send event spread Data to copy prefilled tables in reporting datasets and data collection.
+   *
+   * @param result the result
+   */
+  private void sendEvent(Map<String, Object> result) {
+    kafkaSenderUtils.releaseKafkaEvent(EventType.SPREAD_DATA_EVENT, result);
+
   }
 }
