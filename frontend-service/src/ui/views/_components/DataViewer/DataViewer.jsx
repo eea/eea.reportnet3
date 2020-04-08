@@ -99,13 +99,13 @@ const DataViewer = withRouter(
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
     const [selectedCellId, setSelectedCellId] = useState();
     //
-    const DefaultRowsPage = userContext.userProps.defaultRowSelected;
+
     //
     const [records, dispatchRecords] = useReducer(recordReducer, {
       editedRecord: {},
       fetchedDataFirstRecord: [],
       firstPageRecord: 0,
-      recordsPerPage: DefaultRowsPage,
+      recordsPerPage: userContext.userProps.defaultRowSelected,
       initialRecordValue: undefined,
       isAllDataDeleted: isDatasetDeleted,
       isRecordAdded: false,
@@ -188,6 +188,10 @@ const DataViewer = withRouter(
     //   inmLevelErrorTypesWithCorrects = inmLevelErrorTypesWithCorrects.concat(levelErrorTypes);
     //   setLevelErrorTypesWithCorrects(inmLevelErrorTypesWithCorrects);
     // }, [levelErrorTypes]);
+
+    useEffect(() => {
+      records.recordsPerPage = userContext.userProps.defaultRowSelected;
+    }, []);
 
     useEffect(() => {
       setLevelErrorValidations(levelErrorTypesWithCorrects);
@@ -546,7 +550,7 @@ const DataViewer = withRouter(
         sort.sortField,
         sort.sortOrder,
         records.firstPageRecord,
-        records.recordsPerPage,
+
         levelErrorValidations
       );
     };
