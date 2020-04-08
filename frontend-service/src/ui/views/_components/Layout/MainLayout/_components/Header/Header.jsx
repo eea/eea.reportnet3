@@ -1,13 +1,12 @@
-import React, { useContext, useState } from 'react';
-import { withRouter, Link } from 'react-router-dom';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { withRouter } from 'react-router-dom';
+import isEmpty from 'lodash/isEmpty';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import logo from 'assets/images/logo.png';
 import styles from './Header.module.scss';
-////////////////////////////////////////////
 
-//////////////////
 import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
@@ -22,14 +21,22 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { getUrl } from 'core/infrastructure/CoreUtils';
-import { Settings } from 'ui/views/Settings/Settings';
+
 const Header = withRouter(({ history }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const themeContext = useContext(ThemeContext);
 
+  const avatarImage = useRef();
+
   const [confirmvisible, setConfirmVisible] = useState(false);
+
+  useEffect(() => {
+    if (!isEmpty(userContext.userProps.userImage) && userContext.userProps.userImage.join('') !== '') {
+      onLoadImage();
+    }
+  }, [userContext.userProps.userImage]);
 
   const loadTitle = () => (
     <a
@@ -53,31 +60,28 @@ const Header = withRouter(({ history }) => {
     return false;
   };
 
-  const localThemeSwitch = (
-    isLocalEnvironment() && (
-      <InputSwitch
-        checked={themeContext.currentTheme === 'dark'}
-        onChange={e => {
-          themeContext.onToggleTheme(e.value ? 'dark' : 'light');
-        }}
-        sliderCheckedClassName={styles.themeSwitcherInputSwitch}
-        style={{ marginRight: '1rem' }}
-        tooltip={
-          themeContext.currentTheme === 'light'
-            ? resources.messages['toggleDarkTheme']
-            : resources.messages['toggleLightTheme']
-        }
-        tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
-      />
-    )
-  );
-
-  const localhostEnvironmentAlert = (
-    isLocalEnvironment() && (
+  const localhostEnvironmentAlert = isLocalEnvironment() && (
     <div className={styles.localhostAlert}>
       <FontAwesomeIcon icon={AwesomeIcons('localhostAlert')} title={resources.messages['localhostAlert']} />
     </div>
-    )
+  );
+
+  const themeSwitcher = (
+    <InputSwitch
+      checked={themeContext.currentTheme === 'dark'}
+      onChange={e => {
+        userContext.onToggleVisualTheme(e.value ? 'dark' : 'light');
+        themeContext.onToggleTheme(e.value ? 'dark' : 'light');
+      }}
+      sliderCheckedClassName={styles.themeSwitcherInputSwitch}
+      style={{ marginRight: '1rem' }}
+      tooltip={
+        themeContext.currentTheme === 'light'
+          ? resources.messages['toggleDarkTheme']
+          : resources.messages['toggleLightTheme']
+      }
+      tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
+    />
   );
 
   const userLogout = async () => {
@@ -102,10 +106,16 @@ const Header = withRouter(({ history }) => {
         e.preventDefault();
         history.push(getUrl(routes.SETTINGS));
       }}>
-      <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />{' '}
+      <img
+        ref={avatarImage}
+        icon={<FontAwesomeIcon icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />}
+        // src={}
+        className={styles.userAvatar}
+      />
+      {/* <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />{' '} */}
       <span>{userContext.preferredUsername}</span>
     </a>
-  )
+  );
 
   const logout = (
     <div className={styles.logoutWrapper}>
@@ -117,18 +127,29 @@ const Header = withRouter(({ history }) => {
         icon={AwesomeIcons('logout')}
       />
     </div>
-  )
+  );
 
   const loadUser = () => (
     <>
       <div className={styles.userWrapper}>
-        {localThemeSwitch}
+        {themeSwitcher}
         {localhostEnvironmentAlert}
         {userProfileSettingsButton}
-        {logout}
       </div>
+
+      <div className={styles.logoutWrapper}>{logout}</div>
     </>
   );
+
+  const onLoadImage = () => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const { current } = avatarImage;
+    current.onload = function () {
+      ctx.drawImage(current, 0, 0);
+    };
+    current.src = userContext.userProps.userImage.join('');
+  };
 
   return (
     <div id="header" className={styles.header}>

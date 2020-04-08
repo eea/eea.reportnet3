@@ -6,9 +6,6 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 const themeReducer = (state, { type, payload }) => {
   switch (type) {
     case 'TOGGLE_THEME':
-      if (typeof Storage !== 'undefined') {
-        localStorage.setItem('theme', payload.newTheme);
-      }
       return {
         ...state,
         currentTheme: payload.newTheme
@@ -29,9 +26,7 @@ export const ThemeProvider = ({ children }) => {
   const userContext = useContext(UserContext);
 
   const [state, dispatch] = useReducer(themeReducer, {
-    currentTheme: !isNull(window.localStorage.getItem('theme'))
-      ? window.localStorage.getItem('theme')
-      : window.localStorage.setItem('theme', 'light'),
+    currentTheme: userContext.userProps.visualTheme,
     themes: {
       light: {
         bg: 'var(--white)',
@@ -576,7 +571,7 @@ export const ThemeProvider = ({ children }) => {
             const cssValue = theme[key];
             document.body.style.setProperty(cssKey, cssValue);
           });
-          userContext.defaultVisualTheme(newTheme);
+          userContext.onToggleVisualTheme(newTheme);
         }
       }}>
       {children}

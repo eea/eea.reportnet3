@@ -29,22 +29,31 @@ const UserConfiguration = props => {
     <div className={styles.userConfigurationContainer}>
       <div className={styles.userConfirmLogout}>
         <h3>{resources.messages['userThemeSelection']}</h3>
+        <div className={styles.switchDiv}>
           <span className={styles.switchTextInput}>{resources.messages['light']}</span>
           <InputSwitch
-            checked={themeContext.currentTheme === 'dark'}
-            onChange={e => {
-              themeContext.onToggleTheme(e.value ? 'dark' : 'light');
+            checked={userContext.userProps.visualTheme === 'dark'}
+            onChange={async e => {
+              const inmUserProperties = { ...userContext.userProps };
+              inmUserProperties.visualTheme = e.value ? 'dark' : 'light';
+              const response = await changeUserProperties(inmUserProperties);
+              if (response.status >= 200 && response.status <= 299) {
+                console.log(e.value);
+                themeContext.onToggleTheme(e.value ? 'dark' : 'light');
+                userContext.onToggleVisualTheme(e.value ? 'dark' : 'light');
+              }
             }}
             sliderCheckedClassName={styles.themeSwitcherInputSwitch}
             style={{ marginRight: '1rem' }}
             tooltip={
-              themeContext.currentTheme === 'light'
+              userContext.userProps.visualTheme === 'light'
                 ? resources.messages['toggleDarkTheme']
                 : resources.messages['toggleLightTheme']
             }
             tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
           />
           <span className={styles.switchTextInput}>{resources.messages['dark']}</span>
+        </div>
       </div>
       <div className={styles.userConfirmLogout}>
         <div>
@@ -76,14 +85,14 @@ const UserConfiguration = props => {
           options={resources.userParameters['defaultRowsPage']}
           onChange={async e => {
             const inmUserProperties = { ...userContext.userProps };
-            inmUserProperties.defaultRowSelected = e.target.value;
+            inmUserProperties.rowsPerPage = e.target.value;
             const response = await changeUserProperties(inmUserProperties);
             if (response.status >= 200 && response.status <= 299) {
-              userContext.defaultRowSelected(e.target.value);
+              userContext.onChangeRowsPerPage(e.target.value);
             }
           }}
           placeholder="select"
-          value={userContext.userProps.defaultRowSelected}
+          value={userContext.userProps.rowsPerPage}
         />
       </div>
       <div className={styles.userConfirmLogout}>
@@ -97,7 +106,7 @@ const UserConfiguration = props => {
             inmUserProperties.dateFormat = e.target.value;
             const response = await changeUserProperties(inmUserProperties);
             if (response.status >= 200 && response.status <= 299) {
-              userContext.dateFormat(e.target.value);
+              userContext.onChangeDateFormat(e.target.value);
             }
           }}
           placeholder="select"

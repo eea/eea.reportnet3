@@ -6,8 +6,8 @@ import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 const userSettingsDefaultState = {
   userProps: {
-    defaultRowSelected: 10,
-    defaultVisualTheme: 'light',
+    rowsPerPage: 10,
+    visualTheme: 'light',
     showLogoutConfirmation: true,
     userImage: [],
     dateFormat: 'MM-DD-YYYY'
@@ -46,7 +46,7 @@ const userReducer = (state, { type, payload }) => {
         ...state,
         userProps: {
           ...state.userProps,
-          defaultRowSelected: payload
+          rowsPerPage: payload
         }
       };
     case 'DATE_FORMAT':
@@ -62,7 +62,15 @@ const userReducer = (state, { type, payload }) => {
         ...state,
         userProps: {
           ...state.userProps,
-          defaultVisualTheme: payload
+          visualTheme: payload
+        }
+      };
+    case 'SETTINGS_LOADED':
+      return {
+        ...state,
+        userProps: {
+          ...state.userProps,
+          settingsLoaded: payload
         }
       };
     case 'USER_AVATAR_IMAGE':
@@ -113,13 +121,13 @@ export const UserProvider = ({ children }) => {
             }
           });
         },
-        defaultRowSelected: rowNumber => {
+        onChangeRowsPerPage: rowNumber => {
           userDispatcher({
             type: 'DEFAULT_ROW_SELECTED',
             payload: rowNumber
           });
         },
-        dateFormat: dateFormat => {
+        onChangeDateFormat: dateFormat => {
           userDispatcher({ type: 'DATE_FORMAT', payload: dateFormat });
         },
         onTokenRefresh: user => {
@@ -136,10 +144,16 @@ export const UserProvider = ({ children }) => {
             payload: logoutConf
           });
         },
-        defaultVisualTheme: currentTheme => {
+        onToggleVisualTheme: currentTheme => {
           userDispatcher({
             type: 'DEFAULT_VISUAL_THEME',
             payload: currentTheme
+          });
+        },
+        onToggleSettingsLoaded: settingsLoaded => {
+          userDispatcher({
+            type: 'SETTINGS_LOADED',
+            payload: settingsLoaded
           });
         },
         onUserFileUpload: base64Image => {

@@ -46,6 +46,7 @@ const Settings = withRouter(({ history }) => {
         command: () => history.push(getUrl(routes.SETTINGS))
       }
     ]);
+    leftSideBarContext.addModels([]);
   }, []);
 
   const renderUserOptions = () => {

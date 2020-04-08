@@ -56,8 +56,8 @@ const parseConfigurationDTO = userConfigurationDTO => {
     userConfigurationDTO.showLogoutConfirmation[0] === 'false'
       ? (userConfiguration.defaultLogoutConfirmation = false)
       : (userConfiguration.defaultLogoutConfirmation = true);
-  userConfiguration.defaultRowsNumber = userConfigurationDTO.defaultRowSelected[0];
-  userConfiguration.theme = userConfigurationDTO.defaultVisualTheme[0];
+  userConfiguration.defaultRowsNumber = userConfigurationDTO.rowsPerPage[0];
+  userConfiguration.theme = userConfigurationDTO.visualTheme[0];
   userConfiguration.userImage = userConfigurationDTO.userImage;
   return userConfiguration;
 };

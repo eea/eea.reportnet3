@@ -105,7 +105,7 @@ const DataViewer = withRouter(
       editedRecord: {},
       fetchedDataFirstRecord: [],
       firstPageRecord: 0,
-      recordsPerPage: userContext.userProps.defaultRowSelected,
+      recordsPerPage: userContext.userProps.rowsPerPage,
       initialRecordValue: undefined,
       isAllDataDeleted: isDatasetDeleted,
       isRecordAdded: false,
@@ -190,7 +190,7 @@ const DataViewer = withRouter(
     // }, [levelErrorTypes]);
 
     useEffect(() => {
-      records.recordsPerPage = userContext.userProps.defaultRowSelected;
+      records.recordsPerPage = userContext.userProps.rowsPerPage;
     }, []);
 
     useEffect(() => {
