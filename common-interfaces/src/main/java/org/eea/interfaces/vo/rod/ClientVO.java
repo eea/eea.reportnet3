@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The type Client vo.
+ */
 @Getter
 @Setter
 @ToString

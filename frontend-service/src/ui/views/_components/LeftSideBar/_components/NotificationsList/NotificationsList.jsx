@@ -23,6 +23,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   const [firstRow, setFirstRow] = useState(0);
   const [sortField, setSortField] = useState('');
   const [sortOrder, setSortOrder] = useState(0);
+
   useEffect(() => {
     const headers = [
       {
@@ -34,8 +35,11 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         header: resources.messages['notificationLevel']
       }
     ];
+
     let columnsArray = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={col.header} />);
+
     setColumns(columnsArray);
+
     const notificationsArray = notificationContext.all.map(notification => {
       const message = sanitizeHtml(notification.message, {
         allowedTags: [],
@@ -56,10 +60,12 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     console.info('notifications: %o', notificationsArray);
     setNotifications(notificationsArray);
   }, [notificationContext]);
+
   const onChangePage = event => {
     setNumberRows(event.rows);
     setFirstRow(event.first);
   };
+
   return (
     <Dialog
       className="edit-table"

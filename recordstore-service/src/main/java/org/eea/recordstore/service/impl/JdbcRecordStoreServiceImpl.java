@@ -613,7 +613,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void deleteDataset(String datasetSchemaName) {
-    StringBuilder stringBuilder = new StringBuilder("DROP SCHEMA ");
+    StringBuilder stringBuilder = new StringBuilder("DROP SCHEMA IF EXISTS ");
     stringBuilder.append(datasetSchemaName).append(" CASCADE");
     jdbcTemplate.execute(stringBuilder.toString());
   }

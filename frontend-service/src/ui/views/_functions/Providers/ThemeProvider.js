@@ -272,7 +272,15 @@ export const ThemeProvider = ({ children }) => {
         'chips-token-color': 'var(--white)',
         'listbox-item-highlight-bg': 'var(--c-corporate-blue)',
         'listbox-item-highlight-bg-hover': 'var(--gray-10)',
-        'listbox-item-highlight-color': 'var(--white)'
+        'listbox-item-highlight-color': 'var(--white)',
+        'card-item-bg': 'var(--bg)',
+        'card-item-box-shadow': ' 0 1px 3px rgba(0, 0, 0, 0.20), 0 1px 2px rgba(0, 0, 0, 0.40)',
+        'card-item-box-shadow-hover': '0 10px 20px rgba(0, 0, 0, 0.21), 0 6px 6px rgba(0, 0, 0, 0.25)',
+        'tooltip-body-bg': 'var(--gray-110)',
+        'tooltip-body-color': 'var(--white)',
+        'tooltip-body-border-color': 'var(--gray-110)',
+        'tooltip-arrow-border-color': 'var(--gray-110)',
+        'tooltip-arrow-bg': 'var(--gray-110)'
       },
       dark: {
         bg: 'var(--c-dark-blue)',
@@ -459,7 +467,7 @@ export const ThemeProvider = ({ children }) => {
         'button-secondary-transparent-color-active': 'var(--white)',
         'button-secondary-transparent-box-shadow-focus': ' 0 0 0 0.2em var(--gray-25)',
         'button-secondary-transparent-border-color-active': 'var(--gray-25)',
-        'toolbar-border': '1px solid var(--c-dark-blue)',
+        'toolbar-border': '1px solid var(--gray-25)',
         'chart-bg': 'var(--bg)',
         'chart-color': 'var(--main-font-color)',
         'multiselect-bg': 'var(--c-dark-blue)',
@@ -525,7 +533,15 @@ export const ThemeProvider = ({ children }) => {
         'chips-token-color': 'var(--white)',
         'listbox-item-highlight-bg': 'var(--c-corporate-yellow)',
         'listbox-item-highlight-bg-hover': 'var(--gray-110)',
-        'listbox-item-highlight-color': 'var(--black)'
+        'listbox-item-highlight-color': 'var(--black)',
+        'card-item-bg': 'var(--c-dark-blue)',
+        'card-item-box-shadow': ' 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.6)',
+        'card-item-box-shadow-hover': '0 10px 20px rgba(0, 0, 0, 0.29), 0 6px 6px rgba(0, 0, 0, 0.33)',
+        'tooltip-body-bg': 'var(--gray-110)',
+        'tooltip-body-color': 'var(--white)',
+        'tooltip-body-border-color': 'var(--white)',
+        'tooltip-arrow-border-color': 'var(--white)',
+        'tooltip-arrow-bg': 'var(--gray-110)'
       }
     }
   });

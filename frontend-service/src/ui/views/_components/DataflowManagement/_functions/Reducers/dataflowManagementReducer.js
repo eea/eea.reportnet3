@@ -1,0 +1,18 @@
+export const dataflowManagementReducer = (state, { type, payload }) => {
+  switch (type) {
+    case 'INITIAL_LOAD':
+      return { ...state, ...payload };
+
+    case 'ON_LOAD_DATA':
+      return { ...state, name: payload.name, description: payload.description };
+
+    case 'ON_LOAD_OBLIGATION':
+      return { ...state, obligation: { id: payload.id, title: payload.title } };
+
+    case 'RESET_STATE':
+      return (state = payload.initialData);
+
+    default:
+      return state;
+  }
+};

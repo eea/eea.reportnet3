@@ -411,7 +411,8 @@ export const Dataset = withRouter(({ match, history }) => {
             name: tableSchema['tableSchemaName'],
             hasErrors: {
               ...datasetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
-            }.hasErrors
+            }.hasErrors,
+            readOnly: tableSchema['tableSchemaReadOnly']
           };
         })
       );
@@ -562,7 +563,7 @@ export const Dataset = withRouter(({ match, history }) => {
           <div className="p-toolbar-group-left">
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
-                !hasWritePermissions ? null : 'p-button-animated-upload'
+                !hasWritePermissions ? null : 'p-button-animated-blink'
               }`}
               disabled={!hasWritePermissions}
               icon={loadingFile ? 'spinnerAnimate' : 'import'}
@@ -580,7 +581,7 @@ export const Dataset = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
-                !hasWritePermissions || isWebFormMMR || !datasetHasData ? null : 'p-button-animated-blink'
+                !hasWritePermissions || isWebFormMMR ? null : 'p-button-animated-blink'
               }`}
               icon={'trash'}
               label={resources.messages['deleteDatasetData']}

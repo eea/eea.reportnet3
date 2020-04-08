@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 /**
  * The interface Issue feign repository.
  */
-@FeignClient(name = "rodIssueInterface", url = "${rod.url}", path = "/rest/country")
+@FeignClient(name = "rodIssueInterface", url = "${rod.url}", path = "/rest/issue")
 public interface IssueFeignRepository {
 
 

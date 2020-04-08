@@ -1,6 +1,7 @@
 import findIndex from 'lodash/findIndex';
 import pullAllWith from 'lodash/pullAllWith';
 import isEqual from 'lodash/isEqual';
+import isNil from 'lodash/isNil';
 
 import { getEmptyExpression } from './getEmptyExpression';
 
@@ -21,15 +22,18 @@ export const groupExpressions = (expressions, groupExpressionsActive, groupCandi
     // compose group expression
     const newGroup = getEmptyExpression();
     const [firstGroupExpression] = expressionsToGroup;
-    newGroup.union = firstGroupExpression.union;
-    newGroup.expressions = expressionsToGroup;
+    if (!isNil(firstGroupExpression)) {
+      newGroup.union = firstGroupExpression.union;
+      newGroup.expressions = expressionsToGroup;
 
-    // add to expressions in the order of the first expressions involved
-    expressions.splice(firstexpressionPosition, 0, newGroup);
+      // add to expressions in the order of the first expressions involved
+      expressions.splice(firstexpressionPosition, 0, newGroup);
 
-    //remove grouped elements from expressions array
-    pullAllWith(expressions, expressionsToGroup, isEqual);
+      //remove grouped elements from expressions array
+      pullAllWith(expressions, expressionsToGroup, isEqual);
 
-    return { expressions, newGroup };
+      return { expressions, newGroup };
+    }
+    return { expressions };
   }
 };

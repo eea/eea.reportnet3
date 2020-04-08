@@ -137,7 +137,6 @@ const Documents = ({
       const filteredAllDocuments = inmAllDocuments.filter(document => document.id !== documentData.id);
       setAllDocuments(filteredAllDocuments);
     } catch (error) {
-      console.log({ error });
       notificationContext.add({
         type: 'DELETE_DOCUMENT_ERROR',
         content: {}
@@ -190,7 +189,7 @@ const Documents = ({
         <Toolbar className={styles.documentsToolbar}>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-upload dataflowHelp-document-upload-help-step`}
+              className={`p-button-rounded p-button-secondary-transparent dataflowHelp-document-upload-help-step`}
               icon={'upload'}
               label={resources.messages['upload']}
               onClick={() => {
