@@ -26,6 +26,7 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dropdown } from 'ui/views/_components/Dropdown';
+import { Spinner } from 'ui/views/_components/Spinner';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -80,10 +81,8 @@ const RepresentativesList = ({
   }, [formState.representativeHasError]);
 
   useEffect(() => {
-    if (!isEmpty(formState.representatives) && formState.representatives.length > 1) {
-      setFormHasRepresentatives(true);
-    } else {
-      setFormHasRepresentatives(false);
+    if (!isEmpty(formState.representatives)) {
+      setFormHasRepresentatives(formState.representatives.length > 1);
     }
   }, [formState.representatives]);
 
@@ -186,6 +185,8 @@ const RepresentativesList = ({
       />
     );
   };
+
+  if (isEmpty(formState.representatives)) return <Spinner style={{ top: 0 }} />;
 
   return (
     <div className={styles.container}>
