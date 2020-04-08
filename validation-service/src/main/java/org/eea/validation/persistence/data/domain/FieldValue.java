@@ -1,5 +1,7 @@
 package org.eea.validation.persistence.data.domain;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.CascadeType;
@@ -19,9 +21,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-/**
- * The Class FieldValue.
- */
+/** The Class FieldValue. */
 @Entity
 @Getter
 @Setter
@@ -29,11 +29,7 @@ import lombok.ToString;
 @Table(name = "FIELD_VALUE")
 public class FieldValue {
 
-
-
-  /**
-   * The id.
-   */
+  /** The id. */
   @Id
   @SequenceGenerator(name = "field_sequence_generator", sequenceName = "field_sequence",
       allocationSize = 1)
@@ -41,35 +37,24 @@ public class FieldValue {
   @Column(name = "ID", columnDefinition = "serial")
   private String id;
 
-  /**
-   * The type.
-   */
+  /** The type. */
   @Column(name = "TYPE")
   private String type;
 
-  /**
-   * The value.
-   */
+  /** The value. */
   @Column(name = "VALUE")
   private String value;
 
-  /**
-   * The id header.
-   */
+  /** The id header. */
   @Column(name = "ID_FIELD_SCHEMA")
   private String idFieldSchema;
 
-  /**
-   * The record.
-   */
+  /** The record. */
   @ManyToOne
   @JoinColumn(name = "ID_RECORD")
   private RecordValue record;
 
-
-  /**
-   * The field validations.
-   */
+  /** The field validations. */
   @OneToMany(mappedBy = "fieldValue",
       cascade = {CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, orphanRemoval = false)
   private List<FieldValidation> fieldValidations;
@@ -77,6 +62,9 @@ public class FieldValue {
   /** The level error. */
   @Transient
   private ErrorTypeEnum levelError;
+
+  /** The Constant DATE_FORMAT. */
+  private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
   /**
    * Hash code.
@@ -118,4 +106,81 @@ public class FieldValue {
         && idFieldSchema.equals(field.idFieldSchema) && record.equals(field.record);
   }
 
+  /**
+   * Equal date used by drools. Value must not be null.
+   *
+   * @param date the date, not null
+   * @return true, if passes the validation
+   */
+  public boolean equalDate(String date) {
+    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+
+    return fieldDate.equals(ruleDate);
+  }
+
+  /**
+   * Distinct date used by drools. Value must not be null.
+   *
+   * @param date the date, not null
+   * @return true, if passes the validation
+   */
+  public boolean distinctDate(String date) {
+    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+
+    return !fieldDate.equals(ruleDate);
+  }
+
+  /**
+   * Greater than date used by drools. Value must not be null.
+   *
+   * @param date the date, not null
+   * @return true, if passes the validation
+   */
+  public boolean greaterThanDate(String date) {
+    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+
+    return fieldDate.isAfter(ruleDate);
+  }
+
+  /**
+   * Less than date used by drools. Value must not be null.
+   *
+   * @param date the date, not null
+   * @return true, if passes the validation
+   */
+  public boolean lessThanDate(String date) {
+    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+
+    return fieldDate.isBefore(ruleDate);
+  }
+
+  /**
+   * Greater than or equals than date used by drools. Value must not be null.
+   *
+   * @param date the date, not null
+   * @return true, if passes the validation
+   */
+  public boolean greaterThanOrEqualsThanDate(String date) {
+    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+
+    return fieldDate.isAfter(ruleDate) || fieldDate.equals(ruleDate);
+  }
+
+  /**
+   * Less than or equals than date used by drools. Value must not be null.
+   *
+   * @param date the date, not null
+   * @return true, if passes the validation
+   */
+  public boolean lessThanOrEqualsThanDate(String date) {
+    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+
+    return fieldDate.isBefore(ruleDate) || fieldDate.equals(ruleDate);
+  }
 }

@@ -30,6 +30,7 @@ import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
 import org.kie.internal.utils.KieHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
@@ -187,13 +188,14 @@ public class KieBaseManager {
   }
 
   /**
-   * Text rule correct and if that rule is ok we can create it.
+   * Text rule and put disable if is the rule have not correct format
    *
    * @param datasetSchemaId the dataset schema id
    * @param rule the rule
    *
    * @return true, if successful
    */
+  @Async
   public void textRuleCorrect(String datasetSchemaId, Rule rule) {
 
     KieServices kieServices = KieServices.Factory.get();
@@ -271,6 +273,8 @@ public class KieBaseManager {
     // will not be created
     if (results.hasMessages(Message.Level.ERROR)) {
       rule.setEnabled(Boolean.FALSE);
+      rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+
     }
   }
 
