@@ -4,14 +4,37 @@
     padding-left: 0;
     .expression {
       display: flex;
+      flex-direction: column;
       justify-content: flex-start;
-      > span {
-        margin-right: 1rem;
-        &:first-of-type {
+      .groupRow {
+        display: flex;
+        justify-content: flex-start;
+        > span {
+          margin-right: 1rem;
+          &:first-of-type {
+            margin-right: 2rem;
+          }
+          &:last-of-type {
+            margin-right: 0;
+          }
+        }
+        .group {
           margin-right: 2rem;
         }
-        &:last-of-type {
-          margin-right: 0;
+        .union {
+          width: 80px;
+          :global .p-dropdown {
+            width: 100%;
+          }
+        }
+      }
+      .groupExpressions {
+        > span {
+          > ul {
+            padding-left: 0px;
+            margin-left: 3.1rem;
+            margin-top: 1rem;
+          }
         }
       }
     }

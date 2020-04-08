@@ -447,14 +447,8 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
             </div>
           </div>
           <div className={styles.section}>
+            <h2>Rule expressions</h2>
             <ul>
-              <li className={styles.expressionsHeader}>
-                <span>{resourcesContext.messages.group}</span>
-                <span>{resourcesContext.messages.andor}</span>
-                <span>{resourcesContext.messages.operatorType}</span>
-                <span>{resourcesContext.messages.operator}</span>
-                <span>{resourcesContext.messages.value}</span>
-              </li>
               {creationFormState.candidateRule.expressions &&
                 creationFormState.candidateRule.expressions.map((expression, i) => (
                   <ValidationExpressionSelector
@@ -469,9 +463,22 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                 ))}
             </ul>
           </div>
-
-          {creationFormState.groupExpressionsActive >= 2 && (
-            <div className={styles.section}>
+          <div className={`${styles.section} ${styles.actionsButtons}`}>
+            <Button
+              id={`${componentName}__addExpresion`}
+              disabled={creationFormState.isRuleAddingDisabled}
+              className="p-button-primary p-button-text-icon-left"
+              type="button"
+              label={resourcesContext.messages.addNewRule}
+              icon="plus"
+              onClick={e =>
+                creationFormDispatch({
+                  type: 'ADD_EMPTY_RULE',
+                  payload: getEmptyExpression()
+                })
+              }
+            />
+            {creationFormState.groupExpressionsActive >= 2 && (
               <Button
                 id={`${componentName}__groupExpresions`}
                 className="p-button-primary p-button-text"
@@ -494,8 +501,9 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                     });
                 }}
               />
-            </div>
-          )}
+            )}
+          </div>
+
           <div className={styles.section}>
             <textarea
               name=""
@@ -508,22 +516,6 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
         </div>
         <div className={styles.footer}>
           <div className={`${styles.section} ${styles.footerToolBar}`}>
-            <div className={styles.subsection}>
-              <Button
-                id={`${componentName}__addExpresion`}
-                disabled={creationFormState.isRuleAddingDisabled}
-                className="p-button-primary p-button-text-icon-left"
-                type="button"
-                label={resourcesContext.messages.addNewRule}
-                icon="plus"
-                onClick={e =>
-                  creationFormDispatch({
-                    type: 'ADD_EMPTY_RULE',
-                    payload: getEmptyExpression()
-                  })
-                }
-              />
-            </div>
             <div className={styles.subsection}>
               {validationContext.ruleEdit ? (
                 <Button
