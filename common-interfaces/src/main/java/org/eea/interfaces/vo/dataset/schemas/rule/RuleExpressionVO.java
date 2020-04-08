@@ -355,8 +355,8 @@ public class RuleExpressionVO implements Serializable {
         continue;
       }
 
-      // Keyword 'value' match: Transform to keyword 'VALUE'
-      if (actual.equals("value")) {
+      // Keywords 'value' or 'this' match: Transform to keyword 'VALUE'
+      if (actual.equals("value") || actual.equals("this")) {
         args.add("VALUE");
         index++;
         continue;
@@ -466,6 +466,8 @@ public class RuleExpressionVO implements Serializable {
   public String toString() {
     if (operator != null) {
       switch (operator) {
+        case NOT:
+          return operator.getLabel() + "(" + arg1 + ")";
         case EQ:
         case DIST:
         case GT:
@@ -475,14 +477,19 @@ public class RuleExpressionVO implements Serializable {
         case AND:
         case OR:
           return toStringBranch(arg1) + " " + operator.getLabel() + " " + toStringBranch(arg2);
-        case NOT:
-          return operator.getLabel() + "(" + arg1 + ")";
         case LEN:
           return "value." + operator.getLabel() + "()";
         case SEQ:
         case SEQIC:
         case MATCH:
           return "value." + operator.getLabel() + "(" + toStringBranch(arg2) + ")";
+        case EQ_DATE:
+        case DIST_DATE:
+        case GT_DATE:
+        case LT_DATE:
+        case GTEQ_DATE:
+        case LTEQ_DATE:
+          return "this." + operator.getLabel() + "(" + toStringBranch(arg2) + ")";
       }
     }
 

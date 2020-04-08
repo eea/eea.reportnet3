@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -64,7 +65,7 @@ const all = async userData => {
 
   const dataflowsData = groupByUserRequesetStatus(dataflows);
 
-  const allDataflows = DataflowConf.userRequestStatus;
+  const allDataflows = cloneDeep(DataflowConf.userRequestStatus);
   Object.keys(dataflowsData).forEach(key => {
     allDataflows[key.toLowerCase()] = parseDataflowDTOs(dataflowsData[key]);
   });

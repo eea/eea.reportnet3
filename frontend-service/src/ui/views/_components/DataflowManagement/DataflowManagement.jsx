@@ -70,33 +70,37 @@ export const DataflowManagement = ({
 
   return (
     <Fragment>
-      <Dialog
-        footer={dialogFooter}
-        header={resources.messages['reportingObligations']}
-        onHide={() => onManageDialogs('isRepObDialogVisible', false, isDialogVisible, true)}
-        style={{ width: '95%' }}
-        visible={state.isRepObDialogVisible}>
-        <ReportingObligations getObligation={onLoadObligation} oblChecked={dataflowManagementState.obligation} />
-      </Dialog>
+      {state.isRepObDialogVisible && (
+        <Dialog
+          footer={dialogFooter}
+          header={resources.messages['reportingObligations']}
+          onHide={() => onManageDialogs('isRepObDialogVisible', false, isDialogVisible, true)}
+          style={{ width: '95%' }}
+          visible={state.isRepObDialogVisible}>
+          <ReportingObligations getObligation={onLoadObligation} oblChecked={dataflowManagementState.obligation} />
+        </Dialog>
+      )}
 
-      <Dialog
-        className={styles.dialog}
-        header={resources.messages[isEditForm ? 'updateDataflow' : 'createNewDataflow']}
-        onHide={() => onManageDialogs(isDialogVisible, false)}
-        visible={state.isAddDialogVisible || state.isEditDialogVisible}>
-        <DataflowManagementForm
-          data={dataflowManagementState}
-          dataflowId={dataflowId}
-          getData={onLoadData}
-          isEditForm={isEditForm}
-          onCancel={() => onManageDialogs(isDialogVisible, false)}
-          onCreate={onCreateDataflow}
-          onEdit={onEditDataflow}
-          onResetData={onResetData}
-          onSearch={() => onManageDialogs('isRepObDialogVisible', true, isDialogVisible, false)}
-          refresh={isEditForm ? state.isEditDialogVisible : state.isAddDialogVisible}
-        />
-      </Dialog>
+      {(state.isAddDialogVisible || state.isEditDialogVisible) && (
+        <Dialog
+          className={styles.dialog}
+          header={resources.messages[isEditForm ? 'updateDataflow' : 'createNewDataflow']}
+          onHide={() => onManageDialogs(isDialogVisible, false)}
+          visible={state.isAddDialogVisible || state.isEditDialogVisible}>
+          <DataflowManagementForm
+            data={dataflowManagementState}
+            dataflowId={dataflowId}
+            getData={onLoadData}
+            isEditForm={isEditForm}
+            onCancel={() => onManageDialogs(isDialogVisible, false)}
+            onCreate={onCreateDataflow}
+            onEdit={onEditDataflow}
+            onResetData={onResetData}
+            onSearch={() => onManageDialogs('isRepObDialogVisible', true, isDialogVisible, false)}
+            refresh={isEditForm ? state.isEditDialogVisible : state.isAddDialogVisible}
+          />
+        </Dialog>
+      )}
     </Fragment>
   );
 };
