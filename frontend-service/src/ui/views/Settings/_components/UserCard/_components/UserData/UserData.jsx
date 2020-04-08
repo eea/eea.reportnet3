@@ -22,7 +22,7 @@ const UserData = () => {
 
       <div className={styles.userMail}>{userContext.preferredUsername}@reportnet.net</div>
 
-      <div className={`${styles.FooterExpanded} ${styles.Footer}`}>
+      <div>
         <a
           type="button"
           disabled
