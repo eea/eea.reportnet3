@@ -151,16 +151,6 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
             ? 'flex-start'
             : 'space-between'
       }}>
-      <div className={styles.filters}>
-        <Filters
-          data={reportingObligationState.data}
-          dateOptions={ObligationConf.filterItems['date']}
-          dropDownList={parsedFilterList}
-          dropdownOptions={ObligationConf.filterItems['dropdown']}
-          filterByList={reportingObligationState.filterBy}
-          sendData={onLoadReportingObligations}
-        />
-      </div>
       <div className={styles.repOblTools}>
         <SearchAll
           data={reportingObligationState.filteredData}
@@ -173,6 +163,18 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
           <label className={styles.switchTextInput}>{resources.messages['listView']}</label>
         </div>
       </div>
+
+      <div className={styles.filters}>
+        <Filters
+          data={reportingObligationState.data}
+          dateOptions={ObligationConf.filterItems['date']}
+          dropDownList={parsedFilterList}
+          dropdownOptions={ObligationConf.filterItems['dropdown']}
+          filterByList={reportingObligationState.filterBy}
+          sendData={onLoadReportingObligations}
+        />
+      </div>
+
       {reportingObligationState.isLoading ? (
         <Spinner style={{ top: 0, left: 0 }} />
       ) : isEmpty(reportingObligationState.data) ? (

@@ -272,29 +272,30 @@ export const Filters = ({
       {dropdownOptions && dropdownOptions.map(option => renderDropdown(option))}
       {dateOptions && dateOptions.map(option => renderCalendarFilter(option))}
 
-      {sendData ? (
-        <Button
-          className="p-button-animated-blink"
-          icon="filter"
-          onClick={() => sendData(filterState.filterBy)}
-          tooltip={resources.messages['applyFilters']}
-          tooltipOptions={{ position: 'bottom' }}
-        />
-      ) : (
-        <Fragment />
-      )}
+      <div className={styles.buttonWrapper} style={{ width: sendData ? 'inherit' : '' }}>
+        {sendData ? (
+          <Button
+            className={`p-button-animated-blink ${styles.sendButton}`}
+            icon="filter"
+            label={resources.messages['applyFilters']}
+            onClick={() => sendData(filterState.filterBy)}
+          />
+        ) : (
+          <Fragment />
+        )}
 
-      {(inputOptions || selectOptions || dateOptions) && (
-        <Button
-          className={`${
-            sendData ? 'p-button-secondary' : 'p-button-secondary-icon-only'
-          } p-button-rounded  p-button-animated-blink`}
-          icon="cancel"
-          onClick={() => onClearAllFilters()}
-          tooltip={resources.messages['clearFilters']}
-          tooltipOptions={{ position: 'bottom' }}
-        />
-      )}
+        {(inputOptions || selectOptions || dateOptions) && (
+          <Button
+            className={`${
+              sendData ? 'p-button-secondary' : 'p-button-secondary'
+            } p-button-rounded  p-button-animated-blink`}
+            icon="undo"
+            onClick={() => onClearAllFilters()}
+            label={resources.messages['reset']}
+            style={{ marginLeft: sendData ? '1rem' : '' }}
+          />
+        )}
+      </div>
     </div>
   );
 };
