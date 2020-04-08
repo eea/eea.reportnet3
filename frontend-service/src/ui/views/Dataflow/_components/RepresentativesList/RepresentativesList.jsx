@@ -212,7 +212,7 @@ const RepresentativesList = ({
         <DataTable
           value={
             formState.representatives.length > formState.allPossibleDataProvidersNoSelect.length
-              ? formState.representatives.filter(representative => representative.representativeId !== null)
+              ? formState.representatives.filter(representative => !isNil(representative.representativeId))
               : formState.representatives
           }>
           <Column
