@@ -48,20 +48,6 @@ const Settings = withRouter(({ history }) => {
     ]);
   }, []);
 
-  useEffect(() => {
-    leftSideBarContext.addModels([
-      {
-        icon: 'info',
-        label: 'PRIVACY',
-        onClick: e => {
-          e.preventDefault();
-          history.push(getUrl(routes['PRIVACY_STATEMENT']));
-        },
-        title: 'User Configuration Options'
-      }
-    ]);
-  }, []);
-
   const renderUserOptions = () => {
     return (
       <>

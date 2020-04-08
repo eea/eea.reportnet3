@@ -26,7 +26,7 @@ const PrivacyStatement = withRouter(({ history }) => {
         command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
-        label: resources.messages['privacyStatement'],
+        label: resources.messages['privacyPolicy'],
         icon: 'info',
         href: getUrl(routes.PRIVACY_STATEMENT),
         command: () => history.push(getUrl(routes.PRIVACY_STATEMENT))
@@ -55,10 +55,10 @@ const PrivacyStatement = withRouter(({ history }) => {
     <div className="rep-row">
       <div className={` rep-col-12 rep-col-sm-12`}>
         <Title
-          title={resources.messages['PrivacyStatementTitle']}
+          title={resources.messages['PrivacyPolicyTitle']}
           icon="info"
           iconSize="4rem"
-          subtitle={resources.messages['PrivacyStatementSubtitle']}
+          subtitle={resources.messages['PrivacyPolicySubtitle']}
         />
 
         <div className={styles.sectionMainContent}>

@@ -10,7 +10,7 @@ export const routes = {
   DATASET: '/dataflow/:dataflowId/dataset/:datasetId',
   DATASET_SCHEMA: '/dataflow/:dataflowId/datasetSchema/:datasetId',
   DOCUMENTS: '/dataflow/:dataflowId/documents',
-  PRIVACY_STATEMENT: '/privacyStatement',
+  PRIVACY_STATEMENT: '/privacyPolicy',
   REPRESENTATIVE: '/dataflow/:dataflowId/representative/:representative',
   SETTINGS: '/settings'
 };

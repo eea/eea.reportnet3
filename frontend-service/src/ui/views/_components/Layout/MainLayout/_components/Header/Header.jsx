@@ -136,7 +136,7 @@ const Header = withRouter(({ history }) => {
           header={resources.messages['logout']}
           labelConfirm={resources.messages['yes']}
           labelCancel={resources.messages['no']}>
-          {resources.messages['confirmationLogout']}
+          {resources.messages['userLogout']}
         </ConfirmDialog>
       )}
     </div>
