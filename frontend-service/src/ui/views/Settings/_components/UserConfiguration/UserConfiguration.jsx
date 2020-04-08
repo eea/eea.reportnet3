@@ -29,21 +29,22 @@ const UserConfiguration = props => {
     <div className={styles.userConfigurationContainer}>
       <div className={styles.userConfirmLogout}>
         <h3>{resources.messages['userThemeSelection']}</h3>
-        <Dropdown
-          name="visualTheme"
-          options={resources.userParameters['visualTheme']}
-          onChange={async e => {
-            const inmUserProperties = { ...userContext.userProps };
-            inmUserProperties.defaultVisualTheme = e.value;
-            const response = await changeUserProperties(inmUserProperties);
-            if (response.status >= 200 && response.status <= 299) {
-              themeContext.onToggleTheme(e.value);
-              userContext.defaultVisualTheme(e.value);
+          <span className={styles.switchTextInput}>{resources.messages['light']}</span>
+          <InputSwitch
+            checked={themeContext.currentTheme === 'dark'}
+            onChange={e => {
+              themeContext.onToggleTheme(e.value ? 'dark' : 'light');
+            }}
+            sliderCheckedClassName={styles.themeSwitcherInputSwitch}
+            style={{ marginRight: '1rem' }}
+            tooltip={
+              themeContext.currentTheme === 'light'
+                ? resources.messages['toggleDarkTheme']
+                : resources.messages['toggleLightTheme']
             }
-          }}
-          placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
-          value={userContext.userProps.defaultVisualTheme}
-        />
+            tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
+          />
+          <span className={styles.switchTextInput}>{resources.messages['dark']}</span>
       </div>
       <div className={styles.userConfirmLogout}>
         <div>

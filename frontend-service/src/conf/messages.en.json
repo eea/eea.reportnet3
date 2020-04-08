@@ -565,6 +565,8 @@
     "gdprWhoCanSeeMessage": "The Eionet User Directory is only accessible to users of the Eionet User Directory. Following personal data is available for authenticated users:",
     "gdprGivenName": "Given Name",
     "gdprSurname": "Surname",
-    "gdprOrganisation": "Organisation"
+    "gdprOrganisation": "Organisation",
+    "dark": "Dark",
+    "light": "Light"
   }
 }

@@ -44,6 +44,7 @@ const Header = withRouter(({ history }) => {
       <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>
     </a>
   );
+
   const isLocalEnvironment = () => {
     let url = window.location.href;
     if (url.toString().includes('localhost')) {
@@ -51,21 +52,34 @@ const Header = withRouter(({ history }) => {
     }
     return false;
   };
-  const localhostEnvironmentAlert = () => {
-    if (!isLocalEnvironment()) {
-      return;
-    } else
-      return (
-        <React.Fragment>
-          <div className={styles.localhostAlert}>
-            <FontAwesomeIcon icon={AwesomeIcons('localhostAlert')} title={resources.messages['localhostAlert']} />
-          </div>
-        </React.Fragment>
-      );
-  };
-  ////////////////////////////////////////////
 
-  ///////////////////////////////////////////////////
+  const localThemeSwitch = (
+    isLocalEnvironment() && (
+      <InputSwitch
+        checked={themeContext.currentTheme === 'dark'}
+        onChange={e => {
+          themeContext.onToggleTheme(e.value ? 'dark' : 'light');
+        }}
+        sliderCheckedClassName={styles.themeSwitcherInputSwitch}
+        style={{ marginRight: '1rem' }}
+        tooltip={
+          themeContext.currentTheme === 'light'
+            ? resources.messages['toggleDarkTheme']
+            : resources.messages['toggleLightTheme']
+        }
+        tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
+      />
+    )
+  );
+
+  const localhostEnvironmentAlert = (
+    isLocalEnvironment() && (
+    <div className={styles.localhostAlert}>
+      <FontAwesomeIcon icon={AwesomeIcons('localhostAlert')} title={resources.messages['localhostAlert']} />
+    </div>
+    )
+  );
+
   const userLogout = async () => {
     userContext.socket.disconnect(() => {});
     try {
@@ -79,48 +93,43 @@ const Header = withRouter(({ history }) => {
     }
   };
 
+  const userProfileSettingsButton = (
+    <a
+      className="userSettingsBtn"
+      href={getUrl(routes.SETTINGS)}
+      title="User profile details"
+      onClick={async e => {
+        e.preventDefault();
+        history.push(getUrl(routes.SETTINGS));
+      }}>
+      <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />{' '}
+      <span>{userContext.preferredUsername}</span>
+    </a>
+  )
+
+  const logout = (
+    <div className={styles.logoutWrapper}>
+      <FontAwesomeIcon
+        onClick={async e => {
+          e.preventDefault();
+          userContext.userProps.showLogoutConfirmation ? setConfirmVisible(true) : userLogout();
+        }}
+        icon={AwesomeIcons('logout')}
+      />
+    </div>
+  )
+
   const loadUser = () => (
     <>
       <div className={styles.userWrapper}>
-        <InputSwitch
-          checked={themeContext.currentTheme === 'dark'}
-          onChange={e => {
-            themeContext.onToggleTheme(e.value ? 'dark' : 'light');
-          }}
-          sliderCheckedClassName={styles.themeSwitcherInputSwitch}
-          style={{ marginRight: '1rem' }}
-          tooltip={
-            themeContext.currentTheme === 'light'
-              ? resources.messages['toggleDarkTheme']
-              : resources.messages['toggleLightTheme']
-          }
-          tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
-        />
-        {localhostEnvironmentAlert()}
-        <a
-          className="userSettingsBtn"
-          href={getUrl(routes.SETTINGS)}
-          title="User profile details"
-          onClick={async e => {
-            e.preventDefault();
-            history.push(getUrl(routes.SETTINGS));
-          }}>
-          <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />{' '}
-          <span>{userContext.preferredUsername}</span>
-        </a>
-      </div>
-
-      <div className={styles.logoutWrapper}>
-        <FontAwesomeIcon
-          onClick={async e => {
-            e.preventDefault();
-            userContext.userProps.showLogoutConfirmation ? setConfirmVisible(true) : userLogout();
-          }}
-          icon={AwesomeIcons('logout')}
-        />
+        {localThemeSwitch}
+        {localhostEnvironmentAlert}
+        {userProfileSettingsButton}
+        {logout}
       </div>
     </>
   );
+
   return (
     <div id="header" className={styles.header}>
       {loadTitle()}
