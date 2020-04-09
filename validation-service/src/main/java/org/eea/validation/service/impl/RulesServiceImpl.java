@@ -134,6 +134,7 @@ public class RulesServiceImpl implements RulesService {
     RulesSchema ruleSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchemaId));
     if (null != ruleSchema) {
       rulesRepository.deleteByIdDatasetSchema(ruleSchema.getRulesSchemaId());
+      rulesSequenceRepository.deleteByDatasetSchemaId(ruleSchema.getIdDatasetSchema());
     }
   }
 
