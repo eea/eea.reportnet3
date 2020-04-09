@@ -183,9 +183,30 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void testDeleteImportDataSuccess() throws Exception {
-    doNothing().when(datasetService).deleteImportData(Mockito.any());
+    doNothing().when(deleteHelper).executeDeleteDatasetProcess(Mockito.any());
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     dataSetControllerImpl.deleteImportData(1L);
-    Mockito.verify(datasetService, times(1)).deleteImportData(Mockito.any());
+    Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.any());
+  }
+
+  /**
+   * Test delete dataset values exception deleting.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteDatasetValuesExceptionDeleting() throws EEAException {
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    doThrow(new EEAException()).when(deleteHelper).executeDeleteDatasetProcess(Mockito.any());
+    try {
+      dataSetControllerImpl.deleteImportData(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      throw e;
+    }
   }
 
   /**
@@ -444,7 +465,7 @@ public class DataSetControllerImplTest {
   public void testDeleteImportTable() throws EEAException {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-    doNothing().when(deleteHelper).executeDeleteProcess(Mockito.any(), Mockito.any());
+    doNothing().when(deleteHelper).executeDeleteTableProcess(Mockito.any(), Mockito.any());
     dataSetControllerImpl.deleteImportTable(1L, "");
 
   }
@@ -471,7 +492,7 @@ public class DataSetControllerImplTest {
   public void testDeleteImportTableThrow() throws EEAException {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-    doThrow(new EEAException()).when(deleteHelper).executeDeleteProcess(Mockito.any(),
+    doThrow(new EEAException()).when(deleteHelper).executeDeleteTableProcess(Mockito.any(),
         Mockito.any());
     dataSetControllerImpl.deleteImportTable(1L, "");
 
