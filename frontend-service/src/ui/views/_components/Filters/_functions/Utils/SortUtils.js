@@ -6,8 +6,8 @@ const getOrderIcon = order => {
   else if (order === -1) return 'alphabeticOrderUp';
 };
 
-const getOrderInitialState = (input = [], select = [], date = []) => {
-  const orderByGroup = input.concat(select, date);
+const getOrderInitialState = (input = [], select = [], date = [], dropDown = []) => {
+  const orderByGroup = input.concat(select, date, dropDown);
   const orderByState = orderByGroup.reduce((obj, key) => Object.assign(obj, { [key]: 0 }), {});
   date.forEach(date => {
     orderByState[date] = 1;

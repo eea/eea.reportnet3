@@ -335,7 +335,7 @@
     "key": "config/apiGateway/dataset.ribbon.ReadTimeout",
     "value": "JHtSSUJCT05fUkVBRF9USU1FT1VUOjIwMDAwfQ=="
   },
-   {
+  {
     "key": "config/apiGateway/validation.ribbon.ReadTimeout",
     "value": "JHtSSUJCT05fUkVBRF9USU1FT1VUOjIwMDAwfQ=="
   },
@@ -1036,6 +1036,14 @@
     "value": "JHtSRURJU19QT1JUOjMyMDk2fQ=="
   },
   {
+    "key": "config/application/spring.redis.sentinel.master",
+    "value": "JHtSRURJU19TRU5USU5FTF9NQVNURVI6bXltYXN0ZXJ9"
+  },
+  {
+    "key": "config/application/spring.redis.sentinel.nodes",
+    "value": "JHtSRURJU19TRU5USU5FTF9OT0RFUzpyZWRpczoyNjM3OX0="
+  },
+  {
     "key": "config/dataset/dataset.propagation.fieldBatchSize",
     "value": "JHtEQVRBU0NIRU1BX0ZJRUxEX0JBVENIX1NJWkU6MzAwMH0="
   },
@@ -1127,7 +1135,7 @@
     "key": "config/rod/rod.url",
     "value": "JHtST0RfVVJMOnJvZDMuZGV2ZWwxZHViLmVpb25ldC5ldXJvcGEuZXV9"
   },
-    {
+  {
     "key": "config/rod/kafka.bootstrapAddress",
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
   }

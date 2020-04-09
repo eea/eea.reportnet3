@@ -50,6 +50,7 @@ export const TabsSchema = ({
                   tableHasErrors={tableHasErrors}
                   tableId={table.id}
                   tableName={table.name}
+                  tableReadOnly={table.readOnly}
                   tableSchemaColumns={
                     !isUndefined(tableSchemaColumns)
                       ? tableSchemaColumns

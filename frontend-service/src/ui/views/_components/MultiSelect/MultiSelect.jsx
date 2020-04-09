@@ -537,9 +537,7 @@ export class MultiSelect extends Component {
         onClick={this.onClick}
         ref={el => (this.container = el)}
         style={this.props.style}>
-        <div
-          className={`p-hidden-accessible ${this.props.inputClassName}`}
-          style={{ overflow: 'visible', clip: 'auto', height: 'auto' }}>
+        <div className={`p-hidden-accessible ${this.props.inputClassName}`}>
           <input
             aria-haspopup="listbox"
             aria-labelledby={this.props.ariaLabelledBy}
