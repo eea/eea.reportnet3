@@ -37,6 +37,33 @@ const logout = async () => {
   const response = await apiUser.logout(currentTokens.refreshToken);
   return response;
 };
+
+const uploadImg = async (userId, imgData) => {
+  const response = await apiUser.uploadImg(userId, imgData);
+  return response;
+};
+
+const getConfiguration = async () => {
+  const userConfigurationDTO = await apiUser.configuration();
+  const userConfiguration = parseConfigurationDTO(userConfigurationDTO);
+  return userConfiguration;
+};
+
+const parseConfigurationDTO = userConfigurationDTO => {
+  const userConfiguration = {};
+  userConfiguration.dateFormat = userConfigurationDTO.dateFormat[0];
+  userConfiguration.defaultLogoutConfirmation =
+    userConfigurationDTO.showLogoutConfirmation[0] === 'false'
+      ? (userConfiguration.defaultLogoutConfirmation = false)
+      : (userConfiguration.defaultLogoutConfirmation = true);
+  userConfiguration.defaultRowsNumber = userConfigurationDTO.rowsPerPage[0];
+  userConfiguration.theme = userConfigurationDTO.visualTheme[0];
+  userConfiguration.userImage = userConfigurationDTO.userImage;
+  return userConfiguration;
+};
+
+const updateAttributes = async attributes => await apiUser.updateAttributes(attributes);
+
 const oldLogin = async (userName, password) => {
   const userDTO = await apiUser.oldLogin(userName, password);
   const { accessToken, refreshToken } = userDTO;
@@ -54,6 +81,7 @@ const oldLogin = async (userName, password) => {
   timeOut((remain - 10) * 1000);
   return user;
 };
+
 const refreshToken = async () => {
   try {
     const currentTokens = userStorage.get();
@@ -105,10 +133,13 @@ const getToken = () => {
 
 export const ApiUserRepository = {
   login,
+  getConfiguration,
+  updateAttributes,
   logout,
   oldLogin,
   refreshToken,
   hasPermission,
   getToken,
-  userRole
+  userRole,
+  uploadImg
 };

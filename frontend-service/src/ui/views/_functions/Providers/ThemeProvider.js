@@ -1,27 +1,32 @@
-import React, { useReducer } from 'react';
+import React, { useContext, useReducer } from 'react';
 import { isNull } from 'lodash';
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const themeReducer = (state, { type, payload }) => {
   switch (type) {
     case 'TOGGLE_THEME':
-      if (typeof Storage !== 'undefined') {
-        localStorage.setItem('theme', payload.newTheme);
-      }
       return {
         ...state,
         currentTheme: payload.newTheme
       };
+    case 'DEFAULT_VISUAL_THEME':
+      //   document.body.style.setProperty('--bg', '#282c35');
+      return {
+        ...state,
+        currentTheme: payload.newTheme
+      };
+
     default:
       return state;
   }
 };
 
 export const ThemeProvider = ({ children }) => {
+  const userContext = useContext(UserContext);
+
   const [state, dispatch] = useReducer(themeReducer, {
-    currentTheme: !isNull(window.localStorage.getItem('theme'))
-      ? window.localStorage.getItem('theme')
-      : window.localStorage.setItem('theme', 'light'),
+    currentTheme: userContext.userProps.visualTheme,
     themes: {
       light: {
         bg: 'var(--white)',
@@ -280,7 +285,9 @@ export const ThemeProvider = ({ children }) => {
         'tooltip-body-color': 'var(--white)',
         'tooltip-body-border-color': 'var(--gray-110)',
         'tooltip-arrow-border-color': 'var(--gray-110)',
-        'tooltip-arrow-bg': 'var(--gray-110)'
+        'tooltip-arrow-bg': 'var(--gray-110)',
+        'user-image-bg-hover': 'var(--main-font-color)',
+        'user-image-bg-opacity': '0.6'
       },
       dark: {
         bg: 'var(--c-dark-blue)',
@@ -541,7 +548,9 @@ export const ThemeProvider = ({ children }) => {
         'tooltip-body-color': 'var(--white)',
         'tooltip-body-border-color': 'var(--white)',
         'tooltip-arrow-border-color': 'var(--white)',
-        'tooltip-arrow-bg': 'var(--gray-110)'
+        'tooltip-arrow-bg': 'var(--gray-110)',
+        'user-image-bg-hover': 'var(--main-font-color)',
+        'user-image-bg-opacity': '0.6'
       }
     }
   });
@@ -558,11 +567,13 @@ export const ThemeProvider = ({ children }) => {
             }
           });
           const theme = state.themes[newTheme];
+
           Object.keys(theme).forEach(key => {
             const cssKey = `--${key}`;
             const cssValue = theme[key];
             document.body.style.setProperty(cssKey, cssValue);
           });
+          userContext.onToggleVisualTheme(newTheme);
         }
       }}>
       {children}

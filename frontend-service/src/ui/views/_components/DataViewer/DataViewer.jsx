@@ -18,6 +18,7 @@ import { Chips } from 'ui/views/_components/Chips';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContextMenu } from 'ui/views/_components/ContextMenu';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataForm } from './_components/DataForm';
 import { DataTable } from 'ui/views/_components/DataTable';
@@ -69,6 +70,8 @@ const DataViewer = withRouter(
     tableReadOnly,
     tableSchemaColumns
   }) => {
+    const userContext = useContext(UserContext);
+
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
@@ -95,11 +98,14 @@ const DataViewer = withRouter(
     const [levelErrorValidations, setLevelErrorValidations] = useState([]);
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
     const [selectedCellId, setSelectedCellId] = useState();
+    //
 
+    //
     const [records, dispatchRecords] = useReducer(recordReducer, {
       editedRecord: {},
       fetchedDataFirstRecord: [],
       firstPageRecord: 0,
+      recordsPerPage: userContext.userProps.rowsPerPage,
       initialRecordValue: undefined,
       isAllDataDeleted: isDatasetDeleted,
       isRecordAdded: false,
@@ -182,6 +188,10 @@ const DataViewer = withRouter(
     //   inmLevelErrorTypesWithCorrects = inmLevelErrorTypesWithCorrects.concat(levelErrorTypes);
     //   setLevelErrorTypesWithCorrects(inmLevelErrorTypesWithCorrects);
     // }, [levelErrorTypes]);
+
+    useEffect(() => {
+      records.recordsPerPage = userContext.userProps.rowsPerPage;
+    }, []);
 
     useEffect(() => {
       setLevelErrorValidations(levelErrorTypesWithCorrects);
@@ -540,7 +550,7 @@ const DataViewer = withRouter(
         sort.sortField,
         sort.sortOrder,
         records.firstPageRecord,
-        records.recordsPerPage,
+
         levelErrorValidations
       );
     };
@@ -862,7 +872,9 @@ const DataViewer = withRouter(
             resizableColumns={true}
             rowClassName={rowClassName}
             rows={records.recordsPerPage}
+            //////////////////////////////////////////////////
             rowsPerPageOptions={[5, 10, 20, 100]}
+            /////////////////////////////////////////
             scrollable={true}
             scrollHeight="70vh"
             selectionMode="single"
