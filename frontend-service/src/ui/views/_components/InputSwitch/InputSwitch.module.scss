@@ -1,7 +1,12 @@
 .inputswitch_dark_theme_checked:before {
   background-color: var(--black) !important;
   box-shadow: inset -4px -1px var(--white) !important;
-  bottom: 0.35em !important;
+  // bottom: 0.35em !important;
+}
+
+.inputswitch_dark_theme_unchecked,
+.inputswitch_dark_theme_checked {
+  margin-right: -0.15em !important;
 }
 
 .inputswitch_dark_theme_checked {

@@ -10,6 +10,7 @@ import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const PrivateRoute = ({ component: Component, path }) => {
   const user = useContext(UserContext);
+
   return (
     <Route
       path={path}

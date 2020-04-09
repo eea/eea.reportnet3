@@ -35,6 +35,7 @@ const accepted = async () => {
 
 const all = async userData => {
   const pendingDataflowsDTO = await apiDataflow.all(userData);
+  console.log({ pendingDataflowsDTO, userData, DataflowConf });
   const dataflows = !userData ? pendingDataflowsDTO : [];
   const userRoles = [];
 
@@ -67,9 +68,10 @@ const all = async userData => {
 
   const allDataflows = cloneDeep(DataflowConf.userRequestStatus);
   Object.keys(dataflowsData).forEach(key => {
+    console.log({ key });
     allDataflows[key.toLowerCase()] = parseDataflowDTOs(dataflowsData[key]);
   });
-
+  console.log({ allDataflows });
   return allDataflows;
 };
 

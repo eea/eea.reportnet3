@@ -21,23 +21,46 @@ const MainLayout = ({ children }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notifications = useContext(NotificationContext);
   const themeContext = useContext(ThemeContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
   const [margin, setMargin] = useState('50px');
 
+  const getUserConfiguration = async () => {
+    try {
+      const userConfiguration = await UserService.getConfiguration();
+
+      userContext.onChangeDateFormat(userConfiguration.dateFormat);
+      userContext.onChangeRowsPerPage(parseInt(userConfiguration.defaultRowsNumber));
+      userContext.onToggleLogoutConfirm(userConfiguration.defaultLogoutConfirmation);
+      userContext.onToggleVisualTheme(userConfiguration.theme);
+      userContext.onUserFileUpload(userConfiguration.userImage);
+      themeContext.onToggleTheme(userConfiguration.theme);
+      userContext.onToggleSettingsLoaded(true);
+    } catch (error) {
+      console.error(error);
+      userContext.onToggleSettingsLoaded(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!userContext.userProps.settingsLoaded) {
+      getUserConfiguration();
+    }
+  }, []);
+
   useEffect(() => {
     async function fetchData() {
-      if (isUndefined(user.id)) {
+      if (isUndefined(userContext.id)) {
         try {
           const userObject = await UserService.refreshToken();
-          user.onTokenRefresh(userObject);
+          userContext.onTokenRefresh(userObject);
         } catch (error) {
           notifications.add({
             key: 'TOKEN_REFRESH_ERROR',
             content: {}
           });
           await UserService.logout();
-          user.onLogout();
+          userContext.onLogout();
         }
       }
     }
@@ -45,7 +68,6 @@ const MainLayout = ({ children }) => {
     const bodySelector = document.querySelector('body');
     bodySelector.style.overflow = 'hidden auto';
     window.scrollTo(0, 0);
-    themeContext.onToggleTheme(localStorage.getItem('theme'));
   }, []);
 
   useEffect(() => {
