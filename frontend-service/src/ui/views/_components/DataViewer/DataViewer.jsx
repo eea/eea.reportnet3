@@ -98,14 +98,11 @@ const DataViewer = withRouter(
     const [levelErrorValidations, setLevelErrorValidations] = useState([]);
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
     const [selectedCellId, setSelectedCellId] = useState();
-    //
 
-    //
     const [records, dispatchRecords] = useReducer(recordReducer, {
       editedRecord: {},
       fetchedDataFirstRecord: [],
       firstPageRecord: 0,
-      recordsPerPage: userContext.userProps.rowsPerPage,
       initialRecordValue: undefined,
       isAllDataDeleted: isDatasetDeleted,
       isRecordAdded: false,
@@ -113,7 +110,7 @@ const DataViewer = withRouter(
       newRecord: {},
       numCopiedRecords: undefined,
       pastedRecords: undefined,
-      recordsPerPage: 10,
+      recordsPerPage: userContext.userProps.rowsPerPage,
       selectedRecord: {},
       totalFilteredRecords: 0,
       totalRecords: 0
@@ -190,10 +187,6 @@ const DataViewer = withRouter(
     // }, [levelErrorTypes]);
 
     useEffect(() => {
-      records.recordsPerPage = userContext.userProps.rowsPerPage;
-    }, []);
-
-    useEffect(() => {
       setLevelErrorValidations(levelErrorTypesWithCorrects);
     }, [levelErrorTypesWithCorrects]);
 
@@ -244,6 +237,7 @@ const DataViewer = withRouter(
         }
         setFetchedData(dataFiltered);
       };
+      console.log({ levelErrorValidations });
       levelErrorValidations = removeSelectAllFromList(levelErrorValidations);
 
       setIsLoading(true);
@@ -324,6 +318,7 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       if (recordErrorPositionId === -1) {
+        console.log(records.recordsPerPage);
         onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
       }
     }, [levelErrorValidations]);
@@ -550,7 +545,7 @@ const DataViewer = withRouter(
         sort.sortField,
         sort.sortOrder,
         records.firstPageRecord,
-
+        records.recordsPerPage,
         levelErrorValidations
       );
     };
@@ -872,9 +867,7 @@ const DataViewer = withRouter(
             resizableColumns={true}
             rowClassName={rowClassName}
             rows={records.recordsPerPage}
-            //////////////////////////////////////////////////
             rowsPerPageOptions={[5, 10, 20, 100]}
-            /////////////////////////////////////////
             scrollable={true}
             scrollHeight="70vh"
             selectionMode="single"
