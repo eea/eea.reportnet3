@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 
 import styles from './LeftSideBarButton.module.scss';
 
@@ -14,6 +14,23 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    console.log(notificationContext.all);
+    if (notificationContext.all.length > 0) {
+      setAnimate(true);
+    }
+  }, [notificationContext.all]);
+
+  useEffect(() => {
+    if (animate) {
+      setTimeout(() => {
+        setAnimate(false);
+      }, 600);
+    }
+  }, [animate]);
+
   const defaultLayout = (
     <>
       <FontAwesomeIcon
@@ -26,8 +43,13 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
   const notificationsLayout = (
     <>
       <div className={`${styles.notificationIconWrapper} ${styles.leftSideBarElementAnimation}`}>
-        <FontAwesomeIcon className={`${styles.leftSideBarUserIcon}`} icon={AwesomeIcons(icon)} />
-        <span className={styles.notificationCounter}>{notificationContext.all.length || 0}</span>
+        <FontAwesomeIcon
+          className={`${styles.leftSideBarUserIcon} ${animate ? styles.leftSideBarElementNotification : ''}`}
+          icon={AwesomeIcons(icon)}
+        />
+        {notificationContext.all.length > 0 ? (
+          <span className={styles.notificationCounter}>{notificationContext.all.length || 0}</span>
+        ) : null}
       </div>
       <span className={styles.leftSideBarUserText}>{resourcesContext.messages[label]}</span>
     </>

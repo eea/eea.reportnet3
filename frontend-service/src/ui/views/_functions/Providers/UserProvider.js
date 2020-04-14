@@ -2,7 +2,6 @@ import React, { useContext, useReducer } from 'react';
 
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
-import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 const userSettingsDefaultState = {
   userProps: {
@@ -89,7 +88,6 @@ const userReducer = (state, { type, payload }) => {
 
 export const UserProvider = ({ children }) => {
   const notificationContext = useContext(NotificationContext);
-  const themeContext = useContext(ThemeContext);
   //const [state, userDispatcher] = useReducer(userReducer, {});
   const [state, userDispatcher] = useReducer(userReducer, userSettingsDefaultState);
   // const notificationContext = useContext(NotificationContext);
