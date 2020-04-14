@@ -344,6 +344,9 @@
           "key": "LOAD_ORGANIZATIONS_ERROR"
         },
         {
+          "key": "LOAD_DATAFLOW_DATA_ERROR"
+        },
+        {
           "key": "GET_CONFIGURATION_USER_SERVICE_ERROR"
         },
         {
