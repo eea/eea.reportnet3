@@ -41,7 +41,6 @@ const UserConfiguration = props => {
               inmUserProperties.visualTheme = e.value ? 'dark' : 'light';
               const response = await changeUserProperties(inmUserProperties);
               if (response.status >= 200 && response.status <= 299) {
-                console.log(e.value);
                 themeContext.onToggleTheme(e.value ? 'dark' : 'light');
                 userContext.onToggleVisualTheme(e.value ? 'dark' : 'light');
               }
