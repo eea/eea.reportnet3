@@ -87,9 +87,7 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
         {itemContent.status == DataflowConf.dataflowStatus['DRAFT'] ? (
           <>
             <span>{resources.messages['deliveryDate']}:</span>{' '}
-            {!isNil(itemContent.expirationDate)
-              ? moment.unix(itemContent.expirationDate).format(userContext.userProps.dateFormat)
-              : moment(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
+            {moment(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
           </>
         ) : null}
       </div>
