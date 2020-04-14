@@ -12,7 +12,7 @@ const filteredInitialValues = (data, checkedId, format) => {
     id: obligation.obligationId,
     title: obligation.title,
     legalInstrument: !isNil(obligation.legalInstruments) && obligation.legalInstruments.alias,
-    dueDate: moment(obligation.expirationDate).format(format)
+    dueDate: !isNil(obligation.expirationDate) ? moment(obligation.expirationDate).format(format) : '-'
   }));
 };
 
