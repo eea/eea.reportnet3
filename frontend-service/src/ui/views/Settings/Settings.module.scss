@@ -1,4 +1,6 @@
 .sectionMainContent {
+  border: 1px solid var(--blue-75);
+  border-radius: 3px;
   width: 100%;
   margin: 0.5rem;
   display: flex;
@@ -6,4 +8,9 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 5rem;
+}
+
+.settingsContainer {
+  border-radius: 5px !important;
+  border: 1px solid var(--card-box-shadow);
 }
