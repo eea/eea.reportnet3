@@ -4,6 +4,8 @@ import isEmpty from 'lodash/isEmpty';
 
 import { config } from 'conf';
 
+import defaultAvatar from 'assets/images/avatars/defaultAvatar.png';
+
 import styles from './UserImg.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
@@ -117,7 +119,7 @@ const UserImg = () => {
           data-event="click"
           ref={uploadedImage}
           icon={<FontAwesomeIcon icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />}
-          // src={}
+          src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
           className={styles.userDataIcon}
           // onClick={() => imageUploader.current.click()}
         />
