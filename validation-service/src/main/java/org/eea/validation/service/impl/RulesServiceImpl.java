@@ -241,7 +241,6 @@ public class RulesServiceImpl implements RulesService {
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
     validateRule(rule);
-
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     }
@@ -315,6 +314,14 @@ public class RulesServiceImpl implements RulesService {
               FIELD_TYPE + typeData, document.get("codelistItems").toString(), "FT" + shortcode,
               FT_DESCRIPTION + typeData));
 
+          break;
+        case URL:
+          ruleList.add(AutomaticRules.createUrlAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case EMAIL:
+          ruleList.add(AutomaticRules.createEmailAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
         default:
           LOG.info("This Data Type has not automatic rule {}", typeData.getValue());

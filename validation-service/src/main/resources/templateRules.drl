@@ -123,7 +123,35 @@ function boolean isCordenateLong( String value ){
    }
    return false;
  }
+//////////////////////////////////////////VALIDATION NUMBER///////////////////////////////////////////////////////////
+function boolean isURL(String value){
+	if(!isBlank(value)){
+		return true;
+	}
+    try {
+         new URL(value).toURI();
+         return true;
+    }catch (URISyntaxException exception) {
+         return false;
+    }catch (MalformedURLException exception) {
+         return false;
+    }
+ }
+ 
+ //////////////////////////////////////////VALIDATION NUMBER///////////////////////////////////////////////////////////
+function boolean isEmail(String value){
+	if(!isBlank(value)){
+		return true;
+	}
+	Pattern pat = Pattern.compile(“([a-z0-9]+(\\.?[a-z0-9])*)+@(([a-z]+)\\.([a-z]+))+”);					
+	Matcher mather = pattern.matcher(value);					
+	if (mather.find() == true) {
+			return true;
+		} else {
+			return false;
+		}					
 
+ }
  //////////////////////////////////////////DEFAULT VALIDATIONS END BLOCK////////////////////////////////////////////////////////////
  
  //////////////////////////////////////////VALIDATION PK////////////////////////////////////////////////////////////
