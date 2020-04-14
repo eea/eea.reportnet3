@@ -581,6 +581,8 @@
     "dark": "Dark",
     "light": "Light",
     "uploadImage": "Upload your image",
-    "selectImage": "Select one"
+    "selectImage": "Select one",
+    "getConfigurationUserServiceError": "Error loading user preferences.",
+    "updateAttributesUserServiceError": "Error updating user preferences."
   }
 }

@@ -6,11 +6,13 @@ import { InputSwitch } from 'ui/views/_components/InputSwitch';
 
 import { UserService } from 'core/services/User';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const UserConfiguration = props => {
+  const notificationContext = useContext(NotificationContext);
   const userContext = useContext(UserContext);
   const resources = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
@@ -20,8 +22,9 @@ const UserConfiguration = props => {
       const response = await UserService.updateAttributes(userProperties);
       return response;
     } catch (error) {
-      console.error(error);
-      //Notification
+      notificationContext.add({
+        type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR'
+      });
     }
   };
 

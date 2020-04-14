@@ -37,8 +37,10 @@ const MainLayout = ({ children }) => {
       themeContext.onToggleTheme(userConfiguration.theme);
       userContext.onToggleSettingsLoaded(true);
     } catch (error) {
-      console.error(error);
       userContext.onToggleSettingsLoaded(false);
+      notifications.add({
+        type: 'GET_CONFIGURATION_USER_SERVICE_ERROR'
+      });
     }
   };
 

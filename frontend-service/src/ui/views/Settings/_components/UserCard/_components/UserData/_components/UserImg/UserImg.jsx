@@ -17,10 +17,12 @@ import ReactTooltip from 'react-tooltip';
 
 import { UserService } from 'core/services/User';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const UserImg = () => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -86,8 +88,9 @@ const UserImg = () => {
         userContext.onUserFileUpload(splittedBase64Image);
       }
     } catch (error) {
-      console.error(error);
-      //Notification
+      notificationContext.add({
+        type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR'
+      });
     }
   };
 

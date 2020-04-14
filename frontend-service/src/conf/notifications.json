@@ -342,6 +342,12 @@
         },
         {
           "key": "LOAD_ORGANIZATIONS_ERROR"
+        },
+        {
+          "key": "GET_CONFIGURATION_USER_SERVICE_ERROR"
+        },
+        {
+          "key": "UPDATE_ATTRIBUTES_USER_SERVICE_ERROR"
         }
       ]
     },
