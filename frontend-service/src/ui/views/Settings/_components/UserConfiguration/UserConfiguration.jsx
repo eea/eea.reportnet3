@@ -3,14 +3,17 @@ import styles from './userConfiguration.module.scss';
 
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
+import { TitleWithItem } from 'ui/views/_components/TitleWithItem';
 
 import { UserService } from 'core/services/User';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-const UserConfiguration = props => {
+const UserConfiguration = () => {
+  const notificationContext = useContext(NotificationContext);
   const userContext = useContext(UserContext);
   const resources = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
@@ -20,100 +23,157 @@ const UserConfiguration = props => {
       const response = await UserService.updateAttributes(userProperties);
       return response;
     } catch (error) {
-      console.error(error);
-      //Notification
+      notificationContext.add({
+        type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR'
+      });
     }
   };
 
-  return (
-    <div className={styles.userConfigurationContainer}>
-      <div className={styles.userConfirmLogout}>
-        <h3>{resources.messages['userThemeSelection']}</h3>
-        <div className={styles.switchDiv}>
-          <span className={styles.switchTextInput}>{resources.messages['light']}</span>
-          <InputSwitch
-            checked={userContext.userProps.visualTheme === 'dark'}
-            onChange={async e => {
-              const inmUserProperties = { ...userContext.userProps };
-              inmUserProperties.visualTheme = e.value ? 'dark' : 'light';
-              const response = await changeUserProperties(inmUserProperties);
-              if (response.status >= 200 && response.status <= 299) {
-                console.log(e.value);
-                themeContext.onToggleTheme(e.value ? 'dark' : 'light');
-                userContext.onToggleVisualTheme(e.value ? 'dark' : 'light');
-              }
-            }}
-            sliderCheckedClassName={styles.themeSwitcherInputSwitch}
-            style={{ marginRight: '1rem' }}
-            tooltip={
-              userContext.userProps.visualTheme === 'light'
-                ? resources.messages['toggleDarkTheme']
-                : resources.messages['toggleLightTheme']
+  const themeSwitch = (
+    <React.Fragment>
+      <span className={styles.switchTextInput}>{resources.messages['light']}</span>
+        <InputSwitch
+          checked={userContext.userProps.visualTheme === 'dark'}
+          onChange={async e => {
+            const inmUserProperties = { ...userContext.userProps };
+            inmUserProperties.visualTheme = e.value ? 'dark' : 'light';
+            const response = await changeUserProperties(inmUserProperties);
+            if (response.status >= 200 && response.status <= 299) {
+              themeContext.onToggleTheme(e.value ? 'dark' : 'light');
+              userContext.onToggleVisualTheme(e.value ? 'dark' : 'light');
             }
-            tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
-          />
-          <span className={styles.switchTextInput}>{resources.messages['dark']}</span>
-        </div>
-      </div>
-      <div className={styles.userConfirmLogout}>
-        <div>
-          <h3>{resources.messages['userConfirmationLogout']}</h3>
-          <InputSwitch
-            checked={userContext.userProps.showLogoutConfirmation}
-            style={{ marginRight: '1rem' }}
-            onChange={async e => {
-              const inmUserProperties = { ...userContext.userProps };
-              inmUserProperties.showLogoutConfirmation = e.value;
-              const response = await changeUserProperties(inmUserProperties);
-              if (response.status >= 200 && response.status <= 299) {
-                userContext.onToggleLogoutConfirm(e.value);
-              }
-            }}
-            tooltip={
-              userContext.userProps.showLogoutConfirmation === true
-                ? resources.messages['toogleConfirmationOff']
-                : resources.messages['toogleConfirmationOn']
-            }
-          />
-        </div>
-      </div>
+          }}
+          sliderCheckedClassName={styles.themeSwitcherInputSwitch}
+          style={{ marginRight: '1rem' }}
+          tooltip={
+            userContext.userProps.visualTheme === 'light'
+              ? resources.messages['toggleDarkTheme']
+              : resources.messages['toggleLightTheme']
+          }
+          tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
+        />
+      <span className={styles.switchTextInput}>{resources.messages['dark']}</span>
+    </React.Fragment>
+  );
 
-      <div className={styles.userConfirmLogout}>
-        <h3>{resources.messages['userDefaultRowsPage']}</h3>
-        <Dropdown
-          name="rowPerPage"
-          options={resources.userParameters['defaultRowsPage']}
-          onChange={async e => {
-            const inmUserProperties = { ...userContext.userProps };
-            inmUserProperties.rowsPerPage = e.target.value;
-            const response = await changeUserProperties(inmUserProperties);
-            if (response.status >= 200 && response.status <= 299) {
-              userContext.onChangeRowsPerPage(e.target.value);
-            }
-          }}
-          placeholder="select"
-          value={userContext.userProps.rowsPerPage}
+  const confirmationLogoutSwitch = (
+    <React.Fragment>
+      <span className={styles.switchTextInput}>No popup</span>
+        <InputSwitch
+      checked={userContext.userProps.showLogoutConfirmation}
+      style={{ marginRight: '1rem' }}
+      onChange={async e => {
+        const inmUserProperties = { ...userContext.userProps };
+        inmUserProperties.showLogoutConfirmation = e.value;
+        const response = await changeUserProperties(inmUserProperties);
+        if (response.status >= 200 && response.status <= 299) {
+          userContext.onToggleLogoutConfirm(e.value);
+        }
+      }}
+      tooltip={
+        userContext.userProps.showLogoutConfirmation === true
+          ? resources.messages['toogleConfirmationOff']
+          : resources.messages['toogleConfirmationOn']
+      }
         />
+      <span className={styles.switchTextInput}>Popup</span>
+    </React.Fragment>
+  );
+
+  const rowsInPaginationDropdown = (
+    <React.Fragment>
+      <Dropdown
+        name="rowPerPage"
+        options={resources.userParameters['defaultRowsPage']}
+        onChange={async e => {
+          const inmUserProperties = { ...userContext.userProps };
+          inmUserProperties.rowsPerPage = e.target.value;
+          const response = await changeUserProperties(inmUserProperties);
+          if (response.status >= 200 && response.status <= 299) {
+            userContext.onChangeRowsPerPage(e.target.value);
+          }
+        }}
+        placeholder="select"
+        value={userContext.userProps.rowsPerPage}
+      />
+    </React.Fragment>
+  );
+
+  const dateFormatDropdown = (
+    <React.Fragment>
+      <Dropdown
+        name="rowPerPage"
+        options={resources.userParameters['dateFormat']}
+        onChange={async e => {
+          const inmUserProperties = { ...userContext.userProps };
+          inmUserProperties.dateFormat = e.target.value;
+          const response = await changeUserProperties(inmUserProperties);
+          if (response.status >= 200 && response.status <= 299) {
+            userContext.onChangeDateFormat(e.target.value);
+          }
+        }}
+        placeholder="select"
+        value={userContext.userProps.dateFormat}
+      />
+    </React.Fragment>
+  );
+
+  const themeConfiguration = (
+    <TitleWithItem
+      title={resources.messages['theme']}
+      icon="palette"
+      iconSize="2rem"
+      subtitle='Choose the theme to display in the system'
+      item={themeSwitch}
+    />
+  );
+
+  const logoutConfiguration = (
+    <TitleWithItem
+      title={resources.messages['userConfirmationLogout']}
+      icon="power-off"
+      iconSize="2rem"
+      subtitle='Configure the way to logout with or without a confirmation popup.'
+      item={confirmationLogoutSwitch}
+    />
+  );
+
+  const rowsInPaginationConfiguration = (
+    <TitleWithItem
+      title={resources.messages['userRowsInPagination']}
+      icon="list-ol"
+      iconSize="2rem"
+      subtitle='Configure the number of rows displayed in the pagination.'
+      item={rowsInPaginationDropdown}
+    />
+  );
+
+  const dateFormatSubtitle = (
+    <React.Fragment>
+      <div>{resources.messages['dateFormatSubtitle']}</div>
+      <div className={styles.dateFormatWarning}>{resources.messages['dateFormatWarning']}</div>
+    </React.Fragment>
+  );
+
+  const dateFormatConfiguration = (
+    <TitleWithItem
+      title={resources.messages['dateFormat']}
+      icon="calendar"
+      iconSize="2rem"
+      subtitle={dateFormatSubtitle}
+      item={dateFormatDropdown}
+    />
+  ); 
+
+  return (
+    <React.Fragment>
+      <div className={styles.userConfiguration}>
+        {rowsInPaginationConfiguration}
+        {dateFormatConfiguration}
+        {themeConfiguration}
+        {logoutConfiguration}
       </div>
-      <div className={styles.userConfirmLogout}>
-        <h3>{resources.messages['dateFormat']}</h3>
-        <h5 className={styles.italicTitle}>{resources.messages['dateFormatWarning']}</h5>
-        <Dropdown
-          name="rowPerPage"
-          options={resources.userParameters['dateFormat']}
-          onChange={async e => {
-            const inmUserProperties = { ...userContext.userProps };
-            inmUserProperties.dateFormat = e.target.value;
-            const response = await changeUserProperties(inmUserProperties);
-            if (response.status >= 200 && response.status <= 299) {
-              userContext.onChangeDateFormat(e.target.value);
-            }
-          }}
-          placeholder="select"
-          value={userContext.userProps.dateFormat}
-        />
-      </div>
-    </div>
+    </React.Fragment>
   );
 };
 

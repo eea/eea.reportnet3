@@ -1,0 +1,43 @@
+.titleWrap {
+    width: 100%;
+    align-content: center;
+    align-items: center;
+    display: flex;
+}
+  
+.iconWrap {
+    align-content: center;
+}
+  
+.title {
+    display: table-cell;
+    font-size: 1.1rem;
+    color: var(--title-color);
+    margin: 0px;
+    font-weight: bold;
+}
+  
+.subtitle {
+    font-size: 0.9rem;
+    color: var(--subtitle-color);
+    margin: 0px;
+    font-weight: 400;
+}
+  
+.icon {
+    color: var(--title-icon-color);
+    opacity: 0.6;
+    margin-right: 0.5rem !important;
+}
+  
+.itemContainer {
+    width: 40%;
+    display: flex !important;
+    align-items: center !important;
+    align-content: center !important;
+}
+
+.rowContainer {
+    display: flex;
+    margin: 2rem;
+}

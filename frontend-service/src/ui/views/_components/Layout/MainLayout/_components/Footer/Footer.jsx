@@ -11,7 +11,6 @@ export const Footer = () => {
     { text: 'copyrightLanguage' },
     { text: 'copyrightResources' },
     { text: 'copyrightCookies' },
-
     { text: 'copyrightLegal' },
     { text: 'copyrightContact' }
   ];
