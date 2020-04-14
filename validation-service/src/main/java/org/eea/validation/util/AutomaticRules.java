@@ -32,8 +32,9 @@ public class AutomaticRules {
         description);
   }
 
+
   /**
-   * Creates the automatic number rule.
+   * Creates the number integer automatic rule.
    *
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
@@ -42,9 +43,25 @@ public class AutomaticRules {
    * @param description the description
    * @return the rule
    */
-  public static Rule createNumberAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
-      String nameRule, String shortCode, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isNumber(value)",
+  public static Rule createNumberIntegerAutomaticRule(String referenceId,
+      EntityTypeEnum typeEntityEnum, String nameRule, String shortCode, String description) {
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isNumberInteger(value)",
+        "The field must be a valid number", ErrorTypeEnum.ERROR.getValue(), shortCode, description);
+  }
+
+  /**
+   * Creates the number decimal automatic rule.
+   *
+   * @param referenceId the reference id
+   * @param typeEntityEnum the type entity enum
+   * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
+   * @return the rule
+   */
+  public static Rule createNumberDecimalAutomaticRule(String referenceId,
+      EntityTypeEnum typeEntityEnum, String nameRule, String shortCode, String description) {
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isNumberDecimal(value)",
         "The field must be a valid number", ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
 
@@ -150,6 +167,7 @@ public class AutomaticRules {
    * @param nameRule the name rule
    * @param shortCode the short code
    * @param description the description
+   * @param tableSchemaId the table schema id
    * @param datasetId the dataset id
    * @return the rule
    */
@@ -164,6 +182,42 @@ public class AutomaticRules {
     rule.setWhenCondition(whenCondition.toString());
     rule.setReferenceFieldSchemaPKId(new ObjectId(referenceId));
     return rule;
+  }
+
+  /**
+   * Creates the url automatic rule.
+   *
+   * @param referenceId the reference id
+   * @param typeEntityEnum the type entity enum
+   * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
+   * @return the rule
+   */
+  public static Rule createUrlAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
+      String nameRule, String shortCode, String description) {
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isURL(value)",
+        "The field must be a valid URL format.", ErrorTypeEnum.ERROR.getValue(), shortCode,
+        description);
+  }
+
+
+
+  /**
+   * Creates the email automatic rule.
+   *
+   * @param referenceId the reference id
+   * @param typeEntityEnum the type entity enum
+   * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
+   * @return the rule
+   */
+  public static Rule createEmailAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
+      String nameRule, String shortCode, String description) {
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isEmail(value)",
+        "The field must be a valid email format.", ErrorTypeEnum.ERROR.getValue(), shortCode,
+        description);
   }
 
   /**

@@ -1,9 +1,8 @@
 package org.eea.interfaces.vo.dataset.enums;
 
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
-import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 
 /**
  * The Enum TypeData.
@@ -18,12 +17,19 @@ public enum DataType {
   TEXT("TEXT"),
 
   /**
-   * The Number.
+   * The Number Integer.
    *
    * Cast in JPA: CAST(fv.value as java.math.BigDecimal)
    */
-  NUMBER("NUMBER"),
+  NUMBER_INTEGER("NUMBER_INTEGER"),
 
+
+  /**
+   * The Number Decimal.
+   *
+   * Cast in JPA: CAST(fv.value as java.math.BigDecimal)
+   */
+  NUMBER_DECIMAL("NUMBER_DECIMAL"),
   /**
    * The Date.
    *
@@ -91,7 +97,11 @@ public enum DataType {
   LINK("LINK"),
 
   /** The link data. */
-  LINK_DATA("LINK_DATA");
+  LINK_DATA("LINK_DATA"),
+
+  URL("URL"),
+
+  EMAIL("EMAIL");
 
 
   /**
@@ -126,9 +136,7 @@ public enum DataType {
    */
   @JsonCreator
   public static DataType fromValue(String value) {
-    return Arrays.stream(DataType.values()).filter(e -> e.value.equals(value))
-        .findFirst()
-        .get();
+    return Arrays.stream(DataType.values()).filter(e -> e.value.equals(value)).findFirst().get();
   }
 
   @Override

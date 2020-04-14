@@ -275,8 +275,12 @@ public class RulesServiceImpl implements RulesService {
           "Field cardinality", "FC" + shortcode, FC_DESCRIPTION));
     } else {
       switch (typeData) {
-        case NUMBER:
-          ruleList.add(AutomaticRules.createNumberAutomaticRule(referenceId, typeEntityEnum,
+        case NUMBER_INTEGER:
+          ruleList.add(AutomaticRules.createNumberIntegerAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case NUMBER_DECIMAL:
+          ruleList.add(AutomaticRules.createNumberDecimalAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
         case DATE:
@@ -315,6 +319,14 @@ public class RulesServiceImpl implements RulesService {
               FIELD_TYPE + typeData, document.get("codelistItems").toString(), "FT" + shortcode,
               FT_DESCRIPTION + typeData));
 
+          break;
+        case URL:
+          ruleList.add(AutomaticRules.createUrlAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+        case EMAIL:
+          ruleList.add(AutomaticRules.createEmailAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
         default:
           LOG.info("This Data Type has not automatic rule {}", typeData.getValue());
