@@ -338,11 +338,8 @@ const Dataflow = withRouter(({ history, match }) => {
         }
       }
     } catch (error) {
-      notificationContext.add({
-        type: 'RELEASED_BY_ID_REPORTER_ERROR',
-        content: {}
-      });
-      if (error.response.status === 401 || error.response.status === 403) {
+      notificationContext.add({ type: 'LOAD_DATAFLOW_DATA_ERROR' });
+      if (error.response.status === 401 || error.response.status === 403 || error.response.status === 500) {
         history.push(getUrl(routes.DATAFLOWS));
       }
     } finally {

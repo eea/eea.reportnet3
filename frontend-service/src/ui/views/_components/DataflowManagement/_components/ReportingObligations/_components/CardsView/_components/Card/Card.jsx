@@ -6,8 +6,6 @@ import styles from './Card.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-import { Checkbox } from 'ui/views/_components/Checkbox';
-
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const Card = ({ checked, date, icon, id, obligation, onCheck, subtitle, title }) => {

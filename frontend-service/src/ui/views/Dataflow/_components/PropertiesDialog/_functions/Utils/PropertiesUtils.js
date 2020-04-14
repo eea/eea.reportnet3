@@ -1,3 +1,6 @@
+import isNil from 'lodash/isNil';
+import moment from 'moment';
+
 const camelCaseToNormal = str => str.replace(/([A-Z])/g, ' $1').replace(/^./, str2 => str2.toUpperCase());
 
 const parseDataflowData = (config, data, dataflowId, messages, user, UserService) => {
@@ -17,7 +20,7 @@ const parseDataflowData = (config, data, dataflowId, messages, user, UserService
   }
 };
 
-const parseObligationsData = data => {
+const parseObligationsData = (data, format) => {
   if (data.obligations) {
     return [
       {
@@ -26,7 +29,9 @@ const parseObligationsData = data => {
           title: data.obligations.title,
           description: data.obligations.description,
           comment: data.obligations.comment,
-          expirationDate: data.obligations.expirationDate
+          expirationDate: !isNil(data.obligations.expirationDate)
+            ? moment(data.obligations.expirationDate).format(format)
+            : '-'
         }
       },
       {
