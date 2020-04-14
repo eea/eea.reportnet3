@@ -583,6 +583,8 @@
     "uploadImage": "Upload your image",
     "selectImage": "Select one",
     "loadDataflowDataError": "Error loading dataflow",
-    "dataCollectionExpirationDate": "Current expiration date is <strong>{:expirationData}</strong>"
+    "dataCollectionExpirationDate": "Current expiration date is <strong>{:expirationData}</strong>",
+    "createValidationTitle": "Create Field Constraint",
+    "editValidationTitle": "Edit Field Constraint"
   }
 }
