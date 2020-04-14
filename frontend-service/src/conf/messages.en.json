@@ -18,7 +18,7 @@
     "categoryShortCode": "Short code",
     "categoryDescription": "Description",
     "chooseChartColor": "Choose your dashboard color",
-    "chooseExpirationDate": "Please, choose data collection expiration date",
+    "chooseExpirationDate": "The expiration date is not defined or has expired. Please, choose data collection expiration date",
     "cleanFilters": "Clean filters",
     "close": "Close",
     "closeSidebar": "Close sidebar",
@@ -581,6 +581,8 @@
     "dark": "Dark",
     "light": "Light",
     "uploadImage": "Upload your image",
-    "selectImage": "Select one"
+    "selectImage": "Select one",
+    "loadDataflowDataError": "Error loading dataflow",
+    "dataCollectionExpirationDate": "Current expiration date is <strong>{:expirationData}</strong>"
   }
 }

@@ -144,7 +144,7 @@ export const Filters = ({
   const renderCalendarFilter = (property, i) => (
     <span key={i} className={styles.dataflowInput} ref={dateRef}>
       {renderOrderFilter(property)}
-      <span className="p-float-label">
+      <span className={`p-float-label ${!sendData ? styles.label : ''}`}>
         <Calendar
           dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
           className={styles.calendarFilter}

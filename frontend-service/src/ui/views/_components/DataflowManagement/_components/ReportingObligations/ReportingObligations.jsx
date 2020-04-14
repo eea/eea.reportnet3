@@ -38,7 +38,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     isTableView: false,
     oblChoosed: {},
     organizations: [],
-    pagination: { first: 0, rows: userContext.userProps.rowsPerPage, page: 0 },
+    pagination: { first: 0, rows: 10, page: 0 },
     searchedData: []
   });
 

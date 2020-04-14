@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
+import isNil from 'lodash/isNil';
 import remove from 'lodash/remove';
-import isUndefined from 'lodash/isUndefined';
 
 import styles from './BigButtonList.module.css';
 
@@ -25,6 +25,7 @@ import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
 import { MetadataUtils } from 'ui/views/_functions/Utils';
+import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const BigButtonList = ({
   dataflowData,
@@ -49,7 +50,7 @@ export const BigButtonList = ({
   const resources = useContext(ResourcesContext);
 
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
-  const [dataCollectionDueDate, setDataCollectionDueDate] = useState();
+  const [dataCollectionDueDate, setDataCollectionDueDate] = useState(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
@@ -58,6 +59,7 @@ export const BigButtonList = ({
   const [isFormReset, setIsFormReset] = useState(true);
   const [isUpdateDatacollectionDialogVisible, setIsUpdateDatacollectionDialogVisible] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
+  const hasExpirationDate = new Date(dataflowDataState.obligations.expirationDate) > new Date();
 
   const receiptBtnRef = useRef(null);
 
@@ -69,15 +71,16 @@ export const BigButtonList = ({
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
 
     if (response) {
-      receiptDispatch({
-        type: 'ON_DOWNLOAD',
-        payload: { isLoading: false }
-      });
+      receiptDispatch({ type: 'ON_DOWNLOAD', payload: { isLoading: false } });
     }
   }, [notificationContext]);
 
+  useEffect(() => {
+    getExpirationDate();
+  }, [dataflowDataState.obligations.expirationDate]);
+
   const downloadPdf = response => {
-    if (!isUndefined(response)) {
+    if (!isNil(response)) {
       DownloadFile(response, `${dataflowData.name}_${Date.now()}.pdf`);
 
       const url = window.URL.createObjectURL(new Blob([response]));
@@ -116,6 +119,15 @@ export const BigButtonList = ({
   const getDeleteSchemaIndex = index => {
     setDeleteSchemaIndex(index);
     setDeleteDialogVisible(true);
+  };
+
+  const getExpirationDate = () => {
+    setDataCollectionDueDate(
+      !isNil(dataflowDataState.obligations.expirationDate) &&
+        new Date(dataflowDataState.obligations.expirationDate) > new Date()
+        ? new Date(dataflowDataState.obligations.expirationDate)
+        : null
+    );
   };
 
   const getMetadata = async ids => {
@@ -338,13 +350,22 @@ export const BigButtonList = ({
 
       <ConfirmDialog
         header={resources.messages['createDataCollection']}
-        disabledConfirm={isUndefined(dataCollectionDueDate)}
+        disabledConfirm={isNil(dataCollectionDueDate)}
         labelCancel={resources.messages['close']}
         labelConfirm={resources.messages['create']}
         onConfirm={() => onCreateDataCollection(new Date(dataCollectionDueDate).getTime() / 1000)}
         onHide={() => setDataCollectionDialog(false)}
         visible={dataCollectionDialog}>
-        <p>{`${resources.messages['chooseExpirationDate']}: `}</p>
+        {hasExpirationDate ? (
+          <p
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(resources.messages['dataCollectionExpirationDate'], {
+                expirationData: dataflowDataState.obligations.expirationDate
+              })
+            }}></p>
+        ) : (
+          <p>{`${resources.messages['chooseExpirationDate']}: `}</p>
+        )}
         <Calendar
           className={styles.calendar}
           disabledDates={[new Date()]}
