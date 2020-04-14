@@ -100,13 +100,7 @@ export const Filters = ({
       payload: {
         filterBy: FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions, dropdownOptions),
         filteredData: cloneDeep(data),
-        labelAnimations: FilterUtils.getLabelInitialState(
-          inputOptions,
-          selectOptions,
-          dateOptions,
-          dropdownOptions,
-          filterState.filterBy
-        ),
+        labelAnimations: FilterUtils.onClearLabelState(inputOptions, selectOptions, dateOptions, dropdownOptions),
         orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions, dropdownOptions)
       }
     });

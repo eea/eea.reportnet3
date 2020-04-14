@@ -356,7 +356,9 @@ export const BigButtonList = ({
         disabledConfirm={isNil(dataCollectionDueDate)}
         labelCancel={resources.messages['close']}
         labelConfirm={resources.messages['create']}
-        onConfirm={() => onCreateDataCollection(new Date(dataCollectionDueDate).getTime() / 1000)}
+        onConfirm={() =>
+          onCreateDataCollection(new Date(moment(dataCollectionDueDate).endOf('day').format()).getTime() / 1000)
+        }
         onHide={() => setDataCollectionDialog(false)}
         visible={dataCollectionDialog}>
         {hasExpirationDate ? (

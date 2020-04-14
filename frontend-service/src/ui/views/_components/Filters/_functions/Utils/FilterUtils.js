@@ -133,6 +133,11 @@ const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value, dateOp
   })
 ];
 
+const onClearLabelState = (input = [], select = [], date = [], dropDown = []) => {
+  const labelByGroup = input.concat(select, date, dropDown);
+  return labelByGroup.reduce((obj, key) => Object.assign(obj, { [key]: false }), {});
+};
+
 export const FilterUtils = {
   getFilterInitialState,
   getFilterKeys,
@@ -140,5 +145,6 @@ export const FilterUtils = {
   getOptionTypes,
   getSelectedKeys,
   getYesterdayDate,
-  onApplyFilters
+  onApplyFilters,
+  onClearLabelState
 };
