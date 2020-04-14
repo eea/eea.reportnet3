@@ -2,8 +2,13 @@ package org.eea.lock.service.impl;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -29,6 +34,12 @@ public class LockServiceImpl implements LockService {
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant SCHEDULER. */
+  private static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(1);
+
+  /** The Constant TASKS. */
+  private static final Map<Integer, ScheduledFuture<?>> TASKS = new HashMap<>();
 
   /** The lock repository. */
   @Autowired
@@ -74,6 +85,10 @@ public class LockServiceImpl implements LockService {
   @Override
   public Boolean removeLock(Integer lockId) {
     Boolean isRemoved = lockRepository.deleteIfPresent(lockId);
+    ScheduledFuture<?> task = TASKS.remove(lockId);
+    if (task != null) {
+      task.cancel(false);
+    }
     LOG.info("Lock removed: {} - {}", lockId, isRemoved);
     return isRemoved;
   }
@@ -137,4 +152,16 @@ public class LockServiceImpl implements LockService {
   public LockVO findByCriteria(Map<String, Object> lockCriteria) {
     return findById(generateHashCode(lockCriteria.values().stream().collect(Collectors.toList())));
   }
+
+  /**
+   * Schedule task.
+   *
+   * @param lockId the lock id
+   */
+  @Override
+  public void scheduleTask(Integer lockId) {
+    ScheduledFuture<?> task = SCHEDULER.schedule(() -> removeLock(lockId), 30, TimeUnit.MINUTES);
+    TASKS.put(lockId, task);
+  }
+
 }

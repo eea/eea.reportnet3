@@ -51,13 +51,17 @@ public class MethodLockAspect {
     LockMethod lockMethod = method.getAnnotation(LockMethod.class);
 
     try {
+      Object rtn;
       Object user = ThreadPropertiesManager.getVariable("user");
       LockVO lockVO = lockService.createLock(new Timestamp(System.currentTimeMillis()),
           user != null ? (String) user : null, LockType.METHOD, getLockCriteria(joinPoint));
 
-      Object rtn = joinPoint.proceed();
       if (lockMethod.removeWhenFinish()) {
+        rtn = joinPoint.proceed();
         lockService.removeLock(lockVO.getId());
+      } else {
+        lockService.scheduleTask(lockVO.getId());
+        rtn = joinPoint.proceed();
       }
 
       return rtn;
