@@ -166,21 +166,6 @@ public class AutomaticRules {
     return rule;
   }
 
-
-  public static Rule createUrlAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
-      String nameRule, String shortCode, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isURL(value)",
-        "The field must be a valid URL.", ErrorTypeEnum.ERROR.getValue(), shortCode, description);
-  }
-
-
-
-  public static Rule createEmailAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
-      String nameRule, String shortCode, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isEmail(value)",
-        "The field must be a valid email.", ErrorTypeEnum.ERROR.getValue(), shortCode, description);
-  }
-
   /**
    * Compose rule.
    *

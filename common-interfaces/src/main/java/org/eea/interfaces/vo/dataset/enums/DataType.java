@@ -1,8 +1,9 @@
 package org.eea.interfaces.vo.dataset.enums;
 
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Arrays;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 
 /**
  * The Enum TypeData.
@@ -89,12 +90,8 @@ public enum DataType {
   /** The link. */
   LINK("LINK"),
 
-
-  URL("URL"),
-
-  EMAIL("EMAIL"),
-
-  NUMBER_DECIMAL("NUMBER_DECIMAL");
+  /** The link data. */
+  LINK_DATA("LINK_DATA");
 
 
   /**
@@ -129,7 +126,9 @@ public enum DataType {
    */
   @JsonCreator
   public static DataType fromValue(String value) {
-    return Arrays.stream(DataType.values()).filter(e -> e.value.equals(value)).findFirst().get();
+    return Arrays.stream(DataType.values()).filter(e -> e.value.equals(value))
+        .findFirst()
+        .get();
   }
 
   @Override
