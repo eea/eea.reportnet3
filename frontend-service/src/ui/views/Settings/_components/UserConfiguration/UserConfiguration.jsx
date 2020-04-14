@@ -99,7 +99,7 @@ const UserConfiguration = props => {
         <h3>{resources.messages['dateFormat']}</h3>
         <h5 className={styles.italicTitle}>{resources.messages['dateFormatWarning']}</h5>
         <Dropdown
-          name="rowPerPage"
+          name="dateFormat"
           options={resources.userParameters['dateFormat']}
           onChange={async e => {
             const inmUserProperties = { ...userContext.userProps };

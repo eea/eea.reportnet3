@@ -10,7 +10,7 @@ const userSettingsDefaultState = {
     visualTheme: 'light',
     showLogoutConfirmation: true,
     userImage: [],
-    dateFormat: 'MM-DD-YYYY'
+    dateFormat: 'YYYY-MM-DD'
   }
 };
 
