@@ -17,6 +17,7 @@ import { ObligationService } from 'core/services/Obligation';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { reportingObligationReducer } from './_functions/Reducers/reportingObligationReducer';
 
@@ -25,6 +26,7 @@ import { ReportingObligationUtils } from './_functions/Utils/ReportingObligation
 export const ReportingObligations = ({ getObligation, oblChecked }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
 
   const [reportingObligationState, reportingObligationDispatch] = useReducer(reportingObligationReducer, {
     countries: [],
@@ -36,7 +38,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     isTableView: false,
     oblChoosed: {},
     organizations: [],
-    pagination: { first: 0, rows: 10, page: 0 },
+    pagination: { first: 0, rows: userContext.userProps.rowsPerPage, page: 0 },
     searchedData: []
   });
 
@@ -90,7 +92,11 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
         type: 'INITIAL_LOAD',
         payload: {
           data: response,
-          filteredData: ReportingObligationUtils.filteredInitialValues(response, oblChecked.id),
+          filteredData: ReportingObligationUtils.filteredInitialValues(
+            response,
+            oblChecked.id,
+            userContext.userProps.dateFormat
+          ),
           oblChoosed: oblChecked,
           filterBy: filterData
         }
