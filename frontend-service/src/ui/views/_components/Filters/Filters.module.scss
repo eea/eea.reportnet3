@@ -21,8 +21,8 @@
       display: flex;
       flex-direction: row;
       justify-content: space-between;
-      width: 70%;
       border-bottom: var(--inputtext-border) !important;
+      width: 100%;
     }
 
     .inputFilter {
@@ -54,6 +54,7 @@
       clip: auto;
       height: auto;
       overflow: visible;
+      width: 70%;
     }
 
     .multiselectFilter {
@@ -120,7 +121,7 @@
 
     .selectHeader {
       border-radius: 3px;
-      color: var(--black);
+      color: var(--floating-label-color);
       font-size: 9pt;
       font-weight: 500;
       padding: 4px;

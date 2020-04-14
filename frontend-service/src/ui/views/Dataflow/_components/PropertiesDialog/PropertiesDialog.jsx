@@ -72,7 +72,7 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
     user,
     UserService
   );
-  const parsedObligationsData = PropertiesUtils.parseObligationsData(dataflowDataState);
+  const parsedObligationsData = PropertiesUtils.parseObligationsData(dataflowDataState, user.userProps.dateFormat);
 
   const dialogFooter = (
     <Fragment>

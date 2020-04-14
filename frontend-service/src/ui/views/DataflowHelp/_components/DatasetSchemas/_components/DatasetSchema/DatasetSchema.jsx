@@ -88,7 +88,7 @@ const parseDesignDataset = (design, validationList) => {
   parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
   parsedDataset.levelErrorTypes = design.levelErrorTypes;
   parsedDataset.validations = validationList;
-
+  console.log({ validationList });
   if (!isUndefined(design.tables) && !isNull(design.tables) && design.tables.length > 0) {
     const tables = design.tables.map(tableDTO => {
       const table = {};
@@ -111,7 +111,6 @@ const parseDesignDataset = (design, validationList) => {
               field.codelistItems = [];
             }
           }
-          console.log({ field });
           return field;
         });
         table.fields = fields;

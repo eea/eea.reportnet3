@@ -4,6 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
+import defaultAvatar from 'assets/images/avatars/defaultAvatar.png';
 import logo from 'assets/images/logo.png';
 import styles from './Header.module.scss';
 
@@ -109,7 +110,7 @@ const Header = withRouter(({ history }) => {
       <img
         ref={avatarImage}
         icon={<FontAwesomeIcon icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />}
-        // src={}
+        src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
         className={styles.userAvatar}
       />
       {/* <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />{' '} */}
