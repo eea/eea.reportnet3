@@ -41,9 +41,9 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
       case 'COORDINATE_LAT':
         return 'num';
       case 'TEXT':
-        return 'alphanum';
+        return 'any';
       default:
-        return 'alphanum';
+        return 'any';
     }
   };
 
