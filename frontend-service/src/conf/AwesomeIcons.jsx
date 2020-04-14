@@ -75,8 +75,7 @@ import {
   faTimes,
   faFolder,
   faCaretRight,
-  faExternalLinkAlt,
-  faListOl
+  faExternalLinkAlt
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
