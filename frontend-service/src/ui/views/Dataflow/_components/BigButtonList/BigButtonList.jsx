@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import isNil from 'lodash/isNil';
 import remove from 'lodash/remove';
+import moment from 'moment';
 
 import styles from './BigButtonList.module.css';
 
@@ -20,6 +21,7 @@ import { DataCollectionService } from 'core/services/DataCollection';
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
@@ -48,6 +50,7 @@ export const BigButtonList = ({
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const user = useContext(UserContext);
 
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
   const [dataCollectionDueDate, setDataCollectionDueDate] = useState(null);
@@ -360,7 +363,7 @@ export const BigButtonList = ({
           <p
             dangerouslySetInnerHTML={{
               __html: TextUtils.parseText(resources.messages['dataCollectionExpirationDate'], {
-                expirationData: dataflowDataState.obligations.expirationDate
+                expirationData: moment(dataflowDataState.obligations.expirationDate).format(user.userProps.dateFormat)
               })
             }}></p>
         ) : (
