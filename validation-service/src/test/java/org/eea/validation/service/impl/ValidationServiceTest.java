@@ -79,9 +79,7 @@ public class ValidationServiceTest {
   private ValidationServiceImpl validationServiceImpl;
 
 
-  /**
-   * The resource management controller
-   */
+  /** The resource management controller. */
   @Mock
   private ResourceManagementControllerZull resourceManagementController;
   /**
@@ -217,16 +215,22 @@ public class ValidationServiceTest {
   List<Long> idList;
 
 
+  /** The attributes. */
   private Map<String, List<String>> attributes;
 
+  /** The field repository. */
   @Mock
   private FieldRepository fieldRepository;
+
+  /** The table repository. */
   @Mock
   private TableRepository tableRepository;
 
+  /** The dataset schema controller. */
   @Mock
   private DatasetSchemaController datasetSchemaController;
 
+  /** The rules error utils. */
   @Mock
   private RulesErrorUtils rulesErrorUtils;
 
@@ -880,6 +884,9 @@ public class ValidationServiceTest {
   }
 
 
+  /**
+   * Run dataset vlaidations exception.
+   */
   @Test
   public void runDatasetVlaidationsException() {
     doThrow(new RuntimeException()).when(kieSession).fireAllRules();
@@ -888,6 +895,9 @@ public class ValidationServiceTest {
         Mockito.any());
   }
 
+  /**
+   * Run table validations exception.
+   */
   @Test
   public void runTableValidationsException() {
     doThrow(new RuntimeException()).when(kieSession).fireAllRules();
@@ -896,6 +906,9 @@ public class ValidationServiceTest {
         Mockito.any());
   }
 
+  /**
+   * Run record validations exception.
+   */
   @Test
   public void runRecordValidationsException() {
     doThrow(new RuntimeException()).when(kieSession).fireAllRules();
@@ -904,6 +917,9 @@ public class ValidationServiceTest {
         Mockito.any());
   }
 
+  /**
+   * Run field validations exception.
+   */
   @Test
   public void runFieldValidationsException() {
     doThrow(new RuntimeException()).when(kieSession).fireAllRules();
@@ -912,9 +928,14 @@ public class ValidationServiceTest {
         Mockito.any());
   }
 
+  /**
+   * Load rules knowledge base exception.
+   *
+   * @throws EEAException the EEA exception
+   * @throws FileNotFoundException the file not found exception
+   */
   @Test(expected = EEAException.class)
   public void loadRulesKnowledgeBaseException() throws EEAException, FileNotFoundException {
-    // Mockito.when(datasetSchemaController.getDatasetSchemaId(Mockito.any())).thenReturn("");
     doThrow(new NullPointerException()).when(datasetSchemaController)
         .getDatasetSchemaId(Mockito.any());
     try {
