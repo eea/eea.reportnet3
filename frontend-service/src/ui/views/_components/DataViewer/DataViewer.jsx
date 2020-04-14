@@ -237,7 +237,6 @@ const DataViewer = withRouter(
         }
         setFetchedData(dataFiltered);
       };
-      console.log({ levelErrorValidations });
       levelErrorValidations = removeSelectAllFromList(levelErrorValidations);
 
       setIsLoading(true);
@@ -318,7 +317,6 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       if (recordErrorPositionId === -1) {
-        console.log(records.recordsPerPage);
         onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
       }
     }, [levelErrorValidations]);

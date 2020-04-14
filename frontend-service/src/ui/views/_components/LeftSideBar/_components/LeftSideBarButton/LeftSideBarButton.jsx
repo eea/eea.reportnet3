@@ -17,7 +17,6 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
-    console.log(notificationContext.all);
     if (notificationContext.all.length > 0) {
       setAnimate(true);
     }
