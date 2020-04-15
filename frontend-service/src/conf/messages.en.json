@@ -586,6 +586,8 @@
     "updateAttributesUserServiceError": "Error updating user preferences.",
     "theme": "Theme",
     "dateFormatSubtitle": "Select the desired date format to visualice.",
-    "qcRuleUpdatingError": "Error udpating the rule, please check it"
+    "qcRuleUpdatingError": "Error udpating the rule, please check it",
+    "createFieldConstraintTitle": "Create Field Constraint",
+    "editFieldConstraint": "Update Field Constraint"
   }
 }

@@ -303,8 +303,8 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     <Dialog
       header={
         validationContext.ruleEdit
-          ? resourcesContext.messages.editValidationTitle
-          : resourcesContext.messages.createValidationTitle
+          ? resourcesContext.messages.editFieldConstraint
+          : resourcesContext.messages.createFieldConstraintTitle
       }
       visible={validationContext.isVisible}
       style={{ width: '90%' }}
