@@ -87,7 +87,7 @@ const LeftSideBar = withRouter(({ history }) => {
         e.preventDefault();
         setRun(true);
       },
-      title: leftSideBarContext.helpTitle,
+      title: 'help',
       icon: 'questionCircle',
       // label: leftSideBarContext.helpTitle
       label: 'help'
