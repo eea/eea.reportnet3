@@ -1,6 +1,10 @@
 import jwt_decode from 'jwt-decode';
 import moment from 'moment';
-import { isUndefined } from 'lodash';
+
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
 import { apiUser } from 'core/infrastructure/api/domain/model/User';
 import { User } from 'core/domain/model/User/User';
@@ -45,20 +49,49 @@ const uploadImg = async (userId, imgData) => {
 
 const getConfiguration = async () => {
   const userConfigurationDTO = await apiUser.configuration();
-  const userConfiguration = parseConfigurationDTO(userConfigurationDTO);
-  return userConfiguration;
+  return parseConfigurationDTO(userConfigurationDTO);
 };
 
 const parseConfigurationDTO = userConfigurationDTO => {
   const userConfiguration = {};
-  userConfiguration.dateFormat = userConfigurationDTO.dateFormat[0];
-  userConfiguration.defaultLogoutConfirmation =
-    userConfigurationDTO.showLogoutConfirmation[0] === 'false'
+
+  const userDefaultConfiguration = {
+    dateFormat: 'MM-DD-YYYY',
+    defaultLogoutConfirmation: true,
+    defaultRowsNumber: 10,
+    theme: 'light',
+    userImage: []
+  };
+
+  if (isNil(userConfigurationDTO) || isEmpty(userConfigurationDTO)) {
+    userConfiguration.dateFormat = userDefaultConfiguration.dateFormat;
+    userConfiguration.defaultLogoutConfirmation = userDefaultConfiguration.defaultLogoutConfirmation;
+    userConfiguration.defaultRowsNumber = userDefaultConfiguration.defaultRowsNumber;
+    userConfiguration.theme = userDefaultConfiguration.theme;
+    userConfiguration.userImage = userDefaultConfiguration.userImage;
+  } else {
+    userConfiguration.dateFormat = !isNil(userConfigurationDTO.dateFormat[0])
+      ? userConfigurationDTO.dateFormat[0]
+      : userDefaultConfiguration.dateFormat;
+
+    userConfiguration.showLogoutConfirmation = isNil(userConfigurationDTO.defaultLogoutConfirmation)
+      ? userDefaultConfiguration.defaultLogoutConfirmation
+      : userConfigurationDTO.showLogoutConfirmation[0] === 'false'
       ? (userConfiguration.defaultLogoutConfirmation = false)
       : (userConfiguration.defaultLogoutConfirmation = true);
-  userConfiguration.defaultRowsNumber = userConfigurationDTO.rowsPerPage[0];
-  userConfiguration.theme = userConfigurationDTO.visualTheme[0];
-  userConfiguration.userImage = userConfigurationDTO.userImage;
+
+    userConfiguration.defaultRowsNumber = !isNil(userConfigurationDTO.rowsPerPage[0])
+      ? parseInt(userConfigurationDTO.rowsPerPage[0])
+      : userDefaultConfiguration.defaultRowsNumber;
+
+    userConfiguration.theme = !isNil(userConfigurationDTO.visualTheme[0])
+      ? userConfigurationDTO.visualTheme[0]
+      : userDefaultConfiguration.theme;
+
+    userConfiguration.userImage = !isNil(userConfigurationDTO.userImage)
+      ? userConfigurationDTO.userImage
+      : userDefaultConfiguration.userImage;
+  }
   return userConfiguration;
 };
 

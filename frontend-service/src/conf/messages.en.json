@@ -588,6 +588,7 @@
     "dateFormatSubtitle": "Select the desired date format to visualice.",
     "qcRuleUpdatingError": "Error udpating the rule, please check it",
     "createFieldConstraintTitle": "Create Field Constraint",
-    "editFieldConstraint": "Update Field Constraint"
+    "editFieldConstraint": "Update Field Constraint",
+    "myDataflows": "My dataflows"
   }
 }

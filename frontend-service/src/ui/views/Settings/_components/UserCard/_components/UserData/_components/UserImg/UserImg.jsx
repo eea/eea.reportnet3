@@ -135,7 +135,13 @@ const UserImg = () => {
         onHide={e => setIsAvatarDialogVisible(false)}>
         <div className={styles.gridContainer}>{listOfImages()}</div>
       </Dialog>
-      <ReactTooltip className={styles.tooltipClass} id="addAvatar" place="top" effect="solid" clickable={true}>
+      <ReactTooltip
+        className={styles.tooltipClass}
+        clickable={true}
+        effect="solid"
+        globalEventOff="click"
+        id="addAvatar"
+        place="top">
         <Button
           className={`p-button-secondary p-button-animated-blink`}
           // label={isEditForm ? resources.messages['save'] : resources.messages['create']}
