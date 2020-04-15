@@ -351,6 +351,9 @@
         },
         {
           "key": "UPDATE_ATTRIBUTES_USER_SERVICE_ERROR"
+        },
+        {
+          "key": "QC_RULE_UPDATING_ERROR"
         }
       ]
     },
