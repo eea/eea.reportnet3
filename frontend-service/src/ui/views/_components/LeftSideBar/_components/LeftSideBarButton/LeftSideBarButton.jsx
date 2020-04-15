@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import ReactTooltip from 'react-tooltip';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, label, onClick, style, title }) => {
@@ -17,18 +18,14 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
-    if (notificationContext.all.length > 0) {
+    if (notificationContext.newNotification) {
       setAnimate(true);
-    }
-  }, [notificationContext.all]);
-
-  useEffect(() => {
-    if (animate) {
+    } else {
       setTimeout(() => {
         setAnimate(false);
       }, 600);
     }
-  }, [animate]);
+  }, [notificationContext.newNotification]);
 
   const defaultLayout = (
     <>
@@ -57,14 +54,16 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
   const buttonsLayouts = { defaultLayout, notificationsLayout };
 
   return (
-    <a
-      className={className}
-      href={href}
-      onClick={onClick}
-      style={style}
-      title={!leftSideBarContext.isLeftSideBarOpened ? resourcesContext.messages[title] : undefined}>
-      <div className={styles.leftSideBarElementWrapper}>{buttonsLayouts[`${buttonType}Layout`]}</div>
-    </a>
+    <>
+      <a className={className} href={href} onClick={onClick} style={style} data-tip data-for={title}>
+        <div className={styles.leftSideBarElementWrapper}>{buttonsLayouts[`${buttonType}Layout`]}</div>
+      </a>
+      {!leftSideBarContext.isLeftSideBarOpened ? (
+        <ReactTooltip className={styles.tooltipClass} effect="solid" id={title} place="right">
+          <span>{!leftSideBarContext.isLeftSideBarOpened ? resourcesContext.messages[title] : undefined}</span>
+        </ReactTooltip>
+      ) : null}
+    </>
   );
 };
 

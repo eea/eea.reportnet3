@@ -66,11 +66,13 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       setIsLoading(true);
       const validationsServiceList = await ValidationService.getAll(datasetSchemaId);
 
-      validationsServiceList.validations.forEach(validation => {
-        const aditionalInfo = getAditionalValidationInfo(validation.referenceId);
-        validation.table = aditionalInfo.tableName;
-        validation.field = aditionalInfo.fieldName;
-      });
+      if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
+        validationsServiceList.validations.forEach(validation => {
+          const aditionalInfo = getAditionalValidationInfo(validation.referenceId);
+          validation.table = aditionalInfo.tableName;
+          validation.field = aditionalInfo.fieldName;
+        });
+      }
 
       setValidationsList(validationsServiceList);
     } catch (error) {
