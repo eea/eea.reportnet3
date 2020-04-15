@@ -20,17 +20,6 @@ const Settings = withRouter(({ history }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
 
-  // useEffect(() => {
-  //   document.querySelectorAll('.userSettingsBtn').forEach(btn => {
-  //     btn.addEventListener('click', initUserSettingsSection);
-  //   });
-  //   return () => {
-  //     document.querySelectorAll('.userSettingsBtn').forEach(btn => {
-  //       btn.removeEventListener('click', initUserSettingsSection);
-  //     });
-  //   };
-  // }, []);
-
   useEffect(() => {
     breadCrumbContext.add([
       {
@@ -73,12 +62,12 @@ const Settings = withRouter(({ history }) => {
 
   const userConfigurations = () =>
     layout(
-      <div>
+      <div className={styles.settingsContainer}>
         <div className="rep-row">
           <div className={` rep-col-12 rep-col-sm-12`}>
             <Title
               title={resources.messages['userSettingsTitle']}
-              icon="user-profile"
+              icon="userConfig"
               iconSize="4rem"
               subtitle={resources.messages['userSettingsSubtitle']}
             />

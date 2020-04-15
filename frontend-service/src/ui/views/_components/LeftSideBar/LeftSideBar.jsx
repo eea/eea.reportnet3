@@ -38,6 +38,20 @@ const LeftSideBar = withRouter(({ history }) => {
     }
   };
 
+  const renderHome = () => {
+    const userButtonProps = {
+      href: getUrl(routes['DATAFLOWS']),
+      onClick: e => {
+        e.preventDefault();
+        history.push(getUrl(routes['DATAFLOWS']));
+      },
+      title: 'dataflows',
+      icon: 'home',
+      label: 'dataflows'
+    };
+    return <LeftSideBarButton {...userButtonProps} />;
+  };
+
   const renderUserProfile = () => {
     const userButtonProps = {
       href: getUrl(routes['SETTINGS']),
@@ -47,8 +61,7 @@ const LeftSideBar = withRouter(({ history }) => {
       },
       title: 'userSettings',
       icon: 'user-profile',
-      label: 'userSettings',
-      className: 'userSettingsBtn'
+      label: 'userSettings'
     };
     return <LeftSideBarButton {...userButtonProps} />;
   };
@@ -148,9 +161,10 @@ const LeftSideBar = withRouter(({ history }) => {
         {
           <>
             <div className={styles.barSection}>
+              {renderHome()}
               {renderUserProfile()}
-              {renderUserNotifications()}
               {renderHelp()}
+              {renderUserNotifications()}
             </div>
             <hr />
             <div className={styles.barSection}>{renderSectionButtons()}</div>

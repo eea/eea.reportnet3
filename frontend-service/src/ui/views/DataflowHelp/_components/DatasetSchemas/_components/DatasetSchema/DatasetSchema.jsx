@@ -83,12 +83,22 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
 //   }
 // };
 
+const getFieldFormat = fieldType => {
+  switch (fieldType.toUpperCase()) {
+    case 'DATE':
+      return 'YYYY-MM-DD';
+    case 'TEXT':
+      return '5000 characters';
+    default:
+      return '';
+  }
+};
+
 const parseDesignDataset = (design, validationList) => {
   const parsedDataset = {};
   parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
   parsedDataset.levelErrorTypes = design.levelErrorTypes;
   parsedDataset.validations = validationList;
-  console.log({ validationList });
   if (!isUndefined(design.tables) && !isNull(design.tables) && design.tables.length > 0) {
     const tables = design.tables.map(tableDTO => {
       const table = {};
@@ -111,6 +121,7 @@ const parseDesignDataset = (design, validationList) => {
               field.codelistItems = [];
             }
           }
+          field.format = getFieldFormat(fieldDTO.type);
           return field;
         });
         table.fields = fields;
