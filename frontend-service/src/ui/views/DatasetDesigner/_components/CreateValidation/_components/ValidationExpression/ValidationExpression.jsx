@@ -164,6 +164,7 @@ const ValidationExpression = ({
       </span>
       <span>
         <Button
+          className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton} p-button-animated-blink`}
           disabled={isDisabled}
           type="button"
           icon="trash"

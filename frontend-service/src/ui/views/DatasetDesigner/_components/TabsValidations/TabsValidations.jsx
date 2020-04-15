@@ -1,7 +1,10 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { capitalize, isEmpty, isUndefined } from 'lodash';
+import capitalize from 'lodash/capitalize';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './TabsValidations.module.scss';
 
@@ -23,7 +26,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
-const TabsValidations = withRouter(({ datasetSchemaId, dataset, onHideValidationsDialog }) => {
+const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSchemaId, onHideValidationsDialog }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
@@ -63,8 +66,15 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset, onHideValidation
       setIsLoading(true);
       const validationsServiceList = await ValidationService.getAll(datasetSchemaId);
 
+      validationsServiceList.validations.forEach(validation => {
+        const aditionalInfo = getAditionalValidationInfo(validation.referenceId);
+        validation.table = aditionalInfo.tableName;
+        validation.field = aditionalInfo.fieldName;
+      });
+
       setValidationsList(validationsServiceList);
     } catch (error) {
+      console.log(error);
       notificationContext.add({
         type: 'VALIDATION_SERVICE_GET_ALL_ERROR'
       });
@@ -97,6 +107,25 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset, onHideValidation
     </div>
   );
 
+  const getAditionalValidationInfo = referenceId => {
+    const aditionalInfo = {};
+    datasetSchemaAllTables.forEach(table => {
+      if (!isUndefined(table.records)) {
+        table.records.forEach(record =>
+          record.fields.forEach(field => {
+            if (!isNil(field)) {
+              if (field.fieldId === referenceId) {
+                aditionalInfo.tableName = table.tableSchemaName;
+                aditionalInfo.fieldName = field.name;
+              }
+            }
+          })
+        );
+      }
+    });
+    return aditionalInfo;
+  };
+
   const getHeader = fieldHeader => {
     let header;
     if (fieldHeader === 'levelError') {
@@ -117,14 +146,16 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset, onHideValidation
       { id: 'shortCode', index: 1 },
       { id: 'name', index: 2 },
       { id: 'description', index: 3 },
-      { id: 'levelError', index: 4 },
-      { id: 'enabled', index: 5 },
-      { id: 'automatic', index: 6 },
-      { id: 'referenceId', index: 7 },
-      { id: 'activationGroup', index: 8 },
-      { id: 'date', index: 9 },
-      { id: 'entityType', index: 10 },
-      { id: 'actionButtons', index: 11 }
+      { id: 'table', index: 4 },
+      { id: 'field', index: 5 },
+      { id: 'levelError', index: 6 },
+      { id: 'enabled', index: 7 },
+      { id: 'automatic', index: 8 },
+      { id: 'referenceId', index: 9 },
+      { id: 'activationGroup', index: 10 },
+      { id: 'date', index: 11 },
+      { id: 'entityType', index: 12 },
+      { id: 'actionButtons', index: 13 }
     ];
     return validations
       .map(error => validationsWithPriority.filter(e => error === e.id))
@@ -164,9 +195,10 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset, onHideValidation
     const invisibleFields = ['id', 'referenceId', 'activationGroup', 'condition', 'date', 'entityType'];
     if (field.toUpperCase() === 'DESCRIPTION') {
       style.width = '40%';
-    } else {
-      style.width = '20%';
     }
+    // else {
+    //   style.width = '20%';
+    // }
     if (invisibleFields.includes(field)) {
       style.display = 'none';
     } else {
