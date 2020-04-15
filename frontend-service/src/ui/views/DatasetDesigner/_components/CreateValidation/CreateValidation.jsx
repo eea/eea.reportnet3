@@ -301,7 +301,11 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
 
   const dialogLayout = children => (
     <Dialog
-      header="Create Field Validation rule"
+      header={
+        validationContext.ruleEdit
+          ? resourcesContext.messages.editValidationTitle
+          : resourcesContext.messages.createValidationTitle
+      }
       visible={validationContext.isVisible}
       style={{ width: '90%' }}
       onHide={e => onHide()}>

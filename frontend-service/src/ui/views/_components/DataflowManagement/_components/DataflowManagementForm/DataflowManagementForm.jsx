@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import * as Yup from 'yup';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { ErrorMessage, Field, Form, Formik } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
-import styles from './DataflowManagementForm.module.css';
+import styles from './DataflowManagementForm.module.scss';
 
 import DataflowConf from 'conf/dataflow.config.json';
 
@@ -115,6 +115,7 @@ const DataflowManagementForm = ({
                 autoComplete="off"
                 name="description"
                 component="textarea"
+                rows="10"
                 onChange={event => getData({ ...data, description: event.target.value })}
                 placeholder={resources.messages['createDataflowDescription']}
                 value={data.description}
@@ -122,27 +123,25 @@ const DataflowManagementForm = ({
               <ErrorMessage className="error" name="description" component="div" />
             </div>
 
-            <div
-              className={`formField${
-                (!isEmpty(errors.obligation) && !isEmpty(touched.obligation) && touched.obligation.title) ||
-                isObligationEmpty
-                  ? ' error'
-                  : ''
-              } ${styles.search}`}>
+            <div className={`${styles.search}`}>
+              <Button
+                className={`p-button-secondary`}
+                icon="search"
+                label={resources.messages['search']}
+                onMouseDown={onSearch}
+              />
               <Field
-                className={styles.searchInput}
+                className={`${styles.searchInput} ${
+                  (!isEmpty(errors.obligation) && !isEmpty(touched.obligation) && touched.obligation.title) ||
+                  isObligationEmpty
+                    ? styles.searchErrors
+                    : ''
+                }`}
                 name="obligation.title"
                 placeholder={resources.messages['associatedObligation']}
                 readOnly={true}
                 type="text"
                 value={data.obligation.title}
-              />
-              <Button
-                className={styles.searchButton}
-                icon="search"
-                label={resources.messages['search']}
-                layout="simple"
-                onClick={onSearch}
               />
               <ErrorMessage className="error" name="obligation.title" component="div" />
             </div>

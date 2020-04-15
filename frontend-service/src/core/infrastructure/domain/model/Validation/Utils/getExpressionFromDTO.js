@@ -14,9 +14,8 @@ export const getExpressionFromDTO = (expression, allExpressions, parentUnion) =>
   newExpression.operatorValue = config.validations.reverseEquivalences[expression.operator];
   newExpression.expressionValue = expression.arg2;
   newExpression.expressions = [];
-  if (!isNil(expression.arg2) && !isNil(expression.arg2.operator) && expression.arg2.operator == 'LEN') {
+  if (!isNil(expression.arg1) && !isNil(expression.arg1.operator) && expression.arg1.operator == 'LEN') {
     newExpression.operatorType = 'LEN';
-    newExpression.expressionValue = expression.arg1;
   } else {
     newExpression.operatorType = getExpressionOperatorType(expression.operator);
   }
