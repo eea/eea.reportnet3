@@ -80,7 +80,7 @@ public class DataFlowControllerImpl implements DataFlowController {
       if (isDataCustodian()) {
         result = dataflowService.getById(id);
       } else {
-        result = dataflowService.getByIdNoRepresentatives(id);
+        result = dataflowService.getByIdUserEmailOnly(id);
       }
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());

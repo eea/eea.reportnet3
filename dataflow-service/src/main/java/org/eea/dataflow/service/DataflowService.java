@@ -29,7 +29,7 @@ public interface DataflowService {
    * @return the by id no representatives
    * @throws EEAException the EEA exception
    */
-  DataFlowVO getByIdNoRepresentatives(Long id) throws EEAException;
+  DataFlowVO getByIdUserEmailOnly(Long id) throws EEAException;
 
   /**
    * Gets the by status.

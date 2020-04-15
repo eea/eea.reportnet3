@@ -24,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public interface UserManagementController {
 
-
   /**
    * The interface User management controller zull.
    */
@@ -148,7 +147,6 @@ public interface UserManagementController {
   @RequestMapping(value = "/createUsers", method = RequestMethod.POST)
   void createUsers(@RequestParam("file") MultipartFile file) throws IOException;
 
-
   /**
    * Gets the users.
    *
@@ -208,6 +206,12 @@ public interface UserManagementController {
   @RequestMapping(value = "/getAttributes", method = RequestMethod.GET)
   Map<String, List<String>> getUserAttributes();
 
-
-
+  /**
+   * Gets the email by user id.
+   *
+   * @param userId the user id
+   * @return the email by user id
+   */
+  @GetMapping("/getUserByUserId")
+  UserRepresentationVO getEmailByUserId(@RequestParam("userId") String userId);
 }

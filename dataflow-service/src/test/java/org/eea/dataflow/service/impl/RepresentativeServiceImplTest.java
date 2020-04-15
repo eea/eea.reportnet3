@@ -377,4 +377,14 @@ public class RepresentativeServiceImplTest {
       throw e;
     }
   }
+
+  @Test
+  public void getRepresetativesByDataflowIdAndEmailTest() {
+    List<Representative> representatives = new ArrayList<>();
+    Mockito.when(representativeRepository.findByDataflowIdAndEmail(Mockito.any(), Mockito.any()))
+        .thenReturn(representatives);
+    representativeServiceImpl.getRepresetativesByDataflowIdAndEmail(1L, "provider@reportnet.net");
+    Assert.assertEquals(0, representativeServiceImpl
+        .getRepresetativesByDataflowIdAndEmail(1L, "provider@reportnet.net").size());
+  }
 }

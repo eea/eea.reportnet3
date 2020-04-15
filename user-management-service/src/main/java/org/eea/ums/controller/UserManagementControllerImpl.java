@@ -307,6 +307,24 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   /**
+   * Gets the email by user id.
+   *
+   * @param userId the user id
+   * @return the email by user id
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping("/getUserByUserId")
+  public UserRepresentationVO getEmailByUserId(@RequestParam("userId") String userId) {
+    UserRepresentationVO userVO = null;
+    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    if (user != null) {
+      userVO = userRepresentationMapper.entityToClass(user);
+    }
+    return userVO;
+  }
+
+  /**
    * Update user attributes.
    *
    * @param attributes the attributes
