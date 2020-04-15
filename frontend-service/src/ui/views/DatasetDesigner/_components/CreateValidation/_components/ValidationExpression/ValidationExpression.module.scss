@@ -3,6 +3,13 @@
   justify-content: flex-start;
   .group {
     margin-right: 2rem;
+    :global .p-checkbox-box {
+      width: 29px !important;
+      height: 29px !important;
+      :global .p-checkbox-icon {
+        font-size: 27px;
+      }
+    }
   }
   .union {
     width: 80px;
@@ -32,6 +39,6 @@
     border: 1px solid var(--c-custom-gray) !important;
     box-shadow: 0 0 0 0em var(--blue-120) !important;
     color: var(--errors) !important;
-    margin-left: 3px !important;
+    margin: 0 !important;
   }
 }
