@@ -1,0 +1,36 @@
+.search {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  cursor: pointer !important;
+
+  .searchInput {
+    border: none;
+    padding: 10px;
+    outline: none;
+    border-radius: 0 !important;
+    background-color: var(--form-field-bg);
+
+    &:focus {
+      border: none;
+      box-shadow: none;
+    }
+  }
+
+  .searchErrors {
+    &::placeholder {
+      color: var(--errors);
+      opacity: 1;
+    }
+  }
+}
+
+.buttonWrap {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+
+  .cancelButton {
+    margin-left: 0.5rem !important;
+  }
+}
