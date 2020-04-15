@@ -589,6 +589,7 @@
     "qcRuleUpdatingError": "Error udpating the rule, please check it",
     "createFieldConstraintTitle": "Create Field Constraint",
     "editFieldConstraint": "Update Field Constraint",
-    "myDataflows": "My dataflows"
+    "myDataflows": "My dataflows",
+    "enabled": "Enabled"
   }
 }
