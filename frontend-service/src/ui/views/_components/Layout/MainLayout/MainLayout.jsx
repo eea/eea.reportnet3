@@ -30,13 +30,14 @@ const MainLayout = ({ children }) => {
       const userConfiguration = await UserService.getConfiguration();
 
       userContext.onChangeDateFormat(userConfiguration.dateFormat);
-      userContext.onChangeRowsPerPage(parseInt(userConfiguration.defaultRowsNumber));
-      userContext.onToggleLogoutConfirm(userConfiguration.defaultLogoutConfirmation);
-      userContext.onToggleVisualTheme(userConfiguration.theme);
+      userContext.onChangeRowsPerPage(parseInt(userConfiguration.rowsPerPage));
+      userContext.onToggleLogoutConfirm(userConfiguration.showLogoutConfirmation);
+      userContext.onToggleVisualTheme(userConfiguration.visualTheme);
       userContext.onUserFileUpload(userConfiguration.userImage);
-      themeContext.onToggleTheme(userConfiguration.theme);
+      themeContext.onToggleTheme(userConfiguration.visualTheme);
       userContext.onToggleSettingsLoaded(true);
     } catch (error) {
+      console.log(error);
       userContext.onToggleSettingsLoaded(false);
       notifications.add({
         type: 'GET_CONFIGURATION_USER_SERVICE_ERROR'
