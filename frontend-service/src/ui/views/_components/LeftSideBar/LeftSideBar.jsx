@@ -45,9 +45,9 @@ const LeftSideBar = withRouter(({ history }) => {
         e.preventDefault();
         history.push(getUrl(routes['DATAFLOWS']));
       },
-      title: 'dataflows',
+      title: 'myDataflows',
       icon: 'home',
-      label: 'dataflows'
+      label: 'myDataflows'
     };
     return <LeftSideBarButton {...userButtonProps} />;
   };
