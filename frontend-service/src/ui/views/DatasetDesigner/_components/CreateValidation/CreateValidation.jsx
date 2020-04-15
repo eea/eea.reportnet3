@@ -436,7 +436,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
             </div>
             <div className={styles.subsection}>
               <div className={`${styles.field} ${styles.qcActive}`}>
-                <label htmlFor="QcActive">{resourcesContext.messages.active}</label>
+                <label htmlFor="QcActive">{resourcesContext.messages.enabled}</label>
                 <Checkbox
                   id={`${componentName}__active`}
                   onChange={e =>
