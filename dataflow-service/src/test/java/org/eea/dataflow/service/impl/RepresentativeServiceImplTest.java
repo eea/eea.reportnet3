@@ -424,4 +424,18 @@ public class RepresentativeServiceImplTest {
     representativeServiceImpl.findDataProvidersByIds(new ArrayList<>());
     Mockito.verify(dataProviderMapper, times(2)).entityToClass(Mockito.any());
   }
+
+  /**
+   * Find Representatives by dataflowId and Email test.
+   */
+  @Test
+  public void getRepresetativesByDataflowIdAndEmailTest() {
+    List<Representative> representatives = new ArrayList<>();
+    Mockito.when(representativeRepository.findByDataflowIdAndEmail(Mockito.any(), Mockito.any()))
+        .thenReturn(representatives);
+    representativeServiceImpl.getRepresetativesByDataflowIdAndEmail(1L, "provider@reportnet.net");
+    Assert.assertEquals(0, representativeServiceImpl
+        .getRepresetativesByDataflowIdAndEmail(1L, "provider@reportnet.net").size());
+  }
+  
 }

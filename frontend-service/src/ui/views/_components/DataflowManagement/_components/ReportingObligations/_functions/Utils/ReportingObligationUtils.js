@@ -1,7 +1,8 @@
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import moment from 'moment';
 
-const filteredInitialValues = (data, checkedId) => {
+const filteredInitialValues = (data, checkedId, format) => {
   let obligationList = data;
   const orderedData = onOrderCheckedValue(data, checkedId);
 
@@ -11,7 +12,7 @@ const filteredInitialValues = (data, checkedId) => {
     id: obligation.obligationId,
     title: obligation.title,
     legalInstrument: !isNil(obligation.legalInstruments) && obligation.legalInstruments.alias,
-    dueDate: obligation.expirationDate
+    dueDate: !isNil(obligation.expirationDate) ? moment(obligation.expirationDate).format(format) : '-'
   }));
 };
 

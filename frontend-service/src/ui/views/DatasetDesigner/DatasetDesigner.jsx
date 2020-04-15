@@ -69,6 +69,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [datasetHasData, setDatasetHasData] = useState(false);
   const [datasetSchemaId, setDatasetSchemaId] = useState('');
   const [datasetSchemaName, setDatasetSchemaName] = useState('');
+  const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
   const [datasetSchemas, setDatasetSchemas] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
@@ -96,6 +97,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         const dataset = await DatasetService.schemaById(datasetId);
         setDatasetDescription(dataset.datasetSchemaDescription);
         setDatasetSchemaId(dataset.datasetSchemaId);
+        setDatasetSchemaAllTables(dataset.tables);
       };
       const getDatasetSchemas = async () => {
         const datasetSchemasDTO = await DataflowService.getAllSchemas(dataflowId);
@@ -280,6 +282,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onLoadTableData = hasData => setDatasetHasData(hasData);
 
+  const onUpdateTable = tables => setDatasetSchemaAllTables(tables);
+
   const onKeyChange = event => {
     if (event.key === 'Escape') {
       setDatasetDescription(initialDatasetDescription);
@@ -354,8 +358,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           style={{ width: '80%' }}
           visible={validationListDialogVisible}>
           <TabsValidations
-            datasetSchemaId={datasetSchemaId}
             dataset={metaData.dataset}
+            datasetSchemaAllTables={datasetSchemaAllTables}
+            datasetSchemaId={datasetSchemaId}
             onHideValidationsDialog={onHideValidationsDialog}
           />
         </Dialog>
@@ -465,6 +470,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           isPreviewModeOn={isPreviewModeOn}
           onChangeReference={onChangeReference}
           onLoadTableData={onLoadTableData}
+          onUpdateTable={onUpdateTable}
         />
         <Snapshots
           isLoadingSnapshotListData={isLoadingSnapshotListData}

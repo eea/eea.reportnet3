@@ -9,7 +9,6 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const UserData = () => {
   const userContext = useContext(UserContext);
-
   const resources = useContext(ResourcesContext);
 
   return (
@@ -17,11 +16,8 @@ const UserData = () => {
       <div className={styles.userLogoBoxContainer}>
         <UserImg />
       </div>
-
       <div className={styles.userName}>{userContext.preferredUsername}</div>
-
       <div className={styles.userMail}>{userContext.preferredUsername}@reportnet.net</div>
-
       <div>
         <a
           type="button"

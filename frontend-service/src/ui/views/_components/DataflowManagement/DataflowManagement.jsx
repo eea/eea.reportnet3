@@ -27,6 +27,10 @@ export const DataflowManagement = ({
     obligation:
       isEditForm && state.obligations
         ? { id: state.obligations.obligationId, title: state.obligations.title }
+        : { id: null, title: '' },
+    obligationPrevState:
+      isEditForm && state.obligations
+        ? { id: state.obligations.obligationId, title: state.obligations.title }
         : { id: null, title: '' }
   };
 
@@ -42,19 +46,32 @@ export const DataflowManagement = ({
       <Button
         icon="check"
         label={resources.messages['ok']}
-        onClick={() => onManageDialogs('isRepObDialogVisible', false, isDialogVisible, true)}
+        onClick={() => {
+          onManageDialogs('isRepObDialogVisible', false, isDialogVisible, true);
+          getPrevState(dataflowManagementState.obligation);
+        }}
       />
       <Button
         icon="cancel"
         className="p-button-secondary"
         label={resources.messages['cancel']}
-        onClick={() => {
-          onManageDialogs('isRepObDialogVisible', false, isDialogVisible, true);
-          onResetObl();
-        }}
+        onClick={() => onHideObligationDialog()}
       />
     </Fragment>
   );
+
+  const getPrevState = data =>
+    dataflowManagementDispatch({ type: 'PREV_STATE', payload: { id: data.id, title: data.title } });
+
+  const onHideDataflowDialog = () => {
+    onManageDialogs(isDialogVisible, false);
+    onResetData();
+  };
+
+  const onHideObligationDialog = () => {
+    onManageDialogs('isRepObDialogVisible', false, isDialogVisible, true);
+    onResetObl();
+  };
 
   const onLoadData = ({ name, description }) =>
     dataflowManagementDispatch({ type: 'ON_LOAD_DATA', payload: { name, description } });
@@ -63,10 +80,10 @@ export const DataflowManagement = ({
     dataflowManagementDispatch({ type: 'ON_LOAD_OBLIGATION', payload: { id, title } });
 
   const onResetData = () =>
-    dataflowManagementDispatch({ type: 'RESET_STATE', payload: { initialData: dataflowManagementInitialState } });
+    dataflowManagementDispatch({ type: 'RESET_STATE', payload: { resetData: dataflowManagementInitialState } });
 
   const onResetObl = () =>
-    dataflowManagementDispatch({ type: 'ON_LOAD_OBLIGATION', payload: dataflowManagementInitialState.obligation });
+    dataflowManagementDispatch({ type: 'ON_LOAD_OBLIGATION', payload: dataflowManagementState.obligationPrevState });
 
   return (
     <Fragment>
@@ -74,7 +91,7 @@ export const DataflowManagement = ({
         <Dialog
           footer={dialogFooter}
           header={resources.messages['reportingObligations']}
-          onHide={() => onManageDialogs('isRepObDialogVisible', false, isDialogVisible, true)}
+          onHide={() => onHideObligationDialog()}
           style={{ width: '95%' }}
           visible={state.isRepObDialogVisible}>
           <ReportingObligations getObligation={onLoadObligation} oblChecked={dataflowManagementState.obligation} />
@@ -85,14 +102,14 @@ export const DataflowManagement = ({
         <Dialog
           className={styles.dialog}
           header={resources.messages[isEditForm ? 'updateDataflow' : 'createNewDataflow']}
-          onHide={() => onManageDialogs(isDialogVisible, false)}
+          onHide={() => onHideDataflowDialog()}
           visible={state.isAddDialogVisible || state.isEditDialogVisible}>
           <DataflowManagementForm
             data={dataflowManagementState}
             dataflowId={dataflowId}
             getData={onLoadData}
             isEditForm={isEditForm}
-            onCancel={() => onManageDialogs(isDialogVisible, false)}
+            onCancel={() => onHideDataflowDialog()}
             onCreate={onCreateDataflow}
             onEdit={onEditDataflow}
             onResetData={onResetData}

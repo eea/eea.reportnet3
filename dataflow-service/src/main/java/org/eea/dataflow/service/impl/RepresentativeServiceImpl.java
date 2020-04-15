@@ -279,4 +279,18 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     dataProviders.forEach(dataProvider -> list.add(dataProviderMapper.entityToClass(dataProvider)));
     return list;
   }
+
+  /**
+   * Gets the represetatives by dataflow id and email.
+   *
+   * @param dataflowId the dataflow id
+   * @param email the email
+   * @return the represetatives by dataflow id and email
+   */
+  @Override
+  public List<RepresentativeVO> getRepresetativesByDataflowIdAndEmail(Long dataflowId,
+      String email) {
+    return representativeMapper
+        .entityListToClass(representativeRepository.findByDataflowIdAndEmail(dataflowId, email));
+  }
 }

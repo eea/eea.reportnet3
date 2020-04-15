@@ -28,9 +28,9 @@
   box-shadow: var(--leftSideBar-box-shadow);
 
   .barSection {
-    --top-height: 150px;
-    --botton-height: 100px;
-    --middle-height: calc(100% - var(--top-height) - var(--botton-height) - (1rem * 3));
+    --top-height: 160px;
+    --bottom-height: 100px;
+    --middle-height: calc(100% - var(--top-height) - var(--bottom-height) - (1rem * 3));
     padding: 1rem 0;
     height: var(--middle-height);
 
@@ -39,7 +39,7 @@
     }
 
     &:last-of-type {
-      height: var(--botton-height);
+      height: var(--bottom-height);
       padding-top: 0;
     }
 
@@ -72,9 +72,9 @@
         margin-right: 12px;
       }
 
-      &:hover {
-        color: var(--gray-15);
-      }
+      // &:hover {
+      //   color: var(--gray-15);
+      // }
     }
 
     img {
@@ -145,7 +145,7 @@
 
 .leftSideBarElementAnimation:hover {
   transform: scale(1.25);
-  transition: 0.08s ease-in;
+  transition: 0.08s auto;
 }
 
 .leftSideBarLogo:hover {
