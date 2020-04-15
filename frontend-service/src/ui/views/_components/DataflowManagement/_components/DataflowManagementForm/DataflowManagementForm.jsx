@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import * as Yup from 'yup';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { ErrorMessage, Field, Form, Formik } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -142,7 +142,7 @@ const DataflowManagementForm = ({
                 icon="search"
                 label={resources.messages['search']}
                 layout="simple"
-                onClick={onSearch}
+                onMouseDown={onSearch}
               />
               <ErrorMessage className="error" name="obligation.title" component="div" />
             </div>
