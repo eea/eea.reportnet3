@@ -1,15 +1,16 @@
 .search {
+  cursor: pointer !important;
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
-  cursor: pointer !important;
 
   .searchInput {
-    border: none;
-    padding: 10px;
-    outline: none;
-    border-radius: 0 !important;
     background-color: var(--form-field-bg);
+    border-radius: 0 !important;
+    border: none;
+    color: var(--main-font-color);
+    outline: none;
+    padding: 10px;
 
     &:focus {
       border: none;
