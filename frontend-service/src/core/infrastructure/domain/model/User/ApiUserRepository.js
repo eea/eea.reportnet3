@@ -57,36 +57,36 @@ const parseConfigurationDTO = userConfigurationDTO => {
 
   const userDefaultConfiguration = {
     dateFormat: 'MM-DD-YYYY',
-    defaultLogoutConfirmation: true,
-    defaultRowsNumber: 10,
-    theme: 'light',
+    showLogoutConfirmation: true,
+    rowsPerPage: 10,
+    visualTheme: 'light',
     userImage: []
   };
 
   if (isNil(userConfigurationDTO) || isEmpty(userConfigurationDTO)) {
     userConfiguration.dateFormat = userDefaultConfiguration.dateFormat;
-    userConfiguration.defaultLogoutConfirmation = userDefaultConfiguration.defaultLogoutConfirmation;
-    userConfiguration.defaultRowsNumber = userDefaultConfiguration.defaultRowsNumber;
-    userConfiguration.theme = userDefaultConfiguration.theme;
+    userConfiguration.showLogoutConfirmation = userDefaultConfiguration.showLogoutConfirmation;
+    userConfiguration.rowsPerPage = userDefaultConfiguration.rowsPerPage;
+    userConfiguration.visualTheme = userDefaultConfiguration.visualTheme;
     userConfiguration.userImage = userDefaultConfiguration.userImage;
   } else {
     userConfiguration.dateFormat = !isNil(userConfigurationDTO.dateFormat[0])
       ? userConfigurationDTO.dateFormat[0]
       : userDefaultConfiguration.dateFormat;
 
-    userConfiguration.showLogoutConfirmation = isNil(userConfigurationDTO.defaultLogoutConfirmation)
-      ? userDefaultConfiguration.defaultLogoutConfirmation
+    userConfiguration.showLogoutConfirmation = isNil(userConfigurationDTO.showLogoutConfirmation)
+      ? userDefaultConfiguration.showLogoutConfirmation
       : userConfigurationDTO.showLogoutConfirmation[0] === 'false'
-      ? (userConfiguration.defaultLogoutConfirmation = false)
-      : (userConfiguration.defaultLogoutConfirmation = true);
+      ? (userConfiguration.showLogoutConfirmation = false)
+      : (userConfiguration.showLogoutConfirmation = true);
 
-    userConfiguration.defaultRowsNumber = !isNil(userConfigurationDTO.rowsPerPage[0])
+    userConfiguration.rowsPerPage = !isNil(userConfigurationDTO.rowsPerPage[0])
       ? parseInt(userConfigurationDTO.rowsPerPage[0])
-      : userDefaultConfiguration.defaultRowsNumber;
+      : userDefaultConfiguration.rowsPerPage;
 
-    userConfiguration.theme = !isNil(userConfigurationDTO.visualTheme[0])
+    userConfiguration.visualTheme = !isNil(userConfigurationDTO.visualTheme[0])
       ? userConfigurationDTO.visualTheme[0]
-      : userDefaultConfiguration.theme;
+      : userDefaultConfiguration.visualTheme;
 
     userConfiguration.userImage = !isNil(userConfigurationDTO.userImage)
       ? userConfigurationDTO.userImage

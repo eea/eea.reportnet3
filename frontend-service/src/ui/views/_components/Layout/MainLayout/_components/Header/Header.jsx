@@ -67,7 +67,7 @@ const Header = withRouter(({ history }) => {
     </div>
   );
 
-  const themeSwitcher = (
+  const themeSwitcher = isLocalEnvironment() && (
     <InputSwitch
       checked={themeContext.currentTheme === 'dark'}
       onChange={e => {
