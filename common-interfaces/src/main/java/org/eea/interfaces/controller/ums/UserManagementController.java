@@ -213,5 +213,5 @@ public interface UserManagementController {
    * @return the email by user id
    */
   @GetMapping("/getUserByUserId")
-  UserRepresentationVO getEmailByUserId(@RequestParam("userId") String userId);
+  UserRepresentationVO getUserByUserId(@RequestParam("userId") String userId);
 }

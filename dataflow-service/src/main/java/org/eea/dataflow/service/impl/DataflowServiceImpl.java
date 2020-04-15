@@ -127,7 +127,7 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
-   * Gets the by id no representatives.
+   * Get the dataflow by its id filtering representatives by the user email.
    *
    * @param id the id
    * @return the by id no representatives
@@ -135,7 +135,7 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   @Transactional
-  public DataFlowVO getByIdUserEmailOnly(Long id) throws EEAException {
+  public DataFlowVO getByIdWithRepresentativesFilteredByUserEmail(Long id) throws EEAException {
     return getByIdWithCondition(id, false);
   }
 
@@ -184,7 +184,7 @@ public class DataflowServiceImpl implements DataflowService {
     } else {
       String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication()
           .getDetails()).get("userId");
-      UserRepresentationVO user = userManagementControllerZull.getEmailByUserId(userId);
+      UserRepresentationVO user = userManagementControllerZull.getUserByUserId(userId);
       dataflowVO.setRepresentatives(
           representativeService.getRepresetativesByDataflowIdAndEmail(id, user.getEmail()));
     }

@@ -196,13 +196,13 @@ public class UserManagementControllerImplTest {
     Mockito.when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(user);
     Mockito.when(userRepresentationMapper.entityToClass(Mockito.any())).thenReturn(userVO);
     Assert.assertEquals("provider@reportnet.net",
-        userManagementController.getEmailByUserId("userId").getEmail());
+        userManagementController.getUserByUserId("userId").getEmail());
   }
 
   @Test
   public void getEmailByUserIdNullTest() {
     Mockito.when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(null);
-    Assert.assertNull(userManagementController.getEmailByUserId("userId"));
+    Assert.assertNull(userManagementController.getUserByUserId("userId"));
   }
 
   @Test

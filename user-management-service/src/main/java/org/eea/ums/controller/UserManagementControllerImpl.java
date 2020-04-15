@@ -315,7 +315,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @HystrixCommand
   @GetMapping("/getUserByUserId")
-  public UserRepresentationVO getEmailByUserId(@RequestParam("userId") String userId) {
+  public UserRepresentationVO getUserByUserId(@RequestParam("userId") String userId) {
     UserRepresentationVO userVO = null;
     UserRepresentation user = keycloakConnectorService.getUser(userId);
     if (user != null) {

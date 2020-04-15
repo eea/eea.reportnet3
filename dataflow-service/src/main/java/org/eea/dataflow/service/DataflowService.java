@@ -23,13 +23,13 @@ public interface DataflowService {
   DataFlowVO getById(Long id) throws EEAException;
 
   /**
-   * Gets the by id no representatives.
+   * Get the dataflow by its id filtering representatives by the user email.
    *
    * @param id the id
    * @return the by id no representatives
    * @throws EEAException the EEA exception
    */
-  DataFlowVO getByIdUserEmailOnly(Long id) throws EEAException;
+  DataFlowVO getByIdWithRepresentativesFilteredByUserEmail(Long id) throws EEAException;
 
   /**
    * Gets the by status.

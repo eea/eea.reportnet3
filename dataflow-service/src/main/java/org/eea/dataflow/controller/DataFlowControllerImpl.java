@@ -77,10 +77,10 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
     DataFlowVO result = null;
     try {
-      if (isDataCustodian()) {
+      if (isUserDataCustodian()) {
         result = dataflowService.getById(id);
       } else {
-        result = dataflowService.getByIdUserEmailOnly(id);
+        result = dataflowService.getByIdWithRepresentativesFilteredByUserEmail(id);
       }
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
@@ -416,7 +416,7 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
   }
 
-  private boolean isDataCustodian() {
+  private boolean isUserDataCustodian() {
     String dataCustodianRole = "ROLE_" + SecurityRoleEnum.DATA_CUSTODIAN;
     for (GrantedAuthority role : SecurityContextHolder.getContext().getAuthentication()
         .getAuthorities()) {
