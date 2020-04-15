@@ -37,6 +37,7 @@ import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
@@ -44,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -125,7 +127,7 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
-   * Gets the by id no representatives.
+   * Get the dataflow by its id filtering representatives by the user email.
    *
    * @param id the id
    * @return the by id no representatives
@@ -133,7 +135,7 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   @Transactional
-  public DataFlowVO getByIdNoRepresentatives(Long id) throws EEAException {
+  public DataFlowVO getByIdWithRepresentativesFilteredByUserEmail(Long id) throws EEAException {
     return getByIdWithCondition(id, false);
   }
 
@@ -141,11 +143,11 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the by id.
    *
    * @param id the id
-   * @param includeRepresentatives the include representatives
+   * @param includeAllRepresentatives the include representatives
    * @return the by id
    * @throws EEAException the EEA exception
    */
-  private DataFlowVO getByIdWithCondition(Long id, boolean includeRepresentatives)
+  private DataFlowVO getByIdWithCondition(Long id, boolean includeAllRepresentatives)
       throws EEAException {
 
     if (id == null) {
@@ -177,10 +179,14 @@ public class DataflowServiceImpl implements DataflowService {
             .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
 
     // Add the representatives
-    if (includeRepresentatives) {
+    if (includeAllRepresentatives) {
       dataflowVO.setRepresentatives(representativeService.getRepresetativesByIdDataFlow(id));
     } else {
-      dataflowVO.setRepresentatives(null);
+      String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication()
+          .getDetails()).get("userId");
+      UserRepresentationVO user = userManagementControllerZull.getUserByUserId(userId);
+      dataflowVO.setRepresentatives(
+          representativeService.getRepresetativesByDataflowIdAndEmail(id, user.getEmail()));
     }
 
     getObligation(dataflowVO);
