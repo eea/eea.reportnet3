@@ -644,6 +644,7 @@ const DataViewer = withRouter(
           datasetName
         }
       });
+      setIsTableDeleted(false);
     };
 
     const addRowDialogFooter = (
