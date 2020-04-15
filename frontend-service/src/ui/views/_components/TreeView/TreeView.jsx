@@ -78,8 +78,10 @@ const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) 
         body={
           field === 'type'
             ? typeTemplate
-            : field === 'automatic' || field === 'enabled'
+            : field === 'automatic'
             ? automaticTemplate
+            : field === 'enabled'
+            ? enabledTemplate
             : field === 'codelistItems'
             ? codelistTemplate
             : null
@@ -161,7 +163,18 @@ const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) 
 
 const automaticTemplate = rowData => (
   <div style={{ display: 'flex', justifyContent: 'center' }}>
-    {rowData.automatic === 'true' || rowData.enabled === 'true' ? (
+    {rowData.automatic === 'true' ? (
+      <FontAwesomeIcon
+        icon={AwesomeIcons('check')}
+        style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
+      />
+    ) : null}
+  </div>
+);
+
+const enabledTemplate = rowData => (
+  <div style={{ display: 'flex', justifyContent: 'center' }}>
+    {rowData.enabled === 'true' ? (
       <FontAwesomeIcon
         icon={AwesomeIcons('check')}
         style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
