@@ -303,8 +303,8 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     <Dialog
       header={
         validationContext.ruleEdit
-          ? resourcesContext.messages.editValidationTitle
-          : resourcesContext.messages.createValidationTitle
+          ? resourcesContext.messages.editFieldConstraint
+          : resourcesContext.messages.createFieldConstraintTitle
       }
       visible={validationContext.isVisible}
       style={{ width: '90%' }}
@@ -436,7 +436,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
             </div>
             <div className={styles.subsection}>
               <div className={`${styles.field} ${styles.qcActive}`}>
-                <label htmlFor="QcActive">{resourcesContext.messages.active}</label>
+                <label htmlFor="QcActive">{resourcesContext.messages.enabled}</label>
                 <Checkbox
                   id={`${componentName}__active`}
                   onChange={e =>
@@ -466,48 +466,47 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                   />
                 ))}
             </ul>
-          </div>
-          <div className={`${styles.section} ${styles.actionsButtons}`}>
-            <Button
-              id={`${componentName}__addExpresion`}
-              disabled={creationFormState.isRuleAddingDisabled}
-              className="p-button-primary p-button-text-icon-left"
-              type="button"
-              label={resourcesContext.messages.addNewRule}
-              icon="plus"
-              onClick={e =>
-                creationFormDispatch({
-                  type: 'ADD_EMPTY_RULE',
-                  payload: getEmptyExpression()
-                })
-              }
-            />
-            {creationFormState.groupExpressionsActive >= 2 && (
+            <div className={styles.expressionsActionsBtns}>
               <Button
-                id={`${componentName}__groupExpresions`}
-                className="p-button-primary p-button-text"
+                id={`${componentName}__addExpresion`}
+                disabled={creationFormState.isRuleAddingDisabled}
+                className="p-button-primary p-button-text-icon-left"
                 type="button"
-                label="Group"
+                label={resourcesContext.messages.addNewRule}
                 icon="plus"
-                onClick={e => {
-                  const groupingResult = groupExpressions(
-                    creationFormState.candidateRule.expressions,
-                    creationFormState.groupExpressionsActive,
-                    creationFormState.groupCandidate
-                  );
-                  if (!isNil(groupingResult.newGroup))
-                    creationFormDispatch({
-                      type: 'GROUP_EXPRESSIONS',
-                      payload: {
-                        expressions: groupingResult.expressions,
-                        allExpressions: [...creationFormState.candidateRule.allExpressions, groupingResult.newGroup]
-                      }
-                    });
-                }}
+                onClick={e =>
+                  creationFormDispatch({
+                    type: 'ADD_EMPTY_RULE',
+                    payload: getEmptyExpression()
+                  })
+                }
               />
-            )}
+              {creationFormState.groupExpressionsActive >= 2 && (
+                <Button
+                  id={`${componentName}__groupExpresions`}
+                  className="p-button-primary p-button-text"
+                  type="button"
+                  label="Group"
+                  icon="plus"
+                  onClick={e => {
+                    const groupingResult = groupExpressions(
+                      creationFormState.candidateRule.expressions,
+                      creationFormState.groupExpressionsActive,
+                      creationFormState.groupCandidate
+                    );
+                    if (!isNil(groupingResult.newGroup))
+                      creationFormDispatch({
+                        type: 'GROUP_EXPRESSIONS',
+                        payload: {
+                          expressions: groupingResult.expressions,
+                          allExpressions: [...creationFormState.candidateRule.allExpressions, groupingResult.newGroup]
+                        }
+                      });
+                  }}
+                />
+              )}
+            </div>
           </div>
-
           <div className={styles.section}>
             <textarea
               name=""

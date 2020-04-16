@@ -89,6 +89,8 @@ const FieldEditor = ({
       case 'COORDINATE_LONG':
       case 'COORDINATE_LAT':
         return 'num';
+      case 'DATE':
+        return 'date';
       case 'TEXT':
         return 'any';
       default:
@@ -127,7 +129,8 @@ const FieldEditor = ({
               e.preventDefault();
               onEditorValueFocus(cells, e.target.value);
             }}
-            type="date"
+            // type="date"
+            placeHolder="YYYY-MM-DD"
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
           //   <Calendar

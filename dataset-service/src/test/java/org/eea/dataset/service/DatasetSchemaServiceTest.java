@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -160,15 +161,21 @@ public class DatasetSchemaServiceTest {
   @Mock
   private TableSchemaVO tableSchemaVO;
 
-  /** The validation commands. */
+  /**
+   * The validation commands.
+   */
   @Spy
   private List<ValidationSchemaCommand> validationCommands = new ArrayList<>();
 
-  /** The command. */
+  /**
+   * The command.
+   */
   @Mock
   private ValidationSchemaIntegrityCommand command;
 
-  /** The rules controller zuul. */
+  /**
+   * The rules controller zuul.
+   */
   @Mock
   private RulesControllerZuul rulesControllerZuul;
 
@@ -1048,7 +1055,6 @@ public class DatasetSchemaServiceTest {
     DesignDataset design = new DesignDataset();
     design.setId(1L);
 
-
     Mockito.when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(design));
     Mockito.doNothing().when(datasetMetabaseService).addForeignRelation(Mockito.any(),
@@ -1071,7 +1077,6 @@ public class DatasetSchemaServiceTest {
     fieldSchemaVO.setReferencedField(referenced);
     DesignDataset design = new DesignDataset();
     design.setId(1L);
-
 
     Mockito.when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(design));
@@ -1149,7 +1154,7 @@ public class DatasetSchemaServiceTest {
     Mockito.when(pkCatalogueRepository.findByIdPk(Mockito.any())).thenReturn(catalogue);
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(dataSchemaMapper.entityToClass(schema)).thenReturn(schemaVO);
-    dataSchemaServiceImpl.isSchemaForDeletionAllowed("5ce524fad31fc52540abae73");
+    dataSchemaServiceImpl.isSchemaAllowedForDeletion("5ce524fad31fc52540abae73");
     Mockito.verify(schemasRepository, times(1)).findById(Mockito.any());
   }
 
@@ -1220,7 +1225,6 @@ public class DatasetSchemaServiceTest {
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setId("5ce524fad31fc52540abae73");
     fieldSchemaVO.setPk(false);
-
 
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(fieldSchemaNoRulesMapper.entityToClass(Mockito.any())).thenReturn(fieldSchemaVO);

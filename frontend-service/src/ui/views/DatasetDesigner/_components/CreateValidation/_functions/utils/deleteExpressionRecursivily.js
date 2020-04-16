@@ -29,6 +29,7 @@ export const deleteExpressionRecursivily = (expressionId, expressionColection, i
       if (!isEmpty(resultingExpressions) && resultingExpressions.length < 2) {
         pullAt(expressionColection, i);
         resultingExpressions.forEach((subexpression, index) => {
+          if (index == 0) subexpression.union = expression.union;
           expressionColection.splice(i + index, 0, subexpression);
         });
       }
@@ -40,6 +41,7 @@ export const deleteExpressionRecursivily = (expressionId, expressionColection, i
       const { expressions: subexpressions } = expression;
       pullAt(expressionColection, i);
       subexpressions.forEach((subexpression, index) => {
+        if (index == 0) subexpression.union = expression.union;
         expressionColection.splice(i + index, 0, subexpression);
       });
     }
