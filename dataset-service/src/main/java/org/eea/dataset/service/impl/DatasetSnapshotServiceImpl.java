@@ -349,16 +349,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
         // Restore data from snapshot
         try {
-          restoreSnapshot(idDataCollection, idSnapshot, false);
-          // Check the snapshot released
-          snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
-          // Add the date of the release
-          Optional<Snapshot> snap = snapshotRepository.findById(idSnapshot);
-          if (snap.isPresent()) {
-            snap.get().setDateReleased(java.sql.Timestamp.valueOf(LocalDateTime.now()));
-            snapshotRepository.save(snap.get());
-          }
-
           // Mark the receipt button as outdated because a new release has been done, so it would be
           // necessary to generate a new receipt
           Long idDataflow = datasetService.getDataFlowIdById(idDataset);
@@ -376,6 +366,18 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
                   representative.getId());
             }
           }
+
+          // This method would release the lock and the notification
+          restoreSnapshot(idDataCollection, idSnapshot, false);
+          // Check the snapshot released
+          snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
+          // Add the date of the release
+          Optional<Snapshot> snap = snapshotRepository.findById(idSnapshot);
+          if (snap.isPresent()) {
+            snap.get().setDateReleased(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+            snapshotRepository.save(snap.get());
+          }
+
           LOG.info("Snapshot {} released", idSnapshot);
         } catch (EEAException e) {
           LOG_ERROR.error(e.getMessage());
