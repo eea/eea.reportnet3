@@ -367,15 +367,15 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
             }
           }
 
-          // This method would release the lock and the notification
+          // This method will release the lock and the notification
           restoreSnapshot(idDataCollection, idSnapshot, false);
-          // Check the snapshot released
+          // Check if the snapshot is released
           snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
           // Add the date of the release
-          Optional<Snapshot> snap = snapshotRepository.findById(idSnapshot);
-          if (snap.isPresent()) {
-            snap.get().setDateReleased(java.sql.Timestamp.valueOf(LocalDateTime.now()));
-            snapshotRepository.save(snap.get());
+          Optional<Snapshot> snapshot = snapshotRepository.findById(idSnapshot);
+          if (snapshot.isPresent()) {
+            snapshot.get().setDateReleased(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+            snapshotRepository.save(snapshot.get());
           }
 
           LOG.info("Snapshot {} released", idSnapshot);
