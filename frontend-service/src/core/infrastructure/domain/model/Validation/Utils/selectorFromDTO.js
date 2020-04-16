@@ -20,9 +20,20 @@ export const selectorFromDTO = (expression, expressions, allExpressions, parentO
       !isNil(expression.arg2.operator) &&
       isUnion(parentOperator) &&
       expression.operator != parentOperator &&
-      !isUnion(expression.arg1.operator)
+      !isUnion(expression.arg1.operator) &&
+      isUnion(expression.arg2.operator)
     ) {
-      expressions.push(getGroupFromDTO(expression, allExpressions, parentOperator));
+      selectorFromDTO(expression.arg1, expressions, allExpressions, parentOperator);
+      expressions.push(getGroupFromDTO(expression.arg2, allExpressions, expression.operator));
+    } else if (
+      !isNil(expression.arg1.operator) &&
+      !isNil(expression.arg2.operator) &&
+      isUnion(expression.arg1.operator) &&
+      isUnion(expression.arg2.operator) &&
+      expression.operator != expression.arg2.operator
+    ) {
+      expressions.push(getGroupFromDTO(expression.arg1, allExpressions, parentOperator));
+      expressions.push(getGroupFromDTO(expression.arg2, allExpressions, expression.operator));
     } else if (
       !isNil(expression.arg1.operator) &&
       !isNil(expression.arg2.operator) &&
