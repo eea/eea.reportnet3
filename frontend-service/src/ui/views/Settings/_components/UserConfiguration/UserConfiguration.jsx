@@ -128,7 +128,7 @@ const UserConfiguration = () => {
       title={resources.messages['theme']}
       icon="palette"
       iconSize="2rem"
-      subtitle="Choose the theme to display in the system"
+      subtitle={resources.messages['userSettingsThemeSubtitle']}
       item={themeSwitch}
     />
   );
@@ -138,7 +138,7 @@ const UserConfiguration = () => {
       title={resources.messages['userConfirmationLogout']}
       icon="power-off"
       iconSize="2rem"
-      subtitle="Configure the way to logout with or without a confirmation popup."
+      subtitle={resources.messages['userSettingsConfirmSubtitle']}
       item={confirmationLogoutSwitch}
     />
   );
@@ -148,7 +148,7 @@ const UserConfiguration = () => {
       title={resources.messages['userRowsInPagination']}
       icon="list-ol"
       iconSize="2rem"
-      subtitle="Configure the number of rows displayed in the pagination."
+      subtitle={resources.messages['userSettingsRowsPerPageSubtitle']}
       item={rowsInPaginationDropdown}
     />
   );
