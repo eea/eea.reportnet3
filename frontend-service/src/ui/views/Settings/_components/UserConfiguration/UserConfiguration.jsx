@@ -128,7 +128,7 @@ const UserConfiguration = () => {
       title={resources.messages['theme']}
       icon="palette"
       iconSize="2rem"
-      subtitle="Choose the theme to display in the system"
+      subtitle="Choose the theme to display in the system."
       item={themeSwitch}
     />
   );
