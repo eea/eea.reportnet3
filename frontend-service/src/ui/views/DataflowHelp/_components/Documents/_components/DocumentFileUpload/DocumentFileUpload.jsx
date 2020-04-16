@@ -59,8 +59,11 @@ const DocumentFileUpload = ({
 
   useEffect(() => {
     if (isUploadDialogVisible) {
+      console.log('inputRef', inputRef.current);
       if (!isUndefined(inputRef)) {
-        inputRef.current.focus();
+        setTimeout(() => {
+          inputRef.current.focus();
+        }, 160);
       }
     }
   }, [isUploadDialogVisible]);

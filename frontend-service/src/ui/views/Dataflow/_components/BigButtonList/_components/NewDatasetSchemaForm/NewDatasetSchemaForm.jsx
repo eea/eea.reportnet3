@@ -1,8 +1,13 @@
-import React, { useContext, useRef } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 
 import * as Yup from 'yup';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { isEmpty, isNull, isUndefined } from 'lodash';
+import { ErrorMessage, Field, Form, Formik } from 'formik';
+
+// import { isEmpty, isNull, isUndefined } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './NewDatasetSchemaForm.module.css';
 
@@ -15,6 +20,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { MetadataUtils } from 'ui/views/_functions/Utils/MetadataUtils';
+import { InputText } from 'ui/views/_components/InputText/InputText';
 
 const NewDatasetSchemaForm = ({
   dataflowId,
@@ -29,6 +35,7 @@ const NewDatasetSchemaForm = ({
   const resources = useContext(ResourcesContext);
 
   const form = useRef(null);
+  const inputRef = useRef();
 
   const initialValues = { datasetSchemaName: '' };
   const newDatasetValidationSchema = Yup.object().shape({
@@ -45,13 +52,25 @@ const NewDatasetSchemaForm = ({
       })
   });
 
-  if (!isNull(form.current)) {
-    document.getElementById('dataSchemaInput').focus();
-  }
+  useEffect(() => {
+    if (!isNil(inputRef.current)) {
+      console.log('inputRef comienzo', inputRef.current);
+      setTimeout(() => {
+        inputRef.current.focus();
+      }, 200);
+      // inputRef.current.focus();
+    }
+  }, [inputRef.current]);
+
+  // if (isNull(form.current)) {
+  //   console.log('getElementById', document.getElementById('dataSchemaInput'));
+  //   // document.getElementById('dataSchemaInput').focus();
+  // }
 
   if (!isFormReset && !isNull(form.current)) {
     form.current.resetForm();
   }
+
   return (
     <Formik
       ref={form}
@@ -95,7 +114,9 @@ const NewDatasetSchemaForm = ({
             <div
               className={`formField${!isEmpty(errors.datasetSchemaName) && touched.datasetSchemaName ? ' error' : ''}`}>
               <Field
+                autoFocus={true}
                 id="dataSchemaInput"
+                innerRef={inputRef}
                 name="datasetSchemaName"
                 placeholder={resources.messages['createDatasetSchemaName']}
                 type="text"

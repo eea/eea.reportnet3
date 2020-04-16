@@ -134,8 +134,11 @@ export const WebLinks = ({
 
   useEffect(() => {
     if (isAddOrEditWeblinkDialogVisible) {
+      console.log('inputRef comienzo', inputRef);
       if (!isUndefined(inputRef)) {
-        inputRef.current.focus();
+        setTimeout(() => {
+          inputRef.current.focus();
+        }, 160);
       }
     }
   }, [isAddOrEditWeblinkDialogVisible]);
