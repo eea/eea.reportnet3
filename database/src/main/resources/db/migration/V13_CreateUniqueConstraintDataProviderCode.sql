@@ -1,0 +1,1 @@
+ALTER TABLE public.data_provider ADD CONSTRAINT data_provider_un UNIQUE (code);
