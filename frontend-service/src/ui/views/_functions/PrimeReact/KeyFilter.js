@@ -12,7 +12,8 @@ export default class KeyFilter {
     email: /[a-z0-9_\.\-@]/i,
     alpha: /[a-z_]/i,
     alphanum: /[a-z0-9_]/i,
-    any: /[\s\S]*/
+    any: /[\s\S]*/,
+    date: /[\d\-]/i
   };
   /* eslint-enable */
 
