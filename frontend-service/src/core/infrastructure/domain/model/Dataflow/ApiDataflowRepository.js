@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -15,6 +16,8 @@ import { Dataset } from 'core/domain/model/Dataset/Dataset';
 import { DatasetTable } from 'core/domain/model/Dataset/DatasetTable/DatasetTable';
 import { DatasetTableField } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableField/DatasetTableField';
 import { DatasetTableRecord } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableRecord';
+import { LegalInstrument } from 'core/domain/model/Obligation/LegalInstrument/LegalInstrument';
+import { Obligation } from 'core/domain/model/Obligation/Obligation';
 import { Representative } from 'core/domain/model/Representative/Representative';
 import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
@@ -62,18 +65,14 @@ const all = async userData => {
 
   const dataflowsData = groupByUserRequesetStatus(dataflows);
 
-  const allDataflows = DataflowConf.userRequestStatus;
+  const allDataflows = cloneDeep(DataflowConf.userRequestStatus);
   Object.keys(dataflowsData).forEach(key => {
     allDataflows[key.toLowerCase()] = parseDataflowDTOs(dataflowsData[key]);
   });
-
   return allDataflows;
 };
 
-const create = async (name, description) => {
-  const createdDataflow = await apiDataflow.create(name, description);
-  return createdDataflow;
-};
+const create = async (name, description, obligationId) => await apiDataflow.create(name, description, obligationId);
 
 const completed = async () => {
   const completedDataflowsDTO = await apiDataflow.completed();
@@ -285,6 +284,7 @@ const getAllSchemas = async dataflowId => {
         tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaDescription: datasetTableDTO.description,
         tableSchemaName: datasetTableDTO.nameTableSchema,
+        tableSchemaReadOnly: datasetTableDTO.readOnly,
         records: records,
         recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null
       });
@@ -329,11 +329,10 @@ const parseDataflowDTO = dataflowDTO =>
     description: dataflowDTO.description,
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: parseDocumentListDTO(dataflowDTO.documents),
-    expirationDate: !isNil(dataflowDTO.deadlineDate)
-      ? moment.unix(dataflowDTO.deadlineDate).format('YYYY-MM-DD')
-      : moment(dataflowDTO.deadlineDate).format('YYYY-MM-DD'),
+    expirationDate: dataflowDTO.deadlineDate > 0 ? moment.unix(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
     id: dataflowDTO.id,
     name: dataflowDTO.name,
+    obligation: parseObligationDTO(dataflowDTO.obligation),
     representatives: parseRepresentativeListDTO(dataflowDTO.representatives),
     requestId: dataflowDTO.requestId,
     status: dataflowDTO.status,
@@ -407,6 +406,36 @@ const parseDocumentDTO = documentDTO => {
   });
 };
 
+const parseLegalInstrument = legalInstrumentDTO => {
+  if (!isNil(legalInstrumentDTO)) {
+    return new LegalInstrument({
+      alias: legalInstrumentDTO.sourceAlias,
+      id: legalInstrumentDTO.sourceId,
+      title: legalInstrumentDTO.sourceTitle
+    });
+  }
+  return;
+};
+
+const parseObligationDTO = obligationDTO => {
+  if (!isNil(obligationDTO)) {
+    return new Obligation({
+      comment: obligationDTO.comment,
+      countries: obligationDTO.countries,
+      description: obligationDTO.description,
+      expirationDate: !isNil(obligationDTO.nextDeadline)
+        ? moment.unix(obligationDTO.nextDeadline / 1000).format('YYYY-MM-DD')
+        : null,
+      issues: obligationDTO.issues,
+      legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),
+      obligationId: obligationDTO.obligationId,
+      title: obligationDTO.oblTitle,
+      validSince: obligationDTO.validSince,
+      validTo: obligationDTO.validTo
+    });
+  }
+};
+
 const parseRepresentativeListDTO = representativesDTO => {
   if (!isNull(representativesDTO) && !isUndefined(representativesDTO)) {
     const representatives = [];
@@ -425,7 +454,8 @@ const parseRepresentativeDTO = representativeDTO => {
     id: representativeDTO.id,
     isReceiptDownloaded: representativeDTO.receiptDownloaded,
     isReceiptOutdated: representativeDTO.receiptOutdated,
-    providerAccount: representativeDTO.provideraccount
+    providerAccount: representativeDTO.providerAccount,
+    hasDatasets: representativeDTO.hasDatasets
   });
 };
 
@@ -467,10 +497,8 @@ const schemasValidation = async dataflowId => {
   return await apiDataflow.schemasValidation(dataflowId);
 };
 
-const update = async (dataflowId, name, description) => {
-  const updatedDataflow = await apiDataflow.update(dataflowId, name, description);
-  return updatedDataflow;
-};
+const update = async (dataflowId, name, description, obligationId) =>
+  await apiDataflow.update(dataflowId, name, description, obligationId);
 
 export const ApiDataflowRepository = {
   all,

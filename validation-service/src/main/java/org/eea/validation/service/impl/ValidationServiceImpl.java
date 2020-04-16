@@ -13,7 +13,6 @@ import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
@@ -39,11 +38,11 @@ import org.eea.validation.persistence.data.repository.RecordValidationRepository
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.data.repository.TableValidationRepository;
 import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
-import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.KieBaseManager;
+import org.eea.validation.util.RulesErrorUtils;
 import org.joda.time.LocalDate;
 import org.kie.api.KieBase;
 import org.kie.api.runtime.KieSession;
@@ -95,10 +94,6 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private FieldValidationRepository validationFieldRepository;
 
-
-  /** The rules repository. */
-  @Autowired
-  private RulesRepository rulesRepository;
   /**
    * The dataset repository.
    */
@@ -141,13 +136,12 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private ResourceManagementControllerZull resourceManagementController;
 
-  /** The dataset metabase controller. */
-  @Autowired
-  private DatasetMetabaseController datasetMetabaseController;
-
   /** The dataset schema controller. */
   @Autowired
   private DatasetSchemaController datasetSchemaController;
+
+  @Autowired
+  private RulesErrorUtils rulesErrorUtils;
 
   /**
    * Gets the element lenght.
@@ -164,7 +158,8 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       kieSession.fireAllRules();
     } catch (RuntimeException e) {
-      LOG_ERROR.info("Error with one rule");
+      LOG_ERROR.error("The Dataset Validation fail: ", e.getMessage(), e);
+      rulesErrorUtils.createRuleErrorException(dataset, e);
     }
     return dataset.getDatasetValidations();
   }
@@ -183,7 +178,8 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       kieSession.fireAllRules();
     } catch (RuntimeException e) {
-      LOG_ERROR.info("Error with one rule");
+      LOG_ERROR.error("The Table Validation fail: ", e.getMessage(), e);
+      rulesErrorUtils.createRuleErrorException(table, e);
     }
     return table.getTableValidations() == null ? new ArrayList<>() : table.getTableValidations();
   }
@@ -205,7 +201,8 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       kieSession.fireAllRules();
     } catch (RuntimeException e) {
-      LOG_ERROR.info("Error with one rule");
+      LOG_ERROR.error("The Record Validation fail: ", e.getMessage(), e);
+      rulesErrorUtils.createRuleErrorException(record, e);
     }
 
     return null == record.getRecordValidations() || record.getRecordValidations().isEmpty()
@@ -229,11 +226,13 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       kieSession.fireAllRules();
     } catch (RuntimeException e) {
-      LOG_ERROR.info("Error with one rule");
+      LOG_ERROR.error("The Field Validation fail: ", e.getMessage(), e);
+      rulesErrorUtils.createRuleErrorException(field, e);
     }
     return null == field.getFieldValidations() || field.getFieldValidations().isEmpty()
         ? new ArrayList<>()
         : field.getFieldValidations();
+
   }
 
   /**

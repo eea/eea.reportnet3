@@ -1,6 +1,7 @@
 package org.eea.kafka.domain;
 
 import java.io.Serializable;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/** The class that works as interface to fulfill notifiable events */
 @Getter
 @Setter
 @ToString
@@ -16,9 +18,6 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode
 @Builder
-/**
- * The class that works as interface to fulfill notifiable events
- */
 public class NotificationVO implements Serializable {
 
   /** The Constant serialVersionUID. */
@@ -50,4 +49,7 @@ public class NotificationVO implements Serializable {
 
   /** The error. */
   private String error;
+
+  /** The dataset type. */
+  private DatasetTypeEnum datasetType;
 }

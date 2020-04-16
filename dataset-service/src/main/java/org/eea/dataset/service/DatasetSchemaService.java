@@ -20,7 +20,9 @@ public interface DatasetSchemaService {
    * Creates the empty data set schema.
    *
    * @param dataflowId the dataflow id
+   *
    * @return the object id
+   *
    * @throws EEAException the EEA exception
    */
   ObjectId createEmptyDataSetSchema(Long dataflowId) throws EEAException;
@@ -39,7 +41,9 @@ public interface DatasetSchemaService {
    *
    * @param addRules the add rules
    * @param datasetId the dataset id
+   *
    * @return the data schema by id flow
+   *
    * @throws EEAException the EEA exception
    */
   DataSetSchemaVO getDataSchemaByDatasetId(Boolean addRules, Long datasetId) throws EEAException;
@@ -81,7 +85,9 @@ public interface DatasetSchemaService {
    * Gets the dataset schema id.
    *
    * @param datasetId the dataset id
+   *
    * @return the dataset schema id
+   *
    * @throws EEAException the EEA exception
    */
   String getDatasetSchemaId(Long datasetId) throws EEAException;
@@ -92,6 +98,7 @@ public interface DatasetSchemaService {
    * @param id the id
    * @param tableSchema the table schema
    * @param datasetId the dataset id
+   *
    * @return the table schema VO
    */
   TableSchemaVO createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId);
@@ -101,6 +108,7 @@ public interface DatasetSchemaService {
    *
    * @param datasetSchemaid the dataset schemaid
    * @param tableSchema the table schema
+   *
    * @throws EEAException the EEA exception
    */
   void updateTableSchema(String datasetSchemaid, TableSchemaVO tableSchema) throws EEAException;
@@ -110,6 +118,7 @@ public interface DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param idTableSchema the id table schema
+   *
    * @throws EEAException the EEA exception
    */
   void deleteTableSchema(String datasetSchemaId, String idTableSchema) throws EEAException;
@@ -120,7 +129,9 @@ public interface DatasetSchemaService {
    * @param datasetSchemaId the dataset schema id
    * @param tableSchemaId the table schema id
    * @param position the position
+   *
    * @return the boolean
+   *
    * @throws EEAException the EEA exception
    */
   Boolean orderTableSchema(String datasetSchemaId, String tableSchemaId, Integer position)
@@ -131,7 +142,9 @@ public interface DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
+   *
    * @return true, if successful
+   *
    * @throws EEAException the EEA exception
    */
   String createFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO) throws EEAException;
@@ -141,7 +154,9 @@ public interface DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
+   *
    * @return the type data
+   *
    * @throws EEAException the EEA exception
    */
   DataType updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
@@ -152,7 +167,9 @@ public interface DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaId the field schema id
+   *
    * @return true, if 1 and only 1 fieldSchema has been removed
+   *
    * @throws EEAException the EEA exception
    */
   boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId) throws EEAException;
@@ -163,7 +180,9 @@ public interface DatasetSchemaService {
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaId the field schema id
    * @param position the position
+   *
    * @return the boolean
+   *
    * @throws EEAException the EEA exception
    */
   Boolean orderFieldSchema(String datasetSchemaId, String fieldSchemaId, Integer position)
@@ -174,6 +193,7 @@ public interface DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param description the description
+   *
    * @return the boolean
    */
   Boolean updateDatasetSchemaDescription(String datasetSchemaId, String description);
@@ -183,6 +203,7 @@ public interface DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param tableSchemaId the table schema id
+   *
    * @return the table schema name
    */
   String getTableSchemaName(String datasetSchemaId, String tableSchemaId);
@@ -192,6 +213,7 @@ public interface DatasetSchemaService {
    * Validate schema.
    *
    * @param datasetSchemaId the dataset schema id
+   *
    * @return the boolean
    */
   Boolean validateSchema(String datasetSchemaId);
@@ -213,6 +235,7 @@ public interface DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
+   *
    * @return the boolean
    */
   Boolean checkPkAllowUpdate(String datasetSchemaId, FieldSchemaVO fieldSchemaVO);
@@ -229,6 +252,7 @@ public interface DatasetSchemaService {
    * Check existing pk referenced.
    *
    * @param fieldSchemaVO the field schema VO
+   *
    * @return the boolean
    */
   Boolean checkExistingPkReferenced(FieldSchemaVO fieldSchemaVO);
@@ -246,6 +270,7 @@ public interface DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param idFieldSchema the id field schema
+   *
    * @return the field schema
    */
   FieldSchemaVO getFieldSchema(String datasetSchemaId, String idFieldSchema);
@@ -254,6 +279,7 @@ public interface DatasetSchemaService {
    * Delete from pk catalogue.
    *
    * @param fieldSchemaVO the field schema VO
+   *
    * @throws EEAException the EEA exception
    */
   void deleteFromPkCatalogue(FieldSchemaVO fieldSchemaVO) throws EEAException;
@@ -280,24 +306,26 @@ public interface DatasetSchemaService {
    * Gets the referenced fields by schema.
    *
    * @param datasetSchemaId the dataset schema id
+   *
    * @return the referenced fields by schema
    */
   List<ReferencedFieldSchema> getReferencedFieldsBySchema(String datasetSchemaId);
 
 
-
   /**
-   * Checks if is schema for deletion allowed.
+   * Checks if is schema allowed for deletion.
    *
    * @param idDatasetSchema the id dataset schema
+   *
    * @return the boolean
    */
-  Boolean isSchemaForDeletionAllowed(String idDatasetSchema);
+  Boolean isSchemaAllowedForDeletion(String idDatasetSchema);
 
   /**
    * Update pk catalogue deleting schema.
    *
    * @param idDatasetSchema the id dataset schema
+   *
    * @throws EEAException the EEA exception
    */
   void updatePkCatalogueDeletingSchema(String idDatasetSchema) throws EEAException;
@@ -308,6 +336,7 @@ public interface DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param tableSchemaId the table schema id
+   *
    * @throws EEAException the EEA exception
    */
   void deleteFromPkCatalogue(String datasetSchemaId, String tableSchemaId) throws EEAException;
@@ -318,6 +347,7 @@ public interface DatasetSchemaService {
    *
    * @param idDatasetSchema the id dataset schema
    * @param idDataset the id dataset
+   *
    * @throws EEAException the EEA exception
    */
   void updatePKCatalogueAndForeignsAfterSnapshot(String idDatasetSchema, Long idDataset)

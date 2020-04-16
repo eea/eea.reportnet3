@@ -7,7 +7,7 @@ const checkLastExpressionWithUnion = expression => {
     isEmpty(expression.union) ||
     isEmpty(expression.operatorType) ||
     isEmpty(expression.operatorValue) ||
-    isEmpty(expression.expressionValue)
+    isEmpty(String(expression.expressionValue))
   );
 };
 
@@ -24,7 +24,7 @@ export const checkExpressions = expressions => {
     return (
       isEmpty(lastExpression.operatorType) ||
       isEmpty(lastExpression.operatorValue) ||
-      isEmpty(lastExpression.expressionValue)
+      isEmpty(String(lastExpression.expressionValue))
     );
   }
   return true;

@@ -70,19 +70,27 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /** The resource management controller zull. */
+  /**
+   * The resource management controller zull.
+   */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
-  /** The user management controller zull. */
+  /**
+   * The user management controller zull.
+   */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
-  /** The data flow controller zuul. */
+  /**
+   * The data flow controller zuul.
+   */
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
 
-  /** The rules controller. */
+  /**
+   * The rules controller.
+   */
   @Autowired
   private RulesController rulesController;
 
@@ -92,42 +100,60 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private DataSchemaMapper dataSchemaMapper;
 
-  /** Mapper to map dataset schemas with no rules. */
+  /**
+   * Mapper to map dataset schemas with no rules.
+   */
   @Autowired
   private NoRulesDataSchemaMapper noRulesDataSchemaMapper;
 
-  /** The field schema no rules mapper. */
+  /**
+   * The field schema no rules mapper.
+   */
   @Autowired
   private FieldSchemaNoRulesMapper fieldSchemaNoRulesMapper;
 
-  /** The table schema mapper. */
+  /**
+   * The table schema mapper.
+   */
   @Autowired
   private TableSchemaMapper tableSchemaMapper;
 
-  /** The record store controller zull. */
+  /**
+   * The record store controller zull.
+   */
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
 
-  /** The rules controller zuul. */
+  /**
+   * The rules controller zuul.
+   */
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
 
-  /** The design dataset repository. */
+  /**
+   * The design dataset repository.
+   */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
 
 
-  /** The validation commands. */
+  /**
+   * The validation commands.
+   */
   @Autowired
   private List<ValidationSchemaCommand> validationCommands;
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Autowired
   private DatasetService datasetService;
 
 
-  /** The pk catalogue repository. */
+  /**
+   * The pk catalogue repository.
+   */
   @Autowired
   private PkCatalogueRepository pkCatalogueRepository;
 
@@ -148,7 +174,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
@@ -156,7 +184,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Creates the empty data set schema.
    *
    * @param dataflowId the dataflow id
+   *
    * @return the object id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -169,10 +199,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     ObjectId idDataSetSchema = new ObjectId();
     dataSetSchema.setIdDataFlow(dataflowId);
     dataSetSchema.setIdDataSetSchema(idDataSetSchema);
-    dataSetSchema.setTableSchemas(new ArrayList<TableSchema>());
+    dataSetSchema.setTableSchemas(new ArrayList<>());
     schemasRepository.save(dataSetSchema);
 
-    // create the schema of its rules
+    // create the rules schema
     rulesControllerZuul.createEmptyRulesSchema(idDataSetSchema.toString(),
         new ObjectId().toString());
 
@@ -221,6 +251,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetId the dataset id
    * @param type the type
    * @param role the role
+   *
    * @return the resource info VO
    */
   private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
@@ -237,6 +268,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Gets the data schema by id.
    *
    * @param dataschemaId the dataschema id
+   *
    * @return the data schema by id
    */
   @Override
@@ -259,7 +291,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param addRules the add rules
    * @param datasetId the dataset id
+   *
    * @return the data schema by dataset id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -296,7 +330,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Gets the dataset schema id.
    *
    * @param datasetId the dataset id
+   *
    * @return the dataset schema id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -338,6 +374,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param idTableSchema the id table schema
    * @param dataSetSchema the data set schema
+   *
    * @return the table schema
    */
   private TableSchema getTableSchema(String idTableSchema, DataSetSchema dataSetSchema) {
@@ -375,6 +412,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param id the id
    * @param tableSchemaVO the table schema VO
    * @param datasetId the dataset id
+   *
    * @return the table schema VO
    */
   @Override
@@ -402,6 +440,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schemaid
    * @param tableSchemaVO the table schema VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -419,6 +458,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
         if (tableSchemaVO.getNameTableSchema() != null) {
           tableSchema.put("nameTableSchema", tableSchemaVO.getNameTableSchema());
+        }
+        if (tableSchemaVO.getReadOnly() != null) {
+          tableSchema.put("readOnly", tableSchemaVO.getReadOnly());
         }
 
         // Guardar el TableSchema modificado en MongoDB
@@ -439,6 +481,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param idTableSchema the id table schema
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -473,7 +516,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetSchemaId the dataset schema id
    * @param tableSchemaId the table schema id
    * @param position the position
+   *
    * @return the boolean
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -493,7 +538,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
+   *
    * @return true, if successful
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -522,7 +569,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
+   *
    * @return the type data
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -530,12 +579,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       throws EEAException {
     boolean typeModified = false;
     try {
-      // Recuperar el FieldSchema de MongoDB
+      // Retrieve the FieldSchema from MongoDB
       Document fieldSchema =
           schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
 
       if (fieldSchema != null) {
-        // First of all, we update the previous data in the catalogue
+        // First of all, we update the previous data in the catalog
         if (DataType.LINK.getValue().equals(fieldSchema.get("typeData"))) {
           // Proceed to the changes needed. Remove the previous reference
           String previousId = fieldSchema.get("_id").toString();
@@ -558,11 +607,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           }
         }
 
-
-        // Modificarlo en función de lo que contiene el FieldSchemaVO recibido
+        // Modify it based on FieldSchemaVO data received
         if (fieldSchemaVO.getType() != null
             && !fieldSchema.put("typeData", fieldSchemaVO.getType().getValue())
-                .equals(fieldSchemaVO.getType().getValue())) {
+            .equals(fieldSchemaVO.getType().getValue())) {
           typeModified = true;
           if (!fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")
               && fieldSchema.containsKey("codelistItems")) {
@@ -578,6 +626,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
             && fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")) {
           fieldSchema.put("codelistItems", Arrays.asList(fieldSchemaVO.getCodelistItems()));
+          typeModified = true;
         }
         if (fieldSchemaVO.getRequired() != null) {
           fieldSchema.put("required", fieldSchemaVO.getRequired());
@@ -598,7 +647,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
               fieldSchemaVO.getReferencedField().getIdPk(), true);
         }
 
-        // Guardar el FieldSchema modificado en MongoDB
+        // Save the modified FieldSchema in the MongoDB
         UpdateResult updateResult =
             schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema);
         if (updateResult.getMatchedCount() == 1) {
@@ -620,7 +669,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaId the field schema id
+   *
    * @return true, if 1 and only 1 fieldSchema has been removed
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -636,7 +687,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaId the field schema id
    * @param position the position
+   *
    * @return the boolean
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -656,6 +709,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param description the description
+   *
    * @return the boolean
    */
   @Override
@@ -669,6 +723,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param tableSchemaId the table schema id
+   *
    * @return the table schema name
    */
   @Override
@@ -685,6 +740,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Validate schema.
    *
    * @param datasetSchemaId the dataset schema id
+   *
    * @return the boolean
    */
   @Override
@@ -748,9 +804,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /**
    * Check pk allow update. Checks two things: no more than 1 PK in the same table, and in the case
    * we want to erase a PK, that PK is not being referenced
-   * 
+   *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
+   *
    * @return the boolean
    */
   @Override
@@ -801,8 +858,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
   /**
    * Check existing pk referenced. Check against the PKCatalogue the PK is being referenced
-   * 
+   *
    * @param fieldSchemaVO the field schema VO
+   *
    * @return the boolean
    */
   @Override
@@ -823,31 +881,34 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
 
-
   /**
-   * Checks if is schema for deletion allowed.
+   * Checks if is schema allowed for deletion
    *
    * @param idDatasetSchema the id dataset schema
+   *
    * @return the boolean
    */
   @Override
-  public Boolean isSchemaForDeletionAllowed(String idDatasetSchema) {
+  public Boolean isSchemaAllowedForDeletion(String idDatasetSchema) {
     Boolean allow = true;
     DataSetSchemaVO schema = this.getDataSchemaById(idDatasetSchema);
-    for (TableSchemaVO tableVO : schema.getTableSchemas()) {
-      if (tableVO.getRecordSchema() != null && tableVO.getRecordSchema().getFieldSchema() != null) {
-        for (FieldSchemaVO field : tableVO.getRecordSchema().getFieldSchema()) {
-          if (field.getPk() != null && field.getPk() && field.getPkReferenced() != null
-              && field.getPkReferenced()) {
-            PkCatalogueSchema catalogue =
-                pkCatalogueRepository.findByIdPk(new ObjectId(field.getId()));
-            if (catalogue != null && catalogue.getReferenced() != null
-                && !catalogue.getReferenced().isEmpty()) {
-              for (ObjectId referenced : catalogue.getReferenced()) {
-                Document fieldSchema =
-                    schemasRepository.findFieldSchema(idDatasetSchema, referenced.toString());
-                if (fieldSchema == null) {
-                  allow = false;
+    if (null != schema && null != schema.getTableSchemas() && !schema.getTableSchemas().isEmpty()) {
+      for (TableSchemaVO tableVO : schema.getTableSchemas()) {
+        if (tableVO.getRecordSchema() != null
+            && tableVO.getRecordSchema().getFieldSchema() != null) {
+          for (FieldSchemaVO field : tableVO.getRecordSchema().getFieldSchema()) {
+            if (field.getPk() != null && field.getPk() && field.getPkReferenced() != null
+                && field.getPkReferenced()) {
+              PkCatalogueSchema catalogue =
+                  pkCatalogueRepository.findByIdPk(new ObjectId(field.getId()));
+              if (catalogue != null && catalogue.getReferenced() != null
+                  && !catalogue.getReferenced().isEmpty()) {
+                for (ObjectId referenced : catalogue.getReferenced()) {
+                  Document fieldSchema =
+                      schemasRepository.findFieldSchema(idDatasetSchema, referenced.toString());
+                  if (fieldSchema == null) {
+                    allow = false;
+                  }
                 }
               }
             }
@@ -857,7 +918,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
     return allow;
   }
-
 
 
   /**
@@ -890,6 +950,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Delete from pk catalogue.
    *
    * @param fieldSchemaVO the field schema VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -965,17 +1026,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       String datasetSchemaId) {
     Document fieldSchema =
         schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
-    if (fieldSchema != null) {
+    if (fieldSchema != null && DataType.LINK.getValue().equals(fieldSchema.get("typeData"))) {
       // First of all, we delete the previous relation on the Metabase, if applies
-      if (DataType.LINK.getValue().equals(fieldSchema.get("typeData"))) {
-        Document previousReferenced = (Document) fieldSchema.get("referencedField");
-        String previousIdPk = previousReferenced.get("idPk").toString();
-        String previousIdDatasetReferenced = previousReferenced.get("idDatasetSchema").toString();
-        datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
-            this.getDesignDatasetIdDestinationFromFk(previousIdDatasetReferenced), previousIdPk,
-            fieldSchemaVO.getId());
-      }
-
+      Document previousReferenced = (Document) fieldSchema.get("referencedField");
+      String previousIdPk = previousReferenced.get("idPk").toString();
+      String previousIdDatasetReferenced = previousReferenced.get("idDatasetSchema").toString();
+      datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
+          this.getDesignDatasetIdDestinationFromFk(previousIdDatasetReferenced), previousIdPk,
+          fieldSchemaVO.getId());
     }
     // If the type is Link, then we add the relation on the Metabase
     if (fieldSchemaVO.getType() != null
@@ -989,6 +1047,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param idFieldSchema the id field schema
+   *
    * @return the field schema
    */
   @Override
@@ -1020,6 +1079,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Gets the design dataset id destination from fk.
    *
    * @param idDatasetSchema the id dataset schema
+   *
    * @return the design dataset id destination from fk
    */
   private Long getDesignDatasetIdDestinationFromFk(String idDatasetSchema) {
@@ -1040,6 +1100,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * update the catalogue one by one
    *
    * @param idDatasetSchema the id dataset schema
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1059,7 +1120,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
               // We need to update the field isReferenced from the PK referenced if this was the
               // only field that was FK
               if (catalogue.getReferenced() != null && catalogue.getReferenced().isEmpty()) {
-                this.updateIsPkReferencedInFieldSchema(
+                updateIsPkReferencedInFieldSchema(
                     field.getReferencedField().getIdDatasetSchema().toString(),
                     field.getReferencedField().getIdPk().toString(), false);
               }
@@ -1075,6 +1136,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Gets the referenced fields by schema.
    *
    * @param datasetSchemaId the dataset schema id
+   *
    * @return the referenced fields by schema
    */
   @Override
@@ -1100,6 +1162,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param tableSchemaId the table schema id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1129,6 +1192,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param idDatasetSchema the id dataset schema
    * @param idDataset the id dataset
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1157,7 +1221,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             }
             pkCatalogueRepository.save(catalogue);
             // Update the PK referenced in field schema, to mark it as referenced=true
-            this.updateIsPkReferencedInFieldSchema(
+            updateIsPkReferencedInFieldSchema(
                 field.getReferencedField().getIdDatasetSchema().toString(),
                 field.getReferencedField().getIdPk().toString(), true);
             // Add the relation into the metabase
@@ -1171,10 +1235,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
   /**
    * Update the property isPKreferenced of the class FieldSchema
-   * 
-   * @param referencedIdDatasetSchema
-   * @param referencedIdPk
-   * @param referenced
+   *
    * @throws EEAException
    */
   private void updateIsPkReferencedInFieldSchema(String referencedIdDatasetSchema,

@@ -1,0 +1,72 @@
+.imageWrapper .editIcon {
+  position: absolute;
+  font-size: 3em;
+  color: var(--main-font-color);
+  opacity: 0;
+  pointer-events: none;
+}
+.imageWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 3rem 0rem 3rem 0rem;
+}
+.overlay {
+  // position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+  transition: 0.3s ease;
+  background-color: red;
+  font-weight: 900;
+}
+.userDataIcon {
+  font-size: 8rem !important;
+  // padding: 0.5rem;
+  margin: 0.5rem;
+  border-radius: 50%;
+  -moz-border-radius: 50%;
+  -webkit-border-radius: 50%;
+  border: 3px solid var(--main-font-color);
+  color: var(--main-font-color);
+  width: 12.875rem;
+  height: 12.875rem;
+}
+.userDataIcon:hover {
+  // background-color: var(--user-image-bg-hover);
+  opacity: var(--user-image-bg-opacity);
+  border: 3px dashed var(--user-image-bg-hover);
+  cursor: pointer;
+}
+.userDataIcon:hover + .editIcon {
+  opacity: 1;
+}
+
+.tooltipClass {
+  border: 1px solid var(--main-font-color) !important;
+  &:after {
+    border-top-color: var(--main-font-color) !important;
+  }
+}
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto;
+  padding: 1rem;
+}
+.gridItem {
+  background-color: var(--bg);
+  padding: 10px;
+  text-align: center;
+  transform: scale(0.95);
+}
+.gridItem:hover {
+  cursor: pointer;
+  transform: scale(1);
+  transition: 0.08s ease-in;
+}

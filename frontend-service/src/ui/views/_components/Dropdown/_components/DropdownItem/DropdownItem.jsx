@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { isUndefined, isNull } from 'util';
+import isNil from 'lodash/isNil';
 
 export const DropdownItem = ({
   option = null,
@@ -19,7 +19,7 @@ export const DropdownItem = ({
   let content = template ? template(option) : label;
 
   const onItemClick = event => {
-    if (!isUndefined(onClick) && !isNull(onClick)) {
+    if (!isNil(onClick)) {
       onClick({
         originalEvent: event,
         option: option
@@ -28,7 +28,7 @@ export const DropdownItem = ({
   };
 
   return (
-    <li className={classNamed} onClick={onItemClick}>
+    <li className={classNamed} onMouseDown={onItemClick} onClick={onItemClick} key={option}>
       {content}
     </li>
   );

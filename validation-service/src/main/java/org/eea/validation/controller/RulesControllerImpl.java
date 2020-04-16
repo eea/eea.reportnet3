@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -166,13 +167,19 @@ public class RulesControllerImpl implements RulesController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   @PutMapping("/createNewRule")
-  public void createNewRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO) {
+  public ResponseEntity<?> createNewRule(@RequestParam("datasetId") long datasetId,
+      @RequestBody RuleVO ruleVO) {
+    String message = "";
+    HttpStatus status = HttpStatus.OK;
     try {
       rulesService.createNewRule(datasetId, ruleVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Error creating rule: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      message = e.getMessage();
+      status = HttpStatus.BAD_REQUEST;
     }
+
+    return new ResponseEntity<>(message, status);
   }
 
   /**
@@ -195,28 +202,21 @@ public class RulesControllerImpl implements RulesController {
 
     // we use the required value to differentiate if the rule to create is a required rule or if the
     // rules is a automatic rule for any type (boolean, number)
-    if (requiredRule) {
-      try {
-        rulesService.createAutomaticRules(datasetSchemaId, referenceId, null, typeEntityEnum,
-            datasetId, true);
-      } catch (EEAException e) {
+    try {
+      rulesService.createAutomaticRules(datasetSchemaId, referenceId, typeData, typeEntityEnum,
+          datasetId, requiredRule);
+    } catch (EEAException e) {
+      if (requiredRule) {
         LOG_ERROR.error(
             "Error creating the required rule for idDatasetSchema {} and field with id {} ",
             datasetSchemaId, referenceId);
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            EEAErrorMessage.ERROR_CREATING_RULE, e);
-      }
-    } else {
-      try {
-        rulesService.createAutomaticRules(datasetSchemaId, referenceId, typeData, typeEntityEnum,
-            datasetId, false);
-      } catch (EEAException e) {
+      } else {
         LOG_ERROR.error(
             "Error creating the automatic rule for idDatasetSchema {} and field with id {} for a {} ",
             datasetSchemaId, referenceId, typeData);
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            EEAErrorMessage.ERROR_CREATING_RULE, e);
       }
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.ERROR_CREATING_RULE,
+          e);
     }
     LOG.info("creation automatic rule for a type {} at lv of {} successfully", typeData,
         typeEntityEnum);

@@ -73,7 +73,7 @@ public class ReleaseBlockedEventTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void getMapTest1() throws EEAException {
+  public void getMapFromMinimumDataTest() throws EEAException {
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(datasetVO);
     Mockito.when(datasetVO.getDataSetName()).thenReturn("datasetName");

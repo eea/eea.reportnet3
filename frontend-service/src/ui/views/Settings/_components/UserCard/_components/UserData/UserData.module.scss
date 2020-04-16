@@ -1,0 +1,19 @@
+.userDataContainer {
+  text-align: center;
+  padding: 1rem;
+}
+
+.userName {
+  color: var(--subtitle-color);
+  font-weight: bold;
+  margin-top: 0.5rem;
+  font-size: 1.25em;
+}
+
+.userMail {
+  margin-top: 0.1rem;
+  margin-bottom: 1rem;
+  font-size: 1em;
+  font-weight: bold;
+  color: var(--main-font-color);
+}

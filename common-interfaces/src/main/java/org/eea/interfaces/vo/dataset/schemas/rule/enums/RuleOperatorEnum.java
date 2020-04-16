@@ -3,12 +3,13 @@ package org.eea.interfaces.vo.dataset.schemas.rule.enums;
 import java.util.HashMap;
 import java.util.Map;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Enum RuleOperatorEnum.
  */
 public enum RuleOperatorEnum {
 
-  // Arithmetic operators
+  // Number operators
   /** Equals. */
   EQ("=="),
   /** Distinct. */
@@ -30,19 +31,35 @@ public enum RuleOperatorEnum {
   /** Not. */
   NOT("!"),
 
-  // Functions
+  // String operators
   /** Length. */
   LEN("length"),
   /** Equals for strings. */
   SEQ("equals"),
   /** Equals for string ignoring case. */
-  SEQIC("equalsIgnoreCase");
+  SEQIC("equalsIgnoreCase"),
+  /** Match. */
+  MATCH("matches"),
+
+  // Date operators
+  /** The eq date. */
+  EQ_DATE("equalDate"),
+  /** The dist date. */
+  DIST_DATE("distinctDate"),
+  /** The gt date. */
+  GT_DATE("greaterThanDate"),
+  /** The lt date. */
+  LT_DATE("lessThanDate"),
+  /** The gteq date. */
+  GTEQ_DATE("greaterThanOrEqualsThanDate"),
+  /** The lteq date. */
+  LTEQ_DATE("lessThanOrEqualsThanDate");
 
   /** Operator's Java representation. */
   private final String label;
 
   /** Transformation between RuleOperatorEnum and Java representation. */
-  private final static Map<String, RuleOperatorEnum> map;
+  private static final Map<String, RuleOperatorEnum> map;
 
   static {
     map = new HashMap<>();

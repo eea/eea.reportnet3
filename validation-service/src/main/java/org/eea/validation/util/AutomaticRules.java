@@ -45,7 +45,7 @@ public class AutomaticRules {
   public static Rule createNumberAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isNumber(value)",
-        "The field must be a valid number", ErrorTypeEnum.ERROR.getValue(), shortCode, description);
+        "The value is not a valid number.", ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
 
   /**
@@ -61,7 +61,7 @@ public class AutomaticRules {
   public static Rule createDateAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isDateYYYYMMDD(value)",
-        "The field must be a valid date(YYYYMMDD) ", ErrorTypeEnum.ERROR.getValue(), shortCode,
+        "The value is not a valid date (YYYY-MM-DD). ", ErrorTypeEnum.ERROR.getValue(), shortCode,
         description);
   }
 
@@ -136,7 +136,7 @@ public class AutomaticRules {
     // PART INSENSITIVE
     ruleList.add(composeRule(referenceId, typeEntityEnum, nameRule,
         "isCodelistInsensitive(value,'" + codelistItems + "')",
-        "The value must be avaliable value in the codelist", ErrorTypeEnum.ERROR.getValue(),
+        "The value is not a valid member of the codelist", ErrorTypeEnum.ERROR.getValue(),
         shortCode, description));
     return ruleList;
   }
@@ -156,8 +156,9 @@ public class AutomaticRules {
   public static Rule createPKAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description, String tableSchemaId, Long datasetId) {
     Rule rule = composeRule(tableSchemaId, typeEntityEnum, nameRule,
-        "isfieldPK(datasetId,'" + referenceId + "',", "The value must be based on criteria.",
-        ErrorTypeEnum.ERROR.getValue(), shortCode, description);
+        "isfieldPK(datasetId,'" + referenceId + "',",
+        "The value is not a valid member of the referenced list.", ErrorTypeEnum.ERROR.getValue(),
+        shortCode, description);
     // we add the rule data to take the message if the user edit the rule
     StringBuilder whenCondition = new StringBuilder(rule.getWhenCondition());
     whenCondition = whenCondition.append("'").append(rule.getRuleId().toString()).append("')");
@@ -183,7 +184,7 @@ public class AutomaticRules {
       String nameRule, String whenCondition, String thenCondition0, String thenCondition1,
       String shortCode, String description) {
     final Rule rule = new Rule();
-    List<String> thenCondition = new ArrayList<String>();
+    List<String> thenCondition = new ArrayList<>();
     rule.setRuleId(new ObjectId());
     rule.setReferenceId(new ObjectId(referenceId));
     rule.setAutomatic(Boolean.TRUE);

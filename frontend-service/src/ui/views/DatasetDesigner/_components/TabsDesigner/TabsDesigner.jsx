@@ -22,7 +22,16 @@ import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarCont
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 export const TabsDesigner = withRouter(
-  ({ datasetSchemas, editable = false, match, history, onChangeReference, onLoadTableData }) => {
+  ({
+    datasetSchemas,
+    editable = false,
+    match,
+    history,
+    isPreviewModeOn,
+    onChangeReference,
+    onLoadTableData,
+    onUpdateTable
+  }) => {
     const {
       params: { dataflowId, datasetId }
     } = match;
@@ -64,6 +73,10 @@ export const TabsDesigner = withRouter(
         scrollFn();
       }
     }, [scrollFn, tabs, isEditing]);
+
+    useEffect(() => {
+      onUpdateTable(tabs);
+    }, [tabs]);
 
     useEffect(() => {
       if (!isUndefined(datasetSchema)) {
@@ -115,6 +128,7 @@ export const TabsDesigner = withRouter(
           table.index = idx;
           table.levelErrorTypes = inmDatasetSchema.levelErrorTypes;
           table.newTab = false;
+          table.readOnly = table.tableSchemaReadOnly;
           table.showContextMenu = false;
         });
         //Add tab Button/Tab
@@ -153,13 +167,9 @@ export const TabsDesigner = withRouter(
       }
     };
 
-    const onTabClicked = event => {
-      setActiveIndex(event.index);
-    };
+    const onTabClicked = event => setActiveIndex(event.index);
 
-    const onTabEditingHeader = editing => {
-      setIsEditing(editing);
-    };
+    const onTabEditingHeader = editing => setIsEditing(editing);
 
     const onTableAdd = (header, tabIndex, initialHeader) => {
       if (header !== initialHeader) {
@@ -178,13 +188,9 @@ export const TabsDesigner = withRouter(
       }
     };
 
-    const onTableDelete = deletedTabIndx => {
-      deleteTable(deletedTabIndx);
-    };
+    const onTableDelete = deletedTabIndx => deleteTable(deletedTabIndx);
 
-    const onTableDragAndDrop = (draggedTabHeader, droppedTabHeader) => {
-      reorderTable(draggedTabHeader, droppedTabHeader);
-    };
+    const onTableDragAndDrop = (draggedTabHeader, droppedTabHeader) => reorderTable(draggedTabHeader, droppedTabHeader);
 
     const onTableDragAndDropStart = draggedTabIdx => {
       if (!isUndefined(draggedTabIdx)) {
@@ -344,8 +350,10 @@ export const TabsDesigner = withRouter(
             activeIndex={activeIndex}
             checkEditingTabs={checkEditingTabs}
             designMode={true}
+            history={history}
             initialTabIndexDrag={initialTabIndexDrag}
             isErrorDialogVisible={isErrorDialogVisible}
+            isPreviewModeOn={isPreviewModeOn}
             onTabAdd={onTabAdd}
             onTabAddCancel={onTabAddCancel}
             onTabBlur={onTableAdd}
@@ -373,6 +381,7 @@ export const TabsDesigner = withRouter(
                           dataflowId={dataflowId}
                           datasetId={datasetId}
                           datasetSchemas={datasetSchemas}
+                          isPreviewModeOn={isPreviewModeOn}
                           onLoadTableData={onLoadTableData}
                           datasetSchemaId={datasetSchema.datasetSchemaId}
                           key={tab.index}

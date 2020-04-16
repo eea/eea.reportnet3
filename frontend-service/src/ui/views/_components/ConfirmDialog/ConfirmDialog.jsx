@@ -89,9 +89,9 @@ const ConfirmDialog = forwardRef((props, _) => {
         />
       ) : (
         <Button
-          className={`${!isUndefined(classNameConfirm) ? classNameConfirm : 'p-button-primary'} ${
-            !disabledConfirm ? 'p-button-animated-blink' : null
-          }`}
+          className={`${
+            !isUndefined(classNameConfirm) ? classNameConfirm : 'p-button-primary p-button-animated-blink'
+          } ${!disabledConfirm ? 'p-button-animated-blink' : null}`}
           disabled={disabledConfirm}
           icon={iconConfirm ? iconConfirm : 'check'}
           label={labelConfirm}
@@ -99,7 +99,7 @@ const ConfirmDialog = forwardRef((props, _) => {
         />
       )}
       <Button
-        className={`${!isUndefined(classNameCancel) ? classNameCancel : 'p-button-secondary'}`}
+        className={`${!isUndefined(classNameCancel) ? classNameCancel : 'p-button-secondary p-button-animated-blink'}`}
         icon={iconCancel ? iconCancel : 'cancel'}
         label={labelCancel}
         onClick={onHide}
@@ -114,7 +114,6 @@ const ConfirmDialog = forwardRef((props, _) => {
         focusOnShow={true}
         footer={footer}
         header={header}
-        maximizable={maximizable}
         onHide={onHide}
         style={dialogStyle ? dialogStyle : { minWidth: '50vw', maxWidth: '80vw', maxHeight: '80vh' }}
         visible={visible}>

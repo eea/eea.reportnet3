@@ -91,7 +91,7 @@ export const useSetColumns = (
       !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
         ? `<span style="font-weight:bold">Description:</span> ${
             !isNil(column.description) ? column.description : 'No description'
-          }<br/><span style="font-weight:bold">Codelists: </span>
+          }<br/><span style="font-weight:bold">${resources.messages['codelists']}: </span>
           ${column.codelistItems
             .map(codelistItem =>
               !isEmpty(codelistItem) && codelistItem.length > 15 ? `${codelistItem.substring(0, 15)}...` : codelistItem
@@ -160,7 +160,7 @@ export const useSetColumns = (
             <React.Fragment>
               {column.header}
               <Button
-                className={`${styles.codelistInfoButton} p-button-rounded p-button-secondary-transparent`}
+                className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
                 icon="infoCircle"
                 onClick={() => {
                   setSelectedHeader(column.header);

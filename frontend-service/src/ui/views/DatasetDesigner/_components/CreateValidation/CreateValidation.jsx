@@ -1,6 +1,7 @@
-import React, { useEffect, useReducer, useContext } from 'react';
+import React, { useEffect, useReducer, useContext, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import pull from 'lodash/pull';
 
 import styles from './CreateValidation.module.scss';
@@ -12,10 +13,9 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { ValidationExpressionSelector } from './_components/ValidationExpressionSelector';
 
-import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
-
 import { ValidationService } from 'core/services/Validation';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
@@ -31,8 +31,9 @@ import { deleteExpressionRecursivily } from './_functions/utils/deleteExpression
 import { getDatasetSchemaTableFields } from './_functions/utils/getDatasetSchemaTableFields';
 import { getEmptyExpression } from './_functions/utils/getEmptyExpression';
 import { getExpressionString } from './_functions/utils/getExpressionString';
-import { getSelectedTableByFieldId } from './_functions/utils/getSelectedTableByFieldId';
 import { getSelectedFieldById } from './_functions/utils/getSeletedFieldById';
+import { getSelectedTableByFieldId } from './_functions/utils/getSelectedTablebyFieldId';
+import { getSelectedTableBytableSchemaId } from './_functions/utils/getSelectedTableBytableSchemaId';
 import { groupExpressions } from './_functions/utils/groupExpressions';
 import { initValidationRuleCreation } from './_functions/utils/initValidationRuleCreation';
 import { resetValidationRuleCreation } from './_functions/utils/resetValidationRuleCreation';
@@ -47,6 +48,8 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     createValidationReducer,
     createValidationReducerInitState
   );
+  const [fieldsDropdown, setfieldsDropdown] = useState();
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
 
   const ruleDisablingCheckListener = [creationFormState.candidateRule.table, creationFormState.candidateRule.field];
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
@@ -67,6 +70,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
         payload: getDatasetSchemaTableFields(table, tabs)
       });
     }
+
     if (validationContext.fieldId) {
       creationFormDispatch({
         type: 'SET_FORM_FIELD',
@@ -79,12 +83,18 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   }, [creationFormState.candidateRule.table]);
 
   useEffect(() => {
+    let table = null;
     if (validationContext.fieldId) {
+      if (!isNil(validationContext.tableSchemaId)) {
+        table = getSelectedTableBytableSchemaId(validationContext.tableSchemaId, tabs);
+      } else {
+        table = getSelectedTableByFieldId(validationContext.fieldId, tabs);
+      }
       creationFormDispatch({
         type: 'SET_FORM_FIELD',
         payload: {
           key: 'table',
-          value: getSelectedTableByFieldId(validationContext.fieldId, tabs)
+          value: table
         }
       });
     }
@@ -132,6 +142,64 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     });
   }, [creationFormState.candidateRule]);
 
+  useEffect(() => {
+    if (validationContext.ruleEdit && !isEmpty(validationContext.ruleToEdit)) {
+      creationFormDispatch({
+        type: 'POPULATE_CREATE_FORM',
+        payload: validationContext.ruleToEdit
+      });
+    }
+  }, [validationContext.ruleEdit]);
+
+  useEffect(() => {
+    const { tableFields } = creationFormState;
+    const dropdownOptions = {
+      disabled: true,
+      placeholder: resourcesContext.messages.field,
+      options: [],
+      onChange: () => {},
+      value: null
+    };
+    if (isNil(tableFields)) {
+      dropdownOptions.value = null;
+    }
+    if (!isNil(tableFields) && tableFields.length == 0) {
+      dropdownOptions.placeholder = resourcesContext.messages.designSchemaTabNoFields;
+      dropdownOptions.value = null;
+    }
+    if (!isNil(tableFields) && tableFields.length > 0) {
+      dropdownOptions.options = tableFields;
+      dropdownOptions.disabled = false;
+      dropdownOptions.onChange = e =>
+        creationFormDispatch({
+          type: 'SET_FORM_FIELD',
+          payload: {
+            key: 'field',
+            value: e.target.value
+          }
+        });
+      dropdownOptions.value = creationFormState.candidateRule.field;
+    }
+    setfieldsDropdown(
+      <Dropdown
+        id={`${componentName}__field`}
+        disabled={dropdownOptions.disabled}
+        appendTo={document.body}
+        filterPlaceholder={dropdownOptions.placeholder}
+        placeholder={dropdownOptions.placeholder}
+        optionLabel="label"
+        options={dropdownOptions.options}
+        onChange={dropdownOptions.onChange}
+        value={dropdownOptions.value}
+      />
+    );
+  }, [
+    creationFormState.tableFields,
+    validationContext.isVisible,
+    creationFormState.candidateRule.field,
+    creationFormState.candidateRule.table
+  ]);
+
   const checkActivateRules = () => {
     return creationFormState.candidateRule.table && creationFormState.candidateRule.field;
   };
@@ -143,8 +211,9 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     );
   };
 
-  const createValidationRule = async () => {
+  const onCreateValidationRule = async () => {
     try {
+      setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
       await ValidationService.create(datasetId, candidateRule);
       onHide();
@@ -152,7 +221,25 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
       notificationContext.add({
         type: 'QC_RULE_CREATION_ERROR'
       });
-      console.error('createValidationRule error', error);
+      console.error('onCreateValidationRule error', error);
+    } finally {
+      setIsSubmitDisabled(false);
+    }
+  };
+
+  const onUpdateValidationRule = async () => {
+    try {
+      setIsSubmitDisabled(true);
+      const { candidateRule } = creationFormState;
+      await ValidationService.update(datasetId, candidateRule);
+      onHide();
+    } catch (error) {
+      notificationContext.add({
+        type: 'QC_RULE_UPDATING_ERROR'
+      });
+      console.error('onUpdateValidationRule error', error);
+    } finally {
+      setIsSubmitDisabled(false);
     }
   };
 
@@ -160,8 +247,8 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     const {
       candidateRule: { expressions, allExpressions }
     } = creationFormState;
-    const parsedAllExpressions = deleteExpression(expressionId, allExpressions);
     const parsedExpressions = deleteExpressionRecursivily(expressionId, expressions);
+    const parsedAllExpressions = deleteExpression(expressionId, allExpressions);
     creationFormDispatch({
       type: 'UPDATE_RULES',
       payload: parsedAllExpressions
@@ -185,10 +272,10 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   const onExpressionGroup = (expressionId, field) => {
     const {
       groupCandidate,
-      candidateRule: { expressions }
+      candidateRule: { allExpressions }
     } = creationFormState;
 
-    const [currentExpression] = expressions.filter(expression => expression.expressionId == expressionId);
+    const [currentExpression] = allExpressions.filter(expression => expression.expressionId == expressionId);
     currentExpression[field.key] = field.value;
 
     if (field.value) {
@@ -201,7 +288,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
       payload: {
         groupExpressionsActive: field.value ? 1 : -1,
         groupCandidate,
-        expressions
+        allExpressions
       }
     });
   };
@@ -214,7 +301,11 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
 
   const dialogLayout = children => (
     <Dialog
-      header="Create Field Validation rule"
+      header={
+        validationContext.ruleEdit
+          ? resourcesContext.messages.editFieldConstraint
+          : resourcesContext.messages.createFieldConstraintTitle
+      }
       visible={validationContext.isVisible}
       style={{ width: '90%' }}
       onHide={e => onHide()}>
@@ -251,24 +342,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
               </div>
               <div className={styles.field}>
                 <label htmlFor="field">{resourcesContext.messages.field}</label>
-                <Dropdown
-                  id={`${componentName}__field`}
-                  appendTo={document.body}
-                  filterPlaceholder={resourcesContext.messages.field}
-                  placeholder={resourcesContext.messages.field}
-                  optionLabel="label"
-                  options={creationFormState.tableFields}
-                  onChange={e =>
-                    creationFormDispatch({
-                      type: 'SET_FORM_FIELD',
-                      payload: {
-                        key: 'field',
-                        value: e.target.value
-                      }
-                    })
-                  }
-                  value={creationFormState.candidateRule.field}
-                />
+                {fieldsDropdown}
               </div>
               <div className={styles.field}>
                 <label htmlFor="shortCode">{resourcesContext.messages.ruleShortCode}</label>
@@ -362,7 +436,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
             </div>
             <div className={styles.subsection}>
               <div className={`${styles.field} ${styles.qcActive}`}>
-                <label htmlFor="QcActive">{resourcesContext.messages.active}</label>
+                <label htmlFor="QcActive">{resourcesContext.messages.enabled}</label>
                 <Checkbox
                   id={`${componentName}__active`}
                   onChange={e =>
@@ -377,14 +451,8 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
             </div>
           </div>
           <div className={styles.section}>
+            <h2>Rule expressions</h2>
             <ul>
-              <li className={styles.expressionsHeader}>
-                <span>{resourcesContext.messages.group}</span>
-                <span>{resourcesContext.messages.andor}</span>
-                <span>{resourcesContext.messages.operatorType}</span>
-                <span>{resourcesContext.messages.operator}</span>
-                <span>{resourcesContext.messages.value}</span>
-              </li>
               {creationFormState.candidateRule.expressions &&
                 creationFormState.candidateRule.expressions.map((expression, i) => (
                   <ValidationExpressionSelector
@@ -398,40 +466,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                   />
                 ))}
             </ul>
-          </div>
-
-          {creationFormState.groupExpressionsActive >= 2 && (
-            <div className={styles.section}>
-              <Button
-                id={`${componentName}__groupExpresions`}
-                className="p-button-primary p-button-text"
-                type="button"
-                label="Group"
-                icon="plus"
-                onClick={e => {
-                  const groupingResult = groupExpressions(
-                    creationFormState.candidateRule.expressions,
-                    creationFormState.groupExpressionsActive,
-                    creationFormState.groupCandidate
-                  );
-                  creationFormDispatch({
-                    type: 'GROUP_EXPRESSIONS',
-                    payload: {
-                      expressions: groupingResult.expressions,
-                      allExpressions: [...creationFormState.candidateRule.allExpressions, groupingResult.newGroup]
-                    }
-                  });
-                }}
-              />
-            </div>
-          )}
-          <div className={styles.section}>
-            <textarea name="" id="" cols="30" rows="5" value={creationFormState.validationRuleString}></textarea>
-          </div>
-        </div>
-        <div className={styles.footer}>
-          <div className={`${styles.section} ${styles.footerToolBar}`}>
-            <div className={styles.subsection}>
+            <div className={styles.expressionsActionsBtns}>
               <Button
                 id={`${componentName}__addExpresion`}
                 disabled={creationFormState.isRuleAddingDisabled}
@@ -446,17 +481,67 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                   })
                 }
               />
+              {creationFormState.groupExpressionsActive >= 2 && (
+                <Button
+                  id={`${componentName}__groupExpresions`}
+                  className="p-button-primary p-button-text"
+                  type="button"
+                  label="Group"
+                  icon="plus"
+                  onClick={e => {
+                    const groupingResult = groupExpressions(
+                      creationFormState.candidateRule.expressions,
+                      creationFormState.groupExpressionsActive,
+                      creationFormState.groupCandidate
+                    );
+                    if (!isNil(groupingResult.newGroup))
+                      creationFormDispatch({
+                        type: 'GROUP_EXPRESSIONS',
+                        payload: {
+                          expressions: groupingResult.expressions,
+                          allExpressions: [...creationFormState.candidateRule.allExpressions, groupingResult.newGroup]
+                        }
+                      });
+                  }}
+                />
+              )}
             </div>
+          </div>
+          <div className={styles.section}>
+            <textarea
+              name=""
+              id=""
+              cols="30"
+              readOnly
+              rows="5"
+              value={creationFormState.validationRuleString}></textarea>
+          </div>
+        </div>
+        <div className={styles.footer}>
+          <div className={`${styles.section} ${styles.footerToolBar}`}>
             <div className={styles.subsection}>
-              <Button
-                id={`${componentName}__create`}
-                disabled={creationFormState.isValidationCreationDisabled}
-                className="p-button-primary p-button-text-icon-left"
-                type="button"
-                label={resourcesContext.messages.create}
-                icon="check"
-                onClick={e => createValidationRule()}
-              />
+              {validationContext.ruleEdit ? (
+                <Button
+                  id={`${componentName}__update`}
+                  disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
+                  className="p-button-primary p-button-text-icon-left"
+                  type="button"
+                  label={resourcesContext.messages.update}
+                  icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
+                  onClick={e => onUpdateValidationRule()}
+                />
+              ) : (
+                <Button
+                  id={`${componentName}__create`}
+                  disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
+                  className="p-button-primary p-button-text-icon-left"
+                  type="button"
+                  label={resourcesContext.messages.create}
+                  icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
+                  onClick={e => onCreateValidationRule()}
+                />
+              )}
+
               <Button
                 id={`${componentName}__cancel`}
                 className="p-button-secondary p-button-text-icon-left"

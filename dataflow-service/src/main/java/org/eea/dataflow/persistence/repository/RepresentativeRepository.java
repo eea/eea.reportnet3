@@ -7,9 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-/**
- * The Interface RepresentativeRepository.
- */
+/** The Interface RepresentativeRepository. */
 public interface RepresentativeRepository extends CrudRepository<Representative, Long> {
 
   /**
@@ -24,12 +22,21 @@ public interface RepresentativeRepository extends CrudRepository<Representative,
    * Exists by user mail.
    *
    * @param dataProviderId the data provider id
-   * @param userMail the user mail
    * @param dataflowId the dataflow id
    * @return true, if successful
    */
-  @Query("SELECT r from Representative r WHERE (r.dataProvider.id = :dataProviderId AND r.userMail= :userMail AND r.dataflow.id= :dataflowId)")
-  Optional<List<Representative>> findBydataProviderIdAnduserMailAnddataflowId(
-      @Param("dataProviderId") Long dataProviderId, @Param("userMail") String userMail,
-      @Param("dataflowId") Long dataflowId);
+  @Query("SELECT r from Representative r WHERE (r.dataProvider.id = :dataProviderId AND r.dataflow.id= :dataflowId)")
+  Optional<List<Representative>> findByDataProviderIdAndDataflowId(
+      @Param("dataProviderId") Long dataProviderId, @Param("dataflowId") Long dataflowId);
+
+  /**
+   * Find by dataflow id and email.
+   *
+   * @param dataflowId the dataflow id
+   * @param email the email
+   * @return the list
+   */
+  @Query("SELECT r from Representative r WHERE (r.userMail = :email AND r.dataflow.id= :dataflowId)")
+  List<Representative> findByDataflowIdAndEmail(@Param("dataflowId") Long dataflowId,
+      @Param("email") String email);
 }

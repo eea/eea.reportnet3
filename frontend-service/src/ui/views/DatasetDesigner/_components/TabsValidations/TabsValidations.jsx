@@ -1,7 +1,10 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { capitalize, isEmpty, isUndefined } from 'lodash';
+import capitalize from 'lodash/capitalize';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './TabsValidations.module.scss';
 
@@ -21,10 +24,12 @@ import { ValidationService } from 'core/services/Validation';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
-const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
+const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSchemaId, onHideValidationsDialog }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const validationContext = useContext(ValidationContext);
 
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
@@ -60,8 +65,18 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
     try {
       setIsLoading(true);
       const validationsServiceList = await ValidationService.getAll(datasetSchemaId);
+
+      if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
+        validationsServiceList.validations.forEach(validation => {
+          const aditionalInfo = getAditionalValidationInfo(validation.referenceId);
+          validation.table = aditionalInfo.tableName;
+          validation.field = aditionalInfo.fieldName;
+        });
+      }
+
       setValidationsList(validationsServiceList);
     } catch (error) {
+      console.log(error);
       notificationContext.add({
         type: 'VALIDATION_SERVICE_GET_ALL_ERROR'
       });
@@ -94,6 +109,25 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
     </div>
   );
 
+  const getAditionalValidationInfo = referenceId => {
+    const aditionalInfo = {};
+    datasetSchemaAllTables.forEach(table => {
+      if (!isUndefined(table.records)) {
+        table.records.forEach(record =>
+          record.fields.forEach(field => {
+            if (!isNil(field)) {
+              if (field.fieldId === referenceId) {
+                aditionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
+                aditionalInfo.fieldName = field.name;
+              }
+            }
+          })
+        );
+      }
+    });
+    return aditionalInfo;
+  };
+
   const getHeader = fieldHeader => {
     let header;
     if (fieldHeader === 'levelError') {
@@ -111,18 +145,20 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
   const getOrderedValidations = validations => {
     const validationsWithPriority = [
       { id: 'id', index: 0 },
-      { id: 'shortCode', index: 1 },
-      { id: 'name', index: 2 },
-      { id: 'description', index: 3 },
-      { id: 'levelError', index: 4 },
-      { id: 'enabled', index: 5 },
-      { id: 'automatic', index: 6 },
-      { id: 'referenceId', index: 7 },
-      { id: 'activationGroup', index: 8 },
-      { id: 'date', index: 9 },
-      { id: 'entityType', index: 10 },
-      { id: 'actionButtons', index: 11 }
-    ];  
+      { id: 'table', index: 1 },
+      { id: 'field', index: 2 },
+      { id: 'shortCode', index: 3 },
+      { id: 'name', index: 4 },
+      { id: 'description', index: 5 },
+      { id: 'levelError', index: 6 },
+      { id: 'enabled', index: 7 },
+      { id: 'automatic', index: 8 },
+      { id: 'referenceId', index: 9 },
+      { id: 'activationGroup', index: 10 },
+      { id: 'date', index: 11 },
+      { id: 'entityType', index: 12 },
+      { id: 'actionButtons', index: 13 }
+    ];
     return validations
       .map(error => validationsWithPriority.filter(e => error === e.id))
       .flat()
@@ -130,19 +166,30 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
       .map(orderedError => orderedError.id);
   };
 
-  const actionsTemplate = () => (
+  const actionsTemplate = row => (
     <ActionsColumn
       onDeleteClick={() => onShowDeleteDialog()}
       onEditClick={() => {
-        '';
+        validationContext.onOpenToEdit(row, 'validationsListDialog');
+        onHideValidationsDialog();
       }}
     />
   );
 
-  const deleteTemplate = () => (
-    <ActionsColumn
-      onDeleteClick={() => onShowDeleteDialog()}      
-    />
+  const deleteTemplate = () => <ActionsColumn onDeleteClick={() => onShowDeleteDialog()} />;
+
+  const deleteValidationDialog = () => (
+    <ConfirmDialog
+      classNameConfirm={'p-button-danger'}
+      header={resources.messages['deleteValidationHeader']}
+      labelCancel={resources.messages['no']}
+      labelConfirm={resources.messages['yes']}
+      onConfirm={() => onDeleteValidation()}
+      onHide={() => onHideDeleteDialog()}
+      visible={isDeleteDialogVisible}
+      maximizable={false}>
+      {resources.messages['deleteValidationConfirm']}
+    </ConfirmDialog>
   );
 
   const columnStyles = field => {
@@ -150,9 +197,10 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
     const invisibleFields = ['id', 'referenceId', 'activationGroup', 'condition', 'date', 'entityType'];
     if (field.toUpperCase() === 'DESCRIPTION') {
       style.width = '40%';
-    } else {
-      style.width = '20%';
     }
+    // else {
+    //   style.width = '20%';
+    // }
     if (invisibleFields.includes(field)) {
       style.display = 'none';
     } else {
@@ -163,12 +211,12 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
 
   const actionButtonsColumn = (
     <Column
-        body={row => row.automatic ? deleteTemplate() : actionsTemplate()}
-        className={styles.validationCol}
-        header={resources.messages['actions']}
-        key="actions"
-        sortable={false}
-        style={{ width: '100px' }}
+      body={row => (row.automatic ? deleteTemplate() : actionsTemplate(row))}
+      className={styles.validationCol}
+      header={resources.messages['actions']}
+      key="actions"
+      sortable={false}
+      style={{ width: '100px' }}
     />
   );
 
@@ -184,10 +232,10 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
       return (
         <Column
           body={template}
-          key={field} 
           columnResizeMode="expand"
           field={field}
           header={getHeader(field)}
+          key={field}
           sortable={true}
           style={columnStyles(field)}
         />
@@ -205,41 +253,41 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
         </div>
       );
     }
-      const paginatorRightText = `${capitalize('FIELD')} records: ${validationsList.validations.length}`;
-      return (
-        <div className={null}>
-          <DataTable
-            autoLayout={true}
-            className={styles.paginatorValidationViewer}
-            loading={false}
-            onRowClick={event => setValidationId(event.data.id)}
-            paginator={true}
-            paginatorRight={paginatorRightText}
-            rows={10}
-            rowsPerPageOptions={[5, 10, 15]}
-            totalRecords={validationsList.validations.length}
-            value={validationsList.validations}>
-            {renderColumns(validationsList.validations)}
-          </DataTable>
-        </div>
+    const paginatorRightText = `${capitalize('FIELD')} records: ${validationsList.validations.length}`;
+    return (
+      <div className={null}>
+        <DataTable
+          autoLayout={true}
+          className={styles.paginatorValidationViewer}
+          loading={false}
+          onRowClick={event => setValidationId(event.data.id)}
+          paginator={true}
+          paginatorRight={paginatorRightText}
+          rows={10}
+          rowsPerPageOptions={[5, 10, 15]}
+          totalRecords={validationsList.validations.length}
+          value={validationsList.validations}>
+          {renderColumns(validationsList.validations)}
+        </DataTable>
+      </div>
 
-        // <TabPanel header={entityType} key={entityType} rightIcon={null}>
-        //   <div className={null}>
-        //     <DataTable
-        //       autoLayout={true}
-        //       className={null}
-        //       loading={false}
-        //       paginator={true}
-        //       paginatorRight={paginatorRightText}
-        //       rows={10}
-        //       rowsPerPageOptions={[5, 10, 15]}
-        //       totalRecords={validationsFilteredByEntityType.length}
-        //       value={validationsFilteredByEntityType}>
-        //       {columns}
-        //     </DataTable>
-        //   </div>
-        // </TabPanel>
-      );
+      // <TabPanel header={entityType} key={entityType} rightIcon={null}>
+      //   <div className={null}>
+      //     <DataTable
+      //       autoLayout={true}
+      //       className={null}
+      //       loading={false}
+      //       paginator={true}
+      //       paginatorRight={paginatorRightText}
+      //       rows={10}
+      //       rowsPerPageOptions={[5, 10, 15]}
+      //       totalRecords={validationsFilteredByEntityType.length}
+      //       value={validationsFilteredByEntityType}>
+      //       {columns}
+      //     </DataTable>
+      //   </div>
+      // </TabPanel>
+    );
     // });
   };
 
@@ -250,17 +298,7 @@ const TabsValidations = withRouter(({ datasetSchemaId, dataset }) => {
   return (
     <Fragment>
       {validationList()}
-
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        header={resources.messages['deleteValidationHeader']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        onConfirm={() => onDeleteValidation()}
-        onHide={() => onHideDeleteDialog()}
-        visible={isDeleteDialogVisible}>
-        {resources.messages['deleteValidationConfirm']}
-      </ConfirmDialog>
+      {isDeleteDialogVisible && deleteValidationDialog()}
     </Fragment>
   );
 });

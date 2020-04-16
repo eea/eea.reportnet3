@@ -117,6 +117,9 @@
           "key": "MANAGE_ROLES_ACCOUNT_ERROR"
         },
         {
+          "key": "UPDATE_DATACOLLECTION_FAILED_EVENT"
+        },
+        {
           "key": "DELETE_TABLE_DATA_BY_ID_ERROR",
           "navigateTo": {
             "section": "DATASET",
@@ -181,12 +184,6 @@
             "section": "DATASET_SCHEMA",
             "parameters": ["dataflowId", "datasetId"]
           }
-        },
-        {
-          "key": "CODELIST_SERVICE_GET_CODELISTS_IDS_BY_SCHEMAS"
-        },
-        {
-          "key": "CODELIST_SERVICE_GET_CODELISTS_BY_IDS"
         },
         {
           "key": "ADD_DATASET_SNAPSHOT_FAILED_EVENT",
@@ -283,46 +280,7 @@
           }
         },
         {
-          "key": "RELEASE_DATASET_SNAPSHOT_FAILED_EVENT"
-        },
-        {
-          "key": "SAVE_EDIT_CODELIST_ERROR"
-        },
-        {
           "key": "USER_SERVICE_OLD_LOGIN_ERROR"
-        },
-        {
-          "key": "CODELIST_SERVICE_ADD_BY_ID_ERROR"
-        },
-        {
-          "key": "CODELIST_SERVICE_CLONE_BY_ID_ERROR"
-        },
-        {
-          "key": "CODELIST_SERVICE_GET_ALL_IN_CATEGORY_ERROR"
-        },
-        {
-          "key": "CODELIST_SERVICE_GET_BY_ID_ERROR"
-        },
-        {
-          "key": "CODELIST_SERVICE_GET_CODELISTS_LIST"
-        },
-        {
-          "key": "CODELIST_SERVICE_UPDATE_BY_ID_ERROR"
-        },
-        {
-          "key": "CODELIST_CATEGORY_SERVICE_ADD_BY_ID_ERROR"
-        },
-        {
-          "key": "CODELIST_CATEGORY_SERVICE_ALL_ERROR"
-        },
-        {
-          "key": "CODELIST_CATEGORY_SERVICE_DELETE_BY_ID_ERROR"
-        },
-        {
-          "key": "CODELIST_CATEGORY_SERVICE_GET_CATEGORY_INFO_ERROR"
-        },
-        {
-          "key": "CODELIST_CATEGORY_SERVICE_UPDATE_BY_ID_ERROR"
         },
         {
           "key": "LOAD_SNAPSHOTS_LIST_ERROR"
@@ -367,6 +325,35 @@
         },
         {
           "key": "DELETE_DATASET_SCHEMA_LINK_ERROR"
+        },
+        {
+          "key": "LOAD_OPENED_OBLIGATION_ERROR"
+        },
+        {
+          "key": "DATAFLOW_OBLIGATION_EMPTY",
+          "lifeTime": 5000,
+          "fixed": false
+        },
+        {
+          "key": "LOAD_COUNTRIES_ERROR"
+        },
+        {
+          "key": "LOAD_ISSUES_ERROR"
+        },
+        {
+          "key": "LOAD_ORGANIZATIONS_ERROR"
+        },
+        {
+          "key": "LOAD_DATAFLOW_DATA_ERROR"
+        },
+        {
+          "key": "GET_CONFIGURATION_USER_SERVICE_ERROR"
+        },
+        {
+          "key": "UPDATE_ATTRIBUTES_USER_SERVICE_ERROR"
+        },
+        {
+          "key": "QC_RULE_UPDATING_ERROR"
         }
       ]
     },
@@ -495,11 +482,17 @@
           }
         },
         {
+          "key": "UPDATE_DATACOLLECTION_COMPLETED_EVENT"
+        },
+        {
           "key": "ADD_DATACOLLECTION_COMPLETED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",
             "parameters": ["dataflowId"]
           }
+        },
+        {
+          "key": "DATAFLOW_DELETE_SUCCESS"
         }
       ]
     },

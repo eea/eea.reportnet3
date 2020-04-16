@@ -14,6 +14,7 @@ export const createValidationReducerInitState = {
   datasetSchema: {},
   schemaTables: [],
   errorLevels: [],
+  validationRuleString: '',
   areRulesDisabled: true,
   isRuleAddingDisabled: true,
   isValidationCreationDisabled: true,
@@ -38,7 +39,11 @@ export const createValidationReducer = (state, { type, payload }) => {
     case 'SET_FIELDS':
       return {
         ...state,
-        tableFields: payload
+        tableFields: payload,
+        candidateRule: {
+          ...state.candidateRule,
+          field: null
+        }
       };
     case 'UPDATE_RULES':
       return {
@@ -106,7 +111,7 @@ export const createValidationReducer = (state, { type, payload }) => {
         groupCandidate: payload.groupCandidate,
         candidateRule: {
           ...state.candidateRule,
-          expressions: payload.expressions
+          allExpressions: payload.allExpressions
         }
       };
     case 'SET_EXPRESSIONS_STRING':
@@ -135,6 +140,22 @@ export const createValidationReducer = (state, { type, payload }) => {
         candidateRule: {
           ...state.candidateRule,
           allExpressions: payload
+        }
+      };
+    case 'POPULATE_CREATE_FORM':
+      return {
+        ...state,
+        candidateRule: {
+          ...state.candidateRule,
+          id: payload.id,
+          shortCode: payload.shortCode,
+          description: payload.description,
+          errorMessage: payload.message,
+          errorLevel: { label: payload.levelError, value: payload.levelError },
+          name: payload.name,
+          active: payload.enabled,
+          expressions: payload.expressions,
+          allExpressions: payload.allExpressions
         }
       };
     default:

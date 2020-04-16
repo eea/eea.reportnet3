@@ -9,6 +9,8 @@ import java.util.Objects;
 import org.eea.interfaces.vo.dataset.schemas.rule.enums.RuleOperatorEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -101,11 +103,27 @@ public class RuleExpressionVO implements Serializable {
   @SuppressWarnings("unchecked")
   public void setArg1(Object arg1) {
     if (arg1 != null) {
+
       if (arg1 instanceof Map) {
         this.arg1 = new RuleExpressionVO((Map<String, Object>) arg1);
-      } else {
-        this.arg1 = arg1;
+        return;
       }
+
+      if (arg1 instanceof Number) {
+        if (arg1 instanceof Integer || arg1 instanceof Long || arg1 instanceof Float
+            || arg1 instanceof Double) {
+          this.arg1 = arg1;
+          return;
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid number: " + arg1);
+      }
+
+      if (arg1 instanceof String) {
+        this.arg1 = arg1;
+        return;
+      }
+
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid type: " + arg2);
     }
   }
 
@@ -117,13 +135,30 @@ public class RuleExpressionVO implements Serializable {
   @SuppressWarnings("unchecked")
   public void setArg2(Object arg2) {
     if (arg2 != null) {
+
       if (arg2 instanceof Map) {
         this.arg2 = new RuleExpressionVO((Map<String, Object>) arg2);
-      } else {
-        this.arg2 = arg2;
+        return;
       }
+
+      if (arg2 instanceof Number) {
+        if (arg2 instanceof Integer || arg2 instanceof Long || arg2 instanceof Float
+            || arg2 instanceof Double) {
+          this.arg2 = arg2;
+          return;
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid number: " + arg2);
+      }
+
+      if (arg2 instanceof String) {
+        this.arg2 = arg2;
+        return;
+      }
+
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid type: " + arg2);
     }
   }
+
 
   /**
    * Tokenize a function. A function starts with ".", the first word is the operator, and the
@@ -320,8 +355,8 @@ public class RuleExpressionVO implements Serializable {
         continue;
       }
 
-      // Keyword 'value' match: Transform to keyword 'VALUE'
-      if (actual.equals("value")) {
+      // Keywords 'value' or 'this' match: Transform to keyword 'VALUE'
+      if (actual.equals("value") || actual.equals("this")) {
         args.add("VALUE");
         index++;
         continue;
@@ -334,13 +369,8 @@ public class RuleExpressionVO implements Serializable {
         continue;
       }
 
-      // Long or Integer match: By default, assume that the token is a integer number representation
-      Long n = Long.parseLong(actual);
-      if (n <= Integer.MAX_VALUE) {
-        args.add(n.intValue());
-      } else {
-        args.add(n);
-      }
+      // Long match
+      args.add(Long.parseLong(actual));
       index++;
     }
 
@@ -373,6 +403,7 @@ public class RuleExpressionVO implements Serializable {
     switch (actual) {
       case ' ':
         return 0;
+      case '-':
       case '0':
       case '1':
       case '2':
@@ -392,12 +423,11 @@ public class RuleExpressionVO implements Serializable {
       case '&':
         return 2;
       case '.':
-        if (lastInputType == 1) {
-          return 1;
-        }
-        return 3;
+        return lastInputType == 1 ? 1 : 3;
       case ')':
         return 4;
+      case 'E':
+        return lastInputType == 1 ? 1 : 5;
       default:
         return 5;
     }
@@ -437,6 +467,8 @@ public class RuleExpressionVO implements Serializable {
   public String toString() {
     if (operator != null) {
       switch (operator) {
+        case NOT:
+          return operator.getLabel() + "(" + arg1 + ")";
         case EQ:
         case DIST:
         case GT:
@@ -446,13 +478,19 @@ public class RuleExpressionVO implements Serializable {
         case AND:
         case OR:
           return toStringBranch(arg1) + " " + operator.getLabel() + " " + toStringBranch(arg2);
-        case NOT:
-          return operator.getLabel() + "(" + arg1 + ")";
         case LEN:
           return "value." + operator.getLabel() + "()";
         case SEQ:
         case SEQIC:
+        case MATCH:
           return "value." + operator.getLabel() + "(" + toStringBranch(arg2) + ")";
+        case EQ_DATE:
+        case DIST_DATE:
+        case GT_DATE:
+        case LT_DATE:
+        case GTEQ_DATE:
+        case LTEQ_DATE:
+          return "this." + operator.getLabel() + "(" + toStringBranch(arg2) + ")";
       }
     }
 

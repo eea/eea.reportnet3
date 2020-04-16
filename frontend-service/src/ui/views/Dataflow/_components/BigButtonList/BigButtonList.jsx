@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
-import { isEmpty, isNull, isUndefined, remove } from 'lodash';
+import isNil from 'lodash/isNil';
+import remove from 'lodash/remove';
+import moment from 'moment';
 
 import styles from './BigButtonList.module.css';
 
@@ -19,20 +21,21 @@ import { DataCollectionService } from 'core/services/DataCollection';
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
 import { MetadataUtils } from 'ui/views/_functions/Utils';
+import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const BigButtonList = ({
   dataflowData,
+  dataflowDataState,
   dataflowId,
-  dataflowStatus,
   dataProviderId,
   designDatasetSchemas,
   handleRedirect,
-  hasRepresentatives,
   hasWritePermissions,
   isCustodian,
   isDataSchemaCorrect,
@@ -47,34 +50,40 @@ export const BigButtonList = ({
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const user = useContext(UserContext);
 
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
-  const [dataCollectionDueDate, setDataCollectionDueDate] = useState();
+  const [dataCollectionDueDate, setDataCollectionDueDate] = useState(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
-  const [isCreateButtonActive, setIsCreateButtonActive] = useState(true);
+  const [isActiveButton, setIsActiveButton] = useState(true);
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
+  const [isUpdateDatacollectionDialogVisible, setIsUpdateDatacollectionDialogVisible] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
+  const hasExpirationDate = new Date(dataflowDataState.obligations.expirationDate) > new Date();
 
   const receiptBtnRef = useRef(null);
 
-  useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsCreateButtonActive, true);
+  useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
+  useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
+  useCheckNotifications(['UPDATE_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
 
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
 
     if (response) {
-      receiptDispatch({
-        type: 'ON_DOWNLOAD',
-        payload: { isLoading: false }
-      });
+      receiptDispatch({ type: 'ON_DOWNLOAD', payload: { isLoading: false } });
     }
   }, [notificationContext]);
 
+  useEffect(() => {
+    getExpirationDate();
+  }, [dataflowDataState.obligations.expirationDate]);
+
   const downloadPdf = response => {
-    if (!isUndefined(response)) {
+    if (!isNil(response)) {
       DownloadFile(response, `${dataflowData.name}_${Date.now()}.pdf`);
 
       const url = window.URL.createObjectURL(new Blob([response]));
@@ -115,6 +124,15 @@ export const BigButtonList = ({
     setDeleteDialogVisible(true);
   };
 
+  const getExpirationDate = () => {
+    setDataCollectionDueDate(
+      !isNil(dataflowDataState.obligations.expirationDate) &&
+        new Date(dataflowDataState.obligations.expirationDate) > new Date()
+        ? new Date(dataflowDataState.obligations.expirationDate)
+        : null
+    );
+  };
+
   const getMetadata = async ids => {
     try {
       return await MetadataUtils.getMetadata(ids);
@@ -134,11 +152,14 @@ export const BigButtonList = ({
 
   const onCreateDataCollection = async date => {
     setDataCollectionDialog(false);
+
     notificationContext.add({
       type: 'CREATE_DATA_COLLECTION_INIT',
       content: {}
     });
-    setIsCreateButtonActive(false);
+
+    setIsActiveButton(false);
+
     try {
       return await DataCollectionService.create(dataflowId, date);
     } catch (error) {
@@ -153,7 +174,21 @@ export const BigButtonList = ({
           dataflowName
         }
       });
-      setIsCreateButtonActive(true);
+
+      setIsActiveButton(true);
+    }
+  };
+
+  const onUpdateDataCollection = async () => {
+    setIsUpdateDatacollectionDialogVisible(false);
+
+    setIsActiveButton(false);
+
+    try {
+      const result = await DataCollectionService.update(dataflowId);
+      return result;
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -163,6 +198,7 @@ export const BigButtonList = ({
 
   const onDeleteDatasetSchema = async index => {
     setDeleteDialogVisible(false);
+
     showLoading();
     try {
       const response = await DatasetService.deleteSchemaById(designDatasetSchemas[index].datasetId);
@@ -223,26 +259,30 @@ export const BigButtonList = ({
     setDataCollectionDialog(true);
   };
 
+  const onShowUpdateDataCollectionModal = () => {
+    setIsUpdateDatacollectionDialogVisible(true);
+  };
+
   const bigButtonList = useBigButtonList({
-    dataflowData: dataflowData,
-    dataflowId: dataflowId,
-    dataflowStatus: dataflowStatus,
-    getDeleteSchemaIndex: getDeleteSchemaIndex,
-    handleRedirect: handleRedirect,
-    hasRepresentatives: hasRepresentatives,
-    hasWritePermissions: hasWritePermissions,
-    isCreateButtonActive: isCreateButtonActive,
-    isCustodian: isCustodian,
-    isDataSchemaCorrect: isDataSchemaCorrect,
-    onDatasetSchemaNameError: onDatasetSchemaNameError,
-    onDuplicateName: onDuplicateName,
-    onLoadReceiptData: onLoadReceiptData,
-    onSaveName: onSaveName,
-    onShowDataCollectionModal: onShowDataCollectionModal,
-    onShowNewSchemaDialog: onShowNewSchemaDialog,
-    receiptState: receiptState,
-    showReleaseSnapshotDialog: showReleaseSnapshotDialog,
-    updatedDatasetSchema: updatedDatasetSchema
+    dataflowData,
+    dataflowDataState,
+    dataflowId,
+    getDeleteSchemaIndex,
+    handleRedirect,
+    hasWritePermissions,
+    isActiveButton,
+    isCustodian,
+    isDataSchemaCorrect,
+    onDatasetSchemaNameError,
+    onDuplicateName,
+    onLoadReceiptData,
+    onSaveName,
+    onShowDataCollectionModal,
+    onShowNewSchemaDialog,
+    onShowUpdateDataCollectionModal,
+    receiptState,
+    showReleaseSnapshotDialog,
+    updatedDatasetSchema
   })
     .filter(button => button.visibility)
     .map((button, i) => <BigButton key={i} {...button} />);
@@ -302,16 +342,38 @@ export const BigButtonList = ({
       </ConfirmDialog>
 
       <ConfirmDialog
-        header={resources.messages['createDataCollection']}
-        disabledConfirm={isUndefined(dataCollectionDueDate)}
+        header={resources.messages['updateDataCollectionHeader']}
         labelCancel={resources.messages['close']}
         labelConfirm={resources.messages['create']}
-        onConfirm={() => onCreateDataCollection(new Date(dataCollectionDueDate).getTime() / 1000)}
+        onConfirm={() => onUpdateDataCollection()}
+        onHide={() => setIsUpdateDatacollectionDialogVisible(false)}
+        visible={isUpdateDatacollectionDialogVisible}>
+        <p>{resources.messages['updateDataCollectionMessage']}</p>
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        header={resources.messages['createDataCollection']}
+        disabledConfirm={isNil(dataCollectionDueDate)}
+        labelCancel={resources.messages['close']}
+        labelConfirm={resources.messages['create']}
+        onConfirm={() =>
+          onCreateDataCollection(new Date(moment(dataCollectionDueDate).endOf('day').format()).getTime() / 1000)
+        }
         onHide={() => setDataCollectionDialog(false)}
         visible={dataCollectionDialog}>
-        <p>{`${resources.messages['chooseExpirationDate']}: `}</p>
+        {hasExpirationDate ? (
+          <p
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(resources.messages['dataCollectionExpirationDate'], {
+                expirationData: moment(dataflowDataState.obligations.expirationDate).format(user.userProps.dateFormat)
+              })
+            }}></p>
+        ) : (
+          <p>{`${resources.messages['chooseExpirationDate']}: `}</p>
+        )}
         <Calendar
           className={styles.calendar}
+          disabledDates={[new Date()]}
           inline={true}
           monthNavigator={true}
           minDate={new Date()}
@@ -324,11 +386,6 @@ export const BigButtonList = ({
       </ConfirmDialog>
 
       {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
-      {/* <PDFDownloadLink
-        document={<ConfirmationReceipt receiptPdf={receiptState.receiptPdf} resources={resources} />}
-        fileName={`${dataflowData.name}_${Date.now()}.pdf`}>
-        {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
-      </PDFDownloadLink> */}
     </>
   );
 };

@@ -78,8 +78,10 @@ const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) 
         body={
           field === 'type'
             ? typeTemplate
-            : field === 'automatic' || field === 'enabled'
+            : field === 'automatic'
             ? automaticTemplate
+            : field === 'enabled'
+            ? enabledTemplate
             : field === 'codelistItems'
             ? codelistTemplate
             : null
@@ -161,7 +163,18 @@ const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) 
 
 const automaticTemplate = rowData => (
   <div style={{ display: 'flex', justifyContent: 'center' }}>
-    {rowData.automatic || rowData.enabled ? (
+    {rowData.automatic === 'true' ? (
+      <FontAwesomeIcon
+        icon={AwesomeIcons('check')}
+        style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
+      />
+    ) : null}
+  </div>
+);
+
+const enabledTemplate = rowData => (
+  <div style={{ display: 'flex', justifyContent: 'center' }}>
+    {rowData.enabled === 'true' ? (
       <FontAwesomeIcon
         icon={AwesomeIcons('check')}
         style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
@@ -178,23 +191,23 @@ const getFieldTypeValue = value => {
   const fieldTypes = [
     { fieldType: 'Number', value: 'Number', fieldTypeIcon: 'number' },
     { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
-    { fieldType: 'Latitude', value: 'Geospatial object (Latitude)', fieldTypeIcon: 'map' },
-    { fieldType: 'Longitude', value: 'Geospatial object (Longitude)', fieldTypeIcon: 'map' },
+    // { fieldType: 'Latitude', value: 'Geospatial object (Latitude)', fieldTypeIcon: 'map' },
+    // { fieldType: 'Longitude', value: 'Geospatial object (Longitude)', fieldTypeIcon: 'map' },
     { fieldType: 'Text', value: 'Single line text', fieldTypeIcon: 'italic' },
-    { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
-    { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
-    { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
-    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
-    { fieldType: 'Codelist', value: 'Codelist', fieldTypeIcon: 'list' },
+    // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
+    // { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
+    // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
+    // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
+    { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
     { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' }
   ];
 
-  if (value.toUpperCase() === 'COORDINATE_LONG') {
-    value = 'Longitude';
-  }
-  if (value.toUpperCase() === 'COORDINATE_LAT') {
-    value = 'Latitude';
-  }
+  // if (value.toUpperCase() === 'COORDINATE_LONG') {
+  //   value = 'Longitude';
+  // }
+  // if (value.toUpperCase() === 'COORDINATE_LAT') {
+  //   value = 'Latitude';
+  // }
   return fieldTypes.filter(field => field.fieldType.toUpperCase() === value.toUpperCase())[0];
 };
 

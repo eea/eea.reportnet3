@@ -72,44 +72,51 @@ const ValidationExpressionGroup = ({
     <li className={styles.groupExpression}>
       <ul>
         <li className={styles.expression}>
-          <span>
-            <Checkbox
-              onChange={e => onExpressionGroup(expressionId, { key: 'group', value: e.checked })}
-              isChecked={expressionValues.group}
-              disabled={isDisabled}
-            />
-          </span>
-          <span>
-            <Dropdown
-              disabled={isDisabled || position == 0}
-              appendTo={document.body}
-              placeholder={resourcesContext.messages.union}
-              optionLabel="label"
-              options={config.validations.logicalOperators}
-              onChange={e =>
-                onExpressionFieldUpdate(expressionId, {
-                  key: 'union',
-                  value: e.target.value
-                })
-              }
-              value={{ label: expressionValues.union, value: expressionValues.union }}
-            />
-          </span>
-          <span>
-            <FontAwesomeIcon icon={AwesomeIcons('folder')} style={{ fontSize: '2rem' }} />
-            {expressionsVisibilityToggleBtn()}
-          </span>
-          <span>
-            <Button
-              disabled={isDisabled}
-              type="button"
-              icon="trash"
-              onClick={e => {
-                onExpressionDelete(expressionId);
-              }}
-            />
-          </span>
-          <span>{groupExpressionsVisible && getContainedExpressions()}</span>
+          <div className={styles.groupRow}>
+            <span className={styles.group}>
+              <Checkbox
+                onChange={e => onExpressionGroup(expressionId, { key: 'group', value: e.checked })}
+                isChecked={expressionValues.group}
+                disabled={isDisabled}
+              />
+            </span>
+            <span className={styles.union}>
+              <Dropdown
+                disabled={isDisabled || position == 0}
+                appendTo={document.body}
+                placeholder={resourcesContext.messages.union}
+                optionLabel="label"
+                options={config.validations.logicalOperators}
+                onChange={e =>
+                  onExpressionFieldUpdate(expressionId, {
+                    key: 'union',
+                    value: e.target.value
+                  })
+                }
+                value={{ label: expressionValues.union, value: expressionValues.union }}
+              />
+            </span>
+            <span className={styles.groupToggler}>
+              <FontAwesomeIcon icon={AwesomeIcons('folder')} style={{ fontSize: '2rem' }} />
+              {expressionsVisibilityToggleBtn()}
+            </span>
+            <span>
+              <Button
+                className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton} p-button-animated-blink`}
+                disabled={isDisabled}
+                type="button"
+                icon="trash"
+                onClick={e => {
+                  onExpressionDelete(expressionId);
+                }}
+              />
+            </span>
+          </div>
+          <div className={styles.groupExpressions}>
+            <span>
+              <ul>{groupExpressionsVisible && getContainedExpressions()}</ul>
+            </span>
+          </div>
         </li>
       </ul>
     </li>

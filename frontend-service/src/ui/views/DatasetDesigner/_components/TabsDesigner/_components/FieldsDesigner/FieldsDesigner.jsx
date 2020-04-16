@@ -9,11 +9,11 @@ import isUndefined from 'lodash/isUndefined';
 import styles from './FieldsDesigner.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
+import { Checkbox } from 'primereact/checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataViewer } from 'ui/views/_components/DataViewer';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldDesigner } from './_components/FieldDesigner';
-import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -28,6 +28,7 @@ export const FieldsDesigner = ({
   onChangeFields,
   onChangeTableDescription,
   onLoadTableData,
+  isPreviewModeOn,
   table
 }) => {
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
@@ -40,22 +41,18 @@ export const FieldsDesigner = ({
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isPreviewModeOn, setIsPreviewModeOn] = useState(false);
+  const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
   const [tableDescriptionValue, setTableDescriptionValue] = useState('');
 
   const resources = useContext(ResourcesContext);
 
   useEffect(() => {
-    if (
-      !isUndefined(table) &&
-      !isNull(table.records) &&
-      !isUndefined(table.records) &&
-      !isNull(table.records[0].fields)
-    ) {
+    if (!isUndefined(table) && !isNil(table.records) && !isNull(table.records[0].fields)) {
       setFields(table.records[0].fields);
     }
     if (!isUndefined(table)) {
-      setTableDescriptionValue(table.description);
+      setTableDescriptionValue(table.description || '');
+      setIsReadOnlyTable(table.readOnly || false);
     }
   }, []);
 
@@ -130,6 +127,11 @@ export const FieldsDesigner = ({
     }
   };
 
+  const onChangeIsReadOnly = checked => {
+    setIsReadOnlyTable(checked);
+    updateTableDesign(checked);
+  };
+
   const onFieldDragAndDrop = (draggedFieldIdx, droppedFieldName) => {
     reorderField(draggedFieldIdx, droppedFieldName);
   };
@@ -143,7 +145,7 @@ export const FieldsDesigner = ({
       setTableDescriptionValue(initialTableDescription);
     } else if (event.key == 'Enter') {
       event.preventDefault();
-      updateTableDescriptionDesign();
+      updateTableDesign(isReadOnlyTable);
     }
   };
 
@@ -206,61 +208,57 @@ export const FieldsDesigner = ({
   };
 
   const previewData = () => {
-    const tableSchemaColumns =
-      !isUndefined(fields) && !isNull(fields)
-        ? fields.map(field => {
-            return {
-              codelistItems: field.codelistItems,
-              description: field.description,
-              field: field['fieldId'],
-              header: `${capitalize(field['name'])}`,
-              recordId: field['recordId'],
-              referencedField: field['referencedField'],
-              required: field.required,
-              table: table['tableSchemaName'],
-              type: field['type']
-            };
-          })
-        : [];
+    const tableSchemaColumns = !isNil(fields)
+      ? fields.map(field => {
+          return {
+            codelistItems: field.codelistItems,
+            description: field.description,
+            field: field['fieldId'],
+            header: `${capitalize(field['name'])}`,
+            recordId: field['recordId'],
+            referencedField: field['referencedField'],
+            required: field.required,
+            table: table['tableSchemaName'],
+            type: field['type']
+          };
+        })
+      : [];
 
-    return !isUndefined(table) && !isUndefined(table.records) && !isNull(table.records) ? (
-      <DataViewer
-        hasWritePermissions={true}
-        isPreviewModeOn={isPreviewModeOn}
-        isWebFormMMR={false}
-        key={table.id}
-        levelErrorTypes={table.levelErrorTypes}
-        onLoadTableData={onLoadTableData}
-        recordPositionId={-1}
-        tableHasErrors={table.hasErrors}
-        tableId={table.tableSchemaId}
-        tableName={table.tableSchemaName}
-        tableSchemaColumns={tableSchemaColumns}
-      />
-    ) : (
-      <div>
-        <h3>{resources.messages['datasetDesignerNoFields']}</h3>
-      </div>
-    );
+    if (!isUndefined(table) && !isNil(table.records)) {
+      return (
+        <DataViewer
+          hasWritePermissions={true}
+          isPreviewModeOn={isPreviewModeOn}
+          isWebFormMMR={false}
+          key={table.id}
+          levelErrorTypes={table.levelErrorTypes}
+          onLoadTableData={onLoadTableData}
+          recordPositionId={-1}
+          tableHasErrors={table.hasErrors}
+          tableId={table.tableSchemaId}
+          tableName={table.tableSchemaName}
+          tableReadOnly={false}
+          tableSchemaColumns={tableSchemaColumns}
+        />
+      );
+    }
   };
 
-  const renderConfirmDialog = () => {
-    return (
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        header={resources.messages['deleteFieldTitle']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        onConfirm={() => {
-          deleteField(indexToDelete, fieldToDeleteType);
-          setIsDeleteDialogVisible(false);
-        }}
-        onHide={() => setIsDeleteDialogVisible(false)}
-        visible={isDeleteDialogVisible}>
-        {resources.messages['deleteFieldConfirm']}
-      </ConfirmDialog>
-    );
-  };
+  const renderConfirmDialog = () => (
+    <ConfirmDialog
+      classNameConfirm={'p-button-danger'}
+      header={resources.messages['deleteFieldTitle']}
+      labelCancel={resources.messages['no']}
+      labelConfirm={resources.messages['yes']}
+      onConfirm={() => {
+        deleteField(indexToDelete, fieldToDeleteType);
+        setIsDeleteDialogVisible(false);
+      }}
+      onHide={() => setIsDeleteDialogVisible(false)}
+      visible={isDeleteDialogVisible}>
+      {resources.messages['deleteFieldConfirm']}
+    </ConfirmDialog>
+  );
 
   const renderAllFields = () => {
     if (isLoading) {
@@ -268,8 +266,8 @@ export const FieldsDesigner = ({
     } else {
       return (
         <>
-          {isPreviewModeOn ? previewData() : renderFields()}
-          {!isPreviewModeOn ? renderNewField() : null}
+          {isPreviewModeOn ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
+          {!isPreviewModeOn && renderNewField()}
         </>
       );
     }
@@ -331,10 +329,10 @@ export const FieldsDesigner = ({
                 datasetId={datasetId}
                 fieldDescription={field.description}
                 fieldId={field.fieldId}
+                fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
+                fieldName={field.name}
                 fieldPK={field.pk}
                 fieldPKReferenced={field.pkReferenced}
-                fieldName={field.name}
-                fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
                 fieldRequired={Boolean(field.required)}
                 fieldType={field.type}
                 fieldValue={field.value}
@@ -383,14 +381,21 @@ export const FieldsDesigner = ({
     }
   };
 
-  const updateTableDescriptionDesign = async () => {
-    if (isUndefined(tableDescriptionValue)) {
-      return;
-    }
+  const renderNoFields = () => (
+    <div>
+      <h3>{resources.messages['datasetDesignerNoFields']}</h3>
+    </div>
+  );
+
+  const updateTableDesign = async readOnly => {
+    // if (isUndefined(tableDescriptionValue)) {
+    //   return;
+    // }
     try {
       const tableUpdated = await DatasetService.updateTableDescriptionDesign(
         table.tableSchemaId,
         tableDescriptionValue,
+        readOnly,
         datasetId
       );
       if (!tableUpdated) {
@@ -413,7 +418,7 @@ export const FieldsDesigner = ({
           expandableOnClick={true}
           key="tableDescription"
           onChange={e => setTableDescriptionValue(e.target.value)}
-          onBlur={() => updateTableDescriptionDesign()}
+          onBlur={() => updateTableDesign(isReadOnlyTable)}
           onFocus={e => {
             setInitialTableDescription(e.target.value);
           }}
@@ -423,19 +428,18 @@ export const FieldsDesigner = ({
           value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : ''}
         />
         <div className={styles.switchDiv}>
-          <span className={styles.switchTextInput}>{resources.messages['design']}</span>
-          <InputSwitch
-            checked={isPreviewModeOn}
-            // disabled={true}
-            disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
-            onChange={e => {
-              setIsPreviewModeOn(e.value);
-            }}
+          <span className={styles.switchTextInput}>{resources.messages['readOnlyTable']}</span>
+          <Checkbox
+            checked={isReadOnlyTable}
+            // className={styles.checkRequired}
+            inputId={`${table.tableId}_check`}
+            label="Default"
+            onChange={e => onChangeIsReadOnly(e.checked)}
+            style={{ width: '70px' }}
           />
-          <span className={styles.switchTextInput}>{resources.messages['preview']}</span>
         </div>
       </div>
-      {!isPreviewModeOn ? (
+      {!isPreviewModeOn && (
         <div className={styles.fieldsHeader}>
           <label></label>
           <label>{resources.messages['required']}</label>
@@ -444,10 +448,10 @@ export const FieldsDesigner = ({
           <label>{resources.messages['newFieldDescriptionPlaceHolder']}</label>
           <label>{resources.messages['newFieldTypePlaceHolder']}</label>
         </div>
-      ) : null}
+      )}
       {renderAllFields()}
       {renderErrors(errorMessageAndTitle.title, errorMessageAndTitle.message)}
-      {!isErrorDialogVisible ? renderConfirmDialog() : null}
+      {!isErrorDialogVisible && isDeleteDialogVisible && renderConfirmDialog()}
     </React.Fragment>
   );
 };

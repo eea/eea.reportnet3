@@ -2470,7 +2470,6 @@ body .p-dialog .p-dialog-titlebar .p-dialog-titlebar-icon:hover {
   color: var(--dialog-header-icon-color-hover);
 }
 body .p-dialog .p-dialog-content {
-  /*display: inline-block;*/
   background-color: var(--dialog-content-bg);
   color: var(--dialog-content-color);
   border: var(--dialog-content-border);
@@ -2506,9 +2505,10 @@ body .p-dialog.p-confirm-dialog .p-dialog-content > span.p-icon {
   margin-right: 0.35em;
   font-size: 16px;
 }
-.p-component-overlay.p-dialog-mask {
+/* .p-component-overlay.p-dialog-mask {
   display: none !important;
-}
+  background-color: rgba(0, 0, 0, 0);
+} */
 
 .p-dialog {
   -webkit-transform: none;
@@ -2550,8 +2550,8 @@ body .p-sidebar .p-sidebar-close:hover {
   color: var(--sidebar-close-icon-color-hover);
 }
 body .p-tooltip .p-tooltip-text {
-  background-color: #404040;
-  color: #ffffff;
+  background-color: var(--tooltip-body-bg);
+  color: var(--tooltip-body-color);
   padding: 0.429em;
   -webkit-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
   -moz-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
@@ -2559,18 +2559,19 @@ body .p-tooltip .p-tooltip-text {
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
+  border: 1px solid var(--tooltip-body-border-color);
 }
 body .p-tooltip.p-tooltip-right .p-tooltip-arrow {
-  border-right-color: #404040;
+  border-right-color: var(--tooltip-body-border-color);
 }
 body .p-tooltip.p-tooltip-left .p-tooltip-arrow {
-  border-left-color: #404040;
+  border-left-color: var(--tooltip-body-border-color);
 }
 body .p-tooltip.p-tooltip-top .p-tooltip-arrow {
-  border-top-color: #404040;
+  border-top-color: var(--tooltip-body-border-color);
 }
 body .p-tooltip.p-tooltip-bottom .p-tooltip-arrow {
-  border-bottom-color: #404040;
+  border-bottom-color: var(--tooltip-body-border-color);
 }
 body .p-lightbox {
   -webkit-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
@@ -3366,4 +3367,22 @@ body .p-fluid .p-inplace.p-inplace-closable .p-inplace-content > :first-child {
   position: relative;
   background-color: var(--chart-bg);
   color: var(--chart-color);
+}
+
+/* Change all scrollbar styles for webkit-based browsers */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gray-75);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-50);
 }

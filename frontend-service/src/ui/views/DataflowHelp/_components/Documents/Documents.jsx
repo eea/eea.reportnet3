@@ -24,13 +24,13 @@ import { DocumentService } from 'core/services/Document';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const Documents = ({
   documents,
   isCustodian,
   isDeletingDocument,
   dataflowId,
-  onLoadDocuments,
   setIsDeletingDocument,
   setSortFieldDocuments,
   setSortOrderDocuments,
@@ -39,17 +39,23 @@ const Documents = ({
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const user = useContext(UserContext);
 
+  const [allDocuments, setAllDocuments] = useState(documents);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [documentInitialValues, setDocumentInitialValues] = useState({});
   const [fileName, setFileName] = useState('');
   const [fileToDownload, setFileToDownload] = useState(undefined);
-  const [isDownloading, setIsDownloading] = useState('');
+  const [downloadingId, setDownloadingId] = useState('');
   const [isEditForm, setIsEditForm] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   const [rowDataState, setRowDataState] = useState();
+
+  useEffect(() => {
+    setAllDocuments(documents);
+  }, [documents]);
 
   useEffect(() => {
     if (!isUndefined(fileToDownload)) {
@@ -61,14 +67,13 @@ const Documents = ({
     return `${title.split(' ').join('_')}`;
   };
 
-  const dateColumnTemplate = rowData => {
-    return <span>{moment(rowData.date).format('YYYY-MM-DD')}</span>;
-  };
+  const dateColumnTemplate = rowData => <span>{moment(rowData.date).format(user.userProps.dateFormat)}</span>;
 
   const documentsEditButtons = rowData => {
     return (
       <div className={`${styles.documentsEditButtons} dataflowHelp-document-edit-delete-help-step`}>
         <ActionsColumn
+          isDeletingDocument={isDeletingDocument}
           onDeleteClick={() => {
             setDeleteDialogVisible(true);
             setRowDataState(rowData);
@@ -84,7 +89,7 @@ const Documents = ({
       <span
         className={`${styles.downloadIcon} dataflowHelp-document-icon-help-step`}
         onClick={() => onDownloadDocument(rowData)}>
-        {isDownloading === rowData.id ? (
+        {downloadingId === rowData.id ? (
           <Icon icon="spinnerAnimate" />
         ) : (
           <div>
@@ -128,6 +133,9 @@ const Documents = ({
     });
     try {
       await DocumentService.deleteDocument(documentData.id);
+      const inmAllDocuments = [...allDocuments];
+      const filteredAllDocuments = inmAllDocuments.filter(document => document.id !== documentData.id);
+      setAllDocuments(filteredAllDocuments);
     } catch (error) {
       notificationContext.add({
         type: 'DELETE_DOCUMENT_ERROR',
@@ -139,13 +147,13 @@ const Documents = ({
 
   const onDownloadDocument = async rowData => {
     try {
-      setIsDownloading(rowData.id);
+      setDownloadingId(rowData.id);
       setFileName(createFileName(rowData.title));
       setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
     } catch (error) {
       console.error(error.response);
     } finally {
-      setIsDownloading('');
+      setDownloadingId('');
     }
   };
 
@@ -181,7 +189,7 @@ const Documents = ({
         <Toolbar className={styles.documentsToolbar}>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-upload dataflowHelp-document-upload-help-step`}
+              className={`p-button-rounded p-button-secondary-transparent dataflowHelp-document-upload-help-step`}
               icon={'upload'}
               label={resources.messages['upload']}
               onClick={() => {
@@ -209,7 +217,7 @@ const Documents = ({
         selectionMode="single"
         sortField={sortFieldDocuments}
         sortOrder={sortOrderDocuments}
-        value={documents}>
+        value={allDocuments}>
         <Column
           body={titleColumnTemplate}
           columnResizeMode="expand"
@@ -308,8 +316,8 @@ const Documents = ({
         labelConfirm={resources.messages['yes']}
         maximizable={false}
         onConfirm={() => {
-          onDeleteDocument(rowDataState);
           setIsDeletingDocument(true);
+          onDeleteDocument(rowDataState);
         }}
         onHide={onHideDeleteDialog}
         visible={deleteDialogVisible}>

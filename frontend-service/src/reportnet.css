@@ -352,12 +352,6 @@
   --chart-bg: var(--bg);
   --chart-color: var(--main-font-color);
 
-  /* Category expandable Treeview*/
-  --category-expandable-treeview-color: var(--main-font-color);
-
-  /* Codelist expandable Treeview*/
-  --codelist-expandable-treeview-color: var(--main-font-color);
-
   /* Multiselect */
   --multiselect-bg: var(--white);
   --multiselect-border: 1px solid var(--gray-15);
@@ -441,6 +435,17 @@
   --listbox-item-highlight-bg: var(--c-corporate-blue);
   --listbox-item-highlight-bg-hover: var(--gray-10);
   --listbox-item-highlight-color: var(--white);
+
+  /* Tooltip */
+  --tooltip-body-bg: var(--gray-110);
+  --tooltip-body-color: var(--white);
+  --tooltip-body-border-color: var(--gray-110);
+  --tooltip-arrow-border-color: var(--gray-110);
+  --tooltip-arrow-bg: var(--gray-110);
+
+  /* User image */
+  --user-image-bg-hover: var(--main-font-color);
+  --user-image-bg-opacity: 0.6;
 }
 body {
   margin: 0px;
@@ -2216,7 +2221,7 @@ form .error {
 
 /*Tooltip*/
 .p-tooltip {
-  z-index: 4000 !important;
+  z-index: 5000 !important;
 }
 /*dialog*/
 body .p-dialog.edit-table .p-dialog-content {
@@ -2246,7 +2251,7 @@ body .p-dialog.edit-table .p-dialog-content {
 
 /*growl notifications*/
 .p-growl.p-component.p-growl-topright {
-  z-index: 3100 !important;
+  z-index: 5100 !important;
 }
 
 .p-sidebar-right {

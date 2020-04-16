@@ -1,5 +1,6 @@
 package org.eea.validation.controller;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -18,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -226,8 +228,7 @@ public class RulesControllerImplTest {
    */
   @Test
   public void createAutomaticRuleTestTrue() throws EEAException {
-    rulesControllerImpl.createAutomaticRule("", "", DataType.BOOLEAN, EntityTypeEnum.FIELD, 1L,
-        Boolean.TRUE);
+    rulesControllerImpl.createAutomaticRule("", "", null, EntityTypeEnum.FIELD, 1L, Boolean.TRUE);
     Mockito.verify(rulesService, times(1)).createAutomaticRules("", "", null, EntityTypeEnum.FIELD,
         1L, Boolean.TRUE);
   }
@@ -242,8 +243,7 @@ public class RulesControllerImplTest {
     doThrow(EEAException.class).when(rulesService).createAutomaticRules("", "", null,
         EntityTypeEnum.FIELD, 1L, Boolean.TRUE);
     try {
-      rulesControllerImpl.createAutomaticRule("", "", DataType.BOOLEAN, EntityTypeEnum.FIELD, 1L,
-          Boolean.TRUE);
+      rulesControllerImpl.createAutomaticRule("", "", null, EntityTypeEnum.FIELD, 1L, Boolean.TRUE);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       Assert.assertEquals(EEAErrorMessage.ERROR_CREATING_RULE, e.getReason());
@@ -305,16 +305,14 @@ public class RulesControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void createNewRuleExceptionTest() throws EEAException {
     Mockito.doThrow(EEAException.class).when(rulesService).createNewRule(Mockito.anyLong(),
         Mockito.any());
-    try {
-      rulesControllerImpl.createNewRule(1L, new RuleVO());
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      throw e;
-    }
+
+    ResponseEntity<?> value = rulesControllerImpl.createNewRule(1L, new RuleVO());
+    assertEquals(null, value.getBody());
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
   }
 
   /**
@@ -417,5 +415,16 @@ public class RulesControllerImplTest {
   @Test
   public void deleteRuleRequiredTest() {
     rulesControllerImpl.deleteRuleRequired("5e44110d6a9e3a270ce13fac", null);
+    Mockito.verify(rulesService, times(1)).deleteRuleRequired(Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Delete rule by reference field schema PK id.
+   */
+  @Test
+  public void deleteRuleByReferenceFieldSchemaPKId() {
+    rulesControllerImpl.deleteRuleByReferenceFieldSchemaPKId("", "");
+    Mockito.verify(rulesService, times(1)).deleteRuleByReferenceFieldSchemaPKId(Mockito.any(),
+        Mockito.any());
   }
 }

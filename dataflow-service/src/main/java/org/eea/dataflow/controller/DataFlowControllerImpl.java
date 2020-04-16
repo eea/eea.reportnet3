@@ -14,6 +14,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,7 +58,6 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Autowired
   private DataflowService dataflowService;
 
-
   /**
    * Find by id.
    *
@@ -76,8 +77,11 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
     DataFlowVO result = null;
     try {
-      result = dataflowService.getById(id);
-
+      if (isUserDataCustodian()) {
+        result = dataflowService.getById(id);
+      } else {
+        result = dataflowService.getByIdWithRepresentativesFilteredByUserEmail(id);
+      }
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -280,19 +284,26 @@ public class DataFlowControllerImpl implements DataFlowController {
       status = HttpStatus.BAD_REQUEST;
     }
 
-    if (StringUtils.isBlank(dataFlowVO.getName())
-        || StringUtils.isBlank(dataFlowVO.getDescription())) {
+    if (status == HttpStatus.OK && (StringUtils.isBlank(dataFlowVO.getName())
+        || StringUtils.isBlank(dataFlowVO.getDescription()))) {
 
       message = EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
       status = HttpStatus.BAD_REQUEST;
     }
+    if (status == HttpStatus.OK && (null == dataFlowVO.getObligation()
+        || null == dataFlowVO.getObligation().getObligationId())) {
+      message = EEAErrorMessage.DATAFLOW_OBLIGATION;
+      status = HttpStatus.BAD_REQUEST;
+    }
 
-    try {
-      dataflowService.createDataFlow(dataFlowVO);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Create dataflow failed. ", e.getCause());
-      message = e.getMessage();
-      status = HttpStatus.INTERNAL_SERVER_ERROR;
+    if (status == HttpStatus.OK) {
+      try {
+        dataflowService.createDataFlow(dataFlowVO);
+      } catch (EEAException e) {
+        LOG_ERROR.error("Create dataflow failed. ", e.getCause());
+        message = e.getMessage();
+        status = HttpStatus.INTERNAL_SERVER_ERROR;
+      }
     }
 
     return new ResponseEntity<>(message, status);
@@ -321,19 +332,26 @@ public class DataFlowControllerImpl implements DataFlowController {
       message = EEAErrorMessage.DATE_AFTER_INCORRECT;
       status = HttpStatus.BAD_REQUEST;
     }
+    if (status == HttpStatus.OK && (StringUtils.isBlank(dataFlowVO.getName())
+        || StringUtils.isBlank(dataFlowVO.getDescription()))) {
 
-    if (StringUtils.isBlank(dataFlowVO.getName())
-        || StringUtils.isBlank(dataFlowVO.getDescription())) {
       message = EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
       status = HttpStatus.BAD_REQUEST;
     }
+    if (status == HttpStatus.OK && (null == dataFlowVO.getObligation()
+        || null == dataFlowVO.getObligation().getObligationId())) {
+      message = EEAErrorMessage.DATAFLOW_OBLIGATION;
+      status = HttpStatus.BAD_REQUEST;
+    }
 
-    try {
-      dataflowService.updateDataFlow(dataFlowVO);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Update dataflow failed. ", e.getCause());
-      message = e.getMessage();
-      status = HttpStatus.INTERNAL_SERVER_ERROR;
+    if (status == HttpStatus.OK) {
+      try {
+        dataflowService.updateDataFlow(dataFlowVO);
+      } catch (EEAException e) {
+        LOG_ERROR.error("Update dataflow failed. ", e.getCause());
+        message = e.getMessage();
+        status = HttpStatus.INTERNAL_SERVER_ERROR;
+      }
     }
 
     return new ResponseEntity<>(message, status);
@@ -385,7 +403,6 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
   }
 
-
   @Override
   @PutMapping(value = "/{id}/updateStatus", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
@@ -399,5 +416,14 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
   }
 
-
+  private boolean isUserDataCustodian() {
+    String dataCustodianRole = "ROLE_" + SecurityRoleEnum.DATA_CUSTODIAN;
+    for (GrantedAuthority role : SecurityContextHolder.getContext().getAuthentication()
+        .getAuthorities()) {
+      if (dataCustodianRole.equals(role.getAuthority())) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

@@ -7,8 +7,10 @@ export class DatasetTable {
     recordsWithErrorsPercentage,
     recordsWithWarningsPercentage,
     recordsWithoutErrorsPercentage,
+    tableSchemaDescription,
     tableSchemaId,
     tableSchemaName,
+    tableSchemaReadOnly,
     totalRecords
   } = {}) {
     this.hasErrors = hasErrors;
@@ -18,8 +20,10 @@ export class DatasetTable {
     this.recordsWithoutErrorsPercentage = recordsWithoutErrorsPercentage;
     this.recordsWithErrorsPercentage = recordsWithErrorsPercentage;
     this.recordsWithWarningsPercentage = recordsWithWarningsPercentage;
+    this.tableSchemaDescription = tableSchemaDescription;
     this.tableSchemaId = tableSchemaId;
     this.tableSchemaName = tableSchemaName;
+    this.tableSchemaReadOnly = tableSchemaReadOnly;
     this.totalRecords = totalRecords;
   }
 }

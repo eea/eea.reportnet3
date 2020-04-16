@@ -2,7 +2,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isEmpty, isUndefined, sortBy, cloneDeep } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import cloneDeep from 'lodash/cloneDeep';
+import isUndefined from 'lodash/isUndefined';
+import sortBy from 'lodash/sortBy';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';
@@ -370,7 +373,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     return layout(
       <>
         <Title title={`${resources.messages['dataflowHelp']} `} subtitle={dataflowName} icon="info" iconSize="3.5rem" />
-        <TabView activeIndex={0} onTabClick={e => setHelpSteps(e)}>
+        <TabView activeIndex={0} hasQueryString={false} onTabClick={e => setHelpSteps(e)}>
           <TabPanel
             headerClassName="dataflowHelp-documents-help-step"
             header={resources.messages['supportingDocuments']}>

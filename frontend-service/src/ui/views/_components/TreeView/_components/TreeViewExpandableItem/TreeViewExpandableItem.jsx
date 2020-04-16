@@ -35,6 +35,7 @@ const TreeViewExpandableItem = ({
       }
     }
   }, [isOpen]);
+
   useEffect(() => {
     setIsOpen(expanded);
   }, [expanded]);
@@ -68,7 +69,7 @@ const TreeViewExpandableItem = ({
     return !isUndefined(buttons)
       ? buttons.map((button, i) => (
           <Button
-            className={`${
+            className={`${button.className} ${
               !isUndefined(button.disabled) && button.disabled
                 ? styles.defaultExpandableButtonDisable
                 : styles.defaultExpandableButtonEnable
@@ -106,7 +107,14 @@ const TreeViewExpandableItem = ({
 
   return (
     <React.Fragment>
-      <div className={!isUndefined(className) ? className : styles.defaultExpandable}>
+      <div
+        style={{
+          cursor: 'pointer',
+          color: blockExpand ? 'var(--errors)' : 'inherit',
+          opacity: blockExpand ? '0.7' : '1'
+        }}
+        className={!isUndefined(className) ? className : styles.defaultExpandable}
+        onClick={!blockExpand ? () => setIsOpen(!isOpen) : null}>
         {!isUndefined(items) & (items.length > 0) ? (
           isOpen ? (
             <FontAwesomeIcon

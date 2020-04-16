@@ -3,6 +3,7 @@ package org.eea.dataflow.service.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
@@ -24,6 +25,7 @@ import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollec
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
+import org.eea.interfaces.controller.rod.ObligationController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -31,10 +33,11 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
-import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.document.DocumentVO;
+import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
@@ -42,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -50,101 +54,101 @@ import org.springframework.stereotype.Service;
 @Service("dataflowService")
 public class DataflowServiceImpl implements DataflowService {
 
-
   /** The representative repository. */
   @Autowired
   private RepresentativeRepository representativeRepository;
 
-  /**
-   * The dataflow repository.
-   */
+  /** The dataflow repository. */
   @Autowired
   private DataflowRepository dataflowRepository;
 
-  /**
-   * The user request repository.
-   */
+  /** The user request repository. */
   @Autowired
   private UserRequestRepository userRequestRepository;
 
-  /**
-   * The contributor repository.
-   */
+  /** The contributor repository. */
   @Autowired
   private ContributorRepository contributorRepository;
 
-  /**
-   * The dataflow mapper.
-   */
+  /** The dataflow mapper. */
   @Autowired
   private DataflowMapper dataflowMapper;
 
-  /**
-   * The dataflow no content mapper.
-   */
+  /** The dataflow no content mapper. */
   @Autowired
   private DataflowNoContentMapper dataflowNoContentMapper;
 
-  /**
-   * The dataset metabase controller.
-   */
+  /** The dataset metabase controller. */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
-  /**
-   * The user management controller zull.
-   */
+  /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
-
-  /**
-   * The resource management controller zull.
-   */
+  /** The resource management controller zull. */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
-  /**
-   * The data set schema controller zuul.
-   */
+  /** The data set schema controller zuul. */
   @Autowired
   private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
-  /**
-   * The document controller zuul.
-   */
+  /** The document controller zuul. */
   @Autowired
   private DocumentControllerZuul documentControllerZuul;
-
 
   /** The data collection controller zuul. */
   @Autowired
   private DataCollectionControllerZuul dataCollectionControllerZuul;
 
-
   /** The representative service. */
   @Autowired
   private RepresentativeService representativeService;
 
+  /** The obligation controller. */
+  @Autowired
+  private ObligationController obligationController;
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
-
 
   /**
    * Gets the by id.
    *
    * @param id the id
-   *
    * @return the by id
-   *
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
   public DataFlowVO getById(Long id) throws EEAException {
+    return getByIdWithCondition(id, true);
+  }
+
+  /**
+   * Get the dataflow by its id filtering representatives by the user email.
+   *
+   * @param id the id
+   * @return the by id no representatives
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public DataFlowVO getByIdWithRepresentativesFilteredByUserEmail(Long id) throws EEAException {
+    return getByIdWithCondition(id, false);
+  }
+
+  /**
+   * Gets the by id.
+   *
+   * @param id the id
+   * @param includeAllRepresentatives the include representatives
+   * @return the by id
+   * @throws EEAException the EEA exception
+   */
+  private DataFlowVO getByIdWithCondition(Long id, boolean includeAllRepresentatives)
+      throws EEAException {
 
     if (id == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
@@ -175,17 +179,17 @@ public class DataflowServiceImpl implements DataflowService {
             .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
 
     // Add the representatives
-    List<RepresentativeVO> representatives =
-        representativeService.getRepresetativesByIdDataFlow(id);
-    List<Long> dataProviderIds = dataflowVO.getReportingDatasets().stream()
-        .map(ReportingDatasetVO::getDataProviderId).collect(Collectors.toList());
-
-    if (representatives != null && !representatives.isEmpty()) {
-      dataflowVO.setRepresentatives(representatives.stream()
-          .filter(representative -> dataProviderIds.contains(representative.getDataProviderId()))
-          .collect(Collectors.toList()));
+    if (includeAllRepresentatives) {
+      dataflowVO.setRepresentatives(representativeService.getRepresetativesByIdDataFlow(id));
+    } else {
+      String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication()
+          .getDetails()).get("userId");
+      UserRepresentationVO user = userManagementControllerZull.getUserByUserId(userId);
+      dataflowVO.setRepresentatives(
+          representativeService.getRepresetativesByDataflowIdAndEmail(id, user.getEmail()));
     }
 
+    getObligation(dataflowVO);
 
     LOG.info("Get the dataflow information with id {}", id);
 
@@ -250,7 +254,49 @@ public class DataflowServiceImpl implements DataflowService {
           dataflowVOs.add(dataflowVO);
         });
 
+    getOpenedObligations(dataflowVOs);
+
     return dataflowVOs;
+  }
+
+  /**
+   * Gets the opened obligations.
+   *
+   * @param dataflowVOs the dataflow V os
+   * @return the opened obligations
+   */
+  private void getOpenedObligations(List<DataFlowVO> dataflowVOs) {
+
+    // Get all opened obligations from ROD
+    List<ObligationVO> obligations =
+        obligationController.findOpenedObligations(null, null, null, null, null);
+
+    Map<Integer, ObligationVO> obligationMap = obligations.stream().collect(
+        Collectors.toMap(obligation -> obligation.getObligationId(), obligation -> obligation));
+
+    for (DataFlowVO dataFlowVO : dataflowVOs) {
+      if (dataFlowVO.getObligation() != null
+          && dataFlowVO.getObligation().getObligationId() != null) {
+        dataFlowVO.setObligation(obligationMap.get(dataFlowVO.getObligation().getObligationId()));
+      }
+    }
+  }
+
+
+  /**
+   * Gets the obligation.
+   *
+   * @param dataflow the dataflow
+   * @return the obligation
+   */
+  private void getObligation(DataFlowVO dataflow) {
+    // Get the obligationVO from ROD and Set in dataflow VO
+    // We check that the field is not empty to avoid the call to rod due to maintain backward
+    // compatibility concerns
+    if (dataflow.getObligation() != null && dataflow.getObligation().getObligationId() != null) {
+      dataflow.setObligation(
+          obligationController.findObligationById(dataflow.getObligation().getObligationId()));
+    }
   }
 
 
@@ -418,6 +464,7 @@ public class DataflowServiceImpl implements DataflowService {
       if (dataflowSave.isPresent()) {
         dataflowSave.get().setName(dataflowVO.getName());
         dataflowSave.get().setDescription(dataflowVO.getDescription());
+        dataflowSave.get().setObligationId(dataflowVO.getObligation().getObligationId());
         dataflowRepository.save(dataflowSave.get());
         LOG.info("The dataflow {} has been saved.", dataflowSave.get().getName());
       }
@@ -550,10 +597,9 @@ public class DataflowServiceImpl implements DataflowService {
       }
     }
     try {
-      // this is necessary since the deletion of documents requires dataflow to be updated in
-      // Hibernate Cache before removing the entity itself
-      Dataflow dataflow = dataflowRepository.findById(idDataflow).get();
-      dataflowRepository.delete(dataflow);
+      // Delete the dataflow metabase info. Also by the foreign keys of the database, entities like
+      // weblinks are also deleted
+      dataflowRepository.deleteNativeDataflow(idDataflow);
       LOG.info("Delete full dataflow with id: {}", idDataflow);
     } catch (Exception e) {
       LOG.error("Error deleting dataflow: {}", idDataflow, e);

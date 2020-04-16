@@ -1,0 +1,6 @@
+{
+  "filterItems": {
+    "date": ["expirationDate"],
+    "dropdown": ["countries", "issues", "organizations"]
+  }
+}

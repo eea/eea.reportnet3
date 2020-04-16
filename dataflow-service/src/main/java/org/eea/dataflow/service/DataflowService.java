@@ -17,12 +17,19 @@ public interface DataflowService {
    * Gets the by id.
    *
    * @param id the id
-   *
    * @return the by id
-   *
    * @throws EEAException the EEA exception
    */
   DataFlowVO getById(Long id) throws EEAException;
+
+  /**
+   * Get the dataflow by its id filtering representatives by the user email.
+   *
+   * @param id the id
+   * @return the by id no representatives
+   * @throws EEAException the EEA exception
+   */
+  DataFlowVO getByIdWithRepresentativesFilteredByUserEmail(Long id) throws EEAException;
 
   /**
    * Gets the by status.
@@ -161,6 +168,7 @@ public interface DataflowService {
    * @throws EEAException the EEA exception
    */
   void updateDataFlowStatus(Long id, TypeStatusEnum status, Date deadline) throws EEAException;
+
 
 
 }

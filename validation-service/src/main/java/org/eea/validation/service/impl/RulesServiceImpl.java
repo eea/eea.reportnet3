@@ -23,6 +23,7 @@ import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.RulesService;
 import org.eea.validation.util.AutomaticRules;
+import org.eea.validation.util.KieBaseManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,9 +54,14 @@ public class RulesServiceImpl implements RulesService {
   /** The rules sequence repository. */
   @Autowired
   private RulesSequenceRepository rulesSequenceRepository;
+
   /** The rule mapper. */
   @Autowired
   private RuleMapper ruleMapper;
+
+  /** The kie base manager. */
+  @Autowired
+  private KieBaseManager kieBaseManager;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
@@ -72,6 +78,7 @@ public class RulesServiceImpl implements RulesService {
   /** The Constant TB_DESCRIPTION. */
   private static final String TC_DESCRIPTION = "Checks if the record based on criteria is valid ";
 
+
   /** The Constant FIELD_TYPE. */
   private static final String FIELD_TYPE = "Field type ";
 
@@ -79,6 +86,7 @@ public class RulesServiceImpl implements RulesService {
    * Gets the rules schema by dataset id.
    *
    * @param datasetSchemaId the dataset schema id
+   * 
    * @return the rules schema by dataset id
    */
   @Override
@@ -126,6 +134,7 @@ public class RulesServiceImpl implements RulesService {
     RulesSchema ruleSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchemaId));
     if (null != ruleSchema) {
       rulesRepository.deleteByIdDatasetSchema(ruleSchema.getRulesSchemaId());
+      rulesSequenceRepository.deleteByDatasetSchemaId(ruleSchema.getIdDatasetSchema());
     }
   }
 
@@ -231,13 +240,14 @@ public class RulesServiceImpl implements RulesService {
     rule.setType(EntityTypeEnum.FIELD);
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
-
     validateRule(rule);
-
 
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     }
+
+    // test if the rule is well defined, otherwise it is created but disabled
+    kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
   }
 
   /**
@@ -257,7 +267,7 @@ public class RulesServiceImpl implements RulesService {
       EntityTypeEnum typeEntityEnum, Long datasetId, boolean required) throws EEAException {
 
     List<Rule> ruleList = new ArrayList<>();
-    // we use that if to differentiate beetween a rule required and rule for any other type(Boolean,
+    // we use that if to sort between a rule required and rule for any other type(Boolean,
     // number etc)
     Long shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
     if (required) {
@@ -288,7 +298,7 @@ public class RulesServiceImpl implements RulesService {
         case LINK:
           // we call this method to find the tableschemaid because we want to create that validation
           // at TABLE level
-          // that is for evite do many calls to database and colapse it
+          // that is for avoid do many calls to database and collapse it
           DataSetSchema datasetSchema =
               schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
           String tableSchemaId = getTableSchemaIdFromIdFieldSchema(datasetSchema, referenceId);
@@ -298,7 +308,7 @@ public class RulesServiceImpl implements RulesService {
               datasetId));
           break;
         case CODELIST:
-          // we find values avaliable to create this validation for a codelist, same value with
+          // we find values available to create this validation for a codelist, same value with
           // capital letter and without capital letters
           Document document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
           ruleList.addAll(AutomaticRules.createCodelistAutomaticRule(referenceId, typeEntityEnum,
@@ -312,10 +322,8 @@ public class RulesServiceImpl implements RulesService {
       }
     }
     if (!ruleList.isEmpty()) {
-      ruleList.stream().forEach(rule -> {
-        rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
-      });
-
+      ruleList.stream()
+          .forEach(rule -> rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule));
     }
   }
 
@@ -390,9 +398,12 @@ public class RulesServiceImpl implements RulesService {
     rule.setActivationGroup(null);
 
     validateRule(rule);
+
     if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_UPDATING_RULE);
     }
+    // test if the rule is well defined, otherwise it is created but disabled
+    kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
   }
 
   /**

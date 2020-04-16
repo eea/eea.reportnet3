@@ -1,5 +1,6 @@
 import React from 'react';
 
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
@@ -15,7 +16,7 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
         fields: {
           filtered: false,
           groupable: true,
-          names: { shortCode: 'Shortcode', codelistItems: 'Codelist items' }
+          names: { shortCode: 'Shortcode', codelistItems: 'Single select items' }
         },
         validations: {
           filtered: true,
@@ -27,8 +28,14 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
                 { label: 'Table', value: 'TABLE' },
                 { label: 'Dataset', value: 'DATASET' }
               ],
-              automatic: [{ label: 'True', value: 'true' }, { label: 'False', value: 'false' }],
-              enabled: [{ label: 'True', value: 'true' }, { label: 'False', value: 'false' }],
+              automatic: [
+                { label: 'True', value: 'true' },
+                { label: 'False', value: 'false' }
+              ],
+              enabled: [
+                { label: 'True', value: 'true' },
+                { label: 'False', value: 'false' }
+              ],
               levelError: [
                 { label: 'Info', value: 'INFO' },
                 { label: 'Warning', value: 'WARNING' },
@@ -76,26 +83,45 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
 //   }
 // };
 
+const getFieldFormat = fieldType => {
+  switch (fieldType.toUpperCase()) {
+    case 'DATE':
+      return 'YYYY-MM-DD';
+    case 'TEXT':
+      return '5000 characters';
+    default:
+      return '';
+  }
+};
+
 const parseDesignDataset = (design, validationList) => {
   const parsedDataset = {};
   parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
   parsedDataset.levelErrorTypes = design.levelErrorTypes;
   parsedDataset.validations = validationList;
-
   if (!isUndefined(design.tables) && !isNull(design.tables) && design.tables.length > 0) {
     const tables = design.tables.map(tableDTO => {
       const table = {};
       table.tableSchemaName = tableDTO.tableSchemaName;
       table.tableSchemaDescription = tableDTO.tableSchemaDescription;
+      table.tableSchemaReadOnly = tableDTO.tableSchemaReadOnly;
       if (!isNull(tableDTO.records) && !isNil(tableDTO.records[0].fields) && tableDTO.records[0].fields.length > 0) {
+        const containsCodelists = !isEmpty(
+          tableDTO.records[0].fields.filter(fieldElmt => fieldElmt.type === 'CODELIST')
+        );
         const fields = tableDTO.records[0].fields.map(fieldDTO => {
           const field = {};
-          field.description = !isNull(fieldDTO.description) ? fieldDTO.description : '-';
           field.name = fieldDTO.name;
+          field.description = !isNull(fieldDTO.description) ? fieldDTO.description : '-';
           field.type = fieldDTO.type;
-          if (fieldDTO.type === 'CODELIST') {
-            field.codelistItems = fieldDTO.codelistItems;
+          if (containsCodelists) {
+            if (fieldDTO.type === 'CODELIST') {
+              field.codelistItems = fieldDTO.codelistItems;
+            } else {
+              field.codelistItems = [];
+            }
           }
+          field.format = getFieldFormat(fieldDTO.type);
           return field;
         });
         table.fields = fields;

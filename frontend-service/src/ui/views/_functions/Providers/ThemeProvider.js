@@ -1,27 +1,32 @@
-import React, { useReducer } from 'react';
+import React, { useContext, useReducer } from 'react';
 import { isNull } from 'lodash';
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const themeReducer = (state, { type, payload }) => {
   switch (type) {
     case 'TOGGLE_THEME':
-      if (typeof Storage !== 'undefined') {
-        localStorage.setItem('theme', payload.newTheme);
-      }
       return {
         ...state,
         currentTheme: payload.newTheme
       };
+    case 'DEFAULT_VISUAL_THEME':
+      //   document.body.style.setProperty('--bg', '#282c35');
+      return {
+        ...state,
+        currentTheme: payload.newTheme
+      };
+
     default:
       return state;
   }
 };
 
 export const ThemeProvider = ({ children }) => {
+  const userContext = useContext(UserContext);
+
   const [state, dispatch] = useReducer(themeReducer, {
-    currentTheme: !isNull(window.localStorage.getItem('theme'))
-      ? window.localStorage.getItem('theme')
-      : window.localStorage.setItem('theme', 'light'),
+    currentTheme: userContext.userProps.visualTheme,
     themes: {
       light: {
         bg: 'var(--white)',
@@ -101,7 +106,7 @@ export const ThemeProvider = ({ children }) => {
         'paginator-pages-not-highlight-hover-bg': 'var(--white)',
         'paginator-pages-not-highlight-hover-color': 'var(--gray-110)',
         'paginator-pages-not-highlight-hover-border': ' 1px solid var(--c-corporate-blue)',
-        'paginator-pages-highlight-box-shadow': ' inset 0 0 0 0.1em var(--gray-75)',
+        'paginator-pages-highlight-box-shadow': ' inset 0 0 0 0.1em var(--c-corporate-blue',
         'paginator-pages-highlight-bg': 'var(--white)',
         'paginator-pages-highlight-color': 'var(--black)',
         'paginator-pages-color': 'var(--white)',
@@ -210,8 +215,6 @@ export const ThemeProvider = ({ children }) => {
         'toolbar-border': '1px solid var(--gray-10)',
         'chart-bg': 'var(--bg)',
         'chart-color': 'var(--main-font-color)',
-        'category-expandable-treeview-color': 'var(--main-font-color)',
-        'codelist-expandable-treeview-color': 'var(--main-font-color)',
         'multiselect-bg': 'var(--white)',
         'multiselect-border': '1px solid var(--gray-15)',
         'multiselect-bg-hover': 'var(--gray-110)',
@@ -274,7 +277,17 @@ export const ThemeProvider = ({ children }) => {
         'chips-token-color': 'var(--white)',
         'listbox-item-highlight-bg': 'var(--c-corporate-blue)',
         'listbox-item-highlight-bg-hover': 'var(--gray-10)',
-        'listbox-item-highlight-color': 'var(--white)'
+        'listbox-item-highlight-color': 'var(--white)',
+        'card-item-bg': 'var(--bg)',
+        'card-item-box-shadow': ' 0 1px 3px rgba(0, 0, 0, 0.20), 0 1px 2px rgba(0, 0, 0, 0.40)',
+        'card-item-box-shadow-hover': '0 10px 20px rgba(0, 0, 0, 0.21), 0 6px 6px rgba(0, 0, 0, 0.25)',
+        'tooltip-body-bg': 'var(--gray-110)',
+        'tooltip-body-color': 'var(--white)',
+        'tooltip-body-border-color': 'var(--gray-110)',
+        'tooltip-arrow-border-color': 'var(--gray-110)',
+        'tooltip-arrow-bg': 'var(--gray-110)',
+        'user-image-bg-hover': 'var(--main-font-color)',
+        'user-image-bg-opacity': '0.6'
       },
       dark: {
         bg: 'var(--c-dark-blue)',
@@ -354,7 +367,7 @@ export const ThemeProvider = ({ children }) => {
         'paginator-pages-not-highlight-hover-bg': 'var(--white)',
         'paginator-pages-not-highlight-hover-color': 'var(--black)',
         'paginator-pages-not-highlight-hover-border': '1px solid var(--gray-75)',
-        'paginator-pages-highlight-box-shadow': 'inset 0 0 0 0.1em var(--c-corporate-blue)',
+        'paginator-pages-highlight-box-shadow': 'inset 0 0 0 0.1em var(--c-corporate-yellow)',
         'paginator-pages-highlight-bg': 'var(--c-darkest-blue)',
         'paginator-pages-highlight-color': 'var(--white)',
         'paginator-pages-color': 'var(--white)',
@@ -461,11 +474,9 @@ export const ThemeProvider = ({ children }) => {
         'button-secondary-transparent-color-active': 'var(--white)',
         'button-secondary-transparent-box-shadow-focus': ' 0 0 0 0.2em var(--gray-25)',
         'button-secondary-transparent-border-color-active': 'var(--gray-25)',
-        'toolbar-border': '1px solid var(--c-dark-blue)',
+        'toolbar-border': '1px solid var(--gray-25)',
         'chart-bg': 'var(--bg)',
         'chart-color': 'var(--main-font-color)',
-        'category-expandable-treeview-color': 'var(--main-font-color)',
-        'codelist-expandable-treeview-color': 'var(--main-font-color)',
         'multiselect-bg': 'var(--c-dark-blue)',
         'multiselect-border': '1px solid var(--gray-25)',
         'multiselect-bg-hover': 'var(--gray-15)',
@@ -529,7 +540,17 @@ export const ThemeProvider = ({ children }) => {
         'chips-token-color': 'var(--white)',
         'listbox-item-highlight-bg': 'var(--c-corporate-yellow)',
         'listbox-item-highlight-bg-hover': 'var(--gray-110)',
-        'listbox-item-highlight-color': 'var(--black)'
+        'listbox-item-highlight-color': 'var(--black)',
+        'card-item-bg': 'var(--c-dark-blue)',
+        'card-item-box-shadow': ' 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.6)',
+        'card-item-box-shadow-hover': '0 10px 20px rgba(0, 0, 0, 0.29), 0 6px 6px rgba(0, 0, 0, 0.33)',
+        'tooltip-body-bg': 'var(--gray-110)',
+        'tooltip-body-color': 'var(--white)',
+        'tooltip-body-border-color': 'var(--white)',
+        'tooltip-arrow-border-color': 'var(--white)',
+        'tooltip-arrow-bg': 'var(--gray-110)',
+        'user-image-bg-hover': 'var(--main-font-color)',
+        'user-image-bg-opacity': '0.6'
       }
     }
   });
@@ -546,11 +567,13 @@ export const ThemeProvider = ({ children }) => {
             }
           });
           const theme = state.themes[newTheme];
+
           Object.keys(theme).forEach(key => {
             const cssKey = `--${key}`;
             const cssValue = theme[key];
             document.body.style.setProperty(cssKey, cssValue);
           });
+          userContext.onToggleVisualTheme(newTheme);
         }
       }}>
       {children}

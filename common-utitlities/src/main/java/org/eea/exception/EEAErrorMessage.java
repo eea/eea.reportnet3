@@ -14,6 +14,9 @@ public final class EEAErrorMessage {
   /** The Constant NOT_DESIGN_DATAFLOW. */
   public static final String NOT_DESIGN_DATAFLOW = "Not a DESIGN dataflow";
 
+  /** The Constant NOT_DRAFT_DATAFLOW. */
+  public static final String NOT_DRAFT_DATAFLOW = "Not a DRAFT dataflow";
+
   /** The Constant FILE_EXTENSION. */
   public static final String FILE_EXTENSION = "File without extension";
 
@@ -68,8 +71,14 @@ public final class EEAErrorMessage {
   /** The Constant DATAFLOW_CRITERIA. */
   public static final String DATAFLOW_DESCRIPTION_NAME = "Dataflow Description or Name empty";
 
+  /** The Constant DATAFLOW_CRITERIA. */
+  public static final String DATAFLOW_OBLIGATION = "Dataflow Obligation empty";
+
   /** The Constant USER_REQUEST_NOTFOUND. */
   public static final String USER_REQUEST_NOTFOUND = "User request not found";
+
+  /** The Constant USER_NOTFOUND. */
+  public static final String USER_NOTFOUND = "User not found";
 
   /** The Constant SCHEMA_ID_NONFOUND. */
   public static final String SCHEMA_NOT_FOUND = "Schema not found";
@@ -163,8 +172,8 @@ public final class EEAErrorMessage {
   /** The Constant ERROR_CREATING_RULE. */
   public static final String ERROR_CREATING_RULE = "Error creating rule";
 
-  /** The Constant ERROR_CREATING_RULE_INVADE. */
-  public static final String ERROR_CREATING_RULE_INVADE =
+  /** The Constant ERROR_CREATING_RULE_NOT_CORRECT. */
+  public static final String ERROR_CREATING_RULE_NOT_CORRECT =
       "Error creating rule, the expression rule is not correct";
 
   /** The Constant ERROR_ORDERING_RULE. */

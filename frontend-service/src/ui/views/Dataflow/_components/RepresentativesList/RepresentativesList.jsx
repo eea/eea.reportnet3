@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useReducer } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
 import uuid from 'uuid';
 import styles from './RepresentativesList.module.scss';
@@ -21,29 +22,36 @@ import {
 } from './_functions/Utils/representativeUtils';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
-import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dropdown } from 'ui/views/_components/Dropdown';
+import { Spinner } from 'ui/views/_components/Spinner';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManageRolesDialog }) => {
+const RepresentativesList = ({
+  dataflowRepresentatives,
+  dataflowId,
+  isActiveManageRolesDialog,
+  setFormHasRepresentatives,
+  setHasRepresentativesWithoutDatasets
+}) => {
   const resources = useContext(ResourcesContext);
 
   const initialState = {
     allPossibleDataProviders: [],
     allPossibleDataProvidersNoSelect: [],
+    dataflowRepresentatives: dataflowRepresentatives,
     dataProvidersTypesList: [],
+    initialRepresentatives: [],
     isVisibleConfirmDeleteDialog: false,
+    refresher: false,
+    representativeHasError: [],
     representativeIdToDelete: '',
     representatives: [],
-    initialRepresentatives: [],
-    refresher: false,
     selectedDataProviderGroup: null,
-    unusedDataProvidersOptions: [],
-    representativeHasError: []
+    unusedDataProvidersOptions: []
   };
 
   const [formState, formDispatcher] = useReducer(reducer, initialState);
@@ -73,10 +81,24 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
   }, [formState.representativeHasError]);
 
   useEffect(() => {
+    if (!isEmpty(formState.representatives)) {
+      setFormHasRepresentatives(formState.representatives.length > 1);
+    }
+  }, [formState.representatives]);
+
+  useEffect(() => {
     if (!isEmpty(formState.representatives) && formState.representatives.length > 1) {
-      setHasRepresentatives(true);
-    } else {
-      setHasRepresentatives(false);
+      const representativesNoDatasets = formState.representatives.filter(
+        representative => !representative.hasDatasets && !isUndefined(representative.representativeId)
+      );
+
+      const representativesHaveDatasets = formState.representatives.filter(
+        representative => representative.hasDatasets && !isUndefined(representative.representativeId)
+      );
+
+      setHasRepresentativesWithoutDatasets(
+        !isEmpty(representativesNoDatasets) && !isEmpty(representativesHaveDatasets)
+      );
     }
   }, [formState.representatives]);
 
@@ -86,28 +108,32 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
     let hasError = formState.representativeHasError.includes(representative.representativeId);
 
     return (
-      <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
-        <input
-          autoFocus={isNil(representative.representativeId)}
-          id={isEmpty(inputData) ? 'emptyInput' : undefined}
-          onBlur={() => {
-            representative.providerAccount = representative.providerAccount.toLowerCase();
-            onAddProvider(formDispatcher, formState, representative, dataflowId);
-          }}
-          onChange={event => {
-            formDispatcher({
-              type: 'ON_ACCOUNT_CHANGE',
-              payload: {
-                providerAccount: event.target.value,
-                dataProviderId: representative.dataProviderId
-              }
-            });
-          }}
-          onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
-          placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
-          value={inputData}
-        />
-      </div>
+      <>
+        <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
+          <input
+            className={representative.hasDatasets ? styles.disabled : undefined}
+            disabled={representative.hasDatasets}
+            autoFocus={isNil(representative.representativeId)}
+            id={isEmpty(inputData) ? 'emptyInput' : undefined}
+            onBlur={() => {
+              representative.providerAccount = representative.providerAccount.toLowerCase();
+              onAddProvider(formDispatcher, formState, representative, dataflowId);
+            }}
+            onChange={event => {
+              formDispatcher({
+                type: 'ON_ACCOUNT_CHANGE',
+                payload: {
+                  providerAccount: event.target.value,
+                  dataProviderId: representative.dataProviderId
+                }
+              });
+            }}
+            onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
+            placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
+            value={inputData}
+          />
+        </div>
+      </>
     );
   };
 
@@ -123,7 +149,10 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
     return (
       <>
         <select
-          className={styles.selectDataProvider}
+          disabled={representative.hasDatasets}
+          className={
+            representative.hasDatasets ? `${styles.disabled} ${styles.selectDataProvider}` : styles.selectDataProvider
+          }
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={event => {
             onDataProviderIdChange(formDispatcher, event.target.value, representative);
@@ -143,7 +172,7 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
   };
 
   const deleteBtnColumnTemplate = representative => {
-    return isNil(representative.representativeId) ? (
+    return isNil(representative.representativeId) || representative.hasDatasets ? (
       <></>
     ) : (
       <ActionsColumn
@@ -156,6 +185,8 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
       />
     );
   };
+
+  if (isEmpty(formState.representatives)) return <Spinner style={{ top: 0 }} />;
 
   return (
     <div className={styles.container}>
@@ -182,7 +213,7 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
         <DataTable
           value={
             formState.representatives.length > formState.allPossibleDataProvidersNoSelect.length
-              ? formState.representatives.filter(representative => representative.representativeId !== null)
+              ? formState.representatives.filter(representative => !isNil(representative.representativeId))
               : formState.representatives
           }>
           <Column
@@ -196,18 +227,20 @@ const RepresentativesList = ({ dataflowId, setHasRepresentatives, isActiveManage
         <p className={styles.chooseRepresentative}>{resources.messages['manageRolesDialogNoRepresentativesMessage']}</p>
       )}
 
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        onConfirm={() => {
-          onDeleteConfirm(formDispatcher, formState);
-        }}
-        onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
-        visible={formState.isVisibleConfirmDeleteDialog}
-        header={resources.messages['manageRolesDialogConfirmDeleteHeader']}
-        labelConfirm={resources.messages['yes']}
-        labelCancel={resources.messages['no']}>
-        {resources.messages['manageRolesDialogConfirmDeleteQuestion']}
-      </ConfirmDialog>
+      {formState.isVisibleConfirmDeleteDialog && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          onConfirm={() => {
+            onDeleteConfirm(formDispatcher, formState);
+          }}
+          onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
+          visible={formState.isVisibleConfirmDeleteDialog}
+          header={resources.messages['manageRolesDialogConfirmDeleteHeader']}
+          labelConfirm={resources.messages['yes']}
+          labelCancel={resources.messages['no']}>
+          {resources.messages['manageRolesDialogConfirmDeleteQuestion']}
+        </ConfirmDialog>
+      )}
     </div>
   );
 };

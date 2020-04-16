@@ -18,6 +18,7 @@ import { Chips } from 'ui/views/_components/Chips';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContextMenu } from 'ui/views/_components/ContextMenu';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataForm } from './_components/DataForm';
 import { DataTable } from 'ui/views/_components/DataTable';
@@ -66,8 +67,11 @@ const DataViewer = withRouter(
     tableHasErrors,
     tableId,
     tableName,
+    tableReadOnly,
     tableSchemaColumns
   }) => {
+    const userContext = useContext(UserContext);
+
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
@@ -106,7 +110,7 @@ const DataViewer = withRouter(
       newRecord: {},
       numCopiedRecords: undefined,
       pastedRecords: undefined,
-      recordsPerPage: 10,
+      recordsPerPage: userContext.userProps.rowsPerPage,
       selectedRecord: {},
       totalFilteredRecords: 0,
       totalRecords: 0
@@ -166,7 +170,7 @@ const DataViewer = withRouter(
       cellDataEditor,
       colsSchema,
       columnOptions,
-      hasWritePermissions,
+      hasWritePermissions && !tableReadOnly,
       initialCellValue,
       isDataCollection,
       isWebFormMMR,
@@ -253,7 +257,7 @@ const DataViewer = withRouter(
           onLoadTableData(true);
         }
 
-        if (!isUndefined(colsSchema) && !isUndefined(tableData)) {
+        if (!isUndefined(colsSchema) && !isEmpty(colsSchema) && !isUndefined(tableData)) {
           if (!isUndefined(tableData.records)) {
             if (tableData.records.length > 0) {
               dispatchRecords({
@@ -640,6 +644,7 @@ const DataViewer = withRouter(
           datasetName
         }
       });
+      setIsTableDeleted(false);
     };
 
     const addRowDialogFooter = (
@@ -741,7 +746,7 @@ const DataViewer = withRouter(
               icon={AwesomeIcons('check')}
               style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
             />
-          ) : rowData.field === 'Codelist items' ? (
+          ) : rowData.field === 'Single select items' ? (
             <Chips disabled={true} value={rowData.value}></Chips>
           ) : (
             rowData.value
@@ -817,19 +822,20 @@ const DataViewer = withRouter(
           tableHasErrors={tableHasErrors}
           tableId={tableId}
           tableName={tableName}
+          tableReadOnly={tableReadOnly}
         />
         <ContextMenu model={menu} ref={contextMenuRef} />
         <div className={styles.Table}>
           <DataTable
             // autoLayout={true}
             contextMenuSelection={records.selectedRecord}
-            editable={hasWritePermissions}
+            editable={hasWritePermissions && !tableReadOnly}
             id={tableId}
             first={records.firstPageRecord}
             footer={
-              hasWritePermissions && !isWebFormMMR ? (
+              hasWritePermissions && !tableReadOnly && !isWebFormMMR ? (
                 <Footer
-                  hasWritePermissions={hasWritePermissions}
+                  hasWritePermissions={hasWritePermissions && !tableReadOnly}
                   onAddClick={() => {
                     setIsNewRecord(true);
                     setAddDialogVisible(true);
@@ -841,7 +847,7 @@ const DataViewer = withRouter(
             lazy={true}
             loading={isLoading}
             onContextMenu={
-              hasWritePermissions && !isEditing
+              hasWritePermissions && !tableReadOnly && !isEditing
                 ? e => {
                     datatableRef.current.closeEditingCell();
                     contextMenuRef.current.show(e.originalEvent);

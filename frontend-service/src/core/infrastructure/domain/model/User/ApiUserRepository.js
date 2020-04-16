@@ -1,6 +1,10 @@
 import jwt_decode from 'jwt-decode';
 import moment from 'moment';
-import { isUndefined } from 'lodash';
+
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
 import { apiUser } from 'core/infrastructure/api/domain/model/User';
 import { User } from 'core/domain/model/User/User';
@@ -37,6 +41,62 @@ const logout = async () => {
   const response = await apiUser.logout(currentTokens.refreshToken);
   return response;
 };
+
+const uploadImg = async (userId, imgData) => {
+  const response = await apiUser.uploadImg(userId, imgData);
+  return response;
+};
+
+const getConfiguration = async () => {
+  const userConfigurationDTO = await apiUser.configuration();
+  return parseConfigurationDTO(userConfigurationDTO);
+};
+
+const parseConfigurationDTO = userConfigurationDTO => {
+  const userConfiguration = {};
+
+  const userDefaultConfiguration = {
+    dateFormat: 'MM-DD-YYYY',
+    showLogoutConfirmation: true,
+    rowsPerPage: 10,
+    visualTheme: 'light',
+    userImage: []
+  };
+
+  if (isNil(userConfigurationDTO) || isEmpty(userConfigurationDTO)) {
+    userConfiguration.dateFormat = userDefaultConfiguration.dateFormat;
+    userConfiguration.showLogoutConfirmation = userDefaultConfiguration.showLogoutConfirmation;
+    userConfiguration.rowsPerPage = userDefaultConfiguration.rowsPerPage;
+    userConfiguration.visualTheme = userDefaultConfiguration.visualTheme;
+    userConfiguration.userImage = userDefaultConfiguration.userImage;
+  } else {
+    userConfiguration.dateFormat = !isNil(userConfigurationDTO.dateFormat[0])
+      ? userConfigurationDTO.dateFormat[0]
+      : userDefaultConfiguration.dateFormat;
+
+    userConfiguration.showLogoutConfirmation = isNil(userConfigurationDTO.showLogoutConfirmation)
+      ? userDefaultConfiguration.showLogoutConfirmation
+      : userConfigurationDTO.showLogoutConfirmation[0] === 'false'
+      ? (userConfiguration.showLogoutConfirmation = false)
+      : (userConfiguration.showLogoutConfirmation = true);
+
+    userConfiguration.rowsPerPage = !isNil(userConfigurationDTO.rowsPerPage[0])
+      ? parseInt(userConfigurationDTO.rowsPerPage[0])
+      : userDefaultConfiguration.rowsPerPage;
+
+    userConfiguration.visualTheme = !isNil(userConfigurationDTO.visualTheme[0])
+      ? userConfigurationDTO.visualTheme[0]
+      : userDefaultConfiguration.visualTheme;
+
+    userConfiguration.userImage = !isNil(userConfigurationDTO.userImage)
+      ? userConfigurationDTO.userImage
+      : userDefaultConfiguration.userImage;
+  }
+  return userConfiguration;
+};
+
+const updateAttributes = async attributes => await apiUser.updateAttributes(attributes);
+
 const oldLogin = async (userName, password) => {
   const userDTO = await apiUser.oldLogin(userName, password);
   const { accessToken, refreshToken } = userDTO;
@@ -54,6 +114,7 @@ const oldLogin = async (userName, password) => {
   timeOut((remain - 10) * 1000);
   return user;
 };
+
 const refreshToken = async () => {
   try {
     const currentTokens = userStorage.get();
@@ -105,10 +166,13 @@ const getToken = () => {
 
 export const ApiUserRepository = {
   login,
+  getConfiguration,
+  updateAttributes,
   logout,
   oldLogin,
   refreshToken,
   hasPermission,
   getToken,
-  userRole
+  userRole,
+  uploadImg
 };

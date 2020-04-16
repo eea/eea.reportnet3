@@ -11,10 +11,12 @@ import org.eea.dataflow.persistence.domain.DataProviderCode;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.Representative;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
+import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
@@ -23,9 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/**
- * The Class RepresentativeServiceImpl.
- */
+/** The Class RepresentativeServiceImpl. */
 @Service("dataflowRepresentativeService")
 public class RepresentativeServiceImpl implements RepresentativeService {
 
@@ -37,6 +37,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Autowired
   private DataProviderRepository dataProviderRepository;
 
+  /** The dataflow repository. */
+  @Autowired
+  private DataflowRepository dataflowRepository;
+
   /** The representative mapper. */
   @Autowired
   private RepresentativeMapper representativeMapper;
@@ -45,18 +49,18 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Autowired
   private DataProviderMapper dataProviderMapper;
 
-  /**
-   * The Constant LOG.
-   */
+  /** The user management controller zull. */
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZull;
+
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RepresentativeServiceImpl.class);
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
-   * Insert representative.
+   * Creates the representative.
    *
    * @param dataflowId the dataflow id
    * @param representativeVO the representative VO
@@ -65,26 +69,36 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    */
   @Override
   @Transactional
-  public Long insertRepresentative(Long dataflowId, RepresentativeVO representativeVO)
+  public Long createRepresentative(Long dataflowId, RepresentativeVO representativeVO)
       throws EEAException {
-    if (representativeVO == null || dataflowId == null) {
+
+    String email = representativeVO.getProviderAccount();
+    Long dataProviderId = representativeVO.getDataProviderId();
+    Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+
+    if (dataflow == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
-    if (existsUserMail(representativeVO.getDataProviderId(), representativeVO.getProviderAccount(),
-        dataflowId)) {
+
+    if (userManagementControllerZull.getUserByEmail(email) == null) {
+      throw new EEAException(EEAErrorMessage.USER_REQUEST_NOTFOUND);
+    }
+
+    if (existsUserMail(dataProviderId, email, dataflowId)) {
       throw new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED);
     }
-    Representative dataflowRepresentative = representativeMapper.classToEntity(representativeVO);
-    Dataflow dataflow = new Dataflow();
-    dataflow.setId(dataflowId);
-    dataflowRepresentative.setDataflow(dataflow);
-    dataflowRepresentative.setReceiptDownloaded(false);
-    dataflowRepresentative.setReceiptOutdated(false);
+
     DataProvider dataProvider = new DataProvider();
-    dataProvider.setId(representativeVO.getDataProviderId());
-    dataflowRepresentative.setDataProvider(dataProvider);
+    dataProvider.setId(dataProviderId);
+    Representative representative = representativeMapper.classToEntity(representativeVO);
+    representative.setDataflow(dataflow);
+    representative.setDataProvider(dataProvider);
+    representative.setReceiptDownloaded(false);
+    representative.setReceiptOutdated(false);
+    representative.setHasDatasets(false);
+
     LOG.info("Insert new representative relation to dataflow: {}", dataflowId);
-    return representativeRepository.save(dataflowRepresentative).getId();
+    return representativeRepository.save(representative).getId();
   }
 
   /**
@@ -213,8 +227,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (dataProviderId == null || StringUtils.isBlank(userMail)) {
       throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     }
-    return representativeRepository.findBydataProviderIdAnduserMailAnddataflowId(dataProviderId,
-        userMail.toLowerCase(), dataflowId).isPresent();
+    return representativeRepository.findByDataProviderIdAndDataflowId(dataProviderId, dataflowId)
+        .isPresent();
   }
 
 
@@ -264,5 +278,19 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     Iterable<DataProvider> dataProviders = dataProviderRepository.findAllById(dataProviderIds);
     dataProviders.forEach(dataProvider -> list.add(dataProviderMapper.entityToClass(dataProvider)));
     return list;
+  }
+
+  /**
+   * Gets the represetatives by dataflow id and email.
+   *
+   * @param dataflowId the dataflow id
+   * @param email the email
+   * @return the represetatives by dataflow id and email
+   */
+  @Override
+  public List<RepresentativeVO> getRepresetativesByDataflowIdAndEmail(Long dataflowId,
+      String email) {
+    return representativeMapper
+        .entityListToClass(representativeRepository.findByDataflowIdAndEmail(dataflowId, email));
   }
 }

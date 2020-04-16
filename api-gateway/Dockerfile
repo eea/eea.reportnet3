@@ -11,6 +11,6 @@ RUN rm filebeat-6.6.1-linux-x86_64.tar.gz
 COPY filebeat.yml /filebeat-6.6.1-linux-x86_64/filebeat.yml
 #COPY entrypoint.sh /bin/entrypoint.sh
 #RUN chmod +x /bin/entrypoint.sh
-ENTRYPOINT ["java","-jar","/ApiGatewayApplication.jar"]
+ENTRYPOINT ["java","-Dspring.profiles.active=production","-jar","/ApiGatewayApplication.jar"]
 CMD ["which","/filebeat-6.6.1-linux-x86_64/filebeat"]
 #CMD "java -jar ./ApiGatewayApplication.jar"

@@ -1,7 +1,17 @@
 import React, { useContext, useReducer } from 'react';
 
-import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+
+const userSettingsDefaultState = {
+  userProps: {
+    rowsPerPage: 10,
+    visualTheme: 'light',
+    showLogoutConfirmation: true,
+    userImage: [],
+    dateFormat: 'YYYY-MM-DD'
+  }
+};
 
 const userReducer = (state, { type, payload }) => {
   switch (type) {
@@ -11,7 +21,7 @@ const userReducer = (state, { type, payload }) => {
         ...payload.user
       };
     case 'LOGOUT':
-      return {};
+      return userSettingsDefaultState;
     case 'ADD_SOCKET':
       return {
         ...state,
@@ -22,6 +32,54 @@ const userReducer = (state, { type, payload }) => {
         ...state,
         ...payload.user
       };
+    case 'TOGGLE_LOGOUT_CONFIRM':
+      return {
+        ...state,
+        userProps: {
+          ...state.userProps,
+          showLogoutConfirmation: payload
+        }
+      };
+    case 'DEFAULT_ROW_SELECTED':
+      return {
+        ...state,
+        userProps: {
+          ...state.userProps,
+          rowsPerPage: payload
+        }
+      };
+    case 'DATE_FORMAT':
+      return {
+        ...state,
+        userProps: {
+          ...state.userProps,
+          dateFormat: payload
+        }
+      };
+    case 'DEFAULT_VISUAL_THEME':
+      return {
+        ...state,
+        userProps: {
+          ...state.userProps,
+          visualTheme: payload
+        }
+      };
+    case 'SETTINGS_LOADED':
+      return {
+        ...state,
+        userProps: {
+          ...state.userProps,
+          settingsLoaded: payload
+        }
+      };
+    case 'USER_AVATAR_IMAGE':
+      return {
+        ...state,
+        userProps: {
+          ...state.userProps,
+          userImage: payload
+        }
+      };
 
     default:
       return state;
@@ -30,15 +88,16 @@ const userReducer = (state, { type, payload }) => {
 
 export const UserProvider = ({ children }) => {
   const notificationContext = useContext(NotificationContext);
-
-  const [state, dispatch] = useReducer(userReducer, {});
+  //const [state, userDispatcher] = useReducer(userReducer, {});
+  const [state, userDispatcher] = useReducer(userReducer, userSettingsDefaultState);
+  // const notificationContext = useContext(NotificationContext);
 
   return (
     <UserContext.Provider
       value={{
         ...state,
         onLogin: user => {
-          dispatch({
+          userDispatcher({
             type: 'LOGIN',
             payload: {
               user
@@ -46,26 +105,59 @@ export const UserProvider = ({ children }) => {
           });
         },
         onAddSocket: socket => {
-          dispatch({
+          userDispatcher({
             type: 'ADD_SOCKET',
             payload: socket
           });
         },
         onLogout: () => {
           notificationContext.deleteAll();
-          dispatch({
+          userDispatcher({
             type: 'LOGOUT',
             payload: {
               user: {}
             }
           });
         },
+        onChangeRowsPerPage: rowNumber => {
+          userDispatcher({
+            type: 'DEFAULT_ROW_SELECTED',
+            payload: rowNumber
+          });
+        },
+        onChangeDateFormat: dateFormat => {
+          userDispatcher({ type: 'DATE_FORMAT', payload: dateFormat });
+        },
         onTokenRefresh: user => {
-          dispatch({
+          userDispatcher({
             type: 'REFRESH_TOKEN',
             payload: {
               user
             }
+          });
+        },
+        onToggleLogoutConfirm: logoutConf => {
+          userDispatcher({
+            type: 'TOGGLE_LOGOUT_CONFIRM',
+            payload: logoutConf
+          });
+        },
+        onToggleVisualTheme: currentTheme => {
+          userDispatcher({
+            type: 'DEFAULT_VISUAL_THEME',
+            payload: currentTheme
+          });
+        },
+        onToggleSettingsLoaded: settingsLoaded => {
+          userDispatcher({
+            type: 'SETTINGS_LOADED',
+            payload: settingsLoaded
+          });
+        },
+        onUserFileUpload: base64Image => {
+          userDispatcher({
+            type: 'USER_AVATAR_IMAGE',
+            payload: base64Image
           });
         }
       }}>
