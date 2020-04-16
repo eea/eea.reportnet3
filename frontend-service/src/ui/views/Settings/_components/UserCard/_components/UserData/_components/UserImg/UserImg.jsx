@@ -39,7 +39,6 @@ const UserImg = () => {
 
   const handleImageUpload = e => {
     const [file] = e.target.files;
-
     if (file) {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
@@ -60,6 +59,7 @@ const UserImg = () => {
       };
 
       current.src = URL.createObjectURL(e.target.files[0]);
+      e.target.value = '';
     }
   };
 
