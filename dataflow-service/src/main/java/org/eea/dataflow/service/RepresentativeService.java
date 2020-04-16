@@ -77,4 +77,13 @@ public interface RepresentativeService {
    * @return the list
    */
   List<DataProviderVO> findDataProvidersByIds(List<Long> dataProviderIds);
+
+  /**
+   * Gets the represetatives by dataflow id and email.
+   *
+   * @param dataflowId the dataflow id
+   * @param email the email
+   * @return the represetatives by dataflow id and email
+   */
+  List<RepresentativeVO> getRepresetativesByDataflowIdAndEmail(Long dataflowId, String email);
 }

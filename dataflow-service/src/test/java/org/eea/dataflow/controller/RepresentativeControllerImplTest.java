@@ -280,4 +280,37 @@ public class RepresentativeControllerImplTest {
       throw e;
     }
   }
+
+  /**
+   * Find data provider by id test.
+   */
+  @Test
+  public void findDataProviderByIdTest() {
+    DataProviderVO dataProvider = new DataProviderVO();
+    Mockito.when(representativeService.getDataProviderById(Mockito.any())).thenReturn(dataProvider);
+    assertEquals(dataProvider, representativeControllerImpl.findDataProviderById(1L));
+  }
+
+  /**
+   * Find data provider by id exception.
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void findDataProviderByIdException() {
+    try {
+      representativeControllerImpl.findDataProviderById(null);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      assertEquals(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test
+  public void findDataProvidersByIdsTest() {
+    List<DataProviderVO> dataProviders = new ArrayList<>();
+    Mockito.when(representativeService.findDataProvidersByIds(Mockito.any()))
+        .thenReturn(dataProviders);
+    assertEquals(dataProviders,
+        representativeControllerImpl.findDataProvidersByIds(new ArrayList<>()));
+  }
 }

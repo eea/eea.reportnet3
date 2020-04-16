@@ -4,6 +4,11 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -16,6 +21,7 @@ import org.eea.lock.service.LockService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,11 +30,21 @@ import org.springframework.stereotype.Service;
 @Service("lockService")
 public class LockServiceImpl implements LockService {
 
+  /** The delay. */
+  @Value("${lock.releaseDelay}")
+  private long delay;
+
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(LockServiceImpl.class);
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant SCHEDULER. */
+  private static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(1);
+
+  /** The Constant TASKS. */
+  private static final Map<Integer, ScheduledFuture<?>> TASKS = new ConcurrentHashMap<>();
 
   /** The lock repository. */
   @Autowired
@@ -74,6 +90,10 @@ public class LockServiceImpl implements LockService {
   @Override
   public Boolean removeLock(Integer lockId) {
     Boolean isRemoved = lockRepository.deleteIfPresent(lockId);
+    ScheduledFuture<?> task = TASKS.remove(lockId);
+    if (task != null) {
+      task.cancel(false);
+    }
     LOG.info("Lock removed: {} - {}", lockId, isRemoved);
     return isRemoved;
   }
@@ -136,5 +156,31 @@ public class LockServiceImpl implements LockService {
   @Override
   public LockVO findByCriteria(Map<String, Object> lockCriteria) {
     return findById(generateHashCode(lockCriteria.values().stream().collect(Collectors.toList())));
+  }
+
+  /**
+   * Schedule lock removal task.
+   *
+   * @param lockId the lock id
+   */
+  @Override
+  public void scheduleLockRemovalTask(Integer lockId) {
+    ScheduledFuture<?> task =
+        SCHEDULER.schedule(() -> scheduledRemoveLock(lockId), delay, TimeUnit.MILLISECONDS);
+    TASKS.put(lockId, task);
+  }
+
+  /**
+   * Scheduled remove lock.
+   *
+   * @param lockId the lock id
+   */
+  private void scheduledRemoveLock(Integer lockId) {
+    Boolean isRemoved = lockRepository.deleteIfPresent(lockId);
+    ScheduledFuture<?> task = TASKS.remove(lockId);
+    if (task != null) {
+      task.cancel(false);
+    }
+    LOG.warn("Lock removed by scheduler: {} - {}", lockId, isRemoved);
   }
 }
