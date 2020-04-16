@@ -96,7 +96,7 @@ const parseObligation = obligationDTO =>
     countries: obligationDTO.countries,
     description: obligationDTO.description,
     expirationDate:
-      obligationDTO.nextDeadline > 0 ? moment.unix(obligationDTO.nextDeadline / 1000).format('YYYY-MM-DD') : '-',
+      obligationDTO.nextDeadline > 0 ? moment.unix(obligationDTO.nextDeadline / 1000).format('YYYY-MM-DD') : null,
     issues: obligationDTO.issues,
     legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),
     obligationId: obligationDTO.obligationId,

@@ -132,7 +132,7 @@ const formatValidations = validations => {
     if (errorValidations.length > 1) {
       error = `${capitalize(validation.levelError)}: `;
     }
-    message += '- ' + error + capitalize(validation.message) + '\n';
+    message += '- ' + error + validation.message + '\n';
   });
   return message;
 };

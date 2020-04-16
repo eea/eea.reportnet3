@@ -30,13 +30,10 @@ const UserObligations = () => {
     // onLoadReportingDataflow(match);
   }, []);
 
-  ////////////////////////////////////////////////////////////////////////////////////
   const [loading, setLoading] = useState(true);
   const [acceptedContent, setacceptedContent] = useState([]);
   const [initialvalues, setInitialValues] = useState([]);
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
-  //   if
-
   const [dataflowData, setDataflowData] = useState();
   const [dataflowStatus, setDataflowStatus] = useState();
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
@@ -88,15 +85,10 @@ const UserObligations = () => {
     dataset.datasetSchemaName = datasetSchemaDTO.nameDatasetSchema;
   };
 
-  ////////////////////////////////////////////////////////////////////////////////////
-
   const renderChildrenArray = () => {
-    ///
-
     if (loading) {
       return <Spinner />;
     }
-    //
     return acceptedContent.map(item => (
       <TreeViewExpandableItem
         className={styles.obligationsExpandable}
