@@ -32,26 +32,28 @@ const UserConfiguration = () => {
   const themeSwitch = (
     <React.Fragment>
       <span className={styles.switchTextInput}>{resources.messages['light']}</span>
-        <InputSwitch
-          checked={userContext.userProps.visualTheme === 'dark'}
-          onChange={async e => {
-            const inmUserProperties = { ...userContext.userProps };
-            inmUserProperties.visualTheme = e.value ? 'dark' : 'light';
-            const response = await changeUserProperties(inmUserProperties);
-            if (response.status >= 200 && response.status <= 299) {
-              themeContext.onToggleTheme(e.value ? 'dark' : 'light');
-              userContext.onToggleVisualTheme(e.value ? 'dark' : 'light');
-            }
-          }}
-          sliderCheckedClassName={styles.themeSwitcherInputSwitch}
-          style={{ marginRight: '1rem' }}
-          tooltip={
-            userContext.userProps.visualTheme === 'light'
-              ? resources.messages['toggleDarkTheme']
-              : resources.messages['toggleLightTheme']
+      <InputSwitch
+        checked={userContext.userProps.visualTheme === 'dark'}
+        onChange={async e => {
+          themeContext.onToggleTheme(e.value ? 'dark' : 'light');
+          userContext.onToggleVisualTheme(e.value ? 'dark' : 'light');
+          const inmUserProperties = { ...userContext.userProps };
+          inmUserProperties.visualTheme = e.value ? 'dark' : 'light';
+          const response = await changeUserProperties(inmUserProperties);
+          if (response.status < 200 || response.status > 299) {
+            themeContext.onToggleTheme(!e.value ? 'dark' : 'light');
+            userContext.onToggleVisualTheme(!e.value ? 'dark' : 'light');
           }
-          tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
-        />
+        }}
+        sliderCheckedClassName={styles.themeSwitcherInputSwitch}
+        style={{ marginRight: '1rem' }}
+        tooltip={
+          userContext.userProps.visualTheme === 'light'
+            ? resources.messages['toggleDarkTheme']
+            : resources.messages['toggleLightTheme']
+        }
+        tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
+      />
       <span className={styles.switchTextInput}>{resources.messages['dark']}</span>
     </React.Fragment>
   );
@@ -59,23 +61,26 @@ const UserConfiguration = () => {
   const confirmationLogoutSwitch = (
     <React.Fragment>
       <span className={styles.switchTextInput}>No popup</span>
-        <InputSwitch
-      checked={userContext.userProps.showLogoutConfirmation}
-      style={{ marginRight: '1rem' }}
-      onChange={async e => {
-        const inmUserProperties = { ...userContext.userProps };
-        inmUserProperties.showLogoutConfirmation = e.value;
-        const response = await changeUserProperties(inmUserProperties);
-        if (response.status >= 200 && response.status <= 299) {
+      <InputSwitch
+        checked={userContext.userProps.showLogoutConfirmation}
+        style={{ marginRight: '1rem' }}
+        onChange={async e => {
           userContext.onToggleLogoutConfirm(e.value);
+          const inmUserProperties = { ...userContext.userProps };
+          inmUserProperties.showLogoutConfirmation = e.value;
+          const response = await changeUserProperties(inmUserProperties);
+          console.log({ response });
+          if (response.status < 200 || response.status > 299) {
+            console.log(inmUserProperties.showLogoutConfirmation);
+            userContext.onToggleLogoutConfirm(!e.value);
+          }
+        }}
+        tooltip={
+          userContext.userProps.showLogoutConfirmation === true
+            ? resources.messages['toogleConfirmationOff']
+            : resources.messages['toogleConfirmationOn']
         }
-      }}
-      tooltip={
-        userContext.userProps.showLogoutConfirmation === true
-          ? resources.messages['toogleConfirmationOff']
-          : resources.messages['toogleConfirmationOn']
-      }
-        />
+      />
       <span className={styles.switchTextInput}>Popup</span>
     </React.Fragment>
   );
@@ -123,7 +128,7 @@ const UserConfiguration = () => {
       title={resources.messages['theme']}
       icon="palette"
       iconSize="2rem"
-      subtitle='Choose the theme to display in the system'
+      subtitle="Choose the theme to display in the system"
       item={themeSwitch}
     />
   );
@@ -133,7 +138,7 @@ const UserConfiguration = () => {
       title={resources.messages['userConfirmationLogout']}
       icon="power-off"
       iconSize="2rem"
-      subtitle='Configure the way to logout with or without a confirmation popup.'
+      subtitle="Configure the way to logout with or without a confirmation popup."
       item={confirmationLogoutSwitch}
     />
   );
@@ -143,7 +148,7 @@ const UserConfiguration = () => {
       title={resources.messages['userRowsInPagination']}
       icon="list-ol"
       iconSize="2rem"
-      subtitle='Configure the number of rows displayed in the pagination.'
+      subtitle="Configure the number of rows displayed in the pagination."
       item={rowsInPaginationDropdown}
     />
   );
@@ -163,7 +168,7 @@ const UserConfiguration = () => {
       subtitle={dateFormatSubtitle}
       item={dateFormatDropdown}
     />
-  ); 
+  );
 
   return (
     <React.Fragment>
