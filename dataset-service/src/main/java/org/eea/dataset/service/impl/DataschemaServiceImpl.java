@@ -626,6 +626,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
             && fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")) {
           fieldSchema.put("codelistItems", Arrays.asList(fieldSchemaVO.getCodelistItems()));
+          typeModified = true;
         }
         if (fieldSchemaVO.getRequired() != null) {
           fieldSchema.put("required", fieldSchemaVO.getRequired());
