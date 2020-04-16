@@ -5,7 +5,7 @@ export const setValidationExpression = (expressionId, field, expressions) => {
     case 'expressionValue':
       targetExpression[field.key] = config.validations.nonNumericOperators.includes(targetExpression.operatorType)
         ? field.value.value
-        : Number(field.value.value);
+        : field.value.value;
       break;
     case 'operatorType':
       targetExpression[field.key] = field.value.value;
