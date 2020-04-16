@@ -260,15 +260,13 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   };
 
   const onExpressionFieldUpdate = (expressionId, field) => {
-    setTimeout(() => {
-      const {
-        candidateRule: { expressions, allExpressions }
-      } = creationFormState;
-      creationFormDispatch({
-        type: 'UPDATE_RULES',
-        payload: setValidationExpression(expressionId, field, allExpressions)
-      });
-    }, 100);
+    const {
+      candidateRule: { expressions, allExpressions }
+    } = creationFormState;
+    creationFormDispatch({
+      type: 'UPDATE_RULES',
+      payload: setValidationExpression(expressionId, field, allExpressions)
+    });
   };
 
   const onExpressionGroup = (expressionId, field) => {

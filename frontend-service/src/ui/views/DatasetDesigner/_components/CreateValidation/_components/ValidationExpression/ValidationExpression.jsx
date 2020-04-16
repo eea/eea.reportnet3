@@ -38,17 +38,6 @@ const ValidationExpression = ({
   }, [expressionValues.operatorType]);
 
   useEffect(() => {
-    const { operatorType, expressionValue } = expressionValues;
-    if (operatorType == 'number' || operatorType == 'LEN') {
-      if (!Number(expressionValue)) {
-        onExpressionFieldUpdate(expressionId, {
-          key: 'expressionValue',
-          value: { value: '' }
-        });
-      }
-    }
-  }, [expressionValues.operatorType, expressionValues.expressionValue]);
-  useEffect(() => {
     const options = [];
     for (let type in operatorTypesConf) {
       options.push(operatorTypesConf[type].option);
