@@ -189,6 +189,23 @@ public class UserManagementControllerImplTest {
   }
 
   @Test
+  public void getEmailByUserIdTest() {
+    UserRepresentation user = new UserRepresentation();
+    UserRepresentationVO userVO = new UserRepresentationVO();
+    userVO.setEmail("provider@reportnet.net");
+    Mockito.when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(user);
+    Mockito.when(userRepresentationMapper.entityToClass(Mockito.any())).thenReturn(userVO);
+    Assert.assertEquals("provider@reportnet.net",
+        userManagementController.getUserByUserId("userId").getEmail());
+  }
+
+  @Test
+  public void getEmailByUserIdNullTest() {
+    Mockito.when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(null);
+    Assert.assertNull(userManagementController.getUserByUserId("userId"));
+  }
+
+  @Test
   public void getUsersTest() throws IOException {
 
     UserRepresentation[] userList = new UserRepresentation[1];

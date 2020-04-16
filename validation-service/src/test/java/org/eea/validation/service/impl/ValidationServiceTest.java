@@ -1,7 +1,7 @@
 /*
  *
  */
-package org.eea.validation.service;
+package org.eea.validation.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.bson.types.ObjectId;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
@@ -47,8 +48,8 @@ import org.eea.validation.persistence.data.repository.TableValidationRepository;
 import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
-import org.eea.validation.service.impl.ValidationServiceImpl;
 import org.eea.validation.util.KieBaseManager;
+import org.eea.validation.util.RulesErrorUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -78,9 +79,7 @@ public class ValidationServiceTest {
   private ValidationServiceImpl validationServiceImpl;
 
 
-  /**
-   * The resource management controller
-   */
+  /** The resource management controller. */
   @Mock
   private ResourceManagementControllerZull resourceManagementController;
   /**
@@ -216,15 +215,24 @@ public class ValidationServiceTest {
   List<Long> idList;
 
 
+  /** The attributes. */
   private Map<String, List<String>> attributes;
 
+  /** The field repository. */
   @Mock
   private FieldRepository fieldRepository;
+
+  /** The table repository. */
   @Mock
   private TableRepository tableRepository;
 
+  /** The dataset schema controller. */
   @Mock
   private DatasetSchemaController datasetSchemaController;
+
+  /** The rules error utils. */
+  @Mock
+  private RulesErrorUtils rulesErrorUtils;
 
   /**
    * Inits the mocks.
@@ -874,4 +882,68 @@ public class ValidationServiceTest {
     when(recordRepository.countFieldsDataset()).thenReturn(1);
     assertEquals("not Equals", Integer.valueOf(1), validationServiceImpl.countFieldsDataset(1L));
   }
+
+
+  /**
+   * Run dataset vlaidations exception.
+   */
+  @Test
+  public void runDatasetVlaidationsException() {
+    doThrow(new RuntimeException()).when(kieSession).fireAllRules();
+    validationServiceImpl.runDatasetValidations(new DatasetValue(), kieSession);
+    Mockito.verify(rulesErrorUtils, times(1)).createRuleErrorException(Mockito.any(),
+        Mockito.any());
+  }
+
+  /**
+   * Run table validations exception.
+   */
+  @Test
+  public void runTableValidationsException() {
+    doThrow(new RuntimeException()).when(kieSession).fireAllRules();
+    validationServiceImpl.runTableValidations(new TableValue(), kieSession);
+    Mockito.verify(rulesErrorUtils, times(1)).createRuleErrorException(Mockito.any(),
+        Mockito.any());
+  }
+
+  /**
+   * Run record validations exception.
+   */
+  @Test
+  public void runRecordValidationsException() {
+    doThrow(new RuntimeException()).when(kieSession).fireAllRules();
+    validationServiceImpl.runRecordValidations(new RecordValue(), kieSession);
+    Mockito.verify(rulesErrorUtils, times(1)).createRuleErrorException(Mockito.any(),
+        Mockito.any());
+  }
+
+  /**
+   * Run field validations exception.
+   */
+  @Test
+  public void runFieldValidationsException() {
+    doThrow(new RuntimeException()).when(kieSession).fireAllRules();
+    validationServiceImpl.runFieldValidations(new FieldValue(), kieSession);
+    Mockito.verify(rulesErrorUtils, times(1)).createRuleErrorException(Mockito.any(),
+        Mockito.any());
+  }
+
+  /**
+   * Load rules knowledge base exception.
+   *
+   * @throws EEAException the EEA exception
+   * @throws FileNotFoundException the file not found exception
+   */
+  @Test(expected = EEAException.class)
+  public void loadRulesKnowledgeBaseException() throws EEAException, FileNotFoundException {
+    doThrow(new NullPointerException()).when(datasetSchemaController)
+        .getDatasetSchemaId(Mockito.any());
+    try {
+      validationServiceImpl.loadRulesKnowledgeBase(1L);
+    } catch (Exception e) {
+      assertEquals(EEAErrorMessage.VALIDATION_SESSION_ERROR, e.getLocalizedMessage());
+      throw e;
+    }
+  }
+
 }

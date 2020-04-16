@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -120,8 +119,7 @@ public class ExecuteFieldValidationCommandTest {
     Mockito.verify(validationService, times(1)).validateFields(Mockito.any(), Mockito.any(),
         Mockito.any());
     Mockito.verify(kafkaSenderUtils, times(1))
-        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_VALIDATED_FIELD_COMPLETED),
-            Mockito.any());
+        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_VALIDATED_FIELD_COMPLETED), Mockito.any());
   }
 
   /**
@@ -140,7 +138,27 @@ public class ExecuteFieldValidationCommandTest {
     Mockito.verify(validationService, times(1)).validateFields(Mockito.any(), Mockito.any(),
         Mockito.any());
     Mockito.verify(kafkaSenderUtils, times(1))
-        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_VALIDATED_FIELD_COMPLETED),
-            Mockito.any());
+        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_VALIDATED_FIELD_COMPLETED), Mockito.any());
+  }
+
+  /**
+   * Execute test contains key.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void executeTestContainsKey() throws EEAException {
+    processesMap.put("uuid", 1);
+    ReflectionTestUtils.setField(executeFieldValidationCommand, "fieldBatchSize", 20);
+    doNothing().when(validationService).validateFields(Mockito.any(), Mockito.any(), Mockito.any());
+    ConcurrentHashMap<String, Integer> processMap = new ConcurrentHashMap<>();
+    processMap.put("uuid", 1);
+    Mockito.when(validationHelper.getProcessesMap()).thenReturn(processMap);
+    executeFieldValidationCommand.execute(eeaEventVO);
+
+    Mockito.verify(validationService, times(1)).validateFields(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    Mockito.verify(validationHelper, times(1)).checkFinishedValidations(Mockito.any(),
+        Mockito.any());
   }
 }

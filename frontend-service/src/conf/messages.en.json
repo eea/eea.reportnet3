@@ -585,7 +585,7 @@
     "getConfigurationUserServiceError": "Error loading user preferences.",
     "updateAttributesUserServiceError": "Error updating user preferences.",
     "theme": "Theme",
-    "dateFormatSubtitle": "Select the desired date format to visualice.",
+    "dateFormatSubtitle": "Select the desired date format to visualize.",
     "qcRuleUpdatingError": "Error udpating the rule, please check it",
     "createFieldConstraintTitle": "Create Field Constraint",
     "editFieldConstraint": "Update Field Constraint",
