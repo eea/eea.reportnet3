@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,7 +61,9 @@ public class DataSetSchemaControllerImplTest {
   @InjectMocks
   private DataSetSchemaControllerImpl dataSchemaControllerImpl;
 
-  /** The expected ex. */
+  /**
+   * The expected ex.
+   */
   @Rule
   public ExpectedException expectedEx = ExpectedException.none();
 
@@ -88,15 +91,21 @@ public class DataSetSchemaControllerImplTest {
   @Mock
   private RecordStoreControllerZull recordStoreControllerZull;
 
-  /** The dataset snapshot service. */
+  /**
+   * The dataset snapshot service.
+   */
   @Mock
   private DatasetSnapshotService datasetSnapshotService;
 
-  /** The dataflow controller zuul. */
+  /**
+   * The dataflow controller zuul.
+   */
   @Mock
   private DataFlowControllerZuul dataflowControllerZuul;
 
-  /** The dataset schema VO. */
+  /**
+   * The dataset schema VO.
+   */
   private DataSetSchemaVO datasetSchemaVO;
 
   @Mock
@@ -324,7 +333,7 @@ public class DataSetSchemaControllerImplTest {
     df.setId(1L);
     df.setStatus(TypeStatusEnum.DESIGN);
     when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(df);
-    when(dataschemaService.isSchemaForDeletionAllowed(Mockito.any())).thenReturn(true);
+    when(dataschemaService.isSchemaAllowedForDeletion(Mockito.any())).thenReturn(true);
     dataSchemaControllerImpl.deleteDatasetSchema(1L, false);
 
     Mockito.verify(recordStoreControllerZull, times(1)).deleteDataset(Mockito.any());
@@ -340,7 +349,7 @@ public class DataSetSchemaControllerImplTest {
     DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
     dataSetSchemaVO.setIdDataSetSchema("schemaId");
     when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
-    when(dataschemaService.isSchemaForDeletionAllowed(Mockito.any())).thenReturn(true);
+    when(dataschemaService.isSchemaAllowedForDeletion(Mockito.any())).thenReturn(true);
     DataFlowVO df = new DataFlowVO();
     df.setId(1L);
     df.setStatus(TypeStatusEnum.DRAFT);
@@ -368,7 +377,7 @@ public class DataSetSchemaControllerImplTest {
     df.setId(1L);
     df.setStatus(TypeStatusEnum.DESIGN);
     when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(df);
-    when(dataschemaService.isSchemaForDeletionAllowed(Mockito.any())).thenReturn(true);
+    when(dataschemaService.isSchemaAllowedForDeletion(Mockito.any())).thenReturn(true);
     doThrow(new EEAException()).when(datasetSnapshotService)
         .deleteAllSchemaSnapshots(Mockito.any());
     try {
@@ -383,7 +392,7 @@ public class DataSetSchemaControllerImplTest {
   public void deleteDatasetSchemaExceptionNotAllowedTest() throws EEAException {
 
     when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
-    when(dataschemaService.isSchemaForDeletionAllowed(Mockito.any())).thenReturn(false);
+    when(dataschemaService.isSchemaAllowedForDeletion(Mockito.any())).thenReturn(false);
     try {
       dataSchemaControllerImpl.deleteDatasetSchema(1L, false);
     } catch (ResponseStatusException e) {
@@ -487,7 +496,6 @@ public class DataSetSchemaControllerImplTest {
     fieldSchemaVO.setName("test");
     dataSchemaControllerImpl.createFieldSchema(1L, fieldSchemaVO);
   }
-
 
 
   /**
