@@ -294,9 +294,6 @@ public class RepresentativeServiceImplTest {
         .thenReturn(Optional.of(new Dataflow()));
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(new UserRepresentationVO());
-    // Mockito.when(representativeRepository
-    // .findBydataProviderIdAnduserMailAnddataflowId(Mockito.any(), Mockito.any(), Mockito.any()))
-    // .thenReturn(Optional.of(new ArrayList<Representative>()));
     Mockito.when(
         representativeRepository.findByDataProviderIdAndDataflowId(Mockito.any(), Mockito.any()))
         .thenReturn(Optional.empty());
@@ -305,6 +302,32 @@ public class RepresentativeServiceImplTest {
 
     Assert.assertEquals(1,
         representativeServiceImpl.createRepresentative(1L, representativeVO).longValue());
+  }
+
+
+  /**
+   * Representative not found test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void RepresentativeNotFoundTest() throws EEAException {
+    Representative representative = new Representative();
+    representative.setId(1L);
+    RepresentativeVO representativeVO = new RepresentativeVO();
+    representativeVO.setProviderAccount("sample@email.net");
+    representativeVO.setDataProviderId(null);
+
+    Mockito.when(dataflowRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new Dataflow()));
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
+        .thenReturn(new UserRepresentationVO());
+    try {
+      representativeServiceImpl.createRepresentative(1L, representativeVO);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e.getLocalizedMessage());
+      throw e;
+    }
   }
 
   /**
@@ -377,4 +400,42 @@ public class RepresentativeServiceImplTest {
       throw e;
     }
   }
+
+  /**
+   * Gets the data provider by id test.
+   *
+   * @return the data provider by id test
+   */
+  @Test
+  public void getDataProviderByIdTest() {
+    representativeServiceImpl.getDataProviderById(1L);
+    Mockito.verify(dataProviderMapper, times(1)).entityToClass(Mockito.any());
+  }
+
+  /**
+   * Find data providers by ids test.
+   */
+  @Test
+  public void findDataProvidersByIdsTest() {
+    List<DataProvider> dataProviders = new ArrayList<>();
+    dataProviders.add(new DataProvider());
+    dataProviders.add(new DataProvider());
+    Mockito.when(dataProviderRepository.findAllById(Mockito.any())).thenReturn(dataProviders);
+    representativeServiceImpl.findDataProvidersByIds(new ArrayList<>());
+    Mockito.verify(dataProviderMapper, times(2)).entityToClass(Mockito.any());
+  }
+
+  /**
+   * Find Representatives by dataflowId and Email test.
+   */
+  @Test
+  public void getRepresetativesByDataflowIdAndEmailTest() {
+    List<Representative> representatives = new ArrayList<>();
+    Mockito.when(representativeRepository.findByDataflowIdAndEmail(Mockito.any(), Mockito.any()))
+        .thenReturn(representatives);
+    representativeServiceImpl.getRepresetativesByDataflowIdAndEmail(1L, "provider@reportnet.net");
+    Assert.assertEquals(0, representativeServiceImpl
+        .getRepresetativesByDataflowIdAndEmail(1L, "provider@reportnet.net").size());
+  }
+  
 }

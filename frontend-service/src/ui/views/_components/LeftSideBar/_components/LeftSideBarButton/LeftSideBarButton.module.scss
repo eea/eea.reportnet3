@@ -47,6 +47,13 @@
   margin: -10px 3px 0 2px;
 }
 
+.tooltipClass {
+  border: 1px solid var(--main-font-color) !important;
+  &:after {
+    border-right-color: var(--main-font-color) !important;
+  }
+}
+
 @keyframes bell {
   0% {
     transform: rotate(35deg);

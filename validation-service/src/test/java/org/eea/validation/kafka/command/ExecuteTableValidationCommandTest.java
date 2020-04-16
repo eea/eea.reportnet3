@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -119,8 +118,7 @@ public class ExecuteTableValidationCommandTest {
     Mockito.verify(validationService, times(1)).validateTable(Mockito.any(), Mockito.any(),
         Mockito.any());
     Mockito.verify(kafkaSenderUtils, times(1))
-        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_VALIDATED_TABLE_COMPLETED),
-            Mockito.any());
+        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_VALIDATED_TABLE_COMPLETED), Mockito.any());
   }
 
   /**
@@ -138,8 +136,26 @@ public class ExecuteTableValidationCommandTest {
     Mockito.verify(validationService, times(1)).validateTable(Mockito.any(), Mockito.any(),
         Mockito.any());
     Mockito.verify(kafkaSenderUtils, times(1))
-        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_VALIDATED_TABLE_COMPLETED),
-            Mockito.any());
+        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_VALIDATED_TABLE_COMPLETED), Mockito.any());
   }
 
+  /**
+   * Execute test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void executeTestContainsKey() throws EEAException {
+    processesMap.put("uuid", 1);
+    doNothing().when(validationService).validateTable(Mockito.any(), Mockito.any(), Mockito.any());
+    ConcurrentHashMap<String, Integer> processMap = new ConcurrentHashMap<>();
+    processMap.put("uuid", 1);
+    Mockito.when(validationHelper.getProcessesMap()).thenReturn(processMap);
+    executeTableValidationCommand.execute(eeaEventVO);
+
+    Mockito.verify(validationService, times(1)).validateTable(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    Mockito.verify(validationHelper, times(1)).checkFinishedValidations(Mockito.any(),
+        Mockito.any());
+  }
 }

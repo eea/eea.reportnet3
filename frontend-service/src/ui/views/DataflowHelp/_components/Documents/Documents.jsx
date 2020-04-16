@@ -24,6 +24,7 @@ import { DocumentService } from 'core/services/Document';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const Documents = ({
   documents,
@@ -38,6 +39,7 @@ const Documents = ({
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const user = useContext(UserContext);
 
   const [allDocuments, setAllDocuments] = useState(documents);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -65,9 +67,7 @@ const Documents = ({
     return `${title.split(' ').join('_')}`;
   };
 
-  const dateColumnTemplate = rowData => {
-    return <span>{moment(rowData.date).format('YYYY-MM-DD')}</span>;
-  };
+  const dateColumnTemplate = rowData => <span>{moment(rowData.date).format(user.userProps.dateFormat)}</span>;
 
   const documentsEditButtons = rowData => {
     return (
