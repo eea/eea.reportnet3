@@ -292,22 +292,23 @@ const Documents = ({
         )}
       </DataTable>
 
-      <Dialog
-        className={styles.dialog}
-        dismissableMask={false}
-        header={isEditForm ? resources.messages['editDocument'] : resources.messages['uploadDocument']}
-        onHide={onCancelDialog}
-        visible={isUploadDialogVisible}>
-        <DocumentFileUpload
-          dataflowId={dataflowId}
-          documentInitialValues={documentInitialValues}
-          isEditForm={isEditForm}
-          isFormReset={isFormReset}
-          isUploadDialogVisible={isUploadDialogVisible}
-          onUpload={onUploadDocument}
-          setIsUploadDialogVisible={setIsUploadDialogVisible}
-        />
-      </Dialog>
+      {isUploadDialogVisible && (
+        <Dialog
+          className={styles.dialog}
+          dismissableMask={false}
+          header={isEditForm ? resources.messages['editDocument'] : resources.messages['uploadDocument']}
+          onHide={onCancelDialog}
+          visible={isUploadDialogVisible}>
+          <DocumentFileUpload
+            dataflowId={dataflowId}
+            documentInitialValues={documentInitialValues}
+            isEditForm={isEditForm}
+            isUploadDialogVisible={isUploadDialogVisible}
+            onUpload={onUploadDocument}
+            setIsUploadDialogVisible={setIsUploadDialogVisible}
+          />
+        </Dialog>
+      )}
 
       <ConfirmDialog
         classNameConfirm={'p-button-danger'}

@@ -4,6 +4,7 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import isEmpty from 'lodash/isEmpty';
 import isEqual from 'lodash/isEqual';
+import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isPlainObject from 'lodash/isPlainObject';
 import isUndefined from 'lodash/isUndefined';
@@ -24,7 +25,6 @@ const DocumentFileUpload = ({
   dataflowId,
   documentInitialValues,
   isEditForm = false,
-  isFormReset,
   isUploadDialogVisible,
   onUpload,
   setIsUploadDialogVisible
@@ -58,20 +58,15 @@ const DocumentFileUpload = ({
   });
 
   useEffect(() => {
-    if (isUploadDialogVisible) {
-      console.log('inputRef', inputRef.current);
-      if (!isUndefined(inputRef)) {
-        setTimeout(() => {
-          inputRef.current.focus();
-        }, 160);
-      }
+    if (!isNil(form.current)) {
+      form.current.resetForm();
+      document.querySelector('.uploadFile').value = '';
     }
-  }, [isUploadDialogVisible]);
+  }, [form.current]);
 
-  if (!isNull(form.current) && !isFormReset) {
-    form.current.resetForm();
-    document.querySelector('.uploadFile').value = '';
-  }
+  useEffect(() => {
+    if (isUploadDialogVisible) inputRef.current.focus();
+  }, [isUploadDialogVisible]);
 
   const buildInitialValue = documentInitialValues => {
     let initialValues = { description: '', lang: '', uploadFile: {}, isPublic: false };
