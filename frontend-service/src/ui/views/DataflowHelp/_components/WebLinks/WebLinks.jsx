@@ -5,7 +5,7 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
-import isNull from 'lodash/isNull';
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './WebLinks.module.scss';
@@ -50,10 +50,6 @@ export const WebLinks = ({
       )
       .required(' ')
   });
-
-  if (!isNull(form.current) && !isFormReset) {
-    form.current.resetForm();
-  }
 
   const onHideAddEditDialog = () => {
     setIsAddOrEditWeblinkDialogVisible(false);
@@ -133,14 +129,13 @@ export const WebLinks = ({
   };
 
   useEffect(() => {
-    if (isAddOrEditWeblinkDialogVisible) {
-      console.log('inputRef comienzo', inputRef);
-      if (!isUndefined(inputRef)) {
-        setTimeout(() => {
-          inputRef.current.focus();
-        }, 160);
-      }
+    if (!isNil(form.current)) {
+      form.current.resetForm();
     }
+  }, [form.current]);
+
+  useEffect(() => {
+    if (isAddOrEditWeblinkDialogVisible) inputRef.current.focus();
   }, [isAddOrEditWeblinkDialogVisible]);
 
   const webLinkEditButtons = () => {
@@ -256,70 +251,75 @@ export const WebLinks = ({
         value={webLinks}>
         {!isEmpty(webLinks) ? webLinksColumns : emptyWebLinkColumns}
       </DataTable>
-      <Dialog
-        className={styles.dialog}
-        blockScroll={false}
-        contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
-        header={
-          isUndefined(weblinkItem.id) ? resources.messages['createNewWebLink'] : resources.messages['editWebLink']
-        }
-        modal={true}
-        onHide={() => onHideAddEditDialog()}
-        style={{ width: '50%', height: '80%' }}
-        visible={isAddOrEditWeblinkDialogVisible}>
-        <Formik
-          enableReinitialize={true}
-          ref={form}
-          initialValues={weblinkItem}
-          validationSchema={addWeblinkSchema}
-          onSubmit={e => {
-            onSaveRecord(e);
-          }}>
-          {({ isSubmitting, errors, touched, values }) => (
-            <Form>
-              <fieldset>
-                <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
-                  <Field
-                    autoFocus={true}
-                    innerRef={inputRef}
-                    name="description"
-                    type="text"
-                    placeholder={resources.messages['description']}
-                    value={values.description}
-                  />
-                </div>
-                <div className={`formField${!isEmpty(errors.url) && touched.url ? ' error' : ''}`}>
-                  <Field name="url" type="text" placeholder={resources.messages['url']} value={values.url} />
-                  <ErrorMessage name="url" component="div" />
-                </div>
-              </fieldset>
-              <fieldset>
-                <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
-                  <Button
-                    className={
-                      !isEmpty(touched)
-                        ? isEmpty(errors)
-                          ? styles.primaryButton
+      {isAddOrEditWeblinkDialogVisible && (
+        <Dialog
+          className={styles.dialog}
+          blockScroll={false}
+          contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
+          header={
+            isUndefined(weblinkItem.id) ? resources.messages['createNewWebLink'] : resources.messages['editWebLink']
+          }
+          modal={true}
+          onHide={() => onHideAddEditDialog()}
+          style={{ width: '50%', height: '80%' }}
+          visible={isAddOrEditWeblinkDialogVisible}>
+          <Formik
+            enableReinitialize={true}
+            ref={form}
+            // initialValues={weblinkItem}
+            validationSchema={addWeblinkSchema}
+            onSubmit={e => {
+              onSaveRecord(e);
+            }}>
+            {({ isSubmitting, errors, touched, values }) => (
+              <Form>
+                <fieldset>
+                  {console.log('errors', errors)}
+                  {console.log('isAddOrEditWeblinkDialogVisible', isAddOrEditWeblinkDialogVisible)}
+
+                  <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
+                    <Field
+                      autoFocus={true}
+                      innerRef={inputRef}
+                      name="description"
+                      type="text"
+                      placeholder={resources.messages['description']}
+                      value={values.description}
+                    />
+                  </div>
+                  <div className={`formField${!isEmpty(errors.url) && touched.url ? ' error' : ''}`}>
+                    <Field name="url" type="text" placeholder={resources.messages['url']} value={values.url} />
+                    <ErrorMessage name="url" component="div" />
+                  </div>
+                </fieldset>
+                <fieldset>
+                  <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
+                    <Button
+                      className={
+                        !isEmpty(touched)
+                          ? isEmpty(errors)
+                            ? styles.primaryButton
+                            : styles.disabledButton
                           : styles.disabledButton
-                        : styles.disabledButton
-                    }
-                    label={isUndefined(weblinkItem.id) ? resources.messages['add'] : resources.messages['edit']}
-                    disabled={isSubmitting}
-                    icon={isUndefined(weblinkItem.id) ? 'add' : 'edit'}
-                    type={isSubmitting ? '' : 'submit'}
-                  />
-                  <Button
-                    className={`${styles.cancelButton} p-button-secondary`}
-                    label={resources.messages['cancel']}
-                    icon="cancel"
-                    onClick={() => onHideAddEditDialog()}
-                  />
-                </div>
-              </fieldset>
-            </Form>
-          )}
-        </Formik>
-      </Dialog>
+                      }
+                      label={isUndefined(weblinkItem.id) ? resources.messages['add'] : resources.messages['edit']}
+                      disabled={isSubmitting}
+                      icon={isUndefined(weblinkItem.id) ? 'add' : 'edit'}
+                      type={isSubmitting ? '' : 'submit'}
+                    />
+                    <Button
+                      className={`${styles.cancelButton} p-button-secondary`}
+                      label={resources.messages['cancel']}
+                      icon="cancel"
+                      onClick={() => onHideAddEditDialog()}
+                    />
+                  </div>
+                </fieldset>
+              </Form>
+            )}
+          </Formik>
+        </Dialog>
+      )}
 
       <ConfirmDialog
         classNameConfirm={'p-button-danger'}
