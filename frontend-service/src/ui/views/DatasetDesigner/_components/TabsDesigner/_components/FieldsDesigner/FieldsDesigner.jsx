@@ -31,6 +31,7 @@ export const FieldsDesigner = ({
   isPreviewModeOn,
   table
 }) => {
+  const [copyTableData, setCopyTableData] = useState(false);
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState([]);
   const [indexToDelete, setIndexToDelete] = useState();
@@ -53,6 +54,7 @@ export const FieldsDesigner = ({
     if (!isUndefined(table)) {
       setTableDescriptionValue(table.description || '');
       setIsReadOnlyTable(table.readOnly || false);
+      setCopyTableData(table.copyTableData || false);
     }
   }, []);
 
@@ -129,7 +131,15 @@ export const FieldsDesigner = ({
 
   const onChangeIsReadOnly = checked => {
     setIsReadOnlyTable(checked);
-    updateTableDesign(checked);
+    if (checked) {
+      setCopyTableData(checked);
+    }
+    updateTableDesign({ readOnly: checked, copyData: checked });
+  };
+
+  const onChangeCopyTableData = checked => {
+    setCopyTableData(checked);
+    updateTableDesign({ readOnly: isReadOnlyTable, copyData: checked });
   };
 
   const onFieldDragAndDrop = (draggedFieldIdx, droppedFieldName) => {
@@ -387,12 +397,13 @@ export const FieldsDesigner = ({
     </div>
   );
 
-  const updateTableDesign = async readOnly => {
+  const updateTableDesign = async ({ readOnly, copyTableData }) => {
     // if (isUndefined(tableDescriptionValue)) {
     //   return;
     // }
     try {
       const tableUpdated = await DatasetService.updateTableDescriptionDesign(
+        copyTableData,
         table.tableSchemaId,
         tableDescriptionValue,
         readOnly,
@@ -418,7 +429,7 @@ export const FieldsDesigner = ({
           expandableOnClick={true}
           key="tableDescription"
           onChange={e => setTableDescriptionValue(e.target.value)}
-          onBlur={() => updateTableDesign(isReadOnlyTable)}
+          onBlur={() => updateTableDesign({ readOnly: isReadOnlyTable, copyData: copyTableData })}
           onFocus={e => {
             setInitialTableDescription(e.target.value);
           }}
@@ -428,15 +439,28 @@ export const FieldsDesigner = ({
           value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : ''}
         />
         <div className={styles.switchDiv}>
-          <span className={styles.switchTextInput}>{resources.messages['readOnlyTable']}</span>
-          <Checkbox
-            checked={isReadOnlyTable}
-            // className={styles.checkRequired}
-            inputId={`${table.tableId}_check`}
-            label="Default"
-            onChange={e => onChangeIsReadOnly(e.checked)}
-            style={{ width: '70px' }}
-          />
+          <div>
+            <span className={styles.switchTextInput}>{resources.messages['readOnlyTable']}</span>
+            <Checkbox
+              checked={isReadOnlyTable}
+              // className={styles.checkRequired}
+              inputId={`${table.tableId}_check`}
+              label="Default"
+              onChange={e => onChangeIsReadOnly(e.checked)}
+              style={{ width: '70px' }}
+            />
+          </div>
+          <div>
+            <span className={styles.switchTextInput}>{resources.messages['copyDataToReporting']}</span>
+            <Checkbox
+              checked={copyTableData}
+              // className={styles.checkRequired}
+              inputId={`${table.tableId}_check`}
+              label="Default"
+              onChange={e => onChangeCopyTableData(e.checked)}
+              style={{ width: '70px' }}
+            />
+          </div>
         </div>
       </div>
       {!isPreviewModeOn && (

@@ -283,6 +283,9 @@ const schemaById = async datasetId => {
       hasPKReferenced: !isEmpty(
         records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
       ),
+      tableSchemaCopyTableData: isNull(datasetTableDTO.tableSchemaCopyTableData)
+        ? false
+        : datasetTableDTO.tableSchemaCopyTableData,
       tableSchemaId: datasetTableDTO.idTableSchema,
       tableSchemaDescription: datasetTableDTO.description,
       tableSchemaName: datasetTableDTO.nameTableSchema,
@@ -501,12 +504,14 @@ const updateSchemaNameById = async (datasetId, datasetSchemaName) =>
   await apiDataset.updateSchemaNameById(datasetId, datasetSchemaName);
 
 const updateTableDescriptionDesign = async (
+  tableSchemaCopyTableData,
   tableSchemaId,
   tableSchemaDescription,
   tableSchemaIsReadOnly,
   datasetId
 ) => {
   const tableSchemaUpdated = await apiDataset.updateTableDescriptionDesign(
+    tableSchemaCopyTableData,
     tableSchemaId,
     tableSchemaDescription,
     tableSchemaIsReadOnly,

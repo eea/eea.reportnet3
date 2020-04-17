@@ -8,6 +8,7 @@ export class DatasetTable {
     recordsWithWarningsPercentage,
     recordsWithoutErrorsPercentage,
     tableSchemaDescription,
+    tableSchemaCopyTableData,
     tableSchemaId,
     tableSchemaName,
     tableSchemaReadOnly,
@@ -21,6 +22,7 @@ export class DatasetTable {
     this.recordsWithErrorsPercentage = recordsWithErrorsPercentage;
     this.recordsWithWarningsPercentage = recordsWithWarningsPercentage;
     this.tableSchemaDescription = tableSchemaDescription;
+    this.tableSchemaCopyTableData = tableSchemaCopyTableData;
     this.tableSchemaId = tableSchemaId;
     this.tableSchemaName = tableSchemaName;
     this.tableSchemaReadOnly = tableSchemaReadOnly;

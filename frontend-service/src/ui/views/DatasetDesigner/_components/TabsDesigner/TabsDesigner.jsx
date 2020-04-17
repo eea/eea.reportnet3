@@ -121,6 +121,7 @@ export const TabsDesigner = withRouter(
 
         inmDatasetSchema.tables.forEach((table, idx) => {
           table.addTab = false;
+          table.copyTableData = table.tableSchemaCopyTableData;
           table.description = table.tableSchemaDescription;
           table.editable = editable;
           table.hasErrors = true;

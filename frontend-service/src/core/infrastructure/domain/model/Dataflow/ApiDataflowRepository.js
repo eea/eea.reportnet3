@@ -281,6 +281,7 @@ const getAllSchemas = async dataflowId => {
         hasPKReferenced: !isEmpty(
           records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
         ),
+        tableSchemaCopyTableData: datasetTableDTO.tableSchemaCopyTableData,
         tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaDescription: datasetTableDTO.description,
         tableSchemaName: datasetTableDTO.nameTableSchema,
