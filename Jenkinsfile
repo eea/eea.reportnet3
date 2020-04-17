@@ -179,6 +179,7 @@ pipeline {
                      env.INDEXSEARCH_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=indexsearch.version -q -DforceStdout', returnStdout: true
                      env.UMS_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=ums.version -q -DforceStdout', returnStdout: true
                      env.FRONTEND_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=frontend.version -q -DforceStdout', returnStdout: true
+                     env.ROD_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=rod.version -q -DforceStdout', returnStdout: true
 
                   }
                 }
@@ -263,6 +264,12 @@ pipeline {
                             echo 'User Management Service'
                             def app
                             app = docker.build("k8s-swi001:5000/user-management-service:" + env.UMS_VERSION + env.TAG_SUFIX, "--build-arg JAR_FILE=target/user-management-service-" + env.UMS_VERSION + ".jar --build-arg MS_PORT=9010 -f ./Dockerfile ./user-management-service")
+                            app.push()
+                        }
+                        script {
+                            echo 'ROD Service'
+                            def app
+                            app = docker.build("k8s-swi001:5000/rod-service:" + env.ROD_VERSION + env.TAG_SUFIX, "--build-arg JAR_FILE=target/rod-service-" + env.ROD_VERSION + ".jar --build-arg MS_PORT=9050 -f ./Dockerfile ./rod-service")
                             app.push()
                         }
 
