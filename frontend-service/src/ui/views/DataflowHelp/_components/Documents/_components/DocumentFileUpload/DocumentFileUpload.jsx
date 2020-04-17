@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useRef } from 'react';
 
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
@@ -33,7 +33,18 @@ const DocumentFileUpload = ({
   const resources = useContext(ResourcesContext);
 
   const form = useRef(null);
-  const inputRef = useRef();
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (!isNil(form.current)) {
+      form.current.resetForm();
+      document.querySelector('.uploadFile').value = '';
+    }
+  }, [form.current]);
+
+  useEffect(() => {
+    if (isUploadDialogVisible) inputRef.current.focus();
+  }, [isUploadDialogVisible]);
 
   const validationSchema = Yup.object().shape({
     description: Yup.string().required(),
@@ -57,17 +68,6 @@ const DocumentFileUpload = ({
           })
   });
 
-  useEffect(() => {
-    if (!isNil(form.current)) {
-      form.current.resetForm();
-      document.querySelector('.uploadFile').value = '';
-    }
-  }, [form.current]);
-
-  useEffect(() => {
-    if (isUploadDialogVisible) inputRef.current.focus();
-  }, [isUploadDialogVisible]);
-
   const buildInitialValue = documentInitialValues => {
     let initialValues = { description: '', lang: '', uploadFile: {}, isPublic: false };
     if (isEditForm) {
@@ -84,16 +84,14 @@ const DocumentFileUpload = ({
 
   const initialValuesWithLangField = buildInitialValue(documentInitialValues);
 
-  const IsPublicCheckbox = ({ field, type, checked }) => {
-    return (
-      <>
-        <input id="isPublic" {...field} type={type} checked={checked} />
-        <label htmlFor="isPublic" style={{ display: 'block' }}>
-          {resources.messages['documentUploadCheckboxIsPublic']}
-        </label>
-      </>
-    );
-  };
+  const IsPublicCheckbox = ({ checked, field, type }) => (
+    <Fragment>
+      <input id="isPublic" {...field} type={type} checked={checked} />
+      <label htmlFor="isPublic" style={{ display: 'block' }}>
+        {resources.messages['documentUploadCheckboxIsPublic']}
+      </label>
+    </Fragment>
+  );
 
   return (
     <Formik
@@ -148,7 +146,7 @@ const DocumentFileUpload = ({
           setIsUploadDialogVisible(false);
         }
       }}>
-      {({ isSubmitting, setFieldValue, errors, touched, values }) => (
+      {({ errors, isSubmitting, setFieldValue, touched, values }) => (
         <Form>
           <fieldset>
             <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
