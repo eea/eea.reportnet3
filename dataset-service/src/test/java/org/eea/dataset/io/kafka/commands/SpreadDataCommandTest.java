@@ -116,7 +116,7 @@ public class SpreadDataCommandTest {
    * Execute test no desing.
    */
   @Test
-  public void executeTestNoDesing() {
+  public void executeTestToPrefill() {
     eeaEventVO.setData(result);
     eeaEventVO.setEventType(EventType.SPREAD_DATA_EVENT);
     DesignDataset desingDataset = new DesignDataset();
@@ -126,6 +126,7 @@ public class SpreadDataCommandTest {
     when(designDatasetRepository.findByDataflowId(Mockito.anyLong())).thenReturn(desingDatasetList);
     DataSetSchema schema = new DataSetSchema();
     TableSchema desingTableSchema = new TableSchema();
+    desingTableSchema.setToPrefill(Boolean.TRUE);
     desingTableSchema.setIdTableSchema(new ObjectId());
     List<TableSchema> desingTableSchemas = new ArrayList<>();
     desingTableSchemas.add(desingTableSchema);
@@ -141,6 +142,27 @@ public class SpreadDataCommandTest {
     when(fieldRepository.findByRecord(Mockito.any())).thenReturn(fieldValues);
     spreadDataCommand.execute(eeaEventVO);
     Mockito.verify(designDatasetRepository, times(1)).findByDataflowId(Mockito.anyLong());
+  }
+
+
+  @Test
+  public void executeTestNotToPrefill() {
+    eeaEventVO.setData(result);
+    eeaEventVO.setEventType(EventType.SPREAD_DATA_EVENT);
+    DesignDataset desingDataset = new DesignDataset();
+    desingDataset.setId(2L);
+    List<DesignDataset> desingDatasetList = new ArrayList<>();
+    desingDatasetList.add(desingDataset);
+    when(designDatasetRepository.findByDataflowId(Mockito.anyLong())).thenReturn(desingDatasetList);
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema desingTableSchema = new TableSchema();
+    desingTableSchema.setToPrefill(Boolean.FALSE);
+    desingTableSchema.setIdTableSchema(new ObjectId());
+    List<TableSchema> desingTableSchemas = new ArrayList<>();
+    desingTableSchemas.add(desingTableSchema);
+    schema.setTableSchemas(desingTableSchemas);
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    spreadDataCommand.execute(eeaEventVO);
   }
 
 

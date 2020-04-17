@@ -103,47 +103,54 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
       // get tables from schema
       DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
       List<TableSchema> listOfTables = schema.getTableSchemas();
-
-
-      // get the data from designs datasets
-      TenantResolver.setTenantName(String.format(DATASET_ID, design.getId().toString()));
-      List<RecordValue> recordDesignValues = new ArrayList<>();
-
-      for (TableSchema desingTable : listOfTables) {
-        recordDesignValues.addAll(
-            recordRepository.findByTableValueAllRecords(desingTable.getIdTableSchema().toString()));
-
-      }
-      List<RecordValue> recordDesignValuesList = new ArrayList<>();
-
-      // fill the data
-      DatasetValue ds = new DatasetValue();
-      ds.setId(dataset);
-
-      for (RecordValue record : recordDesignValues) {
-        RecordValue recordAux = new RecordValue();
-        recordAux.setTableValue(record.getTableValue());
-
-        recordAux.setDatasetPartitionId(dataset);
-        List<FieldValue> fieldValues = fieldRepository.findByRecord(record);
-        List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
-        for (FieldValue field : fieldValues) {
-          FieldValue auxField = new FieldValue();
-          auxField.setValue(field.getValue());
-          auxField.setIdFieldSchema(field.getIdFieldSchema());
-          auxField.setType(field.getType());
-          auxField.setRecord(recordAux);
-          fieldValuesOnlyValues.add(auxField);
+      List<TableSchema> listOfTablesFiltered = new ArrayList<>();
+      for (TableSchema desingTableToPrefill : listOfTables) {
+        if (Boolean.TRUE.equals(desingTableToPrefill.getToPrefill())) {
+          listOfTablesFiltered.add(desingTableToPrefill);
         }
-        recordAux.setFields(fieldValuesOnlyValues);
-        recordDesignValuesList.add(recordAux);
       }
-      if (!recordDesignValuesList.isEmpty()) {
-        // save values
-        TenantResolver.setTenantName(String.format(DATASET_ID, dataset));
-        recordRepository.saveAll(recordDesignValuesList);
+      // get the data from designs datasets
+      if (!listOfTablesFiltered.isEmpty()) {
+
+        TenantResolver.setTenantName(String.format(DATASET_ID, design.getId().toString()));
+        List<RecordValue> recordDesignValues = new ArrayList<>();
+
+        for (TableSchema desingTable : listOfTablesFiltered) {
+
+          recordDesignValues.addAll(recordRepository
+              .findByTableValueAllRecords(desingTable.getIdTableSchema().toString()));
+
+        }
+        List<RecordValue> recordDesignValuesList = new ArrayList<>();
+
+        // fill the data
+        DatasetValue ds = new DatasetValue();
+        ds.setId(dataset);
+
+        for (RecordValue record : recordDesignValues) {
+          RecordValue recordAux = new RecordValue();
+          recordAux.setTableValue(record.getTableValue());
+
+          recordAux.setDatasetPartitionId(dataset);
+          List<FieldValue> fieldValues = fieldRepository.findByRecord(record);
+          List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
+          for (FieldValue field : fieldValues) {
+            FieldValue auxField = new FieldValue();
+            auxField.setValue(field.getValue());
+            auxField.setIdFieldSchema(field.getIdFieldSchema());
+            auxField.setType(field.getType());
+            auxField.setRecord(recordAux);
+            fieldValuesOnlyValues.add(auxField);
+          }
+          recordAux.setFields(fieldValuesOnlyValues);
+          recordDesignValuesList.add(recordAux);
+        }
+        if (!recordDesignValuesList.isEmpty()) {
+          // save values
+          TenantResolver.setTenantName(String.format(DATASET_ID, dataset));
+          recordRepository.saveAll(recordDesignValuesList);
+        }
       }
     }
   }
-
 }
