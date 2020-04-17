@@ -116,7 +116,7 @@
     "datasetSchemas": "Dataset schemas",
     "date": "Date",
     "dateFormat": "Date Format",
-    "dateFormatWarning": "Note: Only affects visually and not how data is entered",
+    "dateFormatWarning": "Note: Only affects visually and not how data is entered.",
     "deadline": "Deadline",
     "delete": "Delete",
     "deleteCategory": "Delete category",
@@ -590,6 +590,9 @@
     "createFieldConstraintTitle": "Create Field Constraint",
     "editFieldConstraint": "Update Field Constraint",
     "myDataflows": "My dataflows",
-    "enabled": "Enabled"
+    "enabled": "Enabled",
+    "userSettingsThemeSubtitle": "Choose the theme to display in the system.",
+    "userSettingsConfirmSubtitle": "Configure the way to logout with or without a confirmation popup.",
+    "userSettingsRowsPerPageSubtitle": "Configure the number of rows displayed in the pagination."
   }
 }

@@ -5,14 +5,12 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
     case 'CANCEL_SELECT_CODELIST':
       return {
         ...state,
-        fieldTypeValue: payload,
         isCodelistEditorVisible: false,
         isLinkSelectorVisible: false
       };
     case 'CANCEL_SELECT_LINK':
       return {
         ...state,
-        fieldTypeValue: payload,
         isCodelistEditorVisible: false,
         isLinkSelectorVisible: false
       };

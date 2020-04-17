@@ -27,44 +27,23 @@ const ValidationExpression = ({
   const resourcesContext = useContext(ResourcesContext);
   const { expressionId } = expressionValues;
   const [operatorValues, setOperatorValues] = useState([]);
-  const [isNumber, setIsNumber] = useState(false);
-  const [inputOptions, setInputOptions] = useState();
-  const operatorTypes = config.validations.operatorTypes;
+  const [operatorTypes, setOperatorTypes] = useState([]);
+  const {
+    validations: { operatorTypes: operatorTypesConf }
+  } = config;
   useEffect(() => {
     if (expressionValues.operatorType) {
-      setOperatorValues(operatorTypes[expressionValues.operatorType].values);
+      setOperatorValues(operatorTypesConf[expressionValues.operatorType].values);
     }
   }, [expressionValues.operatorType]);
 
   useEffect(() => {
-    const { operatorType, expressionValue } = expressionValues;
-    const inputOptions = {
-      keyfilter: ''
-    };
-    if (operatorType == 'number' || operatorType == 'LEN') {
-      inputOptions.keyfilter = 'num';
-      if (!Number(expressionValue)) {
-        onExpressionFieldUpdate(expressionId, {
-          key: 'expressionValue',
-          value: { value: '' }
-        });
-      }
-    }
-  }, [expressionValues.operatorType, expressionValues.expressionValue]);
-
-  useEffect(() => {
-    const inputOptions = {};
-    if (isNumber) {
-    }
-  }, [expressionValues.operatorType, isNumber]);
-
-  const getOperatorTypeOptions = () => {
     const options = [];
-    for (const type in operatorTypes) {
-      options.push(operatorTypes[type].option);
+    for (let type in operatorTypesConf) {
+      options.push(operatorTypesConf[type].option);
     }
-    return options;
-  };
+    setOperatorTypes(options);
+  }, []);
 
   // layouts
   const defaultLayout = (
@@ -98,14 +77,14 @@ const ValidationExpression = ({
           appendTo={document.body}
           placeholder={resourcesContext.messages.operatorType}
           optionLabel="label"
-          options={getOperatorTypeOptions()}
+          options={operatorTypes}
           onChange={e =>
             onExpressionFieldUpdate(expressionId, {
               key: 'operatorType',
               value: e.target.value
             })
           }
-          value={!isEmpty(expressionValues.operatorType) ? operatorTypes[expressionValues.operatorType].option : null}
+          value={!isEmpty(expressionValues.operatorType) ? operatorTypesConf[expressionValues.operatorType].option : ''}
         />
       </span>
       <span className={styles.operatorValue}>
@@ -124,7 +103,7 @@ const ValidationExpression = ({
           value={
             !isEmpty(expressionValues.operatorValue)
               ? { label: expressionValues.operatorValue, value: expressionValues.operatorValue }
-              : null
+              : ''
           }
         />
       </span>
