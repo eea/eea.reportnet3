@@ -59,7 +59,6 @@ export const BigButtonList = ({
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [isActiveButton, setIsActiveButton] = useState(true);
   const [isDuplicated, setIsDuplicated] = useState(false);
-  const [isFormReset, setIsFormReset] = useState(true);
   const [isUpdateDatacollectionDialogVisible, setIsUpdateDatacollectionDialogVisible] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
   const hasExpirationDate = new Date(dataflowDataState.obligations.expirationDate) > new Date();
@@ -252,7 +251,6 @@ export const BigButtonList = ({
 
   const onShowNewSchemaDialog = () => {
     setNewDatasetDialog(true);
-    setIsFormReset(true);
   };
 
   const onShowDataCollectionModal = () => {
@@ -295,24 +293,22 @@ export const BigButtonList = ({
         </div>
       </div>
 
-      <Dialog
-        header={resources.messages['newDatasetSchema']}
-        visible={newDatasetDialog}
-        className={styles.dialog}
-        dismissableMask={false}
-        onHide={() => {
-          setNewDatasetDialog(false);
-          setIsFormReset(false);
-        }}>
-        <NewDatasetSchemaForm
-          dataflowId={dataflowId}
-          datasetSchemaInfo={updatedDatasetSchema}
-          isFormReset={isFormReset}
-          onCreate={onCreateDatasetSchema}
-          onUpdateData={onUpdateData}
-          setNewDatasetDialog={setNewDatasetDialog}
-        />
-      </Dialog>
+      {newDatasetDialog && (
+        <Dialog
+          className={styles.dialog}
+          dismissableMask={false}
+          header={resources.messages['newDatasetSchema']}
+          onHide={() => setNewDatasetDialog(false)}
+          visible={newDatasetDialog}>
+          <NewDatasetSchemaForm
+            dataflowId={dataflowId}
+            datasetSchemaInfo={updatedDatasetSchema}
+            onCreate={onCreateDatasetSchema}
+            onUpdateData={onUpdateData}
+            setNewDatasetDialog={setNewDatasetDialog}
+          />
+        </Dialog>
+      )}
 
       <Dialog
         footer={errorDialogFooter}
