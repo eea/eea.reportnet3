@@ -283,7 +283,7 @@ pipeline {
                         script {
                             echo 'ReportNet 3.0 Frontend'
                             def app
-                            app = docker.build("k8s-swi001:5000/reportnet-frontend-service:$FRONTEND_VERSION$TAG_SUFIX", " ./frontend-service/")
+                            app = docker.build("k8s-swi001:5000/reportnet-frontend-service:" +env.$FRONTEND_VERSION + env.$TAG_SUFIX, " ./frontend-service/")
                             app.push()                    
                         }
                     }

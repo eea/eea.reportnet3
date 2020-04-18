@@ -7,14 +7,15 @@
     <groupId>org.eea</groupId>
     <version>3.0.0</version>
     <relativePath>../parent-poms/microservice</relativePath>
+
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <properties>
     <sonar.moduleKey>org.eea:reportnet:indexsearch-service:${sonar.jenkins.branch}</sonar.moduleKey>
   </properties>
-  <groupId>org.eea.indexsearc</groupId>
+  <groupId>org.eea.indexsearch</groupId>
   <artifactId>indexsearch-service</artifactId>
-  <version>${inspire.version}</version>
+  <version>${indexsearch.version}</version>
   <dependencies>
 
     <dependency>
