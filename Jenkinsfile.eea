@@ -145,7 +145,7 @@ pipeline {
                 }
                  script {
                     def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
-                    image = docker.build("eeacms/rod-service:" + env.ROD_VERSION, "--build-arg JAR_FILE=rod-service/target/rod-service-" + env.ROD_VERSION + ".jar  --build-arg MS_PORT=9050 ." ./rod-service/")
+                    image = docker.build("eeacms/rod-service:" + env.ROD_VERSION, "--build-arg JAR_FILE=rod-service/target/rod-service-" + env.ROD_VERSION + ".jar  --build-arg MS_PORT=9050 .")
                     docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
                         image.push()
                         image.push(date)
