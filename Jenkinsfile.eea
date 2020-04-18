@@ -28,7 +28,7 @@ pipeline {
                     agent { node { label 'eea'} }
                     steps {
                         sh '''
-                            npm install --cache /tmp/empty-cache frontend-service/
+                            npm install frontend-service/
                         '''
                     }
                 }
