@@ -27,6 +27,7 @@ pipeline {
                 stage('Build Frontend') {
                     agent { node { label 'eea'} }
                     steps {
+                        sh 'rm -rf frontend-service/node_modules/'
                         sh '''
                             npm install frontend-service/
                         '''
