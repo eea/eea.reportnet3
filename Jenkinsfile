@@ -36,6 +36,7 @@ pipeline {
                 }
                 stage('Compile NPM') {
                     steps {
+                        sh 'npm cache verify'
                         sh '''
                             npm install frontend-service/
                         '''                                
