@@ -27,6 +27,7 @@ pipeline {
                 stage('Build Frontend') {
                     agent { node { label 'eea'} }
                     steps {
+                        sh 'npm cache verify'
                         sh '''
                             npm install frontend-service/
                         '''
