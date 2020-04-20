@@ -2,6 +2,7 @@ package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -33,6 +34,8 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Assert;
@@ -44,6 +47,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 
 /**
@@ -156,6 +161,44 @@ public class DatasetMetabaseServiceTest {
     Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any());
 
+  }
+
+  /**
+   * Creates the empty dataset exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createEmptyDatasetExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(kafkaSenderUtils).releaseNotificableKafkaEvent(
+        EventType.ADD_DATACOLLECTION_COMPLETED_EVENT, null, NotificationVO.builder()
+            .user((String) ThreadPropertiesManager.getVariable("user")).dataflowId(1L).build());
+    RepresentativeVO representative = new RepresentativeVO();
+    representative.setDataProviderId(1L);
+    representative.setProviderAccount("test@reportnet.net");
+    try {
+      datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.REPORTING, "datasetName",
+          (new ObjectId()).toString(), 1L, null, new ArrayList<>(), 0);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the empty dataset exception null test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void createEmptyDatasetExceptionNullTest() throws EEAException {
+    try {
+      datasetMetabaseService.createEmptyDataset(null, "datasetName", (new ObjectId()).toString(),
+          1L, null, new ArrayList<>(), 0);
+    } catch (EEAException e) {
+      assertEquals("createEmptyDataset: Bad arguments", e.getMessage());
+      throw e;
+    }
   }
 
   /**

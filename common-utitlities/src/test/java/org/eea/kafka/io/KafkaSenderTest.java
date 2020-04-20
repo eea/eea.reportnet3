@@ -1,7 +1,5 @@
 package org.eea.kafka.io;
 
-import static org.mockito.Mockito.times;
-
 import java.io.IOException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -13,8 +11,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.kafka.core.KafkaOperations;
-import org.springframework.kafka.core.KafkaOperations.OperationsCallback;
 import org.springframework.kafka.core.KafkaTemplate;
 
 /**
@@ -59,6 +55,13 @@ public class KafkaSenderTest {
     Mockito.when(kafkaTemplate.executeInTransaction(Mockito.any())).thenReturn(true);
     kafkaSender.sendMessage(event);
     Mockito.verify(kafkaTemplate, Mockito.times(1)).executeInTransaction(Mockito.any());
+  }
+
+  @Test
+  public void sendMessage() {
+    EEAEventVO event = new EEAEventVO();
+    event.setEventType(EventType.LOAD_DATA_COMPLETED_EVENT);
+    kafkaSender.sendMessage(event);
   }
 
 }
