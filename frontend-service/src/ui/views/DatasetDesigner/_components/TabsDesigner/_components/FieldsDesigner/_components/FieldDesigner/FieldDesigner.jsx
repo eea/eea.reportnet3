@@ -262,12 +262,12 @@ export const FieldDesigner = ({
 
   const onCancelSaveLink = () => {
     // onCodelistAndLinkShow(fieldId, { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' });
-    dispatchFieldDesigner({ type: 'CANCEL_SELECT_LINK', payload: fieldDesignerState.fieldPreviousTypeValue });
+    dispatchFieldDesigner({ type: 'CANCEL_SELECT_LINK' });
   };
 
   const onCancelSaveCodelist = () => {
     // onCodelistAndLinkShow(fieldId, { fieldType: 'Codelist', value: 'Codelist', fieldTypeIcon: 'list' });
-    dispatchFieldDesigner({ type: 'CANCEL_SELECT_CODELIST', payload: fieldDesignerState.fieldPreviousTypeValue });
+    dispatchFieldDesigner({ type: 'CANCEL_SELECT_CODELIST' });
   };
 
   const onCodelistDropdownSelected = fieldType => {

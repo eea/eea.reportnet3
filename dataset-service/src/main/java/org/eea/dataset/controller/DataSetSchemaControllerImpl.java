@@ -87,7 +87,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DataSetSchemaControllerImpl.class);
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
@@ -102,11 +104,15 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
-  /** The rules controller zuul. */
+  /**
+   * The rules controller zuul.
+   */
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
 
-  /** The design dataset service. */
+  /**
+   * The design dataset service.
+   */
   @Autowired
   private DesignDatasetService designDatasetService;
 
@@ -229,7 +235,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     // Check if the dataflow has any PK being referenced by an FK. If so, denies the delete
     // If forceDelete = true, skip this check. Made specially for deleting an entire dataflow
     if ((forceDelete == null || !forceDelete)
-        && !dataschemaService.isSchemaForDeletionAllowed(schemaId)) {
+        && !dataschemaService.isSchemaAllowedForDeletion(schemaId)) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, EEAErrorMessage.PK_REFERENCED);
     }
 
@@ -415,7 +421,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       // Add the register into the metabase fieldRelations
       dataschemaService.addForeignRelation(datasetId, fieldSchemaVO);
 
-
       return (response);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
@@ -567,6 +572,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Validate schema.
    *
    * @param datasetSchemaId the dataset schema id
+   *
    * @return the boolean
    */
   @Override
@@ -580,6 +586,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Validate schemas.
    *
    * @param dataflowId the dataflow id
+   *
    * @return the boolean
    */
   @Override
@@ -599,11 +606,11 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   }
 
 
-
   /**
    * Find data schemas by id dataflow.
    *
    * @param idDataflow the id dataflow
+   *
    * @return the list
    */
   @Override

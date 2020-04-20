@@ -1,8 +1,9 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 
-import isNil from 'lodash/isNil';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import isNil from 'lodash/isNil';
+import moment from 'moment';
 
 import styles from './DataflowsItem.module.scss';
 
@@ -18,8 +19,6 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
-
-import moment from 'moment';
 
 const DataflowsItem = ({ dataFetch, itemContent, type }) => {
   const resources = useContext(ResourcesContext);

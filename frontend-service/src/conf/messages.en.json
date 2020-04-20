@@ -116,7 +116,7 @@
     "datasetSchemas": "Dataset schemas",
     "date": "Date",
     "dateFormat": "Date Format",
-    "dateFormatWarning": "Note: Only affects visually and not how data is entered",
+    "dateFormatWarning": "Note: Only affects visually and not how data is entered.",
     "deadline": "Deadline",
     "delete": "Delete",
     "deleteCategory": "Delete category",
@@ -521,7 +521,7 @@
     "legalInstrument": "Legal instrument",
     "dueDate": "Expiration date",
     "searchAllLabel": "Search",
-    "update": "update",
+    "update": "Update",
     "designSchemaTabNoFields": "No fields yet",
     "reportingObligations": "Reporting Obligations",
     "noObligationsWithSelectedParameters": "There are no obligations with the selected parameters",
@@ -585,7 +585,14 @@
     "getConfigurationUserServiceError": "Error loading user preferences.",
     "updateAttributesUserServiceError": "Error updating user preferences.",
     "theme": "Theme",
-    "dateFormatSubtitle": "Select the desired date format to visualice.",
-    "myDataflows": "My dataflows"
+    "dateFormatSubtitle": "Select the desired date format to visualize.",
+    "qcRuleUpdatingError": "Error udpating the rule, please check it",
+    "createFieldConstraintTitle": "Create Field Constraint",
+    "editFieldConstraint": "Update Field Constraint",
+    "myDataflows": "My dataflows",
+    "enabled": "Enabled",
+    "userSettingsThemeSubtitle": "Choose the theme to display in the system.",
+    "userSettingsConfirmSubtitle": "Configure the way to logout with or without a confirmation popup.",
+    "userSettingsRowsPerPageSubtitle": "Configure the number of rows displayed in the pagination."
   }
 }

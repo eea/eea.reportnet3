@@ -66,11 +66,13 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       setIsLoading(true);
       const validationsServiceList = await ValidationService.getAll(datasetSchemaId);
 
-      validationsServiceList.validations.forEach(validation => {
-        const aditionalInfo = getAditionalValidationInfo(validation.referenceId);
-        validation.table = aditionalInfo.tableName;
-        validation.field = aditionalInfo.fieldName;
-      });
+      if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
+        validationsServiceList.validations.forEach(validation => {
+          const aditionalInfo = getAditionalValidationInfo(validation.referenceId);
+          validation.table = aditionalInfo.tableName;
+          validation.field = aditionalInfo.fieldName;
+        });
+      }
 
       setValidationsList(validationsServiceList);
     } catch (error) {
@@ -115,7 +117,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
           record.fields.forEach(field => {
             if (!isNil(field)) {
               if (field.fieldId === referenceId) {
-                aditionalInfo.tableName = table.tableSchemaName;
+                aditionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
                 aditionalInfo.fieldName = field.name;
               }
             }
@@ -143,11 +145,11 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   const getOrderedValidations = validations => {
     const validationsWithPriority = [
       { id: 'id', index: 0 },
-      { id: 'shortCode', index: 1 },
-      { id: 'name', index: 2 },
-      { id: 'description', index: 3 },
-      { id: 'table', index: 4 },
-      { id: 'field', index: 5 },
+      { id: 'table', index: 1 },
+      { id: 'field', index: 2 },
+      { id: 'shortCode', index: 3 },
+      { id: 'name', index: 4 },
+      { id: 'description', index: 5 },
       { id: 'levelError', index: 6 },
       { id: 'enabled', index: 7 },
       { id: 'automatic', index: 8 },
