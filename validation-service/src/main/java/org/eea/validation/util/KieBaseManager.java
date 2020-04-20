@@ -10,7 +10,6 @@ import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.drools.template.ObjectDataCompiler;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
@@ -66,30 +65,28 @@ public class KieBaseManager {
    * Reload rules.
    *
    * @param datasetId the dataset id
-   * @param datasetSchema the dataset schema
+   * @param datasetSchemaId the dataset schema
    *
    * @return the kie base
    *
    * @throws FileNotFoundException the file not found exception
    */
-  public KieBase reloadRules(Long datasetId, String datasetSchema) throws FileNotFoundException {
-    DataSetMetabaseVO dataSetMetabaseVO =
-        datasetMetabaseController.findDatasetMetabaseById(datasetId);
+  public KieBase reloadRules(Long datasetId, String datasetSchemaId) throws FileNotFoundException {
 
-    // we take all actives kiebase
-    RulesSchema schemaRules =
-        rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchema), true);
-
+    ObjectId datasetSchemaOId = new ObjectId(datasetSchemaId);
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
     ObjectDataCompiler compiler = new ObjectDataCompiler();
     KieServices kieServices = KieServices.Factory.get();
 
+    // Get enabled and verified rules
+    RulesSchema schemaRules = rulesRepository.getActiveAndVerifiedRules(datasetSchemaOId);
+
     // we bring the datasetschema
-    DataSetSchema dataSetSchema =
-        schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchema));
+    DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(datasetSchemaOId);
 
     // here we have the mothod who compose the field in template
-    if (null != schemaRules.getRules() && !schemaRules.getRules().isEmpty()) {
+    if (null != schemaRules && null != schemaRules.getRules()
+        && !schemaRules.getRules().isEmpty()) {
       schemaRules.getRules().stream().forEach(rule -> {
         String schemasDrools = "";
         String originName = "";
@@ -99,7 +96,8 @@ public class KieBaseManager {
           case DATASET:
             schemasDrools = SchemasDrools.ID_DATASET_SCHEMA.getValue();
             typeValidation = TypeValidation.DATASET;
-            originName = dataSetMetabaseVO.getDataSetName();
+            originName =
+                datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataSetName();
             break;
           case TABLE:
             schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
@@ -134,8 +132,8 @@ public class KieBaseManager {
             // if the type is field and isnt automatic we create the rules to validate check if
             // the
             // data are correct
-            Document documentField =
-                schemasRepository.findFieldSchema(datasetSchema, rule.getReferenceId().toString());
+            Document documentField = schemasRepository.findFieldSchema(datasetSchemaId,
+                rule.getReferenceId().toString());
             DataType datatype = DataType.valueOf(documentField.get("typeData").toString());
 
             // that switch clear the validations , and check if the datas in values are correct
@@ -268,14 +266,11 @@ public class KieBaseManager {
     // We create the same text like in kiebase and with that part we check if the rule is correct
     KieHelper kieHelperTest = kiebaseAssemble(compiler, kieServices, ruleAttribute);
 
+    // Check rule integrity
     Results results = kieHelperTest.verify();
-    // if one rule is not correct we return a false and the rule
-    // will not be created
-    if (results.hasMessages(Message.Level.ERROR)) {
-      rule.setEnabled(Boolean.FALSE);
-      rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
 
-    }
+    rule.setVerified(!results.hasMessages(Message.Level.ERROR));
+    rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
   }
 
   /**

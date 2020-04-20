@@ -268,4 +268,35 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     Query query = new Query(new Criteria("idDatasetSchema").is(datasetSchemaId));
     return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
   }
+
+  /**
+   * Gets the active and verified rules.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the active and verified rules
+   */
+  @Override
+  @CheckForNull
+  public RulesSchema getActiveAndVerifiedRules(ObjectId datasetSchemaId) {
+    List<RulesSchema> result;
+
+    Document enabled = new Document("$eq", Arrays.asList("$$rule.enabled", true));
+    Document verified = new Document("$eq", Arrays.asList("$$rule.verified", true));
+    Document filterExpression = new Document();
+    filterExpression.append("input", "$rules");
+    filterExpression.append("as", "rule");
+    filterExpression.append("cond", new Document("$and", Arrays.asList(enabled, verified)));
+    Document filter = new Document("$filter", filterExpression);
+    result =
+        mongoTemplate
+            .aggregate(
+                Aggregation.newAggregation(
+                    Aggregation.match(Criteria.where("idDatasetSchema").is(datasetSchemaId)),
+                    Aggregation.project("idDatasetSchema")
+                        .and(aggregationOperationContext -> filter).as("rules")),
+                RulesSchema.class, RulesSchema.class)
+            .getMappedResults();
+
+    return result.isEmpty() ? null : result.get(0);
+  }
 }

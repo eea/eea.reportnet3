@@ -181,8 +181,6 @@ public class RulesServiceImpl implements RulesService {
         new ObjectId(referenceFieldSchemaPKId));
   }
 
-
-
   /**
    * Validate rule.
    *
@@ -240,6 +238,8 @@ public class RulesServiceImpl implements RulesService {
     rule.setType(EntityTypeEnum.FIELD);
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
+    rule.setVerified(false);
+
     validateRule(rule);
 
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
@@ -396,6 +396,7 @@ public class RulesServiceImpl implements RulesService {
     rule.setType(EntityTypeEnum.FIELD);
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
+    rule.setVerified(false);
 
     validateRule(rule);
 
