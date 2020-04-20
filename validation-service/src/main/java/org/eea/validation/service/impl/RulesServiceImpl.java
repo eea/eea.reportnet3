@@ -246,7 +246,7 @@ public class RulesServiceImpl implements RulesService {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     }
 
-    // test if the rule is well defined, otherwise it is created but disabled
+    // Check if rule is valid
     kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
   }
 
@@ -403,7 +403,8 @@ public class RulesServiceImpl implements RulesService {
     if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_UPDATING_RULE);
     }
-    // test if the rule is well defined, otherwise it is created but disabled
+
+    // Check if rule is valid
     kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
   }
 
