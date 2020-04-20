@@ -804,4 +804,32 @@ public class DataSetControllerImplTest {
     Mockito.when(datasetService.getDatasetType(Mockito.any())).thenReturn(DatasetTypeEnum.DESIGN);
     Assert.assertEquals(DatasetTypeEnum.DESIGN, dataSetControllerImpl.getDatasetType(1L));
   }
+
+  /**
+   * Gets the field values referenced.
+   *
+   * @return the field values referenced
+   */
+  @Test
+  public void getFieldValuesReferencedTest() {
+    List<FieldVO> fields = new ArrayList<>();
+    fields.add(new FieldVO());
+    Mockito
+        .when(datasetService.getFieldValuesReferenced(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(fields);
+    assertEquals("error", fields, dataSetControllerImpl.getFieldValuesReferenced(1L, "", ""));
+  }
+
+  /**
+   * Gets the referenced dataset id.
+   *
+   * @return the referenced dataset id
+   */
+  @Test
+  public void getReferencedDatasetId() {
+    Mockito.when(datasetService.getReferencedDatasetId(Mockito.any(), Mockito.any()))
+        .thenReturn(1L);
+    assertEquals("error", Long.valueOf(1L), dataSetControllerImpl.getReferencedDatasetId(1L, ""));
+  }
+
 }
