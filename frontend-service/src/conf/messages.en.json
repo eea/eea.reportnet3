@@ -595,6 +595,7 @@
     "userSettingsConfirmSubtitle": "Configure the way to logout with or without a confirmation popup.",
     "userSettingsRowsPerPageSubtitle": "Configure the number of rows displayed in the pagination.",
     "dataCollectionExpirationDate": "Current expiration date is <strong>{:expirationData}</strong>",
-    "loadDataflowDataError": "Error loading dataflow"
+    "loadDataflowDataError": "Error loading dataflow",
+    "fieldConstraintTableFieldNoOptions": "No tables yet"
   }
 }
