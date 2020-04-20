@@ -593,6 +593,7 @@
     "enabled": "Enabled",
     "userSettingsThemeSubtitle": "Choose the theme to display in the system.",
     "userSettingsConfirmSubtitle": "Configure the way to logout with or without a confirmation popup.",
-    "userSettingsRowsPerPageSubtitle": "Configure the number of rows displayed in the pagination."
+    "userSettingsRowsPerPageSubtitle": "Configure the number of rows displayed in the pagination.",
+    "fieldConstraintTableFieldNoOptions": "No tables yet"
   }
 }
