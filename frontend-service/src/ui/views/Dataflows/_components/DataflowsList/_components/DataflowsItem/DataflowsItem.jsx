@@ -1,8 +1,9 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 
-import isNil from 'lodash/isNil';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import isNil from 'lodash/isNil';
+import moment from 'moment';
 
 import styles from './DataflowsItem.module.scss';
 
@@ -17,9 +18,11 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const DataflowsItem = ({ dataFetch, itemContent, type }) => {
   const resources = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
 
   const onAccept = async () => {
     try {
@@ -46,7 +49,6 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
       console.error('RejectDataflow error: ', error);
     }
   };
-
   const layout = children => {
     return (
       <div
@@ -83,7 +85,8 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
       <div className={`${styles.deliveryDate} dataflowList-delivery-date-help-step`}>
         {itemContent.status == DataflowConf.dataflowStatus['DRAFT'] ? (
           <>
-            <span>{resources.messages['deliveryDate']}:</span> {itemContent.expirationDate}
+            <span>{resources.messages['deliveryDate']}:</span>{' '}
+            {moment(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
           </>
         ) : null}
       </div>

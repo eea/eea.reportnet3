@@ -5,6 +5,7 @@
   text-align: center;
   color: var(--c-black-300);
   padding: 1rem 0;
+
   width: 100%;
   /* margin-top: 2em; */
   margin-left: 45px;
@@ -32,6 +33,7 @@
 .FooterExpanded {
   display: block;
 }
+
 .FooterCollapsed {
   display: none;
 }

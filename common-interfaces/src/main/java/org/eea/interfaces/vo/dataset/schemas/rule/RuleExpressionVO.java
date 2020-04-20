@@ -403,6 +403,7 @@ public class RuleExpressionVO implements Serializable {
     switch (actual) {
       case ' ':
         return 0;
+      case '-':
       case '0':
       case '1':
       case '2':

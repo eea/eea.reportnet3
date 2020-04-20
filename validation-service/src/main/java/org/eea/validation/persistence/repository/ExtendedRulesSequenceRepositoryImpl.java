@@ -64,4 +64,15 @@ public class ExtendedRulesSequenceRepositoryImpl implements ExtendedRulesSequenc
     return seq;
 
   }
+
+  /**
+   * Delete by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   */
+  @Override
+  public void deleteByDatasetSchemaId(ObjectId datasetSchemaId) {
+    mongoTemplate.remove(new Query(Criteria.where("datasetSchemaId").is(datasetSchemaId)),
+        RuleSequence.class);
+  }
 }

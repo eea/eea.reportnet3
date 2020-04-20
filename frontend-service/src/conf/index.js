@@ -1,3 +1,4 @@
+import avatarImages from './avatarImages.json';
 import countryCode from './countries.code.json';
 import exportTypeCode from './exportType.code.json';
 import languageCode from './language.code.json';
@@ -7,11 +8,13 @@ import primeIcons from './prime.icons';
 import validations from './validation.config.json';
 
 const config = {};
+const { images } = avatarImages;
 const { countries } = countryCode;
 const { exportTypes } = exportTypeCode;
 const { icons } = primeIcons;
 const { languages } = languageCode;
 
+config.avatars = images;
 config.countries = countries;
 config.exportTypes = exportTypes;
 config.icons = icons;

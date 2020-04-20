@@ -14,6 +14,7 @@ import {
   faTrashAlt,
   faCaretDown,
   faChartBar,
+  faCogs,
   faPlus,
   faArchive,
   faBroom,
@@ -44,6 +45,7 @@ import {
   faHome,
   faCloudUploadAlt,
   faThList,
+  faUserCog,
   faMinus,
   faEye,
   faAngleDoubleUp,
@@ -58,10 +60,12 @@ import {
   faSortAlphaDown,
   faSortAlphaUp,
   faSortAlphaUpAlt,
+  faPalette,
   faPowerOff,
   faCog,
   faPen,
   faUsersCog,
+  faUserShield,
   faIgloo,
   faFileDownload,
   faDraftingCompass,
@@ -309,20 +313,30 @@ export const AwesomeIcons = icon => {
       return faPen;
     case 'manageRoles':
       return faUsersCog;
+    case 'userConfig':
+      return faUserCog;
     case 'localhostAlert':
       return faIgloo;
     case 'fileDownload':
       return faFileDownload;
     case 'cross':
       return faTimes;
+    case 'palette':
+      return faPalette;
+    case 'cofings':
+      return faCogs;
     case 'folder':
       return faFolder;
     case 'expanded':
       return faCaretDown;
     case 'collapsed':
       return faCaretRight;
+    case 'userShield':
+      return faUserShield;
     case 'externalLink':
       return faExternalLinkAlt;
+    case 'power-off':
+      return faPowerOff;
     default:
       return faFileAlt;
   }

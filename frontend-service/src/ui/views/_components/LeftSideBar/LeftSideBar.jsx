@@ -1,13 +1,16 @@
 import React, { useState, useContext } from 'react';
 import { withRouter } from 'react-router-dom';
+import { routes } from 'ui/routes';
 import Joyride, { STATUS } from 'react-joyride';
 
 import styles from './LeftSideBar.module.scss';
 
 import { LeftSideBarButton } from './_components/LeftSideBarButton';
 import { NotificationsList } from './_components/NotificationsList';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 import { UserService } from 'core/services/User';
+import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
@@ -15,7 +18,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-const LeftSideBar = withRouter(() => {
+const LeftSideBar = withRouter(({ history }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
@@ -23,6 +26,7 @@ const LeftSideBar = withRouter(() => {
   const userContext = useContext(UserContext);
 
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
+  const [logoutConfirmvisible, setlogoutConfirmVisible] = useState(undefined);
   const [run, setRun] = useState(false);
 
   const handleJoyrideCallback = data => {
@@ -34,11 +38,26 @@ const LeftSideBar = withRouter(() => {
     }
   };
 
+  const renderHome = () => {
+    const userButtonProps = {
+      href: getUrl(routes['DATAFLOWS']),
+      onClick: e => {
+        e.preventDefault();
+        history.push(getUrl(routes['DATAFLOWS']));
+      },
+      title: 'myDataflows',
+      icon: 'home',
+      label: 'myDataflows'
+    };
+    return <LeftSideBarButton {...userButtonProps} />;
+  };
+
   const renderUserProfile = () => {
     const userButtonProps = {
-      href: '#userProfilePage',
-      onClick: async e => {
+      href: getUrl(routes['SETTINGS']),
+      onClick: e => {
         e.preventDefault();
+        history.push(getUrl(routes['SETTINGS']));
       },
       title: 'userSettings',
       icon: 'user-profile',
@@ -68,7 +87,7 @@ const LeftSideBar = withRouter(() => {
         e.preventDefault();
         setRun(true);
       },
-      title: leftSideBarContext.helpTitle,
+      title: 'help',
       icon: 'questionCircle',
       // label: leftSideBarContext.helpTitle
       label: 'help'
@@ -79,21 +98,28 @@ const LeftSideBar = withRouter(() => {
   const renderSectionButtons = () => {
     return leftSideBarContext.models.map((model, i) => <LeftSideBarButton key={i} {...model} />);
   };
+
+  const userLogout = async () => {
+    {
+      userContext.socket.disconnect(() => {});
+      try {
+        await UserService.logout();
+      } catch (error) {
+        notificationContext.add({
+          type: 'USER_LOGOUT_ERROR'
+        });
+      } finally {
+        userContext.onLogout();
+      }
+    }
+  };
+
   const renderLogout = () => {
     const logoutProps = {
       href: '#',
-      onClick: async e => {
+      onClick: e => {
         e.preventDefault();
-        userContext.socket.disconnect(() => {});
-        try {
-          await UserService.logout();
-        } catch (error) {
-          notificationContext.add({
-            type: 'USER_LOGOUT_ERROR'
-          });
-        } finally {
-          userContext.onLogout();
-        }
+        userContext.userProps.showLogoutConfirmation ? setlogoutConfirmVisible(true) : userLogout();
       },
       title: 'logout',
       icon: 'logout',
@@ -135,9 +161,10 @@ const LeftSideBar = withRouter(() => {
         {
           <>
             <div className={styles.barSection}>
+              {renderHome()}
               {renderUserProfile()}
-              {renderUserNotifications()}
               {renderHelp()}
+              {renderUserNotifications()}
             </div>
             <hr />
             <div className={styles.barSection}>{renderSectionButtons()}</div>
@@ -150,6 +177,20 @@ const LeftSideBar = withRouter(() => {
               isNotificationVisible={isNotificationVisible}
               setIsNotificationVisible={setIsNotificationVisible}
             />
+
+            {userContext.userProps.showLogoutConfirmation && (
+              <ConfirmDialog
+                onConfirm={() => {
+                  userLogout();
+                }}
+                onHide={() => setlogoutConfirmVisible(false)}
+                visible={logoutConfirmvisible}
+                header={resources.messages['logout']}
+                labelConfirm={resources.messages['yes']}
+                labelCancel={resources.messages['no']}>
+                {resources.messages['userLogout']}
+              </ConfirmDialog>
+            )}
           </>
         }
       </div>

@@ -63,7 +63,10 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
       footer={codelistDialogFooter}
       header={resources.messages['codelistEditor']}
       modal={true}
-      onHide={() => setIsVisible(false)}
+      onHide={() => {
+        onCancelSaveCodelist();
+        setIsVisible(false);
+      }}
       style={{ width: '40%' }}
       visible={isVisible}
       zIndex={3003}>

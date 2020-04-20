@@ -24,6 +24,10 @@ public interface ExtendedRulesSequenceRepository {
    */
   long updateSequence(ObjectId ruleSchemaId);
 
-
-
+  /**
+   * Delete by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   */
+  void deleteByDatasetSchemaId(ObjectId datasetSchemaId);
 }

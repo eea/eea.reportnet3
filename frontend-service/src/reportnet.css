@@ -442,6 +442,10 @@
   --tooltip-body-border-color: var(--gray-110);
   --tooltip-arrow-border-color: var(--gray-110);
   --tooltip-arrow-bg: var(--gray-110);
+
+  /* User image */
+  --user-image-bg-hover: var(--main-font-color);
+  --user-image-bg-opacity: 0.6;
 }
 body {
   margin: 0px;

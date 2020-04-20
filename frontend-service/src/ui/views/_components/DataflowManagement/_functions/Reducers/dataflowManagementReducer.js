@@ -9,8 +9,11 @@ export const dataflowManagementReducer = (state, { type, payload }) => {
     case 'ON_LOAD_OBLIGATION':
       return { ...state, obligation: { id: payload.id, title: payload.title } };
 
+    case 'PREV_STATE':
+      return { ...state, obligationPrevState: { id: payload.id, title: payload.title } };
+
     case 'RESET_STATE':
-      return (state = payload.initialData);
+      return (state = payload.resetData);
 
     default:
       return state;

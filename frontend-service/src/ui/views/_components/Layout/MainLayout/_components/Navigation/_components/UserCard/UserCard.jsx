@@ -2,9 +2,9 @@ import React, { useContext } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-
+import { routes } from 'ui/routes';
 import { isUndefined } from 'lodash';
-
+import { getUrl } from 'core/infrastructure/CoreUtils';
 import styles from './UserCard.module.css';
 
 import { Icon } from 'ui/views/_components/Icon';
@@ -20,10 +20,11 @@ const UserCard = React.memo(() => {
     <div id="userProfile" className={styles.userProfileCard}>
       <div className={styles.userProfile}>
         <a
-          href="#userProfilePage"
-          title="User profile details"
+          href={getUrl(routes.SETTINGS)}      
+           title="User profile details"
           onClick={async e => {
             e.preventDefault();
+            
           }}>
           <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />
           <h5 className={styles.userProfile}>

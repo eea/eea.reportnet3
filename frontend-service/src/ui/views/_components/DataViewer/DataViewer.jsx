@@ -18,6 +18,7 @@ import { Chips } from 'ui/views/_components/Chips';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContextMenu } from 'ui/views/_components/ContextMenu';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataForm } from './_components/DataForm';
 import { DataTable } from 'ui/views/_components/DataTable';
@@ -69,6 +70,8 @@ const DataViewer = withRouter(
     tableReadOnly,
     tableSchemaColumns
   }) => {
+    const userContext = useContext(UserContext);
+
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
@@ -107,7 +110,7 @@ const DataViewer = withRouter(
       newRecord: {},
       numCopiedRecords: undefined,
       pastedRecords: undefined,
-      recordsPerPage: 10,
+      recordsPerPage: userContext.userProps.rowsPerPage,
       selectedRecord: {},
       totalFilteredRecords: 0,
       totalRecords: 0
@@ -641,6 +644,7 @@ const DataViewer = withRouter(
           datasetName
         }
       });
+      setIsTableDeleted(false);
     };
 
     const addRowDialogFooter = (
