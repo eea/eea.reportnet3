@@ -24,22 +24,20 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * The Class ExcelReaderStrategy.
  */
 public class ExcelReaderStrategy implements ReaderStrategy {
 
-  /** The field max length. */
-  @Value("${spring.jpa.hibernate.ddl-auto}")
-  private int fieldMaxLength;
-
   /** The file common. */
   private FileCommonUtils fileCommon;
 
   /** The dataset id. */
   private Long datasetId;
+
+  /** The field max length. */
+  private int fieldMaxLength;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(CSVReaderStrategy.class);
@@ -49,9 +47,10 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    *
    * @param fileCommon the file common
    */
-  public ExcelReaderStrategy(final FileCommonUtils fileCommon, Long datasetId) {
+  public ExcelReaderStrategy(final FileCommonUtils fileCommon, Long datasetId, int fieldMaxLength) {
     this.fileCommon = fileCommon;
     this.datasetId = datasetId;
+    this.fieldMaxLength = fieldMaxLength;
   }
 
   /**

@@ -20,7 +20,6 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
@@ -39,10 +38,6 @@ public class CSVReaderStrategy implements ReaderStrategy {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(CSVReaderStrategy.class);
 
-  /** The field max length. */
-  @Value("${spring.jpa.hibernate.ddl-auto}")
-  private int fieldMaxLength;
-
   /** The delimiter. */
   private char delimiter;
 
@@ -52,6 +47,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
   /** The parse common. */
   private FileCommonUtils fileCommon;
 
+  /** The field max length. */
+  private int fieldMaxLength;
+
   /**
    * Instantiates a new CSV reader strategy.
    *
@@ -59,10 +57,12 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param fileCommon the parse common
    * @param datasetId the dataset id
    */
-  public CSVReaderStrategy(final char delimiter, final FileCommonUtils fileCommon, Long datasetId) {
+  public CSVReaderStrategy(final char delimiter, final FileCommonUtils fileCommon, Long datasetId,
+      int fieldMaxLength) {
     this.delimiter = delimiter;
     this.fileCommon = fileCommon;
     this.datasetId = datasetId;
+    this.fieldMaxLength = fieldMaxLength;
   }
 
   /**
