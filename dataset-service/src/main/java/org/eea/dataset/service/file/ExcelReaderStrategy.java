@@ -24,10 +24,12 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import lombok.NoArgsConstructor;
 
 /**
  * The Class ExcelReaderStrategy.
  */
+@NoArgsConstructor
 public class ExcelReaderStrategy implements ReaderStrategy {
 
   /** The file common. */

@@ -1025,8 +1025,12 @@ public class DatasetServiceImpl implements DatasetService {
     List<FieldValue> fieldValues = new ArrayList<>();
     for (RecordValue recordValue : recordValues) {
       for (FieldValue fieldValue : recordValue.getFields()) {
-        if (null != fieldValue.getValue() && fieldValue.getValue().length() >= fieldMaxLength) {
-          fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
+        if (null == fieldValue.getValue()) {
+          fieldValue.setValue("");
+        } else {
+          if (fieldValue.getValue().length() >= fieldMaxLength) {
+            fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
+          }
         }
         fieldValues.add(fieldValue);
       }
@@ -1080,8 +1084,15 @@ public class DatasetServiceImpl implements DatasetService {
       table.setDatasetId(dataset);
       record.setTableValue(table);
       record.setDataProviderCode(provider.getCode());
-      record.getFields().stream().filter(field -> field.getValue() == null)
-          .forEach(field -> field.setValue(""));
+      for (FieldValue field : record.getFields()) {
+        if (null == field.getValue()) {
+          field.setValue("");
+        } else {
+          if (field.getValue().length() >= fieldMaxLength) {
+            field.setValue(field.getValue().substring(0, fieldMaxLength));
+          }
+        }
+      }
 
     });
     recordRepository.saveAll(recordValue);
