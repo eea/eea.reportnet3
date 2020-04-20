@@ -8,9 +8,12 @@ import styles from './DatasetDesigner.module.scss';
 import { config } from 'conf';
 import { routes } from 'ui/routes';
 
+import QCRules from 'conf/QCRules.config.json';
+
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { Filters } from 'ui/views/_components/Filters';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -70,6 +73,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [datasetSchemaId, setDatasetSchemaId] = useState('');
   const [datasetSchemaName, setDatasetSchemaName] = useState('');
   const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
+  const [datasetSchemaAllTablesToFilter, setDatasetSchemaAllTablesToFilter] = useState([]);
   const [datasetSchemas, setDatasetSchemas] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
@@ -173,6 +177,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       changeUrl();
     }
   }, [isPreviewModeOn]);
+
+  // useEffect(() => {
+  //   setDatasetSchemaAllTables(DatasetDesignerUtils.parseDataToFilter(datasetSchemaAllTables));
+  // }, [validationListDialogVisible]);
 
   const callSetMetaData = async () => {
     setMetaData(await getMetadata({ datasetId, dataflowId }));
@@ -357,6 +365,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           }}
           style={{ width: '80%' }}
           visible={validationListDialogVisible}>
+          <Filters
+            data={datasetSchemaAllTablesToFilter}
+            // getFiltredData={onLoadFiltredData}
+            inputOptions={QCRules.filterItems['input']}
+            selectOptions={QCRules.filterItems['select']}
+            sortable={true}
+          />
           <TabsValidations
             dataset={metaData.dataset}
             datasetSchemaAllTables={datasetSchemaAllTables}
