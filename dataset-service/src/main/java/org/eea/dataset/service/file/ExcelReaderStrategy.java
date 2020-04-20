@@ -24,11 +24,16 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * The Class ExcelReaderStrategy.
  */
 public class ExcelReaderStrategy implements ReaderStrategy {
+
+  /** The field max length. */
+  @Value("${spring.jpa.hibernate.ddl-auto}")
+  private int fieldMaxLength;
 
   /** The file common. */
   private FileCommonUtils fileCommon;
@@ -169,12 +174,16 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       List<String> idSchema = new ArrayList<>();
 
       // Reads the same number of cells as headers we have
-
       for (int i = 0; i < headersSize; i++) {
+        String value = dataFormatter.formatCellValue(recordRow.getCell(i));
+        // Trim the string if it is too large
+        if (value.length() >= fieldMaxLength) {
+          value = value.substring(0, fieldMaxLength);
+        }
         FieldVO field = new FieldVO();
         field.setIdFieldSchema(headers.get(i).getId());
         field.setType(headers.get(i).getType());
-        field.setValue(dataFormatter.formatCellValue(recordRow.getCell(i)));
+        field.setValue(value);
         if (field.getIdFieldSchema() != null) {
           fields.add(field);
           idSchema.add(field.getIdFieldSchema());
