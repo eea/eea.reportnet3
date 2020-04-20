@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
@@ -6,7 +6,6 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isUndefined from 'lodash/isUndefined';
 
 import styles from './WebLinks.module.scss';
 
@@ -15,33 +14,65 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
+
 import { WebLinkService } from 'core/services/WebLink';
 
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
 export const WebLinks = ({
-  isCustodian,
   dataflowId,
-  webLinks,
+  isCustodian,
   onLoadWebLinks,
-  sortFieldWeblinks,
   setSortFieldWeblinks,
+  setSortOrderWeblinks,
+  sortFieldWeblinks,
   sortOrderWeblinks,
-  setSortOrderWeblinks
+  webLinks
 }) => {
   const resources = useContext(ResourcesContext);
+
   const [isAddOrEditWeblinkDialogVisible, setIsAddOrEditWeblinkDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
-  const [isFormReset, setIsFormReset] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [weblinkItem, setWeblinkItem] = useState({});
+  const [weblinkItem, setWeblinkItem] = useState({ id: undefined, description: '', url: '' });
   const [webLinksColumns, setWebLinksColumns] = useState([]);
 
   const form = useRef(null);
-  const inputRef = useRef();
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (!isNil(form.current)) form.current.resetForm();
+  }, [form.current, isAddOrEditWeblinkDialogVisible]);
+
+  useEffect(() => {
+    if (inputRef.current) inputRef.current.focus();
+  }, [inputRef.current, isAddOrEditWeblinkDialogVisible]);
+
+  useEffect(() => {
+    let webLinkKeys = !isEmpty(webLinks) ? Object.keys(webLinks[0]) : [];
+    let webLinkColArray = webLinkKeys
+      .filter(key => key !== 'id')
+      .map(key => (
+        <Column
+          body={key === 'url' ? linkTemplate : null}
+          columnResizeMode="expand"
+          field={key}
+          filter={false}
+          filterMatchMode="contains"
+          header={key === 'url' ? key.toUpperCase() : capitalize(key)}
+          key={key}
+          sortable={true}
+        />
+      ));
+
+    if (isCustodian) webLinkColArray = [...webLinkColArray, webLinkEditionColumn];
+
+    setWebLinksColumns(webLinkColArray);
+  }, [webLinks]);
 
   const addWeblinkSchema = Yup.object().shape({
-    description: Yup.string().required(),
+    description: Yup.string().required(' '),
     url: Yup.string()
       .lowercase()
       .matches(
@@ -51,37 +82,54 @@ export const WebLinks = ({
       .required(' ')
   });
 
-  const onHideAddEditDialog = () => {
-    setIsAddOrEditWeblinkDialogVisible(false);
-    setIsFormReset(false);
-    onResetValues();
-  };
-
-  const onResetValues = () => {
-    setWeblinkItem({ id: undefined, description: '', url: '' });
-  };
-
-  const getValidUrl = (url = '') => {
-    let newUrl = window.decodeURIComponent(url);
-    newUrl = newUrl.trim().replace(/\s/g, '');
-
-    if (/^(:\/\/)/.test(newUrl)) {
-      return `http${newUrl}`;
-    }
-    if (!/^(f|ht)tps?:\/\//i.test(newUrl)) {
-      return `//${newUrl}`;
-    }
-
-    return newUrl;
-  };
-
   const fieldsArray = [
     { field: 'description', header: resources.messages['description'] },
     { field: 'url', header: resources.messages['url'] }
   ];
 
+  const emptyWebLinkColumns = fieldsArray.map(item => (
+    <Column field={item.field} header={item.header} key={item.field} />
+  ));
+
+  const getValidUrl = (url = '') => {
+    let newUrl = window.decodeURIComponent(url);
+    newUrl = newUrl.trim().replace(/\s/g, '');
+
+    if (/^(:\/\/)/.test(newUrl)) return `http${newUrl}`;
+
+    if (!/^(f|ht)tps?:\/\//i.test(newUrl)) return `//${newUrl}`;
+
+    return newUrl;
+  };
+
+  const linkTemplate = rowData => (
+    <a href={getValidUrl(rowData.url)} target="_blank" rel="noopener noreferrer">
+      {rowData.url}
+    </a>
+  );
+
+  const onDeleteWeblink = async () => {
+    const weblinkToDelete = await WebLinkService.deleteWeblink(weblinkItem);
+    if (weblinkToDelete.isDeleted) {
+      onLoadWebLinks();
+    }
+    setIsConfirmDeleteVisible(false);
+  };
+
+  const onHideAddEditDialog = () => {
+    setIsAddOrEditWeblinkDialogVisible(false);
+    onResetValues();
+  };
+
+  const onHideDeleteDialog = () => {
+    setIsConfirmDeleteVisible(false);
+    onResetValues();
+  };
+
+  const onResetValues = () => setWeblinkItem({ id: undefined, description: '', url: '' });
+
   const onSaveRecord = async e => {
-    if (isUndefined(weblinkItem.id)) {
+    if (isNil(weblinkItem.id)) {
       setWeblinkItem(e);
 
       try {
@@ -112,41 +160,13 @@ export const WebLinks = ({
     }
   };
 
-  const onDeleteWeblink = async () => {
-    const weblinkToDelete = await WebLinkService.deleteWeblink(weblinkItem);
-
-    if (weblinkToDelete.isDeleted) {
-      onLoadWebLinks();
-    }
-
-    setIsConfirmDeleteVisible(false);
-  };
-
-  const onHideDeleteDialog = () => {
-    setIsConfirmDeleteVisible(false);
-    setIsFormReset(false);
-    onResetValues();
-  };
-
-  useEffect(() => {
-    if (!isNil(form.current)) {
-      form.current.resetForm();
-    }
-  }, [form.current]);
-
-  useEffect(() => {
-    if (isAddOrEditWeblinkDialogVisible) inputRef.current.focus();
-  }, [isAddOrEditWeblinkDialogVisible]);
-
   const webLinkEditButtons = () => {
     return (
       <div className={styles.webLinkEditButtons}>
         <Button
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
           icon="edit"
-          onClick={_ => {
-            setIsAddOrEditWeblinkDialogVisible(true);
-          }}
+          onClick={() => setIsAddOrEditWeblinkDialogVisible(true)}
           type="button"
         />
         <Button
@@ -163,43 +183,8 @@ export const WebLinks = ({
     <Column key={'buttonsUniqueId'} body={row => webLinkEditButtons(row)} style={{ width: '5em' }} />
   );
 
-  useEffect(() => {
-    let webLinkKeys = !isEmpty(webLinks) ? Object.keys(webLinks[0]) : [];
-    let webLinkColArray = webLinkKeys
-      .filter(key => key !== 'id')
-      .map(key => (
-        <Column
-          body={key === 'url' ? linkTemplate : null}
-          columnResizeMode="expand"
-          field={key}
-          filter={false}
-          filterMatchMode="contains"
-          header={key === 'url' ? key.toUpperCase() : capitalize(key)}
-          key={key}
-          sortable={true}
-        />
-      ));
-
-    if (isCustodian) {
-      webLinkColArray = [...webLinkColArray, webLinkEditionColumn];
-    }
-    setWebLinksColumns(webLinkColArray);
-  }, [webLinks]);
-
-  const emptyWebLinkColumns = fieldsArray.map(item => (
-    <Column field={item.field} header={item.header} key={item.field} />
-  ));
-
-  const linkTemplate = rowData => {
-    return (
-      <a href={getValidUrl(rowData.url)} target="_blank" rel="noopener noreferrer">
-        {rowData.url}
-      </a>
-    );
-  };
-
   return (
-    <>
+    <Fragment>
       {isCustodian ? (
         <Toolbar className={styles.weblinksToolbar}>
           <div className="p-toolbar-group-left">
@@ -235,9 +220,7 @@ export const WebLinks = ({
       <DataTable
         autoLayout={true}
         loading={isLoading}
-        onRowSelect={e => {
-          setWeblinkItem(Object.assign({}, e.data));
-        }}
+        onRowSelect={e => setWeblinkItem(Object.assign({}, e.data))}
         onSort={e => {
           setSortFieldWeblinks(e.sortField);
           setSortOrderWeblinks(e.sortOrder);
@@ -256,9 +239,7 @@ export const WebLinks = ({
           className={styles.dialog}
           blockScroll={false}
           contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
-          header={
-            isUndefined(weblinkItem.id) ? resources.messages['createNewWebLink'] : resources.messages['editWebLink']
-          }
+          header={isNil(weblinkItem.id) ? resources.messages['createNewWebLink'] : resources.messages['editWebLink']}
           modal={true}
           onHide={() => onHideAddEditDialog()}
           style={{ width: '50%', height: '80%' }}
@@ -266,7 +247,7 @@ export const WebLinks = ({
           <Formik
             enableReinitialize={true}
             ref={form}
-            // initialValues={weblinkItem}
+            initialValues={weblinkItem}
             validationSchema={addWeblinkSchema}
             onSubmit={e => {
               onSaveRecord(e);
@@ -274,9 +255,6 @@ export const WebLinks = ({
             {({ isSubmitting, errors, touched, values }) => (
               <Form>
                 <fieldset>
-                  {console.log('errors', errors)}
-                  {console.log('isAddOrEditWeblinkDialogVisible', isAddOrEditWeblinkDialogVisible)}
-
                   <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
                     <Field
                       autoFocus={true}
@@ -302,9 +280,9 @@ export const WebLinks = ({
                             : styles.disabledButton
                           : styles.disabledButton
                       }
-                      label={isUndefined(weblinkItem.id) ? resources.messages['add'] : resources.messages['edit']}
+                      label={isNil(weblinkItem.id) ? resources.messages['add'] : resources.messages['edit']}
                       disabled={isSubmitting}
-                      icon={isUndefined(weblinkItem.id) ? 'add' : 'edit'}
+                      icon={isNil(weblinkItem.id) ? 'add' : 'edit'}
                       type={isSubmitting ? '' : 'submit'}
                     />
                     <Button
@@ -332,6 +310,6 @@ export const WebLinks = ({
         visible={isConfirmDeleteVisible}>
         {resources.messages['deleteWebLink']}
       </ConfirmDialog>
-    </>
+    </Fragment>
   );
 };
