@@ -59,6 +59,10 @@
   margin-left: auto;
   flex-direction: column;
 }
+
+.switchDiv div:nth-child(1) {
+  margin-bottom: 0.5rem;
+}
 .switchDivInput {
   display: flex;
   align-items: center;

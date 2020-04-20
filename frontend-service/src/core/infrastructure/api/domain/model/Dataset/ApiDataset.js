@@ -493,7 +493,7 @@ export const apiDataset = {
     return response.status;
   },
   updateTableDescriptionDesign: async (
-    tableSchemaCopyTableData,
+    tableSchemaToPrefill,
     tableSchemaId,
     tableSchemaDescription,
     tableSchemaIsReadOnly,
@@ -509,9 +509,9 @@ export const apiDataset = {
             }),
         data: {
           idTableSchema: tableSchemaId,
-          copyTableData: tableSchemaCopyTableData,
           description: tableSchemaDescription,
-          readOnly: tableSchemaIsReadOnly
+          readOnly: tableSchemaIsReadOnly,
+          toPrefill: tableSchemaToPrefill
         },
         queryString: {},
         headers: {

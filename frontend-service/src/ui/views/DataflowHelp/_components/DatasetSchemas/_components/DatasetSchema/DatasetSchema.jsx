@@ -105,6 +105,7 @@ const parseDesignDataset = (design, validationList) => {
       table.tableSchemaName = tableDTO.tableSchemaName;
       table.tableSchemaDescription = tableDTO.tableSchemaDescription;
       table.tableSchemaReadOnly = tableDTO.tableSchemaReadOnly;
+      table.tableSchemaPrefilled = !isNil(tableDTO.tableSchemaPrefilled);
       if (!isNull(tableDTO.records) && !isNil(tableDTO.records[0].fields) && tableDTO.records[0].fields.length > 0) {
         const containsCodelists = !isEmpty(
           tableDTO.records[0].fields.filter(fieldElmt => fieldElmt.type === 'CODELIST')

@@ -31,7 +31,7 @@ export const FieldsDesigner = ({
   isPreviewModeOn,
   table
 }) => {
-  const [copyTableData, setCopyTableData] = useState(false);
+  const [toPrefill, setToPrefill] = useState(false);
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState([]);
   const [indexToDelete, setIndexToDelete] = useState();
@@ -54,7 +54,7 @@ export const FieldsDesigner = ({
     if (!isUndefined(table)) {
       setTableDescriptionValue(table.description || '');
       setIsReadOnlyTable(table.readOnly || false);
-      setCopyTableData(table.copyTableData || false);
+      setToPrefill(table.toPrefill || false);
     }
   }, []);
 
@@ -132,14 +132,14 @@ export const FieldsDesigner = ({
   const onChangeIsReadOnly = checked => {
     setIsReadOnlyTable(checked);
     if (checked) {
-      setCopyTableData(checked);
+      setToPrefill(checked);
     }
-    updateTableDesign({ readOnly: checked, copyData: checked });
+    updateTableDesign({ readOnly: checked, toPrefill: checked === false ? toPrefill : checked });
   };
 
-  const onChangeCopyTableData = checked => {
-    setCopyTableData(checked);
-    updateTableDesign({ readOnly: isReadOnlyTable, copyData: checked });
+  const onChangeToPrefill = checked => {
+    setToPrefill(checked);
+    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill: checked });
   };
 
   const onFieldDragAndDrop = (draggedFieldIdx, droppedFieldName) => {
@@ -397,13 +397,13 @@ export const FieldsDesigner = ({
     </div>
   );
 
-  const updateTableDesign = async ({ readOnly, copyTableData }) => {
+  const updateTableDesign = async ({ readOnly, toPrefill }) => {
     // if (isUndefined(tableDescriptionValue)) {
     //   return;
     // }
     try {
       const tableUpdated = await DatasetService.updateTableDescriptionDesign(
-        copyTableData,
+        toPrefill,
         table.tableSchemaId,
         tableDescriptionValue,
         readOnly,
@@ -429,7 +429,7 @@ export const FieldsDesigner = ({
           expandableOnClick={true}
           key="tableDescription"
           onChange={e => setTableDescriptionValue(e.target.value)}
-          onBlur={() => updateTableDesign({ readOnly: isReadOnlyTable, copyData: copyTableData })}
+          onBlur={() => updateTableDesign({ readOnly: isReadOnlyTable, toPrefill })}
           onFocus={e => {
             setInitialTableDescription(e.target.value);
           }}
@@ -451,13 +451,14 @@ export const FieldsDesigner = ({
             />
           </div>
           <div>
-            <span className={styles.switchTextInput}>{resources.messages['copyDataToReporting']}</span>
+            <span className={styles.switchTextInput}>{resources.messages['prefilled']}</span>
             <Checkbox
-              checked={copyTableData}
+              checked={toPrefill}
+              disabled={isReadOnlyTable}
               // className={styles.checkRequired}
               inputId={`${table.tableId}_check`}
               label="Default"
-              onChange={e => onChangeCopyTableData(e.checked)}
+              onChange={e => onChangeToPrefill(e.checked)}
               style={{ width: '70px' }}
             />
           </div>
