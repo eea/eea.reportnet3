@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
+import org.eea.dataset.mapper.ETLRecordMapper;
 import org.eea.dataset.mapper.FieldNoValidationMapper;
 import org.eea.dataset.mapper.FieldValidationMapper;
 import org.eea.dataset.mapper.RecordMapper;
@@ -63,6 +64,9 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController.Represent
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.ETLDatasetVO;
+import org.eea.interfaces.vo.dataset.ETLRecordVO;
+import org.eea.interfaces.vo.dataset.ETLTableVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -201,6 +205,10 @@ public class DatasetServiceImpl implements DatasetService {
   /** The field no validation mapper. */
   @Autowired
   private FieldNoValidationMapper fieldNoValidationMapper;
+
+  /** The etl record mapper. */
+  @Autowired
+  private ETLRecordMapper etlRecordMapper;
 
   /**
    * Process file.
@@ -1477,5 +1485,52 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     return type;
+  }
+
+  /**
+   * Etl export dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the ETL dataset VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public ETLDatasetVO etlExportDataset(@DatasetId Long datasetId) throws EEAException {
+
+    // Get the datasetSchemaId by the datasetId
+    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+    if (null == datasetSchemaId) {
+      throw new EEAException("DatasetSchemaId not found for datasetId " + datasetId);
+    }
+
+    // Get the datasetSchema by the datasetSchemaId
+    DataSetSchema datasetSchema =
+        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+    if (null == datasetSchema) {
+      throw new EEAException("DatasetSchema not found for datasetSchemaId " + datasetSchemaId);
+    }
+
+    ETLDatasetVO etlDatasetVO = new ETLDatasetVO();
+    etlDatasetVO.setTables(new ArrayList<ETLTableVO>());
+
+    for (TableSchema tableSchema : datasetSchema.getTableSchemas()) {
+      ETLTableVO etlTableVO = new ETLTableVO();
+      etlTableVO.setTableName(tableSchema.getNameTableSchema());
+      ObjectId tableSchemaId = tableSchema.getIdTableSchema();
+
+      if (null == tableSchemaId) {
+        throw new EEAException("TableSchemaId does not exists in tableSchema: " + tableSchema);
+      }
+
+      List<RecordValue> recordValues =
+          recordRepository.findByTableValueNoOrder(tableSchemaId.toString(), null);
+      List<ETLRecordVO> etlRecordValues = etlRecordMapper.entityListToClass(recordValues);
+
+      etlTableVO.setRecords(etlRecordValues);
+
+      etlDatasetVO.getTables().add(etlTableVO);
+    }
+
+    return etlDatasetVO;
   }
 }
