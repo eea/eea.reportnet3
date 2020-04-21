@@ -15,6 +15,7 @@ import { BigButtonList } from './_components/BigButtonList';
 import { Button } from 'ui/views/_components/Button';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { ApiKeyDialog } from 'ui/views/_components/ApiKeyDialog';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { RepresentativesList } from './_components/RepresentativesList';
@@ -59,6 +60,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
+  const [isVisibleApiKeyDialog, setIsVisibleApiKeyDialog] = useState(true);
 
   const dataflowInitialState = {
     data: {},
@@ -455,6 +457,15 @@ const Dataflow = withRouter(({ history, match }) => {
           onManageDialogs={onManageDialogs}
           state={dataflowDataState}
         />
+
+        {isVisibleApiKeyDialog && (
+          <ApiKeyDialog
+            isVisibleApiKeyDialog={isVisibleApiKeyDialog}
+            setIsVisibleApiKeyDialog={setIsVisibleApiKeyDialog}
+            dataflowId={dataflowId}
+            dataProviderId={dataProviderId}
+          />
+        )}
       </div>
     </div>
   );
