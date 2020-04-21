@@ -114,7 +114,7 @@ const ValidationExpression = ({
             baseZIndex={6000}
             dateFormat="yy-mm-dd"
             monthNavigator={true}
-            readOnlyInput={true}
+            readOnlyInput={false}
             onChange={e => {
               onExpressionFieldUpdate(expressionId, {
                 key: 'expressionValue',
