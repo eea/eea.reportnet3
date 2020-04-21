@@ -132,6 +132,20 @@ export const apiDataflow = {
 
     return '111-222-222-222';
   },
+  generateApiKey: async () => {
+    /*  const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.getApiKey),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+
+    return response.data; */
+
+    return '777-555-555-555';
+  },
   pending: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({

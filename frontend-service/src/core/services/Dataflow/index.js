@@ -7,6 +7,7 @@ import { GetAccepted } from './GetAccepted';
 import { GetAll } from './GetAll';
 import { GetAllSchemas } from './GetAllSchemas';
 import { GetApiKey } from './GetApiKey';
+import { GenerateApiKey } from './GenerateApiKey';
 import { GetCompleted } from './GetCompleted';
 import { GetDatasetStatisticStatus } from './GetDatasetStatisticStatus';
 import { GetDetails } from './GetDetails';
@@ -29,6 +30,7 @@ export const DataflowService = {
   deleteById: Delete({ dataflowRepository }),
   getAllSchemas: GetAllSchemas({ dataflowRepository }),
   getApiKey: GetApiKey({ dataflowRepository }),
+  generateApiKey: GenerateApiKey({ dataflowRepository }),
   newEmptyDatasetSchema: CreateDatasetSchema({ dataflowRepository }),
   pending: GetPending({ dataflowRepository }),
   reject: Reject({ dataflowRepository }),
