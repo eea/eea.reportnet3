@@ -48,6 +48,7 @@ import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseR
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -1485,4 +1486,47 @@ public class DatasetServiceImpl implements DatasetService {
 
     return type;
   }
+
+
+  @Override
+  public Boolean getTableReadOnly(Long datasetId, String objectId, EntityTypeEnum type) {
+    Boolean readOnly = false;
+    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
+
+    switch (type) {
+      case TABLE:
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          if (objectId.equals(tableSchema.getIdTableSchema().toString())
+              && tableSchema.getReadOnly() != null && tableSchema.getReadOnly()) {
+            readOnly = true;
+            break;
+          }
+        }
+        break;
+      case RECORD:
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          if (objectId.equals(tableSchema.getRecordSchema().getIdRecordSchema().toString())
+              && tableSchema.getReadOnly() != null && tableSchema.getReadOnly()) {
+            readOnly = true;
+            break;
+          }
+        }
+        break;
+      case FIELD:
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          for (FieldSchema fieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
+            if (objectId.equals(fieldSchema.getIdFieldSchema().toString())
+                && tableSchema.getReadOnly() != null && tableSchema.getReadOnly()) {
+              readOnly = true;
+              break;
+            }
+          }
+        }
+        break;
+    }
+    return readOnly;
+  }
+
+
 }

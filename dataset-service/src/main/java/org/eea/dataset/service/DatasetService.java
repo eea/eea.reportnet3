@@ -354,4 +354,6 @@ public interface DatasetService {
    * @return the dataset type
    */
   DatasetTypeEnum getDatasetType(Long datasetId);
+
+  Boolean getTableReadOnly(Long datasetId, String tableSchemaId, EntityTypeEnum type);
 }
