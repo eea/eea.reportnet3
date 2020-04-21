@@ -335,6 +335,8 @@ export const AwesomeIcons = icon => {
       return faUserShield;
     case 'externalLink':
       return faExternalLinkAlt;
+    case 'power-off':
+      return faPowerOff;
     default:
       return faFileAlt;
   }

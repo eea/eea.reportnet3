@@ -128,7 +128,10 @@ const LinkSelector = withRouter(
         footer={linkSelectorDialogFooter}
         header={resources.messages['linkSelector']}
         modal={true}
-        onHide={() => setIsVisible(false)}
+        onHide={() => {
+          onCancelSaveLink();
+          setIsVisible(false);
+        }}
         style={{ minWidth: '55%' }}
         visible={isVisible}
         zIndex={3003}>

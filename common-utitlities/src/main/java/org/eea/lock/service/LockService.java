@@ -63,4 +63,11 @@ public interface LockService {
    * @return the lock VO
    */
   public LockVO findByCriteria(Map<String, Object> lockCriteria);
+
+  /**
+   * Schedule lock removal task.
+   *
+   * @param lockId the lock id
+   */
+  void scheduleLockRemovalTask(Integer lockId);
 }

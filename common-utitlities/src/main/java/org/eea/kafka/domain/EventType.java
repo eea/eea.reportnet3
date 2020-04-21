@@ -6,6 +6,8 @@ public enum EventType {
   /** The connection created event. */
   CONNECTION_CREATED_EVENT("DATA_REPORTING_TOPIC", "connection_key", true),
 
+  SPREAD_DATA_EVENT("DATA_REPORTING_TOPIC", "connection_key", true),
+
   /** The hello kafka event. */
   HELLO_KAFKA_EVENT("DATA_REPORTING_TOPIC", "hello_kafka_key", true),
 
@@ -35,6 +37,9 @@ public enum EventType {
 
   /** The delete table completed event. */
   DELETE_TABLE_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_table_completed_event", true),
+
+  /** The delete dataset data completed event. */
+  DELETE_DATASET_DATA_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_table_completed_event", true),
 
   /** The delete table schema completed event. */
   DELETE_TABLE_SCHEMA_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_table_schema_completed_event",
@@ -166,7 +171,12 @@ public enum EventType {
   RELEASE_BLOCKED_EVENT("DATA_REPORTING_TOPIC", "release_blocked_event", true),
 
   /** The updated document completed event. */
-  UPDATED_DOCUMENT_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "update_document_completed_event", true);
+  UPDATED_DOCUMENT_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "update_document_completed_event", true),
+
+  /** The invalidated qc rule event. */
+  INVALIDATED_QC_RULE_EVENT("DATA_REPORTING_TOPIC", "invalidated_qc_rule_event", true);
+
+
 
   /** The topic. */
   private String topic;

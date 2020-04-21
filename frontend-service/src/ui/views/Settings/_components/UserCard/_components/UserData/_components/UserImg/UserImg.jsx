@@ -4,6 +4,8 @@ import isEmpty from 'lodash/isEmpty';
 
 import { config } from 'conf';
 
+import defaultAvatar from 'assets/images/avatars/defaultAvatar.png';
+
 import styles from './UserImg.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
@@ -15,10 +17,12 @@ import ReactTooltip from 'react-tooltip';
 
 import { UserService } from 'core/services/User';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const UserImg = () => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -35,7 +39,6 @@ const UserImg = () => {
 
   const handleImageUpload = e => {
     const [file] = e.target.files;
-
     if (file) {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
@@ -56,6 +59,7 @@ const UserImg = () => {
       };
 
       current.src = URL.createObjectURL(e.target.files[0]);
+      e.target.value = '';
     }
   };
 
@@ -84,8 +88,9 @@ const UserImg = () => {
         userContext.onUserFileUpload(splittedBase64Image);
       }
     } catch (error) {
-      console.error(error);
-      //Notification
+      notificationContext.add({
+        type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR'
+      });
     }
   };
 
@@ -117,7 +122,7 @@ const UserImg = () => {
           data-event="click"
           ref={uploadedImage}
           icon={<FontAwesomeIcon icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />}
-          // src={}
+          src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
           className={styles.userDataIcon}
           // onClick={() => imageUploader.current.click()}
         />
@@ -130,7 +135,13 @@ const UserImg = () => {
         onHide={e => setIsAvatarDialogVisible(false)}>
         <div className={styles.gridContainer}>{listOfImages()}</div>
       </Dialog>
-      <ReactTooltip className={styles.tooltipClass} id="addAvatar" place="top" effect="solid" clickable={true}>
+      <ReactTooltip
+        className={styles.tooltipClass}
+        clickable={true}
+        effect="solid"
+        globalEventOff="click"
+        id="addAvatar"
+        place="top">
         <Button
           className={`p-button-secondary p-button-animated-blink`}
           // label={isEditForm ? resources.messages['save'] : resources.messages['create']}

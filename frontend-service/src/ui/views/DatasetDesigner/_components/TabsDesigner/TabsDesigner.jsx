@@ -22,7 +22,16 @@ import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarCont
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 export const TabsDesigner = withRouter(
-  ({ datasetSchemas, editable = false, match, history, isPreviewModeOn, onChangeReference, onLoadTableData }) => {
+  ({
+    datasetSchemas,
+    editable = false,
+    match,
+    history,
+    isPreviewModeOn,
+    onChangeReference,
+    onLoadTableData,
+    onUpdateTable
+  }) => {
     const {
       params: { dataflowId, datasetId }
     } = match;
@@ -64,6 +73,10 @@ export const TabsDesigner = withRouter(
         scrollFn();
       }
     }, [scrollFn, tabs, isEditing]);
+
+    useEffect(() => {
+      onUpdateTable(tabs);
+    }, [tabs]);
 
     useEffect(() => {
       if (!isUndefined(datasetSchema)) {

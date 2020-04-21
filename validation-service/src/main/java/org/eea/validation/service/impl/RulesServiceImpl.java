@@ -181,8 +181,6 @@ public class RulesServiceImpl implements RulesService {
         new ObjectId(referenceFieldSchemaPKId));
   }
 
-
-
   /**
    * Validate rule.
    *
@@ -240,13 +238,15 @@ public class RulesServiceImpl implements RulesService {
     rule.setType(EntityTypeEnum.FIELD);
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
+    rule.setVerified(false);
+
     validateRule(rule);
 
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     }
 
-    // test if the rule is well defined, otherwise it is created but disabled
+    // Check if rule is valid
     kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
   }
 
@@ -412,13 +412,15 @@ public class RulesServiceImpl implements RulesService {
     rule.setType(EntityTypeEnum.FIELD);
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
+    rule.setVerified(false);
 
     validateRule(rule);
 
     if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_UPDATING_RULE);
     }
-    // test if the rule is well defined, otherwise it is created but disabled
+
+    // Check if rule is valid
     kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
   }
 

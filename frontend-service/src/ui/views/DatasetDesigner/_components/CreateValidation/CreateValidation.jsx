@@ -50,6 +50,10 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   );
   const [fieldsDropdown, setfieldsDropdown] = useState();
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
+  const [tableFieldOptions, setTableFieldOptions] = useState({
+    disabled: true,
+    placeholder: resourcesContext.messages.fieldConstraintTableFieldNoOptions
+  });
 
   const ruleDisablingCheckListener = [creationFormState.candidateRule.table, creationFormState.candidateRule.field];
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
@@ -153,7 +157,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
 
   useEffect(() => {
     const { tableFields } = creationFormState;
-    const dropdownOptions = {
+    const fieldDropdownOptions = {
       disabled: true,
       placeholder: resourcesContext.messages.field,
       options: [],
@@ -161,16 +165,16 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
       value: null
     };
     if (isNil(tableFields)) {
-      dropdownOptions.value = null;
+      fieldDropdownOptions.value = null;
     }
     if (!isNil(tableFields) && tableFields.length == 0) {
-      dropdownOptions.placeholder = resourcesContext.messages.designSchemaTabNoFields;
-      dropdownOptions.value = null;
+      fieldDropdownOptions.placeholder = resourcesContext.messages.designSchemaTabNoFields;
+      fieldDropdownOptions.value = null;
     }
     if (!isNil(tableFields) && tableFields.length > 0) {
-      dropdownOptions.options = tableFields;
-      dropdownOptions.disabled = false;
-      dropdownOptions.onChange = e =>
+      fieldDropdownOptions.options = tableFields;
+      fieldDropdownOptions.disabled = false;
+      fieldDropdownOptions.onChange = e =>
         creationFormDispatch({
           type: 'SET_FORM_FIELD',
           payload: {
@@ -178,19 +182,19 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
             value: e.target.value
           }
         });
-      dropdownOptions.value = creationFormState.candidateRule.field;
+      fieldDropdownOptions.value = creationFormState.candidateRule.field;
     }
     setfieldsDropdown(
       <Dropdown
         id={`${componentName}__field`}
-        disabled={dropdownOptions.disabled}
+        disabled={fieldDropdownOptions.disabled}
         appendTo={document.body}
-        filterPlaceholder={dropdownOptions.placeholder}
-        placeholder={dropdownOptions.placeholder}
+        filterPlaceholder={fieldDropdownOptions.placeholder}
+        placeholder={fieldDropdownOptions.placeholder}
         optionLabel="label"
-        options={dropdownOptions.options}
-        onChange={dropdownOptions.onChange}
-        value={dropdownOptions.value}
+        options={fieldDropdownOptions.options}
+        onChange={fieldDropdownOptions.onChange}
+        value={fieldDropdownOptions.value}
       />
     );
   }, [
@@ -199,6 +203,20 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     creationFormState.candidateRule.field,
     creationFormState.candidateRule.table
   ]);
+
+  useEffect(() => {
+    if (creationFormState.schemaTables.length > 0) {
+      setTableFieldOptions({
+        disabled: false,
+        placeholder: resourcesContext.messages.table
+      });
+    } else {
+      setTableFieldOptions({
+        disabled: true,
+        placeholder: resourcesContext.messages.fieldConstraintTableFieldNoOptions
+      });
+    }
+  }, [creationFormState.schemaTables]);
 
   const checkActivateRules = () => {
     return creationFormState.candidateRule.table && creationFormState.candidateRule.field;
@@ -301,7 +319,11 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
 
   const dialogLayout = children => (
     <Dialog
-      header="Create Field Validation rule"
+      header={
+        validationContext.ruleEdit
+          ? resourcesContext.messages.editFieldConstraint
+          : resourcesContext.messages.createFieldConstraintTitle
+      }
       visible={validationContext.isVisible}
       style={{ width: '90%' }}
       onHide={e => onHide()}>
@@ -319,9 +341,10 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                 <label htmlFor="table">{resourcesContext.messages.table}</label>
                 <Dropdown
                   id={`${componentName}__table`}
+                  disabled={tableFieldOptions.disabled}
                   appendTo={document.body}
                   filterPlaceholder={resourcesContext.messages.table}
-                  placeholder={resourcesContext.messages.table}
+                  placeholder={tableFieldOptions.placeholder}
                   optionLabel="label"
                   options={creationFormState.schemaTables}
                   onChange={e =>
@@ -432,7 +455,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
             </div>
             <div className={styles.subsection}>
               <div className={`${styles.field} ${styles.qcActive}`}>
-                <label htmlFor="QcActive">{resourcesContext.messages.active}</label>
+                <label htmlFor="QcActive">{resourcesContext.messages.enabled}</label>
                 <Checkbox
                   id={`${componentName}__active`}
                   onChange={e =>
@@ -462,48 +485,47 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                   />
                 ))}
             </ul>
-          </div>
-          <div className={`${styles.section} ${styles.actionsButtons}`}>
-            <Button
-              id={`${componentName}__addExpresion`}
-              disabled={creationFormState.isRuleAddingDisabled}
-              className="p-button-primary p-button-text-icon-left"
-              type="button"
-              label={resourcesContext.messages.addNewRule}
-              icon="plus"
-              onClick={e =>
-                creationFormDispatch({
-                  type: 'ADD_EMPTY_RULE',
-                  payload: getEmptyExpression()
-                })
-              }
-            />
-            {creationFormState.groupExpressionsActive >= 2 && (
+            <div className={styles.expressionsActionsBtns}>
               <Button
-                id={`${componentName}__groupExpresions`}
-                className="p-button-primary p-button-text"
+                id={`${componentName}__addExpresion`}
+                disabled={creationFormState.isRuleAddingDisabled}
+                className="p-button-primary p-button-text-icon-left"
                 type="button"
-                label="Group"
+                label={resourcesContext.messages.addNewRule}
                 icon="plus"
-                onClick={e => {
-                  const groupingResult = groupExpressions(
-                    creationFormState.candidateRule.expressions,
-                    creationFormState.groupExpressionsActive,
-                    creationFormState.groupCandidate
-                  );
-                  if (!isNil(groupingResult.newGroup))
-                    creationFormDispatch({
-                      type: 'GROUP_EXPRESSIONS',
-                      payload: {
-                        expressions: groupingResult.expressions,
-                        allExpressions: [...creationFormState.candidateRule.allExpressions, groupingResult.newGroup]
-                      }
-                    });
-                }}
+                onClick={e =>
+                  creationFormDispatch({
+                    type: 'ADD_EMPTY_RULE',
+                    payload: getEmptyExpression()
+                  })
+                }
               />
-            )}
+              {creationFormState.groupExpressionsActive >= 2 && (
+                <Button
+                  id={`${componentName}__groupExpresions`}
+                  className="p-button-primary p-button-text"
+                  type="button"
+                  label="Group"
+                  icon="plus"
+                  onClick={e => {
+                    const groupingResult = groupExpressions(
+                      creationFormState.candidateRule.expressions,
+                      creationFormState.groupExpressionsActive,
+                      creationFormState.groupCandidate
+                    );
+                    if (!isNil(groupingResult.newGroup))
+                      creationFormDispatch({
+                        type: 'GROUP_EXPRESSIONS',
+                        payload: {
+                          expressions: groupingResult.expressions,
+                          allExpressions: [...creationFormState.candidateRule.allExpressions, groupingResult.newGroup]
+                        }
+                      });
+                  }}
+                />
+              )}
+            </div>
           </div>
-
           <div className={styles.section}>
             <textarea
               name=""

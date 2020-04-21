@@ -28,6 +28,9 @@ public class TableSchemaVO {
   /** The record schema. */
   private RecordSchemaVO recordSchema;
 
+  /** The to prefill. */
+  private Boolean toPrefill;
+
 
   /**
    * Hash code.

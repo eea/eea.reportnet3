@@ -13,6 +13,7 @@ import { InputText } from 'ui/views/_components/InputText';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { filterReducer } from './_functions/Reducers/filterReducer';
 
@@ -35,6 +36,7 @@ export const Filters = ({
   sortable
 }) => {
   const resources = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
 
   const dateRef = useRef(null);
 
@@ -98,13 +100,7 @@ export const Filters = ({
       payload: {
         filterBy: FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions, dropdownOptions),
         filteredData: cloneDeep(data),
-        labelAnimations: FilterUtils.getLabelInitialState(
-          inputOptions,
-          selectOptions,
-          dateOptions,
-          dropdownOptions,
-          filterState.filterBy
-        ),
+        labelAnimations: FilterUtils.onClearLabelState(inputOptions, selectOptions, dateOptions, dropdownOptions),
         orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions, dropdownOptions)
       }
     });
@@ -142,9 +138,9 @@ export const Filters = ({
   const renderCalendarFilter = (property, i) => (
     <span key={i} className={styles.dataflowInput} ref={dateRef}>
       {renderOrderFilter(property)}
-      <span className="p-float-label">
+      <span className={`p-float-label ${!sendData ? styles.label : ''}`}>
         <Calendar
-          dateFormat="yy-mm-dd"
+          dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
           className={styles.calendarFilter}
           inputClassName={styles.inputFilter}
           inputId={property}
@@ -203,7 +199,7 @@ export const Filters = ({
   const renderInputFilter = (property, i) => (
     <span key={i} className={styles.dataflowInput}>
       {renderOrderFilter(property)}
-      <span className="p-float-label">
+      <span className={`p-float-label ${styles.label}`}>
         <InputText
           className={styles.inputFilter}
           id={property}

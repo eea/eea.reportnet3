@@ -96,12 +96,13 @@ const ValidationExpressionGroup = ({
                 value={{ label: expressionValues.union, value: expressionValues.union }}
               />
             </span>
-            <span>
+            <span className={styles.groupToggler}>
               <FontAwesomeIcon icon={AwesomeIcons('folder')} style={{ fontSize: '2rem' }} />
               {expressionsVisibilityToggleBtn()}
             </span>
             <span>
               <Button
+                className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton} p-button-animated-blink`}
                 disabled={isDisabled}
                 type="button"
                 icon="trash"

@@ -328,6 +328,19 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     return query.getResultList();
   }
 
+  /**
+   * Find by table value all records.
+   *
+   * @param idTableSchema the id table schema
+   * @return the list
+   */
+  @Override
+  public List<RecordValue> findByTableValueAllRecords(String idTableSchema) {
+    Query query = entityManager.createQuery(QUERY_UNSORTERED);
+    query.setParameter("idTableSchema", idTableSchema);
+    return query.getResultList();
+  }
+
 
   /**
    * Sanitize ordered records.

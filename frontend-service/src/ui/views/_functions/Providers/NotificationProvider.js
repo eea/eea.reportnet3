@@ -16,13 +16,15 @@ const notificationReducer = (state, { type, payload }) => {
       return {
         ...state,
         toShow: [...state.toShow, payload],
-        all: [...state.all, payload]
+        all: [...state.all, payload],
+        newNotification: true
       };
     case 'READ':
       return {
         ...state,
         toShow: [...state.toShow, payload],
-        all: [...state.all, payload]
+        all: [...state.all, payload],
+        newNotification: false
       };
     case 'REMOVE':
       return {
@@ -40,14 +42,18 @@ const notificationReducer = (state, { type, payload }) => {
         toShow: [],
         all: []
       };
-
+    case 'NEW_NOTIFICATION_ADDED':
+      return {
+        ...state,
+        newNotification: false
+      };
     default:
       return state;
   }
 };
 
 const NotificationProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(notificationReducer, { toShow: [], all: [] });
+  const [state, dispatch] = useReducer(notificationReducer, { toShow: [], all: [], newNotification: false });
   const resourcesContext = useContext(ResourcesContext);
 
   return (
@@ -67,6 +73,9 @@ const NotificationProvider = ({ children }) => {
           dispatch({
             type: 'ADD',
             payload: notification
+          });
+          dispatch({
+            type: 'NEW_NOTIFICATION_ADDED'
           });
         },
         read: notificationId => {

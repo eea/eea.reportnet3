@@ -37,4 +37,14 @@ public interface RecordExtendedQueriesRepository {
    */
   List<RecordValue> findByTableValueNoOrder(String idTableSchema, Pageable pageable);
 
+
+
+  /**
+   * Find by table value all records.
+   *
+   * @param idTableSchema the id table schema
+   * @return the list
+   */
+  List<RecordValue> findByTableValueAllRecords(String idTableSchema);
+
 }

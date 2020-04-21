@@ -415,5 +415,16 @@ public class RulesControllerImplTest {
   @Test
   public void deleteRuleRequiredTest() {
     rulesControllerImpl.deleteRuleRequired("5e44110d6a9e3a270ce13fac", null);
+    Mockito.verify(rulesService, times(1)).deleteRuleRequired(Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Delete rule by reference field schema PK id.
+   */
+  @Test
+  public void deleteRuleByReferenceFieldSchemaPKId() {
+    rulesControllerImpl.deleteRuleByReferenceFieldSchemaPKId("", "");
+    Mockito.verify(rulesService, times(1)).deleteRuleByReferenceFieldSchemaPKId(Mockito.any(),
+        Mockito.any());
   }
 }

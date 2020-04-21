@@ -40,10 +40,12 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
       case 'COORDINATE_LONG':
       case 'COORDINATE_LAT':
         return 'num';
+      case 'DATE':
+        return 'date';
       case 'TEXT':
-        return 'alphanum';
+        return 'any';
       default:
-        return 'alphanum';
+        return 'any';
     }
   };
 
@@ -106,7 +108,9 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
         keyfilter={getFilter(type)}
         onChange={e => onChangeForm(field, e.target.value)}
         value={fieldValue}
-        type={type === 'DATE' ? 'date' : 'text'}
+        // type={type === 'DATE' ? 'date' : 'text'}
+        placeHolder={type === 'DATE' ? 'YYYY-MM-DD' : ''}
+        type="text"
       />
     );
 
