@@ -279,7 +279,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
 
   const onExpressionFieldUpdate = (expressionId, field) => {
     const {
-      candidateRule: { expressions, allExpressions }
+      candidateRule: { allExpressions }
     } = creationFormState;
     creationFormDispatch({
       type: 'UPDATE_RULES',
