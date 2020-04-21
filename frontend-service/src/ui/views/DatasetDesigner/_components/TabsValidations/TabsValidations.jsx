@@ -94,18 +94,21 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   };
 
   const automaticTemplate = rowData => (
-    <div className={styles.checkedValueColumn} style={{ textAlign: 'center' }}>
-      {rowData.automatic ? (
-        <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
-      ) : null}
+    <div className={styles.checkedValueColumn}>
+      {rowData.automatic ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
     </div>
   );
 
-  const enabledTemplate = rowData => (
-    <div className={styles.checkedValueColumn} style={{ textAlign: 'center' }}>
-      {rowData.enabled ? (
-        <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
+  const correctTemplate = rowData => (
+    <div className={styles.checkedValueColumn}>
+      {!isNil(rowData.isCorrect) ? (
+        <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons(rowData.isCorrect ? 'check' : 'cross')} />
       ) : null}
+    </div>
+  );
+  const enabledTemplate = rowData => (
+    <div className={styles.checkedValueColumn}>
+      {rowData.enabled ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
     </div>
   );
 
@@ -138,6 +141,10 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       header = 'Code';
       return header;
     }
+    if (fieldHeader === 'isCorrect') {
+      header = 'Correct';
+      return header;
+    }
     header = fieldHeader;
     return capitalize(header);
   };
@@ -157,7 +164,8 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       { id: 'activationGroup', index: 10 },
       { id: 'date', index: 11 },
       { id: 'entityType', index: 12 },
-      { id: 'actionButtons', index: 13 }
+      { id: 'actionButtons', index: 13 },
+      { id: 'isCorrect', index: 14 }
     ];
     return validations
       .map(error => validationsWithPriority.filter(e => error === e.id))
@@ -223,12 +231,9 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   const renderColumns = validations => {
     const fieldColumns = getOrderedValidations(Object.keys(validations[0])).map(field => {
       let template = null;
-      if (field === 'automatic') {
-        template = automaticTemplate;
-      }
-      if (field === 'enabled') {
-        template = enabledTemplate;
-      }
+      if (field === 'automatic') template = automaticTemplate;
+      if (field === 'enabled') template = enabledTemplate;
+      if (field === 'isCorrect') template = correctTemplate;
       return (
         <Column
           body={template}
