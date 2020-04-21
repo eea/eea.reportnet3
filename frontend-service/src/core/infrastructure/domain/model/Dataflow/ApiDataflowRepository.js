@@ -302,6 +302,8 @@ const getAllSchemas = async dataflowId => {
   return datasetSchemas;
 };
 
+const getApiKey = async () => await apiDataflow.getApiKey();
+
 const getPercentageOfValue = (val, total) => {
   return total === 0 ? '0.00' : ((val / total) * 100).toFixed(2);
 };
@@ -511,6 +513,7 @@ export const ApiDataflowRepository = {
   datasetsReleasedStatus,
   deleteById,
   getAllSchemas,
+  getApiKey,
   newEmptyDatasetSchema,
   pending,
   reject,

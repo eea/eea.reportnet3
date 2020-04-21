@@ -118,6 +118,20 @@ export const apiDataflow = {
     });
     return response;
   },
+  getApiKey: async () => {
+    /*  const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.getApiKey),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+
+    return response.data; */
+
+    return '111-222-222-222';
+  },
   pending: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({

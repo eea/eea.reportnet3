@@ -11,6 +11,7 @@ export const DataflowRepository = {
   datasetsReleasedStatus: () => Promise.reject('[DataflowRepository#datasetsReleasedStatus] must be implemented'),
   deleteById: () => Promise.reject('[DataflowRepository#deleteById] must be implemented'),
   getAllSchemas: () => Promise.reject('[DataflowRepository#getAllSchemas] must be implemented'),
+  getApiKey: () => Promise.reject('[DataflowRepository#getApiKey] must be implemented'),
   metadata: () => Promise.reject('[DataflowRepository#metadata] must be implemented'),
   newEmptyDatasetSchema: () => Promise.reject('[DataflowRepository#newEmptyDatasetSchema] must be implemented'),
   pending: () => Promise.reject('[DataflowRepository#pending] must be implemented'),
