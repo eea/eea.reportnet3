@@ -21,9 +21,6 @@ public class ETLRecordVO implements Serializable {
   /** The Constant serialVersionUID. */
   private static final long serialVersionUID = -8755775977405479894L;
 
-  /** The table name. */
-  private String tableName;
-
   /** The records. */
   private List<ETLFieldVO> fields;
 }
