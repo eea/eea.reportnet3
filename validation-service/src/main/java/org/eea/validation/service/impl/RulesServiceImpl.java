@@ -318,7 +318,6 @@ public class RulesServiceImpl implements RulesService {
           ruleList.addAll(AutomaticRules.createCodelistAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, document.get("codelistItems").toString(), "FT" + shortcode,
               FT_DESCRIPTION + typeData));
-
           break;
         case URL:
           ruleList.add(AutomaticRules.createUrlAutomaticRule(referenceId, typeEntityEnum,
@@ -326,6 +325,11 @@ public class RulesServiceImpl implements RulesService {
           break;
         case EMAIL:
           ruleList.add(AutomaticRules.createEmailAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
+
+        case PHONE:
+          ruleList.add(AutomaticRules.createPhoneAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
         default:

@@ -156,7 +156,7 @@ function boolean isEmail(String value){
 	if(!isBlank(value)){
 		return true;
 	}
-	Pattern pat = Pattern.compile(“([a-z0-9]+(\\.?[a-z0-9])*)+@(([a-z]+)\\.([a-z]+))+”);					
+	Pattern pat = Pattern.compile(“^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$”);					
 	Matcher mather = pattern.matcher(value);					
 	if (mather.find() == true) {
 			return true;
@@ -166,6 +166,20 @@ function boolean isEmail(String value){
  
  }
 
+ //////////////////////////////////////////VALIDATION PHONE///////////////////////////////////////////////////////////
+function boolean isPhone(String value){
+	if(!isBlank(value)){
+		return true;
+	}
+	Pattern pat = Pattern.compile(“^(\(?\+?[0-9]*\)?)?[0-9_\- \(\)]*$”);					
+	Matcher mather = pattern.matcher(value);					
+	if (mather.find() == true) {
+			return true;
+		} else {
+			return false;
+		}					
+ 
+ }
  //////////////////////////////////////////DEFAULT VALIDATIONS END BLOCK////////////////////////////////////////////////////////////
  
  //////////////////////////////////////////VALIDATION PK////////////////////////////////////////////////////////////

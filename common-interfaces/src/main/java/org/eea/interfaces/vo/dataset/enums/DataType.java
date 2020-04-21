@@ -17,6 +17,13 @@ public enum DataType {
   TEXT("TEXT"),
 
   /**
+   * The Text with more than 10000 characters.
+   *
+   * Cast in JPA: java.lang.String
+   */
+  LONG_TEXT("LONG_TEXT"),
+
+  /**
    * The Number Integer.
    *
    * Cast in JPA: CAST(fv.value as java.math.BigDecimal)
@@ -90,17 +97,46 @@ public enum DataType {
    */
   POLYGON("POLYGON"),
 
-  /** The codelist. */
+  /**
+   * The codelist.
+   *
+   * Cast in JPA: java.lang.String
+   */
   CODELIST("CODELIST"),
 
-  /** The link. */
+  /**
+   * The link data with PK.
+   *
+   * Cast in JPA: java.lang.String
+   */
   LINK("LINK"),
 
-  /** The link data. */
+  /**
+   * The link data with PK.
+   *
+   * Cast in JPA: java.lang.String
+   */
   LINK_DATA("LINK_DATA"),
 
+  /**
+   * The url valid.
+   *
+   * Cast in JPA: java.lang.String
+   */
   URL("URL"),
 
+  /**
+   * The phone.
+   *
+   * Cast in JPA: java.lang.String
+   */
+  PHONE("PHONE"),
+
+  /**
+   * The email.
+   *
+   * Cast in JPA: java.lang.String
+   */
   EMAIL("EMAIL");
 
 
@@ -139,6 +175,11 @@ public enum DataType {
     return Arrays.stream(DataType.values()).filter(e -> e.value.equals(value)).findFirst().get();
   }
 
+  /**
+   * To string.
+   *
+   * @return the string
+   */
   @Override
   @JsonValue
   public String toString() {

@@ -46,7 +46,8 @@ public class AutomaticRules {
   public static Rule createNumberIntegerAutomaticRule(String referenceId,
       EntityTypeEnum typeEntityEnum, String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isNumberInteger(value)",
-        "The field must be a valid number", ErrorTypeEnum.ERROR.getValue(), shortCode, description);
+        "The field must be a valid number without decimals", ErrorTypeEnum.ERROR.getValue(),
+        shortCode, description);
   }
 
   /**
@@ -197,11 +198,26 @@ public class AutomaticRules {
   public static Rule createUrlAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isURL(value)",
-        "The field must be a valid URL format.", ErrorTypeEnum.ERROR.getValue(), shortCode,
-        description);
+        "The value does not follow the expected syntax for a valid URL.",
+        ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
 
-
+  /**
+   * Creates the phone automatic rule.
+   *
+   * @param referenceId the reference id
+   * @param typeEntityEnum the type entity enum
+   * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
+   * @return the rule
+   */
+  public static Rule createPhoneAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
+      String nameRule, String shortCode, String description) {
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isPhone(value)",
+        "The value does not follow the expected syntax for a valid phone number.",
+        ErrorTypeEnum.ERROR.getValue(), shortCode, description);
+  }
 
   /**
    * Creates the email automatic rule.
