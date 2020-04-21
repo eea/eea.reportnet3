@@ -86,15 +86,6 @@ public class SpreadDataCommandTest {
     Assert.assertEquals(EventType.SPREAD_DATA_EVENT, spreadDataCommand.getEventType());
   }
 
-  /**
-   * Execute test other event.
-   */
-  @Test
-  public void executeTestOtherEvent() {
-    eeaEventVO.setEventType(EventType.COMMAND_CLEAN_KYEBASE);
-    spreadDataCommand.execute(eeaEventVO);
-    Mockito.verifyNoMoreInteractions(designDatasetRepository);
-  }
 
   /**
    * Execute test.
@@ -145,6 +136,9 @@ public class SpreadDataCommandTest {
   }
 
 
+  /**
+   * Execute test not to prefill.
+   */
   @Test
   public void executeTestNotToPrefill() {
     eeaEventVO.setData(result);
@@ -163,6 +157,7 @@ public class SpreadDataCommandTest {
     schema.setTableSchemas(desingTableSchemas);
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     spreadDataCommand.execute(eeaEventVO);
+    Mockito.verify(designDatasetRepository, times(1)).findByDataflowId(Mockito.anyLong());
   }
 
 
@@ -178,6 +173,20 @@ public class SpreadDataCommandTest {
     spreadDataCommand.execute(eeaEventVO);
     Mockito.verify(designDatasetRepository, times(1)).findByDataflowId(Mockito.anyLong());
   }
+
+
+  /**
+   * Execute test desing datasets are null.
+   */
+  @Test
+  public void executeTestNoDesingDatasetsNull() {
+    eeaEventVO.setData(result);
+    eeaEventVO.setEventType(EventType.SPREAD_DATA_EVENT);
+    when(dataSetMetabaseRepository.findDataflowIdById(Mockito.anyLong())).thenReturn(null);
+    spreadDataCommand.execute(eeaEventVO);
+    Mockito.verify(designDatasetRepository, times(1)).findByDataflowId(null);
+  }
+
 
 
 }

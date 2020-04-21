@@ -70,25 +70,24 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) {
-    if (EventType.SPREAD_DATA_EVENT.equals(eeaEventVO.getEventType())) {
-      String stringDataset = (String) eeaEventVO.getData().get("dataset_id");
-      String idDatasetSchema = (String) eeaEventVO.getData().get("idDatasetSchema");
-      Long dataset = Long.valueOf(stringDataset);
-      Long dataflowId = dataSetMetabaseRepository.findDataflowIdById(dataset);
-      List<DesignDataset> designs = designDatasetRepository.findByDataflowId(dataflowId);
-      boolean isdesing = false;
-      if (!designs.isEmpty()) {
-        for (DesignDataset design : designs) {
-          if (design.getId().equals(dataset)) {
-            isdesing = true;
-          }
+    String stringDataset = (String) eeaEventVO.getData().get("dataset_id");
+    String idDatasetSchema = (String) eeaEventVO.getData().get("idDatasetSchema");
+    Long dataset = Long.valueOf(stringDataset);
+    Long dataflowId = dataSetMetabaseRepository.findDataflowIdById(dataset);
+    List<DesignDataset> designs = designDatasetRepository.findByDataflowId(dataflowId);
+    boolean isdesing = false;
+    if (!designs.isEmpty()) {
+      for (DesignDataset design : designs) {
+        if (design.getId().equals(dataset)) {
+          isdesing = true;
         }
-        if (!isdesing) {
-          spreadData(designs, dataset, idDatasetSchema);
-        }
+      }
+      if (!isdesing) {
+        spreadData(designs, dataset, idDatasetSchema);
       }
     }
   }
+
 
   /**
    * Spread data.
