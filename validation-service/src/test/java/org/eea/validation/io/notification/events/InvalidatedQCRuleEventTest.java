@@ -17,7 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 /**
- * The Class DisabledQCRuleEventTest.
+ * The Class InvalidatedQCRuleEventTest.
  */
 public class InvalidatedQCRuleEventTest {
 
@@ -29,6 +29,9 @@ public class InvalidatedQCRuleEventTest {
   @Mock
   private DataSetSchemaControllerZuul datasetSchemaController;
 
+  /**
+   * Inits the mocks.
+   */
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
@@ -44,8 +47,8 @@ public class InvalidatedQCRuleEventTest {
 
   /**
    * Test get map.
-   * 
-   * @throws EEAException
+   *
+   * @throws EEAException the EEA exception
    */
   @Test
   public void testGetMap() throws EEAException {
@@ -63,8 +66,8 @@ public class InvalidatedQCRuleEventTest {
 
   /**
    * Test get map.
-   * 
-   * @throws EEAException
+   *
+   * @throws EEAException the EEA exception
    */
   @Test
   public void testGetMapSearchName() throws EEAException {
