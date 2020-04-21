@@ -1,6 +1,0 @@
-{
-  "filterItems": {
-    "input": ["nameTable", "field", "text"],
-    "select": ["typeOfQC", "errorLevel", "enabled", "correct"]
-  }
-}

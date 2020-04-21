@@ -11,11 +11,13 @@ import styles from './TabsValidations.module.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
+import ValidationList from 'conf/validationList.config.json';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
+import { Filters } from 'ui/views/_components/Filters';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabView } from 'ui/views/_components/TabView'; // Do not delete
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel'; // Do not delete
@@ -31,6 +33,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
 
+  const [filteredData, setFilteredData] = useState([]);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -84,6 +87,8 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       setIsLoading(false);
     }
   };
+
+  const onLoadFiltredData = data => setFilteredData(data);
 
   const onShowDeleteDialog = () => {
     setIsDeleteDialogVisible(true);
@@ -256,19 +261,31 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     const paginatorRightText = `${capitalize('FIELD')} records: ${validationsList.validations.length}`;
     return (
       <div className={null}>
-        <DataTable
-          autoLayout={true}
-          className={styles.paginatorValidationViewer}
-          loading={false}
-          onRowClick={event => setValidationId(event.data.id)}
-          paginator={true}
-          paginatorRight={paginatorRightText}
-          rows={10}
-          rowsPerPageOptions={[5, 10, 15]}
-          totalRecords={validationsList.validations.length}
-          value={validationsList.validations}>
-          {renderColumns(validationsList.validations)}
-        </DataTable>
+        <Filters
+          data={validationsList.validations}
+          getFiltredData={onLoadFiltredData}
+          inputOptions={ValidationList.filterItems['input']}
+          selectOptions={ValidationList.filterItems['select']}
+          sortable={true}
+        />
+
+        {!isEmpty(filteredData) ? (
+          <DataTable
+            autoLayout={true}
+            className={styles.paginatorValidationViewer}
+            loading={false}
+            onRowClick={event => setValidationId(event.data.id)}
+            paginator={true}
+            paginatorRight={paginatorRightText}
+            rows={10}
+            rowsPerPageOptions={[5, 10, 15]}
+            totalRecords={validationsList.validations.length}
+            value={filteredData}>
+            {renderColumns(validationsList.validations)}
+          </DataTable>
+        ) : (
+          <div className={styles.noDataflows}>{resources.messages['noDataflowsWithSelectedParameters']}</div>
+        )}
       </div>
 
       // <TabPanel header={entityType} key={entityType} rightIcon={null}>

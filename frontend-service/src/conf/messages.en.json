@@ -597,9 +597,7 @@
     "webForm": "Webform",
     "webLinks": "Web links",
     "yes": "Yes",
-    "nameTable": "Table",
-    "typeOfQC": "Type of QC",
-    "errorLevel": "Error Level",
+    "entityType": "Type of QC",
     "text": "Text"
   }
 }
