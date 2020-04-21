@@ -419,6 +419,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public TableSchemaVO createTableSchema(String id, TableSchemaVO tableSchemaVO, Long datasetId) {
     ObjectId tableSchemaId = new ObjectId();
     tableSchemaVO.setIdTableSchema(tableSchemaId.toString());
+    tableSchemaVO.setToPrefill(false);
     RecordSchema recordSchema = new RecordSchema();
     ObjectId recordSchemaId = new ObjectId();
     recordSchema.setIdRecordSchema(recordSchemaId);
@@ -461,6 +462,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
         if (tableSchemaVO.getReadOnly() != null) {
           tableSchema.put("readOnly", tableSchemaVO.getReadOnly());
+        }
+        if (tableSchemaVO.getToPrefill() != null) {
+          tableSchema.put("toPrefill", tableSchemaVO.getToPrefill());
         }
 
         // Guardar el TableSchema modificado en MongoDB

@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEmpty from 'lodash/isEmpty';
-import isUndefined from 'lodash/isUndefined';
+import isNil from 'lodash/isNil';
 import moment from 'moment';
 
 import styles from './Documents.module.scss';
@@ -48,7 +48,6 @@ const Documents = ({
   const [fileToDownload, setFileToDownload] = useState(undefined);
   const [downloadingId, setDownloadingId] = useState('');
   const [isEditForm, setIsEditForm] = useState(false);
-  const [isFormReset, setIsFormReset] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   const [rowDataState, setRowDataState] = useState();
@@ -58,47 +57,39 @@ const Documents = ({
   }, [documents]);
 
   useEffect(() => {
-    if (!isUndefined(fileToDownload)) {
-      DownloadFile(fileToDownload, fileName);
-    }
+    if (!isNil(fileToDownload)) DownloadFile(fileToDownload, fileName);
   }, [fileToDownload]);
 
-  const createFileName = title => {
-    return `${title.split(' ').join('_')}`;
-  };
+  const createFileName = title => `${title.split(' ').join('_')}`;
 
   const dateColumnTemplate = rowData => <span>{moment(rowData.date).format(user.userProps.dateFormat)}</span>;
 
-  const documentsEditButtons = rowData => {
-    return (
-      <div className={`${styles.documentsEditButtons} dataflowHelp-document-edit-delete-help-step`}>
-        <ActionsColumn
-          isDeletingDocument={isDeletingDocument}
-          onDeleteClick={() => {
-            setDeleteDialogVisible(true);
-            setRowDataState(rowData);
-          }}
-          onEditClick={() => onEditDocument()}
-        />
-      </div>
-    );
-  };
+  const documentsEditButtons = rowData => (
+    <div className={`${styles.documentsEditButtons} dataflowHelp-document-edit-delete-help-step`}>
+      <ActionsColumn
+        isDeletingDocument={isDeletingDocument}
+        onDeleteClick={() => {
+          setDeleteDialogVisible(true);
+          setRowDataState(rowData);
+        }}
+        onEditClick={() => onEditDocument()}
+      />
+    </div>
+  );
 
-  const downloadColumnTemplate = rowData => {
-    return (
-      <span
-        className={`${styles.downloadIcon} dataflowHelp-document-icon-help-step`}
-        onClick={() => onDownloadDocument(rowData)}>
-        {downloadingId === rowData.id ? (
-          <Icon icon="spinnerAnimate" />
-        ) : (
-          <div>
-            <FontAwesomeIcon icon={AwesomeIcons(rowData.category)} />
-          </div>
-        )}
-      </span>
-    );
-  };
+  const downloadColumnTemplate = rowData => (
+    <span
+      className={`${styles.downloadIcon} dataflowHelp-document-icon-help-step`}
+      onClick={() => onDownloadDocument(rowData)}>
+      {downloadingId === rowData.id ? (
+        <Icon icon="spinnerAnimate" />
+      ) : (
+        <div>
+          <FontAwesomeIcon icon={AwesomeIcons(rowData.category)} />
+        </div>
+      )}
+    </span>
+  );
 
   const formatBytes = bytes => {
     if (bytes === 0) return '0 B';
@@ -116,21 +107,18 @@ const Documents = ({
     return result;
   };
 
-  const isPublicColumnTemplate = rowData => {
-    return <span>{rowData.isPublic ? resources.messages['yes'] : resources.messages['no']}</span>;
-  };
+  const isPublicColumnTemplate = rowData => (
+    <span>{rowData.isPublic ? resources.messages['yes'] : resources.messages['no']}</span>
+  );
 
   const onCancelDialog = () => {
-    setIsFormReset(false);
     setIsUploadDialogVisible(false);
   };
 
   const onDeleteDocument = async documentData => {
     setDeleteDialogVisible(false);
-    notificationContext.add({
-      type: 'DELETE_DOCUMENT_INIT_INFO',
-      content: {}
-    });
+    notificationContext.add({ type: 'DELETE_DOCUMENT_INIT_INFO' });
+
     try {
       await DocumentService.deleteDocument(documentData.id);
       const inmAllDocuments = [...allDocuments];
@@ -173,18 +161,16 @@ const Documents = ({
   const sizeColumnTemplate = rowData => {
     const formatedRowData = formatBytes(rowData.size);
     return (
-      <>
+      <Fragment>
         {formatedRowData.bytesParsed} {formatedRowData.sizeType}
-      </>
+      </Fragment>
     );
   };
 
-  const titleColumnTemplate = rowData => {
-    return <span onClick={() => onDownloadDocument(rowData)}>{rowData.title}</span>;
-  };
+  const titleColumnTemplate = rowData => <span onClick={() => onDownloadDocument(rowData)}>{rowData.title}</span>;
 
   return (
-    <>
+    <Fragment>
       {isCustodian ? (
         <Toolbar className={styles.documentsToolbar}>
           <div className="p-toolbar-group-left">
@@ -200,7 +186,7 @@ const Documents = ({
           </div>
         </Toolbar>
       ) : (
-        <></>
+        <Fragment></Fragment>
       )}
 
       <DataTable
@@ -292,22 +278,23 @@ const Documents = ({
         )}
       </DataTable>
 
-      <Dialog
-        className={styles.dialog}
-        dismissableMask={false}
-        header={isEditForm ? resources.messages['editDocument'] : resources.messages['uploadDocument']}
-        onHide={onCancelDialog}
-        visible={isUploadDialogVisible}>
-        <DocumentFileUpload
-          dataflowId={dataflowId}
-          documentInitialValues={documentInitialValues}
-          isEditForm={isEditForm}
-          isFormReset={isFormReset}
-          isUploadDialogVisible={isUploadDialogVisible}
-          onUpload={onUploadDocument}
-          setIsUploadDialogVisible={setIsUploadDialogVisible}
-        />
-      </Dialog>
+      {isUploadDialogVisible && (
+        <Dialog
+          className={styles.dialog}
+          dismissableMask={false}
+          header={isEditForm ? resources.messages['editDocument'] : resources.messages['uploadDocument']}
+          onHide={onCancelDialog}
+          visible={isUploadDialogVisible}>
+          <DocumentFileUpload
+            dataflowId={dataflowId}
+            documentInitialValues={documentInitialValues}
+            isEditForm={isEditForm}
+            isUploadDialogVisible={isUploadDialogVisible}
+            onUpload={onUploadDocument}
+            setIsUploadDialogVisible={setIsUploadDialogVisible}
+          />
+        </Dialog>
+      )}
 
       <ConfirmDialog
         classNameConfirm={'p-button-danger'}
@@ -323,7 +310,7 @@ const Documents = ({
         visible={deleteDialogVisible}>
         {resources.messages['deleteDocument']}
       </ConfirmDialog>
-    </>
+    </Fragment>
   );
 };
 

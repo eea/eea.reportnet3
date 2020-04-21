@@ -1,8 +1,10 @@
-import React, { useContext, useRef } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 
 import * as Yup from 'yup';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { isEmpty, isNull, isUndefined } from 'lodash';
+import { ErrorMessage, Field, Form, Formik } from 'formik';
+
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './NewDatasetSchemaForm.module.css';
 
@@ -16,26 +18,28 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { MetadataUtils } from 'ui/views/_functions/Utils/MetadataUtils';
 
-const NewDatasetSchemaForm = ({
-  dataflowId,
-  datasetSchemaInfo,
-  isFormReset,
-  onCreate,
-  onUpdateData,
-  setNewDatasetDialog
-}) => {
+const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdateData, setNewDatasetDialog }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const form = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (!isNil(form.current)) form.current.resetForm();
+  }, [form.current]);
+
+  useEffect(() => {
+    if (!isNil(inputRef.current)) inputRef.current.focus();
+  }, [inputRef.current]);
 
   const initialValues = { datasetSchemaName: '' };
   const newDatasetValidationSchema = Yup.object().shape({
     datasetSchemaName: Yup.string()
       .required(' ')
       .test('', resources.messages['duplicateSchemaError'], value => {
-        if (!isUndefined(value) && !isEmpty(datasetSchemaInfo)) {
+        if (!isNil(value) && !isEmpty(datasetSchemaInfo)) {
           const schemas = [...datasetSchemaInfo];
           const isRepeat = schemas.filter(title => title.schemaName.toLowerCase() !== value.toLowerCase());
           return isRepeat.length === schemas.length;
@@ -45,13 +49,6 @@ const NewDatasetSchemaForm = ({
       })
   });
 
-  if (!isNull(form.current)) {
-    document.getElementById('dataSchemaInput').focus();
-  }
-
-  if (!isFormReset && !isNull(form.current)) {
-    form.current.resetForm();
-  }
   return (
     <Formik
       ref={form}
@@ -95,7 +92,7 @@ const NewDatasetSchemaForm = ({
             <div
               className={`formField${!isEmpty(errors.datasetSchemaName) && touched.datasetSchemaName ? ' error' : ''}`}>
               <Field
-                id="dataSchemaInput"
+                innerRef={inputRef}
                 name="datasetSchemaName"
                 placeholder={resources.messages['createDatasetSchemaName']}
                 type="text"

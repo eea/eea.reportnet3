@@ -399,8 +399,15 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void deleteImportData(final Long dataSetId) {
-    datasetRepository.removeDatasetData(dataSetId);
 
+    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(dataSetId);
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
+    // Delete the records from the tables of the dataset that aren't marked as read only
+    for (TableSchema tableSchema : schema.getTableSchemas()) {
+      if (tableSchema.getReadOnly() == null || !tableSchema.getReadOnly()) {
+        recordRepository.deleteRecordWithIdTableSchema(tableSchema.getIdTableSchema().toString());
+      }
+    }
     try {
       this.saveStatistics(dataSetId);
     } catch (EEAException e) {

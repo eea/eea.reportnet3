@@ -129,9 +129,7 @@ const ValidationExpression = ({
             disabled={isDisabled}
             placeholder={resourcesContext.messages.value}
             value={expressionValues.expressionValue}
-            keyfilter={
-              expressionValues.operatorType == 'LEN' || expressionValues.operatorType == 'number' ? 'num' : 'alphanum'
-            }
+            keyfilter={expressionValues.operatorType == 'LEN' || expressionValues.operatorType == 'number' ? 'num' : ''}
             onChange={e =>
               onExpressionFieldUpdate(expressionId, {
                 key: 'expressionValue',

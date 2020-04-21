@@ -629,6 +629,8 @@ public class DatasetSchemaServiceTest {
         .thenReturn(tableSchema);
     Mockito.when(tableSchemaVO.getDescription()).thenReturn("description");
     Mockito.when(tableSchemaVO.getNameTableSchema()).thenReturn("nameTableSchema");
+    Mockito.when(tableSchemaVO.getReadOnly()).thenReturn(true);
+    Mockito.when(tableSchemaVO.getToPrefill()).thenReturn(true);
     Mockito.when(tableSchema.put(Mockito.any(), Mockito.any())).thenReturn(null);
     Mockito.when(schemasRepository.updateTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
@@ -647,6 +649,8 @@ public class DatasetSchemaServiceTest {
         .thenReturn(tableSchema);
     Mockito.when(tableSchemaVO.getDescription()).thenReturn(null);
     Mockito.when(tableSchemaVO.getNameTableSchema()).thenReturn(null);
+    Mockito.when(tableSchemaVO.getReadOnly()).thenReturn(null);
+    Mockito.when(tableSchemaVO.getToPrefill()).thenReturn(null);
     Mockito.when(schemasRepository.updateTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
     try {
