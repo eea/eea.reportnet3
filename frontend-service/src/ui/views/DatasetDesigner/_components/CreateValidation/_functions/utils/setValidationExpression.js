@@ -3,7 +3,14 @@ export const setValidationExpression = (expressionId, field, expressions) => {
   const [targetExpression] = expressions.filter(expression => expressionId == expression.expressionId);
   switch (field.key) {
     case 'expressionValue':
-      targetExpression[field.key] = field.value.value;
+      const {
+        value: { value }
+      } = field;
+      if (value == null) {
+        targetExpression[field.key] = '';
+      } else {
+        targetExpression[field.key] = value;
+      }
       break;
     case 'operatorType':
       targetExpression[field.key] = field.value.value;

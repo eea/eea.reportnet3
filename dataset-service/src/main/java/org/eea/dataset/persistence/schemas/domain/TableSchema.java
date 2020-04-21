@@ -37,6 +37,10 @@ public class TableSchema {
   @Field(value = "readOnly")
   private Boolean readOnly;
 
+  /** The to prefill. */
+  @Field(value = "toPrefill")
+  private Boolean toPrefill;
+
 
   /** The record schema. */
   @Field(value = "recordSchema")

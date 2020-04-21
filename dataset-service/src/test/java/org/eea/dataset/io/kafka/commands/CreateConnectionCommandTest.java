@@ -9,6 +9,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +43,10 @@ public class CreateConnectionCommandTest {
   /** The schema repository. */
   @Mock
   private SchemasRepository schemaRepository;
+
+  /** The kafka sender utils. */
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /** The eea event VO. */
   private EEAEventVO eeaEventVO;
