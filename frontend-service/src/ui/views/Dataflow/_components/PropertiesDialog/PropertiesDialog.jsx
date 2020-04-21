@@ -86,7 +86,7 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
           />
         )}
       </div>
-      <Button className="p-button-text-only" label="Generate new API-key" disabled />
+      <Button className="p-button-text-only" label={resources.messages['generateKey']} />
       <Button className="p-button-text-only" label="Open Metadata" disabled />
       <Button
         className="p-button-secondary p-button-animated-blink"

@@ -596,6 +596,7 @@
     "warning": "Warning",
     "webForm": "Webform",
     "webLinks": "Web links",
-    "yes": "Yes"
+    "yes": "Yes",
+    "generateKey": "Generate new API-key"
   }
 }
