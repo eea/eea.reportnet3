@@ -1,11 +1,16 @@
 .container {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   padding: 3em 0;
-  p {
+  .textarea {
+    text-align: center;
     margin: 0;
-    padding-right: 1em;
+    margin-right: 1em;
     font-weight: 600;
+    max-width: 70%;
+    border: none;
+    outline: none;
+    box-shadow: 0 0 0 0 Transparent;
   }
 }

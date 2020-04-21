@@ -13,6 +13,7 @@ import { DataflowService } from 'core/services/Dataflow';
 const ApiKeyDialog = ({ dataflowId, dataProviderId, isVisibleApiKeyDialog, setIsVisibleApiKeyDialog }) => {
   const [apiKey, setApiKey] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [textRef, setTextRef] = useState(null);
 
   const resources = useContext(ResourcesContext);
 
@@ -28,10 +29,10 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isVisibleApiKeyDialog, setIs
   };
 
   const onCopy = () => {
-    // TODO Copy to clipboard functionality
     // TODO message on growl confirming Copy to clipboard
-    //
-    console.log('COPY TO CLIPBOARD');
+    const el = textRef;
+    el.select();
+    document.execCommand('copy');
   };
 
   const onGetApiKey = async () => {
@@ -90,7 +91,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isVisibleApiKeyDialog, setIs
             <p>{resources.messages['noApiKey']}</p>
           ) : (
             <>
-              <p> {apiKey}</p>
+              <textarea className={styles.textarea} ref={text => setTextRef(text)} value={apiKey} rows={1} readOnly />
               <div>
                 <Button
                   icon={'copy'}
