@@ -2,6 +2,9 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { Spinner } from 'ui/views/_components/Spinner';
+
+import styles from './ApiKeyDialog.module.scss';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -56,12 +59,14 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isVisibleApiKeyDialog, setIs
   const footer = (
     <>
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        icon={'key'}
+        className="p-button-primary"
         label={resources.messages['generateKey']}
         onClick={() => onGenerateApiKey()}
+        disabled={isGenerating}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className="p-button-secondary"
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => onCloseDialog()}
@@ -74,19 +79,21 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isVisibleApiKeyDialog, setIs
       blockScroll={false}
       closeOnEscape={true}
       footer={footer}
-      header={'Api Key' /* resources.messages['TODO'] */}
+      header={resources.messages['copyRestAPIKey']}
       modal={true}
       onHide={() => onCloseDialog()}
-      style={{ width: '50%' }}
       visible={isVisibleApiKeyDialog}
       zIndex={3003}>
-      <div>
-        <p>{`This is api key : ${apiKey}`}</p>{' '}
-        <Button
-          className="p-button-secondary p-button-animated-blink"
-          label={resources.messages['copy']}
-          onClick={() => onCopy()}
-        />
+      <div className={styles.container}>
+        {isGenerating || apiKey === '' ? <Spinner /> : <p> {apiKey}</p>}
+        <div>
+          <Button
+            icon={'copy'}
+            className="p-button-secondary"
+            label={resources.messages['copy']}
+            onClick={() => onCopy()}
+          />
+        </div>
       </div>
     </Dialog>
   );

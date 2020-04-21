@@ -56,7 +56,7 @@
     "contributorLoginValidationMin": "Login is too short!",
     "contributorLoginValidationRequired": "Login is required",
     "contributorRoleValidationIsRequired": "Assign a role to contributor",
-    "copyRestAPIKey": "Copy API-key (API-key access for developers)",
+    "copyRestAPIKey": "API-key (API-key access for developers)",
     "copyrightAbout": "About the Commission's new web presence",
     "copyrightContact": "Contact",
     "copyrightCookies": "Cookies",
@@ -597,6 +597,7 @@
     "webForm": "Webform",
     "webLinks": "Web links",
     "yes": "Yes",
+    "copy": "Copy to clipboard",
     "generateKey": "Generate new API-key"
   }
 }

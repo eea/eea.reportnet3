@@ -1,0 +1,11 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3em 0;
+  p {
+    margin: 0;
+    padding-right: 1em;
+    font-weight: 600;
+  }
+}
