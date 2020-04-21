@@ -21,9 +21,9 @@ import org.mockito.MockitoAnnotations;
  */
 public class InvalidatedQCRuleEventTest {
 
-  /** The disabled QC rule event. */
+  /** The invalidated QC rule event. */
   @InjectMocks
-  private InvalidatedQCRuleEvent disabledQCRuleEvent;
+  private InvalidatedQCRuleEvent invalidatedQCRuleEvent;
 
   /** The dataset schema controller. */
   @Mock
@@ -42,7 +42,7 @@ public class InvalidatedQCRuleEventTest {
    */
   @Test
   public void testGetEventType() {
-    assertEquals(EventType.INVALIDATED_QC_RULE_EVENT, disabledQCRuleEvent.getEventType());
+    assertEquals(EventType.INVALIDATED_QC_RULE_EVENT, invalidatedQCRuleEvent.getEventType());
   }
 
   /**
@@ -61,7 +61,7 @@ public class InvalidatedQCRuleEventTest {
     notification.put("datasetSchemaId", notificationVO.getDatasetSchemaId());
     notification.put("datasetName", notificationVO.getDatasetName());
     notification.put("shortCode", notificationVO.getShortCode());
-    assertEquals(notification, disabledQCRuleEvent.getMap(notificationVO));
+    assertEquals(notification, invalidatedQCRuleEvent.getMap(notificationVO));
   }
 
   /**
@@ -81,7 +81,7 @@ public class InvalidatedQCRuleEventTest {
     notification.put("shortCode", notificationVO.getShortCode());
     Mockito.when(datasetSchemaController.findDataSchemaById(Mockito.any()))
         .thenReturn(new DataSetSchemaVO());
-    assertEquals(notification, disabledQCRuleEvent.getMap(notificationVO));
+    assertEquals(notification, invalidatedQCRuleEvent.getMap(notificationVO));
   }
 
 }
