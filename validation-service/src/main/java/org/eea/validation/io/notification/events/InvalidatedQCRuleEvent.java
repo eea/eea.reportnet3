@@ -10,9 +10,8 @@ import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
 /**
- * The Class DisabledQCRuleEvent.
+ * The Class InvalidatedQCRuleEvent.
  */
 @Component
 public class InvalidatedQCRuleEvent implements NotificableEventHandler {
