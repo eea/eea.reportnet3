@@ -206,21 +206,33 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+
   /**
-   * Call services delete.
+   * Delete import data.
    *
-   * @param dataSetId id import
+   * @param dataSetId the data set id
    */
   @Override
+  @LockMethod(removeWhenFinish = false)
   @HystrixCommand
   @DeleteMapping(value = "{id}/deleteImportData")
   @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
-  public void deleteImportData(@PathVariable("id") final Long dataSetId) {
+  public void deleteImportData(
+      @LockCriteria(name = "id") @PathVariable("id") final Long dataSetId) {
     if (dataSetId == null || dataSetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    datasetService.deleteImportData(dataSetId);
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    try {
+      // This method will release the lock
+      deleteHelper.executeDeleteDatasetProcess(dataSetId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
   }
 
   /**
@@ -413,7 +425,7 @@ public class DataSetControllerImpl implements DatasetController {
     LOG.info("Executing delete table value with id {} from dataset {}", tableSchemaId, datasetId);
     try {
       // This method will release the lock
-      deleteHelper.executeDeleteProcess(datasetId, tableSchemaId);
+      deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
