@@ -598,6 +598,7 @@
     "webLinks": "Web links",
     "yes": "Yes",
     "entityType": "Type of QC",
-    "text": "Text"
+    "text": "Text",
+    "noQCRulesWithSelectedParameters": "There are no QC rules with the selected parameters"
   }
 }

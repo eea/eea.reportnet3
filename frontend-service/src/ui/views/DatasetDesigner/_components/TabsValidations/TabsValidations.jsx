@@ -284,7 +284,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
             {renderColumns(validationsList.validations)}
           </DataTable>
         ) : (
-          <div className={styles.noDataflows}>{resources.messages['noDataflowsWithSelectedParameters']}</div>
+          <div className={styles.noDataflows}>{resources.messages['noQCRulesWithSelectedParameters']}</div>
         )}
       </div>
 

@@ -109,6 +109,7 @@ export const Filters = ({
   const onFilterData = (filter, value) => {
     const inputKeys = FilterUtils.getFilterKeys(filterState, filter, inputOptions);
     const selectedKeys = FilterUtils.getSelectedKeys(filterState, filter, selectOptions);
+
     const filteredData = FilterUtils.onApplyFilters(
       filter,
       inputKeys,
@@ -258,7 +259,9 @@ export const Filters = ({
   const selectTemplate = option => {
     if (!isNil(option.type)) {
       return (
-        <span className={`${styles[option.type.toString().toLowerCase()]} ${styles.statusBox}`}>{option.type}</span>
+        <span className={`${styles[option.type.toString().toLowerCase()]} ${styles.statusBox}`}>
+          {option.type.toString().toUpperCase()}
+        </span>
       );
     }
   };

@@ -94,6 +94,51 @@
         background-color: rgba(#c2c8cf, 0.8);
         color: var(--black);
       }
+
+      .field {
+        background-color: rgba(#6565a8, 0.9);
+      }
+
+      .row {
+        background-color: rgba(#c2c8cf, 0.8);
+        color: var(--black);
+      }
+
+      .table {
+        background-color: rgba(#6565a8, 0.9);
+      }
+
+      .dataset {
+        background-color: rgba(#c2c8cf, 0.8);
+        color: var(--black);
+      }
+
+      .info {
+        background-color: rgba(#6565a8, 0.9);
+      }
+
+      .warning {
+        background-color: rgba(#c2c8cf, 0.8);
+        color: var(--black);
+      }
+
+      .error {
+        background-color: rgba(#6565a8, 0.9);
+      }
+
+      .blocker {
+        background-color: rgba(#c2c8cf, 0.8);
+        color: var(--black);
+      }
+
+      .true {
+        background-color: rgba(#6565a8, 0.9);
+      }
+
+      .false {
+        background-color: rgba(#c2c8cf, 0.8);
+        color: var(--black);
+      }
     }
 
     .dropdownFilter {

@@ -85,7 +85,7 @@ const getOptionTypes = (data, option, list) => {
     for (let i = 0; i < validOptionItems.length; i++) {
       const template = [];
       validOptionItems.forEach(item => {
-        template.push({ type: item, value: item });
+        template.push({ type: item.toString().toUpperCase(), value: item.toString().toUpperCase() });
       });
       return template;
     }
@@ -110,7 +110,9 @@ const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value, dateOp
         checkDates(state.filterBy[dateOptions], data[dateOptions]) &&
         checkFilters(filteredKeys, data, state) &&
         checkSelected(state, data, selectedKeys) &&
-        (isEmpty(value) ? true : [...value.map(type => type.toLowerCase())].includes(data[filter].toLowerCase()))
+        (isEmpty(value)
+          ? true
+          : [...value.map(type => type.toString().toLowerCase())].includes(data[filter].toString().toLowerCase()))
       );
     } else if (dateOptions.includes(filter)) {
       let dates;
