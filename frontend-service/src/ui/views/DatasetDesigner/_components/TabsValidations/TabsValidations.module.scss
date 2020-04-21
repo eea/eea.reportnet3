@@ -31,13 +31,8 @@
       box-shadow: none;
     }
   }
-}
-
-.checkedValueColumn {
-  text-align: center;
-
-  .icon {
-    color: var(--main-color-font);
+  .checkedValueColumn {
+    text-align: center !important;
   }
 }
 

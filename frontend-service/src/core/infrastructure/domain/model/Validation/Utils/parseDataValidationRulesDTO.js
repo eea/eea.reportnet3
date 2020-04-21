@@ -20,7 +20,6 @@ export const parseDataValidationRulesDTO = validations => {
         enabled: validationDTO.enabled,
         entityType: validationDTO.type,
         id: validationDTO.ruleId,
-        isCorrect: validationDTO.verified,
         levelError:
           !isNil(validationDTO.thenCondition) && !isNil(validationDTO.thenCondition[1])
             ? validationDTO.thenCondition[1]

@@ -355,7 +355,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           onHide={() => {
             onHideValidationsDialog();
           }}
-          style={{ width: '90%' }}
+          style={{ width: '80%' }}
           visible={validationListDialogVisible}>
           <TabsValidations
             dataset={metaData.dataset}
