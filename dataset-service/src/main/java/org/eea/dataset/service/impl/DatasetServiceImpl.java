@@ -1488,6 +1488,14 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+  /**
+   * Gets the table read only.
+   *
+   * @param datasetId the dataset id
+   * @param objectId the object id
+   * @param type the type
+   * @return the table read only
+   */
   @Override
   public Boolean getTableReadOnly(Long datasetId, String objectId, EntityTypeEnum type) {
     Boolean readOnly = false;

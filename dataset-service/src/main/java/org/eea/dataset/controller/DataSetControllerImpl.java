@@ -193,6 +193,10 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
+    if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
+        && datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+    }
     // extract the filename
     String fileName = file.getOriginalFilename();
     // extract the file content
