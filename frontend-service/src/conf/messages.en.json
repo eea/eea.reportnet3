@@ -596,6 +596,7 @@
     "warning": "Warning",
     "webForm": "Webform",
     "webLinks": "Web links",
-    "yes": "Yes"
+    "yes": "Yes",
+    "invalidatedQcRuleEvent": "The rule <strong title='{:shortCode}'>{:shortShortCode}</strong> is not valid, please check it"
   }
 }
