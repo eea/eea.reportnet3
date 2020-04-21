@@ -75,7 +75,9 @@ import {
   faTimes,
   faFolder,
   faCaretRight,
-  faExternalLinkAlt
+  faExternalLinkAlt,
+  faAlignRight,
+  faEnvelope
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -337,6 +339,10 @@ export const AwesomeIcons = icon => {
       return faExternalLinkAlt;
     case 'power-off':
       return faPowerOff;
+    case 'align-right':
+      return faAlignRight;
+    // case 'email':
+    // return faEnvelope;
     default:
       return faFileAlt;
   }
