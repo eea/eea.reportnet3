@@ -84,17 +84,29 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isVisibleApiKeyDialog, setIs
       onHide={() => onCloseDialog()}
       visible={isVisibleApiKeyDialog}
       zIndex={3003}>
-      <div className={styles.container}>
-        {isGenerating || apiKey === '' ? <Spinner /> : <p> {apiKey}</p>}
-        <div>
-          <Button
-            icon={'copy'}
-            className="p-button-secondary"
-            label={resources.messages['copy']}
-            onClick={() => onCopy()}
-          />
+      {!isGenerating ? (
+        <div className={styles.container}>
+          {apiKey === '' ? (
+            <p>{resources.messages['noApiKey']}</p>
+          ) : (
+            <>
+              <p> {apiKey}</p>
+              <div>
+                <Button
+                  icon={'copy'}
+                  className="p-button-secondary"
+                  label={resources.messages['copy']}
+                  onClick={() => onCopy()}
+                />
+              </div>
+            </>
+          )}
         </div>
-      </div>
+      ) : (
+        <div className={styles.container}>
+          <Spinner style={{ top: 0, left: 0 }} />
+        </div>
+      )}
     </Dialog>
   );
 };

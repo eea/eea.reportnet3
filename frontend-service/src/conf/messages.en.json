@@ -598,6 +598,7 @@
     "webLinks": "Web links",
     "yes": "Yes",
     "copy": "Copy to clipboard",
-    "generateKey": "Generate new API-key"
+    "generateKey": "Generate new API-key",
+    "noApiKey": "There is no generated API key"
   }
 }
