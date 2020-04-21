@@ -31,8 +31,13 @@
       box-shadow: none;
     }
   }
-  .checkedValueColumn {
-    text-align: center !important;
+}
+
+.checkedValueColumn {
+  text-align: center;
+
+  .icon {
+    color: var(--main-color-font);
   }
 }
 
