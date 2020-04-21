@@ -493,6 +493,9 @@
         },
         {
           "key": "DATAFLOW_DELETE_SUCCESS"
+        },
+        {
+          "key": "COPY_TO_CLIPBOARD_SUCCESS"
         }
       ]
     },

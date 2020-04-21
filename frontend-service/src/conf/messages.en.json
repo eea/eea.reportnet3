@@ -599,6 +599,7 @@
     "yes": "Yes",
     "copy": "Copy to clipboard",
     "generateKey": "Generate new API-key",
-    "noApiKey": "There is no generated API key"
+    "noApiKey": "There is no generated API key",
+    "copyToClipboardSuccess": "Api key copied to clipboard"
   }
 }

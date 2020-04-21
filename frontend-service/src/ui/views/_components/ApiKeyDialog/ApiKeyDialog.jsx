@@ -6,6 +6,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 
 import styles from './ApiKeyDialog.module.scss';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { DataflowService } from 'core/services/Dataflow';
@@ -13,9 +14,10 @@ import { DataflowService } from 'core/services/Dataflow';
 const ApiKeyDialog = ({ dataflowId, dataProviderId, isVisibleApiKeyDialog, setIsVisibleApiKeyDialog }) => {
   const [apiKey, setApiKey] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [textRef, setTextRef] = useState(null);
+  const [textAreaRef, setTextAreaRef] = useState(null);
 
   const resources = useContext(ResourcesContext);
+  const notificationContext = useContext(NotificationContext);
 
   useEffect(() => {
     onGetApiKey();
@@ -30,9 +32,12 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isVisibleApiKeyDialog, setIs
 
   const onCopy = () => {
     // TODO message on growl confirming Copy to clipboard
-    const el = textRef;
-    el.select();
+    const textArea = textAreaRef;
+    textArea.select();
     document.execCommand('copy');
+    notificationContext.add({
+      type: 'COPY_TO_CLIPBOARD_SUCCESS'
+    });
   };
 
   const onGetApiKey = async () => {
@@ -91,7 +96,13 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isVisibleApiKeyDialog, setIs
             <p>{resources.messages['noApiKey']}</p>
           ) : (
             <>
-              <textarea className={styles.textarea} ref={text => setTextRef(text)} value={apiKey} rows={1} readOnly />
+              <textarea
+                className={styles.textarea}
+                ref={thisEl => setTextAreaRef(thisEl)}
+                value={apiKey}
+                rows={1}
+                readOnly
+              />
               <div>
                 <Button
                   icon={'copy'}
