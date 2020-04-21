@@ -118,6 +118,10 @@ export const BigButtonList = ({
     </div>
   );
 
+  const exportDatatableSchema = (datasetId, datasetName) => {
+    console.log(datasetId, datasetName);
+  };
+
   const getDeleteSchemaIndex = index => {
     setDeleteSchemaIndex(index);
     setDeleteDialogVisible(true);
@@ -265,6 +269,7 @@ export const BigButtonList = ({
     dataflowData,
     dataflowDataState,
     dataflowId,
+    exportDatatableSchema,
     getDeleteSchemaIndex,
     handleRedirect,
     hasWritePermissions,

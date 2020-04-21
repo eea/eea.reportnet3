@@ -597,6 +597,7 @@
     "webForm": "Webform",
     "webLinks": "Web links",
     "yes": "Yes",
-    "prefilled": "Prefilled"
+    "prefilled": "Prefilled",
+    "exportDatasetSchema": "Export schema"
   }
 }
