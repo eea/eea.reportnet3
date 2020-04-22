@@ -30,11 +30,11 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isVisibleApiKeyDialog, setIs
     setIsVisibleApiKeyDialog(false);
   };
 
-  const onCopy = () => {
-    // TODO message on growl confirming Copy to clipboard
+  const onCopyToClipboard = () => {
     const textArea = textAreaRef;
     textArea.select();
     document.execCommand('copy');
+    window.getSelection().removeAllRanges();
     notificationContext.add({
       type: 'COPY_TO_CLIPBOARD_SUCCESS'
     });
@@ -85,7 +85,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isVisibleApiKeyDialog, setIs
       blockScroll={false}
       closeOnEscape={true}
       footer={footer}
-      header={resources.messages['copyRestAPIKey']}
+      header={resources.messages['apiKeyModalHeader']}
       modal={true}
       onHide={() => onCloseDialog()}
       visible={isVisibleApiKeyDialog}
@@ -108,7 +108,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isVisibleApiKeyDialog, setIs
                   icon={'copy'}
                   className="p-button-secondary"
                   label={resources.messages['copy']}
-                  onClick={() => onCopy()}
+                  onClick={() => onCopyToClipboard()}
                 />
               </div>
             </>

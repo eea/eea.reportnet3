@@ -600,6 +600,7 @@
     "copy": "Copy to clipboard",
     "generateKey": "Generate new API-key",
     "noApiKey": "There is no generated API key",
-    "copyToClipboardSuccess": "Api key copied to clipboard"
+    "copyToClipboardSuccess": "Api key copied to clipboard",
+    "apiKeyModalHeader": "API-key"
   }
 }
