@@ -55,10 +55,13 @@
 }
 .switchDiv {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   margin-left: auto;
-  display: none;
-  /* flex-direction: row-reverse; */
+  flex-direction: column;
+}
+
+.switchDiv div:nth-child(1) {
+  margin-bottom: 0.5rem;
 }
 .switchDivInput {
   display: flex;

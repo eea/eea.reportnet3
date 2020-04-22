@@ -601,6 +601,8 @@
     "generateKey": "Generate new API-key",
     "noApiKey": "There is no generated API key",
     "copyToClipboardSuccess": "Api key copied to clipboard",
-    "apiKey": "API-key"
+    "apiKey": "API-key",
+    "prefilled": "Prefilled",
+    "exportDatasetSchema": "Export schema"
   }
 }

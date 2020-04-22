@@ -257,18 +257,18 @@ const schemaById = async datasetId => {
     const records = !isNull(datasetTableDTO.recordSchema)
       ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
           const fields = !isNull(dataTableRecordDTO.fieldSchema)
-            ? dataTableRecordDTO.fieldSchema.map(DataTableFieldDTO => {
+            ? dataTableRecordDTO.fieldSchema.map(dataTableFieldDTO => {
                 return new DatasetTableField({
-                  codelistItems: DataTableFieldDTO.codelistItems,
-                  description: DataTableFieldDTO.description,
-                  fieldId: DataTableFieldDTO.id,
-                  pk: !isNull(DataTableFieldDTO.pk) ? DataTableFieldDTO.pk : false,
-                  pkReferenced: !isNull(DataTableFieldDTO.pkReferenced) ? DataTableFieldDTO.pkReferenced : false,
-                  name: DataTableFieldDTO.name,
-                  recordId: DataTableFieldDTO.idRecord,
-                  referencedField: DataTableFieldDTO.referencedField,
-                  required: DataTableFieldDTO.required,
-                  type: DataTableFieldDTO.type
+                  codelistItems: dataTableFieldDTO.codelistItems,
+                  description: dataTableFieldDTO.description,
+                  fieldId: dataTableFieldDTO.id,
+                  pk: !isNull(dataTableFieldDTO.pk) ? dataTableFieldDTO.pk : false,
+                  pkReferenced: !isNull(dataTableFieldDTO.pkReferenced) ? dataTableFieldDTO.pkReferenced : false,
+                  name: dataTableFieldDTO.name,
+                  recordId: dataTableFieldDTO.idRecord,
+                  referencedField: dataTableFieldDTO.referencedField,
+                  required: dataTableFieldDTO.required,
+                  type: dataTableFieldDTO.type
                 });
               })
             : null;
@@ -283,6 +283,7 @@ const schemaById = async datasetId => {
       hasPKReferenced: !isEmpty(
         records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
       ),
+      tableSchemaToPrefill: isNull(datasetTableDTO.toPrefill) ? false : datasetTableDTO.toPrefill,
       tableSchemaId: datasetTableDTO.idTableSchema,
       tableSchemaDescription: datasetTableDTO.description,
       tableSchemaName: datasetTableDTO.nameTableSchema,
@@ -501,12 +502,14 @@ const updateSchemaNameById = async (datasetId, datasetSchemaName) =>
   await apiDataset.updateSchemaNameById(datasetId, datasetSchemaName);
 
 const updateTableDescriptionDesign = async (
+  tableSchemaToPrefill,
   tableSchemaId,
   tableSchemaDescription,
   tableSchemaIsReadOnly,
   datasetId
 ) => {
   const tableSchemaUpdated = await apiDataset.updateTableDescriptionDesign(
+    tableSchemaToPrefill,
     tableSchemaId,
     tableSchemaDescription,
     tableSchemaIsReadOnly,
