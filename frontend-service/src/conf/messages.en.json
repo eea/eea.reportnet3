@@ -597,6 +597,8 @@
     "webForm": "Webform",
     "webLinks": "Web links",
     "yes": "Yes",
-    "invalidatedQcRuleEvent": "The rule <strong title='{:shortCode}'>{:shortShortCode}</strong> is not valid, please check it"
+    "invalidatedQcRuleEvent": "The rule <strong title='{:shortCode}'>{:shortShortCode}</strong> is not valid, please check it",
+    "prefilled": "Prefilled",
+    "exportDatasetSchema": "Export schema"
   }
 }

@@ -31,6 +31,7 @@ export const FieldsDesigner = ({
   isPreviewModeOn,
   table
 }) => {
+  const [toPrefill, setToPrefill] = useState(false);
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState([]);
   const [indexToDelete, setIndexToDelete] = useState();
@@ -53,6 +54,7 @@ export const FieldsDesigner = ({
     if (!isUndefined(table)) {
       setTableDescriptionValue(table.description || '');
       setIsReadOnlyTable(table.readOnly || false);
+      setToPrefill(table.toPrefill || false);
     }
   }, []);
 
@@ -129,7 +131,15 @@ export const FieldsDesigner = ({
 
   const onChangeIsReadOnly = checked => {
     setIsReadOnlyTable(checked);
-    updateTableDesign(checked);
+    if (checked) {
+      setToPrefill(checked);
+    }
+    updateTableDesign({ readOnly: checked, toPrefill: checked === false ? toPrefill : checked });
+  };
+
+  const onChangeToPrefill = checked => {
+    setToPrefill(checked);
+    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill: checked });
   };
 
   const onFieldDragAndDrop = (draggedFieldIdx, droppedFieldName) => {
@@ -387,12 +397,13 @@ export const FieldsDesigner = ({
     </div>
   );
 
-  const updateTableDesign = async readOnly => {
+  const updateTableDesign = async ({ readOnly, toPrefill }) => {
     // if (isUndefined(tableDescriptionValue)) {
     //   return;
     // }
     try {
       const tableUpdated = await DatasetService.updateTableDescriptionDesign(
+        toPrefill,
         table.tableSchemaId,
         tableDescriptionValue,
         readOnly,
@@ -418,7 +429,7 @@ export const FieldsDesigner = ({
           expandableOnClick={true}
           key="tableDescription"
           onChange={e => setTableDescriptionValue(e.target.value)}
-          onBlur={() => updateTableDesign(isReadOnlyTable)}
+          onBlur={() => updateTableDesign({ readOnly: isReadOnlyTable, toPrefill })}
           onFocus={e => {
             setInitialTableDescription(e.target.value);
           }}
@@ -428,15 +439,29 @@ export const FieldsDesigner = ({
           value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : ''}
         />
         <div className={styles.switchDiv}>
-          <span className={styles.switchTextInput}>{resources.messages['readOnlyTable']}</span>
-          <Checkbox
-            checked={isReadOnlyTable}
-            // className={styles.checkRequired}
-            inputId={`${table.tableId}_check`}
-            label="Default"
-            onChange={e => onChangeIsReadOnly(e.checked)}
-            style={{ width: '70px' }}
-          />
+          <div>
+            <span className={styles.switchTextInput}>{resources.messages['readOnlyTable']}</span>
+            <Checkbox
+              checked={isReadOnlyTable}
+              // className={styles.checkRequired}
+              inputId={`${table.tableId}_check`}
+              label="Default"
+              onChange={e => onChangeIsReadOnly(e.checked)}
+              style={{ width: '70px' }}
+            />
+          </div>
+          <div>
+            <span className={styles.switchTextInput}>{resources.messages['prefilled']}</span>
+            <Checkbox
+              checked={toPrefill}
+              disabled={isReadOnlyTable}
+              // className={styles.checkRequired}
+              inputId={`${table.tableId}_check`}
+              label="Default"
+              onChange={e => onChangeToPrefill(e.checked)}
+              style={{ width: '70px' }}
+            />
+          </div>
         </div>
       </div>
       {!isPreviewModeOn && (
