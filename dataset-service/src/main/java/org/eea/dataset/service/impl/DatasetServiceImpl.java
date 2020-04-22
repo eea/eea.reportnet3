@@ -1270,12 +1270,15 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void saveTablePropagation(Long datasetId, TableSchemaVO tableSchema) throws EEAException {
     TableValue table = new TableValue();
+    TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
     Optional<DatasetValue> dataset = datasetRepository.findById(datasetId);
     if (dataset.isPresent()) {
       table.setIdTableSchema(tableSchema.getIdTableSchema());
       table.setDatasetId(dataset.get());
       saveTable(datasetId, table);
     } else {
+      LOG_ERROR.error("Saving table propagation failed because the dataset {} is not found",
+          datasetId);
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
   }
@@ -1576,5 +1579,55 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     return etlDatasetVO;
+  }
+
+  /**
+   * Gets the table read only. Receives by parameter the datasetId, the objectId and the type
+   * (table, record, field). In example, if receives an objectId that is a Record (that's a record
+   * schema id), find the property readOnly of the table that belongs to the record
+   * 
+   * @param datasetId the dataset id
+   * @param objectId the object id
+   * @param type the type
+   * @return the table read only
+   */
+  @Override
+  public Boolean getTableReadOnly(Long datasetId, String objectId, EntityTypeEnum type) {
+    Boolean readOnly = false;
+    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
+
+    switch (type) {
+      case TABLE:
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          if (objectId.equals(tableSchema.getIdTableSchema().toString())
+              && tableSchema.getReadOnly() != null && tableSchema.getReadOnly()) {
+            readOnly = true;
+            break;
+          }
+        }
+        break;
+      case RECORD:
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          if (objectId.equals(tableSchema.getRecordSchema().getIdRecordSchema().toString())
+              && tableSchema.getReadOnly() != null && tableSchema.getReadOnly()) {
+            readOnly = true;
+            break;
+          }
+        }
+        break;
+      case FIELD:
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          for (FieldSchema fieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
+            if (objectId.equals(fieldSchema.getIdFieldSchema().toString())
+                && tableSchema.getReadOnly() != null && tableSchema.getReadOnly()) {
+              readOnly = true;
+              break;
+            }
+          }
+        }
+        break;
+    }
+    return readOnly;
   }
 }

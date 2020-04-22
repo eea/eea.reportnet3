@@ -200,6 +200,9 @@ public final class EEAErrorMessage {
   public static final String DATASET_SCHEMA_ID_NOT_FOUND =
       "DatasetSchemaId not found for datasetId";
 
+  /** The Constant TABLE_READ_ONLY. */
+  public static final String TABLE_READ_ONLY = "The table is marked as read only";
+
   /**
    * Instantiates a new EEA error message.
    */

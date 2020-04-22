@@ -257,8 +257,9 @@ public class AutomaticRules {
     List<String> thenCondition = new ArrayList<>();
     rule.setRuleId(new ObjectId());
     rule.setReferenceId(new ObjectId(referenceId));
-    rule.setAutomatic(Boolean.TRUE);
-    rule.setEnabled(Boolean.TRUE);
+    rule.setAutomatic(true);
+    rule.setEnabled(true);
+    rule.setVerified(true);
     rule.setRuleName(nameRule);
     rule.setWhenCondition(whenCondition);
     thenCondition.add(thenCondition0);
