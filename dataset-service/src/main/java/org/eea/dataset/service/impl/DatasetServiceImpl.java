@@ -18,7 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
-import org.eea.dataset.mapper.ETLRecordMapper;
 import org.eea.dataset.mapper.FieldNoValidationMapper;
 import org.eea.dataset.mapper.FieldValidationMapper;
 import org.eea.dataset.mapper.RecordMapper;
@@ -49,6 +48,7 @@ import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseR
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -65,6 +65,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
+import org.eea.interfaces.vo.dataset.ETLFieldVO;
 import org.eea.interfaces.vo.dataset.ETLRecordVO;
 import org.eea.interfaces.vo.dataset.ETLTableVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -205,10 +206,6 @@ public class DatasetServiceImpl implements DatasetService {
   /** The field no validation mapper. */
   @Autowired
   private FieldNoValidationMapper fieldNoValidationMapper;
-
-  /** The etl record mapper. */
-  @Autowired
-  private ETLRecordMapper etlRecordMapper;
 
   /**
    * Process file.
@@ -1517,25 +1514,42 @@ public class DatasetServiceImpl implements DatasetService {
       throw new EEAException("DatasetSchema not found for datasetSchemaId " + datasetSchemaId);
     }
 
+    // Construct object to be returned
     ETLDatasetVO etlDatasetVO = new ETLDatasetVO();
-    etlDatasetVO.setTables(new ArrayList<ETLTableVO>());
+    List<ETLTableVO> etlTableVOs = new ArrayList<>();
+    etlDatasetVO.setTables(etlTableVOs);
 
+    // Loop to fill ETLTableVOs
     for (TableSchema tableSchema : datasetSchema.getTableSchemas()) {
-      ETLTableVO etlTableVO = new ETLTableVO();
-      etlTableVO.setTableName(tableSchema.getNameTableSchema());
-      ObjectId tableSchemaId = tableSchema.getIdTableSchema();
 
-      if (null == tableSchemaId) {
-        throw new EEAException("TableSchemaId does not exists in tableSchema: " + tableSchema);
+      // Match each fieldSchemaId with its headerName
+      Map<String, String> fieldMap = new HashMap<>();
+      for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
+        fieldMap.put(field.getIdFieldSchema().toString(), field.getHeaderName());
       }
 
-      List<RecordValue> recordValues =
-          recordRepository.findByTableValueNoOrder(tableSchemaId.toString(), null);
-      List<ETLRecordVO> etlRecordValues = etlRecordMapper.entityListToClass(recordValues);
+      ETLTableVO etlTableVO = new ETLTableVO();
+      List<ETLRecordVO> etlRecordVOs = new ArrayList<>();
+      etlTableVO.setTableName(tableSchema.getNameTableSchema());
+      etlTableVO.setRecords(etlRecordVOs);
+      etlTableVOs.add(etlTableVO);
 
-      etlTableVO.setRecords(etlRecordValues);
+      // Loop to fill ETLRecordVOs
+      for (RecordValue record : recordRepository
+          .findByTableValueNoOrder(tableSchema.getIdTableSchema().toString(), null)) {
+        ETLRecordVO etlRecordVO = new ETLRecordVO();
+        List<ETLFieldVO> etlFieldVOs = new ArrayList<>();
+        etlRecordVO.setFields(etlFieldVOs);
+        etlRecordVOs.add(etlRecordVO);
 
-      etlDatasetVO.getTables().add(etlTableVO);
+        // Loop to fill ETLFieldVOs
+        for (FieldValue field : record.getFields()) {
+          ETLFieldVO etlFieldVO = new ETLFieldVO();
+          etlFieldVO.setFieldName(fieldMap.get(field.getIdFieldSchema()));
+          etlFieldVO.setValue(field.getValue());
+          etlFieldVOs.add(etlFieldVO);
+        }
+      }
     }
 
     return etlDatasetVO;
