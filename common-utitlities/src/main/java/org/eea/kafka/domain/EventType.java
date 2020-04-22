@@ -174,7 +174,10 @@ public enum EventType {
   UPDATED_DOCUMENT_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "update_document_completed_event", true),
 
   /** The invalidated qc rule event. */
-  INVALIDATED_QC_RULE_EVENT("DATA_REPORTING_TOPIC", "invalidated_qc_rule_event", true);
+  INVALIDATED_QC_RULE_EVENT("DATA_REPORTING_TOPIC", "invalidated_qc_rule_event", true),
+
+  /** The validated qc rule event. */
+  VALIDATED_QC_RULE_EVENT("DATA_REPORTING_TOPIC", "validated_qc_rule_event", true);
 
 
 
