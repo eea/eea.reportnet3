@@ -11,7 +11,6 @@ import styles from './TabsValidations.module.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-import ValidationList from 'conf/validationList.config.json';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
@@ -90,7 +89,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     }
   };
 
-  const onLoadFiltredData = data => setFilteredData(data);
+  const onLoadFilteredData = data => setFilteredData(data);
 
   const onLoadSearchedData = data => setSearchedData(data);
 
@@ -271,7 +270,6 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     }
     const paginatorRightText = `${capitalize('FIELD')} records: ${validationsList.validations.length}`;
 
-    console.log('validationsList.validations', validationsList.validations);
     return (
       <div className={null}>
         <div className={styles.searchInput}>
@@ -279,7 +277,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
         </div>
         <Filters
           data={validationsList.validations}
-          getFiltredData={onLoadFiltredData}
+          getFiltredData={onLoadFilteredData}
           inputOptions={validationListConf.filterItems['input']}
           selectOptions={validationListConf.filterItems['select']}
           sortable={false}

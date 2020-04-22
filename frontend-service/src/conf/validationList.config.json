@@ -1,6 +1,0 @@
-{
-  "filterItems": {
-    "input": ["table", "field"],
-    "select": ["entityType", "levelError", "enabled"]
-  }
-}
