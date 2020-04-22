@@ -106,7 +106,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
                 <Button
                   icon={'copy'}
                   className={`p-button-secondary ${styles.copyBtn}`}
-                  label={resources.messages['copy']}
+                  label={resources.messages['copyApiKeyBtn']}
                   onClick={() => onCopyToClipboard()}
                 />
               </div>

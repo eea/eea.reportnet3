@@ -597,7 +597,7 @@
     "webForm": "Webform",
     "webLinks": "Web links",
     "yes": "Yes",
-    "copy": "Copy to clipboard",
+    "copyApiKeyBtn": "Copy to clipboard",
     "generateApiKey": "Generate new API-key",
     "noApiKey": "There is no generated API key",
     "copyToClipboardSuccess": "Api key copied to clipboard",
