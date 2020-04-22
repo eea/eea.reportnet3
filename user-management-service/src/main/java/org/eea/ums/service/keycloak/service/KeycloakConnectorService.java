@@ -169,4 +169,15 @@ public interface KeycloakConnectorService {
    * @return the user
    */
   UserRepresentation getUser(String userId);
+
+  /**
+   * Update api key.
+   *
+   * @param user the user
+   * @param dataflowId the dataflow id
+   * @param shortCode the short code
+   * @return the string
+   */
+  String updateApiKey(UserRepresentation user, Long dataflowId, String shortCode)
+      throws EEAException;
 }

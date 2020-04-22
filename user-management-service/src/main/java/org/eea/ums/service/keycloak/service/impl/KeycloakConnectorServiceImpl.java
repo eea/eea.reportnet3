@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.eea.exception.EEAErrorMessage;
@@ -464,8 +465,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             .buildAndExpand(uriParams).toString(),
         HttpMethod.GET, request, UserRepresentation.class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody)
-        .map(entity -> (UserRepresentation) entity).orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
+        .orElse(null);
   }
 
   /**
@@ -486,7 +487,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
           .path(CREATE_USER_GROUP_URL).buildAndExpand(uriParams).toString(), request, Void.class);
     } catch (Exception e) {
       throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED);
-    } ;
+    }
   }
 
   /**
@@ -558,7 +559,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
   /**
    * Gets the users.
-   * 
+   *
    * @return the users
    */
   @Override
@@ -811,5 +812,41 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
     HttpEntity<T> request = new HttpEntity<>(body, headers);
     return request;
+  }
+
+
+  /**
+   * Update api key.
+   *
+   * @param user the user
+   * @param dataflowId the dataflow id
+   * @param shortCode the short code
+   * @return the string
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public String updateApiKey(UserRepresentation user, Long dataflowId, String shortCode)
+      throws EEAException {
+    String apiKey = UUID.randomUUID().toString();
+    // Update the keys with the new one
+    Map<String, List<String>> attributes = user.getAttributes();
+    List<String> apiKeys = new ArrayList<>();
+    String newValueAttribute = dataflowId + "," + shortCode;
+    if (!attributes.get("ApiKeys").isEmpty()) {
+      apiKeys = attributes.get("ApiKeys");
+      for (String keyString : apiKeys) {
+        if (keyString.contains(newValueAttribute)) {
+          apiKeys.remove(keyString);
+          break;
+        }
+      }
+    }
+    apiKeys.add(apiKey + "," + newValueAttribute);
+    attributes.put("ApiKeys", apiKeys);
+    user.setAttributes(attributes);
+    // insert the changes
+    updateUser(user);
+    // return new apiKey
+    return apiKey;
   }
 }

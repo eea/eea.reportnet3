@@ -30,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -430,5 +431,27 @@ public class UserManagementControllerImpl implements UserManagementController {
     }
   }
 
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER')")
+  @RequestMapping(value = "/createApiKey/{dataflowId}/{shortCode}", method = RequestMethod.POST)
+  public String createApiKey(@PathVariable("dataflowId") final Long dataflowId,
+      @PathVariable("shortCode") final String shortCode) {
 
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get("userId");
+    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    if (user == null) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.USER_NOTFOUND);
+    }
+    try {
+      return keycloakConnectorService.updateApiKey(user, dataflowId, shortCode);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.PERMISSION_NOT_CREATED);
+    }
+  }
 }
