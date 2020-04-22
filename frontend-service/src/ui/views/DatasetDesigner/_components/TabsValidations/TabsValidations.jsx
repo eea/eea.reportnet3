@@ -33,13 +33,18 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
 
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [validationId, setValidationId] = useState();
   const [validationsList, setValidationsList] = useState();
 
   useEffect(() => {
     onLoadValidationsList(datasetSchemaId);
   }, [isDataUpdated]);
+
+  useEffect(() => {
+    const response = notificationContext.hidden.find(notification => notification === 'VALIDATED_QC_RULE_EVENT');
+    if (response) onUpdateData();
+  }, [notificationContext]);
 
   const onDeleteValidation = async () => {
     try {
@@ -63,7 +68,6 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
 
   const onLoadValidationsList = async datasetSchemaId => {
     try {
-      setIsLoading(true);
       const validationsServiceList = await ValidationService.getAll(datasetSchemaId);
 
       if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
