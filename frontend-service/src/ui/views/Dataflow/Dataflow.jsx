@@ -60,7 +60,6 @@ const Dataflow = withRouter(({ history, match }) => {
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
-  const [isVisibleApiKeyDialog, setIsVisibleApiKeyDialog] = useState(true);
 
   const dataflowInitialState = {
     data: {},
@@ -75,6 +74,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isEditDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPropertiesDialogVisible: false,
+    isApiKeyDialogVisible: false,
     name: '',
     obligations: {},
     status: ''
@@ -148,7 +148,22 @@ const Dataflow = withRouter(({ history, match }) => {
         }
       ]);
     } else {
+      //is not empty dataproviderId
+
+      let apiKeyBtn = {};
+
+      if (true) {
+        apiKeyBtn = {
+          className: 'dataflow-properties-provider-help-step',
+          icon: 'settings',
+          label: 'apiKey',
+          onClick: () => onManageDialogs('isApiKeyDialogVisible', true),
+          title: 'apiKey'
+        };
+      }
+
       leftSideBarContext.addModels([
+        apiKeyBtn,
         {
           className: 'dataflow-properties-provider-help-step',
           icon: 'infoCircle',
@@ -458,10 +473,10 @@ const Dataflow = withRouter(({ history, match }) => {
           state={dataflowDataState}
         />
 
-        {isVisibleApiKeyDialog && (
+        {dataflowDataState.isApiKeyDialogVisible && (
           <ApiKeyDialog
-            isVisibleApiKeyDialog={isVisibleApiKeyDialog}
-            setIsVisibleApiKeyDialog={setIsVisibleApiKeyDialog}
+            isApiKeyDialogVisible={dataflowDataState.isApiKeyDialogVisible}
+            onManageDialogs={onManageDialogs}
             dataflowId={dataflowId}
             dataProviderId={dataProviderId}
           />

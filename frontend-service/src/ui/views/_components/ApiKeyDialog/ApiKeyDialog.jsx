@@ -11,7 +11,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { DataflowService } from 'core/services/Dataflow';
 
-const ApiKeyDialog = ({ dataflowId, dataProviderId, isVisibleApiKeyDialog, setIsVisibleApiKeyDialog }) => {
+const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onManageDialogs }) => {
   const [apiKey, setApiKey] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [textAreaRef, setTextAreaRef] = useState(null);
@@ -27,7 +27,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isVisibleApiKeyDialog, setIs
   }, []);
 
   const onCloseDialog = () => {
-    setIsVisibleApiKeyDialog(false);
+    onManageDialogs('isApiKeyDialogVisible', false);
   };
 
   const onCopyToClipboard = () => {
@@ -85,10 +85,10 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isVisibleApiKeyDialog, setIs
       blockScroll={false}
       closeOnEscape={true}
       footer={footer}
-      header={resources.messages['apiKeyModalHeader']}
+      header={resources.messages['apiKey']}
       modal={true}
       onHide={() => onCloseDialog()}
-      visible={isVisibleApiKeyDialog}
+      visible={isApiKeyDialogVisible}
       zIndex={3003}>
       {!isGenerating ? (
         <div className={styles.container}>

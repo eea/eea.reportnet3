@@ -601,6 +601,6 @@
     "generateKey": "Generate new API-key",
     "noApiKey": "There is no generated API key",
     "copyToClipboardSuccess": "Api key copied to clipboard",
-    "apiKeyModalHeader": "API-key"
+    "apiKey": "API-key"
   }
 }

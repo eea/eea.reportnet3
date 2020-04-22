@@ -91,10 +91,10 @@ const Representative = withRouter(({ match, history }) => {
 
     leftSideBarContext.addModels([
       {
-        label: 'settings',
-        icon: 'settings',
+        label: 'properties',
+        icon: 'infoCircle',
         onClick: () => onManageDialogs('isPropertiesDialogVisible', true),
-        title: 'settings'
+        title: 'properties'
       }
     ]);
   }, []);
