@@ -1273,6 +1273,8 @@ public class DatasetServiceImpl implements DatasetService {
       table.setDatasetId(dataset.get());
       saveTable(datasetId, table);
     } else {
+      LOG_ERROR.error("Saving table propagation failed because the dataset {} is not found",
+          datasetId);
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
   }
