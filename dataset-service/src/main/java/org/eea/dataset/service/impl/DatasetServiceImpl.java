@@ -1527,14 +1527,14 @@ public class DatasetServiceImpl implements DatasetService {
     // Get the datasetSchemaId by the datasetId
     String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
     if (null == datasetSchemaId) {
-      throw new EEAException("DatasetSchemaId not found for datasetId " + datasetId);
+      throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND + " " + datasetId);
     }
 
     // Get the datasetSchema by the datasetSchemaId
     DataSetSchema datasetSchema =
         schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
     if (null == datasetSchema) {
-      throw new EEAException("DatasetSchema not found for datasetSchemaId " + datasetSchemaId);
+      throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND + " " + datasetSchemaId);
     }
 
     // Construct object to be returned
