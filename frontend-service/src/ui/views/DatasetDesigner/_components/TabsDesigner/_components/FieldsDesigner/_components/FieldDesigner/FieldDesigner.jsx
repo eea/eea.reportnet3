@@ -61,7 +61,7 @@ export const FieldDesigner = ({
     { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
     { fieldType: 'Long_Text', value: 'Long text', fieldTypeIcon: 'align-right' },
     { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
-    { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'externalLink' },
+    { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
     { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
     // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
     // { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
