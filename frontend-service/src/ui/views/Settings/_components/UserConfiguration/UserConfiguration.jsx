@@ -69,9 +69,7 @@ const UserConfiguration = () => {
           const inmUserProperties = { ...userContext.userProps };
           inmUserProperties.showLogoutConfirmation = e.value;
           const response = await changeUserProperties(inmUserProperties);
-          console.log({ response });
           if (response.status < 200 || response.status > 299) {
-            console.log(inmUserProperties.showLogoutConfirmation);
             userContext.onToggleLogoutConfirm(!e.value);
           }
         }}

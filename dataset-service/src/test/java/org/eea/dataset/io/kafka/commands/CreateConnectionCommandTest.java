@@ -73,15 +73,6 @@ public class CreateConnectionCommandTest {
     Assert.assertEquals(EventType.CONNECTION_CREATED_EVENT, createConnectionCommand.getEventType());
   }
 
-  /**
-   * Execute test 1.
-   */
-  @Test
-  public void executeTest1() {
-    eeaEventVO.setEventType(EventType.COMMAND_CLEAN_KYEBASE);
-    createConnectionCommand.execute(eeaEventVO);
-    Mockito.verifyNoMoreInteractions(datasetService);
-  }
 
   /**
    * Execute test 1.
