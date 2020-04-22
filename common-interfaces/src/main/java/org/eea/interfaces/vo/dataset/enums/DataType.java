@@ -1,9 +1,8 @@
 package org.eea.interfaces.vo.dataset.enums;
 
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
-import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 
 /**
  * The Enum TypeData.
@@ -18,12 +17,26 @@ public enum DataType {
   TEXT("TEXT"),
 
   /**
-   * The Number.
+   * The Text with more than 10000 characters.
+   *
+   * Cast in JPA: java.lang.String
+   */
+  LONG_TEXT("LONG_TEXT"),
+
+  /**
+   * The Number Integer.
    *
    * Cast in JPA: CAST(fv.value as java.math.BigDecimal)
    */
-  NUMBER("NUMBER"),
+  NUMBER_INTEGER("NUMBER_INTEGER"),
 
+
+  /**
+   * The Number Decimal.
+   *
+   * Cast in JPA: CAST(fv.value as java.math.BigDecimal)
+   */
+  NUMBER_DECIMAL("NUMBER_DECIMAL"),
   /**
    * The Date.
    *
@@ -84,14 +97,47 @@ public enum DataType {
    */
   POLYGON("POLYGON"),
 
-  /** The codelist. */
+  /**
+   * The codelist.
+   *
+   * Cast in JPA: java.lang.String
+   */
   CODELIST("CODELIST"),
 
-  /** The link. */
+  /**
+   * The link data with PK.
+   *
+   * Cast in JPA: java.lang.String
+   */
   LINK("LINK"),
 
-  /** The link data. */
-  LINK_DATA("LINK_DATA");
+  /**
+   * The link data with PK.
+   *
+   * Cast in JPA: java.lang.String
+   */
+  LINK_DATA("LINK_DATA"),
+
+  /**
+   * The url valid.
+   *
+   * Cast in JPA: java.lang.String
+   */
+  URL("URL"),
+
+  /**
+   * The phone.
+   *
+   * Cast in JPA: java.lang.String
+   */
+  PHONE("PHONE"),
+
+  /**
+   * The email.
+   *
+   * Cast in JPA: java.lang.String
+   */
+  EMAIL("EMAIL");
 
 
   /**
@@ -126,11 +172,14 @@ public enum DataType {
    */
   @JsonCreator
   public static DataType fromValue(String value) {
-    return Arrays.stream(DataType.values()).filter(e -> e.value.equals(value))
-        .findFirst()
-        .get();
+    return Arrays.stream(DataType.values()).filter(e -> e.value.equals(value)).findFirst().get();
   }
 
+  /**
+   * To string.
+   *
+   * @return the string
+   */
   @Override
   @JsonValue
   public String toString() {

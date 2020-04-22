@@ -81,8 +81,21 @@ function boolean isDateYYYYMMDD( String value ){
     return true;
 }
 
-//////////////////////////////////////////VALIDATION NUMBER///////////////////////////////////////////////////////////
-function boolean isNumber(String value){
+//////////////////////////////////////////VALIDATION NUMBER_INTEGER///////////////////////////////////////////////////////////
+function boolean isNumberInteger(String value){
+	if(!isBlank(value)){
+		return true;
+	}
+    try {
+        Long.valueOf(value);
+        return true;
+    } catch( Exception e ){
+        return false;        
+    }
+ }
+
+//////////////////////////////////////////VALIDATION NUMBER_DECIMAL///////////////////////////////////////////////////////////
+function boolean isNumberDecimal(String value){
 	if(!isBlank(value)){
 		return true;
 	}
@@ -95,7 +108,6 @@ function boolean isNumber(String value){
         return false;        
     }
  }
-
 //////////////////////////////////////////VALIDATION LATITUDE///////////////////////////////////////////////////////////
 function boolean isCordenateLat( String value ){
 	if(!isBlank(value)){
@@ -104,7 +116,7 @@ function boolean isCordenateLat( String value ){
    if (value.contains(",")){
    	value = value.replace(",",".");
    }
-   if(isNumber(value)){
+   if(isNumberDecimal(value)){
     	return Double.valueOf(value) >= -90 && Double.valueOf(value) <= 90;
    }
    return false;
@@ -118,12 +130,56 @@ function boolean isCordenateLong( String value ){
    if (value.contains(",")){
    	value = value.replace(",",".");
    }
-   if(isNumber(value)){
+   if(isNumberDecimal(value)){
     	return Double.valueOf(value) >= -180 && Double.valueOf(value) <= 180;
    }
    return false;
  }
+ 
+ //////////////////////////////////////////VALIDATION NUMBER///////////////////////////////////////////////////////////
+function boolean isURL(String value){
+	if(!isBlank(value)){
+		return true;
+	}
+    try {
+         new URL(value).toURI();
+         return true;
+    }catch (URISyntaxException exception) {
+         return false;
+    }catch (MalformedURLException exception) {
+         return false;
+    }
+ }
+ 
+ //////////////////////////////////////////VALIDATION NUMBER///////////////////////////////////////////////////////////
+function boolean isEmail(String value){
+	if(!isBlank(value)){
+		return true;
+	}
+	Pattern pat = Pattern.compile(“^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$”);					
+	Matcher mather = pattern.matcher(value);					
+	if (mather.find() == true) {
+			return true;
+		} else {
+			return false;
+		}					
+ 
+ }
 
+ //////////////////////////////////////////VALIDATION PHONE///////////////////////////////////////////////////////////
+function boolean isPhone(String value){
+	if(!isBlank(value)){
+		return true;
+	}
+	Pattern pat = Pattern.compile(“^(\(?\+?[0-9]*\)?)?[0-9_\- \(\)]*$”);					
+	Matcher mather = pattern.matcher(value);					
+	if (mather.find() == true) {
+			return true;
+		} else {
+			return false;
+		}					
+ 
+ }
  //////////////////////////////////////////DEFAULT VALIDATIONS END BLOCK////////////////////////////////////////////////////////////
  
  //////////////////////////////////////////VALIDATION PK////////////////////////////////////////////////////////////

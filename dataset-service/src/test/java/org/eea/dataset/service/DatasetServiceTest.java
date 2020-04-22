@@ -1059,26 +1059,6 @@ public class DatasetServiceTest {
   }
 
   /**
-   * Update records null test.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = EEAException.class)
-  public void updateRecordsNullTest() throws Exception {
-    datasetService.updateRecords(null, new ArrayList<RecordVO>());
-  }
-
-  /**
-   * Update records null 2 test.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = EEAException.class)
-  public void updateRecordsNull2Test() throws Exception {
-    datasetService.updateRecords(1L, null);
-  }
-
-  /**
    * Delete records null test.
    *
    * @throws Exception the exception
@@ -1109,19 +1089,6 @@ public class DatasetServiceTest {
     datasetService.deleteRecord(1L, "1L");
     Mockito.verify(recordRepository, times(1)).deleteRecordWithId(Mockito.any());
   }
-
-  /**
-   * Update records test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void updateRecordsTest() throws EEAException {
-    when(recordMapper.classListToEntity(Mockito.any())).thenReturn(recordValues);
-    datasetService.updateRecords(1L, new ArrayList<RecordVO>());
-    Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
-  }
-
 
   /**
    * Creates the records test.
@@ -1536,7 +1503,7 @@ public class DatasetServiceTest {
    */
   @Test
   public void getFieldValuesReferencedTestNumber() {
-    field.setType(DataType.NUMBER);
+    field.setType(DataType.NUMBER_DECIMAL);
 
     Mockito.when(
         datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
@@ -1776,5 +1743,28 @@ public class DatasetServiceTest {
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     datasetService.getTableReadOnly(1L, "5ce524fad31fc52540abae73", EntityTypeEnum.FIELD);
     Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
+  }
+
+
+  @Test(expected = EEAException.class)
+  public void updateRecordsNullTest() throws Exception {
+    datasetService.updateRecords(null, new ArrayList<RecordVO>());
+  }
+
+  @Test(expected = EEAException.class)
+  public void updateRecordsNull2Test() throws Exception {
+    datasetService.updateRecords(1L, null);
+  }
+
+  @Test
+  public void updateRecordTest() throws EEAException {
+    FieldValue fieldValue = new FieldValue();
+    RecordValue recordValue = new RecordValue();
+    fieldValue.setValue("Lorem ipsum");
+    recordValue.setFields(Arrays.asList(fieldValue));
+    when(recordMapper.classListToEntity(Mockito.any())).thenReturn(Arrays.asList(recordValue));
+    datasetService.updateRecords(1L, new ArrayList<RecordVO>());
+    Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
+
   }
 }
