@@ -274,6 +274,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void saveTable(@DatasetId Long datasetId, TableValue tableValue) {
+    TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
     DatasetValue datasetValue = datasetRepository.findById(datasetId).get();
     tableValue.setDatasetId(datasetValue);
     tableRepository.saveAndFlush(tableValue);

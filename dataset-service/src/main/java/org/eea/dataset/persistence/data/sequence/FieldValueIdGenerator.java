@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.UUID;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.hibernate.HibernateException;
@@ -28,7 +29,9 @@ public class FieldValueIdGenerator implements IdentifierGenerator {
    *
    * @param session the session
    * @param object the object
+   *
    * @return the serializable
+   *
    * @throws HibernateException the hibernate exception
    */
   @Override
@@ -45,21 +48,9 @@ public class FieldValueIdGenerator implements IdentifierGenerator {
     } else {
       prefix = "FIELD" + field.getRecord().getDataProviderCode();
     }
-    // Connection must not close because transaction not finished yet.
-    Connection connection = session.connection(); // NOPMD
 
-    try (Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery("SELECT nextval('field_sequence')")) {
+    String idcompose = datasetId + prefix + UUID.randomUUID();
+    return DigestUtils.md5Hex(idcompose).toUpperCase();
 
-      if (rs.next()) {
-        int id = rs.getInt(1);
-        String idcompose = datasetId + prefix + Integer.valueOf(id);
-        return DigestUtils.md5Hex(idcompose).toUpperCase();
-
-      }
-    } catch (SQLException e) {
-      LOG_ERROR.error("Faliled to generate Field ID");
-    }
-    return null;
   }
 }

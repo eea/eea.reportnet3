@@ -1536,7 +1536,7 @@ public class DatasetServiceTest {
    */
   @Test
   public void getFieldValuesReferencedTestNumber() {
-    field.setType(DataType.NUMBER);
+    field.setType(DataType.NUMBER_DECIMAL);
 
     Mockito.when(
         datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))

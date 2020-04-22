@@ -113,8 +113,9 @@ const ValidationExpression = ({
             appendTo={document.body}
             baseZIndex={6000}
             dateFormat="yy-mm-dd"
+            placeholder="YYYY-MM-DD"
             monthNavigator={true}
-            readOnlyInput={true}
+            readOnlyInput={false}
             onChange={e => {
               onExpressionFieldUpdate(expressionId, {
                 key: 'expressionValue',
@@ -123,7 +124,7 @@ const ValidationExpression = ({
             }}
             value={expressionValues.expressionValue}
             yearNavigator={true}
-            yearRange="2015:2030"></Calendar>
+            yearRange="1900:2500"></Calendar>
         ) : (
           <InputText
             disabled={isDisabled}
