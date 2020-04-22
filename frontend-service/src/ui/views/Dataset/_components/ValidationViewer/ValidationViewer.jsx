@@ -68,7 +68,7 @@ const ValidationViewer = React.memo(
         },
         {
           id: 'entityType',
-          header: resources.messages['entityType']
+          header: resources.messages['entity']
         }
       ];
 
@@ -413,7 +413,7 @@ const ValidationViewer = React.memo(
               <Button
                 className={`p-button-rounded p-button-secondary-transparent`}
                 icon={'filter'}
-                label={resources.messages['entityType']}
+                label={resources.messages['entity']}
                 onClick={event => {
                   dropdownTypeEntitiesFilterRef.current.show(event);
                 }}

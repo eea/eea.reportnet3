@@ -13,7 +13,7 @@ import { searchReducer } from './_functions/Reducers/searchReducer';
 
 import { SearchUtils } from './_functions/Utils/SearchUtils';
 
-export const SearchAll = ({ data, getValues }) => {
+export const SearchAll = ({ data, getValues, typeData }) => {
   const resources = useContext(ResourcesContext);
 
   const [searchState, searchDispatch] = useReducer(searchReducer, {
@@ -33,11 +33,11 @@ export const SearchAll = ({ data, getValues }) => {
   const onLoadInitialState = () =>
     searchDispatch({
       type: 'INITIAL_LOAD',
-      payload: { data, searchedData: SearchUtils.onApplySearch(data, searchState.searchBy) }
+      payload: { data, searchedData: SearchUtils.onApplySearch(data, searchState.searchBy, typeData) }
     });
 
   const onSearchData = value => {
-    const searchedValues = SearchUtils.onApplySearch(searchState.data, value);
+    const searchedValues = SearchUtils.onApplySearch(searchState.data, value, typeData);
 
     searchDispatch({ type: 'ON_SEARCH_DATA', payload: { searchedValues, value } });
   };

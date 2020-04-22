@@ -158,7 +158,11 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
             : 'space-between'
       }}>
       <div className={styles.repOblTools}>
-        <SearchAll data={reportingObligationState.filteredData} getValues={onLoadSearchedData} />
+        <SearchAll
+          data={reportingObligationState.filteredData}
+          getValues={onLoadSearchedData}
+          typeData={'obligations'}
+        />
         <div className={styles.switchDiv}>
           <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
           <InputSwitch checked={reportingObligationState.isTableView} onChange={() => onToggleView()} />

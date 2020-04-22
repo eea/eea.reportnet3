@@ -259,7 +259,7 @@
     "emptyTitleValidationError": "Please enter a title",
     "emptyValidations": "There are no validations defined yet.",
     "enabled": "Enabled",
-    "entityType": "Entity",
+    "entity": "Entity",
     "error": "Error",
     "errorMessage": "Message",
     "errors": "Errors",

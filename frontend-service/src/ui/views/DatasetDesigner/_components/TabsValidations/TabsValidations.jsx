@@ -18,6 +18,7 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Filters } from 'ui/views/_components/Filters';
+import { SearchAll } from 'ui/views/_components/DataflowManagement/_components/ReportingObligations/_components/SearchAll';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabView } from 'ui/views/_components/TabView'; // Do not delete
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel'; // Do not delete
@@ -37,6 +38,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchedData, setSearchedData] = useState([]);
   const [validationId, setValidationId] = useState();
   const [validationsList, setValidationsList] = useState();
 
@@ -89,6 +91,8 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   };
 
   const onLoadFiltredData = data => setFilteredData(data);
+
+  const onLoadSearchedData = data => setSearchedData(data);
 
   const onShowDeleteDialog = () => {
     setIsDeleteDialogVisible(true);
@@ -261,15 +265,18 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     const paginatorRightText = `${capitalize('FIELD')} records: ${validationsList.validations.length}`;
     return (
       <div className={null}>
+        <div className={styles.searchInput}>
+          <SearchAll data={filteredData} getValues={onLoadSearchedData} typeData={'qc'} />
+        </div>
         <Filters
           data={validationsList.validations}
           getFiltredData={onLoadFiltredData}
           inputOptions={ValidationList.filterItems['input']}
           selectOptions={ValidationList.filterItems['select']}
-          sortable={true}
+          sortable={false}
         />
 
-        {!isEmpty(filteredData) ? (
+        {!isEmpty(searchedData) ? (
           <DataTable
             autoLayout={true}
             className={styles.paginatorValidationViewer}
@@ -280,7 +287,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
             rows={10}
             rowsPerPageOptions={[5, 10, 15]}
             totalRecords={validationsList.validations.length}
-            value={filteredData}>
+            value={searchedData}>
             {renderColumns(validationsList.validations)}
           </DataTable>
         ) : (
