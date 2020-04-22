@@ -2,6 +2,7 @@ package org.eea.security.jwt.utils;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.eea.security.jwt.data.CacheTokenVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +24,6 @@ public class EeaFeignSecurityInterceptor implements RequestInterceptor {
   private static final String AUTHORIZATION_HEADER = "Authorization";
   private static final String BEARER_TOKEN_TYPE = "Bearer";
 
-  @Autowired
-  @Qualifier("securityRedisTemplate")
-  private RedisTemplate<String, CacheTokenVO> securityRedisTemplate;
 
   @Override
   public void apply(RequestTemplate template) {
@@ -37,6 +35,9 @@ public class EeaFeignSecurityInterceptor implements RequestInterceptor {
       template.header(AUTHORIZATION_HEADER,
           String.format("%s %s", BEARER_TOKEN_TYPE,
               authentication.getCredentials()));
+      template.header("FeignInvocationUser", authentication.getName());
+      template.header("FeignInvocationId",
+          ((Map<String, String>) authentication.getDetails()).get("userId"));
     }
   }
 }
