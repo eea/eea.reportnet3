@@ -78,7 +78,8 @@ import {
   faExternalLinkAlt,
   faAlignRight,
   faDiceFour,
-  faPhone
+  faPhone,
+  faDice
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -265,7 +266,7 @@ export const AwesomeIcons = icon => {
     case 'notifications':
       return faBell;
     case 'number-decimal':
-      return faDiceSix;
+      return faDice;
     case 'percentage':
       return faPercentage;
     case 'point':

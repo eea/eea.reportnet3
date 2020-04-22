@@ -1142,5 +1142,45 @@
   {
     "key": "config/application/lock.releaseDelay",
     "value": "JHtMT0NLX1JFTEVBU0VfTUlMTElTRUNPTkRTOjYwMDAwMH0="
+  },
+  {
+    "key": "config/dataset/dataset.fieldMaxLength",
+    "value": "JHtGSUVMRF9NQVhfTEVOR1RIOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.obligation_client.path",
+    "value": "L29ibGlnYXRpb25fY2xpZW50Lyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.obligation_client.serviceId",
+    "value": "cm9k"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.obligation_client.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.obligation_country.path",
+    "value": "L29ibGlnYXRpb25fY291bnRyeS8qKg=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.obligation_country.serviceId",
+    "value": "cm9k"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.obligation_country.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.obligation_issue.path",
+    "value": "L29ibGlnYXRpb25faXNzdWUvKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.obligation_issue.serviceId",
+    "value": "cm9k"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.obligation_issue.stripPrefix",
+    "value": "ZmFsc2U="
   }
 ]
