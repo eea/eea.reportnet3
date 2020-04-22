@@ -53,17 +53,22 @@ export const FieldDesigner = ({
   totalFields
 }) => {
   const fieldTypes = [
-    { fieldType: 'Number', value: 'Number', fieldTypeIcon: 'number' },
+    { fieldType: 'Number_Integer', value: 'Number - Integer', fieldTypeIcon: 'number-integer' },
+    { fieldType: 'Number_Decimal', value: 'Number - Decimal', fieldTypeIcon: 'number-decimal' },
     { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
     // { fieldType: 'Latitude', value: 'Geospatial object (Latitude)', fieldTypeIcon: 'map' },
     // { fieldType: 'Longitude', value: 'Geospatial object (Longitude)', fieldTypeIcon: 'map' },
-    { fieldType: 'Text', value: 'Single line text', fieldTypeIcon: 'italic' },
+    { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
+    { fieldType: 'Long_Text', value: 'Long text', fieldTypeIcon: 'align-right' },
+    { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
+    { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'externalLink' },
+    { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
     // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
     // { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
     // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
     // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
-    { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' }
+    { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' }
     // { fieldType: 'Reference', value: 'Reference', fieldTypeIcon: 'link' }
     // { fieldType: 'URL', value: 'Url', fieldTypeIcon: 'url' },
     // { fieldType: 'LongText', value: 'Long text', fieldTypeIcon: 'text' },
