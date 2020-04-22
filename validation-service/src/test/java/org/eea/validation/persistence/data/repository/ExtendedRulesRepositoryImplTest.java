@@ -324,4 +324,18 @@ public class ExtendedRulesRepositoryImplTest {
     Assert.assertFalse(extendedRulesRepositoryImpl
         .deleteRuleByReferenceFieldSchemaPKId(new ObjectId(), new ObjectId()));
   }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void getActiveAndVerifiedRulesTest() {
+    RulesSchema rulesSchema = new RulesSchema();
+    List<Object> rulesSchemas = new ArrayList<>();
+    rulesSchemas.add(rulesSchema);
+    Mockito.when(
+        mongoTemplate.aggregate(Mockito.any(), Mockito.any(Class.class), Mockito.any(Class.class)))
+        .thenReturn(aggregationResults);
+    Mockito.when(aggregationResults.getMappedResults()).thenReturn(rulesSchemas);
+    Assert.assertEquals(rulesSchema,
+        extendedRulesRepositoryImpl.getActiveAndVerifiedRules(new ObjectId()));
+  }
 }
