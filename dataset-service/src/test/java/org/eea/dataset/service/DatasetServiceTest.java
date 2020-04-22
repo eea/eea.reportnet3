@@ -1648,4 +1648,133 @@ public class DatasetServiceTest {
     Mockito.when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(false);
     Assert.assertNull(datasetService.getDatasetType(1L));
   }
+
+  @Test
+  public void testGetTableReadOnly() {
+
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema table = new TableSchema();
+    RecordSchema record = new RecordSchema();
+    FieldSchema field = new FieldSchema();
+    field.setIdFieldSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    record.setFieldSchema(Arrays.asList(field));
+    table.setRecordSchema(record);
+    table.setReadOnly(true);
+    table.setIdTableSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    schema.setTableSchemas(Arrays.asList(table));
+
+    Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5ce524fad31fc52540abae73");
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    datasetService.getTableReadOnly(1L, "5ce524fad31fc52540abae73", EntityTypeEnum.TABLE);
+    Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
+  }
+
+  @Test
+  public void testGetTableReadOnlyWithNonMatching() {
+
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema table = new TableSchema();
+    RecordSchema record = new RecordSchema();
+    FieldSchema field = new FieldSchema();
+    field.setIdFieldSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    record.setFieldSchema(Arrays.asList(field));
+    table.setRecordSchema(record);
+    table.setReadOnly(false);
+    table.setIdTableSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    schema.setTableSchemas(Arrays.asList(table));
+
+
+    Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5ce524fad31fc52540abae73");
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    datasetService.getTableReadOnly(1L, "5ce524fad31fc52540abae73", EntityTypeEnum.TABLE);
+    Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
+  }
+
+  @Test
+  public void testGetRecordReadOnly() {
+
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema table = new TableSchema();
+    RecordSchema record = new RecordSchema();
+    FieldSchema field = new FieldSchema();
+    field.setIdFieldSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    record.setFieldSchema(Arrays.asList(field));
+    record.setIdRecordSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    table.setRecordSchema(record);
+    table.setReadOnly(true);
+    table.setIdTableSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    schema.setTableSchemas(Arrays.asList(table));
+
+    Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5ce524fad31fc52540abae73");
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    datasetService.getTableReadOnly(1L, "5ce524fad31fc52540abae73", EntityTypeEnum.RECORD);
+    Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
+  }
+
+  @Test
+  public void testGetRecordReadOnlyWithNonMatching() {
+
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema table = new TableSchema();
+    RecordSchema record = new RecordSchema();
+    FieldSchema field = new FieldSchema();
+    field.setIdFieldSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    record.setFieldSchema(Arrays.asList(field));
+    record.setIdRecordSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    table.setRecordSchema(record);
+    table.setReadOnly(false);
+    table.setIdTableSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    schema.setTableSchemas(Arrays.asList(table));
+
+    Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5ce524fad31fc52540abae73");
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    datasetService.getTableReadOnly(1L, "5ce524fad31fc52540abae73", EntityTypeEnum.RECORD);
+    Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
+  }
+
+  @Test
+  public void testGetFieldReadOnly() {
+
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema table = new TableSchema();
+    RecordSchema record = new RecordSchema();
+    FieldSchema field = new FieldSchema();
+    field.setIdFieldSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    record.setFieldSchema(Arrays.asList(field));
+    table.setRecordSchema(record);
+    table.setReadOnly(false);
+    table.setIdTableSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    schema.setTableSchemas(Arrays.asList(table));
+
+    Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5ce524fad31fc52540abae73");
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    datasetService.getTableReadOnly(1L, "5ce524fad31fc52540abae73", EntityTypeEnum.FIELD);
+    Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
+  }
+
+  @Test
+  public void testGetFieldReadOnlyWithNonMatching() {
+
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema table = new TableSchema();
+    RecordSchema record = new RecordSchema();
+    FieldSchema field = new FieldSchema();
+    field.setIdFieldSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    record.setFieldSchema(Arrays.asList(field));
+    table.setRecordSchema(record);
+    table.setReadOnly(true);
+    table.setIdTableSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    schema.setTableSchemas(Arrays.asList(table));
+
+    Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5ce524fad31fc52540abae73");
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    datasetService.getTableReadOnly(1L, "5ce524fad31fc52540abae73", EntityTypeEnum.FIELD);
+    Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
+  }
 }

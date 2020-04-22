@@ -1489,8 +1489,10 @@ public class DatasetServiceImpl implements DatasetService {
 
 
   /**
-   * Gets the table read only.
-   *
+   * Gets the table read only. Receives by parameter the datasetId, the objectId and the type
+   * (table, record, field). In example, if receives an objectId that is a Record (that's a record
+   * schema id), find the property readOnly of the table that belongs to the record
+   * 
    * @param datasetId the dataset id
    * @param objectId the object id
    * @param type the type
