@@ -32,8 +32,9 @@ public class AutomaticRules {
         description);
   }
 
+
   /**
-   * Creates the automatic number rule.
+   * Creates the number integer automatic rule.
    *
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
@@ -42,9 +43,26 @@ public class AutomaticRules {
    * @param description the description
    * @return the rule
    */
-  public static Rule createNumberAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
-      String nameRule, String shortCode, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isNumber(value)",
+  public static Rule createNumberIntegerAutomaticRule(String referenceId,
+      EntityTypeEnum typeEntityEnum, String nameRule, String shortCode, String description) {
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isNumberInteger(value)",
+        "The value is not a valid number without decimals.", ErrorTypeEnum.ERROR.getValue(),
+        shortCode, description);
+  }
+
+  /**
+   * Creates the number decimal automatic rule.
+   *
+   * @param referenceId the reference id
+   * @param typeEntityEnum the type entity enum
+   * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
+   * @return the rule
+   */
+  public static Rule createNumberDecimalAutomaticRule(String referenceId,
+      EntityTypeEnum typeEntityEnum, String nameRule, String shortCode, String description) {
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isNumberDecimal(value)",
         "The value is not a valid number.", ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
 
@@ -136,7 +154,7 @@ public class AutomaticRules {
     // PART INSENSITIVE
     ruleList.add(composeRule(referenceId, typeEntityEnum, nameRule,
         "isCodelistInsensitive(value,'" + codelistItems + "')",
-        "The value is not a valid member of the codelist", ErrorTypeEnum.ERROR.getValue(),
+        "The value must be avaliable value in the codelist", ErrorTypeEnum.ERROR.getValue(),
         shortCode, description));
     return ruleList;
   }
@@ -150,6 +168,7 @@ public class AutomaticRules {
    * @param nameRule the name rule
    * @param shortCode the short code
    * @param description the description
+   * @param tableSchemaId the table schema id
    * @param datasetId the dataset id
    * @return the rule
    */
@@ -165,6 +184,57 @@ public class AutomaticRules {
     rule.setWhenCondition(whenCondition.toString());
     rule.setReferenceFieldSchemaPKId(new ObjectId(referenceId));
     return rule;
+  }
+
+  /**
+   * Creates the url automatic rule.
+   *
+   * @param referenceId the reference id
+   * @param typeEntityEnum the type entity enum
+   * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
+   * @return the rule
+   */
+  public static Rule createUrlAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
+      String nameRule, String shortCode, String description) {
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isURL(value)",
+        "The value does not follow the expected syntax for a valid URL.",
+        ErrorTypeEnum.ERROR.getValue(), shortCode, description);
+  }
+
+  /**
+   * Creates the phone automatic rule.
+   *
+   * @param referenceId the reference id
+   * @param typeEntityEnum the type entity enum
+   * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
+   * @return the rule
+   */
+  public static Rule createPhoneAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
+      String nameRule, String shortCode, String description) {
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isPhone(value)",
+        "The value does not follow the expected syntax for a valid phone number.",
+        ErrorTypeEnum.ERROR.getValue(), shortCode, description);
+  }
+
+  /**
+   * Creates the email automatic rule.
+   *
+   * @param referenceId the reference id
+   * @param typeEntityEnum the type entity enum
+   * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
+   * @return the rule
+   */
+  public static Rule createEmailAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
+      String nameRule, String shortCode, String description) {
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isEmail(value)",
+        "The value does not follow the expected syntax for a valid email.",
+        ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
 
   /**
@@ -187,8 +257,9 @@ public class AutomaticRules {
     List<String> thenCondition = new ArrayList<>();
     rule.setRuleId(new ObjectId());
     rule.setReferenceId(new ObjectId(referenceId));
-    rule.setAutomatic(Boolean.TRUE);
-    rule.setEnabled(Boolean.TRUE);
+    rule.setAutomatic(true);
+    rule.setEnabled(true);
+    rule.setVerified(true);
     rule.setRuleName(nameRule);
     rule.setWhenCondition(whenCondition);
     thenCondition.add(thenCondition0);

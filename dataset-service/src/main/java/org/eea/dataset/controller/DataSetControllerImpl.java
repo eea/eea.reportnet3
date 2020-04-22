@@ -193,6 +193,10 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
+    if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
+        && datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+    }
     // extract the filename
     String fileName = file.getOriginalFilename();
     // extract the file content
@@ -336,6 +340,10 @@ public class DataSetControllerImpl implements DatasetController {
     if (datasetId == null || records == null || records.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
+    if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId)) && datasetService
+        .getTableReadOnly(datasetId, records.get(0).getIdRecordSchema(), EntityTypeEnum.RECORD)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+    }
     try {
       updateRecordHelper.executeUpdateProcess(datasetId, records);
     } catch (EEAException e) {
@@ -360,6 +368,10 @@ public class DataSetControllerImpl implements DatasetController {
       @PathVariable("recordId") final String recordId) {
     if (datasetId == null || recordId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
+    }
+    if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
+        && datasetService.getTableReadOnly(datasetId, recordId, EntityTypeEnum.RECORD)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
     try {
       updateRecordHelper.executeDeleteProcess(datasetId, recordId);
@@ -387,6 +399,11 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestBody final List<RecordVO> records) {
     if (datasetId == null || records == null || records.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
+    }
+    // Not allow insert if the table is marked as read only. This not applies to design datasets
+    if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
+        && datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
     try {
       updateRecordHelper.executeCreateProcess(datasetId, records, idTableSchema);
@@ -421,7 +438,11 @@ public class DataSetControllerImpl implements DatasetController {
     } else if (tableSchemaId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
+    } else if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
+        && datasetService.getTableReadOnly(datasetId, tableSchemaId, EntityTypeEnum.TABLE)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
+
     LOG.info("Executing delete table value with id {} from dataset {}", tableSchemaId, datasetId);
     try {
       // This method will release the lock
@@ -508,6 +529,10 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestBody final FieldVO field) {
     if (datasetId == null || field == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NOT_FOUND);
+    }
+    if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId)) && datasetService
+        .getTableReadOnly(datasetId, field.getIdFieldSchema(), EntityTypeEnum.FIELD)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
     try {
       updateRecordHelper.executeFieldUpdateProcess(datasetId, field);

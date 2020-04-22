@@ -147,8 +147,13 @@ public class KieBaseManager {
             // that switch clear the validations , and check if the datas in values are correct
             if (null != datatype && !rule.isAutomatic()) {
               switch (datatype) {
-                case NUMBER:
-                  expression.append("( !isBlank(value) || isNumber(value) && ");
+                case NUMBER_INTEGER:
+                  expression.append("( !isBlank(value) || isNumberInteger(value) && ");
+                  rule.setWhenCondition(
+                      rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
+                  break;
+                case NUMBER_DECIMAL:
+                  expression.append("( !isBlank(value) || isNumberDecimal(value) && ");
                   rule.setWhenCondition(
                       rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
@@ -238,8 +243,12 @@ public class KieBaseManager {
     // we do the same thing like in kiebase validation part
     if (null != datatype) {
       switch (datatype) {
-        case NUMBER:
-          expression.append("( !isBlank(value) || isNumber(value) && ");
+        case NUMBER_INTEGER:
+          expression.append("( !isBlank(value) || isNumberInteger(value) && ");
+          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
+          break;
+        case NUMBER_DECIMAL:
+          expression.append("( !isBlank(value) || isNumberDecimal(value) && ");
           whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
           break;
         case DATE:
@@ -286,6 +295,9 @@ public class KieBaseManager {
     } else {
       rule.setVerified(true);
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATED_QC_RULE_EVENT, null,
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build());
     }
   }
 
