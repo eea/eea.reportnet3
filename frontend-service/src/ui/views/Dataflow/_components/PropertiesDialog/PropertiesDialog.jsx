@@ -4,7 +4,6 @@ import isNil from 'lodash/isNil';
 
 import styles from './PropertiesDialog.module.scss';
 
-import { config } from 'conf';
 import { routes } from 'ui/routes';
 import DataflowConf from 'conf/dataflow.config.json';
 
@@ -16,7 +15,6 @@ import { TreeView } from 'ui/views/_components/TreeView';
 import { TreeViewExpandableItem } from 'ui/views/_components/TreeView/_components/TreeViewExpandableItem';
 
 import { DataflowService } from 'core/services/Dataflow';
-import { UserService } from 'core/services/User';
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -64,14 +62,7 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
     }
   };
 
-  const parsedDataflowData = PropertiesUtils.parseDataflowData(
-    config,
-    dataflowDataState,
-    dataflowId,
-    resources.messages,
-    user,
-    UserService
-  );
+  const parsedDataflowData = { dataflowStatus: dataflowDataState.data.status };
   const parsedObligationsData = PropertiesUtils.parseObligationsData(dataflowDataState, user.userProps.dateFormat);
 
   const dialogFooter = (

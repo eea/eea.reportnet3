@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 
+import styles from './ApiKeyDialog.module.scss';
+
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Spinner } from 'ui/views/_components/Spinner';
-
-import styles from './ApiKeyDialog.module.scss';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -12,12 +12,12 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { DataflowService } from 'core/services/Dataflow';
 
 const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onManageDialogs }) => {
+  const resources = useContext(ResourcesContext);
+  const notificationContext = useContext(NotificationContext);
+
   const [apiKey, setApiKey] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [textAreaRef, setTextAreaRef] = useState(null);
-
-  const resources = useContext(ResourcesContext);
-  const notificationContext = useContext(NotificationContext);
 
   useEffect(() => {
     onGetApiKey();
@@ -26,9 +26,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
     };
   }, []);
 
-  const onCloseDialog = () => {
-    onManageDialogs('isApiKeyDialogVisible', false);
-  };
+  const onCloseDialog = () => onManageDialogs('isApiKeyDialogVisible', false);
 
   const onCopyToClipboard = () => {
     const textArea = textAreaRef;

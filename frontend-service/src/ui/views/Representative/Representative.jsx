@@ -10,6 +10,7 @@ import styles from './Representative.module.scss';
 import { config } from 'conf';
 import { routes } from 'ui/routes';
 
+import { ApiKeyDialog } from 'ui/views/_components/ApiKeyDialog';
 import { BigButtonList } from './_components/BigButtonList';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { PropertiesDialog } from 'ui/views/Dataflow/_components/PropertiesDialog';
@@ -56,6 +57,7 @@ const Representative = withRouter(({ match, history }) => {
     description: '',
     hasWritePermissions: false,
     id: dataflowId,
+    isApiKeyDialogVisible: false,
     isCustodian: false,
     isDeleteDialogVisible: false,
     isManageRolesDialogVisible: false,
@@ -72,31 +74,39 @@ const Representative = withRouter(({ match, history }) => {
   useEffect(() => {
     breadCrumbContext.add([
       {
-        label: resources.messages['dataflows'],
+        command: () => history.push(getUrl(routes.DATAFLOWS)),
+        href: getUrl(routes.DATAFLOWS),
         icon: 'home',
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOWS))
+        label: resources.messages['dataflows']
       },
       {
-        label: resources.messages['dataflow'],
+        command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true)),
+        href: getUrl(routes.DATAFLOWS),
         icon: 'archive',
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true))
+        label: resources.messages['dataflow']
       },
       {
-        label: representative || resources.messages['representative'],
-        icon: 'representative'
+        icon: 'representative',
+        label: representative || resources.messages['representative']
       }
     ]);
 
-    leftSideBarContext.addModels([
-      {
-        label: 'properties',
-        icon: 'infoCircle',
-        onClick: () => onManageDialogs('isPropertiesDialogVisible', true),
-        title: 'properties'
-      }
-    ]);
+    const propertiesBtn = {
+      icon: 'infoCircle',
+      label: 'properties',
+      onClick: () => onManageDialogs('isPropertiesDialogVisible', true),
+      title: 'properties'
+    };
+
+    const apiKeyBtn = {
+      className: 'dataflow-properties-provider-help-step',
+      icon: 'settings',
+      label: 'apiKey',
+      onClick: () => onManageDialogs('isApiKeyDialogVisible', true),
+      title: 'apiKey'
+    };
+
+    leftSideBarContext.addModels([representativeState.isCustodian ? propertiesBtn : apiKeyBtn, propertiesBtn]);
   }, []);
 
   useEffect(() => {
@@ -252,6 +262,15 @@ const Representative = withRouter(({ match, history }) => {
           history={history}
           onManageDialogs={onManageDialogs}
         />
+
+        {representativeState.isApiKeyDialogVisible && (
+          <ApiKeyDialog
+            dataflowId={dataflowId}
+            dataProviderId={dataProviderId}
+            isApiKeyDialogVisible={representativeState.isApiKeyDialogVisible}
+            onManageDialogs={onManageDialogs}
+          />
+        )}
       </div>
     </div>
   );
