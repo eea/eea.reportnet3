@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
@@ -17,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 /**
  * The type Eea security expression root.
  */
+@Slf4j
 public class EeaSecurityExpressionRoot extends SecurityExpressionRoot implements
     MethodSecurityExpressionOperations {
 
@@ -45,33 +47,41 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot implements
    * @return the boolean
    */
   public boolean secondLevelAuthorize(Long idEntity, ObjectAccessRoleEnum... objectAccessRoles) {
-    Collection<String> authorities = SecurityContextHolder.getContext()
+    boolean canAccess = false;
+    if (SecurityContextHolder.getContext()
         .getAuthentication()
-        .getAuthorities().stream().map(authority -> ((GrantedAuthority) authority).getAuthority())
-        .collect(
-            Collectors.toList());
-    List<String> roles = Arrays.asList(objectAccessRoles).stream()
-        .map(objectAccessRoleEnum -> objectAccessRoleEnum.getAccessRole(idEntity)).collect(
-            Collectors.toList());
-
-    boolean canAccess = !roles.stream().filter(authorities::contains).findFirst()
-        .orElse("not_found")
-        .equals("not_found");
-    if (!canAccess) {//No authority found in the current token. Check against keycloak to finde if there were some change at User rights that wasn't be propagated to the token yet
-      List<ResourceAccessVO> resourceAccessVOS = this.userManagementControllerZull
-          .getResourcesByUser();
-      // ObjectAccessRoleEnum expression has the following formate ROLE_DATASCHEMA-1-DATA_CUSTODIAN
-      List<String> resourceRoles = resourceAccessVOS.stream()
-          .map(resourceAccessVO -> {
-            StringBuilder builder = new StringBuilder("ROLE_");
-            return builder.append(resourceAccessVO.getResource().toString()).append("-")
-                .append(resourceAccessVO.getId()).append("-").append(resourceAccessVO.getRole())
-                .toString().toUpperCase();
-          }).collect(
+        .getAuthorities().contains("feign")) {
+      log.warn("Invocation was made from a feign client with a due token. Letting it go");
+      canAccess = true;
+    } else {
+      Collection<String> authorities = SecurityContextHolder.getContext()
+          .getAuthentication()
+          .getAuthorities().stream().map(authority -> ((GrantedAuthority) authority).getAuthority())
+          .collect(
               Collectors.toList());
-      canAccess = !roles.stream().filter(resourceRoles::contains).findFirst()
+      List<String> roles = Arrays.asList(objectAccessRoles).stream()
+          .map(objectAccessRoleEnum -> objectAccessRoleEnum.getAccessRole(idEntity)).collect(
+              Collectors.toList());
+
+      canAccess = !roles.stream().filter(authorities::contains).findFirst()
           .orElse("not_found")
           .equals("not_found");
+      if (!canAccess) {//No authority found in the current token. Check against keycloak to finde if there were some change at User rights that wasn't be propagated to the token yet
+        List<ResourceAccessVO> resourceAccessVOS = this.userManagementControllerZull
+            .getResourcesByUser();
+        // ObjectAccessRoleEnum expression has the following formate ROLE_DATASCHEMA-1-DATA_CUSTODIAN
+        List<String> resourceRoles = resourceAccessVOS.stream()
+            .map(resourceAccessVO -> {
+              StringBuilder builder = new StringBuilder("ROLE_");
+              return builder.append(resourceAccessVO.getResource().toString()).append("-")
+                  .append(resourceAccessVO.getId()).append("-").append(resourceAccessVO.getRole())
+                  .toString().toUpperCase();
+            }).collect(
+                Collectors.toList());
+        canAccess = !roles.stream().filter(resourceRoles::contains).findFirst()
+            .orElse("not_found")
+            .equals("not_found");
+      }
     }
     return canAccess;
   }
