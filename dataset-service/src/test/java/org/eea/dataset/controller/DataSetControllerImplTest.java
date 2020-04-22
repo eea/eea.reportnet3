@@ -156,6 +156,25 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.loadTableData(1L, file, "example");
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void testLoadDataReadOnlyException() throws Exception {
+    try {
+      Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
+          .thenReturn(DatasetTypeEnum.REPORTING);
+      Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
+          .thenReturn(true);
+
+      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+      Mockito.when(authentication.getName()).thenReturn("user");
+      final EEAMockMultipartFile file =
+          new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), false);
+      dataSetControllerImpl.loadTableData(1L, file, "example");
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
+      throw e;
+    }
+  }
+
   /**
    * Test delete import data throw non provided.
    *
@@ -523,6 +542,24 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.deleteImportTable(-2L, "");
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteImportTableReadOnlyException() throws Exception {
+    try {
+      Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
+          .thenReturn(DatasetTypeEnum.REPORTING);
+      Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
+          .thenReturn(true);
+
+      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+      Mockito.when(authentication.getName()).thenReturn("user");
+
+      dataSetControllerImpl.deleteImportTable(1L, "");
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
+      throw e;
+    }
+  }
+
   /**
    * Testupdate records null entry.
    *
@@ -563,6 +600,21 @@ public class DataSetControllerImplTest {
     doNothing().when(updateRecordHelper).executeUpdateProcess(Mockito.any(), Mockito.any());
     dataSetControllerImpl.updateRecords(1L, records);
     Mockito.verify(updateRecordHelper, times(1)).executeUpdateProcess(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testUpdateRecordsReadOnlyException() throws Exception {
+    try {
+      Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
+          .thenReturn(DatasetTypeEnum.REPORTING);
+      Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
+          .thenReturn(true);
+
+      dataSetControllerImpl.updateRecords(1L, records);
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
+      throw e;
+    }
   }
 
   /**
@@ -608,6 +660,21 @@ public class DataSetControllerImplTest {
     doNothing().when(updateRecordHelper).executeDeleteProcess(Mockito.any(), Mockito.any());
     dataSetControllerImpl.deleteRecord(1L, recordId);
     Mockito.verify(updateRecordHelper, times(1)).executeDeleteProcess(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteRecordReadOnlyException() throws Exception {
+    try {
+      Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
+          .thenReturn(DatasetTypeEnum.REPORTING);
+      Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
+          .thenReturn(true);
+
+      dataSetControllerImpl.deleteRecord(1L, recordId);
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
+      throw e;
+    }
   }
 
   /**
@@ -676,6 +743,22 @@ public class DataSetControllerImplTest {
     doThrow(new EEAException()).when(updateRecordHelper).executeCreateProcess(Mockito.any(),
         Mockito.any(), Mockito.any());
     dataSetControllerImpl.insertRecords(1L, "id", records);
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testinsertRecordsTableReadOnlyException() throws Exception {
+    try {
+      Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
+          .thenReturn(DatasetTypeEnum.REPORTING);
+      Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
+          .thenReturn(true);
+
+      dataSetControllerImpl.insertRecords(1L, "id", records);
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
+      throw e;
+    }
   }
 
   /**
@@ -768,6 +851,21 @@ public class DataSetControllerImplTest {
     doThrow(new EEAException()).when(updateRecordHelper).executeFieldUpdateProcess(Mockito.any(),
         Mockito.any());
     dataSetControllerImpl.updateField(1L, new FieldVO());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testUpdateFieldReadOnlyException() throws Exception {
+    try {
+      Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
+          .thenReturn(DatasetTypeEnum.REPORTING);
+      Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
+          .thenReturn(true);
+
+      dataSetControllerImpl.updateField(1L, new FieldVO());
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
+      throw e;
+    }
   }
 
   /**

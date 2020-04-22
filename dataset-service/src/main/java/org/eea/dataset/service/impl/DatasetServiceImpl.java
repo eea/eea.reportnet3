@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -48,6 +47,7 @@ import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseR
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -84,6 +84,7 @@ import org.eea.multitenancy.TenantResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -101,6 +102,10 @@ public class DatasetServiceImpl implements DatasetService {
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The field max length. */
+  @Value("${dataset.fieldMaxLength}")
+  private int fieldMaxLength;
 
   /** The dataset repository. */
   @Autowired
@@ -269,6 +274,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void saveTable(@DatasetId Long datasetId, TableValue tableValue) {
+    TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
     DatasetValue datasetValue = datasetRepository.findById(datasetId).get();
     tableValue.setDatasetId(datasetValue);
     tableRepository.saveAndFlush(tableValue);
@@ -1024,10 +1030,21 @@ public class DatasetServiceImpl implements DatasetService {
       throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
 
     }
-    List<RecordValue> recordValue = recordMapper.classListToEntity(records);
-    List<FieldValue> fields = recordValue.parallelStream().map(RecordValue::getFields)
-        .filter(Objects::nonNull).flatMap(List::stream).collect(Collectors.toList());
-    fieldRepository.saveAll(fields);
+    List<RecordValue> recordValues = recordMapper.classListToEntity(records);
+    List<FieldValue> fieldValues = new ArrayList<>();
+    for (RecordValue recordValue : recordValues) {
+      for (FieldValue fieldValue : recordValue.getFields()) {
+        if (null == fieldValue.getValue()) {
+          fieldValue.setValue("");
+        } else {
+          if (fieldValue.getValue().length() >= fieldMaxLength) {
+            fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
+          }
+        }
+        fieldValues.add(fieldValue);
+      }
+    }
+    fieldRepository.saveAll(fieldValues);
   }
 
   /**
@@ -1076,8 +1093,15 @@ public class DatasetServiceImpl implements DatasetService {
       table.setDatasetId(dataset);
       record.setTableValue(table);
       record.setDataProviderCode(provider.getCode());
-      record.getFields().stream().filter(field -> field.getValue() == null)
-          .forEach(field -> field.setValue(""));
+      for (FieldValue field : record.getFields()) {
+        if (null == field.getValue()) {
+          field.setValue("");
+        } else {
+          if (field.getValue().length() >= fieldMaxLength) {
+            field.setValue(field.getValue().substring(0, fieldMaxLength));
+          }
+        }
+      }
 
     });
     recordRepository.saveAll(recordValue);
@@ -1242,12 +1266,15 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void saveTablePropagation(Long datasetId, TableSchemaVO tableSchema) throws EEAException {
     TableValue table = new TableValue();
+    TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
     Optional<DatasetValue> dataset = datasetRepository.findById(datasetId);
     if (dataset.isPresent()) {
       table.setIdTableSchema(tableSchema.getIdTableSchema());
       table.setDatasetId(dataset.get());
       saveTable(datasetId, table);
     } else {
+      LOG_ERROR.error("Saving table propagation failed because the dataset {} is not found",
+          datasetId);
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
   }
@@ -1485,4 +1512,57 @@ public class DatasetServiceImpl implements DatasetService {
 
     return type;
   }
+
+
+  /**
+   * Gets the table read only. Receives by parameter the datasetId, the objectId and the type
+   * (table, record, field). In example, if receives an objectId that is a Record (that's a record
+   * schema id), find the property readOnly of the table that belongs to the record
+   * 
+   * @param datasetId the dataset id
+   * @param objectId the object id
+   * @param type the type
+   * @return the table read only
+   */
+  @Override
+  public Boolean getTableReadOnly(Long datasetId, String objectId, EntityTypeEnum type) {
+    Boolean readOnly = false;
+    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
+
+    switch (type) {
+      case TABLE:
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          if (objectId.equals(tableSchema.getIdTableSchema().toString())
+              && tableSchema.getReadOnly() != null && tableSchema.getReadOnly()) {
+            readOnly = true;
+            break;
+          }
+        }
+        break;
+      case RECORD:
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          if (objectId.equals(tableSchema.getRecordSchema().getIdRecordSchema().toString())
+              && tableSchema.getReadOnly() != null && tableSchema.getReadOnly()) {
+            readOnly = true;
+            break;
+          }
+        }
+        break;
+      case FIELD:
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          for (FieldSchema fieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
+            if (objectId.equals(fieldSchema.getIdFieldSchema().toString())
+                && tableSchema.getReadOnly() != null && tableSchema.getReadOnly()) {
+              readOnly = true;
+              break;
+            }
+          }
+        }
+        break;
+    }
+    return readOnly;
+  }
+
+
 }
