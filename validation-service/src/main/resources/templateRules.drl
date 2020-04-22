@@ -19,6 +19,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+
+
 template "templateValidateRules"
 rule "@{ruleid}"
 dialect "java"
@@ -141,14 +143,13 @@ function boolean isURL(String value){
 	if(!isBlank(value)){
 		return true;
 	}
-    try {
-         new URL(value).toURI();
-         return true;
-    }catch (URISyntaxException exception) {
-         return false;
-    }catch (MalformedURLException exception) {
-         return false;
-    }
+	Pattern pat = Pattern.compile(“https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)”);					
+	Matcher mather = pattern.matcher(value);					
+	if (mather.find() == true) {
+			return true;
+		} else {
+			return false;
+		}		
  }
  
  //////////////////////////////////////////VALIDATION NUMBER///////////////////////////////////////////////////////////
