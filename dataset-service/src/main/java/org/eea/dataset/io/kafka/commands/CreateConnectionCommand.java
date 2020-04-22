@@ -1,11 +1,15 @@
 package org.eea.dataset.io.kafka.commands;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.multitenancy.TenantResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +32,9 @@ public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
+
   /**
    * Gets the event type.
    *
@@ -49,26 +56,46 @@ public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
     // When there is a new dataset created, if there is idSchema in the event, call to
     // datasetService.insertSchema
     // to insert that values into the dataset_X.dataset_value and dataset_X.table_value
-    if (EventType.CONNECTION_CREATED_EVENT.equals(eeaEventVO.getEventType())) {
 
-      // if there is idDatasetSchema, insert it into the corresponding dataset_value
-      String dataset = (String) eeaEventVO.getData().get("dataset_id");
-      String idDatasetSchema = (String) eeaEventVO.getData().get("idDatasetSchema");
-      if (StringUtils.isNotBlank(dataset) && StringUtils.isNotBlank(idDatasetSchema)) {
-        try {
-          String[] aux = dataset.split("_");
-          Long idDataset = Long.valueOf(aux[aux.length - 1]);
-          datasetService.insertSchema(idDataset, idDatasetSchema);
 
-          // First insert of the statistics
-          datasetService.saveStatistics(idDataset);
+    // if there is idDatasetSchema, insert it into the corresponding dataset_value
+    String dataset = (String) eeaEventVO.getData().get("dataset_id");
+    String idDatasetSchema = (String) eeaEventVO.getData().get("idDatasetSchema");
+    if (StringUtils.isNotBlank(dataset) && StringUtils.isNotBlank(idDatasetSchema)) {
+      try {
+        String[] aux = dataset.split("_");
+        Long idDataset = Long.valueOf(aux[aux.length - 1]);
+        TenantResolver.setTenantName(String.format("dataset_%s", idDataset));
+        datasetService.insertSchema(idDataset, idDatasetSchema);
 
-        } catch (EEAException e) {
-          LOG_ERROR.error(
-              "Error executing the processes after creating a new empty dataset. Error message: {}",
-              e.getMessage(), e);
-        }
+        // First insert of the statistics
+        datasetService.saveStatistics(idDataset);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("dataset_id", idDataset.toString());
+        result.put("idDatasetSchema", idDatasetSchema);
+        sendEvent(result);
+
+      } catch (EEAException e) {
+        LOG_ERROR.error(
+            "Error executing the processes after creating a new empty dataset. Error message: {}",
+            e.getMessage(), e);
       }
+    } else {
+      LOG_ERROR.error(
+          "Error creating the processes creating a new dataset connection because of the null datasetId or idDatasetSchema. DatasetId: {}. IdDatasetSchema: {}",
+          dataset, idDatasetSchema);
     }
+  }
+
+
+  /**
+   * Send event spread Data to copy prefilled tables in reporting datasets and data collection.
+   *
+   * @param result the result
+   */
+  private void sendEvent(Map<String, Object> result) {
+    kafkaSenderUtils.releaseKafkaEvent(EventType.SPREAD_DATA_EVENT, result);
+
   }
 }

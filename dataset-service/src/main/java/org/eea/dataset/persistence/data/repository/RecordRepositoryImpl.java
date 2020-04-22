@@ -277,47 +277,33 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   private void createSorterQuery(StringBuilder sortQueryBuilder,
       StringBuilder directionQueryBuilder, int criteriaNumber, SortField... sortFields) {
     // Multisorting Query accept n fields and order asc(1)/desc(0)
+    String sortQuery = "";
+
     if (null != sortFields) {
       LOG.info("Init Order");
       for (SortField field : sortFields) {
         switch (field.getTypefield()) {
           case COORDINATE_LAT:
-            sortQueryBuilder.append(",")
-                .append(String.format(SORT_COORDINATE_QUERY, field.getFieldName(), criteriaNumber))
-                .append(" ");
-            directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
-                .append(" ").append(field.getAsc() ? "asc" : "desc");
-            break;
           case COORDINATE_LONG:
-            sortQueryBuilder.append(",")
-                .append(String.format(SORT_COORDINATE_QUERY, field.getFieldName(), criteriaNumber))
-                .append(" ");
-            directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
-                .append(" ").append(field.getAsc() ? "asc" : "desc");
+            sortQuery = SORT_COORDINATE_QUERY;
             break;
-          case NUMBER:
-            sortQueryBuilder.append(",")
-                .append(String.format(SORT_NUMERIC_QUERY, field.getFieldName(), criteriaNumber))
-                .append(" ");
-            directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
-                .append(" ").append(field.getAsc() ? "asc" : "desc");
+          case NUMBER_INTEGER:
+          case NUMBER_DECIMAL:
+            sortQuery = SORT_NUMERIC_QUERY;
             break;
           case DATE:
-            sortQueryBuilder.append(",")
-                .append(String.format(SORT_DATE_QUERY, field.getFieldName(), criteriaNumber))
-                .append(" ");
-            directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
-                .append(" ").append(field.getAsc() ? "asc" : "desc");
+            sortQuery = SORT_DATE_QUERY;
             break;
           default:
-            sortQueryBuilder.append(",")
-                .append(String.format(SORT_STRING_QUERY, field.getFieldName(), criteriaNumber))
-                .append(" ");
-            directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
-                .append(" ").append(field.getAsc() ? "asc" : "desc");
+            sortQuery = SORT_STRING_QUERY;
             break;
         }
+        sortQueryBuilder.append(",")
+            .append(String.format(sortQuery, field.getFieldName(), criteriaNumber)).append(" ");
+        directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
+            .append(" ").append(field.getAsc() ? "asc" : "desc");
       }
+
     }
   }
 
@@ -339,6 +325,19 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
       query.setMaxResults(pageable.getPageSize());
     }
+    return query.getResultList();
+  }
+
+  /**
+   * Find by table value all records.
+   *
+   * @param idTableSchema the id table schema
+   * @return the list
+   */
+  @Override
+  public List<RecordValue> findByTableValueAllRecords(String idTableSchema) {
+    Query query = entityManager.createQuery(QUERY_UNSORTERED);
+    query.setParameter("idTableSchema", idTableSchema);
     return query.getResultList();
   }
 

@@ -496,10 +496,18 @@ public class DatasetServiceTest {
    */
   @Test
   public void testDeleteImportData() throws Exception {
-    doNothing().when(datasetRepository).removeDatasetData(Mockito.any());
+
+    Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5cf0e9b3b793310e9ceca190");
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema table = new TableSchema();
+    table.setIdTableSchema(new ObjectId());
+    schema.setTableSchemas(Arrays.asList(table));
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     datasetService.deleteImportData(1L);
-    Mockito.verify(datasetRepository, times(1)).removeDatasetData(Mockito.any());
+    Mockito.verify(recordRepository, times(1)).deleteRecordWithIdTableSchema(Mockito.any());
   }
+
 
   /**
    * Test delete data schema.
@@ -1495,7 +1503,7 @@ public class DatasetServiceTest {
    */
   @Test
   public void getFieldValuesReferencedTestNumber() {
-    field.setType(DataType.NUMBER);
+    field.setType(DataType.NUMBER_DECIMAL);
 
     Mockito.when(
         datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
