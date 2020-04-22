@@ -143,7 +143,7 @@ const Dataflow = withRouter(({ history, match }) => {
       leftSideBarContext.addModels([propertiesBtn, manageRolesBtn]);
     } else {
       leftSideBarContext.addModels(
-        dataflowDataState.isRepresentativeView ? [apiKeyBtn, propertiesBtn] : [propertiesBtn]
+        dataflowDataState.isRepresentativeView ? [propertiesBtn, apiKeyBtn] : [propertiesBtn]
       );
     }
   }, [dataflowDataState.isCustodian, dataflowDataState.status]);

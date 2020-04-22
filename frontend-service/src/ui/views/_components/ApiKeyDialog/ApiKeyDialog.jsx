@@ -80,6 +80,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
 
   return (
     <Dialog
+      style={{ width: '80%', maxWidth: '650px' }}
       blockScroll={false}
       closeOnEscape={true}
       footer={footer}
@@ -104,7 +105,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
               <div>
                 <Button
                   icon={'copy'}
-                  className="p-button-secondary"
+                  className={`p-button-secondary ${styles.copyBtn}`}
                   label={resources.messages['copy']}
                   onClick={() => onCopyToClipboard()}
                 />

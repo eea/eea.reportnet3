@@ -106,7 +106,7 @@ const Representative = withRouter(({ match, history }) => {
       title: 'apiKey'
     };
 
-    leftSideBarContext.addModels([representativeState.isCustodian ? propertiesBtn : apiKeyBtn, propertiesBtn]);
+    leftSideBarContext.addModels([representativeState.isCustodian ? propertiesBtn : propertiesBtn, apiKeyBtn]);
   }, []);
 
   useEffect(() => {
