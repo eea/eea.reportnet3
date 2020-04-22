@@ -48,6 +48,8 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    * Instantiates a new excel reader strategy.
    *
    * @param fileCommon the file common
+   * @param datasetId the dataset id
+   * @param fieldMaxLength the field max length
    */
   public ExcelReaderStrategy(final FileCommonUtils fileCommon, Long datasetId, int fieldMaxLength) {
     this.fileCommon = fileCommon;
@@ -63,7 +65,7 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
    * @return the data set VO
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public DataSetVO parseFile(InputStream inputStream, Long dataflowId, Long partitionId,
