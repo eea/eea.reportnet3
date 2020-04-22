@@ -1030,36 +1030,6 @@ public class DatasetServiceTest {
   }
 
   /**
-   * Update records null test.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = EEAException.class)
-  public void updateRecordsNullTest() throws Exception {
-    datasetService.updateRecords(null, new ArrayList<RecordVO>());
-  }
-
-  /**
-   * Update records null 2 test.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = EEAException.class)
-  public void updateRecordsNull2Test() throws Exception {
-    datasetService.updateRecords(1L, null);
-  }
-
-  /**
-   * Delete records null test.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = EEAException.class)
-  public void deleteRecordsNullTest() throws Exception {
-    datasetService.deleteRecord(null, "1L");
-  }
-
-  /**
    * Delete records null 2 test.
    *
    * @throws Exception the exception
