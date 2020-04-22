@@ -106,6 +106,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       ) : null}
     </div>
   );
+
   const enabledTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
       {rowData.enabled ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}

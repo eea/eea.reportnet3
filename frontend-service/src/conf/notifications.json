@@ -528,5 +528,6 @@
         }
       ]
     }
-  ]
+  ],
+  "hiddenNotifications": ["VALIDATED_QC_RULE_EVENT"]
 }
