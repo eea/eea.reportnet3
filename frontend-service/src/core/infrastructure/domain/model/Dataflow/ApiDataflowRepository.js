@@ -303,6 +303,11 @@ const getAllSchemas = async dataflowId => {
   return datasetSchemas;
 };
 
+const getApiKey = async (dataflowId, dataProviderId) => await apiDataflow.getApiKey(dataflowId, dataProviderId);
+
+const generateApiKey = async (dataflowId, dataProviderId) =>
+  await apiDataflow.generateApiKey(dataflowId, dataProviderId);
+
 const getPercentageOfValue = (val, total) => {
   return total === 0 ? '0.00' : ((val / total) * 100).toFixed(2);
 };
@@ -502,16 +507,18 @@ const update = async (dataflowId, name, description, obligationId) =>
   await apiDataflow.update(dataflowId, name, description, obligationId);
 
 export const ApiDataflowRepository = {
-  all,
   accept,
   accepted,
-  create,
+  all,
   completed,
+  create,
   dataflowDetails,
-  datasetsValidationStatistics,
   datasetsReleasedStatus,
+  datasetsValidationStatistics,
   deleteById,
+  generateApiKey,
   getAllSchemas,
+  getApiKey,
   newEmptyDatasetSchema,
   pending,
   reject,

@@ -118,6 +118,34 @@ export const apiDataflow = {
     });
     return response;
   },
+  getApiKey: async (dataflowId, dataProviderId) => {
+    /*  const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.getApiKey,{dataflowId, dataProviderId}),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+
+    return response.data; */
+
+    return '111-222-222-222';
+  },
+  generateApiKey: async (dataflowId, dataProviderId) => {
+    /*  const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.generateApiKey,{dataflowId, dataProviderId}),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+
+    return response.data; */
+
+    return `${Math.random(1000 * 99999) * 10} ${dataProviderId} ${dataflowId}`;
+  },
   pending: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
