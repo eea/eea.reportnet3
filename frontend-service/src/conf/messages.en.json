@@ -599,6 +599,8 @@
     "yes": "Yes",
     "entityType": "Type of QC",
     "text": "Text",
-    "noQCRulesWithSelectedParameters": "There are no QC rules with the selected parameters"
+    "noQCRulesWithSelectedParameters": "There are no QC rules with the selected parameters",
+    "prefilled": "Prefilled",
+    "exportDatasetSchema": "Export schema"
   }
 }

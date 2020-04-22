@@ -60,8 +60,8 @@ export class InputTextarea extends Component {
     onInput: null,
     rows: 1,
     tooltip: null,
-    tooltipOptions: null,
-    value: undefined
+    tooltipOptions: null
+    // value: undefined
   };
 
   static propTypes = {
@@ -72,6 +72,7 @@ export class InputTextarea extends Component {
     rows: PropTypes.number,
     tooltip: PropTypes.string,
     tooltipOptions: PropTypes.object
+    // value: PropTypes.string
   };
 
   constructor(props) {
