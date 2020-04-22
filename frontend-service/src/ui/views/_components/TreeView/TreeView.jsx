@@ -189,11 +189,16 @@ const codelistTemplate = rowData => <Chips disabled={true} value={rowData.codeli
 
 const getFieldTypeValue = value => {
   const fieldTypes = [
-    { fieldType: 'Number', value: 'Number', fieldTypeIcon: 'number' },
+    { fieldType: 'Integer', value: 'Number - Integer', fieldTypeIcon: 'number-integer' },
+    { fieldType: 'Decimal', value: 'Number - Decimal', fieldTypeIcon: 'number-decimal' },
     { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
     // { fieldType: 'Latitude', value: 'Geospatial object (Latitude)', fieldTypeIcon: 'map' },
     // { fieldType: 'Longitude', value: 'Geospatial object (Longitude)', fieldTypeIcon: 'map' },
     { fieldType: 'Text', value: 'Single line text', fieldTypeIcon: 'italic' },
+    { fieldType: 'LongText', value: 'Long text', fieldTypeIcon: 'align-right' },
+    { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
+    { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'externalLink' },
+    { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
     // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
     // { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
     // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
