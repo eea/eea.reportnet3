@@ -267,7 +267,6 @@ public class DatasetServiceTest {
   /** The table VO. */
   private TableVO tableVO;
 
-
   /** The field list. */
   private List<FieldValue> fieldList;
 
@@ -445,8 +444,6 @@ public class DatasetServiceTest {
     datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
   }
 
-
-
   /**
    * Test process file success update table.
    *
@@ -507,7 +504,6 @@ public class DatasetServiceTest {
     datasetService.deleteImportData(1L);
     Mockito.verify(recordRepository, times(1)).deleteRecordWithIdTableSchema(Mockito.any());
   }
-
 
   /**
    * Test delete data schema.
@@ -947,28 +943,6 @@ public class DatasetServiceTest {
 
   }
 
-
-  /**
-   * Test get statistics success.
-   *
-   * @throws Exception the exception
-   */
-  /**
-   * Test get statistics success 2.
-   *
-   * @throws Exception the exception
-   */
-  /**
-   * Test get statistics success sanitize else.
-   *
-   * @throws Exception the exception
-   */
-  /**
-   * Test get statistics success 3.
-   *
-   * @throws Exception the exception
-   */
-
   /**
    * Test get table from any object id.
    *
@@ -983,8 +957,6 @@ public class DatasetServiceTest {
     datasetService.getPositionFromAnyObjectId("1L", 1L, EntityTypeEnum.RECORD);
     Mockito.verify(recordRepository, times(1)).findByIdAndTableValue_DatasetId_Id(Mockito.any(),
         Mockito.any());
-
-
   }
 
   /**
@@ -1000,7 +972,6 @@ public class DatasetServiceTest {
 
     datasetService.getPositionFromAnyObjectId("1", 1L, EntityTypeEnum.TABLE);
     Mockito.verify(tableRepository, times(1)).findByIdAndDatasetId_Id(Mockito.any(), Mockito.any());
-
   }
 
   /**
@@ -1025,7 +996,6 @@ public class DatasetServiceTest {
 
     datasetService.getPositionFromAnyObjectId("1", 1L, EntityTypeEnum.TABLE);
     Mockito.verify(tableRepository, times(1)).findByIdAndDatasetId_Id(Mockito.any(), Mockito.any());
-
   }
 
   /**
@@ -1044,7 +1014,6 @@ public class DatasetServiceTest {
         .findByIdAndRecord_TableValue_DatasetId_Id(Mockito.any(), Mockito.any());
 
   }
-
 
   /**
    * Test delete table data.
@@ -1173,7 +1142,6 @@ public class DatasetServiceTest {
     datasetService.createRecords(null, new ArrayList<RecordVO>(), "");
   }
 
-
   /**
    * Export file test.
    *
@@ -1218,11 +1186,8 @@ public class DatasetServiceTest {
    */
   @Test
   public void testGetFileNameException() throws EEAException {
-
     thrown.expectMessage(EEAErrorMessage.DATASET_NOTFOUND);
     datasetService.getFileName("csv", "test", null);
-
-
   }
 
   /**
@@ -1311,7 +1276,6 @@ public class DatasetServiceTest {
 
     datasetService.saveStatistics(1L);
     Mockito.verify(statisticsRepository, times(1)).saveAll(Mockito.any());
-
   }
 
   /**
@@ -1523,7 +1487,6 @@ public class DatasetServiceTest {
   @Test
   public void getFieldValuesReferencedTestDate() {
     field.setType(DataType.DATE);
-
     Mockito.when(
         datasetMetabaseService.getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any()))
         .thenReturn(1L);
@@ -1533,7 +1496,6 @@ public class DatasetServiceTest {
     datasetService.getFieldValuesReferenced(1L, "", "");
     Mockito.verify(fieldNoValidationMapper, times(1)).entityListToClass(sortedList);
   }
-
 
   /**
    * Gets the field values referenced test string.
@@ -1616,6 +1578,9 @@ public class DatasetServiceTest {
     Assert.assertNull(datasetService.getDatasetType(1L));
   }
 
+  /**
+   * Test get table read only.
+   */
   @Test
   public void testGetTableReadOnly() {
 
@@ -1637,6 +1602,9 @@ public class DatasetServiceTest {
     Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
   }
 
+  /**
+   * Test get table read only with non matching.
+   */
   @Test
   public void testGetTableReadOnlyWithNonMatching() {
 
@@ -1659,6 +1627,9 @@ public class DatasetServiceTest {
     Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
   }
 
+  /**
+   * Test get record read only.
+   */
   @Test
   public void testGetRecordReadOnly() {
 
@@ -1681,6 +1652,9 @@ public class DatasetServiceTest {
     Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
   }
 
+  /**
+   * Test get record read only with non matching.
+   */
   @Test
   public void testGetRecordReadOnlyWithNonMatching() {
 
@@ -1703,6 +1677,9 @@ public class DatasetServiceTest {
     Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
   }
 
+  /**
+   * Test get field read only.
+   */
   @Test
   public void testGetFieldReadOnly() {
 
@@ -1724,6 +1701,9 @@ public class DatasetServiceTest {
     Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
   }
 
+  /**
+   * Test get field read only with non matching.
+   */
   @Test
   public void testGetFieldReadOnlyWithNonMatching() {
 
@@ -1745,17 +1725,31 @@ public class DatasetServiceTest {
     Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
   }
 
-
+  /**
+   * Update records null test.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = EEAException.class)
   public void updateRecordsNullTest() throws Exception {
     datasetService.updateRecords(null, new ArrayList<RecordVO>());
   }
 
+  /**
+   * Update records null 2 test.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = EEAException.class)
   public void updateRecordsNull2Test() throws Exception {
     datasetService.updateRecords(1L, null);
   }
 
+  /**
+   * Update record test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateRecordTest() throws EEAException {
     FieldValue fieldValue = new FieldValue();
@@ -1765,6 +1759,5 @@ public class DatasetServiceTest {
     when(recordMapper.classListToEntity(Mockito.any())).thenReturn(Arrays.asList(recordValue));
     datasetService.updateRecords(1L, new ArrayList<RecordVO>());
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
-
   }
 }
