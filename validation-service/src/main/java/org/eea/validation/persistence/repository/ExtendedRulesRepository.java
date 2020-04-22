@@ -117,4 +117,12 @@ public interface ExtendedRulesRepository {
    * @return the rules with type rule criteria
    */
   RulesSchema getRulesWithTypeRuleCriteria(ObjectId datasetSchemaId, boolean required);
+
+  /**
+   * Gets the active and verified rules.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the active and verified rules
+   */
+  RulesSchema getActiveAndVerifiedRules(ObjectId datasetSchemaId);
 }
