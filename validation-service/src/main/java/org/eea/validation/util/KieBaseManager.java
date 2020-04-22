@@ -295,6 +295,9 @@ public class KieBaseManager {
     } else {
       rule.setVerified(true);
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATED_QC_RULE_EVENT, null,
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build());
     }
   }
 
