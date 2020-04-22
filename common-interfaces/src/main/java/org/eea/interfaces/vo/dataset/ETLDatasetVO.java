@@ -3,19 +3,13 @@ package org.eea.interfaces.vo.dataset;
 import java.io.Serializable;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 /**
  * The Class ETLDatasetVO.
  */
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ETLDatasetVO implements Serializable {
