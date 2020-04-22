@@ -108,9 +108,9 @@ const Dataflow = withRouter(({ history, match }) => {
     const apiKeyBtn = {
       className: 'dataflow-properties-provider-help-step',
       icon: 'settings',
-      label: 'apiKey',
+      label: 'sidebarApiKeyBtn',
       onClick: () => onManageDialogs('isApiKeyDialogVisible', true),
-      title: 'apiKey'
+      title: 'sidebarApiKeyBtn'
     };
 
     const editBtn = {

@@ -598,10 +598,11 @@
     "webLinks": "Web links",
     "yes": "Yes",
     "copy": "Copy to clipboard",
-    "generateKey": "Generate new API-key",
+    "generateApiKey": "Generate new API-key",
     "noApiKey": "There is no generated API key",
     "copyToClipboardSuccess": "Api key copied to clipboard",
-    "apiKey": "API-key",
+    "apiKeyDialogHead": "API-key",
+    "sidebarApiKeyBtn": "API-key",
     "prefilled": "Prefilled",
     "exportDatasetSchema": "Export schema"
   }

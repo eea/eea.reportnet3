@@ -101,9 +101,9 @@ const Representative = withRouter(({ match, history }) => {
     const apiKeyBtn = {
       className: 'dataflow-properties-provider-help-step',
       icon: 'settings',
-      label: 'apiKey',
+      label: 'sidebarApiKeyBtn',
       onClick: () => onManageDialogs('isApiKeyDialogVisible', true),
-      title: 'apiKey'
+      title: 'sidebarApiKeyBtn'
     };
 
     leftSideBarContext.addModels([representativeState.isCustodian ? propertiesBtn : propertiesBtn, apiKeyBtn]);

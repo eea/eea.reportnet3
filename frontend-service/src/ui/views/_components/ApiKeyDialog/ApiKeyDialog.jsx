@@ -65,7 +65,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
       <Button
         icon={'key'}
         className="p-button-primary"
-        label={resources.messages['generateKey']}
+        label={resources.messages['generateApiKey']}
         onClick={() => onGenerateApiKey()}
         disabled={isGenerating}
       />
@@ -84,7 +84,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
       blockScroll={false}
       closeOnEscape={true}
       footer={footer}
-      header={resources.messages['apiKey']}
+      header={resources.messages['apiKeyDialogHead']}
       modal={true}
       onHide={() => onCloseDialog()}
       visible={isApiKeyDialogVisible}
