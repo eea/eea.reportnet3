@@ -2,6 +2,7 @@ package org.eea.security.jwt.utils;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,12 +65,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Map<String, String> details = new HashMap<>();
         details.put("userId", token.getUserId());
         authentication.setDetails(details);
-        authentication.getDetails();
         SecurityContextHolder.getContext().setAuthentication(authentication);
         ThreadPropertiesManager.setVariable("user", authentication.getName());
       }
     } catch (VerificationException e) {
       LOG_ERROR.error("Could not set user authentication in security context", e);
+      String feignInvocationUser = request.getHeader("FeignInvocationUser");
+      String feignInvocationUserId = request.getHeader("FeignInvocationUserId");
+      if (!StringUtils.isEmpty(feignInvocationUser) && !StringUtils
+          .isEmpty(feignInvocationUserId)) {
+        log.info(
+            "Invocation came from a feign client, setting security context with user {} and user id {} ",
+            feignInvocationUser, feignInvocationUserId);
+        Set<String> authorities = new HashSet<>();
+        authorities.add("feign");
+        UserDetails userDetails = EeaUserDetails.create(feignInvocationUser, authorities);
+
+        UsernamePasswordAuthenticationToken authentication =
+            new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        Map<String, String> details = new HashMap<>();
+        details.put("userId", feignInvocationUserId);
+        authentication.setDetails(details);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        ThreadPropertiesManager.setVariable("user", authentication.getName());
+      }
     }
 
     filterChain.doFilter(request, response);
