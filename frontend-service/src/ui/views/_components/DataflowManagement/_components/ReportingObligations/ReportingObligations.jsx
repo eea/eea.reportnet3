@@ -9,7 +9,7 @@ import ObligationConf from 'conf/obligation.config.json';
 import { CardsView } from './_components/CardsView';
 import { Filters } from 'ui/views/_components/Filters';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
-import { SearchAll } from './_components/SearchAll';
+import { SearchAll } from 'ui/views/_components/SearchAll';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TableView } from './_components/TableView';
 
@@ -83,6 +83,8 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
       notificationContext.add({ type: 'LOAD_ORGANIZATIONS_ERROR' });
     }
   };
+
+  console.log('searchedData', reportingObligationState.searchedData);
 
   const onLoadReportingObligations = async filterData => {
     isLoading(true);

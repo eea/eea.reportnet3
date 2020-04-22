@@ -18,7 +18,7 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Filters } from 'ui/views/_components/Filters';
-import { SearchAll } from 'ui/views/_components/DataflowManagement/_components/ReportingObligations/_components/SearchAll';
+import { SearchAll } from 'ui/views/_components/SearchAll';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabView } from 'ui/views/_components/TabView'; // Do not delete
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel'; // Do not delete
@@ -254,6 +254,13 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     return fieldColumns;
   };
 
+  const validationListConf = {
+    filterItems: {
+      input: ['table', 'field'],
+      select: ['entityType', 'levelError', 'enabled']
+    }
+  };
+
   const validationList = () => {
     if (isUndefined(validationsList) || isEmpty(validationsList)) {
       return (
@@ -263,6 +270,8 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       );
     }
     const paginatorRightText = `${capitalize('FIELD')} records: ${validationsList.validations.length}`;
+
+    console.log('validationsList.validations', validationsList.validations);
     return (
       <div className={null}>
         <div className={styles.searchInput}>
@@ -271,8 +280,8 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
         <Filters
           data={validationsList.validations}
           getFiltredData={onLoadFiltredData}
-          inputOptions={ValidationList.filterItems['input']}
-          selectOptions={ValidationList.filterItems['select']}
+          inputOptions={validationListConf.filterItems['input']}
+          selectOptions={validationListConf.filterItems['select']}
           sortable={false}
         />
 

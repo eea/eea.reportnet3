@@ -113,20 +113,20 @@
         color: var(--black);
       }
 
-      .info {
-        background-color: rgba(#6565a8, 0.9);
-      }
-
-      .warning {
-        background-color: rgba(#c2c8cf, 0.8);
-        color: var(--black);
-      }
-
       .error {
         background-color: rgba(#6565a8, 0.9);
       }
 
       .blocker {
+        background-color: rgba(#c2c8cf, 0.8);
+        color: var(--black);
+      }
+
+      .warning {
+        background-color: rgba(#6565a8, 0.9);
+      }
+
+      .info {
         background-color: rgba(#c2c8cf, 0.8);
         color: var(--black);
       }
