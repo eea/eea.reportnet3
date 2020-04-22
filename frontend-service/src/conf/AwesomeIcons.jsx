@@ -77,7 +77,8 @@ import {
   faCaretRight,
   faExternalLinkAlt,
   faAlignRight,
-  faEnvelope
+  faDiceFour,
+  faPhone
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -263,7 +264,7 @@ export const AwesomeIcons = icon => {
       return faBars;
     case 'notifications':
       return faBell;
-    case 'number':
+    case 'number-decimal':
       return faDiceSix;
     case 'percentage':
       return faPercentage;
@@ -341,8 +342,10 @@ export const AwesomeIcons = icon => {
       return faPowerOff;
     case 'align-right':
       return faAlignRight;
-    // case 'email':
-    // return faEnvelope;
+    case 'number-integer':
+      return faDiceFour;
+    case 'mobile':
+      return faPhone;
     default:
       return faFileAlt;
   }
