@@ -118,6 +118,32 @@ export const BigButtonList = ({
     </div>
   );
 
+  const exportDatatableSchema = async (datasetId, datasetName) => {
+    const schema = await DatasetService.schemaById(datasetId);
+    console.log(datasetId, datasetName, schema);
+
+    // let blob = new Blob([csv], {
+    //   type: 'text/csv;charset=utf-8;'
+    // });
+
+    // if (window.navigator.msSaveOrOpenBlob) {
+    //   navigator.msSaveOrOpenBlob(blob, this.props.exportFilename + '.csv');
+    // } else {
+    //   let link = document.createElement('a');
+    //   link.style.display = 'none';
+    //   document.body.appendChild(link);
+    //   if (link.download !== undefined) {
+    //     link.setAttribute('href', URL.createObjectURL(blob));
+    //     link.setAttribute('download', this.props.exportFilename + '.csv');
+    //     link.click();
+    //   } else {
+    //     csv = 'data:text/csv;charset=utf-8,' + csv;
+    //     window.open(encodeURI(csv));
+    //   }
+    //   document.body.removeChild(link);
+    // }
+  };
+
   const getDeleteSchemaIndex = index => {
     setDeleteSchemaIndex(index);
     setDeleteDialogVisible(true);
@@ -265,6 +291,7 @@ export const BigButtonList = ({
     dataflowData,
     dataflowDataState,
     dataflowId,
+    exportDatatableSchema,
     getDeleteSchemaIndex,
     handleRedirect,
     hasWritePermissions,
