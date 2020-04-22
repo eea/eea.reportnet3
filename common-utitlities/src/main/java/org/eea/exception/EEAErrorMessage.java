@@ -191,6 +191,9 @@ public final class EEAErrorMessage {
   /** The Constant SHORT_CODE_REQUIRED. */
   public static final String SHORT_CODE_REQUIRED = "ShortCode is required";
 
+  /** The Constant TABLE_READ_ONLY. */
+  public static final String TABLE_READ_ONLY = "The table is marked as read only";
+
   /**
    * Instantiates a new EEA error message.
    */
