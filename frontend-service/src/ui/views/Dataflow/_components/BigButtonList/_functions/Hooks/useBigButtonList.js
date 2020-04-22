@@ -13,6 +13,7 @@ const useBigButtonList = ({
   dataflowDataState,
   dataflowData,
   dataflowId,
+  exportDatatableSchema,
   getDeleteSchemaIndex,
   handleRedirect,
   onShowUpdateDataCollectionModal,
@@ -130,6 +131,12 @@ const useBigButtonList = ({
         disabled: dataflowDataState.status !== DataflowConf.dataflowStatus['DESIGN'],
         command: () => getDeleteSchemaIndex(newDatasetSchema.index)
       }
+      // {
+      //   label: resources.messages['exportDatasetSchema'],
+      //   icon: 'import',
+      //   // disabled: dataflowDataState.status !== DataflowConf.dataflowStatus['DESIGN'],
+      //   command: () => exportDatatableSchema(newDatasetSchema.datasetId, newDatasetSchema.datasetSchemaName)
+      // }
     ],
     onDuplicateName: onDuplicateName,
     onSaveError: onDatasetSchemaNameError,

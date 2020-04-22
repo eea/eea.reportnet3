@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -84,6 +83,7 @@ import org.eea.multitenancy.TenantResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -101,6 +101,10 @@ public class DatasetServiceImpl implements DatasetService {
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The field max length. */
+  @Value("${dataset.fieldMaxLength}")
+  private int fieldMaxLength;
 
   /** The dataset repository. */
   @Autowired
@@ -1025,10 +1029,21 @@ public class DatasetServiceImpl implements DatasetService {
       throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
 
     }
-    List<RecordValue> recordValue = recordMapper.classListToEntity(records);
-    List<FieldValue> fields = recordValue.parallelStream().map(RecordValue::getFields)
-        .filter(Objects::nonNull).flatMap(List::stream).collect(Collectors.toList());
-    fieldRepository.saveAll(fields);
+    List<RecordValue> recordValues = recordMapper.classListToEntity(records);
+    List<FieldValue> fieldValues = new ArrayList<>();
+    for (RecordValue recordValue : recordValues) {
+      for (FieldValue fieldValue : recordValue.getFields()) {
+        if (null == fieldValue.getValue()) {
+          fieldValue.setValue("");
+        } else {
+          if (fieldValue.getValue().length() >= fieldMaxLength) {
+            fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
+          }
+        }
+        fieldValues.add(fieldValue);
+      }
+    }
+    fieldRepository.saveAll(fieldValues);
   }
 
   /**
@@ -1077,8 +1092,15 @@ public class DatasetServiceImpl implements DatasetService {
       table.setDatasetId(dataset);
       record.setTableValue(table);
       record.setDataProviderCode(provider.getCode());
-      record.getFields().stream().filter(field -> field.getValue() == null)
-          .forEach(field -> field.setValue(""));
+      for (FieldValue field : record.getFields()) {
+        if (null == field.getValue()) {
+          field.setValue("");
+        } else {
+          if (field.getValue().length() >= fieldMaxLength) {
+            field.setValue(field.getValue().substring(0, fieldMaxLength));
+          }
+        }
+      }
 
     });
     recordRepository.saveAll(recordValue);
