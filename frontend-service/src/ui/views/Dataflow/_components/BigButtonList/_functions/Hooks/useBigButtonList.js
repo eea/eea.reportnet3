@@ -130,13 +130,13 @@ const useBigButtonList = ({
         icon: 'trash',
         disabled: dataflowDataState.status !== DataflowConf.dataflowStatus['DESIGN'],
         command: () => getDeleteSchemaIndex(newDatasetSchema.index)
-      },
-      {
-        label: resources.messages['exportDatasetSchema'],
-        icon: 'import',
-        // disabled: dataflowDataState.status !== DataflowConf.dataflowStatus['DESIGN'],
-        command: () => exportDatatableSchema(newDatasetSchema.datasetId, newDatasetSchema.datasetSchemaName)
       }
+      // {
+      //   label: resources.messages['exportDatasetSchema'],
+      //   icon: 'import',
+      //   // disabled: dataflowDataState.status !== DataflowConf.dataflowStatus['DESIGN'],
+      //   command: () => exportDatatableSchema(newDatasetSchema.datasetId, newDatasetSchema.datasetSchemaName)
+      // }
     ],
     onDuplicateName: onDuplicateName,
     onSaveError: onDatasetSchemaNameError,
