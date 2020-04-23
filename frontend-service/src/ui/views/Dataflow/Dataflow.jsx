@@ -52,7 +52,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
-  const [dataProviderId, setDataProviderId] = useState([]);
+  // const [dataProviderId, setDataProviderId] = useState([]);
   const [datasetIdToSnapshotProps, setDatasetIdToSnapshotProps] = useState();
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
@@ -78,7 +78,9 @@ const Dataflow = withRouter(({ history, match }) => {
     isRepresentativeView: false,
     name: '',
     obligations: {},
-    status: ''
+    status: '',
+
+    dataProviderId: []
   };
 
   const [dataflowDataState, dataflowDataDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -287,6 +289,10 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowDataDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian } });
   };
 
+  const setDataProviderId = id => {
+    dataflowDataDispatch({ type: 'SET_DATA_PROVIDER_ID', payload: { id } });
+  };
+
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.reporting(dataflowId);
@@ -312,6 +318,7 @@ const Dataflow = withRouter(({ history, match }) => {
           setDataProviderId(dataProviderIds[0]);
         }
       }
+
       if (!isEmpty(dataflow.designDatasets)) {
         dataflow.designDatasets.forEach((schema, idx) => {
           schema.index = idx;
@@ -323,6 +330,7 @@ const Dataflow = withRouter(({ history, match }) => {
         });
         setUpdatedDatasetSchema(datasetSchemaInfo);
       }
+
       if (!isEmpty(dataflow.representatives)) {
         const isOutdated = dataflow.representatives.map(representative => representative.isReceiptOutdated);
         if (isOutdated.length === 1) {
@@ -388,7 +396,7 @@ const Dataflow = withRouter(({ history, match }) => {
           dataflowData={dataflowDataState.data}
           dataflowDataState={dataflowDataState}
           dataflowId={dataflowId}
-          dataProviderId={dataProviderId}
+          dataProviderId={dataflowDataState.dataProviderId}
           designDatasetSchemas={designDatasetSchemas}
           handleRedirect={handleRedirect}
           formHasRepresentatives={dataflowDataState.formHasRepresentatives}
@@ -451,7 +459,7 @@ const Dataflow = withRouter(({ history, match }) => {
         {dataflowDataState.isApiKeyDialogVisible && (
           <ApiKeyDialog
             dataflowId={dataflowId}
-            dataProviderId={dataProviderId}
+            dataProviderId={dataflowDataState.dataProviderId}
             isApiKeyDialogVisible={dataflowDataState.isApiKeyDialogVisible}
             onManageDialogs={onManageDialogs}
           />
