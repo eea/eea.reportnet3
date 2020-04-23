@@ -604,6 +604,7 @@
     "apiKeyDialogHead": "API-key",
     "sidebarApiKeyBtn": "API-key",
     "prefilled": "Prefilled",
-    "exportDatasetSchema": "Export schema"
+    "exportDatasetSchema": "Export schema",
+    "deleteDatasetDataCompletedEvent": "Delete dataset data finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>"
   }
 }
