@@ -34,8 +34,6 @@ const checkSelected = (state, data, selectedKeys) => {
           return false;
         }
       }
-    } else {
-      return true;
     }
   }
   return true;

@@ -1,7 +1,5 @@
 import React, { useContext, useEffect, useReducer } from 'react';
 
-import isEmpty from 'lodash/isEmpty';
-
 import styles from './SearchAll.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
