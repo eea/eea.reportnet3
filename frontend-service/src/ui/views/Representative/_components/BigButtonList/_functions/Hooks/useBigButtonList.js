@@ -18,7 +18,7 @@ const useBigButtonList = ({
   onLoadReceiptData,
   receiptState,
   representative,
-  showReleaseSnapshotDialog
+  onShowSnapshotDialog
 }) => {
   const resources = useContext(ResourcesContext);
   const helpButton = {
@@ -84,7 +84,7 @@ const useBigButtonList = ({
               {
                 label: resources.messages['releaseDataCollection'],
                 icon: 'cloudUpload',
-                command: () => showReleaseSnapshotDialog(dataset.datasetId),
+                command: () => onShowSnapshotDialog(dataset.datasetId),
                 disabled: false
               }
             ]

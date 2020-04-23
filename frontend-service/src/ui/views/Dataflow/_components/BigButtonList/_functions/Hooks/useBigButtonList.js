@@ -30,7 +30,7 @@ const useBigButtonList = ({
   onShowDataCollectionModal,
   onShowNewSchemaDialog,
   receiptState,
-  showReleaseSnapshotDialog,
+  onShowSnapshotDialog,
   updatedDatasetSchema
 }) => {
   const resources = useContext(ResourcesContext);
@@ -137,7 +137,7 @@ const useBigButtonList = ({
                 {
                   label: resources.messages['releaseDataCollection'],
                   icon: 'cloudUpload',
-                  command: () => showReleaseSnapshotDialog(dataset.datasetId),
+                  command: () => onShowSnapshotDialog(dataset.datasetId),
                   disabled: false
                 }
               ]

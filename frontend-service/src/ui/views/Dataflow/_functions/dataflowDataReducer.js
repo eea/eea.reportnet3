@@ -50,6 +50,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_IS_PAGE_LOADING':
       return { ...state, isPageLoading: payload.isPageLoading };
 
+    case 'SET_UPDATED_DATASET_SCHEMA':
+      return { ...state, updatedDatasetSchema: payload.updatedData };
+
     default:
       return state;
   }

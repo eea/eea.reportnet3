@@ -244,7 +244,7 @@ const Representative = withRouter(({ match, history }) => {
           receiptDispatch={receiptDispatch}
           receiptState={receiptState}
           representative={representative}
-          showReleaseSnapshotDialog={onShowReleaseSnapshotDialog}
+          onShowSnapshotDialog={onShowReleaseSnapshotDialog}
         />
 
         <SnapshotsDialog

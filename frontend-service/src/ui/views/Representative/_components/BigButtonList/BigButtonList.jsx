@@ -23,7 +23,7 @@ export const BigButtonList = ({
   receiptDispatch,
   receiptState,
   representative,
-  showReleaseSnapshotDialog
+  onShowSnapshotDialog
 }) => {
   const notificationContext = useContext(NotificationContext);
 
@@ -101,7 +101,7 @@ export const BigButtonList = ({
               onLoadReceiptData: onLoadReceiptData,
               receiptState,
               representative,
-              showReleaseSnapshotDialog
+              onShowSnapshotDialog
             }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <></>))}
           </div>
         </div>

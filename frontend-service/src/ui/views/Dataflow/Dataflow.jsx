@@ -52,15 +52,6 @@ const Dataflow = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
-  // const [dataProviderId, setDataProviderId] = useState([]);
-  //const [datasetIdToSnapshotProps, setDatasetIdToSnapshotProps] = useState();
-  // const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
-  const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
-  // const [isDataSchemaCorrect, setIsDataSchemaCorrect] = useState(false);
-  // const [isDataUpdated, setIsDataUpdated] = useState(false);
-  // const [isPageLoading, setIsPageLoading] = useState(true);
-  const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
-
   const dataflowInitialState = {
     data: {},
     deleteInput: '',
@@ -85,7 +76,9 @@ const Dataflow = withRouter(({ history, match }) => {
     designDatasetSchemas: [],
     isDataSchemaCorrect: [],
     isDataUpdated: false,
-    isPageLoading: true
+    isPageLoading: true,
+    updatedDatasetSchema: undefined,
+    isSnapshotDialogVisible: false
   };
 
   const [dataflowDataState, dataflowDataDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -270,6 +263,12 @@ const Dataflow = withRouter(({ history, match }) => {
       payload: { id }
     });
 
+  const setUpdatedDatasetSchema = updatedData =>
+    dataflowDataDispatch({
+      type: 'SET_UPDATED_DATASET_SCHEMA',
+      payload: { updatedData }
+    });
+
   const onConfirmDelete = event =>
     dataflowDataDispatch({ type: 'ON_DELETE_DATAFLOW', payload: { deleteInput: event.target.value } });
 
@@ -283,8 +282,6 @@ const Dataflow = withRouter(({ history, match }) => {
     });
     onLoadReportingDataflow();
   };
-
-  const onHideSnapshotDialog = () => setIsActiveReleaseSnapshotDialog(false);
 
   const onLoadPermission = () => {
     const hasWritePermissions = UserService.hasPermission(
@@ -393,14 +390,14 @@ const Dataflow = withRouter(({ history, match }) => {
       dataflowDataState.designDatasetSchemas[index].datasetId,
       encodeURIComponent(value)
     );
-    const titles = [...updatedDatasetSchema];
-    titles[index].schemaName = value;
-    setUpdatedDatasetSchema(titles);
+    const updatedTitles = [...dataflowDataState.updatedDatasetSchema];
+    updatedTitles[index].schemaName = value;
+    setUpdatedDatasetSchema(updatedTitles);
   };
 
-  const onShowReleaseSnapshotDialog = async datasetId => {
+  const onShowSnapshotDialog = async datasetId => {
     setDatasetIdToSnapshotProps(datasetId);
-    setIsActiveReleaseSnapshotDialog(true);
+    manageDialogs('isSnapshotDialogVisible', true);
   };
 
   useCheckNotifications(['ADD_DATACOLLECTION_COMPLETED_EVENT'], setIsDataUpdated);
@@ -439,18 +436,18 @@ const Dataflow = withRouter(({ history, match }) => {
           receiptDispatch={receiptDispatch}
           receiptState={receiptState}
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}
-          showReleaseSnapshotDialog={onShowReleaseSnapshotDialog}
-          updatedDatasetSchema={updatedDatasetSchema}
+          onShowSnapshotDialog={onShowSnapshotDialog}
+          updatedDatasetSchema={dataflowDataState.updatedDatasetSchema}
         />
 
-        <SnapshotsDialog
-          dataflowData={dataflowDataState.data}
-          dataflowId={dataflowId}
-          datasetId={dataflowDataState.datasetIdToSnapshotProps}
-          hideSnapshotDialog={onHideSnapshotDialog}
-          isSnapshotDialogVisible={isActiveReleaseSnapshotDialog}
-          setSnapshotDialog={setIsActiveReleaseSnapshotDialog}
-        />
+        {
+          <SnapshotsDialog
+            dataflowId={dataflowId}
+            datasetId={dataflowDataState.datasetIdToSnapshotProps}
+            isSnapshotDialogVisible={dataflowDataState.isSnapshotDialogVisible}
+            manageDialogs={manageDialogs}
+          />
+        }
 
         {dataflowDataState.isCustodian && (
           <Dialog

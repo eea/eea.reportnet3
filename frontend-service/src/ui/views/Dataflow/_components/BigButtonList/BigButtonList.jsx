@@ -44,7 +44,7 @@ export const BigButtonList = ({
   receiptDispatch,
   receiptState,
   setUpdatedDatasetSchema,
-  showReleaseSnapshotDialog,
+  onShowSnapshotDialog,
   updatedDatasetSchema
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
@@ -306,7 +306,7 @@ export const BigButtonList = ({
     onShowNewSchemaDialog,
     onShowUpdateDataCollectionModal,
     receiptState,
-    showReleaseSnapshotDialog,
+    onShowSnapshotDialog,
     updatedDatasetSchema
   })
     .filter(button => button.visibility)
