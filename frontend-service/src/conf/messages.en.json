@@ -56,7 +56,7 @@
     "contributorLoginValidationMin": "Login is too short!",
     "contributorLoginValidationRequired": "Login is required",
     "contributorRoleValidationIsRequired": "Assign a role to contributor",
-    "copyRestAPIKey": "Copy API-key (API-key access for developers)",
+    "copyRestAPIKey": "API-key (API-key access for developers)",
     "copyrightAbout": "About the Commission's new web presence",
     "copyrightContact": "Contact",
     "copyrightCookies": "Cookies",
@@ -600,6 +600,12 @@
     "entityType": "Type of QC",
     "text": "Text",
     "noQCRulesWithSelectedParameters": "There are no QC rules with the selected parameters",
+    "copyApiKeyBtn": "Copy to clipboard",
+    "generateApiKey": "Generate new API-key",
+    "noApiKey": "There is no generated API key",
+    "copyToClipboardSuccess": "Api key copied to clipboard",
+    "apiKeyDialogHead": "API-key",
+    "sidebarApiKeyBtn": "API-key",
     "prefilled": "Prefilled",
     "exportDatasetSchema": "Export schema"
   }

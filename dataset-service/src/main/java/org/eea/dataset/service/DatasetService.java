@@ -7,6 +7,7 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -355,6 +356,14 @@ public interface DatasetService {
    */
   DatasetTypeEnum getDatasetType(Long datasetId);
 
+  /**
+   * Etl export dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the ETL dataset VO
+   * @throws EEAException the EEA exception
+   */
+  ETLDatasetVO etlExportDataset(@DatasetId Long datasetId) throws EEAException;
 
   /**
    * Gets the table read only.
