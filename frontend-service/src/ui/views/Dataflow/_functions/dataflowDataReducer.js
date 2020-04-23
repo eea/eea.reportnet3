@@ -38,6 +38,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_DATASET_ID_TO_SNAPSHOT_PROPS':
       return { ...state, datasetIdToSnapshotProps: payload.id };
 
+    case 'SET_DESIGN_DATASET_SCHEMAS':
+      return { ...state, designDatasetSchemas: payload.designDatasets };
+
     default:
       return state;
   }

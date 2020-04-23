@@ -54,7 +54,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   // const [dataProviderId, setDataProviderId] = useState([]);
   //const [datasetIdToSnapshotProps, setDatasetIdToSnapshotProps] = useState();
-  const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
+  // const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
   const [isDataSchemaCorrect, setIsDataSchemaCorrect] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
@@ -81,7 +81,8 @@ const Dataflow = withRouter(({ history, match }) => {
     status: '',
 
     dataProviderId: [],
-    datasetIdToSnapshotProps: undefined
+    datasetIdToSnapshotProps: undefined,
+    designDatasetSchemas: []
   };
 
   const [dataflowDataState, dataflowDataDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -159,7 +160,7 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowDataState.formHasRepresentatives,
     dataflowDataState.status,
     dataflowId,
-    designDatasetSchemas,
+    dataflowDataState.designDatasetSchemas,
     dataflowDataState.isCustodian,
     isDataSchemaCorrect
   ]);
@@ -301,6 +302,10 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowDataDispatch({ type: 'SET_DATA_PROVIDER_ID', payload: { id } });
   };
 
+  const setDesignDatasetSchemas = designDatasets => {
+    dataflowDataDispatch({ type: 'SET_DESIGN_DATASET_SCHEMAS', payload: { designDatasets } });
+  };
+
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.reporting(dataflowId);
@@ -367,7 +372,10 @@ const Dataflow = withRouter(({ history, match }) => {
     });
 
   const onSaveName = async (value, index) => {
-    await DatasetService.updateSchemaNameById(designDatasetSchemas[index].datasetId, encodeURIComponent(value));
+    await DatasetService.updateSchemaNameById(
+      dataflowDataState.designDatasetSchemas[index].datasetId,
+      encodeURIComponent(value)
+    );
     const titles = [...updatedDatasetSchema];
     titles[index].schemaName = value;
     setUpdatedDatasetSchema(titles);
@@ -405,7 +413,7 @@ const Dataflow = withRouter(({ history, match }) => {
           dataflowDataState={dataflowDataState}
           dataflowId={dataflowId}
           dataProviderId={dataflowDataState.dataProviderId}
-          designDatasetSchemas={designDatasetSchemas}
+          designDatasetSchemas={dataflowDataState.designDatasetSchemas}
           handleRedirect={handleRedirect}
           formHasRepresentatives={dataflowDataState.formHasRepresentatives}
           hasWritePermissions={dataflowDataState.hasWritePermissions}
