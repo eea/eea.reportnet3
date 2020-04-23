@@ -56,8 +56,8 @@ const Dataflow = withRouter(({ history, match }) => {
   //const [datasetIdToSnapshotProps, setDatasetIdToSnapshotProps] = useState();
   // const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
-  const [isDataSchemaCorrect, setIsDataSchemaCorrect] = useState(false);
-  const [isDataUpdated, setIsDataUpdated] = useState(false);
+  // const [isDataSchemaCorrect, setIsDataSchemaCorrect] = useState(false);
+  // const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
 
@@ -82,7 +82,9 @@ const Dataflow = withRouter(({ history, match }) => {
 
     dataProviderId: [],
     datasetIdToSnapshotProps: undefined,
-    designDatasetSchemas: []
+    designDatasetSchemas: [],
+    isDataSchemaCorrect: [],
+    isDataUpdated: false
   };
 
   const [dataflowDataState, dataflowDataDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -157,12 +159,12 @@ const Dataflow = withRouter(({ history, match }) => {
     leftSideBarContext.addHelpSteps('dataflowHelp', steps);
   }, [
     dataflowDataState.data,
-    dataflowDataState.formHasRepresentatives,
-    dataflowDataState.status,
-    dataflowId,
     dataflowDataState.designDatasetSchemas,
+    dataflowDataState.formHasRepresentatives,
     dataflowDataState.isCustodian,
-    isDataSchemaCorrect
+    dataflowDataState.isDataSchemaCorrect,
+    dataflowDataState.status,
+    dataflowId
   ]);
 
   useEffect(() => {
@@ -180,7 +182,7 @@ const Dataflow = withRouter(({ history, match }) => {
     setLoading(true);
     onLoadReportingDataflow();
     onLoadSchemasValidations();
-  }, [dataflowId, isDataUpdated]);
+  }, [dataflowId, dataflowDataState.isDataUpdated]);
 
   const filterHelpSteps = () => {
     const dataflowSteps = [
@@ -306,6 +308,14 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowDataDispatch({ type: 'SET_DESIGN_DATASET_SCHEMAS', payload: { designDatasets } });
   };
 
+  const setIsDataSchemaCorrect = validationResult => {
+    dataflowDataDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { validationResult } });
+  };
+
+  const setIsDataUpdated = () => {
+    dataflowDataDispatch({ type: 'SET_IS_DATA_UPDATED' });
+  };
+
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.reporting(dataflowId);
@@ -362,8 +372,10 @@ const Dataflow = withRouter(({ history, match }) => {
 
   useCheckNotifications(['RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT'], onLoadReportingDataflow);
 
-  const onLoadSchemasValidations = async () =>
-    setIsDataSchemaCorrect(await DataflowService.schemasValidation(dataflowId));
+  const onLoadSchemasValidations = async () => {
+    const validationResult = await DataflowService.schemasValidation(dataflowId);
+    setIsDataSchemaCorrect(validationResult);
+  };
 
   const manageDialogs = (dialog, value, secondDialog, secondValue) =>
     dataflowDataDispatch({
@@ -386,9 +398,7 @@ const Dataflow = withRouter(({ history, match }) => {
     setIsActiveReleaseSnapshotDialog(true);
   };
 
-  const onUpdateData = () => setIsDataUpdated(!isDataUpdated);
-
-  useCheckNotifications(['ADD_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
+  useCheckNotifications(['ADD_DATACOLLECTION_COMPLETED_EVENT'], setIsDataUpdated);
 
   const layout = children => (
     <MainLayout leftSideBarConfig={{ isCustodian: dataflowDataState.isCustodian, buttons: [] }}>
@@ -418,9 +428,9 @@ const Dataflow = withRouter(({ history, match }) => {
           formHasRepresentatives={dataflowDataState.formHasRepresentatives}
           hasWritePermissions={dataflowDataState.hasWritePermissions}
           isCustodian={dataflowDataState.isCustodian}
-          isDataSchemaCorrect={isDataSchemaCorrect}
+          isDataSchemaCorrect={dataflowDataState.isDataSchemaCorrect}
           onSaveName={onSaveName}
-          onUpdateData={onUpdateData}
+          onUpdateData={setIsDataUpdated}
           receiptDispatch={receiptDispatch}
           receiptState={receiptState}
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}

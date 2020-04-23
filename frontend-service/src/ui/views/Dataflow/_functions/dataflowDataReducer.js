@@ -41,6 +41,12 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_DESIGN_DATASET_SCHEMAS':
       return { ...state, designDatasetSchemas: payload.designDatasets };
 
+    case 'SET_IS_DATA_SCHEMA_CORRECT':
+      return { ...state, isDataSchemaCorrect: payload.validationResult };
+
+    case 'SET_IS_DATA_UPDATED':
+      return { ...state, isDataUpdated: !state.isDataUpdated };
+
     default:
       return state;
   }
