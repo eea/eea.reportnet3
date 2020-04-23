@@ -53,7 +53,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const user = useContext(UserContext);
 
   // const [dataProviderId, setDataProviderId] = useState([]);
-  const [datasetIdToSnapshotProps, setDatasetIdToSnapshotProps] = useState();
+  //const [datasetIdToSnapshotProps, setDatasetIdToSnapshotProps] = useState();
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
   const [isDataSchemaCorrect, setIsDataSchemaCorrect] = useState(false);
@@ -80,7 +80,8 @@ const Dataflow = withRouter(({ history, match }) => {
     obligations: {},
     status: '',
 
-    dataProviderId: []
+    dataProviderId: [],
+    datasetIdToSnapshotProps: undefined
   };
 
   const [dataflowDataState, dataflowDataDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -252,10 +253,17 @@ const Dataflow = withRouter(({ history, match }) => {
       onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
     />
   );
+
   const setHasRepresentativesWithoutDatasets = value =>
     dataflowDataDispatch({
       type: 'SET_HAS_REPRESENTATIVES_WITHOUT_DATASETS',
       payload: { hasRepresentativesWithoutDatasets: value }
+    });
+
+  const setDatasetIdToSnapshotProps = id =>
+    dataflowDataDispatch({
+      type: 'SET_DATASET_ID_TO_SNAPSHOT_PROPS',
+      payload: { id }
     });
 
   const onConfirmDelete = event =>
@@ -415,7 +423,7 @@ const Dataflow = withRouter(({ history, match }) => {
         <SnapshotsDialog
           dataflowData={dataflowDataState.data}
           dataflowId={dataflowId}
-          datasetId={datasetIdToSnapshotProps}
+          datasetId={dataflowDataState.datasetIdToSnapshotProps}
           hideSnapshotDialog={onHideSnapshotDialog}
           isSnapshotDialogVisible={isActiveReleaseSnapshotDialog}
           setSnapshotDialog={setIsActiveReleaseSnapshotDialog}
