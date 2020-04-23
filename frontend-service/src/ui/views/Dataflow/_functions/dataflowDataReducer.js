@@ -47,6 +47,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_IS_DATA_UPDATED':
       return { ...state, isDataUpdated: !state.isDataUpdated };
 
+    case 'SET_IS_PAGE_LOADING':
+      return { ...state, isPageLoading: payload.isPageLoading };
+
     default:
       return state;
   }

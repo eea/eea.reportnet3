@@ -58,7 +58,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
   // const [isDataSchemaCorrect, setIsDataSchemaCorrect] = useState(false);
   // const [isDataUpdated, setIsDataUpdated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  // const [isPageLoading, setIsPageLoading] = useState(true);
   const [updatedDatasetSchema, setUpdatedDatasetSchema] = useState();
 
   const dataflowInitialState = {
@@ -84,7 +84,8 @@ const Dataflow = withRouter(({ history, match }) => {
     datasetIdToSnapshotProps: undefined,
     designDatasetSchemas: [],
     isDataSchemaCorrect: [],
-    isDataUpdated: false
+    isDataUpdated: false,
+    isPageLoading: true
   };
 
   const [dataflowDataState, dataflowDataDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -179,7 +180,7 @@ const Dataflow = withRouter(({ history, match }) => {
   }, [dataflowDataState.data.representatives]);
 
   useEffect(() => {
-    setLoading(true);
+    setIsPageLoading(true);
     onLoadReportingDataflow();
     onLoadSchemasValidations();
   }, [dataflowId, dataflowDataState.isDataUpdated]);
@@ -304,6 +305,10 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowDataDispatch({ type: 'SET_DATA_PROVIDER_ID', payload: { id } });
   };
 
+  const setIsPageLoading = isPageLoading => {
+    dataflowDataDispatch({ type: 'SET_IS_PAGE_LOADING', payload: { isPageLoading } });
+  };
+
   const setDesignDatasetSchemas = designDatasets => {
     dataflowDataDispatch({ type: 'SET_DESIGN_DATASET_SCHEMAS', payload: { designDatasets } });
   };
@@ -366,7 +371,7 @@ const Dataflow = withRouter(({ history, match }) => {
         history.push(getUrl(routes.DATAFLOWS));
       }
     } finally {
-      setLoading(false);
+      setIsPageLoading(false);
     }
   };
 
@@ -406,7 +411,7 @@ const Dataflow = withRouter(({ history, match }) => {
     </MainLayout>
   );
 
-  if (loading || isNil(dataflowDataState.data)) return layout(<Spinner />);
+  if (dataflowDataState.isPageLoading || isNil(dataflowDataState.data)) return layout(<Spinner />);
 
   return layout(
     <div className="rep-row">
