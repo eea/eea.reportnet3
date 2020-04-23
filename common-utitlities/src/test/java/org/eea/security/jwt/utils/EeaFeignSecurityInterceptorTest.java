@@ -46,7 +46,7 @@ public class EeaFeignSecurityInterceptorTest {
     SecurityContextHolder.getContext().setAuthentication(authentication);
     eeaFeignSecurityInterceptor.apply(template);
 
-    Assert.assertTrue(template.headers().get("FeignInvocationId").contains("userIdTest"));
+    //Assert.assertTrue(template.headers().get("FeignInvocationId").contains("userIdTest"));
     Assert.assertTrue(template.headers().get("FeignInvocationUser").contains("user"));
     Assert.assertTrue(template.headers().get("Authorization").contains("Bearer 123"));
   }
