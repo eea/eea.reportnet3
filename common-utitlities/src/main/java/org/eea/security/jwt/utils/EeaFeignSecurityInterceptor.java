@@ -36,8 +36,9 @@ public class EeaFeignSecurityInterceptor implements RequestInterceptor {
           String.format("%s %s", BEARER_TOKEN_TYPE,
               authentication.getCredentials()));
       template.header("FeignInvocationUser", authentication.getName());
+     /* to be reviwed, it seems that in real invocation details are not present in the authentication
       template.header("FeignInvocationId",
-          ((Map<String, String>) authentication.getDetails()).get("userId"));
+          ((Map<String, String>) authentication.getDetails()).get("userId"));*/
     }
   }
 }
