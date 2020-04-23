@@ -84,15 +84,24 @@ const FieldEditor = ({
 
   const getFilter = type => {
     switch (type) {
-      case 'NUMBER':
+      case 'NUMBER_INTEGER':
+        return 'pint';
+      case 'NUMBER_DECIMAL':
       case 'POINT':
       case 'COORDINATE_LONG':
       case 'COORDINATE_LAT':
-        return 'num';
+        return 'pnum';
       case 'DATE':
         return 'date';
       case 'TEXT':
+      case 'LONG_TEXT':
         return 'any';
+      case 'EMAIL':
+        return 'email';
+      case 'PHONE':
+        return 'phone';
+      // case 'URL':
+      //   return 'url';
       default:
         return 'any';
     }
@@ -101,7 +110,40 @@ const FieldEditor = ({
   const renderField = type => {
     switch (type) {
       case 'TEXT':
-      case 'NUMBER':
+      case 'LONG_TEXT':
+        return (
+          <InputText
+            keyfilter={getFilter(type)}
+            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+            onChange={e => onEditorValueChange(cells, e.target.value)}
+            onFocus={e => {
+              e.preventDefault();
+              onEditorValueFocus(cells, e.target.value);
+            }}
+            onKeyDown={e => onEditorKeyChange(cells, e, record)}
+            type="text"
+            value={RecordUtils.getCellValue(cells, cells.field)}
+            maxlength="10000"
+          />
+        );
+      case 'NUMBER_INTEGER':
+      case 'NUMBER_DECIMAL':
+        return (
+          <InputText
+            keyfilter={getFilter(type)}
+            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+            onChange={e => onEditorValueChange(cells, e.target.value)}
+            onFocus={e => {
+              e.preventDefault();
+              onEditorValueFocus(cells, e.target.value);
+            }}
+            onKeyDown={e => onEditorKeyChange(cells, e, record)}
+            type="number"
+            // min="-9,223,372,036,854,775,807"
+            // max="9,223,372,036,854,775,808"
+            value={RecordUtils.getCellValue(cells, cells.field)}
+          />
+        );
       case 'POINT':
       case 'COORDINATE_LONG':
       case 'COORDINATE_LAT':
