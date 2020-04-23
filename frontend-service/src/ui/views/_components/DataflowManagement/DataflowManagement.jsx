@@ -16,7 +16,7 @@ export const DataflowManagement = ({
   isEditForm,
   onCreateDataflow,
   onEditDataflow,
-  onManageDialogs,
+  manageDialogs,
   state
 }) => {
   const resources = useContext(ResourcesContext);
@@ -47,7 +47,7 @@ export const DataflowManagement = ({
         icon="check"
         label={resources.messages['ok']}
         onClick={() => {
-          onManageDialogs('isRepObDialogVisible', false, isDialogVisible, true);
+          manageDialogs('isRepObDialogVisible', false, isDialogVisible, true);
           getPrevState(dataflowManagementState.obligation);
         }}
       />
@@ -64,12 +64,12 @@ export const DataflowManagement = ({
     dataflowManagementDispatch({ type: 'PREV_STATE', payload: { id: data.id, title: data.title } });
 
   const onHideDataflowDialog = () => {
-    onManageDialogs(isDialogVisible, false);
+    manageDialogs(isDialogVisible, false);
     onResetData();
   };
 
   const onHideObligationDialog = () => {
-    onManageDialogs('isRepObDialogVisible', false, isDialogVisible, true);
+    manageDialogs('isRepObDialogVisible', false, isDialogVisible, true);
     onResetObl();
   };
 
@@ -113,7 +113,7 @@ export const DataflowManagement = ({
             onCreate={onCreateDataflow}
             onEdit={onEditDataflow}
             onResetData={onResetData}
-            onSearch={() => onManageDialogs('isRepObDialogVisible', true, isDialogVisible, false)}
+            onSearch={() => manageDialogs('isRepObDialogVisible', true, isDialogVisible, false)}
             refresh={isEditForm ? state.isEditDialogVisible : state.isAddDialogVisible}
           />
         </Dialog>

@@ -111,7 +111,7 @@ const Dataflow = withRouter(({ history, match }) => {
       className: 'dataflow-properties-provider-help-step',
       icon: 'settings',
       label: 'sidebarApiKeyBtn',
-      onClick: () => onManageDialogs('isApiKeyDialogVisible', true),
+      onClick: () => manageDialogs('isApiKeyDialogVisible', true),
       title: 'sidebarApiKeyBtn'
     };
 
@@ -119,7 +119,7 @@ const Dataflow = withRouter(({ history, match }) => {
       className: 'dataflow-edit-help-step',
       icon: 'edit',
       label: 'edit',
-      onClick: () => onManageDialogs('isEditDialogVisible', true),
+      onClick: () => manageDialogs('isEditDialogVisible', true),
       title: 'edit'
     };
 
@@ -127,7 +127,7 @@ const Dataflow = withRouter(({ history, match }) => {
       className: 'dataflow-manage-roles-help-step',
       icon: 'manageRoles',
       label: 'manageRoles',
-      onClick: () => onManageDialogs('isManageRolesDialogVisible', true),
+      onClick: () => manageDialogs('isManageRolesDialogVisible', true),
       title: 'manageRoles'
     };
 
@@ -135,7 +135,7 @@ const Dataflow = withRouter(({ history, match }) => {
       className: 'dataflow-properties-provider-help-step',
       icon: 'infoCircle',
       label: 'properties',
-      onClick: () => onManageDialogs('isPropertiesDialogVisible', true),
+      onClick: () => manageDialogs('isPropertiesDialogVisible', true),
       title: 'properties'
     };
 
@@ -249,7 +249,7 @@ const Dataflow = withRouter(({ history, match }) => {
       className="p-button-secondary p-button-animated-blink"
       icon={'cancel'}
       label={resources.messages['close']}
-      onClick={() => onManageDialogs('isManageRolesDialogVisible', false)}
+      onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
     />
   );
   const setHasRepresentativesWithoutDatasets = value =>
@@ -352,7 +352,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const onLoadSchemasValidations = async () =>
     setIsDataSchemaCorrect(await DataflowService.schemasValidation(dataflowId));
 
-  const onManageDialogs = (dialog, value, secondDialog, secondValue) =>
+  const manageDialogs = (dialog, value, secondDialog, secondValue) =>
     dataflowDataDispatch({
       type: 'MANAGE_DIALOGS',
       payload: { dialog, value, secondDialog, secondValue, deleteInput: '' }
@@ -426,7 +426,7 @@ const Dataflow = withRouter(({ history, match }) => {
             contentStyle={{ maxHeight: '60vh' }}
             footer={manageRoleDialogFooter}
             header={resources.messages['manageRolesDialogTitle']}
-            onHide={() => onManageDialogs('isManageRolesDialogVisible', false)}
+            onHide={() => manageDialogs('isManageRolesDialogVisible', false)}
             visible={dataflowDataState.isManageRolesDialogVisible}>
             <div className={styles.dialog}>
               <RepresentativesList
@@ -445,14 +445,14 @@ const Dataflow = withRouter(({ history, match }) => {
           dataflowId={dataflowId}
           history={history}
           onConfirmDelete={onConfirmDelete}
-          onManageDialogs={onManageDialogs}
+          manageDialogs={manageDialogs}
         />
 
         <DataflowManagement
           dataflowId={dataflowId}
           isEditForm={true}
           onEditDataflow={onEditDataflow}
-          onManageDialogs={onManageDialogs}
+          manageDialogs={manageDialogs}
           state={dataflowDataState}
         />
 
@@ -461,7 +461,7 @@ const Dataflow = withRouter(({ history, match }) => {
             dataflowId={dataflowId}
             dataProviderId={dataflowDataState.dataProviderId}
             isApiKeyDialogVisible={dataflowDataState.isApiKeyDialogVisible}
-            onManageDialogs={onManageDialogs}
+            manageDialogs={manageDialogs}
           />
         )}
       </div>

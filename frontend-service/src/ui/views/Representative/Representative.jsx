@@ -94,7 +94,7 @@ const Representative = withRouter(({ match, history }) => {
     const propertiesBtn = {
       icon: 'infoCircle',
       label: 'properties',
-      onClick: () => onManageDialogs('isPropertiesDialogVisible', true),
+      onClick: () => manageDialogs('isPropertiesDialogVisible', true),
       title: 'properties'
     };
 
@@ -102,7 +102,7 @@ const Representative = withRouter(({ match, history }) => {
       className: 'dataflow-properties-provider-help-step',
       icon: 'settings',
       label: 'sidebarApiKeyBtn',
-      onClick: () => onManageDialogs('isApiKeyDialogVisible', true),
+      onClick: () => manageDialogs('isApiKeyDialogVisible', true),
       title: 'sidebarApiKeyBtn'
     };
 
@@ -203,7 +203,7 @@ const Representative = withRouter(({ match, history }) => {
     }
   };
 
-  const onManageDialogs = (dialog, value, secondDialog, secondValue) =>
+  const manageDialogs = (dialog, value, secondDialog, secondValue) =>
     representativeDispatch({
       type: 'MANAGE_DIALOGS',
       payload: { dialog, value, secondDialog, secondValue, deleteInput: '' }
@@ -260,7 +260,7 @@ const Representative = withRouter(({ match, history }) => {
           dataflowDataState={representativeState}
           dataflowId={dataflowId}
           history={history}
-          onManageDialogs={onManageDialogs}
+          manageDialogs={manageDialogs}
         />
 
         {representativeState.isApiKeyDialogVisible && (
@@ -268,7 +268,7 @@ const Representative = withRouter(({ match, history }) => {
             dataflowId={dataflowId}
             dataProviderId={dataProviderId}
             isApiKeyDialogVisible={representativeState.isApiKeyDialogVisible}
-            onManageDialogs={onManageDialogs}
+            manageDialogs={manageDialogs}
           />
         )}
       </div>

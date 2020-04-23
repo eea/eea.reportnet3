@@ -25,7 +25,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { PropertiesUtils } from './_functions/Utils/PropertiesUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
-export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onConfirmDelete, onManageDialogs }) => {
+export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onConfirmDelete, manageDialogs }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -40,7 +40,7 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
   }, [dataflowDataState.isDeleteDialogVisible]);
 
   const onDeleteDataflow = async () => {
-    onManageDialogs('isDeleteDialogVisible', false, 'isPropertiesDialogVisible', true);
+    manageDialogs('isDeleteDialogVisible', false, 'isPropertiesDialogVisible', true);
     showLoading();
     try {
       const response = await DataflowService.deleteById(dataflowId);
@@ -73,7 +73,7 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
             className="p-button-danger p-button-animated-blink"
             label={resources.messages['deleteDataflowButton']}
             icon="trash"
-            onClick={() => onManageDialogs('isDeleteDialogVisible', true, 'isPropertiesDialogVisible', false)}
+            onClick={() => manageDialogs('isDeleteDialogVisible', true, 'isPropertiesDialogVisible', false)}
           />
         )}
       </div>
@@ -81,7 +81,7 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
         className="p-button-secondary p-button-animated-blink"
         icon="cancel"
         label={resources.messages['close']}
-        onClick={() => onManageDialogs('isPropertiesDialogVisible', false)}
+        onClick={() => manageDialogs('isPropertiesDialogVisible', false)}
       />
     </Fragment>
   );
@@ -92,7 +92,7 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
         className={styles.propertiesDialog}
         footer={dialogFooter}
         header={resources.messages['properties']}
-        onHide={() => onManageDialogs('isPropertiesDialogVisible', false)}
+        onHide={() => manageDialogs('isPropertiesDialogVisible', false)}
         visible={dataflowDataState.isPropertiesDialogVisible}>
         <div className={styles.propertiesWrap}>
           {dataflowDataState.description}
@@ -133,7 +133,7 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
         labelConfirm={resources.messages['yes']}
         disabledConfirm={dataflowDataState.deleteInput.toLowerCase() !== dataflowDataState.name.toLowerCase()}
         onConfirm={() => onDeleteDataflow()}
-        onHide={() => onManageDialogs('isDeleteDialogVisible', false, 'isPropertiesDialogVisible', true)}
+        onHide={() => manageDialogs('isDeleteDialogVisible', false, 'isPropertiesDialogVisible', true)}
         visible={dataflowDataState.isDeleteDialogVisible}>
         <p>{resources.messages['deleteDataflow']}</p>
         <p

@@ -11,7 +11,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { DataflowService } from 'core/services/Dataflow';
 
-const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onManageDialogs }) => {
+const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, manageDialogs }) => {
   const resources = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
@@ -26,7 +26,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
     };
   }, []);
 
-  const onCloseDialog = () => onManageDialogs('isApiKeyDialogVisible', false);
+  const onCloseDialog = () => manageDialogs('isApiKeyDialogVisible', false);
 
   const onCopyToClipboard = () => {
     const textArea = textAreaRef;
