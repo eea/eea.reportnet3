@@ -96,9 +96,17 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot implements
    * @return the boolean
    */
   public boolean checkPermission(String resource, AccessScopeEnum... accessScopeEnums) {
-
-    return userManagementControllerZull
-        .checkResourceAccessPermission(resource, accessScopeEnums);
+    boolean canAccess = false;
+    if (SecurityContextHolder.getContext()
+        .getAuthentication()
+        .getAuthorities().contains("feign")) {
+      log.warn("Invocation was made from a feign client with a due token. Letting it go");
+      canAccess = true;
+    } else {
+      canAccess = userManagementControllerZull
+          .checkResourceAccessPermission(resource, accessScopeEnums);
+    }
+    return canAccess;
   }
 
   @Override
