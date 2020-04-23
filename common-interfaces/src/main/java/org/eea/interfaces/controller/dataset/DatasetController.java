@@ -6,6 +6,7 @@ package org.eea.interfaces.controller.dataset;
 import java.util.List;
 import javax.ws.rs.Produces;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -233,4 +234,13 @@ public interface DatasetController {
    */
   @GetMapping("/private/datasetType/{datasetId}")
   DatasetTypeEnum getDatasetType(@PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Etl export dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the ETL dataset VO
+   */
+  @GetMapping("/etlExport/dataset/{datasetId}")
+  ETLDatasetVO etlExportDataset(@PathVariable("datasetId") Long datasetId);
 }
