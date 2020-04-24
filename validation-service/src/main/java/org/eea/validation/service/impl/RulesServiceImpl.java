@@ -238,7 +238,7 @@ public class RulesServiceImpl implements RulesService {
     rule.setType(EntityTypeEnum.FIELD);
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
-    rule.setVerified(false);
+    rule.setVerified(null);
 
     validateRule(rule);
 
@@ -411,7 +411,7 @@ public class RulesServiceImpl implements RulesService {
     rule.setType(EntityTypeEnum.FIELD);
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
-    rule.setVerified(false);
+    rule.setVerified(null);
 
     validateRule(rule);
 
