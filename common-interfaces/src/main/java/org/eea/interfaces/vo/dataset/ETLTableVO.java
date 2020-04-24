@@ -3,17 +3,13 @@ package org.eea.interfaces.vo.dataset;
 import java.io.Serializable;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 /**
  * The Class ETLTableVO.
  */
-@Getter
-@Setter
-@ToString
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ETLTableVO implements Serializable {

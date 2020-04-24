@@ -364,4 +364,14 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   ETLDatasetVO etlExportDataset(@DatasetId Long datasetId) throws EEAException;
+
+  /**
+   * Gets the table read only.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param type the type
+   * @return the table read only
+   */
+  Boolean getTableReadOnly(Long datasetId, String tableSchemaId, EntityTypeEnum type);
 }

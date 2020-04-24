@@ -19,6 +19,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+
+
 template "templateValidateRules"
 rule "@{ruleid}"
 dialect "java"
@@ -136,50 +138,6 @@ function boolean isCordenateLong( String value ){
    return false;
  }
  
- //////////////////////////////////////////VALIDATION NUMBER///////////////////////////////////////////////////////////
-function boolean isURL(String value){
-	if(!isBlank(value)){
-		return true;
-	}
-    try {
-         new URL(value).toURI();
-         return true;
-    }catch (URISyntaxException exception) {
-         return false;
-    }catch (MalformedURLException exception) {
-         return false;
-    }
- }
- 
- //////////////////////////////////////////VALIDATION NUMBER///////////////////////////////////////////////////////////
-function boolean isEmail(String value){
-	if(!isBlank(value)){
-		return true;
-	}
-	Pattern pat = Pattern.compile(“^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$”);					
-	Matcher mather = pattern.matcher(value);					
-	if (mather.find() == true) {
-			return true;
-		} else {
-			return false;
-		}					
- 
- }
-
- //////////////////////////////////////////VALIDATION PHONE///////////////////////////////////////////////////////////
-function boolean isPhone(String value){
-	if(!isBlank(value)){
-		return true;
-	}
-	Pattern pat = Pattern.compile(“^(\(?\+?[0-9]*\)?)?[0-9_\- \(\)]*$”);					
-	Matcher mather = pattern.matcher(value);					
-	if (mather.find() == true) {
-			return true;
-		} else {
-			return false;
-		}					
- 
- }
  //////////////////////////////////////////DEFAULT VALIDATIONS END BLOCK////////////////////////////////////////////////////////////
  
  //////////////////////////////////////////VALIDATION PK////////////////////////////////////////////////////////////

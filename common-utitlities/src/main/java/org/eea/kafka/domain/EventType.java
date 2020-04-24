@@ -39,7 +39,8 @@ public enum EventType {
   DELETE_TABLE_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_table_completed_event", true),
 
   /** The delete dataset data completed event. */
-  DELETE_DATASET_DATA_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_table_completed_event", true),
+  DELETE_DATASET_DATA_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_dataset_data_completed_event",
+      true),
 
   /** The delete table schema completed event. */
   DELETE_TABLE_SCHEMA_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_table_schema_completed_event",
@@ -174,7 +175,10 @@ public enum EventType {
   UPDATED_DOCUMENT_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "update_document_completed_event", true),
 
   /** The invalidated qc rule event. */
-  INVALIDATED_QC_RULE_EVENT("DATA_REPORTING_TOPIC", "invalidated_qc_rule_event", true);
+  INVALIDATED_QC_RULE_EVENT("DATA_REPORTING_TOPIC", "invalidated_qc_rule_event", true),
+
+  /** The validated qc rule event. */
+  VALIDATED_QC_RULE_EVENT("DATA_REPORTING_TOPIC", "validated_qc_rule_event", true);
 
 
 
