@@ -75,6 +75,7 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -239,6 +240,10 @@ public class DatasetServiceTest {
   /** The field no validation mapper. */
   @Mock
   private FieldNoValidationMapper fieldNoValidationMapper;
+
+  /** The lock service. */
+  @Mock
+  private LockService lockService;
 
   /** The field value. */
   private FieldValue fieldValue;
@@ -1767,4 +1772,11 @@ public class DatasetServiceTest {
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
 
   }
+
+  @Test
+  public void testReleaseLock() {
+    datasetService.releaseLock(1L);
+    Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
+  }
+
 }

@@ -20,6 +20,7 @@ import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
@@ -187,14 +188,17 @@ public class DataSetControllerImpl implements DatasetController {
 
     // filter if the file is empty
     if (file == null || file.isEmpty()) {
+      datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
     if (datasetId == null) {
+      datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
         && datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE)) {
+      datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
     // extract the filename
@@ -433,13 +437,19 @@ public class DataSetControllerImpl implements DatasetController {
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     if (datasetId == null || datasetId < 1) {
+      datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
+          datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     } else if (tableSchemaId == null) {
+      datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
+          datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
     } else if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
         && datasetService.getTableReadOnly(datasetId, tableSchemaId, EntityTypeEnum.TABLE)) {
+      datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
+          datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
 
@@ -449,6 +459,8 @@ public class DataSetControllerImpl implements DatasetController {
       deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
+      datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
+          datasetId);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }

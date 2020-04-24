@@ -79,6 +79,7 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
 import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
 import org.slf4j.Logger;
@@ -206,6 +207,10 @@ public class DatasetServiceImpl implements DatasetService {
   /** The field no validation mapper. */
   @Autowired
   private FieldNoValidationMapper fieldNoValidationMapper;
+
+  /** The lock service. */
+  @Autowired
+  private LockService lockService;
 
   /**
    * Process file.
@@ -1562,6 +1567,22 @@ public class DatasetServiceImpl implements DatasetService {
         break;
     }
     return readOnly;
+  }
+
+  /**
+   * Release lock.
+   *
+   * @param criteria the criteria
+   */
+  @Override
+  public void releaseLock(Object... criteria) {
+
+    List<Object> criteriaList = new ArrayList<>();
+    for (Object crit : criteria) {
+      criteriaList.add(crit);
+    }
+    lockService.removeLockByCriteria(criteriaList);
+
   }
 
 
