@@ -833,11 +833,11 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     // Initialize the attributes
     Map<String, List<String>> attributes =
         user.getAttributes() != null ? user.getAttributes() : new HashMap<>();
-    List<String> apiKeys = new ArrayList<>();
+    List<String> apiKeys =
+        attributes.get(apiKeysConst) != null ? attributes.get(apiKeysConst) : new ArrayList<>();
     String newValueAttribute = dataflowId + "," + shortCode;
     // Find and remove old key
-    if (attributes.get(apiKeysConst) != null && !attributes.get(apiKeysConst).isEmpty()) {
-      apiKeys = attributes.get(apiKeysConst);
+    if (!apiKeys.isEmpty()) {
       for (String keyString : apiKeys) {
         if (keyString.contains(newValueAttribute)) {
           apiKeys.remove(keyString);

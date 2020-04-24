@@ -14,6 +14,7 @@ import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -223,7 +224,7 @@ public interface UserManagementController {
    * @param shortCode the short code
    * @return the string
    */
-  @RequestMapping(value = "/createApiKey/{dataflowId}/{shortCode}", method = RequestMethod.POST)
+  @PostMapping("/createApiKey/{dataflowId}/{shortCode}")
   String createApiKey(@PathVariable("dataflowId") final Long dataflowId,
       @PathVariable("shortCode") final String shortCode);
 }
