@@ -166,6 +166,7 @@ public final class EEAErrorMessage {
 
   /** The Constant ERROR_DELETING_RULE. */
   public static final String ERROR_DELETING_RULE = "Error deleting rules";
+
   /** The Constant PERMISSION_NOT_CREATED. */
   public static final String PERMISSION_NOT_CREATED = "Permission not created";
 
@@ -190,6 +191,17 @@ public final class EEAErrorMessage {
 
   /** The Constant SHORT_CODE_REQUIRED. */
   public static final String SHORT_CODE_REQUIRED = "ShortCode is required";
+
+  /** The Constant DATASET_SCHEMA_NOT_FOUND. */
+  public static final String DATASET_SCHEMA_NOT_FOUND =
+      "DatasetSchema not found for datasetSchemaId";
+
+  /** The Constant DATASET_SCHEMA_ID_NOT_FOUND. */
+  public static final String DATASET_SCHEMA_ID_NOT_FOUND =
+      "DatasetSchemaId not found for datasetId";
+
+  /** The Constant TABLE_READ_ONLY. */
+  public static final String TABLE_READ_ONLY = "The table is marked as read only";
 
   /**
    * Instantiates a new EEA error message.
