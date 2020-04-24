@@ -39,7 +39,8 @@ public enum EventType {
   DELETE_TABLE_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_table_completed_event", true),
 
   /** The delete dataset data completed event. */
-  DELETE_DATASET_DATA_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_table_completed_event", true),
+  DELETE_DATASET_DATA_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_dataset_data_completed_event",
+      true),
 
   /** The delete table schema completed event. */
   DELETE_TABLE_SCHEMA_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_table_schema_completed_event",

@@ -47,6 +47,7 @@ import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseR
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -62,6 +63,10 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController.Represent
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.ETLDatasetVO;
+import org.eea.interfaces.vo.dataset.ETLFieldVO;
+import org.eea.interfaces.vo.dataset.ETLRecordVO;
+import org.eea.interfaces.vo.dataset.ETLTableVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -1265,12 +1270,15 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void saveTablePropagation(Long datasetId, TableSchemaVO tableSchema) throws EEAException {
     TableValue table = new TableValue();
+    TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
     Optional<DatasetValue> dataset = datasetRepository.findById(datasetId);
     if (dataset.isPresent()) {
       table.setIdTableSchema(tableSchema.getIdTableSchema());
       table.setDatasetId(dataset.get());
       saveTable(datasetId, table);
     } else {
+      LOG_ERROR.error("Saving table propagation failed because the dataset {} is not found",
+          datasetId);
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
   }
@@ -1507,5 +1515,119 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     return type;
+  }
+
+  /**
+   * Etl export dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the ETL dataset VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public ETLDatasetVO etlExportDataset(@DatasetId Long datasetId) throws EEAException {
+
+    // Get the datasetSchemaId by the datasetId
+    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+    if (null == datasetSchemaId) {
+      throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND + " " + datasetId);
+    }
+
+    // Get the datasetSchema by the datasetSchemaId
+    DataSetSchema datasetSchema =
+        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+    if (null == datasetSchema) {
+      throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND + " " + datasetSchemaId);
+    }
+
+    // Construct object to be returned
+    ETLDatasetVO etlDatasetVO = new ETLDatasetVO();
+    List<ETLTableVO> etlTableVOs = new ArrayList<>();
+    etlDatasetVO.setTables(etlTableVOs);
+
+    // Loop to fill ETLTableVOs
+    for (TableSchema tableSchema : datasetSchema.getTableSchemas()) {
+
+      // Match each fieldSchemaId with its headerName
+      Map<String, String> fieldMap = new HashMap<>();
+      for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
+        fieldMap.put(field.getIdFieldSchema().toString(), field.getHeaderName());
+      }
+
+      ETLTableVO etlTableVO = new ETLTableVO();
+      List<ETLRecordVO> etlRecordVOs = new ArrayList<>();
+      etlTableVO.setTableName(tableSchema.getNameTableSchema());
+      etlTableVO.setRecords(etlRecordVOs);
+      etlTableVOs.add(etlTableVO);
+
+      // Loop to fill ETLRecordVOs
+      for (RecordValue record : recordRepository
+          .findByTableValueNoOrder(tableSchema.getIdTableSchema().toString(), null)) {
+        ETLRecordVO etlRecordVO = new ETLRecordVO();
+        List<ETLFieldVO> etlFieldVOs = new ArrayList<>();
+        etlRecordVO.setFields(etlFieldVOs);
+        etlRecordVOs.add(etlRecordVO);
+
+        // Loop to fill ETLFieldVOs
+        for (FieldValue field : record.getFields()) {
+          ETLFieldVO etlFieldVO = new ETLFieldVO();
+          etlFieldVO.setFieldName(fieldMap.get(field.getIdFieldSchema()));
+          etlFieldVO.setValue(field.getValue());
+          etlFieldVOs.add(etlFieldVO);
+        }
+      }
+    }
+
+    return etlDatasetVO;
+  }
+
+  /**
+   * Gets the table read only. Receives by parameter the datasetId, the objectId and the type
+   * (table, record, field). In example, if receives an objectId that is a Record (that's a record
+   * schema id), find the property readOnly of the table that belongs to the record
+   * 
+   * @param datasetId the dataset id
+   * @param objectId the object id
+   * @param type the type
+   * @return the table read only
+   */
+  @Override
+  public Boolean getTableReadOnly(Long datasetId, String objectId, EntityTypeEnum type) {
+    Boolean readOnly = false;
+    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
+
+    switch (type) {
+      case TABLE:
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          if (objectId.equals(tableSchema.getIdTableSchema().toString())
+              && tableSchema.getReadOnly() != null && tableSchema.getReadOnly()) {
+            readOnly = true;
+            break;
+          }
+        }
+        break;
+      case RECORD:
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          if (objectId.equals(tableSchema.getRecordSchema().getIdRecordSchema().toString())
+              && tableSchema.getReadOnly() != null && tableSchema.getReadOnly()) {
+            readOnly = true;
+            break;
+          }
+        }
+        break;
+      case FIELD:
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          for (FieldSchema fieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
+            if (objectId.equals(fieldSchema.getIdFieldSchema().toString())
+                && tableSchema.getReadOnly() != null && tableSchema.getReadOnly()) {
+              readOnly = true;
+              break;
+            }
+          }
+        }
+        break;
+    }
+    return readOnly;
   }
 }
