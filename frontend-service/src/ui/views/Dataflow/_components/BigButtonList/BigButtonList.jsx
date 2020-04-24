@@ -31,7 +31,6 @@ import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const BigButtonList = ({
   dataflowState,
-  dataflowId,
   dataProviderId,
   designDatasetSchemas,
   handleRedirect,
@@ -60,9 +59,11 @@ export const BigButtonList = ({
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isUpdateDatacollectionDialogVisible, setIsUpdateDatacollectionDialogVisible] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
-  const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
 
+  const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
   const receiptBtnRef = useRef(null);
+
+  const dataflowId = dataflowState.id;
 
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
@@ -191,6 +192,7 @@ export const BigButtonList = ({
       const {
         dataflow: { name: dataflowName }
       } = await getMetadata({ dataflowId });
+
       notificationContext.add({
         type: 'CREATE_DATA_COLLECTION_ERROR',
         content: {
