@@ -69,75 +69,67 @@
       padding-left: 0em;
       width: 65% !important;
 
-      .statusBox {
-        border-radius: 3px;
-        color: white;
-        font-size: 10pt;
-        font-weight: 600;
-        padding: 4px;
-      }
+      li {
+        opacity: 0.8;
 
-      .draft {
-        background-color: rgba(#6565a8, 0.9);
-      }
+        &:hover {
+          opacity: 1;
+        }
 
-      .design {
-        background-color: rgba(#c2c8cf, 0.8);
-        color: var(--black);
-      }
+        &:nth-child(odd) {
+          .statusBox {
+            background-color: rgba(#008675, 0.8);
+          }
+        }
 
-      .reporter {
-        background-color: rgba(#6565a8, 0.9);
-      }
+        &:nth-child(even) {
+          .statusBox {
+            background-color: rgba(#0286c9, 0.8);
+          }
+        }
 
-      .requester {
-        background-color: rgba(#c2c8cf, 0.8);
-        color: var(--black);
-      }
+        .statusBox {
+          border-radius: 3px;
+          color: white;
+          font-size: 10pt;
+          font-weight: 600;
+          padding: 4px;
+        }
 
-      .field {
-        background-color: rgba(#6565a8, 0.9);
-      }
+        .blocker {
+          background-color: rgba(#c2c8cf, 0.8) !important;
+          color: rgba(#000, 0.8) !important;
+        }
 
-      .row {
-        background-color: rgba(#c2c8cf, 0.8);
-        color: var(--black);
-      }
+        .correct {
+          background-color: #c8e6c9 !important;
+          color: #256029 !important;
+        }
 
-      .table {
-        background-color: rgba(#6565a8, 0.9);
-      }
+        .design {
+          background-color: rgba(#c2c8cf, 0.8) !important;
+          color: var(--black) !important;
+        }
 
-      .dataset {
-        background-color: rgba(#c2c8cf, 0.8);
-        color: var(--black);
-      }
+        .draft {
+          background-color: #eccfff !important;
+          color: #694382 !important;
+        }
 
-      .error {
-        background-color: rgba(#6565a8, 0.9);
-      }
+        .error {
+          background-color: #ffcdd2 !important;
+          color: #c63737 !important;
+        }
 
-      .blocker {
-        background-color: rgba(#c2c8cf, 0.8);
-        color: var(--black);
-      }
+        .info {
+          background-color: #b3e5fc !important;
+          color: #23547b !important;
+        }
 
-      .warning {
-        background-color: rgba(#6565a8, 0.9);
-      }
-
-      .info {
-        background-color: rgba(#c2c8cf, 0.8);
-        color: var(--black);
-      }
-
-      .true {
-        background-color: rgba(#6565a8, 0.9);
-      }
-
-      .false {
-        background-color: rgba(#c2c8cf, 0.8);
-        color: var(--black);
+        .warning {
+          background-color: #ffd8b2 !important;
+          color: #805b36 !important;
+        }
       }
     }
 
