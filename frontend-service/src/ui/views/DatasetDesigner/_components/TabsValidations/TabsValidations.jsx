@@ -107,7 +107,9 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     <div className={styles.checkedValueColumn}>
       {!isNil(rowData.isCorrect) ? (
         <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons(rowData.isCorrect ? 'check' : 'cross')} />
-      ) : null}
+      ) : (
+        <FontAwesomeIcon className={`${styles.icon} ${styles.spinner}`} icon={AwesomeIcons('spinner')} />
+      )}
     </div>
   );
 
