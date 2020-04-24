@@ -25,7 +25,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { PropertiesUtils } from './_functions/Utils/PropertiesUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
-export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onConfirmDelete, manageDialogs }) => {
+export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onDeleteDataflow, manageDialogs }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -39,7 +39,7 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
     }
   }, [dataflowDataState.isDeleteDialogVisible]);
 
-  const onDeleteDataflow = async () => {
+  const onConfirmDeleteDataflow = async () => {
     manageDialogs('isDeleteDialogVisible', false, 'isPropertiesDialogVisible', true);
     showLoading();
     try {
@@ -132,8 +132,8 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
         disabledConfirm={dataflowDataState.deleteInput.toLowerCase() !== dataflowDataState.name.toLowerCase()}
-        onConfirm={() => onDeleteDataflow()}
-        onHide={() => manageDialogs('isDeleteDialogVisible', false, 'isPropertiesDialogVisible', true)}
+        onConfirm={() => onConfirmDeleteDataflow()}
+        onHide={() => ('isDeleteDialogVisible', false, 'isPropertiesDialogVisible', true)}
         visible={dataflowDataState.isDeleteDialogVisible}>
         <p>{resources.messages['deleteDataflow']}</p>
         <p
@@ -146,7 +146,7 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
           <InputText
             autoFocus={true}
             className={`${styles.inputText}`}
-            onChange={event => onConfirmDelete(event)}
+            onChange={event => onDeleteDataflow(event)}
             ref={deleteInputRef}
             value={dataflowDataState.deleteInput}
           />

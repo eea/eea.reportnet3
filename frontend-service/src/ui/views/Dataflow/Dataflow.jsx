@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -251,35 +251,70 @@ const Dataflow = withRouter(({ history, match }) => {
     />
   );
 
+  const initialLoad = (dataflow, isRepresentativeView) =>
+    dataflowDataDispatch({
+      type: 'INITIAL_LOAD',
+      payload: {
+        data: dataflow,
+        description: dataflow.description,
+        isRepresentativeView: isRepresentativeView,
+        name: dataflow.name,
+        obligations: dataflow.obligation,
+        status: dataflow.status
+      }
+    });
+
+  const loadPermissions = (hasWritePermissions, isCustodian) =>
+    dataflowDataDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian } });
+
+  const manageDialogs = (dialog, value, secondDialog, secondValue) =>
+    dataflowDataDispatch({
+      type: 'MANAGE_DIALOGS',
+      payload: { dialog, value, secondDialog, secondValue, deleteInput: '' }
+    });
+
+  const onDeleteDataflow = event =>
+    dataflowDataDispatch({ type: 'ON_DELETE_DATAFLOW', payload: { deleteInput: event.target.value } });
+
+  const onEditData = (newName, newDescription) =>
+    dataflowDataDispatch({
+      type: 'ON_EDIT_DATA',
+      payload: { name: newName, description: newDescription, isEditDialogVisible: false }
+    });
+
+  const setDataProviderId = id => dataflowDataDispatch({ type: 'SET_DATA_PROVIDER_ID', payload: { id } });
+
+  const setDatasetIdToSnapshotProps = id =>
+    dataflowDataDispatch({ type: 'SET_DATASET_ID_TO_SNAPSHOT_PROPS', payload: { id } });
+
+  const setDesignDatasetSchemas = designDatasets =>
+    dataflowDataDispatch({ type: 'SET_DESIGN_DATASET_SCHEMAS', payload: { designDatasets } });
+
+  const setFormHasRepresentatives = value =>
+    dataflowDataDispatch({ type: 'SET_FORM_HAS_REPRESENTATIVES', payload: { formHasRepresentatives: value } });
+
   const setHasRepresentativesWithoutDatasets = value =>
     dataflowDataDispatch({
       type: 'SET_HAS_REPRESENTATIVES_WITHOUT_DATASETS',
       payload: { hasRepresentativesWithoutDatasets: value }
     });
 
-  const setDatasetIdToSnapshotProps = id =>
-    dataflowDataDispatch({
-      type: 'SET_DATASET_ID_TO_SNAPSHOT_PROPS',
-      payload: { id }
-    });
+  const setIsDataSchemaCorrect = validationResult =>
+    dataflowDataDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { validationResult } });
+
+  const setIsDataUpdated = () => dataflowDataDispatch({ type: 'SET_IS_DATA_UPDATED' });
+
+  const setIsPageLoading = isPageLoading =>
+    dataflowDataDispatch({ type: 'SET_IS_PAGE_LOADING', payload: { isPageLoading } });
+
+  const setIsRepresentativeView = isRepresentativeView =>
+    dataflowDataDispatch({ type: 'SET_IS_REPRESENTATIVE_VIEW', payload: { isRepresentativeView } });
 
   const setUpdatedDatasetSchema = updatedData =>
-    dataflowDataDispatch({
-      type: 'SET_UPDATED_DATASET_SCHEMA',
-      payload: { updatedData }
-    });
-
-  const onConfirmDelete = event =>
-    dataflowDataDispatch({ type: 'ON_DELETE_DATAFLOW', payload: { deleteInput: event.target.value } });
-
-  const setFormHasRepresentatives = value =>
-    dataflowDataDispatch({ type: 'SET_FORM_HAS_REPRESENTATIVES', payload: { formHasRepresentatives: value } });
+    dataflowDataDispatch({ type: 'SET_UPDATED_DATASET_SCHEMA', payload: { updatedData } });
 
   const onEditDataflow = (newName, newDescription) => {
-    dataflowDataDispatch({
-      type: 'ON_EDIT_DATA',
-      payload: { name: newName, description: newDescription, isVisible: false }
-    });
+    onEditData(newName, newDescription);
     onLoadReportingDataflow();
   };
 
@@ -289,33 +324,25 @@ const Dataflow = withRouter(({ history, match }) => {
       [config.permissions.PROVIDER],
       `${config.permissions.DATAFLOW}${dataflowId}`
     );
+
     const isCustodian = UserService.hasPermission(
       user,
       [config.permissions.CUSTODIAN],
       `${config.permissions.DATAFLOW}${dataflowId}`
     );
 
-    dataflowDataDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian } });
+    loadPermissions(hasWritePermissions, isCustodian);
   };
 
-  const setDataProviderId = id => {
-    dataflowDataDispatch({ type: 'SET_DATA_PROVIDER_ID', payload: { id } });
+  const checkIsRepresentativeView = datasets => {
+    const uniqRepresentatives = uniq(datasets.map(dataset => dataset.datasetSchemaName));
+
+    return uniqRepresentatives.length === 1;
   };
 
-  const setIsPageLoading = isPageLoading => {
-    dataflowDataDispatch({ type: 'SET_IS_PAGE_LOADING', payload: { isPageLoading } });
-  };
-
-  const setDesignDatasetSchemas = designDatasets => {
-    dataflowDataDispatch({ type: 'SET_DESIGN_DATASET_SCHEMAS', payload: { designDatasets } });
-  };
-
-  const setIsDataSchemaCorrect = validationResult => {
-    dataflowDataDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { validationResult } });
-  };
-
-  const setIsDataUpdated = () => {
-    dataflowDataDispatch({ type: 'SET_IS_DATA_UPDATED' });
+  const onInitialLoad = (dataflow, datasets) => {
+    const isRepresentativeView = checkIsRepresentativeView(datasets);
+    initialLoad(dataflow, isRepresentativeView);
   };
 
   const onLoadReportingDataflow = async () => {
@@ -323,19 +350,8 @@ const Dataflow = withRouter(({ history, match }) => {
       const dataflow = await DataflowService.reporting(dataflowId);
 
       const { datasets } = dataflow;
-      const uniqRepresentatives = uniq(datasets.map(dataset => dataset.datasetSchemaName));
 
-      dataflowDataDispatch({
-        type: 'INITIAL_LOAD',
-        payload: {
-          data: dataflow,
-          description: dataflow.description,
-          isRepresentativeView: uniqRepresentatives.length === 1,
-          name: dataflow.name,
-          obligations: dataflow.obligation,
-          status: dataflow.status
-        }
-      });
+      onInitialLoad(dataflow, datasets);
 
       if (!isEmpty(dataflow.datasets)) {
         const dataProviderIds = dataflow.datasets.map(dataset => dataset.dataProviderId);
@@ -378,12 +394,6 @@ const Dataflow = withRouter(({ history, match }) => {
     const validationResult = await DataflowService.schemasValidation(dataflowId);
     setIsDataSchemaCorrect(validationResult);
   };
-
-  const manageDialogs = (dialog, value, secondDialog, secondValue) =>
-    dataflowDataDispatch({
-      type: 'MANAGE_DIALOGS',
-      payload: { dialog, value, secondDialog, secondValue, deleteInput: '' }
-    });
 
   const onSaveName = async (value, index) => {
     await DatasetService.updateSchemaNameById(
@@ -440,14 +450,12 @@ const Dataflow = withRouter(({ history, match }) => {
           updatedDatasetSchema={dataflowDataState.updatedDatasetSchema}
         />
 
-        {
-          <SnapshotsDialog
-            dataflowId={dataflowId}
-            datasetId={dataflowDataState.datasetIdToSnapshotProps}
-            isSnapshotDialogVisible={dataflowDataState.isSnapshotDialogVisible}
-            manageDialogs={manageDialogs}
-          />
-        }
+        <SnapshotsDialog
+          dataflowId={dataflowId}
+          datasetId={dataflowDataState.datasetIdToSnapshotProps}
+          isSnapshotDialogVisible={dataflowDataState.isSnapshotDialogVisible}
+          manageDialogs={manageDialogs}
+        />
 
         {dataflowDataState.isCustodian && (
           <Dialog
@@ -472,7 +480,7 @@ const Dataflow = withRouter(({ history, match }) => {
           dataflowDataState={dataflowDataState}
           dataflowId={dataflowId}
           history={history}
-          onConfirmDelete={onConfirmDelete}
+          onDeleteDataflow={onDeleteDataflow}
           manageDialogs={manageDialogs}
         />
 

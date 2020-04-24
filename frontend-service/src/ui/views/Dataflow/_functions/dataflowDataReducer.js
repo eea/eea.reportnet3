@@ -27,7 +27,7 @@ export const dataflowDataReducer = (state, { type, payload }) => {
       return {
         ...state,
         description: payload.description,
-        isEditDialogVisible: payload.isVisible,
+        isEditDialogVisible: payload.isEditDialogVisible,
         name: payload.name
       };
     // Refactor START
@@ -52,6 +52,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
 
     case 'SET_UPDATED_DATASET_SCHEMA':
       return { ...state, updatedDatasetSchema: payload.updatedData };
+
+    case 'SET_IS_REPRESENTATIVE_VIEW':
+      return { ...state, IsRepresentativeView: payload.isRepresentativeView };
 
     default:
       return state;
