@@ -11,7 +11,7 @@ import { searchReducer } from './_functions/Reducers/searchReducer';
 
 import { SearchUtils } from './_functions/Utils/SearchUtils';
 
-export const SearchAll = ({ data, getValues, typeData }) => {
+export const SearchAll = ({ data, getValues, searchBy }) => {
   const resources = useContext(ResourcesContext);
 
   const [searchState, searchDispatch] = useReducer(searchReducer, { data: [], searchedData: [], searchBy: '' });
@@ -27,11 +27,11 @@ export const SearchAll = ({ data, getValues, typeData }) => {
   const onLoadInitialState = () =>
     searchDispatch({
       type: 'INITIAL_LOAD',
-      payload: { data, searchedData: SearchUtils.onApplySearch(data, searchState.searchBy, typeData) }
+      payload: { data, searchedData: SearchUtils.onApplySearch(data, searchBy, searchState.searchBy) }
     });
 
   const onSearchData = value => {
-    const searchedValues = SearchUtils.onApplySearch(searchState.data, value, typeData);
+    const searchedValues = SearchUtils.onApplySearch(searchState.data, searchBy, value);
     searchDispatch({ type: 'ON_SEARCH_DATA', payload: { searchedValues, value } });
   };
 

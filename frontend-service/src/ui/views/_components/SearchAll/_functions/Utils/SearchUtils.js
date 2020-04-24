@@ -1,22 +1,15 @@
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 const getSearchKeys = data => {
-  if (!isNil(data)) return Object.keys(data).filter(item => item !== 'id');
+  if (!isNil(data)) return Object.keys(data).filter(item => item !== 'id' && item !== 'key');
 };
 
-const onApplySearch = (data, value, typeData) => [
+const onApplySearch = (data, searchBy = [], value) => [
   ...data.filter(data => {
-    if (typeData == 'qc') {
-      return (
-        data['name'].toLowerCase().includes(value.toLowerCase()) ||
-        data['description'].toLowerCase().includes(value.toLowerCase())
-      );
-    } else {
-      return (
-        data['title'].toLowerCase().includes(value.toLowerCase()) ||
-        data['legalInstrument'].toLowerCase().includes(value.toLowerCase()) ||
-        data['dueDate'].toLowerCase().includes(value.toLowerCase())
-      );
+    const searchedParams = !isEmpty(searchBy) ? searchBy : getSearchKeys(data);
+    for (let index = 0; index < searchedParams.length; index++) {
+      return data[searchedParams[index]].toLowerCase().includes(value.toLowerCase());
     }
   })
 ];

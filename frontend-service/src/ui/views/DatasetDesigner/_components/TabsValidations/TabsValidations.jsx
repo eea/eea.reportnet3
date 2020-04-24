@@ -228,6 +228,10 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     />
   );
 
+  const levelErrorTemplate = rowData => (
+    <span className={`${styles.levelError} ${styles[rowData.levelError.toLowerCase()]}`}>{rowData.levelError}</span>
+  );
+
   const renderColumns = validations => {
     const fieldColumns = getOrderedValidations(Object.keys(validations[0])).map(field => {
       let template = null;
@@ -236,6 +240,9 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       }
       if (field === 'enabled') {
         template = enabledTemplate;
+      }
+      if (field === 'levelError') {
+        template = levelErrorTemplate;
       }
       return (
         <Column
@@ -273,7 +280,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     return (
       <div className={null}>
         <div className={styles.searchInput}>
-          <SearchAll data={filteredData} getValues={onLoadSearchedData} typeData={'qc'} />
+          <SearchAll data={filteredData} getValues={onLoadSearchedData} searchBy={['name', 'description']} />
         </div>
         <Filters
           data={validationsList.validations}

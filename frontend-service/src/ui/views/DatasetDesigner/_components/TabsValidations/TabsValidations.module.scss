@@ -43,3 +43,31 @@
 .paginatorValidationViewer :global .p-dropdown-panel {
   top: -6rem !important;
 }
+
+.levelError {
+  border-radius: 3px;
+  color: white;
+  font-size: 10pt;
+  font-weight: 600;
+  padding: 4px;
+}
+
+.blocker {
+  background-color: rgba(#c2c8cf, 0.8) !important;
+  color: rgba(#000, 0.8) !important;
+}
+
+.error {
+  background-color: #ffcdd2 !important;
+  color: #c63737 !important;
+}
+
+.info {
+  background-color: #b3e5fc !important;
+  color: #23547b !important;
+}
+
+.warning {
+  background-color: #ffd8b2 !important;
+  color: #805b36 !important;
+}
