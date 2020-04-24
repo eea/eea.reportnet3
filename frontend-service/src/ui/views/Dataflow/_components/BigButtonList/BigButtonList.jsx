@@ -30,8 +30,7 @@ import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const BigButtonList = ({
-  dataflowData,
-  dataflowDataState,
+  dataflowState,
   dataflowId,
   dataProviderId,
   designDatasetSchemas,
@@ -61,7 +60,7 @@ export const BigButtonList = ({
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isUpdateDatacollectionDialogVisible, setIsUpdateDatacollectionDialogVisible] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
-  const hasExpirationDate = new Date(dataflowDataState.obligations.expirationDate) > new Date();
+  const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
 
   const receiptBtnRef = useRef(null);
 
@@ -79,11 +78,11 @@ export const BigButtonList = ({
 
   useEffect(() => {
     getExpirationDate();
-  }, [dataflowDataState.obligations.expirationDate]);
+  }, [dataflowState.obligations.expirationDate]);
 
   const downloadPdf = response => {
     if (!isNil(response)) {
-      DownloadFile(response, `${dataflowData.name}_${Date.now()}.pdf`);
+      DownloadFile(response, `${dataflowState.data.name}_${Date.now()}.pdf`);
 
       const url = window.URL.createObjectURL(new Blob([response]));
 
@@ -151,9 +150,9 @@ export const BigButtonList = ({
 
   const getExpirationDate = () => {
     setDataCollectionDueDate(
-      !isNil(dataflowDataState.obligations.expirationDate) &&
-        new Date(dataflowDataState.obligations.expirationDate) > new Date()
-        ? new Date(dataflowDataState.obligations.expirationDate)
+      !isNil(dataflowState.obligations.expirationDate) &&
+        new Date(dataflowState.obligations.expirationDate) > new Date()
+        ? new Date(dataflowState.obligations.expirationDate)
         : null
     );
   };
@@ -288,8 +287,7 @@ export const BigButtonList = ({
   };
 
   const bigButtonList = useBigButtonList({
-    dataflowData,
-    dataflowDataState,
+    dataflowState,
     dataflowId,
     exportDatatableSchema,
     getDeleteSchemaIndex,
@@ -388,7 +386,7 @@ export const BigButtonList = ({
           <p
             dangerouslySetInnerHTML={{
               __html: TextUtils.parseText(resources.messages['dataCollectionExpirationDate'], {
-                expirationData: moment(dataflowDataState.obligations.expirationDate).format(user.userProps.dateFormat)
+                expirationData: moment(dataflowState.obligations.expirationDate).format(user.userProps.dateFormat)
               })
             }}></p>
         ) : (

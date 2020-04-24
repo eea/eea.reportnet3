@@ -25,7 +25,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { PropertiesUtils } from './_functions/Utils/PropertiesUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
-export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onDeleteDataflow, manageDialogs }) => {
+export const PropertiesDialog = ({ dataflowState, dataflowId, history, onDeleteDataflow, manageDialogs }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -34,10 +34,10 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onDel
   const deleteInputRef = useRef(null);
 
   useEffect(() => {
-    if (dataflowDataState.isDeleteDialogVisible && !isNil(deleteInputRef.current)) {
+    if (dataflowState.isDeleteDialogVisible && !isNil(deleteInputRef.current)) {
       deleteInputRef.current.element.focus();
     }
-  }, [dataflowDataState.isDeleteDialogVisible]);
+  }, [dataflowState.isDeleteDialogVisible]);
 
   const onConfirmDeleteDataflow = async () => {
     manageDialogs('isDeleteDialogVisible', false, 'isPropertiesDialogVisible', true);
@@ -62,13 +62,13 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onDel
     }
   };
 
-  const parsedDataflowData = { dataflowStatus: dataflowDataState.data.status };
-  const parsedObligationsData = PropertiesUtils.parseObligationsData(dataflowDataState, user.userProps.dateFormat);
+  const parsedDataflowData = { dataflowStatus: dataflowState.data.status };
+  const parsedObligationsData = PropertiesUtils.parseObligationsData(dataflowState, user.userProps.dateFormat);
 
   const dialogFooter = (
     <Fragment>
       <div className="p-toolbar-group-left">
-        {dataflowDataState.isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DESIGN'] && (
+        {dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN'] && (
           <Button
             className="p-button-danger p-button-animated-blink"
             label={resources.messages['deleteDataflowButton']}
@@ -93,9 +93,9 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onDel
         footer={dialogFooter}
         header={resources.messages['properties']}
         onHide={() => manageDialogs('isPropertiesDialogVisible', false)}
-        visible={dataflowDataState.isPropertiesDialogVisible}>
+        visible={dataflowState.isPropertiesDialogVisible}>
         <div className={styles.propertiesWrap}>
-          {dataflowDataState.description}
+          {dataflowState.description}
           {parsedObligationsData.map((data, i) => (
             <div key={i} style={{ marginTop: '1rem', marginBottom: '2rem' }}>
               <TreeViewExpandableItem
@@ -109,7 +109,7 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onDel
                           tooltip: resources.messages['viewMore'],
                           onClick: () =>
                             window.open(
-                              `http://rod3.devel1dub.eionet.europa.eu/obligations/${dataflowDataState.obligations.obligationId}`
+                              `http://rod3.devel1dub.eionet.europa.eu/obligations/${dataflowState.obligations.obligationId}`
                             )
                         }
                       ]
@@ -131,15 +131,15 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onDel
         header={resources.messages['delete'].toUpperCase()}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
-        disabledConfirm={dataflowDataState.deleteInput.toLowerCase() !== dataflowDataState.name.toLowerCase()}
+        disabledConfirm={dataflowState.deleteInput.toLowerCase() !== dataflowState.name.toLowerCase()}
         onConfirm={() => onConfirmDeleteDataflow()}
         onHide={() => ('isDeleteDialogVisible', false, 'isPropertiesDialogVisible', true)}
-        visible={dataflowDataState.isDeleteDialogVisible}>
+        visible={dataflowState.isDeleteDialogVisible}>
         <p>{resources.messages['deleteDataflow']}</p>
         <p
           dangerouslySetInnerHTML={{
             __html: TextUtils.parseText(resources.messages['deleteDataflowConfirm'], {
-              dataflowName: dataflowDataState.name
+              dataflowName: dataflowState.name
             })
           }}></p>
         <p>
@@ -148,7 +148,7 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onDel
             className={`${styles.inputText}`}
             onChange={event => onDeleteDataflow(event)}
             ref={deleteInputRef}
-            value={dataflowDataState.deleteInput}
+            value={dataflowState.deleteInput}
           />
         </p>
       </ConfirmDialog>

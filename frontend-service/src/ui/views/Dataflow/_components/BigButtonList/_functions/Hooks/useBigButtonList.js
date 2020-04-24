@@ -12,7 +12,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const useBigButtonList = ({
-  dataflowDataState,
+  dataflowState,
   dataflowData,
   dataflowId,
   exportDatatableSchema,
@@ -51,7 +51,7 @@ const useBigButtonList = ({
         },
         { label: resources.messages['createNewDatasetFromTemplate'], icon: 'add', disabled: true }
       ],
-      visibility: isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DESIGN']
+      visibility: isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']
     },
     {
       buttonClass: 'dataflowHelp',
@@ -65,11 +65,11 @@ const useBigButtonList = ({
     }
   ];
 
-  const designDatasetModels = dataflowData.designDatasets.map(newDatasetSchema => ({
+  const designDatasetModels = dataflowState.data.designDatasets.map(newDatasetSchema => ({
     buttonClass: 'schemaDataset',
     buttonIcon: 'pencilRuler',
     caption: newDatasetSchema.datasetSchemaName,
-    dataflowStatus: dataflowDataState.status,
+    dataflowStatus: dataflowState.status,
     datasetSchemaInfo: updatedDatasetSchema,
     handleRedirect: () => {
       handleRedirect(getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true));
@@ -88,18 +88,18 @@ const useBigButtonList = ({
       {
         label: resources.messages['rename'],
         icon: 'pencil',
-        disabled: dataflowDataState.status !== DataflowConf.dataflowStatus['DESIGN']
+        disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN']
       },
       {
         label: resources.messages['delete'],
         icon: 'trash',
-        disabled: dataflowDataState.status !== DataflowConf.dataflowStatus['DESIGN'],
+        disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'],
         command: () => getDeleteSchemaIndex(newDatasetSchema.index)
       }
       // {
       //   label: resources.messages['exportDatasetSchema'],
       //   icon: 'import',
-      //   // disabled: dataflowDataState.status !== DataflowConf.dataflowStatus['DESIGN'],
+      //   // disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'],
       //   command: () => exportDatatableSchema(newDatasetSchema.datasetId, newDatasetSchema.datasetSchemaName)
       // }
     ],
@@ -108,7 +108,8 @@ const useBigButtonList = ({
     onSaveName: onSaveName,
     onWheel: getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true),
     placeholder: resources.messages['datasetSchemaNamePlaceholder'],
-    visibility: !isUndefined(dataflowData.designDatasets) && isEmpty(dataflowData.dataCollections) && isCustodian
+    visibility:
+      !isUndefined(dataflowState.data.designDatasets) && isEmpty(dataflowState.data.dataCollections) && isCustodian
   }));
 
   const buildGroupByRepresentativeModels = dataflowData => {
@@ -143,7 +144,7 @@ const useBigButtonList = ({
               ]
             : [{ label: resources.messages['properties'], icon: 'info', disabled: true }],
           onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
-          visibility: !isEmpty(dataflowData.datasets)
+          visibility: !isEmpty(dataflowState.data.datasets)
         };
       });
     }
@@ -157,11 +158,11 @@ const useBigButtonList = ({
       helpClassName: 'dataflow-dataset-container-help-step',
       layout: 'defaultBigButton',
       onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representative }, true),
-      visibility: !isEmpty(dataflowData.datasets)
+      visibility: !isEmpty(dataflowState.data.datasets)
     }));
   };
 
-  const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowData);
+  const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState.data);
 
   const dashboardModels = [
     {
@@ -172,7 +173,7 @@ const useBigButtonList = ({
       helpClassName: 'dataflow-dashboards-help-step',
       layout: 'defaultBigButton',
       onWheel: getUrl(routes.DASHBOARDS, { dataflowId }, true),
-      visibility: isCustodian && !isEmpty(dataflowData.datasets)
+      visibility: isCustodian && !isEmpty(dataflowState.data.datasets)
     }
   ];
 
@@ -186,7 +187,7 @@ const useBigButtonList = ({
       handleRedirect: isActiveButton ? () => onShowDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
       visibility:
-        isEmpty(dataflowData.dataCollections) && isDataSchemaCorrect && dataflowDataState.formHasRepresentatives
+        isEmpty(dataflowState.data.dataCollections) && isDataSchemaCorrect && dataflowState.formHasRepresentatives
     }
   ];
 
@@ -199,11 +200,11 @@ const useBigButtonList = ({
       helpClassName: 'dataflow-datacollection-help-step',
       handleRedirect: isActiveButton ? () => onShowUpdateDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
-      visibility: dataflowDataState.status === 'DRAFT' && dataflowDataState.hasRepresentativesWithoutDatasets
+      visibility: dataflowState.status === 'DRAFT' && dataflowState.hasRepresentativesWithoutDatasets
     }
   ];
 
-  const dataCollectionModels = dataflowData.dataCollections.map(dataCollection => ({
+  const dataCollectionModels = dataflowState.data.dataCollections.map(dataCollection => ({
     buttonClass: 'schemaDataset',
     buttonIcon: 'dataCollection',
     caption: dataCollection.dataCollectionName,
@@ -234,11 +235,11 @@ const useBigButtonList = ({
     //     disabled: true
     //   }
     // ],
-    visibility: !isEmpty(dataflowData.dataCollections)
+    visibility: !isEmpty(dataflowState.data.dataCollections)
   }));
 
   const onBuildReceiptButton = () => {
-    const { datasets } = dataflowData;
+    const { datasets } = dataflowState.data;
     const representativeNames = datasets.map(dataset => dataset.datasetSchemaName);
     const releasedStates = datasets.map(dataset => dataset.isReleased);
 

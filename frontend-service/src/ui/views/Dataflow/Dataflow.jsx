@@ -81,7 +81,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isSnapshotDialogVisible: false
   };
 
-  const [dataflowDataState, dataflowDataDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
+  const [dataflowState, dataflowDataDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
   const [receiptState, receiptDispatch] = useReducer(receiptReducer, {});
 
   useEffect(() => {
@@ -137,46 +137,44 @@ const Dataflow = withRouter(({ history, match }) => {
       title: 'properties'
     };
 
-    if (dataflowDataState.isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DESIGN']) {
+    if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']) {
       leftSideBarContext.addModels([propertiesBtn, editBtn, manageRolesBtn]);
-    } else if (dataflowDataState.isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DRAFT']) {
+    } else if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']) {
       leftSideBarContext.addModels([propertiesBtn, manageRolesBtn]);
     } else {
-      leftSideBarContext.addModels(
-        dataflowDataState.isRepresentativeView ? [propertiesBtn, apiKeyBtn] : [propertiesBtn]
-      );
+      leftSideBarContext.addModels(dataflowState.isRepresentativeView ? [propertiesBtn, apiKeyBtn] : [propertiesBtn]);
     }
-  }, [dataflowDataState.isCustodian, dataflowDataState.status]);
+  }, [dataflowState.isCustodian, dataflowState.status]);
 
   useEffect(() => {
     const steps = filterHelpSteps();
     leftSideBarContext.addHelpSteps('dataflowHelp', steps);
   }, [
-    dataflowDataState.data,
-    dataflowDataState.designDatasetSchemas,
-    dataflowDataState.formHasRepresentatives,
-    dataflowDataState.isCustodian,
-    dataflowDataState.isDataSchemaCorrect,
-    dataflowDataState.status,
+    dataflowState.data,
+    dataflowState.designDatasetSchemas,
+    dataflowState.formHasRepresentatives,
+    dataflowState.isCustodian,
+    dataflowState.isDataSchemaCorrect,
+    dataflowState.status,
     dataflowId
   ]);
 
   useEffect(() => {
-    if (!isEmpty(dataflowDataState.data.representatives)) {
-      const representativesNoDatasets = dataflowDataState.data.representatives.filter(
+    if (!isEmpty(dataflowState.data.representatives)) {
+      const representativesNoDatasets = dataflowState.data.representatives.filter(
         representative => !representative.hasDatasets
       );
       //set for the first load
       setHasRepresentativesWithoutDatasets(!isEmpty(representativesNoDatasets));
       setFormHasRepresentatives(!isEmpty(representativesNoDatasets));
     }
-  }, [dataflowDataState.data.representatives]);
+  }, [dataflowState.data.representatives]);
 
   useEffect(() => {
     setIsPageLoading(true);
     onLoadReportingDataflow();
     onLoadSchemasValidations();
-  }, [dataflowId, dataflowDataState.isDataUpdated]);
+  }, [dataflowId, dataflowState.isDataUpdated]);
 
   const filterHelpSteps = () => {
     const dataflowSteps = [
@@ -397,10 +395,10 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onSaveName = async (value, index) => {
     await DatasetService.updateSchemaNameById(
-      dataflowDataState.designDatasetSchemas[index].datasetId,
+      dataflowState.designDatasetSchemas[index].datasetId,
       encodeURIComponent(value)
     );
-    const updatedTitles = [...dataflowDataState.updatedDatasetSchema];
+    const updatedTitles = [...dataflowState.updatedDatasetSchema];
     updatedTitles[index].schemaName = value;
     setUpdatedDatasetSchema(updatedTitles);
   };
@@ -413,12 +411,12 @@ const Dataflow = withRouter(({ history, match }) => {
   useCheckNotifications(['ADD_DATACOLLECTION_COMPLETED_EVENT'], setIsDataUpdated);
 
   const layout = children => (
-    <MainLayout leftSideBarConfig={{ isCustodian: dataflowDataState.isCustodian, buttons: [] }}>
+    <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
       <div className="rep-container">{children}</div>
     </MainLayout>
   );
 
-  if (dataflowDataState.isPageLoading || isNil(dataflowDataState.data)) return layout(<Spinner />);
+  if (dataflowState.isPageLoading || isNil(dataflowState.data)) return layout(<Spinner />);
 
   return layout(
     <div className="rep-row">
@@ -427,48 +425,47 @@ const Dataflow = withRouter(({ history, match }) => {
           icon="archive"
           iconSize="4rem"
           subtitle={resources.messages['dataflow']}
-          title={TextUtils.ellipsis(dataflowDataState.name)}
+          title={TextUtils.ellipsis(dataflowState.name)}
         />
 
         <BigButtonList
-          dataflowData={dataflowDataState.data}
-          dataflowDataState={dataflowDataState}
+          dataflowState={dataflowState}
           dataflowId={dataflowId}
-          dataProviderId={dataflowDataState.dataProviderId}
-          designDatasetSchemas={dataflowDataState.designDatasetSchemas}
+          dataProviderId={dataflowState.dataProviderId}
+          designDatasetSchemas={dataflowState.designDatasetSchemas}
           handleRedirect={handleRedirect}
-          formHasRepresentatives={dataflowDataState.formHasRepresentatives}
-          hasWritePermissions={dataflowDataState.hasWritePermissions}
-          isCustodian={dataflowDataState.isCustodian}
-          isDataSchemaCorrect={dataflowDataState.isDataSchemaCorrect}
+          formHasRepresentatives={dataflowState.formHasRepresentatives}
+          hasWritePermissions={dataflowState.hasWritePermissions}
+          isCustodian={dataflowState.isCustodian}
+          isDataSchemaCorrect={dataflowState.isDataSchemaCorrect}
           onSaveName={onSaveName}
           onUpdateData={setIsDataUpdated}
           receiptDispatch={receiptDispatch}
           receiptState={receiptState}
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}
           onShowSnapshotDialog={onShowSnapshotDialog}
-          updatedDatasetSchema={dataflowDataState.updatedDatasetSchema}
+          updatedDatasetSchema={dataflowState.updatedDatasetSchema}
         />
 
         <SnapshotsDialog
           dataflowId={dataflowId}
-          datasetId={dataflowDataState.datasetIdToSnapshotProps}
-          isSnapshotDialogVisible={dataflowDataState.isSnapshotDialogVisible}
+          datasetId={dataflowState.datasetIdToSnapshotProps}
+          isSnapshotDialogVisible={dataflowState.isSnapshotDialogVisible}
           manageDialogs={manageDialogs}
         />
 
-        {dataflowDataState.isCustodian && (
+        {dataflowState.isCustodian && (
           <Dialog
             contentStyle={{ maxHeight: '60vh' }}
             footer={manageRoleDialogFooter}
             header={resources.messages['manageRolesDialogTitle']}
             onHide={() => manageDialogs('isManageRolesDialogVisible', false)}
-            visible={dataflowDataState.isManageRolesDialogVisible}>
+            visible={dataflowState.isManageRolesDialogVisible}>
             <div className={styles.dialog}>
               <RepresentativesList
-                dataflowRepresentatives={dataflowDataState.data.representatives}
+                dataflowRepresentatives={dataflowState.data.representatives}
                 dataflowId={dataflowId}
-                isActiveManageRolesDialog={dataflowDataState.isManageRolesDialogVisible}
+                isActiveManageRolesDialog={dataflowState.isManageRolesDialogVisible}
                 setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
                 setFormHasRepresentatives={setFormHasRepresentatives}
               />
@@ -477,7 +474,7 @@ const Dataflow = withRouter(({ history, match }) => {
         )}
 
         <PropertiesDialog
-          dataflowDataState={dataflowDataState}
+          dataflowState={dataflowState}
           dataflowId={dataflowId}
           history={history}
           onDeleteDataflow={onDeleteDataflow}
@@ -489,14 +486,14 @@ const Dataflow = withRouter(({ history, match }) => {
           isEditForm={true}
           onEditDataflow={onEditDataflow}
           manageDialogs={manageDialogs}
-          state={dataflowDataState}
+          state={dataflowState}
         />
 
-        {dataflowDataState.isApiKeyDialogVisible && (
+        {dataflowState.isApiKeyDialogVisible && (
           <ApiKeyDialog
             dataflowId={dataflowId}
-            dataProviderId={dataflowDataState.dataProviderId}
-            isApiKeyDialogVisible={dataflowDataState.isApiKeyDialogVisible}
+            dataProviderId={dataflowState.dataProviderId}
+            isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
             manageDialogs={manageDialogs}
           />
         )}

@@ -257,7 +257,7 @@ const Representative = withRouter(({ match, history }) => {
         />
 
         <PropertiesDialog
-          dataflowDataState={representativeState}
+          dataflowState={representativeState}
           dataflowId={dataflowId}
           history={history}
           manageDialogs={manageDialogs}
