@@ -126,32 +126,34 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
         </div>
       </Dialog>
 
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        header={resources.messages['delete'].toUpperCase()}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        disabledConfirm={dataflowDataState.deleteInput.toLowerCase() !== dataflowDataState.name.toLowerCase()}
-        onConfirm={() => onDeleteDataflow()}
-        onHide={() => onManageDialogs('isDeleteDialogVisible', false, 'isPropertiesDialogVisible', true)}
-        visible={dataflowDataState.isDeleteDialogVisible}>
-        <p>{resources.messages['deleteDataflow']}</p>
-        <p
-          dangerouslySetInnerHTML={{
-            __html: TextUtils.parseText(resources.messages['deleteDataflowConfirm'], {
-              dataflowName: dataflowDataState.name
-            })
-          }}></p>
-        <p>
-          <InputText
-            autoFocus={true}
-            className={`${styles.inputText}`}
-            onChange={event => onConfirmDelete(event)}
-            ref={deleteInputRef}
-            value={dataflowDataState.deleteInput}
-          />
-        </p>
-      </ConfirmDialog>
+      {dataflowDataState.isDeleteDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={resources.messages['delete'].toUpperCase()}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          disabledConfirm={dataflowDataState.deleteInput.toLowerCase() !== dataflowDataState.name.toLowerCase()}
+          onConfirm={() => onDeleteDataflow()}
+          onHide={() => onManageDialogs('isDeleteDialogVisible', false, 'isPropertiesDialogVisible', true)}
+          visible={dataflowDataState.isDeleteDialogVisible}>
+          <p>{resources.messages['deleteDataflow']}</p>
+          <p
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(resources.messages['deleteDataflowConfirm'], {
+                dataflowName: dataflowDataState.name
+              })
+            }}></p>
+          <p>
+            <InputText
+              autoFocus={true}
+              className={`${styles.inputText}`}
+              onChange={event => onConfirmDelete(event)}
+              ref={deleteInputRef}
+              value={dataflowDataState.deleteInput}
+            />
+          </p>
+        </ConfirmDialog>
+      )}
     </Fragment>
   );
 };
