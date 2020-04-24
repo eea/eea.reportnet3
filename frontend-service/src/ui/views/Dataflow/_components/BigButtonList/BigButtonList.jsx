@@ -31,7 +31,6 @@ import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const BigButtonList = ({
   dataflowState,
-  dataProviderId,
   designDatasetSchemas,
   handleRedirect,
   hasWritePermissions,
@@ -259,7 +258,7 @@ export const BigButtonList = ({
         type: 'ON_DOWNLOAD',
         payload: { isLoading: true }
       });
-      const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
+      const response = await ConfirmationReceiptService.get(dataflowId, dataflowState.dataProviderId);
 
       downloadPdf(response);
       removeNew();

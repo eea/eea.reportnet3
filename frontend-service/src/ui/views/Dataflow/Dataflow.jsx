@@ -430,7 +430,6 @@ const Dataflow = withRouter(({ history, match }) => {
 
         <BigButtonList
           dataflowState={dataflowState}
-          dataProviderId={dataflowState.dataProviderId}
           designDatasetSchemas={dataflowState.designDatasetSchemas}
           handleRedirect={handleRedirect}
           formHasRepresentatives={dataflowState.formHasRepresentatives}
