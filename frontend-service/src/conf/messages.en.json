@@ -605,6 +605,8 @@
     "apiKeyDialogHead": "API-key",
     "sidebarApiKeyBtn": "API-key",
     "prefilled": "Prefilled",
-    "exportDatasetSchema": "Export schema"
+    "exportDatasetSchema": "Export schema",
+    "tabMenuConstraintData": "Constraint data",
+    "tabMenuExpressions": "Expressions"
   }
 }
