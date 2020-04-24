@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import capitalize from 'lodash/capitalize';
@@ -28,26 +28,39 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
+import { tabsValidationsReducer } from './Reducers/tabsValidationsReducer';
+
 const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSchemaId, onHideValidationsDialog }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
 
-  const [filteredData, setFilteredData] = useState([]);
-  const [isDataUpdated, setIsDataUpdated] = useState(false);
-  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchedData, setSearchedData] = useState([]);
-  const [validationId, setValidationId] = useState();
   const [validationsList, setValidationsList] = useState();
+
+  const [tabsValidationsState, tabsValidationsDispatch] = useReducer(tabsValidationsReducer, {
+    filteredData: [],
+    isDataUpdated: false,
+    isDeleteDialogVisible: false,
+    isLoading: false,
+    searchedData: [],
+    // validationList: {},
+    validationId: ''
+  });
 
   useEffect(() => {
     onLoadValidationsList(datasetSchemaId);
-  }, [isDataUpdated]);
+  }, [tabsValidationsState.isDataUpdated]);
+
+  const isDeleteDialogVisible = value =>
+    tabsValidationsDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
+
+  const isLoading = value => tabsValidationsDispatch({ type: 'IS_LOADING', payload: { value } });
+
+  const isDataUpdated = value => tabsValidationsDispatch({ type: 'IS_DATA_UPDATED', payload: { value } });
 
   const onDeleteValidation = async () => {
     try {
-      const response = await ValidationService.deleteById(dataset.datasetId, validationId);
+      const response = await ValidationService.deleteById(dataset.datasetId, tabsValidationsState.validationId);
       if (response.status >= 200 && response.status <= 299) {
         onUpdateData();
       }
@@ -61,13 +74,13 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   };
 
   const onHideDeleteDialog = () => {
-    setIsDeleteDialogVisible(false);
-    setValidationId('');
+    isDeleteDialogVisible(false);
+    validationId('');
   };
 
   const onLoadValidationsList = async datasetSchemaId => {
     try {
-      setIsLoading(true);
+      isLoading(true);
       const validationsServiceList = await ValidationService.getAll(datasetSchemaId);
 
       if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
@@ -78,6 +91,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
         });
       }
 
+      // tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_LIST', payload: { validationsServiceList } });
       setValidationsList(validationsServiceList);
     } catch (error) {
       console.log(error);
@@ -85,20 +99,20 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
         type: 'VALIDATION_SERVICE_GET_ALL_ERROR'
       });
     } finally {
-      setIsLoading(false);
+      isLoading(false);
     }
   };
 
-  const onLoadFilteredData = data => setFilteredData(data);
+  const onLoadFilteredData = data => tabsValidationsDispatch({ type: 'FILTER_DATA', payload: { data } });
 
-  const onLoadSearchedData = data => setSearchedData(data);
+  const onLoadSearchedData = data => tabsValidationsDispatch({ type: 'SEARCHED_DATA', payload: { data } });
 
   const onShowDeleteDialog = () => {
-    setIsDeleteDialogVisible(true);
+    isDeleteDialogVisible(true);
   };
 
   const onUpdateData = () => {
-    setIsDataUpdated(!isDataUpdated);
+    isDataUpdated(!tabsValidationsState.isDataUpdated);
   };
 
   const automaticTemplate = rowData => (
@@ -194,7 +208,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       labelConfirm={resources.messages['yes']}
       onConfirm={() => onDeleteValidation()}
       onHide={() => onHideDeleteDialog()}
-      visible={isDeleteDialogVisible}
+      visible={tabsValidationsState.isDeleteDialogVisible}
       maximizable={false}>
       {resources.messages['deleteValidationConfirm']}
     </ConfirmDialog>
@@ -260,22 +274,30 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     }
   };
 
+  const validationId = value => tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_ID', payload: { value } });
+
+  console.log('validationList', validationsList);
   const validationList = () => {
     if (isUndefined(validationsList) || isEmpty(validationsList)) {
+      // if (isUndefined(tabsValidationsState.validationsList) || isEmpty(tabsValidationsState.validationsList)) {
       return (
         <div>
           <h3>{resources.messages['emptyValidations']}</h3>
         </div>
       );
     }
-    const paginatorRightText = `${capitalize('FIELD')} records: ${validationsList.validations.length}`;
+    const paginatorRightText = `${capitalize('FIELD')} records: ${
+      // tabsValidationsState.validationsList.validations.length
+      validationsList.validations.length
+    }`;
 
     return (
       <div className={null}>
         <div className={styles.searchInput}>
-          <SearchAll data={filteredData} getValues={onLoadSearchedData} typeData={'qc'} />
+          <SearchAll data={tabsValidationsState.filteredData} getValues={onLoadSearchedData} typeData={'qc'} />
         </div>
         <Filters
+          // data={tabsValidationsState.validationsList.validations}
           data={validationsList.validations}
           getFiltredData={onLoadFilteredData}
           inputOptions={validationListConf.filterItems['input']}
@@ -283,18 +305,20 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
           sortable={false}
         />
 
-        {!isEmpty(searchedData) ? (
+        {!isEmpty(tabsValidationsState.searchedData) ? (
           <DataTable
             autoLayout={true}
             className={styles.paginatorValidationViewer}
             loading={false}
-            onRowClick={event => setValidationId(event.data.id)}
+            onRowClick={event => validationId(event.data.id)}
             paginator={true}
             paginatorRight={paginatorRightText}
             rows={10}
             rowsPerPageOptions={[5, 10, 15]}
+            // totalRecords={tabsValidationsState.validationsList.validations.length}
             totalRecords={validationsList.validations.length}
-            value={searchedData}>
+            value={tabsValidationsState.searchedData}>
+            {/* {renderColumns(tabsValidationsState.validationsList.validations)} */}
             {renderColumns(validationsList.validations)}
           </DataTable>
         ) : (
@@ -322,14 +346,14 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     // });
   };
 
-  if (isLoading) {
+  if (tabsValidationsState.isLoading) {
     return <Spinner className={styles.positioning} />;
   }
 
   return (
     <Fragment>
       {validationList()}
-      {isDeleteDialogVisible && deleteValidationDialog()}
+      {tabsValidationsState.isDeleteDialogVisible && deleteValidationDialog()}
     </Fragment>
   );
 });
