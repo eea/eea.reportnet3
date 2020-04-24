@@ -334,10 +334,10 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   }
 
   return (
-    <Fragment>
+    <div className={styles.validations}>
       {validationList()}
       {isDeleteDialogVisible && deleteValidationDialog()}
-    </Fragment>
+    </div>
   );
 });
 
