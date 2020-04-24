@@ -63,7 +63,7 @@ public class ValidationDroolsUtils {
    * @param regExp the reg exp
    * @return the boolean
    */
-  public static Boolean validateRegExpressionfinal(final String value, final String regExp) {
+  public static Boolean validateRegExpression(final String value, final String regExp) {
     // we put a value to validate depends of the expression we recieve in regExp
     String compiler = null;
     switch (regExp) {
