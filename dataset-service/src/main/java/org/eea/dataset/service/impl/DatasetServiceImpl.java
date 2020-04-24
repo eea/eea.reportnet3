@@ -63,6 +63,10 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController.Represent
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.ETLDatasetVO;
+import org.eea.interfaces.vo.dataset.ETLFieldVO;
+import org.eea.interfaces.vo.dataset.ETLRecordVO;
+import org.eea.interfaces.vo.dataset.ETLTableVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -1518,6 +1522,69 @@ public class DatasetServiceImpl implements DatasetService {
     return type;
   }
 
+  /**
+   * Etl export dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the ETL dataset VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public ETLDatasetVO etlExportDataset(@DatasetId Long datasetId) throws EEAException {
+
+    // Get the datasetSchemaId by the datasetId
+    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+    if (null == datasetSchemaId) {
+      throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND + " " + datasetId);
+    }
+
+    // Get the datasetSchema by the datasetSchemaId
+    DataSetSchema datasetSchema =
+        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+    if (null == datasetSchema) {
+      throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND + " " + datasetSchemaId);
+    }
+
+    // Construct object to be returned
+    ETLDatasetVO etlDatasetVO = new ETLDatasetVO();
+    List<ETLTableVO> etlTableVOs = new ArrayList<>();
+    etlDatasetVO.setTables(etlTableVOs);
+
+    // Loop to fill ETLTableVOs
+    for (TableSchema tableSchema : datasetSchema.getTableSchemas()) {
+
+      // Match each fieldSchemaId with its headerName
+      Map<String, String> fieldMap = new HashMap<>();
+      for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
+        fieldMap.put(field.getIdFieldSchema().toString(), field.getHeaderName());
+      }
+
+      ETLTableVO etlTableVO = new ETLTableVO();
+      List<ETLRecordVO> etlRecordVOs = new ArrayList<>();
+      etlTableVO.setTableName(tableSchema.getNameTableSchema());
+      etlTableVO.setRecords(etlRecordVOs);
+      etlTableVOs.add(etlTableVO);
+
+      // Loop to fill ETLRecordVOs
+      for (RecordValue record : recordRepository
+          .findByTableValueNoOrder(tableSchema.getIdTableSchema().toString(), null)) {
+        ETLRecordVO etlRecordVO = new ETLRecordVO();
+        List<ETLFieldVO> etlFieldVOs = new ArrayList<>();
+        etlRecordVO.setFields(etlFieldVOs);
+        etlRecordVOs.add(etlRecordVO);
+
+        // Loop to fill ETLFieldVOs
+        for (FieldValue field : record.getFields()) {
+          ETLFieldVO etlFieldVO = new ETLFieldVO();
+          etlFieldVO.setFieldName(fieldMap.get(field.getIdFieldSchema()));
+          etlFieldVO.setValue(field.getValue());
+          etlFieldVOs.add(etlFieldVO);
+        }
+      }
+    }
+
+    return etlDatasetVO;
+  }
 
   /**
    * Gets the table read only. Receives by parameter the datasetId, the objectId and the type
@@ -1584,6 +1651,5 @@ public class DatasetServiceImpl implements DatasetService {
     lockService.removeLockByCriteria(criteriaList);
 
   }
-
 
 }

@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+
 template "templateValidateRules"
 rule "@{ruleid}"
 dialect "java"
@@ -36,11 +37,11 @@ end template
 
 //////////////////////////////////////////VALIDATION CODELIST////////////////////////////////////////////////////////////
 function boolean isCodelist( String value , String codelistItems){
-	return CodelistUtils.codelistValidate(value,codelistItems,true);
+	return ValidationDroolsUtils.codelistValidate(value,codelistItems,true);
 }
 
 function boolean isCodelistInsensitive( String value ,  String codelistItems){
-	return CodelistUtils.codelistValidate(value,codelistItems,false);
+	return ValidationDroolsUtils.codelistValidate(value,codelistItems,false);
 }
 
 //////////////////////////////////////////VALIDATION EMPTY VALUE////////////////////////////////////////////////////////////
@@ -136,50 +137,30 @@ function boolean isCordenateLong( String value ){
    return false;
  }
  
- //////////////////////////////////////////VALIDATION NUMBER///////////////////////////////////////////////////////////
-function boolean isURL(String value){
+//////////////////////////////////////////VALIDATION URL///////////////////////////////////////////////////////////
+function boolean isURL( String value ){	
 	if(!isBlank(value)){
 		return true;
 	}
-    try {
-         new URL(value).toURI();
-         return true;
-    }catch (URISyntaxException exception) {
-         return false;
-    }catch (MalformedURLException exception) {
-         return false;
-    }
- }
- 
- //////////////////////////////////////////VALIDATION NUMBER///////////////////////////////////////////////////////////
+	return ValidationDroolsUtils.validateRegExpression(value,"REG_EXP_URL");	    
+}
+
+//////////////////////////////////////////VALIDATION EMAIL///////////////////////////////////////////////////////////
 function boolean isEmail(String value){
 	if(!isBlank(value)){
 		return true;
 	}
-	Pattern pat = Pattern.compile(“^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$”);					
-	Matcher mather = pattern.matcher(value);					
-	if (mather.find() == true) {
-			return true;
-		} else {
-			return false;
-		}					
- 
+	return ValidationDroolsUtils.validateRegExpression(value,"REG_EXP_EMAIL");		
  }
-
+ 
  //////////////////////////////////////////VALIDATION PHONE///////////////////////////////////////////////////////////
 function boolean isPhone(String value){
 	if(!isBlank(value)){
 		return true;
 	}
-	Pattern pat = Pattern.compile(“^(\(?\+?[0-9]*\)?)?[0-9_\- \(\)]*$”);					
-	Matcher mather = pattern.matcher(value);					
-	if (mather.find() == true) {
-			return true;
-		} else {
-			return false;
-		}					
- 
+	return ValidationDroolsUtils.validateRegExpression(value,"REG_EXP_PHONE");
  }
+ 
  //////////////////////////////////////////DEFAULT VALIDATIONS END BLOCK////////////////////////////////////////////////////////////
  
  //////////////////////////////////////////VALIDATION PK////////////////////////////////////////////////////////////

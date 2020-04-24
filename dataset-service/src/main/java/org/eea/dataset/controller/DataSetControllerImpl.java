@@ -13,6 +13,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -595,5 +596,21 @@ public class DataSetControllerImpl implements DatasetController {
   @GetMapping("/private/datasetType/{datasetId}")
   public DatasetTypeEnum getDatasetType(@PathVariable("datasetId") Long datasetId) {
     return datasetService.getDatasetType(datasetId);
+  }
+
+  /**
+   * Etl export dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the ETL dataset VO
+   */
+  @Override
+  @GetMapping("/etlExport/dataset/{datasetId}")
+  public ETLDatasetVO etlExportDataset(@PathVariable("datasetId") Long datasetId) {
+    try {
+      return datasetService.etlExportDataset(datasetId);
+    } catch (EEAException e) {
+      return null;
+    }
   }
 }
