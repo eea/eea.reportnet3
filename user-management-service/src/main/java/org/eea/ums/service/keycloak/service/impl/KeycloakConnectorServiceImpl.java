@@ -816,7 +816,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
 
   /**
-   * Update api key.
+   * Update api key with the new one.
    *
    * @param user the user
    * @param dataflowId the dataflow id
@@ -827,14 +827,17 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   @Override
   public String updateApiKey(UserRepresentation user, Long dataflowId, String shortCode)
       throws EEAException {
+    // Create new uuid for the new key
     String apiKey = UUID.randomUUID().toString();
-    // Update the keys with the new one
+    String apiKeysConst = "ApiKeys";
+    // Initialize the attributes
     Map<String, List<String>> attributes =
         user.getAttributes() != null ? user.getAttributes() : new HashMap<>();
     List<String> apiKeys = new ArrayList<>();
     String newValueAttribute = dataflowId + "," + shortCode;
-    if (attributes.get("ApiKeys") != null && !attributes.get("ApiKeys").isEmpty()) {
-      apiKeys = attributes.get("ApiKeys");
+    // Find and remove old key
+    if (attributes.get(apiKeysConst) != null && !attributes.get(apiKeysConst).isEmpty()) {
+      apiKeys = attributes.get(apiKeysConst);
       for (String keyString : apiKeys) {
         if (keyString.contains(newValueAttribute)) {
           apiKeys.remove(keyString);
@@ -843,7 +846,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
       }
     }
     apiKeys.add(apiKey + "," + newValueAttribute);
-    attributes.put("ApiKeys", apiKeys);
+    attributes.put(apiKeysConst, apiKeys);
     user.setAttributes(attributes);
     // insert the changes
     updateUser(user);

@@ -1,6 +1,8 @@
 package org.eea.ums.service.keycloak.service.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -211,7 +213,7 @@ public class KeycloakConnectorServiceImplTest {
         Mockito.any(Class.class));
 
     try {
-      GroupInfo[] result = keycloakConnectorService.getGroupsByUser("user1");
+      keycloakConnectorService.getGroupsByUser("user1");
     } catch (RestClientException e) {
       Assert.assertEquals("error test", e.getMessage());
       throw e;
@@ -455,5 +457,34 @@ public class KeycloakConnectorServiceImplTest {
     assertEquals(user, userRepresentation);
   }
 
+  @Test
+  public void updateApiKeyEmptyTest() throws EEAException {
+    UserRepresentation user = new UserRepresentation();
+    user.setAttributes(null);
+    String key = keycloakConnectorService.updateApiKey(user, 1L, "ES");
+    assertNotNull(key);
+  }
+
+  @Test
+  public void updateApiKeyAttributesTest() throws EEAException {
+    UserRepresentation user = new UserRepresentation();
+    Map<String, List<String>> attributes = new HashMap<>();
+    attributes.put("ApiKeys", new ArrayList<>());
+    user.setAttributes(attributes);
+    String key = keycloakConnectorService.updateApiKey(user, 1L, "ES");
+    assertNotNull(key);
+  }
+
+  @Test
+  public void updateApiKeyFullAttributesTest() throws EEAException {
+    UserRepresentation user = new UserRepresentation();
+    Map<String, List<String>> attributes = new HashMap<>();
+    List<String> oldKeys = new ArrayList<>();
+    oldKeys.add("uuid");
+    attributes.put("ApiKeys", oldKeys);
+    user.setAttributes(attributes);
+    String key = keycloakConnectorService.updateApiKey(user, 1L, "ES");
+    assertNotNull(key);
+  }
 
 }

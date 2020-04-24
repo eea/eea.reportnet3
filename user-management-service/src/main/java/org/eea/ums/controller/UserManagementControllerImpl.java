@@ -431,6 +431,13 @@ public class UserManagementControllerImpl implements UserManagementController {
     }
   }
 
+  /**
+   * Creates the api key.
+   *
+   * @param dataflowId the dataflow id
+   * @param shortCode the short code
+   * @return the string
+   */
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER')")
