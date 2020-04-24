@@ -430,19 +430,14 @@ const Dataflow = withRouter(({ history, match }) => {
 
         <BigButtonList
           dataflowState={dataflowState}
-          designDatasetSchemas={dataflowState.designDatasetSchemas}
           handleRedirect={handleRedirect}
           formHasRepresentatives={dataflowState.formHasRepresentatives}
-          hasWritePermissions={dataflowState.hasWritePermissions}
-          isCustodian={dataflowState.isCustodian}
-          isDataSchemaCorrect={dataflowState.isDataSchemaCorrect}
           onSaveName={onSaveName}
           onUpdateData={setIsDataUpdated}
           receiptDispatch={receiptDispatch}
           receiptState={receiptState}
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}
           onShowSnapshotDialog={onShowSnapshotDialog}
-          updatedDatasetSchema={dataflowState.updatedDatasetSchema}
         />
 
         <SnapshotsDialog

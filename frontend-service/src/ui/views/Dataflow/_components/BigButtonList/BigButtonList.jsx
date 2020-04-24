@@ -31,10 +31,7 @@ import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const BigButtonList = ({
   dataflowState,
-  designDatasetSchemas,
   handleRedirect,
-  hasWritePermissions,
-  isCustodian,
   isDataSchemaCorrect,
   onSaveName,
   onUpdateData,
@@ -226,7 +223,7 @@ export const BigButtonList = ({
 
     showLoading();
     try {
-      const response = await DatasetService.deleteSchemaById(designDatasetSchemas[index].datasetId);
+      const response = await DatasetService.deleteSchemaById(dataflowState.designDatasetSchemas[index].datasetId);
       if (response >= 200 && response <= 299) {
         onUpdateData();
         setUpdatedDatasetSchema(remove(updatedDatasetSchema, event => event.schemaIndex != index));
@@ -293,9 +290,7 @@ export const BigButtonList = ({
     exportDatatableSchema,
     getDeleteSchemaIndex,
     handleRedirect,
-    hasWritePermissions,
     isActiveButton,
-    isCustodian,
     isDataSchemaCorrect,
     onDatasetSchemaNameError,
     onDuplicateName,

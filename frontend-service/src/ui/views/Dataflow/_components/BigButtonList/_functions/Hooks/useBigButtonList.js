@@ -13,16 +13,12 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const useBigButtonList = ({
   dataflowState,
-  dataflowData,
   dataflowId,
   exportDatatableSchema,
   getDeleteSchemaIndex,
   handleRedirect,
   onShowUpdateDataCollectionModal,
-  hasWritePermissions,
   isActiveButton,
-  isCustodian,
-  isDataSchemaCorrect,
   onDatasetSchemaNameError,
   onDuplicateName,
   onLoadReceiptData,
@@ -30,10 +26,11 @@ const useBigButtonList = ({
   onShowDataCollectionModal,
   onShowNewSchemaDialog,
   receiptState,
-  onShowSnapshotDialog,
-  updatedDatasetSchema
+  onShowSnapshotDialog
 }) => {
   const resources = useContext(ResourcesContext);
+
+  const isCustodian = dataflowState.isCustodian;
 
   const buttonList = [
     {
@@ -70,7 +67,7 @@ const useBigButtonList = ({
     buttonIcon: 'pencilRuler',
     caption: newDatasetSchema.datasetSchemaName,
     dataflowStatus: dataflowState.status,
-    datasetSchemaInfo: updatedDatasetSchema,
+    datasetSchemaInfo: dataflowState.updatedDatasetSchema,
     handleRedirect: () => {
       handleRedirect(getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true));
     },
@@ -133,7 +130,7 @@ const useBigButtonList = ({
           infoStatus: dataset.isReleased,
           infoStatusIcon: true,
           layout: 'defaultBigButton',
-          model: hasWritePermissions
+          model: dataflowState.hasWritePermissions
             ? [
                 {
                   label: resources.messages['releaseDataCollection'],
@@ -187,7 +184,9 @@ const useBigButtonList = ({
       handleRedirect: isActiveButton ? () => onShowDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
       visibility:
-        isEmpty(dataflowState.data.dataCollections) && isDataSchemaCorrect && dataflowState.formHasRepresentatives
+        isEmpty(dataflowState.data.dataCollections) &&
+        dataflowState.isDataSchemaCorrect &&
+        dataflowState.formHasRepresentatives
     }
   ];
 
