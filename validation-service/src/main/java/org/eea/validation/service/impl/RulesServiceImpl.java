@@ -327,7 +327,6 @@ public class RulesServiceImpl implements RulesService {
           ruleList.add(AutomaticRules.createEmailAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
-
         case PHONE:
           ruleList.add(AutomaticRules.createPhoneAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
