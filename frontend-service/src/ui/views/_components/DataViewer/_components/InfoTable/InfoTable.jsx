@@ -29,6 +29,38 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
       </div>
     );
   };
+
+  const getMaxCharactersValueByFieldType = type => {
+    const intCharacters = 18;
+    // const decimalCharacters = 1078;
+    const textCharacters = 200;
+    const longTextCharacters = 10000;
+    const dateCharacters = 10;
+    switch (type) {
+      case 'NUMBER_INTEGER':
+      case 'NUMBER_DECIMAL':
+        return intCharacters;
+      case 'POINT':
+      case 'COORDINATE_LONG':
+      case 'COORDINATE_LAT':
+        return textCharacters;
+      case 'DATE':
+        return dateCharacters;
+      case 'TEXT':
+        return textCharacters;
+      case 'LONG_TEXT':
+        return longTextCharacters;
+      case 'EMAIL':
+        return textCharacters;
+      case 'PHONE':
+        return intCharacters;
+      // case 'URL':
+      //   return 'url';
+      default:
+        return null;
+    }
+  };
+
   const dataTemplate = (recordData, column) => {
     let field = recordData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
     if (isUndefined(field.fieldData[column.field])) {
@@ -40,7 +72,8 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
         </div>
       );
     } else {
-      return <div className={styles.infoTableCellCorrect}>{field ? field.fieldData[column.field] : null}</div>;
+      const value = getMaxCharactersValueByFieldType(field.type);
+      return <div className={styles.infoTableCellCorrect}>{field ? value : null}</div>;
     }
   };
 
