@@ -61,7 +61,7 @@ pipeline {
         }
 
         stage("Quality Gate"){
-            steps {
+            /*steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     retry(3) {
                         script {
@@ -117,12 +117,12 @@ pipeline {
                     }
                 }
                 
-            }
-            post {
+            }*/
+            /*post {
                 failure {
                     slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - Quality Gate NOT MET (marked as ERROR) https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
                 }
-            }
+            }*/
         }
         
         stage('Install in Nexus') {
