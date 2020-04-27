@@ -606,6 +606,7 @@
     "prefilled": "Prefilled",
     "exportDatasetSchema": "Export schema",
     "tabMenuConstraintData": "Constraint data",
-    "tabMenuExpressions": "Expressions"
+    "tabMenuExpressions": "Expressions",
+    "deleteDatasetDataCompletedEvent": "Delete dataset data finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>"
   }
 }
