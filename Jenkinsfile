@@ -53,7 +53,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('Altia SonarQube') {
                     // requires SonarQube Scanner for Maven 3.2+
-                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -P sonar -Dsonar.java.source=1.8 -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
+                   // sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -P sonar -Dsonar.java.source=1.8 -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
 
                     // sh 'cd frontend-service && npm install sonar-scanner && npm run sonar-scanner && cd ..'
                 }
@@ -65,7 +65,7 @@ pipeline {
                 timeout(time: 2, unit: 'MINUTES') {
                     retry(3) {
                         script {
-                            def props = readProperties  file: 'target/sonar/report-task.txt'
+                           /* def props = readProperties  file: 'target/sonar/report-task.txt'
                             echo "properties=${props}"
                             def sonarServerUrl=props['serverUrl']
                             def ceTaskUrl= props['ceTaskUrl']
@@ -87,7 +87,7 @@ pipeline {
                             if ("WARN".equals(qualitygate["projectStatus"]["status"])) {
                                 currentBuild.result = 'UNSTABLE'
                                 slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - Quality Gate in WARNING (marked as UNSTABLE) https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
-                            }
+                            }*/
                             // Frontend
                           /*  props = readProperties  file: 'frontend-service/.scannerwork/report-task.txt'
                             echo "properties=${props}"
