@@ -195,12 +195,6 @@ public class DataSetControllerImpl implements DatasetController {
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
-    if (datasetId == null) {
-      datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
-      LOG_ERROR.error("Error importing a file into a table. The datasetId is null");
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
     if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
         && datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE)) {
       datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
@@ -384,10 +378,6 @@ public class DataSetControllerImpl implements DatasetController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void deleteRecord(@PathVariable("id") final Long datasetId,
       @PathVariable("recordId") final String recordId) {
-    if (datasetId == null || recordId == null) {
-      LOG_ERROR.error("Error deleting record. The datasetId or the recordId is null");
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
-    }
     if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
         && datasetService.getTableReadOnly(datasetId, recordId, EntityTypeEnum.RECORD)) {
       LOG_ERROR.error("Error deleting record in the datasetId {}. The table is read only",
@@ -458,21 +448,7 @@ public class DataSetControllerImpl implements DatasetController {
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
-    if (datasetId == null || datasetId < 1) {
-      datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
-          datasetId);
-      LOG_ERROR.error("Error deleting the table values. The datasetId is null");
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    } else if (tableSchemaId == null) {
-      datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
-          datasetId);
-      LOG_ERROR.error(
-          "Error deleting the table values from the datasetId {}. The tableSchemaId is null",
-          datasetId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
-    } else if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
+    if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
         && datasetService.getTableReadOnly(datasetId, tableSchemaId, EntityTypeEnum.TABLE)) {
       datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
           datasetId);
@@ -569,10 +545,6 @@ public class DataSetControllerImpl implements DatasetController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void updateField(@PathVariable("id") final Long datasetId,
       @RequestBody final FieldVO field) {
-    if (datasetId == null || field == null) {
-      LOG_ERROR.error("Error updating a field. The datasetId or the field is null");
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NOT_FOUND);
-    }
     if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId)) && datasetService
         .getTableReadOnly(datasetId, field.getIdFieldSchema(), EntityTypeEnum.FIELD)) {
       LOG_ERROR.error("Error updating a field in the dataset {}. The table is read only",

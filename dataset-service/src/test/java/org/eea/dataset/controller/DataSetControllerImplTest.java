@@ -100,19 +100,6 @@ public class DataSetControllerImplTest {
     MockitoAnnotations.initMocks(this);
   }
 
-  /**
-   * Test load dataset data throw exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testLoadDatasetDataThrowException() throws Exception {
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
-    final MockMultipartFile fileNoExtension =
-        new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-    dataSetControllerImpl.loadTableData(null, fileNoExtension, null);
-  }
 
   /**
    * Test load dataset data throw exception 2.
@@ -489,18 +476,6 @@ public class DataSetControllerImplTest {
 
   }
 
-  /**
-   * Test delete import table id schema null.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testDeleteImportTableIdSchemaNull() throws EEAException {
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
-    dataSetControllerImpl.deleteImportTable(1L, null);
-
-  }
 
   /**
    * Test delete import table throw.
@@ -517,30 +492,7 @@ public class DataSetControllerImplTest {
 
   }
 
-  /**
-   * Test delete import table throw non provided.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testDeleteImportTableThrowNonProvided() throws Exception {
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
-    dataSetControllerImpl.deleteImportTable(null, "");
-  }
 
-
-  /**
-   * Test delete import table throw invalid.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testDeleteImportTableThrowInvalid() throws Exception {
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
-    dataSetControllerImpl.deleteImportTable(-2L, "");
-  }
 
   @Test(expected = ResponseStatusException.class)
   public void testDeleteImportTableReadOnlyException() throws Exception {
@@ -630,25 +582,6 @@ public class DataSetControllerImplTest {
   }
 
 
-  /**
-   * Testdelete record null entry.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testdeleteRecordNullEntry() throws Exception {
-    dataSetControllerImpl.deleteRecord(null, "1L");
-  }
-
-  /**
-   * Testdelete record null.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testdeleteRecordNull() throws Exception {
-    dataSetControllerImpl.deleteRecord(-2L, null);
-  }
 
   /**
    * Testdelete record success.
@@ -808,25 +741,7 @@ public class DataSetControllerImplTest {
     }
   }
 
-  /**
-   * Testupdate field null entry.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testupdateFieldNullEntry() throws Exception {
-    dataSetControllerImpl.updateField(null, new FieldVO());
-  }
 
-  /**
-   * Testupdate field null.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testupdateFieldNull() throws Exception {
-    dataSetControllerImpl.updateField(-2L, null);
-  }
 
   /**
    * Testupdate field success.
