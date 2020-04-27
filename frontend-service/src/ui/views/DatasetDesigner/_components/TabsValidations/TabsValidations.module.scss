@@ -31,11 +31,29 @@
       box-shadow: none;
     }
   }
-  .checkedValueColumn {
-    text-align: center !important;
+}
+
+.checkedValueColumn {
+  text-align: center;
+
+  .icon {
+    color: var(--main-color-font);
+  }
+
+  .spinner {
+    animation: spinnerAnimation 0.75s linear infinite;
   }
 }
 
 .paginatorValidationViewer :global .p-dropdown-panel {
   top: -6rem !important;
+}
+
+@keyframes spinnerAnimation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

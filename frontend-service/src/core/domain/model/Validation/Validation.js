@@ -1,8 +1,8 @@
 export class Validation {
   constructor({
     activationGroup,
-    automatic,
     allExpressions,
+    automatic,
     condition,
     date,
     description,
@@ -10,6 +10,7 @@ export class Validation {
     entityType,
     expressions,
     id,
+    isCorrect,
     levelError,
     message,
     name,
@@ -17,19 +18,20 @@ export class Validation {
     shortCode
   } = {}) {
     this.activationGroup = activationGroup;
+    this.allExpressions = allExpressions;
     this.automatic = automatic;
     this.condition = condition;
     this.date = date;
     this.description = description;
     this.enabled = enabled;
     this.entityType = entityType;
+    this.expressions = expressions;
     this.id = id;
+    this.isCorrect = isCorrect;
     this.levelError = levelError;
     this.message = message;
     this.name = name;
     this.referenceId = referenceId;
     this.shortCode = shortCode;
-    this.expressions = expressions;
-    this.allExpressions = allExpressions;
   }
 }
