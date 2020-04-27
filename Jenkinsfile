@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage('Preparation') {
             steps {
-                sh 'echo "Starting CI/CD Pipeline"'                
+                sh 'echo "Starting CI/CD Pipeline"'
             }
         }
         stage('Compile') {
@@ -21,7 +21,7 @@ pipeline {
                     steps {
                         sh '''
                             mvn -Dmaven.test.failure.ignore=true -s '/home/jenkins/.m2/settings.xml' clean install
-                            
+
                         '''
 
                     }
@@ -39,12 +39,12 @@ pipeline {
                         sh 'rm -rf frontend-service/node_modules/'
                         sh '''
                             npm install frontend-service/
-                        '''                                
+                        '''
                     }
                     post {
                         failure {
                             slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'Build FAILED - NPM Compilation Error in branch ' + env.BRANCH_NAME.replace('/', '_'), token: 'HRvukH8087RNW9NYQ3fd6jtM'
-                        }                        
+                        }
                     }
                 }
             }
@@ -53,15 +53,15 @@ pipeline {
             steps {
                 withSonarQubeEnv('Altia SonarQube') {
                     // requires SonarQube Scanner for Maven 3.2+
-                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -P sonar -Dsonar.java.source=1.8 -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
+                   // sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -P sonar -Dsonar.java.source=1.8 -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
 
                     // sh 'cd frontend-service && npm install sonar-scanner && npm run sonar-scanner && cd ..'
                 }
             }
         }
 
-        stage("Quality Gate"){
-            steps {
+       /*stage("Quality Gate"){
+           steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     retry(3) {
                         script {
@@ -89,7 +89,7 @@ pipeline {
                                 slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - Quality Gate in WARNING (marked as UNSTABLE) https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
                             }
                             // Frontend
-                          /*  props = readProperties  file: 'frontend-service/.scannerwork/report-task.txt'
+                           props = readProperties  file: 'frontend-service/.scannerwork/report-task.txt'
                             echo "properties=${props}"
                             sonarServerUrl=props['serverUrl']
                             ceTaskUrl= props['ceTaskUrl']
@@ -112,22 +112,22 @@ pipeline {
                                 }
                                 emailext body: 'New Build Done - Quality Gate is ' + qualitygate["status"] + " at https://sonar-oami.altia.es/dashboard?id=Reportnet-sonar-frontend\nOverview" + output, subject: 'SonarQube Frontend FAIL Notification', to: 'fjlabiano@itracasa.es; ext.jose.luis.anton@altia.es; ealfaro@tracasa.es; marina.montoro@altia.es'
                             }
-                            */
+
                         }
                     }
                 }
-                
+
             }
             post {
                 failure {
                     slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - Quality Gate NOT MET (marked as ERROR) https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
                 }
             }
-        }
-        
+        }*/
+
         stage('Install in Nexus') {
             when {
-                branch 'develop1' 
+                branch 'develop1'
             }
             parallel {
                 stage('Install in JAVA repository') {
@@ -195,7 +195,7 @@ pipeline {
                         script {
                             echo 'Recordstore Service'
                             def app
-                            app = docker.build("k8s-swi001:5000/recordstore-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/recordstore-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=8090 ./recordstore-service/")
+                            app = docker.build("k8s-swi001:5000/recordstore-service:3.0$TAG_SUFIX", "--no-cache --build-arg JAR_FILE=target/recordstore-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=8090 ./recordstore-service/")
                             app.push()
                         }
                         script {
@@ -269,15 +269,15 @@ pipeline {
                         script {
                             echo 'ReportNet 3.0 Frontend'
                             def app
-                            app = docker.build("k8s-swi001:5000/reportnet-frontend-service:3.0$TAG_SUFIX", " ./frontend-service/")
-                            app.push()                    
+                            app = docker.build("k8s-swi001:5000/reportnet-frontend-service:3.0$TAG_SUFIX", "--no-cache  ./frontend-service/")
+                            app.push()
                         }
                     }
                 }
-            
+
             }
         }
-        
-        
+
+
     }
 }
