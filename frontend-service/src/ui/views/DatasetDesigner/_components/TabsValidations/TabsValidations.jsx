@@ -26,6 +26,8 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
+import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
+
 const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSchemaId, onHideValidationsDialog }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -93,9 +95,9 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     setIsDeleteDialogVisible(true);
   };
 
-  const onUpdateData = () => {
-    setIsDataUpdated(!isDataUpdated);
-  };
+  const onUpdateData = () => setIsDataUpdated(!isDataUpdated);
+
+  useCheckNotifications(['INVALIDATED_QC_RULE_EVENT'], onUpdateData);
 
   const automaticTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
