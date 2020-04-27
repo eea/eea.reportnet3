@@ -26,7 +26,7 @@ export const FieldsDesigner = ({
   datasetId,
   datasetSchemas,
   onChangeFields,
-  onChangeTableDescription,
+  onChangeTableProperties,
   onLoadTableData,
   isPreviewModeOn,
   table
@@ -412,7 +412,7 @@ export const FieldsDesigner = ({
       if (!tableUpdated) {
         console.error('Error during table description update');
       } else {
-        onChangeTableDescription(table.tableSchemaId, tableDescriptionValue);
+        onChangeTableProperties(table.tableSchemaId, tableDescriptionValue, readOnly, toPrefill);
       }
     } catch (error) {
       console.error(`Error during table description update: ${error}`);

@@ -1,9 +1,11 @@
 import { useContext } from 'react';
 
-import { isEmpty, isUndefined, uniq } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
+import uniq from 'lodash/uniq';
 
-import DataflowConf from 'conf/dataflow.config.json';
 import { routes } from 'ui/routes';
+import DataflowConf from 'conf/dataflow.config.json';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -47,11 +49,7 @@ const useBigButtonList = ({
           icon: 'add',
           command: () => onShowNewSchemaDialog()
         },
-        {
-          label: resources.messages['createNewDatasetFromTemplate'],
-          icon: 'add',
-          disabled: true
-        }
+        { label: resources.messages['createNewDatasetFromTemplate'], icon: 'add', disabled: true }
       ],
       visibility: isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DESIGN']
     },
@@ -60,24 +58,9 @@ const useBigButtonList = ({
       buttonIcon: 'info',
       caption: resources.messages['dataflowHelp'],
       layout: 'defaultBigButton',
-      handleRedirect: () =>
-        handleRedirect(
-          getUrl(
-            routes.DOCUMENTS,
-            {
-              dataflowId
-            },
-            true
-          )
-        ),
+      handleRedirect: () => handleRedirect(getUrl(routes.DOCUMENTS, { dataflowId }, true)),
       helpClassName: 'dataflow-documents-weblinks-help-step',
-      onWheel: getUrl(
-        routes.DOCUMENTS,
-        {
-          dataflowId
-        },
-        true
-      ),
+      onWheel: getUrl(routes.DOCUMENTS, { dataflowId }, true),
       visibility: true
     }
   ];
@@ -89,16 +72,7 @@ const useBigButtonList = ({
     dataflowStatus: dataflowDataState.status,
     datasetSchemaInfo: updatedDatasetSchema,
     handleRedirect: () => {
-      handleRedirect(
-        getUrl(
-          routes.DATASET_SCHEMA,
-          {
-            dataflowId,
-            datasetId: newDatasetSchema.datasetId
-          },
-          true
-        )
-      );
+      handleRedirect(getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true));
     },
     helpClassName: 'dataflow-schema-help-step',
     index: newDatasetSchema.index,
@@ -108,16 +82,7 @@ const useBigButtonList = ({
         label: resources.messages['openDataset'],
         icon: 'openFolder',
         command: () => {
-          handleRedirect(
-            getUrl(
-              routes.DATASET_SCHEMA,
-              {
-                dataflowId,
-                datasetId: newDatasetSchema.datasetId
-              },
-              true
-            )
-          );
+          handleRedirect(getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true));
         }
       },
       {
@@ -141,14 +106,7 @@ const useBigButtonList = ({
     onDuplicateName: onDuplicateName,
     onSaveError: onDatasetSchemaNameError,
     onSaveName: onSaveName,
-    onWheel: getUrl(
-      routes.DATASET_SCHEMA,
-      {
-        dataflowId,
-        datasetId: newDatasetSchema.datasetId
-      },
-      true
-    ),
+    onWheel: getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true),
     placeholder: resources.messages['datasetSchemaNamePlaceholder'],
     visibility: !isUndefined(dataflowData.designDatasets) && isEmpty(dataflowData.dataCollections) && isCustodian
   }));
@@ -156,11 +114,7 @@ const useBigButtonList = ({
   const buildGroupByRepresentativeModels = dataflowData => {
     const { datasets } = dataflowData;
 
-    const representatives = datasets.map(dataset => {
-      return dataset.datasetSchemaName;
-    });
-
-    const uniqRepresentatives = uniq(representatives);
+    const uniqRepresentatives = uniq(datasets.map(dataset => dataset.datasetSchemaName));
 
     if (uniqRepresentatives.length === 1 && !isCustodian) {
       const [representative] = uniqRepresentatives;
@@ -173,16 +127,7 @@ const useBigButtonList = ({
           caption: datasetName,
           helpClassName: 'dataflow-dataset-help-step',
           handleRedirect: () => {
-            handleRedirect(
-              getUrl(
-                routes.DATASET,
-                {
-                  dataflowId,
-                  datasetId: dataset.datasetId
-                },
-                true
-              )
-            );
+            handleRedirect(getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true));
           },
           infoStatus: dataset.isReleased,
           infoStatusIcon: true,
@@ -196,21 +141,8 @@ const useBigButtonList = ({
                   disabled: false
                 }
               ]
-            : [
-                {
-                  label: resources.messages['properties'],
-                  icon: 'info',
-                  disabled: true
-                }
-              ],
-          onWheel: getUrl(
-            routes.DATASET,
-            {
-              dataflowId,
-              datasetId: dataset.datasetId
-            },
-            true
-          ),
+            : [{ label: resources.messages['properties'], icon: 'info', disabled: true }],
+          onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
           visibility: !isEmpty(dataflowData.datasets)
         };
       });
@@ -220,27 +152,11 @@ const useBigButtonList = ({
       buttonIcon: 'representative',
       caption: representative,
       handleRedirect: () => {
-        handleRedirect(
-          getUrl(
-            routes.REPRESENTATIVE,
-            {
-              dataflowId,
-              representative
-            },
-            true
-          )
-        );
+        handleRedirect(getUrl(routes.REPRESENTATIVE, { dataflowId, representative }, true));
       },
       helpClassName: 'dataflow-dataset-container-help-step',
       layout: 'defaultBigButton',
-      onWheel: getUrl(
-        routes.REPRESENTATIVE,
-        {
-          dataflowId,
-          representative
-        },
-        true
-      ),
+      onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representative }, true),
       visibility: !isEmpty(dataflowData.datasets)
     }));
   };
@@ -252,25 +168,10 @@ const useBigButtonList = ({
       buttonClass: 'dashboard',
       buttonIcon: 'barChart',
       caption: resources.messages['dashboards'],
-      handleRedirect: () =>
-        handleRedirect(
-          getUrl(
-            routes.DASHBOARDS,
-            {
-              dataflowId
-            },
-            true
-          )
-        ),
+      handleRedirect: () => handleRedirect(getUrl(routes.DASHBOARDS, { dataflowId }, true)),
       helpClassName: 'dataflow-dashboards-help-step',
       layout: 'defaultBigButton',
-      onWheel: getUrl(
-        routes.DASHBOARDS,
-        {
-          dataflowId
-        },
-        true
-      ),
+      onWheel: getUrl(routes.DASHBOARDS, { dataflowId }, true),
       visibility: isCustodian && !isEmpty(dataflowData.datasets)
     }
   ];
@@ -307,16 +208,7 @@ const useBigButtonList = ({
     buttonIcon: 'dataCollection',
     caption: dataCollection.dataCollectionName,
     handleRedirect: () => {
-      handleRedirect(
-        getUrl(
-          routes.DATA_COLLECTION,
-          {
-            dataflowId,
-            datasetId: dataCollection.dataCollectionId
-          },
-          true
-        )
-      );
+      handleRedirect(getUrl(routes.DATA_COLLECTION, { dataflowId, datasetId: dataCollection.dataCollectionId }, true));
     },
     helpClassName: 'dataflow-datacollection-help-step',
     layout: 'defaultBigButton',
@@ -347,12 +239,8 @@ const useBigButtonList = ({
 
   const onBuildReceiptButton = () => {
     const { datasets } = dataflowData;
-    const representativeNames = datasets.map(dataset => {
-      return dataset.datasetSchemaName;
-    });
-    const releasedStates = datasets.map(dataset => {
-      return dataset.isReleased;
-    });
+    const representativeNames = datasets.map(dataset => dataset.datasetSchemaName);
+    const releasedStates = datasets.map(dataset => dataset.isReleased);
 
     return [
       {

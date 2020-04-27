@@ -11,6 +11,7 @@ import { config } from 'conf';
 import { routes } from 'ui/routes';
 import DataflowConf from 'conf/dataflow.config.json';
 
+import { ApiKeyDialog } from 'ui/views/_components/ApiKeyDialog';
 import { BigButtonList } from './_components/BigButtonList';
 import { Button } from 'ui/views/_components/Button';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
@@ -68,11 +69,13 @@ const Dataflow = withRouter(({ history, match }) => {
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
     id: dataflowId,
+    isApiKeyDialogVisible: false,
     isCustodian: false,
     isDeleteDialogVisible: false,
     isEditDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPropertiesDialogVisible: false,
+    isRepresentativeView: false,
     name: '',
     obligations: {},
     status: ''
@@ -102,59 +105,46 @@ const Dataflow = withRouter(({ history, match }) => {
   }, []);
 
   useEffect(() => {
+    const apiKeyBtn = {
+      className: 'dataflow-properties-provider-help-step',
+      icon: 'settings',
+      label: 'sidebarApiKeyBtn',
+      onClick: () => onManageDialogs('isApiKeyDialogVisible', true),
+      title: 'sidebarApiKeyBtn'
+    };
+
+    const editBtn = {
+      className: 'dataflow-edit-help-step',
+      icon: 'edit',
+      label: 'edit',
+      onClick: () => onManageDialogs('isEditDialogVisible', true),
+      title: 'edit'
+    };
+
+    const manageRolesBtn = {
+      className: 'dataflow-manage-roles-help-step',
+      icon: 'manageRoles',
+      label: 'manageRoles',
+      onClick: () => onManageDialogs('isManageRolesDialogVisible', true),
+      title: 'manageRoles'
+    };
+
+    const propertiesBtn = {
+      className: 'dataflow-properties-provider-help-step',
+      icon: 'infoCircle',
+      label: 'properties',
+      onClick: () => onManageDialogs('isPropertiesDialogVisible', true),
+      title: 'properties'
+    };
+
     if (dataflowDataState.isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DESIGN']) {
-      leftSideBarContext.addModels([
-        {
-          className: 'dataflow-properties-help-step',
-          icon: 'infoCircle',
-          label: 'properties',
-          onClick: () => onManageDialogs('isPropertiesDialogVisible', true),
-          show: true,
-          title: 'properties'
-        },
-        {
-          className: 'dataflow-edit-help-step',
-          icon: 'edit',
-          label: 'edit',
-          onClick: () => onManageDialogs('isEditDialogVisible', true),
-          title: 'edit'
-        },
-        {
-          className: 'dataflow-manage-roles-help-step',
-          icon: 'manageRoles',
-          label: 'manageRoles',
-          onClick: () => onManageDialogs('isManageRolesDialogVisible', true),
-          title: 'manageRoles'
-        }
-      ]);
+      leftSideBarContext.addModels([propertiesBtn, editBtn, manageRolesBtn]);
     } else if (dataflowDataState.isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DRAFT']) {
-      leftSideBarContext.addModels([
-        {
-          className: 'dataflow-properties-help-step',
-          icon: 'infoCircle',
-          label: 'properties',
-          onClick: () => onManageDialogs('isPropertiesDialogVisible', true),
-          show: true,
-          title: 'properties'
-        },
-        {
-          className: 'dataflow-manage-roles-help-step',
-          icon: 'manageRoles',
-          label: 'manageRoles',
-          onClick: () => onManageDialogs('isManageRolesDialogVisible', true),
-          title: 'manageRoles'
-        }
-      ]);
+      leftSideBarContext.addModels([propertiesBtn, manageRolesBtn]);
     } else {
-      leftSideBarContext.addModels([
-        {
-          className: 'dataflow-properties-provider-help-step',
-          icon: 'infoCircle',
-          label: 'properties',
-          onClick: () => onManageDialogs('isPropertiesDialogVisible', true),
-          title: 'properties'
-        }
-      ]);
+      leftSideBarContext.addModels(
+        dataflowDataState.isRepresentativeView ? [propertiesBtn, apiKeyBtn] : [propertiesBtn]
+      );
     }
   }, [dataflowDataState.isCustodian, dataflowDataState.status]);
 
@@ -300,11 +290,16 @@ const Dataflow = withRouter(({ history, match }) => {
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.reporting(dataflowId);
+
+      const { datasets } = dataflow;
+      const uniqRepresentatives = uniq(datasets.map(dataset => dataset.datasetSchemaName));
+
       dataflowDataDispatch({
         type: 'INITIAL_LOAD',
         payload: {
           data: dataflow,
           description: dataflow.description,
+          isRepresentativeView: uniqRepresentatives.length === 1,
           name: dataflow.name,
           obligations: dataflow.obligation,
           status: dataflow.status
@@ -331,10 +326,7 @@ const Dataflow = withRouter(({ history, match }) => {
       if (!isEmpty(dataflow.representatives)) {
         const isOutdated = dataflow.representatives.map(representative => representative.isReceiptOutdated);
         if (isOutdated.length === 1) {
-          receiptDispatch({
-            type: 'INIT_DATA',
-            payload: { isLoading: false, isOutdated: isOutdated[0] }
-          });
+          receiptDispatch({ type: 'INIT_DATA', payload: { isLoading: false, isOutdated: isOutdated[0] } });
         }
       }
     } catch (error) {
@@ -455,6 +447,15 @@ const Dataflow = withRouter(({ history, match }) => {
           onManageDialogs={onManageDialogs}
           state={dataflowDataState}
         />
+
+        {dataflowDataState.isApiKeyDialogVisible && (
+          <ApiKeyDialog
+            dataflowId={dataflowId}
+            dataProviderId={dataProviderId}
+            isApiKeyDialogVisible={dataflowDataState.isApiKeyDialogVisible}
+            onManageDialogs={onManageDialogs}
+          />
+        )}
       </div>
     </div>
   );
