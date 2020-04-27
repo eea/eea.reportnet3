@@ -21,6 +21,7 @@ import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
@@ -188,14 +189,18 @@ public class DataSetControllerImpl implements DatasetController {
 
     // filter if the file is empty
     if (file == null || file.isEmpty()) {
+      datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
+      LOG_ERROR.error(
+          "Error importing a file into a table of the datasetId {}. The file is null or empty",
+          datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
-    }
-    if (datasetId == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
         && datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE)) {
+      datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
+      LOG_ERROR.error(
+          "Error importing a file into a table of the dataset {}. The table is read only",
+          datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
     // extract the filename
@@ -206,7 +211,8 @@ public class DataSetControllerImpl implements DatasetController {
       // This method will release the lock
       fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema);
     } catch (IOException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error importing a file into a table of the dataset {}. Message: {}",
+          datasetId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
@@ -339,16 +345,21 @@ public class DataSetControllerImpl implements DatasetController {
   public void updateRecords(@PathVariable("id") final Long datasetId,
       @RequestBody final List<RecordVO> records) {
     if (datasetId == null || records == null || records.isEmpty()) {
+      LOG_ERROR.error(
+          "Error updating records. The datasetId or the records to update are emtpy or null");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
     if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId)) && datasetService
         .getTableReadOnly(datasetId, records.get(0).getIdRecordSchema(), EntityTypeEnum.RECORD)) {
+      LOG_ERROR.error("Error updating records in the datasetId {}. The table is read only",
+          datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
     try {
       updateRecordHelper.executeUpdateProcess(datasetId, records);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error updating records in the datasetId {}. Message: {}", datasetId,
+          e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
@@ -367,17 +378,17 @@ public class DataSetControllerImpl implements DatasetController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void deleteRecord(@PathVariable("id") final Long datasetId,
       @PathVariable("recordId") final String recordId) {
-    if (datasetId == null || recordId == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
-    }
     if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
         && datasetService.getTableReadOnly(datasetId, recordId, EntityTypeEnum.RECORD)) {
+      LOG_ERROR.error("Error deleting record in the datasetId {}. The table is read only",
+          datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
     try {
       updateRecordHelper.executeDeleteProcess(datasetId, recordId);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error deleting record in the datasetId {}. Message: {}", datasetId,
+          e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
@@ -399,17 +410,21 @@ public class DataSetControllerImpl implements DatasetController {
       @PathVariable("idTableSchema") final String idTableSchema,
       @RequestBody final List<RecordVO> records) {
     if (datasetId == null || records == null || records.isEmpty()) {
+      LOG_ERROR.error("Error inserting records. The datasetId or the records are empty or null");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
     // Not allow insert if the table is marked as read only. This not applies to design datasets
     if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
         && datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE)) {
+      LOG_ERROR.error("Error inserting records in the datasetId {}. The table is read only",
+          datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
     try {
       updateRecordHelper.executeCreateProcess(datasetId, records, idTableSchema);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error inserting records in the datasetId {}. Message {}:", datasetId,
+          e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
@@ -433,14 +448,13 @@ public class DataSetControllerImpl implements DatasetController {
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
-    if (datasetId == null || datasetId < 1) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    } else if (tableSchemaId == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
-    } else if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
+    if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
         && datasetService.getTableReadOnly(datasetId, tableSchemaId, EntityTypeEnum.TABLE)) {
+      datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
+          datasetId);
+      LOG_ERROR.error(
+          "Error deleting the table values from the datasetId {}. The table is read only",
+          datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
 
@@ -449,7 +463,10 @@ public class DataSetControllerImpl implements DatasetController {
       // This method will release the lock
       deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error deleting the table values from the datasetId {}. Message: ", datasetId,
+          e.getMessage());
+      datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
+          datasetId);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
@@ -528,17 +545,17 @@ public class DataSetControllerImpl implements DatasetController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void updateField(@PathVariable("id") final Long datasetId,
       @RequestBody final FieldVO field) {
-    if (datasetId == null || field == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NOT_FOUND);
-    }
     if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId)) && datasetService
         .getTableReadOnly(datasetId, field.getIdFieldSchema(), EntityTypeEnum.FIELD)) {
+      LOG_ERROR.error("Error updating a field in the dataset {}. The table is read only",
+          datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
     try {
       updateRecordHelper.executeFieldUpdateProcess(datasetId, field);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error updating a field in the dataset {}. Message: {}", datasetId,
+          e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }

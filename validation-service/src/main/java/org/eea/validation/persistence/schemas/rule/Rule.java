@@ -45,7 +45,7 @@ public class Rule {
 
   /** The verified. */
   @Field(value = "verified")
-  private boolean verified;
+  private Boolean verified;
 
   /** The activation_group. */
   @Field(value = "activationGroup")

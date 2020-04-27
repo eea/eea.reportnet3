@@ -12,14 +12,19 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.service.RulesService;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -39,6 +44,21 @@ public class RulesControllerImplTest {
   /** The rule mapper. */
   @Mock
   private RuleMapper ruleMapper;
+
+  /** The security context. */
+  SecurityContext securityContext;
+
+  /** The authentication. */
+  Authentication authentication;
+
+  @Before
+  public void initMocks() {
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
+    MockitoAnnotations.initMocks(this);
+  }
 
   /**
    * Delete rule by id test.
@@ -295,6 +315,8 @@ public class RulesControllerImplTest {
    */
   @Test
   public void createNewRuleTest() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.doNothing().when(rulesService).createNewRule(Mockito.anyLong(), Mockito.any());
     rulesControllerImpl.createNewRule(1L, new RuleVO());
     Mockito.verify(rulesService, times(1)).createNewRule(Mockito.anyLong(), Mockito.any());
@@ -307,6 +329,8 @@ public class RulesControllerImplTest {
    */
   @Test
   public void createNewRuleExceptionTest() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.doThrow(EEAException.class).when(rulesService).createNewRule(Mockito.anyLong(),
         Mockito.any());
 
@@ -322,6 +346,8 @@ public class RulesControllerImplTest {
    */
   @Test
   public void updateRuleTest() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.doNothing().when(rulesService).updateRule(Mockito.anyLong(), Mockito.any());
     rulesControllerImpl.updateRule(1L, new RuleVO());
     Mockito.verify(rulesService, times(1)).updateRule(Mockito.anyLong(), Mockito.any());
@@ -334,6 +360,8 @@ public class RulesControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void updateRuleExceptionTest() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.doThrow(EEAException.class).when(rulesService).updateRule(Mockito.anyLong(),
         Mockito.any());
     try {

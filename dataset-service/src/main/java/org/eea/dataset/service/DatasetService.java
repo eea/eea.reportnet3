@@ -383,4 +383,12 @@ public interface DatasetService {
    * @return the table read only
    */
   Boolean getTableReadOnly(Long datasetId, String tableSchemaId, EntityTypeEnum type);
+
+
+  /**
+   * Release lock.
+   *
+   * @param criteria the criteria
+   */
+  void releaseLock(Object... criteria);
 }
