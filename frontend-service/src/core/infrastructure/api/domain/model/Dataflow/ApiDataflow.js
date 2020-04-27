@@ -129,8 +129,6 @@ export const apiDataflow = {
     });
 
     return response.data;
-
-    // return '111-222-222-222';
   },
   generateApiKey: async (dataflowId, dataProviderId) => {
     const tokens = userStorage.get();
@@ -143,8 +141,6 @@ export const apiDataflow = {
     });
 
     return response.data;
-
-    // return `${Math.random(1000 * 99999) * 10} ${dataProviderId} ${dataflowId}`;
   },
   pending: async () => {
     const tokens = userStorage.get();
