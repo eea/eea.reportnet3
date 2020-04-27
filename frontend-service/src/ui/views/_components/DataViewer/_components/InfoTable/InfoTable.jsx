@@ -32,14 +32,18 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
 
   const getMaxCharactersValueByFieldType = type => {
     const intCharacters = 18;
-    // const decimalCharacters = 1078;
+    const phoneCharacters = 18;
+    const decimalCharacters = 18;
     const textCharacters = 200;
+    const emailCharacters = 200;
     const longTextCharacters = 10000;
     const dateCharacters = 10;
+    const urlCharacters = 200;
     switch (type) {
       case 'NUMBER_INTEGER':
-      case 'NUMBER_DECIMAL':
         return intCharacters;
+      case 'NUMBER_DECIMAL':
+        return decimalCharacters;
       case 'POINT':
       case 'COORDINATE_LONG':
       case 'COORDINATE_LAT':
@@ -51,11 +55,11 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
       case 'LONG_TEXT':
         return longTextCharacters;
       case 'EMAIL':
-        return textCharacters;
+        return emailCharacters;
       case 'PHONE':
-        return intCharacters;
-      // case 'URL':
-      //   return 'url';
+        return phoneCharacters;
+      case 'URL':
+        return urlCharacters;
       default:
         return null;
     }
@@ -72,14 +76,27 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
         </div>
       );
     } else {
-      const value = getMaxCharactersValueByFieldType(field.type);
+      let value = field.fieldData[column.field];
+      const valueMaxLength = getMaxCharactersValueByFieldType(field.fieldData.type);
+      field.fieldData[column.field] = value.substring(0, valueMaxLength);
+      value = field.fieldData[column.field];
       return <div className={styles.infoTableCellCorrect}>{field ? value : null}</div>;
     }
   };
 
   const getColumns = () => {
     const columnsArr = filteredColumns.map(column => {
-      return <Column body={dataTemplate} field={column.field} header={column.header} key={column.field} />;
+      const fieldMaxLength = getMaxCharactersValueByFieldType(column.type);
+      console.log('fieldMaxLength', fieldMaxLength);
+      return (
+        <Column
+          body={dataTemplate}
+          field={column.field}
+          header={column.header}
+          key={column.field}
+          filterMaxLength={fieldMaxLength}
+        />
+      );
     });
 
     const editCol = (
