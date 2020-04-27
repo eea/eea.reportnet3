@@ -822,7 +822,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    *
    * @param user the user
    * @param dataflowId the dataflow id
-   * @param shortCode the short code
+   * @param countryId the country id
    * @return the string
    * @throws EEAException the EEA exception
    */
