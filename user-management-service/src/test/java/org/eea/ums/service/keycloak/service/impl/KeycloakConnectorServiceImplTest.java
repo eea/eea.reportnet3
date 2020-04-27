@@ -461,7 +461,7 @@ public class KeycloakConnectorServiceImplTest {
   public void updateApiKeyEmptyTest() throws EEAException {
     UserRepresentation user = new UserRepresentation();
     user.setAttributes(null);
-    String key = keycloakConnectorService.updateApiKey(user, 1L, "ES");
+    String key = keycloakConnectorService.updateApiKey(user, 1L, 1L);
     assertNotNull(key);
   }
 
@@ -471,7 +471,7 @@ public class KeycloakConnectorServiceImplTest {
     Map<String, List<String>> attributes = new HashMap<>();
     attributes.put("ApiKeys", new ArrayList<>());
     user.setAttributes(attributes);
-    String key = keycloakConnectorService.updateApiKey(user, 1L, "ES");
+    String key = keycloakConnectorService.updateApiKey(user, 1L, 1L);
     assertNotNull(key);
   }
 
@@ -483,8 +483,38 @@ public class KeycloakConnectorServiceImplTest {
     oldKeys.add("uuid");
     attributes.put("ApiKeys", oldKeys);
     user.setAttributes(attributes);
-    String key = keycloakConnectorService.updateApiKey(user, 1L, "ES");
+    String key = keycloakConnectorService.getApiKey(user, 1L, 1L);
     assertNotNull(key);
+  }
+
+  @Test
+  public void getApiKeyEmptyTest() throws EEAException {
+    UserRepresentation user = new UserRepresentation();
+    user.setAttributes(null);
+    String key = keycloakConnectorService.getApiKey(user, 1L, 1L);
+    assertNotNull("error", key);
+  }
+
+  @Test
+  public void getApiKeyAttributesTest() throws EEAException {
+    UserRepresentation user = new UserRepresentation();
+    Map<String, List<String>> attributes = new HashMap<>();
+    attributes.put("ApiKeys", new ArrayList<>());
+    user.setAttributes(attributes);
+    String key = keycloakConnectorService.getApiKey(user, 1L, 1L);
+    assertEquals("error", "", key);
+  }
+
+  @Test
+  public void getApiKeyFullAttributesTest() throws EEAException {
+    UserRepresentation user = new UserRepresentation();
+    Map<String, List<String>> attributes = new HashMap<>();
+    List<String> oldKeys = new ArrayList<>();
+    oldKeys.add("uuid,1,1");
+    attributes.put("ApiKeys", oldKeys);
+    user.setAttributes(attributes);
+    String key = keycloakConnectorService.getApiKey(user, 1L, 1L);
+    assertEquals("error", "uuid", key);
   }
 
 }

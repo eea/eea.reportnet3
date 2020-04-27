@@ -442,9 +442,9 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER')")
-  @PostMapping("/createApiKey/{dataflowId}/{shortCode}")
+  @PostMapping("/createApiKey/{dataflowId}/{countryId}")
   public String createApiKey(@PathVariable("dataflowId") final Long dataflowId,
-      @PathVariable("shortCode") final String shortCode) {
+      @PathVariable("countryId") final Long countryId) {
 
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
@@ -455,7 +455,30 @@ public class UserManagementControllerImpl implements UserManagementController {
           EEAErrorMessage.USER_NOTFOUND);
     }
     try {
-      return keycloakConnectorService.updateApiKey(user, dataflowId, shortCode);
+      return keycloakConnectorService.updateApiKey(user, dataflowId, countryId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.PERMISSION_NOT_CREATED);
+    }
+  }
+
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER')")
+  @GetMapping("/getApiKey/{dataflowId}/{countryId}")
+  public String getApiKey(@PathVariable("dataflowId") final Long dataflowId,
+      @PathVariable("countryId") final Long countryId) {
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get("userId");
+    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    if (user == null) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.USER_NOTFOUND);
+    }
+    try {
+      return keycloakConnectorService.getApiKey(user, dataflowId, countryId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,

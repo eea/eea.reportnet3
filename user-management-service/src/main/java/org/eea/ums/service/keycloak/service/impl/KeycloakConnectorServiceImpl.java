@@ -166,6 +166,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant APIKEYS. */
+  private static final String APIKEYS = "ApiKeys";
 
 
   /**
@@ -825,17 +827,16 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public String updateApiKey(UserRepresentation user, Long dataflowId, String shortCode)
+  public String updateApiKey(UserRepresentation user, Long dataflowId, Long countryId)
       throws EEAException {
     // Create new uuid for the new key
     String apiKey = UUID.randomUUID().toString();
-    String apiKeysConst = "ApiKeys";
     // Initialize the attributes
     Map<String, List<String>> attributes =
         user.getAttributes() != null ? user.getAttributes() : new HashMap<>();
     List<String> apiKeys =
-        attributes.get(apiKeysConst) != null ? attributes.get(apiKeysConst) : new ArrayList<>();
-    String newValueAttribute = dataflowId + "," + shortCode;
+        attributes.get(APIKEYS) != null ? attributes.get(APIKEYS) : new ArrayList<>();
+    String newValueAttribute = dataflowId + "," + countryId;
     // Find and remove old key
     if (!apiKeys.isEmpty()) {
       for (String keyString : apiKeys) {
@@ -846,11 +847,41 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
       }
     }
     apiKeys.add(apiKey + "," + newValueAttribute);
-    attributes.put(apiKeysConst, apiKeys);
+    attributes.put(APIKEYS, apiKeys);
     user.setAttributes(attributes);
     // insert the changes
     updateUser(user);
     // return new apiKey
     return apiKey;
+  }
+
+
+  /**
+   * Gets the api key.
+   *
+   * @param user the user
+   * @param dataflowId the dataflow id
+   * @param countryId the country id
+   * @return the api key
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public String getApiKey(UserRepresentation user, Long dataflowId, Long countryId)
+      throws EEAException {
+    String result = "";
+    Map<String, List<String>> attributes =
+        user.getAttributes() != null ? user.getAttributes() : new HashMap<>();
+    List<String> apiKeys =
+        attributes.get(APIKEYS) != null ? attributes.get(APIKEYS) : new ArrayList<>();
+    String findValue = "," + dataflowId + "," + countryId;
+    if (!apiKeys.isEmpty()) {
+      for (String keyString : apiKeys) {
+        if (keyString.contains(findValue)) {
+          result = keyString.replace(findValue, "");
+          break;
+        }
+      }
+    }
+    return result;
   }
 }

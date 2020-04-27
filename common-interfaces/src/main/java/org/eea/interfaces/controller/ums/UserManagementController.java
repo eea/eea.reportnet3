@@ -224,7 +224,18 @@ public interface UserManagementController {
    * @param shortCode the short code
    * @return the string
    */
-  @PostMapping("/createApiKey/{dataflowId}/{shortCode}")
+  @PostMapping("/createApiKey/{dataflowId}/{countryId}")
   String createApiKey(@PathVariable("dataflowId") final Long dataflowId,
-      @PathVariable("shortCode") final String shortCode);
+      @PathVariable("countryId") final Long countryId);
+
+  /**
+   * Gets the api key.
+   *
+   * @param dataflowId the dataflow id
+   * @param countryCode the country code
+   * @return the api key
+   */
+  @GetMapping("/getApiKey/{dataflowId}/{countryId}")
+  String getApiKey(@PathVariable("dataflowId") final Long dataflowId,
+      @PathVariable("countryId") final Long countryId);
 }
