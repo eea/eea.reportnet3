@@ -87,7 +87,6 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
   const getColumns = () => {
     const columnsArr = filteredColumns.map(column => {
       const fieldMaxLength = getMaxCharactersValueByFieldType(column.type);
-      console.log('fieldMaxLength', fieldMaxLength);
       return (
         <Column
           body={dataTemplate}
