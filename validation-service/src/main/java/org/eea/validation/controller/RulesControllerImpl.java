@@ -7,6 +7,7 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.service.RulesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -172,6 +174,10 @@ public class RulesControllerImpl implements RulesController {
     String message = "";
     HttpStatus status = HttpStatus.OK;
     try {
+      // Set the user name on the thread
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
+
       rulesService.createNewRule(datasetId, ruleVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Error creating rule: {}", e.getMessage());
@@ -234,6 +240,10 @@ public class RulesControllerImpl implements RulesController {
   @PutMapping("/updateRule")
   public void updateRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO) {
     try {
+      // Set the user name on the thread
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
+
       rulesService.updateRule(datasetId, ruleVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Error updating rule: {}", e.getMessage());

@@ -238,7 +238,7 @@ public class RulesServiceImpl implements RulesService {
     rule.setType(EntityTypeEnum.FIELD);
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
-    rule.setVerified(false);
+    rule.setVerified(null);
 
     validateRule(rule);
 
@@ -327,7 +327,6 @@ public class RulesServiceImpl implements RulesService {
           ruleList.add(AutomaticRules.createEmailAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
-
         case PHONE:
           ruleList.add(AutomaticRules.createPhoneAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
@@ -412,7 +411,7 @@ public class RulesServiceImpl implements RulesService {
     rule.setType(EntityTypeEnum.FIELD);
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
-    rule.setVerified(false);
+    rule.setVerified(null);
 
     validateRule(rule);
 
