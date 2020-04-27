@@ -354,6 +354,9 @@
         },
         {
           "key": "QC_RULE_UPDATING_ERROR"
+        },
+        {
+          "key": "INVALIDATED_QC_RULE_EVENT"
         }
       ]
     },
@@ -532,5 +535,6 @@
         }
       ]
     }
-  ]
+  ],
+  "hiddenNotifications": ["VALIDATED_QC_RULE_EVENT"]
 }

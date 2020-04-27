@@ -84,7 +84,9 @@ const FieldEditor = ({
 
   const getFilter = type => {
     switch (type) {
-      case 'NUMBER':
+      case 'NUMBER_INTEGER':
+        return 'int';
+      case 'NUMBER_DECIMAL':
       case 'POINT':
       case 'COORDINATE_LONG':
       case 'COORDINATE_LAT':
@@ -92,16 +94,92 @@ const FieldEditor = ({
       case 'DATE':
         return 'date';
       case 'TEXT':
+      case 'LONG_TEXT':
         return 'any';
+      case 'EMAIL':
+        return 'email';
+      case 'PHONE':
+        return 'phone';
+      // case 'URL':
+      //   return 'url';
       default:
         return 'any';
     }
   };
 
+  const getMaxLengthByFieldType = type => {};
+
   const renderField = type => {
+    // const fieldTypeMaxLength = getMaxLengthByFieldType(type);
+    const intCharacters = 18;
+    const decimalCharacters = 1078;
+    const textCharacters = 200;
+    const longTextCharacters = 10000;
+    const dateCharacters = 10;
+
     switch (type) {
       case 'TEXT':
-      case 'NUMBER':
+        return (
+          <InputText
+            keyfilter={getFilter(type)}
+            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+            onChange={e => onEditorValueChange(cells, e.target.value)}
+            onFocus={e => {
+              e.preventDefault();
+              onEditorValueFocus(cells, e.target.value);
+            }}
+            onKeyDown={e => onEditorKeyChange(cells, e, record)}
+            type="text"
+            value={RecordUtils.getCellValue(cells, cells.field)}
+            maxlength={textCharacters}
+          />
+        );
+      case 'LONG_TEXT':
+        return (
+          <InputText
+            keyfilter={getFilter(type)}
+            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+            onChange={e => onEditorValueChange(cells, e.target.value)}
+            onFocus={e => {
+              e.preventDefault();
+              onEditorValueFocus(cells, e.target.value);
+            }}
+            onKeyDown={e => onEditorKeyChange(cells, e, record)}
+            type="text"
+            value={RecordUtils.getCellValue(cells, cells.field)}
+            maxlength={longTextCharacters}
+          />
+        );
+      case 'NUMBER_INTEGER':
+        return (
+          <InputText
+            keyfilter={getFilter(type)}
+            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+            onChange={e => onEditorValueChange(cells, e.target.value)}
+            onFocus={e => {
+              e.preventDefault();
+              onEditorValueFocus(cells, e.target.value);
+            }}
+            onKeyDown={e => onEditorKeyChange(cells, e, record)}
+            maxlength={intCharacters}
+            value={RecordUtils.getCellValue(cells, cells.field)}
+          />
+        );
+      case 'NUMBER_DECIMAL':
+        return (
+          <InputText
+            keyfilter={getFilter(type)}
+            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+            onChange={e => onEditorValueChange(cells, e.target.value)}
+            onFocus={e => {
+              e.preventDefault();
+              onEditorValueFocus(cells, e.target.value);
+            }}
+            onKeyDown={e => onEditorKeyChange(cells, e, record)}
+            maxlength={intCharacters}
+            value={RecordUtils.getCellValue(cells, cells.field)}
+          />
+        );
       case 'POINT':
       case 'COORDINATE_LONG':
       case 'COORDINATE_LAT':
@@ -130,6 +208,7 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             // type="date"
+            maxlength={dateCharacters}
             placeHolder="YYYY-MM-DD"
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
@@ -159,6 +238,7 @@ const FieldEditor = ({
             onMouseDown={e => {
               onEditorValueFocus(cells, e.target.value);
             }}
+            maxlength={textCharacters}
             optionLabel="itemType"
             options={linkItemsOptions}
             showFilterClear={true}
