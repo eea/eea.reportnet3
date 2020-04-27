@@ -106,10 +106,12 @@ export const TabsDesigner = withRouter(
       }
     };
 
-    const onChangeTableDescription = (tableSchemaId, tableSchemaDescription) => {
+    const onChangeTableProperties = (tableSchemaId, tableSchemaDescription, readOnly, toPrefill) => {
       const inmTabs = [...tabs];
       const tabIdx = getIndexByTableSchemaId(tableSchemaId, inmTabs);
       inmTabs[tabIdx].description = tableSchemaDescription;
+      inmTabs[tabIdx].readOnly = readOnly;
+      inmTabs[tabIdx].toPrefill = toPrefill;
       setTabs(inmTabs);
     };
 
@@ -388,7 +390,7 @@ export const TabsDesigner = withRouter(
                           key={tab.index}
                           onChangeFields={onChangeFields}
                           onChangeReference={onChangeReference}
-                          onChangeTableDescription={onChangeTableDescription}
+                          onChangeTableProperties={onChangeTableProperties}
                           table={tabs[i]}
                         />
                       ) : (
