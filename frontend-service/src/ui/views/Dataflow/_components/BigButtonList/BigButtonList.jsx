@@ -299,6 +299,7 @@ export const BigButtonList = ({
     onShowDataCollectionModal,
     onShowNewSchemaDialog,
     onShowUpdateDataCollectionModal,
+    receiptDispatch, //
     receiptState,
     onShowSnapshotDialog,
     updatedDatasetSchema

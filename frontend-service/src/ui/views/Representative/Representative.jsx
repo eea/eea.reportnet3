@@ -44,28 +44,39 @@ const Representative = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
-  const [dataProviderId, setDataProviderId] = useState([]);
-  const [datasetIdToSnapshotProps, setDatasetIdToSnapshotProps] = useState();
-  const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
-  const [isDataUpdated, setIsDataUpdated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  // const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
 
-  const [receiptState, receiptDispatch] = useReducer(receiptReducer, {});
-  const [representativeState, representativeDispatch] = useReducer(representativeReducer, {
+  const representativeInitialState = {
     data: {},
     deleteInput: '',
     description: '',
+    formHasRepresentatives: false,
+    hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
     id: dataflowId,
     isApiKeyDialogVisible: false,
     isCustodian: false,
     isDeleteDialogVisible: false,
+    isEditDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPropertiesDialogVisible: false,
+    isRepresentativeView: false,
     name: '',
     obligations: {},
-    status: ''
-  });
+    status: '',
+
+    dataProviderId: [],
+    datasetIdToSnapshotProps: undefined,
+    designDatasetSchemas: [],
+    isDataSchemaCorrect: [],
+    isDataUpdated: false,
+    isPageLoading: true,
+    updatedDatasetSchema: undefined,
+    isSnapshotDialogVisible: false
+  };
+
+  const [receiptState, receiptDispatch] = useReducer(receiptReducer, {});
+  const [representativeState, representativeDispatch] = useReducer(representativeReducer, representativeInitialState);
 
   useEffect(() => {
     if (!isNil(user.contextRoles)) onLoadPermission();
@@ -110,9 +121,9 @@ const Representative = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    setLoading(true);
+    setIsPageLoading(true);
     onLoadReportingDataflow();
-  }, [dataflowId, isDataUpdated]);
+  }, [dataflowId, representativeState.isDataUpdated]);
 
   useEffect(() => {
     const refresh = notificationContext.toShow.find(
@@ -134,7 +145,7 @@ const Representative = withRouter(({ match, history }) => {
 
   const handleRedirect = target => history.push(target);
 
-  const onHideSnapshotDialog = () => setIsActiveReleaseSnapshotDialog(false);
+  const onHideSnapshotDialog = () => manageDialogs('isSnapshotDialogVisible', false);
 
   const onLoadPermission = () => {
     const hasWritePermissions = UserService.hasPermission(
@@ -150,6 +161,16 @@ const Representative = withRouter(({ match, history }) => {
 
     representativeDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian } });
   };
+
+  const setIsPageLoading = isPageLoading =>
+    representativeDispatch({ type: 'SET_IS_PAGE_LOADING', payload: { isPageLoading } });
+
+  const setDataProviderId = id => representativeDispatch({ type: 'SET_DATA_PROVIDER_ID', payload: { id } });
+
+  const setIsDataUpdated = () => representativeDispatch({ type: 'SET_IS_DATA_UPDATED' });
+
+  const setDatasetIdToSnapshotProps = id =>
+    representativeDispatch({ type: 'SET_DATASET_ID_TO_SNAPSHOT_PROPS', payload: { id } });
 
   const onLoadReportingDataflow = async () => {
     try {
@@ -199,7 +220,7 @@ const Representative = withRouter(({ match, history }) => {
         history.push(getUrl(routes.DATAFLOWS));
       }
     } finally {
-      setLoading(false);
+      setIsPageLoading(false);
     }
   };
 
@@ -211,10 +232,10 @@ const Representative = withRouter(({ match, history }) => {
 
   const onShowReleaseSnapshotDialog = async datasetId => {
     setDatasetIdToSnapshotProps(datasetId);
-    setIsActiveReleaseSnapshotDialog(true);
+    manageDialogs('isSnapshotDialogVisible', true);
   };
 
-  const onUpdateData = () => setIsDataUpdated(!isDataUpdated);
+  const onUpdateData = () => setIsDataUpdated(!representativeState.isDataUpdated);
 
   const layout = children => (
     <MainLayout leftSideBarConfig={{ isCustodian: representativeState.isCustodian, buttons: [] }}>
@@ -222,7 +243,7 @@ const Representative = withRouter(({ match, history }) => {
     </MainLayout>
   );
 
-  if (loading || isNil(representativeState.data)) return layout(<Spinner />);
+  if (representativeState.isPageLoading || isNil(representativeState.data)) return layout(<Spinner />);
 
   return layout(
     <div className="rep-row">
@@ -237,7 +258,7 @@ const Representative = withRouter(({ match, history }) => {
         <BigButtonList
           dataflowData={representativeState.data}
           dataflowId={dataflowId}
-          dataProviderId={dataProviderId}
+          dataProviderId={representativeState.dataProviderId}
           handleRedirect={handleRedirect}
           hasWritePermissions={representativeState.hasWritePermissions}
           isCustodian={representativeState.isCustodian}
@@ -248,12 +269,10 @@ const Representative = withRouter(({ match, history }) => {
         />
 
         <SnapshotsDialog
-          dataflowData={representativeState.data}
           dataflowId={dataflowId}
-          datasetId={datasetIdToSnapshotProps}
-          hideSnapshotDialog={onHideSnapshotDialog}
-          isSnapshotDialogVisible={isActiveReleaseSnapshotDialog}
-          setSnapshotDialog={setIsActiveReleaseSnapshotDialog}
+          datasetId={representativeState.datasetIdToSnapshotProps}
+          isSnapshotDialogVisible={representativeState.isSnapshotDialogVisible}
+          manageDialogs={manageDialogs}
         />
 
         <PropertiesDialog
@@ -266,7 +285,7 @@ const Representative = withRouter(({ match, history }) => {
         {representativeState.isApiKeyDialogVisible && (
           <ApiKeyDialog
             dataflowId={dataflowId}
-            dataProviderId={dataProviderId}
+            dataProviderId={representativeState.dataProviderId}
             isApiKeyDialogVisible={representativeState.isApiKeyDialogVisible}
             manageDialogs={manageDialogs}
           />

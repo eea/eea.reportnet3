@@ -431,7 +431,6 @@ const Dataflow = withRouter(({ history, match }) => {
         <BigButtonList
           dataflowState={dataflowState}
           handleRedirect={handleRedirect}
-          formHasRepresentatives={dataflowState.formHasRepresentatives}
           onSaveName={onSaveName}
           onUpdateData={setIsDataUpdated}
           receiptDispatch={receiptDispatch}

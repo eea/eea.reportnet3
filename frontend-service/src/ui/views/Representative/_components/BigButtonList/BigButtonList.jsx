@@ -23,7 +23,8 @@ export const BigButtonList = ({
   receiptDispatch,
   receiptState,
   representative,
-  onShowSnapshotDialog
+  onShowSnapshotDialog,
+  manageDialogs
 }) => {
   const notificationContext = useContext(NotificationContext);
 
@@ -94,6 +95,7 @@ export const BigButtonList = ({
           <div className={styles.datasetItem}>
             {useBigButtonList({
               dataflowData,
+              manageDialogs,
               dataflowId,
               handleRedirect,
               hasWritePermissions,

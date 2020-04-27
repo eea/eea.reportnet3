@@ -5,20 +5,20 @@ import isUndefined from 'lodash/isUndefined';
 
 import { routes } from 'ui/routes';
 
-import { getUrl } from 'core/infrastructure/CoreUtils';
-
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const useBigButtonList = ({
   dataflowData,
   dataflowId,
   handleRedirect,
-  hasWritePermissions,
   isCustodian,
   onLoadReceiptData,
   receiptState,
   representative,
-  onShowSnapshotDialog
+  onShowSnapshotDialog,
+  hasWritePermissions
 }) => {
   const resources = useContext(ResourcesContext);
   const helpButton = {
@@ -80,7 +80,8 @@ const useBigButtonList = ({
           true
         ),
         model: hasWritePermissions
-          ? [
+          ? // model: dataflowState.hasWritePermissions
+            [
               {
                 label: resources.messages['releaseDataCollection'],
                 icon: 'cloudUpload',
