@@ -1582,6 +1582,111 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
+   * Etl import dataset.
+   *
+   * @param datasetId the dataset id
+   * @param etlDatasetVO the etl dataset VO
+   * @throws EEAException
+   */
+  @Override
+  public void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO)
+      throws EEAException {
+    // Get the datasetSchemaId by the datasetId
+    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+    if (null == datasetSchemaId) {
+      throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND + " " + datasetId);
+    }
+
+    // Get the datasetSchema by the datasetSchemaId
+    DataSetSchema datasetSchema =
+        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+    if (null == datasetSchema) {
+      throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND + " " + datasetSchemaId);
+    }
+    // Construct Maps to relate ids
+    Map<String, TableSchema> tableMap = new HashMap<>();
+    Map<String, FieldSchema> fieldMap = new HashMap<>();
+    for (TableSchema tableSchema : datasetSchema.getTableSchemas()) {
+      tableMap.put(tableSchema.getNameTableSchema(), tableSchema);
+      // Match each fieldSchemaId with its headerName
+      for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
+        fieldMap.put(field.getHeaderName(), field);
+      }
+    }
+
+    // Construct object to be save
+    DatasetValue dataset = new DatasetValue();
+    List<TableValue> tables = new ArrayList<>();
+
+    // Loops to build the entity
+    for (ETLTableVO etlTable : etlDatasetVO.getTables()) {
+      TableValue table = new TableValue();
+      TableSchema tableSchema = tableMap.get(etlTable.getTableName());
+      if (tableSchema != null) {
+        table.setIdTableSchema(tableSchema.getIdTableSchema().toString());
+        List<RecordValue> records = new ArrayList<>();
+        for (ETLRecordVO etlRecord : etlTable.getRecords()) {
+          RecordValue recordValue = new RecordValue();
+          recordValue.setIdRecordSchema(tableMap.get(etlTable.getTableName()).getRecordSchema()
+              .getIdRecordSchema().toString());
+          recordValue.setTableValue(table);
+          List<FieldValue> fieldValues = new ArrayList<>();
+          List<String> idSchema = new ArrayList<>();
+          for (ETLFieldVO etlField : etlRecord.getFields()) {
+            FieldValue field = new FieldValue();
+            FieldSchema fieldSchema = fieldMap.get(etlField.getFieldName());
+            if (fieldSchema != null) {
+              field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
+              field.setType(fieldSchema.getType());
+              field.setValue(etlField.getValue());
+              field.setRecord(recordValue);
+              fieldValues.add(field);
+              idSchema.add(field.getIdFieldSchema());
+              setMissingField(
+                  tableMap.get(etlTable.getTableName()).getRecordSchema().getFieldSchema(),
+                  fieldValues, idSchema, recordValue);
+            }
+          }
+          recordValue.setFields(fieldValues);
+          records.add(recordValue);
+        }
+        table.setRecords(records);
+        tables.add(table);
+        table.setDatasetId(dataset);
+      }
+    }
+    dataset.setTableValues(tables);
+    dataset.setIdDatasetSchema(datasetSchemaId);
+    dataset.setId(datasetId);
+
+    datasetRepository.save(dataset);
+
+  }
+
+  /**
+   * Sets the missing field.
+   *
+   * @param headersSchema the headers schema
+   * @param fields the fields
+   * @param idSchema the id schema
+   * @param recordValue the record value
+   */
+  private void setMissingField(List<FieldSchema> headersSchema, final List<FieldValue> fields,
+      List<String> idSchema, RecordValue recordValue) {
+    headersSchema.stream().forEach(header -> {
+      if (!idSchema.contains(header.getIdFieldSchema().toString())) {
+        final FieldValue field = new FieldValue();
+        field.setIdFieldSchema(header.getIdFieldSchema().toString());
+        field.setType(header.getType());
+        field.setValue("");
+        field.setRecord(recordValue);
+        fields.add(field);
+      }
+    });
+  }
+
+
+  /**
    * Gets the table read only. Receives by parameter the datasetId, the objectId and the type
    * (table, record, field). In example, if receives an objectId that is a Record (that's a record
    * schema id), find the property readOnly of the table that belongs to the record
