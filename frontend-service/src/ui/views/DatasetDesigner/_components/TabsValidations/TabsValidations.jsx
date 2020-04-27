@@ -158,14 +158,15 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       { id: 'shortCode', index: 3 },
       { id: 'name', index: 4 },
       { id: 'description', index: 5 },
-      { id: 'levelError', index: 6 },
-      { id: 'enabled', index: 7 },
-      { id: 'automatic', index: 8 },
-      { id: 'referenceId', index: 9 },
-      { id: 'activationGroup', index: 10 },
-      { id: 'date', index: 11 },
-      { id: 'entityType', index: 12 },
-      { id: 'actionButtons', index: 13 }
+      { id: 'message', index: 6 },
+      { id: 'levelError', index: 7 },
+      { id: 'enabled', index: 8 },
+      { id: 'automatic', index: 9 },
+      { id: 'referenceId', index: 10 },
+      { id: 'activationGroup', index: 11 },
+      { id: 'date', index: 12 },
+      { id: 'entityType', index: 13 },
+      { id: 'actionButtons', index: 14 }
     ];
     return validations
       .map(error => validationsWithPriority.filter(e => error === e.id))
@@ -204,7 +205,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     const style = {};
     const invisibleFields = ['id', 'referenceId', 'activationGroup', 'condition', 'date', 'entityType'];
     if (field.toUpperCase() === 'DESCRIPTION') {
-      style.width = '40%';
+      style.width = '23%';
     }
     // else {
     //   style.width = '20%';
@@ -280,7 +281,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     return (
       <div className={null}>
         <div className={styles.searchInput}>
-          <SearchAll data={filteredData} getValues={onLoadSearchedData} searchBy={['name', 'description']} />
+          <SearchAll data={filteredData} getValues={onLoadSearchedData} searchBy={['name', 'description', 'message']} />
         </div>
         <Filters
           data={validationsList.validations}
