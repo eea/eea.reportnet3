@@ -182,7 +182,8 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       { id: 'activationGroup', index: 11 },
       { id: 'date', index: 12 },
       { id: 'entityType', index: 13 },
-      { id: 'actionButtons', index: 14 }
+      { id: 'actionButtons', index: 14 },
+      { id: 'isCorrect', index: 15 }
     ];
     return validations
       .map(error => validationsWithPriority.filter(e => error === e.id))
