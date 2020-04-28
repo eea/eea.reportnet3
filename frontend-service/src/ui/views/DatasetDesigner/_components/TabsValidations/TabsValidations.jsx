@@ -36,15 +36,15 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
 
-  const [validationsList, setValidationsList] = useState();
+  // const [validationsList, setValidationsList] = useState();
 
   const [tabsValidationsState, tabsValidationsDispatch] = useReducer(tabsValidationsReducer, {
     filteredData: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
-    isLoading: false,
+    isLoading: true,
     searchedData: [],
-    // validationList: {},
+    validationList: {},
     validationId: ''
   });
 
@@ -52,17 +52,17 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     onLoadValidationsList(datasetSchemaId);
   }, [tabsValidationsState.isDataUpdated]);
 
+  useEffect(() => {
+    const response = notificationContext.hidden.find(notification => notification === 'VALIDATED_QC_RULE_EVENT');
+    if (response) onUpdateData();
+  }, [notificationContext]);
+
   const isDeleteDialogVisible = value =>
     tabsValidationsDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
 
   const isLoading = value => tabsValidationsDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const isDataUpdated = value => tabsValidationsDispatch({ type: 'IS_DATA_UPDATED', payload: { value } });
-
-  useEffect(() => {
-    const response = notificationContext.hidden.find(notification => notification === 'VALIDATED_QC_RULE_EVENT');
-    if (response) onUpdateData();
-  }, [notificationContext]);
 
   const onDeleteValidation = async () => {
     try {
@@ -86,7 +86,6 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
 
   const onLoadValidationsList = async datasetSchemaId => {
     try {
-      isLoading(true);
       const validationsServiceList = await ValidationService.getAll(datasetSchemaId);
 
       if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
@@ -96,9 +95,12 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
           validation.field = aditionalInfo.fieldName;
         });
       }
+      tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_LIST', payload: { validationsServiceList } });
+      // setValidationsList(validationsServiceList);
 
-      // tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_LIST', payload: { validationsServiceList } });
-      setValidationsList(validationsServiceList);
+      // console.log('validationsServiceList', validationsServiceList);
+      console.log('tabsValidationsState.validationsList', tabsValidationsState.validationsList);
+      // console.log('validationList', validationsList);
     } catch (error) {
       console.log(error);
       notificationContext.add({
@@ -167,15 +169,15 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   const getHeader = fieldHeader => {
     let header;
     if (fieldHeader === 'levelError') {
-      header = 'Level error';
+      header = resources.messages['ruleLevelError'];
       return header;
     }
     if (fieldHeader === 'shortCode') {
-      header = 'Code';
+      header = resources.messages['ruleCode'];
       return header;
     }
     if (fieldHeader === 'isCorrect') {
-      header = 'Correct';
+      header = resources.messages['correct'];
       return header;
     }
     header = fieldHeader;
@@ -298,20 +300,18 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
 
   const validationId = value => tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_ID', payload: { value } });
 
-  console.log('validationList', validationsList);
   const validationList = () => {
-    if (isUndefined(validationsList) || isEmpty(validationsList)) {
-      // if (isUndefined(tabsValidationsState.validationsList) || isEmpty(tabsValidationsState.validationsList)) {
+    // if (isUndefined(validationsList) || isEmpty(validationsList)) {
+    if (isUndefined(tabsValidationsState.validationsList) || isEmpty(tabsValidationsState.validationsList)) {
       return (
         <div>
           <h3>{resources.messages['emptyValidations']}</h3>
         </div>
       );
     }
-    const paginatorRightText = `${capitalize('FIELD')} records: ${
-      // tabsValidationsState.validationsList.validations.length
-      validationsList.validations.length
-    }`;
+
+    // const paginatorRightText = `${resources.messages['fieldRecords']}: ${validationsList.validations.length}`;
+    const paginatorRightText = `${resources.messages['fieldRecords']}: ${tabsValidationsState.validationsList.validations.length}`;
 
     return (
       <div className={null}>
@@ -323,10 +323,11 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
           />
         </div>
         <Filters
-          // data={tabsValidationsState.validationsList.validations}
-          data={validationsList.validations}
+          data={tabsValidationsState.validationsList.validations}
+          // data={validationsList.validations}
           getFiltredData={onLoadFilteredData}
           inputOptions={validationListConf.filterItems['input']}
+          resetFilters={tabsValidationsState.onResetFilters}
           selectOptions={validationListConf.filterItems['select']}
           sortable={false}
         />
@@ -341,11 +342,11 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
             paginatorRight={paginatorRightText}
             rows={10}
             rowsPerPageOptions={[5, 10, 15]}
-            // totalRecords={tabsValidationsState.validationsList.validations.length}
-            totalRecords={validationsList.validations.length}
+            totalRecords={tabsValidationsState.validationsList.validations.length}
+            // totalRecords={validationsList.validations.length}
             value={tabsValidationsState.searchedData}>
-            {/* {renderColumns(tabsValidationsState.validationsList.validations)} */}
-            {renderColumns(validationsList.validations)}
+            {renderColumns(tabsValidationsState.validationsList.validations)}
+            {/* {renderColumns(validationsList.validations)} */}
           </DataTable>
         ) : (
           <div className={styles.noDataflows}>{resources.messages['noQCRulesWithSelectedParameters']}</div>
