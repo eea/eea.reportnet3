@@ -256,6 +256,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       if (field === 'automatic') template = automaticTemplate;
       if (field === 'enabled') template = enabledTemplate;
       if (field === 'isCorrect') template = correctTemplate;
+      if (field === 'levelError') template = levelErrorTemplate;
       return (
         <Column
           body={template}
