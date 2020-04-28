@@ -618,4 +618,22 @@ public class DataSetControllerImpl implements DatasetController {
       return null;
     }
   }
+
+  /**
+   * Etl export dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the ETL dataset VO
+   */
+  @Override
+  @PostMapping("/etlImport/dataset/{datasetId}")
+  public void etlImportDataset(@PathVariable("datasetId") Long datasetId,
+      @RequestBody ETLDatasetVO etlDatasetVO) {
+    try {
+      datasetService.etlImportDataset(datasetId, etlDatasetVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
 }
