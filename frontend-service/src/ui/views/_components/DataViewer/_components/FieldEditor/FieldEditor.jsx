@@ -107,15 +107,15 @@ const FieldEditor = ({
     }
   };
 
-  const getMaxLengthByFieldType = type => {};
-
   const renderField = type => {
-    // const fieldTypeMaxLength = getMaxLengthByFieldType(type);
-    const intCharacters = 18;
-    const decimalCharacters = 1078;
-    const textCharacters = 200;
-    const longTextCharacters = 10000;
+    const longCharacters = 20;
+    const decimalCharacters = 40;
     const dateCharacters = 10;
+    const textCharacters = 5000;
+    const longTextCharacters = 10000;
+    const emailCharacters = 256;
+    const phoneCharacters = 18;
+    const urlCharacters = 5000;
 
     switch (type) {
       case 'TEXT':
@@ -161,7 +161,7 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
-            maxlength={intCharacters}
+            maxlength={longCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -176,7 +176,7 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
-            maxlength={intCharacters}
+            maxlength={decimalCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -221,6 +221,48 @@ const FieldEditor = ({
           //     yearRange="2010:2030"
           //   />
         );
+      case 'EMAIL':
+        return (
+          <InputText
+            keyfilter={getFilter(type)}
+            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+            onChange={e => onEditorValueChange(cells, e.target.value)}
+            onFocus={e => {
+              e.preventDefault();
+              onEditorValueFocus(cells, e.target.value);
+            }}
+            maxlength={emailCharacters}
+            value={RecordUtils.getCellValue(cells, cells.field)}
+          />
+        );
+      case 'URL':
+        return (
+          <InputText
+            keyfilter={getFilter(type)}
+            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+            onChange={e => onEditorValueChange(cells, e.target.value)}
+            onFocus={e => {
+              e.preventDefault();
+              onEditorValueFocus(cells, e.target.value);
+            }}
+            maxlength={urlCharacters}
+            value={RecordUtils.getCellValue(cells, cells.field)}
+          />
+        );
+      case 'PHONE':
+        return (
+          <InputText
+            keyfilter={getFilter(type)}
+            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+            onChange={e => onEditorValueChange(cells, e.target.value)}
+            onFocus={e => {
+              e.preventDefault();
+              onEditorValueFocus(cells, e.target.value);
+            }}
+            maxlength={phoneCharacters}
+            value={RecordUtils.getCellValue(cells, cells.field)}
+          />
+        );
       case 'LINK':
         return (
           <Dropdown
@@ -238,7 +280,6 @@ const FieldEditor = ({
             onMouseDown={e => {
               onEditorValueFocus(cells, e.target.value);
             }}
-            maxlength={textCharacters}
             optionLabel="itemType"
             options={linkItemsOptions}
             showFilterClear={true}

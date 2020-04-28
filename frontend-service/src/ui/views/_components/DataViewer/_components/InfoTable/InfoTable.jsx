@@ -31,17 +31,18 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
   };
 
   const getMaxCharactersValueByFieldType = type => {
-    const intCharacters = 18;
-    const phoneCharacters = 18;
-    const decimalCharacters = 18;
-    const textCharacters = 200;
-    const emailCharacters = 200;
-    const longTextCharacters = 10000;
+    const longCharacters = 20;
+    const decimalCharacters = 40;
     const dateCharacters = 10;
-    const urlCharacters = 200;
+    const textCharacters = 5000;
+    const longTextCharacters = 10000;
+    const emailCharacters = 256;
+    const phoneCharacters = 18;
+    const urlCharacters = 5000;
+
     switch (type) {
       case 'NUMBER_INTEGER':
-        return intCharacters;
+        return longCharacters;
       case 'NUMBER_DECIMAL':
         return decimalCharacters;
       case 'POINT':
