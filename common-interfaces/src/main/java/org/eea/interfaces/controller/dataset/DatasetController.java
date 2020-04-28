@@ -243,4 +243,15 @@ public interface DatasetController {
    */
   @GetMapping("/etlExport/dataset/{datasetId}")
   ETLDatasetVO etlExportDataset(@PathVariable("datasetId") Long datasetId);
+
+
+  /**
+   * Etl import dataset.
+   *
+   * @param datasetId the dataset id
+   * @param etlDatasetVO the etl dataset VO
+   */
+  @PostMapping("/etlImport/dataset/{datasetId}")
+  void etlImportDataset(@PathVariable("datasetId") Long datasetId,
+      @RequestBody ETLDatasetVO etlDatasetVO);
 }
