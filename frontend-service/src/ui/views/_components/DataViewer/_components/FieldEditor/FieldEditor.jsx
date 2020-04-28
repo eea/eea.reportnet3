@@ -114,7 +114,7 @@ const FieldEditor = ({
     const textCharacters = 5000;
     const longTextCharacters = 10000;
     const emailCharacters = 256;
-    const phoneCharacters = 18;
+    const phoneCharacters = 256;
     const urlCharacters = 5000;
 
     switch (type) {
