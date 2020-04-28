@@ -56,7 +56,7 @@ const parseConfigurationDTO = userConfigurationDTO => {
   const userConfiguration = {};
 
   const userDefaultConfiguration = {
-    dateFormat: 'MM-DD-YYYY',
+    dateFormat: 'YYYY-MM-DD',
     showLogoutConfirmation: true,
     rowsPerPage: 10,
     visualTheme: 'light',

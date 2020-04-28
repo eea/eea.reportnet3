@@ -289,6 +289,7 @@ public class KieBaseManager {
 
     if (results.hasMessages(Message.Level.ERROR)) {
       rule.setVerified(false);
+      rule.setEnabled(false);
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.INVALIDATED_QC_RULE_EVENT, null,
           NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
