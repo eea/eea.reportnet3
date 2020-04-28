@@ -597,6 +597,7 @@
     "webForm": "Webform",
     "webLinks": "Web links",
     "yes": "Yes",
+    "invalidatedQcRuleEvent": "The rule <strong title='{:shortCode}'>{:shortShortCode}</strong> is not valid, please check it",
     "copyApiKeyBtn": "Copy to clipboard",
     "generateApiKey": "Generate new API-key",
     "noApiKey": "There is no generated API key",

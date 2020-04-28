@@ -3,17 +3,19 @@ import DomHandler from './DomHandler';
 export default class KeyFilter {
   /* eslint-disable */
   static DEFAULT_MASKS = {
-    pint: /[\d]/,
-    int: /[\d\-]/,
-    pnum: /[\d\.]/,
-    money: /[\d\.\s,]/,
-    num: /[\d\-\.]/,
-    hex: /[0-9a-f]/i,
-    email: /[a-z0-9_\.\-@]/i,
     alpha: /[a-z_]/i,
     alphanum: /[a-z0-9_]/i,
     any: /[\s\S]*/,
-    date: /[\d\-]/i
+    date: /[\d\-]/i,
+    email: /[a-z0-9_\.\-@]/i,
+    hex: /[0-9a-f]/i,
+    int: /[\d\-]/,
+    money: /[\d\.\s,]/,
+    num: /[\d\-\.]/,
+    phone: /^(\(?\+?[0-9]*\)?)?[0-9_\- \(\)]*$/,
+    pint: /[\d]/,
+    pnum: /[\d\.]/,
+    url: /^\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/
   };
   /* eslint-enable */
 

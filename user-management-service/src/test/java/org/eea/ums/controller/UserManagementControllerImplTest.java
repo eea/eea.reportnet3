@@ -1,7 +1,9 @@
 package org.eea.ums.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -310,8 +312,8 @@ public class UserManagementControllerImplTest {
 
   @Test
   public void updateUserAttributesTest() {
-    Map<String, List<String>> attributes = new HashMap<String, List<String>>();
-    List<String> atts = new ArrayList<String>();
+    Map<String, List<String>> attributes = new HashMap<>();
+    List<String> atts = new ArrayList<>();
     atts.add("attribute1");
     attributes.put("AT1", atts);
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -328,8 +330,8 @@ public class UserManagementControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void updateUserAttributesTestError() {
-    Map<String, List<String>> attributes = new HashMap<String, List<String>>();
-    List<String> atts = new ArrayList<String>();
+    Map<String, List<String>> attributes = new HashMap<>();
+    List<String> atts = new ArrayList<>();
     atts.add("attribute1");
     attributes.put("AT1", atts);
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -349,7 +351,7 @@ public class UserManagementControllerImplTest {
 
   @Test
   public void getUserAttributesTest() {
-    Map<String, List<String>> attributes = new HashMap<String, List<String>>();
+    Map<String, List<String>> attributes = new HashMap<>();
     UserRepresentation user = new UserRepresentation();
     user.setAttributes(attributes);
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -364,7 +366,7 @@ public class UserManagementControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void getUserAttributesTestError() {
-    Map<String, List<String>> attributes = new HashMap<String, List<String>>();
+    Map<String, List<String>> attributes = new HashMap<>();
     UserRepresentation user = new UserRepresentation();
     user.setAttributes(attributes);
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -416,6 +418,107 @@ public class UserManagementControllerImplTest {
     }
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void createApiKeyNoUserErrorTest() throws EEAException {
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken("user1", null, null);
+    Map<String, String> details = new HashMap<>();
+    details.put("userId", "userId_123");
+    authenticationToken.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(null);
+    try {
+      userManagementController.createApiKey(1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals("bad status", HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals("bad message", EEAErrorMessage.USER_NOTFOUND, e.getReason());
+      throw e;
+    }
+  }
 
+  @Test(expected = ResponseStatusException.class)
+  public void createApiKeyPermissionErrorTest() throws EEAException {
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken("user1", null, null);
+    Map<String, String> details = new HashMap<>();
+    details.put("userId", "userId_123");
+    authenticationToken.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(new UserRepresentation());
+    doThrow(new EEAException("error")).when(keycloakConnectorService).updateApiKey(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    try {
+      userManagementController.createApiKey(1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals("bad status", HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals("bad message", EEAErrorMessage.PERMISSION_NOT_CREATED, e.getReason());
+      throw e;
+    }
+  }
 
+  @Test
+  public void createApiKeySuccessTest() throws EEAException {
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken("user1", null, null);
+    Map<String, String> details = new HashMap<>();
+    details.put("userId", "userId_123");
+    authenticationToken.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(new UserRepresentation());
+    when(keycloakConnectorService.updateApiKey(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn("uuid");
+    assertEquals("error", "uuid", userManagementController.createApiKey(1L, 1L));
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getApiKeyNoUserErrorTest() throws EEAException {
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken("user1", null, null);
+    Map<String, String> details = new HashMap<>();
+    details.put("userId", "userId_123");
+    authenticationToken.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(null);
+    try {
+      userManagementController.getApiKey(1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals("bad status", HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals("bad message", EEAErrorMessage.USER_NOTFOUND, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getApiKeyPermissionErrorTest() throws EEAException {
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken("user1", null, null);
+    Map<String, String> details = new HashMap<>();
+    details.put("userId", "userId_123");
+    authenticationToken.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(new UserRepresentation());
+    doThrow(new EEAException("error")).when(keycloakConnectorService).getApiKey(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    try {
+      userManagementController.getApiKey(1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals("bad status", HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals("bad message", EEAErrorMessage.PERMISSION_NOT_CREATED, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test
+  public void getApiKeySuccessTest() throws EEAException {
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken("user1", null, null);
+    Map<String, String> details = new HashMap<>();
+    details.put("userId", "userId_123");
+    authenticationToken.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(new UserRepresentation());
+    when(keycloakConnectorService.getApiKey(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn("uuid");
+    assertEquals("error", "uuid", userManagementController.getApiKey(1L, 1L));
+  }
 }
