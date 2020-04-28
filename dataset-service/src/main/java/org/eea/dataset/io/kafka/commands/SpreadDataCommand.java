@@ -102,11 +102,12 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
   }
 
 
+
   /**
    * Spread data.
    *
    * @param designs the designs
-   * @param dataset the dataset
+   * @param datasetId the dataset id
    * @param idDatasetSchema the id dataset schema
    */
   @Transactional
