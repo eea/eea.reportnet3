@@ -39,8 +39,17 @@
       box-shadow: none;
     }
   }
-  .checkedValueColumn {
-    text-align: center !important;
+}
+
+.checkedValueColumn {
+  text-align: center;
+
+  .icon {
+    color: var(--main-color-font);
+  }
+
+  .spinner {
+    animation: spinnerAnimation 0.75s linear infinite;
   }
 }
 
@@ -74,4 +83,13 @@
 .warning {
   background-color: #ffd8b2 !important;
   color: #805b36 !important;
+}
+
+@keyframes spinnerAnimation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

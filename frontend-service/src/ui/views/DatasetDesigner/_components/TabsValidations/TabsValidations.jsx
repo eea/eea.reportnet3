@@ -28,6 +28,8 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
+import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
+
 const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSchemaId, onHideValidationsDialog }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -44,6 +46,11 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   useEffect(() => {
     onLoadValidationsList(datasetSchemaId);
   }, [isDataUpdated]);
+
+  useEffect(() => {
+    const response = notificationContext.hidden.find(notification => notification === 'VALIDATED_QC_RULE_EVENT');
+    if (response) onUpdateData();
+  }, [notificationContext]);
 
   const onDeleteValidation = async () => {
     try {
@@ -67,7 +74,6 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
 
   const onLoadValidationsList = async datasetSchemaId => {
     try {
-      setIsLoading(true);
       const validationsServiceList = await ValidationService.getAll(datasetSchemaId);
 
       if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
@@ -97,23 +103,29 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     setIsDeleteDialogVisible(true);
   };
 
-  const onUpdateData = () => {
-    setIsDataUpdated(!isDataUpdated);
-  };
+  const onUpdateData = () => setIsDataUpdated(!isDataUpdated);
+
+  useCheckNotifications(['INVALIDATED_QC_RULE_EVENT'], onUpdateData);
 
   const automaticTemplate = rowData => (
-    <div className={styles.checkedValueColumn} style={{ textAlign: 'center' }}>
-      {rowData.automatic ? (
-        <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
-      ) : null}
+    <div className={styles.checkedValueColumn}>
+      {rowData.automatic ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+    </div>
+  );
+
+  const correctTemplate = rowData => (
+    <div className={styles.checkedValueColumn}>
+      {!isNil(rowData.isCorrect) ? (
+        <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons(rowData.isCorrect ? 'check' : 'cross')} />
+      ) : (
+        <FontAwesomeIcon className={`${styles.icon} ${styles.spinner}`} icon={AwesomeIcons('spinner')} />
+      )}
     </div>
   );
 
   const enabledTemplate = rowData => (
-    <div className={styles.checkedValueColumn} style={{ textAlign: 'center' }}>
-      {rowData.enabled ? (
-        <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
-      ) : null}
+    <div className={styles.checkedValueColumn}>
+      {rowData.enabled ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
     </div>
   );
 
@@ -144,6 +156,10 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     }
     if (fieldHeader === 'shortCode') {
       header = 'Code';
+      return header;
+    }
+    if (fieldHeader === 'isCorrect') {
+      header = 'Correct';
       return header;
     }
     header = fieldHeader;
@@ -236,15 +252,9 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   const renderColumns = validations => {
     const fieldColumns = getOrderedValidations(Object.keys(validations[0])).map(field => {
       let template = null;
-      if (field === 'automatic') {
-        template = automaticTemplate;
-      }
-      if (field === 'enabled') {
-        template = enabledTemplate;
-      }
-      if (field === 'levelError') {
-        template = levelErrorTemplate;
-      }
+      if (field === 'automatic') template = automaticTemplate;
+      if (field === 'enabled') template = enabledTemplate;
+      if (field === 'isCorrect') template = correctTemplate;
       return (
         <Column
           body={template}
