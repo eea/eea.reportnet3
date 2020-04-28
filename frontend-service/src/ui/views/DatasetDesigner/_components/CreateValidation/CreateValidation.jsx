@@ -3,6 +3,7 @@ import React, { useEffect, useReducer, useContext, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import pull from 'lodash/pull';
+import pick from 'lodash/pick';
 
 import styles from './CreateValidation.module.scss';
 
@@ -63,17 +64,30 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
       tabKey: 'data'
     },
     {
-      label: resourcesContext.messages.tabMenuExpressions,
+      label: resourcesContext.messages.tabMenuExpression,
       className: styles.flow_tab,
-      tabKey: 'expressions'
+      tabKey: 'expression'
     }
   ]);
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
+  const [tabsChanges, setTabsChanges] = useState({});
 
   const ruleDisablingCheckListener = [creationFormState.candidateRule.table, creationFormState.candidateRule.field];
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
 
   const componentName = 'createValidation';
+
+  useEffect(() => {
+    const tabsKeys = tabMenuItems.map(tabMenu => {
+      return pick(tabMenu, ['tabKey']);
+    });
+    const tabChangesInitValues = {};
+    tabsKeys.forEach(tab => {
+      tabChangesInitValues[tab.tabKey] = false;
+    });
+
+    setTabsChanges(tabChangesInitValues);
+  }, []);
 
   useEffect(() => {
     if (!isEmpty(tabs)) {
@@ -332,6 +346,15 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     toggleVisibility(false);
   };
 
+  const onTabChange = tab => {
+    console.log('tab: ', tab);
+    const newTabsChanges = { ...tabsChanges };
+    newTabsChanges[tabMenuActiveItem.tabKey] = true;
+    console.log(newTabsChanges);
+    setTabsChanges(newTabsChanges);
+    setTabMenuActiveItem(tab);
+  };
+
   const dialogLayout = children => (
     <Dialog
       header={
@@ -348,14 +371,17 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
 
   return dialogLayout(
     <>
-      <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
+      <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => onTabChange(e.value)} />
       <form>
         <div id={styles.QCFormWrapper}>
           <div className={styles.body}>
             {tabMenuActiveItem.tabKey == 'data' && (
               <div className={styles.section}>
                 <fieldset>
-                  <div className={`${styles.field} ${styles.qcTable}`}>
+                  <div
+                    className={`${styles.field} ${styles.qcTable} formField ${
+                      tabsChanges.data && isEmpty(creationFormState.candidateRule.table) ? 'error' : ''
+                    }`}>
                     <label htmlFor="table">{resourcesContext.messages.table}</label>
                     <Dropdown
                       id={`${componentName}__table`}
@@ -377,11 +403,17 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                       value={creationFormState.candidateRule.table}
                     />
                   </div>
-                  <div className={`${styles.field} ${styles.qcField}`}>
+                  <div
+                    className={`${styles.field} ${styles.qcField} formField ${
+                      tabsChanges.data && isEmpty(creationFormState.candidateRule.field) ? 'error' : ''
+                    }`}>
                     <label htmlFor="field">{resourcesContext.messages.field}</label>
                     {fieldsDropdown}
                   </div>
-                  <div className={`${styles.field} ${styles.qcShortCode}`}>
+                  <div
+                    className={`${styles.field} ${styles.qcShortCode} formField ${
+                      tabsChanges.data && isEmpty(creationFormState.candidateRule.shortCode) ? 'error' : ''
+                    }`}>
                     <label htmlFor="shortCode">{resourcesContext.messages.ruleShortCode}</label>
                     <InputText
                       id={`${componentName}__shortCode`}
@@ -398,7 +430,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                       }
                     />
                   </div>
-                  <div className={`${styles.field} ${styles.qcEnabled}`}>
+                  <div className={`${styles.field} ${styles.qcEnabled} formField `}>
                     <label htmlFor="QcActive">{resourcesContext.messages.enabled}</label>
                     <Checkbox
                       id={`${componentName}__active`}
@@ -413,7 +445,10 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                   </div>
                 </fieldset>
                 <fieldset>
-                  <div className={`${styles.field} ${styles.qcName}`}>
+                  <div
+                    className={`${styles.field} ${styles.qcName} formField ${
+                      tabsChanges.data && isEmpty(creationFormState.candidateRule.name) ? 'error' : ''
+                    }`}>
                     <label htmlFor="name">{resourcesContext.messages.ruleName}</label>
                     <InputText
                       id={`${componentName}__name`}
@@ -430,7 +465,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                       }
                     />
                   </div>
-                  <div className={`${styles.field} ${styles.qcDescription}`}>
+                  <div className={`${styles.field} ${styles.qcDescription} formField`}>
                     <label htmlFor="description">{resourcesContext.messages.description}</label>
                     <InputText
                       id={`${componentName}__description`}
@@ -449,7 +484,10 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                   </div>
                 </fieldset>
                 <fieldset>
-                  <div className={`${styles.field} ${styles.qcErrorType}`}>
+                  <div
+                    className={`${styles.field} ${styles.qcErrorType} formField ${
+                      tabsChanges.data && isEmpty(creationFormState.candidateRule.errorLevel) ? 'error' : ''
+                    }`}>
                     <label htmlFor="description">{resourcesContext.messages.errorType}</label>
                     <Dropdown
                       id={`${componentName}__errorType`}
@@ -470,7 +508,10 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                       value={creationFormState.candidateRule.errorLevel}
                     />
                   </div>
-                  <div className={`${styles.field} ${styles.qcErrorMessage}`}>
+                  <div
+                    className={`${styles.field} ${styles.qcErrorMessage} formField ${
+                      tabsChanges.data && isEmpty(creationFormState.candidateRule.errorMessage) ? 'error' : ''
+                    }`}>
                     <label htmlFor="errorMessage">{resourcesContext.messages.ruleErrorMessage}</label>
                     <InputText
                       id={`${componentName}__errorMessage`}
@@ -490,7 +531,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                 </fieldset>
               </div>
             )}
-            {tabMenuActiveItem.tabKey == 'expressions' && (
+            {tabMenuActiveItem.tabKey == 'expression' && (
               <>
                 <div className={styles.section}>
                   <ul>
@@ -504,6 +545,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                           onExpressionFieldUpdate={onExpressionFieldUpdate}
                           onExpressionGroup={onExpressionGroup}
                           position={i}
+                          showRequiredFields={tabsChanges.expression}
                         />
                       ))}
                   </ul>
