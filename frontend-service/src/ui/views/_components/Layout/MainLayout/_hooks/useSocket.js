@@ -1,7 +1,9 @@
 import React, { useContext } from 'react';
 
-import { isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
 import { Stomp } from '@stomp/stompjs';
+
+import { config } from 'conf';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
@@ -27,7 +29,9 @@ const useSocket = () => {
       stompClient.connect({ token }, frame => {
         stompClient.subscribe('/user/queue/notifications', notification => {
           const { type, content } = JSON.parse(notification.body);
-          notificationContext.add({ type, content });
+          config.notifications.hiddenNotifications.includes(type)
+            ? notificationContext.hide({ type, content })
+            : notificationContext.add({ type, content });
         });
       });
     }

@@ -446,6 +446,16 @@
   /* User image */
   --user-image-bg-hover: var(--main-font-color);
   --user-image-bg-opacity: 0.6;
+
+  /* Calendar */
+  --calendar-bg: var(--bg);
+  --calendar-color: var(--gray-75);
+  --calendar-border-color: var(--c-custom-gray);
+  --calendar-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+  --calendar-body-span-color: var(--gray-110);
+  --calendar-header-next-prev-color: var(--gray-75);
+  --calendar-header-bg: var(--bg);
+  --calendar-header-color: var(--gray-75);
 }
 body {
   margin: 0px;
@@ -2252,6 +2262,10 @@ body .p-dialog.edit-table .p-dialog-content {
 /*growl notifications*/
 .p-growl.p-component.p-growl-topright {
   z-index: 5100 !important;
+}
+
+.p-growl.p-growl-topright {
+  top: 75px !important;
 }
 
 .p-sidebar-right {

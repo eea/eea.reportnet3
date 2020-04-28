@@ -6,6 +6,8 @@
   "dataSchemasValidation": "/dataschema/validate/dataflow/{:dataflowId}",
   "datasetsReleasedStatus": "/datasetmetabase/dataflow/{:dataflowId}",
   "deleteDataflow": "/dataflow/{:dataflowId}",
+  "generateApiKey": "/user/generateApiKey/{:dataflowId}/{:dataProviderId}",
+  "getApiKey": "/user/getApiKey/{:dataflowId}/{:dataProviderId}",
   "globalStatistics": "/datasetmetabase/globalStatistics/{:datasetSchemaId}",
   "loadDataflowTaskPendingAccepted": "/dataflow/pendingaccepted",
   "loadDatasetsByDataflowId": "/dataflow/{:dataflowId}",
