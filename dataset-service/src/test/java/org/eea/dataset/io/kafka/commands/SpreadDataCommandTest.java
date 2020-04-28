@@ -6,14 +6,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
+import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
@@ -28,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+
 
 /**
  * The Class SpreadDataCommandTest.
@@ -55,9 +61,18 @@ public class SpreadDataCommandTest {
   @Mock
   private FieldRepository fieldRepository;
 
+  /** The partition data set metabase repository. */
+  @Mock
+  private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
+
   /** The schemas repository. */
   @Mock
   private SchemasRepository schemasRepository;
+
+
+  /** The table repository. */
+  @Mock
+  private TableRepository tableRepository;
 
   /** The eea event VO. */
   private EEAEventVO eeaEventVO;
@@ -125,12 +140,18 @@ public class SpreadDataCommandTest {
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     List<RecordValue> recordDesignValues = new ArrayList<>();
     RecordValue record = new RecordValue();
+    TableValue table = new TableValue();
+    table.setId(1L);
+    record.setTableValue(table);
     recordDesignValues.add(record);
     when(recordRepository.findByTableValueAllRecords(Mockito.any())).thenReturn(recordDesignValues);
     List<FieldValue> fieldValues = new ArrayList<>();
     FieldValue field = new FieldValue();
     fieldValues.add(field);
     when(fieldRepository.findByRecord(Mockito.any())).thenReturn(fieldValues);
+    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(Mockito.any()))
+        .thenReturn(Optional.of(new PartitionDataSetMetabase()));
+    when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(1L);
     spreadDataCommand.execute(eeaEventVO);
     Mockito.verify(designDatasetRepository, times(1)).findByDataflowId(Mockito.anyLong());
   }

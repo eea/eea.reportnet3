@@ -1745,7 +1745,7 @@ public class DatasetServiceTest {
     try {
       datasetService.etlExportDataset(1L);
     } catch (EEAException e) {
-      Assert.assertTrue(e.getMessage().startsWith(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND));
+      assertEquals(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, 1L), e.getMessage());
       throw e;
     }
   }
@@ -1764,7 +1764,8 @@ public class DatasetServiceTest {
     try {
       datasetService.etlExportDataset(1L);
     } catch (EEAException e) {
-      Assert.assertTrue(e.getMessage().startsWith(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND));
+      assertEquals(String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND,
+          new ObjectId("5cf0e9b3b793310e9ceca190")), e.getMessage());
       throw e;
     }
   }
@@ -1863,6 +1864,103 @@ public class DatasetServiceTest {
     datasetService.updateRecords(1L, new ArrayList<RecordVO>());
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
+
+  /**
+   * Etl import dataset schema not found test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void etlImportDatasetSchemaIdNotFoundTest() throws EEAException {
+    try {
+      datasetService.etlImportDataset(1L, new ETLDatasetVO());
+    } catch (EEAException e) {
+      assertEquals(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, 1L), e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Etl import dataset not found test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void etlImportDatasetNotFoundTest() throws EEAException {
+    Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
+        .thenReturn("5cf0e9b3b793310e9ceca190");
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    try {
+      datasetService.etlImportDataset(1L, new ETLDatasetVO());
+    } catch (EEAException e) {
+      assertEquals(
+          String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, "5cf0e9b3b793310e9ceca190"),
+          e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Et import dataset test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void etImportDatasetTest() throws EEAException {
+    ETLDatasetVO etlDatasetVO = new ETLDatasetVO();
+    List<ETLTableVO> etlTableVOs = new ArrayList<>();
+    ETLTableVO etlTableVO = new ETLTableVO();
+    List<ETLRecordVO> etlRecordVOs = new ArrayList<>();
+    ETLRecordVO etlRecordVO = new ETLRecordVO();
+    List<ETLFieldVO> etlFieldVOs = new ArrayList<>();
+    ETLFieldVO etlFieldVO = new ETLFieldVO();
+    etlDatasetVO.setTables(etlTableVOs);
+    etlTableVOs.add(etlTableVO);
+    etlTableVO.setTableName("nameTableSchema");
+    etlTableVO.setRecords(etlRecordVOs);
+    etlRecordVOs.add(etlRecordVO);
+    etlRecordVO.setFields(etlFieldVOs);
+    etlFieldVOs.add(etlFieldVO);
+    etlFieldVO.setFieldName("headerName");
+    etlFieldVO.setValue("value");
+
+    DataSetSchema datasetSchema = new DataSetSchema();
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    TableSchema tableSchema = new TableSchema();
+    RecordSchema recordSchema = new RecordSchema();
+    recordSchema.setIdRecordSchema(new ObjectId());
+    List<FieldSchema> fieldSchemas = new ArrayList<>();
+    FieldSchema fieldSchema = new FieldSchema();
+    FieldSchema fieldSchema2 = new FieldSchema();
+    List<RecordValue> recordValues = new ArrayList<>();
+    RecordValue recordValue = new RecordValue();
+    List<FieldValue> fieldValues = new ArrayList<>();
+    FieldValue fieldValue = new FieldValue();
+    datasetSchema.setTableSchemas(tableSchemas);
+    tableSchemas.add(tableSchema);
+    tableSchema.setIdTableSchema(new ObjectId());
+    tableSchema.setNameTableSchema("nameTableSchema");
+    tableSchema.setRecordSchema(recordSchema);
+    recordSchema.setFieldSchema(fieldSchemas);
+    fieldSchemas.add(fieldSchema);
+    fieldSchemas.add(fieldSchema2);
+    fieldSchema.setHeaderName("headerName");
+    fieldSchema.setIdFieldSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    fieldSchema2.setHeaderName("headerName1");
+    fieldSchema2.setIdFieldSchema(new ObjectId());
+    recordValues.add(recordValue);
+    recordValue.setFields(fieldValues);
+    fieldValues.add(fieldValue);
+    fieldValue.setIdFieldSchema("5cf0e9b3b793310e9ceca190");
+    fieldValue.setValue("value");
+
+    Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
+        .thenReturn(new ObjectId().toString());
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetSchema));
+    datasetService.etlImportDataset(1L, etlDatasetVO);
+    Mockito.verify(datasetRepository, times(1)).save(Mockito.any());
+  }
+
 
   @Test
   public void testReleaseLock() {
