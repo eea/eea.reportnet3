@@ -194,11 +194,11 @@ public final class EEAErrorMessage {
 
   /** The Constant DATASET_SCHEMA_NOT_FOUND. */
   public static final String DATASET_SCHEMA_NOT_FOUND =
-      "DatasetSchema not found for datasetSchemaId";
+      "DatasetSchema not found for datasetSchemaId %s";
 
   /** The Constant DATASET_SCHEMA_ID_NOT_FOUND. */
   public static final String DATASET_SCHEMA_ID_NOT_FOUND =
-      "DatasetSchemaId not found for datasetId";
+      "DatasetSchemaId not found for datasetId %s";
 
   /** The Constant TABLE_READ_ONLY. */
   public static final String TABLE_READ_ONLY = "The table is marked as read only";
