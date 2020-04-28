@@ -4,87 +4,103 @@
   justify-content: flex-start;
   .body {
     overflow: auto hidden;
+    min-height: 294px;
     .section {
       display: flex;
-      margin-bottom: 2rem;
+      flex-direction: column;
+      justify-content: flex-start;
+      margin: 2rem 0;
       h2 {
         font-size: 1rem;
         margin: 0 0 1rem 0;
         color: var(--title-color);
       }
-      &:first-of-type {
-        flex-direction: row;
+      fieldset {
+        display: flex;
         justify-content: flex-start;
-        align-items: center;
-        margin-bottom: 2rem;
-        .subsection {
+        margin-bottom: 0.5rem;
+        .field {
           display: flex;
-          flex-direction: row;
-          justify-content: center;
-          align-items: center;
-          width: 10%;
-          &:first-of-type {
-            justify-content: space-between;
-            flex-wrap: wrap;
-            width: 90%;
-            .field {
-              display: flex;
-              flex-direction: column;
-              justify-content: flex-start;
-              width: 23%;
-              margin-bottom: 1rem;
-              padding-left: 0.1rem;
-              &.errorMessage {
-                width: 49%;
-              }
-              > label {
-                margin-bottom: 0.2rem;
-              }
+          flex-direction: column;
+          justify-content: flex-start;
+          padding-left: 0.1rem;
+          margin-right: 1rem;
+          > label {
+            margin-bottom: 0.2rem;
+          }
+          &.qcTable {
+            width: 285px;
+          }
+          &.qcField {
+            width: 285px;
+          }
+          &.qcShortCode {
+            width: 216px;
+          }
+          &.qcEnabled {
+            width: 85px;
+            margin-right: 0;
+            align-items: center;
+            :global .p-checkbox {
+              width: 2rem;
+              height: 2rem;
+            }
+            :global .p-checkbox-box {
+              width: 2rem;
+              height: 2rem;
+            }
+            :global .p-checkbox-icon {
+              font-size: calc(2rem - 4px);
             }
           }
-          &:last-of-type {
-            .field {
-              &.qcActive {
-                flex-direction: row;
-                align-items: center;
-                > label {
-                  margin: 0 0.5rem 0 0;
-                }
-              }
+          &.qcName {
+            width: 285px;
+          }
+          &.qcDescription {
+            width: 621px;
+            margin-right: 0;
+          }
+          &.qcErrorType {
+            width: 285px;
+          }
+          &.qcErrorMessage {
+            width: 621px;
+            margin-right: 0;
+          }
+        }
+      }
+      ul {
+        list-style: none;
+      }
+      > ul {
+        margin: 0px;
+        padding-left: 0;
+        .expressionsHeader {
+          display: flex;
+          justify-content: flex-start;
+          span {
+            margin-right: 1rem;
+            width: 179px;
+            text-align: center;
+            &:first-of-type {
+              width: 53px;
+              margin-right: 0;
+              text-align: left;
             }
           }
         }
       }
-      &:nth-of-type(2) {
-        flex-direction: column;
-        overflow-y: auto;
-        > ul {
-          list-style: none;
-          margin: 0px;
-          .expressionsHeader {
-            display: flex;
-            justify-content: flex-start;
-            span {
-              margin-right: 1rem;
-              width: 179px;
-              text-align: center;
-              &:first-of-type {
-                width: 53px;
-                margin-right: 0;
-                text-align: left;
-              }
-            }
-          }
-        }
-      }
+
       .expressionsActionsBtns {
         button {
           margin-right: 0.5rem;
+          margin-top: 1.2rem;
         }
       }
       textarea {
-        background-color: transparent;
+        background-color: var(--inputtext-bg);
         color: var(--inputtext-color);
+        height: 4rem;
       }
     }
   }

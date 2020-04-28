@@ -34,7 +34,10 @@ const parse = ({ type, content = {}, message, config, routes }) => {
         navigateTo.parameters.forEach(parameter => {
           urlParameters[parameter] = content[parameter];
         });
-        const section = (type.toString() !== "VALIDATION_FINISHED_EVENT") ? routes[navigateTo.section] : routes[getSectionValidationRedirectionUrl(content.type)];
+        const section =
+          type.toString() !== 'VALIDATION_FINISHED_EVENT'
+            ? routes[navigateTo.section]
+            : routes[getSectionValidationRedirectionUrl(content.type)];
         notificationDTO.redirectionUrl = getUrl(section, urlParameters, true);
         notificationDTO.message = TextUtils.parseText(notificationDTO.message, {
           navigateTo: notificationDTO.redirectionUrl
@@ -57,19 +60,16 @@ const parse = ({ type, content = {}, message, config, routes }) => {
   return new Notification(notificationDTO);
 };
 
-const getSectionValidationRedirectionUrl = (sectionDTO) => {
-  if (!isNil(sectionDTO))
-  {
-    if (sectionDTO === "REPORTING") {
-      return "DATASET";
-    }
-    else if (sectionDTO === "DESIGN") { 
-      return "DATASET_SCHEMA"
-    }
-    else {
-      return "DATA_COLLECTION"
+const getSectionValidationRedirectionUrl = sectionDTO => {
+  if (!isNil(sectionDTO)) {
+    if (sectionDTO === 'REPORTING') {
+      return 'DATASET';
+    } else if (sectionDTO === 'DESIGN') {
+      return 'DATASET_SCHEMA';
+    } else {
+      return 'DATA_COLLECTION';
     }
   }
-}
+};
 
 export const ApiNotificationRepository = { all, parse, removeAll, removeById, readAll, readById };

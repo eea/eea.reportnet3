@@ -25,6 +25,7 @@ export const groupExpressions = (expressions, groupExpressionsActive, groupCandi
       const [firstGroupExpression] = expressionsToGroup;
       if (!isNil(firstGroupExpression)) {
         newGroup.union = firstGroupExpression.union;
+        firstGroupExpression.union = '';
         newGroup.expressions = expressionsToGroup;
 
         // add to expressions in the order of the first expressions involved

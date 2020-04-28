@@ -262,18 +262,19 @@ export const Dataset = withRouter(({ match, history }) => {
     try {
       setDeleteDialogVisible(false);
       const dataDeleted = await DatasetService.deleteDataById(datasetId);
+      console.log(dataDeleted);
       if (dataDeleted) {
         setIsDataDeleted(true);
       }
-      notificationContext.add({
-        type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_SUCCESS',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
-      });
+      // notificationContext.add({
+      //   type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_SUCCESS',
+      //   content: {
+      //     dataflowId,
+      //     datasetId,
+      //     dataflowName,
+      //     datasetName
+      //   }
+      // });
     } catch (error) {
       const {
         dataflow: { name: dataflowName },

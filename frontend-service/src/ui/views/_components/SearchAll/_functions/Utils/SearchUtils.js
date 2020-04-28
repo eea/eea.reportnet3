@@ -8,9 +8,11 @@ const getSearchKeys = data => {
 const onApplySearch = (data, searchBy = [], value) => [
   ...data.filter(data => {
     const searchedParams = !isEmpty(searchBy) ? searchBy : getSearchKeys(data);
+    const filteredData = [];
     for (let index = 0; index < searchedParams.length; index++) {
-      return data[searchedParams[index]].toLowerCase().includes(value.toLowerCase());
+      filteredData.push(data[searchedParams[index]].toLowerCase().includes(value.toLowerCase()));
     }
+    return filteredData.includes(true);
   })
 ];
 

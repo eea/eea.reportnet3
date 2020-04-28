@@ -1,6 +1,6 @@
-import React, { useEffect, useContext, useRef } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 
-import { capitalize } from 'lodash';
+import capitalize from 'lodash/capitalize';
 import sanitizeHtml from 'sanitize-html';
 
 import { Growl } from 'primereact/growl';

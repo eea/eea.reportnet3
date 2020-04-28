@@ -35,7 +35,9 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
 
   const getFilter = type => {
     switch (type) {
-      case 'NUMBER':
+      case 'NUMBER_INTEGER':
+        return 'int';
+      case 'NUMBER_DECIMAL':
       case 'POINT':
       case 'COORDINATE_LONG':
       case 'COORDINATE_LAT':
@@ -43,7 +45,14 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
       case 'DATE':
         return 'date';
       case 'TEXT':
+      case 'LONG_TEXT':
         return 'any';
+      case 'EMAIL':
+        return 'email';
+      case 'PHONE':
+        return 'phone';
+      // case 'URL':
+      //   return 'url';
       default:
         return 'any';
     }
@@ -97,6 +106,37 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     />
   );
 
+  const getMaxCharactersByType = type => {
+    const intCharacters = 18;
+    // const decimalCharacters = 1078;
+    const textCharacters = 200;
+    const longTextCharacters = 10000;
+    const dateCharacters = 10;
+    switch (type) {
+      case 'NUMBER_INTEGER':
+      case 'NUMBER_DECIMAL':
+        return intCharacters;
+      case 'POINT':
+      case 'COORDINATE_LONG':
+      case 'COORDINATE_LAT':
+        return textCharacters;
+      case 'DATE':
+        return dateCharacters;
+      case 'TEXT':
+        return textCharacters;
+      case 'LONG_TEXT':
+        return longTextCharacters;
+      case 'EMAIL':
+        return textCharacters;
+      case 'PHONE':
+        return intCharacters;
+      // case 'URL':
+      //   return 'url';
+      default:
+        return null;
+    }
+  };
+
   const renderFieldEditor = () =>
     type === 'CODELIST' ? (
       renderCodelistDropdown(field, fieldValue)
@@ -106,6 +146,7 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
       <InputText
         id={field}
         keyfilter={getFilter(type)}
+        maxlength={getMaxCharactersByType(type)}
         onChange={e => onChangeForm(field, e.target.value)}
         value={fieldValue}
         // type={type === 'DATE' ? 'date' : 'text'}

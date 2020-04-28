@@ -29,6 +29,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 import { tabsValidationsReducer } from './Reducers/tabsValidationsReducer';
+import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
 const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSchemaId, onHideValidationsDialog }) => {
   const notificationContext = useContext(NotificationContext);
@@ -57,6 +58,11 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   const isLoading = value => tabsValidationsDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const isDataUpdated = value => tabsValidationsDispatch({ type: 'IS_DATA_UPDATED', payload: { value } });
+
+  useEffect(() => {
+    const response = notificationContext.hidden.find(notification => notification === 'VALIDATED_QC_RULE_EVENT');
+    if (response) onUpdateData();
+  }, [notificationContext]);
 
   const onDeleteValidation = async () => {
     try {
@@ -115,19 +121,27 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     isDataUpdated(!tabsValidationsState.isDataUpdated);
   };
 
+  useCheckNotifications(['INVALIDATED_QC_RULE_EVENT'], onUpdateData);
+
   const automaticTemplate = rowData => (
-    <div className={styles.checkedValueColumn} style={{ textAlign: 'center' }}>
-      {rowData.automatic ? (
-        <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
-      ) : null}
+    <div className={styles.checkedValueColumn}>
+      {rowData.automatic ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+    </div>
+  );
+
+  const correctTemplate = rowData => (
+    <div className={styles.checkedValueColumn}>
+      {!isNil(rowData.isCorrect) ? (
+        <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons(rowData.isCorrect ? 'check' : 'cross')} />
+      ) : (
+        <FontAwesomeIcon className={`${styles.icon} ${styles.spinner}`} icon={AwesomeIcons('spinner')} />
+      )}
     </div>
   );
 
   const enabledTemplate = rowData => (
-    <div className={styles.checkedValueColumn} style={{ textAlign: 'center' }}>
-      {rowData.enabled ? (
-        <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
-      ) : null}
+    <div className={styles.checkedValueColumn}>
+      {rowData.enabled ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
     </div>
   );
 
@@ -160,6 +174,10 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       header = 'Code';
       return header;
     }
+    if (fieldHeader === 'isCorrect') {
+      header = 'Correct';
+      return header;
+    }
     header = fieldHeader;
     return capitalize(header);
   };
@@ -172,14 +190,16 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       { id: 'shortCode', index: 3 },
       { id: 'name', index: 4 },
       { id: 'description', index: 5 },
-      { id: 'levelError', index: 6 },
-      { id: 'enabled', index: 7 },
-      { id: 'automatic', index: 8 },
-      { id: 'referenceId', index: 9 },
-      { id: 'activationGroup', index: 10 },
-      { id: 'date', index: 11 },
-      { id: 'entityType', index: 12 },
-      { id: 'actionButtons', index: 13 }
+      { id: 'message', index: 6 },
+      { id: 'levelError', index: 7 },
+      { id: 'enabled', index: 8 },
+      { id: 'automatic', index: 9 },
+      { id: 'referenceId', index: 10 },
+      { id: 'activationGroup', index: 11 },
+      { id: 'date', index: 12 },
+      { id: 'entityType', index: 13 },
+      { id: 'actionButtons', index: 14 },
+      { id: 'isCorrect', index: 15 }
     ];
     return validations
       .map(error => validationsWithPriority.filter(e => error === e.id))
@@ -218,7 +238,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     const style = {};
     const invisibleFields = ['id', 'referenceId', 'activationGroup', 'condition', 'date', 'entityType'];
     if (field.toUpperCase() === 'DESCRIPTION') {
-      style.width = '40%';
+      style.width = '23%';
     }
     // else {
     //   style.width = '20%';
@@ -249,15 +269,10 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   const renderColumns = validations => {
     const fieldColumns = getOrderedValidations(Object.keys(validations[0])).map(field => {
       let template = null;
-      if (field === 'automatic') {
-        template = automaticTemplate;
-      }
-      if (field === 'enabled') {
-        template = enabledTemplate;
-      }
-      if (field === 'levelError') {
-        template = levelErrorTemplate;
-      }
+      if (field === 'automatic') template = automaticTemplate;
+      if (field === 'enabled') template = enabledTemplate;
+      if (field === 'isCorrect') template = correctTemplate;
+      if (field === 'levelError') template = levelErrorTemplate;
       return (
         <Column
           body={template}
@@ -304,7 +319,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
           <SearchAll
             data={tabsValidationsState.filteredData}
             getValues={onLoadSearchedData}
-            searchBy={['name', 'description']}
+            searchBy={['name', 'description', 'message']}
           />
         </div>
         <Filters
@@ -362,10 +377,10 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   }
 
   return (
-    <Fragment>
+    <div className={styles.validations}>
       {validationList()}
       {tabsValidationsState.isDeleteDialogVisible && deleteValidationDialog()}
-    </Fragment>
+    </div>
   );
 });
 
