@@ -2,9 +2,9 @@
   align-items: center;
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
   margin: 2rem 0;
   width: 100%;
-  justify-content: space-between;
 
   > span {
     display: flex;
@@ -14,14 +14,14 @@
   }
 
   .dataflowInput {
-    height: 2.5em;
     color: var(--floating-label-color) !important;
+    height: 2.5em;
 
     > span {
+      border-bottom: var(--inputtext-border) !important;
       display: flex;
       flex-direction: row;
       justify-content: space-between;
-      border-bottom: var(--inputtext-border) !important;
       width: 100%;
     }
 
@@ -76,21 +76,9 @@
           opacity: 1;
         }
 
-        &:nth-child(odd) {
-          .statusBox {
-            background-color: rgba(#008675, 0.8);
-          }
-        }
-
-        &:nth-child(even) {
-          .statusBox {
-            background-color: rgba(#0286c9, 0.8);
-          }
-        }
-
         .statusBox {
           border-radius: 3px;
-          color: white;
+          color: var(--main-font-color);
           font-size: 10pt;
           font-weight: 600;
           padding: 4px;
@@ -146,13 +134,13 @@
       width: 75% !important;
 
       > label {
-        position: absolute;
-        top: 0;
         margin: 0;
-        width: 95%;
-        white-space: nowrap;
-        text-overflow: ellipsis;
         overflow: hidden;
+        position: absolute;
+        text-overflow: ellipsis;
+        top: 0;
+        white-space: nowrap;
+        width: 95%;
       }
     }
 
@@ -196,8 +184,8 @@
   }
 
   .buttonWrapper {
-    display: flex;
     align-items: center;
+    display: flex;
     justify-content: flex-end;
   }
 }

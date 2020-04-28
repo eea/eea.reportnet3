@@ -85,13 +85,7 @@ export const Filters = ({
   };
 
   const onAnimateLabel = (property, value) => {
-    filterDispatch({
-      type: 'ANIMATE_LABEL',
-      payload: {
-        animatedProperty: property,
-        isAnimated: value
-      }
-    });
+    filterDispatch({ type: 'ANIMATE_LABEL', payload: { animatedProperty: property, isAnimated: value } });
   };
 
   const onClearAllFilters = () => {
@@ -109,7 +103,6 @@ export const Filters = ({
   const onFilterData = (filter, value) => {
     const inputKeys = FilterUtils.getFilterKeys(filterState, filter, inputOptions);
     const selectedKeys = FilterUtils.getSelectedKeys(filterState, filter, selectOptions);
-
     const filteredData = FilterUtils.onApplyFilters(
       filter,
       inputKeys,
@@ -130,10 +123,7 @@ export const Filters = ({
     const orderBy = order === 0 ? -1 : order;
     const resetOrder = SortUtils.onResetOrderData(inputOptions, selectOptions, dateOptions);
 
-    filterDispatch({
-      type: 'ORDER_DATA',
-      payload: { filteredSortedData, orderBy, property, resetOrder, sortedData }
-    });
+    filterDispatch({ type: 'ORDER_DATA', payload: { filteredSortedData, orderBy, property, resetOrder, sortedData } });
   };
 
   const renderCalendarFilter = (property, i) => (
@@ -141,8 +131,8 @@ export const Filters = ({
       {renderOrderFilter(property)}
       <span className={`p-float-label ${!sendData ? styles.label : ''}`}>
         <Calendar
-          dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
           className={styles.calendarFilter}
+          dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
           inputClassName={styles.inputFilter}
           inputId={property}
           monthNavigator={true}
@@ -291,8 +281,8 @@ export const Filters = ({
               sendData ? 'p-button-secondary' : 'p-button-secondary'
             } p-button-rounded  p-button-animated-blink`}
             icon="undo"
-            onClick={() => onClearAllFilters()}
             label={resources.messages['reset']}
+            onClick={() => onClearAllFilters()}
             style={{ marginLeft: sendData ? '1rem' : '' }}
           />
         )}

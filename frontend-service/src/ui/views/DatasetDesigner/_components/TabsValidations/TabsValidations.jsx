@@ -273,13 +273,6 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     return fieldColumns;
   };
 
-  const validationListConf = {
-    filterItems: {
-      input: ['table', 'field'],
-      select: ['entityType', 'levelError', 'enabled']
-    }
-  };
-
   const validationList = () => {
     if (isUndefined(validationsList) || isEmpty(validationsList)) {
       return (
@@ -294,14 +287,12 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       <div className={null}>
         <div className={styles.searchInput}>
           <SearchAll data={filteredData} getValues={onLoadSearchedData} searchBy={['name', 'description', 'message']} />
+          <Filters
+            data={validationsList.validations}
+            getFiltredData={onLoadFilteredData}
+            selectOptions={['table', 'field', 'entityType', 'levelError', 'enabled', 'isCorrect']}
+          />
         </div>
-        <Filters
-          data={validationsList.validations}
-          getFiltredData={onLoadFilteredData}
-          inputOptions={validationListConf.filterItems['input']}
-          selectOptions={validationListConf.filterItems['select']}
-          sortable={false}
-        />
 
         {!isEmpty(searchedData) ? (
           <DataTable
@@ -342,9 +333,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     // });
   };
 
-  if (isLoading) {
-    return <Spinner className={styles.positioning} />;
-  }
+  if (isLoading) return <Spinner className={styles.positioning} />;
 
   return (
     <div className={styles.validations}>

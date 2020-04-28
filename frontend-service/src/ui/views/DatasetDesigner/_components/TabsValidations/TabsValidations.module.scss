@@ -11,7 +11,14 @@
 }
 
 .searchInput {
-  margin-top: 1rem;
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  margin: 0 0 1rem 0;
+
+  > span {
+    margin-right: 2rem;
+  }
 }
 
 .actionButtons {
