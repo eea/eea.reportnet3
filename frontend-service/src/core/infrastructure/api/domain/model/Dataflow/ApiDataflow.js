@@ -132,7 +132,7 @@ export const apiDataflow = {
   },
   generateApiKey: async (dataflowId, dataProviderId) => {
     const tokens = userStorage.get();
-    const response = await HTTPRequester.get({
+    const response = await HTTPRequester.post({
       url: getUrl(DataflowConfig.generateApiKey, { dataflowId, dataProviderId }),
       queryString: {},
       headers: {
