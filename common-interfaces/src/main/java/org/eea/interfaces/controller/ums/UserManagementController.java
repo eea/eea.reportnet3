@@ -13,6 +13,7 @@ import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -214,4 +215,26 @@ public interface UserManagementController {
    */
   @GetMapping("/getUserByUserId")
   UserRepresentationVO getUserByUserId(@RequestParam("userId") String userId);
+
+  /**
+   * Creates the api key.
+   *
+   * @param dataflowId the dataflow id
+   * @param shortCode the short code
+   * @return the string
+   */
+  @PostMapping("/createApiKey")
+  String createApiKey(@RequestParam("dataflowId") final Long dataflowId,
+      @RequestParam("dataProvider") final Long dataProvider);
+
+  /**
+   * Gets the api key.
+   *
+   * @param dataflowId the dataflow id
+   * @param countryCode the country code
+   * @return the api key
+   */
+  @GetMapping("/getApiKey")
+  String getApiKey(@RequestParam("dataflowId") final Long dataflowId,
+      @RequestParam("dataProvider") final Long dataProvider);
 }
