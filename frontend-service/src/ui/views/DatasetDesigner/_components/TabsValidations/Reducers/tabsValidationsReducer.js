@@ -1,5 +1,4 @@
 export const tabsValidationsReducer = (state, { type, payload }) => {
-  console.log('payload', payload);
   switch (type) {
     case 'FILTER_DATA':
       return { ...state, filteredData: payload.data };

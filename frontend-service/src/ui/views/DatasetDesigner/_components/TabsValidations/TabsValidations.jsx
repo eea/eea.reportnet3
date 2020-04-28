@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import capitalize from 'lodash/capitalize';
@@ -36,8 +36,6 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
 
-  // const [validationsList, setValidationsList] = useState();
-
   const [tabsValidationsState, tabsValidationsDispatch] = useReducer(tabsValidationsReducer, {
     filteredData: [],
     isDataUpdated: false,
@@ -67,13 +65,9 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   const onDeleteValidation = async () => {
     try {
       const response = await ValidationService.deleteById(dataset.datasetId, tabsValidationsState.validationId);
-      if (response.status >= 200 && response.status <= 299) {
-        onUpdateData();
-      }
+      if (response.status >= 200 && response.status <= 299) onUpdateData();
     } catch (error) {
-      notificationContext.add({
-        type: 'DELETE_RULE_ERROR'
-      });
+      notificationContext.add({ type: 'DELETE_RULE_ERROR' });
     } finally {
       onHideDeleteDialog();
     }
@@ -95,17 +89,11 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
           validation.field = aditionalInfo.fieldName;
         });
       }
-      tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_LIST', payload: { validationsServiceList } });
-      // setValidationsList(validationsServiceList);
 
-      // console.log('validationsServiceList', validationsServiceList);
-      console.log('tabsValidationsState.validationsList', tabsValidationsState.validationsList);
-      // console.log('validationList', validationsList);
+      tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_LIST', payload: { validationsServiceList } });
     } catch (error) {
       console.log(error);
-      notificationContext.add({
-        type: 'VALIDATION_SERVICE_GET_ALL_ERROR'
-      });
+      notificationContext.add({ type: 'VALIDATION_SERVICE_GET_ALL_ERROR' });
     } finally {
       isLoading(false);
     }
@@ -115,13 +103,9 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
 
   const onLoadSearchedData = data => tabsValidationsDispatch({ type: 'SEARCHED_DATA', payload: { data } });
 
-  const onShowDeleteDialog = () => {
-    isDeleteDialogVisible(true);
-  };
+  const onShowDeleteDialog = () => isDeleteDialogVisible(true);
 
-  const onUpdateData = () => {
-    isDataUpdated(!tabsValidationsState.isDataUpdated);
-  };
+  const onUpdateData = () => isDataUpdated(!tabsValidationsState.isDataUpdated);
 
   useCheckNotifications(['INVALIDATED_QC_RULE_EVENT'], onUpdateData);
 
@@ -301,8 +285,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   const validationId = value => tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_ID', payload: { value } });
 
   const validationList = () => {
-    // if (isUndefined(validationsList) || isEmpty(validationsList)) {
-    if (isUndefined(tabsValidationsState.validationsList) || isEmpty(tabsValidationsState.validationsList)) {
+    if (isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList)) {
       return (
         <div>
           <h3>{resources.messages['emptyValidations']}</h3>
@@ -310,8 +293,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       );
     }
 
-    // const paginatorRightText = `${resources.messages['fieldRecords']}: ${validationsList.validations.length}`;
-    const paginatorRightText = `${resources.messages['fieldRecords']}: ${tabsValidationsState.validationsList.validations.length}`;
+    const paginatorRightText = `${resources.messages['fieldRecords']}: ${tabsValidationsState.validationList.validations.length}`;
 
     return (
       <div className={null}>
@@ -323,8 +305,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
           />
         </div>
         <Filters
-          data={tabsValidationsState.validationsList.validations}
-          // data={validationsList.validations}
+          data={tabsValidationsState.validationList.validations}
           getFiltredData={onLoadFilteredData}
           inputOptions={validationListConf.filterItems['input']}
           resetFilters={tabsValidationsState.onResetFilters}
@@ -342,11 +323,9 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
             paginatorRight={paginatorRightText}
             rows={10}
             rowsPerPageOptions={[5, 10, 15]}
-            totalRecords={tabsValidationsState.validationsList.validations.length}
-            // totalRecords={validationsList.validations.length}
+            totalRecords={tabsValidationsState.validationList.validations.length}
             value={tabsValidationsState.searchedData}>
-            {renderColumns(tabsValidationsState.validationsList.validations)}
-            {/* {renderColumns(validationsList.validations)} */}
+            {renderColumns(tabsValidationsState.validationList.validations)}
           </DataTable>
         ) : (
           <div className={styles.noDataflows}>{resources.messages['noQCRulesWithSelectedParameters']}</div>
