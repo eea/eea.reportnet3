@@ -1745,7 +1745,7 @@ public class DatasetServiceTest {
     try {
       datasetService.etlExportDataset(1L);
     } catch (EEAException e) {
-      Assert.assertTrue(e.getMessage().startsWith(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND));
+      assertEquals(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, 1L), e.getMessage());
       throw e;
     }
   }
@@ -1764,7 +1764,8 @@ public class DatasetServiceTest {
     try {
       datasetService.etlExportDataset(1L);
     } catch (EEAException e) {
-      Assert.assertTrue(e.getMessage().startsWith(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND));
+      assertEquals(String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND,
+          new ObjectId("5cf0e9b3b793310e9ceca190")), e.getMessage());
       throw e;
     }
   }
@@ -1870,11 +1871,11 @@ public class DatasetServiceTest {
    * @throws EEAException the EEA exception
    */
   @Test(expected = EEAException.class)
-  public void etlImportDatasetSchemaNotFoundTest() throws EEAException {
+  public void etlImportDatasetSchemaIdNotFoundTest() throws EEAException {
     try {
       datasetService.etlImportDataset(1L, new ETLDatasetVO());
     } catch (EEAException e) {
-      Assert.assertTrue(e.getMessage().startsWith(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND));
+      assertEquals(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, 1L), e.getMessage());
       throw e;
     }
   }
@@ -1887,12 +1888,14 @@ public class DatasetServiceTest {
   @Test(expected = EEAException.class)
   public void etlImportDatasetNotFoundTest() throws EEAException {
     Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
-        .thenReturn(new ObjectId().toString());
+        .thenReturn("5cf0e9b3b793310e9ceca190");
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.empty());
     try {
       datasetService.etlImportDataset(1L, new ETLDatasetVO());
     } catch (EEAException e) {
-      Assert.assertTrue(e.getMessage().startsWith(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND));
+      assertEquals(
+          String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, "5cf0e9b3b793310e9ceca190"),
+          e.getMessage());
       throw e;
     }
   }

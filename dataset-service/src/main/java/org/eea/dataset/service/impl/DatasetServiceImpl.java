@@ -1535,14 +1535,15 @@ public class DatasetServiceImpl implements DatasetService {
     // Get the datasetSchemaId by the datasetId
     String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
     if (null == datasetSchemaId) {
-      throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND + " " + datasetId);
+      throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, datasetId));
     }
 
     // Get the datasetSchema by the datasetSchemaId
     DataSetSchema datasetSchema =
         schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
     if (null == datasetSchema) {
-      throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND + " " + datasetSchemaId);
+      throw new EEAException(
+          String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, datasetSchemaId));
     }
 
     // Construct object to be returned
@@ -1599,15 +1600,17 @@ public class DatasetServiceImpl implements DatasetService {
     // Get the datasetSchemaId by the datasetId
     String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
     if (null == datasetSchemaId) {
-      throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND + " " + datasetId);
+      throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, datasetId));
     }
 
     // Get the datasetSchema by the datasetSchemaId
     DataSetSchema datasetSchema =
         schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
     if (null == datasetSchema) {
-      throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND + " " + datasetSchemaId);
+      throw new EEAException(
+          String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, datasetSchemaId));
     }
+
     // Construct Maps to relate ids
     Map<String, TableSchema> tableMap = new HashMap<>();
     Map<String, FieldSchema> fieldMap = new HashMap<>();
