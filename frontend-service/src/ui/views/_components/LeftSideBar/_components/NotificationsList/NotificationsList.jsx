@@ -33,14 +33,31 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       {
         id: 'messageLevel',
         header: resources.messages['notificationLevel']
+      },
+      {
+        id: 'date',
+        header: resources.messages['date']
+      },
+      {
+        id: 'redirectionUrl',
+        header: resources.messages['url']
       }
     ];
 
-    let columnsArray = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={col.header} />);
+    let columnsArray = headers.map(col => (
+      <Column
+        body={col.id === 'redirectionUrl' ? linkTemplate : null}
+        sortable={true}
+        key={col.id}
+        field={col.id}
+        header={col.header}
+      />
+    ));
 
     setColumns(columnsArray);
 
     const notificationsArray = notificationContext.all.map(notification => {
+      console.log({ notification });
       const message = sanitizeHtml(notification.message, {
         allowedTags: [],
         allowedAttributes: {
@@ -54,12 +71,34 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
 
       return {
         message: message,
-        messageLevel: capitalizedMessageLevel
+        messageLevel: capitalizedMessageLevel,
+        date: notification.date.toLocaleString(),
+        redirectionUrl: `${window.env.REACT_APP_BACKEND}${notification.redirectionUrl}`
       };
     });
     console.info('notifications: %o', notificationsArray);
     setNotifications(notificationsArray);
   }, [notificationContext]);
+
+  const getValidUrl = (url = '') => {
+    let newUrl = window.decodeURIComponent(url);
+    newUrl = newUrl.trim().replace(/\s/g, '');
+
+    if (/^(:\/\/)/.test(newUrl)) return `http${newUrl}`;
+
+    if (!/^(f|ht)tps?:\/\//i.test(newUrl)) return `//${newUrl}`;
+
+    return newUrl;
+  };
+
+  const linkTemplate = rowData => {
+    console.log(rowData);
+    return (
+      <a href={getValidUrl(rowData.redirectionUrl)} target="_blank" rel="noopener noreferrer">
+        {rowData.redirectionUrl}
+      </a>
+    );
+  };
 
   const onChangePage = event => {
     setNumberRows(event.rows);
