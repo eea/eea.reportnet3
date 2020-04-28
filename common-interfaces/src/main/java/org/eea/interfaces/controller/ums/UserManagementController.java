@@ -13,7 +13,6 @@ import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -224,9 +223,9 @@ public interface UserManagementController {
    * @param shortCode the short code
    * @return the string
    */
-  @PostMapping("/createApiKey/{dataflowId}/{countryId}")
-  String createApiKey(@PathVariable("dataflowId") final Long dataflowId,
-      @PathVariable("countryId") final Long countryId);
+  @PostMapping("/createApiKey")
+  String createApiKey(@RequestParam("dataflowId") final Long dataflowId,
+      @RequestParam("dataProvider") final Long dataProvider);
 
   /**
    * Gets the api key.
@@ -235,7 +234,7 @@ public interface UserManagementController {
    * @param countryCode the country code
    * @return the api key
    */
-  @GetMapping("/getApiKey/{dataflowId}/{countryId}")
-  String getApiKey(@PathVariable("dataflowId") final Long dataflowId,
-      @PathVariable("countryId") final Long countryId);
+  @GetMapping("/getApiKey")
+  String getApiKey(@RequestParam("dataflowId") final Long dataflowId,
+      @RequestParam("dataProvider") final Long dataProvider);
 }

@@ -30,7 +30,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -442,9 +441,9 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER')")
-  @PostMapping("/createApiKey/{dataflowId}/{countryId}")
-  public String createApiKey(@PathVariable("dataflowId") final Long dataflowId,
-      @PathVariable("countryId") final Long countryId) {
+  @PostMapping("/createApiKey")
+  public String createApiKey(@RequestParam("dataflowId") final Long dataflowId,
+      @RequestParam("dataProvider") final Long dataProvider) {
 
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
@@ -455,7 +454,7 @@ public class UserManagementControllerImpl implements UserManagementController {
           EEAErrorMessage.USER_NOTFOUND);
     }
     try {
-      return keycloakConnectorService.updateApiKey(user, dataflowId, countryId);
+      return keycloakConnectorService.updateApiKey(user, dataflowId, dataProvider);
     } catch (EEAException e) {
       LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -466,9 +465,9 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER')")
-  @GetMapping("/getApiKey/{dataflowId}/{countryId}")
-  public String getApiKey(@PathVariable("dataflowId") final Long dataflowId,
-      @PathVariable("countryId") final Long countryId) {
+  @GetMapping("/getApiKey")
+  public String getApiKey(@RequestParam("dataflowId") final Long dataflowId,
+      @RequestParam("dataProvider") final Long dataProvider) {
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get("userId");
@@ -478,7 +477,7 @@ public class UserManagementControllerImpl implements UserManagementController {
           EEAErrorMessage.USER_NOTFOUND);
     }
     try {
-      return keycloakConnectorService.getApiKey(user, dataflowId, countryId);
+      return keycloakConnectorService.getApiKey(user, dataflowId, dataProvider);
     } catch (EEAException e) {
       LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,

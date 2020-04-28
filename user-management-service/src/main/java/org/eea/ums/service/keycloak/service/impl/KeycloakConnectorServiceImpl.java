@@ -822,12 +822,12 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    *
    * @param user the user
    * @param dataflowId the dataflow id
-   * @param countryId the country id
+   * @param dataProvider the dataProvider id
    * @return the string
    * @throws EEAException the EEA exception
    */
   @Override
-  public String updateApiKey(UserRepresentation user, Long dataflowId, Long countryId)
+  public String updateApiKey(UserRepresentation user, Long dataflowId, Long dataProvider)
       throws EEAException {
     // Create new uuid for the new key
     String apiKey = UUID.randomUUID().toString();
@@ -836,7 +836,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
         user.getAttributes() != null ? user.getAttributes() : new HashMap<>();
     List<String> apiKeys =
         attributes.get(APIKEYS) != null ? attributes.get(APIKEYS) : new ArrayList<>();
-    String newValueAttribute = dataflowId + "," + countryId;
+    String newValueAttribute = dataflowId + "," + dataProvider;
     // Find and remove old key
     if (!apiKeys.isEmpty()) {
       for (String keyString : apiKeys) {
@@ -861,19 +861,19 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    *
    * @param user the user
    * @param dataflowId the dataflow id
-   * @param countryId the country id
+   * @param dataProvider the dataProvider id
    * @return the api key
    * @throws EEAException the EEA exception
    */
   @Override
-  public String getApiKey(UserRepresentation user, Long dataflowId, Long countryId)
+  public String getApiKey(UserRepresentation user, Long dataflowId, Long dataProvider)
       throws EEAException {
     String result = "";
     Map<String, List<String>> attributes =
         user.getAttributes() != null ? user.getAttributes() : new HashMap<>();
     List<String> apiKeys =
         attributes.get(APIKEYS) != null ? attributes.get(APIKEYS) : new ArrayList<>();
-    String findValue = "," + dataflowId + "," + countryId;
+    String findValue = "," + dataflowId + "," + dataProvider;
     if (!apiKeys.isEmpty()) {
       for (String keyString : apiKeys) {
         if (keyString.contains(findValue)) {
