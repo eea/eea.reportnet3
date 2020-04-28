@@ -30,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -430,5 +431,57 @@ public class UserManagementControllerImpl implements UserManagementController {
     }
   }
 
+  /**
+   * Creates the api key.
+   *
+   * @param dataflowId the dataflow id
+   * @param shortCode the short code
+   * @return the string
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER')")
+  @PostMapping("/createApiKey")
+  public String createApiKey(@RequestParam("dataflowId") final Long dataflowId,
+      @RequestParam("dataProvider") final Long dataProvider) {
 
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get("userId");
+    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    if (user == null) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.USER_NOTFOUND);
+    }
+    try {
+      return keycloakConnectorService.updateApiKey(user, dataflowId, dataProvider);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.PERMISSION_NOT_CREATED);
+    }
+  }
+
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER')")
+  @GetMapping("/getApiKey")
+  public String getApiKey(@RequestParam("dataflowId") final Long dataflowId,
+      @RequestParam("dataProvider") final Long dataProvider) {
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get("userId");
+    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    if (user == null) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.USER_NOTFOUND);
+    }
+    try {
+      return keycloakConnectorService.getApiKey(user, dataflowId, dataProvider);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.PERMISSION_NOT_CREATED);
+    }
+  }
 }
