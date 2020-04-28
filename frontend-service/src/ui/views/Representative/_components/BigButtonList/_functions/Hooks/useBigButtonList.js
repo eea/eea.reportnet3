@@ -15,7 +15,7 @@ const useBigButtonList = ({
   handleRedirect,
   isCustodian,
   onLoadReceiptData,
-  receiptState,
+  dataflowState,
   representative,
   onShowSnapshotDialog,
   hasWritePermissions
@@ -103,17 +103,17 @@ const useBigButtonList = ({
   const receiptBigButton = [
     {
       buttonClass: 'schemaDataset',
-      buttonIcon: receiptState.isLoading ? 'spinner' : 'fileDownload',
-      buttonIconClass: receiptState.isLoading ? 'spinner' : 'fileDownload',
+      buttonIcon: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
+      buttonIconClass: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
       caption: resources.messages['confirmationReceipt'],
-      handleRedirect: receiptState.isLoading ? () => {} : () => onLoadReceiptData(),
-      infoStatus: receiptState.isOutdated,
+      handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onLoadReceiptData(),
+      infoStatus: dataflowState.isReceiptOutdated,
       layout: 'defaultBigButton',
       visibility:
         !isCustodian &&
-        !isUndefined(receiptState.isReleased) &&
-        !receiptState.isReleased.includes(false) &&
-        !receiptState.isReleased.includes(null)
+        !isUndefined(dataflowState.isReleased) &&
+        !dataflowState.isReleased.includes(false) &&
+        !dataflowState.isReleased.includes(null)
     }
   ];
 

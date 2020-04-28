@@ -27,7 +27,6 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-import { receiptReducer } from 'ui/views/_functions/Reducers/receiptReducer';
 import { representativeReducer } from './_functions/representativeReducer';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -72,11 +71,12 @@ const Representative = withRouter(({ match, history }) => {
     isDataUpdated: false,
     isPageLoading: true,
     updatedDatasetSchema: undefined,
-    isSnapshotDialogVisible: false
+    isSnapshotDialogVisible: false,
+    isReceiptLoading: false,
+    isReceiptOutdated: false
   };
 
-  const [receiptState, receiptDispatch] = useReducer(receiptReducer, {});
-  const [representativeState, representativeDispatch] = useReducer(representativeReducer, representativeInitialState);
+  const [dataflowState, dataflowDispatch] = useReducer(representativeReducer, representativeInitialState);
 
   useEffect(() => {
     if (!isNil(user.contextRoles)) onLoadPermission();
@@ -117,13 +117,13 @@ const Representative = withRouter(({ match, history }) => {
       title: 'sidebarApiKeyBtn'
     };
 
-    leftSideBarContext.addModels([representativeState.isCustodian ? propertiesBtn : propertiesBtn, apiKeyBtn]);
+    leftSideBarContext.addModels([dataflowState.isCustodian ? propertiesBtn : propertiesBtn, apiKeyBtn]);
   }, []);
 
   useEffect(() => {
     setIsPageLoading(true);
     onLoadReportingDataflow();
-  }, [dataflowId, representativeState.isDataUpdated]);
+  }, [dataflowId, dataflowState.isDataUpdated]);
 
   useEffect(() => {
     const refresh = notificationContext.toShow.find(
@@ -159,23 +159,23 @@ const Representative = withRouter(({ match, history }) => {
       `${config.permissions.DATAFLOW}${dataflowId}`
     );
 
-    representativeDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian } });
+    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian } });
   };
 
   const setIsPageLoading = isPageLoading =>
-    representativeDispatch({ type: 'SET_IS_PAGE_LOADING', payload: { isPageLoading } });
+    dataflowDispatch({ type: 'SET_IS_PAGE_LOADING', payload: { isPageLoading } });
 
-  const setDataProviderId = id => representativeDispatch({ type: 'SET_DATA_PROVIDER_ID', payload: { id } });
+  const setDataProviderId = id => dataflowDispatch({ type: 'SET_DATA_PROVIDER_ID', payload: { id } });
 
-  const setIsDataUpdated = () => representativeDispatch({ type: 'SET_IS_DATA_UPDATED' });
+  const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
 
   const setDatasetIdToSnapshotProps = id =>
-    representativeDispatch({ type: 'SET_DATASET_ID_TO_SNAPSHOT_PROPS', payload: { id } });
+    dataflowDispatch({ type: 'SET_DATASET_ID_TO_SNAPSHOT_PROPS', payload: { id } });
 
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.reporting(dataflowId);
-      representativeDispatch({
+      dataflowDispatch({
         type: 'INITIAL_LOAD',
         payload: {
           data: dataflow,
@@ -204,14 +204,14 @@ const Representative = withRouter(({ match, history }) => {
           .filter(representative => representative.dataProviderId === uniq(representativeId)[0])
           .map(releasedStatus => releasedStatus.isReleased);
 
-        const isOutdated = dataflow.representatives
+        const isReceiptOutdated = dataflow.representatives
           .filter(representative => representative.dataProviderId === uniq(representativeId)[0])
           .map(representative => representative.isReceiptOutdated);
 
-        if (isOutdated.length === 1 && isReleased.length === 1) {
-          receiptDispatch({
-            type: 'INIT_DATA',
-            payload: { isLoading: false, isOutdated: isOutdated[0], receiptPdf: {}, isReleased }
+        if (isReceiptOutdated.length === 1 && isReleased.length === 1) {
+          dataflowDispatch({
+            type: 'ON_INIT_RECEIPT_DATA',
+            payload: { isReceiptLoading: false, isReceiptOutdated: isReceiptOutdated[0], receiptPdf: {}, isReleased }
           });
         }
       }
@@ -225,7 +225,7 @@ const Representative = withRouter(({ match, history }) => {
   };
 
   const manageDialogs = (dialog, value, secondDialog, secondValue) =>
-    representativeDispatch({
+    dataflowDispatch({
       type: 'MANAGE_DIALOGS',
       payload: { dialog, value, secondDialog, secondValue, deleteInput: '' }
     });
@@ -235,58 +235,58 @@ const Representative = withRouter(({ match, history }) => {
     manageDialogs('isSnapshotDialogVisible', true);
   };
 
-  const onUpdateData = () => setIsDataUpdated(!representativeState.isDataUpdated);
+  const onUpdateData = () => setIsDataUpdated(!dataflowState.isDataUpdated);
 
   const layout = children => (
-    <MainLayout leftSideBarConfig={{ isCustodian: representativeState.isCustodian, buttons: [] }}>
+    <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
       <div className="rep-container">{children}</div>
     </MainLayout>
   );
 
-  if (representativeState.isPageLoading || isNil(representativeState.data)) return layout(<Spinner />);
+  if (dataflowState.isPageLoading || isNil(dataflowState.data)) return layout(<Spinner />);
 
   return layout(
     <div className="rep-row">
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
         <Title
-          title={!isNil(representativeState.data) ? `${representative}` : null}
-          subtitle={` ${TextUtils.ellipsis(representativeState.name)}`}
+          title={!isNil(dataflowState.data) ? `${representative}` : null}
+          subtitle={` ${TextUtils.ellipsis(dataflowState.name)}`}
           icon="representative"
           iconSize="4rem"
         />
 
         <BigButtonList
-          dataflowData={representativeState.data}
+          dataflowState={dataflowState}
+          dataflowDispatch={dataflowDispatch}
+          dataflowData={dataflowState.data}
           dataflowId={dataflowId}
-          dataProviderId={representativeState.dataProviderId}
+          dataProviderId={dataflowState.dataProviderId}
           handleRedirect={handleRedirect}
-          hasWritePermissions={representativeState.hasWritePermissions}
-          isCustodian={representativeState.isCustodian}
-          receiptDispatch={receiptDispatch}
-          receiptState={receiptState}
+          hasWritePermissions={dataflowState.hasWritePermissions}
+          isCustodian={dataflowState.isCustodian}
           representative={representative}
           onShowSnapshotDialog={onShowReleaseSnapshotDialog}
         />
 
         <SnapshotsDialog
           dataflowId={dataflowId}
-          datasetId={representativeState.datasetIdToSnapshotProps}
-          isSnapshotDialogVisible={representativeState.isSnapshotDialogVisible}
+          datasetId={dataflowState.datasetIdToSnapshotProps}
+          isSnapshotDialogVisible={dataflowState.isSnapshotDialogVisible}
           manageDialogs={manageDialogs}
         />
 
         <PropertiesDialog
-          dataflowState={representativeState}
+          dataflowState={dataflowState}
           dataflowId={dataflowId}
           history={history}
           manageDialogs={manageDialogs}
         />
 
-        {representativeState.isApiKeyDialogVisible && (
+        {dataflowState.isApiKeyDialogVisible && (
           <ApiKeyDialog
             dataflowId={dataflowId}
-            dataProviderId={representativeState.dataProviderId}
-            isApiKeyDialogVisible={representativeState.isApiKeyDialogVisible}
+            dataProviderId={dataflowState.dataProviderId}
+            isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
             manageDialogs={manageDialogs}
           />
         )}

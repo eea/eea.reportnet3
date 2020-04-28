@@ -20,8 +20,8 @@ export const BigButtonList = ({
   handleRedirect,
   hasWritePermissions,
   isCustodian,
-  receiptDispatch,
-  receiptState,
+  dataflowDispatch,
+  dataflowState,
   representative,
   onShowSnapshotDialog,
   manageDialogs
@@ -33,9 +33,9 @@ export const BigButtonList = ({
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
     if (response) {
-      receiptDispatch({
-        type: 'ON_DOWNLOAD',
-        payload: { isLoading: false }
+      dataflowDispatch({
+        type: 'ON_DOWNLOAD_RECEIPT',
+        payload: { isReceiptLoading: false }
       });
     }
   }, [notificationContext]);
@@ -60,9 +60,9 @@ export const BigButtonList = ({
 
   const onLoadReceiptData = async () => {
     try {
-      receiptDispatch({
-        type: 'ON_DOWNLOAD',
-        payload: { isLoading: true }
+      dataflowDispatch({
+        type: 'ON_DOWNLOAD_RECEIPT',
+        payload: { isReceiptLoading: true }
       });
       const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
 
@@ -74,17 +74,17 @@ export const BigButtonList = ({
         type: 'LOAD_RECEIPT_DATA_ERROR'
       });
     } finally {
-      receiptDispatch({
-        type: 'ON_DOWNLOAD',
-        payload: { isLoading: false }
+      dataflowDispatch({
+        type: 'ON_DOWNLOAD_RECEIPT',
+        payload: { isReceiptLoading: false }
       });
     }
   };
 
   const removeNew = () => {
-    receiptDispatch({
-      type: 'ON_CLEAN_UP',
-      payload: { isLoading: false, isOutdated: false }
+    dataflowDispatch({
+      type: 'ON_CLEAN_UP_RECEIPT',
+      payload: { isReceiptLoading: false, isReceiptLoading: false }
     });
   };
 
@@ -94,6 +94,8 @@ export const BigButtonList = ({
         <div className={styles.splitButtonWrapper}>
           <div className={styles.datasetItem}>
             {useBigButtonList({
+              dataflowState,
+              dataflowDispatch,
               dataflowData,
               manageDialogs,
               dataflowId,
@@ -101,7 +103,6 @@ export const BigButtonList = ({
               hasWritePermissions,
               isCustodian,
               onLoadReceiptData: onLoadReceiptData,
-              receiptState,
               representative,
               onShowSnapshotDialog
             }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <></>))}

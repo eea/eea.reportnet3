@@ -25,7 +25,6 @@ const useBigButtonList = ({
   onSaveName,
   onShowDataCollectionModal,
   onShowNewSchemaDialog,
-  receiptState,
   onShowSnapshotDialog
 }) => {
   const resources = useContext(ResourcesContext);
@@ -112,10 +111,19 @@ const useBigButtonList = ({
   const buildGroupByRepresentativeModels = dataflowData => {
     const { datasets } = dataflowData;
 
-    const uniqRepresentatives = uniq(datasets.map(dataset => dataset.datasetSchemaName));
+    /*   const uniqRepresentatives = uniq(
+      datasets.map(dataset => {
+        return { name: dataset.datasetSchemaName, id: dataset.dataProviderId };
+      })
+    ); */
+    const uniqRepresentatives = uniq(
+      datasets.map(dataset => {
+        return { name: dataset.datasetSchemaName, id: dataset.dataProviderId };
+      })
+    );
 
     if (uniqRepresentatives.length === 1 && !isCustodian) {
-      const [representative] = uniqRepresentatives;
+      // const [representative] = uniqRepresentatives;
 
       return datasets.map(dataset => {
         const datasetName = dataset.name;
@@ -148,13 +156,14 @@ const useBigButtonList = ({
     return uniqRepresentatives.map(representative => ({
       buttonClass: 'dataset',
       buttonIcon: 'representative',
-      caption: representative,
+      caption: representative.name,
       handleRedirect: () => {
-        handleRedirect(getUrl(routes.REPRESENTATIVE, { dataflowId, representative }, true));
+        handleRedirect(getUrl(routes.REPRESENTATIVE, { dataflowId, representative: representative.name }, true));
+        // window.history.replaceState(null, '', `/dataflow/${dataflowId}/${representative.id}`);
       },
       helpClassName: 'dataflow-dataset-container-help-step',
       layout: 'defaultBigButton',
-      onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representative }, true),
+      onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representative: representative.id }, true),
       visibility: !isEmpty(dataflowState.data.datasets)
     }));
   };
@@ -245,11 +254,11 @@ const useBigButtonList = ({
     return [
       {
         buttonClass: 'schemaDataset',
-        buttonIcon: receiptState.isLoading ? 'spinner' : 'fileDownload',
-        buttonIconClass: receiptState.isLoading ? 'spinner' : 'fileDownload',
+        buttonIcon: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
+        buttonIconClass: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
         caption: resources.messages['confirmationReceipt'],
-        handleRedirect: receiptState.isLoading ? () => {} : () => onLoadReceiptData(),
-        infoStatus: receiptState.isOutdated,
+        handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onLoadReceiptData(),
+        infoStatus: dataflowState.isReceiptOutdated,
         layout: 'defaultBigButton',
         visibility:
           !isCustodian &&

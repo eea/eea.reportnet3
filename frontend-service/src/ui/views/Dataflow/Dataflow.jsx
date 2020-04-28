@@ -34,7 +34,6 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { dataflowDataReducer } from './_functions/dataflowDataReducer';
-import { receiptReducer } from 'ui/views/_functions/Reducers/receiptReducer';
 
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
@@ -78,11 +77,13 @@ const Dataflow = withRouter(({ history, match }) => {
     isDataUpdated: false,
     isPageLoading: true,
     updatedDatasetSchema: undefined,
-    isSnapshotDialogVisible: false
+    isSnapshotDialogVisible: false,
+    currentUrl: '',
+    isReceiptLoading: false,
+    isReceiptOutdated: false
   };
 
-  const [dataflowState, dataflowDataDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
-  const [receiptState, receiptDispatch] = useReducer(receiptReducer, {});
+  const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
   useEffect(() => {
     if (!isNil(user.contextRoles)) onLoadPermission();
@@ -250,7 +251,7 @@ const Dataflow = withRouter(({ history, match }) => {
   );
 
   const initialLoad = (dataflow, isRepresentativeView) =>
-    dataflowDataDispatch({
+    dataflowDispatch({
       type: 'INITIAL_LOAD',
       payload: {
         data: dataflow,
@@ -263,53 +264,55 @@ const Dataflow = withRouter(({ history, match }) => {
     });
 
   const loadPermissions = (hasWritePermissions, isCustodian) =>
-    dataflowDataDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian } });
+    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian } });
 
   const manageDialogs = (dialog, value, secondDialog, secondValue) =>
-    dataflowDataDispatch({
+    dataflowDispatch({
       type: 'MANAGE_DIALOGS',
       payload: { dialog, value, secondDialog, secondValue, deleteInput: '' }
     });
 
   const onDeleteDataflow = event =>
-    dataflowDataDispatch({ type: 'ON_DELETE_DATAFLOW', payload: { deleteInput: event.target.value } });
+    dataflowDispatch({ type: 'ON_DELETE_DATAFLOW', payload: { deleteInput: event.target.value } });
 
   const onEditData = (newName, newDescription) =>
-    dataflowDataDispatch({
+    dataflowDispatch({
       type: 'ON_EDIT_DATA',
       payload: { name: newName, description: newDescription, isEditDialogVisible: false }
     });
 
-  const setDataProviderId = id => dataflowDataDispatch({ type: 'SET_DATA_PROVIDER_ID', payload: { id } });
+  const setDataProviderId = id => dataflowDispatch({ type: 'SET_DATA_PROVIDER_ID', payload: { id } });
 
   const setDatasetIdToSnapshotProps = id =>
-    dataflowDataDispatch({ type: 'SET_DATASET_ID_TO_SNAPSHOT_PROPS', payload: { id } });
+    dataflowDispatch({ type: 'SET_DATASET_ID_TO_SNAPSHOT_PROPS', payload: { id } });
 
   const setDesignDatasetSchemas = designDatasets =>
-    dataflowDataDispatch({ type: 'SET_DESIGN_DATASET_SCHEMAS', payload: { designDatasets } });
+    dataflowDispatch({ type: 'SET_DESIGN_DATASET_SCHEMAS', payload: { designDatasets } });
 
   const setFormHasRepresentatives = value =>
-    dataflowDataDispatch({ type: 'SET_FORM_HAS_REPRESENTATIVES', payload: { formHasRepresentatives: value } });
+    dataflowDispatch({ type: 'SET_FORM_HAS_REPRESENTATIVES', payload: { formHasRepresentatives: value } });
 
   const setHasRepresentativesWithoutDatasets = value =>
-    dataflowDataDispatch({
+    dataflowDispatch({
       type: 'SET_HAS_REPRESENTATIVES_WITHOUT_DATASETS',
       payload: { hasRepresentativesWithoutDatasets: value }
     });
 
   const setIsDataSchemaCorrect = validationResult =>
-    dataflowDataDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { validationResult } });
+    dataflowDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { validationResult } });
 
-  const setIsDataUpdated = () => dataflowDataDispatch({ type: 'SET_IS_DATA_UPDATED' });
+  const setCurrentUrl = url => dataflowDispatch({ type: 'SET_CURRENT_URL', payload: { url } });
+
+  const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
 
   const setIsPageLoading = isPageLoading =>
-    dataflowDataDispatch({ type: 'SET_IS_PAGE_LOADING', payload: { isPageLoading } });
+    dataflowDispatch({ type: 'SET_IS_PAGE_LOADING', payload: { isPageLoading } });
 
   const setIsRepresentativeView = isRepresentativeView =>
-    dataflowDataDispatch({ type: 'SET_IS_REPRESENTATIVE_VIEW', payload: { isRepresentativeView } });
+    dataflowDispatch({ type: 'SET_IS_REPRESENTATIVE_VIEW', payload: { isRepresentativeView } });
 
   const setUpdatedDatasetSchema = updatedData =>
-    dataflowDataDispatch({ type: 'SET_UPDATED_DATASET_SCHEMA', payload: { updatedData } });
+    dataflowDispatch({ type: 'SET_UPDATED_DATASET_SCHEMA', payload: { updatedData } });
 
   const onEditDataflow = (newName, newDescription) => {
     onEditData(newName, newDescription);
@@ -371,9 +374,9 @@ const Dataflow = withRouter(({ history, match }) => {
       }
 
       if (!isEmpty(dataflow.representatives)) {
-        const isOutdated = dataflow.representatives.map(representative => representative.isReceiptOutdated);
-        if (isOutdated.length === 1) {
-          receiptDispatch({ type: 'INIT_DATA', payload: { isLoading: false, isOutdated: isOutdated[0] } });
+        const isReceiptOutdated = dataflow.representatives.map(representative => representative.isReceiptOutdated);
+        if (isReceiptOutdated.length === 1) {
+          dataflowDispatch({ type: 'ON_INIT_RECEIPT_DATA', payload: { isReceiptOutdated: isReceiptOutdated[0] } });
         }
       }
     } catch (error) {
@@ -430,11 +433,10 @@ const Dataflow = withRouter(({ history, match }) => {
 
         <BigButtonList
           dataflowState={dataflowState}
+          dataflowDispatch={dataflowDispatch}
           handleRedirect={handleRedirect}
           onSaveName={onSaveName}
           onUpdateData={setIsDataUpdated}
-          receiptDispatch={receiptDispatch}
-          receiptState={receiptState}
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}
           onShowSnapshotDialog={onShowSnapshotDialog}
         />

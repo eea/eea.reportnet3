@@ -30,13 +30,12 @@ import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const BigButtonList = ({
+  dataflowDispatch,
   dataflowState,
   handleRedirect,
   isDataSchemaCorrect,
   onSaveName,
   onUpdateData,
-  receiptDispatch,
-  receiptState,
   setUpdatedDatasetSchema,
   onShowSnapshotDialog,
   updatedDatasetSchema
@@ -69,7 +68,7 @@ export const BigButtonList = ({
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
 
     if (response) {
-      receiptDispatch({ type: 'ON_DOWNLOAD', payload: { isLoading: false } });
+      dataflowDispatch({ type: 'ON_DOWNLOAD_RECEIPT', payload: { isReceiptLoading: false } });
     }
   }, [notificationContext]);
 
@@ -95,9 +94,9 @@ export const BigButtonList = ({
   };
 
   const removeNew = () => {
-    receiptDispatch({
-      type: 'ON_CLEAN_UP',
-      payload: { isLoading: false, isOutdated: false }
+    dataflowDispatch({
+      type: 'ON_CLEAN_UP_RECEIPT',
+      payload: { isReceiptLoading: false, isReceiptOutdated: false }
     });
   };
 
@@ -251,9 +250,9 @@ export const BigButtonList = ({
 
   const onLoadReceiptData = async () => {
     try {
-      receiptDispatch({
-        type: 'ON_DOWNLOAD',
-        payload: { isLoading: true }
+      dataflowDispatch({
+        type: 'ON_DOWNLOAD_RECEIPT',
+        payload: { isReceiptLoading: true }
       });
       const response = await ConfirmationReceiptService.get(dataflowId, dataflowState.dataProviderId);
 
@@ -265,9 +264,9 @@ export const BigButtonList = ({
         type: 'LOAD_RECEIPT_DATA_ERROR'
       });
     } finally {
-      receiptDispatch({
-        type: 'ON_DOWNLOAD',
-        payload: { isLoading: false }
+      dataflowDispatch({
+        type: 'ON_DOWNLOAD_RECEIPT',
+        payload: { isReceiptLoading: false }
       });
     }
   };
@@ -299,8 +298,7 @@ export const BigButtonList = ({
     onShowDataCollectionModal,
     onShowNewSchemaDialog,
     onShowUpdateDataCollectionModal,
-    receiptDispatch, //
-    receiptState,
+
     onShowSnapshotDialog,
     updatedDatasetSchema
   })

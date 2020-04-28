@@ -55,6 +55,14 @@ export const representativeReducer = (state, { type, payload }) => {
 
     case 'SET_IS_REPRESENTATIVE_VIEW':
       return { ...state, IsRepresentativeView: payload.isRepresentativeView };
+    case 'ON_INIT_RECEIPT_DATA':
+      return { ...state, ...payload };
+
+    case 'ON_DOWNLOAD_RECEIPT':
+      return { ...state, isReceiptLoading: payload.isReceiptLoading };
+
+    case 'ON_CLEAN_UP_RECEIPT':
+      return { ...state, ...payload };
 
     default:
       return state;
