@@ -4,8 +4,6 @@ import isEmpty from 'lodash/isEmpty';
 
 import styles from './ReportingObligations.module.scss';
 
-import ObligationConf from 'conf/obligation.config.json';
-
 import { CardsView } from './_components/CardsView';
 import { Filters } from 'ui/views/_components/Filters';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
@@ -129,6 +127,13 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     organizations: reportingObligationState.organizations
   };
 
+  const reportingObligationsConf = {
+    filterItems: {
+      date: ['expirationDate'],
+      dropdown: ['countries', 'issues', 'organizations']
+    }
+  };
+
   const renderData = () =>
     reportingObligationState.isTableView ? (
       <TableView
@@ -171,9 +176,9 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
       <div className={styles.filters}>
         <Filters
           data={reportingObligationState.data}
-          dateOptions={ObligationConf.filterItems['date']}
+          dateOptions={reportingObligationsConf.filterItems['date']}
           dropDownList={parsedFilterList}
-          dropdownOptions={ObligationConf.filterItems['dropdown']}
+          dropdownOptions={reportingObligationsConf.filterItems['dropdown']}
           filterByList={reportingObligationState.filterBy}
           sendData={onLoadReportingObligations}
         />
