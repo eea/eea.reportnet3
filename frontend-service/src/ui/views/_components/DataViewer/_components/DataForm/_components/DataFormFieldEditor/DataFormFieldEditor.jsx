@@ -107,15 +107,20 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
   );
 
   const getMaxCharactersByType = type => {
-    const intCharacters = 18;
-    // const decimalCharacters = 1078;
-    const textCharacters = 200;
-    const longTextCharacters = 10000;
+    const longCharacters = 20;
+    const decimalCharacters = 40;
     const dateCharacters = 10;
+    const textCharacters = 5000;
+    const longTextCharacters = 10000;
+    const emailCharacters = 256;
+    const phoneCharacters = 256;
+    const urlCharacters = 5000;
+
     switch (type) {
       case 'NUMBER_INTEGER':
+        return longCharacters;
       case 'NUMBER_DECIMAL':
-        return intCharacters;
+        return decimalCharacters;
       case 'POINT':
       case 'COORDINATE_LONG':
       case 'COORDINATE_LAT':
@@ -127,11 +132,11 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
       case 'LONG_TEXT':
         return longTextCharacters;
       case 'EMAIL':
-        return textCharacters;
+        return emailCharacters;
       case 'PHONE':
-        return intCharacters;
-      // case 'URL':
-      //   return 'url';
+        return phoneCharacters;
+      case 'URL':
+        return urlCharacters;
       default:
         return null;
     }

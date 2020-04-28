@@ -2,16 +2,21 @@ package org.eea.dataset.io.kafka.commands;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
+import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
@@ -33,6 +38,10 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
+  /** The partition data set metabase repository. */
+  @Autowired
+  private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
+
   /** The design dataset repository. */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
@@ -48,6 +57,10 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
   /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
+
+  /** The table repository. */
+  @Autowired
+  private TableRepository tableRepository;
 
   /** The Constant DATASET_ID. */
   private static final String DATASET_ID = "dataset_%s";
@@ -89,15 +102,16 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
   }
 
 
+
   /**
    * Spread data.
    *
    * @param designs the designs
-   * @param dataset the dataset
+   * @param datasetId the dataset id
    * @param idDatasetSchema the id dataset schema
    */
   @Transactional
-  private void spreadData(List<DesignDataset> designs, Long dataset, String idDatasetSchema) {
+  private void spreadData(List<DesignDataset> designs, Long datasetId, String idDatasetSchema) {
     for (DesignDataset design : designs) {
       // get tables from schema
       DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
@@ -110,6 +124,8 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
       }
       // get the data from designs datasets
       if (!listOfTablesFiltered.isEmpty()) {
+
+
 
         TenantResolver.setTenantName(String.format(DATASET_ID, design.getId().toString()));
         List<RecordValue> recordDesignValues = new ArrayList<>();
@@ -124,13 +140,27 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
 
         // fill the data
         DatasetValue ds = new DatasetValue();
-        ds.setId(dataset);
+        ds.setId(datasetId);
+
+        Optional<PartitionDataSetMetabase> datasetPartition =
+            partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(datasetId);
+        Long datasetPartitionId = null;
+        if (null != datasetPartition.orElse(null)) {
+          datasetPartitionId = datasetPartition.get().getId();
+        }
 
         for (RecordValue record : recordDesignValues) {
           RecordValue recordAux = new RecordValue();
-          recordAux.setTableValue(record.getTableValue());
+          TableValue tableAux = record.getTableValue();
+          TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
+          tableAux.setId(
+              tableRepository.findIdByIdTableSchema(record.getTableValue().getIdTableSchema()));
 
-          recordAux.setDatasetPartitionId(dataset);
+          recordAux.setTableValue(tableAux);
+          recordAux.setIdRecordSchema(record.getIdRecordSchema());
+          recordAux.setDatasetPartitionId(datasetPartitionId);
+
+          TenantResolver.setTenantName(String.format(DATASET_ID, design.getId().toString()));
           List<FieldValue> fieldValues = fieldRepository.findByRecord(record);
           List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
           for (FieldValue field : fieldValues) {
@@ -146,7 +176,7 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
         }
         if (!recordDesignValuesList.isEmpty()) {
           // save values
-          TenantResolver.setTenantName(String.format(DATASET_ID, dataset));
+          TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
           recordRepository.saveAll(recordDesignValuesList);
         }
       }
