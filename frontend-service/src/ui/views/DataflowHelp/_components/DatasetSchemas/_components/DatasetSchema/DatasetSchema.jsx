@@ -5,6 +5,8 @@ import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
+import styles from './DatasetSchema.module.scss';
+
 import { TreeView } from 'ui/views/_components/TreeView';
 
 const DatasetSchema = ({ designDataset, index, validationList }) => {
@@ -13,6 +15,11 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
       const parsedDesignDataset = parseDesignDataset(designDataset, validationList);
 
       const columnOptions = {
+        levelErrorTypes: {
+          hasClass: true,
+          class: styles.levelError,
+          subClasses: [styles.blocker, styles.error, styles.warning, styles.info]
+        },
         fields: {
           filtered: false,
           groupable: true,
@@ -37,10 +44,10 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
                 { label: 'False', value: 'false' }
               ],
               levelError: [
-                { label: 'Info', value: 'INFO' },
-                { label: 'Warning', value: 'WARNING' },
-                { label: 'Error', value: 'ERROR' },
-                { label: 'Blocker', value: 'BLOCKER' }
+                { label: 'Info', value: 'INFO', class: styles.levelError, subclass: styles.info },
+                { label: 'Warning', value: 'WARNING', class: styles.levelError, subclass: styles.warning },
+                { label: 'Error', value: 'ERROR', class: styles.levelError, subclass: styles.error },
+                { label: 'Blocker', value: 'BLOCKER', class: styles.levelError, subclass: styles.blocker }
               ]
             }
           },
@@ -105,7 +112,7 @@ const parseDesignDataset = (design, validationList) => {
       table.tableSchemaName = tableDTO.tableSchemaName;
       table.tableSchemaDescription = tableDTO.tableSchemaDescription;
       table.tableSchemaReadOnly = tableDTO.tableSchemaReadOnly;
-      table.tableSchemaPrefilled = !isNil(tableDTO.tableSchemaPrefilled);
+      table.tableSchemaToPrefill = !isNil(tableDTO.tableSchemaToPrefill);
       if (!isNull(tableDTO.records) && !isNil(tableDTO.records[0].fields) && tableDTO.records[0].fields.length > 0) {
         const containsCodelists = !isEmpty(
           tableDTO.records[0].fields.filter(fieldElmt => fieldElmt.type === 'CODELIST')
@@ -113,6 +120,8 @@ const parseDesignDataset = (design, validationList) => {
         const fields = tableDTO.records[0].fields.map(fieldDTO => {
           const field = {};
           field.name = fieldDTO.name;
+          field.pk = fieldDTO.pk;
+          field.required = fieldDTO.required;
           field.description = !isNull(fieldDTO.description) ? fieldDTO.description : '-';
           field.type = fieldDTO.type;
           if (containsCodelists) {
