@@ -348,7 +348,7 @@ public class UserManagementControllerImpl implements UserManagementController {
 
     UserRepresentation user = keycloakConnectorService.getUser(userId);
     if (user != null) {
-      user.setAttributes(attributes);
+      user = securityProviderInterfaceService.setAttributesWithApiKey(user, attributes);
     } else {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           String.format(EEAErrorMessage.USER_NOTFOUND, userId));
