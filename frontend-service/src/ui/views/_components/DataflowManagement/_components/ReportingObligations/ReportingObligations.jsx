@@ -82,8 +82,6 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     }
   };
 
-  console.log('searchedData', reportingObligationState.searchedData);
-
   const onLoadReportingObligations = async filterData => {
     isLoading(true);
     try {

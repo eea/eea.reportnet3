@@ -40,6 +40,9 @@ export const filterReducer = (state, { type, payload }) => {
         labelAnimations: { ...state.labelAnimations, [payload.animatedProperty]: payload.isAnimated }
       };
 
+    case 'ON_SEARCH_DATA':
+      return { ...state, filteredData: payload.searchedValues, searchBy: payload.value };
+
     default:
       return state;
   }

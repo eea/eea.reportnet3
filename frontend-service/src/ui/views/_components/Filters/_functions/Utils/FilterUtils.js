@@ -12,26 +12,38 @@ const checkDates = (betweenDates, data) => {
 };
 
 const checkFilters = (filteredKeys, dataflow, state) => {
-  for (let i = 0; i < filteredKeys.length; i++) {
-    if (state.filterBy[filteredKeys[i]].toLowerCase() !== '') {
-      if (!dataflow[filteredKeys[i]].toLowerCase().includes(state.filterBy[filteredKeys[i]].toLowerCase())) {
-        return false;
+  if (filteredKeys) {
+    for (let i = 0; i < filteredKeys.length; i++) {
+      if (state.filterBy[filteredKeys[i]].toLowerCase() !== '') {
+        if (!dataflow[filteredKeys[i]].toLowerCase().includes(state.filterBy[filteredKeys[i]].toLowerCase())) {
+          return false;
+        }
       }
     }
   }
   return true;
 };
 
+const checkSearched = (state, data, searchedKeys) => {
+  const searched = [];
+  for (let index = 0; index < searchedKeys.length; index++) {
+    searched.push(data[searchedKeys[index]].toLowerCase().includes(state.searchBy.toLowerCase()));
+  }
+  return searched.includes(true);
+};
+
 const checkSelected = (state, data, selectedKeys) => {
-  for (let index = 0; index < selectedKeys.length; index++) {
-    if (!isEmpty(state.filterBy[selectedKeys[index]])) {
-      if (!isNil(data[selectedKeys[index]])) {
-        if (
-          ![...state.filterBy[selectedKeys[index]].map(option => option.toLowerCase())].includes(
-            data[selectedKeys[index]].toString().toLowerCase()
-          )
-        ) {
-          return false;
+  if (selectedKeys) {
+    for (let index = 0; index < selectedKeys.length; index++) {
+      if (!isEmpty(state.filterBy[selectedKeys[index]])) {
+        if (!isNil(data[selectedKeys[index]])) {
+          if (
+            ![...state.filterBy[selectedKeys[index]].map(option => option.toLowerCase())].includes(
+              data[selectedKeys[index]].toString().toLowerCase()
+            )
+          ) {
+            return false;
+          }
         }
       }
     }
@@ -90,6 +102,10 @@ const getOptionTypes = (data, option, list) => {
   }
 };
 
+const getSearchKeys = data => {
+  if (!isNil(data)) return Object.keys(data).filter(item => item !== 'id' && item !== 'key');
+};
+
 const getSelectedKeys = (state, select, selectOptions = []) =>
   Object.keys(state.filterBy).filter(key => key !== select && selectOptions.includes(key));
 
@@ -101,12 +117,23 @@ const getYesterdayDate = () => {
   return new Date(yesterdayDate);
 };
 
-const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value, dateOptions = [], selectOptions = []) => [
+const onApplyFilters = (
+  filter,
+  filteredKeys,
+  state,
+  selectedKeys,
+  value,
+  dateOptions = [],
+  selectOptions = [],
+  dropdownOptions = [],
+  searchedKeys
+) => [
   ...state.data.filter(data => {
     if (selectOptions.includes(filter) && !isNil(data[filter])) {
       return (
         checkDates(state.filterBy[dateOptions], data[dateOptions]) &&
         checkFilters(filteredKeys, data, state) &&
+        checkSearched(state, data, searchedKeys) &&
         checkSelected(state, data, selectedKeys) &&
         (isEmpty(value)
           ? true
@@ -119,17 +146,36 @@ const onApplyFilters = (filter, filteredKeys, state, selectedKeys, value, dateOp
         ? new Date(data[filter]).getTime() / 1000 >= dates[0] &&
             new Date(data[filter]).getTime() / 1000 <= dates[1] &&
             checkFilters(filteredKeys, data, state) &&
+            checkSearched(state, data, searchedKeys) &&
             checkSelected(state, data, selectedKeys)
-        : checkFilters(filteredKeys, data, state) && checkSelected(state, data, selectedKeys);
+        : checkFilters(filteredKeys, data, state) &&
+            checkSearched(state, data, searchedKeys) &&
+            checkSelected(state, data, selectedKeys);
     } else {
       return (
         !isNil(data[filter]) &&
         data[filter].toLowerCase().includes(value.toLowerCase()) &&
         checkFilters(filteredKeys, data, state) &&
+        checkSearched(state, data, searchedKeys) &&
         checkSelected(state, data, selectedKeys) &&
         checkDates(state.filterBy[dateOptions], data[dateOptions])
       );
     }
+  })
+];
+
+const onApplySearch = (data, searchBy = [], value, state, inputKeys, selectedKeys) => [
+  ...data.filter(data => {
+    const searchedParams = !isEmpty(searchBy) ? searchBy : getSearchKeys(data);
+    const filteredData = [];
+    for (let index = 0; index < searchedParams.length; index++) {
+      if (!isNil(data[searchedParams[index]])) {
+        filteredData.push(data[searchedParams[index]].toLowerCase().includes(value.toLowerCase()));
+      }
+    }
+    return (
+      filteredData.includes(true) && checkFilters(inputKeys, data, state) && checkSelected(state, data, selectedKeys)
+    );
   })
 ];
 
@@ -143,8 +189,10 @@ export const FilterUtils = {
   getFilterKeys,
   getLabelInitialState,
   getOptionTypes,
+  getSearchKeys,
   getSelectedKeys,
   getYesterdayDate,
   onApplyFilters,
+  onApplySearch,
   onClearLabelState
 };

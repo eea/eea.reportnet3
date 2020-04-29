@@ -30,6 +30,8 @@ export const Filters = ({
   filterByList,
   getFiltredData,
   inputOptions,
+  searchAll,
+  searchBy,
   selectList,
   selectOptions,
   sendData,
@@ -45,7 +47,8 @@ export const Filters = ({
     filterBy: {},
     filteredData: [],
     labelAnimations: {},
-    orderBy: {}
+    orderBy: {},
+    searchBy: ''
   });
 
   useEffect(() => {
@@ -68,7 +71,7 @@ export const Filters = ({
       dropdownOptions,
       filterByList
     );
-    const initialFilteredData = cloneDeep(data);
+    const initialFilteredData = FilterUtils.onApplySearch(data, searchBy, filterState.searchBy, filterState);
     const initialLabelAnimations = FilterUtils.getLabelInitialState(
       inputOptions,
       selectOptions,
@@ -102,6 +105,7 @@ export const Filters = ({
 
   const onFilterData = (filter, value) => {
     const inputKeys = FilterUtils.getFilterKeys(filterState, filter, inputOptions);
+    const searchedKeys = !isEmpty(searchBy) ? searchBy : FilterUtils.getSearchKeys(filterState.data);
     const selectedKeys = FilterUtils.getSelectedKeys(filterState, filter, selectOptions);
     const filteredData = FilterUtils.onApplyFilters(
       filter,
@@ -111,7 +115,8 @@ export const Filters = ({
       value,
       dateOptions,
       selectOptions,
-      dropdownOptions
+      dropdownOptions,
+      searchedKeys
     );
 
     filterDispatch({ type: 'FILTER_DATA', payload: { filteredData, filter, value } });
@@ -124,6 +129,21 @@ export const Filters = ({
     const resetOrder = SortUtils.onResetOrderData(inputOptions, selectOptions, dateOptions);
 
     filterDispatch({ type: 'ORDER_DATA', payload: { filteredSortedData, orderBy, property, resetOrder, sortedData } });
+  };
+
+  const onSearchData = value => {
+    const inputKeys = FilterUtils.getFilterKeys(filterState, '', inputOptions);
+    const selectedKeys = FilterUtils.getSelectedKeys(filterState, '', selectOptions);
+    const searchedValues = FilterUtils.onApplySearch(
+      filterState.data,
+      searchBy,
+      value,
+      filterState,
+      inputKeys,
+      selectedKeys
+    );
+
+    filterDispatch({ type: 'ON_SEARCH_DATA', payload: { searchedValues, value } });
   };
 
   const renderCalendarFilter = (property, i) => (
@@ -246,6 +266,25 @@ export const Filters = ({
     </span>
   );
 
+  const renderSearchAll = () => (
+    <span className={`p-float-label ${styles.dataflowInput}`}>
+      <InputText
+        className={styles.searchInput}
+        id={'searchInput'}
+        onChange={event => onSearchData(event.target.value)}
+        value={filterState.searchBy}
+      />
+      {filterState.searchBy && (
+        <Button
+          className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+          icon="cancel"
+          onClick={() => onSearchData('')}
+        />
+      )}
+      <label htmlFor={'searchInput'}>{resources.messages['searchAllLabel']}</label>
+    </span>
+  );
+
   const selectTemplate = option => {
     if (!isNil(option.type)) {
       return (
@@ -258,6 +297,7 @@ export const Filters = ({
 
   return (
     <div className={styles.header}>
+      {searchAll && renderSearchAll()}
       {inputOptions && inputOptions.map((option, i) => renderInputFilter(option, i))}
       {selectOptions && selectOptions.map((option, i) => renderSelectFilter(option, i))}
       {dropdownOptions && dropdownOptions.map((option, i) => renderDropdown(option, i))}
@@ -282,7 +322,10 @@ export const Filters = ({
             } p-button-rounded  p-button-animated-blink`}
             icon="undo"
             label={resources.messages['reset']}
-            onClick={() => onClearAllFilters()}
+            onClick={() => {
+              onClearAllFilters();
+              onSearchData('');
+            }}
             style={{ marginLeft: sendData ? '1rem' : '' }}
           />
         )}
