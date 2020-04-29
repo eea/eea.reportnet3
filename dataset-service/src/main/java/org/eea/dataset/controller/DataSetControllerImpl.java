@@ -606,10 +606,11 @@ public class DataSetControllerImpl implements DatasetController {
   public ETLDatasetVO etlExportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId) {
 
-    if (dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
-      LOG_ERROR.error("Forbidden: Dataset {} does not belongs to dataflow {}", datasetId,
-          dataflowId);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "");
+    if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
+      LOG_ERROR
+          .error(String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
 
     try {
@@ -633,10 +634,11 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long providerId) {
 
-    if (dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
-      LOG_ERROR.error("Forbidden: Dataset {} does not belongs to dataflow {}", datasetId,
-          dataflowId);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "");
+    if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
+      LOG_ERROR
+          .error(String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
 
     try {

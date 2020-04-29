@@ -336,6 +336,10 @@ public final class EEAErrorMessage {
   /** Rule not found for datasetSchemaId %s and ruleId %s */
   public static final String RULE_NOT_FOUND = "Rule not found for datasetSchemaId %s and ruleId %s";
 
+  /** Forbidden: Dataset %d does not belongs to dataflow %d" */
+  public static final String DATASET_NOT_BELONG_DATAFLOW =
+      "Forbidden: Dataset %d does not belongs to dataflow %d";
+
   /**
    * Instantiates a new EEA error message.
    */
