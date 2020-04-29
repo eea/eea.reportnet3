@@ -5,6 +5,8 @@ import styles from './ValidationExpressionGroup.module.scss';
 import { config } from 'conf/';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
+import isEmpty from 'lodash/isEmpty';
+
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
@@ -20,7 +22,8 @@ const ValidationExpressionGroup = ({
   onExpressionDelete,
   onExpressionFieldUpdate,
   onExpressionGroup,
-  position
+  position,
+  showRequiredFields
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const { expressionId } = expressionValues;
@@ -80,7 +83,10 @@ const ValidationExpressionGroup = ({
                 disabled={isDisabled}
               />
             </span>
-            <span className={styles.union}>
+            <span
+              className={`${styles.union} formField ${
+                showRequiredFields && position > 0 && isEmpty(expressionValues.union) ? 'error' : ''
+              }`}>
               <Dropdown
                 disabled={isDisabled || position == 0}
                 appendTo={document.body}
