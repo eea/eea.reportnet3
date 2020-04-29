@@ -127,4 +127,13 @@ public interface RulesService {
    */
   void deleteRuleByReferenceFieldSchemaPKId(String datasetSchemaId,
       String referenceFieldSchemaPKId);
+
+  /**
+   * Update automatic rule.
+   *
+   * @param datasetId the dataset id
+   * @param ruleVO the rule VO
+   * @throws EEAException
+   */
+  void updateAutomaticRule(long datasetId, RuleVO ruleVO) throws EEAException;
 }
