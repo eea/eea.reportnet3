@@ -4,6 +4,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.model.TokenInfo;
+
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
@@ -98,6 +99,7 @@ public interface KeycloakConnectorService {
    * Create group detail.
    *
    * @param groupInfo the group info
+   *
    * @throws EEAException the EEA exception
    */
   void createGroupDetail(GroupInfo groupInfo) throws EEAException;
@@ -114,6 +116,7 @@ public interface KeycloakConnectorService {
    *
    * @param userId the user resourceId
    * @param groupId the group resourceId
+   *
    * @throws EEAException the EEA exception
    */
   void addUserToGroup(String userId, String groupId) throws EEAException;
@@ -136,9 +139,11 @@ public interface KeycloakConnectorService {
    * Gets the users by email.
    *
    * @param email the email
+   *
    * @return the users by email
    */
   UserRepresentation[] getUsersByEmail(String email);
+
 
   /**
    * Gets the role.
@@ -166,31 +171,17 @@ public interface KeycloakConnectorService {
    * Gets the user.
    *
    * @param userId the user id
+   *
    * @return the user
    */
   UserRepresentation getUser(String userId);
 
-
   /**
-   * Update api key.
+   * Gets the user roles.
    *
-   * @param user the user
-   * @param dataflowId the dataflow id
-   * @param dataProvider the dataProvider id
-   * @return the string
-   * @throws EEAException the EEA exception
-   */
-  String updateApiKey(UserRepresentation user, Long dataflowId, Long dataProvider)
-      throws EEAException;
-
-  /**
-   * Gets the api key.
+   * @param userId the user id
    *
-   * @param user the user
-   * @param dataflowId the dataflow id
-   * @param dataProvider the dataProvider id
-   * @return the api key
-   * @throws EEAException the EEA exception
+   * @return the user roles
    */
-  String getApiKey(UserRepresentation user, Long dataflowId, Long dataProvider) throws EEAException;
+  RoleRepresentation[] getUserRoles(String userId);
 }

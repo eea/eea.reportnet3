@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -99,8 +100,8 @@ public class UserManagementControllerImplTest {
   @Test
   public void checkResourceAccessPermissionTest() {
     Mockito.when(securityProviderInterfaceService.checkAccessPermission("Dataflow",
-        new AccessScopeEnum[] {AccessScopeEnum.CREATE})).thenReturn(true);
-    AccessScopeEnum[] scopes = new AccessScopeEnum[] {AccessScopeEnum.CREATE};
+        new AccessScopeEnum[]{AccessScopeEnum.CREATE})).thenReturn(true);
+    AccessScopeEnum[] scopes = new AccessScopeEnum[]{AccessScopeEnum.CREATE};
     boolean checkedAccessPermission =
         userManagementController.checkResourceAccessPermission("Dataflow", scopes);
     Assert.assertTrue(checkedAccessPermission);
@@ -344,7 +345,8 @@ public class UserManagementControllerImplTest {
       userManagementController.updateUserAttributes(attributes);
     } catch (ResponseStatusException e) {
       assertEquals("bad status", HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
-      assertEquals("bad message", EEAErrorMessage.USER_NOTFOUND, e.getReason());
+      assertEquals("bad message", String.format(EEAErrorMessage.USER_NOTFOUND, "userId_123"),
+          e.getReason());
       throw e;
     }
   }
@@ -379,7 +381,8 @@ public class UserManagementControllerImplTest {
       userManagementController.getUserAttributes();
     } catch (ResponseStatusException e) {
       assertEquals("bad status", HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
-      assertEquals("bad message", EEAErrorMessage.USER_NOTFOUND, e.getReason());
+      assertEquals("bad message", String.format(EEAErrorMessage.USER_NOTFOUND, "userId_123"),
+          e.getReason());
       throw e;
     }
   }
@@ -410,7 +413,7 @@ public class UserManagementControllerImplTest {
     Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
         .addContributorsToUserGroup(Mockito.any());
     try {
-      userManagementController.addContributorsToResources(new ArrayList<ResourceAssignationVO>());
+      userManagementController.addContributorsToResources(new ArrayList<>());
     } catch (ResponseStatusException e) {
       assertEquals("bad status", HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       assertEquals("bad message", EEAErrorMessage.PERMISSION_NOT_CREATED, e.getReason());
@@ -426,12 +429,15 @@ public class UserManagementControllerImplTest {
     details.put("userId", "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-    when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(null);
+    doThrow(new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED))
+        .when(securityProviderInterfaceService)
+        .createApiKey(Mockito.anyString(), Mockito.anyLong(), Mockito.anyLong());
     try {
       userManagementController.createApiKey(1L, 1L);
     } catch (ResponseStatusException e) {
       assertEquals("bad status", HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
-      assertEquals("bad message", EEAErrorMessage.USER_NOTFOUND, e.getReason());
+      assertEquals("bad message", EEAErrorMessage.PERMISSION_NOT_CREATED,
+          e.getReason());
       throw e;
     }
   }
@@ -444,9 +450,9 @@ public class UserManagementControllerImplTest {
     details.put("userId", "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-    when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(new UserRepresentation());
-    doThrow(new EEAException("error")).when(keycloakConnectorService).updateApiKey(Mockito.any(),
-        Mockito.any(), Mockito.any());
+    doThrow(new EEAException("error")).when(securityProviderInterfaceService)
+        .createApiKey(Mockito.any(),
+            Mockito.any(), Mockito.any());
     try {
       userManagementController.createApiKey(1L, 1L);
     } catch (ResponseStatusException e) {
@@ -464,8 +470,7 @@ public class UserManagementControllerImplTest {
     details.put("userId", "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-    when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(new UserRepresentation());
-    when(keycloakConnectorService.updateApiKey(Mockito.any(), Mockito.any(), Mockito.any()))
+    when(securityProviderInterfaceService.createApiKey(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn("uuid");
     assertEquals("error", "uuid", userManagementController.createApiKey(1L, 1L));
   }
@@ -478,12 +483,14 @@ public class UserManagementControllerImplTest {
     details.put("userId", "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-    when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(null);
+    doThrow(new EEAException("error")).when(securityProviderInterfaceService)
+        .getApiKey(Mockito.any(),
+            Mockito.any(), Mockito.any());
     try {
       userManagementController.getApiKey(1L, 1L);
     } catch (ResponseStatusException e) {
       assertEquals("bad status", HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
-      assertEquals("bad message", EEAErrorMessage.USER_NOTFOUND, e.getReason());
+      assertEquals("bad message", EEAErrorMessage.PERMISSION_NOT_CREATED, e.getReason());
       throw e;
     }
   }
@@ -496,9 +503,9 @@ public class UserManagementControllerImplTest {
     details.put("userId", "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-    when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(new UserRepresentation());
-    doThrow(new EEAException("error")).when(keycloakConnectorService).getApiKey(Mockito.any(),
-        Mockito.any(), Mockito.any());
+    doThrow(new EEAException("error")).when(securityProviderInterfaceService)
+        .getApiKey(Mockito.any(),
+            Mockito.any(), Mockito.any());
     try {
       userManagementController.getApiKey(1L, 1L);
     } catch (ResponseStatusException e) {
@@ -516,9 +523,26 @@ public class UserManagementControllerImplTest {
     details.put("userId", "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-    when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(new UserRepresentation());
-    when(keycloakConnectorService.getApiKey(Mockito.any(), Mockito.any(), Mockito.any()))
+//    when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(new UserRepresentation());
+    when(securityProviderInterfaceService.getApiKey(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn("uuid");
     assertEquals("error", "uuid", userManagementController.getApiKey(1L, 1L));
+  }
+
+  @Test
+  public void authenticateUserByApiKey() {
+    TokenVO tokenVO = new TokenVO();
+    tokenVO.setPreferredUsername("userName1");
+    when(securityProviderInterfaceService.authenticateApiKey(Mockito.eq("apiKey1")))
+        .thenReturn(tokenVO);
+    TokenVO result = this.userManagementController.authenticateUserByApiKey("apiKey1");
+    Assert.assertNotNull(result);
+    Assert.assertEquals(result, tokenVO);
+  }
+
+  @Test
+  public void authenticateUserByApiKeyWrongApiKey() {
+    TokenVO result = this.userManagementController.authenticateUserByApiKey("apiKey1");
+    Assert.assertNull(result);
   }
 }

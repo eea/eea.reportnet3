@@ -1,9 +1,14 @@
 package org.eea.ums.service.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
@@ -22,6 +27,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.keycloak.common.VerificationException;
+import org.keycloak.representations.idm.RoleRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -61,12 +68,12 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     roles.add("/DATA_PROVIDER");
     claims.put("user_groups", roles);
     tokenDataVO.setOtherClaims(claims);
-    Mockito.when(jwtTokenProvider.parseToken("token")).thenReturn(tokenDataVO);
-    Mockito.when(keycloakConnectorService.generateToken(Mockito.anyString(), Mockito.anyString()))
+    when(jwtTokenProvider.parseToken("token")).thenReturn(tokenDataVO);
+    when(keycloakConnectorService.generateToken(Mockito.anyString(), Mockito.anyString()))
         .thenReturn(tokenInfo);
     ValueOperations<String, CacheTokenVO> operations = Mockito.mock(ValueOperations.class);
 
-    Mockito.when(securityRedisTemplate.opsForValue()).thenReturn(operations);
+    when(securityRedisTemplate.opsForValue()).thenReturn(operations);
     TokenVO token = keycloakSecurityProviderInterfaceService.doLogin("user1", "1234");
     Assert.assertNotNull(token);
     Assert.assertNotNull(token.getAccessToken());
@@ -83,13 +90,12 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     roles.add("/DATA_PROVIDER");
     claims.put("user_groups", roles);
     tokenDataVO.setOtherClaims(claims);
-    Mockito.when(jwtTokenProvider.parseToken("token")).thenReturn(tokenDataVO);
-    Mockito
-        .when(keycloakConnectorService.generateAdminToken(Mockito.anyString(), Mockito.anyString()))
+    when(jwtTokenProvider.parseToken("token")).thenReturn(tokenDataVO);
+    when(keycloakConnectorService.generateAdminToken(Mockito.anyString(), Mockito.anyString()))
         .thenReturn(tokenInfo);
     ValueOperations<String, CacheTokenVO> operations = Mockito.mock(ValueOperations.class);
 
-    Mockito.when(securityRedisTemplate.opsForValue()).thenReturn(operations);
+    when(securityRedisTemplate.opsForValue()).thenReturn(operations);
 
     TokenVO token = keycloakSecurityProviderInterfaceService.doLogin("user1", "1234", true);
     Assert.assertNotNull(token);
@@ -107,12 +113,12 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     roles.add("/DATA_PROVIDER");
     claims.put("user_groups", roles);
     tokenDataVO.setOtherClaims(claims);
-    Mockito.when(jwtTokenProvider.parseToken("token")).thenReturn(tokenDataVO);
-    Mockito.when(keycloakConnectorService.generateToken(Mockito.anyString(), Mockito.anyString()))
+    when(jwtTokenProvider.parseToken("token")).thenReturn(tokenDataVO);
+    when(keycloakConnectorService.generateToken(Mockito.anyString(), Mockito.anyString()))
         .thenReturn(tokenInfo);
     ValueOperations<String, CacheTokenVO> operations = Mockito.mock(ValueOperations.class);
 
-    Mockito.when(securityRedisTemplate.opsForValue()).thenReturn(operations);
+    when(securityRedisTemplate.opsForValue()).thenReturn(operations);
 
     TokenVO token = keycloakSecurityProviderInterfaceService.doLogin("user1", "1234", false);
     Assert.assertNotNull(token);
@@ -131,11 +137,11 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     roles.add("/DATA_PROVIDER");
     claims.put("user_groups", roles);
     tokenDataVO.setOtherClaims(claims);
-    Mockito.when(jwtTokenProvider.parseToken("token")).thenReturn(tokenDataVO);
-    Mockito.when(keycloakConnectorService.generateToken(Mockito.anyString())).thenReturn(tokenInfo);
+    when(jwtTokenProvider.parseToken("token")).thenReturn(tokenDataVO);
+    when(keycloakConnectorService.generateToken(Mockito.anyString())).thenReturn(tokenInfo);
     ValueOperations<String, CacheTokenVO> operations = Mockito.mock(ValueOperations.class);
 
-    Mockito.when(securityRedisTemplate.opsForValue()).thenReturn(operations);
+    when(securityRedisTemplate.opsForValue()).thenReturn(operations);
 
     TokenVO token = keycloakSecurityProviderInterfaceService.doLogin("code");
     Assert.assertNotNull(token);
@@ -155,10 +161,10 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     tokenDataVO.setOtherClaims(claims);
     ValueOperations<String, CacheTokenVO> operations = Mockito.mock(ValueOperations.class);
 
-    Mockito.when(securityRedisTemplate.opsForValue()).thenReturn(operations);
+    when(securityRedisTemplate.opsForValue()).thenReturn(operations);
 
-    Mockito.when(jwtTokenProvider.parseToken("token")).thenReturn(tokenDataVO);
-    Mockito.when(keycloakConnectorService.refreshToken(Mockito.anyString())).thenReturn(tokenInfo);
+    when(jwtTokenProvider.parseToken("token")).thenReturn(tokenDataVO);
+    when(keycloakConnectorService.refreshToken(Mockito.anyString())).thenReturn(tokenInfo);
     TokenVO token = keycloakSecurityProviderInterfaceService.refreshToken("1234");
     Assert.assertNotNull(token);
     Assert.assertNotNull(token.getAccessToken());
@@ -166,9 +172,9 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
 
   @Test
   public void checkAccessPermission() {
-    Mockito.when(keycloakConnectorService.checkUserPermision("Dataflow",
-        new AccessScopeEnum[] {AccessScopeEnum.CREATE})).thenReturn("PERMIT");
-    AccessScopeEnum[] scopes = new AccessScopeEnum[] {AccessScopeEnum.CREATE};
+    when(keycloakConnectorService.checkUserPermision("Dataflow",
+        new AccessScopeEnum[]{AccessScopeEnum.CREATE})).thenReturn("PERMIT");
+    AccessScopeEnum[] scopes = new AccessScopeEnum[]{AccessScopeEnum.CREATE};
     boolean checkedAccessPermission =
         keycloakSecurityProviderInterfaceService.checkAccessPermission("Dataflow", scopes);
     Assert.assertTrue(checkedAccessPermission);
@@ -191,8 +197,8 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     ValueOperations<String, CacheTokenVO> operations = Mockito.mock(ValueOperations.class);
     CacheTokenVO tokenVO = new CacheTokenVO();
 
-    Mockito.when(securityRedisTemplate.opsForValue()).thenReturn(operations);
-    Mockito.when(operations.get(Mockito.anyString())).thenReturn(tokenVO);
+    when(securityRedisTemplate.opsForValue()).thenReturn(operations);
+    when(operations.get(Mockito.anyString())).thenReturn(tokenVO);
     keycloakSecurityProviderInterfaceService.createResourceInstance(resourceInfoVO);
     Mockito.verify(this.keycloakConnectorService, Mockito.times(1))
         .createGroupDetail(Mockito.any(GroupInfo.class));
@@ -212,13 +218,13 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     groupInfo.setName("Dataflow-1-DATA_PROVIDER");
     groupInfo.setPath("/path");
     groupInfos[0] = groupInfo;
-    Mockito.when(keycloakConnectorService.getGroupsByUser(Mockito.anyString()))
+    when(keycloakConnectorService.getGroupsByUser(Mockito.anyString()))
         .thenReturn(groupInfos);
     ValueOperations<String, CacheTokenVO> operations = Mockito.mock(ValueOperations.class);
     CacheTokenVO tokenVO = new CacheTokenVO();
 
-    Mockito.when(securityRedisTemplate.opsForValue()).thenReturn(operations);
-    Mockito.when(operations.get(Mockito.anyString())).thenReturn(tokenVO);
+    when(securityRedisTemplate.opsForValue()).thenReturn(operations);
+    when(operations.get(Mockito.anyString())).thenReturn(tokenVO);
     List<ResourceAccessVO> result =
         keycloakSecurityProviderInterfaceService.getResourcesByUser("user1");
     Assert.assertNotNull(result);
@@ -240,7 +246,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     groupInfo.setId("idGroupInfo");
     groupInfo.setName("Dataflow-1-DATA_CUSTODIAN");
     groupInfos[0] = groupInfo;
-    Mockito.when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
+    when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
     keycloakSecurityProviderInterfaceService.addUserToUserGroup("user1",
         "DATAFLOW-1-DATA_CUSTODIAN");
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).addUserToGroup("user1",
@@ -254,13 +260,13 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     groupInfo.setId("idGroupInfo");
     groupInfo.setName("Dataflow-1-DATA_CUSTODIAN");
     groupInfos[0] = groupInfo;
-    Mockito.when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
-    Mockito.when(keycloakConnectorService.getGroupDetail("idGroupInfo")).thenReturn(groupInfo);
+    when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
+    when(keycloakConnectorService.getGroupDetail("idGroupInfo")).thenReturn(groupInfo);
 
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
     resourceInfoVO.setResourceId(1l);
     resourceInfoVO.setName("Dataflow-1-DATA_CUSTODIAN");
-    Mockito.when(groupInfoMapper.entityToClass(Mockito.any(GroupInfo.class)))
+    when(groupInfoMapper.entityToClass(Mockito.any(GroupInfo.class)))
         .thenReturn(resourceInfoVO);
     ResourceInfoVO result = this.keycloakSecurityProviderInterfaceService
         .getResourceDetails("Dataflow-1-DATA_CUSTODIAN");
@@ -281,7 +287,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     groupInfo.setId("idGroupInfo");
     groupInfo.setName("Dataflow-1-DATA_CUSTODIAN");
     groupInfos[0] = groupInfo;
-    Mockito.when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
+    when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
     keycloakSecurityProviderInterfaceService.deleteResourceInstances(resourceInfoVOs);
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).getGroups();
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).deleteGroupDetail("idGroupInfo");
@@ -297,10 +303,140 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     groupInfo.setId("idGroupInfo");
     groupInfo.setName("Dataflow-1-DATA_CUSTODIAN");
     groupInfos[0] = groupInfo;
-    Mockito.when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
+    when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
     keycloakSecurityProviderInterfaceService.deleteResourceInstancesByName(resourceNames);
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).getGroups();
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).deleteGroupDetail("idGroupInfo");
   }
 
+
+  @Test
+  public void updateApiKeyFullAttributesTest() throws EEAException {
+    UserRepresentation user = new UserRepresentation();
+    Map<String, List<String>> attributes = new HashMap<>();
+    List<String> oldKeys = new ArrayList<>();
+    oldKeys.add("uuid");
+    attributes.put("ApiKeys", oldKeys);
+    user.setAttributes(attributes);
+    when(keycloakConnectorService.getUser(Mockito.anyString())).thenReturn(user);
+    String key = keycloakSecurityProviderInterfaceService.getApiKey("userId", 1L, 1L);
+    assertNotNull(key);
+  }
+
+  @Test
+  public void getApiKeyEmptyTest() throws EEAException {
+    UserRepresentation user = new UserRepresentation();
+    user.setAttributes(null);
+    when(keycloakConnectorService.getUser(Mockito.anyString())).thenReturn(user);
+    String key = keycloakSecurityProviderInterfaceService.getApiKey("userId", 1L, 1L);
+    assertNotNull(key);
+  }
+
+  @Test
+  public void getApiKeyAttributesTest() throws EEAException {
+    UserRepresentation user = new UserRepresentation();
+    Map<String, List<String>> attributes = new HashMap<>();
+    attributes.put("ApiKeys", new ArrayList<>());
+    user.setAttributes(attributes);
+    when(keycloakConnectorService.getUser(Mockito.anyString())).thenReturn(user);
+    String key = keycloakSecurityProviderInterfaceService.getApiKey("userId", 1L, 1L);
+    assertEquals("", key);
+  }
+
+  @Test
+  public void getApiKeyFullAttributesTest() throws EEAException {
+    UserRepresentation user = new UserRepresentation();
+    Map<String, List<String>> attributes = new HashMap<>();
+    List<String> oldKeys = new ArrayList<>();
+    oldKeys.add("uuid,1,1");
+    attributes.put("ApiKeys", oldKeys);
+    user.setAttributes(attributes);
+    when(keycloakConnectorService.getUser(Mockito.anyString())).thenReturn(user);
+    String key = keycloakSecurityProviderInterfaceService.getApiKey("userId", 1L, 1L);
+    assertEquals("uuid", key);
+  }
+
+  @Test
+  public void createApiKey() throws EEAException {
+    UserRepresentation user = new UserRepresentation();
+    Map<String, List<String>> attributes = new HashMap<>();
+    List<String> oldKeys = new ArrayList<>();
+    oldKeys.add("uuid,1,1");
+    attributes.put("ApiKeys", oldKeys);
+    user.setAttributes(attributes);
+    when(keycloakConnectorService.getUser(Mockito.anyString())).thenReturn(user);
+    String key = keycloakSecurityProviderInterfaceService.createApiKey("userId", 1L, 1L);
+    assertNotNull(key);
+  }
+
+  @Test(expected = EEAException.class)
+  public void createApiKeyUserNotFoundError() throws EEAException {
+
+    try {
+      keycloakSecurityProviderInterfaceService.createApiKey("userId", 1L, 1L);
+    } catch (EEAException e) {
+      Assert.assertEquals(String.format(EEAErrorMessage.USER_NOTFOUND, "userId"), e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test
+  public void authenticateApiKey() {
+
+    //Configuration of user representations for "userId1"
+    UserRepresentation[] userRepresentations = new UserRepresentation[1];
+    UserRepresentation userRepresentation = new UserRepresentation();
+    userRepresentations[0] = userRepresentation;
+    Map<String, List<String>> attributes = new HashMap<>();
+    List<String> apiKey = new ArrayList<>();
+    apiKey.add("ApiKey1,1,1");
+    attributes.put("ApiKeys", apiKey);
+    userRepresentation.setAttributes(attributes);
+    userRepresentation.setId("userId1");
+    userRepresentation.setUsername("userName1");
+    when(keycloakConnectorService.getUsers()).thenReturn(userRepresentations);
+
+    //Configuration of group info for the user "userId1"
+    GroupInfo[] groupInfos = new GroupInfo[1];
+    GroupInfo groupInfo = new GroupInfo();
+    groupInfo.setName("Dataflow-1-DATA_PROVIDER");
+    groupInfo.setPath("/Dataflow-1-DATA_PROVIDER");
+    groupInfos[0] = groupInfo;
+    when(keycloakConnectorService.getGroupsByUser(Mockito.eq("userId1"))).thenReturn(groupInfos);
+
+    //Configuration of user roles for user "userId1"
+    RoleRepresentation[] roleRepresentations = new RoleRepresentation[1];
+    RoleRepresentation roleRepresentation = new RoleRepresentation();
+    roleRepresentation.setName("DATA_PROVIDER");
+    roleRepresentations[0] = roleRepresentation;
+    when(keycloakConnectorService.getUserRoles(Mockito.eq("userId1")))
+        .thenReturn(roleRepresentations);
+
+    TokenVO result = keycloakSecurityProviderInterfaceService.authenticateApiKey("ApiKey1");
+    Assert.assertNotNull(result);
+    Assert.assertEquals(result.getUserId(), "userId1");
+    Assert.assertEquals(result.getPreferredUsername(), "userName1");
+    Assert.assertEquals(result.getGroups().size(), 1);
+    Assert.assertEquals(result.getRoles().size(), 1);
+    Assert.assertEquals(result.getGroups().iterator().next(), "Dataflow-1-DATA_PROVIDER");
+    Assert.assertEquals(result.getRoles().iterator().next(), "DATA_PROVIDER");
+
+  }
+
+  @Test
+  public void authenticateApiKeyWrongApi() {
+
+    //Configuration of user representations for "userId1"
+    UserRepresentation[] userRepresentations = new UserRepresentation[1];
+    UserRepresentation userRepresentation = new UserRepresentation();
+    userRepresentations[0] = userRepresentation;
+    userRepresentation.setId("userId1");
+    userRepresentation.setUsername("userName1");
+    when(keycloakConnectorService.getUsers()).thenReturn(userRepresentations);
+
+    TokenVO result = keycloakSecurityProviderInterfaceService.authenticateApiKey("ApiKey1");
+    Assert.assertNull(result);
+
+
+  }
 }
