@@ -609,6 +609,14 @@
     "tabMenuConstraintData": "Info",
     "tabMenuExpressions": "Expressions",
     "deleteDatasetDataCompletedEvent": "Delete dataset data finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "tabMenuExpression": "Expression"
+    "tabMenuExpression": "Expression",
+    "longFieldFormatRestriction": "Maximum of 20 characters",
+    "decimalFieldFormatRestriction": "Maximum of 40 characters",
+    "dateFieldFormatRestriction": "YYYY-MM-DD",
+    "textFieldFormatRestriction": "Maximum of 5000 characters",
+    "longTextFieldFormatRestriction": "Maximum of 10000 characters",
+    "emailFieldFormatRestriction": "Maximum of 256 characters",
+    "urlFieldFormatRestriction": "Maximum of 5000 characters",
+    "phoneNumberFieldFormatRestriction": "Maximum of 256 characters"
   }
 }
