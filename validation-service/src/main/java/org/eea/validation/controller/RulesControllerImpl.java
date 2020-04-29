@@ -140,7 +140,6 @@ public class RulesControllerImpl implements RulesController {
         datasetSchemaId);
   }
 
-
   /**
    * Delete rule by reference field schema PK id.
    *
@@ -157,7 +156,6 @@ public class RulesControllerImpl implements RulesController {
     LOG.info("Delete thes rules with referenceId {} in datasetSchema {} successfully",
         referenceFieldSchemaPKId, datasetSchemaId);
   }
-
 
   /**
    * Creates the new rule.
@@ -247,6 +245,26 @@ public class RulesControllerImpl implements RulesController {
       rulesService.updateRule(datasetId, ruleVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Error updating rule: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+  }
+
+  /**
+   * Update automatic rule.
+   *
+   * @param datasetId the dataset id
+   * @param ruleVO the rule VO
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PutMapping("/updateAutomaticRule/{datasetId}")
+  public void updateAutomaticRule(@PathVariable("datasetId") long datasetId,
+      @RequestBody RuleVO ruleVO) {
+    try {
+      rulesService.updateAutomaticRule(datasetId, ruleVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error updating automatic rule: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
