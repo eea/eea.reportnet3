@@ -601,7 +601,7 @@
     "generateApiKey": "Generate new API-key",
     "noApiKey": "There is no generated API key",
     "copyToClipboardSuccess": "Copied",
-    "apiKeyDialogHead": "API-key",
+    "apiKeyDialogHead": "Manage API-key",
     "apiKeyDialogLabel": "API-key:",
     "sidebarApiKeyBtn": "API-key",
     "prefilled": "Prefilled",
