@@ -615,6 +615,7 @@
     "ruleCode": "Code",
     "fieldRecords": "Field records: ",
     "tabMenuExpression": "Expression",
-    "nextReportDue": "Next report due"
+    "nextReportDue": "Next report due",
+    "isCorrect": "Correct"
   }
 }
