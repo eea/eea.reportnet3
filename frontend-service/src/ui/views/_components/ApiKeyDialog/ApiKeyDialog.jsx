@@ -16,14 +16,11 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
   const notificationContext = useContext(NotificationContext);
 
   const [apiKey, setApiKey] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [isKeyLoading, setIsKeyLoading] = useState(false);
   const [textAreaRef, setTextAreaRef] = useState(null);
 
   useEffect(() => {
     onGetApiKey();
-    return () => {
-      setIsGenerating(false);
-    };
   }, []);
 
   const onCloseDialog = () => onManageDialogs('isApiKeyDialogVisible', false);
@@ -39,16 +36,19 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
   };
 
   const onGetApiKey = async () => {
+    setIsKeyLoading(true);
     try {
       const responseApiKey = await DataflowService.getApiKey(dataflowId, dataProviderId);
       setApiKey(responseApiKey);
     } catch (error) {
       console.error('Error on getting Api key:', error);
+    } finally {
+      setIsKeyLoading(false);
     }
   };
 
   const onGenerateApiKey = async () => {
-    setIsGenerating(true);
+    setIsKeyLoading(true);
 
     try {
       const responseApiKey = await DataflowService.generateApiKey(dataflowId, dataProviderId);
@@ -56,7 +56,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
     } catch (error) {
       console.error('Error on generating Api key:', error);
     } finally {
-      setIsGenerating(false);
+      setIsKeyLoading(false);
     }
   };
 
@@ -67,7 +67,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
         className="p-button-primary"
         label={resources.messages['generateApiKey']}
         onClick={() => onGenerateApiKey()}
-        disabled={isGenerating}
+        disabled={isKeyLoading}
       />
       <Button
         className="p-button-secondary"
@@ -89,7 +89,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
       onHide={() => onCloseDialog()}
       visible={isApiKeyDialogVisible}
       zIndex={3003}>
-      {!isGenerating ? (
+      {!isKeyLoading ? (
         <div className={styles.container}>
           {apiKey === '' ? (
             <p>{resources.messages['noApiKey']}</p>
@@ -115,7 +115,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
         </div>
       ) : (
         <div className={styles.container}>
-          <Spinner style={{ top: 0, left: 0 }} />
+          <Spinner style={{ top: 0, left: 0, width: '50px', height: '50px' }} />
         </div>
       )}
     </Dialog>
