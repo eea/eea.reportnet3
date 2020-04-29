@@ -277,11 +277,13 @@ public class RulesServiceImpl implements RulesService {
       switch (typeData) {
         case NUMBER_INTEGER:
           ruleList.add(AutomaticRules.createNumberIntegerAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+              FIELD_TYPE + "NUMBER - INTEGER", "FT" + shortcode,
+              FT_DESCRIPTION + "NUMBER - INTEGER"));
           break;
         case NUMBER_DECIMAL:
           ruleList.add(AutomaticRules.createNumberDecimalAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+              FIELD_TYPE + "NUMBER - DECIMAL", "FT" + shortcode,
+              FT_DESCRIPTION + "NUMBER - DECIMAL"));
           break;
         case DATE:
           ruleList.add(AutomaticRules.createDateAutomaticRule(referenceId, typeEntityEnum,
