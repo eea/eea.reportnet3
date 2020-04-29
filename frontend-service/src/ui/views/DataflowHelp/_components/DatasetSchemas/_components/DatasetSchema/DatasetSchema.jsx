@@ -23,7 +23,7 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
         fields: {
           filtered: false,
           groupable: true,
-          names: { shortCode: 'Shortcode', codelistItems: 'Single select items' }
+          names: { shortCode: 'Shortcode', codelistItems: 'Single select items', pk: 'Primary key' }
         },
         validations: {
           filtered: true,
@@ -95,7 +95,21 @@ const getFieldFormat = fieldType => {
     case 'DATE':
       return 'YYYY-MM-DD';
     case 'TEXT':
-      return '5000 characters';
+      return '5000 max characters';
+    case 'LONG_TEXT':
+      return '10000 max characters';
+    case 'NUMBER_DECIMAL':
+      return '40 max characters';
+    case 'NUMBER_INTEGER':
+      return '20 max characters without decimals number';
+    case 'NUMBER_DECIMAL':
+      return '40 max characters decimal number';
+    case 'EMAIL':
+      return '256 max characters';
+    case 'PHONE':
+      return '256 max characters';
+    case 'URL':
+      return '5000 max characters';
     default:
       return '';
   }
@@ -119,9 +133,9 @@ const parseDesignDataset = (design, validationList) => {
         );
         const fields = tableDTO.records[0].fields.map(fieldDTO => {
           const field = {};
-          field.name = fieldDTO.name;
           field.pk = fieldDTO.pk;
           field.required = fieldDTO.required;
+          field.name = fieldDTO.name;
           field.description = !isNull(fieldDTO.description) ? fieldDTO.description : '-';
           field.type = fieldDTO.type;
           if (containsCodelists) {
