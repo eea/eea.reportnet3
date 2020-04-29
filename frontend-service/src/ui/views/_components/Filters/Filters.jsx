@@ -19,7 +19,8 @@ import { filterReducer } from './_functions/Reducers/filterReducer';
 
 import { useOnClickOutside } from 'ui/views/_functions/Hooks/useOnClickOutside';
 
-import { FilterUtils } from './_functions/Utils/FilterUtils';
+import { ApplyFilterUtils } from './_functions/Utils/ApplyFilterUtils';
+import { FiltersUtils } from './_functions/Utils/FiltersUtils';
 import { SortUtils } from './_functions/Utils/SortUtils';
 
 export const Filters = ({
@@ -63,7 +64,7 @@ export const Filters = ({
 
   const getInitialState = () => {
     const initialData = cloneDeep(data);
-    const initialFilterBy = FilterUtils.getFilterInitialState(
+    const initialFilterBy = FiltersUtils.getFilterInitialState(
       data,
       inputOptions,
       selectOptions,
@@ -71,8 +72,8 @@ export const Filters = ({
       dropdownOptions,
       filterByList
     );
-    const initialFilteredData = FilterUtils.onApplySearch(data, searchBy, filterState.searchBy, filterState);
-    const initialLabelAnimations = FilterUtils.getLabelInitialState(
+    const initialFilteredData = ApplyFilterUtils.onApplySearch(data, searchBy, filterState.searchBy, filterState);
+    const initialLabelAnimations = FiltersUtils.getLabelInitialState(
       inputOptions,
       selectOptions,
       dateOptions,
@@ -95,29 +96,29 @@ export const Filters = ({
     filterDispatch({
       type: 'CLEAR_ALL',
       payload: {
-        filterBy: FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions, dropdownOptions),
+        filterBy: FiltersUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions, dropdownOptions),
         filteredData: cloneDeep(data),
-        labelAnimations: FilterUtils.onClearLabelState(inputOptions, selectOptions, dateOptions, dropdownOptions),
+        labelAnimations: ApplyFilterUtils.onClearLabelState(inputOptions, selectOptions, dateOptions, dropdownOptions),
         orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions, dropdownOptions)
       }
     });
   };
 
   const onFilterData = (filter, value) => {
-    const inputKeys = FilterUtils.getFilterKeys(filterState, filter, inputOptions);
-    const searchedKeys = !isEmpty(searchBy) ? searchBy : FilterUtils.getSearchKeys(filterState.data);
-    const selectedKeys = FilterUtils.getSelectedKeys(filterState, filter, selectOptions);
-    const filteredData = FilterUtils.onApplyFilters(
-      filter,
-      inputKeys,
-      filterState,
-      selectedKeys,
-      value,
+    const inputKeys = FiltersUtils.getFilterKeys(filterState, filter, inputOptions);
+    const searchedKeys = !isEmpty(searchBy) ? searchBy : ApplyFilterUtils.getSearchKeys(filterState.data);
+    const selectedKeys = FiltersUtils.getSelectedKeys(filterState, filter, selectOptions);
+    const filteredData = ApplyFilterUtils.onApplyFilters({
       dateOptions,
-      selectOptions,
       dropdownOptions,
-      searchedKeys
-    );
+      filter,
+      filteredKeys: inputKeys,
+      searchedKeys,
+      selectedKeys,
+      selectOptions,
+      state: filterState,
+      value
+    });
 
     filterDispatch({ type: 'FILTER_DATA', payload: { filteredData, filter, value } });
   };
@@ -132,9 +133,9 @@ export const Filters = ({
   };
 
   const onSearchData = value => {
-    const inputKeys = FilterUtils.getFilterKeys(filterState, '', inputOptions);
-    const selectedKeys = FilterUtils.getSelectedKeys(filterState, '', selectOptions);
-    const searchedValues = FilterUtils.onApplySearch(
+    const inputKeys = FiltersUtils.getFilterKeys(filterState, '', inputOptions);
+    const selectedKeys = FiltersUtils.getSelectedKeys(filterState, '', selectOptions);
+    const searchedValues = ApplyFilterUtils.onApplySearch(
       filterState.data,
       searchBy,
       value,
@@ -187,7 +188,7 @@ export const Filters = ({
       {renderOrderFilter(property)}
       <Dropdown
         className={styles.dropdownFilter}
-        filter={FilterUtils.getOptionTypes(data, property, dropDownList).length > 10}
+        filter={FiltersUtils.getOptionTypes(data, property, dropDownList).length > 10}
         filterPlaceholder={resources.messages[property]}
         id={property}
         inputClassName={`p-float-label ${styles.label}`}
@@ -199,7 +200,7 @@ export const Filters = ({
           event.stopPropagation();
         }}
         optionLabel="type"
-        options={FilterUtils.getOptionTypes(data, property, dropDownList)}
+        options={FiltersUtils.getOptionTypes(data, property, dropDownList)}
         showClear={!isEmpty(filterState.filterBy[property])}
         showFilterClear={true}
         value={filterState.filterBy[property]}
@@ -260,7 +261,7 @@ export const Filters = ({
         notCheckAllHeader={resources.messages['uncheckAllFilter']}
         onChange={event => onFilterData(property, event.value)}
         optionLabel="type"
-        options={FilterUtils.getOptionTypes(data, property, selectList)}
+        options={FiltersUtils.getOptionTypes(data, property, selectList)}
         value={filterState.filterBy[property]}
       />
     </span>

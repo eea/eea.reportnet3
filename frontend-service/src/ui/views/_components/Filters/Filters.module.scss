@@ -144,6 +144,24 @@
       }
     }
 
+    .searchInput {
+      background: transparent !important;
+      border-left: 0 !important;
+      border-radius: 0 !important;
+      border-right: 0 !important;
+      border-top: 0 !important;
+      width: 100% !important;
+
+      &:focus,
+      &:enabled:focus {
+        box-shadow: 0 0 0 0 var(--blue-120) !important;
+      }
+
+      &:active {
+        width: 15.55%;
+      }
+    }
+
     .selectHeader {
       border-radius: 3px;
       color: var(--floating-label-color);

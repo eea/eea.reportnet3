@@ -1,6 +1,5 @@
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import uniq from 'lodash/uniq';
 import moment from 'moment';
 
 const checkDates = (betweenDates, data) => {
@@ -11,11 +10,34 @@ const checkDates = (betweenDates, data) => {
   return true;
 };
 
-const checkFilters = (filteredKeys, dataflow, state) => {
-  if (filteredKeys) {
-    for (let i = 0; i < filteredKeys.length; i++) {
-      if (state.filterBy[filteredKeys[i]].toLowerCase() !== '') {
-        if (!dataflow[filteredKeys[i]].toLowerCase().includes(state.filterBy[filteredKeys[i]].toLowerCase())) {
+const checkFilters = (filteredKeys = [], dataflow, state) => {
+  for (let i = 0; i < filteredKeys.length; i++) {
+    if (state.filterBy[filteredKeys[i]].toLowerCase() !== '') {
+      if (!dataflow[filteredKeys[i]].toLowerCase().includes(state.filterBy[filteredKeys[i]].toLowerCase())) {
+        return false;
+      }
+    }
+  }
+  return true;
+};
+
+const checkSearched = (state, data, searchedKeys = []) => {
+  const searched = [];
+  for (let index = 0; index < searchedKeys.length; index++) {
+    searched.push(data[searchedKeys[index]].toLowerCase().includes(state.searchBy.toLowerCase()));
+  }
+  return searched.includes(true);
+};
+
+const checkSelected = (state, data, selectedKeys = []) => {
+  for (let index = 0; index < selectedKeys.length; index++) {
+    if (!isEmpty(state.filterBy[selectedKeys[index]])) {
+      if (!isNil(data[selectedKeys[index]])) {
+        if (
+          ![...state.filterBy[selectedKeys[index]].map(option => option.toLowerCase())].includes(
+            data[selectedKeys[index]].toString().toLowerCase()
+          )
+        ) {
           return false;
         }
       }
@@ -24,110 +46,24 @@ const checkFilters = (filteredKeys, dataflow, state) => {
   return true;
 };
 
-const checkSearched = (state, data, searchedKeys) => {
-  const searched = [];
-  for (let index = 0; index < searchedKeys.length; index++) {
-    searched.push(data[searchedKeys[index]].toLowerCase().includes(state.searchBy.toLowerCase()));
-  }
-  return searched.includes(true);
-};
-
-const checkSelected = (state, data, selectedKeys) => {
-  if (selectedKeys) {
-    for (let index = 0; index < selectedKeys.length; index++) {
-      if (!isEmpty(state.filterBy[selectedKeys[index]])) {
-        if (!isNil(data[selectedKeys[index]])) {
-          if (
-            ![...state.filterBy[selectedKeys[index]].map(option => option.toLowerCase())].includes(
-              data[selectedKeys[index]].toString().toLowerCase()
-            )
-          ) {
-            return false;
-          }
-        }
-      }
-    }
-  }
-  return true;
-};
-
-const getFilterInitialState = (data, input = [], select = [], date = [], dropDown = [], filterByList) => {
-  if (filterByList) return filterByList;
-
-  const filterByGroup = input.concat(select, date, dropDown);
-  const filterBy = filterByGroup.reduce((obj, key) => Object.assign(obj, { [key]: '' }), {});
-  if (select) {
-    select.forEach(selectOption => {
-      const selectItems = uniq(data.map(item => item[selectOption]));
-      const validSelectItems = selectItems.filter(option => !isNil(option));
-      for (let i = 0; i < validSelectItems.length; i++) {
-        filterBy[selectOption] = [];
-      }
-    });
-  }
-  if (date) {
-    date.forEach(dateOption => {
-      filterBy[dateOption] = [];
-    });
-  }
-  return filterBy;
-};
-
 const getEndOfDay = date => new Date(moment(date).endOf('day').format()).getTime() / 1000;
-
-const getFilterKeys = (state, filter, inputOptions = []) =>
-  Object.keys(state.filterBy).filter(key => key !== filter && inputOptions.includes(key));
-
-const getLabelInitialState = (input = [], select = [], date = [], dropDown = [], filteredBy) => {
-  const labelByGroup = input.concat(select, date, dropDown);
-  return labelByGroup.reduce((obj, key) => Object.assign(obj, { [key]: !isEmpty(filteredBy[key]) }), {});
-};
-
-const getOptionTypes = (data, option, list) => {
-  if (list) {
-    return list[option].map(item => ({
-      type: item.acronym ? `${item.acronym} - ${item.name}` : item.name,
-      value: item.id
-    }));
-  } else {
-    const optionItems = uniq(data.map(item => item[option]));
-    const validOptionItems = optionItems.filter(option => !isNil(option));
-    for (let i = 0; i < validOptionItems.length; i++) {
-      const template = [];
-      validOptionItems.forEach(item => {
-        template.push({ type: item.toString().toUpperCase(), value: item.toString().toUpperCase() });
-      });
-      return template;
-    }
-  }
-};
 
 const getSearchKeys = data => {
   if (!isNil(data)) return Object.keys(data).filter(item => item !== 'id' && item !== 'key');
 };
 
-const getSelectedKeys = (state, select, selectOptions = []) =>
-  Object.keys(state.filterBy).filter(key => key !== select && selectOptions.includes(key));
-
 const getStartOfDay = date => new Date(moment(date).startOf('day').format()).getTime() / 1000;
 
-const getYesterdayDate = () => {
-  var currentDate = new Date();
-  var yesterdayDate = currentDate.setDate(currentDate.getDate() - 1);
-  return new Date(yesterdayDate);
-};
-
-const onApplyFilters = (
+const onApplyFilters = ({
+  dateOptions = [],
   filter,
   filteredKeys,
-  state,
+  searchedKeys,
   selectedKeys,
-  value,
-  dateOptions = [],
   selectOptions = [],
-  dropdownOptions = [],
-  searchedKeys
-) => [
+  state,
+  value
+}) => [
   ...state.data.filter(data => {
     if (selectOptions.includes(filter) && !isNil(data[filter])) {
       return (
@@ -184,15 +120,4 @@ const onClearLabelState = (input = [], select = [], date = [], dropDown = []) =>
   return labelByGroup.reduce((obj, key) => Object.assign(obj, { [key]: false }), {});
 };
 
-export const FilterUtils = {
-  getFilterInitialState,
-  getFilterKeys,
-  getLabelInitialState,
-  getOptionTypes,
-  getSearchKeys,
-  getSelectedKeys,
-  getYesterdayDate,
-  onApplyFilters,
-  onApplySearch,
-  onClearLabelState
-};
+export const ApplyFilterUtils = { getSearchKeys, onApplyFilters, onApplySearch, onClearLabelState };
