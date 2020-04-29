@@ -16,6 +16,14 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagination, pagination }) => {
   const resources = useContext(ResourcesContext);
 
+  const headerTableTemplate = obligation => {
+    if (obligation === 'dueDate') {
+      return resources.messages['nextReportDue'];
+    } else {
+      return resources.messages[obligation];
+    }
+  };
+
   const onLoadPagination = event => onChangePagination({ first: event.first, rows: event.rows, page: event.page });
 
   const onLoadCheckButton = row => (
@@ -52,13 +60,15 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
         .filter(key => key !== 'id')
         .map(obligation => {
           let template = null;
+
           if (obligation === 'title') template = onLoadTitleTemplate;
+
           return (
             <Column
               body={template}
               columnResizeMode="expand"
               field={obligation}
-              header={resources.messages[obligation]}
+              header={headerTableTemplate(obligation)}
               key={obligation}
               sortable={true}
             />

@@ -614,6 +614,7 @@
     "deleteDatasetDataCompletedEvent": "Delete dataset data finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "ruleCode": "Code",
     "fieldRecords": "Field records: ",
-    "tabMenuExpression": "Expression"
+    "tabMenuExpression": "Expression",
+    "nextReportDue": "Next report due"
   }
 }
