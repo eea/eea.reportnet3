@@ -58,7 +58,7 @@ export const representativeReducer = (state, { type, payload }) => {
     case 'ON_INIT_RECEIPT_DATA':
       return { ...state, ...payload };
 
-    case 'ON_DOWNLOAD_RECEIPT':
+    case 'SET_IS_RECEIPT_LOADING':
       return { ...state, isReceiptLoading: payload.isReceiptLoading };
 
     case 'ON_CLEAN_UP_RECEIPT':

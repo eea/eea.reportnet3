@@ -68,7 +68,7 @@ export const BigButtonList = ({
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
 
     if (response) {
-      dataflowDispatch({ type: 'ON_DOWNLOAD_RECEIPT', payload: { isReceiptLoading: false } });
+      setIsReceiptLoading(false);
     }
   }, [notificationContext]);
 
@@ -91,13 +91,6 @@ export const BigButtonList = ({
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     }
-  };
-
-  const removeNew = () => {
-    dataflowDispatch({
-      type: 'ON_CLEAN_UP_RECEIPT',
-      payload: { isReceiptLoading: false, isReceiptOutdated: false }
-    });
   };
 
   const errorDialogFooter = (
@@ -166,6 +159,19 @@ export const BigButtonList = ({
     }
   };
 
+  const setIsReceiptLoading = isReceiptLoading => {
+    dataflowDispatch({
+      type: 'SET_IS_RECEIPT_LOADING',
+      payload: { isReceiptLoading }
+    });
+  };
+
+  const onCleanUpReceipt = () => {
+    dataflowDispatch({
+      type: 'ON_CLEAN_UP_RECEIPT',
+      payload: { isReceiptLoading: false, isReceiptOutdated: false }
+    });
+  };
   const onCreateDatasetSchema = () => {
     setNewDatasetDialog(false);
   };
@@ -250,24 +256,18 @@ export const BigButtonList = ({
 
   const onLoadReceiptData = async () => {
     try {
-      dataflowDispatch({
-        type: 'ON_DOWNLOAD_RECEIPT',
-        payload: { isReceiptLoading: true }
-      });
+      setIsReceiptLoading(true);
       const response = await ConfirmationReceiptService.get(dataflowId, dataflowState.dataProviderId);
 
       downloadPdf(response);
-      removeNew();
+      onCleanUpReceipt();
     } catch (error) {
       console.error(error);
       notificationContext.add({
         type: 'LOAD_RECEIPT_DATA_ERROR'
       });
     } finally {
-      dataflowDispatch({
-        type: 'ON_DOWNLOAD_RECEIPT',
-        payload: { isReceiptLoading: false }
-      });
+      setIsReceiptLoading(false);
     }
   };
 
