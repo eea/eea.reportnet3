@@ -84,7 +84,7 @@ export const BigButtonList = ({
   const removeNew = () => {
     dataflowDispatch({
       type: 'ON_CLEAN_UP_RECEIPT',
-      payload: { isReceiptLoading: false, isReceiptLoading: false }
+      payload: { isReceiptLoading: false, isReceiptOutdated: false }
     });
   };
 
