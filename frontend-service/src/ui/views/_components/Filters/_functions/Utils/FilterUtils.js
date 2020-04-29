@@ -78,6 +78,20 @@ const getOptionTypes = (data, option, list) => {
       value: item.id
     }));
   } else {
+    data.forEach(element => {
+      if (element.isCorrect === true || element.isCorrect === 'CORRECT') {
+        element.isCorrect = 'CORRECT';
+      } else {
+        element.isCorrect = 'INCORRECT';
+      }
+
+      if (element.enabled === true || element.enabled === 'ENABLED') {
+        element.enabled = 'ENABLED';
+      } else {
+        element.enabled = 'DISABLED';
+      }
+    });
+
     const optionItems = uniq(data.map(item => item[option]));
     const validOptionItems = optionItems.filter(option => !isNil(option));
     for (let i = 0; i < validOptionItems.length; i++) {
