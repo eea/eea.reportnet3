@@ -595,11 +595,12 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     assertEquals(null, keycloakSecurityProviderInterfaceService.getUserWithoutKeys(""));
   }
 
+
   /**
-   * Sets the attributes.
+   * Sets the attributes with api key test.
    */
   @Test
-  public void setAttributes() {
+  public void setAttributesWithApiKeyTest() {
     UserRepresentation user = new UserRepresentation();
     Map<String, List<String>> attributes = new HashMap<>();
     List<String> oldKeys = new ArrayList<>();
