@@ -63,11 +63,11 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
   const footer = (
     <>
       <Button
-        icon={'key'}
         className="p-button-primary"
+        disabled={isKeyLoading}
+        icon={'key'}
         label={resources.messages['generateApiKey']}
         onClick={() => onGenerateApiKey()}
-        disabled={isKeyLoading}
       />
       <Button
         className="p-button-secondary"
@@ -80,13 +80,13 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
 
   return (
     <Dialog
-      style={{ width: '80%', maxWidth: '650px' }}
       blockScroll={false}
       closeOnEscape={true}
       footer={footer}
       header={resources.messages['apiKeyDialogHead']}
       modal={true}
       onHide={() => onCloseDialog()}
+      style={{ width: '80%', maxWidth: '650px' }}
       visible={isApiKeyDialogVisible}
       zIndex={3003}>
       {!isKeyLoading ? (
@@ -95,21 +95,19 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
             <p>{resources.messages['noApiKey']}</p>
           ) : (
             <>
+              <label>{resources.messages['apiKeyDialogLabel']}</label>
               <textarea
                 className={styles.textarea}
-                ref={thisEl => setTextAreaRef(thisEl)}
-                value={apiKey}
-                rows={1}
                 readOnly
+                ref={textRef => setTextAreaRef(textRef)}
+                rows={1}
+                value={apiKey}
               />
-              <div>
-                <Button
-                  icon={'copy'}
-                  className={`p-button-secondary ${styles.copyBtn}`}
-                  label={resources.messages['copyApiKeyBtn']}
-                  onClick={() => onCopyToClipboard()}
-                />
-              </div>
+              <Button
+                className={`p-button-primary ${styles.copyBtn}`}
+                icon={'copy'}
+                onClick={() => onCopyToClipboard()}
+              />
             </>
           )}
         </div>

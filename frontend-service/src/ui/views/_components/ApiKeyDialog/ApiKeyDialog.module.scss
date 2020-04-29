@@ -1,22 +1,35 @@
 .container {
-  display: flex;
-  justify-content: center;
   align-items: center;
+  box-sizing: border-box;
+  display: flex;
+  flex-basis: max-content;
+  flex-wrap: nowrap;
+  justify-content: center;
+  min-height: 10em;
   padding: 3em 0;
-  min-height: 135px;
+  label {
+    min-width: 10%;
+  }
+  .label {
+    padding-right: 2em;
+  }
   .textarea {
-    background-color: var(--form-field-bg);
-    color: var(--form-field-color);
-    text-align: center;
-    margin: 0;
-    margin-right: 1em;
-    font-weight: 600;
-    max-width: 70%;
+    background-color: var(--gray-5);
+    border-radius: 4px 0px 0px 4px;
     border: none;
-    outline: none;
     box-shadow: 0 0 0 0 Transparent;
+    color: black;
+    font-weight: 600;
+    margin: 0;
+    max-width: 22em;
+    outline: none;
+    text-align: center;
+    width: 80%;
   }
 }
+
 .copyBtn {
-  margin-right: 0.5em !important;
+  align-self: center;
+  border-radius: 0px 4px 4px 0px !important;
+  border: 1.5px solid var(--button-primary-bg) !important;
 }
