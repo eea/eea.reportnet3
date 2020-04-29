@@ -424,6 +424,48 @@ public class RulesServiceImpl implements RulesService {
   }
 
   /**
+   * Update automatic rule.
+   *
+   * @param datasetId the dataset id
+   * @param ruleVO the rule VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void updateAutomaticRule(long datasetId, RuleVO ruleVO) throws EEAException {
+
+    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+    String ruleId = ruleVO.getRuleId();
+
+    if (null != datasetSchemaId) {
+      if (null != ruleId && ObjectId.isValid(ruleId)) {
+
+        // Find the actual rule
+        Rule rule = rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
+
+        if (null != rule) {
+
+          // Update only allowed properties
+          updateAllowedRuleProperties(ruleVO, rule);
+
+          // Save the modified rule
+          rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+        } else {
+          LOG_ERROR.error("Rule not found for datasetSchemaId {} and ruleId {}", datasetSchemaId,
+              ruleId);
+          throw new EEAException(
+              String.format(EEAErrorMessage.RULE_NOT_FOUND, datasetSchemaId, ruleId));
+        }
+      } else {
+        LOG_ERROR.error("RuleId not valid: {}", ruleId);
+        throw new EEAException(EEAErrorMessage.RULEID_INCORRECT);
+      }
+    } else {
+      LOG_ERROR.error("DatasetSchemaId not found for datasetId {}", datasetId);
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+  }
+
+  /**
    * Insert rule in position.
    *
    * @param datasetSchemaId the dataset schema id
@@ -451,5 +493,24 @@ public class RulesServiceImpl implements RulesService {
     return false;
   }
 
+  private void updateAllowedRuleProperties(RuleVO ruleVO, Rule rule) {
 
+    rule.setEnabled(ruleVO.isEnabled());
+
+    if (null != ruleVO.getRuleName()) {
+      rule.setRuleName(ruleVO.getRuleName());
+    }
+
+    if (null != ruleVO.getDescription()) {
+      rule.setDescription(ruleVO.getDescription());
+    }
+
+    if (null != ruleVO.getShortCode()) {
+      rule.setShortCode(ruleVO.getShortCode());
+    }
+
+    if (null != ruleVO.getThenCondition() && ruleVO.getThenCondition().size() == 2) {
+      rule.setThenCondition(ruleVO.getThenCondition());
+    }
+  }
 }

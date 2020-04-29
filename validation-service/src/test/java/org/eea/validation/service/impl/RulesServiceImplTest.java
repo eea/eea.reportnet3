@@ -841,4 +841,103 @@ public class RulesServiceImplTest {
         "5e44110d6a9e3a270ce13fac", 0));
   }
 
+  @Test
+  public void udateAutomaticRuleAllPropertiesUpdatedTest() throws EEAException {
+
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setRuleId("5e44110d6a9e3a270ce13fac");
+    ruleVO.setEnabled(true);
+    ruleVO.setRuleName("ruleName");
+    ruleVO.setDescription("description");
+    ruleVO.setShortCode("shortCode");
+    ruleVO.setThenCondition(Arrays.asList("ERROR", "error message"));
+
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(new Rule());
+    Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
+
+    rulesServiceImpl.updateAutomaticRule(1L, ruleVO);
+    Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void udateAutomaticRuleOnlyEnabledPropertyUpdatedTest() throws EEAException {
+
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setRuleId("5e44110d6a9e3a270ce13fac");
+    ruleVO.setEnabled(true);
+
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(new Rule());
+    Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
+
+    rulesServiceImpl.updateAutomaticRule(1L, ruleVO);
+    Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void udateAutomaticRuleEmptyThenConditionArrayTest() throws EEAException {
+
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setRuleId("5e44110d6a9e3a270ce13fac");
+    ruleVO.setEnabled(true);
+    ruleVO.setThenCondition(new ArrayList<String>());
+
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(new Rule());
+    Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
+
+    rulesServiceImpl.updateAutomaticRule(1L, ruleVO);
+    Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = EEAException.class)
+  public void updateAutomaticRuleInvalidDatasetIdExceptionTest() throws EEAException {
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn(null);
+    try {
+      rulesServiceImpl.updateAutomaticRule(1L, new RuleVO());
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void updateAutomaticRuleInvalidRuleIdExceptionTest() throws EEAException {
+
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setRuleId("notObjectIdComplaining");
+
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    try {
+      rulesServiceImpl.updateAutomaticRule(1L, ruleVO);
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.RULEID_INCORRECT, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void udateAutomaticRuleRuleNotFoundExceptionTest() throws EEAException {
+
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setRuleId("5e44110d6a9e3a270ce13fac");
+
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(null);
+
+    try {
+      rulesServiceImpl.updateAutomaticRule(1L, ruleVO);
+    } catch (EEAException e) {
+      Assert.assertEquals(String.format(EEAErrorMessage.RULE_NOT_FOUND, "5e44110d6a9e3a270ce13fac",
+          "5e44110d6a9e3a270ce13fac"), e.getMessage());
+      throw e;
+    }
+  }
 }
