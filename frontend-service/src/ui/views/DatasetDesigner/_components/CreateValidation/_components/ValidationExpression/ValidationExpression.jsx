@@ -118,7 +118,7 @@ const ValidationExpression = ({
         />
       </span>
       <span
-        className={`${styles.operatorValue} formField ${
+        className={`${styles.expressionValue} formField ${
           showRequiredFields && isEmpty(expressionValues.expressionValue) ? 'error' : ''
         }`}>
         {expressionValues.operatorType == 'date' ? (
