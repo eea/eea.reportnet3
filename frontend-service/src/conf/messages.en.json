@@ -600,7 +600,7 @@
     "invalidatedQcRuleEvent": "The rule <strong title='{:shortCode}'>{:shortShortCode}</strong> is not valid, please check it",
     "generateApiKey": "Generate new API-key",
     "noApiKey": "There is no generated API key",
-    "copyToClipboardSuccess": "Api key copied to clipboard",
+    "copyToClipboardSuccess": "Copied",
     "apiKeyDialogHead": "API-key",
     "apiKeyDialogLabel": "API-key:",
     "sidebarApiKeyBtn": "API-key",

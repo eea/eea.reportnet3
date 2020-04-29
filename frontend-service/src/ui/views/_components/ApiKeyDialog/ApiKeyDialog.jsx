@@ -30,9 +30,6 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
     textArea.select();
     document.execCommand('copy');
     window.getSelection().removeAllRanges();
-    notificationContext.add({
-      type: 'COPY_TO_CLIPBOARD_SUCCESS'
-    });
   };
 
   const onGetApiKey = async () => {
@@ -104,6 +101,9 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
                 value={apiKey}
               />
               <Button
+                tooltip={resources.messages['copyToClipboardSuccess']}
+                tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
+                showDelay="3000"
                 className={`p-button-primary ${styles.copyBtn}`}
                 icon={'copy'}
                 onClick={() => onCopyToClipboard()}
