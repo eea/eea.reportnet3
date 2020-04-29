@@ -288,6 +288,9 @@ public class KieBaseManager {
     Results results = kieHelperTest.verify();
 
     if (results.hasMessages(Message.Level.ERROR)) {
+      rule.setVerified(false);
+      rule.setEnabled(false);
+      rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.INVALIDATED_QC_RULE_EVENT, null,
           NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
               .datasetSchemaId(datasetSchemaId).error("The QC Rule is disabled")

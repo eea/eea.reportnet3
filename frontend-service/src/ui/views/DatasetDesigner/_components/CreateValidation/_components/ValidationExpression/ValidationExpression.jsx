@@ -22,7 +22,8 @@ const ValidationExpression = ({
   onExpressionDelete,
   onExpressionFieldUpdate,
   onExpressionGroup,
-  position
+  position,
+  showRequiredFields
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const { expressionId } = expressionValues;
@@ -55,7 +56,10 @@ const ValidationExpression = ({
           disabled={isDisabled}
         />
       </span>
-      <span className={styles.union}>
+      <span
+        className={`${styles.union} formField ${
+          showRequiredFields && position != 0 && isEmpty(expressionValues.union) ? 'error' : ''
+        }`}>
         <Dropdown
           disabled={isDisabled || position == 0}
           appendTo={document.body}
@@ -71,7 +75,10 @@ const ValidationExpression = ({
           value={{ label: expressionValues.union, value: expressionValues.union }}
         />
       </span>
-      <span className={styles.operatorType}>
+      <span
+        className={`${styles.operatorType} formField ${
+          showRequiredFields && isEmpty(expressionValues.operatorType) ? 'error' : ''
+        }`}>
         <Dropdown
           disabled={isDisabled}
           appendTo={document.body}
@@ -87,7 +94,10 @@ const ValidationExpression = ({
           value={!isEmpty(expressionValues.operatorType) ? operatorTypesConf[expressionValues.operatorType].option : ''}
         />
       </span>
-      <span className={styles.operatorValue}>
+      <span
+        className={`${styles.operatorValue} formField ${
+          showRequiredFields && isEmpty(expressionValues.operatorValue) ? 'error' : ''
+        }`}>
         <Dropdown
           disabled={isDisabled}
           appendTo={document.body}
@@ -107,7 +117,10 @@ const ValidationExpression = ({
           }
         />
       </span>
-      <span className={styles.operatorValue}>
+      <span
+        className={`${styles.operatorValue} formField ${
+          showRequiredFields && isEmpty(expressionValues.expressionValue) ? 'error' : ''
+        }`}>
         {expressionValues.operatorType == 'date' ? (
           <Calendar
             appendTo={document.body}

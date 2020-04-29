@@ -1,0 +1,21 @@
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3em 0;
+  .textarea {
+    background-color: var(--form-field-bg);
+    color: var(--form-field-color);
+    text-align: center;
+    margin: 0;
+    margin-right: 1em;
+    font-weight: 600;
+    max-width: 70%;
+    border: none;
+    outline: none;
+    box-shadow: 0 0 0 0 Transparent;
+  }
+}
+.copyBtn {
+  margin-right: 0.5em !important;
+}

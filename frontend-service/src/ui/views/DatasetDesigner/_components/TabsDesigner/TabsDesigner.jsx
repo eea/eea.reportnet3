@@ -10,7 +10,6 @@ import { CreateValidation } from 'ui/views/DatasetDesigner/_components/CreateVal
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldsDesigner } from './_components/FieldsDesigner';
 import { getUrl } from 'core/infrastructure/CoreUtils';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { routes } from 'ui/routes';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabView } from 'ui/views/_components/TabView';
@@ -19,6 +18,7 @@ import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 import { DatasetService } from 'core/services/Dataset';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 export const TabsDesigner = withRouter(
@@ -106,10 +106,12 @@ export const TabsDesigner = withRouter(
       }
     };
 
-    const onChangeTableDescription = (tableSchemaId, tableSchemaDescription) => {
+    const onChangeTableProperties = (tableSchemaId, tableSchemaDescription, readOnly, toPrefill) => {
       const inmTabs = [...tabs];
       const tabIdx = getIndexByTableSchemaId(tableSchemaId, inmTabs);
       inmTabs[tabIdx].description = tableSchemaDescription;
+      inmTabs[tabIdx].readOnly = readOnly;
+      inmTabs[tabIdx].toPrefill = toPrefill;
       setTabs(inmTabs);
     };
 
@@ -388,7 +390,7 @@ export const TabsDesigner = withRouter(
                           key={tab.index}
                           onChangeFields={onChangeFields}
                           onChangeReference={onChangeReference}
-                          onChangeTableDescription={onChangeTableDescription}
+                          onChangeTableProperties={onChangeTableProperties}
                           table={tabs[i]}
                         />
                       ) : (
@@ -437,7 +439,7 @@ export const TabsDesigner = withRouter(
       <React.Fragment>
         {renderTabViews()}
         {renderErrors(errorMessageTitle, errorMessage)}
-        {datasetSchema && tabs && (
+        {datasetSchema && tabs && validationContext.isVisible && (
           <CreateValidation
             isVisible={isAddValidationVisible}
             tabs={tabs}

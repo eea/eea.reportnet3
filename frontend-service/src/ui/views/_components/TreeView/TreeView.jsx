@@ -1,6 +1,9 @@
 import React, { useEffect, useReducer, useRef } from 'react';
 
-import { capitalize, isUndefined, isNull } from 'lodash';
+import capitalize from 'lodash/capitalize';
+import isNull from 'lodash/isNull';
+import isNil from 'lodash/isNil';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './TreeView.module.scss';
 
@@ -14,7 +17,7 @@ import { TreeViewExpandableItem } from './_components/TreeViewExpandableItem';
 
 import { treeViewReducer } from './_functions/Reducers/treeViewReducer';
 
-const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) => {
+const TreeView = ({ className = '', columnOptions = {}, property, propertyName, rootProperty }) => {
   const dataTableRef = useRef();
   const initialTreeViewState = {
     filters: {
@@ -40,10 +43,16 @@ const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) 
     ) {
       return (
         <MultiSelect
+          itemTemplate={
+            !isUndefined(columnOptions[propertyName]['filterType']['multiselect'][field][0]['class']) &&
+            !isUndefined(columnOptions[propertyName]['filterType']['multiselect'][field][0]['subclass'])
+              ? multiselectItemTemplate
+              : null
+          }
+          onChange={e => onFilterChange(e, field)}
+          options={columnOptions[propertyName]['filterType']['multiselect'][field]}
           style={{ width: '100%' }}
           value={treeViewState.filters[field]}
-          options={columnOptions[propertyName]['filterType']['multiselect'][field]}
-          onChange={e => onFilterChange(e, field)}
         />
       );
     }
@@ -79,11 +88,15 @@ const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) 
           field === 'type'
             ? typeTemplate
             : field === 'automatic'
-            ? automaticTemplate
+            ? rowData => itemTemplate(rowData, 'automatic')
             : field === 'enabled'
-            ? enabledTemplate
+            ? rowData => itemTemplate(rowData, 'enabled')
             : field === 'codelistItems'
             ? codelistTemplate
+            : field === 'pk'
+            ? rowData => itemTemplate(rowData, 'pk')
+            : field === 'required'
+            ? rowData => itemTemplate(rowData, 'required')
             : null
         }
         key={field}
@@ -118,12 +131,18 @@ const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) 
       />
     ));
 
+  const multiselectItemTemplate = option => {
+    if (!isNil(option.value)) {
+      return <span className={`${option.class} ${option.subclass}`}>{option.value}</span>;
+    }
+  };
+
   return (
     <React.Fragment>
       {!isUndefined(property) && !isNull(property) ? (
         <div
           style={{
-            paddingTop: '6px',
+            paddingTop: '12px',
             paddingLeft: '3px',
             marginLeft: '10px'
           }}>
@@ -132,7 +151,11 @@ const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) 
               <span className={styles.propertyTitle}>
                 {!Number.isInteger(Number(propertyName)) ? `${camelCaseToNormal(propertyName)}: ` : ''}
               </span>
-              {property !== '' ? <span className={styles.propertyValue}>{property.toString()}</span> : '-'}
+              {property !== '' ? (
+                <span className={`${styles.propertyValue} ${className}`}>{property.toString()}</span>
+              ) : (
+                '-'
+              )}
             </React.Fragment>
           ) : (
             <TreeViewExpandableItem
@@ -145,6 +168,15 @@ const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) 
                 : !isUndefined(property)
                 ? Object.values(property).map((proper, index, { length }) => (
                     <TreeView
+                      className={
+                        !isUndefined(columnOptions[propertyName]) &&
+                        columnOptions[propertyName]['hasClass'] &&
+                        columnOptions[propertyName]['subClasses']
+                          ? `${columnOptions[propertyName]['class']} ${columnOptions[propertyName]['subClasses']
+                              .filter(cl => cl.toUpperCase().includes(proper.toString().toUpperCase()))
+                              .join(' ')}`
+                          : ''
+                      }
                       columnOptions={columnOptions}
                       excludeBottomBorder={index === length - 1}
                       key={index}
@@ -160,28 +192,6 @@ const TreeView = ({ columnOptions = {}, property, propertyName, rootProperty }) 
     </React.Fragment>
   );
 };
-
-const automaticTemplate = rowData => (
-  <div style={{ display: 'flex', justifyContent: 'center' }}>
-    {rowData.automatic === 'true' ? (
-      <FontAwesomeIcon
-        icon={AwesomeIcons('check')}
-        style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
-      />
-    ) : null}
-  </div>
-);
-
-const enabledTemplate = rowData => (
-  <div style={{ display: 'flex', justifyContent: 'center' }}>
-    {rowData.enabled === 'true' ? (
-      <FontAwesomeIcon
-        icon={AwesomeIcons('check')}
-        style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
-      />
-    ) : null}
-  </div>
-);
 
 const camelCaseToNormal = str => str.replace(/([A-Z])/g, ' $1').replace(/^./, str2 => str2.toUpperCase());
 
@@ -214,6 +224,19 @@ const getFieldTypeValue = value => {
   //   value = 'Latitude';
   // }
   return fieldTypes.filter(field => field.fieldType.toUpperCase() === value.toUpperCase())[0];
+};
+
+const itemTemplate = (rowData, key) => {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center' }}>
+      {rowData[key] === 'true' ? (
+        <FontAwesomeIcon
+          icon={AwesomeIcons('check')}
+          style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
+        />
+      ) : null}
+    </div>
+  );
 };
 
 const typeTemplate = rowData => {

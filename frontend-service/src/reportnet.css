@@ -101,6 +101,15 @@
   --c-chart-error: #cc3300;
   --c-custom-gray: #c8c8c8;
   --c-growl-info-blue: #8bc3ed;
+  /* level error statusbox colors */
+  --statusBox-blocker-bg: 194, 200, 207;
+  --statusBox-blocker-color: 0, 0, 0;
+  --statusBox-error-bg: #ffcdd2;
+  --statusBox-error-color: #c63737;
+  --statusBox-info-bg: #b3e5fc;
+  --statusBox-info-color: #23547b;
+  --statusBox-warning-bg: #ffd8b2;
+  --statusBox-warning-color: #805b36;
 
   --header-height: 4rem;
 
@@ -446,6 +455,16 @@
   /* User image */
   --user-image-bg-hover: var(--main-font-color);
   --user-image-bg-opacity: 0.6;
+
+  /* Calendar */
+  --calendar-bg: var(--bg);
+  --calendar-color: var(--gray-75);
+  --calendar-border-color: var(--c-custom-gray);
+  --calendar-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+  --calendar-body-span-color: var(--gray-110);
+  --calendar-header-next-prev-color: var(--gray-75);
+  --calendar-header-bg: var(--bg);
+  --calendar-header-color: var(--gray-75);
 }
 body {
   margin: 0px;
@@ -2206,6 +2225,12 @@ textarea:focus {
   box-shadow: inset 0px 0px 0px 1px var(--errors);
   outline: none;
 }
+.formField.error .p-dropdown {
+  border-color: var(--errors);
+  box-shadow: inset 0px 0px 0px 1px var(--errors);
+  outline: none;
+  border-width: 2px;
+}
 .formField input {
   background-color: var(--form-field-bg);
   color: var(--form-field-color);
@@ -2252,6 +2277,10 @@ body .p-dialog.edit-table .p-dialog-content {
 /*growl notifications*/
 .p-growl.p-component.p-growl-topright {
   z-index: 5100 !important;
+}
+
+.p-growl.p-growl-topright {
+  top: 75px !important;
 }
 
 .p-sidebar-right {
