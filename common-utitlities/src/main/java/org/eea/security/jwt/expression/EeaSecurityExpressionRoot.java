@@ -3,6 +3,7 @@ package org.eea.security.jwt.expression;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -107,6 +108,23 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot implements
           .checkResourceAccessPermission(resource, accessScopeEnums);
     }
     return canAccess;
+  }
+
+
+  /**
+   * Check api key boolean.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProvider the data provider
+   *
+   * @return the boolean
+   */
+  public boolean checkApiKey(final Long dataflowId, final Long dataProvider) {
+    String userId = ((Map<String, String>) SecurityContextHolder.getContext()
+        .getAuthentication().getDetails()).get("userId");
+    String apiKey = this.userManagementControllerZull.getApiKey(userId, dataflowId, dataProvider);
+    return SecurityContextHolder.getContext()
+        .getAuthentication().getCredentials().toString().equals(apiKey);
   }
 
   @Override

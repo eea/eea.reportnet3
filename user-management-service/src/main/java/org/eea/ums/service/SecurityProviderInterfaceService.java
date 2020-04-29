@@ -63,6 +63,7 @@ public interface SecurityProviderInterfaceService {
    * Create resource instance.
    *
    * @param resourceInfoVO the resource info vo
+   *
    * @throws EEAException the EEA exception
    */
   void createResourceInstance(ResourceInfoVO resourceInfoVO) throws EEAException;
@@ -87,6 +88,7 @@ public interface SecurityProviderInterfaceService {
    *
    * @param userId the user id
    * @param groupName the group name
+   *
    * @throws EEAException the EEA exception
    */
   void addUserToUserGroup(String userId, String groupName) throws EEAException;
@@ -151,6 +153,7 @@ public interface SecurityProviderInterfaceService {
    * Creates the resource instance.
    *
    * @param resourceInfoVOs the resource info V os
+   *
    * @throws EEAException the EEA exception
    */
   void createResourceInstance(List<ResourceInfoVO> resourceInfoVOs) throws EEAException;
@@ -159,6 +162,7 @@ public interface SecurityProviderInterfaceService {
    * Adds the contributosr to user group.
    *
    * @param resources the resources
+   *
    * @throws EEAException the EEA exception
    */
   void addContributorsToUserGroup(List<ResourceAssignationVO> resources) throws EEAException;
@@ -170,6 +174,7 @@ public interface SecurityProviderInterfaceService {
    * @param contributor the contributor
    * @param userMail the user mail
    * @param groupName the group name
+   *
    * @throws EEAException the EEA exception
    */
   void addContributorToUserGroup(Optional<UserRepresentation> contributor, String userMail,
@@ -185,4 +190,37 @@ public interface SecurityProviderInterfaceService {
    * @param datasetIds the dataset ids
    */
   void deleteResourceInstancesByDatasetId(List<Long> datasetIds);
+
+  /**
+   * Authenticate api key token vo.
+   *
+   * @param apiKey the api key
+   *
+   * @return the token vo
+   */
+  TokenVO authenticateApiKey(String apiKey);
+
+  /**
+   * Create api key string.
+   *
+   * @param userId the user id
+   * @param dataflowId the dataflow id
+   * @param dataProvider the data provider
+   *
+   * @return the string
+   *
+   * @throws EEAException the eea exception
+   */
+  String createApiKey(String userId, Long dataflowId, Long dataProvider) throws EEAException;
+
+  /**
+   * Gets api key.
+   *
+   * @param userId the user id
+   * @param dataflowId the dataflow id
+   * @param dataProvider the data provider
+   *
+   * @return the api key
+   */
+  String getApiKey(String userId, Long dataflowId, Long dataProvider) throws EEAException;
 }
