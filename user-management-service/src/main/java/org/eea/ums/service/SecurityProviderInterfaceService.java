@@ -2,6 +2,7 @@ package org.eea.ums.service;
 
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import org.eea.exception.EEAException;
@@ -231,4 +232,14 @@ public interface SecurityProviderInterfaceService {
    * @return the user without keys
    */
   UserRepresentation getUserWithoutKeys(String userId);
+
+
+  /**
+   * Sets the attributes.
+   *
+   * @param user the user
+   * @param attributes the attributes
+   * @return the user representation
+   */
+  UserRepresentation setAttributesWithApiKey(UserRepresentation user, Map<String, List<String>> attributes);
 }

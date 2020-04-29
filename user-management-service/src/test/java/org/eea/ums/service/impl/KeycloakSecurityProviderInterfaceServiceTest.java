@@ -35,27 +35,46 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
+/**
+ * The Class KeycloakSecurityProviderInterfaceServiceTest.
+ */
 public class KeycloakSecurityProviderInterfaceServiceTest {
 
+  /** The keycloak security provider interface service. */
   @InjectMocks
   private KeycloakSecurityProviderInterfaceService keycloakSecurityProviderInterfaceService;
+
+  /** The keycloak connector service. */
   @Mock
   private KeycloakConnectorService keycloakConnectorService;
 
+  /** The group info mapper. */
   @Mock
   private GroupInfoMapper groupInfoMapper;
 
+  /** The jwt token provider. */
   @Mock
   private JwtTokenProvider jwtTokenProvider;
 
+  /** The security redis template. */
   @Mock
   private RedisTemplate<String, CacheTokenVO> securityRedisTemplate;
 
+  /**
+   * Sets the up.
+   *
+   * @throws Exception the exception
+   */
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
   }
 
+  /**
+   * Do login.
+   *
+   * @throws VerificationException the verification exception
+   */
   @Test
   public void doLogin() throws VerificationException {
     TokenInfo tokenInfo = new TokenInfo();
@@ -78,6 +97,11 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     Assert.assertNotNull(token.getAccessToken());
   }
 
+  /**
+   * Do admin login.
+   *
+   * @throws VerificationException the verification exception
+   */
   @Test
   public void doAdminLogin() throws VerificationException {
     TokenInfo tokenInfo = new TokenInfo();
@@ -101,6 +125,11 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     Assert.assertNotNull(token.getAccessToken());
   }
 
+  /**
+   * Do not admin login.
+   *
+   * @throws VerificationException the verification exception
+   */
   @Test
   public void doNotAdminLogin() throws VerificationException {
     TokenInfo tokenInfo = new TokenInfo();
@@ -124,6 +153,11 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     Assert.assertNotNull(token.getAccessToken());
   }
 
+  /**
+   * Do login by code.
+   *
+   * @throws VerificationException the verification exception
+   */
   @Test
   public void doLoginByCode() throws VerificationException {
     TokenInfo tokenInfo = new TokenInfo();
@@ -147,6 +181,11 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     Assert.assertNotNull(token.getAccessToken());
   }
 
+  /**
+   * Refresh token.
+   *
+   * @throws VerificationException the verification exception
+   */
   @Test
   public void refreshToken() throws VerificationException {
     TokenInfo tokenInfo = new TokenInfo();
@@ -169,6 +208,9 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     Assert.assertNotNull(token.getAccessToken());
   }
 
+  /**
+   * Check access permission.
+   */
   @Test
   public void checkAccessPermission() {
     when(keycloakConnectorService.checkUserPermision("Dataflow",
@@ -180,12 +222,22 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   }
 
 
+  /**
+   * Gets the users.
+   *
+   * @return the users
+   */
   @Test(expected = UnsupportedOperationException.class)
   public void getUsers() {
     keycloakSecurityProviderInterfaceService.getUsers("");
 
   }
 
+  /**
+   * Creates the resource instance.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createResourceInstance() throws EEAException {
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
@@ -204,11 +256,19 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   }
 
 
+  /**
+   * Removes the user from user group.
+   */
   @Test(expected = UnsupportedOperationException.class)
   public void removeUserFromUserGroup() {
     keycloakSecurityProviderInterfaceService.removeUserFromUserGroup("", "");
   }
 
+  /**
+   * Gets the resources by user.
+   *
+   * @return the resources by user
+   */
   @Test
   public void getResourcesByUser() {
     GroupInfo[] groupInfos = new GroupInfo[1];
@@ -231,12 +291,20 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     Assert.assertEquals(SecurityRoleEnum.DATA_PROVIDER, result.get(0).getRole());
   }
 
+  /**
+   * Do logout.
+   */
   @Test
   public void doLogout() {
     keycloakSecurityProviderInterfaceService.doLogout("authToken");
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).logout("authToken");
   }
 
+  /**
+   * Adds the user to user group.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void addUserToUserGroup() throws EEAException {
     GroupInfo[] groupInfos = new GroupInfo[1];
@@ -251,6 +319,11 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
         "idGroupInfo");
   }
 
+  /**
+   * Gets the group detail.
+   *
+   * @return the group detail
+   */
   @Test
   public void getGroupDetail() {
     GroupInfo[] groupInfos = new GroupInfo[1];
@@ -273,6 +346,9 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     Assert.assertEquals(result.getSecurityRoleEnum(), SecurityRoleEnum.DATA_CUSTODIAN);
   }
 
+  /**
+   * Delete resource instances.
+   */
   @Test
   public void deleteResourceInstances() {
     List<ResourceInfoVO> resourceInfoVOs = new ArrayList<>();
@@ -290,6 +366,9 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).deleteGroupDetail("idGroupInfo");
   }
 
+  /**
+   * Delete resource instances by name.
+   */
   @Test
   public void deleteResourceInstancesByName() {
     List<String> resourceNames = new ArrayList<>();
@@ -307,6 +386,11 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   }
 
 
+  /**
+   * Update api key full attributes test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateApiKeyFullAttributesTest() throws EEAException {
     UserRepresentation user = new UserRepresentation();
@@ -320,6 +404,12 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     assertNotNull(key);
   }
 
+  /**
+   * Gets the api key empty test.
+   *
+   * @return the api key empty test
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void getApiKeyEmptyTest() throws EEAException {
     UserRepresentation user = new UserRepresentation();
@@ -329,6 +419,12 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     assertNotNull(key);
   }
 
+  /**
+   * Gets the api key attributes test.
+   *
+   * @return the api key attributes test
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void getApiKeyAttributesTest() throws EEAException {
     UserRepresentation user = new UserRepresentation();
@@ -340,6 +436,12 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     assertEquals("", key);
   }
 
+  /**
+   * Gets the api key full attributes test.
+   *
+   * @return the api key full attributes test
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void getApiKeyFullAttributesTest() throws EEAException {
     UserRepresentation user = new UserRepresentation();
@@ -353,6 +455,11 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     assertEquals("uuid", key);
   }
 
+  /**
+   * Creates the api key.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createApiKey() throws EEAException {
     UserRepresentation user = new UserRepresentation();
@@ -366,6 +473,11 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     assertNotNull(key);
   }
 
+  /**
+   * Creates the api key user not found error.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void createApiKeyUserNotFoundError() throws EEAException {
 
@@ -377,6 +489,9 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     }
   }
 
+  /**
+   * Authenticate api key.
+   */
   @Test
   public void authenticateApiKey() {
 
@@ -420,6 +535,9 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
 
   }
 
+  /**
+   * Authenticate api key wrong api.
+   */
   @Test
   public void authenticateApiKeyWrongApi() {
 
@@ -435,6 +553,11 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     Assert.assertNull(result);
   }
 
+  /**
+   * Gets the user without keys success test.
+   *
+   * @return the user without keys success test
+   */
   @Test
   public void getUserWithoutKeysSuccessTest() {
     UserRepresentation user = new UserRepresentation();
@@ -447,6 +570,11 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     assertEquals(user, keycloakSecurityProviderInterfaceService.getUserWithoutKeys(""));
   }
 
+  /**
+   * Gets the user without keys empty attibutes test.
+   *
+   * @return the user without keys empty attibutes test
+   */
   @Test
   public void getUserWithoutKeysEmptyAttibutesTest() {
     UserRepresentation user = new UserRepresentation();
@@ -456,9 +584,30 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     assertEquals(user, keycloakSecurityProviderInterfaceService.getUserWithoutKeys(""));
   }
 
+  /**
+   * Gets the user without keys user null test.
+   *
+   * @return the user without keys user null test
+   */
   @Test
   public void getUserWithoutKeysUserNullTest() {
     when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(null);
     assertEquals(null, keycloakSecurityProviderInterfaceService.getUserWithoutKeys(""));
+  }
+
+
+  /**
+   * Sets the attributes with api key test.
+   */
+  @Test
+  public void setAttributesWithApiKeyTest() {
+    UserRepresentation user = new UserRepresentation();
+    Map<String, List<String>> attributes = new HashMap<>();
+    List<String> oldKeys = new ArrayList<>();
+    oldKeys.add("uuid,1,1");
+    attributes.put("ApiKeys", oldKeys);
+    user.setAttributes(attributes);
+    assertEquals(user,
+        keycloakSecurityProviderInterfaceService.setAttributesWithApiKey(user, attributes));
   }
 }

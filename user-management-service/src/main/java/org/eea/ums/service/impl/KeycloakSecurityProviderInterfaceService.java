@@ -76,10 +76,12 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   private GroupInfoMapper groupInfoMapper;
 
 
+  /** The security redis template. */
   @Autowired
   @Qualifier("securityRedisTemplate")
   private RedisTemplate<String, CacheTokenVO> securityRedisTemplate;
 
+  /** The jwt token provider. */
   @Autowired
   private JwtTokenProvider jwtTokenProvider;
 
@@ -228,8 +230,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * Creates the resource instance.
    *
    * @param resourceInfoVO the resource info vo
-   *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public void createResourceInstance(ResourceInfoVO resourceInfoVO) throws EEAException {
@@ -318,8 +319,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    *
    * @param userId the user resourceId
    * @param groupName the group name
-   *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public void addUserToUserGroup(String userId, String groupName) throws EEAException {
@@ -417,9 +417,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   /**
    * Adds the contributor to user group.
    *
+   * @param contributor the contributor
    * @param userMail the user mail
    * @param groupName the group name
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -485,8 +485,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * Creates the resource instance.
    *
    * @param resourceInfoVOs the resource info V os
-   *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public void createResourceInstance(List<ResourceInfoVO> resourceInfoVOs) throws EEAException {
@@ -510,6 +509,12 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
 
   }
 
+  /**
+   * Authenticate api key.
+   *
+   * @param apiKey the api key
+   * @return the token VO
+   */
   @Override
   @Cacheable(value = "api_key")
   public TokenVO authenticateApiKey(String apiKey) {
@@ -556,6 +561,15 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     return tokenVO;
   }
 
+  /**
+   * Creates the api key.
+   *
+   * @param userId the user id
+   * @param dataflowId the dataflow id
+   * @param dataProvider the data provider
+   * @return the string
+   * @throws EEAException the EEA exception
+   */
   @Override
   public String createApiKey(String userId, Long dataflowId, Long dataProvider)
       throws EEAException {
@@ -587,6 +601,15 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     return apiKey;
   }
 
+  /**
+   * Gets the api key.
+   *
+   * @param userId the user id
+   * @param dataflowId the dataflow id
+   * @param dataProvider the data provider
+   * @return the api key
+   * @throws EEAException the EEA exception
+   */
   @Override
   public String getApiKey(String userId, Long dataflowId, Long dataProvider) throws EEAException {
     UserRepresentation user = keycloakConnectorService.getUser(userId);
@@ -653,6 +676,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     return tokenVO;
   }
 
+  /**
+   * Adds the token info to cache.
+   *
+   * @param tokenVO the token VO
+   * @param cacheExpireIn the cache expire in
+   * @return the string
+   */
   private String addTokenInfoToCache(TokenVO tokenVO, Long cacheExpireIn) {
     CacheTokenVO cacheTokenVO = new CacheTokenVO();
     cacheTokenVO.setAccessToken(tokenVO.getAccessToken());
@@ -663,6 +693,12 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     return key;
   }
 
+  /**
+   * Gets the user without keys.
+   *
+   * @param userId the user id
+   * @return the user without keys
+   */
   @Override
   public UserRepresentation getUserWithoutKeys(String userId) {
     UserRepresentation user = keycloakConnectorService.getUser(userId);
@@ -672,5 +708,21 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     return user;
   }
 
+  /**
+   * Sets the attributes with ApiKeys.
+   *
+   * @param user the user
+   * @param attributes the attributes
+   * @return the user representation
+   */
+  @Override
+  public UserRepresentation setAttributesWithApiKey(UserRepresentation user,
+      Map<String, List<String>> attributes) {
+    if (user.getAttributes() != null && user.getAttributes().get(APIKEYS) != null) {
+      attributes.put(APIKEYS, user.getAttributes().get(APIKEYS));
+    }
+    user.setAttributes(attributes);
+    return user;
+  }
 
 }
