@@ -73,7 +73,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         message: message,
         messageLevel: capitalizedMessageLevel,
         date: notification.date.toLocaleString(),
-        redirectionUrl: `${window.env.REACT_APP_BACKEND}${notification.redirectionUrl}`
+        redirectionUrl: `${window.location.protocol}//${window.location.hostname}${notification.redirectionUrl}`
       };
     });
     console.info('notifications: %o', notificationsArray);
