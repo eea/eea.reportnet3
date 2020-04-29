@@ -1,14 +1,13 @@
 import React, { useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './TabsValidations.module.scss';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
@@ -19,8 +18,8 @@ import { DataTable } from 'ui/views/_components/DataTable';
 import { Filters } from 'ui/views/_components/Filters';
 import { SearchAll } from 'ui/views/_components/SearchAll';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { TabView } from 'ui/views/_components/TabView'; // Do not delete
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel'; // Do not delete
+import { TabView } from 'ui/views/_components/TabView'; // Do not delete
 
 import { ValidationService } from 'core/services/Validation';
 
@@ -29,6 +28,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 import { tabsValidationsReducer } from './Reducers/tabsValidationsReducer';
+
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
 const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSchemaId, onHideValidationsDialog }) => {
@@ -42,8 +42,8 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     isDeleteDialogVisible: false,
     isLoading: true,
     searchedData: [],
-    validationList: {},
-    validationId: ''
+    validationId: '',
+    validationList: {}
   });
 
   useEffect(() => {
@@ -78,6 +78,10 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     validationId('');
   };
 
+  const onLoadFilteredData = data => tabsValidationsDispatch({ type: 'FILTER_DATA', payload: { data } });
+
+  const onLoadSearchedData = data => tabsValidationsDispatch({ type: 'SEARCHED_DATA', payload: { data } });
+
   const onLoadValidationsList = async datasetSchemaId => {
     try {
       const validationsServiceList = await ValidationService.getAll(datasetSchemaId);
@@ -98,10 +102,6 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       isLoading(false);
     }
   };
-
-  const onLoadFilteredData = data => tabsValidationsDispatch({ type: 'FILTER_DATA', payload: { data } });
-
-  const onLoadSearchedData = data => tabsValidationsDispatch({ type: 'SEARCHED_DATA', payload: { data } });
 
   const onShowDeleteDialog = () => isDeleteDialogVisible(true);
 

@@ -85,8 +85,8 @@
         }
 
         .blocker {
-          background-color: rgba(#c2c8cf, 0.8) !important;
-          color: rgba(#000, 0.8) !important;
+          background-color: var(--statusBox-blocker-bg) !important;
+          color: var(--statusBox-blocker-color) !important;
         }
 
         .correct {
@@ -105,18 +105,18 @@
         }
 
         .error {
-          background-color: #ffcdd2 !important;
-          color: #c63737 !important;
+          background-color: var(--statusBox-error-bg) !important;
+          color: var(--statusBox-error-color) !important;
         }
 
         .info {
-          background-color: #b3e5fc !important;
-          color: #23547b !important;
+          background-color: var(--statusBox-info-bg) !important;
+          color: var(--statusBox-info-color) !important;
         }
 
         .warning {
-          background-color: #ffd8b2 !important;
-          color: #805b36 !important;
+          background-color: var(--statusBox-warning-bg) !important;
+          color: var(--statusBox-warning-color) !important;
         }
       }
     }
