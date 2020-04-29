@@ -350,29 +350,6 @@ public class DataSetControllerImplTest {
   }
 
   /**
-   * Test get data flow id by id find error.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testGetDataFlowIdByIdFindError() throws Exception {
-    doThrow(new EEAException()).when(datasetService).getDataFlowIdById(Mockito.any());
-    Long result = dataSetControllerImpl.getDataFlowIdById(1L);
-    Mockito.verify(datasetService, times(1)).getDataFlowIdById(Mockito.any());
-    assertNull("should be null", result);
-  }
-
-  /**
-   * Test get by id exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testGetDataFlowIdByIdException() throws Exception {
-    dataSetControllerImpl.getDataFlowIdById(null);
-  }
-
-  /**
    * Test update dataset success.
    *
    * @throws Exception the exception
