@@ -203,14 +203,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     if (!isNil(tableFields) && tableFields.length > 0) {
       fieldDropdownOptions.options = tableFields;
       fieldDropdownOptions.disabled = false;
-      fieldDropdownOptions.onChange = e =>
-        creationFormDispatch({
-          type: 'SET_FORM_FIELD',
-          payload: {
-            key: 'field',
-            value: e.target.value
-          }
-        });
+      fieldDropdownOptions.onChange = e => onInfoFieldChange('field', e.target.value);
       fieldDropdownOptions.value = creationFormState.candidateRule.field;
     }
     setfieldsDropdown(
@@ -355,6 +348,16 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     setTabMenuActiveItem(tab);
   };
 
+  const onInfoFieldChange = (fieldKey, fieldValue) => {
+    creationFormDispatch({
+      type: 'SET_FORM_FIELD',
+      payload: {
+        key: fieldKey,
+        value: fieldValue
+      }
+    });
+  };
+
   const dialogLayout = children => (
     <Dialog
       header={
@@ -391,15 +394,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                       placeholder={tableFieldOptions.placeholder}
                       optionLabel="label"
                       options={creationFormState.schemaTables}
-                      onChange={e =>
-                        creationFormDispatch({
-                          type: 'SET_FORM_FIELD',
-                          payload: {
-                            key: 'table',
-                            value: e.target.value
-                          }
-                        })
-                      }
+                      onChange={e => onInfoFieldChange('table', e.target.value)}
                       value={creationFormState.candidateRule.table}
                     />
                   </div>
@@ -419,27 +414,14 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                       id={`${componentName}__shortCode`}
                       placeholder={resourcesContext.messages.ruleShortCode}
                       value={creationFormState.candidateRule.shortCode}
-                      onChange={e =>
-                        creationFormDispatch({
-                          type: 'SET_FORM_FIELD',
-                          payload: {
-                            key: 'shortCode',
-                            value: e.target.value
-                          }
-                        })
-                      }
+                      onChange={e => onInfoFieldChange('shortCode', e.target.value)}
                     />
                   </div>
                   <div className={`${styles.field} ${styles.qcEnabled} formField `}>
                     <label htmlFor="QcActive">{resourcesContext.messages.enabled}</label>
                     <Checkbox
                       id={`${componentName}__active`}
-                      onChange={e =>
-                        creationFormDispatch({
-                          type: 'SET_FORM_FIELD',
-                          payload: { key: 'active', value: e.checked }
-                        })
-                      }
+                      onChange={e => onInfoFieldChange('active', e.checked)}
                       isChecked={creationFormState.candidateRule.active}
                     />
                   </div>
@@ -454,15 +436,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                       id={`${componentName}__name`}
                       placeholder={resourcesContext.messages.ruleName}
                       value={creationFormState.candidateRule.name}
-                      onChange={e =>
-                        creationFormDispatch({
-                          type: 'SET_FORM_FIELD',
-                          payload: {
-                            key: 'name',
-                            value: e.target.value
-                          }
-                        })
-                      }
+                      onChange={e => onInfoFieldChange('name', e.target.value)}
                     />
                   </div>
                   <div className={`${styles.field} ${styles.qcDescription} formField`}>
@@ -471,15 +445,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                       id={`${componentName}__description`}
                       placeholder={resourcesContext.messages.description}
                       value={creationFormState.candidateRule.description}
-                      onChange={e =>
-                        creationFormDispatch({
-                          type: 'SET_FORM_FIELD',
-                          payload: {
-                            key: 'description',
-                            value: e.target.value
-                          }
-                        })
-                      }
+                      onChange={e => onInfoFieldChange('description', e.target.value)}
                     />
                   </div>
                 </fieldset>
@@ -496,15 +462,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                       appendTo={document.body}
                       optionLabel="label"
                       options={creationFormState.errorLevels}
-                      onChange={e =>
-                        creationFormDispatch({
-                          type: 'SET_FORM_FIELD',
-                          payload: {
-                            key: 'errorLevel',
-                            value: e.target.value
-                          }
-                        })
-                      }
+                      onChange={e => onInfoFieldChange('errorLevel', e.target.value)}
                       value={creationFormState.candidateRule.errorLevel}
                     />
                   </div>
@@ -517,15 +475,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                       id={`${componentName}__errorMessage`}
                       placeholder={resourcesContext.messages.ruleErrorMessage}
                       value={creationFormState.candidateRule.errorMessage}
-                      onChange={e =>
-                        creationFormDispatch({
-                          type: 'SET_FORM_FIELD',
-                          payload: {
-                            key: 'errorMessage',
-                            value: e.target.value
-                          }
-                        })
-                      }
+                      onChange={e => onInfoFieldChange('errorMessage', e.target.value)}
                     />
                   </div>
                 </fieldset>
