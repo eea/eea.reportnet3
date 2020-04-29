@@ -663,11 +663,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    *
    * @return the data flow id by id
-   *
-   * @throws EEAException the EEA exception
    */
   @Override
-  public Long getDataFlowIdById(Long datasetId) throws EEAException {
+  public Long getDataFlowIdById(Long datasetId) {
     return dataSetMetabaseRepository.findDataflowIdById(datasetId);
   }
 
