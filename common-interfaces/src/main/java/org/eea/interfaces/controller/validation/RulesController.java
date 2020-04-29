@@ -103,7 +103,7 @@ public interface RulesController {
    *
    * @param datasetId the dataset id
    * @param ruleVO the rule VO
-   * @return
+   * @return the response entity
    */
   @PutMapping("/createNewRule")
   ResponseEntity<?> createNewRule(@RequestParam("datasetId") long datasetId,
@@ -169,6 +169,12 @@ public interface RulesController {
       @RequestParam("position") int position,
       @RequestParam("datasetSchemaId") String datasetSchemaId);
 
-
-
+  /**
+   * Update automatic rule.
+   *
+   * @param datasetId the dataset id
+   * @param ruleVO the rule VO
+   */
+  @PutMapping("/updateAutomaticRule/{datasetId}")
+  void updateAutomaticRule(@PathVariable("datasetId") long datasetId, @RequestBody RuleVO ruleVO);
 }
