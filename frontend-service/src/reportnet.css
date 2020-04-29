@@ -101,6 +101,15 @@
   --c-chart-error: #cc3300;
   --c-custom-gray: #c8c8c8;
   --c-growl-info-blue: #8bc3ed;
+  /* level error statusbox colors */
+  --statusBox-blocker-bg: 194, 200, 207;
+  --statusBox-blocker-color: 0, 0, 0;
+  --statusBox-error-bg: #ffcdd2;
+  --statusBox-error-color: #c63737;
+  --statusBox-info-bg: #b3e5fc;
+  --statusBox-info-color: #23547b;
+  --statusBox-warning-bg: #ffd8b2;
+  --statusBox-warning-color: #805b36;
 
   --header-height: 4rem;
 
@@ -2215,6 +2224,12 @@ textarea:focus {
   border-color: var(--errors);
   box-shadow: inset 0px 0px 0px 1px var(--errors);
   outline: none;
+}
+.formField.error .p-dropdown {
+  border-color: var(--errors);
+  box-shadow: inset 0px 0px 0px 1px var(--errors);
+  outline: none;
+  border-width: 2px;
 }
 .formField input {
   background-color: var(--form-field-bg);
