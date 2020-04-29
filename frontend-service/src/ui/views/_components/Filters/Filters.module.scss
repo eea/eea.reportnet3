@@ -90,23 +90,38 @@
         }
 
         .correct {
-          background-color: #c8e6c9 !important;
-          color: #256029 !important;
+          background-color: var(--statusBox-true-bg) !important;
+          color: var(--statusBox-true-color) !important;
         }
 
         .design {
-          background-color: rgba(#c2c8cf, 0.8) !important;
+          background-color: var(--statusBox-designer-bg) !important;
           color: var(--black) !important;
         }
 
+        .disabled {
+          background-color: var(--statusBox-false-bg) !important;
+          color: var(--statusBox-false-color) !important;
+        }
+
         .draft {
-          background-color: #eccfff !important;
-          color: #694382 !important;
+          background-color: var(--statusBox-draft-bg) !important;
+          color: var(--statusBox-draft-color) !important;
+        }
+
+        .enabled {
+          background-color: var(--statusBox-true-bg) !important;
+          color: var(--statusBox-true-color) !important;
         }
 
         .error {
           background-color: var(--statusBox-error-bg) !important;
           color: var(--statusBox-error-color) !important;
+        }
+
+        .incorrect {
+          background-color: var(--statusBox-false-bg) !important;
+          color: var(--statusBox-false-color) !important;
         }
 
         .info {
