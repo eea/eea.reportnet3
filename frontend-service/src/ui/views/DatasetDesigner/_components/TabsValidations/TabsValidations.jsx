@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -16,7 +16,6 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Filters } from 'ui/views/_components/Filters';
-import { SearchAll } from 'ui/views/_components/SearchAll';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel'; // Do not delete
 import { TabView } from 'ui/views/_components/TabView'; // Do not delete
@@ -41,7 +40,6 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     isDataUpdated: false,
     isDeleteDialogVisible: false,
     isLoading: true,
-    searchedData: [],
     validationId: '',
     validationList: {}
   });
@@ -79,8 +77,6 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   };
 
   const onLoadFilteredData = data => tabsValidationsDispatch({ type: 'FILTER_DATA', payload: { data } });
-
-  const onLoadSearchedData = data => tabsValidationsDispatch({ type: 'SEARCHED_DATA', payload: { data } });
 
   const onLoadValidationsList = async datasetSchemaId => {
     try {
@@ -291,24 +287,18 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     const paginatorRightText = `${resources.messages['fieldRecords']}: ${tabsValidationsState.validationList.validations.length}`;
 
     return (
-      <div className={null}>
+      <Fragment>
         <div className={styles.searchInput}>
-          <SearchAll
-            data={tabsValidationsState.filteredData}
-            getValues={onLoadSearchedData}
-            searchBy={['name', 'description', 'message']}
-          />
           <Filters
             data={tabsValidationsState.validationList.validations}
             getFiltredData={onLoadFilteredData}
-            inputOptions={['name']}
             searchAll
             searchBy={['name', 'description', 'message']}
             selectOptions={['table', 'field', 'entityType', 'levelError', 'enabled', 'isCorrect']}
           />
         </div>
 
-        {!isEmpty(tabsValidationsState.searchedData) ? (
+        {!isEmpty(tabsValidationsState.filteredData) ? (
           <DataTable
             autoLayout={true}
             className={styles.paginatorValidationViewer}
@@ -319,13 +309,13 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
             rows={10}
             rowsPerPageOptions={[5, 10, 15]}
             totalRecords={tabsValidationsState.validationList.validations.length}
-            value={tabsValidationsState.searchedData}>
+            value={tabsValidationsState.filteredData}>
             {renderColumns(tabsValidationsState.validationList.validations)}
           </DataTable>
         ) : (
           <div className={styles.noDataflows}>{resources.messages['noQCRulesWithSelectedParameters']}</div>
         )}
-      </div>
+      </Fragment>
 
       // <TabPanel header={entityType} key={entityType} rightIcon={null}>
       //   <div className={null}>

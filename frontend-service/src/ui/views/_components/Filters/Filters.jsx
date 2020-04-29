@@ -32,7 +32,7 @@ export const Filters = ({
   getFiltredData,
   inputOptions,
   searchAll,
-  searchBy,
+  searchBy = [],
   selectList,
   selectOptions,
   sendData,
@@ -99,7 +99,8 @@ export const Filters = ({
         filterBy: FiltersUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions, dropdownOptions),
         filteredData: cloneDeep(data),
         labelAnimations: ApplyFilterUtils.onClearLabelState(inputOptions, selectOptions, dateOptions, dropdownOptions),
-        orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions, dropdownOptions)
+        orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions, dropdownOptions),
+        searchBy: ''
       }
     });
   };
@@ -323,10 +324,7 @@ export const Filters = ({
             } p-button-rounded  p-button-animated-blink`}
             icon="undo"
             label={resources.messages['reset']}
-            onClick={() => {
-              onClearAllFilters();
-              onSearchData('');
-            }}
+            onClick={() => onClearAllFilters()}
             style={{ marginLeft: sendData ? '1rem' : '' }}
           />
         )}

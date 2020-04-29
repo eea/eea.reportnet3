@@ -31,7 +31,8 @@ export const filterReducer = (state, { type, payload }) => {
         filterBy: payload.filterBy,
         filteredData: payload.filteredData,
         labelAnimations: payload.labelAnimations,
-        orderBy: payload.orderBy
+        orderBy: payload.orderBy,
+        searchBy: payload.searchBy
       };
 
     case 'ANIMATE_LABEL':

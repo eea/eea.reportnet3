@@ -17,8 +17,5 @@ export const tabsValidationsReducer = (state, { type, payload }) => {
 
     case 'ON_LOAD_VALIDATION_LIST':
       return { ...state, validationList: payload.validationsServiceList };
-
-    case 'SEARCHED_DATA':
-      return { ...state, searchedData: payload.data };
   }
 };

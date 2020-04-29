@@ -24,7 +24,9 @@ const checkFilters = (filteredKeys = [], dataflow, state) => {
 const checkSearched = (state, data, searchedKeys = []) => {
   const searched = [];
   for (let index = 0; index < searchedKeys.length; index++) {
-    searched.push(data[searchedKeys[index]].toLowerCase().includes(state.searchBy.toLowerCase()));
+    if (!isNil(data[searchedKeys[index]])) {
+      searched.push(data[searchedKeys[index]].toLowerCase().includes(state.searchBy.toLowerCase()));
+    }
   }
   return searched.includes(true);
 };
@@ -49,7 +51,8 @@ const checkSelected = (state, data, selectedKeys = []) => {
 const getEndOfDay = date => new Date(moment(date).endOf('day').format()).getTime() / 1000;
 
 const getSearchKeys = data => {
-  if (!isNil(data)) return Object.keys(data).filter(item => item !== 'id' && item !== 'key');
+  if (!isNil(data))
+    return Object.keys(Array.isArray(data) ? data[0] : data).filter(item => item !== 'id' && item !== 'key');
 };
 
 const getStartOfDay = date => new Date(moment(date).startOf('day').format()).getTime() / 1000;
@@ -106,7 +109,7 @@ const onApplySearch = (data, searchBy = [], value, state, inputKeys, selectedKey
     const filteredData = [];
     for (let index = 0; index < searchedParams.length; index++) {
       if (!isNil(data[searchedParams[index]])) {
-        filteredData.push(data[searchedParams[index]].toLowerCase().includes(value.toLowerCase()));
+        filteredData.push(data[searchedParams[index]].toString().toLowerCase().includes(value.toLowerCase()));
       }
     }
     return (
