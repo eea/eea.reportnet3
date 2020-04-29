@@ -28,6 +28,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { representativeReducer } from './_functions/representativeReducer';
+import { dataflowActionCreators } from './_functions/dataflowActionCreators';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
@@ -77,6 +78,23 @@ const Representative = withRouter(({ match, history }) => {
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(representativeReducer, representativeInitialState);
+
+  const {
+    initialLoad,
+    loadPermissions,
+    manageDialogs,
+    onDeleteDataflow,
+    onEditData,
+    setDataProviderId,
+    setDatasetIdToSnapshotProps,
+    setDesignDatasetSchemas,
+    setFormHasRepresentatives,
+    setHasRepresentativesWithoutDatasets,
+    setIsDataSchemaCorrect,
+    setIsDataUpdated,
+    setIsPageLoading,
+    setUpdatedDatasetSchema
+  } = dataflowActionCreators(dataflowDispatch);
 
   useEffect(() => {
     if (!isNil(user.contextRoles)) onLoadPermission();
@@ -145,8 +163,6 @@ const Representative = withRouter(({ match, history }) => {
 
   const handleRedirect = target => history.push(target);
 
-  const onHideSnapshotDialog = () => manageDialogs('isSnapshotDialogVisible', false);
-
   const onLoadPermission = () => {
     const hasWritePermissions = UserService.hasPermission(
       user,
@@ -159,32 +175,27 @@ const Representative = withRouter(({ match, history }) => {
       `${config.permissions.DATAFLOW}${dataflowId}`
     );
 
-    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian } });
+    loadPermissions(hasWritePermissions, isCustodian);
   };
 
-  const setIsPageLoading = isPageLoading =>
-    dataflowDispatch({ type: 'SET_IS_PAGE_LOADING', payload: { isPageLoading } });
+  const checkIsRepresentativeView = datasets => {
+    const uniqRepresentatives = uniq(datasets.map(dataset => dataset.datasetSchemaName));
 
-  const setDataProviderId = id => dataflowDispatch({ type: 'SET_DATA_PROVIDER_ID', payload: { id } });
+    return uniqRepresentatives.length === 1;
+  };
 
-  const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
-
-  const setDatasetIdToSnapshotProps = id =>
-    dataflowDispatch({ type: 'SET_DATASET_ID_TO_SNAPSHOT_PROPS', payload: { id } });
+  const onInitialLoad = (dataflow, datasets) => {
+    const isRepresentativeView = checkIsRepresentativeView(datasets);
+    initialLoad(dataflow, isRepresentativeView);
+  };
 
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.reporting(dataflowId);
-      dataflowDispatch({
-        type: 'INITIAL_LOAD',
-        payload: {
-          data: dataflow,
-          description: dataflow.description,
-          name: dataflow.name,
-          obligations: dataflow.obligation,
-          status: dataflow.status
-        }
-      });
+
+      const { datasets } = dataflow;
+
+      onInitialLoad(dataflow, datasets);
 
       if (!isEmpty(dataflow.datasets)) {
         const representativeId = dataflow.datasets
@@ -211,7 +222,7 @@ const Representative = withRouter(({ match, history }) => {
         if (isReceiptOutdated.length === 1 && isReleased.length === 1) {
           dataflowDispatch({
             type: 'ON_INIT_RECEIPT_DATA',
-            payload: { isReceiptLoading: false, isReceiptOutdated: isReceiptOutdated[0], receiptPdf: {}, isReleased }
+            payload: { isReceiptLoading: false, isReceiptOutdated: isReceiptOutdated[0], isReleased }
           });
         }
       }
@@ -223,12 +234,6 @@ const Representative = withRouter(({ match, history }) => {
       setIsPageLoading(false);
     }
   };
-
-  const manageDialogs = (dialog, value, secondDialog, secondValue) =>
-    dataflowDispatch({
-      type: 'MANAGE_DIALOGS',
-      payload: { dialog, value, secondDialog, secondValue, deleteInput: '' }
-    });
 
   const onShowReleaseSnapshotDialog = async datasetId => {
     setDatasetIdToSnapshotProps(datasetId);

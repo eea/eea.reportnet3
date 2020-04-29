@@ -12,21 +12,24 @@ import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
+import { dataflowActionCreators } from '../../_functions/dataflowActionCreators';
 
 export const BigButtonList = ({
   dataflowData,
+  dataflowDispatch,
   dataflowId,
+  dataflowState,
   dataProviderId,
   handleRedirect,
   hasWritePermissions,
   isCustodian,
-  dataflowDispatch,
-  dataflowState,
-  representative,
+  manageDialogs,
   onShowSnapshotDialog,
-  manageDialogs
+  representative
 }) => {
   const notificationContext = useContext(NotificationContext);
+
+  const { setIsReceiptLoading, onCleanUpReceipt } = dataflowActionCreators(dataflowDispatch);
 
   const receiptBtnRef = useRef(null);
 
@@ -36,20 +39,6 @@ export const BigButtonList = ({
       setIsReceiptLoading(false);
     }
   }, [notificationContext]);
-
-  const setIsReceiptLoading = isReceiptLoading => {
-    dataflowDispatch({
-      type: 'SET_IS_RECEIPT_LOADING',
-      payload: { isReceiptLoading }
-    });
-  };
-
-  const onCleanUpReceipt = () => {
-    dataflowDispatch({
-      type: 'ON_CLEAN_UP_RECEIPT',
-      payload: { isReceiptLoading: false, isReceiptOutdated: false }
-    });
-  };
 
   const downloadPdf = response => {
     if (!isUndefined(response)) {
