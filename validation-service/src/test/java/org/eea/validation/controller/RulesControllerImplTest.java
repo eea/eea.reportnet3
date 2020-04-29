@@ -455,4 +455,23 @@ public class RulesControllerImplTest {
     Mockito.verify(rulesService, times(1)).deleteRuleByReferenceFieldSchemaPKId(Mockito.any(),
         Mockito.any());
   }
+
+  @Test
+  public void updateAutomaticRuleTest() throws EEAException {
+    Mockito.doNothing().when(rulesService).updateAutomaticRule(Mockito.anyLong(), Mockito.any());
+    rulesControllerImpl.updateAutomaticRule(1L, new RuleVO());
+    Mockito.verify(rulesService, times(1)).updateAutomaticRule(Mockito.anyLong(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateAutomaticRuleExceptionTest() throws EEAException {
+    try {
+      Mockito.doThrow(EEAException.class).when(rulesService).updateAutomaticRule(Mockito.anyLong(),
+          Mockito.any());
+      rulesControllerImpl.updateAutomaticRule(1L, new RuleVO());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
 }
