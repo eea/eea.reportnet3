@@ -42,9 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class KeycloakSecurityProviderInterfaceService.
@@ -518,13 +516,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     List<UserRepresentation> userRepresentations = new ArrayList<>();
     Long dataflowId = 0l;
     for (UserRepresentation userRepresentation : keycloakConnectorService.getUsers()) {
-      if (null != userRepresentation.getAttributes() && 1 >= userRepresentation.getAttributes()
-          .size()) {
+      if (null != userRepresentation.getAttributes()
+          && 1 >= userRepresentation.getAttributes().size()) {
         List<String> apiKeys = userRepresentation.getAttributes().get("ApiKeys");
-        //an api key in attributes is represented as a string where positions are:
-        //ApiKeyValue,dataflowId,dataproviderId
-        String userApiKey = apiKeys.stream().filter(value -> value.startsWith(apiKey)).findFirst()
-            .orElse("");
+        // an api key in attributes is represented as a string where positions are:
+        // ApiKeyValue,dataflowId,dataproviderId
+        String userApiKey =
+            apiKeys.stream().filter(value -> value.startsWith(apiKey)).findFirst().orElse("");
         if (StringUtils.isNotEmpty(userApiKey)) {
 
           String[] apiKeyValues = userApiKey.split(",");
@@ -548,8 +546,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       }
       tokenVO.setGroups(userGroups);
       tokenVO.setRoles(Arrays.asList(keycloakConnectorService.getUserRoles(user.getId())).stream()
-          .map(roleRepresentation -> roleRepresentation.getName()).collect(
-              Collectors.toSet()));
+          .map(roleRepresentation -> roleRepresentation.getName()).collect(Collectors.toSet()));
 
       tokenVO.setPreferredUsername(user.getUsername());
       LOG.info("User {} logged in and cached succesfully via api key {}",
@@ -637,13 +634,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       Optional.ofNullable(token.getOtherClaims())
           .map(claims -> (List<String>) claims.get("user_groups"))
           .filter(groups -> groups.size() > 0).ifPresent(groups -> {
-        groups.stream().map(group -> {
-          if (group.startsWith("/")) {
-            group = group.substring(1);
-          }
-          return group.toUpperCase();
-        }).forEach(eeaGroups::add);
-      });
+            groups.stream().map(group -> {
+              if (group.startsWith("/")) {
+                group = group.substring(1);
+              }
+              return group.toUpperCase();
+            }).forEach(eeaGroups::add);
+          });
 
       tokenVO.setRoles(token.getRoles());
       tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
@@ -664,6 +661,15 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     String key = UUID.randomUUID().toString();
     securityRedisTemplate.opsForValue().set(key, cacheTokenVO, cacheExpireIn, TimeUnit.SECONDS);
     return key;
+  }
+
+  @Override
+  public UserRepresentation getUserWithoutKeys(String userId) {
+    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    if (user != null && user.getAttributes() != null) {
+      user.getAttributes().remove(APIKEYS);
+    }
+    return user;
   }
 
 

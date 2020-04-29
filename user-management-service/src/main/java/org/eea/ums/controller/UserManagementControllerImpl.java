@@ -1,6 +1,5 @@
 package org.eea.ums.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -40,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The type User management controller.
@@ -251,7 +251,8 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @RequestMapping(value = "/test-security", method = RequestMethod.GET)
   @HystrixCommand
-  //@PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTER','DATAFLOW_PROVIDER') AND checkPermission('Dataflow','READ')")
+  // @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTER','DATAFLOW_PROVIDER') AND
+  // checkPermission('Dataflow','READ')")
   @PreAuthorize("checkApiKey(#dataflowId,#provider) AND secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTER','DATAFLOW_PROVIDER')")
   public String testSecuredService(@RequestParam("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long provider) {
@@ -372,7 +373,7 @@ public class UserManagementControllerImpl implements UserManagementController {
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get("userId");
 
-    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    UserRepresentation user = securityProviderInterfaceService.getUserWithoutKeys(userId);
     if (user != null) {
       return user.getAttributes();
     } else {
