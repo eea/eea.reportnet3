@@ -223,4 +223,12 @@ public interface SecurityProviderInterfaceService {
    * @return the api key
    */
   String getApiKey(String userId, Long dataflowId, Long dataProvider) throws EEAException;
+
+  /**
+   * Gets the user without keys.
+   *
+   * @param userId the user id
+   * @return the user without keys
+   */
+  UserRepresentation getUserWithoutKeys(String userId);
 }

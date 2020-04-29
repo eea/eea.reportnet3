@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -100,8 +99,8 @@ public class UserManagementControllerImplTest {
   @Test
   public void checkResourceAccessPermissionTest() {
     Mockito.when(securityProviderInterfaceService.checkAccessPermission("Dataflow",
-        new AccessScopeEnum[]{AccessScopeEnum.CREATE})).thenReturn(true);
-    AccessScopeEnum[] scopes = new AccessScopeEnum[]{AccessScopeEnum.CREATE};
+        new AccessScopeEnum[] {AccessScopeEnum.CREATE})).thenReturn(true);
+    AccessScopeEnum[] scopes = new AccessScopeEnum[] {AccessScopeEnum.CREATE};
     boolean checkedAccessPermission =
         userManagementController.checkResourceAccessPermission("Dataflow", scopes);
     Assert.assertTrue(checkedAccessPermission);
@@ -362,7 +361,8 @@ public class UserManagementControllerImplTest {
     details.put("userId", "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-    Mockito.when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(user);
+    Mockito.when(securityProviderInterfaceService.getUserWithoutKeys(Mockito.any()))
+        .thenReturn(user);
     assertEquals("error", attributes, userManagementController.getUserAttributes());
   }
 
@@ -436,8 +436,7 @@ public class UserManagementControllerImplTest {
       userManagementController.createApiKey(1L, 1L);
     } catch (ResponseStatusException e) {
       assertEquals("bad status", HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
-      assertEquals("bad message", EEAErrorMessage.PERMISSION_NOT_CREATED,
-          e.getReason());
+      assertEquals("bad message", EEAErrorMessage.PERMISSION_NOT_CREATED, e.getReason());
       throw e;
     }
   }
@@ -451,8 +450,7 @@ public class UserManagementControllerImplTest {
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     doThrow(new EEAException("error")).when(securityProviderInterfaceService)
-        .createApiKey(Mockito.any(),
-            Mockito.any(), Mockito.any());
+        .createApiKey(Mockito.any(), Mockito.any(), Mockito.any());
     try {
       userManagementController.createApiKey(1L, 1L);
     } catch (ResponseStatusException e) {
@@ -484,8 +482,7 @@ public class UserManagementControllerImplTest {
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     doThrow(new EEAException("error")).when(securityProviderInterfaceService)
-        .getApiKey(Mockito.any(),
-            Mockito.any(), Mockito.any());
+        .getApiKey(Mockito.any(), Mockito.any(), Mockito.any());
     try {
       userManagementController.getApiKey(1L, 1L);
     } catch (ResponseStatusException e) {
@@ -504,8 +501,7 @@ public class UserManagementControllerImplTest {
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     doThrow(new EEAException("error")).when(securityProviderInterfaceService)
-        .getApiKey(Mockito.any(),
-            Mockito.any(), Mockito.any());
+        .getApiKey(Mockito.any(), Mockito.any(), Mockito.any());
     try {
       userManagementController.getApiKey(1L, 1L);
     } catch (ResponseStatusException e) {
@@ -523,7 +519,7 @@ public class UserManagementControllerImplTest {
     details.put("userId", "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-//    when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(new UserRepresentation());
+    // when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(new UserRepresentation());
     when(securityProviderInterfaceService.getApiKey(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn("uuid");
     assertEquals("error", "uuid", userManagementController.getApiKey(1L, 1L));
