@@ -17,11 +17,8 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
   const resources = useContext(ResourcesContext);
 
   const headerTableTemplate = obligation => {
-    if (obligation === 'dueDate') {
-      return resources.messages['nextReportDue'];
-    } else {
-      return resources.messages[obligation];
-    }
+    if (obligation === 'dueDate') return resources.messages['nextReportDue'];
+    else return resources.messages[obligation];
   };
 
   const onLoadPagination = event => onChangePagination({ first: event.first, rows: event.rows, page: event.page });
@@ -60,7 +57,6 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
         .filter(key => key !== 'id')
         .map(obligation => {
           let template = null;
-
           if (obligation === 'title') template = onLoadTitleTemplate;
 
           return (

@@ -33,10 +33,10 @@ const onOrderCheckedValue = (data, checkedId) => {
 
 const parseObligationData = (data, format) => {
   return data.map(data => ({
-    dueDate: !isNil(data.expirationDate) ? moment(data.expirationDate).format(format) : '-',
     id: data.obligationId,
+    title: data.title,
     legalInstrument: !isNil(data.legalInstruments) && data.legalInstruments.alias,
-    title: data.title
+    dueDate: !isNil(data.expirationDate) ? moment(data.expirationDate).format(format) : '-'
   }));
 };
 

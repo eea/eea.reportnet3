@@ -124,13 +124,6 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     organizations: reportingObligationState.organizations
   };
 
-  const reportingObligationsConf = {
-    filterItems: {
-      date: ['expirationDate'],
-      dropdown: ['countries', 'issues', 'organizations']
-    }
-  };
-
   const renderData = () =>
     reportingObligationState.isTableView ? (
       <TableView
@@ -173,9 +166,9 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
       <div className={styles.filters}>
         <Filters
           data={reportingObligationState.data}
-          dateOptions={reportingObligationsConf.filterItems['date']}
+          dateOptions={['expirationDate']}
           dropDownList={parsedFilterList}
-          dropdownOptions={reportingObligationsConf.filterItems['dropdown']}
+          dropdownOptions={['countries', 'issues', 'organizations']}
           filterByList={reportingObligationState.filterBy}
           sendData={onLoadReportingObligations}
         />
