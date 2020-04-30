@@ -3,6 +3,7 @@ package org.eea.ums.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
@@ -38,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -57,6 +60,10 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
   /**
+   * The Constant APIKEYS.
+   */
+  private static final String APIKEYS = "ApiKeys";
+  /**
    * The keycloak connector service.
    */
   @Autowired
@@ -69,12 +76,15 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   private GroupInfoMapper groupInfoMapper;
 
 
+  /** The security redis template. */
   @Autowired
   @Qualifier("securityRedisTemplate")
   private RedisTemplate<String, CacheTokenVO> securityRedisTemplate;
 
+  /** The jwt token provider. */
   @Autowired
   private JwtTokenProvider jwtTokenProvider;
+
 
   /**
    * Do login.
@@ -147,69 +157,6 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     return tokenVO;
   }
 
-  /**
-   * Map token to VO.
-   *
-   * @param tokenInfo the token info
-   *
-   * @return the token VO
-   */
-
-  private TokenVO mapTokenToVO(TokenInfo tokenInfo) {
-    TokenDataVO token = null;
-    TokenVO tokenVO = new TokenVO();
-    try {
-      token = jwtTokenProvider.parseToken(tokenInfo.getAccessToken());
-    } catch (VerificationException e) {
-      LOG_ERROR.error("Error trying to parse token", e);
-    }
-
-    if (null != token) {
-      Set<String> eeaGroups = new HashSet<>();
-      Optional.ofNullable(token.getOtherClaims())
-          .map(claims -> (List<String>) claims.get("user_groups"))
-          .filter(groups -> groups.size() > 0).ifPresent(groups -> {
-            groups.stream().map(group -> {
-              if (group.startsWith("/")) {
-                group = group.substring(1);
-              }
-              return group.toUpperCase();
-            }).forEach(eeaGroups::add);
-          });
-
-      tokenVO.setRoles(token.getRoles());
-      tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
-      tokenVO.setGroups(eeaGroups);
-      tokenVO.setPreferredUsername(token.getPreferredUsername());
-      tokenVO.setAccessTokenExpiration(token.getExpiration());
-      tokenVO.setUserId(token.getUserId());
-      tokenVO.setAccessToken(tokenInfo.getAccessToken());
-    }
-    return tokenVO;
-  }
-
-  private String addTokenInfoToCache(TokenVO tokenVO, Long cacheExpireIn) {
-    CacheTokenVO cacheTokenVO = new CacheTokenVO();
-    cacheTokenVO.setAccessToken(tokenVO.getAccessToken());
-    cacheTokenVO.setRefreshToken(tokenVO.getRefreshToken());
-    cacheTokenVO.setExpiration(tokenVO.getAccessTokenExpiration());
-    String key = calculateCacheKey(tokenVO.getRefreshToken());
-    securityRedisTemplate.opsForValue().set(key, cacheTokenVO, cacheExpireIn, TimeUnit.SECONDS);
-    return key;
-  }
-
-  private String calculateCacheKey(String refreshToken) {
-    // MessageDigest messageDigest = null;
-    // String key = "";
-    // try {
-    // messageDigest = MessageDigest.getInstance("SHA-256");
-    // messageDigest.update(refreshToken.getBytes());
-    // key = new String(messageDigest.digest());
-    // } catch (NoSuchAlgorithmException e) {
-    // LOG_ERROR.error("Error creating hash key before saving token to cache");
-    // }
-    return UUID.randomUUID().toString();
-  }
 
   /**
    * Do logout.
@@ -283,7 +230,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * Creates the resource instance.
    *
    * @param resourceInfoVO the resource info vo
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public void createResourceInstance(ResourceInfoVO resourceInfoVO) throws EEAException {
@@ -372,7 +319,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    *
    * @param userId the user resourceId
    * @param groupName the group name
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public void addUserToUserGroup(String userId, String groupName) throws EEAException {
@@ -470,9 +417,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   /**
    * Adds the contributor to user group.
    *
+   * @param contributor the contributor
    * @param userMail the user mail
    * @param groupName the group name
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -501,6 +448,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * Adds the contributors to user group.
    *
    * @param resources the resources
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -535,9 +483,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
 
   /**
    * Creates the resource instance.
-   * 
+   *
    * @param resourceInfoVOs the resource info V os
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public void createResourceInstance(List<ResourceInfoVO> resourceInfoVOs) throws EEAException {
@@ -561,5 +509,220 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
 
   }
 
+  /**
+   * Authenticate api key.
+   *
+   * @param apiKey the api key
+   * @return the token VO
+   */
+  @Override
+  @Cacheable(value = "api_key")
+  public TokenVO authenticateApiKey(String apiKey) {
+    List<UserRepresentation> userRepresentations = new ArrayList<>();
+    Long dataflowId = 0l;
+    for (UserRepresentation userRepresentation : keycloakConnectorService.getUsers()) {
+      if (null != userRepresentation.getAttributes()
+          && 1 >= userRepresentation.getAttributes().size()) {
+        List<String> apiKeys = userRepresentation.getAttributes().get("ApiKeys");
+        // an api key in attributes is represented as a string where positions are:
+        // ApiKeyValue,dataflowId,dataproviderId
+        String userApiKey =
+            apiKeys.stream().filter(value -> value.startsWith(apiKey)).findFirst().orElse("");
+        if (StringUtils.isNotEmpty(userApiKey)) {
+
+          String[] apiKeyValues = userApiKey.split(",");
+          dataflowId = Long.valueOf(apiKeyValues[1]);
+          userRepresentations.add(userRepresentation);
+        }
+      }
+    }
+    TokenVO tokenVO = null;
+    if (1 == userRepresentations.size()) {
+      UserRepresentation user = userRepresentations.get(0);
+
+      tokenVO = new TokenVO();
+      tokenVO.setUserId(user.getId());
+      Set<String> userGroups = new HashSet<>();
+      for (GroupInfo groupInfo : keycloakConnectorService.getGroupsByUser(user.getId())) {
+        if (groupInfo.getName()
+            .equals(ResourceGroupEnum.DATAFLOW_PROVIDER.getGroupName(dataflowId))) {
+          userGroups.add(groupInfo.getName());
+        }
+      }
+      tokenVO.setGroups(userGroups);
+      tokenVO.setRoles(Arrays.asList(keycloakConnectorService.getUserRoles(user.getId())).stream()
+          .map(roleRepresentation -> roleRepresentation.getName()).collect(Collectors.toSet()));
+
+      tokenVO.setPreferredUsername(user.getUsername());
+      LOG.info("User {} logged in and cached succesfully via api key {}",
+          tokenVO.getPreferredUsername(), apiKey);
+    }
+
+    return tokenVO;
+  }
+
+  /**
+   * Creates the api key.
+   *
+   * @param userId the user id
+   * @param dataflowId the dataflow id
+   * @param dataProvider the data provider
+   * @return the string
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public String createApiKey(String userId, Long dataflowId, Long dataProvider)
+      throws EEAException {
+    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    if (user == null) {
+      throw new EEAException(String.format(EEAErrorMessage.USER_NOTFOUND, userId));
+    }
+    // Create new uuid for the new key
+    String apiKey = UUID.randomUUID().toString();
+    // Initialize the attributes
+    Map<String, List<String>> attributes =
+        user.getAttributes() != null ? user.getAttributes() : new HashMap<>();
+    List<String> apiKeys =
+        attributes.get(APIKEYS) != null ? attributes.get(APIKEYS) : new ArrayList<>();
+    String newValueAttribute = dataflowId + "," + dataProvider;
+    // Find and remove old key
+    if (!apiKeys.isEmpty()) {
+      for (String keyString : apiKeys) {
+        if (keyString.contains(newValueAttribute)) {
+          apiKeys.remove(keyString);
+          break;
+        }
+      }
+    }
+    apiKeys.add(apiKey + "," + newValueAttribute);
+    attributes.put(APIKEYS, apiKeys);
+    user.setAttributes(attributes);
+    keycloakConnectorService.updateUser(user);
+    return apiKey;
+  }
+
+  /**
+   * Gets the api key.
+   *
+   * @param userId the user id
+   * @param dataflowId the dataflow id
+   * @param dataProvider the data provider
+   * @return the api key
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public String getApiKey(String userId, Long dataflowId, Long dataProvider) throws EEAException {
+    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    if (user == null) {
+      throw new EEAException(String.format(EEAErrorMessage.USER_NOTFOUND, userId));
+    }
+    String result = "";
+    // Initialize the attributes
+    Map<String, List<String>> attributes =
+        user.getAttributes() != null ? user.getAttributes() : new HashMap<>();
+    List<String> apiKeys =
+        attributes.get(APIKEYS) != null ? attributes.get(APIKEYS) : new ArrayList<>();
+    String findValue = "," + dataflowId + "," + dataProvider;
+    if (!apiKeys.isEmpty()) {
+      for (String keyString : apiKeys) {
+        if (keyString.contains(findValue)) {
+          result = keyString.replace(findValue, "");
+          break;
+        }
+      }
+    }
+    return result;
+
+  }
+
+  /**
+   * Map token to VO.
+   *
+   * @param tokenInfo the token info
+   *
+   * @return the token VO
+   */
+
+  private TokenVO mapTokenToVO(TokenInfo tokenInfo) {
+    TokenDataVO token = null;
+    TokenVO tokenVO = new TokenVO();
+    try {
+      token = jwtTokenProvider.parseToken(tokenInfo.getAccessToken());
+    } catch (VerificationException e) {
+      LOG_ERROR.error("Error trying to parse token", e);
+    }
+
+    if (null != token) {
+      Set<String> eeaGroups = new HashSet<>();
+      Optional.ofNullable(token.getOtherClaims())
+          .map(claims -> (List<String>) claims.get("user_groups"))
+          .filter(groups -> groups.size() > 0).ifPresent(groups -> {
+            groups.stream().map(group -> {
+              if (group.startsWith("/")) {
+                group = group.substring(1);
+              }
+              return group.toUpperCase();
+            }).forEach(eeaGroups::add);
+          });
+
+      tokenVO.setRoles(token.getRoles());
+      tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
+      tokenVO.setGroups(eeaGroups);
+      tokenVO.setPreferredUsername(token.getPreferredUsername());
+      tokenVO.setAccessTokenExpiration(token.getExpiration());
+      tokenVO.setUserId(token.getUserId());
+      tokenVO.setAccessToken(tokenInfo.getAccessToken());
+    }
+    return tokenVO;
+  }
+
+  /**
+   * Adds the token info to cache.
+   *
+   * @param tokenVO the token VO
+   * @param cacheExpireIn the cache expire in
+   * @return the string
+   */
+  private String addTokenInfoToCache(TokenVO tokenVO, Long cacheExpireIn) {
+    CacheTokenVO cacheTokenVO = new CacheTokenVO();
+    cacheTokenVO.setAccessToken(tokenVO.getAccessToken());
+    cacheTokenVO.setRefreshToken(tokenVO.getRefreshToken());
+    cacheTokenVO.setExpiration(tokenVO.getAccessTokenExpiration());
+    String key = UUID.randomUUID().toString();
+    securityRedisTemplate.opsForValue().set(key, cacheTokenVO, cacheExpireIn, TimeUnit.SECONDS);
+    return key;
+  }
+
+  /**
+   * Gets the user without keys.
+   *
+   * @param userId the user id
+   * @return the user without keys
+   */
+  @Override
+  public UserRepresentation getUserWithoutKeys(String userId) {
+    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    if (user != null && user.getAttributes() != null) {
+      user.getAttributes().remove(APIKEYS);
+    }
+    return user;
+  }
+
+  /**
+   * Sets the attributes with ApiKeys.
+   *
+   * @param user the user
+   * @param attributes the attributes
+   * @return the user representation
+   */
+  @Override
+  public UserRepresentation setAttributesWithApiKey(UserRepresentation user,
+      Map<String, List<String>> attributes) {
+    if (user.getAttributes() != null && user.getAttributes().get(APIKEYS) != null) {
+      attributes.put(APIKEYS, user.getAttributes().get(APIKEYS));
+    }
+    user.setAttributes(attributes);
+    return user;
+  }
 
 }

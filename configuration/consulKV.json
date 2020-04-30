@@ -89,7 +89,7 @@
   },
   {
     "key": "config/dataset/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
-    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6MjB9"
   },
   {
     "key": "config/dataset/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
@@ -205,7 +205,7 @@
   },
   {
     "key": "config/dataflow/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
-    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6MjB9"
   },
   {
     "key": "config/dataflow/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
@@ -265,7 +265,7 @@
   },
   {
     "key": "config/recordstore/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
-    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6MjB9"
   },
   {
     "key": "config/recordstore/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
@@ -345,7 +345,7 @@
   },
   {
     "key": "config/apiGateway/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
-    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6MjB9"
   },
   {
     "key": "config/apiGateway/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
@@ -357,10 +357,22 @@
   },
   {
     "key": "config/apiGateway/hystrix.command.dataset.circuitBreaker.requestVolumeThreshold",
-    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6MjB9"
   },
   {
     "key": "config/apiGateway/hystrix.command.dataset.circuitBreaker.sleepWindowInMilliseconds",
+    "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
+  },
+  {
+    "key": "config/apiGateway/hystrix.command.validation.execution.isolation.thread.timeoutInMilliseconds",
+    "value": "JHtIWVNUUklYX1RJTUVPVVQ6NjUwMDB9"
+  },
+  {
+    "key": "config/apiGateway/hystrix.command.validation.circuitBreaker.requestVolumeThreshold",
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6MjB9"
+  },
+  {
+    "key": "config/apiGateway/hystrix.command.validation.circuitBreaker.sleepWindowInMilliseconds",
     "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
   },
   {
@@ -689,7 +701,7 @@
   },
   {
     "key": "config/validation/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
-    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6MjB9"
   },
   {
     "key": "config/validation/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
@@ -769,7 +781,7 @@
   },
   {
     "key": "config/ums/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
-    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6MjB9"
   },
   {
     "key": "config/ums/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
@@ -861,7 +873,7 @@
   },
   {
     "key": "config/ums/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
-    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6MjB9"
   },
   {
     "key": "config/ums/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
@@ -969,7 +981,7 @@
   },
   {
     "key": "config/indexsearch/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
-    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6MjB9"
   },
   {
     "key": "config/indexsearch/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",

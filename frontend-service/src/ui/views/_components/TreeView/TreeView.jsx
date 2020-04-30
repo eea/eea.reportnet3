@@ -71,6 +71,19 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
     }
   };
 
+  const levelErrorTemplate = rowData => {
+    if (!isNil(rowData.levelError)) {
+      return (
+        <span
+          className={`${columnOptions['levelErrorTypes']['class']} ${columnOptions['levelErrorTypes']['subClasses']
+            .filter(cl => cl.toUpperCase().includes(rowData.levelError.toString().toUpperCase()))
+            .join(' ')}`}>
+          {rowData.levelError}
+        </span>
+      );
+    }
+  };
+
   const parseData = fieldsDTO => {
     fieldsDTO.forEach(fieldDTO => {
       for (let [key, value] of Object.entries(fieldDTO)) {
@@ -97,6 +110,8 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
             ? rowData => itemTemplate(rowData, 'pk')
             : field === 'required'
             ? rowData => itemTemplate(rowData, 'required')
+            : field === 'levelError'
+            ? levelErrorTemplate
             : null
         }
         key={field}
