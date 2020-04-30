@@ -29,7 +29,7 @@ export const Card = ({ checked, date, icon, id, obligation, onCheck, subtitle, t
       </div>
 
       <div className={`${styles.date}`}>
-        {resources.messages['dueDate']}: <span className={styles.dueDate}>{date}</span>
+        {resources.messages['nextReportDue']}: <span className={styles.dueDate}>{date}</span>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
+import moment from 'moment';
 
-import { isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
 
 import sanitizeHtml from 'sanitize-html';
 
@@ -12,10 +13,12 @@ import { DataTable } from 'ui/views/_components/DataTable';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
 
   const [columns, setColumns] = useState([]);
   const [notifications, setNotifications] = useState([]);
@@ -57,7 +60,6 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     setColumns(columnsArray);
 
     const notificationsArray = notificationContext.all.map(notification => {
-      console.log({ notification });
       const message = sanitizeHtml(notification.message, {
         allowedTags: [],
         allowedAttributes: {
@@ -68,17 +70,22 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       const capitalizedMessageLevel = !isUndefined(notification.type)
         ? notification.type.charAt(0).toUpperCase() + notification.type.slice(1)
         : notification.type;
-
       return {
         message: message,
         messageLevel: capitalizedMessageLevel,
-        date: notification.date.toLocaleString(),
-        redirectionUrl: `${window.location.protocol}//${window.location.hostname}${notification.redirectionUrl}`
+        date: moment(notification.date).format(
+          `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
+            userContext.userProps.amPm24h ? '' : ' A'
+          }`
+        ),
+        redirectionUrl: `${window.location.protocol}//${window.location.hostname}${
+          window.location.port !== '' && window.location.port.toString() !== '80' ? `:${window.location.port}` : ''
+        }${notification.redirectionUrl}`
       };
     });
     console.info('notifications: %o', notificationsArray);
     setNotifications(notificationsArray);
-  }, [notificationContext]);
+  }, [notificationContext, userContext]);
 
   const getValidUrl = (url = '') => {
     let newUrl = window.decodeURIComponent(url);
@@ -92,7 +99,6 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   };
 
   const linkTemplate = rowData => {
-    console.log(rowData);
     return (
       <a href={getValidUrl(rowData.redirectionUrl)} target="_blank" rel="noopener noreferrer">
         {rowData.redirectionUrl}

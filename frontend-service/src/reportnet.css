@@ -110,6 +110,15 @@
   --statusBox-info-color: #23547b;
   --statusBox-warning-bg: #ffd8b2;
   --statusBox-warning-color: #805b36;
+  /* boolean statusbox colors*/
+  --statusBox-true-bg: #c8e6c9;
+  --statusBox-true-color: #256029;
+  --statusBox-false-bg: #ffcdd2;
+  --statusBox-false-color: #c63737;
+  /* status  statusbox colors*/
+  --statusBox-draft-bg: #eccfff;
+  --statusBox-draft-color: #694382;
+  --statusBox-designer-bg: #c2c8cf;
 
   --header-height: 4rem;
 

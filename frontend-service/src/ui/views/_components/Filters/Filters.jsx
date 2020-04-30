@@ -19,10 +19,12 @@ import { filterReducer } from './_functions/Reducers/filterReducer';
 
 import { useOnClickOutside } from 'ui/views/_functions/Hooks/useOnClickOutside';
 
-import { FilterUtils } from './_functions/Utils/FilterUtils';
+import { ApplyFilterUtils } from './_functions/Utils/ApplyFilterUtils';
+import { FiltersUtils } from './_functions/Utils/FiltersUtils';
 import { SortUtils } from './_functions/Utils/SortUtils';
 
 export const Filters = ({
+  className,
   data,
   dateOptions,
   dropDownList,
@@ -30,6 +32,8 @@ export const Filters = ({
   filterByList,
   getFiltredData,
   inputOptions,
+  searchAll,
+  searchBy = [],
   selectList,
   selectOptions,
   sendData,
@@ -45,7 +49,8 @@ export const Filters = ({
     filterBy: {},
     filteredData: [],
     labelAnimations: {},
-    orderBy: {}
+    orderBy: {},
+    searchBy: ''
   });
 
   useEffect(() => {
@@ -60,7 +65,7 @@ export const Filters = ({
 
   const getInitialState = () => {
     const initialData = cloneDeep(data);
-    const initialFilterBy = FilterUtils.getFilterInitialState(
+    const initialFilterBy = FiltersUtils.getFilterInitialState(
       data,
       inputOptions,
       selectOptions,
@@ -68,8 +73,8 @@ export const Filters = ({
       dropdownOptions,
       filterByList
     );
-    const initialFilteredData = cloneDeep(data);
-    const initialLabelAnimations = FilterUtils.getLabelInitialState(
+    const initialFilteredData = ApplyFilterUtils.onApplySearch(data, searchBy, filterState.searchBy, filterState);
+    const initialLabelAnimations = FiltersUtils.getLabelInitialState(
       inputOptions,
       selectOptions,
       dateOptions,
@@ -85,40 +90,37 @@ export const Filters = ({
   };
 
   const onAnimateLabel = (property, value) => {
-    filterDispatch({
-      type: 'ANIMATE_LABEL',
-      payload: {
-        animatedProperty: property,
-        isAnimated: value
-      }
-    });
+    filterDispatch({ type: 'ANIMATE_LABEL', payload: { animatedProperty: property, isAnimated: value } });
   };
 
   const onClearAllFilters = () => {
     filterDispatch({
       type: 'CLEAR_ALL',
       payload: {
-        filterBy: FilterUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions, dropdownOptions),
+        filterBy: FiltersUtils.getFilterInitialState(data, inputOptions, selectOptions, dateOptions, dropdownOptions),
         filteredData: cloneDeep(data),
-        labelAnimations: FilterUtils.onClearLabelState(inputOptions, selectOptions, dateOptions, dropdownOptions),
-        orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions, dropdownOptions)
+        labelAnimations: ApplyFilterUtils.onClearLabelState(inputOptions, selectOptions, dateOptions, dropdownOptions),
+        orderBy: SortUtils.getOrderInitialState(inputOptions, selectOptions, dateOptions, dropdownOptions),
+        searchBy: ''
       }
     });
   };
 
   const onFilterData = (filter, value) => {
-    const inputKeys = FilterUtils.getFilterKeys(filterState, filter, inputOptions);
-    const selectedKeys = FilterUtils.getSelectedKeys(filterState, filter, selectOptions);
-    const filteredData = FilterUtils.onApplyFilters(
-      filter,
-      inputKeys,
-      filterState,
-      selectedKeys,
-      value,
+    const inputKeys = FiltersUtils.getFilterKeys(filterState, filter, inputOptions);
+    const searchedKeys = !isEmpty(searchBy) ? searchBy : ApplyFilterUtils.getSearchKeys(filterState.data);
+    const selectedKeys = FiltersUtils.getSelectedKeys(filterState, filter, selectOptions);
+    const filteredData = ApplyFilterUtils.onApplyFilters({
       dateOptions,
+      dropdownOptions,
+      filter,
+      filteredKeys: inputKeys,
+      searchedKeys,
+      selectedKeys,
       selectOptions,
-      dropdownOptions
-    );
+      state: filterState,
+      value
+    });
 
     filterDispatch({ type: 'FILTER_DATA', payload: { filteredData, filter, value } });
   };
@@ -129,10 +131,22 @@ export const Filters = ({
     const orderBy = order === 0 ? -1 : order;
     const resetOrder = SortUtils.onResetOrderData(inputOptions, selectOptions, dateOptions);
 
-    filterDispatch({
-      type: 'ORDER_DATA',
-      payload: { filteredSortedData, orderBy, property, resetOrder, sortedData }
-    });
+    filterDispatch({ type: 'ORDER_DATA', payload: { filteredSortedData, orderBy, property, resetOrder, sortedData } });
+  };
+
+  const onSearchData = value => {
+    const inputKeys = FiltersUtils.getFilterKeys(filterState, '', inputOptions);
+    const selectedKeys = FiltersUtils.getSelectedKeys(filterState, '', selectOptions);
+    const searchedValues = ApplyFilterUtils.onApplySearch(
+      filterState.data,
+      searchBy,
+      value,
+      filterState,
+      inputKeys,
+      selectedKeys
+    );
+
+    filterDispatch({ type: 'ON_SEARCH_DATA', payload: { searchedValues, value } });
   };
 
   const renderCalendarFilter = (property, i) => (
@@ -140,8 +154,8 @@ export const Filters = ({
       {renderOrderFilter(property)}
       <span className={`p-float-label ${!sendData ? styles.label : ''}`}>
         <Calendar
-          dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
           className={styles.calendarFilter}
+          dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
           inputClassName={styles.inputFilter}
           inputId={property}
           monthNavigator={true}
@@ -176,7 +190,7 @@ export const Filters = ({
       {renderOrderFilter(property)}
       <Dropdown
         className={styles.dropdownFilter}
-        filter={FilterUtils.getOptionTypes(data, property, dropDownList).length > 10}
+        filter={FiltersUtils.getOptionTypes(data, property, dropDownList).length > 10}
         filterPlaceholder={resources.messages[property]}
         id={property}
         inputClassName={`p-float-label ${styles.label}`}
@@ -188,7 +202,7 @@ export const Filters = ({
           event.stopPropagation();
         }}
         optionLabel="type"
-        options={FilterUtils.getOptionTypes(data, property, dropDownList)}
+        options={FiltersUtils.getOptionTypes(data, property, dropDownList)}
         showClear={!isEmpty(filterState.filterBy[property])}
         showFilterClear={true}
         value={filterState.filterBy[property]}
@@ -249,20 +263,44 @@ export const Filters = ({
         notCheckAllHeader={resources.messages['uncheckAllFilter']}
         onChange={event => onFilterData(property, event.value)}
         optionLabel="type"
-        options={FilterUtils.getOptionTypes(data, property, selectList)}
+        options={FiltersUtils.getOptionTypes(data, property, selectList)}
         value={filterState.filterBy[property]}
       />
     </span>
   );
 
+  const renderSearchAll = () => (
+    <span className={`p-float-label ${styles.dataflowInput}`}>
+      <InputText
+        className={styles.searchInput}
+        id={'searchInput'}
+        onChange={event => onSearchData(event.target.value)}
+        value={filterState.searchBy}
+      />
+      {filterState.searchBy && (
+        <Button
+          className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+          icon="cancel"
+          onClick={() => onSearchData('')}
+        />
+      )}
+      <label htmlFor={'searchInput'}>{resources.messages['searchAllLabel']}</label>
+    </span>
+  );
+
   const selectTemplate = option => {
-    if (!isNil(option.value)) {
-      return <span className={`${styles[option.type.toLowerCase()]} ${styles.statusBox}`}>{option.type}</span>;
+    if (!isNil(option.type)) {
+      return (
+        <span className={`${styles[option.type.toString().toLowerCase()]} ${styles.statusBox}`}>
+          {option.type.toString().toUpperCase()}
+        </span>
+      );
     }
   };
 
   return (
-    <div className={styles.header}>
+    <div className={className ? styles[className] : styles.header}>
+      {searchAll && renderSearchAll()}
       {inputOptions && inputOptions.map((option, i) => renderInputFilter(option, i))}
       {selectOptions && selectOptions.map((option, i) => renderSelectFilter(option, i))}
       {dropdownOptions && dropdownOptions.map((option, i) => renderDropdown(option, i))}
@@ -286,8 +324,8 @@ export const Filters = ({
               sendData ? 'p-button-secondary' : 'p-button-secondary'
             } p-button-rounded  p-button-animated-blink`}
             icon="undo"
-            onClick={() => onClearAllFilters()}
             label={resources.messages['reset']}
+            onClick={() => onClearAllFilters()}
             style={{ marginLeft: sendData ? '1rem' : '' }}
           />
         )}

@@ -1,9 +1,24 @@
+.validations {
+  min-height: 40vh;
+}
+
 .positioning {
   position: sticky !important;
 }
 
 .tabsValidations {
   margin: 0.5em 0;
+}
+
+.searchInput {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  margin: 0 0 1rem 0;
+
+  > span {
+    margin-right: 2rem;
+  }
 }
 
 .actionButtons {
@@ -47,6 +62,34 @@
 
 .paginatorValidationViewer :global .p-dropdown-panel {
   top: -6rem !important;
+}
+
+.levelError {
+  border-radius: 3px;
+  color: white;
+  font-size: 10pt;
+  font-weight: 600;
+  padding: 4px;
+}
+
+.blocker {
+  background-color: rgba(var(--statusBox-blocker-bg), 0.8);
+  color: rgba(var(--statusBox-blocker-color), 0.8);
+}
+
+.error {
+  background-color: var(--statusBox-error-bg);
+  color: var(--statusBox-error-color);
+}
+
+.info {
+  background-color: var(--statusBox-info-bg);
+  color: var(--statusBox-info-color);
+}
+
+.warning {
+  background-color: var(--statusBox-warning-bg);
+  color: var(--statusBox-warning-color);
 }
 
 @keyframes spinnerAnimation {
