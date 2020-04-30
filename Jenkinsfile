@@ -38,7 +38,6 @@ pipeline {
                     steps {
                         sh '''
                         	  rm -rf frontend-service/node_modules/
-                        	  npm cache clean --force
                             npm install frontend-service/
                         '''
                     }
