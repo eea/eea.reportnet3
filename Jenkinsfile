@@ -34,7 +34,7 @@ pipeline {
                         }
                     }
                 }
-                stage('Compile NPM') {
+                /*stage('Compile NPM') {
                     steps {
                         sh '''
                         	  rm -rf frontend-service/node_modules/
@@ -42,7 +42,7 @@ pipeline {
                         '''
                     }
 
-                }
+                }*/
             }
         }
         stage('Static Code Analysis') {
