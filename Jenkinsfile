@@ -36,9 +36,9 @@ pipeline {
                 }
                 stage('Compile NPM') {
                     steps {
-                        sh 'rm -rf frontend-service/node_modules/'
                         sh '''
-                        	npm cache clean --force 
+                        	  rm -rf frontend-service/node_modules/
+                        	  rm frontend-service/package-lock.json
                             npm install frontend-service/
                         '''
                     }
