@@ -44,7 +44,17 @@ const getOptionTypes = (data, option, list) => {
     for (let i = 0; i < validOptionItems.length; i++) {
       const template = [];
       validOptionItems.forEach(item => {
-        template.push({ type: item.toString().toUpperCase(), value: item.toString().toUpperCase() });
+        if (option === 'isCorrect' && item === true) {
+          template.push({ type: 'CORRECT', value: item });
+        } else if (option === 'isCorrect' && item === false) {
+          template.push({ type: 'INCORRECT', value: item });
+        } else if (option === 'enabled' && item === true) {
+          template.push({ type: 'ENABLED', value: item });
+        } else if (option === 'enabled' && item === false) {
+          template.push({ type: 'DISABLED', value: item });
+        } else {
+          template.push({ type: item.toString().toUpperCase(), value: item.toString().toUpperCase() });
+        }
       });
       return template;
     }
