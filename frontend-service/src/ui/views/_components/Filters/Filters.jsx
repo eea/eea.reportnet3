@@ -24,6 +24,7 @@ import { FiltersUtils } from './_functions/Utils/FiltersUtils';
 import { SortUtils } from './_functions/Utils/SortUtils';
 
 export const Filters = ({
+  className,
   data,
   dateOptions,
   dropDownList,
@@ -298,7 +299,7 @@ export const Filters = ({
   };
 
   return (
-    <div className={styles.header}>
+    <div className={className ? styles[className] : styles.header}>
       {searchAll && renderSearchAll()}
       {inputOptions && inputOptions.map((option, i) => renderInputFilter(option, i))}
       {selectOptions && selectOptions.map((option, i) => renderSelectFilter(option, i))}

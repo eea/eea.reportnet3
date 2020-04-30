@@ -290,11 +290,12 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       <Fragment>
         <div className={styles.searchInput}>
           <Filters
+            className="filter-lines"
             data={tabsValidationsState.validationList.validations}
             getFiltredData={onLoadFilteredData}
             searchAll
             searchBy={['name', 'description', 'message']}
-            selectOptions={['table', 'field', 'entityType', 'levelError', 'enabled', 'isCorrect']}
+            selectOptions={['table', 'field', 'entityType', 'levelError', 'enabled', 'automatic', 'isCorrect']}
           />
         </div>
 
