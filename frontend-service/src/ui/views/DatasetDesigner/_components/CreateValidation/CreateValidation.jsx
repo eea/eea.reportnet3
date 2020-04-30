@@ -602,7 +602,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                 )}
                 {(creationFormState.isValidationCreationDisabled || isSubmitDisabled) && (
                   <ReactTooltip className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
-                    <span>{resourcesContext.messages.fcSubmitButtonDisalbed}</span>
+                    <span>{resourcesContext.messages.fcSubmitButtonDisabled}</span>
                   </ReactTooltip>
                 )}
 

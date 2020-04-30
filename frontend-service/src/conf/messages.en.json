@@ -598,11 +598,11 @@
     "webLinks": "Web links",
     "yes": "Yes",
     "invalidatedQcRuleEvent": "The rule <strong title='{:shortCode}'>{:shortShortCode}</strong> is not valid, please check it",
-    "copyApiKeyBtn": "Copy to clipboard",
     "generateApiKey": "Generate new API-key",
     "noApiKey": "There is no generated API key",
-    "copyToClipboardSuccess": "Api key copied to clipboard",
-    "apiKeyDialogHead": "API-key",
+    "copyToClipboardSuccess": "Copied",
+    "apiKeyDialogHead": "Manage API-key",
+    "apiKeyDialogLabel": "API-key:",
     "sidebarApiKeyBtn": "API-key",
     "prefilled": "Prefilled",
     "exportDatasetSchema": "Export schema",
@@ -610,6 +610,14 @@
     "tabMenuExpressions": "Expressions",
     "deleteDatasetDataCompletedEvent": "Delete dataset data finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "tabMenuExpression": "Expression",
-    "fcSubmitButtonDisalbed": "One or more required field(s) are missing"
+    "fcSubmitButtonDisabled": "One or more required field(s) are missing",
+    "longFieldFormatRestriction": "Maximum of 20 characters",
+    "decimalFieldFormatRestriction": "Maximum of 40 characters",
+    "dateFieldFormatRestriction": "YYYY-MM-DD",
+    "textFieldFormatRestriction": "Maximum of 5000 characters",
+    "longTextFieldFormatRestriction": "Maximum of 10000 characters",
+    "emailFieldFormatRestriction": "Maximum of 256 characters",
+    "urlFieldFormatRestriction": "Maximum of 5000 characters",
+    "phoneNumberFieldFormatRestriction": "Maximum of 256 characters"
   }
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -7,9 +7,11 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './DatasetSchema.module.scss';
 
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { TreeView } from 'ui/views/_components/TreeView';
 
 const DatasetSchema = ({ designDataset, index, validationList }) => {
+  const resources = useContext(ResourcesContext);
   const renderDatasetSchema = () => {
     if (!isUndefined(designDataset) && !isNull(designDataset)) {
       const parsedDesignDataset = parseDesignDataset(designDataset, validationList);
@@ -23,7 +25,7 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
         fields: {
           filtered: false,
           groupable: true,
-          names: { shortCode: 'Shortcode', codelistItems: 'Single select items' }
+          names: { shortCode: 'Shortcode', codelistItems: 'Single select items', pk: 'Primary key' }
         },
         validations: {
           filtered: true,
@@ -77,6 +79,75 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
     }
   };
 
+  const getFieldFormat = fieldType => {
+    switch (fieldType.toUpperCase()) {
+      case 'DATE':
+        return resources.messages['dateFieldFormatRestriction'];
+      case 'TEXT':
+        return resources.messages['textFieldFormatRestriction'];
+      case 'LONG_TEXT':
+        return resources.messages['longTextFieldFormatRestriction'];
+      case 'NUMBER_DECIMAL':
+        return resources.messages['dateFieldFormatRestriction'];
+      case 'NUMBER_INTEGER':
+        return resources.messages['longFieldFormatRestriction'];
+      case 'NUMBER_DECIMAL':
+        return resources.messages['decimalFieldFormatRestriction'];
+      case 'EMAIL':
+        return resources.messages['emailFieldFormatRestriction'];
+      case 'PHONE':
+        return resources.messages['phoneNumberFieldFormatRestriction'];
+      case 'URL':
+        return resources.messages['urlFieldFormatRestriction'];
+      default:
+        return '';
+    }
+  };
+
+  const parseDesignDataset = (design, validationList) => {
+    const parsedDataset = {};
+    parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
+    parsedDataset.levelErrorTypes = design.levelErrorTypes;
+    parsedDataset.validations = validationList;
+    if (!isUndefined(design.tables) && !isNull(design.tables) && design.tables.length > 0) {
+      const tables = design.tables.map(tableDTO => {
+        const table = {};
+        table.tableSchemaName = tableDTO.tableSchemaName;
+        table.tableSchemaDescription = tableDTO.tableSchemaDescription;
+        table.tableSchemaReadOnly = tableDTO.tableSchemaReadOnly;
+        table.tableSchemaToPrefill = !isNil(tableDTO.tableSchemaToPrefill);
+        if (!isNull(tableDTO.records) && !isNil(tableDTO.records[0].fields) && tableDTO.records[0].fields.length > 0) {
+          const containsCodelists = !isEmpty(
+            tableDTO.records[0].fields.filter(fieldElmt => fieldElmt.type === 'CODELIST')
+          );
+          const fields = tableDTO.records[0].fields.map(fieldDTO => {
+            const field = {};
+            field.pk = fieldDTO.pk;
+            field.required = fieldDTO.required;
+            field.name = fieldDTO.name;
+            field.description = !isNull(fieldDTO.description) ? fieldDTO.description : '-';
+            field.type = fieldDTO.type;
+            if (containsCodelists) {
+              if (fieldDTO.type === 'CODELIST') {
+                field.codelistItems = fieldDTO.codelistItems;
+              } else {
+                field.codelistItems = [];
+              }
+            }
+            field.format = getFieldFormat(fieldDTO.type);
+            return field;
+          });
+          table.fields = fields;
+        }
+        return table;
+      });
+      parsedDataset.tables = tables;
+    }
+    const dataset = {};
+    dataset[design.datasetSchemaName] = parsedDataset;
+    return dataset;
+  };
+
   return renderDatasetSchema();
 };
 
@@ -89,60 +160,5 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
 //     );
 //   }
 // };
-
-const getFieldFormat = fieldType => {
-  switch (fieldType.toUpperCase()) {
-    case 'DATE':
-      return 'YYYY-MM-DD';
-    case 'TEXT':
-      return '5000 characters';
-    default:
-      return '';
-  }
-};
-
-const parseDesignDataset = (design, validationList) => {
-  const parsedDataset = {};
-  parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
-  parsedDataset.levelErrorTypes = design.levelErrorTypes;
-  parsedDataset.validations = validationList;
-  if (!isUndefined(design.tables) && !isNull(design.tables) && design.tables.length > 0) {
-    const tables = design.tables.map(tableDTO => {
-      const table = {};
-      table.tableSchemaName = tableDTO.tableSchemaName;
-      table.tableSchemaDescription = tableDTO.tableSchemaDescription;
-      table.tableSchemaReadOnly = tableDTO.tableSchemaReadOnly;
-      table.tableSchemaToPrefill = !isNil(tableDTO.tableSchemaToPrefill);
-      if (!isNull(tableDTO.records) && !isNil(tableDTO.records[0].fields) && tableDTO.records[0].fields.length > 0) {
-        const containsCodelists = !isEmpty(
-          tableDTO.records[0].fields.filter(fieldElmt => fieldElmt.type === 'CODELIST')
-        );
-        const fields = tableDTO.records[0].fields.map(fieldDTO => {
-          const field = {};
-          field.name = fieldDTO.name;
-          field.pk = fieldDTO.pk;
-          field.required = fieldDTO.required;
-          field.description = !isNull(fieldDTO.description) ? fieldDTO.description : '-';
-          field.type = fieldDTO.type;
-          if (containsCodelists) {
-            if (fieldDTO.type === 'CODELIST') {
-              field.codelistItems = fieldDTO.codelistItems;
-            } else {
-              field.codelistItems = [];
-            }
-          }
-          field.format = getFieldFormat(fieldDTO.type);
-          return field;
-        });
-        table.fields = fields;
-      }
-      return table;
-    });
-    parsedDataset.tables = tables;
-  }
-  const dataset = {};
-  dataset[design.datasetSchemaName] = parsedDataset;
-  return dataset;
-};
 
 export { DatasetSchema };
