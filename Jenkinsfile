@@ -38,6 +38,7 @@ pipeline {
                     steps {
                         sh '''
                         	  rm -rf frontend-service/node_modules/
+                        	npm ci
                             npm install frontend-service/
                         '''
                     }
