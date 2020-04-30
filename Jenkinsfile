@@ -34,11 +34,11 @@ pipeline {
                         }
                     }
                 }
-                /*stage('Compile NPM') {
+                /*
+                stage('Compile NPM') {
                     steps {
                         sh '''
-                        	  rm -rf frontend-service/node_modules/
-                            npm install frontend-service/
+                            npm install --no-cache frontend-service/
                         '''
                     }
 
