@@ -38,15 +38,10 @@ pipeline {
                     steps {
                         sh '''
                         	  rm -rf frontend-service/node_modules/
-                        	  rm frontend-service/package-lock.json
                             npm install frontend-service/
                         '''
                     }
-                    post {
-                        failure {
-                            slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'Build FAILED - NPM Compilation Error in branch ' + env.BRANCH_NAME.replace('/', '_'), token: 'HRvukH8087RNW9NYQ3fd6jtM'
-                        }
-                    }
+
                 }
             }
         }
