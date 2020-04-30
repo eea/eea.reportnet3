@@ -29,6 +29,7 @@ const ValidationExpression = ({
   const { expressionId } = expressionValues;
   const [operatorValues, setOperatorValues] = useState([]);
   const [operatorTypes, setOperatorTypes] = useState([]);
+  const [clickedFields, setClickedFields] = useState([]);
   const {
     validations: { operatorTypes: operatorTypesConf }
   } = config;
@@ -46,6 +47,40 @@ const ValidationExpression = ({
     setOperatorTypes(options);
   }, []);
 
+  const printRequiredFieldError = field => {
+    let conditions = false;
+    if (field == 'union') {
+      conditions =
+        (showRequiredFields || clickedFields.includes(field)) && position != 0 && isEmpty(expressionValues[field]);
+    } else {
+      conditions = (showRequiredFields || clickedFields.includes(field)) && isEmpty(expressionValues[field]);
+    }
+    return conditions ? 'error' : '';
+  };
+
+  const onUpdateExpressionField = (key, value) => {
+    onDeleteFromClickedFields(key);
+    onExpressionFieldUpdate(expressionId, {
+      key,
+      value
+    });
+  };
+
+  const onAddToClickedFields = field => {
+    const cClickedFields = [...clickedFields];
+    if (!cClickedFields.includes(field)) {
+      cClickedFields.push(field);
+      setClickedFields(cClickedFields);
+    }
+  };
+  const onDeleteFromClickedFields = field => {
+    const cClickedFields = [...clickedFields];
+    if (cClickedFields.includes(field)) {
+      cClickedFields.splice(cClickedFields.indexOf(field), 1);
+      setClickedFields(cClickedFields);
+    }
+  };
+
   // layouts
   const defaultLayout = (
     <li className={styles.expression}>
@@ -57,59 +92,41 @@ const ValidationExpression = ({
         />
       </span>
       <span
-        className={`${styles.union} formField ${
-          showRequiredFields && position != 0 && isEmpty(expressionValues.union) ? 'error' : ''
-        }`}>
+        onBlur={e => onAddToClickedFields('union')}
+        className={`${styles.union} formField ${printRequiredFieldError('union')}`}>
         <Dropdown
           disabled={isDisabled || position == 0}
           appendTo={document.body}
           placeholder={resourcesContext.messages.union}
           optionLabel="label"
           options={config.validations.logicalOperators}
-          onChange={e =>
-            onExpressionFieldUpdate(expressionId, {
-              key: 'union',
-              value: e.target.value
-            })
-          }
+          onChange={e => onUpdateExpressionField('union', e.target.value)}
           value={{ label: expressionValues.union, value: expressionValues.union }}
         />
       </span>
       <span
-        className={`${styles.operatorType} formField ${
-          showRequiredFields && isEmpty(expressionValues.operatorType) ? 'error' : ''
-        }`}>
+        onBlur={e => onAddToClickedFields('operatorType')}
+        className={`${styles.operatorType} formField ${printRequiredFieldError('operatorType')}`}>
         <Dropdown
           disabled={isDisabled}
           appendTo={document.body}
           placeholder={resourcesContext.messages.operatorType}
           optionLabel="label"
           options={operatorTypes}
-          onChange={e =>
-            onExpressionFieldUpdate(expressionId, {
-              key: 'operatorType',
-              value: e.target.value
-            })
-          }
+          onChange={e => onUpdateExpressionField('operatorType', e.target.value)}
           value={!isEmpty(expressionValues.operatorType) ? operatorTypesConf[expressionValues.operatorType].option : ''}
         />
       </span>
       <span
-        className={`${styles.operatorValue} formField ${
-          showRequiredFields && isEmpty(expressionValues.operatorValue) ? 'error' : ''
-        }`}>
+        onBlur={e => onAddToClickedFields('operatorValue')}
+        className={`${styles.operatorValue} formField ${printRequiredFieldError('operatorValue')}`}>
         <Dropdown
           disabled={isDisabled}
           appendTo={document.body}
           placeholder={resourcesContext.messages.operator}
           optionLabel="label"
           options={operatorValues}
-          onChange={e =>
-            onExpressionFieldUpdate(expressionId, {
-              key: 'operatorValue',
-              value: e.target.value
-            })
-          }
+          onChange={e => onUpdateExpressionField('operatorValue', e.target.value)}
           value={
             !isEmpty(expressionValues.operatorValue)
               ? { label: expressionValues.operatorValue, value: expressionValues.operatorValue }
@@ -118,9 +135,8 @@ const ValidationExpression = ({
         />
       </span>
       <span
-        className={`${styles.expressionValue} formField ${
-          showRequiredFields && isEmpty(expressionValues.expressionValue) ? 'error' : ''
-        }`}>
+        onBlur={e => onAddToClickedFields('expressionValue')}
+        className={`${styles.expressionValue} formField ${printRequiredFieldError('expressionValue')}`}>
         {expressionValues.operatorType == 'date' ? (
           <Calendar
             appendTo={document.body}
@@ -129,12 +145,7 @@ const ValidationExpression = ({
             placeholder="YYYY-MM-DD"
             monthNavigator={true}
             readOnlyInput={false}
-            onChange={e => {
-              onExpressionFieldUpdate(expressionId, {
-                key: 'expressionValue',
-                value: { value: e.target.value }
-              });
-            }}
+            onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
             value={expressionValues.expressionValue}
             yearNavigator={true}
             yearRange="1900:2500"></Calendar>
@@ -144,12 +155,7 @@ const ValidationExpression = ({
             placeholder={resourcesContext.messages.value}
             value={expressionValues.expressionValue}
             keyfilter={expressionValues.operatorType == 'LEN' || expressionValues.operatorType == 'number' ? 'num' : ''}
-            onChange={e =>
-              onExpressionFieldUpdate(expressionId, {
-                key: 'expressionValue',
-                value: { value: e.target.value }
-              })
-            }
+            onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
           />
         )}
       </span>
