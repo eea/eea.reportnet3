@@ -78,26 +78,22 @@ const getOptionTypes = (data, option, list) => {
       value: item.id
     }));
   } else {
-    data.forEach(element => {
-      if (element.isCorrect === true || element.isCorrect === 'CORRECT') {
-        element.isCorrect = 'CORRECT';
-      } else {
-        element.isCorrect = 'INCORRECT';
-      }
-
-      if (element.enabled === true || element.enabled === 'ENABLED') {
-        element.enabled = 'ENABLED';
-      } else {
-        element.enabled = 'DISABLED';
-      }
-    });
-
     const optionItems = uniq(data.map(item => item[option]));
     const validOptionItems = optionItems.filter(option => !isNil(option));
     for (let i = 0; i < validOptionItems.length; i++) {
       const template = [];
       validOptionItems.forEach(item => {
-        template.push({ type: item.toString().toUpperCase(), value: item.toString().toUpperCase() });
+        if (option === 'isCorrect' && item === true) {
+          template.push({ type: 'CORRECT', value: item });
+        } else if (option === 'isCorrect' && item === false) {
+          template.push({ type: 'INCORRECT', value: item });
+        } else if (option === 'enabled' && item === true) {
+          template.push({ type: 'ENABLED', value: item });
+        } else if (option === 'enabled' && item === false) {
+          template.push({ type: 'DISABLED', value: item });
+        } else {
+          template.push({ type: item.toString().toUpperCase(), value: item.toString().toUpperCase() });
+        }
       });
       return template;
     }
