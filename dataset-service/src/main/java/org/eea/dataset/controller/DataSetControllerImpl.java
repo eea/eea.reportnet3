@@ -601,7 +601,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @return the ETL dataset VO
    */
   @Override
-  @GetMapping("/etlExport/dataset/{datasetId}")
+  @GetMapping("/{datasetId}/etlExport")
   @PreAuthorize("checkApiKey(#dataflowId,#providerId) OR secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN')")
   public ETLDatasetVO etlExportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId) {
@@ -629,7 +629,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @PreAuthorize("checkApiKey(#dataflowId,#providerId) OR secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN')")
-  @PostMapping("/etlImport/dataset/{datasetId}")
+  @PostMapping("/{datasetId}/etlImport")
   public void etlImportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long providerId) {
