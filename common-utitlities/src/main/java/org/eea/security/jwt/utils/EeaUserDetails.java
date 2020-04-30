@@ -10,6 +10,7 @@ import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.CollectionUtils;
 
 /**
  * The type Eea user details.
@@ -37,14 +38,15 @@ public class EeaUserDetails implements UserDetails {
     EeaUserDetails principal = new EeaUserDetails();
     principal.setUsername(username);
     List<GrantedAuthority> authorities = new ArrayList<>();
-    roles.stream().forEach(role -> {
-      if (!role.startsWith("ROLE_")) {
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
-      } else {
-        authorities.add(new SimpleGrantedAuthority(role));
-      }
-    });
-
+    if (!CollectionUtils.isEmpty(roles)) {
+      roles.stream().forEach(role -> {
+        if (!role.startsWith("ROLE_")) {
+          authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+        } else {
+          authorities.add(new SimpleGrantedAuthority(role));
+        }
+      });
+    }
     principal.setAuthorities(authorities);
 
     return principal;

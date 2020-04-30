@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.eea.exception.EEAErrorMessage;
@@ -41,133 +40,205 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-/** The type Keycloak connector service. */
+
+/**
+ * The type Keycloak connector service.
+ */
 @Service
 public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
-  /** The realm name. */
+  /**
+   * The realm name.
+   */
   @Value("${eea.keycloak.realmName}")
   private String realmName;
 
-  /** The secret. */
+  /**
+   * The secret.
+   */
   @Value("${eea.keycloak.secret}")
   private String secret;
 
-  /** The client id. */
+  /**
+   * The client id.
+   */
   @Value("${eea.keycloak.clientId}")
   private String clientId;
 
-  /** The keycloak host. */
+  /**
+   * The keycloak host.
+   */
   @Value("${eea.keycloak.host}")
   private String keycloakHost;
 
-  /** The keycloak scheme. */
+  /**
+   * The keycloak scheme.
+   */
   @Value("${eea.keycloak.scheme}")
   private String keycloakScheme;
 
-  /** The redirect uri. */
+  /**
+   * The redirect uri.
+   */
   @Value("${eea.keycloak.redirect_uri}")
   private String redirectUri;
 
 
-  /** The admin user. */
+  /**
+   * The admin user.
+   */
   @Value("${eea.keycloak.admin.user}")
   private String adminUser;
 
-  /** The admin pass. */
+  /**
+   * The admin pass.
+   */
   @Value("${eea.keycloak.admin.password}")
   private String adminPass;
 
 
-  /** The internal client id. */
+  /**
+   * The internal client id.
+   */
   private String internalClientId;
 
-  /** The resource types. */
+  /**
+   * The resource types.
+   */
   private Map<String, String> resourceTypes;
 
-  /** The rest template. */
+  /**
+   * The rest template.
+   */
   @Autowired
   private RestTemplate restTemplate;
 
-  /** The Constant GENERATE_TOKEN_URL. */
+  /**
+   * The Constant GENERATE_TOKEN_URL.
+   */
   private static final String GENERATE_TOKEN_URL =
       "/auth/realms/{realm}/protocol/openid-connect/token";
 
-  /** The Constant LOGOUT_URL. */
+  /**
+   * The Constant LOGOUT_URL.
+   */
   private static final String LOGOUT_URL = "/auth/realms/{realm}/protocol/openid-connect/logout";
 
-  /** The Constant LIST_USERS_URL. */
+  /**
+   * The Constant LIST_USERS_URL.
+   */
   private static final String LIST_USERS_URL = "/auth/admin/realms/{realm}/users?max=500";
 
-  /** The Constant GET_USER_BY_EMAIL_URL. */
+  /**
+   * The Constant GET_USER_BY_EMAIL_URL.
+   */
   private static final String GET_USER_BY_EMAIL_URL =
       "/auth/admin/realms/{realm}/users?email={email}";
 
-  /** The Constant LIST_GROUPS_URL. */
+  /**
+   * The Constant LIST_GROUPS_URL.
+   */
   private static final String LIST_GROUPS_URL = "/auth/admin/realms/{realm}/groups";
 
-  /** The Constant GROUP_DETAIL_URL. */
+  /**
+   * The Constant GROUP_DETAIL_URL.
+   */
   private static final String GROUP_DETAIL_URL = "/auth/admin/realms/{realm}/groups/{groupId}";
 
-  /** The Constant CREATE_USER_GROUP_URL. */
+  /**
+   * The Constant CREATE_USER_GROUP_URL.
+   */
   private static final String CREATE_USER_GROUP_URL = "/auth/admin/realms/{realm}/groups/";
 
-  /** The Constant DELETE_USER_GROUP_URL. */
+  /**
+   * The Constant DELETE_USER_GROUP_URL.
+   */
   private static final String DELETE_USER_GROUP_URL = "/auth/admin/realms/{realm}/groups/{groupId}";
 
-  /** The Constant ADD_USER_TO_USER_GROUP_URL. */
+  /**
+   * The Constant ADD_USER_TO_USER_GROUP_URL.
+   */
   private static final String ADD_USER_TO_USER_GROUP_URL =
       "/auth/admin/realms/Reportnet/users/{userId}/groups/{groupId}";
 
-  /** The Constant CHECK_USER_PERMISSION. */
+  /**
+   * The Constant CHECK_USER_PERMISSION.
+   */
   private static final String CHECK_USER_PERMISSION =
       "/auth/admin/realms/{realm}/clients/{clientInterenalId}/authz/resource-server/policy/evaluate";
 
-  /** The Constant GET_CLIENT_ID. */
+  /**
+   * The Constant GET_CLIENT_ID.
+   */
   private static final String GET_CLIENT_ID = "/auth/admin/realms/{realm}/clients/";
 
-  /** The Constant GET_RESOURCE_SET. */
+  /**
+   * The Constant GET_RESOURCE_SET.
+   */
   private static final String GET_RESOURCE_SET =
       "/auth/realms/{realm}/authz/protection/resource_set";
 
-  /** The Constant GET_RESOURCE_INFO. */
+  /**
+   * The Constant GET_RESOURCE_INFO.
+   */
   private static final String GET_RESOURCE_INFO =
       "/auth/realms/{realm}/authz/protection/resource_set/{resourceId}";
 
-  /** The Constant GET_GROUPS_BY_USER. */
+  /**
+   * The Constant GET_GROUPS_BY_USER.
+   */
   private static final String GET_GROUPS_BY_USER =
       "/auth/admin/realms/{realm}/users/{userId}/groups";
 
-  /** The Constant URI_PARAM_REALM. */
+  /**
+   * The Constant URI_PARAM_REALM.
+   */
   private static final String URI_PARAM_REALM = "realm";
 
-  /** The Constant URI_PARAM_RESOURCE_ID. */
+  /**
+   * The Constant URI_PARAM_RESOURCE_ID.
+   */
   private static final String URI_PARAM_RESOURCE_ID = "resourceId";
 
-  /** The Constant URI_PARAM_USER_ID. */
+  /**
+   * The Constant URI_PARAM_USER_ID.
+   */
   private static final String URI_PARAM_USER_ID = "userId";
 
-  /** The Constant URI_PARAM_GROUP_ID. */
+  /**
+   * The Constant URI_PARAM_GROUP_ID.
+   */
   private static final String URI_PARAM_GROUP_ID = "groupId";
 
-  /** The Constant URI_PARAM_EMAIL. */
+  /**
+   * The Constant URI_PARAM_EMAIL.
+   */
   private static final String URI_PARAM_EMAIL = "email";
 
-  /** The Constant LIST_ROLE_BY_REALM. */
+  /**
+   * The Constant LIST_ROLE_BY_REALM.
+   */
   private static final String LIST_ROLE_BY_REALM = "/auth/admin/realms/{realm}/roles";
 
-  /** The Constant ADD_ROLE_TO_USER. */
+  /**
+   * The Constant ADD_ROLE_TO_USER.
+   */
   private static final String ADD_ROLE_TO_USER =
       "/auth/admin/realms/{realm}/users/{userId}/role-mappings/realm";
 
-  /** The Constant USER_URL. */
+  /**
+   * The Constant USER_URL.
+   */
   private static final String USER_URL = "/auth/admin/realms/{realm}/users/{userId}";
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant USER_ROLES_URL.
+   */
+  private static final String USER_ROLES_URL = "/auth/admin/realms/{realm}/users/{userId}/role-mappings/realm/composite";
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-  /** The Constant APIKEYS. */
-  private static final String APIKEYS = "ApiKeys";
 
 
   /**
@@ -260,8 +331,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
                     .path(GET_GROUPS_BY_USER).buildAndExpand(uriParams).toString(),
                 HttpMethod.GET, request, GroupInfo[].class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
-        .orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
 
 
@@ -299,6 +369,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * @param username the username
    * @param password the password
    * @param admin the admin
+   *
    * @return the token generation map
    */
   private MultiValueMap<String, String> getTokenGenerationMap(String username, String password,
@@ -451,6 +522,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * Gets the user.
    *
    * @param userId the user id
+   *
    * @return the user
    */
   @Override
@@ -471,10 +543,28 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
         .orElse(null);
   }
 
+  @Override
+  public RoleRepresentation[] getUserRoles(String userId) {
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
+    uriParams.put(URI_PARAM_USER_ID, userId);
+
+    HttpEntity<UserRepresentation> request = createHttpRequest(null, uriParams);
+
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    ResponseEntity<RoleRepresentation[]> responseEntity = this.restTemplate.exchange(
+        uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(USER_ROLES_URL)
+            .buildAndExpand(uriParams).toString(),
+        HttpMethod.GET, request, RoleRepresentation[].class);
+
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
+  }
+
   /**
    * Creates the group detail.
    *
    * @param groupInfo the group info
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -521,6 +611,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    *
    * @param userId the user id
    * @param groupId the group id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -555,7 +646,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-        .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+            .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 
@@ -584,6 +675,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * Gets the users by email.
    *
    * @param email the email
+   *
    * @return the users by email
    */
   @Override
@@ -615,7 +707,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-        .path(ADD_ROLE_TO_USER).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+            .path(ADD_ROLE_TO_USER).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 
@@ -636,8 +728,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             .buildAndExpand(uriParams).toString(),
         HttpMethod.GET, request, RoleRepresentation[].class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
-        .orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
 
   /**
@@ -817,71 +908,4 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   }
 
 
-  /**
-   * Update api key with the new one.
-   *
-   * @param user the user
-   * @param dataflowId the dataflow id
-   * @param dataProvider the dataProvider id
-   * @return the string
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public String updateApiKey(UserRepresentation user, Long dataflowId, Long dataProvider)
-      throws EEAException {
-    // Create new uuid for the new key
-    String apiKey = UUID.randomUUID().toString();
-    // Initialize the attributes
-    Map<String, List<String>> attributes =
-        user.getAttributes() != null ? user.getAttributes() : new HashMap<>();
-    List<String> apiKeys =
-        attributes.get(APIKEYS) != null ? attributes.get(APIKEYS) : new ArrayList<>();
-    String newValueAttribute = dataflowId + "," + dataProvider;
-    // Find and remove old key
-    if (!apiKeys.isEmpty()) {
-      for (String keyString : apiKeys) {
-        if (keyString.contains(newValueAttribute)) {
-          apiKeys.remove(keyString);
-          break;
-        }
-      }
-    }
-    apiKeys.add(apiKey + "," + newValueAttribute);
-    attributes.put(APIKEYS, apiKeys);
-    user.setAttributes(attributes);
-    // insert the changes
-    updateUser(user);
-    // return new apiKey
-    return apiKey;
-  }
-
-
-  /**
-   * Gets the api key.
-   *
-   * @param user the user
-   * @param dataflowId the dataflow id
-   * @param dataProvider the dataProvider id
-   * @return the api key
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public String getApiKey(UserRepresentation user, Long dataflowId, Long dataProvider)
-      throws EEAException {
-    String result = "";
-    Map<String, List<String>> attributes =
-        user.getAttributes() != null ? user.getAttributes() : new HashMap<>();
-    List<String> apiKeys =
-        attributes.get(APIKEYS) != null ? attributes.get(APIKEYS) : new ArrayList<>();
-    String findValue = "," + dataflowId + "," + dataProvider;
-    if (!apiKeys.isEmpty()) {
-      for (String keyString : apiKeys) {
-        if (keyString.contains(findValue)) {
-          result = keyString.replace(findValue, "");
-          break;
-        }
-      }
-    }
-    return result;
-  }
 }
