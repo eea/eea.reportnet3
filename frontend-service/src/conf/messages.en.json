@@ -620,6 +620,7 @@
     "table": "Tables",
     "field": "Fields",
     "tabMenuExpression": "Expression",
+    "fcSubmitButtonDisabled": "One or more required field(s) are missing",
     "longFieldFormatRestriction": "Maximum of 20 characters",
     "decimalFieldFormatRestriction": "Maximum of 40 characters",
     "dateFieldFormatRestriction": "YYYY-MM-DD",
