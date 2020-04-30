@@ -52,6 +52,10 @@ const getOptionTypes = (data, option, list) => {
           template.push({ type: 'ENABLED', value: item });
         } else if (option === 'enabled' && item === false) {
           template.push({ type: 'DISABLED', value: item });
+        } else if (option === 'automatic' && item === true) {
+          template.push({ type: 'AUTOMATIC', value: item });
+        } else if (option === 'automatic' && item === false) {
+          template.push({ type: 'MANUAL', value: item });
         } else {
           template.push({ type: item.toString().toUpperCase(), value: item.toString().toUpperCase() });
         }

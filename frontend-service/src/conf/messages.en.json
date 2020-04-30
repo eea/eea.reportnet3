@@ -273,7 +273,7 @@
     "exportDataByIdError": "Failed exporting data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "exportTable": "Export table data",
     "exportTableDataByIdError": "Failed exporting data",
-    "field": "Field",
+    "validationViewerField": "Field",
     "fieldConstraintTableFieldNoOptions": "No tables yet",
     "file": "File",
     "fileDescription": "File description",
@@ -518,7 +518,7 @@
     "subscribeDataflow": "No open dataflow to show",
     "subscribeThisButton": "Subscribe to this dataflow",
     "supportingDocuments": "Supporting documents",
-    "table": "Table",
+    "validationViewerTable": "Table",
     "tableDataByIdError": "Failed loading data",
     "tables": "Tables",
     "theme": "Theme",
@@ -616,6 +616,9 @@
     "fieldRecords": "Field records: ",
     "tabMenuExpression": "Expression",
     "nextReportDue": "Next report due",
-    "isCorrect": "Correct"
+    "isCorrect": "Correct",
+    "automatic": "Automatic",
+    "table": "Tables",
+    "field": "Fields"
   }
 }
