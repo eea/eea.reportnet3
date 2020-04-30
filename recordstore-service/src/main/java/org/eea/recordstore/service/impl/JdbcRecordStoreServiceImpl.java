@@ -196,56 +196,42 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       boolean isCreation) {
 
     // Initialize resources
-    Connection connection = null;
-    try {
-      connection = dataSource.getConnection();
-      try (
-          Statement statement = connection.createStatement();
-          BufferedReader br =
-              new BufferedReader(new InputStreamReader(resourceFile.getInputStream()))) {
-        connection.setAutoCommit(false);
-        // Read file and create queries
-        String command;
-        while ((command = br.readLine()) != null) {
-          for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
-            statement.addBatch(command.replace("%dataset_name%", "dataset_" + datasetId)
-                .replace("%user%", userPostgreDb));
-          }
-        }
+    try (Connection connection = dataSource.getConnection();
+        Statement statement = connection.createStatement();
+        BufferedReader br =
+            new BufferedReader(new InputStreamReader(resourceFile.getInputStream()))) {
 
-        // Execute queries and commit results
-        statement.executeBatch();
-        connection.commit();
-        connection.setAutoCommit(true);
-        LOG.info("Schemas created as part of DataCollection creation");
-
-        // Release events to initialize databases content
-        releaseConnectionCreatedEvents(datasetIdsAndSchemaIds);
-
-        // Release the lock and the notification
-        releaseLockAndNotification(dataflowId, isCreation);
-
-      } catch (SQLException | IOException e) {
-        try {
-          connection.rollback();
-        } catch (SQLException e1) {
-          LOG_ERROR.error("Error rolling back schema creation: ", e1);
-        }
-        LOG_ERROR.error("Error creating schemas. Rolling back: ", e);
-        // This method will release the lock
-        dataCollectionControllerZuul.undoDataCollectionCreation(
-            new ArrayList<>(datasetIdsAndSchemaIds.keySet()), dataflowId, isCreation);
-      }
-    } catch (SQLException e) {
-      LOG_ERROR.error("Error creating connection after schema creation: ", e);
-    } finally {
-      if (null != connection) {
-        try {
-          connection.close();
-        } catch (SQLException e) {
-          LOG_ERROR.error("Error closing connection after schema creation: ", e);
+      // Read file and create queries
+      String command;
+      while ((command = br.readLine()) != null) {
+        for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
+          statement.addBatch(command.replace("%dataset_name%", "dataset_" + datasetId)
+              .replace("%user%", userPostgreDb));
         }
       }
+
+      // Execute queries and commit results
+      statement.executeBatch();
+      LOG.info("{} Schemas created as part of DataCollection creation",
+          datasetIdsAndSchemaIds.size());
+      try {
+        //waiting 3 seconds before releasing notifications, so database is able to write the creation of all datasets
+        Thread.sleep(3000);
+      } catch (InterruptedException e) {
+        LOG_ERROR.error("Error sleeping thread before releasing notification kafka events", e);
+      }
+      LOG.info("Releasing notifications via Kafka");
+      // Release events to initialize databases content
+      releaseConnectionCreatedEvents(datasetIdsAndSchemaIds);
+
+      // Release the lock and the notification
+      releaseLockAndNotification(dataflowId, isCreation);
+
+    } catch (SQLException | IOException e) {
+      LOG_ERROR.error("Error creating schemas. Rolling back: ", e);
+      // This method will release the lock
+      dataCollectionControllerZuul.undoDataCollectionCreation(
+          new ArrayList<>(datasetIdsAndSchemaIds.keySet()), dataflowId, isCreation);
     }
   }
 
