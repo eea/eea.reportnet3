@@ -20,6 +20,7 @@ import org.eea.dataset.service.impl.DesignDatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -143,6 +144,11 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.loadTableData(1L, file, "example");
   }
 
+  /**
+   * Test load data read only exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testLoadDataReadOnlyException() throws Exception {
     try {
@@ -350,29 +356,6 @@ public class DataSetControllerImplTest {
   }
 
   /**
-   * Test get data flow id by id find error.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testGetDataFlowIdByIdFindError() throws Exception {
-    doThrow(new EEAException()).when(datasetService).getDataFlowIdById(Mockito.any());
-    Long result = dataSetControllerImpl.getDataFlowIdById(1L);
-    Mockito.verify(datasetService, times(1)).getDataFlowIdById(Mockito.any());
-    assertNull("should be null", result);
-  }
-
-  /**
-   * Test get by id exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testGetDataFlowIdByIdException() throws Exception {
-    dataSetControllerImpl.getDataFlowIdById(null);
-  }
-
-  /**
    * Test update dataset success.
    *
    * @throws Exception the exception
@@ -494,6 +477,11 @@ public class DataSetControllerImplTest {
 
 
 
+  /**
+   * Test delete import table read only exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testDeleteImportTableReadOnlyException() throws Exception {
     try {
@@ -554,6 +542,11 @@ public class DataSetControllerImplTest {
     Mockito.verify(updateRecordHelper, times(1)).executeUpdateProcess(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test update records read only exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testUpdateRecordsReadOnlyException() throws Exception {
     try {
@@ -595,6 +588,11 @@ public class DataSetControllerImplTest {
     Mockito.verify(updateRecordHelper, times(1)).executeDeleteProcess(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test delete record read only exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testDeleteRecordReadOnlyException() throws Exception {
     try {
@@ -679,6 +677,11 @@ public class DataSetControllerImplTest {
   }
 
 
+  /**
+   * Testinsert records table read only exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testinsertRecordsTableReadOnlyException() throws Exception {
     try {
@@ -768,6 +771,11 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.updateField(1L, new FieldVO());
   }
 
+  /**
+   * Test update field read only exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testUpdateFieldReadOnlyException() throws Exception {
     try {
@@ -843,6 +851,97 @@ public class DataSetControllerImplTest {
     Mockito.when(datasetService.getReferencedDatasetId(Mockito.any(), Mockito.any()))
         .thenReturn(1L);
     assertEquals("error", Long.valueOf(1L), dataSetControllerImpl.getReferencedDatasetId(1L, ""));
+  }
+
+  /**
+   * Etl export dataset test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void etlExportDatasetTest() throws EEAException {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
+    dataSetControllerImpl.etlExportDataset(1L, 1L, 1L);
+    Mockito.verify(datasetService, times(1)).etlExportDataset(Mockito.anyLong());
+  }
+
+  /**
+   * Etl export dataset dataflow exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void etlExportDatasetDataflowExceptionTest() throws EEAException {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(null);
+    try {
+      dataSetControllerImpl.etlExportDataset(1L, 1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
+  }
+
+  /**
+   * Etl export dataset exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void etlExportDatasetExceptionTest() throws EEAException {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
+    doThrow(new EEAException()).when(datasetService).etlExportDataset(Mockito.any());
+    try {
+      dataSetControllerImpl.etlExportDataset(1L, 1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
+
+  /**
+   * Etl import dataset test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void etlImportDatasetTest() throws EEAException {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
+    dataSetControllerImpl.etlImportDataset(1L, new ETLDatasetVO(), 1L, 1L);
+    Mockito.verify(datasetService, times(1)).etlImportDataset(Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Etl import dataset dataflow exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void etlImportDatasetDataflowExceptionTest() throws EEAException {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(null);
+    try {
+      dataSetControllerImpl.etlImportDataset(1L, new ETLDatasetVO(), 1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
+  }
+
+  /**
+   * Etl import dataset exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void etlImportDatasetExceptionTest() throws EEAException {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
+    doThrow(new EEAException()).when(datasetService).etlImportDataset(Mockito.any(), Mockito.any());
+    try {
+      dataSetControllerImpl.etlImportDataset(1L, new ETLDatasetVO(), 1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
   }
 
 }

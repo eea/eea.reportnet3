@@ -2,6 +2,7 @@ package org.eea.ums.service.keycloak.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -135,7 +136,7 @@ public class KeycloakConnectorServiceImplTest {
   public void getReportnetClientInfo() {
     ClientInfo info = new ClientInfo();
     info.setClientId("reportnet");
-    ClientInfo[] body = new ClientInfo[] {info};
+    ClientInfo[] body = new ClientInfo[]{info};
 
     ResponseEntity<ClientInfo[]> clientInfoResult = new ResponseEntity<>(body, HttpStatus.OK);
     Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
@@ -149,7 +150,7 @@ public class KeycloakConnectorServiceImplTest {
   @Test
   public void getResourceInfo() {
 
-    String[] bodyResourceSet = new String[] {"resource1"};
+    String[] bodyResourceSet = new String[]{"resource1"};
 
     ResponseEntity<String[]> resourceSetInfo = new ResponseEntity<>(bodyResourceSet, HttpStatus.OK);
 
@@ -189,7 +190,7 @@ public class KeycloakConnectorServiceImplTest {
     groupInfo.setId("1");
     groupInfo.setName("Dataflow-1-DATA_PROVIDER");
     groupInfo.setPath("/path");
-    GroupInfo[] groupInfos = new GroupInfo[] {groupInfo};
+    GroupInfo[] groupInfos = new GroupInfo[]{groupInfo};
 
     ResponseEntity<GroupInfo[]> responseGroupInfos =
         new ResponseEntity<>(groupInfos, HttpStatus.OK);
@@ -457,64 +458,36 @@ public class KeycloakConnectorServiceImplTest {
     assertEquals(user, userRepresentation);
   }
 
+
   @Test
-  public void updateApiKeyEmptyTest() throws EEAException {
-    UserRepresentation user = new UserRepresentation();
-    user.setAttributes(null);
-    String key = keycloakConnectorService.updateApiKey(user, 1L, 1L);
-    assertNotNull(key);
+  public void getUserRoles() {
+    RoleRepresentation[] roles = new RoleRepresentation[1];
+    RoleRepresentation role = new RoleRepresentation();
+    role.setId("idGroupInfo");
+    role.setName("Dataflow-1-DATA_CUSTODIAN");
+    roles[0] = role;
+    ResponseEntity<RoleRepresentation[]> responseGroupInfo =
+        new ResponseEntity<>(roles, HttpStatus.OK);
+
+    Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
+        Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(responseGroupInfo);
+
+    RoleRepresentation[] result = keycloakConnectorService.getUserRoles("userId");
+
+    Assert.assertNotNull(result);
   }
 
   @Test
-  public void updateApiKeyAttributesTest() throws EEAException {
-    UserRepresentation user = new UserRepresentation();
-    Map<String, List<String>> attributes = new HashMap<>();
-    attributes.put("ApiKeys", new ArrayList<>());
-    user.setAttributes(attributes);
-    String key = keycloakConnectorService.updateApiKey(user, 1L, 1L);
-    assertNotNull(key);
-  }
+  public void getUserRolesNoRoles() {
+    RoleRepresentation[] roles = new RoleRepresentation[0];
+    ResponseEntity<RoleRepresentation[]> responseGroupInfo =
+        new ResponseEntity<>(roles, HttpStatus.OK);
 
-  @Test
-  public void updateApiKeyFullAttributesTest() throws EEAException {
-    UserRepresentation user = new UserRepresentation();
-    Map<String, List<String>> attributes = new HashMap<>();
-    List<String> oldKeys = new ArrayList<>();
-    oldKeys.add("uuid");
-    attributes.put("ApiKeys", oldKeys);
-    user.setAttributes(attributes);
-    String key = keycloakConnectorService.getApiKey(user, 1L, 1L);
-    assertNotNull(key);
-  }
+    Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
+        Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(responseGroupInfo);
 
-  @Test
-  public void getApiKeyEmptyTest() throws EEAException {
-    UserRepresentation user = new UserRepresentation();
-    user.setAttributes(null);
-    String key = keycloakConnectorService.getApiKey(user, 1L, 1L);
-    assertNotNull("error", key);
-  }
+    RoleRepresentation[] result = keycloakConnectorService.getUserRoles("userId");
 
-  @Test
-  public void getApiKeyAttributesTest() throws EEAException {
-    UserRepresentation user = new UserRepresentation();
-    Map<String, List<String>> attributes = new HashMap<>();
-    attributes.put("ApiKeys", new ArrayList<>());
-    user.setAttributes(attributes);
-    String key = keycloakConnectorService.getApiKey(user, 1L, 1L);
-    assertEquals("error", "", key);
+    Assert.assertNotNull(result);
   }
-
-  @Test
-  public void getApiKeyFullAttributesTest() throws EEAException {
-    UserRepresentation user = new UserRepresentation();
-    Map<String, List<String>> attributes = new HashMap<>();
-    List<String> oldKeys = new ArrayList<>();
-    oldKeys.add("uuid,1,1");
-    attributes.put("ApiKeys", oldKeys);
-    user.setAttributes(attributes);
-    String key = keycloakConnectorService.getApiKey(user, 1L, 1L);
-    assertEquals("error", "uuid", key);
-  }
-
 }
