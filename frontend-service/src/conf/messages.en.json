@@ -617,6 +617,7 @@
     "longTextFieldFormatRestriction": "Maximum of 10000 characters",
     "emailFieldFormatRestriction": "Maximum of 256 characters",
     "urlFieldFormatRestriction": "Maximum of 5000 characters",
-    "phoneNumberFieldFormatRestriction": "Maximum of 256 characters"
+    "phoneNumberFieldFormatRestriction": "Maximum of 256 characters",
+    "noDescription": "No description"
   }
 }
