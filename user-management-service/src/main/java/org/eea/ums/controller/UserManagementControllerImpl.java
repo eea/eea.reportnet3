@@ -30,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -250,8 +251,11 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @RequestMapping(value = "/test-security", method = RequestMethod.GET)
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTER','DATAFLOW_PROVIDER') AND checkPermission('Dataflow','READ')")
-  public String testSecuredService(@RequestParam("dataflowId") Long dataflowId) {
+  // @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTER','DATAFLOW_PROVIDER') AND
+  // checkPermission('Dataflow','READ')")
+  @PreAuthorize("checkApiKey(#dataflowId,#provider) AND secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTER','DATAFLOW_PROVIDER')")
+  public String testSecuredService(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("providerId") Long provider) {
     return "OLEEEEE";
   }
 
@@ -293,6 +297,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * Gets the user by email.
    *
    * @param email the email
+   *
    * @return the user by email
    */
   @Override
@@ -311,6 +316,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * Gets the email by user id.
    *
    * @param userId the user id
+   *
    * @return the email by user id
    */
   @Override
@@ -342,10 +348,10 @@ public class UserManagementControllerImpl implements UserManagementController {
 
     UserRepresentation user = keycloakConnectorService.getUser(userId);
     if (user != null) {
-      user.setAttributes(attributes);
+      user = securityProviderInterfaceService.setAttributesWithApiKey(user, attributes);
     } else {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.USER_NOTFOUND);
+          String.format(EEAErrorMessage.USER_NOTFOUND, userId));
     }
     keycloakConnectorService.updateUser(user);
 
@@ -367,12 +373,12 @@ public class UserManagementControllerImpl implements UserManagementController {
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get("userId");
 
-    UserRepresentation user = keycloakConnectorService.getUser(userId);
+    UserRepresentation user = securityProviderInterfaceService.getUserWithoutKeys(userId);
     if (user != null) {
       return user.getAttributes();
     } else {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.USER_NOTFOUND);
+          String.format(EEAErrorMessage.USER_NOTFOUND, userId));
     }
 
   }
@@ -431,13 +437,6 @@ public class UserManagementControllerImpl implements UserManagementController {
     }
   }
 
-  /**
-   * Creates the api key.
-   *
-   * @param dataflowId the dataflow id
-   * @param shortCode the short code
-   * @return the string
-   */
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER')")
@@ -448,18 +447,15 @@ public class UserManagementControllerImpl implements UserManagementController {
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get("userId");
-    UserRepresentation user = keycloakConnectorService.getUser(userId);
-    if (user == null) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.USER_NOTFOUND);
-    }
+
     try {
-      return keycloakConnectorService.updateApiKey(user, dataflowId, dataProvider);
+      return securityProviderInterfaceService.createApiKey(userId, dataflowId, dataProvider);
     } catch (EEAException e) {
       LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.PERMISSION_NOT_CREATED);
+          EEAErrorMessage.PERMISSION_NOT_CREATED, e);
     }
+
   }
 
   @Override
@@ -471,17 +467,34 @@ public class UserManagementControllerImpl implements UserManagementController {
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get("userId");
-    UserRepresentation user = keycloakConnectorService.getUser(userId);
-    if (user == null) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.USER_NOTFOUND);
-    }
+    return retrieveApiKey(userId, dataflowId, dataProvider);
+
+  }
+
+  @Override
+  @HystrixCommand
+  @GetMapping("/{userId}/getApiKey")
+  public String getApiKey(@PathVariable("userId") final String userId,
+      @RequestParam("dataflowId") final Long dataflowId,
+      @RequestParam("dataProvider") final Long dataProvider) {
+    return retrieveApiKey(userId, dataflowId, dataProvider);
+  }
+
+  @Override
+  @HystrixCommand
+  @PostMapping(value = "/authenticateByApiKey/{apiKey}")
+  public TokenVO authenticateUserByApiKey(@PathVariable("apiKey") final String apiKey) {
+    return securityProviderInterfaceService.authenticateApiKey(apiKey);
+  }
+
+  private String retrieveApiKey(final String userId, final Long dataflowId,
+      final Long dataProvider) {
     try {
-      return keycloakConnectorService.getApiKey(user, dataflowId, dataProvider);
+      return securityProviderInterfaceService.getApiKey(userId, dataflowId, dataProvider);
     } catch (EEAException e) {
       LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.PERMISSION_NOT_CREATED);
+          EEAErrorMessage.PERMISSION_NOT_CREATED, e);
     }
   }
 }
