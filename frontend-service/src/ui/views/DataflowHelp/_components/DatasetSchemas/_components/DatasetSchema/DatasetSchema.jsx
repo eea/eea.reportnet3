@@ -10,9 +10,8 @@ import styles from './DatasetSchema.module.scss';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { TreeView } from 'ui/views/_components/TreeView';
 
-const resources = useContext(ResourcesContext);
-
 const DatasetSchema = ({ designDataset, index, validationList }) => {
+  const resources = useContext(ResourcesContext);
   const renderDatasetSchema = () => {
     if (!isUndefined(designDataset) && !isNull(designDataset)) {
       const parsedDesignDataset = parseDesignDataset(designDataset, validationList);
