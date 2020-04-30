@@ -43,6 +43,10 @@
     .searchInput {
       width: 85%;
       max-width: 100%;
+
+      &:active {
+        width: 85%;
+      }
     }
   }
 

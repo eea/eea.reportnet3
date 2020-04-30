@@ -284,7 +284,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       );
     }
 
-    const paginatorRightText = `${resources.messages['fieldRecords']}: ${tabsValidationsState.validationList.validations.length}`;
+    const paginatorRightText = `${resources.messages['fieldRecords']} ${tabsValidationsState.validationList.validations.length}`;
 
     return (
       <Fragment>
