@@ -36,7 +36,7 @@ const checkSelected = (state, data, selectedKeys = []) => {
     if (!isEmpty(state.filterBy[selectedKeys[index]])) {
       if (!isNil(data[selectedKeys[index]])) {
         if (
-          ![...state.filterBy[selectedKeys[index]].map(option => option.toLowerCase())].includes(
+          ![...state.filterBy[selectedKeys[index]].map(option => option.toString().toLowerCase())].includes(
             data[selectedKeys[index]].toString().toLowerCase()
           )
         ) {
