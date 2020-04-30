@@ -139,53 +139,53 @@
       }
 
       .blocker {
-        background-color: var(--statusBox-blocker-bg) !important;
-        color: var(--statusBox-blocker-color) !important;
+        background-color: rgba(var(--statusBox-blocker-bg), 0.8);
+        color: rgba(var(--statusBox-blocker-color), 0.8);
       }
 
       .correct {
-        background-color: var(--statusBox-true-bg) !important;
-        color: var(--statusBox-true-color) !important;
+        background-color: var(--statusBox-true-bg);
+        color: var(--statusBox-true-color);
       }
 
       .design {
-        background-color: var(--statusBox-designer-bg) !important;
-        color: var(--black) !important;
+        background-color: var(--statusBox-designer-bg);
+        color: var(--black);
       }
 
       .disabled {
-        background-color: var(--statusBox-false-bg) !important;
-        color: var(--statusBox-false-color) !important;
+        background-color: var(--statusBox-false-bg);
+        color: var(--statusBox-false-color);
       }
 
       .draft {
-        background-color: var(--statusBox-draft-bg) !important;
-        color: var(--statusBox-draft-color) !important;
+        background-color: var(--statusBox-draft-bg);
+        color: var(--statusBox-draft-color);
       }
 
       .enabled {
-        background-color: var(--statusBox-true-bg) !important;
-        color: var(--statusBox-true-color) !important;
+        background-color: var(--statusBox-true-bg);
+        color: var(--statusBox-true-color);
       }
 
       .error {
-        background-color: var(--statusBox-error-bg) !important;
-        color: var(--statusBox-error-color) !important;
+        background-color: var(--statusBox-error-bg);
+        color: var(--statusBox-error-color);
       }
 
       .incorrect {
-        background-color: var(--statusBox-false-bg) !important;
-        color: var(--statusBox-false-color) !important;
+        background-color: var(--statusBox-false-bg);
+        color: var(--statusBox-false-color);
       }
 
       .info {
-        background-color: var(--statusBox-info-bg) !important;
-        color: var(--statusBox-info-color) !important;
+        background-color: var(--statusBox-info-bg);
+        color: var(--statusBox-info-color);
       }
 
       .warning {
-        background-color: var(--statusBox-warning-bg) !important;
-        color: var(--statusBox-warning-color) !important;
+        background-color: var(--statusBox-warning-bg);
+        color: var(--statusBox-warning-color);
       }
     }
   }
