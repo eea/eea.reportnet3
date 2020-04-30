@@ -31,7 +31,8 @@ export const filterReducer = (state, { type, payload }) => {
         filterBy: payload.filterBy,
         filteredData: payload.filteredData,
         labelAnimations: payload.labelAnimations,
-        orderBy: payload.orderBy
+        orderBy: payload.orderBy,
+        searchBy: payload.searchBy
       };
 
     case 'ANIMATE_LABEL':
@@ -39,6 +40,9 @@ export const filterReducer = (state, { type, payload }) => {
         ...state,
         labelAnimations: { ...state.labelAnimations, [payload.animatedProperty]: payload.isAnimated }
       };
+
+    case 'ON_SEARCH_DATA':
+      return { ...state, filteredData: payload.searchedValues, searchBy: payload.value };
 
     default:
       return state;

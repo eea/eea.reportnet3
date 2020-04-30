@@ -4,12 +4,9 @@ import isEmpty from 'lodash/isEmpty';
 
 import styles from './ReportingObligations.module.scss';
 
-import ObligationConf from 'conf/obligation.config.json';
-
 import { CardsView } from './_components/CardsView';
 import { Filters } from 'ui/views/_components/Filters';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
-import { SearchAll } from './_components/SearchAll';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TableView } from './_components/TableView';
 
@@ -91,7 +88,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
       reportingObligationDispatch({
         type: 'INITIAL_LOAD',
         payload: {
-          data: response,
+          data: ReportingObligationUtils.initialValues(response, userContext.userProps.dateFormat),
           filteredData: ReportingObligationUtils.filteredInitialValues(
             response,
             oblChecked.id,
@@ -158,7 +155,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
             : 'space-between'
       }}>
       <div className={styles.repOblTools}>
-        <SearchAll data={reportingObligationState.filteredData} getValues={onLoadSearchedData} />
+        <Filters data={reportingObligationState.filteredData} getFiltredData={onLoadSearchedData} searchAll />
         <div className={styles.switchDiv}>
           <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
           <InputSwitch checked={reportingObligationState.isTableView} onChange={() => onToggleView()} />
@@ -169,9 +166,9 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
       <div className={styles.filters}>
         <Filters
           data={reportingObligationState.data}
-          dateOptions={ObligationConf.filterItems['date']}
+          dateOptions={['expirationDate']}
           dropDownList={parsedFilterList}
-          dropdownOptions={ObligationConf.filterItems['dropdown']}
+          dropdownOptions={['countries', 'issues', 'organizations']}
           filterByList={reportingObligationState.filterBy}
           sendData={onLoadReportingObligations}
         />
