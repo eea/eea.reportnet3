@@ -30,9 +30,6 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
     textArea.select();
     document.execCommand('copy');
     window.getSelection().removeAllRanges();
-    notificationContext.add({
-      type: 'COPY_TO_CLIPBOARD_SUCCESS'
-    });
   };
 
   const onGetApiKey = async () => {
@@ -65,7 +62,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
       <Button
         className="p-button-primary"
         disabled={isKeyLoading}
-        icon={'key'}
+        icon={isKeyLoading ? 'spinnerAnimate' : 'key'}
         label={resources.messages['generateApiKey']}
         onClick={() => onGenerateApiKey()}
       />
@@ -89,33 +86,34 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
       style={{ width: '80%', maxWidth: '650px' }}
       visible={isApiKeyDialogVisible}
       zIndex={3003}>
-      {!isKeyLoading ? (
-        <div className={styles.container}>
-          {apiKey === '' ? (
-            <p>{resources.messages['noApiKey']}</p>
+      <div className={styles.container}>
+        {apiKey === '' ? (
+          isKeyLoading ? (
+            <Spinner style={{ top: 0, left: 0, width: '50px', height: '50px' }} />
           ) : (
-            <>
-              <label>{resources.messages['apiKeyDialogLabel']}</label>
-              <textarea
-                className={styles.textarea}
-                readOnly
-                ref={textRef => setTextAreaRef(textRef)}
-                rows={1}
-                value={apiKey}
-              />
-              <Button
-                className={`p-button-primary ${styles.copyBtn}`}
-                icon={'copy'}
-                onClick={() => onCopyToClipboard()}
-              />
-            </>
-          )}
-        </div>
-      ) : (
-        <div className={styles.container}>
-          <Spinner style={{ top: 0, left: 0, width: '50px', height: '50px' }} />
-        </div>
-      )}
+            <p>{resources.messages['noApiKey']}</p>
+          )
+        ) : (
+          <>
+            <label>{resources.messages['apiKeyDialogLabel']}</label>
+            <textarea
+              className={styles.textarea}
+              readOnly
+              ref={textRef => setTextAreaRef(textRef)}
+              rows={1}
+              value={apiKey}
+            />
+            <Button
+              tooltip={resources.messages['copyToClipboardSuccess']}
+              tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
+              showDelay="3000"
+              className={`p-button-primary ${styles.copyBtn}`}
+              icon={'copy'}
+              onClick={() => onCopyToClipboard()}
+            />
+          </>
+        )}
+      </div>
     </Dialog>
   );
 };
