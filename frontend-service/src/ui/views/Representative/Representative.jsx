@@ -38,6 +38,8 @@ const Representative = withRouter(({ match, history }) => {
     params: { dataflowId, representative }
   } = match;
 
+  console.log('match', match);
+
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
@@ -148,7 +150,7 @@ const Representative = withRouter(({ match, history }) => {
       notification => notification.key === 'ADD_DATACOLLECTION_COMPLETED_EVENT'
     );
     if (refresh) {
-      onUpdateData();
+      setIsDataUpdated(!dataflowState.isDataUpdated);
     }
   }, [notificationContext]);
 
@@ -197,16 +199,44 @@ const Representative = withRouter(({ match, history }) => {
 
       onInitialLoad(dataflow, datasets);
 
+      /////////
+
       if (!isEmpty(dataflow.datasets)) {
-        const representativeId = dataflow.datasets
-          .filter(dataset => dataset.datasetSchemaName === representative)
-          .map(id => id.dataProviderId);
-        if (representativeId.length === 1) {
-          setDataProviderId(uniq(representativeId)[0]);
+        const dataProviderIds = dataflow.datasets.map(dataset => dataset.dataProviderId);
+        if (uniq(dataProviderIds).length === 1) {
+          setDataProviderId(dataProviderIds[0]);
+        }
+      } //+
+
+      if (dataflowState.isRepresentativeView) {
+        if (!isEmpty(dataflow.representatives) && !isEmpty(dataflow.datasets)) {
+          const representativeId = dataflow.datasets.map(id => id.dataProviderId);
+
+          const isReleased = dataflow.datasets
+            .filter(representative => representative.dataProviderId === uniq(representativeId)[0])
+            .map(releasedStatus => releasedStatus.isReleased);
+
+          const isReceiptOutdated = dataflow.representatives
+            .filter(representative => representative.dataProviderId === uniq(representativeId)[0])
+            .map(representative => representative.isReceiptOutdated);
+
+          if (isReceiptOutdated.length === 1 && isReleased.length === 1) {
+            dataflowDispatch({
+              type: 'ON_INIT_RECEIPT_DATA',
+              payload: { isReceiptLoading: false, isReceiptOutdated: isReceiptOutdated[0], isReleased }
+            });
+          }
+        }
+      } else {
+        if (!isEmpty(dataflow.representatives)) {
+          const isReceiptOutdated = dataflow.representatives.map(representative => representative.isReceiptOutdated);
+          if (isReceiptOutdated.length === 1) {
+            dataflowDispatch({ type: 'ON_INIT_RECEIPT_DATA', payload: { isReceiptOutdated: isReceiptOutdated[0] } });
+          }
         }
       }
 
-      if (!isEmpty(dataflow.representatives) && !isEmpty(dataflow.datasets)) {
+      /* if (!isEmpty(dataflow.representatives) && !isEmpty(dataflow.datasets)) {
         const representativeId = dataflow.datasets
           .filter(dataset => dataset.datasetSchemaName === representative)
           .map(id => id.dataProviderId);
@@ -225,9 +255,10 @@ const Representative = withRouter(({ match, history }) => {
             payload: { isReceiptLoading: false, isReceiptOutdated: isReceiptOutdated[0], isReleased }
           });
         }
-      }
+      } */
     } catch (error) {
-      if (error.response.status === 401 || error.response.status === 403) {
+      notificationContext.add({ type: 'LOAD_DATAFLOW_DATA_ERROR' });
+      if (error.response.status === 401 || error.response.status === 403 || error.response.status === 500) {
         history.push(getUrl(routes.DATAFLOWS));
       }
     } finally {
@@ -235,12 +266,10 @@ const Representative = withRouter(({ match, history }) => {
     }
   };
 
-  const onShowReleaseSnapshotDialog = async datasetId => {
+  const onShowSnapshotDialog = async datasetId => {
     setDatasetIdToSnapshotProps(datasetId);
     manageDialogs('isSnapshotDialogVisible', true);
   };
-
-  const onUpdateData = () => setIsDataUpdated(!dataflowState.isDataUpdated);
 
   const layout = children => (
     <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
@@ -270,7 +299,7 @@ const Representative = withRouter(({ match, history }) => {
           hasWritePermissions={dataflowState.hasWritePermissions}
           isCustodian={dataflowState.isCustodian}
           representative={representative}
-          onShowSnapshotDialog={onShowReleaseSnapshotDialog}
+          onShowSnapshotDialog={onShowSnapshotDialog}
         />
 
         <SnapshotsDialog

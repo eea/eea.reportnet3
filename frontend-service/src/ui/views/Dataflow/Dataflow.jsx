@@ -308,13 +308,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
       onInitialLoad(dataflow, datasets);
 
-      if (!isEmpty(dataflow.datasets)) {
-        const dataProviderIds = dataflow.datasets.map(dataset => dataset.dataProviderId);
-        if (uniq(dataProviderIds).length === 1) {
-          setDataProviderId(dataProviderIds[0]);
-        }
-      }
-
+      //SOMETHING WITH DESIGN VIEW
       if (!isEmpty(dataflow.designDatasets)) {
         dataflow.designDatasets.forEach((schema, idx) => {
           schema.index = idx;
@@ -326,13 +320,49 @@ const Dataflow = withRouter(({ history, match }) => {
         });
         setUpdatedDatasetSchema(datasetSchemaInfo);
       }
+      ///////////
 
-      if (!isEmpty(dataflow.representatives)) {
+      if (!isEmpty(dataflow.datasets)) {
+        const dataProviderIds = dataflow.datasets.map(dataset => dataset.dataProviderId);
+        if (uniq(dataProviderIds).length === 1) {
+          setDataProviderId(dataProviderIds[0]);
+        }
+      } //+
+
+      if (dataflowState.isRepresentativeView) {
+        if (!isEmpty(dataflow.representatives) && !isEmpty(dataflow.datasets)) {
+          const representativeId = dataflow.datasets.map(id => id.dataProviderId);
+
+          const isReleased = dataflow.datasets
+            .filter(representative => representative.dataProviderId === uniq(representativeId)[0])
+            .map(releasedStatus => releasedStatus.isReleased);
+
+          const isReceiptOutdated = dataflow.representatives
+            .filter(representative => representative.dataProviderId === uniq(representativeId)[0])
+            .map(representative => representative.isReceiptOutdated);
+
+          if (isReceiptOutdated.length === 1 && isReleased.length === 1) {
+            dataflowDispatch({
+              type: 'ON_INIT_RECEIPT_DATA',
+              payload: { isReceiptLoading: false, isReceiptOutdated: isReceiptOutdated[0], isReleased }
+            });
+          }
+        }
+      } else {
+        if (!isEmpty(dataflow.representatives)) {
+          const isReceiptOutdated = dataflow.representatives.map(representative => representative.isReceiptOutdated);
+          if (isReceiptOutdated.length === 1) {
+            dataflowDispatch({ type: 'ON_INIT_RECEIPT_DATA', payload: { isReceiptOutdated: isReceiptOutdated[0] } });
+          }
+        }
+      }
+
+      /*  if (!isEmpty(dataflow.representatives)) {
         const isReceiptOutdated = dataflow.representatives.map(representative => representative.isReceiptOutdated);
         if (isReceiptOutdated.length === 1) {
           dataflowDispatch({ type: 'ON_INIT_RECEIPT_DATA', payload: { isReceiptOutdated: isReceiptOutdated[0] } });
         }
-      }
+      } */
     } catch (error) {
       notificationContext.add({ type: 'LOAD_DATAFLOW_DATA_ERROR' });
       if (error.response.status === 401 || error.response.status === 403 || error.response.status === 500) {
