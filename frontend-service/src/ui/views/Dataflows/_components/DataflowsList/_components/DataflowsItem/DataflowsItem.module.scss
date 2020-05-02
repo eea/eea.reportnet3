@@ -99,10 +99,14 @@
     grid-row: 1/2;
     color: var(--gray-110);
     font-size: 1rem;
-    font-weight: bold;
     span {
       font-weight: normal;
     }
+  }
+
+  .dateBlock {
+    white-space: nowrap;
+    font-weight: bold !important;
   }
 
   .role {

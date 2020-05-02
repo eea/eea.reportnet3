@@ -133,7 +133,7 @@ export const PropertiesDialog = ({ dataflowState, dataflowId, history, onDeleteD
         labelConfirm={resources.messages['yes']}
         disabledConfirm={dataflowState.deleteInput.toLowerCase() !== dataflowState.name.toLowerCase()}
         onConfirm={() => onConfirmDeleteDataflow()}
-        onHide={() => ('isDeleteDialogVisible', false, 'isPropertiesDialogVisible', true)}
+        onHide={() => manageDialogs('isDeleteDialogVisible', false, 'isPropertiesDialogVisible', true)}
         visible={dataflowState.isDeleteDialogVisible}>
         <p>{resources.messages['deleteDataflow']}</p>
         <p

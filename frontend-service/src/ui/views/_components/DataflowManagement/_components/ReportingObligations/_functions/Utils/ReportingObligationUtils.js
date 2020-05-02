@@ -8,13 +8,10 @@ const filteredInitialValues = (data, checkedId, format) => {
 
   if (!isNil(orderedData)) obligationList = orderedData;
 
-  return obligationList.map(obligation => ({
-    id: obligation.obligationId,
-    title: obligation.title,
-    legalInstrument: !isNil(obligation.legalInstruments) && obligation.legalInstruments.alias,
-    dueDate: !isNil(obligation.expirationDate) ? moment(obligation.expirationDate).format(format) : '-'
-  }));
+  return parseObligationData(obligationList, format);
 };
+
+const initialValues = (data, format) => parseObligationData(data, format);
 
 const isFiltered = filterByData => {
   if (!isNil(filterByData)) {
@@ -34,4 +31,13 @@ const onOrderCheckedValue = (data, checkedId) => {
   }
 };
 
-export const ReportingObligationUtils = { filteredInitialValues, isFiltered };
+const parseObligationData = (data, format) => {
+  return data.map(data => ({
+    id: data.obligationId,
+    title: data.title,
+    legalInstrument: !isNil(data.legalInstruments) && data.legalInstruments.alias,
+    dueDate: !isNil(data.expirationDate) ? moment(data.expirationDate).format(format) : '-'
+  }));
+};
+
+export const ReportingObligationUtils = { filteredInitialValues, initialValues, isFiltered };

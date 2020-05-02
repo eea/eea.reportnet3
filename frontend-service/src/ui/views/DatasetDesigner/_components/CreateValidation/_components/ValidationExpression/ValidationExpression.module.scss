@@ -1,6 +1,9 @@
 .expression {
   display: flex;
   justify-content: flex-start;
+  --unionWidth: 80px;
+  --operatorsWidth: 150px;
+  --fieldsGap: 1rem;
   .group {
     margin-right: 2rem;
     :global .p-checkbox-box {
@@ -12,25 +15,28 @@
     }
   }
   .union {
-    width: 80px;
+    width: var(--unionWidth);
     :global .p-dropdown {
       width: 100%;
     }
   }
   .operatorType {
-    width: 150px;
+    width: var(--operatorsWidth);
     :global .p-dropdown {
       width: 100%;
     }
   }
   .operatorValue {
-    width: 150px;
+    width: var(--operatorsWidth);
     :global .p-dropdown {
       width: 100%;
     }
   }
+  .expressionValue {
+    width: calc(100% - (var(--operatorsWidth) * 2) - var(--unionWidth) - (var(--fieldsGap) * 5));
+  }
   > span {
-    margin-right: 1rem;
+    margin-right: var(--fieldsGap);
     &:last-of-type {
       margin-right: 0;
     }

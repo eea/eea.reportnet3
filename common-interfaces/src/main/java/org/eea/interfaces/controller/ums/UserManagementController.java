@@ -13,6 +13,7 @@ import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -160,6 +161,7 @@ public interface UserManagementController {
    * Gets the user by email.
    *
    * @param email the email
+   *
    * @return the user by email
    */
   @GetMapping("/getUserByEmail")
@@ -195,6 +197,8 @@ public interface UserManagementController {
 
   /**
    * Update user attributes.
+   *
+   * @param attributes the attributes
    */
   @RequestMapping(value = "/updateAttributes", method = RequestMethod.PUT)
   void updateUserAttributes(@RequestBody Map<String, List<String>> attributes);
@@ -211,6 +215,7 @@ public interface UserManagementController {
    * Gets the email by user id.
    *
    * @param userId the user id
+   *
    * @return the email by user id
    */
   @GetMapping("/getUserByUserId")
@@ -220,7 +225,8 @@ public interface UserManagementController {
    * Creates the api key.
    *
    * @param dataflowId the dataflow id
-   * @param shortCode the short code
+   * @param dataProvider the data provider
+   *
    * @return the string
    */
   @PostMapping("/createApiKey")
@@ -231,10 +237,35 @@ public interface UserManagementController {
    * Gets the api key.
    *
    * @param dataflowId the dataflow id
-   * @param countryCode the country code
+   * @param dataProvider the data provider
+   *
    * @return the api key
    */
   @GetMapping("/getApiKey")
   String getApiKey(@RequestParam("dataflowId") final Long dataflowId,
       @RequestParam("dataProvider") final Long dataProvider);
+
+  /**
+   * Gets the api key.
+   *
+   * @param userId the user id
+   * @param dataflowId the dataflow id
+   * @param dataProvider the data provider
+   *
+   * @return the api key
+   */
+  @GetMapping("/{userId}/getApiKey")
+  String getApiKey(@PathVariable("userId") final String userId,
+      @RequestParam("dataflowId") final Long dataflowId,
+      @RequestParam("dataProvider") final Long dataProvider);
+
+  /**
+   * Authenticate user by api key string.
+   *
+   * @param apiKey the api key
+   *
+   * @return the token vo
+   */
+  @PostMapping("/authenticateByApiKey/{apiKey}")
+  TokenVO authenticateUserByApiKey(@PathVariable("apiKey") final String apiKey);
 }

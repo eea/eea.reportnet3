@@ -4,6 +4,7 @@ package org.eea.security.jwt.configuration;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.tuple.Pair;
+import org.eea.security.jwt.utils.ApiKeyAuthenticationFilter;
 import org.eea.security.jwt.utils.JwtAuthenticationEntryPoint;
 import org.eea.security.jwt.utils.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,9 @@ public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter
    */
   @Autowired
   private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+  @Autowired
+  private ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
 
   /**
    * Inits the security.
@@ -87,6 +91,7 @@ public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter
     }
     // Add our custom JWT security filter
     http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(apiKeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 
   }
