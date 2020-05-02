@@ -15,15 +15,9 @@ import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 import { dataflowActionCreators } from '../../_functions/dataflowActionCreators';
 
 export const BigButtonList = ({
-  dataflowData,
   dataflowDispatch,
-  dataflowId,
   dataflowState,
-  dataProviderId,
   handleRedirect,
-  hasWritePermissions,
-  isCustodian,
-  manageDialogs,
   onShowSnapshotDialog,
   representative
 }) => {
@@ -42,7 +36,7 @@ export const BigButtonList = ({
 
   const downloadPdf = response => {
     if (!isUndefined(response)) {
-      DownloadFile(response, `${dataflowData.name}_${Date.now()}.pdf`);
+      DownloadFile(response, `${dataflowState.data.name}_${Date.now()}.pdf`);
 
       const url = window.URL.createObjectURL(new Blob([response]));
 
@@ -61,8 +55,7 @@ export const BigButtonList = ({
   const onLoadReceiptData = async () => {
     try {
       setIsReceiptLoading(true);
-      const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
-
+      const response = await ConfirmationReceiptService.get(dataflowState.id, dataflowState.dataProviderId);
       downloadPdf(response);
       onCleanUpReceipt();
     } catch (error) {
@@ -83,13 +76,8 @@ export const BigButtonList = ({
             {useBigButtonList({
               dataflowState,
               dataflowDispatch,
-              dataflowData,
-              manageDialogs,
-              dataflowId,
               handleRedirect,
-              hasWritePermissions,
-              isCustodian,
-              onLoadReceiptData: onLoadReceiptData,
+              onLoadReceiptData,
               representative,
               onShowSnapshotDialog
             }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <></>))}

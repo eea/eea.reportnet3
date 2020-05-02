@@ -10,15 +10,11 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const useBigButtonList = ({
-  dataflowData,
-  dataflowId,
   handleRedirect,
-  isCustodian,
   onLoadReceiptData,
   dataflowState,
   representative,
-  onShowSnapshotDialog,
-  hasWritePermissions
+  onShowSnapshotDialog
 }) => {
   const resources = useContext(ResourcesContext);
   const helpButton = {
@@ -31,7 +27,7 @@ const useBigButtonList = ({
         getUrl(
           routes.DOCUMENTS,
           {
-            dataflowId: dataflowId
+            dataflowId: dataflowState.id
           },
           true
         )
@@ -40,22 +36,23 @@ const useBigButtonList = ({
     onWheel: getUrl(
       routes.DOCUMENTS,
       {
-        dataflowId: dataflowId
+        dataflowId: dataflowState.id
       },
       true
     ),
     visibility: true
   };
 
-  const groupByRepresentativeModels = dataflowData.datasets
+  //datasetSchemaName!!! change to dataset id and take it from url
+  const groupByRepresentativeModels = dataflowState.data.datasets
     .filter(dataset => dataset.datasetSchemaName === representative)
     .map(dataset => {
-      const datasetName = dataset.name || representative;
+      console.log('dataset', dataset);
       return {
         layout: 'defaultBigButton',
         buttonClass: 'dataset',
         buttonIcon: 'dataset',
-        caption: datasetName,
+        caption: dataset.name,
         infoStatus: dataset.isReleased,
         infoStatusIcon: dataset.isReleased,
         handleRedirect: () => {
@@ -63,7 +60,7 @@ const useBigButtonList = ({
             getUrl(
               routes.DATASET,
               {
-                dataflowId: dataflowId,
+                dataflowId: dataflowState.id,
                 datasetId: dataset.datasetId
               },
               true
@@ -74,14 +71,13 @@ const useBigButtonList = ({
         onWheel: getUrl(
           routes.DATASET,
           {
-            dataflowId: dataflowId,
+            dataflowId: dataflowState.id,
             datasetId: dataset.datasetId
           },
           true
         ),
-        model: hasWritePermissions
-          ? // model: dataflowState.hasWritePermissions
-            [
+        model: dataflowState.hasWritePermissions
+          ? [
               {
                 label: resources.messages['releaseDataCollection'],
                 icon: 'cloudUpload',
@@ -96,7 +92,7 @@ const useBigButtonList = ({
                 disabled: true
               }
             ],
-        visibility: !isEmpty(dataflowData.datasets)
+        visibility: !isEmpty(dataflowState.data.datasets)
       };
     });
 
@@ -110,7 +106,7 @@ const useBigButtonList = ({
       infoStatus: dataflowState.isReceiptOutdated,
       layout: 'defaultBigButton',
       visibility:
-        !isCustodian &&
+        !dataflowState.isCustodian &&
         !isUndefined(dataflowState.isReleased) &&
         !dataflowState.isReleased.includes(false) &&
         !dataflowState.isReleased.includes(null)

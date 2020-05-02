@@ -290,16 +290,11 @@ const Representative = withRouter(({ match, history }) => {
         />
 
         <BigButtonList
-          dataflowState={dataflowState}
           dataflowDispatch={dataflowDispatch}
-          dataflowData={dataflowState.data}
-          dataflowId={dataflowId}
-          dataProviderId={dataflowState.dataProviderId}
+          dataflowState={dataflowState}
           handleRedirect={handleRedirect}
-          hasWritePermissions={dataflowState.hasWritePermissions}
-          isCustodian={dataflowState.isCustodian}
-          representative={representative}
           onShowSnapshotDialog={onShowSnapshotDialog}
+          representative={representative}
         />
 
         <SnapshotsDialog
