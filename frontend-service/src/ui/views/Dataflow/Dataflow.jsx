@@ -70,7 +70,6 @@ const Dataflow = withRouter(({ history, match }) => {
     name: '',
     obligations: {},
     status: '',
-
     dataProviderId: [],
     datasetIdToSnapshotProps: undefined,
     designDatasetSchemas: [],
@@ -308,16 +307,19 @@ const Dataflow = withRouter(({ history, match }) => {
 
       onInitialLoad(dataflow, datasets);
 
-      //SOMETHING WITH DESIGN VIEW
+      //UPDATE NAMES DATASET SCHEMAS IN DESIGN VIEW
       if (!isEmpty(dataflow.designDatasets)) {
         dataflow.designDatasets.forEach((schema, idx) => {
           schema.index = idx;
         });
+
         setDesignDatasetSchemas(dataflow.designDatasets);
+
         const datasetSchemaInfo = [];
         dataflow.designDatasets.map(schema => {
           datasetSchemaInfo.push({ schemaName: schema.datasetSchemaName, schemaIndex: schema.index });
         });
+
         setUpdatedDatasetSchema(datasetSchemaInfo);
       }
       ///////////
@@ -416,13 +418,13 @@ const Dataflow = withRouter(({ history, match }) => {
         />
 
         <BigButtonList
-          dataflowState={dataflowState}
           dataflowDispatch={dataflowDispatch}
+          dataflowState={dataflowState}
           handleRedirect={handleRedirect}
           onSaveName={onSaveName}
+          onShowSnapshotDialog={onShowSnapshotDialog}
           onUpdateData={setIsDataUpdated}
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}
-          onShowSnapshotDialog={onShowSnapshotDialog}
         />
 
         <SnapshotsDialog

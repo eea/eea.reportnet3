@@ -12,12 +12,11 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const useBigButtonList = ({
-  dataflowState,
   dataflowId,
+  dataflowState,
   exportDatatableSchema,
   getDeleteSchemaIndex,
   handleRedirect,
-  onShowUpdateDataCollectionModal,
   isActiveButton,
   onDatasetSchemaNameError,
   onDuplicateName,
@@ -25,7 +24,8 @@ const useBigButtonList = ({
   onSaveName,
   onShowDataCollectionModal,
   onShowNewSchemaDialog,
-  onShowSnapshotDialog
+  onShowSnapshotDialog,
+  onShowUpdateDataCollectionModal
 }) => {
   const resources = useContext(ResourcesContext);
 

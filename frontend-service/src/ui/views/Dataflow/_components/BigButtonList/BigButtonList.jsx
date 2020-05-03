@@ -34,11 +34,10 @@ export const BigButtonList = ({
   dataflowDispatch,
   dataflowState,
   handleRedirect,
-  isDataSchemaCorrect,
   onSaveName,
+  onShowSnapshotDialog,
   onUpdateData,
   setUpdatedDatasetSchema,
-  onShowSnapshotDialog,
   updatedDatasetSchema
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
@@ -274,22 +273,20 @@ export const BigButtonList = ({
   };
 
   const bigButtonList = useBigButtonList({
-    dataflowState,
     dataflowId,
+    dataflowState,
     exportDatatableSchema,
     getDeleteSchemaIndex,
     handleRedirect,
     isActiveButton,
-    isDataSchemaCorrect,
     onDatasetSchemaNameError,
     onDuplicateName,
     onLoadReceiptData,
     onSaveName,
     onShowDataCollectionModal,
     onShowNewSchemaDialog,
-    onShowUpdateDataCollectionModal,
-
     onShowSnapshotDialog,
+    onShowUpdateDataCollectionModal,
     updatedDatasetSchema
   })
     .filter(button => button.visibility)
@@ -358,8 +355,8 @@ export const BigButtonList = ({
       </ConfirmDialog>
 
       <ConfirmDialog
-        header={resources.messages['createDataCollection']}
         disabledConfirm={isNil(dataCollectionDueDate)}
+        header={resources.messages['createDataCollection']}
         labelCancel={resources.messages['close']}
         labelConfirm={resources.messages['create']}
         onConfirm={() =>
@@ -381,8 +378,8 @@ export const BigButtonList = ({
           className={styles.calendar}
           disabledDates={[new Date()]}
           inline={true}
-          monthNavigator={true}
           minDate={new Date()}
+          monthNavigator={true}
           onChange={event => setDataCollectionDueDate(event.target.value)}
           showWeek={true}
           value={dataCollectionDueDate}
