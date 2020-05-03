@@ -29,8 +29,6 @@ const useBigButtonList = ({
 }) => {
   const resources = useContext(ResourcesContext);
 
-  const isCustodian = dataflowState.isCustodian;
-
   const buttonList = [
     {
       buttonClass: 'newItem',
@@ -47,7 +45,7 @@ const useBigButtonList = ({
         },
         { label: resources.messages['createNewDatasetFromTemplate'], icon: 'add', disabled: true }
       ],
-      visibility: isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']
+      visibility: dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']
     },
     {
       buttonClass: 'dataflowHelp',
@@ -105,24 +103,21 @@ const useBigButtonList = ({
     onWheel: getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true),
     placeholder: resources.messages['datasetSchemaNamePlaceholder'],
     visibility:
-      !isUndefined(dataflowState.data.designDatasets) && isEmpty(dataflowState.data.dataCollections) && isCustodian
+      !isUndefined(dataflowState.data.designDatasets) &&
+      isEmpty(dataflowState.data.dataCollections) &&
+      dataflowState.isCustodian
   }));
 
   const buildGroupByRepresentativeModels = dataflowData => {
     const { datasets } = dataflowData;
 
-    /*   const uniqRepresentatives = uniq(
-      datasets.map(dataset => {
-        return { name: dataset.datasetSchemaName, id: dataset.dataProviderId };
-      })
-    ); */
     const uniqRepresentatives = uniq(
       datasets.map(dataset => {
         return { name: dataset.datasetSchemaName, id: dataset.dataProviderId };
       })
     );
 
-    if (uniqRepresentatives.length === 1 && !isCustodian) {
+    if (uniqRepresentatives.length === 1 && !dataflowState.isCustodian) {
       // const [representative] = uniqRepresentatives;
 
       return datasets.map(dataset => {
@@ -179,7 +174,7 @@ const useBigButtonList = ({
       helpClassName: 'dataflow-dashboards-help-step',
       layout: 'defaultBigButton',
       onWheel: getUrl(routes.DASHBOARDS, { dataflowId }, true),
-      visibility: isCustodian && !isEmpty(dataflowState.data.datasets)
+      visibility: dataflowState.isCustodian && !isEmpty(dataflowState.data.datasets)
     }
   ];
 
@@ -261,7 +256,7 @@ const useBigButtonList = ({
         infoStatus: dataflowState.isReceiptOutdated,
         layout: 'defaultBigButton',
         visibility:
-          !isCustodian &&
+          !dataflowState.isCustodian &&
           uniq(representativeNames).length === 1 &&
           !releasedStates.includes(false) &&
           !releasedStates.includes(null)

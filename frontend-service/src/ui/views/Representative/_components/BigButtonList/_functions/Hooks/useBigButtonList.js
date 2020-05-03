@@ -13,7 +13,7 @@ const useBigButtonList = ({
   handleRedirect,
   onLoadReceiptData,
   dataflowState,
-  representative,
+  representative, // should be datasetId
   onShowSnapshotDialog
 }) => {
   const resources = useContext(ResourcesContext);
