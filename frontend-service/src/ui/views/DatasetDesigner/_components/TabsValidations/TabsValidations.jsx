@@ -159,7 +159,15 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       return header;
     }
     if (fieldHeader === 'isCorrect') {
-      header = resources.messages['correct'];
+      header = resources.messages['isCorrect'];
+      return header;
+    }
+    if (fieldHeader === 'automatic') {
+      header = resources.messages['automatic'];
+      return header;
+    }
+    if (fieldHeader === 'enabled') {
+      header = resources.messages['enabled'];
       return header;
     }
     header = fieldHeader;
