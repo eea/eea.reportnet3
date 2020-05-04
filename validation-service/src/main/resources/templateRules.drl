@@ -101,9 +101,7 @@ function boolean isNumberDecimal(String value){
 		return true;
 	}
     try {
-    	String aux = value.replace(".","");
-    	aux = aux.replace(",",".");
-        Double.valueOf( aux );
+        Double.valueOf( value );
         return true;
     } catch( Exception e ){
         return false;        
