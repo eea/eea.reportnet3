@@ -403,7 +403,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
           <div className={styles.body}>
             {tabMenuActiveItem.tabKey == 'data' && (
               <div className={styles.section}>
-                <fieldset>
+                <div className={styles.fieldsGroup}>
                   <div
                     onBlur={e => onAddToClickedFields('table')}
                     className={`${styles.field} ${styles.qcTable} formField ${printError('table')}`}>
@@ -445,8 +445,8 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                       isChecked={creationFormState.candidateRule.active}
                     />
                   </div>
-                </fieldset>
-                <fieldset>
+                </div>
+                <div className={styles.fieldsGroup}>
                   <div
                     onBlur={e => onAddToClickedFields('name')}
                     className={`${styles.field} ${styles.qcName} formField ${printError('name')}`}>
@@ -467,8 +467,8 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                       onChange={e => onInfoFieldChange('description', e.target.value)}
                     />
                   </div>
-                </fieldset>
-                <fieldset>
+                </div>
+                <div className={styles.fieldsGroup}>
                   <div
                     onBlur={e => onAddToClickedFields('errorLevel')}
                     className={`${styles.field} ${styles.qcErrorType} formField ${printError('errorLevel')}`}>
@@ -495,7 +495,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                       onChange={e => onInfoFieldChange('errorMessage', e.target.value)}
                     />
                   </div>
-                </fieldset>
+                </div>
               </div>
             )}
             {tabMenuActiveItem.tabKey == 'expression' && (
