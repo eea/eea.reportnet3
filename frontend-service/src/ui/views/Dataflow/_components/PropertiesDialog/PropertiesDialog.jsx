@@ -98,21 +98,19 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
             <div key={i} style={{ marginTop: '1rem', marginBottom: '2rem' }}>
               <TreeViewExpandableItem
                 items={[{ label: PropertiesUtils.camelCaseToNormal(data.label) }]}
-                buttons={
-                  data.label === 'obligation'
-                    ? [
-                        {
-                          className: `p-button-secondary-transparent`,
-                          icon: 'externalLink',
-                          tooltip: resources.messages['viewMore'],
-                          onClick: () =>
-                            window.open(
-                              `http://rod3.devel1dub.eionet.europa.eu/obligations/${dataflowDataState.obligations.obligationId}`
-                            )
-                        }
-                      ]
-                    : []
-                }>
+                buttons={[
+                  {
+                    className: `p-button-secondary-transparent`,
+                    icon: 'externalLink',
+                    tooltip: resources.messages['viewMore'],
+                    onClick: () =>
+                      window.open(
+                        data.label === 'obligation'
+                          ? `http://rod3.devel1dub.eionet.europa.eu/obligations/${dataflowDataState.obligations.obligationId}`
+                          : `http://rod3.devel1dub.eionet.europa.eu/instruments/${dataflowDataState.obligations.legalInstruments.id}`
+                      )
+                  }
+                ]}>
                 <TreeView property={data.data} propertyName={''} />
               </TreeViewExpandableItem>
             </div>
