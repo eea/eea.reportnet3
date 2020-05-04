@@ -13,6 +13,7 @@ import DataflowConf from 'conf/dataflow.config.json';
 
 import { ApiKeyDialog } from 'ui/views/_components/ApiKeyDialog';
 import { BigButtonList } from './_components/BigButtonList';
+import { BigButtonListRepresentative } from './_components/BigButtonListRepresentative';
 import { Button } from 'ui/views/_components/Button';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -80,7 +81,8 @@ const Dataflow = withRouter(({ history, match }) => {
     isSnapshotDialogVisible: false,
     currentUrl: '',
     isReceiptLoading: false,
-    isReceiptOutdated: false
+    isReceiptOutdated: false,
+    urlRepresentativeId: null
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -99,8 +101,19 @@ const Dataflow = withRouter(({ history, match }) => {
     setIsDataSchemaCorrect,
     setIsDataUpdated,
     setIsPageLoading,
-    setUpdatedDatasetSchema
+    setUpdatedDatasetSchema,
+    setUrlRepresentativeId
   } = dataflowActionCreators(dataflowDispatch);
+
+  useEffect(() => {
+    const currentUrl = window.location.pathname;
+
+    if (currentUrl.includes('representativeId')) {
+      if (dataflowState.urlRepresentativeId === null) {
+        setUrlRepresentativeId(currentUrl.substr(currentUrl.indexOf('Id/') + 3));
+      }
+    }
+  }, [dataflowState.urlRepresentativeId]);
 
   useEffect(() => {
     if (!isNil(user.contextRoles)) onLoadPermission();
@@ -425,6 +438,14 @@ const Dataflow = withRouter(({ history, match }) => {
           onShowSnapshotDialog={onShowSnapshotDialog}
           onUpdateData={setIsDataUpdated}
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}
+        />
+
+        <BigButtonListRepresentative
+          dataflowDispatch={dataflowDispatch}
+          dataflowState={dataflowState}
+          handleRedirect={handleRedirect}
+          onShowSnapshotDialog={onShowSnapshotDialog}
+          representative={'Bulgaria'}
         />
 
         <SnapshotsDialog

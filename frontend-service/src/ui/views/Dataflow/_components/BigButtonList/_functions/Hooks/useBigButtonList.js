@@ -9,11 +9,14 @@ import DataflowConf from 'conf/dataflow.config.json';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { dataflowActionCreators } from '../../../../_functions/dataflowActionCreators';
+
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const useBigButtonList = ({
   dataflowId,
   dataflowState,
+  dataflowDispatch,
   exportDatatableSchema,
   getDeleteSchemaIndex,
   handleRedirect,
@@ -28,6 +31,8 @@ const useBigButtonList = ({
   onShowUpdateDataCollectionModal
 }) => {
   const resources = useContext(ResourcesContext);
+
+  const { setUrlRepresentativeId } = dataflowActionCreators(dataflowDispatch);
 
   const buttonList = [
     {
@@ -153,9 +158,11 @@ const useBigButtonList = ({
       buttonIcon: 'representative',
       caption: representative.name,
       handleRedirect: () => {
-        handleRedirect(getUrl(routes.REPRESENTATIVE, { dataflowId, representative: representative.name }, true));
-        // window.history.replaceState(null, '', `/dataflow/${dataflowId}/${representative.id}`);
+        // handleRedirect(getUrl(routes.REPRESENTATIVE, { dataflowId, representative: representative.name }, true));
+        window.history.replaceState(null, '', `/dataflow/${dataflowId}/representativeId/${representative.id}`);
+        setUrlRepresentativeId(representative.id);
       },
+
       helpClassName: 'dataflow-dataset-container-help-step',
       layout: 'defaultBigButton',
       onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representative: representative.id }, true),

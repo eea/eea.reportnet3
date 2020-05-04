@@ -53,6 +53,7 @@ const App = () => {
                           <PrivateRoute exact path={routes.DATASET_SCHEMA} component={DatasetDesigner} />
                           <PrivateRoute exact path={routes.DASHBOARDS} component={DataflowDashboards} />
                           <PrivateRoute exact path={routes.DATAFLOW} component={Dataflow} />
+                          <PrivateRoute exact path={routes.DATAFLOW_REPRESENTATIVE} component={Dataflow} />
                           <PrivateRoute exact path={routes.DATAFLOWS} component={Dataflows} />
                           <PrivateRoute exact path={routes.SETTINGS} component={Settings} />
                           <PrivateRoute exact path={routes.PRIVACY_STATEMENT} component={PrivacyStatement} />

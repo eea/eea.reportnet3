@@ -62,6 +62,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_IS_RECEIPT_LOADING':
       return { ...state, isReceiptLoading: payload.isReceiptLoading };
 
+    case 'SET_URL_REPRESENTATIVE_ID':
+      return { ...state, urlRepresentativeId: payload.id };
+
     case 'ON_CLEAN_UP_RECEIPT':
       return { ...state, ...payload };
 

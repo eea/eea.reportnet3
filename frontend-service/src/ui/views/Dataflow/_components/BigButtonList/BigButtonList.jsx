@@ -274,6 +274,7 @@ export const BigButtonList = ({
 
   const bigButtonList = useBigButtonList({
     dataflowId,
+    dataflowDispatch,
     dataflowState,
     exportDatatableSchema,
     getDeleteSchemaIndex,

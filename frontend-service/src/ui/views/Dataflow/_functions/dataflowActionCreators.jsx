@@ -50,7 +50,7 @@ export function dataflowActionCreators(dataflowDispatch) {
   const setIsDataSchemaCorrect = validationResult =>
     dataflowDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { validationResult } });
 
-  const setCurrentUrl = url => dataflowDispatch({ type: 'SET_CURRENT_URL', payload: { url } });
+  const setUrlRepresentativeId = id => dataflowDispatch({ type: 'SET_URL_REPRESENTATIVE_ID', payload: { id } });
 
   const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
 
@@ -92,6 +92,7 @@ export function dataflowActionCreators(dataflowDispatch) {
     setIsDataUpdated,
     setIsPageLoading,
     setIsReceiptLoading,
-    setUpdatedDatasetSchema
+    setUpdatedDatasetSchema,
+    setUrlRepresentativeId
   };
 }
