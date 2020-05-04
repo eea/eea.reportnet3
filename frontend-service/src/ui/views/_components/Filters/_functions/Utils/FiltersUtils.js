@@ -45,9 +45,9 @@ const getOptionTypes = (data, option, list) => {
       const template = [];
       validOptionItems.forEach(item => {
         if (option === 'isCorrect' && item === true) {
-          template.push({ type: 'CORRECT', value: item });
+          template.push({ type: 'VALID', value: item });
         } else if (option === 'isCorrect' && item === false) {
-          template.push({ type: 'INCORRECT', value: item });
+          template.push({ type: 'INVALID', value: item });
         } else if (option === 'enabled' && item === true) {
           template.push({ type: 'ENABLED', value: item });
         } else if (option === 'enabled' && item === false) {
