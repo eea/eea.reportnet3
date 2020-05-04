@@ -137,8 +137,8 @@ const Representative = withRouter(({ match, history }) => {
       title: 'sidebarApiKeyBtn'
     };
 
-    leftSideBarContext.addModels([dataflowState.isCustodian ? propertiesBtn : propertiesBtn, apiKeyBtn]);
-  }, []);
+    leftSideBarContext.addModels(dataflowState.isCustodian ? [propertiesBtn] : [propertiesBtn, apiKeyBtn]);
+  }, [dataflowState.isCustodian]);
 
   useEffect(() => {
     setIsPageLoading(true);
