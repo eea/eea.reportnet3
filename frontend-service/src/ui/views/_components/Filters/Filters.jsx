@@ -285,15 +285,6 @@ export const Filters = ({
           onClick={() => onSearchData('')}
         />
       )}
-      {/* {searchBy.length > 1 ? (
-        <label htmlFor={'searchInput'}>{`${resources.messages['searchAllLabel']} (${searchBy.join(', ')})`}</label>
-      ) : (
-        <label htmlFor={'searchInput'}>{`${resources.messages['searchAllLabel']}`}</label>
-      )} */}
-
-      {/* <label htmlFor={'searchInput'} >{`${resources.messages['searchAllLabel']} ${
-        !isEmpty(searchBy) ? resources.messages['searchBy'] : ' '
-      }`}</label> */}
 
       <label
         htmlFor={'searchInput'}
