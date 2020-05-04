@@ -40,14 +40,17 @@ const getOptionTypes = (data, option, list) => {
     }));
   } else {
     const optionItems = uniq(data.map(item => item[option]));
-    const validOptionItems = optionItems.filter(option => !isNil(option));
+    const filteredOptionItems = optionItems.filter(option => !isNil(option));
+    const validOptionItems = filteredOptionItems.some(item => typeof item === 'boolean')
+      ? [true, false]
+      : filteredOptionItems;
     for (let i = 0; i < validOptionItems.length; i++) {
       const template = [];
       validOptionItems.forEach(item => {
         if (option === 'isCorrect' && item === true) {
-          template.push({ type: 'CORRECT', value: item });
+          template.push({ type: 'VALID', value: item });
         } else if (option === 'isCorrect' && item === false) {
-          template.push({ type: 'INCORRECT', value: item });
+          template.push({ type: 'INVALID', value: item });
         } else if (option === 'enabled' && item === true) {
           template.push({ type: 'ENABLED', value: item });
         } else if (option === 'enabled' && item === false) {
