@@ -5,9 +5,11 @@ import moment from 'moment';
 import styles from './Snapshots.module.scss';
 
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { SnapshotSlideBar } from './_components/SnapshotSlideBar';
+
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
-import { SnapshotSlideBar } from './_components/SnapshotSlideBar';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const Snapshots = ({
   isReleaseVisible = false,
@@ -18,6 +20,8 @@ const Snapshots = ({
 }) => {
   const resources = useContext(ResourcesContext);
   const snapshotContext = useContext(SnapshotContext);
+  const userContext = useContext(UserContext);
+
   return (
     <>
       <SnapshotSlideBar
@@ -41,7 +45,11 @@ const Snapshots = ({
         <ul>
           <li>
             <strong>{resources.messages.creationDate}: </strong>
-            {moment(snapshotContext.snapshotState.creationDate).format('YYYY-MM-DD HH:mm:ss')}
+            {moment(snapshotContext.snapshotState.creationDate).format(
+              `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
+                userContext.userProps.amPm24h ? '' : ' A'
+              }`
+            )}
           </li>
           <li>
             <strong>{resources.messages.description}: </strong>

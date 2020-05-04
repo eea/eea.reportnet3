@@ -3,8 +3,8 @@
   "notificationSchema": [
     {
       "key": "error",
-      "lifeTime": 0,
-      "fixed": true,
+      "lifeTime": 30000,
+      "fixed": false,
       "types": [
         {
           "key": "LOAD_DATA_FAILED_EVENT",

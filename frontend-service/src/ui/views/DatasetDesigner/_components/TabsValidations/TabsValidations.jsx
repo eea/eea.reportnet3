@@ -92,7 +92,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
 
       tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_LIST', payload: { validationsServiceList } });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       notificationContext.add({ type: 'VALIDATION_SERVICE_GET_ALL_ERROR' });
     } finally {
       isLoading(false);
@@ -159,7 +159,15 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       return header;
     }
     if (fieldHeader === 'isCorrect') {
-      header = resources.messages['correct'];
+      header = resources.messages['isCorrect'];
+      return header;
+    }
+    if (fieldHeader === 'automatic') {
+      header = resources.messages['automatic'];
+      return header;
+    }
+    if (fieldHeader === 'enabled') {
+      header = resources.messages['enabled'];
       return header;
     }
     header = fieldHeader;
