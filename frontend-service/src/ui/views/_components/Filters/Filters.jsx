@@ -22,6 +22,7 @@ import { useOnClickOutside } from 'ui/views/_functions/Hooks/useOnClickOutside';
 import { ApplyFilterUtils } from './_functions/Utils/ApplyFilterUtils';
 import { FiltersUtils } from './_functions/Utils/FiltersUtils';
 import { SortUtils } from './_functions/Utils/SortUtils';
+import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const Filters = ({
   className,
@@ -284,7 +285,23 @@ export const Filters = ({
           onClick={() => onSearchData('')}
         />
       )}
-      <label htmlFor={'searchInput'}>{resources.messages['searchAllLabel']}</label>
+      {/* {searchBy.length > 1 ? (
+        <label htmlFor={'searchInput'}>{`${resources.messages['searchAllLabel']} (${searchBy.join(', ')})`}</label>
+      ) : (
+        <label htmlFor={'searchInput'}>{`${resources.messages['searchAllLabel']}`}</label>
+      )} */}
+
+      {/* <label htmlFor={'searchInput'} >{`${resources.messages['searchAllLabel']} ${
+        !isEmpty(searchBy) ? resources.messages['searchBy'] : ' '
+      }`}</label> */}
+
+      <label
+        htmlFor={'searchInput'}
+        dangerouslySetInnerHTML={{
+          __html: TextUtils.parseText(resources.messages['searchAllLabel'], {
+            searchData: !isEmpty(searchBy) ? `(${searchBy.join(', ')})` : ''
+          })
+        }}></label>
     </span>
   );
 
