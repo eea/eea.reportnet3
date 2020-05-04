@@ -41,6 +41,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 import { dataflowActionCreators } from './_functions/dataflowActionCreators';
+import isNull from 'lodash/isNull';
 
 const Dataflow = withRouter(({ history, match }) => {
   const {
@@ -344,7 +345,7 @@ const Dataflow = withRouter(({ history, match }) => {
         }
       } //+
 
-      if (dataflowState.isRepresentativeView) {
+      if (dataflowState.urlRepresentativeId) {
         if (!isEmpty(dataflow.representatives) && !isEmpty(dataflow.datasets)) {
           const representativeId = dataflow.datasets.map(id => id.dataProviderId);
 
@@ -430,23 +431,24 @@ const Dataflow = withRouter(({ history, match }) => {
           title={TextUtils.ellipsis(dataflowState.name)}
         />
 
-        <BigButtonList
-          dataflowDispatch={dataflowDispatch}
-          dataflowState={dataflowState}
-          handleRedirect={handleRedirect}
-          onSaveName={onSaveName}
-          onShowSnapshotDialog={onShowSnapshotDialog}
-          onUpdateData={setIsDataUpdated}
-          setUpdatedDatasetSchema={setUpdatedDatasetSchema}
-        />
-
-        <BigButtonListRepresentative
-          dataflowDispatch={dataflowDispatch}
-          dataflowState={dataflowState}
-          handleRedirect={handleRedirect}
-          onShowSnapshotDialog={onShowSnapshotDialog}
-          representative={'Bulgaria'}
-        />
+        {isNull(dataflowState.urlRepresentativeId) ? (
+          <BigButtonList
+            dataflowDispatch={dataflowDispatch}
+            dataflowState={dataflowState}
+            handleRedirect={handleRedirect}
+            onSaveName={onSaveName}
+            onShowSnapshotDialog={onShowSnapshotDialog}
+            onUpdateData={setIsDataUpdated}
+            setUpdatedDatasetSchema={setUpdatedDatasetSchema}
+          />
+        ) : (
+          <BigButtonListRepresentative
+            dataflowDispatch={dataflowDispatch}
+            dataflowState={dataflowState}
+            handleRedirect={handleRedirect}
+            onShowSnapshotDialog={onShowSnapshotDialog}
+          />
+        )}
 
         <SnapshotsDialog
           dataflowId={dataflowId}

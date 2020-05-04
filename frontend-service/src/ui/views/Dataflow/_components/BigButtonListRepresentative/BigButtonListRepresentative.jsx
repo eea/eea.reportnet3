@@ -18,8 +18,7 @@ export const BigButtonListRepresentative = ({
   dataflowDispatch,
   dataflowState,
   handleRedirect,
-  onShowSnapshotDialog,
-  representative
+  onShowSnapshotDialog
 }) => {
   const notificationContext = useContext(NotificationContext);
 
@@ -78,7 +77,6 @@ export const BigButtonListRepresentative = ({
               dataflowDispatch,
               handleRedirect,
               onLoadReceiptData,
-              representative,
               onShowSnapshotDialog
             }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <></>))}
           </div>

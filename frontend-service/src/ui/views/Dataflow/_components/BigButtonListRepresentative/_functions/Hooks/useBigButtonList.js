@@ -9,13 +9,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-const useBigButtonList = ({
-  handleRedirect,
-  onLoadReceiptData,
-  dataflowState,
-  representative, // should be datasetId
-  onShowSnapshotDialog
-}) => {
+const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, onShowSnapshotDialog }) => {
   const resources = useContext(ResourcesContext);
   const helpButton = {
     layout: 'defaultBigButton',
@@ -43,11 +37,9 @@ const useBigButtonList = ({
     visibility: true
   };
 
-  //datasetSchemaName!!! change to dataset id and take it from url
   const groupByRepresentativeModels = dataflowState.data.datasets
-    .filter(dataset => dataset.datasetSchemaName === representative)
+    .filter(dataset => dataset.dataProviderId === dataflowState.urlRepresentativeId)
     .map(dataset => {
-      console.log('dataset', dataset);
       return {
         layout: 'defaultBigButton',
         buttonClass: 'dataset',
