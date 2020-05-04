@@ -40,7 +40,10 @@ const getOptionTypes = (data, option, list) => {
     }));
   } else {
     const optionItems = uniq(data.map(item => item[option]));
-    const validOptionItems = optionItems.filter(option => !isNil(option));
+    const filteredOptionItems = optionItems.filter(option => !isNil(option));
+    const validOptionItems = filteredOptionItems.some(item => typeof item === 'boolean')
+      ? [true, false]
+      : filteredOptionItems;
     for (let i = 0; i < validOptionItems.length; i++) {
       const template = [];
       validOptionItems.forEach(item => {

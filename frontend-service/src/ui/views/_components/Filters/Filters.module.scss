@@ -4,7 +4,7 @@
   grid-template-areas:
     'search table field QCType reset'
     'levelError enabled automatic correct reset';
-  grid-template-columns: calc(90% / 4) calc(90% / 4) calc(90% / 4) calc(90% / 4) auto;
+  grid-template-columns: calc(95% / 4) calc(95% / 4) calc(95% / 4) calc(95% / 4) 5%;
   margin: 1.5rem 0;
   width: 100%;
 
