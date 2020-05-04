@@ -3,24 +3,28 @@ package org.eea.security.jwt.expression;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.server.ResponseStatusException;
+import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * The type Eea security expression root.
  */
 @Slf4j
-public class EeaSecurityExpressionRoot extends SecurityExpressionRoot implements
-    MethodSecurityExpressionOperations {
+public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
+    implements MethodSecurityExpressionOperations {
 
   private Object returnObject;
   private Object filterObject;
@@ -48,38 +52,37 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot implements
    */
   public boolean secondLevelAuthorize(Long idEntity, ObjectAccessRoleEnum... objectAccessRoles) {
     boolean canAccess = false;
-    if (SecurityContextHolder.getContext()
-        .getAuthentication()
-        .getAuthorities().contains("feign")) {
+    if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("feign")) {
       log.warn("Invocation was made from a feign client with a due token. Letting it go");
       canAccess = true;
     } else {
-      Collection<String> authorities = SecurityContextHolder.getContext()
-          .getAuthentication()
+      Collection<String> authorities = SecurityContextHolder.getContext().getAuthentication()
           .getAuthorities().stream().map(authority -> ((GrantedAuthority) authority).getAuthority())
-          .collect(
-              Collectors.toList());
+          .collect(Collectors.toList());
       List<String> roles = Arrays.asList(objectAccessRoles).stream()
-          .map(objectAccessRoleEnum -> objectAccessRoleEnum.getAccessRole(idEntity)).collect(
-              Collectors.toList());
+          .map(objectAccessRoleEnum -> objectAccessRoleEnum.getAccessRole(idEntity))
+          .collect(Collectors.toList());
 
-      canAccess = !roles.stream().filter(authorities::contains).findFirst()
-          .orElse("not_found")
+      canAccess = !roles.stream().filter(authorities::contains).findFirst().orElse("not_found")
           .equals("not_found");
-      if (!canAccess) {//No authority found in the current token. Check against keycloak to finde if there were some change at User rights that wasn't be propagated to the token yet
-        List<ResourceAccessVO> resourceAccessVOS = this.userManagementControllerZull
-            .getResourcesByUser();
-        // ObjectAccessRoleEnum expression has the following formate ROLE_DATASCHEMA-1-DATA_CUSTODIAN
-        List<String> resourceRoles = resourceAccessVOS.stream()
-            .map(resourceAccessVO -> {
-              StringBuilder builder = new StringBuilder("ROLE_");
-              return builder.append(resourceAccessVO.getResource().toString()).append("-")
-                  .append(resourceAccessVO.getId()).append("-").append(resourceAccessVO.getRole())
-                  .toString().toUpperCase();
-            }).collect(
-                Collectors.toList());
-        canAccess = !roles.stream().filter(resourceRoles::contains).findFirst()
-            .orElse("not_found")
+      if (!canAccess) {// No authority found in the current token. Check against keycloak to finde
+                       // if there were some change at User rights that wasn't be propagated to the
+                       // token yet
+        List<ResourceAccessVO> resourceAccessVOS = null;
+        try {
+          resourceAccessVOS = this.userManagementControllerZull.getResourcesByUser();
+        } catch (FeignException e) {
+          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+        // ObjectAccessRoleEnum expression has the following formate
+        // ROLE_DATASCHEMA-1-DATA_CUSTODIAN
+        List<String> resourceRoles = resourceAccessVOS.stream().map(resourceAccessVO -> {
+          StringBuilder builder = new StringBuilder("ROLE_");
+          return builder.append(resourceAccessVO.getResource().toString()).append("-")
+              .append(resourceAccessVO.getId()).append("-").append(resourceAccessVO.getRole())
+              .toString().toUpperCase();
+        }).collect(Collectors.toList());
+        canAccess = !roles.stream().filter(resourceRoles::contains).findFirst().orElse("not_found")
             .equals("not_found");
       }
     }
@@ -97,16 +100,36 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot implements
    */
   public boolean checkPermission(String resource, AccessScopeEnum... accessScopeEnums) {
     boolean canAccess = false;
-    if (SecurityContextHolder.getContext()
-        .getAuthentication()
-        .getAuthorities().contains("feign")) {
+    if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("feign")) {
       log.warn("Invocation was made from a feign client with a due token. Letting it go");
       canAccess = true;
     } else {
-      canAccess = userManagementControllerZull
-          .checkResourceAccessPermission(resource, accessScopeEnums);
+      canAccess =
+          userManagementControllerZull.checkResourceAccessPermission(resource, accessScopeEnums);
     }
     return canAccess;
+  }
+
+
+  /**
+   * Check api key boolean.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProvider the data provider
+   *
+   * @return the boolean
+   */
+  public boolean checkApiKey(final Long dataflowId, final Long dataProvider) {
+    Object details = SecurityContextHolder.getContext().getAuthentication().getDetails();
+
+    if (details instanceof Map) {
+      String userId = ((Map<String, String>) details).get("userId");
+      String apiKey = this.userManagementControllerZull.getApiKey(userId, dataflowId, dataProvider);
+      return SecurityContextHolder.getContext().getAuthentication().getCredentials().toString()
+          .equals(apiKey);
+    }
+
+    return false;
   }
 
   @Override

@@ -49,61 +49,94 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-/** The Class JdbcRecordStoreServiceImpl. */
+/**
+ * The Class JdbcRecordStoreServiceImpl.
+ */
 @Service("jdbcRecordStoreServiceImpl")
 public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
-  /** The Constant FILE_PATTERN_NAME. */
+  /**
+   * The Constant FILE_PATTERN_NAME.
+   */
   private static final String FILE_PATTERN_NAME = "snapshot_%s%s";
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The data collection controller zuul. */
+  /**
+   * The data collection controller zuul.
+   */
   @Autowired
   private DataCollectionControllerZuul dataCollectionControllerZuul;
 
-  /** The user postgre db. */
+  /**
+   * The user postgre db.
+   */
   @Value("${spring.datasource.username}")
   private String userPostgreDb;
 
-  /** The pass postgre db. */
+  /**
+   * The pass postgre db.
+   */
   @Value("${spring.datasource.password}")
   private String passPostgreDb;
 
-  /** The conn string postgre. */
+  /**
+   * The conn string postgre.
+   */
   @Value("${spring.datasource.url}")
   private String connStringPostgre;
 
-  /** The sql get datasets name. */
+  /**
+   * The sql get datasets name.
+   */
   @Value("${sqlGetAllDatasetsName}")
   private String sqlGetDatasetsName;
 
-  /** The jdbc template. */
+  /**
+   * The jdbc template.
+   */
   @Autowired
   private JdbcTemplate jdbcTemplate;
 
-  /** The resource file. */
+  /**
+   * The resource file.
+   */
   @Value("classpath:datasetInitCommands.txt")
   private Resource resourceFile;
 
-  /** The path snapshot. */
+  /**
+   * The path snapshot.
+   */
   @Value("${pathSnapshot}")
   private String pathSnapshot;
 
-  /** The data source. */
+  @Value("${dataset.creation.notification.ms}")
+  private Long timeToWaitBeforeReleasingNotification;
+
+  /**
+   * The data source.
+   */
   @Autowired
   private DataSource dataSource;
 
-  /** The lock service. */
+  /**
+   * The lock service.
+   */
   @Autowired
   private LockService lockService;
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(JdbcRecordStoreServiceImpl.class);
 
   /**
@@ -182,8 +215,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       // Execute queries and commit results
       statement.executeBatch();
-      LOG.info("Schemas created as part of DataCollection creation");
-
+      LOG.info("{} Schemas created as part of DataCollection creation",
+          datasetIdsAndSchemaIds.size());
+      try {
+        //waiting X seconds before releasing notifications, so database is able to write the creation of all datasets
+        Thread.sleep(timeToWaitBeforeReleasingNotification);
+      } catch (InterruptedException e) {
+        LOG_ERROR.error("Error sleeping thread before releasing notification kafka events", e);
+      }
+      LOG.info("Releasing notifications via Kafka");
       // Release events to initialize databases content
       releaseConnectionCreatedEvents(datasetIdsAndSchemaIds);
 
@@ -434,17 +474,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     String signature =
         deleteData
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-                : LockSignature.RESTORE_SNAPSHOT.getValue()
+            : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", idReportingDataset);

@@ -118,7 +118,7 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @return the data flow id by id
    */
-  @RequestMapping(value = "{id}/dataflow", method = RequestMethod.GET)
+  @GetMapping("{id}/dataflow")
   Long getDataFlowIdById(@PathVariable("id") Long datasetId);
 
   /**
@@ -239,19 +239,24 @@ public interface DatasetController {
    * Etl export dataset.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @return the ETL dataset VO
    */
-  @GetMapping("/etlExport/dataset/{datasetId}")
-  ETLDatasetVO etlExportDataset(@PathVariable("datasetId") Long datasetId);
-
+  @GetMapping("/{datasetId}/etlExport")
+  ETLDatasetVO etlExportDataset(@PathVariable("datasetId") Long datasetId,
+      @RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId);
 
   /**
    * Etl import dataset.
    *
    * @param datasetId the dataset id
    * @param etlDatasetVO the etl dataset VO
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    */
-  @PostMapping("/etlImport/dataset/{datasetId}")
+  @PostMapping("/{datasetId}/etlImport")
   void etlImportDataset(@PathVariable("datasetId") Long datasetId,
-      @RequestBody ETLDatasetVO etlDatasetVO);
+      @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("providerId") Long providerId);
 }

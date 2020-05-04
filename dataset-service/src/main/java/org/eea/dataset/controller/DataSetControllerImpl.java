@@ -316,21 +316,10 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "{id}/dataflow", method = RequestMethod.GET)
+  @GetMapping("{id}/dataflow")
   public Long getDataFlowIdById(Long datasetId) {
-    if (datasetId == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-    Long result = null;
-    try {
-      result = datasetService.getDataFlowIdById(datasetId);
-    } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
-    }
-    return result;
+    return datasetService.getDataFlowIdById(datasetId);
   }
-
 
   /**
    * Update records.
@@ -607,15 +596,28 @@ public class DataSetControllerImpl implements DatasetController {
    * Etl export dataset.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @return the ETL dataset VO
    */
   @Override
-  @GetMapping("/etlExport/dataset/{datasetId}")
-  public ETLDatasetVO etlExportDataset(@PathVariable("datasetId") Long datasetId) {
+  @GetMapping("/{datasetId}/etlExport")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId) OR secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN')")
+  public ETLDatasetVO etlExportDataset(@PathVariable("datasetId") Long datasetId,
+      @RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId) {
+
+    if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
+      LOG_ERROR
+          .error(String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+    }
+
     try {
       return datasetService.etlExportDataset(datasetId);
     } catch (EEAException e) {
-      return null;
+      LOG_ERROR.error(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 
@@ -626,9 +628,19 @@ public class DataSetControllerImpl implements DatasetController {
    * @return the ETL dataset VO
    */
   @Override
-  @PostMapping("/etlImport/dataset/{datasetId}")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId) OR secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN')")
+  @PostMapping("/{datasetId}/etlImport")
   public void etlImportDataset(@PathVariable("datasetId") Long datasetId,
-      @RequestBody ETLDatasetVO etlDatasetVO) {
+      @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("providerId") Long providerId) {
+
+    if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
+      LOG_ERROR
+          .error(String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+    }
+
     try {
       datasetService.etlImportDataset(datasetId, etlDatasetVO);
     } catch (EEAException e) {

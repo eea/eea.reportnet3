@@ -37,21 +37,30 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
         return await ValidationService.getAll(datasetSchema.datasetSchemaId);
       });
       Promise.all(datasetValidations).then(allValidations => {
+        if (!isCustodian) {
+          allValidations[0].validations = allValidations[0].validations.filter(
+            validation => validation.enabled !== false
+          );
+        }
         setValidationList(
           !isUndefined(allValidations[0])
-            ? allValidations[0].validations.map(validation =>
-                pick(
-                  validation,
-                  'shortCode',
-                  'name',
-                  'description',
-                  'entityType',
-                  'levelError',
-                  'message',
-                  'automatic',
-                  'enabled'
-                )
-              )
+            ? allValidations[0].validations.map(validation => {
+                if (!isCustodian) {
+                  return pick(validation, 'shortCode', 'name', 'description', 'entityType', 'levelError', 'message');
+                } else {
+                  return pick(
+                    validation,
+                    'shortCode',
+                    'name',
+                    'description',
+                    'entityType',
+                    'levelError',
+                    'message',
+                    'automatic',
+                    'enabled'
+                  );
+                }
+              })
             : []
         );
       });
@@ -93,7 +102,15 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
   const renderDatasetSchemas = () => {
     return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (
       datasetsSchemas.map((designDataset, i) => {
-        return <DatasetSchema designDataset={designDataset} key={i} index={i} validationList={validationList} />;
+        return (
+          <DatasetSchema
+            designDataset={designDataset}
+            key={i}
+            index={i}
+            isCustodian={isCustodian}
+            validationList={validationList}
+          />
+        );
       })
     ) : (
       <h3>{`${resources.messages['noDesignSchemasCreated']}`}</h3>

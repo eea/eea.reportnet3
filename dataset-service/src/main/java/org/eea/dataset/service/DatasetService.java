@@ -111,10 +111,8 @@ public interface DatasetService {
    * @param datasetId the dataset id
    *
    * @return the data flow id by id
-   *
-   * @throws EEAException the EEA exception
    */
-  Long getDataFlowIdById(@DatasetId Long datasetId) throws EEAException;
+  Long getDataFlowIdById(@DatasetId Long datasetId);
 
   /**
    * Update record.

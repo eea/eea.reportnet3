@@ -31,19 +31,29 @@ import org.springframework.stereotype.Component;
 @Component
 public class PKValidationUtils {
 
-  /** The data set controller zuul. */
+  /**
+   * The data set controller zuul.
+   */
   private static DataSetControllerZuul dataSetControllerZuul;
 
-  /** The rules repository. */
+  /**
+   * The rules repository.
+   */
   private static RulesRepository rulesRepository;
 
-  /** The dataset metabase controller zuul. */
+  /**
+   * The dataset metabase controller zuul.
+   */
   private static DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
-  /** The schemas repository. */
+  /**
+   * The schemas repository.
+   */
   private static SchemasRepository schemasRepository;
 
-  /** The field repository. */
+  /**
+   * The field repository.
+   */
   private static FieldRepository fieldRepository;
 
 
@@ -99,7 +109,9 @@ public class PKValidationUtils {
     PKValidationUtils.fieldRepository = fieldRepository;
   }
 
-  /** The Constant PK_VALUE_LIST. */
+  /**
+   * The Constant PK_VALUE_LIST.
+   */
   private static final String PK_VALUE_LIST =
       "select distinct field_value.VALUE from dataset_%s.field_value field_value where field_value.id_field_schema='%s'";
 
@@ -107,14 +119,15 @@ public class PKValidationUtils {
   /**
    * Isfield PK.
    *
-   * @param datasetId the dataset id
+   * @param datasetValue the dataset value
    * @param idFieldSchema the id field schema
    * @param idRule the id rule
+   *
    * @return the boolean
    */
-  public static Boolean isfieldPK(DatasetValue datasetId, String idFieldSchema, String idRule) {
+  public static Boolean isfieldPK(DatasetValue datasetValue, String idFieldSchema, String idRule) {
     // Id dataset to Validate
-    long datasetIdReference = datasetId.getId();
+    long datasetIdReference = datasetValue.getId();
 
     // Get FK Schema
     String fkSchemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetIdReference);
@@ -144,7 +157,6 @@ public class PKValidationUtils {
     // GetValidationData
     Validation pkValidation = createValidation(idRule, fkSchemaId, origname);
 
-
     List<FieldValue> errorFields = new ArrayList<>();
 
     for (FieldValue field : fkFields) {
@@ -173,6 +185,7 @@ public class PKValidationUtils {
    *
    * @param idRule the id rule
    * @param idDatasetSchema the id dataset schema
+   *
    * @return the validation
    */
   private static Validation createValidation(String idRule, String idDatasetSchema,
@@ -206,7 +219,6 @@ public class PKValidationUtils {
     validation.setValidationDate(new Date().toString());
     validation.setOriginName(origname.getNameTableSchema());
 
-
     return validation;
   }
 
@@ -222,12 +234,12 @@ public class PKValidationUtils {
   }
 
 
-
   /**
    * Check PK.
    *
    * @param pkValues the pk values
    * @param value the FieldValue
+   *
    * @return the boolean
    */
   private static Boolean checkPK(List<String> pkValues, FieldValue value) {
@@ -240,18 +252,17 @@ public class PKValidationUtils {
   }
 
 
-
   /**
    * Mount query.
    *
    * @param datasetSchema the dataset schema
    * @param IdFieldScehma the id field scehma
    * @param datasetId the dataset id
+   *
    * @return the list
    */
   private static List<String> mountQuery(DataSetSchema datasetSchema, String idFieldScehma,
       Long datasetId) {
-
 
     List<String> valueList = new ArrayList<>();
 
@@ -266,18 +277,17 @@ public class PKValidationUtils {
   }
 
 
-
   /**
    * Creates the query.
    *
    * @param datasetSchema the dataset schema
    * @param idFieldSchema the id field schema
    * @param datasetId the dataset id
+   *
    * @return the string
    */
   private static String createQuery(DataSetSchema datasetSchema, String idFieldSchema,
       Long datasetId) {
-
 
     Map<String, String> fieldData = getFieldSchemaFromSchema(datasetSchema, idFieldSchema);
     StringBuilder query = new StringBuilder();
@@ -295,6 +305,7 @@ public class PKValidationUtils {
    *
    * @param schema the schema
    * @param idFieldSchema the id field schema
+   *
    * @return the field schema from schema
    */
   private static Map<String, String> getFieldSchemaFromSchema(DataSetSchema schema,
@@ -331,6 +342,7 @@ public class PKValidationUtils {
    *
    * @param schema the schema
    * @param idFieldSchema the id field schema
+   *
    * @return the table schema from id field schema
    */
   private static TableSchema getTableSchemaFromIdFieldSchema(DataSetSchema schema,
@@ -359,6 +371,7 @@ public class PKValidationUtils {
    *
    * @param schema the schema
    * @param idFieldSchema the id field schema
+   *
    * @return the PK field from FK field
    */
   private static String getPKFieldFromFKField(DataSetSchema schema, String idFieldSchema) {
