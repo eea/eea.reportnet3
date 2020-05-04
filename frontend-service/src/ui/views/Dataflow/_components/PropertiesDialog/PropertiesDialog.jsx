@@ -103,7 +103,7 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
                     className: `p-button-secondary-transparent`,
                     icon: 'externalLink',
                     tooltip: resources.messages['viewMore'],
-                    onClick: () =>
+                    onMouseDown: () =>
                       window.open(
                         data.label === 'obligation'
                           ? `http://rod3.devel1dub.eionet.europa.eu/obligations/${dataflowDataState.obligations.obligationId}`
