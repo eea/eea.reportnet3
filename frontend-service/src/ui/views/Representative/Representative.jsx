@@ -58,7 +58,7 @@ const Representative = withRouter(({ match, history }) => {
     hasWritePermissions: false,
     id: dataflowId,
     isApiKeyDialogVisible: false,
-    isCustodian: false,
+    isCustodian: null,
     isDeleteDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPropertiesDialogVisible: false,
@@ -106,7 +106,9 @@ const Representative = withRouter(({ match, history }) => {
       title: 'sidebarApiKeyBtn'
     };
 
-    leftSideBarContext.addModels(representativeState.isCustodian ? [propertiesBtn] : [propertiesBtn, apiKeyBtn]);
+    if (!isNil(representativeState.isCustodian)) {
+      leftSideBarContext.addModels(representativeState.isCustodian ? [propertiesBtn] : [propertiesBtn, apiKeyBtn]);
+    }
   }, [representativeState.isCustodian]);
 
   useEffect(() => {
