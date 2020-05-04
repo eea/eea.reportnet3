@@ -8,6 +8,7 @@ export class Obligation {
     legalInstruments,
     obligationId,
     organization,
+    reportingFrequency,
     title,
     validSince,
     validTo
@@ -20,6 +21,7 @@ export class Obligation {
     this.legalInstruments = legalInstruments;
     this.obligationId = obligationId;
     this.organization = organization;
+    this.reportingFrequency = reportingFrequency;
     this.title = title;
     this.validSince = validSince;
     this.validTo = validTo;
