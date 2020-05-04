@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -14,9 +14,13 @@ import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { DataViewerUtils } from '../Utils/DataViewerUtils';
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
 export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
   const [columnOptions, setColumnOptions] = useState([{}]);
   const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
+
+  const resources = useContext(ResourcesContext);
 
   useEffect(() => {
     let colOptions = [];
@@ -87,10 +91,13 @@ export const useSetColumns = (
   useEffect(() => {
     const maxWidths = [];
 
-    const getTooltipMessage = column =>
-      !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
+    const getTooltipMessage = column => {
+      console.log(column.description);
+      return !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
         ? `<span style="font-weight:bold">Description:</span> ${
-            !isNil(column.description) ? column.description : 'No description'
+            !isNil(column.description) && column.description !== ''
+              ? column.description
+              : resources.messages['noDescription']
           }<br/><span style="font-weight:bold">${resources.messages['codelists']}: </span>
           ${column.codelistItems
             .map(codelistItem =>
@@ -99,7 +106,10 @@ export const useSetColumns = (
             .join(', ')}`
         : !isNil(column.description) && column.description !== '' && column.description.length > 35
         ? column.description.substring(0, 35)
+        : isNil(column.description) || column.description === ''
+        ? resources.messages['noDescription']
         : column.description;
+    };
 
     const providerCodeTemplate = rowData => (
       <div style={{ display: 'flex', alignItems: 'center' }}>{!isUndefined(rowData) ? rowData.providerCode : null}</div>

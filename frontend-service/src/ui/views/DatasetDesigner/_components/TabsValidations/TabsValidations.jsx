@@ -92,7 +92,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
 
       tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_LIST', payload: { validationsServiceList } });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       notificationContext.add({ type: 'VALIDATION_SERVICE_GET_ALL_ERROR' });
     } finally {
       isLoading(false);

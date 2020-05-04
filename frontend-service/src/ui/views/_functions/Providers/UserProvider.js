@@ -9,7 +9,8 @@ const userSettingsDefaultState = {
     visualTheme: 'light',
     showLogoutConfirmation: true,
     userImage: [],
-    dateFormat: 'YYYY-MM-DD'
+    dateFormat: 'YYYY-MM-DD',
+    amPm24h: true
   }
 };
 
@@ -54,6 +55,14 @@ const userReducer = (state, { type, payload }) => {
         userProps: {
           ...state.userProps,
           dateFormat: payload
+        }
+      };
+    case 'TOGGLE_DATE_FORMAT_AM_PM_24H':
+      return {
+        ...state,
+        userProps: {
+          ...state.userProps,
+          amPm24h: payload
         }
       };
     case 'DEFAULT_VISUAL_THEME':
@@ -134,6 +143,12 @@ export const UserProvider = ({ children }) => {
             payload: {
               user
             }
+          });
+        },
+        onToggleAmPm24hFormat: hoursFormat => {
+          userDispatcher({
+            type: 'TOGGLE_DATE_FORMAT_AM_PM_24H',
+            payload: hoursFormat
           });
         },
         onToggleLogoutConfirm: logoutConf => {

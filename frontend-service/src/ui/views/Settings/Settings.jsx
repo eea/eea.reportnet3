@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
