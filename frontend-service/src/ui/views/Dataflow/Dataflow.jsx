@@ -94,6 +94,7 @@ const Dataflow = withRouter(({ history, match }) => {
     manageDialogs,
     onDeleteDataflow,
     onEditData,
+    onInitReceiptData,
     setDataProviderId,
     setDatasetIdToSnapshotProps,
     setDesignDatasetSchemas,
@@ -101,6 +102,7 @@ const Dataflow = withRouter(({ history, match }) => {
     setHasRepresentativesWithoutDatasets,
     setIsDataSchemaCorrect,
     setIsDataUpdated,
+    setIsReceiptOutdated,
     setIsPageLoading,
     setUpdatedDatasetSchema,
     setUrlRepresentativeId
@@ -358,17 +360,14 @@ const Dataflow = withRouter(({ history, match }) => {
             .map(representative => representative.isReceiptOutdated);
 
           if (isReceiptOutdated.length === 1 && isReleased.length === 1) {
-            dataflowDispatch({
-              type: 'ON_INIT_RECEIPT_DATA',
-              payload: { isReceiptLoading: false, isReceiptOutdated: isReceiptOutdated[0], isReleased }
-            });
+            onInitReceiptData({ isReceiptLoading: false, isReceiptOutdated: isReceiptOutdated[0], isReleased });
           }
         }
       } else {
         if (!isEmpty(dataflow.representatives)) {
           const isReceiptOutdated = dataflow.representatives.map(representative => representative.isReceiptOutdated);
           if (isReceiptOutdated.length === 1) {
-            dataflowDispatch({ type: 'ON_INIT_RECEIPT_DATA', payload: { isReceiptOutdated: isReceiptOutdated[0] } });
+            setIsReceiptOutdated({ isReceiptOutdated: isReceiptOutdated[0] });
           }
         }
       }

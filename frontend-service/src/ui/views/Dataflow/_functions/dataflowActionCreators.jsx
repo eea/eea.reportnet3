@@ -69,6 +69,14 @@ export function dataflowActionCreators(dataflowDispatch) {
       payload: { isReceiptLoading }
     });
   };
+
+  const setIsReceiptOutdated = isReceiptOutdated => {
+    dataflowDispatch({
+      type: 'SET_IS_RECEIPT_OUTDATED',
+      payload: { isReceiptOutdated }
+    });
+  };
+
   const onCleanUpReceipt = () => {
     dataflowDispatch({
       type: 'ON_CLEAN_UP_RECEIPT',
@@ -92,6 +100,7 @@ export function dataflowActionCreators(dataflowDispatch) {
     setIsDataUpdated,
     setIsPageLoading,
     setIsReceiptLoading,
+    setIsReceiptOutdated,
     setUpdatedDatasetSchema,
     setUrlRepresentativeId
   };
