@@ -46,8 +46,12 @@ export const apiValidation = {
   },
   update: async (datasetId, validation) => {
     const tokens = userStorage.get();
+    let url = getUrl(ValidationConfig.update, { datasetId });
+    if (validation.automatic) {
+      url = getUrl(ValidationConfig.updateAutomatic, { datasetId });
+    }
     const response = await HTTPRequester.update({
-      url: getUrl(ValidationConfig.update, { datasetId }),
+      url: url,
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
