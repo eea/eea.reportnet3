@@ -237,7 +237,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
 
   const actionButtonsColumn = (
     <Column
-      body={row => (row.automatic ? deleteTemplate() : actionsTemplate(row))}
+      body={row => actionsTemplate(row)}
       className={styles.validationCol}
       header={resources.messages['actions']}
       key="actions"
