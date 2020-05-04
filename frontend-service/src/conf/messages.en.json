@@ -629,6 +629,11 @@
     "emailFieldFormatRestriction": "Maximum of 256 characters",
     "urlFieldFormatRestriction": "Maximum of 5000 characters",
     "phoneNumberFieldFormatRestriction": "Maximum of 256 characters",
-    "emptyTabHeaderError": "The table name is empty, please enter one."
+    "emptyTabHeaderError": "The table name is empty, please enter one.",
+    "noDescription": "No description",
+    "toggleConfirmationOff": "Switch off logout confirmation",
+    "toggleConfirmationOn": "Switch on logout confirmation",
+    "24hFormat": "Switch to 24 hours format",
+    "amPmFormat": "Switch to AM/PM format"
   }
 }

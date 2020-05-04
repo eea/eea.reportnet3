@@ -7,19 +7,25 @@ import styles from './SnapshotItem.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
+
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const SnapshotItem = ({ itemData, isReleaseVisible }) => {
   const snapshotContext = useContext(SnapshotContext);
-
   const resources = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
 
   return (
     <li className={styles.listItem}>
       <div className={styles.listItemData}>
         <h5>
-          {moment(itemData.creationDate).format('YYYY-MM-DD HH:mm:ss')}
+          {moment(itemData.creationDate).format(
+            `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
+              userContext.userProps.amPm24h ? '' : ' A'
+            }`
+          )}
           {itemData.isBlocked && (
             <Button
               className={`${styles.btn} rp-btn ${styles.hasBlockers}`}

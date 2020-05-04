@@ -46,7 +46,6 @@ const UserConfiguration = () => {
           }
         }}
         sliderCheckedClassName={styles.themeSwitcherInputSwitch}
-        style={{ marginRight: '1rem' }}
         tooltip={
           userContext.userProps.visualTheme === 'light'
             ? resources.messages['toggleDarkTheme']
@@ -58,12 +57,33 @@ const UserConfiguration = () => {
     </React.Fragment>
   );
 
+  const amPmSwitch = (
+    <React.Fragment>
+      <span className={styles.switchTextInput}>AM/PM</span>
+      <InputSwitch
+        checked={userContext.userProps.amPm24h}
+        onChange={async e => {
+          userContext.onToggleAmPm24hFormat(e.value);
+          const inmUserProperties = { ...userContext.userProps };
+          inmUserProperties.amPm24h = e.value;
+          const response = await changeUserProperties(inmUserProperties);
+          if (response.status < 200 || response.status > 299) {
+            userContext.onToggleAmPm24hFormat(!e.value);
+          }
+        }}
+        tooltip={
+          userContext.userProps.amPm24h === true ? resources.messages['amPmFormat'] : resources.messages['24hFormat']
+        }
+      />
+      <span className={styles.switchTextInput}>24H</span>
+    </React.Fragment>
+  );
+
   const confirmationLogoutSwitch = (
     <React.Fragment>
       <span className={styles.switchTextInput}>No popup</span>
       <InputSwitch
         checked={userContext.userProps.showLogoutConfirmation}
-        style={{ marginRight: '1rem' }}
         onChange={async e => {
           userContext.onToggleLogoutConfirm(e.value);
           const inmUserProperties = { ...userContext.userProps };
@@ -75,8 +95,8 @@ const UserConfiguration = () => {
         }}
         tooltip={
           userContext.userProps.showLogoutConfirmation === true
-            ? resources.messages['toogleConfirmationOff']
-            : resources.messages['toogleConfirmationOn']
+            ? resources.messages['toggleConfirmationOff']
+            : resources.messages['toggleConfirmationOn']
         }
       />
       <span className={styles.switchTextInput}>Popup</span>
@@ -127,7 +147,7 @@ const UserConfiguration = () => {
       icon="palette"
       iconSize="2rem"
       subtitle={resources.messages['userSettingsThemeSubtitle']}
-      item={themeSwitch}
+      items={[themeSwitch]}
     />
   );
 
@@ -137,7 +157,7 @@ const UserConfiguration = () => {
       icon="power-off"
       iconSize="2rem"
       subtitle={resources.messages['userSettingsConfirmSubtitle']}
-      item={confirmationLogoutSwitch}
+      items={[confirmationLogoutSwitch]}
     />
   );
 
@@ -147,7 +167,7 @@ const UserConfiguration = () => {
       icon="list-ol"
       iconSize="2rem"
       subtitle={resources.messages['userSettingsRowsPerPageSubtitle']}
-      item={rowsInPaginationDropdown}
+      items={[rowsInPaginationDropdown]}
     />
   );
 
@@ -164,7 +184,7 @@ const UserConfiguration = () => {
       icon="calendar"
       iconSize="2rem"
       subtitle={dateFormatSubtitle}
-      item={dateFormatDropdown}
+      items={[dateFormatDropdown, amPmSwitch]}
     />
   );
 

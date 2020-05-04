@@ -67,10 +67,10 @@
   "c-tile": "#ba3c0d",
   "blocker": "#000000",
   "correct": "#99CC33",
-  "error": "#CC3300",
+  "error": "#da2131",
   "info": "#7fa1c9",
   "warning": "#ffCC00",
-  "green400":"#339900",
+  "green400": "#339900",
   "released": "#339900",
   "unreleased": "#cfcfcf"
 }

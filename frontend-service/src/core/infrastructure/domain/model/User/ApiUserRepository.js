@@ -60,7 +60,8 @@ const parseConfigurationDTO = userConfigurationDTO => {
     showLogoutConfirmation: true,
     rowsPerPage: 10,
     visualTheme: 'light',
-    userImage: []
+    userImage: [],
+    amPm24h: true
   };
 
   if (isNil(userConfigurationDTO) || isEmpty(userConfigurationDTO)) {
@@ -69,6 +70,7 @@ const parseConfigurationDTO = userConfigurationDTO => {
     userConfiguration.rowsPerPage = userDefaultConfiguration.rowsPerPage;
     userConfiguration.visualTheme = userDefaultConfiguration.visualTheme;
     userConfiguration.userImage = userDefaultConfiguration.userImage;
+    userConfiguration.amPm24h = userDefaultConfiguration.amPm24h;
   } else {
     userConfiguration.dateFormat = !isNil(userConfigurationDTO.dateFormat[0])
       ? userConfigurationDTO.dateFormat[0]
@@ -91,6 +93,12 @@ const parseConfigurationDTO = userConfigurationDTO => {
     userConfiguration.userImage = !isNil(userConfigurationDTO.userImage)
       ? userConfigurationDTO.userImage
       : userDefaultConfiguration.userImage;
+
+    userConfiguration.amPm24h = isNil(userConfigurationDTO.amPm24h)
+      ? userDefaultConfiguration.amPm24h
+      : userConfigurationDTO.amPm24h[0] === 'false'
+      ? (userConfiguration.amPm24h = false)
+      : (userConfiguration.amPm24h = true);
   }
   return userConfiguration;
 };
