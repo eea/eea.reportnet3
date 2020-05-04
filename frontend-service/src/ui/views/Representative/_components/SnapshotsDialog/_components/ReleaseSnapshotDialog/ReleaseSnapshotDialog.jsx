@@ -11,6 +11,7 @@ import { SnapshotService } from 'core/services/Snapshot';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 export const ReleaseSnapshotDialog = ({
   dataflowId,
@@ -25,6 +26,7 @@ export const ReleaseSnapshotDialog = ({
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
 
   const onBuildSnapshot = async () => {
     try {
@@ -87,7 +89,11 @@ export const ReleaseSnapshotDialog = ({
       <ul>
         <li>
           <strong>{resources.messages['creationDate']}: </strong>
-          {moment(snapshotDataToRelease.creationDate).format('YYYY-MM-DD HH:mm:ss')}
+          {moment(snapshotDataToRelease.creationDate).format(
+            `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
+              userContext.userProps.amPm24h ? '' : ' A'
+            }`
+          )}
         </li>
         <li>
           <strong>{resources.messages['description']}: </strong>

@@ -55,6 +55,7 @@ const parse = ({ type, content = {}, message, config, routes }) => {
         }
       });
       notificationDTO.message = TextUtils.parseText(notificationDTO.message, content);
+      notificationDTO.date = new Date();
     }
   });
   return new Notification(notificationDTO);

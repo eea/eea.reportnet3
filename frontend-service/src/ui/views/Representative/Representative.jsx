@@ -106,8 +106,8 @@ const Representative = withRouter(({ match, history }) => {
       title: 'sidebarApiKeyBtn'
     };
 
-    leftSideBarContext.addModels([representativeState.isCustodian ? propertiesBtn : propertiesBtn, apiKeyBtn]);
-  }, []);
+    leftSideBarContext.addModels(representativeState.isCustodian ? [propertiesBtn] : [propertiesBtn, apiKeyBtn]);
+  }, [representativeState.isCustodian]);
 
   useEffect(() => {
     setLoading(true);

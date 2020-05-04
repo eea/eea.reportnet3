@@ -68,7 +68,7 @@ const ValidationViewer = React.memo(
         },
         {
           id: 'entityType',
-          header: resources.messages['entityType']
+          header: resources.messages['entity']
         }
       ];
 
@@ -154,9 +154,9 @@ const ValidationViewer = React.memo(
     const onLoadTypeEntitiesFilter = () => {
       const allTypeEntitiesFilterList = [
         { label: resources.messages['dataset'], key: 'Dataset' },
-        { label: resources.messages['table'], key: 'Table' },
+        { label: resources.messages['validationViewerTable'], key: 'Table' },
         { label: resources.messages['record'], key: 'Record' },
-        { label: resources.messages['field'], key: 'Field' }
+        { label: resources.messages['validationViewerField'], key: 'Field' }
       ];
       setAllTypeEntitiesFilter(allTypeEntitiesFilterList);
     };
@@ -413,7 +413,7 @@ const ValidationViewer = React.memo(
               <Button
                 className={`p-button-rounded p-button-secondary-transparent`}
                 icon={'filter'}
-                label={resources.messages['entityType']}
+                label={resources.messages['entity']}
                 onClick={event => {
                   dropdownTypeEntitiesFilterRef.current.show(event);
                 }}

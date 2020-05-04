@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useContext, useState } from 'react';
+import React, { Fragment, useEffect, useReducer, useContext, useState, useRef } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -12,6 +12,7 @@ import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import ReactTooltip from 'react-tooltip';
 import { TabMenu } from 'primereact/tabmenu';
 import { ValidationExpressionSelector } from './_components/ValidationExpressionSelector';
 
@@ -71,6 +72,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   ]);
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
   const [tabsChanges, setTabsChanges] = useState({});
+  const [clickedFields, setClickedFields] = useState([]);
 
   const ruleDisablingCheckListener = [creationFormState.candidateRule.table, creationFormState.candidateRule.field];
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
@@ -203,14 +205,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     if (!isNil(tableFields) && tableFields.length > 0) {
       fieldDropdownOptions.options = tableFields;
       fieldDropdownOptions.disabled = false;
-      fieldDropdownOptions.onChange = e =>
-        creationFormDispatch({
-          type: 'SET_FORM_FIELD',
-          payload: {
-            key: 'field',
-            value: e.target.value
-          }
-        });
+      fieldDropdownOptions.onChange = e => onInfoFieldChange('field', e.target.value);
       fieldDropdownOptions.value = creationFormState.candidateRule.field;
     }
     setfieldsDropdown(
@@ -347,12 +342,43 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   };
 
   const onTabChange = tab => {
-    console.log('tab: ', tab);
-    const newTabsChanges = { ...tabsChanges };
-    newTabsChanges[tabMenuActiveItem.tabKey] = true;
-    console.log(newTabsChanges);
-    setTabsChanges(newTabsChanges);
+    setTabsChanges({
+      ...tabsChanges,
+      [tabMenuActiveItem.tabKey]: true
+    });
     setTabMenuActiveItem(tab);
+  };
+
+  const onInfoFieldChange = (fieldKey, fieldValue) => {
+    onDeleteFromClickedFields(fieldKey);
+    creationFormDispatch({
+      type: 'SET_FORM_FIELD',
+      payload: {
+        key: fieldKey,
+        value: fieldValue
+      }
+    });
+  };
+
+  const onAddToClickedFields = field => {
+    const cClickedFields = [...clickedFields];
+    if (!cClickedFields.includes(field)) {
+      cClickedFields.push(field);
+      setClickedFields(cClickedFields);
+    }
+  };
+  const onDeleteFromClickedFields = field => {
+    const cClickedFields = [...clickedFields];
+    if (cClickedFields.includes(field)) {
+      cClickedFields.splice(cClickedFields.indexOf(field), 1);
+      setClickedFields(cClickedFields);
+    }
+  };
+
+  const printError = field => {
+    return (tabsChanges.data || clickedFields.includes(field)) && isEmpty(creationFormState.candidateRule[field])
+      ? 'error'
+      : '';
   };
 
   const dialogLayout = children => (
@@ -379,9 +405,8 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
               <div className={styles.section}>
                 <fieldset>
                   <div
-                    className={`${styles.field} ${styles.qcTable} formField ${
-                      tabsChanges.data && isEmpty(creationFormState.candidateRule.table) ? 'error' : ''
-                    }`}>
+                    onBlur={e => onAddToClickedFields('table')}
+                    className={`${styles.field} ${styles.qcTable} formField ${printError('table')}`}>
                     <label htmlFor="table">{resourcesContext.messages.table}</label>
                     <Dropdown
                       id={`${componentName}__table`}
@@ -391,78 +416,46 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                       placeholder={tableFieldOptions.placeholder}
                       optionLabel="label"
                       options={creationFormState.schemaTables}
-                      onChange={e =>
-                        creationFormDispatch({
-                          type: 'SET_FORM_FIELD',
-                          payload: {
-                            key: 'table',
-                            value: e.target.value
-                          }
-                        })
-                      }
                       value={creationFormState.candidateRule.table}
+                      onChange={e => onInfoFieldChange('table', e.target.value)}
                     />
                   </div>
                   <div
-                    className={`${styles.field} ${styles.qcField} formField ${
-                      tabsChanges.data && isEmpty(creationFormState.candidateRule.field) ? 'error' : ''
-                    }`}>
+                    onBlur={e => onAddToClickedFields('field')}
+                    className={`${styles.field} ${styles.qcField} formField ${printError('field')}`}>
                     <label htmlFor="field">{resourcesContext.messages.field}</label>
                     {fieldsDropdown}
                   </div>
                   <div
-                    className={`${styles.field} ${styles.qcShortCode} formField ${
-                      tabsChanges.data && isEmpty(creationFormState.candidateRule.shortCode) ? 'error' : ''
-                    }`}>
+                    onBlur={e => onAddToClickedFields('shortCode')}
+                    className={`${styles.field} ${styles.qcShortCode} formField ${printError('shortCode')}`}>
                     <label htmlFor="shortCode">{resourcesContext.messages.ruleShortCode}</label>
                     <InputText
                       id={`${componentName}__shortCode`}
                       placeholder={resourcesContext.messages.ruleShortCode}
                       value={creationFormState.candidateRule.shortCode}
-                      onChange={e =>
-                        creationFormDispatch({
-                          type: 'SET_FORM_FIELD',
-                          payload: {
-                            key: 'shortCode',
-                            value: e.target.value
-                          }
-                        })
-                      }
+                      onChange={e => onInfoFieldChange('shortCode', e.target.value)}
                     />
                   </div>
                   <div className={`${styles.field} ${styles.qcEnabled} formField `}>
                     <label htmlFor="QcActive">{resourcesContext.messages.enabled}</label>
                     <Checkbox
                       id={`${componentName}__active`}
-                      onChange={e =>
-                        creationFormDispatch({
-                          type: 'SET_FORM_FIELD',
-                          payload: { key: 'active', value: e.checked }
-                        })
-                      }
+                      onChange={e => onInfoFieldChange('active', e.checked)}
                       isChecked={creationFormState.candidateRule.active}
                     />
                   </div>
                 </fieldset>
                 <fieldset>
                   <div
-                    className={`${styles.field} ${styles.qcName} formField ${
-                      tabsChanges.data && isEmpty(creationFormState.candidateRule.name) ? 'error' : ''
-                    }`}>
+                    onBlur={e => onAddToClickedFields('name')}
+                    className={`${styles.field} ${styles.qcName} formField ${printError('name')}`}>
                     <label htmlFor="name">{resourcesContext.messages.ruleName}</label>
                     <InputText
                       id={`${componentName}__name`}
                       placeholder={resourcesContext.messages.ruleName}
                       value={creationFormState.candidateRule.name}
-                      onChange={e =>
-                        creationFormDispatch({
-                          type: 'SET_FORM_FIELD',
-                          payload: {
-                            key: 'name',
-                            value: e.target.value
-                          }
-                        })
-                      }
+                      onChange={e => onInfoFieldChange('name', e.target.value)}
                     />
                   </div>
                   <div className={`${styles.field} ${styles.qcDescription} formField`}>
@@ -471,24 +464,15 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                       id={`${componentName}__description`}
                       placeholder={resourcesContext.messages.description}
                       value={creationFormState.candidateRule.description}
-                      onChange={e =>
-                        creationFormDispatch({
-                          type: 'SET_FORM_FIELD',
-                          payload: {
-                            key: 'description',
-                            value: e.target.value
-                          }
-                        })
-                      }
+                      onChange={e => onInfoFieldChange('description', e.target.value)}
                     />
                   </div>
                 </fieldset>
                 <fieldset>
                   <div
-                    className={`${styles.field} ${styles.qcErrorType} formField ${
-                      tabsChanges.data && isEmpty(creationFormState.candidateRule.errorLevel) ? 'error' : ''
-                    }`}>
-                    <label htmlFor="description">{resourcesContext.messages.errorType}</label>
+                    onBlur={e => onAddToClickedFields('errorLevel')}
+                    className={`${styles.field} ${styles.qcErrorType} formField ${printError('errorLevel')}`}>
+                    <label htmlFor="errorType">{resourcesContext.messages.errorType}</label>
                     <Dropdown
                       id={`${componentName}__errorType`}
                       filterPlaceholder={resourcesContext.messages.errorType}
@@ -496,36 +480,19 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                       appendTo={document.body}
                       optionLabel="label"
                       options={creationFormState.errorLevels}
-                      onChange={e =>
-                        creationFormDispatch({
-                          type: 'SET_FORM_FIELD',
-                          payload: {
-                            key: 'errorLevel',
-                            value: e.target.value
-                          }
-                        })
-                      }
+                      onChange={e => onInfoFieldChange('errorLevel', e.target.value)}
                       value={creationFormState.candidateRule.errorLevel}
                     />
                   </div>
                   <div
-                    className={`${styles.field} ${styles.qcErrorMessage} formField ${
-                      tabsChanges.data && isEmpty(creationFormState.candidateRule.errorMessage) ? 'error' : ''
-                    }`}>
+                    onBlur={e => onAddToClickedFields('errorMessage')}
+                    className={`${styles.field} ${styles.qcErrorMessage} formField ${printError('errorMessage')}`}>
                     <label htmlFor="errorMessage">{resourcesContext.messages.ruleErrorMessage}</label>
                     <InputText
                       id={`${componentName}__errorMessage`}
                       placeholder={resourcesContext.messages.ruleErrorMessage}
                       value={creationFormState.candidateRule.errorMessage}
-                      onChange={e =>
-                        creationFormDispatch({
-                          type: 'SET_FORM_FIELD',
-                          payload: {
-                            key: 'errorMessage',
-                            value: e.target.value
-                          }
-                        })
-                      }
+                      onChange={e => onInfoFieldChange('errorMessage', e.target.value)}
                     />
                   </div>
                 </fieldset>
@@ -609,25 +576,34 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
             <div className={`${styles.section} ${styles.footerToolBar}`}>
               <div className={styles.subsection}>
                 {validationContext.ruleEdit ? (
-                  <Button
-                    id={`${componentName}__update`}
-                    disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
-                    className="p-button-primary p-button-text-icon-left"
-                    type="button"
-                    label={resourcesContext.messages.update}
-                    icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
-                    onClick={e => onUpdateValidationRule()}
-                  />
+                  <span data-tip data-for="createTooltip">
+                    <Button
+                      id={`${componentName}__update`}
+                      disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
+                      className="p-button-primary p-button-text-icon-left"
+                      type="button"
+                      label={resourcesContext.messages.update}
+                      icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
+                      onClick={e => onUpdateValidationRule()}
+                    />
+                  </span>
                 ) : (
-                  <Button
-                    id={`${componentName}__create`}
-                    disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
-                    className="p-button-primary p-button-text-icon-left"
-                    type="button"
-                    label={resourcesContext.messages.create}
-                    icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
-                    onClick={e => onCreateValidationRule()}
-                  />
+                  <span data-tip data-for="createTooltip">
+                    <Button
+                      id={`${componentName}__create`}
+                      disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
+                      className="p-button-primary p-button-text-icon-left"
+                      type="button"
+                      label={resourcesContext.messages.create}
+                      icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
+                      onClick={e => onCreateValidationRule()}
+                    />
+                  </span>
+                )}
+                {(creationFormState.isValidationCreationDisabled || isSubmitDisabled) && (
+                  <ReactTooltip className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
+                    <span>{resourcesContext.messages.fcSubmitButtonDisabled}</span>
+                  </ReactTooltip>
                 )}
 
                 <Button

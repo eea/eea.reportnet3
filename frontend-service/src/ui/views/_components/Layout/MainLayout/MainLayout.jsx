@@ -34,10 +34,11 @@ const MainLayout = ({ children }) => {
       userContext.onToggleLogoutConfirm(userConfiguration.showLogoutConfirmation);
       userContext.onToggleVisualTheme(userConfiguration.visualTheme);
       userContext.onUserFileUpload(userConfiguration.userImage);
+      userContext.onToggleAmPm24hFormat(userConfiguration.amPm24h);
       themeContext.onToggleTheme(userConfiguration.visualTheme);
       userContext.onToggleSettingsLoaded(true);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       userContext.onToggleSettingsLoaded(false);
       notifications.add({
         type: 'GET_CONFIGURATION_USER_SERVICE_ERROR'
