@@ -114,6 +114,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("${pathSnapshot}")
   private String pathSnapshot;
 
+  @Value("${dataset.creation.notification.ms}")
+  private Long timeToWaitBeforeReleasingNotification;
+
   /**
    * The data source.
    */
@@ -196,12 +199,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       boolean isCreation) {
 
     // Initialize resources
-    Connection connection = null;
-    try (
+    try (Connection connection = dataSource.getConnection();
         Statement statement = connection.createStatement();
         BufferedReader br =
             new BufferedReader(new InputStreamReader(resourceFile.getInputStream()))) {
-      connection = dataSource.getConnection();
+
       // Read file and create queries
       String command;
       while ((command = br.readLine()) != null) {
@@ -213,10 +215,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       // Execute queries and commit results
       statement.executeBatch();
-      connection.commit();
-
-      LOG.info("Schemas created as part of DataCollection creation");
-
+      LOG.info("{} Schemas created as part of DataCollection creation",
+          datasetIdsAndSchemaIds.size());
+      try {
+        //waiting X seconds before releasing notifications, so database is able to write the creation of all datasets
+        Thread.sleep(timeToWaitBeforeReleasingNotification);
+      } catch (InterruptedException e) {
+        LOG_ERROR.error("Error sleeping thread before releasing notification kafka events", e);
+      }
+      LOG.info("Releasing notifications via Kafka");
       // Release events to initialize databases content
       releaseConnectionCreatedEvents(datasetIdsAndSchemaIds);
 
@@ -224,21 +231,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       releaseLockAndNotification(dataflowId, isCreation);
 
     } catch (SQLException | IOException e) {
-      try {
-        connection.rollback();
-      } catch (SQLException e1) {
-        LOG_ERROR.error("Error rolling back schema creation: ", e1);
-      }
       LOG_ERROR.error("Error creating schemas. Rolling back: ", e);
       // This method will release the lock
       dataCollectionControllerZuul.undoDataCollectionCreation(
           new ArrayList<>(datasetIdsAndSchemaIds.keySet()), dataflowId, isCreation);
-    } finally {
-      try {
-        connection.close();
-      } catch (SQLException e) {
-        LOG_ERROR.error("Error closing connection after schema creation: ", e);
-      }
     }
   }
 
