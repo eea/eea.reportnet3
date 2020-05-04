@@ -53,9 +53,7 @@ export const PropertiesDialog = ({ dataflowDataState, dataflowId, history, onCon
     } catch (error) {
       notificationContext.add({
         type: 'DATAFLOW_DELETE_BY_ID_ERROR',
-        content: {
-          dataflowId
-        }
+        content: { dataflowId }
       });
     } finally {
       hideLoading();

@@ -7,6 +7,13 @@ const parseObligationsData = (data, format) => {
   if (data.obligations) {
     return [
       {
+        label: 'legalInstrument',
+        data: {
+          alias: data.obligations.legalInstruments.alias,
+          title: data.obligations.legalInstruments.title
+        }
+      },
+      {
         label: 'obligation',
         data: {
           title: data.obligations.title,
@@ -15,13 +22,6 @@ const parseObligationsData = (data, format) => {
           expirationDate: !isNil(data.obligations.expirationDate)
             ? moment(data.obligations.expirationDate).format(format)
             : '-'
-        }
-      },
-      {
-        label: 'legalInstrument',
-        data: {
-          alias: data.obligations.legalInstruments.alias,
-          title: data.obligations.legalInstruments.title
         }
       }
     ];
