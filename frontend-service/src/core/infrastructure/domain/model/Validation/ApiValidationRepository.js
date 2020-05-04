@@ -49,15 +49,17 @@ const update = async (datasetId, validationRule) => {
   const validation = {
     ruleId: validationRule.id,
     description: validationRule.description,
-    automatic: false,
+    automatic: validationRule.automatic,
     enabled: validationRule.active ? validationRule.active : false,
     referenceId: validationRule.field.code,
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
     type: 'FIELD',
-    thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
-    whenCondition: getCreationDTO(expressions[0], 0, expressions)
+    thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value]
   };
+  if (!validationRule.automatic) {
+    validation.whenCondition = getCreationDTO(expressions[0], 0, expressions);
+  }
   return await apiValidation.update(datasetId, validation);
 };
 
