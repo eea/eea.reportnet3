@@ -475,8 +475,8 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                     <label htmlFor="errorType">{resourcesContext.messages.errorType}</label>
                     <Dropdown
                       id={`${componentName}__errorType`}
-                      filterPlaceholder={resourcesContext.messages.errorType}
-                      placeholder={resourcesContext.messages.errorType}
+                      filterPlaceholder={resourcesContext.messages.errorTypePlaceholder}
+                      placeholder={resourcesContext.messages.errorTypePlaceholder}
                       appendTo={document.body}
                       optionLabel="label"
                       options={creationFormState.errorLevels}
