@@ -629,6 +629,7 @@
     "emailFieldFormatRestriction": "Maximum of 256 characters",
     "urlFieldFormatRestriction": "Maximum of 5000 characters",
     "phoneNumberFieldFormatRestriction": "Maximum of 256 characters",
+    "errorTypePlaceholder": "Select an error type",
     "emptyTabHeaderError": "The table name is empty, please enter one.",
     "noDescription": "No description",
     "toggleConfirmationOff": "Switch off logout confirmation",

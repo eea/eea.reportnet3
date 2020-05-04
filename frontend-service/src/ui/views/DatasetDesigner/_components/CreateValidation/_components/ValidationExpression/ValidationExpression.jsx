@@ -52,6 +52,8 @@ const ValidationExpression = ({
     if (field == 'union') {
       conditions =
         (showRequiredFields || clickedFields.includes(field)) && position != 0 && isEmpty(expressionValues[field]);
+    } else if (field == 'expressionValue') {
+      conditions = (showRequiredFields || clickedFields.includes(field)) && isEmpty(expressionValues[field].toString());
     } else {
       conditions = (showRequiredFields || clickedFields.includes(field)) && isEmpty(expressionValues[field]);
     }

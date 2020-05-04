@@ -15,30 +15,36 @@
         margin: 0 0 1rem 0;
         color: var(--title-color);
       }
-      fieldset {
+      .fieldsGroup {
         display: flex;
+        flex-direction: row;
         justify-content: flex-start;
         margin-bottom: 0.5rem;
         .field {
+          --qcFieldm: 285px;
+          --qcFieldGap: 1rem;
           display: flex;
           flex-direction: column;
           justify-content: flex-start;
           padding-left: 0.1rem;
-          margin-right: 1rem;
+          margin-right: var(--qcFieldGap);
+          :global .p-dropdown {
+            padding-bottom: 1.2px;
+          }
           > label {
             margin-bottom: 0.2rem;
           }
           &.qcTable {
-            width: 285px;
+            width: var(--qcFieldm);
           }
           &.qcField {
-            width: 285px;
+            width: var(--qcFieldm);
           }
           &.qcShortCode {
-            width: 216px;
+            width: calc(var(--qcFieldm) * 0.76);
           }
           &.qcEnabled {
-            width: 85px;
+            width: calc(var(--qcFieldm) * 0.3);
             margin-right: 0;
             align-items: center;
             :global .p-checkbox {
@@ -54,17 +60,17 @@
             }
           }
           &.qcName {
-            width: 285px;
+            width: var(--qcFieldm);
           }
           &.qcDescription {
-            width: 621px;
+            width: calc(100% - (var(--qcFieldm)) - var(--qcFieldGap) * 1);
             margin-right: 0;
           }
           &.qcErrorType {
             width: 285px;
           }
           &.qcErrorMessage {
-            width: 621px;
+            width: calc(100% - (var(--qcFieldm)) - var(--qcFieldGap) * 1);
             margin-right: 0;
           }
         }
@@ -116,11 +122,9 @@
             display: flex;
             flex-direction: row;
             justify-content: flex-end;
-            button {
-              &:first-of-type {
-                margin-right: 0.5rem;
-              }
-            }
+          }
+          span {
+            margin-right: 0.5rem;
           }
         }
       }
