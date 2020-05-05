@@ -79,13 +79,25 @@ export const FieldsDesigner = ({
     );
   };
 
-  const onFieldAdd = ({ codelistItems, description, fieldId, pk, name, recordId, referencedField, required, type }) => {
+  const onFieldAdd = ({
+    codelistItems,
+    description,
+    fieldId,
+    pk,
+    pkMustBeUsed,
+    name,
+    recordId,
+    referencedField,
+    required,
+    type
+  }) => {
     const inmFields = [...fields];
     inmFields.splice(inmFields.length, 0, {
       codelistItems,
       description,
       fieldId,
       pk,
+      pkMustBeUsed,
       name,
       recordId,
       referencedField,
@@ -108,6 +120,7 @@ export const FieldsDesigner = ({
     id,
     isLinkChange,
     pk,
+    pkMustBeUsed,
     name,
     referencedField,
     required,
@@ -124,6 +137,7 @@ export const FieldsDesigner = ({
       inmFields[fieldIndex].referencedField = referencedField;
       inmFields[fieldIndex].required = required;
       inmFields[fieldIndex].pk = pk;
+      inmFields[fieldIndex].pkMustBeUsed = pkMustBeUsed;
       onChangeFields(inmFields, isLinkChange, table.tableSchemaId);
       setFields(inmFields);
     }
@@ -342,6 +356,7 @@ export const FieldsDesigner = ({
                 fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
                 fieldName={field.name}
                 fieldPK={field.pk}
+                fieldPkMustBeUsed={field.pkMustBeUsed}
                 fieldPKReferenced={field.pkReferenced}
                 fieldRequired={Boolean(field.required)}
                 fieldType={field.type}
