@@ -438,7 +438,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                     />
                   </div>
                   <div className={`${styles.field} ${styles.qcEnabled} formField `}>
-                    <label htmlFor="QcActive">{resourcesContext.messages.enabled}</label>
+                    <label htmlFor="QcActive">{resourcesContext.messages.qcEnabled}</label>
                     <Checkbox
                       id={`${componentName}__active`}
                       onChange={e => onInfoFieldChange('active', e.checked)}
