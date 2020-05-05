@@ -59,9 +59,8 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     disabled: true,
     placeholder: resourcesContext.messages.fieldConstraintTableFieldNoOptions
   });
-  const [tabMenuItems] = useState([
+  const [tabMenuItems, setTabMenuItems] = useState([
     {
-      // label: resources.messages['dataflowAcceptedPendingTab'],
       label: resourcesContext.messages.tabMenuConstraintData,
       className: styles.flow_tab,
       tabKey: 'data'
@@ -181,6 +180,15 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
 
   useEffect(() => {
     if (validationContext.ruleEdit && !isEmpty(validationContext.ruleToEdit)) {
+      if (validationContext.ruleToEdit.automatic) {
+        setTabMenuItems([
+          {
+            label: resourcesContext.messages.tabMenuConstraintData,
+            className: styles.flow_tab,
+            tabKey: 'data'
+          }
+        ]);
+      }
       creationFormDispatch({
         type: 'POPULATE_CREATE_FORM',
         payload: validationContext.ruleToEdit
