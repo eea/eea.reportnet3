@@ -9,6 +9,9 @@ export const dataflowManagementReducer = (state, { type, payload }) => {
     case 'ON_LOAD_OBLIGATION':
       return { ...state, obligation: { id: payload.id, title: payload.title } };
 
+    case 'ON_SUBMIT':
+      return { ...state, isSubmitting: payload.submit };
+
     case 'PREV_STATE':
       return { ...state, obligationPrevState: { id: payload.id, title: payload.title } };
 
