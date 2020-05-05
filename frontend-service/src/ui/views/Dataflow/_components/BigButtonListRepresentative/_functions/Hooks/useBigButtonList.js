@@ -9,7 +9,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, onShowSnapshotDialog }) => {
+const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, onShowSnapshotDialog, match }) => {
   const resources = useContext(ResourcesContext);
   const helpButton = {
     layout: 'defaultBigButton',
@@ -38,7 +38,7 @@ const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, on
   };
 
   const groupByRepresentativeModels = dataflowState.data.datasets
-    .filter(dataset => dataset.dataProviderId === dataflowState.urlRepresentativeId)
+    .filter(dataset => dataset.dataProviderId == match.params.representativeId)
     .map(dataset => {
       return {
         layout: 'defaultBigButton',

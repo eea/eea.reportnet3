@@ -32,8 +32,6 @@ const useBigButtonList = ({
 }) => {
   const resources = useContext(ResourcesContext);
 
-  const { setUrlRepresentativeId } = dataflowActionCreators(dataflowDispatch);
-
   const buttonList = [
     {
       buttonClass: 'newItem',
@@ -123,7 +121,7 @@ const useBigButtonList = ({
     );
 
     if (uniqRepresentatives.length === 1 && !dataflowState.isCustodian) {
-      // const [representative] = uniqRepresentatives;
+      const [representative] = uniqRepresentatives;
 
       return datasets.map(dataset => {
         const datasetName = dataset.name;
@@ -158,14 +156,15 @@ const useBigButtonList = ({
       buttonIcon: 'representative',
       caption: representative.name,
       handleRedirect: () => {
-        // handleRedirect(getUrl(routes.REPRESENTATIVE, { dataflowId, representative: representative.name }, true));
-        window.history.replaceState(null, '', `/dataflow/${dataflowId}/representativeId/${representative.id}`);
-        setUrlRepresentativeId(representative.id);
+        handleRedirect(
+          getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: representative.id }, true)
+        );
+        // window.history.replaceState(null, '', `/dataflow/${dataflowId}/representativeId/${representative.id}`);
       },
 
       helpClassName: 'dataflow-dataset-container-help-step',
       layout: 'defaultBigButton',
-      onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representative: representative.id }, true),
+      onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representativeId: representative.id }, true),
       visibility: !isEmpty(dataflowState.data.datasets)
     }));
   };

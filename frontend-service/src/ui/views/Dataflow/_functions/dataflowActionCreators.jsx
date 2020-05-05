@@ -50,8 +50,6 @@ export function dataflowActionCreators(dataflowDispatch) {
   const setIsDataSchemaCorrect = validationResult =>
     dataflowDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { validationResult } });
 
-  const setUrlRepresentativeId = id => dataflowDispatch({ type: 'SET_URL_REPRESENTATIVE_ID', payload: { id } });
-
   const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
 
   const setIsPageLoading = isPageLoading =>
@@ -84,6 +82,17 @@ export function dataflowActionCreators(dataflowDispatch) {
     });
   };
 
+  const onInitReceiptData = (isReceiptLoading, isReceiptOutdated, isReleased) => {
+    dataflowDispatch({
+      type: 'ON_INIT_RECEIPT_DATA',
+      payload: {
+        isReceiptLoading,
+        isReceiptOutdated,
+        isReleased
+      }
+    });
+  };
+
   return {
     initialLoad,
     loadPermissions,
@@ -102,6 +111,6 @@ export function dataflowActionCreators(dataflowDispatch) {
     setIsReceiptLoading,
     setIsReceiptOutdated,
     setUpdatedDatasetSchema,
-    setUrlRepresentativeId
+    onInitReceiptData
   };
 }
