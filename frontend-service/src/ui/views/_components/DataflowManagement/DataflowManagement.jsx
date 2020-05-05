@@ -1,4 +1,6 @@
-import React, { Fragment, useContext, useReducer, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+
+import isNil from 'lodash/isNil';
 
 import styles from './DataflowManagement.module.scss';
 
@@ -58,6 +60,10 @@ export const DataflowManagement = ({
     dataflowManagementReducer,
     dataflowManagementInitialState
   );
+
+  useEffect(() => {
+    if (!isNil(deleteInputRef.current) && state.isDeleteDialogVisible) deleteInputRef.current.element.focus();
+  }, [state.isDeleteDialogVisible]);
 
   const isDialogVisible = isEditForm ? 'isEditDialogVisible' : 'isAddDialogVisible';
 

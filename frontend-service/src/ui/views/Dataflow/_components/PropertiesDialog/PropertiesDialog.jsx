@@ -1,6 +1,4 @@
-import React, { useContext, useEffect, useRef } from 'react';
-
-import isNil from 'lodash/isNil';
+import React, { useContext } from 'react';
 
 import styles from './PropertiesDialog.module.scss';
 
@@ -17,14 +15,6 @@ import { PropertiesUtils } from './_functions/Utils/PropertiesUtils';
 export const PropertiesDialog = ({ dataflowDataState, onManageDialogs }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
-
-  const deleteInputRef = useRef(null);
-
-  useEffect(() => {
-    if (dataflowDataState.isDeleteDialogVisible && !isNil(deleteInputRef.current)) {
-      deleteInputRef.current.element.focus();
-    }
-  }, [dataflowDataState.isDeleteDialogVisible]);
 
   const parsedDataflowData = { dataflowStatus: dataflowDataState.data.status };
   const parsedObligationsData = PropertiesUtils.parseObligationsData(dataflowDataState, user.userProps.dateFormat);
