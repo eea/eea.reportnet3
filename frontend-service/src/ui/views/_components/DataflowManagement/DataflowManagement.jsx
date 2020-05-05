@@ -41,8 +41,9 @@ export const DataflowManagement = ({
   const formRef = useRef(null);
 
   const dataflowManagementInitialState = {
-    name: isEditForm ? state.name : '',
     description: isEditForm ? state.description : '',
+    isSubmitting: false,
+    name: isEditForm ? state.name : '',
     obligation:
       isEditForm && state.obligations
         ? { id: state.obligations.obligationId, title: state.obligations.title }
@@ -62,6 +63,8 @@ export const DataflowManagement = ({
 
   const getPrevState = data =>
     dataflowManagementDispatch({ type: 'PREV_STATE', payload: { id: data.id, title: data.title } });
+
+  const onSubmit = value => dataflowManagementDispatch({ type: 'ON_SUBMIT', payload: { submit: value } });
 
   const onDeleteDataflow = async () => {
     onManageDialogs('isDeleteDialogVisible', false, isDialogVisible, true);
@@ -129,9 +132,10 @@ export const DataflowManagement = ({
         )}
       </div>
       <Button
-        icon={isEditForm ? 'save' : 'add'}
+        disabled={dataflowManagementState.isSubmitting}
+        icon={dataflowManagementState.isSubmitting ? 'spinnerAnimate' : isEditForm ? 'save' : 'add'}
         label={isEditForm ? resources.messages['save'] : resources.messages['create']}
-        onClick={() => onSave()}
+        onClick={() => (dataflowManagementState.isSubmitting ? {} : onSave())}
       />
       {renderCancelButton(onHideDataflowDialog)}
     </Fragment>
@@ -179,6 +183,7 @@ export const DataflowManagement = ({
             onCreate={onCreateDataflow}
             onEdit={onEditDataflow}
             onSearch={() => onManageDialogs('isRepObDialogVisible', true, isDialogVisible, false)}
+            onSubmit={onSubmit}
             ref={formRef}
             refresh={isEditForm ? state.isEditDialogVisible : state.isAddDialogVisible}
           />

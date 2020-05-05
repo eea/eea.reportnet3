@@ -17,7 +17,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const DataflowManagementForm = forwardRef(
-  ({ data, dataflowId, getData, isEditForm, onCreate, onEdit, onSearch, refresh }, ref) => {
+  ({ data, dataflowId, getData, isEditForm, onCreate, onEdit, onSearch, onSubmit, refresh }, ref) => {
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
 
@@ -57,8 +57,8 @@ const DataflowManagementForm = forwardRef(
         enableReinitialize={true}
         initialValues={data}
         validationSchema={dataflowCrudValidation}
-        onSubmit={async (values, { setSubmitting }) => {
-          setSubmitting(true);
+        onSubmit={async values => {
+          onSubmit(true);
           try {
             if (isEditForm) {
               await DataflowService.update(dataflowId, values.name, values.description, data.obligation.id);
@@ -80,10 +80,10 @@ const DataflowManagementForm = forwardRef(
 
             notificationContext.add(notification);
           } finally {
-            setSubmitting(false);
+            onSubmit(false);
           }
         }}>
-        {({ errors, handleChange, isSubmitting, touched }) => (
+        {({ errors, handleChange, touched }) => (
           <Form>
             <fieldset>
               <div
