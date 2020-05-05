@@ -42,6 +42,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 import { dataflowActionCreators } from './_functions/dataflowActionCreators';
+import { useHelpSteps } from './_hooks/useHelpSteps';
 
 const Dataflow = withRouter(({ history, match }) => {
   const {
@@ -107,12 +108,10 @@ const Dataflow = withRouter(({ history, match }) => {
   } = dataflowActionCreators(dataflowDispatch);
 
   useEffect(() => {
-    console.log('match.params.representativeId', match.params.representativeId);
-  }, [match]);
-
-  useEffect(() => {
     if (!isNil(user.contextRoles)) onLoadPermission();
   }, [user]);
+
+  useHelpSteps(leftSideBarContext, dataflowState);
 
   //Bread Crumbs settings
   useEffect(() => {
@@ -173,19 +172,6 @@ const Dataflow = withRouter(({ history, match }) => {
   }, [dataflowState.isCustodian, dataflowState.status]);
 
   useEffect(() => {
-    const steps = filterHelpSteps();
-    leftSideBarContext.addHelpSteps('dataflowHelp', steps);
-  }, [
-    dataflowState.data,
-    dataflowState.designDatasetSchemas,
-    dataflowState.formHasRepresentatives,
-    dataflowState.isCustodian,
-    dataflowState.isDataSchemaCorrect,
-    dataflowState.status,
-    dataflowId
-  ]);
-
-  useEffect(() => {
     if (!isEmpty(dataflowState.data.representatives)) {
       const representativesNoDatasets = dataflowState.data.representatives.filter(
         representative => !representative.hasDatasets
@@ -201,68 +187,6 @@ const Dataflow = withRouter(({ history, match }) => {
     onLoadReportingDataflow();
     onLoadSchemasValidations();
   }, [dataflowId, dataflowState.isDataUpdated]);
-
-  const filterHelpSteps = () => {
-    const dataflowSteps = [
-      {
-        content: <h2>{resources.messages['dataflowHelp']}</h2>,
-        locale: { skip: <strong aria-label="skip">{resources.messages['skipHelp']}</strong> },
-        placement: 'center',
-        target: 'body'
-      },
-      {
-        content: <h2>{resources.messages['dataflowHelpStep1']}</h2>,
-        target: '.dataflow-new-item-help-step'
-      },
-      {
-        content: <h2>{resources.messages['dataflowHelpStep2']}</h2>,
-        target: '.dataflow-documents-weblinks-help-step'
-      },
-      {
-        content: <h2>{resources.messages['dataflowHelpStep3']}</h2>,
-        target: '.dataflow-schema-help-step'
-      },
-      {
-        content: <h2>{resources.messages['dataflowHelpStep4']}</h2>,
-        target: '.dataflow-dataset-container-help-step'
-      },
-      {
-        content: <h2>{resources.messages['dataflowHelpStep5']}</h2>,
-        target: '.dataflow-dataset-help-step'
-      },
-      {
-        content: <h2>{resources.messages['dataflowHelpStep6']}</h2>,
-        target: '.dataflow-datacollection-help-step'
-      },
-      {
-        content: <h2>{resources.messages['dataflowHelpStep7']}</h2>,
-        target: '.dataflow-dashboards-help-step'
-      },
-      {
-        content: <h2>{resources.messages['dataflowHelpStep8']}</h2>,
-        target: '.dataflow-edit-help-step'
-      },
-      {
-        content: <h2>{resources.messages['dataflowHelpStep9']}</h2>,
-        target: '.dataflow-manage-roles-help-step'
-      },
-      {
-        content: <h2>{resources.messages['dataflowHelpStep10']}</h2>,
-        target: '.dataflow-properties-help-step'
-      },
-      {
-        content: <h2>{resources.messages['dataflowHelpStep11']}</h2>,
-        target: '.dataflow-properties-provider-help-step'
-      }
-    ];
-
-    const loadedClassesSteps = [...dataflowSteps].filter(
-      dataflowStep =>
-        !isNil(document.getElementsByClassName(dataflowStep.target.substring(1, dataflowStep.target.length))[0]) ||
-        dataflowStep.target === 'body'
-    );
-    return loadedClassesSteps;
-  };
 
   const handleRedirect = target => history.push(target);
 
@@ -447,8 +371,7 @@ const Dataflow = withRouter(({ history, match }) => {
           match={match}
         />
 
-        {/* 
-        {!isNull(match.params.representativeId) ? (
+        {/*  {!isNull(match.params.representativeId) ? (
           <BigButtonList
             dataflowDispatch={dataflowDispatch}
             dataflowState={dataflowState}
@@ -466,8 +389,8 @@ const Dataflow = withRouter(({ history, match }) => {
             onShowSnapshotDialog={onShowSnapshotDialog}
             match={match}
           />
-        )}
- */}
+        )} */}
+
         <SnapshotsDialog
           dataflowId={dataflowId}
           datasetId={dataflowState.datasetIdToSnapshotProps}
