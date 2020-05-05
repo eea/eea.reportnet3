@@ -2251,6 +2251,17 @@ textarea:focus {
 
 form .error {
   color: var(--errors);
+  transition: color 0.2s;
+}
+
+.formField.error:hover {
+  color: var(--dialog-content-color);
+}
+
+.formField.error:hover input {
+  border-color: var(--dialog-content-color);
+  box-shadow: none;
+  outline: none;
 }
 
 /*Tooltip*/
