@@ -19,18 +19,17 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const LeftSideBar = withRouter(({ history }) => {
-  const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
-  const [logoutConfirmvisible, setlogoutConfirmVisible] = useState(undefined);
+  const [logoutConfirmVisible, setLogoutConfirmVisible] = useState(undefined);
   const [run, setRun] = useState(false);
 
   const handleJoyrideCallback = data => {
-    const { status, type } = data;
+    const { status } = data;
     const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
 
     if (finishedStatuses.includes(status)) {
@@ -119,7 +118,7 @@ const LeftSideBar = withRouter(({ history }) => {
       href: '#',
       onClick: e => {
         e.preventDefault();
-        userContext.userProps.showLogoutConfirmation ? setlogoutConfirmVisible(true) : userLogout();
+        userContext.userProps.showLogoutConfirmation ? setLogoutConfirmVisible(true) : userLogout();
       },
       title: 'logout',
       icon: 'logout',
@@ -183,8 +182,8 @@ const LeftSideBar = withRouter(({ history }) => {
                 onConfirm={() => {
                   userLogout();
                 }}
-                onHide={() => setlogoutConfirmVisible(false)}
-                visible={logoutConfirmvisible}
+                onHide={() => setLogoutConfirmVisible(false)}
+                visible={logoutConfirmVisible}
                 header={resources.messages['logout']}
                 labelConfirm={resources.messages['yes']}
                 labelCancel={resources.messages['no']}>
