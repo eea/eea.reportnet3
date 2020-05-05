@@ -389,7 +389,7 @@ export const BigButtonList = ({
         />
       </ConfirmDialog>
 
-      {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
+      <button ref={receiptBtnRef} style={{ display: 'none' }} />
     </>
   );
 };

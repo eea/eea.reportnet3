@@ -85,7 +85,7 @@ export const BigButtonListRepresentative = ({
         </div>
       </div>
 
-      {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
+      <button ref={receiptBtnRef} style={{ display: 'none' }} />
     </>
   );
 };

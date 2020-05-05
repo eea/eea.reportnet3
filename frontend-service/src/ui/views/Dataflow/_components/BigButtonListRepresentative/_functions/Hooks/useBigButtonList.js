@@ -11,6 +11,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, onShowSnapshotDialog, match }) => {
   const resources = useContext(ResourcesContext);
+
   const helpButton = {
     layout: 'defaultBigButton',
     buttonClass: 'dataflowHelp',
