@@ -635,6 +635,7 @@
     "toggleConfirmationOff": "Switch off logout confirmation",
     "toggleConfirmationOn": "Switch on logout confirmation",
     "24hFormat": "Switch to 24 hours format",
-    "amPmFormat": "Switch to AM/PM format"
+    "amPmFormat": "Switch to AM/PM format",
+    "qcEnabled": "Enabled"
   }
 }

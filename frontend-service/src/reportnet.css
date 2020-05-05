@@ -2236,7 +2236,7 @@ textarea:focus {
 }
 .formField.error .p-dropdown {
   border-color: var(--errors);
-  box-shadow: inset 0px 0px 0px 1px var(--errors);
+  box-shadow: none;
   outline: none;
   border-width: 2px;
 }
