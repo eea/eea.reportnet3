@@ -42,7 +42,8 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 import { dataflowActionCreators } from './_functions/dataflowActionCreators';
-import { useHelpSteps } from './_hooks/useHelpSteps';
+import { useHelpSteps } from 'ui/views/_functions/Hooks/useHelpSteps';
+import { useFilterHelpSteps } from './_hooks/useFilterHelpSteps';
 
 const Dataflow = withRouter(({ history, match }) => {
   const {
@@ -111,7 +112,7 @@ const Dataflow = withRouter(({ history, match }) => {
     if (!isNil(user.contextRoles)) onLoadPermission();
   }, [user]);
 
-  useHelpSteps(leftSideBarContext, dataflowState);
+  useHelpSteps(useFilterHelpSteps, leftSideBarContext, dataflowState);
 
   //Bread Crumbs settings
   useEffect(() => {
