@@ -341,7 +341,14 @@ const Tab = ({
                   onInputBlur(e.target.value, index, initialTitleHeader);
                 } else {
                   if (!isUndefined(onTabNameError)) {
-                    onTabAddCancel();
+                    if (!newTab) {
+                      onTabNameError(
+                        resources.messages['emptyTabHeader'],
+                        resources.messages['emptyTitleValidationError']
+                      );
+                    } else {
+                      onTabAddCancel();
+                    }
                   }
                 }
               }}

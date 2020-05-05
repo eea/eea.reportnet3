@@ -256,7 +256,7 @@
     "emptyReleasedDashboard": "There is no released data available",
     "emptySnapshotList": "There is no created copy to release",
     "emptyTabHeader": "Empty table name",
-    "emptyTitleValidationError": "Please enter a title",
+    "emptyTitleValidationError": "Empty table name, please enter one",
     "emptyValidations": "There are no validations defined yet.",
     "enabled": "Status",
     "entity": "Entity",
