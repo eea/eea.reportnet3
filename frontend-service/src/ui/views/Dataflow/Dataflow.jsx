@@ -432,17 +432,13 @@ const Dataflow = withRouter(({ history, match }) => {
           </Dialog>
         )}
 
-        <PropertiesDialog
-          dataflowDataState={dataflowDataState}
-          dataflowId={dataflowId}
-          history={history}
-          onConfirmDelete={onConfirmDelete}
-          onManageDialogs={onManageDialogs}
-        />
+        <PropertiesDialog dataflowDataState={dataflowDataState} onManageDialogs={onManageDialogs} />
 
         <DataflowManagement
           dataflowId={dataflowId}
+          history={history}
           isEditForm={true}
+          onConfirmDelete={onConfirmDelete}
           onEditDataflow={onEditDataflow}
           onManageDialogs={onManageDialogs}
           state={dataflowDataState}
