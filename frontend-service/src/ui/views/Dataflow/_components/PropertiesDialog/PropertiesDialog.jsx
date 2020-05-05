@@ -1,10 +1,8 @@
-import React, { Fragment, useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 
 import isNil from 'lodash/isNil';
 
 import styles from './PropertiesDialog.module.scss';
-
-import DataflowConf from 'conf/dataflow.config.json';
 
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -32,24 +30,12 @@ export const PropertiesDialog = ({ dataflowDataState, onManageDialogs }) => {
   const parsedObligationsData = PropertiesUtils.parseObligationsData(dataflowDataState, user.userProps.dateFormat);
 
   const dialogFooter = (
-    <Fragment>
-      <div className="p-toolbar-group-left">
-        {dataflowDataState.isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DESIGN'] && (
-          <Button
-            className="p-button-danger p-button-animated-blink"
-            label={resources.messages['deleteDataflowButton']}
-            icon="trash"
-            onClick={() => onManageDialogs('isDeleteDialogVisible', true, 'isPropertiesDialogVisible', false)}
-          />
-        )}
-      </div>
-      <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon="cancel"
-        label={resources.messages['close']}
-        onClick={() => onManageDialogs('isPropertiesDialogVisible', false)}
-      />
-    </Fragment>
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon="cancel"
+      label={resources.messages['close']}
+      onClick={() => onManageDialogs('isPropertiesDialogVisible', false)}
+    />
   );
 
   return (
