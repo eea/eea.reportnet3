@@ -424,7 +424,7 @@ const Dataflow = withRouter(({ history, match }) => {
     <div className="rep-row">
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
         <Title
-          icon="archive"
+          icon="clone"
           iconSize="4rem"
           subtitle={resources.messages['dataflow']}
           title={TextUtils.ellipsis(dataflowState.name)}
