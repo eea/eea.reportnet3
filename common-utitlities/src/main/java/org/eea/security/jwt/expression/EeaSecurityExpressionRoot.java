@@ -9,6 +9,7 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
+import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
@@ -123,7 +124,7 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
     Object details = SecurityContextHolder.getContext().getAuthentication().getDetails();
 
     if (details instanceof Map) {
-      String userId = ((Map<String, String>) details).get("userId");
+      String userId = ((Map<String, String>) details).get(AuthenticationDetails.USER_ID);
       String apiKey = this.userManagementControllerZull.getApiKey(userId, dataflowId, dataProvider);
       return SecurityContextHolder.getContext().getAuthentication().getCredentials().toString()
           .equals(apiKey);

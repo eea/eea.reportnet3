@@ -41,6 +41,7 @@ import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -183,7 +184,7 @@ public class DataflowServiceImpl implements DataflowService {
       dataflowVO.setRepresentatives(representativeService.getRepresetativesByIdDataFlow(id));
     } else {
       String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication()
-          .getDetails()).get("userId");
+          .getDetails()).get(AuthenticationDetails.USER_ID);
       UserRepresentationVO user = userManagementControllerZull.getUserByUserId(userId);
       dataflowVO.setRepresentatives(
           representativeService.getRepresetativesByDataflowIdAndEmail(id, user.getEmail()));

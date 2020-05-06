@@ -1,14 +1,12 @@
 package org.eea.ums.service.keycloak.service.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
+import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.ums.service.keycloak.model.CheckResourcePermissionResult;
 import org.eea.ums.service.keycloak.model.ClientInfo;
 import org.eea.ums.service.keycloak.model.GroupInfo;
@@ -62,7 +60,7 @@ public class KeycloakConnectorServiceImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     CheckResourcePermissionResult body = new CheckResourcePermissionResult();
@@ -136,7 +134,7 @@ public class KeycloakConnectorServiceImplTest {
   public void getReportnetClientInfo() {
     ClientInfo info = new ClientInfo();
     info.setClientId("reportnet");
-    ClientInfo[] body = new ClientInfo[]{info};
+    ClientInfo[] body = new ClientInfo[] {info};
 
     ResponseEntity<ClientInfo[]> clientInfoResult = new ResponseEntity<>(body, HttpStatus.OK);
     Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
@@ -150,7 +148,7 @@ public class KeycloakConnectorServiceImplTest {
   @Test
   public void getResourceInfo() {
 
-    String[] bodyResourceSet = new String[]{"resource1"};
+    String[] bodyResourceSet = new String[] {"resource1"};
 
     ResponseEntity<String[]> resourceSetInfo = new ResponseEntity<>(bodyResourceSet, HttpStatus.OK);
 
@@ -190,7 +188,7 @@ public class KeycloakConnectorServiceImplTest {
     groupInfo.setId("1");
     groupInfo.setName("Dataflow-1-DATA_PROVIDER");
     groupInfo.setPath("/path");
-    GroupInfo[] groupInfos = new GroupInfo[]{groupInfo};
+    GroupInfo[] groupInfos = new GroupInfo[] {groupInfo};
 
     ResponseEntity<GroupInfo[]> responseGroupInfos =
         new ResponseEntity<>(groupInfos, HttpStatus.OK);
