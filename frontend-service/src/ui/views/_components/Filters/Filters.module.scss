@@ -182,9 +182,19 @@
         color: var(--statusBox-false-color);
       }
 
+      .invalid {
+        background-color: var(--statusBox-false-bg);
+        color: var(--statusBox-false-color);
+      }
+
       .info {
         background-color: var(--statusBox-info-bg);
         color: var(--statusBox-info-color);
+      }
+
+      .valid {
+        background-color: var(--statusBox-true-bg);
+        color: var(--statusBox-true-color);
       }
 
       .warning {

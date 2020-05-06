@@ -636,6 +636,9 @@
     "toggleConfirmationOn": "Switch on logout confirmation",
     "24hFormat": "Switch to 24 hours format",
     "amPmFormat": "Switch to AM/PM format",
-    "qcEnabled": "Enabled"
+    "qcEnabled": "Enabled",
+    "valid": "Valid",
+    "pending": "Pending",
+    "dashboardWarning": "Chart shows percentage of records classified by highest QC level found for each record."
   }
 }
