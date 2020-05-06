@@ -12,12 +12,6 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class ObligationVO {
 
@@ -54,6 +48,10 @@ public class ObligationVO {
   /** The issues. */
   private List<IssueVO> issues;
 
-  /** The next reporting. */
-  private String nextReporting;
+  /** The report freq. */
+  private String reportFreq;
+
+  /** The report freq detail. */
+  private String reportFreqDetail;
+
 }
