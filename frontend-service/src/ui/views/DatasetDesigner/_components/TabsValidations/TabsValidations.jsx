@@ -194,8 +194,6 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
 
   const actionsTemplate = row => (row.automatic ? editTemplate(row) : editAndDeleteTemplate());
 
-  const deleteTemplate = () => <ActionsColumn onDeleteClick={() => onShowDeleteDialog()} />;
-
   const editAndDeleteTemplate = row => (
     <ActionsColumn
       onDeleteClick={() => onShowDeleteDialog()}

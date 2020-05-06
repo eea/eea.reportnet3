@@ -86,7 +86,6 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
         <p>
           <>
             <span>{`${resources.messages['deliveryDate']}: `}</span>
-            {console.log('item', itemContent)}
             <span className={`${styles.dateBlock}`}>
               {itemContent.expirationDate == '-'
                 ? resources.messages['pending']
