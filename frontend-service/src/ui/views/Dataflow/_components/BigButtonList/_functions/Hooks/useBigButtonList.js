@@ -9,14 +9,11 @@ import DataflowConf from 'conf/dataflow.config.json';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-import { dataflowActionCreators } from '../../../../_functions/dataflowActionCreators';
-
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const useBigButtonList = ({
   dataflowId,
   dataflowState,
-  dataflowDispatch,
   exportDatatableSchema,
   getDeleteSchemaIndex,
   handleRedirect,
@@ -114,15 +111,13 @@ const useBigButtonList = ({
   const buildGroupByRepresentativeModels = dataflowData => {
     const { datasets } = dataflowData;
 
-    const uniqRepresentatives = uniq(
-      datasets.map(dataset => {
-        return { name: dataset.datasetSchemaName, id: dataset.dataProviderId };
-      })
-    );
+    const allDatasets = datasets.map(dataset => {
+      return { name: dataset.datasetSchemaName, id: dataset.dataProviderId };
+    });
 
-    if (uniqRepresentatives.length === 1 && !dataflowState.isCustodian) {
-      const [representative] = uniqRepresentatives;
+    const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.id)).length === 1;
 
+    if (isUniqRepresentative && !dataflowState.isCustodian) {
       return datasets.map(dataset => {
         const datasetName = dataset.name;
         return {
@@ -151,7 +146,8 @@ const useBigButtonList = ({
         };
       });
     }
-    return uniqRepresentatives.map(representative => ({
+
+    return allDatasets.map(representative => ({
       buttonClass: 'dataset',
       buttonIcon: 'representative',
       caption: representative.name,

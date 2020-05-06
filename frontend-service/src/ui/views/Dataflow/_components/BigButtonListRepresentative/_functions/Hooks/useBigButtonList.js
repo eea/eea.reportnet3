@@ -2,7 +2,6 @@ import { useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
-import uniq from 'lodash/uniq';
 
 import { routes } from 'ui/routes';
 
@@ -92,7 +91,6 @@ const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, on
 
   const onBuildReceiptButton = () => {
     const { datasets } = dataflowState.data;
-    const representativeNames = datasets.map(dataset => dataset.datasetSchemaName);
     const releasedStates = datasets.map(dataset => dataset.isReleased);
 
     return [

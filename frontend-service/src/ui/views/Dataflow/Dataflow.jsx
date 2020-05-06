@@ -105,7 +105,8 @@ const Dataflow = withRouter(({ history, match }) => {
     setIsDataUpdated,
     setIsReceiptOutdated,
     setIsPageLoading,
-    setUpdatedDatasetSchema
+    setUpdatedDatasetSchema,
+    setIsRepresentativeView
   } = dataflowActionCreators(dataflowDispatch);
 
   useEffect(() => {
@@ -187,7 +188,7 @@ const Dataflow = withRouter(({ history, match }) => {
     setIsPageLoading(true);
     onLoadReportingDataflow();
     onLoadSchemasValidations();
-  }, [dataflowId, dataflowState.isDataUpdated]);
+  }, [dataflowId, dataflowState.isDataUpdated, match.params.representativeId]);
 
   const handleRedirect = target => history.push(target);
 
@@ -221,14 +222,14 @@ const Dataflow = withRouter(({ history, match }) => {
     loadPermissions(hasWritePermissions, isCustodian);
   };
 
-  const checkIsRepresentativeView = datasets => {
-    const uniqRepresentatives = uniq(datasets.map(dataset => dataset.datasetSchemaName));
+  const checkIsRepresentativeView = (datasets, dataflow) => {
+    const uniqRepresentatives = uniq(datasets.map(dataset => dataset.dataProviderId));
 
-    return uniqRepresentatives.length === 1;
+    return dataflow.representatives.length === 1 && uniqRepresentatives === 1;
   };
 
   const onInitialLoad = (dataflow, datasets) => {
-    const isRepresentativeView = checkIsRepresentativeView(datasets);
+    const isRepresentativeView = checkIsRepresentativeView(datasets, dataflow);
     initialLoad(dataflow, isRepresentativeView);
   };
 
@@ -264,8 +265,9 @@ const Dataflow = withRouter(({ history, match }) => {
         }
       } //+
 
-      if (!isNil(match.params.representativeId)) {
-        console.log('hello');
+      if (dataflow.representatives.length === 1 /* || !isNil(match.params.representativeId) */) {
+        console.log('in!!! ', match.params.representativeId);
+        console.log('dataflowState.isRepresentativeView', dataflowState.isRepresentativeView);
         if (!isEmpty(dataflow.representatives) && !isEmpty(dataflow.datasets)) {
           const representativeId = dataflow.datasets.map(id => id.dataProviderId);
 

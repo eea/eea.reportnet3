@@ -65,7 +65,6 @@ export const DataflowManagement = ({
   );
 
   useEffect(() => {
-    console.log('state', state);
     if (!isNil(deleteInputRef.current) && state.isDeleteDialogVisible) deleteInputRef.current.element.focus();
   }, [state.isDeleteDialogVisible]);
 

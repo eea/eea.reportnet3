@@ -100,6 +100,7 @@ export function dataflowActionCreators(dataflowDispatch) {
     onCleanUpReceipt,
     onDeleteDataflow,
     onEditData,
+    onInitReceiptData,
     setDataProviderId,
     setDatasetIdToSnapshotProps,
     setDesignDatasetSchemas,
@@ -110,7 +111,7 @@ export function dataflowActionCreators(dataflowDispatch) {
     setIsPageLoading,
     setIsReceiptLoading,
     setIsReceiptOutdated,
-    setUpdatedDatasetSchema,
-    onInitReceiptData
+    setIsRepresentativeView,
+    setUpdatedDatasetSchema
   };
 }
