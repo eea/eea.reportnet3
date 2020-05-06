@@ -42,7 +42,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 import { dataflowActionCreators } from './_functions/dataflowActionCreators';
-import { useHelpSteps } from 'ui/views/_functions/Hooks/useHelpSteps';
+import { useHelpSteps } from 'ui/views/Dataflow/_hooks/useHelpSteps';
 import { useFilterHelpSteps } from './_hooks/useFilterHelpSteps';
 
 const Dataflow = withRouter(({ history, match }) => {
