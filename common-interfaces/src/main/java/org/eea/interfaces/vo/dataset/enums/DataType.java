@@ -105,6 +105,12 @@ public enum DataType {
   CODELIST("CODELIST"),
 
   /**
+   * The codelist with more than one value avaliable.
+   *
+   * Cast in JPA: java.lang.String
+   */
+  CODELIST_MULTISELECT("CODELIST_MULTISELECT"),
+  /**
    * The link data with PK.
    *
    * Cast in JPA: java.lang.String
