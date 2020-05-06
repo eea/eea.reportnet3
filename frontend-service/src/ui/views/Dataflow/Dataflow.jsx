@@ -378,7 +378,7 @@ const Dataflow = withRouter(({ history, match }) => {
     <div className="rep-row">
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
         <Title
-          icon="archive"
+          icon="clone"
           iconSize="4rem"
           subtitle={resources.messages['dataflow']}
           title={TextUtils.ellipsis(dataflowDataState.name)}
@@ -432,17 +432,13 @@ const Dataflow = withRouter(({ history, match }) => {
           </Dialog>
         )}
 
-        <PropertiesDialog
-          dataflowDataState={dataflowDataState}
-          dataflowId={dataflowId}
-          history={history}
-          onConfirmDelete={onConfirmDelete}
-          onManageDialogs={onManageDialogs}
-        />
+        <PropertiesDialog dataflowDataState={dataflowDataState} onManageDialogs={onManageDialogs} />
 
         <DataflowManagement
           dataflowId={dataflowId}
+          history={history}
           isEditForm={true}
+          onConfirmDelete={onConfirmDelete}
           onEditDataflow={onEditDataflow}
           onManageDialogs={onManageDialogs}
           state={dataflowDataState}
