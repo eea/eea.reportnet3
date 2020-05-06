@@ -114,6 +114,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("${pathSnapshot}")
   private String pathSnapshot;
 
+  @Value("${dataset.creation.notification.ms}")
+  private Long timeToWaitBeforeReleasingNotification;
 
   /**
    * The data source.
@@ -215,6 +217,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       statement.executeBatch();
       LOG.info("{} Schemas created as part of DataCollection creation",
           datasetIdsAndSchemaIds.size());
+      try {
+        //waiting X seconds before releasing notifications, so database is able to write the creation of all datasets
+        Thread.sleep(timeToWaitBeforeReleasingNotification);
+      } catch (InterruptedException e) {
+        LOG_ERROR.error("Error sleeping thread before releasing notification kafka events", e);
+      }
 
       LOG.info("Releasing notifications via Kafka");
       // Release events to initialize databases content
