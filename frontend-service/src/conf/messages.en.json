@@ -235,7 +235,7 @@
     "duplicateSchemaError": "The schema name already exists, Please choose another one.",
     "edit": "Edit",
     "editDocument": "Edit document",
-    "editFieldConstraint": "Update Field Constraint",
+    "editFieldConstraint": "Edit Field Constraint",
     "editFieldQC": "Edit field QC",
     "editItem": "Edit item",
     "editRow": "Edit row",
@@ -637,6 +637,9 @@
     "24hFormat": "Switch to 24 hours format",
     "amPmFormat": "Switch to AM/PM format",
     "qcEnabled": "Enabled",
+    "valid": "Valid",
+    "pending": "Pending",
+    "dashboardWarning": "Chart shows percentage of records classified by highest QC level found for each record.",
     "pkValuesMustBeUsed": "All PK values must be used on link"
   }
 }

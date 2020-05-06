@@ -12,6 +12,7 @@ const parseObligationsData = (data, format) => {
           title: data.obligations.title,
           description: data.obligations.description,
           comment: data.obligations.comment,
+          reportingFrequency: data.obligations.reportingFrequency,
           expirationDate: !isNil(data.obligations.expirationDate)
             ? moment(data.obligations.expirationDate).format(format)
             : '-'
@@ -20,8 +21,8 @@ const parseObligationsData = (data, format) => {
       {
         label: 'legalInstrument',
         data: {
-          alias: data.obligations.legalInstruments.alias,
-          title: data.obligations.legalInstruments.title
+          shortName: data.obligations.legalInstruments.alias,
+          legalName: data.obligations.legalInstruments.title
         }
       }
     ];
