@@ -109,7 +109,7 @@ public enum DataType {
    *
    * Cast in JPA: java.lang.String
    */
-  CODELIST_MULTISELECT("CODELIST_MULTISELECT"),
+  MULTISELECT_CODELIST("MULTISELECT_CODELIST"),
   /**
    * The link data with PK.
    *

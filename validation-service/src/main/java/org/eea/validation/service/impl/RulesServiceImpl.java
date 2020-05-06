@@ -321,7 +321,7 @@ public class RulesServiceImpl implements RulesService {
               FIELD_TYPE + typeData, document.get("codelistItems").toString(), "FT" + shortcode,
               FT_DESCRIPTION + typeData));
           break;
-        case CODELIST_MULTISELECT:
+        case MULTISELECT_CODELIST:
           // we find values available to create this validation for a codelist, same value with
           // capital letter and without capital letters
           document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
