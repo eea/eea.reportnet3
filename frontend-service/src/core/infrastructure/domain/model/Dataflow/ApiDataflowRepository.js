@@ -435,6 +435,8 @@ const parseObligationDTO = obligationDTO => {
       issues: obligationDTO.issues,
       legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),
       obligationId: obligationDTO.obligationId,
+      reportingFrequency: obligationDTO.reportFreq,
+      reportingFrequencyDetail: obligationDTO.reportFreqDetail,
       title: obligationDTO.oblTitle,
       validSince: obligationDTO.validSince,
       validTo: obligationDTO.validTo

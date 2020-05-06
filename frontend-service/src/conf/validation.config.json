@@ -111,5 +111,6 @@
   "logicalOperators": [
     { "label": "AND", "value": "AND" },
     { "label": "OR", "value": "OR" }
-  ]
+  ],
+  "requiredFields": ["table", "field", "shortCode", "name", "errorLevel", "errorMessage"]
 }
