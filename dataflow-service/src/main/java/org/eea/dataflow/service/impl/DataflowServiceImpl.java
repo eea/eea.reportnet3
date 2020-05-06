@@ -272,8 +272,8 @@ public class DataflowServiceImpl implements DataflowService {
     List<ObligationVO> obligations =
         obligationController.findOpenedObligations(null, null, null, null, null);
 
-    Map<Integer, ObligationVO> obligationMap = obligations.stream().collect(
-        Collectors.toMap(obligation -> obligation.getObligationId(), obligation -> obligation));
+    Map<Integer, ObligationVO> obligationMap = obligations.stream()
+        .collect(Collectors.toMap(ObligationVO::getObligationId, obligation -> obligation));
 
     for (DataFlowVO dataFlowVO : dataflowVOs) {
       if (dataFlowVO.getObligation() != null
@@ -430,7 +430,7 @@ public class DataflowServiceImpl implements DataflowService {
       dataflowVO.setCreationDate(new Date());
       dataflowVO.setStatus(TypeStatusEnum.DESIGN);
       dataFlowSaved = dataflowRepository.save(dataflowMapper.classToEntity(dataflowVO));
-      LOG.info("The dataflow {} has been saved.", dataFlowSaved.getName());
+      LOG.info("The dataflow {} has been created.", dataFlowSaved.getName());
     }
     // With that method we create the group in keycloack
     resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
@@ -467,7 +467,7 @@ public class DataflowServiceImpl implements DataflowService {
         dataflowSave.get().setDescription(dataflowVO.getDescription());
         dataflowSave.get().setObligationId(dataflowVO.getObligation().getObligationId());
         dataflowRepository.save(dataflowSave.get());
-        LOG.info("The dataflow {} has been saved.", dataflowSave.get().getName());
+        LOG.info("The dataflow {} has been updated.", dataflowSave.get().getName());
       }
     }
   }
@@ -556,46 +556,17 @@ public class DataflowServiceImpl implements DataflowService {
 
     // // PART DELETE DOCUMENTS
     if (null != dataflowVO.getDocuments() && !dataflowVO.getDocuments().isEmpty()) {
-      for (DocumentVO document : dataflowVO.getDocuments()) {
-        try {
-          documentControllerZuul.deleteDocument(document.getId(), Boolean.TRUE);
-        } catch (EEAException e) {
-          LOG.error("Error deleting document with id {}", document.getId());
-          throw new EEAException(new StringBuilder().append("Error Deleting document ")
-              .append(document.getName()).append(" with ").append(document.getId()).toString(), e);
-        }
-      }
-      LOG.info("Documents deleted to dataflow with id: {}", idDataflow);
+      deleteDocuments(idDataflow, dataflowVO);
     }
 
     // PART OF DELETE ALL THE DATASETSCHEMA we have in the dataflow
     if (null != dataflowVO.getDesignDatasets() && !dataflowVO.getDesignDatasets().isEmpty()) {
-      for (DesignDatasetVO designDatasetVO : dataflowVO.getDesignDatasets()) {
-        try {
-          dataSetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId(), true);
-        } catch (Exception e) {
-
-          LOG.error("Error deleting DesignDataset with id {}", designDatasetVO.getId(), e);
-          throw new EEAException(new StringBuilder().append("Error Deleting dataset ")
-              .append(designDatasetVO.getDataSetName()).append(" with ")
-              .append(designDatasetVO.getId()).toString(), e);
-        }
-      }
-      LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
+      deleteDatasetSchemas(idDataflow, dataflowVO);
     }
-
 
     // PART OF DELETE ALL THE REPRESENTATIVE we have in the dataflow
     if (null != dataflowVO.getRepresentatives() && !dataflowVO.getRepresentatives().isEmpty()) {
-      for (RepresentativeVO representative : dataflowVO.getRepresentatives()) {
-        try {
-          representativeRepository.deleteById(representative.getId());
-        } catch (Exception e) {
-          LOG.error("Error deleting representative with id {}", representative.getId(), e);
-          throw new EEAException(new StringBuilder().append("Error Deleting representative")
-              .append(" with id ").append(representative.getId()).toString(), e);
-        }
-      }
+      deleteRepresentatives(dataflowVO);
     }
     try {
       // Delete the dataflow metabase info. Also by the foreign keys of the database, entities like
@@ -621,8 +592,6 @@ public class DataflowServiceImpl implements DataflowService {
 
   }
 
-
-
   /**
    * Update data flow status.
    *
@@ -646,5 +615,43 @@ public class DataflowServiceImpl implements DataflowService {
     }
   }
 
+  private void deleteDocuments(Long idDataflow, DataFlowVO dataflowVO) throws Exception {
+    for (DocumentVO document : dataflowVO.getDocuments()) {
+      try {
+        documentControllerZuul.deleteDocument(document.getId(), Boolean.TRUE);
+      } catch (EEAException e) {
+        LOG.error("Error deleting document with id {}", document.getId());
+        throw new EEAException(new StringBuilder().append("Error Deleting document ")
+            .append(document.getName()).append(" with ").append(document.getId()).toString(), e);
+      }
+    }
+    LOG.info("Documents deleted to dataflow with id: {}", idDataflow);
+  }
+
+  private void deleteDatasetSchemas(Long idDataflow, DataFlowVO dataflowVO) throws EEAException {
+    for (DesignDatasetVO designDatasetVO : dataflowVO.getDesignDatasets()) {
+      try {
+        dataSetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId(), true);
+      } catch (Exception e) {
+        LOG.error("Error deleting DesignDataset with id {}", designDatasetVO.getId(), e);
+        throw new EEAException(new StringBuilder().append("Error Deleting dataset ")
+            .append(designDatasetVO.getDataSetName()).append(" with ")
+            .append(designDatasetVO.getId()).toString(), e);
+      }
+    }
+    LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
+  }
+
+  private void deleteRepresentatives(DataFlowVO dataflowVO) throws EEAException {
+    for (RepresentativeVO representative : dataflowVO.getRepresentatives()) {
+      try {
+        representativeRepository.deleteById(representative.getId());
+      } catch (Exception e) {
+        LOG.error("Error deleting representative with id {}", representative.getId(), e);
+        throw new EEAException(new StringBuilder().append("Error Deleting representative")
+            .append(" with id ").append(representative.getId()).toString(), e);
+      }
+    }
+  }
 
 }

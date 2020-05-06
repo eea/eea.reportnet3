@@ -11,7 +11,6 @@ import javax.persistence.Query;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.util.SortField;
-import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -25,86 +24,62 @@ import org.springframework.data.domain.Pageable;
  */
 public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
-
-  /**
-   * The record no validation.
-   */
+  /** The record no validation mapper. */
   @Autowired
   private RecordNoValidationMapper recordNoValidationMapper;
 
-  /**
-   * The Constant LOG.
-   */
-  private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
-  /**
-   * The entity manager.
-   */
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(RecordRepositoryImpl.class);
+
+  /** The entity manager. */
   @PersistenceContext
   private EntityManager entityManager;
 
-  /**
-   * The Constant DEFAULT_SORT_CRITERIA.
-   */
+  /** The Constant DEFAULT_STRING_SORT_CRITERIA: {@value}. */
   private static final String DEFAULT_STRING_SORT_CRITERIA = "' '";
 
-  /**
-   * The Constant DEFAULT_NUMERIC_SORT_CRITERIA.
-   */
+  /** The Constant DEFAULT_NUMERIC_SORT_CRITERIA: {@value}. */
   private static final String DEFAULT_NUMERIC_SORT_CRITERIA = "0";
 
-  /**
-   * The Constant DEFAULT_DATE_SORT_CRITERIA.
-   */
+  /** The Constant DEFAULT_DATE_SORT_CRITERIA: {@value}. */
   private static final String DEFAULT_DATE_SORT_CRITERIA = "cast('01/01/1970' as java.sql.Date)";
 
-  /**
-   * The Constant SORT_QUERY.
-   */
-  private final static String SORT_STRING_QUERY =
+  /** The Constant SORT_STRING_QUERY: {@value}. */
+  private static final String SORT_STRING_QUERY =
       "COALESCE(( select distinct fv.value from FieldValue fv where fv.record.id=rv.id and fv.idFieldSchema ='%s' ), "
           + DEFAULT_STRING_SORT_CRITERIA + ") as order_criteria_%s";
 
-  /**
-   * The Constant SORT_NUMERIC_QUERY.
-   */
-  private final static String SORT_NUMERIC_QUERY =
+  /** The Constant SORT_NUMERIC_QUERY: {@value}. */
+  private static final String SORT_NUMERIC_QUERY =
       "COALESCE((select distinct case when is_numeric(fv.value) = true "
           + "then CAST(fv.value as java.math.BigDecimal) when is_numeric( fv.value)=false "
           + "then 0 end from FieldValue fv where fv.record.id = rv.id and fv.idFieldSchema = '%s'),"
           + DEFAULT_NUMERIC_SORT_CRITERIA + ") as order_criteria_%s ";
 
-  /**
-   * The Constant SORT_COORDINATE_QUERY.
-   */
-  private final static String SORT_COORDINATE_QUERY =
+  /** The Constant SORT_COORDINATE_QUERY: {@value}. */
+  private static final String SORT_COORDINATE_QUERY =
       "COALESCE((select distinct case when is_double(fv.value) = true "
           + "then CAST(fv.value as java.lang.Double) when is_double( fv.value)=false "
           + "then 0 end from FieldValue fv where fv.record.id = rv.id and fv.idFieldSchema = '%s'),"
           + DEFAULT_NUMERIC_SORT_CRITERIA + ") as order_criteria_%s ";
 
-  /**
-   * The Constant SORT_DATE_QUERY.
-   */
-  private final static String SORT_DATE_QUERY =
+  /** The Constant SORT_DATE_QUERY: {@value}. */
+  private static final String SORT_DATE_QUERY =
       "COALESCE((select distinct case when is_date(fv.value) = true "
           + "then CAST(fv.value as java.sql.Date) " + "when is_date( fv.value)=false "
           + "then cast('01/01/1970' as java.sql.Date) " + "end from FieldValue fv "
           + "where fv.record.id = rv.id and fv.idFieldSchema = '%s')," + DEFAULT_DATE_SORT_CRITERIA
           + ") as order_criteria_%s ";
 
-  /**
-   * The Constant CORRECT_APPEND_QUERY.
-   */
-  private final static String CORRECT_APPEND_QUERY =
+  /** The Constant CORRECT_APPEND_QUERY: {@value}. */
+  private static final String CORRECT_APPEND_QUERY =
       "AND not EXISTS (SELECT recval FROM RecordValidation recval "
           + "where rv.id = recval.recordValue.id) "
           + "AND not EXISTS (SELECT fvval FROM FieldValidation fvval "
           + "where rv.id = fvval.fieldValue.record.id) ";
 
-  /**
-   * The Constant WARNING_ERROR_CORRECT_APPEND_QUERY.
-   */
-  private final static String WARNING_ERROR_INFO_BLOCKER_CORRECT_APPEND_QUERY =
+  /** The Constant WARNING_ERROR_INFO_BLOCKER_CORRECT_APPEND_QUERY: {@value}. */
+  private static final String WARNING_ERROR_INFO_BLOCKER_CORRECT_APPEND_QUERY =
       "AND ((EXISTS (SELECT recval FROM RecordValidation recval "
           + "where rv.id = recval.recordValue.id "
           + "and recval.validation.levelError IN ( :errorList )) "
@@ -115,50 +90,42 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           + "AND not EXISTS (SELECT fvval FROM FieldValidation fvval "
           + "where rv.id = fvval.fieldValue.record.id))) ";
 
-  /**
-   * The Constant WARNING_ERROR_APPEND_QUERY.
-   */
-  private final static String WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY =
+  /** The Constant WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY: {@value}. */
+  private static final String WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY =
       "AND (EXISTS (SELECT recval FROM RecordValidation recval "
           + "where rv.id = recval.recordValue.id "
           + "and recval.validation.levelError IN ( :errorList )) "
           + "OR EXISTS (SELECT fvval FROM FieldValidation fvval "
           + "where rv.id = fvval.fieldValue.record.id and fvval.validation.levelError IN ( :errorList ))) ";
 
-  /**
-   * The Constant MASTER_QUERY.
-   */
-  private final static String MASTER_QUERY =
+  /** The Constant MASTER_QUERY: {@value}. */
+  private static final String MASTER_QUERY =
       "SELECT rv %s from RecordValue rv INNER JOIN rv.tableValue tv "
           + "WHERE tv.idTableSchema = :idTableSchema ";
 
-  /**
-   * The Constant MASTER_QUERY_NO_ORDER.
-   */
-  private final static String MASTER_QUERY_NO_ORDER =
+  /** The Constant MASTER_QUERY_NO_ORDER: {@value}. */
+  private static final String MASTER_QUERY_NO_ORDER =
       "SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv "
           + "WHERE tv.idTableSchema = :idTableSchema ";
 
-  /**
-   * The Constant MASTER_QUERY_COUNT.
-   */
-  private final static String MASTER_QUERY_COUNT =
+  /** The Constant MASTER_QUERY_COUNT: {@value}. */
+  private static final String MASTER_QUERY_COUNT =
       "SELECT count(rv) from RecordValue rv INNER JOIN rv.tableValue tv "
           + "WHERE tv.idTableSchema = :idTableSchema ";
 
+  /** The Constant FINAL_MASTER_QUERY: {@value}. */
+  private static final String FINAL_MASTER_QUERY = " order by %s";
 
-  /**
-   * The Constant FINAL_MASTER_QUERY.
-   */
-  private final static String FINAL_MASTER_QUERY = " order by %s";
-
-  /**
-   * The Constant QUERY_UNSORTERED.
-   */
-  private final static String QUERY_UNSORTERED =
+  /** The Constant QUERY_UNSORTERED: {@value}. */
+  private static final String QUERY_UNSORTERED =
       "SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv  "
           + "WHERE tv.idTableSchema = :idTableSchema";
 
+  /** The Constant ID_TABLE_SCHEMA: {@value}. */
+  private static final String ID_TABLE_SCHEMA = "idTableSchema";
+
+  /** The Constant ERROR_LIST: {@value}. */
+  private static final String ERROR_LIST = "errorList";
 
   /**
    * Find by table value with order.
@@ -167,60 +134,57 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param levelErrorList the level error list
    * @param pageable the pageable
    * @param sortFields the sort fields
-   * @return the list
+   * @return the table VO
    */
   @Override
   public TableVO findByTableValueWithOrder(String idTableSchema, List<ErrorTypeEnum> levelErrorList,
       Pageable pageable, SortField... sortFields) {
+
     StringBuilder sortQueryBuilder = new StringBuilder();
     StringBuilder directionQueryBuilder = new StringBuilder();
     int criteriaNumber = 0;
     TableVO result = new TableVO();
     createSorterQuery(sortQueryBuilder, directionQueryBuilder, criteriaNumber, sortFields);
     String filter = "";
-    Boolean containsCorrect = false;
+    boolean containsCorrect = false;
     List<ErrorTypeEnum> errorList = new ArrayList<>();
-    // Filter Query by level Error if we havent lv error we do other things
-    if (!levelErrorList.isEmpty()) {
 
-      switch (levelErrorList.size()) {
-        case 1:
-          if (levelErrorList.contains(ErrorTypeEnum.CORRECT)) {
-            filter = CORRECT_APPEND_QUERY;
-            containsCorrect = true;
-          } else {
-            filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
-            errorList.add(levelErrorList.get(0));
+    // Compose the query filtering by level ERROR
+    if (!levelErrorList.isEmpty()) {
+      if (levelErrorList.size() == 1) {
+        if (levelErrorList.contains(ErrorTypeEnum.CORRECT)) {
+          filter = CORRECT_APPEND_QUERY;
+          containsCorrect = true;
+        } else {
+          filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
+          errorList.add(levelErrorList.get(0));
+        }
+      } else {
+        if (levelErrorList.contains(ErrorTypeEnum.CORRECT)) {
+          filter = WARNING_ERROR_INFO_BLOCKER_CORRECT_APPEND_QUERY;
+          containsCorrect = true;
+        } else {
+          filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
+        }
+        for (int i = 0; i < levelErrorList.size(); i++) {
+          if (!levelErrorList.get(i).equals(ErrorTypeEnum.CORRECT)) {
+            errorList.add(levelErrorList.get(i));
           }
-          break;
-        default:
-          if (levelErrorList.contains(ErrorTypeEnum.CORRECT)) {
-            filter = WARNING_ERROR_INFO_BLOCKER_CORRECT_APPEND_QUERY;
-            containsCorrect = true;
-          } else {
-            filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
-          }
-          for (int i = 0; i < levelErrorList.size(); i++) {
-            if (!levelErrorList.get(i).equals(ErrorTypeEnum.CORRECT)) {
-              errorList.add(levelErrorList.get(i));
-            }
-          }
-          break;
+        }
       }
     }
     result.setTotalFilteredRecords(0L);
     // we put that condition because we wont to do any query if the filter is empty and return a new
     // result object
-    if (levelErrorList.size() != 0) {
+    if (!levelErrorList.isEmpty()) {
       // Total records calc.
       if (!filter.isEmpty()) {
         Query query2;
-        query2 = entityManager.createQuery(String.format(MASTER_QUERY_COUNT + filter));
-        query2.setParameter("idTableSchema", idTableSchema);
-        if (!filter.isEmpty()
-            && (containsCorrect == false || (containsCorrect == true && errorList.size() > 0))) {
-          query2.setParameter("errorList", errorList);
-          query2.setParameter("errorList", errorList);
+        query2 = entityManager.createQuery(MASTER_QUERY_COUNT + filter);
+        query2.setParameter(ID_TABLE_SCHEMA, idTableSchema);
+        if (!filter.isEmpty() && (!containsCorrect || (containsCorrect && !errorList.isEmpty()))) {
+          query2.setParameter(ERROR_LIST, errorList);
+          query2.setParameter(ERROR_LIST, errorList);
         }
         Long recordsCount = Long.valueOf(query2.getResultList().get(0).toString());
         result.setTotalFilteredRecords(recordsCount);
@@ -229,12 +193,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       Query query;
       // Query without order.
       if (null == sortFields) {
-        query = entityManager.createQuery(String.format(MASTER_QUERY_NO_ORDER + filter));
-        query.setParameter("idTableSchema", idTableSchema);
-        if (!filter.isEmpty()
-            && (containsCorrect == false || (containsCorrect == true && errorList.size() > 0))) {
-          query.setParameter("errorList", errorList);
-          query.setParameter("errorList", errorList);
+        query = entityManager.createQuery(MASTER_QUERY_NO_ORDER + filter);
+        query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
+        if (!filter.isEmpty() && (!containsCorrect || (containsCorrect && !errorList.isEmpty()))) {
+          query.setParameter(ERROR_LIST, errorList);
+          query.setParameter(ERROR_LIST, errorList);
         }
         query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
         query.setMaxResults(pageable.getPageSize());
@@ -246,25 +209,21 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         // Query with order.
         query = entityManager.createQuery(String.format(MASTER_QUERY + filter + FINAL_MASTER_QUERY,
             sortQueryBuilder.toString(), directionQueryBuilder.toString().substring(1)));
-        query.setParameter("idTableSchema", idTableSchema);
-        if (!filter.isEmpty()
-            && (containsCorrect == false || (containsCorrect == true && errorList.size() > 0))) {
-          query.setParameter("errorList", errorList);
-          query.setParameter("errorList", errorList);
+        query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
+        if (!filter.isEmpty() && (!containsCorrect || (containsCorrect && !errorList.isEmpty()))) {
+          query.setParameter(ERROR_LIST, errorList);
+          query.setParameter(ERROR_LIST, errorList);
         }
         query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
         query.setMaxResults(pageable.getPageSize());
         List<Object[]> a = query.getResultList();
-        List<RecordVO> recordVOs = recordNoValidationMapper
-            .entityListToClass(this.sanitizeOrderedRecords(a, sortFields[0].getAsc()));
+        List<RecordVO> recordVOs =
+            recordNoValidationMapper.entityListToClass(sanitizeOrderedRecords(a));
         result.setRecords(recordVOs);
-
       }
     }
     return result;
-
   }
-
 
   /**
    * Creates the sorter query.
@@ -301,26 +260,22 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         sortQueryBuilder.append(",")
             .append(String.format(sortQuery, field.getFieldName(), criteriaNumber)).append(" ");
         directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
-            .append(" ").append(field.getAsc() ? "asc" : "desc");
+            .append(" ").append(Boolean.TRUE.equals(field.getAsc()) ? "asc" : "desc");
       }
-
     }
   }
 
-
   /**
-   * Find by table value no order. Allows null pageable and in that case all de records will be
-   * retrieved
+   * Find by table value no order.
    *
    * @param idTableSchema the id table schema
    * @param pageable the pageable
-   *
    * @return the list
    */
   @Override
   public List<RecordValue> findByTableValueNoOrder(String idTableSchema, Pageable pageable) {
     Query query = entityManager.createQuery(QUERY_UNSORTERED);
-    query.setParameter("idTableSchema", idTableSchema);
+    query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
     if (null != pageable) {
       query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
       query.setMaxResults(pageable.getPageSize());
@@ -337,21 +292,17 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Override
   public List<RecordValue> findByTableValueAllRecords(String idTableSchema) {
     Query query = entityManager.createQuery(QUERY_UNSORTERED);
-    query.setParameter("idTableSchema", idTableSchema);
+    query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
     return query.getResultList();
   }
-
 
   /**
    * Sanitize ordered records.
    *
    * @param queryResults the query results
-   * @param asc the asc
-   *
    * @return the list
    */
-  private List<RecordValue> sanitizeOrderedRecords(List<Object[]> queryResults, Boolean asc) {
-
+  private List<RecordValue> sanitizeOrderedRecords(List<Object[]> queryResults) {
     // First: Copy sortCriteria into de records variables
     List<RecordValue> records = queryResults.stream()
         .map(resultRecord -> (RecordValue) resultRecord[0]).collect(Collectors.toList());
@@ -362,7 +313,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * Sanitize records.
    *
    * @param records the records
-   *
    * @return the list
    */
   private List<RecordValue> sanitizeRecords(List<RecordValue> records) {
@@ -374,11 +324,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         recordValue.getFields().stream().forEach(field -> field.setFieldValidations(null));
         sanitizedRecords.add(recordValue);
       }
-
     }
     return sanitizedRecords;
-
   }
-
 }
 
