@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import styles from './PropertiesDialog.module.scss';
 
@@ -16,7 +16,21 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
-  const parsedDataflowData = { dataflowStatus: dataflowState.data.status };
+  const [dialogHeight, setDialogHeight] = useState(null);
+
+  const propertiesRef = useRef(null);
+
+  useEffect(() => {
+    if (propertiesRef.current && dataflowState.isPropertiesDialogVisible) {
+      setDialogHeight(propertiesRef.current.getBoundingClientRect().height);
+    }
+  }, [propertiesRef.current, dataflowState.isPropertiesDialogVisible]);
+
+  const parsedDataflowData = {
+    dataflowName: dataflowState.name,
+    dataflowDescription: dataflowState.description,
+    dataflowStatus: dataflowState.data.status
+  };
   const parsedObligationsData = PropertiesUtils.parseObligationsData(dataflowState, user.userProps.dateFormat);
 
   const dialogFooter = (
@@ -28,15 +42,19 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
     />
   );
 
-  return (
+  return dataflowState.isPropertiesDialogVisible ? (
     <Dialog
       className={styles.propertiesDialog}
       footer={dialogFooter}
       header={resources.messages['properties']}
       onHide={() => manageDialogs('isPropertiesDialogVisible', false)}
       visible={dataflowState.isPropertiesDialogVisible}>
-      <div className={styles.propertiesWrap}>
-        {dataflowState.description}
+      <div className={styles.propertiesWrap} ref={propertiesRef} style={{ height: dialogHeight }}>
+        <div style={{ marginTop: '1rem', marginBottom: '2rem' }}>
+          <TreeViewExpandableItem items={[{ label: resources.messages['dataflowDetails'] }]}>
+            <TreeView property={parsedDataflowData} propertyName={''} />
+          </TreeViewExpandableItem>
+        </div>
         {parsedObligationsData.map((data, i) => (
           <div key={i} style={{ marginTop: '1rem', marginBottom: '2rem' }}>
             <TreeViewExpandableItem
@@ -58,11 +76,9 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
             </TreeViewExpandableItem>
           </div>
         ))}
-
-        <TreeViewExpandableItem items={[{ label: resources.messages['dataflowDetails'] }]}>
-          <TreeView property={parsedDataflowData} propertyName={''} />
-        </TreeViewExpandableItem>
       </div>
     </Dialog>
+  ) : (
+    <Fragment />
   );
 };
