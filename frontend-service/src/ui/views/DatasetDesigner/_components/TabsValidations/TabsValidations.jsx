@@ -159,15 +159,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       return header;
     }
     if (fieldHeader === 'isCorrect') {
-      header = resources.messages['isCorrect'];
-      return header;
-    }
-    if (fieldHeader === 'automatic') {
-      header = resources.messages['automatic'];
-      return header;
-    }
-    if (fieldHeader === 'enabled') {
-      header = resources.messages['enabled'];
+      header = resources.messages['valid'];
       return header;
     }
     header = fieldHeader;
@@ -184,8 +176,8 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       { id: 'description', index: 5 },
       { id: 'message', index: 6 },
       { id: 'levelError', index: 7 },
-      { id: 'enabled', index: 8 },
-      { id: 'automatic', index: 9 },
+      { id: 'automatic', index: 8 },
+      { id: 'enabled', index: 9 },
       { id: 'referenceId', index: 10 },
       { id: 'activationGroup', index: 11 },
       { id: 'date', index: 12 },
@@ -200,7 +192,11 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       .map(orderedError => orderedError.id);
   };
 
-  const actionsTemplate = row => (
+  const actionsTemplate = row => (row.automatic ? editTemplate(row) : editAndDeleteTemplate());
+
+  const deleteTemplate = () => <ActionsColumn onDeleteClick={() => onShowDeleteDialog()} />;
+
+  const editAndDeleteTemplate = row => (
     <ActionsColumn
       onDeleteClick={() => onShowDeleteDialog()}
       onEditClick={() => {
@@ -210,7 +206,14 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     />
   );
 
-  const deleteTemplate = () => <ActionsColumn onDeleteClick={() => onShowDeleteDialog()} />;
+  const editTemplate = row => (
+    <ActionsColumn
+      onEditClick={() => {
+        validationContext.onOpenToEdit(row, 'validationsListDialog');
+        onHideValidationsDialog();
+      }}
+    />
+  );
 
   const deleteValidationDialog = () => (
     <ConfirmDialog
@@ -303,7 +306,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
             getFiltredData={onLoadFilteredData}
             searchAll
             searchBy={['name', 'description', 'message']}
-            selectOptions={['table', 'field', 'entityType', 'levelError', 'enabled', 'automatic', 'isCorrect']}
+            selectOptions={['table', 'field', 'entityType', 'levelError', 'automatic', 'enabled', 'isCorrect']}
           />
         </div>
 
