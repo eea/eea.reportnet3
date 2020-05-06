@@ -25,7 +25,12 @@ const getFieldValues = (columns, header, filterColumns) => {
   return Object.keys(filteredValues).map(key => {
     return {
       field: key === 'codelistItems' ? 'Single select items' : capitalize(key),
-      value: filteredValues[key] === 'CODELIST' ? 'SINGLE SELECT' : filteredValues[key]
+      value:
+        filteredValues[key] === 'CODELIST'
+          ? 'SINGLE SELECT'
+          : filteredValues[key] === 'MULTISELECT_CODELIST'
+          ? 'MULTIPLE SELECT'
+          : filteredValues[key]
     };
   });
 };

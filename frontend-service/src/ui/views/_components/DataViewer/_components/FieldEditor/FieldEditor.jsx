@@ -304,6 +304,11 @@ const FieldEditor = ({
             value={RecordUtils.getCodelistValue(codelistItemsOptions, codelistItemValue)}
           />
         );
+      case 'MULTISELECT_CODELIST':
+        return (
+          //Multiselect
+          <div></div>
+        );
       default:
         return (
           <InputText

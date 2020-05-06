@@ -118,7 +118,9 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
         table.tableSchemaToPrefill = !isNil(tableDTO.tableSchemaToPrefill);
         if (!isNull(tableDTO.records) && !isNil(tableDTO.records[0].fields) && tableDTO.records[0].fields.length > 0) {
           const containsCodelists = !isEmpty(
-            tableDTO.records[0].fields.filter(fieldElmt => fieldElmt.type === 'CODELIST')
+            tableDTO.records[0].fields.filter(
+              fieldElmt => fieldElmt.type === 'CODELIST' || fieldElmt.type === 'MULTISELECT_CODELIST'
+            )
           );
           const fields = tableDTO.records[0].fields.map(fieldDTO => {
             const field = {};
@@ -128,7 +130,7 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
             field.description = !isNull(fieldDTO.description) ? fieldDTO.description : '-';
             field.type = fieldDTO.type;
             if (containsCodelists) {
-              if (fieldDTO.type === 'CODELIST') {
+              if (fieldDTO.type === 'CODELIST' || fieldDTO.type === 'MULTISELECT_CODELIST') {
                 field.codelistItems = fieldDTO.codelistItems;
               } else {
                 field.codelistItems = [];

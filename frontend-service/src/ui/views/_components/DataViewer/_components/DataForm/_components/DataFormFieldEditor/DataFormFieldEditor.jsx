@@ -106,6 +106,20 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     />
   );
 
+  const renderMultiselectCodelist = (field, fieldValue) => (
+    // <Dropdown
+    //   appendTo={document.body}
+    //   onChange={e => {
+    //     onChangeForm(field, e.target.value.value);
+    //   }}
+    //   optionLabel="itemType"
+    //   options={getCodelistItemsWithEmptyOption(field)}
+    //   value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
+    // />
+    //Multiselect
+    <div></div>
+  );
+
   const getMaxCharactersByType = type => {
     const longCharacters = 20;
     const decimalCharacters = 40;
@@ -145,6 +159,8 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
   const renderFieldEditor = () =>
     type === 'CODELIST' ? (
       renderCodelistDropdown(field, fieldValue)
+    ) : type === 'MULTISELECT_CODELIST' ? (
+      renderMultiselectCodelist(field, fieldValue)
     ) : type === 'LINK' ? (
       renderLinkDropdown(field, fieldValue)
     ) : (
