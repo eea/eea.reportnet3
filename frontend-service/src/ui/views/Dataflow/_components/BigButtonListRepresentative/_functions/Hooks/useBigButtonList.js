@@ -2,6 +2,7 @@ import { useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
+import uniq from 'lodash/uniq';
 
 import { routes } from 'ui/routes';
 
@@ -89,22 +90,30 @@ const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, on
       };
     });
 
-  const receiptBigButton = [
-    {
-      buttonClass: 'schemaDataset',
-      buttonIcon: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
-      buttonIconClass: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
-      caption: resources.messages['confirmationReceipt'],
-      handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onLoadReceiptData(),
-      infoStatus: dataflowState.isReceiptOutdated,
-      layout: 'defaultBigButton',
-      visibility:
-        !dataflowState.isCustodian &&
-        !isUndefined(dataflowState.isReleased) &&
-        !dataflowState.isReleased.includes(false) &&
-        !dataflowState.isReleased.includes(null)
-    }
-  ];
+  const onBuildReceiptButton = () => {
+    const { datasets } = dataflowState.data;
+    const representativeNames = datasets.map(dataset => dataset.datasetSchemaName);
+    const releasedStates = datasets.map(dataset => dataset.isReleased);
+
+    return [
+      {
+        buttonClass: 'schemaDataset',
+        buttonIcon: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
+        buttonIconClass: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
+        caption: resources.messages['confirmationReceipt'],
+        handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onLoadReceiptData(),
+        infoStatus: dataflowState.isReceiptOutdated,
+        layout: 'defaultBigButton',
+        visibility:
+          !dataflowState.isCustodian &&
+          !isUndefined(releasedStates) &&
+          !releasedStates.includes(false) &&
+          !releasedStates.includes(null)
+      }
+    ];
+  };
+
+  const receiptBigButton = onBuildReceiptButton();
 
   return [helpButton, ...groupByRepresentativeModels, ...receiptBigButton];
 };
