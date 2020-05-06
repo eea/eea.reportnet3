@@ -56,3 +56,10 @@
   margin: 0px;
   color: var(--main-font-color);
 }
+.dashboardWarning {
+  text-align: end;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: var(--main-font-color);
+}

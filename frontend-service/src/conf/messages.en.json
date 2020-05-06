@@ -639,5 +639,6 @@
     "qcEnabled": "Enabled",
     "valid": "Valid",
     "pending": "Pending"
+    "dashboardWarning": "Chart shows percentage of records classified by highest QC level found for each record."
   }
 }
