@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import isNil from 'lodash/isNil';
 import remove from 'lodash/remove';
+import uniqBy from 'lodash/uniqBy';
 import moment from 'moment';
 
 import styles from './BigButtonList.module.css';
@@ -272,24 +273,27 @@ export const BigButtonList = ({
     setIsUpdateDatacollectionDialogVisible(true);
   };
 
-  const bigButtonList = useBigButtonList({
-    dataflowId,
-    dataflowDispatch,
-    dataflowState,
-    // exportDatatableSchema,
-    getDeleteSchemaIndex,
-    handleRedirect,
-    isActiveButton,
-    onDatasetSchemaNameError,
-    onDuplicateName,
-    onLoadReceiptData,
-    onSaveName,
-    onShowDataCollectionModal,
-    onShowNewSchemaDialog,
-    onShowSnapshotDialog,
-    onShowUpdateDataCollectionModal,
-    updatedDatasetSchema
-  })
+  const bigButtonList = uniqBy(
+    useBigButtonList({
+      dataflowId,
+      dataflowDispatch,
+      dataflowState,
+      // exportDatatableSchema,
+      getDeleteSchemaIndex,
+      handleRedirect,
+      isActiveButton,
+      onDatasetSchemaNameError,
+      onDuplicateName,
+      onLoadReceiptData,
+      onSaveName,
+      onShowDataCollectionModal,
+      onShowNewSchemaDialog,
+      onShowSnapshotDialog,
+      onShowUpdateDataCollectionModal,
+      updatedDatasetSchema
+    }),
+    'caption'
+  )
     .filter(button => button.visibility)
     .map((button, i) => <BigButton key={i} {...button} />);
 
