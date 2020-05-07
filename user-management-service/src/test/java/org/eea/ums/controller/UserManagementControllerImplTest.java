@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
@@ -135,7 +136,10 @@ public class UserManagementControllerImplTest {
     details.put("userId", "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-    userManagementController.getResourcesByUser();
+    List<ResourceAccessVO> resourceList = new ArrayList<>();
+    Mockito.when(securityProviderInterfaceService.getResourcesByUser(Mockito.any()))
+        .thenReturn(resourceList);
+    assertEquals("assertion error", resourceList, userManagementController.getResourcesByUser());
 
   }
 
@@ -147,7 +151,11 @@ public class UserManagementControllerImplTest {
     details.put("userId", "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-    userManagementController.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
+    List<ResourceAccessVO> resourceList = new ArrayList<>();
+    Mockito.when(securityProviderInterfaceService.getResourcesByUser(Mockito.any()))
+        .thenReturn(resourceList);
+    assertEquals("assertion error", resourceList,
+        userManagementController.getResourcesByUser(ResourceTypeEnum.DATAFLOW));
 
   }
 
@@ -159,8 +167,11 @@ public class UserManagementControllerImplTest {
     details.put("userId", "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-    userManagementController.getResourcesByUser(SecurityRoleEnum.DATA_PROVIDER);
-
+    List<ResourceAccessVO> resourceList = new ArrayList<>();
+    Mockito.when(securityProviderInterfaceService.getResourcesByUser(Mockito.any()))
+        .thenReturn(resourceList);
+    assertEquals("assertion error", resourceList,
+        userManagementController.getResourcesByUser(SecurityRoleEnum.DATA_PROVIDER));
   }
 
   @Test
@@ -171,8 +182,11 @@ public class UserManagementControllerImplTest {
     details.put("userId", "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-    userManagementController.getResourcesByUser(ResourceTypeEnum.DATAFLOW,
-        SecurityRoleEnum.DATA_PROVIDER);
+    List<ResourceAccessVO> resourceList = new ArrayList<>();
+    Mockito.when(securityProviderInterfaceService.getResourcesByUser(Mockito.any()))
+        .thenReturn(resourceList);
+    assertEquals("assertion error", resourceList, userManagementController
+        .getResourcesByUser(ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_PROVIDER));
 
   }
 

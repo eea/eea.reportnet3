@@ -1,5 +1,8 @@
 package org.eea.dataset.service.file;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.times;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataset.persistence.data.domain.FieldValue;
@@ -35,7 +38,7 @@ public class ExcelWriterStrategyTest {
 
   @Test
   public void excelWriterStrategyTest() {
-    new ExcelWriterStrategy(fileCommon, "xls");
+    assertNotNull("failed assertion", new ExcelWriterStrategy(fileCommon, "xls"));
   }
 
   @Test
@@ -112,6 +115,9 @@ public class ExcelWriterStrategyTest {
     excelWriterStrategy.setMimeType("xlsx");
     excelWriterStrategy.writeFile(1L, 1L, "");
     excelWriterStrategy.getMimeType();
+    Mockito.verify(fileCommon, times(1)).getRecordValues(Mockito.any(), Mockito.any());
+    assertEquals("failed assertion", "xlsx", excelWriterStrategy.getMimeType());
+
   }
 
   @Test
@@ -149,5 +155,8 @@ public class ExcelWriterStrategyTest {
     excelWriterStrategy.setMimeType("xlxs");
     excelWriterStrategy.writeFile(1L, 1L, "");
     excelWriterStrategy.getMimeType();
+    Mockito.verify(fileCommon, times(1)).getDataSetSchema(Mockito.any(), Mockito.any());
+    assertEquals("failed assertion", "xlxs", excelWriterStrategy.getMimeType());
+
   }
 }
