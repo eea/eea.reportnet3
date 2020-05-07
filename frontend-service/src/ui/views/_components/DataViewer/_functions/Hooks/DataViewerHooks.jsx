@@ -92,7 +92,6 @@ export const useSetColumns = (
     const maxWidths = [];
 
     const getTooltipMessage = column => {
-      console.log(column.description);
       return !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
         ? `<span style="font-weight:bold">Description:</span> ${
             !isNil(column.description) && column.description !== ''
