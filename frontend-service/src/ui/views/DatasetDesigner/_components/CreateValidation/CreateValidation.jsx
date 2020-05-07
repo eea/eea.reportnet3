@@ -81,6 +81,22 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   const componentName = 'createValidation';
 
   useEffect(() => {
+    if (creationFormState.candidateRule.automatic) {
+      setTabMenuItems([
+        {
+          label: resourcesContext.messages.tabMenuConstraintData,
+          className: styles.flow_tab,
+          tabKey: 'data'
+        }
+      ]);
+    }
+  }, [creationFormState.candidateRule.automatic]);
+
+  useEffect(() => {
+    setTabMenuActiveItem(tabMenuItems[0]);
+  }, [tabMenuItems]);
+
+  useEffect(() => {
     const tabsKeys = tabMenuItems.map(tabMenu => {
       return pick(tabMenu, ['tabKey']);
     });
@@ -180,15 +196,6 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
 
   useEffect(() => {
     if (validationContext.ruleEdit && !isEmpty(validationContext.ruleToEdit)) {
-      if (validationContext.ruleToEdit.automatic) {
-        setTabMenuItems([
-          {
-            label: resourcesContext.messages.tabMenuConstraintData,
-            className: styles.flow_tab,
-            tabKey: 'data'
-          }
-        ]);
-      }
       creationFormDispatch({
         type: 'POPULATE_CREATE_FORM',
         payload: validationContext.ruleToEdit
@@ -394,6 +401,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
 
   const dialogLayout = children => (
     <Dialog
+      className={styles.dialog}
       header={
         validationContext.ruleEdit
           ? resourcesContext.messages.editFieldConstraint

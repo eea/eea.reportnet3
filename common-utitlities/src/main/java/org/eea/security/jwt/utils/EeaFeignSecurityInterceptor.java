@@ -26,7 +26,7 @@ public class EeaFeignSecurityInterceptor implements RequestInterceptor {
     Authentication authentication = securityContext.getAuthentication();
 
     if (authentication != null && authentication instanceof UsernamePasswordAuthenticationToken) {
-      log.debug("Securing invocation to {}", template.url());
+      log.info("Securing invocation to {}", template.url());
       template.header(AUTHORIZATION_HEADER,
           String.format("%s %s", BEARER_TOKEN_TYPE, authentication.getCredentials()));
       template.header("FeignInvocationUser", authentication.getName());

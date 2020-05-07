@@ -94,6 +94,7 @@ export const FieldsDesigner = ({
     });
     onChangeFields(inmFields, type.toUpperCase() === 'LINK', table.tableSchemaId);
     setFields(inmFields);
+    window.scrollTo(0, document.body.scrollHeight);
   };
 
   const onFieldDelete = (deletedFieldIndex, deletedFieldType) => {
