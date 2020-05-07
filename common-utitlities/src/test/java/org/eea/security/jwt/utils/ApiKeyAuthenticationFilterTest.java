@@ -1,7 +1,6 @@
 package org.eea.security.jwt.utils;
 
 import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
@@ -17,7 +16,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,8 +25,10 @@ public class ApiKeyAuthenticationFilterTest {
 
   @InjectMocks
   private ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
+
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
+
   @Mock
   private HttpServletRequest request;
 
@@ -37,17 +37,16 @@ public class ApiKeyAuthenticationFilterTest {
 
   public void init() {
     Mockito.reset(userManagementControllerZull, request, filterChain);
-    SecurityContextHolder
-        .getContext().setAuthentication(null);
+    SecurityContextHolder.getContext().setAuthentication(null);
   }
 
   @Test
   public void doFilterInternal() throws ServletException, IOException {
     String apiKey = "ApiKey1";
-    //rquest configuration
+    // request configuration
     when(request.getHeader("Authorization")).thenReturn("ApiKey " + apiKey);
 
-    //Token configuration
+    // Token configuration
     TokenVO tokenVO = new TokenVO();
     tokenVO.setUserId("userId1");
     tokenVO.setPreferredUsername("userName1");
@@ -62,15 +61,17 @@ public class ApiKeyAuthenticationFilterTest {
         .thenReturn(tokenVO);
 
     apiKeyAuthenticationFilter.doFilterInternal(request, null, filterChain);
-    UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-        .getContext().getAuthentication();
+    UsernamePasswordAuthenticationToken authenticationToken =
+        (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
+            .getAuthentication();
     Assert.assertNotNull(authenticationToken);
     Assert.assertEquals("Retrieved ApiKey is different from expected", apiKey,
         authenticationToken.getCredentials());
     Assert.assertEquals("Retrieved User is different from expected", "userName1",
         ((EeaUserDetails) authenticationToken.getPrincipal()).getUsername());
     Assert.assertEquals("Retrieved Subject is different from expected", "userId1",
-        ((Map<String, String>) authenticationToken.getDetails()).get("userId"));
+        ((Map<String, String>) authenticationToken.getDetails())
+            .get(AuthenticationDetails.USER_ID));
     Mockito.verify(filterChain, Mockito.times(1)).doFilter(request, null);
   }
 
