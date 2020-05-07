@@ -118,9 +118,9 @@ export const BigButtonList = ({
     </div>
   );
 
-  const exportDatatableSchema = async (datasetId, datasetName) => {
-    const schema = await DatasetService.schemaById(datasetId);
-    console.log(datasetId, datasetName, schema);
+  // const exportDatatableSchema = async (datasetId, datasetName) => {
+  //   const schema = await DatasetService.schemaById(datasetId);
+    // console.log(datasetId, datasetName, schema);
 
     // let blob = new Blob([csv], {
     //   type: 'text/csv;charset=utf-8;'
@@ -142,7 +142,7 @@ export const BigButtonList = ({
     //   }
     //   document.body.removeChild(link);
     // }
-  };
+  // };
 
   const getDeleteSchemaIndex = index => {
     setDeleteSchemaIndex(index);
@@ -291,7 +291,7 @@ export const BigButtonList = ({
     dataflowData,
     dataflowDataState,
     dataflowId,
-    exportDatatableSchema,
+    // exportDatatableSchema,
     getDeleteSchemaIndex,
     handleRedirect,
     hasWritePermissions,

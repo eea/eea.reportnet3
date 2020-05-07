@@ -84,14 +84,14 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
 
       <div className={`${styles.deliveryDate} dataflowList-delivery-date-help-step`}>
         <p>
-          {itemContent.status == DataflowConf.dataflowStatus['DRAFT'] ? (
-            <>
-              <span>{`${resources.messages['deliveryDate']}: `}</span>
-              <span className={`${styles.dateBlock}`}>
-                {moment(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
-              </span>
-            </>
-          ) : null}
+          <>
+            <span>{`${resources.messages['deliveryDate']}: `}</span>
+            <span className={`${styles.dateBlock}`}>
+              {itemContent.expirationDate == '-'
+                ? resources.messages['pending']
+                : moment(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
+            </span>
+          </>
         </p>
       </div>
 

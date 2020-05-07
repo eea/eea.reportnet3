@@ -246,7 +246,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
       Object tableSchemas = document.get("tableSchemas");
       if (tableSchemas != null && tableSchemas.getClass().equals(ArrayList.class)) {
         Object tableSchema =
-            ((ArrayList<?>) tableSchemas).size() > 0 ? ((ArrayList<?>) tableSchemas).get(0) : null;
+            !((ArrayList<?>) tableSchemas).isEmpty() ? ((ArrayList<?>) tableSchemas).get(0) : null;
         if (tableSchema != null && tableSchema.getClass().equals(Document.class)) {
           return (Document) tableSchema;
         }
@@ -266,32 +266,34 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   @Override
   public Document findFieldSchema(String datasetSchemaId, String fieldSchemaId) {
 
-    Document document = mongoDatabase.getCollection("DataSetSchema")
+    Object document = mongoDatabase.getCollection("DataSetSchema")
         .find(new Document("_id", new ObjectId(datasetSchemaId))
             .append("tableSchemas.recordSchema.fieldSchemas._id", new ObjectId(fieldSchemaId)))
         .projection(new Document("_id", 0).append("tableSchemas.$", 1)).first();
 
-    if (document != null) {
-      Object tableSchemas = document.get("tableSchemas");
-      if (tableSchemas != null && tableSchemas.getClass().equals(ArrayList.class)) {
-        Object tableSchema =
-            ((ArrayList<?>) tableSchemas).size() > 0 ? ((ArrayList<?>) tableSchemas).get(0) : null;
-        if (tableSchema != null && tableSchema.getClass().equals(Document.class)) {
-          Object recordSchema = ((Document) tableSchema).get("recordSchema");
-          if (recordSchema != null && recordSchema.getClass().equals(Document.class)) {
-            Object fieldSchemas = ((Document) recordSchema).get("fieldSchemas");
-            if (fieldSchemas != null && fieldSchemas.getClass().equals(ArrayList.class)) {
-              return (Document) ((ArrayList<?>) fieldSchemas).stream()
-                  .filter(fieldSchema -> ((Document) fieldSchema).get("_id").toString()
-                      .equals(fieldSchemaId))
-                  .findFirst().orElse(null);
-            }
-          }
-        }
-      }
+    // Null check, secure data type casting and secure array access by index can be avoid as the
+    // query would return null if the requested structure does not match.
+
+    if (null != document) {
+      // Get TableSchemas
+      document = ((Document) document).get("tableSchemas");
+
+      // Get the TableSchema
+      document = ((ArrayList<?>) document).get(0);
+
+      // Get the RecordSchema
+      document = ((Document) document).get("recordSchema");
+
+      // Get FieldSchemas
+      document = ((Document) document).get("fieldSchemas");
+
+      // Get the FieldSchema
+      document = ((ArrayList<?>) document).stream()
+          .filter(fs -> ((Document) fs).get("_id").toString().equals(fieldSchemaId)).findFirst()
+          .orElse(null);
     }
 
-    return null;
+    return null != document ? (Document) document : null;
   }
 
   /**
@@ -318,25 +320,25 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   @Override
   public Document findRecordSchema(String datasetSchemaId, String tableSchemaId) {
 
-    Document document = mongoDatabase.getCollection("DataSetSchema")
+    Object document = mongoDatabase.getCollection("DataSetSchema")
         .find(new Document("_id", new ObjectId(datasetSchemaId)).append("tableSchemas._id",
             new ObjectId(tableSchemaId)))
         .projection(new Document("_id", 0).append("tableSchemas.$", 1)).first();
 
-    if (document != null) {
-      Object tableSchemas = document.get("tableSchemas");
-      if (tableSchemas != null && tableSchemas.getClass().equals(ArrayList.class)) {
-        Object tableSchema =
-            ((ArrayList<?>) tableSchemas).size() > 0 ? ((ArrayList<?>) tableSchemas).get(0) : null;
-        if (tableSchema != null && tableSchema.getClass().equals(Document.class)) {
-          Object recordSchema = ((Document) tableSchema).get("recordSchema");
-          if (recordSchema != null && recordSchema.getClass().equals(Document.class)) {
-            return (Document) recordSchema;
-          }
-        }
-      }
+    // Null check, secure data type casting and secure array access by index can be avoid as the
+    // query would return null if the requested structure does not match.
+
+    if (null != document) {
+      // Get TableSchemas
+      document = ((Document) document).get("tableSchemas");
+
+      // Get the TableSchema
+      document = ((ArrayList<?>) document).get(0);
+
+      // Get the RecordSchema
+      document = ((Document) document).get("recordSchema");
     }
 
-    return null;
+    return null != document ? (Document) document : null;
   }
 }

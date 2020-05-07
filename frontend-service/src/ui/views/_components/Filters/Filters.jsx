@@ -20,6 +20,7 @@ import { filterReducer } from './_functions/Reducers/filterReducer';
 import { useOnClickOutside } from 'ui/views/_functions/Hooks/useOnClickOutside';
 
 import { ApplyFilterUtils } from './_functions/Utils/ApplyFilterUtils';
+import { ErrorUtils } from 'ui/views/_functions/Utils';
 import { FiltersUtils } from './_functions/Utils/FiltersUtils';
 import { SortUtils } from './_functions/Utils/SortUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
@@ -264,7 +265,7 @@ export const Filters = ({
         notCheckAllHeader={resources.messages['uncheckAllFilter']}
         onChange={event => onFilterData(property, event.value)}
         optionLabel="type"
-        options={FiltersUtils.getOptionTypes(data, property, selectList)}
+        options={FiltersUtils.getOptionTypes(data, property, selectList, ErrorUtils.orderLevelErrors)}
         value={filterState.filterBy[property]}
       />
     </span>

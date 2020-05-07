@@ -5,6 +5,8 @@ import isNil from 'lodash/isNil';
 import pull from 'lodash/pull';
 import pick from 'lodash/pick';
 
+import { config } from 'conf';
+
 import styles from './CreateValidation.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
@@ -57,9 +59,8 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     disabled: true,
     placeholder: resourcesContext.messages.fieldConstraintTableFieldNoOptions
   });
-  const [tabMenuItems] = useState([
+  const [tabMenuItems, setTabMenuItems] = useState([
     {
-      // label: resources.messages['dataflowAcceptedPendingTab'],
       label: resourcesContext.messages.tabMenuConstraintData,
       className: styles.flow_tab,
       tabKey: 'data'
@@ -78,6 +79,22 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
 
   const componentName = 'createValidation';
+
+  useEffect(() => {
+    if (creationFormState.candidateRule.automatic) {
+      setTabMenuItems([
+        {
+          label: resourcesContext.messages.tabMenuConstraintData,
+          className: styles.flow_tab,
+          tabKey: 'data'
+        }
+      ]);
+    }
+  }, [creationFormState.candidateRule.automatic]);
+
+  useEffect(() => {
+    setTabMenuActiveItem(tabMenuItems[0]);
+  }, [tabMenuItems]);
 
   useEffect(() => {
     const tabsKeys = tabMenuItems.map(tabMenu => {
@@ -346,6 +363,9 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
       ...tabsChanges,
       [tabMenuActiveItem.tabKey]: true
     });
+    if (tab.tabKey == 'data') {
+      setClickedFields([...config.validations.requiredFields]);
+    }
     setTabMenuActiveItem(tab);
   };
 
@@ -376,13 +396,12 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   };
 
   const printError = field => {
-    return (tabsChanges.data || clickedFields.includes(field)) && isEmpty(creationFormState.candidateRule[field])
-      ? 'error'
-      : '';
+    return clickedFields.includes(field) && isEmpty(creationFormState.candidateRule[field]) ? 'error' : '';
   };
 
   const dialogLayout = children => (
     <Dialog
+      className={styles.dialog}
       header={
         validationContext.ruleEdit
           ? resourcesContext.messages.editFieldConstraint
@@ -406,6 +425,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                 <div className={styles.fieldsGroup}>
                   <div
                     onBlur={e => onAddToClickedFields('table')}
+                    onFocus={e => onDeleteFromClickedFields('table')}
                     className={`${styles.field} ${styles.qcTable} formField ${printError('table')}`}>
                     <label htmlFor="table">{resourcesContext.messages.table}</label>
                     <Dropdown
@@ -422,12 +442,14 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                   </div>
                   <div
                     onBlur={e => onAddToClickedFields('field')}
+                    onFocus={e => onDeleteFromClickedFields('field')}
                     className={`${styles.field} ${styles.qcField} formField ${printError('field')}`}>
                     <label htmlFor="field">{resourcesContext.messages.field}</label>
                     {fieldsDropdown}
                   </div>
                   <div
                     onBlur={e => onAddToClickedFields('shortCode')}
+                    onFocus={e => onDeleteFromClickedFields('shortCode')}
                     className={`${styles.field} ${styles.qcShortCode} formField ${printError('shortCode')}`}>
                     <label htmlFor="shortCode">{resourcesContext.messages.ruleShortCode}</label>
                     <InputText
@@ -438,7 +460,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                     />
                   </div>
                   <div className={`${styles.field} ${styles.qcEnabled} formField `}>
-                    <label htmlFor="QcActive">{resourcesContext.messages.enabled}</label>
+                    <label htmlFor="QcActive">{resourcesContext.messages.qcEnabled}</label>
                     <Checkbox
                       id={`${componentName}__active`}
                       onChange={e => onInfoFieldChange('active', e.checked)}
@@ -449,6 +471,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                 <div className={styles.fieldsGroup}>
                   <div
                     onBlur={e => onAddToClickedFields('name')}
+                    onFocus={e => onDeleteFromClickedFields('name')}
                     className={`${styles.field} ${styles.qcName} formField ${printError('name')}`}>
                     <label htmlFor="name">{resourcesContext.messages.ruleName}</label>
                     <InputText
@@ -471,6 +494,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                 <div className={styles.fieldsGroup}>
                   <div
                     onBlur={e => onAddToClickedFields('errorLevel')}
+                    onFocus={e => onDeleteFromClickedFields('errorLevel')}
                     className={`${styles.field} ${styles.qcErrorType} formField ${printError('errorLevel')}`}>
                     <label htmlFor="errorType">{resourcesContext.messages.errorType}</label>
                     <Dropdown
@@ -486,6 +510,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                   </div>
                   <div
                     onBlur={e => onAddToClickedFields('errorMessage')}
+                    onFocus={e => onDeleteFromClickedFields('errorMessage')}
                     className={`${styles.field} ${styles.qcErrorMessage} formField ${printError('errorMessage')}`}>
                     <label htmlFor="errorMessage">{resourcesContext.messages.ruleErrorMessage}</label>
                     <InputText
