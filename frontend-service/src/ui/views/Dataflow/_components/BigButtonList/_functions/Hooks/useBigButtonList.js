@@ -14,7 +14,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 const useBigButtonList = ({
   dataflowId,
   dataflowState,
-  exportDatatableSchema,
+  // exportDatatableSchema,
   getDeleteSchemaIndex,
   handleRedirect,
   isActiveButton,

@@ -13,7 +13,7 @@ export const checkValidation = candidateRule => {
         isValidated = false;
       }
     } else if (ruleKey == 'expressions' && !isEmpty(candidateRule.expressions)) {
-      console.log('checkValidation', candidateRule.expressions);
+      // console.log('checkValidation', candidateRule.expressions);
 
       if (checkExpressions(candidateRule[ruleKey])) {
         isValidated = false;
