@@ -265,9 +265,7 @@ const Dataflow = withRouter(({ history, match }) => {
         }
       } //+
 
-      if (dataflow.representatives.length === 1 /* || !isNil(match.params.representativeId) */) {
-        console.log('in!!! ', match.params.representativeId);
-        console.log('dataflowState.isRepresentativeView', dataflowState.isRepresentativeView);
+      if (dataflow.representatives.length === 1) {
         if (!isEmpty(dataflow.representatives) && !isEmpty(dataflow.datasets)) {
           const representativeId = dataflow.datasets.map(id => id.dataProviderId);
 
@@ -288,7 +286,6 @@ const Dataflow = withRouter(({ history, match }) => {
           }
         }
       } else {
-        console.log('OUT!!! ', match.params.representativeId);
         if (!isEmpty(dataflow.representatives)) {
           const isReceiptOutdated = dataflow.representatives.map(representative => representative.isReceiptOutdated);
           if (isReceiptOutdated.length === 1) {
@@ -296,13 +293,6 @@ const Dataflow = withRouter(({ history, match }) => {
           }
         }
       }
-
-      /*  if (!isEmpty(dataflow.representatives)) {
-        const isReceiptOutdated = dataflow.representatives.map(representative => representative.isReceiptOutdated);
-        if (isReceiptOutdated.length === 1) {
-          dataflowDispatch({ type: 'ON_INIT_RECEIPT_DATA', payload: { isReceiptOutdated: isReceiptOutdated[0] } });
-        }
-      } */
     } catch (error) {
       notificationContext.add({ type: 'LOAD_DATAFLOW_DATA_ERROR' });
 
@@ -356,7 +346,7 @@ const Dataflow = withRouter(({ history, match }) => {
           title={TextUtils.ellipsis(dataflowState.name)}
         />
 
-        <BigButtonList
+        {/*  <BigButtonList
           dataflowDispatch={dataflowDispatch}
           dataflowState={dataflowState}
           handleRedirect={handleRedirect}
@@ -372,9 +362,9 @@ const Dataflow = withRouter(({ history, match }) => {
           handleRedirect={handleRedirect}
           onShowSnapshotDialog={onShowSnapshotDialog}
           match={match}
-        />
+        /> */}
 
-        {/*    {isNil(match.params.representativeId) ? (
+        {isNil(match.params.representativeId) ? (
           <BigButtonList
             dataflowDispatch={dataflowDispatch}
             dataflowState={dataflowState}
@@ -392,7 +382,7 @@ const Dataflow = withRouter(({ history, match }) => {
             onShowSnapshotDialog={onShowSnapshotDialog}
             match={match}
           />
-        )} */}
+        )}
 
         <SnapshotsDialog
           dataflowId={dataflowId}
