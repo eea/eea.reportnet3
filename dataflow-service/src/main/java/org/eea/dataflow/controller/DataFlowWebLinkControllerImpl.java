@@ -58,13 +58,13 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
     try {
       return dataflowWebLinkService.getWebLink(idLink);
     } catch (EntityNotFoundException e) {
-      LOG_ERROR.error("Data not found");
+      LOG_ERROR.error(HttpStatus.NOT_FOUND.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     } catch (ResourceNoFoundException e) {
-      LOG_ERROR.error("Access forbidden");
+      LOG_ERROR.error(HttpStatus.FORBIDDEN.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     } catch (EEAException e) {
-      LOG_ERROR.error("Internal server Error");
+      LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
@@ -87,13 +87,13 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
     try {
       dataflowWebLinkService.saveWebLink(dataflowId, weblinkVO);
     } catch (EntityNotFoundException e) {
-      LOG_ERROR.error("Data not found");
+      LOG_ERROR.error(HttpStatus.NOT_FOUND.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     } catch (WrongDataExceptions e) {
-      LOG_ERROR.error("Bad Request");
+      LOG_ERROR.error(HttpStatus.BAD_REQUEST.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (EEAException e) {
-      LOG_ERROR.error("Internal server Error");
+      LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
@@ -112,13 +112,13 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
     try {
       dataflowWebLinkService.removeWebLink(idLink);
     } catch (EntityNotFoundException e) {
-      LOG_ERROR.error("Data not found");
+      LOG_ERROR.error(HttpStatus.NOT_FOUND.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     } catch (ResourceNoFoundException e) {
-      LOG_ERROR.error("Access forbidden");
+      LOG_ERROR.error(HttpStatus.FORBIDDEN.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     } catch (EEAException e) {
-      LOG_ERROR.error("Internal server Error");
+      LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
@@ -135,16 +135,16 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
     try {
       dataflowWebLinkService.updateWebLink(weblinkVO);
     } catch (EntityNotFoundException e) {
-      LOG_ERROR.error("Data not found");
+      LOG_ERROR.error(HttpStatus.NOT_FOUND.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     } catch (ResourceNoFoundException e) {
-      LOG_ERROR.error("Access forbidden");
+      LOG_ERROR.error(HttpStatus.FORBIDDEN.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     } catch (WrongDataExceptions e) {
-      LOG_ERROR.error("Bad Request");
+      LOG_ERROR.error(HttpStatus.BAD_REQUEST.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (EEAException e) {
-      LOG_ERROR.error("Internal server Error");
+      LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 

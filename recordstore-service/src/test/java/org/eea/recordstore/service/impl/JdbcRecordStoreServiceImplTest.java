@@ -73,6 +73,9 @@ public class JdbcRecordStoreServiceImplTest {
     ReflectionTestUtils.setField(jdbcRecordStoreService, "sqlGetDatasetsName",
         "select * from pg_namespace where nspname like 'dataset%'");
 
+    ReflectionTestUtils.setField(jdbcRecordStoreService,
+        "timeToWaitBeforeReleasingNotificationDesign", 1000L);
+
   }
 
   @Rule
