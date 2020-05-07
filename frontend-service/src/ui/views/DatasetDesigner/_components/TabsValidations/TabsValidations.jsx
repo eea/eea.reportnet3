@@ -192,7 +192,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       .map(orderedError => orderedError.id);
   };
 
-  const actionsTemplate = row => (row.automatic ? editTemplate(row) : editAndDeleteTemplate());
+  const actionsTemplate = row => (row.automatic ? editTemplate(row) : editAndDeleteTemplate(row));
 
   const editAndDeleteTemplate = row => (
     <ActionsColumn
