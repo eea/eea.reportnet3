@@ -83,7 +83,7 @@
     "createNewDatasetFromTemplate": "New dataset from template",
     "createNewEmptyDatasetSchema": "New empty dataset schema",
     "createNewWebLink": "Add web link",
-    "createQcRule": "Create QC rule",
+    "createQcRule": "Create a new QC for this field",
     "createSnapshotMessage": "Manage copies",
     "createSnapshotPlaceholder": "Description",
     "createSnapshotTitle": "Manage copies",
