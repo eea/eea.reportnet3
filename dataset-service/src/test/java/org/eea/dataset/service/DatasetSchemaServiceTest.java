@@ -5,7 +5,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -467,7 +466,7 @@ public class DatasetSchemaServiceTest {
   public void updateFieldSchemaTest1() throws EEAException {
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchema);
-    Mockito.when(fieldSchemaVO.getType()).thenReturn(DataType.NUMBER);
+    Mockito.when(fieldSchemaVO.getType()).thenReturn(DataType.NUMBER_DECIMAL);
     Mockito.when(fieldSchema.put(Mockito.any(), Mockito.any()))
         .thenReturn(DataType.TEXT.getValue());
     Mockito.when(fieldSchemaVO.getDescription()).thenReturn("description");
@@ -475,7 +474,7 @@ public class DatasetSchemaServiceTest {
     Mockito.when(schemasRepository.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
 
-    Assert.assertEquals(DataType.NUMBER,
+    Assert.assertEquals(DataType.NUMBER_DECIMAL,
         dataSchemaServiceImpl.updateFieldSchema("<id>", fieldSchemaVO));
   }
 
@@ -629,6 +628,8 @@ public class DatasetSchemaServiceTest {
         .thenReturn(tableSchema);
     Mockito.when(tableSchemaVO.getDescription()).thenReturn("description");
     Mockito.when(tableSchemaVO.getNameTableSchema()).thenReturn("nameTableSchema");
+    Mockito.when(tableSchemaVO.getReadOnly()).thenReturn(true);
+    Mockito.when(tableSchemaVO.getToPrefill()).thenReturn(true);
     Mockito.when(tableSchema.put(Mockito.any(), Mockito.any())).thenReturn(null);
     Mockito.when(schemasRepository.updateTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
@@ -647,6 +648,8 @@ public class DatasetSchemaServiceTest {
         .thenReturn(tableSchema);
     Mockito.when(tableSchemaVO.getDescription()).thenReturn(null);
     Mockito.when(tableSchemaVO.getNameTableSchema()).thenReturn(null);
+    Mockito.when(tableSchemaVO.getReadOnly()).thenReturn(null);
+    Mockito.when(tableSchemaVO.getToPrefill()).thenReturn(null);
     Mockito.when(schemasRepository.updateTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
     try {
@@ -866,7 +869,7 @@ public class DatasetSchemaServiceTest {
 
     dataSchemaServiceImpl.propagateRulesAfterUpdateSchema("datasetSchemaId", fieldSchemaVO, null,
         1L);
-
+    Mockito.verify(rulesControllerZuul, times(1)).existsRuleRequired(Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -878,8 +881,9 @@ public class DatasetSchemaServiceTest {
     Mockito.doNothing().when(datasetService).updateFieldValueType(Mockito.anyLong(), Mockito.any(),
         Mockito.any());
     dataSchemaServiceImpl.propagateRulesAfterUpdateSchema("datasetSchemaId", fieldSchemaVO,
-        DataType.NUMBER, 1L);
-
+        DataType.NUMBER_DECIMAL, 1L);
+    Mockito.verify(datasetService, times(1)).updateFieldValueType(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
 
@@ -892,6 +896,7 @@ public class DatasetSchemaServiceTest {
 
     dataSchemaServiceImpl.propagateRulesAfterUpdateSchema("datasetSchemaId", fieldSchemaVO, null,
         1L);
+    Mockito.verify(rulesControllerZuul, times(1)).deleteRuleRequired(Mockito.any(), Mockito.any());
 
   }
 
@@ -904,7 +909,7 @@ public class DatasetSchemaServiceTest {
     Mockito.doNothing().when(datasetService).updateFieldValueType(Mockito.anyLong(), Mockito.any(),
         Mockito.any());
     dataSchemaServiceImpl.propagateRulesAfterUpdateSchema("datasetSchemaId", fieldSchemaVO,
-        DataType.NUMBER, 1L);
+        DataType.NUMBER_DECIMAL, 1L);
 
   }
 

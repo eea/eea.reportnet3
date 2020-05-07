@@ -1,5 +1,6 @@
 package org.eea.validation.persistence.repository;
 
+import javax.annotation.CheckForNull;
 import org.bson.types.ObjectId;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
@@ -98,6 +99,7 @@ public interface ExtendedRulesRepository {
    * @param ruleId the rule id
    * @return the rule
    */
+  @CheckForNull
   Rule findRule(ObjectId datasetSchemaId, ObjectId ruleId);
 
   /**
@@ -117,4 +119,12 @@ public interface ExtendedRulesRepository {
    * @return the rules with type rule criteria
    */
   RulesSchema getRulesWithTypeRuleCriteria(ObjectId datasetSchemaId, boolean required);
+
+  /**
+   * Gets the active and verified rules.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the active and verified rules
+   */
+  RulesSchema getActiveAndVerifiedRules(ObjectId datasetSchemaId);
 }

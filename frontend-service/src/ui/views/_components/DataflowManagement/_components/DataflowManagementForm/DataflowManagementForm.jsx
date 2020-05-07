@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { forwardRef, useContext, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import * as Yup from 'yup';
 import { ErrorMessage, Field, Form, Formik } from 'formik';
@@ -16,167 +16,136 @@ import { DataflowService } from 'core/services/Dataflow';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const DataflowManagementForm = ({
-  data,
-  dataflowId,
-  getData,
-  isEditForm,
-  onCancel,
-  onCreate,
-  onEdit,
-  onSearch,
-  refresh,
-  onResetData
-}) => {
-  const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+const DataflowManagementForm = forwardRef(
+  ({ data, dataflowId, getData, isEditForm, onCreate, onEdit, onSearch, onSubmit, refresh }, ref) => {
+    const notificationContext = useContext(NotificationContext);
+    const resources = useContext(ResourcesContext);
 
-  const [hasErrors, setHasErrors] = useState(false);
-  const [isNameDuplicated, setIsNameDuplicated] = useState(false);
-  const [isObligationEmpty, setIsObligationEmpty] = useState(false);
+    const [hasErrors, setHasErrors] = useState(false);
+    const [isNameDuplicated, setIsNameDuplicated] = useState(false);
+    const [isObligationEmpty, setIsObligationEmpty] = useState(false);
 
-  const form = useRef(null);
-  const inputRef = useRef(null);
+    const form = useRef(null);
+    const inputRef = useRef(null);
 
-  useEffect(() => {
-    if (!isNil(inputRef) && refresh) inputRef.current.focus();
-  }, [hasErrors, inputRef.current, refresh]);
+    useEffect(() => {
+      if (!isNil(inputRef) && refresh) inputRef.current.focus();
+    }, [hasErrors, inputRef.current, refresh]);
 
-  useEffect(() => {
-    if (!isNil(form.current) && refresh) {
-      form.current.resetForm();
-      setHasErrors(false);
-      setIsNameDuplicated(false);
-      setIsObligationEmpty(false);
-    }
-  }, [refresh, form.current]);
+    useEffect(() => {
+      if (!isNil(form.current) && refresh) {
+        form.current.resetForm();
+        setHasErrors(false);
+        setIsNameDuplicated(false);
+        setIsObligationEmpty(false);
+      }
+    }, [refresh, form.current]);
 
-  const dataflowCrudValidation = Yup.object().shape({
-    name: Yup.string().required(' '),
-    description: Yup.string().required(' ').max(255, resources.messages['dataflowDescriptionValidationMax']),
-    obligation: Yup.object({ title: Yup.string().required(' ') })
-  });
+    useImperativeHandle(ref, () => ({
+      handleSubmit: () => form.current.handleSubmit()
+    }));
 
-  return (
-    <Formik
-      ref={form}
-      enableReinitialize={true}
-      initialValues={data}
-      validationSchema={dataflowCrudValidation}
-      onSubmit={async (values, { setSubmitting }) => {
-        setSubmitting(true);
-        try {
-          if (isEditForm) {
-            await DataflowService.update(dataflowId, values.name, values.description, data.obligation.id);
-            onEdit(values.name, values.description, data.obligation.id);
-          } else {
-            await DataflowService.create(values.name, values.description, data.obligation.id);
-            onCreate();
+    const dataflowCrudValidation = Yup.object().shape({
+      name: Yup.string().required(' '),
+      description: Yup.string().required(' ').max(255, resources.messages['dataflowDescriptionValidationMax']),
+      obligation: Yup.object({ title: Yup.string().required(' ') })
+    });
+
+    return (
+      <Formik
+        ref={form}
+        enableReinitialize={true}
+        initialValues={data}
+        validationSchema={dataflowCrudValidation}
+        onSubmit={async values => {
+          onSubmit(true);
+          try {
+            if (isEditForm) {
+              await DataflowService.update(dataflowId, values.name, values.description, data.obligation.id);
+              onEdit(values.name, values.description, data.obligation.id);
+            } else {
+              await DataflowService.create(values.name, values.description, data.obligation.id);
+              onCreate();
+            }
+          } catch (error) {
+            setHasErrors(true);
+            if (error.response.data === DataflowConf.errorTypes['dataflowExists']) {
+              setIsNameDuplicated(true);
+              notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
+            }
+
+            const notification = isEditForm
+              ? { type: 'DATAFLOW_UPDATING_ERROR', content: { dataflowId: data.id, dataflowName: values.name } }
+              : { type: 'DATAFLOW_CREATION_ERROR', content: { dataflowName: values.name } };
+
+            notificationContext.add(notification);
+          } finally {
+            onSubmit(false);
           }
-        } catch (error) {
-          setHasErrors(true);
-          if (error.response.data === DataflowConf.errorTypes['dataflowExists']) {
-            setIsNameDuplicated(true);
-            notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
-          }
+        }}>
+        {({ errors, handleChange, touched }) => (
+          <Form>
+            <fieldset>
+              <div
+                className={`formField${(!isEmpty(errors.name) && touched.name) || isNameDuplicated ? ' error' : ''}`}>
+                <Field
+                  autoComplete="off"
+                  innerRef={inputRef}
+                  name="name"
+                  placeholder={resources.messages['createDataflowName']}
+                  onChange={event => {
+                    getData({ ...data, name: event.target.value });
+                    handleChange(event);
+                    setIsNameDuplicated(false);
+                    setHasErrors(false);
+                  }}
+                  type="text"
+                  value={data.name}
+                />
+                <ErrorMessage className="error" name="name" component="div" />
+              </div>
 
-          const notification = isEditForm
-            ? { type: 'DATAFLOW_UPDATING_ERROR', content: { dataflowId: data.id, dataflowName: values.name } }
-            : { type: 'DATAFLOW_CREATION_ERROR', content: { dataflowName: values.name } };
+              <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
+                <Field
+                  autoComplete="off"
+                  name="description"
+                  component="textarea"
+                  rows="10"
+                  onChange={event => getData({ ...data, description: event.target.value })}
+                  placeholder={resources.messages['createDataflowDescription']}
+                  value={data.description}
+                />
+                <ErrorMessage className="error" name="description" component="div" />
+              </div>
 
-          notificationContext.add(notification);
-        } finally {
-          setSubmitting(false);
-        }
-      }}>
-      {({ errors, handleChange, isSubmitting, touched, values }) => (
-        <Form>
-          <fieldset>
-            <div className={`formField${(!isEmpty(errors.name) && touched.name) || isNameDuplicated ? ' error' : ''}`}>
-              <Field
-                autoComplete="off"
-                innerRef={inputRef}
-                name="name"
-                placeholder={resources.messages['createDataflowName']}
-                onChange={event => {
-                  getData({ ...data, name: event.target.value });
-                  handleChange(event);
-                  setIsNameDuplicated(false);
-                  setHasErrors(false);
-                }}
-                type="text"
-                value={data.name}
-              />
-              <ErrorMessage className="error" name="name" component="div" />
-            </div>
-
-            <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
-              <Field
-                autoComplete="off"
-                name="description"
-                component="textarea"
-                rows="10"
-                onChange={event => getData({ ...data, description: event.target.value })}
-                placeholder={resources.messages['createDataflowDescription']}
-                value={data.description}
-              />
-              <ErrorMessage className="error" name="description" component="div" />
-            </div>
-
-            <div className={`${styles.search}`}>
-              <Button
-                className={`p-button-secondary`}
-                icon="search"
-                label={resources.messages['search']}
-                onMouseDown={onSearch}
-              />
-              <Field
-                className={`${styles.searchInput} ${
-                  (!isEmpty(errors.obligation) && !isEmpty(touched.obligation) && touched.obligation.title) ||
-                  isObligationEmpty
-                    ? styles.searchErrors
-                    : ''
-                }`}
-                name="obligation.title"
-                placeholder={resources.messages['associatedObligation']}
-                readOnly={true}
-                type="text"
-                value={data.obligation.title}
-              />
-              <ErrorMessage className="error" name="obligation.title" component="div" />
-            </div>
-          </fieldset>
-          <fieldset>
-            <hr />
-            <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
-              <Button
-                className={`${
-                  !isEmpty(touched)
-                    ? isEmpty(errors)
-                      ? styles.primaryButton
-                      : styles.disabledButton
-                    : styles.disabledButton
-                } p-button-primary p-button-animated-blink`}
-                label={isEditForm ? resources.messages['save'] : resources.messages['create']}
-                disabled={isSubmitting}
-                icon={isEditForm ? 'save' : 'add'}
-                type={isSubmitting ? '' : 'submit'}
-              />
-              <Button
-                className={`${styles.cancelButton} p-button-secondary p-button-animated-blink`}
-                label={resources.messages['cancel']}
-                icon="cancel"
-                onClick={() => {
-                  onCancel();
-                  onResetData();
-                }}
-              />
-            </div>
-          </fieldset>
-        </Form>
-      )}
-    </Formik>
-  );
-};
+              <div className={`${styles.search}`}>
+                <Button
+                  className={`p-button-secondary`}
+                  icon="search"
+                  label={resources.messages['search']}
+                  onMouseDown={onSearch}
+                />
+                <Field
+                  className={`${styles.searchInput} ${
+                    (!isEmpty(errors.obligation) && !isEmpty(touched.obligation) && touched.obligation.title) ||
+                    isObligationEmpty
+                      ? styles.searchErrors
+                      : ''
+                  }`}
+                  name="obligation.title"
+                  placeholder={resources.messages['associatedObligation']}
+                  readOnly={true}
+                  type="text"
+                  value={data.obligation.title}
+                />
+                <ErrorMessage className="error" name="obligation.title" component="div" />
+              </div>
+            </fieldset>
+          </Form>
+        )}
+      </Formik>
+    );
+  }
+);
 
 export { DataflowManagementForm };

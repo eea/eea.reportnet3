@@ -48,7 +48,22 @@ public class DeleteHelperTest {
         Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    deleteHelper.executeDeleteProcess(1L, "");
+    deleteHelper.executeDeleteTableProcess(1L, "");
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+
+  @Test
+  public void executeDeleteDatasetProcessTest()
+      throws EEAException, IOException, InterruptedException {
+
+    Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
+    Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
+        Mockito.any());
+    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    deleteHelper.executeDeleteDatasetProcess(1L);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }

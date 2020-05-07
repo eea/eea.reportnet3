@@ -6,6 +6,7 @@ package org.eea.interfaces.controller.dataset;
 import java.util.List;
 import javax.ws.rs.Produces;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -117,7 +118,7 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @return the data flow id by id
    */
-  @RequestMapping(value = "{id}/dataflow", method = RequestMethod.GET)
+  @GetMapping("{id}/dataflow")
   Long getDataFlowIdById(@PathVariable("id") Long datasetId);
 
   /**
@@ -233,4 +234,29 @@ public interface DatasetController {
    */
   @GetMapping("/private/datasetType/{datasetId}")
   DatasetTypeEnum getDatasetType(@PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Etl export dataset.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @return the ETL dataset VO
+   */
+  @GetMapping("/{datasetId}/etlExport")
+  ETLDatasetVO etlExportDataset(@PathVariable("datasetId") Long datasetId,
+      @RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId);
+
+  /**
+   * Etl import dataset.
+   *
+   * @param datasetId the dataset id
+   * @param etlDatasetVO the etl dataset VO
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   */
+  @PostMapping("/{datasetId}/etlImport")
+  void etlImportDataset(@PathVariable("datasetId") Long datasetId,
+      @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("providerId") Long providerId);
 }

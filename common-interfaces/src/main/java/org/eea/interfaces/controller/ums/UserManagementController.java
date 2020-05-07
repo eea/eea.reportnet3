@@ -1,6 +1,5 @@
 package org.eea.interfaces.controller.ums;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
@@ -13,19 +12,20 @@ import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * The interface User management controller.
+ * The Interface UserManagementController.
  */
 public interface UserManagementController {
 
   /**
-   * The interface User management controller zull.
+   * The Interface UserManagementControllerZull.
    */
   @FeignClient(value = "ums", path = "/user")
   interface UserManagementControllerZull extends UserManagementController {
@@ -33,126 +33,117 @@ public interface UserManagementController {
   }
 
   /**
-   * Generate token string.
+   * Generate token.
    *
    * @param username the username
    * @param password the password
-   *
-   * @return the string
+   * @return the token VO
    */
-  @RequestMapping(value = "/generateToken", method = RequestMethod.POST)
+  @PostMapping("/generateToken")
   TokenVO generateToken(@RequestParam("username") String username,
       @RequestParam("password") String password);
 
   /**
-   * Generate token token vo based on authorization code.
+   * Generate token.
    *
    * @param code the code
-   *
-   * @return the token vo
+   * @return the token VO
    */
-  @RequestMapping(value = "/generateTokenByCode", method = RequestMethod.POST)
+  @PostMapping("/generateTokenByCode")
   TokenVO generateToken(@RequestParam("code") String code);
 
   /**
-   * Refresh token token vo.
+   * Refresh token.
    *
    * @param refreshToken the refresh token
-   *
-   * @return the token vo
+   * @return the token VO
    */
-  @RequestMapping(value = "/refreshToken", method = RequestMethod.POST)
+  @PostMapping("/refreshToken")
   TokenVO refreshToken(@RequestParam("refreshToken") String refreshToken);
 
   /**
-   * Check resource access permission boolean.
+   * Check resource access permission.
    *
    * @param resource the resource
    * @param scopes the scopes
-   *
    * @return the boolean
    */
-  @RequestMapping(value = "/checkAccess", method = RequestMethod.GET)
+  @GetMapping("/checkAccess")
   Boolean checkResourceAccessPermission(@RequestParam("resource") String resource,
       @RequestParam("scopes") AccessScopeEnum[] scopes);
 
   /**
-   * Gets resources by user.
+   * Gets the resources by user.
    *
    * @return the resources by user
    */
-  @RequestMapping(value = "/resources", method = RequestMethod.GET)
+  @GetMapping("/resources")
   List<ResourceAccessVO> getResourcesByUser();
 
   /**
-   * Gets resources by user.
+   * Gets the resources by user.
    *
    * @param resourceType the resource type
-   *
    * @return the resources by user
    */
-  @RequestMapping(value = "/resources_by_type", method = RequestMethod.GET)
+  @GetMapping("/resources_by_type")
   List<ResourceAccessVO> getResourcesByUser(
       @RequestParam("resourceType") ResourceTypeEnum resourceType);
 
   /**
-   * Gets resources by user.
+   * Gets the resources by user.
    *
    * @param securityRole the security role
-   *
    * @return the resources by user
    */
-  @RequestMapping(value = "/resources_by_role", method = RequestMethod.GET)
+  @GetMapping("/resources_by_role")
   List<ResourceAccessVO> getResourcesByUser(
       @RequestParam("securityRole") SecurityRoleEnum securityRole);
 
   /**
-   * Gets resources by user.
+   * Gets the resources by user.
    *
    * @param resourceType the resource type
    * @param securityRole the security role
-   *
    * @return the resources by user
    */
-  @RequestMapping(value = "/resources_by_type_role", method = RequestMethod.GET)
+  @GetMapping("/resources_by_type_role")
   List<ResourceAccessVO> getResourcesByUser(
       @RequestParam("resourceType") ResourceTypeEnum resourceType,
       @RequestParam("securityRole") SecurityRoleEnum securityRole);
 
   /**
-   * Do log out invalidating the user session.
+   * Do log out.
    *
    * @param refreshToken the refresh token
    */
-  @RequestMapping(value = "/logout", method = RequestMethod.POST)
+  @PostMapping("/logout")
   void doLogOut(@RequestParam("refreshToken") String refreshToken);
 
   /**
-   * Add invoking user to a resource. User must be authenticated
+   * Adds the user to resource.
    *
    * @param idResource the id resource
    * @param resourceGroupEnum the resource group enum
    */
-  @RequestMapping(value = "/add_user_to_resource", method = RequestMethod.PUT)
+  @PutMapping("/add_user_to_resource")
   void addUserToResource(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum);
 
   /**
-   * Sets the users.
+   * Creates the users.
    *
    * @param file the file
-   *
-   * @throws IOException Signals that an I/O exception has occurred.
    */
-  @RequestMapping(value = "/createUsers", method = RequestMethod.POST)
-  void createUsers(@RequestParam("file") MultipartFile file) throws IOException;
+  @PostMapping("/createUsers")
+  void createUsers(@RequestBody MultipartFile file);
 
   /**
    * Gets the users.
    *
    * @return the users
    */
-  @RequestMapping(value = "/getUsers", method = RequestMethod.GET)
+  @GetMapping("/getUsers")
   List<UserRepresentationVO> getUsers();
 
   /**
@@ -165,13 +156,13 @@ public interface UserManagementController {
   UserRepresentationVO getUserByEmail(@RequestParam("email") String email);
 
   /**
-   * Add a contributor to resource.
+   * Adds the contributor to resource.
    *
    * @param idResource the id resource
    * @param resourceGroupEnum the resource group enum
    * @param userMail the user mail
    */
-  @RequestMapping(value = "/add_contributor_to_resource", method = RequestMethod.PUT)
+  @PutMapping("/add_contributor_to_resource")
   void addContributorToResource(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum,
       @RequestParam("userMail") String userMail);
@@ -181,7 +172,7 @@ public interface UserManagementController {
    *
    * @param resources the resources
    */
-  @RequestMapping(value = "/add_contributors_to_resources", method = RequestMethod.PUT)
+  @PutMapping("/add_contributors_to_resources")
   void addContributorsToResources(@RequestBody List<ResourceAssignationVO> resources);
 
   /**
@@ -189,13 +180,15 @@ public interface UserManagementController {
    *
    * @param resources the resources
    */
-  @RequestMapping(value = "/add_user_to_resources", method = RequestMethod.PUT)
+  @PutMapping("/add_user_to_resources")
   void addUserToResources(@RequestBody List<ResourceAssignationVO> resources);
 
   /**
    * Update user attributes.
+   *
+   * @param attributes the attributes
    */
-  @RequestMapping(value = "/updateAttributes", method = RequestMethod.PUT)
+  @PutMapping("/updateAttributes")
   void updateUserAttributes(@RequestBody Map<String, List<String>> attributes);
 
   /**
@@ -203,15 +196,58 @@ public interface UserManagementController {
    *
    * @return the user attributes
    */
-  @RequestMapping(value = "/getAttributes", method = RequestMethod.GET)
+  @GetMapping("/getAttributes")
   Map<String, List<String>> getUserAttributes();
 
   /**
-   * Gets the email by user id.
+   * Gets the user by user id.
    *
    * @param userId the user id
-   * @return the email by user id
+   * @return the user by user id
    */
   @GetMapping("/getUserByUserId")
   UserRepresentationVO getUserByUserId(@RequestParam("userId") String userId);
+
+  /**
+   * Creates the api key.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProvider the data provider
+   * @return the string
+   */
+  @PostMapping("/createApiKey")
+  String createApiKey(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("dataProvider") Long dataProvider);
+
+  /**
+   * Gets the api key.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProvider the data provider
+   * @return the api key
+   */
+  @GetMapping("/getApiKey")
+  String getApiKey(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("dataProvider") Long dataProvider);
+
+  /**
+   * Gets the api key.
+   *
+   * @param userId the user id
+   * @param dataflowId the dataflow id
+   * @param dataProvider the data provider
+   * @return the api key
+   */
+  @GetMapping("/{userId}/getApiKey")
+  String getApiKey(@PathVariable("userId") String userId,
+      @RequestParam("dataflowId") Long dataflowId, @RequestParam("dataProvider") Long dataProvider);
+
+  /**
+   * Authenticate user by api key.
+   *
+   * @param apiKey the api key
+   * @return the token VO
+   */
+  @PostMapping("/authenticateByApiKey/{apiKey}")
+  TokenVO authenticateUserByApiKey(@PathVariable("apiKey") String apiKey);
 }

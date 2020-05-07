@@ -265,15 +265,15 @@ export const Dataset = withRouter(({ match, history }) => {
       if (dataDeleted) {
         setIsDataDeleted(true);
       }
-      notificationContext.add({
-        type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_SUCCESS',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
-      });
+      // notificationContext.add({
+      //   type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_SUCCESS',
+      //   content: {
+      //     dataflowId,
+      //     datasetId,
+      //     dataflowName,
+      //     datasetName
+      //   }
+      // });
     } catch (error) {
       const {
         dataflow: { name: dataflowName },

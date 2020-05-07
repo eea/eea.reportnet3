@@ -508,7 +508,7 @@ public class ValidationServiceTest {
     KieBase kiebase = kieHelper.build();
     when(datasetSchemaController.getDatasetSchemaId(Mockito.any())).thenReturn("");
     when(kieBaseManager.reloadRules(Mockito.any(), Mockito.any())).thenReturn(kiebase);
-    validationServiceImpl.loadRulesKnowledgeBase(1L);
+    assertEquals("assertion error", kiebase, validationServiceImpl.loadRulesKnowledgeBase(1L));
   }
 
 
@@ -802,7 +802,8 @@ public class ValidationServiceTest {
     datasetValidation.setDatasetValue(datasetValue);
     when(validationDatasetRepository.findByValidationIds(Mockito.any()))
         .thenReturn(datasetValue.getDatasetValidations());
-    validationServiceImpl.getDatasetErrors(1L, datasetValue, new ArrayList<>());
+    assertNotNull("assertion error",
+        validationServiceImpl.getDatasetErrors(1L, datasetValue, new ArrayList<>()));
   }
 
   /**
@@ -839,6 +840,7 @@ public class ValidationServiceTest {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(kieBase.newKieSession()).thenReturn(kieSession);
     validationServiceImpl.validateDataSet(1L, kieBase);
+    Mockito.verify(validationDatasetRepository, times(1)).saveAll(Mockito.any());
   }
 
 
@@ -852,6 +854,7 @@ public class ValidationServiceTest {
     when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(tableValue));
     when(kieBase.newKieSession()).thenReturn(kieSession);
     validationServiceImpl.validateTable(1L, Mockito.any(), kieBase);
+    Mockito.verify(tableValidationRepository, times(1)).saveAll(Mockito.any());
   }
 
 

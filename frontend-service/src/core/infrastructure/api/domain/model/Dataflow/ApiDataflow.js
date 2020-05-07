@@ -118,6 +118,30 @@ export const apiDataflow = {
     });
     return response;
   },
+  getApiKey: async (dataflowId, dataProviderId) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.getApiKey, { dataflowId, dataProviderId }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+
+    return response.data;
+  },
+  generateApiKey: async (dataflowId, dataProviderId) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.post({
+      url: getUrl(DataflowConfig.generateApiKey, { dataflowId, dataProviderId }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+
+    return response.data;
+  },
   pending: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({

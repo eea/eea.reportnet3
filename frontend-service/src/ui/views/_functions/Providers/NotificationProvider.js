@@ -47,13 +47,22 @@ const notificationReducer = (state, { type, payload }) => {
         ...state,
         newNotification: false
       };
+
+    case 'HIDE':
+      return { ...state, hidden: [...state.hidden, payload.hidden] };
+
     default:
       return state;
   }
 };
 
 const NotificationProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(notificationReducer, { toShow: [], all: [], newNotification: false });
+  const [state, dispatch] = useReducer(notificationReducer, {
+    all: [],
+    hidden: [],
+    newNotification: false,
+    toShow: []
+  });
   const resourcesContext = useContext(ResourcesContext);
 
   return (
@@ -69,7 +78,7 @@ const NotificationProvider = ({ children }) => {
             config: config.notifications.notificationSchema,
             routes
           });
-          console.log('notification', notification);
+          // console.log('notification', notification);
           dispatch({
             type: 'ADD',
             payload: notification
@@ -104,7 +113,8 @@ const NotificationProvider = ({ children }) => {
           dispatch({
             type: 'DESTROY'
           });
-        }
+        },
+        hide: notification => dispatch({ type: 'HIDE', payload: { hidden: notification.type } })
       }}>
       {children}
     </NotificationContext.Provider>

@@ -43,6 +43,10 @@ public class Rule {
   @Field(value = "enabled")
   private boolean enabled;
 
+  /** The verified. */
+  @Field(value = "verified")
+  private Boolean verified;
+
   /** The activation_group. */
   @Field(value = "activationGroup")
   private String activationGroup;

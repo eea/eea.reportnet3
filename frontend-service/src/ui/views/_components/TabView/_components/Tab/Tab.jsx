@@ -322,7 +322,12 @@ const Tab = ({
           onDrop={e => onTabDrop(e)}
           onDoubleClick={onTabDoubleClick}
           role="tab"
-          style={{ pointerEvents: 'fill', display: 'inline-block', height: isNavigationHidden ? '2.6rem' : '2.7rem' }}
+          style={{
+            pointerEvents: 'fill',
+            display: 'inline-block',
+            height: isNavigationHidden ? '2.6rem' : '2.7rem',
+            minWidth: '3.6rem'
+          }}
           tabIndex={index}>
           {leftIcon && <span className={classNames('p-tabview-left-icon ', leftIcon)}></span>}
           {!isUndefined(editingHeader) && editingHeader ? (
@@ -336,7 +341,14 @@ const Tab = ({
                   onInputBlur(e.target.value, index, initialTitleHeader);
                 } else {
                   if (!isUndefined(onTabNameError)) {
-                    onTabAddCancel();
+                    if (!newTab) {
+                      onTabNameError(
+                        resources.messages['emptyTabHeader'],
+                        resources.messages['emptyTitleValidationError']
+                      );
+                    } else {
+                      onTabAddCancel();
+                    }
                   }
                 }
               }}

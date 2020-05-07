@@ -35,7 +35,9 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
 
   const getFilter = type => {
     switch (type) {
-      case 'NUMBER':
+      case 'NUMBER_INTEGER':
+        return 'int';
+      case 'NUMBER_DECIMAL':
       case 'POINT':
       case 'COORDINATE_LONG':
       case 'COORDINATE_LAT':
@@ -43,7 +45,14 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
       case 'DATE':
         return 'date';
       case 'TEXT':
+      case 'LONG_TEXT':
         return 'any';
+      case 'EMAIL':
+        return 'email';
+      case 'PHONE':
+        return 'phone';
+      // case 'URL':
+      //   return 'url';
       default:
         return 'any';
     }
@@ -97,6 +106,42 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     />
   );
 
+  const getMaxCharactersByType = type => {
+    const longCharacters = 20;
+    const decimalCharacters = 40;
+    const dateCharacters = 10;
+    const textCharacters = 5000;
+    const longTextCharacters = 10000;
+    const emailCharacters = 256;
+    const phoneCharacters = 256;
+    const urlCharacters = 5000;
+
+    switch (type) {
+      case 'NUMBER_INTEGER':
+        return longCharacters;
+      case 'NUMBER_DECIMAL':
+        return decimalCharacters;
+      case 'POINT':
+      case 'COORDINATE_LONG':
+      case 'COORDINATE_LAT':
+        return textCharacters;
+      case 'DATE':
+        return dateCharacters;
+      case 'TEXT':
+        return textCharacters;
+      case 'LONG_TEXT':
+        return longTextCharacters;
+      case 'EMAIL':
+        return emailCharacters;
+      case 'PHONE':
+        return phoneCharacters;
+      case 'URL':
+        return urlCharacters;
+      default:
+        return null;
+    }
+  };
+
   const renderFieldEditor = () =>
     type === 'CODELIST' ? (
       renderCodelistDropdown(field, fieldValue)
@@ -106,6 +151,7 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
       <InputText
         id={field}
         keyfilter={getFilter(type)}
+        maxlength={getMaxCharactersByType(type)}
         onChange={e => onChangeForm(field, e.target.value)}
         value={fieldValue}
         // type={type === 'DATE' ? 'date' : 'text'}

@@ -9,6 +9,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,6 +44,10 @@ public class CreateConnectionCommandTest {
   @Mock
   private SchemasRepository schemaRepository;
 
+  /** The kafka sender utils. */
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
+
   /** The eea event VO. */
   private EEAEventVO eeaEventVO;
 
@@ -68,15 +73,6 @@ public class CreateConnectionCommandTest {
     Assert.assertEquals(EventType.CONNECTION_CREATED_EVENT, createConnectionCommand.getEventType());
   }
 
-  /**
-   * Execute test 1.
-   */
-  @Test
-  public void executeTest1() {
-    eeaEventVO.setEventType(EventType.COMMAND_CLEAN_KYEBASE);
-    createConnectionCommand.execute(eeaEventVO);
-    Mockito.verifyNoMoreInteractions(datasetService);
-  }
 
   /**
    * Execute test 1.

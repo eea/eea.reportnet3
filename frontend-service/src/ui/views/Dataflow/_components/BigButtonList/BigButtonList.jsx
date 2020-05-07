@@ -59,7 +59,6 @@ export const BigButtonList = ({
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [isActiveButton, setIsActiveButton] = useState(true);
   const [isDuplicated, setIsDuplicated] = useState(false);
-  const [isFormReset, setIsFormReset] = useState(true);
   const [isUpdateDatacollectionDialogVisible, setIsUpdateDatacollectionDialogVisible] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
   const hasExpirationDate = new Date(dataflowDataState.obligations.expirationDate) > new Date();
@@ -118,6 +117,32 @@ export const BigButtonList = ({
       />
     </div>
   );
+
+  // const exportDatatableSchema = async (datasetId, datasetName) => {
+  //   const schema = await DatasetService.schemaById(datasetId);
+    // console.log(datasetId, datasetName, schema);
+
+    // let blob = new Blob([csv], {
+    //   type: 'text/csv;charset=utf-8;'
+    // });
+
+    // if (window.navigator.msSaveOrOpenBlob) {
+    //   navigator.msSaveOrOpenBlob(blob, this.props.exportFilename + '.csv');
+    // } else {
+    //   let link = document.createElement('a');
+    //   link.style.display = 'none';
+    //   document.body.appendChild(link);
+    //   if (link.download !== undefined) {
+    //     link.setAttribute('href', URL.createObjectURL(blob));
+    //     link.setAttribute('download', this.props.exportFilename + '.csv');
+    //     link.click();
+    //   } else {
+    //     csv = 'data:text/csv;charset=utf-8,' + csv;
+    //     window.open(encodeURI(csv));
+    //   }
+    //   document.body.removeChild(link);
+    // }
+  // };
 
   const getDeleteSchemaIndex = index => {
     setDeleteSchemaIndex(index);
@@ -252,7 +277,6 @@ export const BigButtonList = ({
 
   const onShowNewSchemaDialog = () => {
     setNewDatasetDialog(true);
-    setIsFormReset(true);
   };
 
   const onShowDataCollectionModal = () => {
@@ -267,6 +291,7 @@ export const BigButtonList = ({
     dataflowData,
     dataflowDataState,
     dataflowId,
+    // exportDatatableSchema,
     getDeleteSchemaIndex,
     handleRedirect,
     hasWritePermissions,
@@ -295,24 +320,22 @@ export const BigButtonList = ({
         </div>
       </div>
 
-      <Dialog
-        header={resources.messages['newDatasetSchema']}
-        visible={newDatasetDialog}
-        className={styles.dialog}
-        dismissableMask={false}
-        onHide={() => {
-          setNewDatasetDialog(false);
-          setIsFormReset(false);
-        }}>
-        <NewDatasetSchemaForm
-          dataflowId={dataflowId}
-          datasetSchemaInfo={updatedDatasetSchema}
-          isFormReset={isFormReset}
-          onCreate={onCreateDatasetSchema}
-          onUpdateData={onUpdateData}
-          setNewDatasetDialog={setNewDatasetDialog}
-        />
-      </Dialog>
+      {newDatasetDialog && (
+        <Dialog
+          className={styles.dialog}
+          dismissableMask={false}
+          header={resources.messages['newDatasetSchema']}
+          onHide={() => setNewDatasetDialog(false)}
+          visible={newDatasetDialog}>
+          <NewDatasetSchemaForm
+            dataflowId={dataflowId}
+            datasetSchemaInfo={updatedDatasetSchema}
+            onCreate={onCreateDatasetSchema}
+            onUpdateData={onUpdateData}
+            setNewDatasetDialog={setNewDatasetDialog}
+          />
+        </Dialog>
+      )}
 
       <Dialog
         footer={errorDialogFooter}

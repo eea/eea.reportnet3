@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
+import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.ums.service.keycloak.model.CheckResourcePermissionResult;
 import org.eea.ums.service.keycloak.model.ClientInfo;
 import org.eea.ums.service.keycloak.model.GroupInfo;
@@ -59,7 +60,7 @@ public class KeycloakConnectorServiceImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     CheckResourcePermissionResult body = new CheckResourcePermissionResult();
@@ -211,7 +212,7 @@ public class KeycloakConnectorServiceImplTest {
         Mockito.any(Class.class));
 
     try {
-      GroupInfo[] result = keycloakConnectorService.getGroupsByUser("user1");
+      keycloakConnectorService.getGroupsByUser("user1");
     } catch (RestClientException e) {
       Assert.assertEquals("error test", e.getMessage());
       throw e;
@@ -456,4 +457,35 @@ public class KeycloakConnectorServiceImplTest {
   }
 
 
+  @Test
+  public void getUserRoles() {
+    RoleRepresentation[] roles = new RoleRepresentation[1];
+    RoleRepresentation role = new RoleRepresentation();
+    role.setId("idGroupInfo");
+    role.setName("Dataflow-1-DATA_CUSTODIAN");
+    roles[0] = role;
+    ResponseEntity<RoleRepresentation[]> responseGroupInfo =
+        new ResponseEntity<>(roles, HttpStatus.OK);
+
+    Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
+        Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(responseGroupInfo);
+
+    RoleRepresentation[] result = keycloakConnectorService.getUserRoles("userId");
+
+    Assert.assertNotNull(result);
+  }
+
+  @Test
+  public void getUserRolesNoRoles() {
+    RoleRepresentation[] roles = new RoleRepresentation[0];
+    ResponseEntity<RoleRepresentation[]> responseGroupInfo =
+        new ResponseEntity<>(roles, HttpStatus.OK);
+
+    Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
+        Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(responseGroupInfo);
+
+    RoleRepresentation[] result = keycloakConnectorService.getUserRoles("userId");
+
+    Assert.assertNotNull(result);
+  }
 }

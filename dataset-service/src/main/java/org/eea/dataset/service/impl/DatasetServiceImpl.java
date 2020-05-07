@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -48,6 +47,7 @@ import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseR
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -63,6 +63,10 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController.Represent
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.ETLDatasetVO;
+import org.eea.interfaces.vo.dataset.ETLFieldVO;
+import org.eea.interfaces.vo.dataset.ETLRecordVO;
+import org.eea.interfaces.vo.dataset.ETLTableVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -79,11 +83,13 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
 import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -101,6 +107,10 @@ public class DatasetServiceImpl implements DatasetService {
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The field max length. */
+  @Value("${dataset.fieldMaxLength}")
+  private int fieldMaxLength;
 
   /** The dataset repository. */
   @Autowired
@@ -202,6 +212,10 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private FieldNoValidationMapper fieldNoValidationMapper;
 
+  /** The lock service. */
+  @Autowired
+  private LockService lockService;
+
   /**
    * Process file.
    *
@@ -269,6 +283,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void saveTable(@DatasetId Long datasetId, TableValue tableValue) {
+    TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
     DatasetValue datasetValue = datasetRepository.findById(datasetId).get();
     tableValue.setDatasetId(datasetValue);
     tableRepository.saveAndFlush(tableValue);
@@ -391,8 +406,15 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void deleteImportData(final Long dataSetId) {
-    datasetRepository.removeDatasetData(dataSetId);
 
+    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(dataSetId);
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
+    // Delete the records from the tables of the dataset that aren't marked as read only
+    for (TableSchema tableSchema : schema.getTableSchemas()) {
+      if (tableSchema.getReadOnly() == null || !tableSchema.getReadOnly()) {
+        recordRepository.deleteRecordWithIdTableSchema(tableSchema.getIdTableSchema().toString());
+      }
+    }
     try {
       this.saveStatistics(dataSetId);
     } catch (EEAException e) {
@@ -641,11 +663,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    *
    * @return the data flow id by id
-   *
-   * @throws EEAException the EEA exception
    */
   @Override
-  public Long getDataFlowIdById(Long datasetId) throws EEAException {
+  public Long getDataFlowIdById(Long datasetId) {
     return dataSetMetabaseRepository.findDataflowIdById(datasetId);
   }
 
@@ -1017,10 +1037,21 @@ public class DatasetServiceImpl implements DatasetService {
       throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
 
     }
-    List<RecordValue> recordValue = recordMapper.classListToEntity(records);
-    List<FieldValue> fields = recordValue.parallelStream().map(RecordValue::getFields)
-        .filter(Objects::nonNull).flatMap(List::stream).collect(Collectors.toList());
-    fieldRepository.saveAll(fields);
+    List<RecordValue> recordValues = recordMapper.classListToEntity(records);
+    List<FieldValue> fieldValues = new ArrayList<>();
+    for (RecordValue recordValue : recordValues) {
+      for (FieldValue fieldValue : recordValue.getFields()) {
+        if (null == fieldValue.getValue()) {
+          fieldValue.setValue("");
+        } else {
+          if (fieldValue.getValue().length() >= fieldMaxLength) {
+            fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
+          }
+        }
+        fieldValues.add(fieldValue);
+      }
+    }
+    fieldRepository.saveAll(fieldValues);
   }
 
   /**
@@ -1069,8 +1100,15 @@ public class DatasetServiceImpl implements DatasetService {
       table.setDatasetId(dataset);
       record.setTableValue(table);
       record.setDataProviderCode(provider.getCode());
-      record.getFields().stream().filter(field -> field.getValue() == null)
-          .forEach(field -> field.setValue(""));
+      for (FieldValue field : record.getFields()) {
+        if (null == field.getValue()) {
+          field.setValue("");
+        } else {
+          if (field.getValue().length() >= fieldMaxLength) {
+            field.setValue(field.getValue().substring(0, fieldMaxLength));
+          }
+        }
+      }
 
     });
     recordRepository.saveAll(recordValue);
@@ -1235,12 +1273,15 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void saveTablePropagation(Long datasetId, TableSchemaVO tableSchema) throws EEAException {
     TableValue table = new TableValue();
+    TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
     Optional<DatasetValue> dataset = datasetRepository.findById(datasetId);
     if (dataset.isPresent()) {
       table.setIdTableSchema(tableSchema.getIdTableSchema());
       table.setDatasetId(dataset.get());
       saveTable(datasetId, table);
     } else {
+      LOG_ERROR.error("Saving table propagation failed because the dataset {} is not found",
+          datasetId);
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
   }
@@ -1478,4 +1519,243 @@ public class DatasetServiceImpl implements DatasetService {
 
     return type;
   }
+
+  /**
+   * Etl export dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the ETL dataset VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public ETLDatasetVO etlExportDataset(@DatasetId Long datasetId) throws EEAException {
+
+    // Get the datasetSchemaId by the datasetId
+    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+    if (null == datasetSchemaId) {
+      throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, datasetId));
+    }
+
+    // Get the datasetSchema by the datasetSchemaId
+    DataSetSchema datasetSchema =
+        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+    if (null == datasetSchema) {
+      throw new EEAException(
+          String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, datasetSchemaId));
+    }
+
+    // Construct object to be returned
+    ETLDatasetVO etlDatasetVO = new ETLDatasetVO();
+    List<ETLTableVO> etlTableVOs = new ArrayList<>();
+    etlDatasetVO.setTables(etlTableVOs);
+
+    // Loop to fill ETLTableVOs
+    for (TableSchema tableSchema : datasetSchema.getTableSchemas()) {
+
+      // Match each fieldSchemaId with its headerName
+      Map<String, String> fieldMap = new HashMap<>();
+      for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
+        fieldMap.put(field.getIdFieldSchema().toString(), field.getHeaderName());
+      }
+
+      ETLTableVO etlTableVO = new ETLTableVO();
+      List<ETLRecordVO> etlRecordVOs = new ArrayList<>();
+      etlTableVO.setTableName(tableSchema.getNameTableSchema());
+      etlTableVO.setRecords(etlRecordVOs);
+      etlTableVOs.add(etlTableVO);
+
+      // Loop to fill ETLRecordVOs
+      for (RecordValue record : recordRepository
+          .findByTableValueNoOrder(tableSchema.getIdTableSchema().toString(), null)) {
+        ETLRecordVO etlRecordVO = new ETLRecordVO();
+        List<ETLFieldVO> etlFieldVOs = new ArrayList<>();
+        etlRecordVO.setFields(etlFieldVOs);
+        etlRecordVOs.add(etlRecordVO);
+
+        // Loop to fill ETLFieldVOs
+        for (FieldValue field : record.getFields()) {
+          ETLFieldVO etlFieldVO = new ETLFieldVO();
+          etlFieldVO.setFieldName(fieldMap.get(field.getIdFieldSchema()));
+          etlFieldVO.setValue(field.getValue());
+          etlFieldVOs.add(etlFieldVO);
+        }
+      }
+    }
+
+    return etlDatasetVO;
+  }
+
+  /**
+   * Etl import dataset.
+   *
+   * @param datasetId the dataset id
+   * @param etlDatasetVO the etl dataset VO
+   * @throws EEAException
+   */
+  @Override
+  public void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO)
+      throws EEAException {
+    // Get the datasetSchemaId by the datasetId
+    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+    if (null == datasetSchemaId) {
+      throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, datasetId));
+    }
+
+    // Get the datasetSchema by the datasetSchemaId
+    DataSetSchema datasetSchema =
+        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+    if (null == datasetSchema) {
+      throw new EEAException(
+          String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, datasetSchemaId));
+    }
+
+    // Construct Maps to relate ids
+    Map<String, TableSchema> tableMap = new HashMap<>();
+    Map<String, FieldSchema> fieldMap = new HashMap<>();
+    for (TableSchema tableSchema : datasetSchema.getTableSchemas()) {
+      tableMap.put(tableSchema.getNameTableSchema(), tableSchema);
+      // Match each fieldSchemaId with its headerName
+      for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
+        fieldMap.put(field.getHeaderName(), field);
+      }
+    }
+
+    // Construct object to be save
+    DatasetValue dataset = new DatasetValue();
+    List<TableValue> tables = new ArrayList<>();
+
+    // Loops to build the entity
+    for (ETLTableVO etlTable : etlDatasetVO.getTables()) {
+      TableValue table = new TableValue();
+      TableSchema tableSchema = tableMap.get(etlTable.getTableName());
+      if (tableSchema != null) {
+        table.setIdTableSchema(tableSchema.getIdTableSchema().toString());
+        List<RecordValue> records = new ArrayList<>();
+        for (ETLRecordVO etlRecord : etlTable.getRecords()) {
+          RecordValue recordValue = new RecordValue();
+          recordValue.setIdRecordSchema(tableMap.get(etlTable.getTableName()).getRecordSchema()
+              .getIdRecordSchema().toString());
+          recordValue.setTableValue(table);
+          List<FieldValue> fieldValues = new ArrayList<>();
+          List<String> idSchema = new ArrayList<>();
+          for (ETLFieldVO etlField : etlRecord.getFields()) {
+            FieldValue field = new FieldValue();
+            FieldSchema fieldSchema = fieldMap.get(etlField.getFieldName());
+            if (fieldSchema != null) {
+              field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
+              field.setType(fieldSchema.getType());
+              field.setValue(etlField.getValue());
+              field.setRecord(recordValue);
+              fieldValues.add(field);
+              idSchema.add(field.getIdFieldSchema());
+              setMissingField(
+                  tableMap.get(etlTable.getTableName()).getRecordSchema().getFieldSchema(),
+                  fieldValues, idSchema, recordValue);
+            }
+          }
+          recordValue.setFields(fieldValues);
+          records.add(recordValue);
+        }
+        table.setRecords(records);
+        tables.add(table);
+        table.setDatasetId(dataset);
+      }
+    }
+    dataset.setTableValues(tables);
+    dataset.setIdDatasetSchema(datasetSchemaId);
+    dataset.setId(datasetId);
+
+    datasetRepository.save(dataset);
+
+  }
+
+  /**
+   * Sets the missing field.
+   *
+   * @param headersSchema the headers schema
+   * @param fields the fields
+   * @param idSchema the id schema
+   * @param recordValue the record value
+   */
+  private void setMissingField(List<FieldSchema> headersSchema, final List<FieldValue> fields,
+      List<String> idSchema, RecordValue recordValue) {
+    headersSchema.stream().forEach(header -> {
+      if (!idSchema.contains(header.getIdFieldSchema().toString())) {
+        final FieldValue field = new FieldValue();
+        field.setIdFieldSchema(header.getIdFieldSchema().toString());
+        field.setType(header.getType());
+        field.setValue("");
+        field.setRecord(recordValue);
+        fields.add(field);
+      }
+    });
+  }
+
+
+  /**
+   * Gets the table read only. Receives by parameter the datasetId, the objectId and the type
+   * (table, record, field). In example, if receives an objectId that is a Record (that's a record
+   * schema id), find the property readOnly of the table that belongs to the record
+   * 
+   * @param datasetId the dataset id
+   * @param objectId the object id
+   * @param type the type
+   * @return the table read only
+   */
+  @Override
+  public Boolean getTableReadOnly(Long datasetId, String objectId, EntityTypeEnum type) {
+    Boolean readOnly = false;
+    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
+
+    switch (type) {
+      case TABLE:
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          if (objectId.equals(tableSchema.getIdTableSchema().toString())
+              && tableSchema.getReadOnly() != null && tableSchema.getReadOnly()) {
+            readOnly = true;
+            break;
+          }
+        }
+        break;
+      case RECORD:
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          if (objectId.equals(tableSchema.getRecordSchema().getIdRecordSchema().toString())
+              && tableSchema.getReadOnly() != null && tableSchema.getReadOnly()) {
+            readOnly = true;
+            break;
+          }
+        }
+        break;
+      case FIELD:
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          for (FieldSchema fieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
+            if (objectId.equals(fieldSchema.getIdFieldSchema().toString())
+                && tableSchema.getReadOnly() != null && tableSchema.getReadOnly()) {
+              readOnly = true;
+              break;
+            }
+          }
+        }
+        break;
+    }
+    return readOnly;
+  }
+
+  /**
+   * Release lock.
+   *
+   * @param criteria the criteria
+   */
+  @Override
+  public void releaseLock(Object... criteria) {
+
+    List<Object> criteriaList = new ArrayList<>();
+    for (Object crit : criteria) {
+      criteriaList.add(crit);
+    }
+    lockService.removeLockByCriteria(criteriaList);
+
+  }
+
 }

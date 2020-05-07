@@ -3,8 +3,8 @@
   "notificationSchema": [
     {
       "key": "error",
-      "lifeTime": 0,
-      "fixed": true,
+      "lifeTime": 30000,
+      "fixed": false,
       "types": [
         {
           "key": "LOAD_DATA_FAILED_EVENT",
@@ -354,6 +354,9 @@
         },
         {
           "key": "QC_RULE_UPDATING_ERROR"
+        },
+        {
+          "key": "INVALIDATED_QC_RULE_EVENT"
         }
       ]
     },
@@ -493,6 +496,16 @@
         },
         {
           "key": "DATAFLOW_DELETE_SUCCESS"
+        },
+        {
+          "key": "COPY_TO_CLIPBOARD_SUCCESS"
+        },
+        {
+          "key": "DELETE_DATASET_DATA_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
         }
       ]
     },
@@ -522,5 +535,6 @@
         }
       ]
     }
-  ]
+  ],
+  "hiddenNotifications": ["VALIDATED_QC_RULE_EVENT"]
 }

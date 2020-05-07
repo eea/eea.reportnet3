@@ -194,6 +194,11 @@ public class RulesServiceImplTest {
   }
 
 
+  /**
+   * Creates the automatic rules required test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createAutomaticRulesRequiredTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
@@ -206,6 +211,11 @@ public class RulesServiceImplTest {
   }
 
 
+  /**
+   * Creates the automatic rules boolean test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createAutomaticRulesBooleanTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
@@ -218,6 +228,11 @@ public class RulesServiceImplTest {
   }
 
 
+  /**
+   * Creates the automatic rules PK test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createAutomaticRulesPKTest() throws EEAException {
     DataSetSchema datasetSchema = new DataSetSchema();
@@ -250,6 +265,11 @@ public class RulesServiceImplTest {
   }
 
 
+  /**
+   * Creates the automatic rules codelist test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createAutomaticRulesCodelistTest() throws EEAException {
     Document doc = new Document();
@@ -265,6 +285,11 @@ public class RulesServiceImplTest {
 
   }
 
+  /**
+   * Creates the automatic rules long test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createAutomaticRulesLongTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
@@ -277,6 +302,11 @@ public class RulesServiceImplTest {
   }
 
 
+  /**
+   * Creates the automatic rules lat test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createAutomaticRulesLatTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
@@ -288,6 +318,11 @@ public class RulesServiceImplTest {
 
   }
 
+  /**
+   * Creates the automatic rules date test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createAutomaticRulesDateTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
@@ -300,8 +335,13 @@ public class RulesServiceImplTest {
   }
 
 
+  /**
+   * Creates the automatic rules number decimal test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
-  public void createAutomaticRulesNumberTest() throws EEAException {
+  public void createAutomaticRulesNumberDecimalTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
     List<Rule> rules = new ArrayList<>();
     Rule rule = new Rule();
@@ -310,7 +350,85 @@ public class RulesServiceImplTest {
     ruleSchema.setRules(rules);
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        DataType.NUMBER, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
+        DataType.NUMBER_DECIMAL, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
+    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+  }
+
+
+  /**
+   * Creates the automatic rules URL test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createAutomaticRulesURLTest() throws EEAException {
+    RulesSchema ruleSchema = new RulesSchema();
+    List<Rule> rules = new ArrayList<>();
+    Rule rule = new Rule();
+    rule.setShortCode("ft01");
+    rules.add(rule);
+    ruleSchema.setRules(rules);
+    Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+    rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
+        DataType.URL, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
+    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+  }
+
+
+  /**
+   * Creates the automatic rules email test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createAutomaticRulesEmailTest() throws EEAException {
+    RulesSchema ruleSchema = new RulesSchema();
+    List<Rule> rules = new ArrayList<>();
+    Rule rule = new Rule();
+    rule.setShortCode("ft01");
+    rules.add(rule);
+    ruleSchema.setRules(rules);
+    Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+    rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
+        DataType.EMAIL, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
+    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Creates the automatic rules phone test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createAutomaticRulesPhoneTest() throws EEAException {
+    RulesSchema ruleSchema = new RulesSchema();
+    List<Rule> rules = new ArrayList<>();
+    Rule rule = new Rule();
+    rule.setShortCode("ft01");
+    rules.add(rule);
+    ruleSchema.setRules(rules);
+    Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+    rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
+        DataType.PHONE, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
+    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Creates the automatic rules number integer test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createAutomaticRulesNumberIntegerTest() throws EEAException {
+    RulesSchema ruleSchema = new RulesSchema();
+    List<Rule> rules = new ArrayList<>();
+    Rule rule = new Rule();
+    rule.setShortCode("ft01");
+    rules.add(rule);
+    ruleSchema.setRules(rules);
+    Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+    rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
+        DataType.NUMBER_INTEGER, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }
 
@@ -723,4 +841,103 @@ public class RulesServiceImplTest {
         "5e44110d6a9e3a270ce13fac", 0));
   }
 
+  @Test
+  public void udateAutomaticRuleAllPropertiesUpdatedTest() throws EEAException {
+
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setRuleId("5e44110d6a9e3a270ce13fac");
+    ruleVO.setEnabled(true);
+    ruleVO.setRuleName("ruleName");
+    ruleVO.setDescription("description");
+    ruleVO.setShortCode("shortCode");
+    ruleVO.setThenCondition(Arrays.asList("ERROR", "error message"));
+
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(new Rule());
+    Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
+
+    rulesServiceImpl.updateAutomaticRule(1L, ruleVO);
+    Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void udateAutomaticRuleOnlyEnabledPropertyUpdatedTest() throws EEAException {
+
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setRuleId("5e44110d6a9e3a270ce13fac");
+    ruleVO.setEnabled(true);
+
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(new Rule());
+    Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
+
+    rulesServiceImpl.updateAutomaticRule(1L, ruleVO);
+    Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void udateAutomaticRuleEmptyThenConditionArrayTest() throws EEAException {
+
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setRuleId("5e44110d6a9e3a270ce13fac");
+    ruleVO.setEnabled(true);
+    ruleVO.setThenCondition(new ArrayList<String>());
+
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(new Rule());
+    Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
+
+    rulesServiceImpl.updateAutomaticRule(1L, ruleVO);
+    Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = EEAException.class)
+  public void updateAutomaticRuleInvalidDatasetIdExceptionTest() throws EEAException {
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn(null);
+    try {
+      rulesServiceImpl.updateAutomaticRule(1L, new RuleVO());
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void updateAutomaticRuleInvalidRuleIdExceptionTest() throws EEAException {
+
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setRuleId("notObjectIdComplaining");
+
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    try {
+      rulesServiceImpl.updateAutomaticRule(1L, ruleVO);
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.RULEID_INCORRECT, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void udateAutomaticRuleRuleNotFoundExceptionTest() throws EEAException {
+
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setRuleId("5e44110d6a9e3a270ce13fac");
+
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(null);
+
+    try {
+      rulesServiceImpl.updateAutomaticRule(1L, ruleVO);
+    } catch (EEAException e) {
+      Assert.assertEquals(String.format(EEAErrorMessage.RULE_NOT_FOUND, "5e44110d6a9e3a270ce13fac",
+          "5e44110d6a9e3a270ce13fac"), e.getMessage());
+      throw e;
+    }
+  }
 }

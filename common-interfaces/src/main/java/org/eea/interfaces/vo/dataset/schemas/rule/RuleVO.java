@@ -30,6 +30,9 @@ public class RuleVO {
   /** The enabled. */
   private boolean enabled;
 
+  /** The verified. */
+  private Boolean verified;
+
   /** The salience. */
   private Integer salience;
 

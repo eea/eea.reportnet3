@@ -1,6 +1,7 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -8,17 +9,16 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './TabsValidations.module.scss';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
+import { Filters } from 'ui/views/_components/Filters';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { TabView } from 'ui/views/_components/TabView'; // Do not delete
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel'; // Do not delete
+import { TabView } from 'ui/views/_components/TabView'; // Do not delete
 
 import { ValidationService } from 'core/services/Validation';
 
@@ -26,44 +26,60 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
+import { tabsValidationsReducer } from './Reducers/tabsValidationsReducer';
+
+import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
+
 const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSchemaId, onHideValidationsDialog }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
 
-  const [isDataUpdated, setIsDataUpdated] = useState(false);
-  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [validationId, setValidationId] = useState();
-  const [validationsList, setValidationsList] = useState();
+  const [tabsValidationsState, tabsValidationsDispatch] = useReducer(tabsValidationsReducer, {
+    filteredData: [],
+    isDataUpdated: false,
+    isDeleteDialogVisible: false,
+    isLoading: true,
+    validationId: '',
+    validationList: {}
+  });
 
   useEffect(() => {
     onLoadValidationsList(datasetSchemaId);
-  }, [isDataUpdated]);
+  }, [tabsValidationsState.isDataUpdated]);
+
+  useEffect(() => {
+    const response = notificationContext.hidden.find(notification => notification === 'VALIDATED_QC_RULE_EVENT');
+    if (response) onUpdateData();
+  }, [notificationContext]);
+
+  const isDeleteDialogVisible = value =>
+    tabsValidationsDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
+
+  const isLoading = value => tabsValidationsDispatch({ type: 'IS_LOADING', payload: { value } });
+
+  const isDataUpdated = value => tabsValidationsDispatch({ type: 'IS_DATA_UPDATED', payload: { value } });
 
   const onDeleteValidation = async () => {
     try {
-      const response = await ValidationService.deleteById(dataset.datasetId, validationId);
-      if (response.status >= 200 && response.status <= 299) {
-        onUpdateData();
-      }
+      const response = await ValidationService.deleteById(dataset.datasetId, tabsValidationsState.validationId);
+      if (response.status >= 200 && response.status <= 299) onUpdateData();
     } catch (error) {
-      notificationContext.add({
-        type: 'DELETE_RULE_ERROR'
-      });
+      notificationContext.add({ type: 'DELETE_RULE_ERROR' });
     } finally {
       onHideDeleteDialog();
     }
   };
 
   const onHideDeleteDialog = () => {
-    setIsDeleteDialogVisible(false);
-    setValidationId('');
+    isDeleteDialogVisible(false);
+    validationId('');
   };
+
+  const onLoadFilteredData = data => tabsValidationsDispatch({ type: 'FILTER_DATA', payload: { data } });
 
   const onLoadValidationsList = async datasetSchemaId => {
     try {
-      setIsLoading(true);
       const validationsServiceList = await ValidationService.getAll(datasetSchemaId);
 
       if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
@@ -74,38 +90,42 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
         });
       }
 
-      setValidationsList(validationsServiceList);
+      tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_LIST', payload: { validationsServiceList } });
     } catch (error) {
-      console.log(error);
-      notificationContext.add({
-        type: 'VALIDATION_SERVICE_GET_ALL_ERROR'
-      });
+      console.error(error);
+      notificationContext.add({ type: 'VALIDATION_SERVICE_GET_ALL_ERROR' });
     } finally {
-      setIsLoading(false);
+      isLoading(false);
     }
   };
 
-  const onShowDeleteDialog = () => {
-    setIsDeleteDialogVisible(true);
-  };
+  const onShowDeleteDialog = () => isDeleteDialogVisible(true);
 
-  const onUpdateData = () => {
-    setIsDataUpdated(!isDataUpdated);
-  };
+  const onUpdateData = () => isDataUpdated(!tabsValidationsState.isDataUpdated);
+
+  useCheckNotifications(['INVALIDATED_QC_RULE_EVENT'], onUpdateData);
 
   const automaticTemplate = rowData => (
-    <div className={styles.checkedValueColumn} style={{ textAlign: 'center' }}>
-      {rowData.automatic ? (
-        <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
-      ) : null}
+    <div className={styles.checkedValueColumn}>
+      {rowData.automatic ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+    </div>
+  );
+
+  const correctTemplate = rowData => (
+    <div className={styles.checkedValueColumn}>
+      {!isNil(rowData.isCorrect) ? (
+        rowData.isCorrect ? (
+          <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />
+        ) : null
+      ) : (
+        <FontAwesomeIcon className={`${styles.icon} ${styles.spinner}`} icon={AwesomeIcons('spinner')} />
+      )}
     </div>
   );
 
   const enabledTemplate = rowData => (
-    <div className={styles.checkedValueColumn} style={{ textAlign: 'center' }}>
-      {rowData.enabled ? (
-        <FontAwesomeIcon icon={AwesomeIcons('check')} style={{ float: 'center', color: 'var(--main-color-font)' }} />
-      ) : null}
+    <div className={styles.checkedValueColumn}>
+      {rowData.enabled ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
     </div>
   );
 
@@ -131,11 +151,15 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   const getHeader = fieldHeader => {
     let header;
     if (fieldHeader === 'levelError') {
-      header = 'Level error';
+      header = resources.messages['ruleLevelError'];
       return header;
     }
     if (fieldHeader === 'shortCode') {
-      header = 'Code';
+      header = resources.messages['ruleCode'];
+      return header;
+    }
+    if (fieldHeader === 'isCorrect') {
+      header = resources.messages['valid'];
       return header;
     }
     header = fieldHeader;
@@ -150,14 +174,16 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       { id: 'shortCode', index: 3 },
       { id: 'name', index: 4 },
       { id: 'description', index: 5 },
-      { id: 'levelError', index: 6 },
-      { id: 'enabled', index: 7 },
+      { id: 'message', index: 6 },
+      { id: 'levelError', index: 7 },
       { id: 'automatic', index: 8 },
-      { id: 'referenceId', index: 9 },
-      { id: 'activationGroup', index: 10 },
-      { id: 'date', index: 11 },
-      { id: 'entityType', index: 12 },
-      { id: 'actionButtons', index: 13 }
+      { id: 'enabled', index: 9 },
+      { id: 'referenceId', index: 10 },
+      { id: 'activationGroup', index: 11 },
+      { id: 'date', index: 12 },
+      { id: 'entityType', index: 13 },
+      { id: 'actionButtons', index: 14 },
+      { id: 'isCorrect', index: 15 }
     ];
     return validations
       .map(error => validationsWithPriority.filter(e => error === e.id))
@@ -166,7 +192,9 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       .map(orderedError => orderedError.id);
   };
 
-  const actionsTemplate = row => (
+  const actionsTemplate = row => (row.automatic ? editTemplate(row) : editAndDeleteTemplate(row));
+
+  const editAndDeleteTemplate = row => (
     <ActionsColumn
       onDeleteClick={() => onShowDeleteDialog()}
       onEditClick={() => {
@@ -176,7 +204,14 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     />
   );
 
-  const deleteTemplate = () => <ActionsColumn onDeleteClick={() => onShowDeleteDialog()} />;
+  const editTemplate = row => (
+    <ActionsColumn
+      onEditClick={() => {
+        validationContext.onOpenToEdit(row, 'validationsListDialog');
+        onHideValidationsDialog();
+      }}
+    />
+  );
 
   const deleteValidationDialog = () => (
     <ConfirmDialog
@@ -186,7 +221,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       labelConfirm={resources.messages['yes']}
       onConfirm={() => onDeleteValidation()}
       onHide={() => onHideDeleteDialog()}
-      visible={isDeleteDialogVisible}
+      visible={tabsValidationsState.isDeleteDialogVisible}
       maximizable={false}>
       {resources.messages['deleteValidationConfirm']}
     </ConfirmDialog>
@@ -196,7 +231,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     const style = {};
     const invisibleFields = ['id', 'referenceId', 'activationGroup', 'condition', 'date', 'entityType'];
     if (field.toUpperCase() === 'DESCRIPTION') {
-      style.width = '40%';
+      style.width = '23%';
     }
     // else {
     //   style.width = '20%';
@@ -211,7 +246,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
 
   const actionButtonsColumn = (
     <Column
-      body={row => (row.automatic ? deleteTemplate() : actionsTemplate(row))}
+      body={row => actionsTemplate(row)}
       className={styles.validationCol}
       header={resources.messages['actions']}
       key="actions"
@@ -220,15 +255,17 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     />
   );
 
+  const levelErrorTemplate = rowData => (
+    <span className={`${styles.levelError} ${styles[rowData.levelError.toLowerCase()]}`}>{rowData.levelError}</span>
+  );
+
   const renderColumns = validations => {
     const fieldColumns = getOrderedValidations(Object.keys(validations[0])).map(field => {
       let template = null;
-      if (field === 'automatic') {
-        template = automaticTemplate;
-      }
-      if (field === 'enabled') {
-        template = enabledTemplate;
-      }
+      if (field === 'automatic') template = automaticTemplate;
+      if (field === 'enabled') template = enabledTemplate;
+      if (field === 'isCorrect') template = correctTemplate;
+      if (field === 'levelError') template = levelErrorTemplate;
       return (
         <Column
           body={template}
@@ -245,31 +282,50 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     return fieldColumns;
   };
 
+  const validationId = value => tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_ID', payload: { value } });
+
   const validationList = () => {
-    if (isUndefined(validationsList) || isEmpty(validationsList)) {
+    if (isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList)) {
       return (
         <div>
           <h3>{resources.messages['emptyValidations']}</h3>
         </div>
       );
     }
-    const paginatorRightText = `${capitalize('FIELD')} records: ${validationsList.validations.length}`;
+
+    const paginatorRightText = `${resources.messages['fieldRecords']} ${tabsValidationsState.validationList.validations.length}`;
+
     return (
-      <div className={null}>
-        <DataTable
-          autoLayout={true}
-          className={styles.paginatorValidationViewer}
-          loading={false}
-          onRowClick={event => setValidationId(event.data.id)}
-          paginator={true}
-          paginatorRight={paginatorRightText}
-          rows={10}
-          rowsPerPageOptions={[5, 10, 15]}
-          totalRecords={validationsList.validations.length}
-          value={validationsList.validations}>
-          {renderColumns(validationsList.validations)}
-        </DataTable>
-      </div>
+      <Fragment>
+        <div className={styles.searchInput}>
+          <Filters
+            className="filter-lines"
+            data={tabsValidationsState.validationList.validations}
+            getFiltredData={onLoadFilteredData}
+            searchAll
+            searchBy={['name', 'description', 'message']}
+            selectOptions={['table', 'field', 'entityType', 'levelError', 'automatic', 'enabled', 'isCorrect']}
+          />
+        </div>
+
+        {!isEmpty(tabsValidationsState.filteredData) ? (
+          <DataTable
+            autoLayout={true}
+            className={styles.paginatorValidationViewer}
+            loading={false}
+            onRowClick={event => validationId(event.data.id)}
+            paginator={true}
+            paginatorRight={paginatorRightText}
+            rows={10}
+            rowsPerPageOptions={[5, 10, 15]}
+            totalRecords={tabsValidationsState.validationList.validations.length}
+            value={tabsValidationsState.filteredData}>
+            {renderColumns(tabsValidationsState.validationList.validations)}
+          </DataTable>
+        ) : (
+          <div className={styles.noDataflows}>{resources.messages['noQCRulesWithSelectedParameters']}</div>
+        )}
+      </Fragment>
 
       // <TabPanel header={entityType} key={entityType} rightIcon={null}>
       //   <div className={null}>
@@ -291,15 +347,13 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     // });
   };
 
-  if (isLoading) {
-    return <Spinner className={styles.positioning} />;
-  }
+  if (tabsValidationsState.isLoading) return <Spinner className={styles.positioning} />;
 
   return (
-    <Fragment>
+    <div className={styles.validations}>
       {validationList()}
-      {isDeleteDialogVisible && deleteValidationDialog()}
-    </Fragment>
+      {tabsValidationsState.isDeleteDialogVisible && deleteValidationDialog()}
+    </div>
   );
 });
 

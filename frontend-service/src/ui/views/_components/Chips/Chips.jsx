@@ -113,6 +113,44 @@ const Chips = ({
   const onBlurChips = event => {
     DomHandler.removeClass(listElement.current, 'p-focus');
 
+    const inputValue = event.target.value;
+
+    if (inputValue && inputValue.trim().length && (!max || max > value.length)) {
+      let values = [...value];
+      if (checkForDuplicates && values.indexOf(inputValue) > -1) {
+        setHasErrors(true);
+        return;
+      } else {
+        values.push(inputValue);
+        //   setValues({ values: values });
+
+        if (!isNil(onAdd)) {
+          onAdd({
+            originalEvent: event,
+            value: inputValue
+          });
+        }
+
+        if (!isNil(onChange)) {
+          onChange({
+            originalEvent: event,
+            value: values,
+            stopPropagation: () => {},
+            preventDefault: () => {},
+            target: {
+              name: name,
+              id: id,
+              value: values
+            }
+          });
+        }
+        setHasErrors(false);
+      }
+    }
+
+    inputElement.current.element.value = '';
+    event.preventDefault();
+
     if (!isNil(onBlur)) {
       onBlur(event);
     }

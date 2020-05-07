@@ -130,15 +130,11 @@ const Dashboard = withRouter(
           xAxes: [
             {
               stacked: true,
-              scaleLabel: {
-                display: true,
-                labelString: resources.messages['tables'],
-                fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#fff'
-              },
-              gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#fff' },
-              ticks: {
-                fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#fff'
-              }
+              gridLines: { display: false }
+              // gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#707070' },
+              // ticks: {
+              //   fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#707070'
+              // }
             }
           ],
           yAxes: [
@@ -146,16 +142,17 @@ const Dashboard = withRouter(
               stacked: true,
               scaleLabel: {
                 display: true,
-                labelString: resources.messages['percentage'],
-                fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#fff'
+                labelString: resources.messages['percentage']
+                // fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#707070'
               },
               ticks: {
                 min: 0,
                 max: 100,
-                callback: (value, index, values) => `${value}%`,
-                fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#fff'
+                callback: (value, index, values) => `${value}%`
+                // fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#707070'
               },
-              gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#fff' }
+              gridLines: { display: false }
+              // gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#707070' }
             }
           ]
         }
@@ -222,6 +219,7 @@ const Dashboard = withRouter(
       return (
         <React.Fragment>
           <h1 className={styles.dashboardTitle}>{dashboardTitle}</h1>
+          <span className={styles.dashboardWarning}>{resources.messages['dashboardWarning']}</span>
           {renderDashboard()}
           {/* {renderColorPicker()} */}
         </React.Fragment>

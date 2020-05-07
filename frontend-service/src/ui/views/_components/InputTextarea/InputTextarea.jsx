@@ -61,6 +61,7 @@ export class InputTextarea extends Component {
     rows: 1,
     tooltip: null,
     tooltipOptions: null
+    // value: undefined
   };
 
   static propTypes = {
@@ -71,6 +72,7 @@ export class InputTextarea extends Component {
     rows: PropTypes.number,
     tooltip: PropTypes.string,
     tooltipOptions: PropTypes.object
+    // value: PropTypes.string
   };
 
   constructor(props) {
@@ -207,7 +209,7 @@ export class InputTextarea extends Component {
         (this.props.defaultValue != null && this.props.defaultValue.toString().length > 0),
       'p-inputtextarea-resizable': this.props.autoResize,
       'p-disabled p-filled':
-        (this.props.disabled && (this.props.value != null && this.props.value.toString().length > 0)) ||
+        (this.props.disabled && this.props.value != null && this.props.value.toString().length > 0) ||
         (this.props.defaultValue != null && this.props.defaultValue.toString().length > 0)
     });
 

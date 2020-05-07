@@ -42,8 +42,7 @@ public class JwtAuthenticationFilterTest {
   @Before
   public void init() {
     Mockito.reset(tokenProvider, request);
-    SecurityContextHolder
-        .getContext().setAuthentication(null);
+    SecurityContextHolder.getContext().setAuthentication(null);
   }
 
   @Test
@@ -52,8 +51,7 @@ public class JwtAuthenticationFilterTest {
 
     Map<String, Object> keys = TestUtils.getRSAKeys();
     String token = TestUtils.generateToken(keys, System.currentTimeMillis() + 1000, "user1");
-    Mockito.when(request.getHeader("Authorization")).thenReturn(
-        "Bearer " + token);
+    Mockito.when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
     TokenDataVO jwt = new TokenDataVO();
 
     jwt.setPreferredUsername("user1");
@@ -69,15 +67,17 @@ public class JwtAuthenticationFilterTest {
     jwt.setRoles(roles);
     Mockito.when(tokenProvider.retrieveToken(Mockito.anyString())).thenReturn(jwt);
     jwtAuthenticationFilter.doFilterInternal(request, null, filterChain);
-    UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-        .getContext().getAuthentication();
+    UsernamePasswordAuthenticationToken authenticationToken =
+        (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
+            .getAuthentication();
     Assert.assertNotNull(authenticationToken);
     Assert.assertEquals("Retrieved JWT is different from expected", token,
         authenticationToken.getCredentials());
     Assert.assertEquals("Retrieved User is different from expected", "user1",
         ((EeaUserDetails) authenticationToken.getPrincipal()).getUsername());
     Assert.assertEquals("Retrieved Subject is different from expected", "userId_123",
-        ((Map<String, String>) authenticationToken.getDetails()).get("userId"));
+        ((Map<String, String>) authenticationToken.getDetails())
+            .get(AuthenticationDetails.USER_ID));
     Mockito.verify(filterChain, Mockito.times(1)).doFilter(request, null);
 
   }
@@ -88,14 +88,14 @@ public class JwtAuthenticationFilterTest {
 
     Map<String, Object> keys = TestUtils.getRSAKeys();
     String token = TestUtils.generateToken(keys, System.currentTimeMillis() + 1000, "user1");
-    Mockito.when(request.getHeader("Authorization")).thenReturn(
-        "Bearer " + token);
-    Mockito.doThrow(new VerificationException())
-        .when(tokenProvider).retrieveToken(Mockito.anyString());
+    Mockito.when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
+    Mockito.doThrow(new VerificationException()).when(tokenProvider)
+        .retrieveToken(Mockito.anyString());
 
     jwtAuthenticationFilter.doFilterInternal(request, null, filterChain);
-    UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-        .getContext().getAuthentication();
+    UsernamePasswordAuthenticationToken authenticationToken =
+        (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
+            .getAuthentication();
     Assert.assertNull(authenticationToken);
     Mockito.verify(filterChain, Mockito.times(1)).doFilter(request, null);
 
