@@ -1,6 +1,8 @@
 package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -12,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -218,12 +221,15 @@ public class DatasetMetabaseServiceTest {
    * Creates the empty dataset test.
    *
    * @throws EEAException the EEA exception
+   * @throws ExecutionException
+   * @throws InterruptedException
    */
   @Test
-  public void createEmptyDatasetTest() throws EEAException {
+  public void createEmptyDatasetTest()
+      throws EEAException, InterruptedException, ExecutionException {
     Mockito.when(designDatasetRepository.save(Mockito.any())).thenReturn(null);
-    datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN, "datasetName",
-        (new ObjectId()).toString(), 1L, null, null, 0);
+    assertNull("failed assertion", datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN,
+        "datasetName", (new ObjectId()).toString(), 1L, null, null, 0).get());
   }
 
   /**
@@ -323,7 +329,8 @@ public class DatasetMetabaseServiceTest {
     StatisticsVO stats = new StatisticsVO();
     Class<?> clazzStats = stats.getClass();
     Object instance = clazzStats.newInstance();
-    datasetMetabaseService.setEntityProperty(instance, "idDataSetSchema", "0sdferf");
+    assertTrue("failed assertion",
+        datasetMetabaseService.setEntityProperty(instance, "idDataSetSchema", "0sdferf"));
   }
 
   /**
@@ -337,7 +344,8 @@ public class DatasetMetabaseServiceTest {
     StatisticsVO stats = new StatisticsVO();
     Class<?> clazzStats = stats.getClass();
     Object instance = clazzStats.newInstance();
-    datasetMetabaseService.setEntityProperty(instance, "datasetErrors", "false");
+    assertTrue("failed assertion",
+        datasetMetabaseService.setEntityProperty(instance, "datasetErrors", "false"));
   }
 
   /**
