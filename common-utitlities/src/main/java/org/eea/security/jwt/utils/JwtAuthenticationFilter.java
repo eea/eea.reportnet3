@@ -72,9 +72,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       LOG_ERROR.error("Could not set user authentication in security context", e);
       String feignInvocationUser = request.getHeader("FeignInvocationUser");
       String feignInvocationUserId = request.getHeader("FeignInvocationUserId");
-      /*at the moment we will check only user, afterward we'll see how to recover user id
-      if (!StringUtils.isEmpty(feignInvocationUser) && !StringUtils
-          .isEmpty(feignInvocationUserId)) {*/
       if (!StringUtils.isEmpty(feignInvocationUser)) {
         log.info(
             "Invocation came from a feign client, setting security context with user {} and user id {} ",

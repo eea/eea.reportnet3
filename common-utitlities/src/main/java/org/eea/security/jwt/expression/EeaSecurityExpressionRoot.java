@@ -15,6 +15,7 @@ import org.springframework.security.access.expression.method.MethodSecurityExpre
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.server.ResponseStatusException;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -57,8 +58,8 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
       log.warn("Invocation was made from a feign client with a due token. Letting it go");
       canAccess = true;
     } else {
-      log.info("Checking available permissions for user {}",
-          SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+      log.info("Checking available authorities for user {}",
+          SecurityContextHolder.getContext().getAuthentication().getName());
       Collection<String> authorities = SecurityContextHolder.getContext().getAuthentication()
           .getAuthorities().stream().map(authority -> ((GrantedAuthority) authority).getAuthority())
           .collect(Collectors.toList());
@@ -108,6 +109,8 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
       log.warn("Invocation was made from a feign client with a due token. Letting it go");
       canAccess = true;
     } else {
+      log.info("Checking available permissions for user {}",
+          SecurityContextHolder.getContext().getAuthentication().getName());
       canAccess =
           userManagementControllerZull.checkResourceAccessPermission(resource, accessScopeEnums);
     }
