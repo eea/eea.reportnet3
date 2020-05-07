@@ -2,9 +2,9 @@ import React, { useContext, useEffect, useRef } from 'react';
 
 import isUndefined from 'lodash/isUndefined';
 
-import styles from './BigButtonListRepresentative.module.css';
+import styles from '../BigButtonList/BigButtonList.module.css';
 
-import { BigButton } from './_components/BigButton';
+import { BigButton } from '../BigButton';
 
 import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';

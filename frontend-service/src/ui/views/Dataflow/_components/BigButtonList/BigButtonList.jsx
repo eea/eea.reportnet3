@@ -6,7 +6,7 @@ import moment from 'moment';
 
 import styles from './BigButtonList.module.css';
 
-import { BigButton } from './_components/BigButton';
+import { BigButton } from '../BigButton';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar/Calendar';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
