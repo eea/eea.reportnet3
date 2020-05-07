@@ -84,7 +84,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         }${!isNil(notification.redirectionUrl) ? notification.redirectionUrl : ''}`
       };
     });
-    console.info('notifications: %o', notificationsArray);
+    // console.info('notifications: %o', notificationsArray);
     setNotifications(notificationsArray);
   }, [notificationContext, userContext]);
 

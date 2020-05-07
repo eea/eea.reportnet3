@@ -78,7 +78,7 @@ const NotificationProvider = ({ children }) => {
             config: config.notifications.notificationSchema,
             routes
           });
-          console.log('notification', notification);
+          // console.log('notification', notification);
           dispatch({
             type: 'ADD',
             payload: notification
