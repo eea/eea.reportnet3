@@ -13,6 +13,18 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
   const [codelistItems, setCodelistItems] = useState(selectedCodelist);
   const [isVisible, setIsVisible] = useState(isCodelistEditorVisible);
 
+  const onPasteChips = event => {
+    if (event) {
+      const clipboardData = event.clipboardData;
+      const pastedData = clipboardData.getData('Text');
+      console.log(pastedData);
+      const inmCodelistItems = [...codelistItems];
+      inmCodelistItems.push(...pastedData.split(','));
+      setCodelistItems(inmCodelistItems);
+      // dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
+    }
+  };
+
   const codelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
@@ -39,7 +51,7 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
 
   const renderChips = () => {
     return (
-      <React.Fragment>
+      <div onPaste={onPasteChips}>
         <div className={styles.inputTitleWrapper}>
           <span>{resources.messages['codelistEditorItems']} </span>
           <span className={styles.subIndex}>{resources.messages['codelistEditorItemsMessage']}</span>
@@ -51,7 +63,7 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
           tooltip={resources.messages['codelistEditorMessage']}
           tooltipOptions={{ position: 'bottom' }}
           value={codelistItems}></Chips>
-      </React.Fragment>
+      </div>
     );
   };
 
