@@ -374,7 +374,7 @@ const Dataflow = withRouter(({ history, match }) => {
           match={match}
         />
 
-        {/*  {!isNull(match.params.representativeId) ? (
+        {/*    {isNil(match.params.representativeId) ? (
           <BigButtonList
             dataflowDispatch={dataflowDispatch}
             dataflowState={dataflowState}
