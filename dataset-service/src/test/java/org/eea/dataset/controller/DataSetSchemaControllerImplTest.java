@@ -6,7 +6,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -437,8 +436,9 @@ public class DataSetSchemaControllerImplTest {
   public void deleteTableSchemaTest1() throws EEAException {
     Mockito.doNothing().when(dataschemaService).deleteTableSchema(Mockito.any(), Mockito.any());
     Mockito.doNothing().when(datasetService).deleteTableValue(Mockito.any(), Mockito.any());
-    // doNothing().when(rulesControllerZuul).deleteRuleByReferenceId(Mockito.any(), Mockito.any());;
     dataSchemaControllerImpl.deleteTableSchema(1L, "");
+    Mockito.verify(rulesControllerZuul, times(1)).deleteRuleByReferenceId(Mockito.any(),
+        Mockito.any());
   }
 
   /**
@@ -817,12 +817,15 @@ public class DataSetSchemaControllerImplTest {
 
 
   @Test
-  public void testFindDataSchemasByIdDataflow() {
+  public void testFindDataSchemasByIdDataflow() throws EEAException {
     DesignDatasetVO design = new DesignDatasetVO();
     design.setId(1L);
     when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
         .thenReturn(Arrays.asList(design));
-    dataSchemaControllerImpl.findDataSchemasByIdDataflow(1L);
+    when(dataschemaService.getDataSchemaByDatasetId(Mockito.anyBoolean(), Mockito.any()))
+        .thenReturn(datasetSchemaVO);
+    assertEquals("failed assertion", Arrays.asList(datasetSchemaVO),
+        dataSchemaControllerImpl.findDataSchemasByIdDataflow(1L));
   }
 
 
