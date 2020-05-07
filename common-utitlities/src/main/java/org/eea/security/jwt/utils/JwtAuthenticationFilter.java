@@ -69,7 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         ThreadPropertiesManager.setVariable("user", authentication.getName());
       }
     } catch (VerificationException e) {
-      LOG_ERROR.error("Could not set user authentication in security context", e);
+      //before showing error check if invocation came from feign client and toke was dued during the previous process
       String feignInvocationUser = request.getHeader("FeignInvocationUser");
       String feignInvocationUserId = request.getHeader("FeignInvocationUserId");
       if (!StringUtils.isEmpty(feignInvocationUser)) {
@@ -87,6 +87,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         authentication.setDetails(details);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         ThreadPropertiesManager.setVariable("user", authentication.getName());
+      } else {
+        LOG_ERROR.error("Could not set user authentication in security context", e);
       }
     }
 
