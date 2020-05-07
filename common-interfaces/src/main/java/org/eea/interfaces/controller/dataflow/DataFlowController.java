@@ -1,6 +1,5 @@
 package org.eea.interfaces.controller.dataflow;
 
-
 import java.util.Date;
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * The interface Data flow controller.
+ * The Interface DataFlowController.
  */
 public interface DataFlowController {
 
@@ -31,33 +30,28 @@ public interface DataFlowController {
   }
 
   /**
-   * Find by id data flow vo.
+   * Find by id.
    *
-   * @param id the id
-   *
-   * @return the data flow vo
+   * @param dataflowId the dataflow id
+   * @return the data flow VO
    */
-  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  DataFlowVO findById(@PathVariable("id") Long id);
-
+  @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataFlowVO findById(@PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Find by status.
    *
    * @param status the status
-   *
    * @return the list
    */
   @GetMapping(value = "/status/{status}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataFlowVO> findByStatus(TypeStatusEnum status);
-
+  List<DataFlowVO> findByStatus(@PathVariable("status") TypeStatusEnum status);
 
   /**
    * Find completed.
    *
    * @param pageNum the page num
    * @param pageSize the page size
-   *
    * @return the list
    */
   @GetMapping(value = "/completed", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -65,17 +59,14 @@ public interface DataFlowController {
       @RequestParam(value = "pageNum", defaultValue = "0") Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20") Integer pageSize);
 
-
   /**
    * Find user dataflows by status.
    *
    * @param type the type
-   *
    * @return the list
    */
   @GetMapping(value = "/request/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataFlowVO> findUserDataflowsByStatus(@PathVariable(value = "type") TypeRequestEnum type);
-
+  List<DataFlowVO> findUserDataflowsByStatus(@PathVariable("type") TypeRequestEnum type);
 
   /**
    * Find pending accepted.
@@ -85,39 +76,35 @@ public interface DataFlowController {
   @GetMapping(value = "/pendingaccepted", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> findPendingAccepted();
 
-
   /**
    * Update user request.
    *
    * @param idUserRequest the id user request
    * @param type the type
    */
-  @PutMapping(value = "/updateStatusRequest/{idUserRequest}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  void updateUserRequest(@PathVariable("idUserRequest") Long idUserRequest, TypeRequestEnum type);
+  @PutMapping("/updateStatusRequest/{idUserRequest}")
+  void updateUserRequest(@PathVariable("idUserRequest") Long idUserRequest,
+      @RequestParam("type") TypeRequestEnum type);
 
   /**
    * Adds the contributor.
    *
-   * @param idDataflow the id dataflow
-   * @param userId the user id
+   * @param dataflowId the dataflow id
+   * @param idContributor the id contributor
    */
-  @PostMapping(value = "/{idDataflow}/contributor/add", produces = MediaType.APPLICATION_JSON_VALUE)
-  void addContributor(@PathVariable("idDataflow") Long idDataflow,
-      @RequestParam(value = "idContributor") String userId);
-
+  @PostMapping("/{dataflowId}/contributor/add")
+  void addContributor(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("idContributor") String idContributor);
 
   /**
    * Removes the contributor.
    *
-   * @param idDataflow the id dataflow
-   * @param userId the user id
+   * @param dataflowId the dataflow id
+   * @param idContributor the id contributor
    */
-  @DeleteMapping(value = "{idDataflow}/contributor/remove")
-  void removeContributor(@PathVariable("idDataflow") Long idDataflow,
-      @RequestParam(value = "idContributor") String userId);
-
-
+  @DeleteMapping("{dataflowId}/contributor/remove")
+  void removeContributor(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("idContributor") String idContributor);
 
   /**
    * Creates the data flow.
@@ -127,8 +114,6 @@ public interface DataFlowController {
    */
   @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
   ResponseEntity<?> createDataFlow(@RequestBody DataFlowVO dataFlowVO);
-
-
 
   /**
    * Update data flow.
@@ -142,34 +127,29 @@ public interface DataFlowController {
   /**
    * Gets the metabase by id.
    *
-   * @param id the id
+   * @param dataflowId the dataflow id
    * @return the metabase by id
    */
-  @GetMapping(value = "/{id}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
-  DataFlowVO getMetabaseById(@PathVariable("id") Long id);
-
-
+  @GetMapping(value = "/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataFlowVO getMetabaseById(@PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Delete data flow.
    *
-   * @param idDataflow the id dataflow
+   * @param dataflowId the dataflow id
    */
-  @DeleteMapping(value = "/{idDataflow}", produces = MediaType.APPLICATION_JSON_VALUE)
-  void deleteDataFlow(@PathVariable("idDataflow") Long idDataflow);
-
-
+  @DeleteMapping("/{dataflowId}")
+  void deleteDataFlow(@PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Update data flow status.
    *
-   * @param idDataflow the id dataflow
+   * @param dataflowId the dataflow id
    * @param status the status
    * @param deadLineDate the dead line date
    */
-  @PutMapping(value = "/{id}/updateStatus", produces = MediaType.APPLICATION_JSON_VALUE)
-  void updateDataFlowStatus(@PathVariable("id") Long idDataflow,
-      @RequestParam(value = "status") TypeStatusEnum status,
+  @PutMapping("/{dataflowId}/updateStatus")
+  void updateDataFlowStatus(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("status") TypeStatusEnum status,
       @RequestParam(value = "deadLineDate", required = false) Date deadLineDate);
-
 }

@@ -19,6 +19,7 @@ import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.ums.mapper.UserRepresentationMapper;
 import org.eea.ums.service.BackupManagmentService;
 import org.eea.ums.service.SecurityProviderInterfaceService;
@@ -119,7 +120,7 @@ public class UserManagementControllerImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     userManagementController.addUserToResource(1l, ResourceGroupEnum.DATAFLOW_CUSTODIAN);
@@ -132,7 +133,7 @@ public class UserManagementControllerImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     userManagementController.getResourcesByUser();
@@ -144,7 +145,7 @@ public class UserManagementControllerImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     userManagementController.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
@@ -156,7 +157,7 @@ public class UserManagementControllerImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     userManagementController.getResourcesByUser(SecurityRoleEnum.DATA_PROVIDER);
@@ -168,7 +169,7 @@ public class UserManagementControllerImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     userManagementController.getResourcesByUser(ResourceTypeEnum.DATAFLOW,
@@ -276,7 +277,7 @@ public class UserManagementControllerImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     ResourceAssignationVO resource = new ResourceAssignationVO();
@@ -296,7 +297,7 @@ public class UserManagementControllerImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     ResourceAssignationVO resource = new ResourceAssignationVO();
@@ -319,7 +320,7 @@ public class UserManagementControllerImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     Mockito.when(keycloakConnectorService.getUser(Mockito.any()))
@@ -337,7 +338,7 @@ public class UserManagementControllerImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     try {
@@ -358,7 +359,7 @@ public class UserManagementControllerImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     Mockito.when(securityProviderInterfaceService.getUserWithoutKeys(Mockito.any()))
@@ -374,7 +375,7 @@ public class UserManagementControllerImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     try {
@@ -426,7 +427,7 @@ public class UserManagementControllerImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     doThrow(new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED))
@@ -446,7 +447,7 @@ public class UserManagementControllerImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     doThrow(new EEAException("error")).when(securityProviderInterfaceService)
@@ -465,7 +466,7 @@ public class UserManagementControllerImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     when(securityProviderInterfaceService.createApiKey(Mockito.any(), Mockito.any(), Mockito.any()))
@@ -478,7 +479,7 @@ public class UserManagementControllerImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     doThrow(new EEAException("error")).when(securityProviderInterfaceService)
@@ -497,7 +498,7 @@ public class UserManagementControllerImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     doThrow(new EEAException("error")).when(securityProviderInterfaceService)
@@ -516,7 +517,7 @@ public class UserManagementControllerImplTest {
     UsernamePasswordAuthenticationToken authenticationToken =
         new UsernamePasswordAuthenticationToken("user1", null, null);
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "userId_123");
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     // when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(new UserRepresentation());
