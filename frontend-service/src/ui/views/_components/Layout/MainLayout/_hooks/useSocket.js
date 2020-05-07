@@ -22,9 +22,10 @@ const useSocket = () => {
       });
       userContext.onAddSocket(stompClient);
 
-      stompClient.debug = str => {
-        if (str !== '>>> PING' && str !== '<<< PONG' && str !== 'Received data') console.log('socket', str);
-      };
+      stompClient.debug = () => {};
+      // stompClient.debug = str => {
+      //   if (str !== '>>> PING' && str !== '<<< PONG' && str !== 'Received data') console.log('socket', str);
+      // };
 
       stompClient.connect({ token }, frame => {
         stompClient.subscribe('/user/queue/notifications', notification => {
