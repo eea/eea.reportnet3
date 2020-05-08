@@ -134,7 +134,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * @param idPartitionDataset the id partition dataset
    */
   @Override
-  @HystrixCommand
+//  @HystrixCommand
   @RequestMapping(value = "/dataset/{datasetId}/snapshot/create", method = RequestMethod.POST)
   public void createSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
