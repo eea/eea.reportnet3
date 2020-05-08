@@ -490,6 +490,24 @@ public class RuleExpressionVO implements Serializable {
         case LT_DATE:
         case GTEQ_DATE:
         case LTEQ_DATE:
+        case EQ_DAY:
+        case DIST_DAY:
+        case GT_DAY:
+        case LT_DAY:
+        case GTEQ_DAY:
+        case LTEQ_DAY:
+        case EQ_MONTH:
+        case DIST_MONTH:
+        case GT_MONTH:
+        case LT_MONTH:
+        case GTEQ_MONTH:
+        case LTEQ_MONTH:
+        case EQ_YEAR:
+        case DIST_YEAR:
+        case GT_YEAR:
+        case LT_YEAR:
+        case GTEQ_YEAR:
+        case LTEQ_YEAR:
           return "this." + operator.getLabel() + "(" + toStringBranch(arg2) + ")";
       }
     }
