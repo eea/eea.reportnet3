@@ -134,7 +134,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * @param idPartitionDataset the id partition dataset
    */
   @Override
-//  @HystrixCommand
+  @HystrixCommand
   @RequestMapping(value = "/dataset/{datasetId}/snapshot/create", method = RequestMethod.POST)
   public void createSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
@@ -206,6 +206,19 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
+  }
+
+  @RequestMapping(value = "/dataset/{datasetId}/snapshot/create/poc", method = RequestMethod.POST)
+  public void createSnapshotDataPoc(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
+      @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset) {
+    try {
+      recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset);
+      LOG.info("Snapshot created");
+    } catch (SQLException | IOException | RecordStoreAccessException e) {
+      LOG_ERROR.error(e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
 
   /**
