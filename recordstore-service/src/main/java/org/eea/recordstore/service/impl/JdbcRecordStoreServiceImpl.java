@@ -621,8 +621,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
             : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
-    Map<String, Object> value = new HashMap<>();
-    value.put("dataset_id", idReportingDataset);
+
     ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
     Connection con = null;
     Statement stmt = null;
@@ -648,7 +647,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
 
       CopyManager cm = new CopyManager((BaseConnection) con);
-      LOG.info("Init restoring the snapshot files from Snapshot {}", idSnapshot);
+      LOG.info("Init restoring the snapshot files from Snapshot {} and dataset {}", idSnapshot,
+          idReportingDataset);
       switch (datasetType) {
         case DESIGN:
           // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
@@ -679,7 +679,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       // Send kafka event to launch Validation
 
-      LOG.info("Snapshot {} restored", idSnapshot);
+      LOG.info("Snapshot {} restored for dataset {}", idSnapshot, idReportingDataset);
     } catch (Exception e) {
       if (null != con) {
         LOG_ERROR.error("Error restoring the snapshot data due to error {}. Rollback",
