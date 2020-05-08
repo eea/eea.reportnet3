@@ -150,7 +150,6 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   }
 
 
-
   /**
    * Restore snapshot data.
    *
@@ -181,6 +180,33 @@ public class RecordStoreControllerImpl implements RecordStoreController {
 
   }
 
+  /**
+   * Restore snapshot data.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   * @param idPartition the id partition
+   * @param datasetType the dataset type
+   */
+  @PostMapping("/dataset/{datasetId}/snapshot/restore/poc")
+  public void restoreSnapshotDataPOC(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
+      @RequestParam(value = "partitionId", required = true) Long idPartition,
+      @RequestParam(value = "typeDataset", required = true) DatasetTypeEnum datasetType,
+      @RequestParam(value = "user", required = true) String user,
+      @RequestParam(value = "isSchemaSnapshot", required = true) Boolean isSchemaSnapshot,
+      @RequestParam(value = "deleteData", defaultValue = "true") Boolean deleteData) {
+
+    try {
+      ThreadPropertiesManager.setVariable("user", user);
+      recordStoreService.restoreDataSnapshotPoc(datasetId, idSnapshot, idPartition, datasetType,
+          isSchemaSnapshot, deleteData);
+    } catch (SQLException | IOException e) {
+      LOG_ERROR.error(e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+
+  }
 
   /**
    * Delete snapshot data.
