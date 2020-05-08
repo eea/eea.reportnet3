@@ -26,7 +26,6 @@ import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.RepresentativeService;
-import org.eea.dataflow.service.impl.DataflowServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
@@ -509,8 +508,11 @@ public class DataFlowServiceImplTest {
    */
   @Test
   public void testGetDatasetsId() throws EEAException {
-
-    dataflowServiceImpl.getReportingDatasetsId("");
+    List<ReportingDatasetVO> reportings = new ArrayList<>();
+    Mockito.when(datasetMetabaseController.getReportingsIdBySchemaId(Mockito.any()))
+        .thenReturn(reportings);
+    assertEquals("failed assertion", reportings,
+        dataflowServiceImpl.getReportingDatasetsId("").getReportingDatasets());
   }
 
 

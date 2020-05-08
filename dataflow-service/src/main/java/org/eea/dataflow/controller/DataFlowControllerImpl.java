@@ -52,7 +52,7 @@ public class DataFlowControllerImpl implements DataFlowController {
 
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#id,'DATAFLOW_PROVIDER','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER')")
   @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   public DataFlowVO findById(@PathVariable("dataflowId") Long dataflowId) {
 
@@ -269,7 +269,7 @@ public class DataFlowControllerImpl implements DataFlowController {
 
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#id,'DATAFLOW_PROVIDER','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER')")
   @GetMapping(value = "/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
   public DataFlowVO getMetabaseById(@PathVariable("dataflowId") Long dataflowId) {
     if (dataflowId == null) {
@@ -292,7 +292,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @param dataflowId the dataflow id
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#idDataflow,'DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   @DeleteMapping("/{dataflowId}")
   public void deleteDataFlow(@PathVariable("dataflowId") Long dataflowId) {
     try {
