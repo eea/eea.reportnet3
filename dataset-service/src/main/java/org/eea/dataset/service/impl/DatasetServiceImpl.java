@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1229,6 +1230,12 @@ public class DatasetServiceImpl implements DatasetService {
     if (datasetId == null || field == null) {
       throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
 
+    }
+    // if the type is multiselect codelist we sort the values in lexicographic order
+    if (DataType.MULTISELECT_CODELIST.equals(field.getType()) && null != field.getValue()) {
+      List<String> values = Arrays.asList(field.getValue().split(","));
+      Collections.sort(values);
+      field.setValue(values.toString().substring(1, values.toString().length() - 1));
     }
     fieldRepository.saveValue(field.getId(), field.getValue());
   }

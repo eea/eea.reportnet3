@@ -1211,6 +1211,20 @@ public class DatasetServiceTest {
   }
 
   /**
+   * Update field test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateFieldMultiSelectTest() throws EEAException {
+    FieldVO multiselectField = new FieldVO();
+    multiselectField.setType(DataType.MULTISELECT_CODELIST);
+    multiselectField.setValue("");
+    datasetService.updateField(1L, multiselectField);
+    Mockito.verify(fieldRepository, times(1)).saveValue(Mockito.any(), Mockito.any());
+  }
+
+  /**
    * Update field exception 1 test.
    *
    * @throws EEAException the EEA exception
