@@ -47,7 +47,17 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
     case 'SET_REQUIRED':
       return { ...state, fieldRequiredValue: payload };
     case 'SET_TYPE':
-      return { ...state, fieldTypeValue: payload.type, fieldPreviousTypeValue: payload.previousType };
+      console.log(payload.type.fieldType.toUpperCase());
+      return {
+        ...state,
+        fieldTypeValue: payload.type,
+        codelistItems:
+          payload.type.fieldType.toUpperCase() !== 'MULTISELECT_CODELIST' &&
+          payload.type.fieldType.toUpperCase() !== 'CODELIST'
+            ? []
+            : state.codelistItems,
+        fieldPreviousTypeValue: payload.previousType
+      };
     case 'TOGGLE_CODELIST_EDITOR_VISIBLE':
       return { ...state, isCodelistEditorVisible: payload, isLinkSelectorVisible: false };
     case 'TOGGLE_LINK_SELECTOR_VISIBLE':

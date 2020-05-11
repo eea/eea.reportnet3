@@ -610,7 +610,7 @@ export const FieldDesigner = ({
   const renderCodelistAndLinkButtons = () => {
     return !isUndefined(fieldDesignerState.fieldTypeValue) &&
       (fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ||
-        fieldDesignerState.fieldTypeValue.fieldType === 'Multiselect_codelist') ? (
+        fieldDesignerState.fieldTypeValue.fieldType === 'Multiselect_Codelist') ? (
       <Button
         className={`${styles.codelistButton} p-button-secondary-transparent`}
         label={
