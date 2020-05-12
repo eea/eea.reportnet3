@@ -121,8 +121,8 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
                   />
                 </div>
                 <p className={styles.ids_info}>
-                  <span className={styles.ml_1}>{resources.messages['dataflow']}: </span> <b>{dataflowId} </b>
-                  <span className={styles.ml_1}>{resources.messages['apiKeyDataProviderIdLabel']}: </span>
+                  <span className={styles.ids_label}>{resources.messages['dataflow']}: </span> <b>{dataflowId} </b>
+                  <span className={styles.ids_label}>{resources.messages['apiKeyDataProviderIdLabel']}: </span>
                   <b>{dataProviderId} </b>
                 </p>
               </div>
