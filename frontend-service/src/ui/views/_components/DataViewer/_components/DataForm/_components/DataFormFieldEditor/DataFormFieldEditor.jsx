@@ -5,6 +5,7 @@ import isUndefined from 'lodash/isUndefined';
 
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -107,6 +108,16 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
   );
 
   const renderMultiselectCodelist = (field, fieldValue) => (
+    <MultiSelect
+      // onChange={e => onFilterChange(e, field)}
+      options={[
+        { option: '1', value: '1' },
+        { option: '2', value: '2' },
+        { option: '3', value: '3' }
+      ]}
+      style={{ width: '100%' }}
+      value={{ option: '1', value: '1' }}
+    />
     // <Dropdown
     //   appendTo={document.body}
     //   onChange={e => {
@@ -117,7 +128,7 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     //   value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
     // />
     //Multiselect
-    <div></div>
+    // <div></div>
   );
 
   const getMaxCharactersByType = type => {
