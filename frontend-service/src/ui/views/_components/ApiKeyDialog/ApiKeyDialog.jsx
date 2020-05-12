@@ -89,28 +89,40 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
       <div className={styles.container}>
         {apiKey === '' ? (
           isKeyLoading ? (
-            <Spinner style={{ top: 0, left: 0, width: '50px', height: '50px' }} />
+            <div className={styles.row}>
+              <Spinner style={{ top: 0, left: 0, width: '50px', height: '50px' }} />
+            </div>
           ) : (
-            <p>{resources.messages['noApiKey']}</p>
+            <div className={styles.row}>
+              <p>{resources.messages['noApiKey']}</p>
+            </div>
           )
         ) : (
           <>
-            <label>{resources.messages['apiKeyDialogLabel']}</label>
-            <textarea
-              className={styles.textarea}
-              readOnly
-              ref={textRef => setTextAreaRef(textRef)}
-              rows={1}
-              value={apiKey}
-            />
-            <Button
-              tooltip={resources.messages['copyToClipboardSuccess']}
-              tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
-              showDelay="3000"
-              className={`p-button-primary ${styles.copyBtn}`}
-              icon={'copy'}
-              onClick={() => onCopyToClipboard()}
-            />
+            {' '}
+            <div className={styles.row}>
+              <label>{resources.messages['apiKeyDialogLabel']}</label>
+              <textarea
+                className={styles.textarea}
+                readOnly
+                ref={textRef => setTextAreaRef(textRef)}
+                rows={1}
+                value={apiKey}
+              />
+              <Button
+                tooltip={resources.messages['copyToClipboardSuccess']}
+                tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
+                showDelay="3000"
+                className={`p-button-primary ${styles.copyBtn}`}
+                icon={'copy'}
+                onClick={() => onCopyToClipboard()}
+              />
+            </div>
+            <div className={`${styles.row} ${styles.pt_1}`}>
+              <p>
+                Dataflow: <b>{dataflowId}</b>, data provider: <b>{dataProviderId}</b>
+              </p>
+            </div>
           </>
         )}
       </div>

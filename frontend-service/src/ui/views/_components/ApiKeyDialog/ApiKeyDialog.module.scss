@@ -1,12 +1,14 @@
 .container {
+  min-height: 10em;
+  padding: 3em 0;
+}
+.row {
   align-items: center;
   box-sizing: border-box;
   display: flex;
   flex-basis: max-content;
   flex-wrap: nowrap;
   justify-content: center;
-  min-height: 10em;
-  padding: 3em 0;
   label {
     min-width: 10%;
   }
@@ -26,6 +28,10 @@
     text-align: center;
     width: 80%;
   }
+}
+
+.pt_1 {
+  padding-top: 1em;
 }
 
 .copyBtn {
