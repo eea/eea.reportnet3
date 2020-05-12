@@ -1,26 +1,29 @@
 gatling_config:
   scenarios:
-    - requestName: testHealth
-      endpoint: /actuator/health
-      usersNumber: 14
-      numberExecutions: 10
-      useFeeder: false
-      method: get
-      puaseTime: 1
-      timeOut: 1000
-      #headers:
-      #Authorization: Basic Y2FzX3NlcnZpY2U6NTFlYTg2OWFmNjM4NDNjYTkwNjQ0YTY5ZDM0Yjg1Nzk=
-      #requestBody: '{"title":"example"}'
-    - requestName: uploadFile
-      endpoint: /dataset/1/loadTableData/5d13810fcbe9834a902d5f65
-      usersNumber: 11
-      numberExecutions: 12
-      useFeeder: false
+    #    - requestName: createDataset
+    #      endpoint: /recordstore/dataset/create/${datasetName}/poc
+    #      usersNumber: 20
+    #      numberExecutions: 5
+    #      useFeeder: true
+    #      method: post
+    #      puaseTime: 1
+    #      timeOut: 1000
+    #headers:
+    #Authorization: Basic Y2FzX3NlcnZpY2U6NTFlYTg2OWFmNjM4NDNjYTkwNjQ0YTY5ZDM0Yjg1Nzk=
+    #requestBody: '{"title":"example"}'
+    - requestName: restoreSnapshot
+      endpoint: /recordstore/dataset/${datasetId}/snapshot/restore/poc?idSnapshot=2078&partitionId=${partitionId}&typeDataset=REPORTING&user=jose.luis.provider&isSchemaSnapshot=false&deleteData=true
+      usersNumber: 5
+      numberExecutions: 1
+      useFeeder: true
       method: post
-      uploadFileName: C:/Users/extjo/Downloads/BWQ_2006_SPAIN_2018_V1_BWQD_2006_Identified_BW6kREGISTROS.csv
-      uploadFileKey: file
       puaseTime: 1
       timeOut: 1000
-      #headers:
-      #Authorization: Basic Y2FzX3NlcnZpY2U6NTFlYTg2OWFmNjM4NDNjYTkwNjQ0YTY5ZDM0Yjg1Nzk=
-      #requestBody: '{"title":"example"}'
+#    - requestName: createSnapshot
+#      endpoint: /recordstore/dataset/${datasetId}/snapshot/create/poc?idSnapshot=${idSnapshot}&idPartitionDataset=${idPartitionDataset}
+#      usersNumber: 100
+#      numberExecutions: 1
+#      useFeeder: true
+#      method: post
+#      puaseTime: 10
+#      timeOut: 1000
