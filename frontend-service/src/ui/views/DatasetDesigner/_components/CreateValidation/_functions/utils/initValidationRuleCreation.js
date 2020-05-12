@@ -8,11 +8,9 @@ export const initValidationRuleCreation = rawTables => {
     .map(table => {
       return { label: table.header, code: table.tableSchemaId };
     });
-  const errorLevels = config.validations.errorLevels;
   const newExpression = getEmptyExpression();
   return {
     tables,
-    errorLevels,
     candidateRule: {
       table: undefined,
       field: undefined,

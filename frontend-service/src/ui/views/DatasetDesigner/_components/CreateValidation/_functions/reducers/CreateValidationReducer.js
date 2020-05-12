@@ -13,7 +13,6 @@ export const createValidationReducerInitState = {
   },
   datasetSchema: {},
   schemaTables: [],
-  errorLevels: [],
   validationRuleString: '',
   areRulesDisabled: true,
   isRuleAddingDisabled: true,
@@ -123,7 +122,6 @@ export const createValidationReducer = (state, { type, payload }) => {
       return {
         ...state,
         schemaTables: payload.tables,
-        errorLevels: payload.errorLevels,
         candidateRule: payload.candidateRule
       };
     case 'RESET_CREATION_FORM':

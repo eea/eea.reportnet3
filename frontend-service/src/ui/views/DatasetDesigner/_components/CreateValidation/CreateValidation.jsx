@@ -81,6 +81,18 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   const componentName = 'createValidation';
 
   useEffect(() => {
+    const tabsKeys = tabMenuItems.map(tabMenu => {
+      return pick(tabMenu, ['tabKey']);
+    });
+    const tabChangesInitValues = {};
+    tabsKeys.forEach(tab => {
+      tabChangesInitValues[tab.tabKey] = false;
+    });
+
+    setTabsChanges(tabChangesInitValues);
+  }, []);
+
+  useEffect(() => {
     if (creationFormState.candidateRule.automatic) {
       setTabMenuItems([
         {
@@ -95,18 +107,6 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   useEffect(() => {
     setTabMenuActiveItem(tabMenuItems[0]);
   }, [tabMenuItems]);
-
-  useEffect(() => {
-    const tabsKeys = tabMenuItems.map(tabMenu => {
-      return pick(tabMenu, ['tabKey']);
-    });
-    const tabChangesInitValues = {};
-    tabsKeys.forEach(tab => {
-      tabChangesInitValues[tab.tabKey] = false;
-    });
-
-    setTabsChanges(tabChangesInitValues);
-  }, []);
 
   useEffect(() => {
     if (!isEmpty(tabs)) {
@@ -503,7 +503,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                       placeholder={resourcesContext.messages.errorTypePlaceholder}
                       appendTo={document.body}
                       optionLabel="label"
-                      options={creationFormState.errorLevels}
+                      options={config.validations.errorLevels}
                       onChange={e => onInfoFieldChange('errorLevel', e.target.value)}
                       value={creationFormState.candidateRule.errorLevel}
                     />
