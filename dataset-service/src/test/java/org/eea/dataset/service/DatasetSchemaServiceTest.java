@@ -5,7 +5,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -870,7 +869,7 @@ public class DatasetSchemaServiceTest {
 
     dataSchemaServiceImpl.propagateRulesAfterUpdateSchema("datasetSchemaId", fieldSchemaVO, null,
         1L);
-
+    Mockito.verify(rulesControllerZuul, times(1)).existsRuleRequired(Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -883,7 +882,8 @@ public class DatasetSchemaServiceTest {
         Mockito.any());
     dataSchemaServiceImpl.propagateRulesAfterUpdateSchema("datasetSchemaId", fieldSchemaVO,
         DataType.NUMBER_DECIMAL, 1L);
-
+    Mockito.verify(datasetService, times(1)).updateFieldValueType(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
 
@@ -896,6 +896,7 @@ public class DatasetSchemaServiceTest {
 
     dataSchemaServiceImpl.propagateRulesAfterUpdateSchema("datasetSchemaId", fieldSchemaVO, null,
         1L);
+    Mockito.verify(rulesControllerZuul, times(1)).deleteRuleRequired(Mockito.any(), Mockito.any());
 
   }
 

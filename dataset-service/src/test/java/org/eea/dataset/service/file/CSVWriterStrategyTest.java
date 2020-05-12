@@ -1,5 +1,7 @@
 package org.eea.dataset.service.file;
 
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.times;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,8 +48,8 @@ public class CSVWriterStrategyTest {
   @Test
   public void csvWriterStrategyTest() {
     CSVWriterStrategy test = new CSVWriterStrategy('|', fileCommon);
+    assertNotNull("failed assertion", test);
   }
-
 
   /**
    * Test write file.
@@ -72,6 +74,8 @@ public class CSVWriterStrategyTest {
     Mockito.when(fileCommon.getRecordValues(Mockito.any(), Mockito.any())).thenReturn(records);
     Mockito.when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any())).thenReturn(fieldSchemas);
     csvWriterStrategy.writeFile(1L, 1L, "");
+    Mockito.verify(fileCommon, times(1)).getFieldSchemas(Mockito.any(), Mockito.any());
+    Mockito.verify(fileCommon, times(1)).getRecordValues(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -99,5 +103,7 @@ public class CSVWriterStrategyTest {
     Mockito.when(fileCommon.getRecordValues(Mockito.any(), Mockito.any())).thenReturn(records);
     Mockito.when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any())).thenReturn(fieldSchemas);
     csvWriterStrategy.writeFile(1L, 1L, "");
+    Mockito.verify(fileCommon, times(1)).getFieldSchemas(Mockito.any(), Mockito.any());
+    Mockito.verify(fileCommon, times(1)).getRecordValues(Mockito.any(), Mockito.any());
   }
 }

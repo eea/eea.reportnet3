@@ -114,6 +114,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("${pathSnapshot}")
   private String pathSnapshot;
 
+  @Value("${dataset.creation.notification.ms}")
+  private Long timeToWaitBeforeReleasingNotification;
+
+  @Value("${design.creation.notification.ms}")
+  private Long timeToWaitBeforeReleasingNotificationDesign;
 
   /**
    * The data source.
@@ -215,6 +220,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       statement.executeBatch();
       LOG.info("{} Schemas created as part of DataCollection creation",
           datasetIdsAndSchemaIds.size());
+      try {
+        // waiting X seconds before releasing notifications, so database is able to write the
+        // creation of all datasets
+        Thread.sleep(timeToWaitBeforeReleasingNotification);
+      } catch (InterruptedException e) {
+        LOG_ERROR.error("Error sleeping thread before releasing notification kafka events", e);
+      }
 
       LOG.info("Releasing notifications via Kafka");
       // Release events to initialize databases content
@@ -265,6 +277,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     LOG.info("Empty dataset created");
 
+    try {
+      // waiting X seconds before releasing notifications, so database is able to write the creation
+      // of all datasets
+      Thread.sleep(timeToWaitBeforeReleasingNotificationDesign);
+    } catch (InterruptedException e) {
+      LOG_ERROR.error("Error sleeping thread before releasing notification kafka events", e);
+    }
     // Send notification
     Map<String, Object> result = new HashMap<>();
     result.put("connectionDataVO", createConnectionDataVO(datasetName));
@@ -467,17 +486,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     String signature =
         deleteData
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-            : LockSignature.RESTORE_SNAPSHOT.getValue()
+                : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", idReportingDataset);

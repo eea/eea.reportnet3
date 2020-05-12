@@ -9,12 +9,14 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
+import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.server.ResponseStatusException;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -52,10 +54,13 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
    */
   public boolean secondLevelAuthorize(Long idEntity, ObjectAccessRoleEnum... objectAccessRoles) {
     boolean canAccess = false;
-    if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("feign")) {
+    if (SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+        .contains("ROLE_FEIGN")) {
       log.warn("Invocation was made from a feign client with a due token. Letting it go");
       canAccess = true;
     } else {
+      log.info("Checking available authorities for user {}",
+          SecurityContextHolder.getContext().getAuthentication().getName());
       Collection<String> authorities = SecurityContextHolder.getContext().getAuthentication()
           .getAuthorities().stream().map(authority -> ((GrantedAuthority) authority).getAuthority())
           .collect(Collectors.toList());
@@ -66,8 +71,8 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
       canAccess = !roles.stream().filter(authorities::contains).findFirst().orElse("not_found")
           .equals("not_found");
       if (!canAccess) {// No authority found in the current token. Check against keycloak to finde
-                       // if there were some change at User rights that wasn't be propagated to the
-                       // token yet
+        // if there were some change at User rights that wasn't be propagated to the
+        // token yet
         List<ResourceAccessVO> resourceAccessVOS = null;
         try {
           resourceAccessVOS = this.userManagementControllerZull.getResourcesByUser();
@@ -100,10 +105,13 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
    */
   public boolean checkPermission(String resource, AccessScopeEnum... accessScopeEnums) {
     boolean canAccess = false;
-    if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("feign")) {
+    if (SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+        .contains("ROLE_FEIGN")) {
       log.warn("Invocation was made from a feign client with a due token. Letting it go");
       canAccess = true;
     } else {
+      log.info("Checking available permissions for user {}",
+          SecurityContextHolder.getContext().getAuthentication().getName());
       canAccess =
           userManagementControllerZull.checkResourceAccessPermission(resource, accessScopeEnums);
     }
@@ -123,7 +131,7 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
     Object details = SecurityContextHolder.getContext().getAuthentication().getDetails();
 
     if (details instanceof Map) {
-      String userId = ((Map<String, String>) details).get("userId");
+      String userId = ((Map<String, String>) details).get(AuthenticationDetails.USER_ID);
       String apiKey = this.userManagementControllerZull.getApiKey(userId, dataflowId, dataProvider);
       return SecurityContextHolder.getContext().getAuthentication().getCredentials().toString()
           .equals(apiKey);
