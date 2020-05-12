@@ -185,7 +185,7 @@
   --datatable-column-sortable-hightlight-color: var(--white);
   --datatable-column-sortable-hightlight-icon-color: var(--white);
   --datatable-column-sortable-hightlight-box-shadow-focus: inset 0 0 0 0.1em var(--gray-25);
-  --datatable-header-footer-bg: var(--gray-10);
+  --datatable-header-footer-bg: var(--white);
   --datatable-header-footer-color: var(--gray-110);
   --datatable-header-footer-border: 1px solid var(--gray-25);
   --datatable-header-info-button-color: var(--c-corporate-blue);
