@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import moment from 'moment';
 
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import sanitizeHtml from 'sanitize-html';
@@ -80,10 +81,10 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         ),
         redirectionUrl: `${window.location.protocol}//${window.location.hostname}${
           window.location.port !== '' && window.location.port.toString() !== '80' ? `:${window.location.port}` : ''
-        }${notification.redirectionUrl}`
+        }${!isNil(notification.redirectionUrl) ? notification.redirectionUrl : ''}`
       };
     });
-    console.info('notifications: %o', notificationsArray);
+    // console.info('notifications: %o', notificationsArray);
     setNotifications(notificationsArray);
   }, [notificationContext, userContext]);
 

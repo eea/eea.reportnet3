@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
+import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.ums.service.keycloak.admin.TokenMonitor;
 import org.eea.ums.service.keycloak.model.CheckResourcePermissionRequest;
 import org.eea.ums.service.keycloak.model.CheckResourcePermissionResult;
@@ -234,7 +235,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   /**
    * The Constant USER_ROLES_URL.
    */
-  private static final String USER_ROLES_URL = "/auth/admin/realms/{realm}/users/{userId}/role-mappings/realm/composite";
+  private static final String USER_ROLES_URL =
+      "/auth/admin/realms/{realm}/users/{userId}/role-mappings/realm/composite";
   /**
    * The Constant LOG_ERROR.
    */
@@ -282,7 +284,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     Map<String, String> authDetails =
         (Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails();
 
-    checkResourceInfo.setUserId(authDetails.get("userId"));
+    checkResourceInfo.setUserId(authDetails.get(AuthenticationDetails.USER_ID));
     List<Resource> resources = new ArrayList<>();
     Resource resource = new Resource();
     resource.setName(resourceName);
@@ -646,7 +648,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-            .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+        .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 
@@ -707,7 +709,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-            .path(ADD_ROLE_TO_USER).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+        .path(ADD_ROLE_TO_USER).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 

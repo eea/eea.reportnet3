@@ -1,7 +1,10 @@
 package org.eea.dataflow.persistence.repository;
 
+import static org.junit.Assert.assertEquals;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import org.eea.dataflow.persistence.domain.Dataflow;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -31,7 +34,8 @@ public class DataflowExtendedRepositoryImplTest {
   public void testFindCompleted() {
     Pageable pageable = PageRequest.of(1, 1);
     Mockito.when(entityManager.createQuery(Mockito.anyString())).thenReturn(query);
-    dataflowExtendedRepository.findCompleted("", pageable);
+    List<Dataflow> result = dataflowExtendedRepository.findCompleted("", pageable);
+    assertEquals("failed assertion", query.getResultList(), result);
   }
 
 }

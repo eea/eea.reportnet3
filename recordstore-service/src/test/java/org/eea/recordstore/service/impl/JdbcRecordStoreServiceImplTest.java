@@ -73,6 +73,9 @@ public class JdbcRecordStoreServiceImplTest {
     ReflectionTestUtils.setField(jdbcRecordStoreService, "sqlGetDatasetsName",
         "select * from pg_namespace where nspname like 'dataset%'");
 
+    ReflectionTestUtils.setField(jdbcRecordStoreService,
+        "timeToWaitBeforeReleasingNotificationDesign", 1000L);
+
   }
 
   @Rule
@@ -147,12 +150,10 @@ public class JdbcRecordStoreServiceImplTest {
 
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
-    /*
-     * Mockito.when( DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
-     * Mockito.anyString())) .thenReturn(conexion);
-     */
 
     jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L);
+    Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
+        Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
   }
 
   @Test

@@ -142,6 +142,8 @@ public class DataSetControllerImplTest {
     doNothing().when(fileTreatmentHelper).executeFileProcess(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
     dataSetControllerImpl.loadTableData(1L, file, "example");
+    Mockito.verify(fileTreatmentHelper, times(1)).executeFileProcess(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
   }
 
   /**
@@ -454,9 +456,8 @@ public class DataSetControllerImplTest {
   public void testDeleteImportTable() throws EEAException {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-    doNothing().when(deleteHelper).executeDeleteTableProcess(Mockito.any(), Mockito.any());
     dataSetControllerImpl.deleteImportTable(1L, "");
-
+    Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.any(), Mockito.any());
   }
 
 
