@@ -169,7 +169,7 @@ const Dataflow = withRouter(({ history, match }) => {
     } else if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']) {
       leftSideBarContext.addModels([propertiesBtn, manageRolesBtn]);
     } else {
-      leftSideBarContext.addModels(dataflowState.isRepresentativeView ? [propertiesBtn, apiKeyBtn] : [propertiesBtn]);
+      leftSideBarContext.addModels(!dataflowState.isCustodian ? [propertiesBtn, apiKeyBtn] : [propertiesBtn]); //Check condition
     }
   }, [dataflowState.isCustodian, dataflowState.status]);
 
@@ -265,7 +265,7 @@ const Dataflow = withRouter(({ history, match }) => {
         }
       } //+
 
-      if (dataflow.representatives.length === 1) {
+      if (match.params.representativeId) {
         if (!isEmpty(dataflow.representatives) && !isEmpty(dataflow.datasets)) {
           const representativeId = dataflow.datasets.map(id => id.dataProviderId);
 
@@ -276,6 +276,8 @@ const Dataflow = withRouter(({ history, match }) => {
           const isReceiptOutdated = dataflow.representatives
             .filter(representative => representative.dataProviderId === uniq(representativeId)[0])
             .map(representative => representative.isReceiptOutdated);
+
+          console.log('IN isReceiptOutdated', isReceiptOutdated);
 
           if (isReceiptOutdated.length === 1 && isReleased.length === 1) {
             onInitReceiptData({
@@ -288,6 +290,9 @@ const Dataflow = withRouter(({ history, match }) => {
       } else {
         if (!isEmpty(dataflow.representatives)) {
           const isReceiptOutdated = dataflow.representatives.map(representative => representative.isReceiptOutdated);
+
+          console.log('OUT isReceiptOutdated', isReceiptOutdated);
+
           if (isReceiptOutdated.length === 1) {
             setIsReceiptOutdated({ isReceiptOutdated: isReceiptOutdated[0] });
           }
@@ -346,7 +351,7 @@ const Dataflow = withRouter(({ history, match }) => {
           title={TextUtils.ellipsis(dataflowState.name)}
         />
 
-        {/*  <BigButtonList
+        <BigButtonList
           dataflowDispatch={dataflowDispatch}
           dataflowState={dataflowState}
           handleRedirect={handleRedirect}
@@ -362,9 +367,9 @@ const Dataflow = withRouter(({ history, match }) => {
           handleRedirect={handleRedirect}
           onShowSnapshotDialog={onShowSnapshotDialog}
           match={match}
-        /> */}
+        />
 
-        {isNil(match.params.representativeId) ? (
+        {/*  {isNil(match.params.representativeId) ? (
           <BigButtonList
             dataflowDispatch={dataflowDispatch}
             dataflowState={dataflowState}
@@ -382,7 +387,7 @@ const Dataflow = withRouter(({ history, match }) => {
             onShowSnapshotDialog={onShowSnapshotDialog}
             match={match}
           />
-        )}
+        )} */}
 
         <SnapshotsDialog
           dataflowId={dataflowId}
