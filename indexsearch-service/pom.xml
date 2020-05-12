@@ -5,7 +5,7 @@
   <parent>
     <artifactId>microservice-pom</artifactId>
     <groupId>org.eea</groupId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.0.0</version>
     <relativePath>../parent-poms/microservice</relativePath>
 
   </parent>
@@ -13,15 +13,11 @@
   <properties>
     <sonar.moduleKey>org.eea:reportnet:indexsearch-service:${sonar.jenkins.branch}</sonar.moduleKey>
   </properties>
-  <groupId>org.eea.indexsearc</groupId>
+  <groupId>org.eea.indexsearch</groupId>
   <artifactId>indexsearch-service</artifactId>
-  <version>3.0-SNAPSHOT</version>
+  <version>${indexsearch.version}</version>
   <dependencies>
-    <dependency>
-      <groupId>org.eea.interfaces</groupId>
-      <artifactId>common-interfaces</artifactId>
-      <version>3.0-SNAPSHOT</version>
-    </dependency>
+
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
       <artifactId>elasticsearch-rest-high-level-client</artifactId>
