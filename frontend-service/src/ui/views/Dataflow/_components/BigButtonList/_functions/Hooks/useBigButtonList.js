@@ -155,7 +155,6 @@ const useBigButtonList = ({
         handleRedirect(
           getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: representative.id }, true)
         );
-        // window.history.replaceState(null, '', `/dataflow/${dataflowId}/representativeId/${representative.id}`);
       },
 
       helpClassName: 'dataflow-dataset-container-help-step',

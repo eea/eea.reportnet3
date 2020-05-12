@@ -55,7 +55,7 @@ export const BigButtonListRepresentative = ({
   const onLoadReceiptData = async () => {
     try {
       setIsReceiptLoading(true);
-      const response = await ConfirmationReceiptService.get(dataflowState.id, dataflowState.dataProviderId);
+      const response = await ConfirmationReceiptService.get(dataflowState.id, match.params.representativeId);
       downloadPdf(response);
       onCleanUpReceipt();
     } catch (error) {
