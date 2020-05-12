@@ -9,11 +9,12 @@
   flex-basis: max-content;
   flex-wrap: nowrap;
   justify-content: center;
-  label {
-    min-width: 10%;
-  }
+
   .label {
-    padding-right: 2em;
+    min-width: 10%;
+    padding-right: 1em;
+    align-self: end;
+    margin-top: 0.5em;
   }
   .textarea {
     background-color: var(--gray-5);
@@ -23,15 +24,24 @@
     color: black;
     font-weight: 600;
     margin: 0;
-    max-width: 22em;
+    width: 22em;
     outline: none;
     text-align: center;
-    width: 80%;
+    flex-shrink: 0;
   }
 }
-
-.pt_1 {
-  padding-top: 1em;
+.input_api {
+  flex-shrink: 0;
+}
+.flex {
+  display: flex;
+}
+.ids_info {
+  padding-top: 0.8em;
+  margin: 0;
+}
+.ml_1 {
+  margin-left: 1em;
 }
 
 .copyBtn {

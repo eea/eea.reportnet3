@@ -99,29 +99,33 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
           )
         ) : (
           <>
-            {' '}
             <div className={styles.row}>
-              <label>{resources.messages['apiKeyDialogLabel']}</label>
-              <textarea
-                className={styles.textarea}
-                readOnly
-                ref={textRef => setTextAreaRef(textRef)}
-                rows={1}
-                value={apiKey}
-              />
-              <Button
-                tooltip={resources.messages['copyToClipboardSuccess']}
-                tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
-                showDelay="3000"
-                className={`p-button-primary ${styles.copyBtn}`}
-                icon={'copy'}
-                onClick={() => onCopyToClipboard()}
-              />
-            </div>
-            <div className={`${styles.row} ${styles.pt_1}`}>
-              <p>
-                Dataflow: <b>{dataflowId}</b>, data provider: <b>{dataProviderId}</b>
-              </p>
+              <label className={styles.label}>{resources.messages['apiKeyDialogLabel']}</label>
+
+              <div className={styles.input_api}>
+                <div className={styles.flex}>
+                  <textarea
+                    className={styles.textarea}
+                    readOnly
+                    ref={textRef => setTextAreaRef(textRef)}
+                    rows={1}
+                    value={apiKey}
+                  />
+                  <Button
+                    tooltip={resources.messages['copyToClipboardSuccess']}
+                    tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
+                    showDelay="3000"
+                    className={`p-button-primary ${styles.copyBtn}`}
+                    icon={'copy'}
+                    onClick={() => onCopyToClipboard()}
+                  />
+                </div>
+                <p className={styles.ids_info}>
+                  <span className={styles.ml_1}>{resources.messages['dataflow']}:</span> <b>{dataflowId} </b>
+                  <span className={styles.ml_1}>{resources.messages['apiKeyDataProviderIdLabel']}:</span>
+                  <b>{dataProviderId} </b>
+                </p>
+              </div>
             </div>
           </>
         )}
