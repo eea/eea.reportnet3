@@ -308,6 +308,10 @@
     "value": "JHtEQVRBU0VUX0NSRUFUSU9OX05PVElGSUNBVElPTl9NUzo1MDAwfQ=="
   },
   {
+    "key": "config/recordstore/design.creation.notification.ms",
+    "value": "JHtERVNJR05fQ1JFQVRJT05fTk9USUZJQ0FUSU9OX01TOjUwMH0="
+  },
+  {
     "key": "config/apiGateway/feign.client.config.default.connectTimeout",
     "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
   },

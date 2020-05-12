@@ -17,6 +17,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.rod.ObligationVO;
+import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -88,7 +89,8 @@ public class DataFlowControllerImplTest {
    */
   @Test
   public void testFindByIdEEAExcep() throws EEAException {
-    when(dataflowService.getByIdWithRepresentativesFilteredByUserEmail(Mockito.any())).thenThrow(EEAException.class);
+    when(dataflowService.getByIdWithRepresentativesFilteredByUserEmail(Mockito.any()))
+        .thenThrow(EEAException.class);
     dataFlowControllerImpl.findById(1L);
     assertEquals("fail", null, dataFlowControllerImpl.findById(1L));
   }
@@ -100,7 +102,8 @@ public class DataFlowControllerImplTest {
    */
   @Test
   public void testFindById() throws EEAException {
-    when(dataflowService.getByIdWithRepresentativesFilteredByUserEmail(Mockito.any())).thenReturn(dataflowVO);
+    when(dataflowService.getByIdWithRepresentativesFilteredByUserEmail(Mockito.any()))
+        .thenReturn(dataflowVO);
     dataFlowControllerImpl.findById(1L);
     assertEquals("fail", dataflowVO, dataFlowControllerImpl.findById(1L));
   }
@@ -138,7 +141,7 @@ public class DataFlowControllerImplTest {
   @Test
   public void findPendingAcceptedThrows() throws EEAException {
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "1");
+    details.put(AuthenticationDetails.USER_ID, "1");
     Authentication authentication = Mockito.mock(Authentication.class);
     SecurityContext securityContext = Mockito.mock(SecurityContext.class);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -195,7 +198,7 @@ public class DataFlowControllerImplTest {
   @Test
   public void findUserDataflowsByStatusThrows() throws EEAException {
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "1");
+    details.put(AuthenticationDetails.USER_ID, "1");
     Authentication authentication = Mockito.mock(Authentication.class);
     SecurityContext securityContext = Mockito.mock(SecurityContext.class);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -216,7 +219,7 @@ public class DataFlowControllerImplTest {
   @Test
   public void findUserDataflowsByStatus() throws EEAException {
     Map<String, String> details = new HashMap<>();
-    details.put("userId", "1");
+    details.put(AuthenticationDetails.USER_ID, "1");
     Authentication authentication = Mockito.mock(Authentication.class);
     SecurityContext securityContext = Mockito.mock(SecurityContext.class);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);

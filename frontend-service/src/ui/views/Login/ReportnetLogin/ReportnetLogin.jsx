@@ -47,7 +47,7 @@ const ReportnetLogin = ({ history }) => {
               setSubmitting(true);
               try {
                 const userObject = await UserService.oldLogin(values.userName, values.password);
-                console.log('userObject', userObject);
+                // console.log('userObject', userObject);
                 user.onLogin(userObject);
                 history.push(getUrl(routes.DATAFLOWS));
               } catch (error) {
