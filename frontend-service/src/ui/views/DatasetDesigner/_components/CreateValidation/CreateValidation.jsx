@@ -470,7 +470,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                         placeholder={resourcesContext.messages.errorTypePlaceholder}
                         appendTo={document.body}
                         optionLabel="label"
-                        options={creationFormState.errorLevels}
+                        options={config.validations.errorLevels}
                         onChange={e => onInfoFieldChange('errorLevel', e.target.value)}
                         value={creationFormState.candidateRule.errorLevel}
                       />
@@ -490,77 +490,79 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                   </div>
                 </div>
               </TabPanel>
-              <TabPanel header={resourcesContext.messages.tabMenuExpression}>
-                <div className={styles.section}>
-                  <ul>
-                    {creationFormState.candidateRule.expressions &&
-                      creationFormState.candidateRule.expressions.map((expression, i) => (
-                        <ValidationExpressionSelector
-                          expressionValues={expression}
-                          isDisabled={creationFormState.areRulesDisabled}
-                          key={expression.expressionId}
-                          onExpressionDelete={onExpressionDelete}
-                          onExpressionFieldUpdate={onExpressionFieldUpdate}
-                          onExpressionGroup={onExpressionGroup}
-                          position={i}
-                          showRequiredFields={tabsChanges.expression}
-                        />
-                      ))}
-                  </ul>
-                  <div className={styles.expressionsActionsBtns}>
-                    <Button
-                      id={`${componentName}__addExpresion`}
-                      disabled={creationFormState.isRuleAddingDisabled}
-                      className="p-button-primary p-button-text-icon-left"
-                      type="button"
-                      label={resourcesContext.messages.addNewRule}
-                      icon="plus"
-                      onClick={e =>
-                        creationFormDispatch({
-                          type: 'ADD_EMPTY_RULE',
-                          payload: getEmptyExpression()
-                        })
-                      }
-                    />
-                    {creationFormState.groupExpressionsActive >= 2 && (
+              {!creationFormState.automatic && (
+                <TabPanel header={resourcesContext.messages.tabMenuExpression}>
+                  <div className={styles.section}>
+                    <ul>
+                      {creationFormState.candidateRule.expressions &&
+                        creationFormState.candidateRule.expressions.map((expression, i) => (
+                          <ValidationExpressionSelector
+                            expressionValues={expression}
+                            isDisabled={creationFormState.areRulesDisabled}
+                            key={expression.expressionId}
+                            onExpressionDelete={onExpressionDelete}
+                            onExpressionFieldUpdate={onExpressionFieldUpdate}
+                            onExpressionGroup={onExpressionGroup}
+                            position={i}
+                            showRequiredFields={tabsChanges.expression}
+                          />
+                        ))}
+                    </ul>
+                    <div className={styles.expressionsActionsBtns}>
                       <Button
-                        id={`${componentName}__groupExpresions`}
-                        className="p-button-primary p-button-text"
+                        id={`${componentName}__addExpresion`}
+                        disabled={creationFormState.isRuleAddingDisabled}
+                        className="p-button-primary p-button-text-icon-left"
                         type="button"
-                        label="Group"
+                        label={resourcesContext.messages.addNewRule}
                         icon="plus"
-                        onClick={e => {
-                          const groupingResult = groupExpressions(
-                            creationFormState.candidateRule.expressions,
-                            creationFormState.groupExpressionsActive,
-                            creationFormState.groupCandidate
-                          );
-                          if (!isNil(groupingResult.newGroup))
-                            creationFormDispatch({
-                              type: 'GROUP_EXPRESSIONS',
-                              payload: {
-                                expressions: groupingResult.expressions,
-                                allExpressions: [
-                                  ...creationFormState.candidateRule.allExpressions,
-                                  groupingResult.newGroup
-                                ]
-                              }
-                            });
-                        }}
+                        onClick={e =>
+                          creationFormDispatch({
+                            type: 'ADD_EMPTY_RULE',
+                            payload: getEmptyExpression()
+                          })
+                        }
                       />
-                    )}
+                      {creationFormState.groupExpressionsActive >= 2 && (
+                        <Button
+                          id={`${componentName}__groupExpresions`}
+                          className="p-button-primary p-button-text"
+                          type="button"
+                          label="Group"
+                          icon="plus"
+                          onClick={e => {
+                            const groupingResult = groupExpressions(
+                              creationFormState.candidateRule.expressions,
+                              creationFormState.groupExpressionsActive,
+                              creationFormState.groupCandidate
+                            );
+                            if (!isNil(groupingResult.newGroup))
+                              creationFormDispatch({
+                                type: 'GROUP_EXPRESSIONS',
+                                payload: {
+                                  expressions: groupingResult.expressions,
+                                  allExpressions: [
+                                    ...creationFormState.candidateRule.allExpressions,
+                                    groupingResult.newGroup
+                                  ]
+                                }
+                              });
+                          }}
+                        />
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className={styles.section}>
-                  <textarea
-                    name=""
-                    id=""
-                    cols="30"
-                    readOnly
-                    rows="5"
-                    value={creationFormState.validationRuleString}></textarea>
-                </div>
-              </TabPanel>
+                  <div className={styles.section}>
+                    <textarea
+                      name=""
+                      id=""
+                      cols="30"
+                      readOnly
+                      rows="5"
+                      value={creationFormState.validationRuleString}></textarea>
+                  </div>
+                </TabPanel>
+              )}
             </TabView>
           </div>
           <div className={styles.footer}>
