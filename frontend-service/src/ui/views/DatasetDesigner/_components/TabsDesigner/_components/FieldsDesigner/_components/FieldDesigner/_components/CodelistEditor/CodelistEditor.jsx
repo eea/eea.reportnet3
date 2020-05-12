@@ -28,6 +28,7 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
       console.log(pastedData);
       const inmCodelistItems = [...codelistItems];
       inmCodelistItems.push(...pastedData.split(',').filter(value => value.trim() !== ''));
+      // event.preventDefault();
       setCodelistItems([...new Set(inmCodelistItems)]);
       // dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
     }
@@ -59,7 +60,7 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
 
   const renderChips = () => {
     return (
-      <div ref={divChipsRef} onPaste={onPasteChips} tabIndex={0} contentEditable={true}>
+      <div ref={divChipsRef} onPaste={onPasteChips}>
         <div className={styles.inputTitleWrapper}>
           <span>{resources.messages['codelistEditorItems']} </span>
           <span className={styles.subIndex}>{resources.messages['codelistEditorItemsMessage']}</span>
