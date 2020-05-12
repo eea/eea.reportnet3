@@ -15,7 +15,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import ReactTooltip from 'react-tooltip';
-import { TabMenu } from 'primereact/tabmenu';
+import { TabView, TabPanel } from 'primereact/tabview';
 import { ValidationExpressionSelector } from './_components/ValidationExpressionSelector';
 
 import { ValidationService } from 'core/services/Validation';
@@ -71,7 +71,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
       tabKey: 'expression'
     }
   ]);
-  const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
+  const [tabMenuActiveItem, setTabMenuActiveItem] = useState(0);
   const [tabsChanges, setTabsChanges] = useState({});
   const [clickedFields, setClickedFields] = useState([]);
 
@@ -105,8 +105,16 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   }, [creationFormState.candidateRule.automatic]);
 
   useEffect(() => {
-    setTabMenuActiveItem(tabMenuItems[0]);
-  }, [tabMenuItems]);
+    const tabsKeys = tabMenuItems.map(tabMenu => {
+      return pick(tabMenu, ['tabKey']);
+    });
+    const tabChangesInitValues = {};
+    tabsKeys.forEach(tab => {
+      tabChangesInitValues[tab.tabKey] = false;
+    });
+
+    setTabsChanges(tabChangesInitValues);
+  }, []);
 
   useEffect(() => {
     if (!isEmpty(tabs)) {
@@ -358,15 +366,17 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     toggleVisibility(false);
   };
 
-  const onTabChange = tab => {
+  const onTabChange = tabIndex => {
+    console.log('onTabChange', tabIndex);
+
     setTabsChanges({
       ...tabsChanges,
       [tabMenuActiveItem.tabKey]: true
     });
-    if (tab.tabKey == 'data') {
+    if (tabIndex == 0) {
       setClickedFields([...config.validations.requiredFields]);
     }
-    setTabMenuActiveItem(tab);
+    setTabMenuActiveItem(tabIndex);
   };
 
   const onInfoFieldChange = (fieldKey, fieldValue) => {
@@ -416,115 +426,119 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
 
   return dialogLayout(
     <>
-      <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => onTabChange(e.value)} />
+      {console.log('tabMenuActiveItem', tabMenuActiveItem)}
       <form>
         <div id={styles.QCFormWrapper}>
           <div className={styles.body}>
-            {tabMenuActiveItem.tabKey == 'data' && (
-              <div className={styles.section}>
-                <div className={styles.fieldsGroup}>
-                  <div
-                    onBlur={e => onAddToClickedFields('table')}
-                    onFocus={e => onDeleteFromClickedFields('table')}
-                    className={`${styles.field} ${styles.qcTable} formField ${printError('table')}`}>
-                    <label htmlFor="table">{resourcesContext.messages.table}</label>
-                    <Dropdown
-                      id={`${componentName}__table`}
-                      disabled={tableFieldOptions.disabled}
-                      appendTo={document.body}
-                      filterPlaceholder={resourcesContext.messages.table}
-                      placeholder={tableFieldOptions.placeholder}
-                      optionLabel="label"
-                      options={creationFormState.schemaTables}
-                      value={creationFormState.candidateRule.table}
-                      onChange={e => onInfoFieldChange('table', e.target.value)}
-                    />
+            <TabView
+              className={styles.tabView}
+              activeIndex={tabMenuActiveItem}
+              onTabChange={e => onTabChange(e.index)}
+              renderActiveOnly={false}>
+              <TabPanel header={resourcesContext.messages.tabMenuConstraintData}>
+                <div className={styles.section}>
+                  <div className={styles.fieldsGroup}>
+                    <div
+                      onBlur={e => onAddToClickedFields('table')}
+                      onFocus={e => onDeleteFromClickedFields('table')}
+                      className={`${styles.field} ${styles.qcTable} formField ${printError('table')}`}>
+                      <label htmlFor="table">{resourcesContext.messages.table}</label>
+                      <Dropdown
+                        id={`${componentName}__table`}
+                        disabled={tableFieldOptions.disabled}
+                        appendTo={document.body}
+                        filterPlaceholder={resourcesContext.messages.table}
+                        placeholder={tableFieldOptions.placeholder}
+                        optionLabel="label"
+                        options={creationFormState.schemaTables}
+                        value={creationFormState.candidateRule.table}
+                        onChange={e => onInfoFieldChange('table', e.target.value)}
+                      />
+                    </div>
+                    <div
+                      onBlur={e => onAddToClickedFields('field')}
+                      onFocus={e => onDeleteFromClickedFields('field')}
+                      className={`${styles.field} ${styles.qcField} formField ${printError('field')}`}>
+                      <label htmlFor="field">{resourcesContext.messages.field}</label>
+                      {fieldsDropdown}
+                    </div>
+                    <div
+                      onBlur={e => onAddToClickedFields('shortCode')}
+                      onFocus={e => onDeleteFromClickedFields('shortCode')}
+                      className={`${styles.field} ${styles.qcShortCode} formField ${printError('shortCode')}`}>
+                      <label htmlFor="shortCode">{resourcesContext.messages.ruleShortCode}</label>
+                      <InputText
+                        id={`${componentName}__shortCode`}
+                        placeholder={resourcesContext.messages.ruleShortCode}
+                        value={creationFormState.candidateRule.shortCode}
+                        onChange={e => onInfoFieldChange('shortCode', e.target.value)}
+                      />
+                    </div>
+                    <div className={`${styles.field} ${styles.qcEnabled} formField `}>
+                      <label htmlFor="QcActive">{resourcesContext.messages.qcEnabled}</label>
+                      <Checkbox
+                        id={`${componentName}__active`}
+                        onChange={e => onInfoFieldChange('active', e.checked)}
+                        isChecked={creationFormState.candidateRule.active}
+                      />
+                    </div>
                   </div>
-                  <div
-                    onBlur={e => onAddToClickedFields('field')}
-                    onFocus={e => onDeleteFromClickedFields('field')}
-                    className={`${styles.field} ${styles.qcField} formField ${printError('field')}`}>
-                    <label htmlFor="field">{resourcesContext.messages.field}</label>
-                    {fieldsDropdown}
+                  <div className={styles.fieldsGroup}>
+                    <div
+                      onBlur={e => onAddToClickedFields('name')}
+                      onFocus={e => onDeleteFromClickedFields('name')}
+                      className={`${styles.field} ${styles.qcName} formField ${printError('name')}`}>
+                      <label htmlFor="name">{resourcesContext.messages.ruleName}</label>
+                      <InputText
+                        id={`${componentName}__name`}
+                        placeholder={resourcesContext.messages.ruleName}
+                        value={creationFormState.candidateRule.name}
+                        onChange={e => onInfoFieldChange('name', e.target.value)}
+                      />
+                    </div>
+                    <div className={`${styles.field} ${styles.qcDescription} formField`}>
+                      <label htmlFor="description">{resourcesContext.messages.description}</label>
+                      <InputText
+                        id={`${componentName}__description`}
+                        placeholder={resourcesContext.messages.description}
+                        value={creationFormState.candidateRule.description}
+                        onChange={e => onInfoFieldChange('description', e.target.value)}
+                      />
+                    </div>
                   </div>
-                  <div
-                    onBlur={e => onAddToClickedFields('shortCode')}
-                    onFocus={e => onDeleteFromClickedFields('shortCode')}
-                    className={`${styles.field} ${styles.qcShortCode} formField ${printError('shortCode')}`}>
-                    <label htmlFor="shortCode">{resourcesContext.messages.ruleShortCode}</label>
-                    <InputText
-                      id={`${componentName}__shortCode`}
-                      placeholder={resourcesContext.messages.ruleShortCode}
-                      value={creationFormState.candidateRule.shortCode}
-                      onChange={e => onInfoFieldChange('shortCode', e.target.value)}
-                    />
-                  </div>
-                  <div className={`${styles.field} ${styles.qcEnabled} formField `}>
-                    <label htmlFor="QcActive">{resourcesContext.messages.qcEnabled}</label>
-                    <Checkbox
-                      id={`${componentName}__active`}
-                      onChange={e => onInfoFieldChange('active', e.checked)}
-                      isChecked={creationFormState.candidateRule.active}
-                    />
+                  <div className={styles.fieldsGroup}>
+                    <div
+                      onBlur={e => onAddToClickedFields('errorLevel')}
+                      onFocus={e => onDeleteFromClickedFields('errorLevel')}
+                      className={`${styles.field} ${styles.qcErrorType} formField ${printError('errorLevel')}`}>
+                      <label htmlFor="errorType">{resourcesContext.messages.errorType}</label>
+                      <Dropdown
+                        id={`${componentName}__errorType`}
+                        filterPlaceholder={resourcesContext.messages.errorTypePlaceholder}
+                        placeholder={resourcesContext.messages.errorTypePlaceholder}
+                        appendTo={document.body}
+                        optionLabel="label"
+                        options={creationFormState.errorLevels}
+                        onChange={e => onInfoFieldChange('errorLevel', e.target.value)}
+                        value={creationFormState.candidateRule.errorLevel}
+                      />
+                    </div>
+                    <div
+                      onBlur={e => onAddToClickedFields('errorMessage')}
+                      onFocus={e => onDeleteFromClickedFields('errorMessage')}
+                      className={`${styles.field} ${styles.qcErrorMessage} formField ${printError('errorMessage')}`}>
+                      <label htmlFor="errorMessage">{resourcesContext.messages.ruleErrorMessage}</label>
+                      <InputText
+                        id={`${componentName}__errorMessage`}
+                        placeholder={resourcesContext.messages.ruleErrorMessage}
+                        value={creationFormState.candidateRule.errorMessage}
+                        onChange={e => onInfoFieldChange('errorMessage', e.target.value)}
+                      />
+                    </div>
                   </div>
                 </div>
-                <div className={styles.fieldsGroup}>
-                  <div
-                    onBlur={e => onAddToClickedFields('name')}
-                    onFocus={e => onDeleteFromClickedFields('name')}
-                    className={`${styles.field} ${styles.qcName} formField ${printError('name')}`}>
-                    <label htmlFor="name">{resourcesContext.messages.ruleName}</label>
-                    <InputText
-                      id={`${componentName}__name`}
-                      placeholder={resourcesContext.messages.ruleName}
-                      value={creationFormState.candidateRule.name}
-                      onChange={e => onInfoFieldChange('name', e.target.value)}
-                    />
-                  </div>
-                  <div className={`${styles.field} ${styles.qcDescription} formField`}>
-                    <label htmlFor="description">{resourcesContext.messages.qcDescription}</label>
-                    <InputText
-                      id={`${componentName}__description`}
-                      placeholder={resourcesContext.messages.description}
-                      value={creationFormState.candidateRule.description}
-                      onChange={e => onInfoFieldChange('description', e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className={styles.fieldsGroup}>
-                  <div
-                    onBlur={e => onAddToClickedFields('errorLevel')}
-                    onFocus={e => onDeleteFromClickedFields('errorLevel')}
-                    className={`${styles.field} ${styles.qcErrorType} formField ${printError('errorLevel')}`}>
-                    <label htmlFor="errorType">{resourcesContext.messages.errorType}</label>
-                    <Dropdown
-                      id={`${componentName}__errorType`}
-                      filterPlaceholder={resourcesContext.messages.errorTypePlaceholder}
-                      placeholder={resourcesContext.messages.errorTypePlaceholder}
-                      appendTo={document.body}
-                      optionLabel="label"
-                      options={config.validations.errorLevels}
-                      onChange={e => onInfoFieldChange('errorLevel', e.target.value)}
-                      value={creationFormState.candidateRule.errorLevel}
-                    />
-                  </div>
-                  <div
-                    onBlur={e => onAddToClickedFields('errorMessage')}
-                    onFocus={e => onDeleteFromClickedFields('errorMessage')}
-                    className={`${styles.field} ${styles.qcErrorMessage} formField ${printError('errorMessage')}`}>
-                    <label htmlFor="errorMessage">{resourcesContext.messages.ruleErrorMessage}</label>
-                    <InputText
-                      id={`${componentName}__errorMessage`}
-                      placeholder={resourcesContext.messages.ruleErrorMessage}
-                      value={creationFormState.candidateRule.errorMessage}
-                      onChange={e => onInfoFieldChange('errorMessage', e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-            {tabMenuActiveItem.tabKey == 'expression' && (
-              <>
+              </TabPanel>
+              <TabPanel header={resourcesContext.messages.tabMenuExpression}>
                 <div className={styles.section}>
                   <ul>
                     {creationFormState.candidateRule.expressions &&
@@ -594,8 +608,8 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                     rows="5"
                     value={creationFormState.validationRuleString}></textarea>
                 </div>
-              </>
-            )}
+              </TabPanel>
+            </TabView>
           </div>
           <div className={styles.footer}>
             <div className={`${styles.section} ${styles.footerToolBar}`}>

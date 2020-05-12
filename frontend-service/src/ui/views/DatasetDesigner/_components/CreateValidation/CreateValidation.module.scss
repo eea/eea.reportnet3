@@ -5,6 +5,31 @@
   .body {
     overflow: auto hidden;
     min-height: 310px;
+    .tabView {
+      padding-bottom: 1rem;
+
+      > ul {
+        li {
+          border: var(--tabview-border);
+          background-color: var(--tabview-bg);
+          margin-right: 0.2rem;
+          border-radius: 3px 3px 0 0;
+          a {
+            color: var(--main-font-color);
+          }
+        }
+        :global .p-highlight {
+          background-color: var(--tabview-highlight-bg);
+          border-bottom: none;
+          a {
+            color: var(--tabview-highlight-color);
+          }
+        }
+        &:last-of-type {
+          margin-right: 0;
+        }
+      }
+    }
     .section {
       display: flex;
       flex-direction: column;
