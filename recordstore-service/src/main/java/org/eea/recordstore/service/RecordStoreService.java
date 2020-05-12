@@ -7,6 +7,7 @@ import java.util.Map;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
+import org.springframework.scheduling.annotation.Async;
 
 /**
  * The interface Record store service.
@@ -29,6 +30,7 @@ public interface RecordStoreService {
    *
    * @param datasetName the dataset name
    * @param idDatasetSchema the id dataset schema
+   *
    * @throws RecordStoreAccessException the record store access exception
    */
   void createEmptyDataSet(String datasetName, String idDatasetSchema)
@@ -70,6 +72,7 @@ public interface RecordStoreService {
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
    * @param idPartitionDataset the id partition dataset
+   *
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws RecordStoreAccessException the record store access exception
@@ -87,6 +90,7 @@ public interface RecordStoreService {
    * @param typeDataset the type dataset
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
+   *
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws RecordStoreAccessException the record store access exception
@@ -95,11 +99,17 @@ public interface RecordStoreService {
       DatasetTypeEnum typeDataset, Boolean isSchemaSnapshot, Boolean deleteData)
       throws SQLException, IOException, RecordStoreAccessException;
 
+  @Async
+  void restoreDataSnapshotPoc(Long idReportingDataset, Long idSnapshot, Long partitionId,
+      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
+      throws SQLException, IOException;
+
   /**
    * Delete data snapshot.
    *
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
+   *
    * @throws IOException Signals that an I/O exception has occurred.
    */
   void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException;
