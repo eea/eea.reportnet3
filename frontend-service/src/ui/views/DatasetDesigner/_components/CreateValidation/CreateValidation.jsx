@@ -59,18 +59,6 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     disabled: true,
     placeholder: resourcesContext.messages.fieldConstraintTableFieldNoOptions
   });
-  const [tabMenuItems, setTabMenuItems] = useState([
-    {
-      label: resourcesContext.messages.tabMenuConstraintData,
-      className: styles.flow_tab,
-      tabKey: 'data'
-    },
-    {
-      label: resourcesContext.messages.tabMenuExpression,
-      className: styles.flow_tab,
-      tabKey: 'expression'
-    }
-  ]);
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(0);
   const [tabsChanges, setTabsChanges] = useState({});
   const [clickedFields, setClickedFields] = useState([]);
@@ -79,42 +67,6 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
 
   const componentName = 'createValidation';
-
-  useEffect(() => {
-    const tabsKeys = tabMenuItems.map(tabMenu => {
-      return pick(tabMenu, ['tabKey']);
-    });
-    const tabChangesInitValues = {};
-    tabsKeys.forEach(tab => {
-      tabChangesInitValues[tab.tabKey] = false;
-    });
-
-    setTabsChanges(tabChangesInitValues);
-  }, []);
-
-  useEffect(() => {
-    if (creationFormState.candidateRule.automatic) {
-      setTabMenuItems([
-        {
-          label: resourcesContext.messages.tabMenuConstraintData,
-          className: styles.flow_tab,
-          tabKey: 'data'
-        }
-      ]);
-    }
-  }, [creationFormState.candidateRule.automatic]);
-
-  useEffect(() => {
-    const tabsKeys = tabMenuItems.map(tabMenu => {
-      return pick(tabMenu, ['tabKey']);
-    });
-    const tabChangesInitValues = {};
-    tabsKeys.forEach(tab => {
-      tabChangesInitValues[tab.tabKey] = false;
-    });
-
-    setTabsChanges(tabChangesInitValues);
-  }, []);
 
   useEffect(() => {
     if (!isEmpty(tabs)) {
@@ -367,16 +319,16 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   };
 
   const onTabChange = tabIndex => {
-    console.log('onTabChange', tabIndex);
-
-    setTabsChanges({
-      ...tabsChanges,
-      [tabMenuActiveItem.tabKey]: true
-    });
-    if (tabIndex == 0) {
-      setClickedFields([...config.validations.requiredFields]);
+    if (tabIndex != tabMenuActiveItem) {
+      if (tabIndex == 1) {
+        setClickedFields([...config.validations.requiredFields]);
+      } else {
+        setTabsChanges({
+          expression: true
+        });
+      }
+      setTabMenuActiveItem(tabIndex);
     }
-    setTabMenuActiveItem(tabIndex);
   };
 
   const onInfoFieldChange = (fieldKey, fieldValue) => {
