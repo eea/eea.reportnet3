@@ -167,7 +167,12 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
                 {!Number.isInteger(Number(propertyName)) ? `${camelCaseToNormal(propertyName)}: ` : ''}
               </span>
               {property !== '' ? (
-                <span className={`${styles.propertyValue} ${className}`}>{property.toString()}</span>
+                <span
+                  className={`${styles.propertyValue} ${className} ${
+                    propertyName === 'tableSchemaName' ? styles.propertyValueTableName : ''
+                  }`}>
+                  {property.toString()}
+                </span>
               ) : (
                 '-'
               )}

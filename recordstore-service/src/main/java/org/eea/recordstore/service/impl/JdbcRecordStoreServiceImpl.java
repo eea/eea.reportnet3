@@ -117,6 +117,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("${dataset.creation.notification.ms}")
   private Long timeToWaitBeforeReleasingNotification;
 
+  @Value("${design.creation.notification.ms}")
+  private Long timeToWaitBeforeReleasingNotificationDesign;
+
   /**
    * The data source.
    */
@@ -218,11 +221,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG.info("{} Schemas created as part of DataCollection creation",
           datasetIdsAndSchemaIds.size());
       try {
-        //waiting X seconds before releasing notifications, so database is able to write the creation of all datasets
+        // waiting X seconds before releasing notifications, so database is able to write the
+        // creation of all datasets
         Thread.sleep(timeToWaitBeforeReleasingNotification);
       } catch (InterruptedException e) {
         LOG_ERROR.error("Error sleeping thread before releasing notification kafka events", e);
       }
+
       LOG.info("Releasing notifications via Kafka");
       // Release events to initialize databases content
       releaseConnectionCreatedEvents(datasetIdsAndSchemaIds);
@@ -272,6 +277,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     LOG.info("Empty dataset created");
 
+    try {
+      // waiting X seconds before releasing notifications, so database is able to write the creation
+      // of all datasets
+      Thread.sleep(timeToWaitBeforeReleasingNotificationDesign);
+    } catch (InterruptedException e) {
+      LOG_ERROR.error("Error sleeping thread before releasing notification kafka events", e);
+    }
     // Send notification
     Map<String, Object> result = new HashMap<>();
     result.put("connectionDataVO", createConnectionDataVO(datasetName));
@@ -568,6 +580,111 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 .build());
       } catch (EEAException ex) {
         LOG.error("Error realeasing event {} due to error {}", failEventType, ex.getMessage(), ex);
+      }
+    } finally {
+      if (null != stmt) {
+        stmt.close();
+      }
+      if (null != con) {
+        con.commit();
+        con.close();
+      }
+      // Release the lock manually
+      List<Object> criteria = new ArrayList<>();
+      criteria.add(signature);
+      if (deleteData) {
+        criteria.add(idReportingDataset);
+      } else {
+        criteria.add(idSnapshot);
+      }
+      lockService.removeLockByCriteria(criteria);
+    }
+  }
+
+  @Override
+  @Async
+  public void restoreDataSnapshotPoc(Long idReportingDataset, Long idSnapshot, Long partitionId,
+      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
+      throws SQLException, IOException {
+
+    EventType successEventType = deleteData
+        ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+        : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
+    EventType failEventType = deleteData
+        ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+        : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
+
+    String signature =
+        deleteData
+            ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
+            : LockSignature.RESTORE_SNAPSHOT.getValue()
+            : LockSignature.RELEASE_SNAPSHOT.getValue();
+
+    ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
+    Connection con = null;
+    Statement stmt = null;
+    try {
+      con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
+          conexion.getPassword());
+      con.setAutoCommit(false);
+
+      if (deleteData) {
+        String sql = "";
+        switch (datasetType) {
+          case REPORTING:
+            sql = "DELETE FROM dataset_" + idReportingDataset
+                + ".record_value WHERE dataset_partition_id=" + partitionId;
+            break;
+          case DESIGN:
+            sql = "DELETE FROM dataset_" + idReportingDataset + ".table_value";
+            break;
+        }
+        stmt = con.createStatement();
+        LOG.info("Deleting previous data");
+        stmt.executeUpdate(sql);
+      }
+
+      CopyManager cm = new CopyManager((BaseConnection) con);
+      LOG.info("Init restoring the snapshot files from Snapshot {} and dataset {}", idSnapshot,
+          idReportingDataset);
+      switch (datasetType) {
+        case DESIGN:
+          // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
+          // not neccesary
+          String nameFileTableValue =
+              pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_TableValue.snap");
+
+          String copyQueryTable = "COPY dataset_" + idReportingDataset
+              + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
+          copyFromFile(copyQueryTable, nameFileTableValue, cm);
+          break;
+      }
+      // Record value
+      String nameFileRecordValue =
+          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_RecordValue.snap");
+
+      String copyQueryRecord = "COPY dataset_" + idReportingDataset
+          + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
+      copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
+
+      // Field value
+      String nameFileFieldValue =
+          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_FieldValue.snap");
+
+      String copyQueryField = "COPY dataset_" + idReportingDataset
+          + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
+      copyFromFile(copyQueryField, nameFileFieldValue, cm);
+
+      // Send kafka event to launch Validation
+
+      LOG.info("Snapshot {} restored for dataset {}", idSnapshot, idReportingDataset);
+    } catch (Exception e) {
+      if (null != con) {
+        LOG_ERROR.error("Error restoring the snapshot data due to error {}. Rollback",
+            e.getMessage(), e);
+        con.rollback();
       }
     } finally {
       if (null != stmt) {

@@ -15,7 +15,7 @@ const useBigButtonList = ({
   dataflowDataState,
   dataflowData,
   dataflowId,
-  exportDatatableSchema,
+  // exportDatatableSchema,
   getDeleteSchemaIndex,
   handleRedirect,
   onShowUpdateDataCollectionModal,

@@ -262,7 +262,6 @@ export const Dataset = withRouter(({ match, history }) => {
     try {
       setDeleteDialogVisible(false);
       const dataDeleted = await DatasetService.deleteDataById(datasetId);
-      console.log(dataDeleted);
       if (dataDeleted) {
         setIsDataDeleted(true);
       }

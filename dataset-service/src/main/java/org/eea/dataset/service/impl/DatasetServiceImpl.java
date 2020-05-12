@@ -1616,6 +1616,17 @@ public class DatasetServiceImpl implements DatasetService {
           String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, datasetSchemaId));
     }
 
+    // Obtain the data provider code to insert into the record
+    Long providerId = 0L;
+    DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(datasetId);
+    if (metabase.getDataProviderId() != null) {
+      providerId = metabase.getDataProviderId();
+    }
+    DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
+
+    // Get the partition for the partiton id
+    final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
+
     // Construct Maps to relate ids
     Map<String, TableSchema> tableMap = new HashMap<>();
     Map<String, FieldSchema> fieldMap = new HashMap<>();
@@ -1661,6 +1672,8 @@ public class DatasetServiceImpl implements DatasetService {
             }
           }
           recordValue.setFields(fieldValues);
+          recordValue.setDatasetPartitionId(partition.getId());
+          recordValue.setDataProviderCode(provider.getCode());
           records.add(recordValue);
         }
         table.setRecords(records);
@@ -1672,8 +1685,35 @@ public class DatasetServiceImpl implements DatasetService {
     dataset.setIdDatasetSchema(datasetSchemaId);
     dataset.setId(datasetId);
 
-    datasetRepository.save(dataset);
+    List<RecordValue> allRecords = new ArrayList<>();
 
+    for (TableValue tableValue : dataset.getTableValues()) {
+      // Check if the table with idTableSchema has been populated already
+      Long oldTableId = findTableIdByTableSchema(datasetId, tableValue.getIdTableSchema());
+      fillTableId(tableValue.getIdTableSchema(), dataset.getTableValues(), oldTableId);
+      allRecords.addAll(tableValue.getRecords());
+      if (null == oldTableId) {
+        tableRepository.saveAndFlush(tableValue);
+      }
+    }
+    recordRepository.saveAll(allRecords);
+
+  }
+
+  /**
+   * Fill table id.
+   *
+   * @param idTableSchema the id table schema
+   * @param listTableValues the list table values
+   * @param oldTableId the old table id
+   */
+  private void fillTableId(final String idTableSchema, final List<TableValue> listTableValues,
+      Long oldTableId) {
+    if (oldTableId != null) {
+      listTableValues.stream()
+          .filter(tableValue -> tableValue.getIdTableSchema().equals(idTableSchema))
+          .forEach(tableValue -> tableValue.setId(oldTableId));
+    }
   }
 
   /**

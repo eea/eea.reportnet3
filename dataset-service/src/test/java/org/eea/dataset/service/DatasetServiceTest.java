@@ -1329,6 +1329,7 @@ public class DatasetServiceTest {
   public void saveTablePropagationTest() throws EEAException {
     Mockito.when(datasetRepository.findById(1L)).thenReturn(Optional.of(datasetValue));
     datasetService.saveTablePropagation(1L, new TableSchemaVO());
+    Mockito.verify(tableRepository, times(1)).saveAndFlush(Mockito.any());
   }
 
   /**
@@ -1378,6 +1379,7 @@ public class DatasetServiceTest {
         .thenReturn(recordValues);
     datasetService.saveNewFieldPropagation(1L, "5cf0e9b3b793310e9ceca190", pageable,
         "5cf0e9b3b793310e9ceca190", DataType.TEXT);
+    Mockito.verify(fieldRepository, times(1)).saveAll(Mockito.any());
   }
 
   /**
@@ -1405,6 +1407,7 @@ public class DatasetServiceTest {
     Mockito.when(datasetRepository.findById(1L)).thenReturn(Optional.of(datasetValue));
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     datasetService.prepareNewFieldPropagation(1L, fs);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -1967,12 +1970,21 @@ public class DatasetServiceTest {
     fieldValues.add(fieldValue);
     fieldValue.setIdFieldSchema("5cf0e9b3b793310e9ceca190");
     fieldValue.setValue("value");
+    DataSetMetabaseVO metabase = new DataSetMetabaseVO();
+    metabase.setDataProviderId(1L);
 
     Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
         .thenReturn(new ObjectId().toString());
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetSchema));
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(metabase);
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
+        .thenReturn(new DataProviderVO());
+    Mockito.when(partitionDataSetMetabaseRepository
+        .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
+        .thenReturn(Optional.of(new PartitionDataSetMetabase()));
+    Mockito.when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(null);
     datasetService.etlImportDataset(1L, etlDatasetVO);
-    Mockito.verify(datasetRepository, times(1)).save(Mockito.any());
+    Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
 
 
