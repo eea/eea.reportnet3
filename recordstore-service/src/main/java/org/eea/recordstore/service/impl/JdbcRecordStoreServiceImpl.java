@@ -2,8 +2,8 @@ package org.eea.recordstore.service.impl;
 
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -33,6 +33,7 @@ import org.eea.lock.service.LockService;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
 import org.eea.thread.ThreadPropertiesManager;
+import org.postgresql.copy.CopyIn;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.copy.CopyOut;
 import org.postgresql.core.BaseConnection;
@@ -119,6 +120,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
   @Value("${design.creation.notification.ms}")
   private Long timeToWaitBeforeReleasingNotificationDesign;
+
+  @Value("${snapshot.bufferSize}")
+  private Integer bufferFile;
 
   /**
    * The data source.
@@ -244,7 +248,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
   /**
-   * Creates the empty data set.
+   * Creates the empty data set. This method is used to create the schema of the design datasets
    *
    * @param datasetName the dataset name
    * @param idDatasetSchema the id dataset schema
@@ -275,21 +279,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       jdbcTemplate.execute(command);
     }
 
-    LOG.info("Empty dataset created");
-
-    try {
-      // waiting X seconds before releasing notifications, so database is able to write the creation
-      // of all datasets
-      Thread.sleep(timeToWaitBeforeReleasingNotificationDesign);
-    } catch (InterruptedException e) {
-      LOG_ERROR.error("Error sleeping thread before releasing notification kafka events", e);
-    }
-    // Send notification
-    Map<String, Object> result = new HashMap<>();
-    result.put("connectionDataVO", createConnectionDataVO(datasetName));
-    result.put("dataset_id", datasetName);
-    result.put("idDatasetSchema", idDatasetSchema);
-    kafkaSenderUtils.releaseKafkaEvent(EventType.CONNECTION_CREATED_EVENT, result);
+    LOG.info("Empty design dataset created");
+    // Now we insert the values into the dataset_value table of the brand new schema
+    StringBuilder insertSql = new StringBuilder("INSERT INTO ");
+    insertSql.append(datasetName).append(".dataset_value(id, id_dataset_schema) values (?, ?)");
+    String[] aux = datasetName.split("_");
+    Long idDataset = Long.valueOf(aux[aux.length - 1]);
+    jdbcTemplate.update(insertSql.toString(), idDataset, idDatasetSchema);
   }
 
   /**
@@ -486,17 +482,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     String signature =
         deleteData
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-            : LockSignature.RESTORE_SNAPSHOT.getValue()
+                : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", idReportingDataset);
@@ -506,7 +502,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     try {
       con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
           conexion.getPassword());
-      con.setAutoCommit(false);
+      con.setAutoCommit(true);
 
       if (deleteData) {
         String sql = "";
@@ -557,6 +553,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       // Send kafka event to launch Validation
       final EEAEventVO event = new EEAEventVO();
       event.setEventType(successEventType);
+
       kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION,
           idReportingDataset);
       try {
@@ -566,6 +563,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       } catch (EEAException e) {
         LOG.error("Error realeasing event {}: ", successEventType, e);
       }
+
       LOG.info("Snapshot {} restored", idSnapshot);
     } catch (Exception e) {
       if (null != con) {
@@ -586,7 +584,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         stmt.close();
       }
       if (null != con) {
-        con.commit();
+        // if autocommit is true, you don't have to commit mannually
         con.close();
       }
       // Release the lock manually
@@ -609,17 +607,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     String signature =
         deleteData
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-            : LockSignature.RESTORE_SNAPSHOT.getValue()
+                : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
 
     ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
@@ -719,17 +717,27 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private void copyFromFile(String query, String fileName, CopyManager copyManager)
       throws IOException, SQLException {
     Path path = Paths.get(fileName);
-    InputStream inputStream = Files.newInputStream(path);
+    FileReader from = new FileReader(path.toString());
+    // bufferFile it's a size in bytes defined in consul variable. It can be 65536
+    Integer bufferSize = bufferFile;
+    char[] cbuf = new char[bufferSize];
+    int len = 0;
+    CopyIn cp = copyManager.copyIn(query);
+    // Copy the data from the file by chunks
     try {
-
-      copyManager.copyIn(query, inputStream);
-
+      while ((len = from.read(cbuf)) > 0) {
+        byte[] buf = new String(cbuf, 0, len).getBytes();
+        cp.writeToCopy(buf, 0, buf.length);
+      }
     } catch (PSQLException e) {
       LOG_ERROR.error(
           "Error restoring the file {} executing query {}. Restoring snapshot continues", fileName,
           query, e);
     } finally {
-      inputStream.close();
+      from.close();
+      cp.endCopy();
+      if (cp.isActive())
+        cp.cancelCopy();
     }
   }
 
