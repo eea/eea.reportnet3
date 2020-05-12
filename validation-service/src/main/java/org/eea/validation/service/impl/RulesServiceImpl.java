@@ -515,4 +515,30 @@ public class RulesServiceImpl implements RulesService {
       rule.setThenCondition(ruleVO.getThenCondition());
     }
   }
+
+  @Override
+  public void createNewRowRule(long datasetId, RuleVO ruleVO) throws EEAException {
+
+    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+    if (datasetSchemaId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
+    Rule rule = ruleMapper.classToEntity(ruleVO);
+    rule.setRuleId(new ObjectId());
+    rule.setType(EntityTypeEnum.RECORD);
+    rule.setAutomatic(false);
+    rule.setActivationGroup(null);
+    rule.setVerified(null);
+
+    validateRule(rule);
+
+    if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
+      throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
+    }
+
+    // Check if rule is valid
+    kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
+
+  }
 }

@@ -233,50 +233,52 @@ public class KieBaseManager {
       case FIELD:
         schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
         typeValidation = TypeValidation.FIELD;
+
+        Document documentField =
+            schemasRepository.findFieldSchema(datasetSchemaId, rule.getReferenceId().toString());
+        DataType datatype = DataType.valueOf(documentField.get("typeData").toString());
+
+        // we do the same thing like in kiebase validation part
+        if (null != datatype) {
+          switch (datatype) {
+            case NUMBER_INTEGER:
+              expression.append("( !isBlank(value) || isNumberInteger(value) && ");
+              whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
+              break;
+            case NUMBER_DECIMAL:
+              expression.append("( !isBlank(value) || isNumberDecimal(value) && ");
+              whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
+              break;
+            case DATE:
+              expression.append("( !isBlank(value) || isDateYYYYMMDD(value) && ");
+              whenCondition = whenCondition.replaceAll("EQUALS", "==");
+              break;
+            case BOOLEAN:
+              expression.append("( !isBlank(value) || isBoolean(value) && ");
+              whenCondition = whenCondition.replaceAll("EQUALS", "==");
+              break;
+            case COORDINATE_LAT:
+              expression.append("( !isBlank(value) || isCordenateLat(value) && ");
+              whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
+              break;
+            case COORDINATE_LONG:
+              expression.append("( !isBlank(value) || isCordenateLong(value) && ");
+              whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
+              break;
+            default:
+              expression.append("( !isBlank(value) || ");
+              break;
+          }
+        }
+        if (!StringUtils.isBlank(expression.toString())) {
+          String whenConditionWithParenthesis =
+              new StringBuilder("").append("(").append(whenCondition).append(")").toString();
+          expression.append(whenConditionWithParenthesis).append(")").toString();
+        }
         break;
     }
 
-    Document documentField =
-        schemasRepository.findFieldSchema(datasetSchemaId, rule.getReferenceId().toString());
-    DataType datatype = DataType.valueOf(documentField.get("typeData").toString());
 
-    // we do the same thing like in kiebase validation part
-    if (null != datatype) {
-      switch (datatype) {
-        case NUMBER_INTEGER:
-          expression.append("( !isBlank(value) || isNumberInteger(value) && ");
-          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
-          break;
-        case NUMBER_DECIMAL:
-          expression.append("( !isBlank(value) || isNumberDecimal(value) && ");
-          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
-          break;
-        case DATE:
-          expression.append("( !isBlank(value) || isDateYYYYMMDD(value) && ");
-          whenCondition = whenCondition.replaceAll("EQUALS", "==");
-          break;
-        case BOOLEAN:
-          expression.append("( !isBlank(value) || isBoolean(value) && ");
-          whenCondition = whenCondition.replaceAll("EQUALS", "==");
-          break;
-        case COORDINATE_LAT:
-          expression.append("( !isBlank(value) || isCordenateLat(value) && ");
-          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
-          break;
-        case COORDINATE_LONG:
-          expression.append("( !isBlank(value) || isCordenateLong(value) && ");
-          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
-          break;
-        default:
-          expression.append("( !isBlank(value) || ");
-          break;
-      }
-    }
-    if (!StringUtils.isBlank(expression.toString())) {
-      String whenConditionWithParenthesis =
-          new StringBuilder("").append("(").append(whenCondition).append(")").toString();
-      expression.append(whenConditionWithParenthesis).append(")").toString();
-    }
     ruleAttribute.add(passDataToMap(rule.getReferenceId().toString(), rule.getRuleId().toString(),
         typeValidation, schemasDrools, expression.toString(), rule.getThenCondition().get(0),
         rule.getThenCondition().get(1), ""));
