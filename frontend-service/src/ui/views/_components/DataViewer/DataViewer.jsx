@@ -419,13 +419,11 @@ const DataViewer = withRouter(
       }
     };
 
-    const onDeletePastedRecord = recordIndex => {
+    const onDeletePastedRecord = recordIndex =>
       dispatchRecords({ type: 'DELETE_PASTED_RECORDS', payload: { recordIndex } });
-    };
 
-    const onEditAddFormInput = (property, value) => {
+    const onEditAddFormInput = (property, value) =>
       dispatchRecords({ type: !isNewRecord ? 'SET_EDITED_RECORD' : 'SET_NEW_RECORD', payload: { property, value } });
-    };
 
     //When pressing "Escape" cell data resets to initial value
     //on "Enter" and "Tab" the value submits
@@ -661,6 +659,10 @@ const DataViewer = withRouter(
           label={resources.messages['cancel']}
           icon="cancel"
           onClick={() => {
+            dispatchRecords({
+              type: 'SET_NEW_RECORD',
+              payload: RecordUtils.createEmptyObject(colsSchema, undefined)
+            });
             setAddDialogVisible(false);
           }}
         />
