@@ -76,6 +76,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isPreviewModeOn, setIsPreviewModeOn] = useState(getUrlParamValue('design'));
   const [metaData, setMetaData] = useState({});
+  const [uniqueConstraintDialogVisible, setUniqueConstraintDialogVisible] = useState(false);
+  const [uniqueConstraintListDialogVisible, setUniqueConstraintListDialogVisible] = useState(false);
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
 
@@ -156,6 +158,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     onLoadDatasetSchemaName();
     callSetMetaData();
   }, []);
+
+  useEffect(() => {
+    if (validationContext.opener == 'uniqueConstraintListDialog' && validationContext.reOpenOpener)
+      setUniqueConstraintListDialogVisible(true);
+  }, [validationContext]);
 
   useEffect(() => {
     if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener)
@@ -317,12 +324,39 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
+  const onHideUniqueConstraintsDialog = () => {
+    if (validationContext.opener == 'uniqueConstraintListDialog' && validationContext.reOpenOpener) {
+      validationContext.onResetOpener();
+    }
+    setUniqueConstraintListDialogVisible(false);
+  };
+
   const onHideValidationsDialog = () => {
     if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener) {
       validationContext.onResetOpener();
     }
     setValidationListDialogVisible(false);
   };
+
+  const actionButtonsUniqueConstraintDialog = (
+    <>
+      <Button
+        className="p-button-primary p-button-animated-blink"
+        icon={'plus'}
+        label={resources.messages['create']}
+        onClick={() => {
+          validationContext.onOpenModalFronOpener('uniqueConstraintsListDialog');
+          onHideUniqueConstraintsDialog();
+        }}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => onHideUniqueConstraintsDialog()}
+      />
+    </>
+  );
 
   const actionButtonsValidationDialog = (
     <>
@@ -343,6 +377,30 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       />
     </>
   );
+
+  const uniqueConstraintsListDialog = () => {
+    if (uniqueConstraintListDialogVisible) {
+      return (
+        <Dialog
+          className={styles.paginatorValidationViewer}
+          dismissableMask={true}
+          footer={actionButtonsUniqueConstraintDialog}
+          header={resources.messages['uniqueConstraints']}
+          onHide={() => {
+            onHideUniqueConstraintsDialog();
+          }}
+          style={{ width: '90%' }}
+          visible={uniqueConstraintListDialogVisible}>
+          <TabsValidations
+            dataset={metaData.dataset}
+            datasetSchemaAllTables={datasetSchemaAllTables}
+            datasetSchemaId={datasetSchemaId}
+            onHideValidationsDialog={onHideValidationsDialog}
+          />
+        </Dialog>
+      );
+    }
+  };
 
   const validationsListDialog = () => {
     if (validationListDialogVisible) {
@@ -444,6 +502,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               />
 
               <Button
+                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                disabled={false}
+                icon={'list'}
+                iconClasses={null}
+                label={resources.messages['uniqueConstraints']}
+                onClick={() => setUniqueConstraintListDialogVisible(true)}
+                ownButtonClasses={null}
+              />
+
+              <Button
                 className={`p-button-rounded p-button-secondary-transparent`}
                 disabled={true}
                 icon={'dashboard'}
@@ -479,6 +547,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           snapshotListData={snapshotListData}
         />
         {validationsListDialog()}
+        {uniqueConstraintsListDialog()}
+
         <ConfirmDialog
           header={resources.messages['validateDataset']}
           labelCancel={resources.messages['no']}
