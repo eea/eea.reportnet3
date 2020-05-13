@@ -159,6 +159,28 @@ public class AutomaticRules {
     return ruleList;
   }
 
+  /**
+   * Creates the multi select codelist automatic rule.
+   *
+   * @param referenceId the reference id
+   * @param typeEntityEnum the type entity enum
+   * @param nameRule the name rule
+   * @param codelistItems the codelist items
+   * @param shortCode the short code
+   * @param description the description
+   * @return the list
+   */
+  public static List<Rule> createMultiSelectCodelistAutomaticRule(String referenceId,
+      EntityTypeEnum typeEntityEnum, String nameRule, String codelistItems, String shortCode,
+      String description) {
+    List<Rule> ruleList = new ArrayList();
+    // PART INSENSITIVE
+    ruleList.add(composeRule(referenceId, typeEntityEnum, nameRule,
+        "isMultiSelectCodelistValidate(value,'" + codelistItems + "')",
+        "The value must be avaliable value in the codelist", ErrorTypeEnum.ERROR.getValue(),
+        shortCode, description));
+    return ruleList;
+  }
 
   /**
    * Creates the PK automatic rule.

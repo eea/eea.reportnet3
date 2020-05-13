@@ -1211,6 +1211,20 @@ public class DatasetServiceTest {
   }
 
   /**
+   * Update field test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateFieldMultiSelectTest() throws EEAException {
+    FieldVO multiselectField = new FieldVO();
+    multiselectField.setType(DataType.MULTISELECT_CODELIST);
+    multiselectField.setValue("");
+    datasetService.updateField(1L, multiselectField);
+    Mockito.verify(fieldRepository, times(1)).saveValue(Mockito.any(), Mockito.any());
+  }
+
+  /**
    * Update field exception 1 test.
    *
    * @throws EEAException the EEA exception
@@ -1956,12 +1970,21 @@ public class DatasetServiceTest {
     fieldValues.add(fieldValue);
     fieldValue.setIdFieldSchema("5cf0e9b3b793310e9ceca190");
     fieldValue.setValue("value");
+    DataSetMetabaseVO metabase = new DataSetMetabaseVO();
+    metabase.setDataProviderId(1L);
 
     Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
         .thenReturn(new ObjectId().toString());
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetSchema));
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(metabase);
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
+        .thenReturn(new DataProviderVO());
+    Mockito.when(partitionDataSetMetabaseRepository
+        .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
+        .thenReturn(Optional.of(new PartitionDataSetMetabase()));
+    Mockito.when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(null);
     datasetService.etlImportDataset(1L, etlDatasetVO);
-    Mockito.verify(datasetRepository, times(1)).save(Mockito.any());
+    Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
 
 
