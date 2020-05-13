@@ -319,7 +319,7 @@ public class RulesServiceImpl implements RulesService {
           document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
           ruleList.addAll(AutomaticRules.createCodelistAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, document.get("codelistItems").toString(), "FT" + shortcode,
-              FT_DESCRIPTION + typeData));
+              FT_DESCRIPTION + "SINGLESELECT_CODELIST"));
           break;
         case MULTISELECT_CODELIST:
           // we find values available to create this validation for a codelist, same value with
