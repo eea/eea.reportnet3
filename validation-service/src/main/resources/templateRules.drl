@@ -37,10 +37,23 @@ end template
 
 //////////////////////////////////////////VALIDATION CODELIST////////////////////////////////////////////////////////////
 function boolean isCodelist( String value , String codelistItems){
+	if(!isBlank(value)){
+		return true;
+	}	
 	return ValidationDroolsUtils.codelistValidate(value,codelistItems,true);
 }
 
+function boolean isMultiSelectCodelistValidate( String value , String codelistItems){
+	if(!isBlank(value)){
+		return true;
+	}	
+	return ValidationDroolsUtils.multiSelectCodelistValidate(value,codelistItems);
+}
+
 function boolean isCodelistInsensitive( String value ,  String codelistItems){
+	if(!isBlank(value)){
+		return true;
+	}	
 	return ValidationDroolsUtils.codelistValidate(value,codelistItems,false);
 }
 
