@@ -158,7 +158,10 @@ export const DataflowDashboards = withRouter(
       <Fragment>
         <Title title={resources.messages['dashboards']} subtitle={dataflowName} icon="barChart" iconSize="4.5rem" />
         <div className={styles.validationChartWrap}>
-          <h2 className={styles.dashboardType}>{resources.messages['validationDashboards']}</h2>
+          <h2 className={styles.dashboardType}>
+            {resources.messages['validationDashboards']}{' '}
+            <span className={styles.dashboardWarning}>{resources.messages['dashboardWarning']}</span>
+          </h2>
 
           <Toolbar className={styles.chartToolbar}>
             <div className="p-toolbar-group-left">{onLoadButtons}</div>
