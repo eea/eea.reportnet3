@@ -1,5 +1,3 @@
-import { config } from 'conf/';
-
 import { getEmptyExpression } from './getEmptyExpression';
 
 export const initValidationRuleCreation = rawTables => {

@@ -3,20 +3,17 @@ import React, { Fragment, useEffect, useReducer, useContext, useState, useRef } 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import pull from 'lodash/pull';
-import pick from 'lodash/pick';
 
 import { config } from 'conf';
 
 import styles from './CreateValidation.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
-import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { Dropdown } from 'ui/views/_components/Dropdown';
-import { InputText } from 'ui/views/_components/InputText';
+import { InfoTab } from './_components/InfoTab';
+import { ExpressionsTab } from './_components/ExpressionsTab';
 import ReactTooltip from 'react-tooltip';
 import { TabView, TabPanel } from 'primereact/tabview';
-import { ValidationExpressionSelector } from './_components/ValidationExpressionSelector';
 
 import { ValidationService } from 'core/services/Validation';
 
@@ -34,12 +31,12 @@ import { checkValidation } from './_functions/utils/checkValidation';
 import { deleteExpression } from './_functions/utils/deleteExpression';
 import { deleteExpressionRecursivily } from './_functions/utils/deleteExpressionRecursivily';
 import { getDatasetSchemaTableFields } from './_functions/utils/getDatasetSchemaTableFields';
-import { getEmptyExpression } from './_functions/utils/getEmptyExpression';
 import { getExpressionString } from './_functions/utils/getExpressionString';
+import { getEmptyExpression } from 'ui/views/DatasetDesigner/_components/CreateValidation/_functions/utils/getEmptyExpression.js';
 import { getSelectedFieldById } from './_functions/utils/getSeletedFieldById';
 import { getSelectedTableByFieldId } from './_functions/utils/getSelectedTablebyFieldId';
 import { getSelectedTableBytableSchemaId } from './_functions/utils/getSelectedTableBytableSchemaId';
-import { groupExpressions } from './_functions/utils/groupExpressions';
+import { groupExpressions } from 'ui/views/DatasetDesigner/_components/CreateValidation/_functions/utils/groupExpressions';
 import { initValidationRuleCreation } from './_functions/utils/initValidationRuleCreation';
 import { resetValidationRuleCreation } from './_functions/utils/resetValidationRuleCreation';
 import { setValidationExpression } from './_functions/utils/setValidationExpression';
@@ -53,15 +50,11 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     createValidationReducer,
     createValidationReducerInitState
   );
-  const [fieldsDropdown, setfieldsDropdown] = useState();
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
-  const [tableFieldOptions, setTableFieldOptions] = useState({
-    disabled: true,
-    placeholder: resourcesContext.messages.fieldConstraintTableFieldNoOptions
-  });
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(0);
   const [tabsChanges, setTabsChanges] = useState({});
   const [clickedFields, setClickedFields] = useState([]);
+  const [tabContents, setTabContents] = useState();
 
   const ruleDisablingCheckListener = [creationFormState.candidateRule.table, creationFormState.candidateRule.field];
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
@@ -73,6 +66,48 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
       creationFormDispatch({ type: 'INIT_FORM', payload: initValidationRuleCreation(tabs) });
     }
   }, [tabs]);
+
+  useEffect(() => {
+    if (!creationFormState.candidateRule.automatic) {
+      setTabContents([
+        <TabPanel header={resourcesContext.messages.tabMenuConstraintData}>
+          <InfoTab
+            componentName={componentName}
+            creationFormState={creationFormState}
+            onAddToClickedFields={onAddToClickedFields}
+            onDeleteFromClickedFields={onDeleteFromClickedFields}
+            onInfoFieldChange={onInfoFieldChange}
+            printError={printError}
+          />
+        </TabPanel>,
+        <TabPanel header={resourcesContext.messages.tabMenuExpression}>
+          <ExpressionsTab
+            componentName={componentName}
+            creationFormState={creationFormState}
+            onExpressionDelete={onExpressionDelete}
+            onExpressionFieldUpdate={onExpressionFieldUpdate}
+            onExpressionGroup={onExpressionGroup}
+            onExpressionMarkToGroup={onExpressionMarkToGroup}
+            tabsChanges={tabsChanges}
+            onAddNewExpression={onAddNewExpression}
+          />
+        </TabPanel>
+      ]);
+    } else {
+      setTabContents([
+        <TabPanel header={resourcesContext.messages.tabMenuConstraintData}>
+          <InfoTab
+            componentName={componentName}
+            creationFormState={creationFormState}
+            onAddToClickedFields={onAddToClickedFields}
+            onDeleteFromClickedFields={onDeleteFromClickedFields}
+            onInfoFieldChange={onInfoFieldChange}
+            printError={printError}
+          />
+        </TabPanel>
+      ]);
+    }
+  }, [creationFormState, clickedFields]);
 
   useEffect(() => {
     const { table } = creationFormState.candidateRule;
@@ -163,62 +198,6 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     }
   }, [validationContext.ruleEdit]);
 
-  useEffect(() => {
-    const { tableFields } = creationFormState;
-    const fieldDropdownOptions = {
-      disabled: true,
-      placeholder: resourcesContext.messages.field,
-      options: [],
-      onChange: () => {},
-      value: null
-    };
-    if (isNil(tableFields)) {
-      fieldDropdownOptions.value = null;
-    }
-    if (!isNil(tableFields) && tableFields.length == 0) {
-      fieldDropdownOptions.placeholder = resourcesContext.messages.designSchemaTabNoFields;
-      fieldDropdownOptions.value = null;
-    }
-    if (!isNil(tableFields) && tableFields.length > 0) {
-      fieldDropdownOptions.options = tableFields;
-      fieldDropdownOptions.disabled = false;
-      fieldDropdownOptions.onChange = e => onInfoFieldChange('field', e.target.value);
-      fieldDropdownOptions.value = creationFormState.candidateRule.field;
-    }
-    setfieldsDropdown(
-      <Dropdown
-        id={`${componentName}__field`}
-        disabled={fieldDropdownOptions.disabled}
-        appendTo={document.body}
-        filterPlaceholder={fieldDropdownOptions.placeholder}
-        placeholder={fieldDropdownOptions.placeholder}
-        optionLabel="label"
-        options={fieldDropdownOptions.options}
-        onChange={fieldDropdownOptions.onChange}
-        value={fieldDropdownOptions.value}
-      />
-    );
-  }, [
-    creationFormState.tableFields,
-    validationContext.isVisible,
-    creationFormState.candidateRule.field,
-    creationFormState.candidateRule.table
-  ]);
-
-  useEffect(() => {
-    if (creationFormState.schemaTables.length > 0) {
-      setTableFieldOptions({
-        disabled: false,
-        placeholder: resourcesContext.messages.table
-      });
-    } else {
-      setTableFieldOptions({
-        disabled: true,
-        placeholder: resourcesContext.messages.fieldConstraintTableFieldNoOptions
-      });
-    }
-  }, [creationFormState.schemaTables]);
-
   const checkActivateRules = () => {
     return creationFormState.candidateRule.table && creationFormState.candidateRule.field;
   };
@@ -288,7 +267,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     });
   };
 
-  const onExpressionGroup = (expressionId, field) => {
+  const onExpressionMarkToGroup = (expressionId, field) => {
     const {
       groupCandidate,
       candidateRule: { allExpressions }
@@ -361,6 +340,29 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     return clickedFields.includes(field) && isEmpty(creationFormState.candidateRule[field]) ? 'error' : '';
   };
 
+  const onAddNewExpression = () => {
+    creationFormDispatch({
+      type: 'ADD_EMPTY_RULE',
+      payload: getEmptyExpression()
+    });
+  };
+
+  const onExpressionGroup = () => {
+    const groupingResult = groupExpressions(
+      creationFormState.candidateRule.expressions,
+      creationFormState.groupExpressionsActive,
+      creationFormState.groupCandidate
+    );
+    if (!isNil(groupingResult.newGroup))
+      creationFormDispatch({
+        type: 'GROUP_EXPRESSIONS',
+        payload: {
+          expressions: groupingResult.expressions,
+          allExpressions: [...creationFormState.candidateRule.allExpressions, groupingResult.newGroup]
+        }
+      });
+  };
+
   const dialogLayout = children => (
     <Dialog
       className={styles.dialog}
@@ -386,184 +388,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
               activeIndex={tabMenuActiveItem}
               onTabChange={e => onTabChange(e.index)}
               renderActiveOnly={false}>
-              <TabPanel header={resourcesContext.messages.tabMenuConstraintData}>
-                <div className={styles.section}>
-                  <div className={styles.fieldsGroup}>
-                    <div
-                      onBlur={e => onAddToClickedFields('table')}
-                      onFocus={e => onDeleteFromClickedFields('table')}
-                      className={`${styles.field} ${styles.qcTable} formField ${printError('table')}`}>
-                      <label htmlFor="table">{resourcesContext.messages.table}</label>
-                      <Dropdown
-                        id={`${componentName}__table`}
-                        disabled={tableFieldOptions.disabled}
-                        appendTo={document.body}
-                        filterPlaceholder={resourcesContext.messages.table}
-                        placeholder={tableFieldOptions.placeholder}
-                        optionLabel="label"
-                        options={creationFormState.schemaTables}
-                        value={creationFormState.candidateRule.table}
-                        onChange={e => onInfoFieldChange('table', e.target.value)}
-                      />
-                    </div>
-                    <div
-                      onBlur={e => onAddToClickedFields('field')}
-                      onFocus={e => onDeleteFromClickedFields('field')}
-                      className={`${styles.field} ${styles.qcField} formField ${printError('field')}`}>
-                      <label htmlFor="field">{resourcesContext.messages.field}</label>
-                      {fieldsDropdown}
-                    </div>
-                    <div
-                      onBlur={e => onAddToClickedFields('shortCode')}
-                      onFocus={e => onDeleteFromClickedFields('shortCode')}
-                      className={`${styles.field} ${styles.qcShortCode} formField ${printError('shortCode')}`}>
-                      <label htmlFor="shortCode">{resourcesContext.messages.ruleShortCode}</label>
-                      <InputText
-                        id={`${componentName}__shortCode`}
-                        placeholder={resourcesContext.messages.ruleShortCode}
-                        value={creationFormState.candidateRule.shortCode}
-                        onChange={e => onInfoFieldChange('shortCode', e.target.value)}
-                      />
-                    </div>
-                    <div className={`${styles.field} ${styles.qcEnabled} formField `}>
-                      <label htmlFor="QcActive">{resourcesContext.messages.qcEnabled}</label>
-                      <Checkbox
-                        id={`${componentName}__active`}
-                        onChange={e => onInfoFieldChange('active', e.checked)}
-                        isChecked={creationFormState.candidateRule.active}
-                      />
-                    </div>
-                  </div>
-                  <div className={styles.fieldsGroup}>
-                    <div
-                      onBlur={e => onAddToClickedFields('name')}
-                      onFocus={e => onDeleteFromClickedFields('name')}
-                      className={`${styles.field} ${styles.qcName} formField ${printError('name')}`}>
-                      <label htmlFor="name">{resourcesContext.messages.ruleName}</label>
-                      <InputText
-                        id={`${componentName}__name`}
-                        placeholder={resourcesContext.messages.ruleName}
-                        value={creationFormState.candidateRule.name}
-                        onChange={e => onInfoFieldChange('name', e.target.value)}
-                      />
-                    </div>
-                    <div className={`${styles.field} ${styles.qcDescription} formField`}>
-                      <label htmlFor="description">{resourcesContext.messages.description}</label>
-                      <InputText
-                        id={`${componentName}__description`}
-                        placeholder={resourcesContext.messages.description}
-                        value={creationFormState.candidateRule.description}
-                        onChange={e => onInfoFieldChange('description', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div className={styles.fieldsGroup}>
-                    <div
-                      onBlur={e => onAddToClickedFields('errorLevel')}
-                      onFocus={e => onDeleteFromClickedFields('errorLevel')}
-                      className={`${styles.field} ${styles.qcErrorType} formField ${printError('errorLevel')}`}>
-                      <label htmlFor="errorType">{resourcesContext.messages.errorType}</label>
-                      <Dropdown
-                        id={`${componentName}__errorType`}
-                        filterPlaceholder={resourcesContext.messages.errorTypePlaceholder}
-                        placeholder={resourcesContext.messages.errorTypePlaceholder}
-                        appendTo={document.body}
-                        optionLabel="label"
-                        options={config.validations.errorLevels}
-                        onChange={e => onInfoFieldChange('errorLevel', e.target.value)}
-                        value={creationFormState.candidateRule.errorLevel}
-                      />
-                    </div>
-                    <div
-                      onBlur={e => onAddToClickedFields('errorMessage')}
-                      onFocus={e => onDeleteFromClickedFields('errorMessage')}
-                      className={`${styles.field} ${styles.qcErrorMessage} formField ${printError('errorMessage')}`}>
-                      <label htmlFor="errorMessage">{resourcesContext.messages.ruleErrorMessage}</label>
-                      <InputText
-                        id={`${componentName}__errorMessage`}
-                        placeholder={resourcesContext.messages.ruleErrorMessage}
-                        value={creationFormState.candidateRule.errorMessage}
-                        onChange={e => onInfoFieldChange('errorMessage', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </TabPanel>
-              {!creationFormState.candidateRule.automatic ? (
-                <TabPanel header={resourcesContext.messages.tabMenuExpression}>
-                  <div className={styles.section}>
-                    <ul>
-                      {creationFormState.candidateRule.expressions &&
-                        creationFormState.candidateRule.expressions.map((expression, i) => (
-                          <ValidationExpressionSelector
-                            expressionValues={expression}
-                            isDisabled={creationFormState.areRulesDisabled}
-                            key={expression.expressionId}
-                            onExpressionDelete={onExpressionDelete}
-                            onExpressionFieldUpdate={onExpressionFieldUpdate}
-                            onExpressionGroup={onExpressionGroup}
-                            position={i}
-                            showRequiredFields={tabsChanges.expression}
-                          />
-                        ))}
-                    </ul>
-                    <div className={styles.expressionsActionsBtns}>
-                      <Button
-                        id={`${componentName}__addExpresion`}
-                        disabled={creationFormState.isRuleAddingDisabled}
-                        className="p-button-primary p-button-text-icon-left"
-                        type="button"
-                        label={resourcesContext.messages.addNewRule}
-                        icon="plus"
-                        onClick={e =>
-                          creationFormDispatch({
-                            type: 'ADD_EMPTY_RULE',
-                            payload: getEmptyExpression()
-                          })
-                        }
-                      />
-                      {creationFormState.groupExpressionsActive >= 2 && (
-                        <Button
-                          id={`${componentName}__groupExpresions`}
-                          className="p-button-primary p-button-text"
-                          type="button"
-                          label="Group"
-                          icon="plus"
-                          onClick={e => {
-                            const groupingResult = groupExpressions(
-                              creationFormState.candidateRule.expressions,
-                              creationFormState.groupExpressionsActive,
-                              creationFormState.groupCandidate
-                            );
-                            if (!isNil(groupingResult.newGroup))
-                              creationFormDispatch({
-                                type: 'GROUP_EXPRESSIONS',
-                                payload: {
-                                  expressions: groupingResult.expressions,
-                                  allExpressions: [
-                                    ...creationFormState.candidateRule.allExpressions,
-                                    groupingResult.newGroup
-                                  ]
-                                }
-                              });
-                          }}
-                        />
-                      )}
-                    </div>
-                  </div>
-                  <div className={styles.section}>
-                    <textarea
-                      name=""
-                      id=""
-                      cols="30"
-                      readOnly
-                      rows="5"
-                      value={creationFormState.validationRuleString}></textarea>
-                  </div>
-                </TabPanel>
-              ) : (
-                ''
-              )}
+              {tabContents}
             </TabView>
           </div>
           <div className={styles.footer}>
