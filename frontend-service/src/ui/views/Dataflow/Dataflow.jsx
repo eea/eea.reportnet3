@@ -274,16 +274,14 @@ const Dataflow = withRouter(({ history, match }) => {
             .map(releasedStatus => releasedStatus.isReleased);
 
           const isReceiptOutdated = dataflow.representatives
-            .filter(representative => representative.dataProviderId === uniq(representativeId)[0])
+            .filter(representative => representative.dataProviderId === parseInt(match.params.representativeId))
             .map(representative => representative.isReceiptOutdated);
 
           console.log('IN isReceiptOutdated', isReceiptOutdated);
 
           if (isReceiptOutdated.length === 1 && isReleased.length === 1) {
-            onInitReceiptData({
-              isReceiptLoading: false,
-              isReceiptOutdated: isReceiptOutdated[0],
-              isReleased: isReleased
+            setIsReceiptOutdated({
+              isReceiptOutdated: isReceiptOutdated[0]
             });
           }
         }

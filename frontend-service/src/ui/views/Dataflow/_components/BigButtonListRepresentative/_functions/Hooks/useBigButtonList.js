@@ -93,6 +93,8 @@ const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, on
     const { datasets } = dataflowState.data;
     const releasedStates = datasets.map(dataset => dataset.isReleased);
 
+    console.log('REPRESENTATIVE dataflowState.isReceiptOutdated', dataflowState.isReceiptOutdated);
+
     return [
       {
         buttonClass: 'schemaDataset',

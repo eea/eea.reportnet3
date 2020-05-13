@@ -247,13 +247,7 @@ const useBigButtonList = ({
     const representativeNames = datasets.map(dataset => dataset.datasetSchemaName);
     const releasedStates = datasets.map(dataset => dataset.isReleased);
 
-    console.log('dataflowState.isReceiptLoading', dataflowState.isReceiptLoading);
-    console.log('dataflowState.isReceiptOutdated', dataflowState.isReceiptOutdated);
-    console.log(
-      uniq(representativeNames).length === 1,
-      !releasedStates.includes(false),
-      !releasedStates.includes(null)
-    );
+    console.log('DATAFLOW dataflowState.isReceiptOutdated', dataflowState.isReceiptOutdated.isReceiptOutdated);
 
     return [
       {
