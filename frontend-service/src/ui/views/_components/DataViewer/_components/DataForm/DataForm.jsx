@@ -27,7 +27,9 @@ const DataForm = ({
           return (
             <React.Fragment key={column.field}>
               <div className="p-col-4" style={{ padding: '.75em' }}>
-                <label htmlFor={column.field}>{column.header}</label>
+                <label htmlFor={column.field}>{`${column.header}${
+                  column.type.toUpperCase() === 'DATE' ? ' (YYYY-MM-DD)' : ''
+                }`}</label>
                 <Button
                   className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
                   icon="infoCircle"
@@ -66,7 +68,9 @@ const DataForm = ({
           return (
             <React.Fragment key={column.field}>
               <div className="p-col-4" style={{ padding: '.75em' }}>
-                <label htmlFor={column.field}>{column.header}</label>
+                <label htmlFor={column.field}>{`${column.header}${
+                  column.type.toUpperCase() === 'DATE' ? ' (YYYY-MM-DD)' : ''
+                }`}</label>
                 <Button
                   className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
                   icon="infoCircle"
