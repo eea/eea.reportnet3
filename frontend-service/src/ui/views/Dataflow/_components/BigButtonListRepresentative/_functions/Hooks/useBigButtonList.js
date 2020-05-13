@@ -39,7 +39,7 @@ const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, on
   };
 
   const groupByRepresentativeModels = dataflowState.data.datasets
-    .filter(dataset => dataset.dataProviderId == match.params.representativeId)
+    .filter(dataset => dataset.dataProviderId === parseInt(match.params.representativeId))
     .map(dataset => {
       return {
         layout: 'defaultBigButton',
@@ -92,8 +92,6 @@ const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, on
   const onBuildReceiptButton = () => {
     const { datasets } = dataflowState.data;
     const releasedStates = datasets.map(dataset => dataset.isReleased);
-
-    console.log('REPRESENTATIVE dataflowState.isReceiptOutdated', dataflowState.isReceiptOutdated);
 
     return [
       {
