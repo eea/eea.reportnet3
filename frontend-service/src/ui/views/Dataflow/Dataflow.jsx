@@ -349,7 +349,7 @@ const Dataflow = withRouter(({ history, match }) => {
           title={TextUtils.ellipsis(dataflowState.name)}
         />
 
-        <BigButtonList
+        {/*   <BigButtonList
           dataflowDispatch={dataflowDispatch}
           dataflowState={dataflowState}
           handleRedirect={handleRedirect}
@@ -365,9 +365,9 @@ const Dataflow = withRouter(({ history, match }) => {
           handleRedirect={handleRedirect}
           onShowSnapshotDialog={onShowSnapshotDialog}
           match={match}
-        />
+        /> */}
 
-        {/*  {isNil(match.params.representativeId) ? (
+        {!dataflowState.isRepresentativeView && isNil(match.params.representativeId) ? (
           <BigButtonList
             dataflowDispatch={dataflowDispatch}
             dataflowState={dataflowState}
@@ -385,7 +385,7 @@ const Dataflow = withRouter(({ history, match }) => {
             onShowSnapshotDialog={onShowSnapshotDialog}
             match={match}
           />
-        )} */}
+        )}
 
         <SnapshotsDialog
           dataflowId={dataflowId}
