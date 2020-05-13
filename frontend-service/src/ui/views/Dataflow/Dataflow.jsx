@@ -46,7 +46,7 @@ import { useHelpSteps } from 'ui/views/Dataflow/_functions/Hooks/useHelpSteps';
 
 const Dataflow = withRouter(({ history, match }) => {
   const {
-    params: { dataflowId }
+    params: { dataflowId, representativeId }
   } = match;
 
   const breadCrumbContext = useContext(BreadCrumbContext);
@@ -187,14 +187,24 @@ const Dataflow = withRouter(({ history, match }) => {
       title: 'properties'
     };
 
-    if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']) {
-      leftSideBarContext.addModels([propertiesBtn, editBtn, manageRolesBtn]);
-    } else if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']) {
-      leftSideBarContext.addModels([propertiesBtn, manageRolesBtn]);
-    } else {
-      leftSideBarContext.addModels(!dataflowState.isCustodian ? [propertiesBtn, apiKeyBtn] : [propertiesBtn]);
+    if (!isEmpty(dataflowState.data)) {
+      if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']) {
+        leftSideBarContext.addModels([propertiesBtn, editBtn, manageRolesBtn]);
+      } else if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']) {
+        leftSideBarContext.addModels([propertiesBtn, manageRolesBtn]);
+      } else {
+        if (!dataflowState.isCustodian) {
+          dataflowState.data.representatives.length === 1 && isUndefined(representativeId)
+            ? leftSideBarContext.addModels([propertiesBtn, apiKeyBtn])
+            : dataflowState.data.representatives.length > 1 && isUndefined(representativeId)
+            ? leftSideBarContext.addModels([propertiesBtn])
+            : leftSideBarContext.addModels([propertiesBtn, apiKeyBtn]);
+        } else {
+          leftSideBarContext.addModels([propertiesBtn]);
+        }
+      }
     }
-  }, [dataflowState.isCustodian, dataflowState.status]);
+  }, [dataflowState.isCustodian, dataflowState.status, representativeId]);
 
   useEffect(() => {
     if (!isEmpty(dataflowState.data.representatives)) {
@@ -327,7 +337,6 @@ const Dataflow = withRouter(({ history, match }) => {
 
       onInitialLoad(dataflow, datasets);
 
-      //UPDATE NAMES DATASET SCHEMAS IN DESIGN VIEW
       if (!isEmpty(dataflow.designDatasets)) {
         dataflow.designDatasets.forEach((schema, idx) => {
           schema.index = idx;

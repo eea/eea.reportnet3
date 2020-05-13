@@ -246,9 +246,6 @@ const useBigButtonList = ({
     const { datasets } = dataflowState.data;
     const representativeNames = datasets.map(dataset => dataset.datasetSchemaName);
     const releasedStates = datasets.map(dataset => dataset.isReleased);
-
-    console.log('DATAFLOW dataflowState.isReceiptOutdated', dataflowState.isReceiptOutdated.isReceiptOutdated);
-
     return [
       {
         buttonClass: 'schemaDataset',
