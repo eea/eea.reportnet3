@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.rule.enums.RuleOperatorEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,7 +159,6 @@ public class RuleExpressionVO implements Serializable {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid type: " + arg2);
     }
   }
-
 
   /**
    * Tokenize a function. A function starts with ".", the first word is the operator, and the
@@ -490,12 +490,71 @@ public class RuleExpressionVO implements Serializable {
         case LT_DATE:
         case GTEQ_DATE:
         case LTEQ_DATE:
+        case EQ_DAY:
+        case DIST_DAY:
+        case GT_DAY:
+        case LT_DAY:
+        case GTEQ_DAY:
+        case LTEQ_DAY:
+        case EQ_MONTH:
+        case DIST_MONTH:
+        case GT_MONTH:
+        case LT_MONTH:
+        case GTEQ_MONTH:
+        case LTEQ_MONTH:
+        case EQ_YEAR:
+        case DIST_YEAR:
+        case GT_YEAR:
+        case LT_YEAR:
+        case GTEQ_YEAR:
+        case LTEQ_YEAR:
           return "this." + operator.getLabel() + "(" + toStringBranch(arg2) + ")";
       }
     }
 
     LOG_ERROR.error("Error stringifying RuleExpressionVO: operator is null");
     throw new IllegalStateException("Operator cannot be null");
+  }
+
+  public boolean isDataTypeCompatible(DataType dataType) {
+
+    // TODO.
+    return true;
+
+    // switch (dataType) {
+    // // DataType: Boolean
+    // case BOOLEAN:
+    // return Boolean.TRUE.equals(isDataTypeCompatibleRecursive("Boolean", this));
+    // // DataType: String
+    // case TEXT:
+    // case LONG_TEXT:
+    // case CODELIST:
+    // case LINK:
+    // case LINK_DATA:
+    // case URL:
+    // case PHONE:
+    // case EMAIL:
+    // return Boolean.TRUE.equals(isDataTypeCompatibleRecursive("String", this));
+    // // DataType: Number
+    // case NUMBER_INTEGER:
+    // case NUMBER_DECIMAL:
+    // case COORDINATE_LAT:
+    // case COORDINATE_LONG:
+    // return Boolean.TRUE.equals(isDataTypeCompatibleRecursive("Number", this));
+    // // DataType: Date
+    // case DATE:
+    // return Boolean.TRUE.equals(isDataTypeCompatibleRecursive("Date", this));
+    // // DataType: Unsupported
+    // default:
+    // LOG_ERROR.error("Unsupported DataType: {}", dataType);
+    // return false;
+    // }
+  }
+
+  private Boolean isDataTypeCompatibleRecursive(String type, RuleExpressionVO ruleExpressionVO) {
+    Boolean rtn = null;
+    // TODO.
+    return rtn;
   }
 
   /**
