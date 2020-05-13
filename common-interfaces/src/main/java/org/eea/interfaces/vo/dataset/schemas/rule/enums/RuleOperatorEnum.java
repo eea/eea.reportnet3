@@ -21,6 +21,8 @@ public enum RuleOperatorEnum {
   GTEQ(">=", "Boolean", "Number", "Number"),
   /** Less than or equals. */
   LTEQ("<=", "Boolean", "Number", "Number"),
+  /** The num match. */
+  NUM_MATCH("numberMatch", "Boolean", "Number", "String"),
 
   // Logical operators
   /** And. */
