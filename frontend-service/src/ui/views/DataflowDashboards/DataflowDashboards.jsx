@@ -160,9 +160,12 @@ export const DataflowDashboards = withRouter(
         <div className={styles.validationChartWrap}>
           <h2 className={styles.dashboardType}>
             {resources.messages['validationDashboards']}{' '}
-            <span className={styles.dashboardWarning}>{resources.messages['dashboardWarning']}</span>
+            <span
+              className={styles.dashboardWarning}
+              dangerouslySetInnerHTML={{
+                __html: resources.messages['dashboardWarning']
+              }}></span>{' '}
           </h2>
-
           <Toolbar className={styles.chartToolbar}>
             <div className="p-toolbar-group-left">{onLoadButtons}</div>
           </Toolbar>
