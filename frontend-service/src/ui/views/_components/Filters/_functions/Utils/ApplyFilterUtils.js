@@ -25,7 +25,7 @@ const checkSearched = (state, data, searchedKeys = []) => {
   const searched = [];
   for (let index = 0; index < searchedKeys.length; index++) {
     if (!isNil(data[searchedKeys[index]])) {
-      searched.push(data[searchedKeys[index]].toLowerCase().includes(state.searchBy.toLowerCase()));
+      searched.push(data[searchedKeys[index]].toString().toLowerCase().includes(state.searchBy.toLowerCase()));
     }
   }
   return searched.includes(true);

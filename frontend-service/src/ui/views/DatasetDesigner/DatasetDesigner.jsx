@@ -20,6 +20,7 @@ import { TabsDesigner } from './_components/TabsDesigner';
 import { TabsValidations } from './_components/TabsValidations';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
+import { UniqueConstraints } from './_components/UniqueConstraints';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -67,9 +68,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [dataflowName, setDataflowName] = useState('');
   const [datasetDescription, setDatasetDescription] = useState('');
   const [datasetHasData, setDatasetHasData] = useState(false);
+  const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
   const [datasetSchemaId, setDatasetSchemaId] = useState('');
   const [datasetSchemaName, setDatasetSchemaName] = useState('');
-  const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
   const [datasetSchemas, setDatasetSchemas] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [initialDatasetDescription, setInitialDatasetDescription] = useState();
@@ -391,12 +392,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           }}
           style={{ width: '90%' }}
           visible={uniqueConstraintListDialogVisible}>
-          <TabsValidations
-            dataset={metaData.dataset}
-            datasetSchemaAllTables={datasetSchemaAllTables}
-            datasetSchemaId={datasetSchemaId}
-            onHideValidationsDialog={onHideValidationsDialog}
-          />
+          <UniqueConstraints />
         </Dialog>
       );
     }
@@ -426,13 +422,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const layout = children => {
-    return (
-      <MainLayout>
-        <div className="rep-container">{children}</div>
-      </MainLayout>
-    );
-  };
+  const layout = children => (
+    <MainLayout>
+      <div className="rep-container">{children}</div>
+    </MainLayout>
+  );
 
   if (isLoading) {
     return layout(<Spinner />);
