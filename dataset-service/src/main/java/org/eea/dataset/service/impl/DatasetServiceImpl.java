@@ -1233,7 +1233,9 @@ public class DatasetServiceImpl implements DatasetService {
     }
     // if the type is multiselect codelist we sort the values in lexicographic order
     if (DataType.MULTISELECT_CODELIST.equals(field.getType()) && null != field.getValue()) {
-      List<String> values = Arrays.asList(field.getValue().split(","));
+      List<String> values = new ArrayList<>();
+      Arrays.asList(field.getValue().split(",")).stream()
+          .forEach(value -> values.add(value.trim()));
       Collections.sort(values);
       field.setValue(values.toString().substring(1, values.toString().length() - 1));
     }
