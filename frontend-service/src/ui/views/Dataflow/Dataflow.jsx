@@ -428,6 +428,7 @@ const Dataflow = withRouter(({ history, match }) => {
             dataProviderId={dataflowState.dataProviderId}
             isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
             manageDialogs={manageDialogs}
+            match={match}
           />
         )}
       </div>
