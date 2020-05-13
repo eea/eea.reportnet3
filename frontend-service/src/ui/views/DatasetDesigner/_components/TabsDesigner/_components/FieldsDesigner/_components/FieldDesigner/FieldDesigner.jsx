@@ -35,6 +35,7 @@ export const FieldDesigner = ({
   fieldPK,
   fieldPKReferenced,
   fieldLink,
+  fieldMustBeUsed,
   fieldRequired,
   fieldType,
   hasPK,
@@ -93,6 +94,7 @@ export const FieldDesigner = ({
     codelistItems: codelistItems,
     fieldDescriptionValue: fieldDescription,
     fieldLinkValue: fieldLink || null,
+    fieldPkMustBeUsed: fieldMustBeUsed || false,
     fieldPKReferencedValue: fieldPKReferenced || false,
     fieldPKValue: fieldPK,
     fieldPreviousTypeValue: getFieldTypeValue(fieldType) || '',
@@ -793,6 +795,7 @@ export const FieldDesigner = ({
       {fieldDesignerState.isLinkSelectorVisible ? (
         <LinkSelector
           isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
+          mustBeUsed={fieldDesignerState.fieldPkMustBeUsed}
           onCancelSaveLink={onCancelSaveLink}
           onSaveLink={onSaveLink}
           selectedLink={fieldDesignerState.fieldLinkValue}

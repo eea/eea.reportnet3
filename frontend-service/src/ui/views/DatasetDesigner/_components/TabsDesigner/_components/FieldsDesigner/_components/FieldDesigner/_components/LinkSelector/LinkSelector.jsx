@@ -18,12 +18,12 @@ import { DataflowService } from 'core/services/Dataflow';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const LinkSelector = withRouter(
-  ({ isLinkSelectorVisible, match, onCancelSaveLink, onSaveLink, selectedLink, tableSchemaId }) => {
+  ({ isLinkSelectorVisible, match, mustBeUsed, onCancelSaveLink, onSaveLink, selectedLink, tableSchemaId }) => {
     const resources = useContext(ResourcesContext);
     const [datasetSchemas, setDatasetSchemas] = useState([]);
     const [isVisible, setIsVisible] = useState(isLinkSelectorVisible);
     const [link, setLink] = useState(selectedLink);
-    const [pkMustBeUsed, setPkMustBeUsed] = useState(false);
+    const [pkMustBeUsed, setPkMustBeUsed] = useState(mustBeUsed);
     const [isLoading, setIsLoading] = useState(false);
 
     const {
