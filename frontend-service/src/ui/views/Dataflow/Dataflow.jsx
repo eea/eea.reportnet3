@@ -279,10 +279,8 @@ const Dataflow = withRouter(({ history, match }) => {
 
           console.log('IN isReceiptOutdated', isReceiptOutdated);
 
-          if (isReceiptOutdated.length === 1 && isReleased.length === 1) {
-            setIsReceiptOutdated({
-              isReceiptOutdated: isReceiptOutdated[0]
-            });
+          if (isReceiptOutdated.length === 1) {
+            setIsReceiptOutdated({ isReceiptOutdated: isReceiptOutdated[0] });
           }
         }
       } else {
