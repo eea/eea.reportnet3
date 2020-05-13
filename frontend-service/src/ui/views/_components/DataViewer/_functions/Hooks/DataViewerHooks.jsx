@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 
+import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -97,9 +98,34 @@ export const useSetColumns = (
     <div style={{ display: 'flex', alignItems: 'center' }}>{!isUndefined(rowData) ? rowData.providerCode : null}</div>
   );
 
+  const getFieldTypeValue = fieldType => {
+    console.log(fieldType);
+    const fieldTypes = [
+      { fieldType: 'Number_Integer', value: 'Number - Integer' },
+      { fieldType: 'Number_Decimal', value: 'Number - Decimal' },
+      { fieldType: 'Date', value: 'Date' },
+      { fieldType: 'Text', value: 'Text' },
+      { fieldType: 'Long_Text', value: 'Long text' },
+      { fieldType: 'Email', value: 'Email' },
+      { fieldType: 'URL', value: 'URL' },
+      { fieldType: 'Phone', value: 'Phone number' },
+      { fieldType: 'Codelist', value: 'Single select' },
+      { fieldType: 'Link', value: 'Link' }
+    ];
+
+    if (!isUndefined(fieldType)) {
+      const filteredTypes = fieldTypes.filter(field => field.fieldType.toUpperCase() === fieldType.toUpperCase())[0];
+      return filteredTypes.value;
+    } else {
+      return '';
+    }
+  };
+
   const getTooltipMessage = column => {
+    console.log(column);
     return !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
-      ? `<span style="font-weight:bold">Description:</span> ${
+      ? `<span style="font-weight:bold">Type:</span> ${getFieldTypeValue(column.type)}
+        <span style="font-weight:bold">Description:</span> ${
           !isNil(column.description) && column.description !== ''
             ? column.description
             : resources.messages['noDescription']
@@ -109,11 +135,14 @@ export const useSetColumns = (
             !isEmpty(codelistItem) && codelistItem.length > 15 ? `${codelistItem.substring(0, 15)}...` : codelistItem
           )
           .join(', ')}`
-      : !isNil(column.description) && column.description !== '' && column.description.length > 35
-      ? column.description.substring(0, 35)
-      : isNil(column.description) || column.description === ''
-      ? resources.messages['noDescription']
-      : column.description;
+      : `<span style="font-weight:bold">Type:</span> ${getFieldTypeValue(column.type)}
+      <span style="font-weight:bold">Description:</span> ${
+        !isNil(column.description) && column.description !== '' && column.description.length > 35
+          ? column.description.substring(0, 35)
+          : isNil(column.description) || column.description === ''
+          ? resources.messages['noDescription']
+          : column.description
+      }`;
   };
 
   const dataTemplate = (rowData, column) => {
