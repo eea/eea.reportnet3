@@ -261,7 +261,7 @@
     "expandAll": "Expand all",
     "expandSidebar": "Expand sidebar",
     "expirationDate": "Date range",
-    "export": "Export",
+    "export": "Export dataset data",
     "exportDataByIdError": "Failed exporting data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "exportTable": "Export table data",
     "exportTableDataByIdError": "Failed exporting data",
