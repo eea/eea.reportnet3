@@ -639,7 +639,7 @@
     "qcEnabled": "Enabled",
     "valid": "Valid",
     "pending": "Pending",
-    "dashboardWarning": "Chart shows percentage of records classified by highest QC level found for each record.",
+    "dashboardWarning": "Chart shows percentage of records classified by&nbsp<u>highest</u>&nbspQC level found for each record.",
     "qcDescription": "Description (optional)",
     "uniqueConstraints": "Unique Constraints",
     "apiKeyDataProviderIdLabel": "Data provider"
