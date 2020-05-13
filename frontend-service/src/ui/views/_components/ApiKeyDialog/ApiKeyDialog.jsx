@@ -89,28 +89,44 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
       <div className={styles.container}>
         {apiKey === '' ? (
           isKeyLoading ? (
-            <Spinner style={{ top: 0, left: 0, width: '50px', height: '50px' }} />
+            <div className={styles.row}>
+              <Spinner style={{ top: 0, left: 0, width: '50px', height: '50px' }} />
+            </div>
           ) : (
-            <p>{resources.messages['noApiKey']}</p>
+            <div className={styles.row}>
+              <p>{resources.messages['noApiKey']}</p>
+            </div>
           )
         ) : (
           <>
-            <label>{resources.messages['apiKeyDialogLabel']}</label>
-            <textarea
-              className={styles.textarea}
-              readOnly
-              ref={textRef => setTextAreaRef(textRef)}
-              rows={1}
-              value={apiKey}
-            />
-            <Button
-              tooltip={resources.messages['copyToClipboardSuccess']}
-              tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
-              showDelay="3000"
-              className={`p-button-primary ${styles.copyBtn}`}
-              icon={'copy'}
-              onClick={() => onCopyToClipboard()}
-            />
+            <div className={styles.row}>
+              <label className={styles.label}>{resources.messages['apiKeyDialogLabel']}</label>
+
+              <div className={styles.input_api}>
+                <div className={styles.flex}>
+                  <textarea
+                    className={styles.textarea}
+                    readOnly
+                    ref={textRef => setTextAreaRef(textRef)}
+                    rows={1}
+                    value={apiKey}
+                  />
+                  <Button
+                    tooltip={resources.messages['copyToClipboardSuccess']}
+                    tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
+                    showDelay="3000"
+                    className={`p-button-primary ${styles.copyBtn}`}
+                    icon={'copy'}
+                    onClick={() => onCopyToClipboard()}
+                  />
+                </div>
+                <p className={styles.ids_info}>
+                  <span className={styles.ids_label}>{resources.messages['dataflow']}: </span> <b>{dataflowId} </b>
+                  <span className={styles.ids_label}>{resources.messages['apiKeyDataProviderIdLabel']}: </span>
+                  <b>{dataProviderId} </b>
+                </p>
+              </div>
+            </div>
           </>
         )}
       </div>
