@@ -1,8 +1,9 @@
 package org.eea.validation.util;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * The Class ValidationDroolsUtils.
@@ -32,24 +33,35 @@ public class ValidationDroolsUtils {
       final boolean sensitive) {
     Boolean validationResult = false;
     // we delete the first character and the last one because we receive a string with [] values
-    if (!StringUtils.isBlank(value)) {
-      final String[] arrayItems = codelistItems.substring(1, codelistItems.length() - 1).split(",");
-
-      if (Boolean.TRUE.equals(sensitive)) {
-        for (int i = 0; i < arrayItems.length; i++) {
-          if (arrayItems[i].trim().equals(value)) {
-            validationResult = Boolean.TRUE;
-          }
-        }
-      } else {
-        for (int i = 0; i < arrayItems.length; i++) {
-          if (arrayItems[i].trim().equalsIgnoreCase(value)) {
-            validationResult = Boolean.TRUE;
-          }
-        }
+    final String[] arrayItems = codelistItems.substring(1, codelistItems.length() - 1).split(",");
+    for (int i = 0; i < arrayItems.length; i++) {
+      if (arrayItems[i].trim().equalsIgnoreCase(value)) {
+        validationResult = Boolean.TRUE;
       }
-    } else {
-      validationResult = Boolean.TRUE;
+    }
+    return validationResult;
+  }
+
+
+  /**
+   * Multi select codelist validate.
+   *
+   * @param value the value
+   * @param codelistItems the codelist items
+   * @return the boolean
+   */
+  public static Boolean multiSelectCodelistValidate(final String value, String codelistItems) {
+    Boolean validationResult = false;
+    // this , checks if the user upload a file and in this field, the field have a , in the last
+    // position(that is really dificult to happend but we put it just in case)
+    if (',' != value.charAt(value.length() - 1)) {
+      // we delete the first character and the last one because we receive a string with [] values
+      final List<String> arrayValue = Arrays.asList(value.split(","));
+      final List<String> arrayItems =
+          Arrays.asList(codelistItems.substring(1, codelistItems.length() - 1).split(", "));
+      if (!arrayValue.isEmpty() && arrayItems.containsAll(arrayValue)) {
+        validationResult = true;
+      }
     }
     return validationResult;
   }

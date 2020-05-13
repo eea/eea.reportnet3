@@ -3,7 +3,6 @@ package org.eea.interfaces.vo.dataset.schemas.rule.enums;
 import java.util.HashMap;
 import java.util.Map;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Enum RuleOperatorEnum.
  */
@@ -40,6 +39,48 @@ public enum RuleOperatorEnum {
   SEQIC("equalsIgnoreCase"),
   /** Match. */
   MATCH("matches"),
+
+  // Day operators
+  /** The eq day. */
+  EQ_DAY("equalDay"),
+  /** The dist day. */
+  DIST_DAY("distinctDay"),
+  /** The gt day. */
+  GT_DAY("greaterThanDay"),
+  /** The lt day. */
+  LT_DAY("lessThanDay"),
+  /** The gteq day. */
+  GTEQ_DAY("greaterThanOrEqualsThanDay"),
+  /** The lteq day. */
+  LTEQ_DAY("lessThanOrEqualsThanDay"),
+
+  // Month operators
+  /** The eq month. */
+  EQ_MONTH("equalMonth"),
+  /** The dist month. */
+  DIST_MONTH("distinctMonth"),
+  /** The gt month. */
+  GT_MONTH("greaterThanMonth"),
+  /** The lt month. */
+  LT_MONTH("lessThanMonth"),
+  /** The gteq month. */
+  GTEQ_MONTH("greaterThanOrEqualsThanMonth"),
+  /** The lteq month. */
+  LTEQ_MONTH("lessThanOrEqualsThanMonth"),
+
+  // Year operators
+  /** The eq year. */
+  EQ_YEAR("equalYear"),
+  /** The dist year. */
+  DIST_YEAR("distinctYear"),
+  /** The gt year. */
+  GT_YEAR("greaterThanYear"),
+  /** The lt year. */
+  LT_YEAR("lessThanYear"),
+  /** The gteq year. */
+  GTEQ_YEAR("greaterThanOrEqualsThanYear"),
+  /** The lteq year. */
+  LTEQ_YEAR("lessThanOrEqualsThanYear"),
 
   // Date operators
   /** The eq date. */
