@@ -265,7 +265,7 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public void createAutomaticRules(String datasetSchemaId, String referenceId, DataType typeData,
       EntityTypeEnum typeEntityEnum, Long datasetId, boolean required) throws EEAException {
-
+    Document document = new Document();
     List<Rule> ruleList = new ArrayList<>();
     // we use that if to sort between a rule required and rule for any other type(Boolean,
     // number etc)
@@ -316,10 +316,18 @@ public class RulesServiceImpl implements RulesService {
         case CODELIST:
           // we find values available to create this validation for a codelist, same value with
           // capital letter and without capital letters
-          Document document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
+          document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
           ruleList.addAll(AutomaticRules.createCodelistAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, document.get("codelistItems").toString(), "FT" + shortcode,
               FT_DESCRIPTION + typeData));
+          break;
+        case MULTISELECT_CODELIST:
+          // we find values available to create this validation for a codelist, same value with
+          // capital letter and without capital letters
+          document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
+          ruleList.addAll(AutomaticRules.createMultiSelectCodelistAutomaticRule(referenceId,
+              typeEntityEnum, FIELD_TYPE + typeData, document.get("codelistItems").toString(),
+              "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
         case URL:
           ruleList.add(AutomaticRules.createUrlAutomaticRule(referenceId, typeEntityEnum,

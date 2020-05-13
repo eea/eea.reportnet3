@@ -269,7 +269,7 @@
     "expandAll": "Expand all",
     "expandSidebar": "Expand sidebar",
     "expirationDate": "Date range",
-    "export": "Export",
+    "export": "Export dataset data",
     "exportDataByIdError": "Failed exporting data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "exportTable": "Export table data",
     "exportTableDataByIdError": "Failed exporting data",
@@ -639,8 +639,10 @@
     "qcEnabled": "Enabled",
     "valid": "Valid",
     "pending": "Pending",
-    "dashboardWarning": "Chart shows percentage of records classified by highest QC level found for each record.",
+    "dashboardWarning": "Chart shows percentage of records classified by&nbsp<u>highest</u>&nbspQC level found for each record.",
     "qcDescription": "Description (optional)",
+    "apiKeyDataProviderIdLabel": "Data provider",
+    "fieldTypeColumnTooltip": "Field type",
     "pkValuesMustBeUsed": "All PK values must be used on link"
   }
 }

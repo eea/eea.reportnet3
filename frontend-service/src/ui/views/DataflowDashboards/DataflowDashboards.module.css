@@ -28,3 +28,10 @@
 .hide {
   color: var(--c-corporate-blue) !important;
 }
+.dashboardWarning {
+  display: flex;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: var(--main-font-color);
+}
