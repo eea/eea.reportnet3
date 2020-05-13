@@ -3,7 +3,7 @@ package org.eea.dataset.io.kafka.commands;
 import static org.mockito.Mockito.times;
 import java.util.HashMap;
 import java.util.Map;
-import org.eea.dataset.kafka.io.kafka.event.CreateConnectionEvent;
+import org.eea.dataset.kafka.io.event.CreateConnectionEvent;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetService;

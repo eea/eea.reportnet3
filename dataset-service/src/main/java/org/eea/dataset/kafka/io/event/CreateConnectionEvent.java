@@ -1,4 +1,4 @@
-package org.eea.dataset.kafka.io.kafka.event;
+package org.eea.dataset.kafka.io.event;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,7 +61,9 @@ public class CreateConnectionEvent extends AbstractEEAEventHandlerCommand {
         String[] aux = dataset.split("_");
         Long idDataset = Long.valueOf(aux[aux.length - 1]);
         TenantResolver.setTenantName(String.format("dataset_%s", idDataset));
-
+        // Initialize the dataset values (insert datasetId and tables into dataset_value and
+        // table_value of the new schema)
+        datasetService.insertSchema(idDataset, idDatasetSchema);
         // First insert of the statistics
         datasetService.saveStatistics(idDataset);
 

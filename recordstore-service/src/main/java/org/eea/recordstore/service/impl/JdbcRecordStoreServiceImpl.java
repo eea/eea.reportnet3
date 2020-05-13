@@ -152,55 +152,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   private static final Logger LOG = LoggerFactory.getLogger(JdbcRecordStoreServiceImpl.class);
 
-  /**
-   * Release lock and notification.
-   *
-   * @param dataflowId the dataflow id
-   */
-  private void releaseLockAndNotification(Long dataflowId, boolean isCreation) {
 
-    String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
-        : LockSignature.UPDATE_DATA_COLLECTION.getValue();
-    EventType successEvent = isCreation ? EventType.ADD_DATACOLLECTION_COMPLETED_EVENT
-        : EventType.UPDATE_DATACOLLECTION_COMPLETED_EVENT;
-
-    // Release the lock
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(methodSignature);
-    criteria.add(dataflowId);
-    lockService.removeLockByCriteria(criteria);
-
-    // Release the notification
-    try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(successEvent, null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .dataflowId(dataflowId).build());
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing {} event: ", successEvent, e);
-    }
-  }
-
-  /**
-   * Releases CONNECTION_CREATED_EVENT Kafka events to initialize databases content. Before that,
-   * insert the values into the schema of the dataset_value and table_value
-   *
-   * @param datasetIdAndSchemaId dataset ids matching schema ids
-   */
-  private void releaseConnectionCreatedEvents(Map<Long, String> datasetIdAndSchemaId) {
-    for (Map.Entry<Long, String> entry : datasetIdAndSchemaId.entrySet()) {
-      Map<String, Object> result = new HashMap<>();
-      String datasetName = "dataset_" + entry.getKey();
-      result.put("connectionDataVO", createConnectionDataVO(datasetName));
-      result.put("dataset_id", datasetName);
-      result.put("idDatasetSchema", entry.getValue());
-
-      // Insert the datasetId and the idSchema (dataset_value, table_value) at every new schema
-      // created
-      datasetControllerZuul.insertIdDataSchema(entry.getKey(), entry.getValue());
-
-      kafkaSenderUtils.releaseKafkaEvent(EventType.CONNECTION_CREATED_EVENT, result);
-    }
-  }
 
   /**
    * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
@@ -338,49 +290,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     return result;
   }
 
-  /**
-   * Creates the connection data VO.
-   *
-   * @param datasetName the dataset name
-   *
-   * @return the connection data VO
-   */
-  private ConnectionDataVO createConnectionDataVO(final String datasetName) {
-    final ConnectionDataVO result = new ConnectionDataVO();
-    result.setConnectionString(connStringPostgre);
-    result.setUser(userPostgreDb);
-    result.setPassword(passPostgreDb);
-    result.setSchema(datasetName);
-    return result;
-  }
-
-  /**
-   * Gets the all data sets name.
-   *
-   * @param datasetName the dataset name
-   *
-   * @return the all data sets name
-   */
-  private List<String> getAllDataSetsName(String datasetName) {
-
-    return jdbcTemplate.query(sqlGetDatasetsName, new PreparedStatementSetter() {
-      @Override
-      public void setValues(PreparedStatement ps) throws SQLException {
-        ps.setString(1, datasetName);
-        ps.setString(2, datasetName);
-      }
-    }, new ResultSetExtractor<List<String>>() {
-      @Override
-      public List<String> extractData(ResultSet resultSet)
-          throws SQLException, DataAccessException {
-        List<String> datasets = new ArrayList<>();
-        while (resultSet.next()) {
-          datasets.add(resultSet.getString(1));
-        }
-        return datasets;
-      }
-    });
-  }
 
   /**
    * Creates the data snapshot.
@@ -449,31 +358,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
-  /**
-   * Prints the to file.
-   *
-   * @param fileName the file name
-   * @param query the query
-   * @param copyManager the copy manager
-   *
-   * @throws SQLException the SQL exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  private void printToFile(String fileName, String query, CopyManager copyManager)
-      throws SQLException, IOException {
-    byte[] buffer;
-    CopyOut copyOut = copyManager.copyOut(query);
-
-    try (OutputStream to = new FileOutputStream(fileName)) {
-      while ((buffer = copyOut.readFromCopy()) != null) {
-        to.write(buffer);
-      }
-    } finally {
-      if (copyOut.isActive()) {
-        copyOut.cancelCopy();
-      }
-    }
-  }
 
   /**
    * Restore data snapshot.
@@ -718,42 +602,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
-  /**
-   * Copy from file.
-   *
-   * @param query the query
-   * @param fileName the file name
-   * @param copyManager the copy manager
-   *
-   * @throws IOException Signals that an I/O exception has occurred.
-   * @throws SQLException the SQL exception
-   */
-  private void copyFromFile(String query, String fileName, CopyManager copyManager)
-      throws IOException, SQLException {
-    Path path = Paths.get(fileName);
-    FileReader from = new FileReader(path.toString());
-    // bufferFile it's a size in bytes defined in consul variable. It can be 65536
-    Integer bufferSize = bufferFile;
-    char[] cbuf = new char[bufferSize];
-    int len = 0;
-    CopyIn cp = copyManager.copyIn(query);
-    // Copy the data from the file by chunks
-    try {
-      while ((len = from.read(cbuf)) > 0) {
-        byte[] buf = new String(cbuf, 0, len).getBytes();
-        cp.writeToCopy(buf, 0, buf.length);
-      }
-    } catch (PSQLException e) {
-      LOG_ERROR.error(
-          "Error restoring the file {} executing query {}. Restoring snapshot continues", fileName,
-          query, e);
-    } finally {
-      from.close();
-      cp.endCopy();
-      if (cp.isActive())
-        cp.cancelCopy();
-    }
-  }
+
 
   /**
    * Delete data snapshot.
@@ -817,4 +666,161 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   public void resetDatasetDatabase() throws RecordStoreAccessException {
     throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
   }
+
+
+  /**
+   * Release lock and notification.
+   *
+   * @param dataflowId the dataflow id
+   */
+  private void releaseLockAndNotification(Long dataflowId, boolean isCreation) {
+
+    String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
+        : LockSignature.UPDATE_DATA_COLLECTION.getValue();
+    EventType successEvent = isCreation ? EventType.ADD_DATACOLLECTION_COMPLETED_EVENT
+        : EventType.UPDATE_DATACOLLECTION_COMPLETED_EVENT;
+
+    // Release the lock
+    List<Object> criteria = new ArrayList<>();
+    criteria.add(methodSignature);
+    criteria.add(dataflowId);
+    lockService.removeLockByCriteria(criteria);
+
+    // Release the notification
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(successEvent, null,
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .dataflowId(dataflowId).build());
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error releasing {} event: ", successEvent, e);
+    }
+  }
+
+  /**
+   * Releases CONNECTION_CREATED_EVENT Kafka events to initialize databases content. Before that,
+   * insert the values into the schema of the dataset_value and table_value
+   *
+   * @param datasetIdAndSchemaId dataset ids matching schema ids
+   */
+  private void releaseConnectionCreatedEvents(Map<Long, String> datasetIdAndSchemaId) {
+    for (Map.Entry<Long, String> entry : datasetIdAndSchemaId.entrySet()) {
+      Map<String, Object> result = new HashMap<>();
+      String datasetName = "dataset_" + entry.getKey();
+      result.put("connectionDataVO", createConnectionDataVO(datasetName));
+      result.put("dataset_id", datasetName);
+      result.put("idDatasetSchema", entry.getValue());
+
+      kafkaSenderUtils.releaseKafkaEvent(EventType.CONNECTION_CREATED_EVENT, result);
+    }
+  }
+
+
+  /**
+   * Creates the connection data VO.
+   *
+   * @param datasetName the dataset name
+   *
+   * @return the connection data VO
+   */
+  private ConnectionDataVO createConnectionDataVO(final String datasetName) {
+    final ConnectionDataVO result = new ConnectionDataVO();
+    result.setConnectionString(connStringPostgre);
+    result.setUser(userPostgreDb);
+    result.setPassword(passPostgreDb);
+    result.setSchema(datasetName);
+    return result;
+  }
+
+  /**
+   * Gets the all data sets name.
+   *
+   * @param datasetName the dataset name
+   *
+   * @return the all data sets name
+   */
+  private List<String> getAllDataSetsName(String datasetName) {
+
+    return jdbcTemplate.query(sqlGetDatasetsName, new PreparedStatementSetter() {
+      @Override
+      public void setValues(PreparedStatement ps) throws SQLException {
+        ps.setString(1, datasetName);
+        ps.setString(2, datasetName);
+      }
+    }, new ResultSetExtractor<List<String>>() {
+      @Override
+      public List<String> extractData(ResultSet resultSet)
+          throws SQLException, DataAccessException {
+        List<String> datasets = new ArrayList<>();
+        while (resultSet.next()) {
+          datasets.add(resultSet.getString(1));
+        }
+        return datasets;
+      }
+    });
+  }
+
+
+  /**
+   * Prints the to file.
+   *
+   * @param fileName the file name
+   * @param query the query
+   * @param copyManager the copy manager
+   *
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private void printToFile(String fileName, String query, CopyManager copyManager)
+      throws SQLException, IOException {
+    byte[] buffer;
+    CopyOut copyOut = copyManager.copyOut(query);
+
+    try (OutputStream to = new FileOutputStream(fileName)) {
+      while ((buffer = copyOut.readFromCopy()) != null) {
+        to.write(buffer);
+      }
+    } finally {
+      if (copyOut.isActive()) {
+        copyOut.cancelCopy();
+      }
+    }
+  }
+
+
+  /**
+   * Copy from file.
+   *
+   * @param query the query
+   * @param fileName the file name
+   * @param copyManager the copy manager
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws SQLException the SQL exception
+   */
+  private void copyFromFile(String query, String fileName, CopyManager copyManager)
+      throws IOException, SQLException {
+    Path path = Paths.get(fileName);
+    FileReader from = new FileReader(path.toString());
+    // bufferFile it's a size in bytes defined in consul variable. It can be 65536
+    char[] cbuf = new char[bufferFile];
+    int len = 0;
+    CopyIn cp = copyManager.copyIn(query);
+    // Copy the data from the file by chunks
+    try {
+      while ((len = from.read(cbuf)) > 0) {
+        byte[] buf = new String(cbuf, 0, len).getBytes();
+        cp.writeToCopy(buf, 0, buf.length);
+      }
+    } catch (PSQLException e) {
+      LOG_ERROR.error(
+          "Error restoring the file {} executing query {}. Restoring snapshot continues", fileName,
+          query, e);
+    } finally {
+      from.close();
+      cp.endCopy();
+      if (cp.isActive())
+        cp.cancelCopy();
+    }
+  }
+
 }
