@@ -393,4 +393,14 @@ public class FieldValue {
     LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
     return fieldDate.getYear() <= number.longValue();
   }
+
+  /**
+   * Number match.
+   *
+   * @param regex the regex, not null.
+   * @return true, if successful
+   */
+  public boolean numberMatch(String regex) {
+    return value.matches(regex);
+  }
 }
