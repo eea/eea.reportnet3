@@ -96,7 +96,7 @@ export const useSetColumns = (
         ? `<span style="font-weight:bold">Description:</span> ${
             !isNil(column.description) && column.description !== ''
               ? column.description
-              : resources.messages['noDescription']
+              : `${resources.messages['fieldTypeColumnTooltip']} ${column.type}`
           }<br/><span style="font-weight:bold">${resources.messages['codelists']}: </span>
           ${column.codelistItems
             .map(codelistItem =>
@@ -106,7 +106,7 @@ export const useSetColumns = (
         : !isNil(column.description) && column.description !== '' && column.description.length > 35
         ? column.description.substring(0, 35)
         : isNil(column.description) || column.description === ''
-        ? resources.messages['noDescription']
+        ? `${resources.messages['fieldTypeColumnTooltip']} ${column.type}`
         : column.description;
     };
 
