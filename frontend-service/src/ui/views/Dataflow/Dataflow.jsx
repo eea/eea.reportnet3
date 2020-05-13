@@ -56,34 +56,34 @@ const Dataflow = withRouter(({ history, match }) => {
   const user = useContext(UserContext);
 
   const dataflowInitialState = {
+    currentUrl: '',
     data: {},
+    dataProviderId: [],
+    datasetIdToSnapshotProps: undefined,
     deleteInput: '',
     description: '',
+    designDatasetSchemas: [],
     formHasRepresentatives: false,
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
     id: dataflowId,
     isApiKeyDialogVisible: false,
     isCustodian: false,
+    isDataSchemaCorrect: [],
+    isDataUpdated: false,
     isDeleteDialogVisible: false,
     isEditDialogVisible: false,
     isManageRolesDialogVisible: false,
+    isPageLoading: true,
     isPropertiesDialogVisible: false,
+    isReceiptLoading: false,
+    isReceiptOutdated: false,
     isRepresentativeView: false,
+    isSnapshotDialogVisible: false,
     name: '',
     obligations: {},
     status: '',
-    dataProviderId: [],
-    datasetIdToSnapshotProps: undefined,
-    designDatasetSchemas: [],
-    isDataSchemaCorrect: [],
-    isDataUpdated: false,
-    isPageLoading: true,
-    updatedDatasetSchema: undefined,
-    isSnapshotDialogVisible: false,
-    currentUrl: '',
-    isReceiptLoading: false,
-    isReceiptOutdated: false
+    updatedDatasetSchema: undefined
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -192,7 +192,7 @@ const Dataflow = withRouter(({ history, match }) => {
     } else if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']) {
       leftSideBarContext.addModels([propertiesBtn, manageRolesBtn]);
     } else {
-      leftSideBarContext.addModels(!dataflowState.isCustodian ? [propertiesBtn, apiKeyBtn] : [propertiesBtn]); //Check condition
+      leftSideBarContext.addModels(!dataflowState.isCustodian ? [propertiesBtn, apiKeyBtn] : [propertiesBtn]);
     }
   }, [dataflowState.isCustodian, dataflowState.status]);
 
