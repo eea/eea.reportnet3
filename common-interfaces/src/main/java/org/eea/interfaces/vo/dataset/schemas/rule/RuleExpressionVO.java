@@ -508,6 +508,7 @@ public class RuleExpressionVO implements Serializable {
         case LT_YEAR:
         case GTEQ_YEAR:
         case LTEQ_YEAR:
+        case NUM_MATCH:
           return "this." + operator.getLabel() + "(" + toStringBranch(arg2) + ")";
       }
     }
