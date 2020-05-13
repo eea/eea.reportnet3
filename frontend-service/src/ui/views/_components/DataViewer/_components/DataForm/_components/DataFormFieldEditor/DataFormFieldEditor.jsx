@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
+import { Calendar } from 'ui/views/_components/Calendar';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 
@@ -31,6 +32,18 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     const linkItems = await getLinkItemsWithEmptyOption(filter, type, column.referencedField);
     inmColumn.linkItems = linkItems;
     setColumnWithLinks(inmColumn);
+  };
+
+  const formatDate = date => {
+    let d = new Date(date),
+      month = '' + (d.getMonth() + 1),
+      day = '' + d.getDate(),
+      year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
   };
 
   const getFilter = type => {
@@ -147,6 +160,8 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
       renderCodelistDropdown(field, fieldValue)
     ) : type === 'LINK' ? (
       renderLinkDropdown(field, fieldValue)
+    ) : type === 'DATE' ? (
+      renderCalendar(field, fieldValue)
     ) : (
       <InputText
         id={field}
@@ -159,6 +174,22 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
         type="text"
       />
     );
+
+  const renderCalendar = (field, fieldValue) => {
+    console.log(field, fieldValue);
+    return (
+      <Calendar
+        onChange={e => onChangeForm(field, formatDate(e.target.value))}
+        appendTo={document.getElementById('pr_id_11')}
+        dateFormat="yy-mm-dd"
+        monthNavigator={true}
+        style={{ width: '60px' }}
+        value={new Date(formatDate(fieldValue))}
+        yearNavigator={true}
+        yearRange="2010:2030"
+      />
+    );
+  };
 
   const renderLinkDropdown = (field, fieldValue) => (
     <Dropdown

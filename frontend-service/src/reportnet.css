@@ -2272,6 +2272,10 @@ form .error {
 body .p-dialog.edit-table .p-dialog-content {
   max-height: 65vh;
 }
+body .p-dialog.edit-table.calendar-table .p-dialog-content {
+  overflow-y: visible !important;
+  overflow: inherit !important;
+}
 /* buttons */
 
 @keyframes p-progress-spinner-color {

@@ -947,7 +947,7 @@ const DataViewer = withRouter(
         {addDialogVisible && (
           <div onKeyPress={onKeyPress}>
             <Dialog
-              className="edit-table"
+              className={'edit-table calendar-table'}
               blockScroll={false}
               footer={addRowDialogFooter}
               header={resources.messages['addRecord']}
@@ -975,7 +975,7 @@ const DataViewer = withRouter(
         {editDialogVisible && (
           <Dialog
             blockScroll={false}
-            className="edit-table"
+            className="edit-table calendar-table"
             closeOnEscape={false}
             footer={editRowDialogFooter}
             header={resources.messages['editRow']}

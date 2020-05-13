@@ -40,7 +40,15 @@ const DataForm = ({
                   tooltipOptions={{ position: 'top' }}
                 />
               </div>
-              <div className="p-col-8" style={{ padding: '.5em' }}>
+              <div
+                className="p-col-8"
+                style={{
+                  padding: '.5em',
+                  width:
+                    column.type === 'DATE' || column.type === 'CODELIST' || column.type === 'MULTISELECT_CODELIST'
+                      ? '30%'
+                      : ''
+                }}>
                 <DataFormFieldEditor
                   column={column}
                   datasetId={datasetId}
@@ -81,7 +89,15 @@ const DataForm = ({
                   tooltipOptions={{ position: 'top' }}
                 />
               </div>
-              <div className="p-col-8" style={{ padding: '.5em' }}>
+              <div
+                className="p-col-8"
+                style={{
+                  padding: '.5em',
+                  width:
+                    column.type === 'DATE' || column.type === 'CODELIST' || column.type === 'MULTISELECT_CODELIST'
+                      ? '30%'
+                      : ''
+                }}>
                 <DataFormFieldEditor
                   column={column}
                   datasetId={datasetId}
