@@ -165,7 +165,7 @@ const DataViewer = withRouter(
       return getIconsValidationsErrors(validationsGroup);
     };
 
-    const { columns, setColumns, originalColumns, selectedHeader } = useSetColumns(
+    const { columns, getTooltipMessage, onShowFieldInfo, originalColumns, selectedHeader, setColumns } = useSetColumns(
       actionTemplate,
       cellDataEditor,
       colsSchema,
@@ -419,13 +419,11 @@ const DataViewer = withRouter(
       }
     };
 
-    const onDeletePastedRecord = recordIndex => {
+    const onDeletePastedRecord = recordIndex =>
       dispatchRecords({ type: 'DELETE_PASTED_RECORDS', payload: { recordIndex } });
-    };
 
-    const onEditAddFormInput = (property, value) => {
+    const onEditAddFormInput = (property, value) =>
       dispatchRecords({ type: !isNewRecord ? 'SET_EDITED_RECORD' : 'SET_NEW_RECORD', payload: { property, value } });
-    };
 
     //When pressing "Escape" cell data resets to initial value
     //on "Enter" and "Tab" the value submits
@@ -661,6 +659,10 @@ const DataViewer = withRouter(
           label={resources.messages['cancel']}
           icon="cancel"
           onClick={() => {
+            dispatchRecords({
+              type: 'SET_NEW_RECORD',
+              payload: RecordUtils.createEmptyObject(colsSchema, undefined)
+            });
             setAddDialogVisible(false);
           }}
         />
@@ -892,6 +894,7 @@ const DataViewer = withRouter(
             footer={columnInfoDialogFooter}
             header={resources.messages['columnInfo']}
             onHide={() => setIsColumnInfoVisible(false)}
+            style={{ minWidth: '40vw', maxWidth: '80vw', maxHeight: '80vh' }}
             visible={isColumnInfoVisible}>
             <DataTable
               autoLayout={true}
@@ -944,7 +947,7 @@ const DataViewer = withRouter(
         {addDialogVisible && (
           <div onKeyPress={onKeyPress}>
             <Dialog
-              className="edit-table"
+              className={'edit-table calendar-table'}
               blockScroll={false}
               footer={addRowDialogFooter}
               header={resources.messages['addRecord']}
@@ -959,7 +962,9 @@ const DataViewer = withRouter(
                   colsSchema={colsSchema}
                   datasetId={datasetId}
                   formType="NEW"
+                  getTooltipMessage={getTooltipMessage}
                   onChangeForm={onEditAddFormInput}
+                  onShowFieldInfo={onShowFieldInfo}
                   records={records}
                 />
               </div>
@@ -970,7 +975,7 @@ const DataViewer = withRouter(
         {editDialogVisible && (
           <Dialog
             blockScroll={false}
-            className="edit-table"
+            className="edit-table calendar-table"
             closeOnEscape={false}
             footer={editRowDialogFooter}
             header={resources.messages['editRow']}
@@ -985,7 +990,9 @@ const DataViewer = withRouter(
                 datasetId={datasetId}
                 editDialogVisible={editDialogVisible}
                 formType="EDIT"
+                getTooltipMessage={getTooltipMessage}
                 onChangeForm={onEditAddFormInput}
+                onShowFieldInfo={onShowFieldInfo}
                 records={records}
               />
             </div>

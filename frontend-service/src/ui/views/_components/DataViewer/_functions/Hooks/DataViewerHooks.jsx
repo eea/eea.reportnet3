@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 
+import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -88,31 +89,88 @@ export const useSetColumns = (
   const [originalColumns, setOriginalColumns] = useState([]);
   const [selectedHeader, setSelectedHeader] = useState();
 
+  const onShowFieldInfo = (header, visible) => {
+    setSelectedHeader(header);
+    setIsColumnInfoVisible(visible);
+  };
+
+  const providerCodeTemplate = rowData => (
+    <div style={{ display: 'flex', alignItems: 'center' }}>{!isUndefined(rowData) ? rowData.providerCode : null}</div>
+  );
+
+  const getFieldTypeValue = fieldType => {
+    console.log(fieldType);
+    const fieldTypes = [
+      { fieldType: 'Number_Integer', value: 'Number - Integer' },
+      { fieldType: 'Number_Decimal', value: 'Number - Decimal' },
+      { fieldType: 'Date', value: 'Date' },
+      { fieldType: 'Text', value: 'Text' },
+      { fieldType: 'Long_Text', value: 'Long text' },
+      { fieldType: 'Email', value: 'Email' },
+      { fieldType: 'URL', value: 'URL' },
+      { fieldType: 'Phone', value: 'Phone number' },
+      { fieldType: 'Codelist', value: 'Single select' },
+      { fieldType: 'Link', value: 'Link' }
+    ];
+
+    if (!isUndefined(fieldType)) {
+      const filteredTypes = fieldTypes.filter(field => field.fieldType.toUpperCase() === fieldType.toUpperCase())[0];
+      return filteredTypes.value;
+    } else {
+      return '';
+    }
+  };
+
+  const getTooltipMessage = column => {
+    console.log(column);
+    return !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
+      ? `<span style="font-weight:bold">Type:</span> ${getFieldTypeValue(column.type)}
+        <span style="font-weight:bold">Description:</span> ${
+          !isNil(column.description) && column.description !== ''
+            ? column.description
+            : resources.messages['noDescription']
+        }<br/><span style="font-weight:bold">${resources.messages['codelists']}: </span>
+        ${column.codelistItems
+          .map(codelistItem =>
+            !isEmpty(codelistItem) && codelistItem.length > 15 ? `${codelistItem.substring(0, 15)}...` : codelistItem
+          )
+          .join(', ')}`
+      : `<span style="font-weight:bold">Type:</span> ${getFieldTypeValue(column.type)}
+      <span style="font-weight:bold">Description:</span> ${
+        !isNil(column.description) && column.description !== '' && column.description.length > 35
+          ? column.description.substring(0, 35)
+          : isNil(column.description) || column.description === ''
+          ? resources.messages['noDescription']
+          : column.description
+      }`;
+  };
+
+  const dataTemplate = (rowData, column) => {
+    let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.field)[0];
+    if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
+      const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
+      const message = DataViewerUtils.formatValidations(validations);
+      const levelError = DataViewerUtils.getLevelError(validations);
+      return (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+          {field ? field.fieldData[column.field] : null}
+          <IconTooltip levelError={levelError} message={message} />
+        </div>
+      );
+    } else {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center' }}>{field ? field.fieldData[column.field] : null}</div>
+      );
+    }
+  };
+
   useEffect(() => {
     const maxWidths = [];
-
-    const getTooltipMessage = column => {
-      return !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
-        ? `<span style="font-weight:bold">Description:</span> ${
-            !isNil(column.description) && column.description !== ''
-              ? column.description
-              : resources.messages['noDescription']
-          }<br/><span style="font-weight:bold">${resources.messages['codelists']}: </span>
-          ${column.codelistItems
-            .map(codelistItem =>
-              !isEmpty(codelistItem) && codelistItem.length > 15 ? `${codelistItem.substring(0, 15)}...` : codelistItem
-            )
-            .join(', ')}`
-        : !isNil(column.description) && column.description !== '' && column.description.length > 35
-        ? column.description.substring(0, 35)
-        : isNil(column.description) || column.description === ''
-        ? resources.messages['noDescription']
-        : column.description;
-    };
-
-    const providerCodeTemplate = rowData => (
-      <div style={{ display: 'flex', alignItems: 'center' }}>{!isUndefined(rowData) ? rowData.providerCode : null}</div>
-    );
 
     // if (!isEditing) {
     //Calculate the max width of the shown data
@@ -127,29 +185,6 @@ export const useSetColumns = (
     //   }
     // });
     //Template for Field validation
-    const dataTemplate = (rowData, column) => {
-      let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.field)[0];
-      if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
-        const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
-        const message = DataViewerUtils.formatValidations(validations);
-        const levelError = DataViewerUtils.getLevelError(validations);
-        return (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-            {field ? field.fieldData[column.field] : null}
-            <IconTooltip levelError={levelError} message={message} />
-          </div>
-        );
-      } else {
-        return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>{field ? field.fieldData[column.field] : null}</div>
-        );
-      }
-    };
 
     //Calculate the max width of data column
     const textMaxWidth = colsSchema.map(col => RecordUtils.getTextWidth(col.header, '14pt Open Sans'));
@@ -172,8 +207,9 @@ export const useSetColumns = (
                 className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
                 icon="infoCircle"
                 onClick={() => {
-                  setSelectedHeader(column.header);
-                  setIsColumnInfoVisible(true);
+                  onShowFieldInfo(column.header, true);
+                  // setSelectedHeader(column.header);
+                  // setIsColumnInfoVisible(true);
                 }}
                 tooltip={getTooltipMessage(column)}
                 tooltipOptions={{ position: 'top' }}
@@ -239,9 +275,11 @@ export const useSetColumns = (
 
   return {
     columns,
-    setColumns,
+    getTooltipMessage,
+    onShowFieldInfo,
     originalColumns,
-    selectedHeader
+    selectedHeader,
+    setColumns
   };
 };
 
