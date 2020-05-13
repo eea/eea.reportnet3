@@ -164,7 +164,7 @@ const Dataflow = withRouter(({ history, match }) => {
             label: resources.messages['dataflow'],
             icon: 'home',
             href: getUrl(routes.DATAFLOW),
-            command: () => history.push(getUrl(routes.DATAFLOW))
+            command: () => history.goBack()
           },
           {
             label: currentRepresentative[0],
@@ -173,7 +173,7 @@ const Dataflow = withRouter(({ history, match }) => {
         ]);
       }
     }
-  }, [match.params.representativeId, dataflowState.data]);
+  }, [match.params, dataflowState.data]);
 
   useEffect(() => {
     const apiKeyBtn = {
