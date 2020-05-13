@@ -114,7 +114,7 @@ const Dataflow = withRouter(({ history, match }) => {
             icon: 'archive'
           }
         ]);
-      } else if (representatives.length > 1 && isUndefined(match.params.representativeId)) {
+      } else if (representatives.length > 1 && isUndefined(representativeId)) {
         breadCrumbContext.add([
           {
             label: resources.messages['dataflows'],
@@ -127,9 +127,9 @@ const Dataflow = withRouter(({ history, match }) => {
             icon: 'archive'
           }
         ]);
-      } else if (match.params.representativeId) {
+      } else if (representativeId) {
         const currentRepresentative = representatives
-          .filter(representative => representative.dataProviderId === parseInt(match.params.representativeId))
+          .filter(representative => representative.dataProviderId === parseInt(representativeId))
           .map(representative => representative.name);
 
         breadCrumbContext.add([
@@ -148,6 +148,15 @@ const Dataflow = withRouter(({ history, match }) => {
           {
             label: currentRepresentative[0],
             icon: 'archive'
+          }
+        ]);
+      } else if (dataflowState.status === 'DESIGN') {
+        breadCrumbContext.add([
+          {
+            label: resources.messages['dataflows'],
+            icon: 'home',
+            href: getUrl(routes.DATAFLOWS),
+            command: () => history.goBack()
           }
         ]);
       }
@@ -221,7 +230,7 @@ const Dataflow = withRouter(({ history, match }) => {
     setIsPageLoading(true);
     onLoadReportingDataflow();
     onLoadSchemasValidations();
-  }, [dataflowId, dataflowState.isDataUpdated, match.params.representativeId]);
+  }, [dataflowId, dataflowState.isDataUpdated, representativeId]);
 
   const handleRedirect = target => history.push(target);
 
@@ -359,10 +368,10 @@ const Dataflow = withRouter(({ history, match }) => {
         }
       }
 
-      if (match.params.representativeId) {
+      if (representativeId) {
         if (!isEmpty(dataflow.representatives) && !isEmpty(dataflow.datasets)) {
           const isReceiptOutdated = dataflow.representatives
-            .filter(representative => representative.dataProviderId === parseInt(match.params.representativeId))
+            .filter(representative => representative.dataProviderId === parseInt(representativeId))
             .map(representative => representative.isReceiptOutdated);
 
           if (isReceiptOutdated.length === 1) {
@@ -432,7 +441,7 @@ const Dataflow = withRouter(({ history, match }) => {
           title={TextUtils.ellipsis(dataflowState.name)}
         />
 
-        {!dataflowState.isRepresentativeView && isNil(match.params.representativeId) ? (
+        {!dataflowState.isRepresentativeView && isNil(representativeId) ? (
           <BigButtonList
             dataflowState={dataflowState}
             handleRedirect={handleRedirect}
