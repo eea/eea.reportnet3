@@ -517,34 +517,38 @@ public class RuleExpressionVO implements Serializable {
   }
 
   public boolean isDataTypeCompatible(DataType dataType) {
-    switch (dataType) {
-      // DataType: Boolean
-      case BOOLEAN:
-        return Boolean.TRUE.equals(isDataTypeCompatibleRecursive("Boolean", this));
-      // DataType: String
-      case TEXT:
-      case LONG_TEXT:
-      case CODELIST:
-      case LINK:
-      case LINK_DATA:
-      case URL:
-      case PHONE:
-      case EMAIL:
-        return Boolean.TRUE.equals(isDataTypeCompatibleRecursive("String", this));
-      // DataType: Number
-      case NUMBER_INTEGER:
-      case NUMBER_DECIMAL:
-      case COORDINATE_LAT:
-      case COORDINATE_LONG:
-        return Boolean.TRUE.equals(isDataTypeCompatibleRecursive("Number", this));
-      // DataType: Date
-      case DATE:
-        return Boolean.TRUE.equals(isDataTypeCompatibleRecursive("Date", this));
-      // DataType: Unsupported
-      default:
-        LOG_ERROR.error("Unsupported DataType: {}", dataType);
-        return false;
-    }
+
+    // TODO.
+    return true;
+
+    // switch (dataType) {
+    // // DataType: Boolean
+    // case BOOLEAN:
+    // return Boolean.TRUE.equals(isDataTypeCompatibleRecursive("Boolean", this));
+    // // DataType: String
+    // case TEXT:
+    // case LONG_TEXT:
+    // case CODELIST:
+    // case LINK:
+    // case LINK_DATA:
+    // case URL:
+    // case PHONE:
+    // case EMAIL:
+    // return Boolean.TRUE.equals(isDataTypeCompatibleRecursive("String", this));
+    // // DataType: Number
+    // case NUMBER_INTEGER:
+    // case NUMBER_DECIMAL:
+    // case COORDINATE_LAT:
+    // case COORDINATE_LONG:
+    // return Boolean.TRUE.equals(isDataTypeCompatibleRecursive("Number", this));
+    // // DataType: Date
+    // case DATE:
+    // return Boolean.TRUE.equals(isDataTypeCompatibleRecursive("Date", this));
+    // // DataType: Unsupported
+    // default:
+    // LOG_ERROR.error("Unsupported DataType: {}", dataType);
+    // return false;
+    // }
   }
 
   private Boolean isDataTypeCompatibleRecursive(String type, RuleExpressionVO ruleExpressionVO) {
