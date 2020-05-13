@@ -141,7 +141,7 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'home',
+            icon: 'archive',
             href: getUrl(routes.DATAFLOW),
             command: () => history.goBack()
           },
@@ -157,6 +157,10 @@ const Dataflow = withRouter(({ history, match }) => {
             icon: 'home',
             href: getUrl(routes.DATAFLOWS),
             command: () => history.goBack()
+          },
+          {
+            label: resources.messages['dataflow'],
+            icon: 'archive'
           }
         ]);
       }
