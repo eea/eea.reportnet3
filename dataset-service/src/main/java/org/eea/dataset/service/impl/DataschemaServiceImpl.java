@@ -600,6 +600,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (fieldSchemaVO.getPk() != null) {
           fieldSchema.put("pk", fieldSchemaVO.getPk());
         }
+        if (fieldSchemaVO.getPkMustBeUsed() != null) {
+          fieldSchema.put("pkMustBeUsed", fieldSchemaVO.getPkMustBeUsed());
+        }
         if (fieldSchemaVO.getReferencedField() != null) {
           Document referenced = new Document();
           referenced.put("idDatasetSchema",
