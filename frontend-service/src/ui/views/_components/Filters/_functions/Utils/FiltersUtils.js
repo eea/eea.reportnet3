@@ -32,7 +32,7 @@ const getLabelInitialState = (input = [], select = [], date = [], dropDown = [],
   return labelByGroup.reduce((obj, key) => Object.assign(obj, { [key]: !isEmpty(filteredBy[key]) }), {});
 };
 
-const getOptionTypes = (data, option, list) => {
+const getOptionTypes = (data, option, list, order) => {
   if (list) {
     return list[option].map(item => ({
       type: item.acronym ? `${item.acronym} - ${item.name}` : item.name,
@@ -41,9 +41,10 @@ const getOptionTypes = (data, option, list) => {
   } else {
     const optionItems = uniq(data.map(item => item[option]));
     const filteredOptionItems = optionItems.filter(option => !isNil(option));
-    const validOptionItems = filteredOptionItems.some(item => typeof item === 'boolean')
-      ? [true, false]
+    const orderedOptions = filteredOptionItems.includes('INFO' || 'WARNING' || 'ERROR' || 'BLOCKER')
+      ? order(filteredOptionItems)
       : filteredOptionItems;
+    const validOptionItems = orderedOptions.some(item => typeof item === 'boolean') ? [true, false] : orderedOptions;
     for (let i = 0; i < validOptionItems.length; i++) {
       const template = [];
       validOptionItems.forEach(item => {

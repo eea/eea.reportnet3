@@ -400,7 +400,6 @@ export class DataTable extends Component {
     let headers = DomHandler.find(this.container, '.p-datatable-thead > tr > th');
     headers.map(header => widths.push(DomHandler.getOuterWidth(header)));
     state.columnWidths = widths.join(',');
-
     if (this.props.columnResizeMode === 'expand') {
       state.tableWidth = this.props.scrollable
         ? DomHandler.findSingle(this.container, '.p-datatable-scrollable-header-table').style.width
@@ -424,7 +423,6 @@ export class DataTable extends Component {
       if (this.props.scrollable) {
         let headerCols = DomHandler.find(this.container, '.p-datatable-scrollable-header-table > colgroup > col');
         let bodyCols = DomHandler.find(this.container, '.p-datatable-scrollable-body-table > colgroup > col');
-
         headerCols.map((col, index) => (col.style.width = widths[index] + 'px'));
         bodyCols.map((col, index) => (col.style.width = widths[index] + 'px'));
       } else {
