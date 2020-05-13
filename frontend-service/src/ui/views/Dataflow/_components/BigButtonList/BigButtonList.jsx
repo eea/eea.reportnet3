@@ -29,15 +29,15 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
-import { dataflowActionCreators } from '../../_functions/dataflowActionCreators';
 
 export const BigButtonList = ({
-  dataflowDispatch,
   dataflowState,
   handleRedirect,
+  onCleanUpReceipt,
   onSaveName,
   onShowSnapshotDialog,
   onUpdateData,
+  setIsReceiptLoading,
   setUpdatedDatasetSchema,
   updatedDatasetSchema
 }) => {
@@ -60,8 +60,6 @@ export const BigButtonList = ({
   const receiptBtnRef = useRef(null);
 
   const dataflowId = dataflowState.id;
-
-  const { setIsReceiptLoading, onCleanUpReceipt } = dataflowActionCreators(dataflowDispatch);
 
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);

@@ -12,18 +12,16 @@ import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
-import { dataflowActionCreators } from '../../_functions/dataflowActionCreators';
 
 export const BigButtonListRepresentative = ({
-  dataflowDispatch,
   dataflowState,
   handleRedirect,
+  match,
+  onCleanUpReceipt,
   onShowSnapshotDialog,
-  match
+  setIsReceiptLoading
 }) => {
   const notificationContext = useContext(NotificationContext);
-
-  const { setIsReceiptLoading, onCleanUpReceipt } = dataflowActionCreators(dataflowDispatch);
 
   const receiptBtnRef = useRef(null);
 
@@ -75,7 +73,6 @@ export const BigButtonListRepresentative = ({
           <div className={styles.datasetItem}>
             {useBigButtonList({
               dataflowState,
-              dataflowDispatch,
               handleRedirect,
               match,
               onLoadReceiptData,

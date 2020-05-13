@@ -41,7 +41,6 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
-import { dataflowActionCreators } from './_functions/dataflowActionCreators';
 import { useHelpSteps } from 'ui/views/Dataflow/_functions/Hooks/useHelpSteps';
 import { useFilterHelpSteps } from './_functions/Hooks/useFilterHelpSteps';
 
@@ -88,26 +87,6 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
-
-  const {
-    initialLoad,
-    loadPermissions,
-    manageDialogs,
-    onDeleteDataflow,
-    onEditData,
-    onInitReceiptData,
-    setDataProviderId,
-    setDatasetIdToSnapshotProps,
-    setDesignDatasetSchemas,
-    setFormHasRepresentatives,
-    setHasRepresentativesWithoutDatasets,
-    setIsDataSchemaCorrect,
-    setIsDataUpdated,
-    setIsReceiptOutdated,
-    setIsPageLoading,
-    setUpdatedDatasetSchema,
-    setIsRepresentativeView
-  } = dataflowActionCreators(dataflowDispatch);
 
   useEffect(() => {
     if (!isNil(user.contextRoles)) onLoadPermission();
@@ -245,8 +224,71 @@ const Dataflow = withRouter(({ history, match }) => {
     />
   );
 
+  const initialLoad = (dataflow, isRepresentativeView) =>
+    dataflowDispatch({
+      type: 'INITIAL_LOAD',
+      payload: {
+        data: dataflow,
+        description: dataflow.description,
+        isRepresentativeView: isRepresentativeView,
+        name: dataflow.name,
+        obligations: dataflow.obligation,
+        status: dataflow.status
+      }
+    });
+
+  const manageDialogs = (dialog, value, secondDialog, secondValue) =>
+    dataflowDispatch({
+      type: 'MANAGE_DIALOGS',
+      payload: { dialog, value, secondDialog, secondValue, deleteInput: '' }
+    });
+
+  const onConfirmDeleteDataflow = event =>
+    dataflowDispatch({ type: 'ON_CONFIRM_DELETE_DATAFLOW', payload: { deleteInput: event.target.value } });
+
+  const setFormHasRepresentatives = value =>
+    dataflowDispatch({ type: 'SET_FORM_HAS_REPRESENTATIVES', payload: { formHasRepresentatives: value } });
+
+  const setHasRepresentativesWithoutDatasets = value =>
+    dataflowDispatch({
+      type: 'SET_HAS_REPRESENTATIVES_WITHOUT_DATASETS',
+      payload: { hasRepresentativesWithoutDatasets: value }
+    });
+
+  const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
+
+  const setIsPageLoading = isPageLoading =>
+    dataflowDispatch({ type: 'SET_IS_PAGE_LOADING', payload: { isPageLoading } });
+
+  const setUpdatedDatasetSchema = updatedData =>
+    dataflowDispatch({ type: 'SET_UPDATED_DATASET_SCHEMA', payload: { updatedData } });
+
+  const setIsReceiptLoading = isReceiptLoading => {
+    dataflowDispatch({
+      type: 'SET_IS_RECEIPT_LOADING',
+      payload: { isReceiptLoading }
+    });
+  };
+
+  const setIsReceiptOutdated = isReceiptOutdated => {
+    dataflowDispatch({
+      type: 'SET_IS_RECEIPT_OUTDATED',
+      payload: { isReceiptOutdated }
+    });
+  };
+
+  const onCleanUpReceipt = () => {
+    dataflowDispatch({
+      type: 'ON_CLEAN_UP_RECEIPT',
+      payload: { isReceiptLoading: false, isReceiptOutdated: false }
+    });
+  };
+
   const onEditDataflow = (newName, newDescription) => {
-    onEditData(newName, newDescription);
+    dataflowDispatch({
+      type: 'ON_EDIT_DATA',
+      payload: { name: newName, description: newDescription, isEditDialogVisible: false }
+    });
     onLoadReportingDataflow();
   };
 
@@ -263,7 +305,7 @@ const Dataflow = withRouter(({ history, match }) => {
       `${config.permissions.DATAFLOW}${dataflowId}`
     );
 
-    loadPermissions(hasWritePermissions, isCustodian);
+    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian } });
   };
 
   const checkIsRepresentativeView = (datasets, dataflow) => {
@@ -291,7 +333,7 @@ const Dataflow = withRouter(({ history, match }) => {
           schema.index = idx;
         });
 
-        setDesignDatasetSchemas(dataflow.designDatasets);
+        dataflowDispatch({ type: 'SET_DESIGN_DATASET_SCHEMAS', payload: { designDatasets: dataflow.designDatasets } });
 
         const datasetSchemaInfo = [];
         dataflow.designDatasets.map(schema => {
@@ -300,14 +342,13 @@ const Dataflow = withRouter(({ history, match }) => {
 
         setUpdatedDatasetSchema(datasetSchemaInfo);
       }
-      ///////////
 
       if (!isEmpty(dataflow.datasets)) {
         const dataProviderIds = dataflow.datasets.map(dataset => dataset.dataProviderId);
         if (uniq(dataProviderIds).length === 1) {
-          setDataProviderId(dataProviderIds[0]);
+          dataflowDispatch({ type: 'SET_DATA_PROVIDER_ID', payload: { id: dataProviderIds[0] } });
         }
-      } //+
+      }
 
       if (match.params.representativeId) {
         if (!isEmpty(dataflow.representatives) && !isEmpty(dataflow.datasets)) {
@@ -321,8 +362,6 @@ const Dataflow = withRouter(({ history, match }) => {
             .filter(representative => representative.dataProviderId === parseInt(match.params.representativeId))
             .map(representative => representative.isReceiptOutdated);
 
-          console.log('IN isReceiptOutdated', isReceiptOutdated);
-
           if (isReceiptOutdated.length === 1) {
             setIsReceiptOutdated(isReceiptOutdated[0]);
           }
@@ -330,8 +369,6 @@ const Dataflow = withRouter(({ history, match }) => {
       } else {
         if (!isEmpty(dataflow.representatives)) {
           const isReceiptOutdated = dataflow.representatives.map(representative => representative.isReceiptOutdated);
-
-          console.log('OUT isReceiptOutdated', isReceiptOutdated);
 
           if (isReceiptOutdated.length === 1) {
             setIsReceiptOutdated(isReceiptOutdated[0]);
@@ -353,7 +390,8 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onLoadSchemasValidations = async () => {
     const validationResult = await DataflowService.schemasValidation(dataflowId);
-    setIsDataSchemaCorrect(validationResult);
+
+    dataflowDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { validationResult } });
   };
 
   const onSaveName = async (value, index) => {
@@ -367,7 +405,7 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   const onShowSnapshotDialog = async datasetId => {
-    setDatasetIdToSnapshotProps(datasetId);
+    dataflowDispatch({ type: 'SET_DATASET_ID_TO_SNAPSHOT_PROPS', payload: { id: datasetId } });
     manageDialogs('isSnapshotDialogVisible', true);
   };
 
@@ -391,41 +429,25 @@ const Dataflow = withRouter(({ history, match }) => {
           title={TextUtils.ellipsis(dataflowState.name)}
         />
 
-        {/*   <BigButtonList
-          dataflowDispatch={dataflowDispatch}
-          dataflowState={dataflowState}
-          handleRedirect={handleRedirect}
-          onSaveName={onSaveName}
-          onShowSnapshotDialog={onShowSnapshotDialog}
-          onUpdateData={setIsDataUpdated}
-          setUpdatedDatasetSchema={setUpdatedDatasetSchema}
-        />
-
-        <BigButtonListRepresentative
-          dataflowDispatch={dataflowDispatch}
-          dataflowState={dataflowState}
-          handleRedirect={handleRedirect}
-          onShowSnapshotDialog={onShowSnapshotDialog}
-          match={match}
-        /> */}
-
         {!dataflowState.isRepresentativeView && isNil(match.params.representativeId) ? (
           <BigButtonList
-            dataflowDispatch={dataflowDispatch}
             dataflowState={dataflowState}
             handleRedirect={handleRedirect}
+            onCleanUpReceipt={onCleanUpReceipt}
             onSaveName={onSaveName}
             onShowSnapshotDialog={onShowSnapshotDialog}
             onUpdateData={setIsDataUpdated}
+            setIsReceiptLoading={setIsReceiptLoading}
             setUpdatedDatasetSchema={setUpdatedDatasetSchema}
           />
         ) : (
           <BigButtonListRepresentative
-            dataflowDispatch={dataflowDispatch}
             dataflowState={dataflowState}
             handleRedirect={handleRedirect}
-            onShowSnapshotDialog={onShowSnapshotDialog}
             match={match}
+            onCleanUpReceipt={onCleanUpReceipt}
+            onShowSnapshotDialog={onShowSnapshotDialog}
+            setIsReceiptLoading={setIsReceiptLoading}
           />
         )}
 
@@ -461,8 +483,9 @@ const Dataflow = withRouter(({ history, match }) => {
           dataflowId={dataflowId}
           history={history}
           isEditForm={true}
-          onEditDataflow={onEditDataflow}
           manageDialogs={manageDialogs}
+          onConfirmDeleteDataflow={onConfirmDeleteDataflow}
+          onEditDataflow={onEditDataflow}
           state={dataflowState}
         />
 

@@ -29,9 +29,9 @@ export const DataflowManagement = ({
   dataflowId,
   history,
   isEditForm,
-  onConfirmDelete,
   onCreateDataflow,
   onEditDataflow,
+  onConfirmDeleteDataflow,
   manageDialogs,
   state
 }) => {
@@ -220,7 +220,7 @@ export const DataflowManagement = ({
             <InputText
               autoFocus={true}
               className={`${styles.inputText}`}
-              onChange={event => onConfirmDelete(event)}
+              onChange={event => onConfirmDeleteDataflow(event)}
               ref={deleteInputRef}
               value={state.deleteInput}
             />
