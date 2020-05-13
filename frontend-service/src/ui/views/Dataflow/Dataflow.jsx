@@ -41,8 +41,8 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
-import { useHelpSteps } from 'ui/views/Dataflow/_functions/Hooks/useHelpSteps';
 import { useFilterHelpSteps } from './_functions/Hooks/useFilterHelpSteps';
+import { useHelpSteps } from 'ui/views/Dataflow/_functions/Hooks/useHelpSteps';
 
 const Dataflow = withRouter(({ history, match }) => {
   const {
@@ -352,12 +352,6 @@ const Dataflow = withRouter(({ history, match }) => {
 
       if (match.params.representativeId) {
         if (!isEmpty(dataflow.representatives) && !isEmpty(dataflow.datasets)) {
-          const representativeId = dataflow.datasets.map(id => id.dataProviderId);
-
-          const isReleased = dataflow.datasets
-            .filter(representative => representative.dataProviderId === uniq(representativeId)[0])
-            .map(releasedStatus => releasedStatus.isReleased);
-
           const isReceiptOutdated = dataflow.representatives
             .filter(representative => representative.dataProviderId === parseInt(match.params.representativeId))
             .map(representative => representative.isReceiptOutdated);

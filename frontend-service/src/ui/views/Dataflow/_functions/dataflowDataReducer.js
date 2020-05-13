@@ -53,20 +53,11 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_UPDATED_DATASET_SCHEMA':
       return { ...state, updatedDatasetSchema: payload.updatedData };
 
-    case 'SET_IS_REPRESENTATIVE_VIEW':
-      return { ...state, IsRepresentativeView: payload.isRepresentativeView };
-
-    case 'ON_INIT_RECEIPT_DATA':
-      return { ...state, ...payload };
-
     case 'SET_IS_RECEIPT_LOADING':
       return { ...state, isReceiptLoading: payload.isReceiptLoading };
 
     case 'SET_IS_RECEIPT_OUTDATED':
       return { ...state, isReceiptOutdated: payload.isReceiptOutdated };
-
-    case 'SET_URL_REPRESENTATIVE_ID':
-      return { ...state, urlRepresentativeId: payload.id };
 
     case 'ON_CLEAN_UP_RECEIPT':
       return { ...state, ...payload };
