@@ -20,8 +20,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
+import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -73,6 +75,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Autowired
   private DataCollectionControllerZuul dataCollectionControllerZuul;
 
+  /** The dataset controller zuul. */
+  @Autowired
+  private DataSetControllerZuul datasetControllerZuul;
+
   /**
    * The user postgre db.
    */
@@ -115,12 +121,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("${pathSnapshot}")
   private String pathSnapshot;
 
+  /** The time to wait before releasing notification. */
   @Value("${dataset.creation.notification.ms}")
   private Long timeToWaitBeforeReleasingNotification;
 
-  @Value("${design.creation.notification.ms}")
-  private Long timeToWaitBeforeReleasingNotificationDesign;
 
+  /** The buffer file. */
   @Value("${snapshot.bufferSize}")
   private Integer bufferFile;
 
@@ -175,7 +181,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
   /**
-   * Releases CONNECTION_CREATED_EVENT Kafka events to initialize databases content.
+   * Releases CONNECTION_CREATED_EVENT Kafka events to initialize databases content. Before that,
+   * insert the values into the schema of the dataset_value and table_value
    *
    * @param datasetIdAndSchemaId dataset ids matching schema ids
    */
@@ -186,6 +193,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       result.put("connectionDataVO", createConnectionDataVO(datasetName));
       result.put("dataset_id", datasetName);
       result.put("idDatasetSchema", entry.getValue());
+
+      // Insert the datasetId and the idSchema (dataset_value, table_value) at every new schema
+      // created
+      datasetControllerZuul.insertIdDataSchema(entry.getKey(), entry.getValue());
+
       kafkaSenderUtils.releaseKafkaEvent(EventType.CONNECTION_CREATED_EVENT, result);
     }
   }
@@ -283,9 +295,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     // Now we insert the values into the dataset_value table of the brand new schema
     StringBuilder insertSql = new StringBuilder("INSERT INTO ");
     insertSql.append(datasetName).append(".dataset_value(id, id_dataset_schema) values (?, ?)");
-    String[] aux = datasetName.split("_");
-    Long idDataset = Long.valueOf(aux[aux.length - 1]);
-    jdbcTemplate.update(insertSql.toString(), idDataset, idDatasetSchema);
+    if (StringUtils.isNotBlank(datasetName) && StringUtils.isNotBlank(idDatasetSchema)) {
+      String[] aux = datasetName.split("_");
+      Long idDataset = Long.valueOf(aux[aux.length - 1]);
+      jdbcTemplate.update(insertSql.toString(), idDataset, idDatasetSchema);
+    }
   }
 
   /**

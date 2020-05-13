@@ -3,6 +3,7 @@ package org.eea.dataset.io.kafka.commands;
 import static org.mockito.Mockito.times;
 import java.util.HashMap;
 import java.util.Map;
+import org.eea.dataset.kafka.io.kafka.event.CreateConnectionEvent;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetService;
@@ -21,16 +22,17 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
 
+
 /**
- * The Class CreateConnectionCommandTest.
+ * The Class CreateConnectionEventTest.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class CreateConnectionCommandTest {
+public class CreateConnectionEventTest {
 
 
   /** The create connection command. */
   @InjectMocks
-  private CreateConnectionCommand createConnectionCommand;
+  private CreateConnectionEvent createConnectionCommand;
 
   /** The dataset service. */
   @Mock
@@ -74,8 +76,9 @@ public class CreateConnectionCommandTest {
   }
 
 
+
   /**
-   * Execute test 1.
+   * Execute test 2.
    */
   @Test
   public void executeTest2() {
@@ -88,8 +91,9 @@ public class CreateConnectionCommandTest {
     Mockito.verifyNoMoreInteractions(datasetService);
   }
 
+
   /**
-   * Execute test 2.
+   * Execute test 3.
    */
   @Test
   public void executeTest3() {
@@ -102,8 +106,9 @@ public class CreateConnectionCommandTest {
     Mockito.verifyNoMoreInteractions(datasetService);
   }
 
+
   /**
-   * Execute test 3.
+   * Execute test 4.
    *
    * @throws EEAException the EEA exception
    */
@@ -114,10 +119,10 @@ public class CreateConnectionCommandTest {
     data.put("dataset_id", "dataset_1");
     data.put("idDatasetSchema", "5ce524fad31fc52540abae73");
     eeaEventVO.setData(data);
-    Mockito.doNothing().when(datasetService).insertSchema(Mockito.any(), Mockito.any());
     createConnectionCommand.execute(eeaEventVO);
-    Mockito.verify(datasetService, times(1)).insertSchema(Mockito.any(), Mockito.any());
+    Mockito.verify(datasetService, times(1)).saveStatistics(Mockito.any());
   }
+
 
   /**
    * Execute test 5.
@@ -131,9 +136,8 @@ public class CreateConnectionCommandTest {
     data.put("dataset_id", "dataset_1");
     data.put("idDatasetSchema", "5ce524fad31fc52540abae73");
     eeaEventVO.setData(data);
-    Mockito.doThrow(EEAException.class).when(datasetService).insertSchema(Mockito.any(),
-        Mockito.any());
+    Mockito.doThrow(EEAException.class).when(datasetService).saveStatistics(Mockito.any());
     createConnectionCommand.execute(eeaEventVO);
-    Mockito.verify(datasetService, times(1)).insertSchema(Mockito.any(), Mockito.any());
+    Mockito.verify(datasetService, times(1)).saveStatistics(Mockito.any());
   }
 }
