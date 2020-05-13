@@ -641,6 +641,7 @@
     "pending": "Pending",
     "dashboardWarning": "Chart shows percentage of records classified by highest QC level found for each record.",
     "qcDescription": "Description (optional)",
-    "uniqueConstraints": "Unique Constraints"
+    "uniqueConstraints": "Unique Constraints",
+    "apiKeyDataProviderIdLabel": "Data provider"
   }
 }
