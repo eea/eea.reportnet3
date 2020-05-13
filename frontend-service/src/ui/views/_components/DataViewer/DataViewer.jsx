@@ -165,7 +165,7 @@ const DataViewer = withRouter(
       return getIconsValidationsErrors(validationsGroup);
     };
 
-    const { columns, setColumns, originalColumns, selectedHeader } = useSetColumns(
+    const { columns, getTooltipMessage, onShowFieldInfo, originalColumns, selectedHeader, setColumns } = useSetColumns(
       actionTemplate,
       cellDataEditor,
       colsSchema,
@@ -894,6 +894,7 @@ const DataViewer = withRouter(
             footer={columnInfoDialogFooter}
             header={resources.messages['columnInfo']}
             onHide={() => setIsColumnInfoVisible(false)}
+            style={{ minWidth: '40vw', maxWidth: '80vw', maxHeight: '80vh' }}
             visible={isColumnInfoVisible}>
             <DataTable
               autoLayout={true}
@@ -961,7 +962,9 @@ const DataViewer = withRouter(
                   colsSchema={colsSchema}
                   datasetId={datasetId}
                   formType="NEW"
+                  getTooltipMessage={getTooltipMessage}
                   onChangeForm={onEditAddFormInput}
+                  onShowFieldInfo={onShowFieldInfo}
                   records={records}
                 />
               </div>
@@ -987,7 +990,9 @@ const DataViewer = withRouter(
                 datasetId={datasetId}
                 editDialogVisible={editDialogVisible}
                 formType="EDIT"
+                getTooltipMessage={getTooltipMessage}
                 onChangeForm={onEditAddFormInput}
+                onShowFieldInfo={onShowFieldInfo}
                 records={records}
               />
             </div>

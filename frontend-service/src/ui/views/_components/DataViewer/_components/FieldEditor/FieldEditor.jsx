@@ -131,7 +131,7 @@ const FieldEditor = ({
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
             type="text"
             value={RecordUtils.getCellValue(cells, cells.field)}
-            maxlength={textCharacters}
+            maxLength={textCharacters}
           />
         );
       case 'LONG_TEXT':
@@ -147,7 +147,7 @@ const FieldEditor = ({
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
             type="text"
             value={RecordUtils.getCellValue(cells, cells.field)}
-            maxlength={longTextCharacters}
+            maxLength={longTextCharacters}
           />
         );
       case 'NUMBER_INTEGER':
@@ -161,7 +161,7 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
-            maxlength={longCharacters}
+            maxLength={longCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -176,7 +176,7 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
-            maxlength={decimalCharacters}
+            maxLength={decimalCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -208,7 +208,7 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             // type="date"
-            maxlength={dateCharacters}
+            maxLength={dateCharacters}
             placeHolder="YYYY-MM-DD"
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
@@ -231,7 +231,7 @@ const FieldEditor = ({
               e.preventDefault();
               onEditorValueFocus(cells, e.target.value);
             }}
-            maxlength={emailCharacters}
+            maxLength={emailCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -245,7 +245,7 @@ const FieldEditor = ({
               e.preventDefault();
               onEditorValueFocus(cells, e.target.value);
             }}
-            maxlength={urlCharacters}
+            maxLength={urlCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -259,7 +259,7 @@ const FieldEditor = ({
               e.preventDefault();
               onEditorValueFocus(cells, e.target.value);
             }}
-            maxlength={phoneCharacters}
+            maxLength={phoneCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );

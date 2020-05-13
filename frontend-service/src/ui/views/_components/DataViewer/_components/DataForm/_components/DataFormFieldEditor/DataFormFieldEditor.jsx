@@ -151,7 +151,7 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
       <InputText
         id={field}
         keyfilter={getFilter(type)}
-        maxlength={getMaxCharactersByType(type)}
+        maxLength={getMaxCharactersByType(type)}
         onChange={e => onChangeForm(field, e.target.value)}
         value={fieldValue}
         // type={type === 'DATE' ? 'date' : 'text'}
