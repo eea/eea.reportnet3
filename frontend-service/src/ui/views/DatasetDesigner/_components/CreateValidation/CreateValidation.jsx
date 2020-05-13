@@ -378,7 +378,6 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
 
   return dialogLayout(
     <>
-      {console.log('tabMenuActiveItem', tabMenuActiveItem)}
       <form>
         <div id={styles.QCFormWrapper}>
           <div className={styles.body}>
@@ -490,7 +489,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                   </div>
                 </div>
               </TabPanel>
-              {!creationFormState.automatic && (
+              {!creationFormState.candidateRule.automatic ? (
                 <TabPanel header={resourcesContext.messages.tabMenuExpression}>
                   <div className={styles.section}>
                     <ul>
@@ -562,6 +561,8 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                       value={creationFormState.validationRuleString}></textarea>
                   </div>
                 </TabPanel>
+              ) : (
+                ''
               )}
             </TabView>
           </div>
