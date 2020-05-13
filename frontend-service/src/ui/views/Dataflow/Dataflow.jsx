@@ -3,7 +3,7 @@ import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 import uniq from 'lodash/uniq';
 
 import styles from './Dataflow.module.scss';
@@ -117,19 +117,63 @@ const Dataflow = withRouter(({ history, match }) => {
 
   //Bread Crumbs settings
   useEffect(() => {
-    breadCrumbContext.add([
-      {
-        label: resources.messages['dataflows'],
-        icon: 'home',
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOWS))
-      },
-      {
-        label: resources.messages['dataflow'],
-        icon: 'archive'
+    if (!isEmpty(dataflowState.data)) {
+      let representatives = dataflowState.data.datasets.map(dataset => {
+        return { name: dataset.datasetSchemaName, dataProviderId: dataset.dataProviderId };
+      });
+
+      if (representatives.length === 1) {
+        breadCrumbContext.add([
+          {
+            label: resources.messages['dataflows'],
+            icon: 'home',
+            href: getUrl(routes.DATAFLOWS),
+            command: () => history.push(getUrl(routes.DATAFLOWS))
+          },
+          {
+            label: resources.messages['dataflow'],
+            icon: 'archive'
+          }
+        ]);
+      } else if (representatives.length > 1 && isUndefined(match.params.representativeId)) {
+        breadCrumbContext.add([
+          {
+            label: resources.messages['dataflows'],
+            icon: 'home',
+            href: getUrl(routes.DATAFLOWS),
+            command: () => history.push(getUrl(routes.DATAFLOWS))
+          },
+          {
+            label: resources.messages['dataflow'],
+            icon: 'archive'
+          }
+        ]);
+      } else if (match.params.representativeId) {
+        const currentRepresentative = representatives
+          .filter(representative => representative.dataProviderId === parseInt(match.params.representativeId))
+          .map(representative => representative.name);
+
+        breadCrumbContext.add([
+          {
+            label: resources.messages['dataflows'],
+            icon: 'home',
+            href: getUrl(routes.DATAFLOWS),
+            command: () => history.push(getUrl(routes.DATAFLOWS))
+          },
+          {
+            label: resources.messages['dataflow'],
+            icon: 'home',
+            href: getUrl(routes.DATAFLOW),
+            command: () => history.push(getUrl(routes.DATAFLOW))
+          },
+          {
+            label: currentRepresentative[0],
+            icon: 'archive'
+          }
+        ]);
       }
-    ]);
-  }, []);
+    }
+  }, [match.params.representativeId, dataflowState.data]);
 
   useEffect(() => {
     const apiKeyBtn = {
