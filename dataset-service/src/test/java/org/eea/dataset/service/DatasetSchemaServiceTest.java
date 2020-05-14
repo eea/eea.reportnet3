@@ -910,6 +910,8 @@ public class DatasetSchemaServiceTest {
         Mockito.any());
     dataSchemaServiceImpl.propagateRulesAfterUpdateSchema("datasetSchemaId", fieldSchemaVO,
         DataType.NUMBER_DECIMAL, 1L);
+    Mockito.verify(datasetService, times(1)).updateFieldValueType(Mockito.any(), Mockito.any(),
+        Mockito.any());
 
   }
 
