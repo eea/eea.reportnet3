@@ -642,7 +642,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
     try {
-      datasetService.etlImportDataset(datasetId, etlDatasetVO);
+      datasetService.etlImportDataset(datasetId, etlDatasetVO, providerId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);

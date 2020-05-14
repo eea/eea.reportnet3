@@ -1602,8 +1602,8 @@ public class DatasetServiceImpl implements DatasetService {
    * @throws EEAException
    */
   @Override
-  public void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO)
-      throws EEAException {
+  public void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO,
+      Long providerId) throws EEAException {
     // Get the datasetSchemaId by the datasetId
     String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
     if (null == datasetSchemaId) {
@@ -1619,11 +1619,6 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     // Obtain the data provider code to insert into the record
-    Long providerId = 0L;
-    DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(datasetId);
-    if (metabase.getDataProviderId() != null) {
-      providerId = metabase.getDataProviderId();
-    }
     DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
 
     // Get the partition for the partiton id
