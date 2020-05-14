@@ -209,42 +209,19 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   }, [validationContext.ruleEdit]);
 
   useEffect(() => {
-    console.log('clickedFields', clickedFields);
-
-    const errors = {
-      info: false,
-      expressions: false
-    };
+    let errors = false;
 
     clickedFields.forEach(clickedField => {
-      console.log('clickedField', printError(clickedField));
-
-      if (printError(clickedField) == 'error') errors.info = true;
+      if (printError(clickedField) == 'error') errors = true;
     });
 
-    console.log('errors', errors);
-    console.log('showErrorOnInfoTab', showErrorOnInfoTab);
-
-    if (errors.info) {
-      if (showErrorOnInfoTab !== errors.info) {
-        console.log('kk');
-
+    if (errors) {
+      if (showErrorOnInfoTab !== errors) {
         setShowErrorOnInfoTab(true);
       }
     } else {
-      console.log('kkk');
-
-      if (showErrorOnInfoTab !== errors.info) {
+      if (showErrorOnInfoTab !== errors) {
         setShowErrorOnInfoTab(false);
-      }
-    }
-    if (errors.expressions) {
-      if (showErrorOnExpressionTab !== errors.expressions) {
-        setShowErrorOnExpressionTab(true);
-      }
-    } else {
-      if (showErrorOnExpressionTab !== errors.expressions) {
-        setShowErrorOnExpressionTab(false);
       }
     }
   }, [clickedFields]);
