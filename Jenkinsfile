@@ -56,7 +56,7 @@ pipeline {
             }
         }
 
-       stage("Quality Gate"){
+       /*stage("Quality Gate"){
            steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     retry(3) {
@@ -85,7 +85,6 @@ pipeline {
                                 slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - Quality Gate in WARNING (marked as UNSTABLE) https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
                             }
                             // Frontend
-                           /*
                            props = readProperties  file: 'frontend-service/.scannerwork/report-task.txt'
                             echo "properties=${props}"
                             sonarServerUrl=props['serverUrl']
@@ -109,13 +108,12 @@ pipeline {
                                 }
                                 emailext body: 'New Build Done - Quality Gate is ' + qualitygate["status"] + " at https://sonar-oami.altia.es/dashboard?id=Reportnet-sonar-frontend\nOverview" + output, subject: 'SonarQube Frontend FAIL Notification', to: 'fjlabiano@itracasa.es; ext.jose.luis.anton@altia.es; ealfaro@tracasa.es; marina.montoro@altia.es'
                             }
-							*/
                         }
                     }
                 }
 
             }
-        }
+        }*/
 
         stage('Install in Nexus') {
             when {
