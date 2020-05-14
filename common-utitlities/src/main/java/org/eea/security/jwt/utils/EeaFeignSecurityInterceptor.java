@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 public class EeaFeignSecurityInterceptor implements RequestInterceptor {
 
   private static final String AUTHORIZATION_HEADER = "Authorization";
-  private static final String BEARER_TOKEN_TYPE = "Bearer";
 
 
   @Override
@@ -28,7 +27,7 @@ public class EeaFeignSecurityInterceptor implements RequestInterceptor {
     if (authentication != null && authentication instanceof UsernamePasswordAuthenticationToken) {
       log.info("Securing invocation to {}", template.url());
       template.header(AUTHORIZATION_HEADER,
-          String.format("%s %s", BEARER_TOKEN_TYPE, authentication.getCredentials()));
+          String.format("%s %s", authentication.getCredentials()));
       template.header("FeignInvocationUser", authentication.getName());
     }
   }

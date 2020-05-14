@@ -28,11 +28,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
 
-  /** The user management controller zull. */
+  private static final String APIKEY_TOKEN = "ApiKey ";
+  /**
+   * The user management controller zull.
+   */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
@@ -41,6 +46,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
    * @param request the request
    * @param response the response
    * @param filterChain the filter chain
+   *
    * @throws ServletException the servlet exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -65,8 +71,9 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
         }
         UserDetails userDetails = EeaUserDetails.create(username, roles);
 
+        //Adding again the toke type so it can be used in EeaFeignSecurityInterceptor regardless the token type
         UsernamePasswordAuthenticationToken authentication =
-            new UsernamePasswordAuthenticationToken(userDetails, apiKey,
+            new UsernamePasswordAuthenticationToken(userDetails, APIKEY_TOKEN + apiKey,
                 userDetails.getAuthorities());
         Map<String, String> details = new HashMap<>();
         details.put(AuthenticationDetails.USER_ID, token.getUserId());
@@ -82,12 +89,13 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
    * Gets the api key from request.
    *
    * @param request the request
+   *
    * @return the api key from request
    */
   private String getApiKeyFromRequest(HttpServletRequest request) {
     String apiKeyToken = request.getHeader("Authorization");
     String apiKey = null;
-    if (StringUtils.hasText(apiKeyToken) && apiKeyToken.startsWith("ApiKey ")) {
+    if (StringUtils.hasText(apiKeyToken) && apiKeyToken.startsWith(APIKEY_TOKEN)) {
       apiKey = apiKeyToken.substring(7, apiKeyToken.length());
     }
     return apiKey;
