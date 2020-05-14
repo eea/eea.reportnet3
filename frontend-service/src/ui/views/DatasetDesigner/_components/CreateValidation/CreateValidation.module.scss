@@ -28,6 +28,13 @@
         &:last-of-type {
           margin-right: 0;
         }
+        li {
+          &.error {
+            span {
+              color: var(--errors);
+            }
+          }
+        }
       }
     }
     .section {

@@ -22,8 +22,7 @@ const ValidationExpression = ({
   onExpressionDelete,
   onExpressionFieldUpdate,
   onExpressionGroup,
-  position,
-  showRequiredFields
+  position
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const { expressionId } = expressionValues;
@@ -50,12 +49,11 @@ const ValidationExpression = ({
   const printRequiredFieldError = field => {
     let conditions = false;
     if (field == 'union') {
-      conditions =
-        (showRequiredFields || clickedFields.includes(field)) && position != 0 && isEmpty(expressionValues[field]);
+      conditions = clickedFields.includes(field) && position != 0 && isEmpty(expressionValues[field]);
     } else if (field == 'expressionValue') {
-      conditions = (showRequiredFields || clickedFields.includes(field)) && isEmpty(expressionValues[field].toString());
+      conditions = clickedFields.includes(field) && isEmpty(expressionValues[field].toString());
     } else {
-      conditions = (showRequiredFields || clickedFields.includes(field)) && isEmpty(expressionValues[field]);
+      conditions = clickedFields.includes(field) && isEmpty(expressionValues[field]);
     }
     return conditions ? 'error' : '';
   };

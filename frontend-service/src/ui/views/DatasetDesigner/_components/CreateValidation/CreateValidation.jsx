@@ -50,11 +50,14 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
     createValidationReducer,
     createValidationReducerInitState
   );
+
+  const [clickedFields, setClickedFields] = useState([]);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(0);
-  const [tabsChanges, setTabsChanges] = useState({});
-  const [clickedFields, setClickedFields] = useState([]);
   const [tabContents, setTabContents] = useState();
+  const [tabsChanges, setTabsChanges] = useState({});
+  const [showErrorOnInfoTab, setShowErrorOnInfoTab] = useState(true);
+  const [showErrorOnExpressionTab, setShowErrorOnExpressionTab] = useState(false);
 
   const ruleDisablingCheckListener = [creationFormState.candidateRule.table, creationFormState.candidateRule.field];
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
@@ -70,7 +73,10 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   useEffect(() => {
     if (!creationFormState.candidateRule.automatic) {
       setTabContents([
-        <TabPanel header={resourcesContext.messages.tabMenuConstraintData}>
+        <TabPanel
+          header={resourcesContext.messages.tabMenuConstraintData}
+          leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}
+          headerClassName={showErrorOnInfoTab ? styles.error : ''}>
           <InfoTab
             componentName={componentName}
             creationFormState={creationFormState}
@@ -80,7 +86,9 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
             printError={printError}
           />
         </TabPanel>,
-        <TabPanel header={resourcesContext.messages.tabMenuExpression}>
+        <TabPanel
+          header={resourcesContext.messages.tabMenuExpression}
+          leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}>
           <ExpressionsTab
             componentName={componentName}
             creationFormState={creationFormState}
@@ -95,7 +103,9 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
       ]);
     } else {
       setTabContents([
-        <TabPanel header={resourcesContext.messages.tabMenuConstraintData}>
+        <TabPanel
+          header={resourcesContext.messages.tabMenuConstraintData}
+          leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
           <InfoTab
             componentName={componentName}
             creationFormState={creationFormState}
@@ -107,7 +117,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
         </TabPanel>
       ]);
     }
-  }, [creationFormState, clickedFields]);
+  }, [creationFormState, clickedFields, showErrorOnInfoTab, showErrorOnExpressionTab]);
 
   useEffect(() => {
     const { table } = creationFormState.candidateRule;
@@ -197,6 +207,47 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
       });
     }
   }, [validationContext.ruleEdit]);
+
+  useEffect(() => {
+    console.log('clickedFields', clickedFields);
+
+    const errors = {
+      info: false,
+      expressions: false
+    };
+
+    clickedFields.forEach(clickedField => {
+      console.log('clickedField', printError(clickedField));
+
+      if (printError(clickedField) == 'error') errors.info = true;
+    });
+
+    console.log('errors', errors);
+    console.log('showErrorOnInfoTab', showErrorOnInfoTab);
+
+    if (errors.info) {
+      if (showErrorOnInfoTab !== errors.info) {
+        console.log('kk');
+
+        setShowErrorOnInfoTab(true);
+      }
+    } else {
+      console.log('kkk');
+
+      if (showErrorOnInfoTab !== errors.info) {
+        setShowErrorOnInfoTab(false);
+      }
+    }
+    if (errors.expressions) {
+      if (showErrorOnExpressionTab !== errors.expressions) {
+        setShowErrorOnExpressionTab(true);
+      }
+    } else {
+      if (showErrorOnExpressionTab !== errors.expressions) {
+        setShowErrorOnExpressionTab(false);
+      }
+    }
+  }, [clickedFields]);
 
   const checkActivateRules = () => {
     return creationFormState.candidateRule.table && creationFormState.candidateRule.field;
