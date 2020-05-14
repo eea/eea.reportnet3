@@ -30,7 +30,6 @@ export const dataflowDataReducer = (state, { type, payload }) => {
         isEditDialogVisible: payload.isEditDialogVisible,
         name: payload.name
       };
-    // Refactor START
 
     case 'SET_DATA_PROVIDER_ID':
       return { ...state, dataProviderId: payload.id };
