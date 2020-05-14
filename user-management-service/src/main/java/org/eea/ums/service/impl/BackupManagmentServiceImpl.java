@@ -130,7 +130,6 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
         LOG.info("Finish save Roles");
       } catch (JsonProcessingException e) {
         LOG_ERROR.error("Role not saved");
-        e.printStackTrace();
       }
     });
 

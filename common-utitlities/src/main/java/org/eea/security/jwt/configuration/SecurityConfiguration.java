@@ -7,6 +7,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.eea.security.jwt.utils.ApiKeyAuthenticationFilter;
 import org.eea.security.jwt.utils.JwtAuthenticationEntryPoint;
 import org.eea.security.jwt.utils.JwtAuthenticationFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -42,8 +44,14 @@ public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter
   @Autowired
   private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+  /** The api key authentication filter. */
   @Autowired
   private ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
+
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Inits the security.
@@ -84,7 +92,7 @@ public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter
         try {
           http.authorizeRequests().antMatchers(pair.getLeft()).hasRole(pair.getRight());
         } catch (Exception e) {
-          e.printStackTrace();
+          LOG_ERROR.error("Exception in security configuration. Message: {}", e.getMessage(), e);
         }
       });
 
