@@ -68,7 +68,7 @@ export const UniqueConstraints = ({ datasetSchemaId }) => {
     <Fragment>
       <Filters
         data={constraintsState.data}
-        getFiltredData={onLoadFilteredData}
+        getFilteredData={onLoadFilteredData}
         inputOptions={['name', 'description']}
         selectOptions={['pkMustBeUsed', 'pkReferenced', 'unique']}
       />
