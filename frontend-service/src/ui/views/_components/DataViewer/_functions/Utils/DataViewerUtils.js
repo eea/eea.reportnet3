@@ -24,7 +24,12 @@ const getFieldValues = (columns, header, filterColumns) => {
   const filteredValues = pick(filteredColumn, ...filterColumns);
   return Object.keys(filteredValues).map(key => {
     return {
-      field: key === 'codelistItems' ? 'Single select items' : capitalize(key),
+      field:
+        key === 'codelistItems'
+          ? filteredValues[key] === 'CODELIST'
+            ? 'Single select items'
+            : 'Multiselect items'
+          : capitalize(key),
       value:
         filteredValues[key] === 'CODELIST'
           ? 'SINGLE SELECT'

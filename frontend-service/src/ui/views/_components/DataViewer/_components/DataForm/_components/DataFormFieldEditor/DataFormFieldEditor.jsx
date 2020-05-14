@@ -6,7 +6,7 @@ import isUndefined from 'lodash/isUndefined';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
-import { MultiSelect } from 'ui/views/_components/MultiSelect';
+import { MultiSelect } from 'primereact/multiselect';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -115,34 +115,30 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
         onChangeForm(field, e.target.value.value);
       }}
       optionLabel="itemType"
-      options={getCodelistItemsWithEmptyOption(field)}
+      options={getCodelistItemsWithEmptyOption()}
       value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
     />
   );
 
-  const renderMultiselectCodelist = (field, fieldValue) => (
-    <MultiSelect
-      // onChange={e => onFilterChange(e, field)}
-      options={[
-        { option: '1', value: '1' },
-        { option: '2', value: '2' },
-        { option: '3', value: '3' }
-      ]}
-      style={{ width: '100%' }}
-      value={{ option: '1', value: '1' }}
-    />
-    // <Dropdown
-    //   appendTo={document.body}
-    //   onChange={e => {
-    //     onChangeForm(field, e.target.value.value);
-    //   }}
-    //   optionLabel="itemType"
-    //   options={getCodelistItemsWithEmptyOption(field)}
-    //   value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
-    // />
-    //Multiselect
-    // <div></div>
-  );
+  const renderMultiselectCodelist = (field, fieldValue) => {
+    console.log(
+      field,
+      fieldValue,
+      RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue),
+      getCodelistItemsWithEmptyOption()
+    );
+    return (
+      <MultiSelect
+        onChange={e => onChangeForm(field, e.value)}
+        options={column.codelistItems.map(codelistItem => {
+          return { itemType: codelistItem, value: codelistItem };
+        })}
+        optionLabel="itemType"
+        value={RecordUtils.getMultiselectValues(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
+        hasSelectedItemsLabel={false}
+      />
+    );
+  };
 
   const getMaxCharactersByType = type => {
     const longCharacters = 20;

@@ -642,6 +642,7 @@
     "dashboardWarning": "Chart shows percentage of records classified by&nbsp<u>highest</u>&nbspQC level found for each record.",
     "qcDescription": "Description (optional)",
     "apiKeyDataProviderIdLabel": "Data provider",
-    "fieldTypeColumnTooltip": "Field type"
+    "fieldTypeColumnTooltip": "Field type",
+    "multiselectCodelists": "Multiselect items"
   }
 }

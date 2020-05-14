@@ -110,6 +110,7 @@ export const useSetColumns = (
       { fieldType: 'URL', value: 'URL' },
       { fieldType: 'Phone', value: 'Phone number' },
       { fieldType: 'Codelist', value: 'Single select' },
+      { fieldType: 'Multiselect_Codelist', value: 'Multiselect' },
       { fieldType: 'Link', value: 'Link' }
     ];
 
@@ -129,7 +130,9 @@ export const useSetColumns = (
           !isNil(column.description) && column.description !== ''
             ? column.description
             : resources.messages['noDescription']
-        }<br/><span style="font-weight:bold">${resources.messages['codelists']}: </span>
+        }<br/><span style="font-weight:bold">${
+          column.type === 'CODELIST' ? resources.messages['codelists'] : resources.messages['multiselectCodelists']
+        }: </span>
         ${column.codelistItems
           .map(codelistItem =>
             !isEmpty(codelistItem) && codelistItem.length > 15 ? `${codelistItem.substring(0, 15)}...` : codelistItem

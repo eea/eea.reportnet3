@@ -82,6 +82,7 @@ const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirs
 
 const getCodelistItems = (colsSchema, field) => {
   const codelistItems = getCellItems(colsSchema, field);
+  console.log({ codelistItems });
   return !isNil(codelistItems)
     ? codelistItems.map(codelistItem => {
         return { itemType: codelistItem, value: codelistItem };
@@ -91,6 +92,7 @@ const getCodelistItems = (colsSchema, field) => {
 
 const getCodelistItemsInSingleColumn = column => {
   const codelistItems = column.codelistItems;
+  console.log({ codelistItems });
   return !isNil(codelistItems)
     ? codelistItems.map(codelistItem => {
         return { itemType: codelistItem, value: codelistItem };
@@ -125,6 +127,16 @@ const getInitialRecordValues = (record, colsSchema) => {
 const getLinkValue = (linkOptions, value) => {
   if (!isUndefined(value) && !isUndefined(linkOptions)) {
     return linkOptions.filter(item => item.value === value)[0];
+  }
+};
+
+const getMultiselectValues = (multiselectItemsOptions, value) => {
+  console.log(
+    { multiselectItemsOptions, value },
+    multiselectItemsOptions.filter(item => item.value === value[0])
+  );
+  if (!isUndefined(value) && !isUndefined(value[0])) {
+    return multiselectItemsOptions.filter(item => value.includes(item.value)).map(item => item.value);
   }
 };
 
@@ -194,6 +206,7 @@ export const RecordUtils = {
   getCodelistValue,
   getInitialRecordValues,
   getLinkValue,
+  getMultiselectValues,
   getNumCopiedRecords,
   getRecordId,
   getTextWidth
