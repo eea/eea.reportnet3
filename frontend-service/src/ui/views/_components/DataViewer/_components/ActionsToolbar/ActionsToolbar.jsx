@@ -173,13 +173,10 @@ const ActionsToolbar = ({
           label={resources.messages['import']}
           onClick={() => setImportDialogVisible(true)}
         />
-
         <Button
           id="buttonExportTable"
-          className={`p-button-rounded p-button-secondary-transparent ${
-            !hasWritePermissions ? null : 'p-button-animated-blink'
-          }`}
-          disabled={!hasWritePermissions}
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+          // disabled={!hasWritePermissions}
           icon={isLoadingFile ? 'spinnerAnimate' : 'import'}
           label={resources.messages['exportTable']}
           onClick={event => {

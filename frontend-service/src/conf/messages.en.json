@@ -269,7 +269,7 @@
     "expandAll": "Expand all",
     "expandSidebar": "Expand sidebar",
     "expirationDate": "Date range",
-    "export": "Export",
+    "export": "Export dataset data",
     "exportDataByIdError": "Failed exporting data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "exportTable": "Export table data",
     "exportTableDataByIdError": "Failed exporting data",
@@ -642,8 +642,9 @@
     "dashboardWarning": "Chart shows percentage of records classified by&nbsp<u>highest</u>&nbspQC level found for each record.",
     "qcDescription": "Description (optional)",
     "uniqueConstraints": "Unique Constraints",
-    "apiKeyDataProviderIdLabel": "Data provider",
     "noConstraintsWithSelectedParameters": "There are no constraints with the selected parameters",
-    "noConstraints": "There are not unique constraints yet"
+    "noConstraints": "There are not unique constraints yet",
+    "apiKeyDataProviderIdLabel": "Data provider",
+    "fieldTypeColumnTooltip": "Field type"
   }
 }

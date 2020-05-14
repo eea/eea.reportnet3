@@ -2,9 +2,22 @@ import React from 'react';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
+import styles from './DataForm.module.css';
+
+import { Button } from 'ui/views/_components/Button';
 import { DataFormFieldEditor } from './_components/DataFormFieldEditor';
 
-const DataForm = ({ addDialogVisible, colsSchema, datasetId, editDialogVisible, formType, onChangeForm, records }) => {
+const DataForm = ({
+  addDialogVisible,
+  colsSchema,
+  datasetId,
+  editDialogVisible,
+  formType,
+  getTooltipMessage,
+  onChangeForm,
+  records,
+  onShowFieldInfo
+}) => {
   const editRecordForm = colsSchema.map((column, i) => {
     //Avoid row id Field and dataSetPartitionId
     if (editDialogVisible) {
@@ -14,9 +27,28 @@ const DataForm = ({ addDialogVisible, colsSchema, datasetId, editDialogVisible, 
           return (
             <React.Fragment key={column.field}>
               <div className="p-col-4" style={{ padding: '.75em' }}>
-                <label htmlFor={column.field}>{column.header}</label>
+                <label htmlFor={column.field}>{`${column.header}${
+                  column.type.toUpperCase() === 'DATE' ? ' (YYYY-MM-DD)' : ''
+                }`}</label>
+                <Button
+                  className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
+                  icon="infoCircle"
+                  onClick={() => {
+                    onShowFieldInfo(column.header, true);
+                  }}
+                  tooltip={getTooltipMessage(column)}
+                  tooltipOptions={{ position: 'top' }}
+                />
               </div>
-              <div className="p-col-8" style={{ padding: '.5em' }}>
+              <div
+                className="p-col-8"
+                style={{
+                  padding: '.5em',
+                  width:
+                    column.type === 'DATE' || column.type === 'CODELIST' || column.type === 'MULTISELECT_CODELIST'
+                      ? '30%'
+                      : ''
+                }}>
                 <DataFormFieldEditor
                   column={column}
                   datasetId={datasetId}
@@ -44,9 +76,28 @@ const DataForm = ({ addDialogVisible, colsSchema, datasetId, editDialogVisible, 
           return (
             <React.Fragment key={column.field}>
               <div className="p-col-4" style={{ padding: '.75em' }}>
-                <label htmlFor={column.field}>{column.header}</label>
+                <label htmlFor={column.field}>{`${column.header}${
+                  column.type.toUpperCase() === 'DATE' ? ' (YYYY-MM-DD)' : ''
+                }`}</label>
+                <Button
+                  className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
+                  icon="infoCircle"
+                  onClick={() => {
+                    onShowFieldInfo(column.header, true);
+                  }}
+                  tooltip={getTooltipMessage(column)}
+                  tooltipOptions={{ position: 'top' }}
+                />
               </div>
-              <div className="p-col-8" style={{ padding: '.5em' }}>
+              <div
+                className="p-col-8"
+                style={{
+                  padding: '.5em',
+                  width:
+                    column.type === 'DATE' || column.type === 'CODELIST' || column.type === 'MULTISELECT_CODELIST'
+                      ? '30%'
+                      : ''
+                }}>
                 <DataFormFieldEditor
                   column={column}
                   datasetId={datasetId}

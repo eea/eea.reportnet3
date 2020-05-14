@@ -31,6 +31,26 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
     renderDatasetSchemas();
   }, [validationList]);
 
+  const getFieldName = (referenceId, datasetSchemaId, datasets) => {
+    const fieldObj = {};
+    const dataset = datasets.filter(datasetSchema => datasetSchema.idDataSetSchema === datasetSchemaId);
+    if (dataset.length > 0) {
+      if (!isUndefined(dataset[0].tables)) {
+        dataset[0].tables.forEach(table =>
+          table.records.filter(record => {
+            record.fields.forEach(field => {
+              if (field.fieldId === referenceId) {
+                fieldObj.tableName = table.tableSchemaName;
+                fieldObj.fieldName = field.name;
+              }
+            });
+          })
+        );
+        return fieldObj;
+      }
+    }
+  };
+
   const getValidationList = async datasetsSchemas => {
     try {
       const datasetValidations = datasetsSchemas.map(async datasetSchema => {
@@ -45,11 +65,30 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
         setValidationList(
           !isUndefined(allValidations[0])
             ? allValidations[0].validations.map(validation => {
+                const validationTableAndField = getFieldName(
+                  validation.referenceId,
+                  validation.idDatasetSchema,
+                  datasetsSchemas
+                );
+                validation.tableName = validationTableAndField.tableName;
+                validation.fieldName = validationTableAndField.fieldName;
                 if (!isCustodian) {
-                  return pick(validation, 'shortCode', 'name', 'description', 'entityType', 'levelError', 'message');
+                  return pick(
+                    validation,
+                    'tableName',
+                    'fieldName',
+                    'shortCode',
+                    'name',
+                    'description',
+                    'entityType',
+                    'levelError',
+                    'message'
+                  );
                 } else {
                   return pick(
                     validation,
+                    'tableName',
+                    'fieldName',
                     'shortCode',
                     'name',
                     'description',

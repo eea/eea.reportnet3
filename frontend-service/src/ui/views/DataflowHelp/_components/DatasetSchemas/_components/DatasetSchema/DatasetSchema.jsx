@@ -56,6 +56,8 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
           groupable: true,
           invisible: ['datasetSchemaId', 'id'],
           names: {
+            tableName: 'Table',
+            fieldName: 'Field',
             entityType: 'Entity type',
             levelError: 'Level error',
             ruleName: 'Rule name'
@@ -109,6 +111,7 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
     parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
     parsedDataset.levelErrorTypes = design.levelErrorTypes;
     parsedDataset.validations = validationList;
+
     if (!isUndefined(design.tables) && !isNull(design.tables) && design.tables.length > 0) {
       const tables = design.tables.map(tableDTO => {
         const table = {};

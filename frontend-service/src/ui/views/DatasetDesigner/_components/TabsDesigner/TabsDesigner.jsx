@@ -224,6 +224,7 @@ export const TabsDesigner = withRouter(
           inmTabs[tabIndex].tableSchemaId = response.data.idTableSchema;
           inmTabs[tabIndex].recordId = response.data.recordSchema.idRecordSchema;
           inmTabs[tabIndex].header = header;
+          inmTabs[tabIndex].tableSchemaName = header;
           inmTabs[tabIndex].newTab = false;
           inmTabs[tabIndex].showContextMenu = false;
           setActiveIndex(inmTabs.length - 2);
@@ -435,6 +436,7 @@ export const TabsDesigner = withRouter(
       if (tableUpdated) {
         const inmTabs = [...tabs];
         inmTabs[getIndexByTableSchemaId(tableSchemaId, inmTabs)].header = tableSchemaName;
+        inmTabs[getIndexByTableSchemaId(tableSchemaId, inmTabs)].tableSchemaName = tableSchemaName;
         setTabs(inmTabs);
       }
     };
