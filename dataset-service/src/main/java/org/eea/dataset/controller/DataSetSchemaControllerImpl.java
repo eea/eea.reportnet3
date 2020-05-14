@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.types.ObjectId;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -633,6 +634,30 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       }
     });
     return schemas;
+  }
+
+  /**
+   * Gets the unique fields.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the unique fields
+   */
+  @Override
+  @GetMapping(value = "{schemaId}/getUniqueFields", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<FieldSchemaVO> getUniqueFields(@PathVariable("schemaId") String datasetSchemaId) {
+    // Return dummy data to mock the service
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setName("schema1");
+    fieldSchemaVO.setUnique(true);
+    fieldSchemaVO.setId(new ObjectId().toString());
+    FieldSchemaVO fieldSchemaVO2 = new FieldSchemaVO();
+    fieldSchemaVO2.setName("schema1");
+    fieldSchemaVO2.setUnique(true);
+    fieldSchemaVO2.setId(new ObjectId().toString());
+    List<FieldSchemaVO> uniqueFields = new ArrayList<>();
+    uniqueFields.add(fieldSchemaVO);
+    uniqueFields.add(fieldSchemaVO2);
+    return uniqueFields;
   }
 
 }
