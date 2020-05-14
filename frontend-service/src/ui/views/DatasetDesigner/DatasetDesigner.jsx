@@ -392,7 +392,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           }}
           style={{ width: '90%' }}
           visible={uniqueConstraintListDialogVisible}>
-          <UniqueConstraints />
+          <UniqueConstraints datasetSchemaId={datasetSchemaId} />
         </Dialog>
       );
     }

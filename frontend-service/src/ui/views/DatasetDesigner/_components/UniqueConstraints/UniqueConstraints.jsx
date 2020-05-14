@@ -20,27 +20,33 @@ import { constraintsReducer } from './_functions/Reducers/constraintsReducer';
 
 import { UniqueConstraintsUtils } from './_functions/Utils/UniqueConstraintsUtils';
 
-export const UniqueConstraints = () => {
+export const UniqueConstraints = ({ datasetSchemaId }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [constraintsState, constraintsDispatch] = useReducer(constraintsReducer, {
-    constraints: [],
-    data: {},
-    filteredData: []
+    data: [],
+    filteredData: [],
+    isLoading: true
   });
 
   useEffect(() => {
     onLoadConstraints();
   }, []);
 
+  const isLoading = value => constraintsDispatch({ type: 'IS_LOADING', payload: value });
+
   const onLoadConstraints = async () => {
     try {
-      const response = await UniqueConstraintsService.all();
-      constraintsDispatch({ type: 'INITIAL_LOAD', payload: { data: response, constraints: response.list } });
+      constraintsDispatch({
+        type: 'INITIAL_LOAD',
+        payload: { data: await UniqueConstraintsService.all(datasetSchemaId) }
+      });
     } catch (error) {
       console.log('error', error);
+    } finally {
+      isLoading(false);
     }
   };
 
@@ -54,15 +60,17 @@ export const UniqueConstraints = () => {
       ));
   };
 
-  if (constraintsState.isLoading) return <Spinner />;
+  if (constraintsState.isLoading) return <Spinner style={{ top: 0 }} />;
 
-  return (
+  return isEmpty(constraintsState.data) ? (
+    <Fragment>{resources.messages['noConstraints']}</Fragment>
+  ) : (
     <Fragment>
       <Filters
-        data={constraintsState.constraints}
+        data={constraintsState.data}
         getFiltredData={onLoadFilteredData}
-        inputOptions={['description', 'constraintsName']}
-        selectOptions={['fieldNames', 'tableName']}
+        inputOptions={['name', 'description']}
+        selectOptions={['pkMustBeUsed', 'pkReferenced', 'unique']}
       />
 
       {!isEmpty(constraintsState.filteredData) ? (
@@ -77,7 +85,7 @@ export const UniqueConstraints = () => {
           {renderColumns(constraintsState.filteredData)}
         </DataTable>
       ) : (
-        <div className={styles.emptyFilteredData}>No with selected parameters</div>
+        <div className={styles.emptyFilteredData}>{resources.messages['noConstraintsWithSelectedParameters']}</div>
       )}
     </Fragment>
   );

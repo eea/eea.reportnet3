@@ -642,6 +642,8 @@
     "dashboardWarning": "Chart shows percentage of records classified by&nbsp<u>highest</u>&nbspQC level found for each record.",
     "qcDescription": "Description (optional)",
     "uniqueConstraints": "Unique Constraints",
-    "apiKeyDataProviderIdLabel": "Data provider"
+    "apiKeyDataProviderIdLabel": "Data provider",
+    "noConstraintsWithSelectedParameters": "There are no constraints with the selected parameters",
+    "noConstraints": "There are not unique constraints yet"
   }
 }

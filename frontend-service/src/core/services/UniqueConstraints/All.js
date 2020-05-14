@@ -1,1 +1,2 @@
-export const All = ({ uniqueConstraintsRepository }) => async () => uniqueConstraintsRepository.all();
+export const All = ({ uniqueConstraintsRepository }) => async datasetSchemaId =>
+  uniqueConstraintsRepository.all(datasetSchemaId);

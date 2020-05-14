@@ -6,6 +6,9 @@ export const constraintsReducer = (state, { type, payload }) => {
     case 'FILTERED_DATA':
       return { ...state, filteredData: payload.data };
 
+    case 'IS_LOADING':
+      return { ...state, isLoading: payload };
+
     default:
       return state;
   }
