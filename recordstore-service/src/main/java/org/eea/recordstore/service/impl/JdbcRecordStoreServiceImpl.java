@@ -522,7 +522,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     try {
       con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
           conexion.getPassword());
-      con.setAutoCommit(false);
+      con.setAutoCommit(true);
 
       if (deleteData) {
         String sql = "";
@@ -576,16 +576,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG.info("Snapshot {} restored for dataset {}", idSnapshot, idReportingDataset);
     } catch (Exception e) {
       if (null != con) {
-        LOG_ERROR.error("Error restoring the snapshot data due to error {}. Rollback",
-            e.getMessage(), e);
-        con.rollback();
+        LOG_ERROR.error("Error restoring the snapshot data due to error {}", e.getMessage(), e);
       }
     } finally {
       if (null != stmt) {
         stmt.close();
       }
       if (null != con) {
-        con.commit();
         con.close();
       }
       // Release the lock manually

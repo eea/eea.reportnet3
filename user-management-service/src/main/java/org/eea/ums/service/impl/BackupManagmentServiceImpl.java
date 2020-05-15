@@ -193,7 +193,6 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
       keycloakConnectorService.addUser(json);
     } catch (JsonProcessingException e) {
       LOG_ERROR.error("User not saved");
-      e.printStackTrace();
     }
     LOG.info("User saved");
 

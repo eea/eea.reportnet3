@@ -13,12 +13,20 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Interface LockMapper.
  */
 @Mapper(componentModel = "spring")
 public interface LockMapper extends IMapper<Lock, LockVO> {
+
+  /**
+   * The Constant LOG_ERROR.
+   */
+  static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
 
   /**
    * Entity to class.
@@ -56,7 +64,8 @@ public interface LockMapper extends IMapper<Lock, LockVO> {
       in = new ObjectInputStream(byteIn);
       lockVO.setLockCriteria((Map<String, Object>) in.readObject());
     } catch (ClassNotFoundException | IOException e) {
-      e.printStackTrace();
+      LOG_ERROR.error("Error in afterMapping byteToHashMap from LockMapper. Message {}:",
+          e.getMessage());
     }
   }
 
@@ -74,7 +83,8 @@ public interface LockMapper extends IMapper<Lock, LockVO> {
       out.writeObject(lockVO.getLockCriteria());
       lock.setLockCriteria(byteOut.toByteArray());
     } catch (IOException e) {
-      e.printStackTrace();
+      LOG_ERROR.error("Error in afterMapping hashMapToByte from LockMapper. Message {}:",
+          e.getMessage());
     }
   }
 }
