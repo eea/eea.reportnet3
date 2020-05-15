@@ -39,6 +39,7 @@ export const recordReducer = (state, { type, payload }) => {
 
     case 'SET_EDITED_RECORD':
       if (!isUndefined(payload.property)) {
+        console.log(payload.value);
         let updatedRecord = RecordUtils.changeRecordValue({ ...state.editedRecord }, payload.property, payload.value);
         return { ...state, editedRecord: updatedRecord };
       } else {
@@ -58,6 +59,7 @@ export const recordReducer = (state, { type, payload }) => {
 
     case 'SET_NEW_RECORD':
       if (!isUndefined(payload.property)) {
+        console.log(payload.value);
         let updatedNewRecord = RecordUtils.changeRecordValue({ ...state.newRecord }, payload.property, payload.value);
         return { ...state, newRecord: updatedNewRecord };
       } else {

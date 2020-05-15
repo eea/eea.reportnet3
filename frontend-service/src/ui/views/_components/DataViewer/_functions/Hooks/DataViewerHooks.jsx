@@ -99,7 +99,6 @@ export const useSetColumns = (
   );
 
   const getFieldTypeValue = fieldType => {
-    console.log(fieldType);
     const fieldTypes = [
       { fieldType: 'Number_Integer', value: 'Number - Integer' },
       { fieldType: 'Number_Decimal', value: 'Number - Decimal' },
@@ -123,7 +122,6 @@ export const useSetColumns = (
   };
 
   const getTooltipMessage = column => {
-    console.log(column);
     return !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
       ? `<span style="font-weight:bold">Type:</span> ${getFieldTypeValue(column.type)}
         <span style="font-weight:bold">Description:</span> ${
@@ -150,6 +148,7 @@ export const useSetColumns = (
 
   const dataTemplate = (rowData, column) => {
     let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.field)[0];
+    console.log(column.type, field);
     if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
       const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
       const message = DataViewerUtils.formatValidations(validations);
@@ -161,13 +160,23 @@ export const useSetColumns = (
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
-          {field ? field.fieldData[column.field] : null}
+          {field
+            ? Array.isArray(field.fieldData[column.field])
+              ? field.fieldData[column.field].join(', ')
+              : field.fieldData[column.field]
+            : null}
           <IconTooltip levelError={levelError} message={message} />
         </div>
       );
     } else {
       return (
-        <div style={{ display: 'flex', alignItems: 'center' }}>{field ? field.fieldData[column.field] : null}</div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {field
+            ? Array.isArray(field.fieldData[column.field])
+              ? field.fieldData[column.field].join(', ')
+              : field.fieldData[column.field]
+            : null}
+        </div>
       );
     }
   };

@@ -121,21 +121,17 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
   );
 
   const renderMultiselectCodelist = (field, fieldValue) => {
-    console.log(
-      field,
-      fieldValue,
-      RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue),
-      getCodelistItemsWithEmptyOption()
-    );
     return (
       <MultiSelect
+        maxSelectedLabels={10}
         onChange={e => onChangeForm(field, e.value)}
         options={column.codelistItems.map(codelistItem => {
           return { itemType: codelistItem, value: codelistItem };
         })}
         optionLabel="itemType"
+        styles={{ border: 'var(--dropdown-border)', borderColor: 'red' }}
         value={RecordUtils.getMultiselectValues(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
-        hasSelectedItemsLabel={false}
+        // hasSelectedItemsLabel={false}
       />
     );
   };
@@ -199,7 +195,6 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     );
 
   const renderCalendar = (field, fieldValue) => {
-    console.log(field, fieldValue);
     return (
       <Calendar
         onChange={e => onChangeForm(field, formatDate(e.target.value))}
