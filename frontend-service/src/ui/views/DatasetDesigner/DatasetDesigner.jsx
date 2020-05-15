@@ -77,7 +77,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isPreviewModeOn, setIsPreviewModeOn] = useState(getUrlParamValue('design'));
   const [metaData, setMetaData] = useState({});
-  const [uniqueConstraintDialogVisible, setUniqueConstraintDialogVisible] = useState(false);
   const [uniqueConstraintListDialogVisible, setUniqueConstraintListDialogVisible] = useState(false);
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
