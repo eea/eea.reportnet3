@@ -31,4 +31,8 @@ const parseConstraintsList = constraintsDTO => {
   return;
 };
 
-export const ApiUniqueConstraintsRepository = { all };
+const deleteById = async (datasetSchemaId, constraintId) => {
+  return await apiUniqueConstraints.deleteById(datasetSchemaId, constraintId);
+};
+
+export const ApiUniqueConstraintsRepository = { all, deleteById };

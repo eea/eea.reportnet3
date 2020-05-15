@@ -12,5 +12,20 @@ export const apiUniqueConstraints = {
       headers: { Authorization: `Bearer ${tokens.accessToken}` }
     });
     return response.data;
+  },
+
+  deleteById: async (datasetSchemaId, constraintId) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.delete({
+      url: getUrl(UniqueConstraintsConfig.delete, {
+        datasetSchemaId,
+        constraintId
+      }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response;
   }
 };

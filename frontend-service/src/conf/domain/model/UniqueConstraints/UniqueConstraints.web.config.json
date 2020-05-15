@@ -1,3 +1,4 @@
 {
-  "all": "/dataschema/{:datasetSchemaId}/getUniqueFields"
+  "all": "/dataschema/{:datasetSchemaId}/getUniqueFields",
+  "delete": "/dataschema/{:datasetSchemaId}/deleteUniqueFields?fieldId={:constraintId}"
 }

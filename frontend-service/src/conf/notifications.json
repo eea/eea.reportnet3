@@ -357,6 +357,12 @@
         },
         {
           "key": "INVALIDATED_QC_RULE_EVENT"
+        },
+        {
+          "key": "LOAD_UNIQUE_CONSTRAINTS_ERROR"
+        },
+        {
+          "key": "DELETE_UNIQUE_CONSTRAINT_ERROR"
         }
       ]
     },
