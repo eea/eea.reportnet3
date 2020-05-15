@@ -156,7 +156,7 @@ const Dataflow = withRouter(({ history, match }) => {
             label: resources.messages['dataflows'],
             icon: 'home',
             href: getUrl(routes.DATAFLOWS),
-            command: () => history.goBack()
+            command: () => history.push(getUrl(routes.DATAFLOWS))
           },
           {
             label: resources.messages['dataflow'],
