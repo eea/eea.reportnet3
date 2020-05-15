@@ -52,7 +52,7 @@ export const UniqueConstraints = ({ datasetSchemaId }) => {
 
   const actionsTemplate = row => (
     <ActionsColumn
-      onDeleteClick={() => onShowDeleteDialog()}
+      onDeleteClick={() => onManageDialog(true)}
       onEditClick={() => console.log('editar constraint', row)}
     />
   );
@@ -72,12 +72,8 @@ export const UniqueConstraints = ({ datasetSchemaId }) => {
       notificationContext.add({ type: 'DELETE_UNIQUE_CONSTRAINT_ERROR' });
       console.log('error', error);
     } finally {
-      onHideDeleteDialog();
+      onManageDialog(false);
     }
-  };
-
-  const onHideDeleteDialog = () => {
-    isDeleteDialogVisible(false);
   };
 
   const isLoading = value => constraintsDispatch({ type: 'IS_LOADING', payload: value });
@@ -98,8 +94,8 @@ export const UniqueConstraints = ({ datasetSchemaId }) => {
 
   const onLoadFilteredData = data => constraintsDispatch({ type: 'FILTERED_DATA', payload: { data } });
 
-  const onShowDeleteDialog = () => {
-    isDeleteDialogVisible(true);
+  const onManageDialog = value => {
+    isDeleteDialogVisible(value);
   };
 
   const onUpdateData = () => {
@@ -153,7 +149,7 @@ export const UniqueConstraints = ({ datasetSchemaId }) => {
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteConstraint()}
-          onHide={() => onHideDeleteDialog()}
+          onHide={() => onManageDialog(false)}
           visible={constraintsState.isDeleteDialogVisible}
           maximizable={false}>
           {resources.messages['deleteUniqueConstraintConfirm']}
