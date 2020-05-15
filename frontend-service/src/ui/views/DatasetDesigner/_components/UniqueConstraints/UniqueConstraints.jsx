@@ -27,9 +27,9 @@ export const UniqueConstraints = ({ datasetSchemaId }) => {
   const userContext = useContext(UserContext);
 
   const [constraintsState, constraintsDispatch] = useReducer(constraintsReducer, {
-    constraintId: '',
     data: {},
     filteredData: [],
+    fieldId: '',
     isDataUpdated: false,
     isDeleteDialogVisible: false,
     isLoading: true
@@ -57,7 +57,7 @@ export const UniqueConstraints = ({ datasetSchemaId }) => {
     />
   );
 
-  const constraintId = value => constraintsDispatch({ type: 'ON_LOAD_CONSTRAINT_ID', payload: { value } });
+  const fieldId = value => constraintsDispatch({ type: 'ON_LOAD_CONSTRAINT_ID', payload: { value } });
 
   const isDeleteDialogVisible = value => constraintsDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
 
@@ -66,7 +66,7 @@ export const UniqueConstraints = ({ datasetSchemaId }) => {
   const onDeleteConstraint = async () => {
     try {
       onUpdateData();
-      const response = await UniqueConstraintsService.deleteById(datasetSchemaId, constraintsState.constraintId);
+      const response = await UniqueConstraintsService.deleteById(datasetSchemaId, constraintsState.fieldId);
       if (response.status >= 200 && response.status <= 299) onUpdateData();
     } catch (error) {
       notificationContext.add({ type: 'DELETE_UNIQUE_CONSTRAINT_ERROR' });
@@ -129,7 +129,7 @@ export const UniqueConstraints = ({ datasetSchemaId }) => {
       {!isEmpty(constraintsState.filteredData) ? (
         <DataTable
           autoLayout={true}
-          onRowClick={event => constraintId(event.data.fieldId)}
+          onRowClick={event => fieldId(event.data.fieldId)}
           paginator={true}
           paginatorRight={`${resources.messages['totalUniqueConstraints']} ${constraintsState.filteredData.length}`}
           rows={10}

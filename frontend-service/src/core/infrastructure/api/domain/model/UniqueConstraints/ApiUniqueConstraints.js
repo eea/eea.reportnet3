@@ -14,13 +14,49 @@ export const apiUniqueConstraints = {
     return response.data;
   },
 
-  deleteById: async (datasetSchemaId, constraintId) => {
+  create: async (description, fieldSchemaId, name) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.post({
+      url: getUrl(UniqueConstraintsConfig.create),
+      data: {
+        description,
+        fieldSchemaId,
+        name
+      },
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response;
+  },
+
+  // parameters in url
+  deleteById: async (datasetSchemaId, fieldId) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.delete({
       url: getUrl(UniqueConstraintsConfig.delete, {
         datasetSchemaId,
-        constraintId
+        fieldId
       }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response;
+  },
+
+  update: async (description, fieldId, fieldSchemaId, name) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.post({
+      url: getUrl(UniqueConstraintsConfig.create),
+      data: {
+        description,
+        fieldId,
+        fieldSchemaId,
+        name
+      },
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
