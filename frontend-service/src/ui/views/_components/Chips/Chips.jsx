@@ -17,6 +17,7 @@ const Chips = ({
   checkForDuplicates = false,
   className = null,
   disabled = null,
+  deleteWhiteSpaces = false,
   id = null,
   inputClassName = null,
   itemTemplate = null,
@@ -45,7 +46,7 @@ const Chips = ({
   }, []);
 
   const onKeyDownChips = event => {
-    const inputValue = event.target.value;
+    const inputValue = deleteWhiteSpaces ? event.target.value.trim() : event.target.value;
 
     switch (event.which) {
       //backspace
@@ -113,7 +114,7 @@ const Chips = ({
   const onBlurChips = event => {
     DomHandler.removeClass(listElement.current, 'p-focus');
 
-    const inputValue = event.target.value;
+    const inputValue = deleteWhiteSpaces ? event.target.value.trim() : event.target.value;
 
     if (inputValue && inputValue.trim().length && (!max || max > value.length)) {
       let values = [...value];

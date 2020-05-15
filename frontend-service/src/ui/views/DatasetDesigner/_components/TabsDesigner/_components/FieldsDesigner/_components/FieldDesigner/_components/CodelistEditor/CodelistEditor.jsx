@@ -67,6 +67,7 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
         </div>
         <Chips
           checkForDuplicates={true}
+          deleteWhiteSpaces={true}
           inputClassName={styles.codelistChips}
           onChange={e => setCodelistItems(e.value)}
           tooltip={resources.messages['codelistEditorMessage']}
