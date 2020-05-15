@@ -363,14 +363,17 @@ public interface DatasetService {
    */
   ETLDatasetVO etlExportDataset(@DatasetId Long datasetId) throws EEAException;
 
+
   /**
    * Etl import dataset.
    *
    * @param datasetId the dataset id
    * @param etlDatasetVO the etl dataset VO
-   * @throws EEAException
+   * @param providerId the provider id
+   * @throws EEAException the EEA exception
    */
-  void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO) throws EEAException;
+  void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO, Long providerId)
+      throws EEAException;
 
   /**
    * Gets the table read only.

@@ -46,8 +46,8 @@ public class AutomaticRules {
   public static Rule createNumberIntegerAutomaticRule(String referenceId,
       EntityTypeEnum typeEntityEnum, String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isNumberInteger(value)",
-        "The value is not a valid number without decimals.", ErrorTypeEnum.ERROR.getValue(),
-        shortCode, description);
+        "The value is not a valid whole number ", ErrorTypeEnum.ERROR.getValue(), shortCode,
+        description);
   }
 
   /**
@@ -63,7 +63,8 @@ public class AutomaticRules {
   public static Rule createNumberDecimalAutomaticRule(String referenceId,
       EntityTypeEnum typeEntityEnum, String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isNumberDecimal(value)",
-        "The value is not a valid number.", ErrorTypeEnum.ERROR.getValue(), shortCode, description);
+        "The value is not a valid whole or decimal number", ErrorTypeEnum.ERROR.getValue(),
+        shortCode, description);
   }
 
   /**
@@ -79,7 +80,7 @@ public class AutomaticRules {
   public static Rule createDateAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isDateYYYYMMDD(value)",
-        "The value is not a valid date (YYYY-MM-DD). ", ErrorTypeEnum.ERROR.getValue(), shortCode,
+        "The value is not a valid date (YYYY-MM-DD) ", ErrorTypeEnum.ERROR.getValue(), shortCode,
         description);
   }
 
@@ -154,7 +155,7 @@ public class AutomaticRules {
     // PART INSENSITIVE
     ruleList.add(composeRule(referenceId, typeEntityEnum, nameRule,
         "isCodelistInsensitive(value,'" + codelistItems + "')",
-        "The value must be avaliable value in the codelist", ErrorTypeEnum.ERROR.getValue(),
+        "The value is not a valid member of the codelist", ErrorTypeEnum.ERROR.getValue(),
         shortCode, description));
     return ruleList;
   }
@@ -177,7 +178,7 @@ public class AutomaticRules {
     // PART INSENSITIVE
     ruleList.add(composeRule(referenceId, typeEntityEnum, nameRule,
         "isMultiSelectCodelistValidate(value,'" + codelistItems + "')",
-        "The value must be avaliable value in the codelist", ErrorTypeEnum.ERROR.getValue(),
+        "The value is not a valid member of the codelist", ErrorTypeEnum.ERROR.getValue(),
         shortCode, description));
     return ruleList;
   }
@@ -228,7 +229,7 @@ public class AutomaticRules {
   public static Rule createUrlAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isURL(value)",
-        "The value does not follow the expected syntax for a valid URL.",
+        "The value does not follow the expected syntax for a valid URL ",
         ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
 
@@ -245,7 +246,7 @@ public class AutomaticRules {
   public static Rule createPhoneAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isPhone(value)",
-        "The value does not follow the expected syntax for a valid phone number.",
+        "The value does not follow the expected syntax for a valid phone number ",
         ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
 
@@ -262,7 +263,7 @@ public class AutomaticRules {
   public static Rule createEmailAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isEmail(value)",
-        "The value does not follow the expected syntax for a valid email.",
+        "The value does not follow the expected syntax for a valid email ",
         ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
 

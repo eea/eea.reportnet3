@@ -71,7 +71,7 @@ public class JwtAuthenticationFilterTest {
         (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
             .getAuthentication();
     Assert.assertNotNull(authenticationToken);
-    Assert.assertEquals("Retrieved JWT is different from expected", token,
+    Assert.assertEquals("Retrieved JWT is different from expected", "Bearer " + token,
         authenticationToken.getCredentials());
     Assert.assertEquals("Retrieved User is different from expected", "user1",
         ((EeaUserDetails) authenticationToken.getPrincipal()).getUsername());
