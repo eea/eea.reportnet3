@@ -285,9 +285,11 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void saveTable(@DatasetId Long datasetId, TableValue tableValue) {
     TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
-    DatasetValue datasetValue = datasetRepository.findById(datasetId).get();
-    tableValue.setDatasetId(datasetValue);
-    tableRepository.saveAndFlush(tableValue);
+    Optional<DatasetValue> datasetValue = datasetRepository.findById(datasetId);
+    if (datasetValue.isPresent()) {
+      tableValue.setDatasetId(datasetValue.get());
+      tableRepository.saveAndFlush(tableValue);
+    }
   }
 
 
@@ -1233,7 +1235,9 @@ public class DatasetServiceImpl implements DatasetService {
     }
     // if the type is multiselect codelist we sort the values in lexicographic order
     if (DataType.MULTISELECT_CODELIST.equals(field.getType()) && null != field.getValue()) {
-      List<String> values = Arrays.asList(field.getValue().split(","));
+      List<String> values = new ArrayList<>();
+      Arrays.asList(field.getValue().split(",")).stream()
+          .forEach(value -> values.add(value.trim()));
       Collections.sort(values);
       field.setValue(values.toString().substring(1, values.toString().length() - 1));
     }
@@ -1592,16 +1596,18 @@ public class DatasetServiceImpl implements DatasetService {
     return etlDatasetVO;
   }
 
+
   /**
    * Etl import dataset.
    *
    * @param datasetId the dataset id
    * @param etlDatasetVO the etl dataset VO
-   * @throws EEAException
+   * @param providerId the provider id
+   * @throws EEAException the EEA exception
    */
   @Override
-  public void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO)
-      throws EEAException {
+  public void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO,
+      Long providerId) throws EEAException {
     // Get the datasetSchemaId by the datasetId
     String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
     if (null == datasetSchemaId) {
@@ -1617,11 +1623,6 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     // Obtain the data provider code to insert into the record
-    Long providerId = 0L;
-    DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(datasetId);
-    if (metabase.getDataProviderId() != null) {
-      providerId = metabase.getDataProviderId();
-    }
     DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
 
     // Get the partition for the partiton id

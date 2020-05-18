@@ -30,11 +30,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-  /** The token provider. */
+  private static final String BEARER_TOKEN = "Bearer ";
+
+  /**
+   * The token provider.
+   */
   @Autowired
   private JwtTokenProvider tokenProvider;
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
@@ -43,6 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
    * @param request the request
    * @param response the response
    * @param filterChain the filter chain
+   *
    * @throws ServletException the servlet exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -67,9 +74,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           }).forEach(roles::add);
         }
         UserDetails userDetails = EeaUserDetails.create(username, roles);
-
+        //Adding again the toke type so it can be used in EeaFeignSecurityInterceptor regardless the token type
         UsernamePasswordAuthenticationToken authentication =
-            new UsernamePasswordAuthenticationToken(userDetails, jwt, userDetails.getAuthorities());
+            new UsernamePasswordAuthenticationToken(userDetails, BEARER_TOKEN + jwt,
+                userDetails.getAuthorities());
         Map<String, String> details = new HashMap<>();
         details.put(AuthenticationDetails.USER_ID, token.getUserId());
         authentication.setDetails(details);
@@ -106,12 +114,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
    * Gets the jwt from request.
    *
    * @param request the request
+   *
    * @return the jwt from request
    */
   private String getJwtFromRequest(HttpServletRequest request) {
     String bearerToken = request.getHeader("Authorization");
     String jwt = null;
-    if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+    if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_TOKEN)) {
       jwt = bearerToken.substring(7, bearerToken.length());
     }
     return jwt;
