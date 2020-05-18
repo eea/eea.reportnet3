@@ -465,9 +465,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG.info("Snapshot {} restored", idSnapshot);
     } catch (Exception e) {
       if (null != con) {
-        LOG_ERROR.error("Error restoring the snapshot data due to error {}. Rollback",
-            e.getMessage(), e);
-        con.rollback();
+        LOG_ERROR.error("Error restoring the snapshot data due to error {}.", e.getMessage(), e);
       }
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(failEventType, value,
@@ -524,7 +522,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     try {
       con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
           conexion.getPassword());
-      con.setAutoCommit(false);
+      con.setAutoCommit(true);
 
       if (deleteData) {
         String sql = "";
@@ -578,16 +576,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG.info("Snapshot {} restored for dataset {}", idSnapshot, idReportingDataset);
     } catch (Exception e) {
       if (null != con) {
-        LOG_ERROR.error("Error restoring the snapshot data due to error {}. Rollback",
-            e.getMessage(), e);
-        con.rollback();
+        LOG_ERROR.error("Error restoring the snapshot data due to error {}", e.getMessage(), e);
       }
     } finally {
       if (null != stmt) {
         stmt.close();
       }
       if (null != con) {
-        con.commit();
         con.close();
       }
       // Release the lock manually
@@ -800,13 +795,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private void copyFromFile(String query, String fileName, CopyManager copyManager)
       throws IOException, SQLException {
     Path path = Paths.get(fileName);
-    FileReader from = new FileReader(path.toString());
     // bufferFile it's a size in bytes defined in consul variable. It can be 65536
     char[] cbuf = new char[bufferFile];
     int len = 0;
+    FileReader from = null;
     CopyIn cp = copyManager.copyIn(query);
     // Copy the data from the file by chunks
     try {
+      from = new FileReader(path.toString());
       while ((len = from.read(cbuf)) > 0) {
         byte[] buf = new String(cbuf, 0, len).getBytes();
         cp.writeToCopy(buf, 0, buf.length);

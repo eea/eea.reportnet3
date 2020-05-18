@@ -195,15 +195,22 @@ public class AutomaticRules {
    * @param datasetId the dataset id
    * @return the rule
    */
-  public static Rule createPKAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
-      String nameRule, String shortCode, String description, String tableSchemaId, Long datasetId) {
+  public static Rule createFKAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
+      String nameRule, String shortCode, String description, String tableSchemaId,
+      Boolean pkMustBeUsed) {
+    String errorMsg = null;
+    if (pkMustBeUsed) {
+      errorMsg = "Omission - does not contain an expected record based on set criteria.";
+    } else {
+      errorMsg = "The value is not a valid member of the referenced list.";
+    }
     Rule rule = composeRule(tableSchemaId, typeEntityEnum, nameRule,
-        "isfieldPK(datasetId,'" + referenceId + "',",
-        "The value is not a valid member of the referenced list", ErrorTypeEnum.ERROR.getValue(),
+        "isfieldFK(datasetId,'" + referenceId + "',", errorMsg, ErrorTypeEnum.ERROR.getValue(),
         shortCode, description);
     // we add the rule data to take the message if the user edit the rule
     StringBuilder whenCondition = new StringBuilder(rule.getWhenCondition());
-    whenCondition = whenCondition.append("'").append(rule.getRuleId().toString()).append("')");
+    whenCondition = whenCondition.append("'").append(rule.getRuleId().toString()).append("',")
+        .append(pkMustBeUsed.toString()).append(")");
     rule.setWhenCondition(whenCondition.toString());
     rule.setReferenceFieldSchemaPKId(new ObjectId(referenceId));
     return rule;
