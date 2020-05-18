@@ -294,14 +294,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const onLoadDatasetSchemaName = async () => {
-    setIsLoading(true);
     try {
       const dataset = await DatasetService.getMetaData(datasetId);
       setDatasetSchemaName(dataset.datasetSchemaName);
     } catch (error) {
       console.error(`Error while getting datasetSchemaName: ${error}`);
     } finally {
-      setIsLoading(false);
     }
   };
 
