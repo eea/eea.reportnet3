@@ -41,7 +41,7 @@ import { initValidationRuleCreation } from 'ui/views/DatasetDesigner/_components
 import { resetValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/resetValidationRuleCreation';
 import { setValidationExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/setValidationExpression';
 
-const FieldValidation = ({ toggleVisibility, datasetId, tabs }) => {
+const FieldValidation = ({ datasetId, tabs }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
