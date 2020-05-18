@@ -464,6 +464,7 @@ public class RulesServiceImplTest {
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.TEXT, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
+    Mockito.verify(rulesSequenceRepository, times(1)).updateSequence(Mockito.any());
 
   }
 
@@ -493,6 +494,8 @@ public class RulesServiceImplTest {
   public void deleteEmptyRulesScehmaNoSchemaTest() {
     when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(null);
     rulesServiceImpl.deleteEmptyRulesSchema("5e44110d6a9e3a270ce13fac");
+
+    Mockito.verify(rulesRepository, times(1)).findByIdDatasetSchema(Mockito.any());
   }
 
   /**
@@ -836,6 +839,7 @@ public class RulesServiceImplTest {
     when(rulesRepository.deleteRuleById(Mockito.any(), Mockito.any())).thenReturn(false);
     rulesServiceImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         0);
+    Mockito.verify(rulesRepository, times(1)).deleteRuleById(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -849,6 +853,8 @@ public class RulesServiceImplTest {
         .thenReturn(false);
     rulesServiceImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         0);
+    Mockito.verify(rulesRepository, times(1)).insertRuleInPosition(Mockito.any(), Mockito.any(),
+        Mockito.anyInt());
   }
 
   /**

@@ -78,6 +78,9 @@ public class RulesServiceImpl implements RulesService {
   /** The Constant TB_DESCRIPTION. */
   private static final String TC_DESCRIPTION = "Checks if the record based on criteria is valid ";
 
+  /** The Constant TO_DESCRIPTION: {@value}. */
+  private static final String TO_DESCRIPTION =
+      "Checks if contains all the records based on set criteria.";
 
   /** The Constant FIELD_TYPE. */
   private static final String FIELD_TYPE = "Field type ";
@@ -308,10 +311,22 @@ public class RulesServiceImpl implements RulesService {
           DataSetSchema datasetSchema =
               schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
           String tableSchemaId = getTableSchemaIdFromIdFieldSchema(datasetSchema, referenceId);
+          FieldSchema fieldSchemaPK = getPKFieldSchemaFromSchema(datasetSchema, referenceId);
 
-          ruleList.add(AutomaticRules.createPKAutomaticRule(referenceId, EntityTypeEnum.TABLE,
+          ruleList.add(AutomaticRules.createFKAutomaticRule(referenceId, EntityTypeEnum.TABLE,
               FIELD_TYPE + typeData, "TC" + shortcode, TC_DESCRIPTION + typeData, tableSchemaId,
-              datasetId));
+              false));
+
+          if (null != fieldSchemaPK && null != fieldSchemaPK.getPkMustBeUsed()
+              && fieldSchemaPK.getPkMustBeUsed()) {
+
+            Long shortcodeAux =
+                rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
+
+            ruleList.add(AutomaticRules.createFKAutomaticRule(referenceId, EntityTypeEnum.TABLE,
+                "Table Completeness", "TO" + shortcodeAux, TO_DESCRIPTION, tableSchemaId, true));
+          }
+
           break;
         case CODELIST:
           // we find values available to create this validation for a codelist, same value with
@@ -319,7 +334,7 @@ public class RulesServiceImpl implements RulesService {
           document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
           ruleList.addAll(AutomaticRules.createCodelistAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, document.get("codelistItems").toString(), "FT" + shortcode,
-              FT_DESCRIPTION + typeData));
+              FT_DESCRIPTION + "SINGLESELECT_CODELIST"));
           break;
         case MULTISELECT_CODELIST:
           // we find values available to create this validation for a codelist, same value with
@@ -350,6 +365,35 @@ public class RulesServiceImpl implements RulesService {
       ruleList.stream()
           .forEach(rule -> rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule));
     }
+  }
+
+
+
+  /**
+   * Gets the PK field schema from schema.
+   *
+   * @param schema the schema
+   * @param idFieldSchema the id field schema
+   * @return the PK field schema from schema
+   */
+  private FieldSchema getPKFieldSchemaFromSchema(DataSetSchema schema, String idFieldSchema) {
+
+    FieldSchema field = null;
+    Boolean locatedPK = false;
+
+    for (TableSchema table : schema.getTableSchemas()) {
+      for (FieldSchema fieldAux : table.getRecordSchema().getFieldSchema()) {
+        if (fieldAux.getIdFieldSchema().toString().equals(idFieldSchema)) {
+          field = fieldAux;
+          locatedPK = Boolean.TRUE;
+          break;
+        }
+      }
+      if (locatedPK.equals(Boolean.TRUE)) {
+        break;
+      }
+    }
+    return field;
   }
 
 
@@ -503,6 +547,12 @@ public class RulesServiceImpl implements RulesService {
     return false;
   }
 
+  /**
+   * Update allowed rule properties.
+   *
+   * @param ruleVO the rule VO
+   * @param rule the rule
+   */
   private void updateAllowedRuleProperties(RuleVO ruleVO, Rule rule) {
 
     rule.setEnabled(ruleVO.isEnabled());

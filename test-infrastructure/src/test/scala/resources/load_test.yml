@@ -2,18 +2,18 @@ gatling_config:
   scenarios:
     #    - requestName: createDataset
     #      endpoint: /recordstore/dataset/create/${datasetName}/poc
-    #      usersNumber: 20
-    #      numberExecutions: 5
+    #      usersNumber: 100
+    #      numberExecutions: 1
     #      useFeeder: true
     #      method: post
     #      puaseTime: 1
-    #      timeOut: 1000
+    #      timeOut: 2000
     #headers:
     #Authorization: Basic Y2FzX3NlcnZpY2U6NTFlYTg2OWFmNjM4NDNjYTkwNjQ0YTY5ZDM0Yjg1Nzk=
     #requestBody: '{"title":"example"}'
     - requestName: restoreSnapshot
-      endpoint: /recordstore/dataset/${datasetId}/snapshot/restore/poc?idSnapshot=2078&partitionId=${partitionId}&typeDataset=REPORTING&user=jose.luis.provider&isSchemaSnapshot=false&deleteData=true
-      usersNumber: 5
+      endpoint: /recordstore/dataset/${datasetId}/snapshot/restore/poc?idSnapshot=1622&partitionId=${partitionId}&typeDataset=REPORTING&user=jose.luis.provider&isSchemaSnapshot=false&deleteData=true
+      usersNumber: 10
       numberExecutions: 1
       useFeeder: true
       method: post
@@ -21,7 +21,7 @@ gatling_config:
       timeOut: 1000
 #    - requestName: createSnapshot
 #      endpoint: /recordstore/dataset/${datasetId}/snapshot/create/poc?idSnapshot=${idSnapshot}&idPartitionDataset=${idPartitionDataset}
-#      usersNumber: 100
+#      usersNumber: 10
 #      numberExecutions: 1
 #      useFeeder: true
 #      method: post
