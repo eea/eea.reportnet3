@@ -6,7 +6,7 @@ import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
 import { Button } from 'ui/views/_components/Button';
-import { CreateValidation } from 'ui/views/DatasetDesigner/_components/CreateValidation';
+// import { CreateValidation } from 'ui/views/DatasetDesigner/_components/CreateValidation';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldsDesigner } from './_components/FieldsDesigner';
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -14,6 +14,7 @@ import { routes } from 'ui/routes';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabView } from 'ui/views/_components/TabView';
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
+import { Validations } from 'ui/views/DatasetDesigner/_components/Validations';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -44,7 +45,6 @@ export const TabsDesigner = withRouter(
     const [errorMessage, setErrorMessage] = useState();
     const [errorMessageTitle, setErrorMessageTitle] = useState();
     const [initialTabIndexDrag, setInitialTabIndexDrag] = useState();
-    const [isAddValidationVisible, setIsAddValidationVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -445,14 +445,8 @@ export const TabsDesigner = withRouter(
       <React.Fragment>
         {renderTabViews()}
         {renderErrors(errorMessageTitle, errorMessage)}
-        {datasetSchema && tabs && validationContext.isVisible && (
-          <CreateValidation
-            isVisible={isAddValidationVisible}
-            tabs={tabs}
-            datasetId={datasetId}
-            toggleVisibility={setIsAddValidationVisible}
-          />
-        )}
+        {/* {datasetSchema && tabs && validationContext.isVisible && <CreateValidation tabs={tabs} datasetId={datasetId} />} */}
+        {datasetSchema && tabs && validationContext.isVisible && <Validations tabs={tabs} datasetId={datasetId} />}
       </React.Fragment>
     );
   }

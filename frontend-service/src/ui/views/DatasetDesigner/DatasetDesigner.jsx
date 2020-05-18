@@ -329,7 +329,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       <Button
         className="p-button-primary p-button-animated-blink"
         icon={'plus'}
-        label={resources.messages['create']}
+        label={resources.messages['createRowValidationBtn']}
+        onClick={() => {
+          validationContext.onOpenModalFronOpener('validationsListDialog');
+          onHideValidationsDialog();
+        }}
+      />
+      <Button
+        className="p-button-primary p-button-animated-blink"
+        icon={'plus'}
+        label={resources.messages['createFieldValidationBtn']}
         onClick={() => {
           validationContext.onOpenModalFronOpener('validationsListDialog');
           onHideValidationsDialog();

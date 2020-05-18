@@ -41,7 +41,7 @@ import { initValidationRuleCreation } from './_functions/utils/initValidationRul
 import { resetValidationRuleCreation } from './_functions/utils/resetValidationRuleCreation';
 import { setValidationExpression } from './_functions/utils/setValidationExpression';
 
-const CreateValidation = ({ datasetId, tabs }) => {
+const FieldValidation = ({ toggleVisibility, datasetId, tabs }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
@@ -494,4 +494,4 @@ const CreateValidation = ({ datasetId, tabs }) => {
   );
 };
 
-export { CreateValidation };
+export { FieldValidation };
