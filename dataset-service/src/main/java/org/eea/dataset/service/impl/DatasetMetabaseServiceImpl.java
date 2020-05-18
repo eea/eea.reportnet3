@@ -176,7 +176,11 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Override
   public DataSetMetabaseVO findDatasetMetabase(Long idDataset) {
     Optional<DataSetMetabase> datasetMetabase = dataSetMetabaseRepository.findById(idDataset);
-    return dataSetMetabaseMapper.entityToClass(datasetMetabase.get());
+    DataSetMetabaseVO metabaseVO = new DataSetMetabaseVO();
+    if (datasetMetabase.isPresent()) {
+      metabaseVO = dataSetMetabaseMapper.entityToClass(datasetMetabase.get());
+    }
+    return metabaseVO;
   }
 
   /**

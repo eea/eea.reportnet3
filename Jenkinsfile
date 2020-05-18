@@ -49,7 +49,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('Altia SonarQube') {
                     // requires SonarQube Scanner for Maven 3.2+
-                   // sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -P sonar -Dsonar.java.source=1.8 -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
+                  	sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -P sonar -Dsonar.java.source=1.8 -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
 
                     // sh 'cd frontend-service && npm install sonar-scanner && npm run sonar-scanner && cd ..'
                 }
@@ -108,16 +108,10 @@ pipeline {
                                 }
                                 emailext body: 'New Build Done - Quality Gate is ' + qualitygate["status"] + " at https://sonar-oami.altia.es/dashboard?id=Reportnet-sonar-frontend\nOverview" + output, subject: 'SonarQube Frontend FAIL Notification', to: 'fjlabiano@itracasa.es; ext.jose.luis.anton@altia.es; ealfaro@tracasa.es; marina.montoro@altia.es'
                             }
-
                         }
                     }
                 }
 
-            }
-            post {
-                failure {
-                    slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - Quality Gate NOT MET (marked as ERROR) https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
-                }
             }
         }*/
 
