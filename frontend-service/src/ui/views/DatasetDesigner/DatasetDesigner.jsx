@@ -1,7 +1,5 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
-
-import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
@@ -36,11 +34,10 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
-import { designerReducer } from './_functions/Reducers/designerReducer';
+import { DatasetDesignerUtils } from './Utils/DatasetDesignerUtils';
 
 import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
 
-import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 
@@ -56,23 +53,33 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const user = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
 
-  const [designerState, designerDispatch] = useReducer(designerReducer, {
-    dataflowName: '',
-    datasetDescription: '',
-    datasetHasData: false,
-    datasetSchemaAllTables: [],
-    datasetSchemaId: '',
-    datasetSchemaName: '',
-    datasetSchemas: [],
-    hasWritePermissions: false,
-    initialDatasetDescription: '',
-    isLoading: true,
-    isPreviewModeOn: DatasetDesignerUtils.getUrlParamValue('design'),
-    metaData: {},
-    uniqueConstraintListDialogVisible: false,
-    validateDialogVisible: false,
-    validationListDialogVisible: false
-  });
+  const getUrlParamValue = param => {
+    let value = '';
+    let queryString = window.location.search;
+    const params = queryString.substring(1, queryString.length).split('&');
+    params.forEach(parameter => {
+      if (parameter.includes(param)) {
+        value = parameter.split('=')[1];
+      }
+    });
+    return param === 'tab' ? Number(value) : value === 'true';
+  };
+
+  const [dataflowName, setDataflowName] = useState('');
+  const [datasetDescription, setDatasetDescription] = useState('');
+  const [datasetHasData, setDatasetHasData] = useState(false);
+  const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
+  const [datasetSchemaId, setDatasetSchemaId] = useState('');
+  const [datasetSchemaName, setDatasetSchemaName] = useState('');
+  const [datasetSchemas, setDatasetSchemas] = useState([]);
+  const [hasWritePermissions, setHasWritePermissions] = useState(false);
+  const [initialDatasetDescription, setInitialDatasetDescription] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPreviewModeOn, setIsPreviewModeOn] = useState(getUrlParamValue('design'));
+  const [metaData, setMetaData] = useState({});
+  const [uniqueConstraintListDialogVisible, setUniqueConstraintListDialogVisible] = useState(false);
+  const [validateDialogVisible, setValidateDialogVisible] = useState(false);
+  const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
 
   const {
     isLoadingSnapshotListData,
@@ -83,129 +90,151 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     snapshotDispatch,
     snapshotListData,
     snapshotState
-  } = useDatasetDesigner(dataflowId, datasetId, designerState.datasetSchemaId);
+  } = useDatasetDesigner(dataflowId, datasetId, datasetSchemaId);
 
   useEffect(() => {
     try {
-      isLoading(true);
+      setIsLoading(true);
       const getDatasetSchemaId = async () => {
         const dataset = await DatasetService.schemaById(datasetId);
-        designerDispatch({
-          type: 'GET_DATASET_DATA',
-          payload: {
-            description: dataset.datasetSchemaDescription,
-            schemaId: dataset.datasetSchemaId,
-            tables: dataset.tables
-          }
-        });
+        setDatasetDescription(dataset.datasetSchemaDescription);
+        setDatasetSchemaId(dataset.datasetSchemaId);
+        setDatasetSchemaAllTables(dataset.tables);
       };
       const getDatasetSchemas = async () => {
-        designerDispatch({
-          type: 'LOAD_DATASET_SCHEMAS',
-          payload: { schemas: await DataflowService.getAllSchemas(dataflowId) }
-        });
+        const datasetSchemasDTO = await DataflowService.getAllSchemas(dataflowId);
+        setDatasetSchemas(datasetSchemasDTO);
       };
       getDatasetSchemaId();
       getDatasetSchemas();
     } catch (error) {
       console.error(`Error while loading schema: ${error}`);
     } finally {
-      isLoading(false);
+      setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
-      designerDispatch({
-        type: 'LOAD_PERMISSIONS',
-        payload: {
-          permissions: UserService.hasPermission(
-            user,
-            [config.permissions.PROVIDER],
-            `${config.permissions.DATASET}${datasetId}`
-          )
-        }
-      });
+      setHasWritePermissions(
+        UserService.hasPermission(user, [config.permissions.PROVIDER], `${config.permissions.DATASET}${datasetId}`)
+      );
     }
   }, [user]);
 
   useEffect(() => {
     breadCrumbContext.add([
       {
-        command: () => history.push(getUrl(routes.DATAFLOWS)),
-        href: getUrl(routes.DATAFLOWS),
+        label: resources.messages['dataflows'],
         icon: 'home',
-        label: resources.messages['dataflows']
+        href: getUrl(routes.DATAFLOWS),
+        command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
-        command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true)),
-        href: getUrl(routes.DATAFLOW, { dataflowId }, true),
+        label: resources.messages['dataflow'],
         icon: 'archive',
-        label: resources.messages['dataflow']
+        href: getUrl(
+          routes.DATAFLOW,
+          {
+            dataflowId
+          },
+          true
+        ),
+        command: () =>
+          history.push(
+            getUrl(
+              routes.DATAFLOW,
+              {
+                dataflowId
+              },
+              true
+            )
+          )
       },
       { label: resources.messages['datasetDesigner'], icon: 'pencilRuler' }
     ]);
     leftSideBarContext.removeModels();
+    getDataflowName();
+    onLoadDatasetSchemaName();
     callSetMetaData();
   }, []);
 
   useEffect(() => {
-    if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener)
-      manageDialogs('validationListDialogVisible', true);
+    if (validationContext.opener == 'uniqueConstraintListDialog' && validationContext.reOpenOpener)
+      setUniqueConstraintListDialogVisible(true);
   }, [validationContext]);
 
   useEffect(() => {
-    if (designerState.validationListDialogVisible) {
+    if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener)
+      setValidationListDialogVisible(true);
+  }, [validationContext]);
+
+  useEffect(() => {
+    if (validationListDialogVisible) {
       validationContext.resetReOpenOpener();
     }
-  }, [designerState.validationListDialogVisible]);
+  }, [validationListDialogVisible]);
 
   useEffect(() => {
     if (window.location.search !== '') {
       changeUrl();
     }
-  }, [designerState.isPreviewModeOn]);
+  }, [isPreviewModeOn]);
 
   const callSetMetaData = async () => {
-    const metaData = await getMetadata({ datasetId, dataflowId });
-    designerDispatch({
-      type: 'GET_METADATA',
-      payload: { metaData, dataflowName: metaData.dataflow.name, schemaName: metaData.dataset.name }
-    });
+    setMetaData(await getMetadata({ datasetId, dataflowId }));
   };
 
   const changeUrl = () => {
     window.history.replaceState(
       null,
       null,
-      `?tab=${DatasetDesignerUtils.getUrlParamValue('tab')}${
-        !isUndefined(designerState.isPreviewModeOn) ? `&design=${designerState.isPreviewModeOn}` : ''
-      }`
+      `?tab=${getUrlParamValue('tab')}${!isUndefined(isPreviewModeOn) ? `&design=${isPreviewModeOn}` : ''}`
     );
+  };
+
+  const getDataflowName = async () => {
+    const dataflowData = await DataflowService.dataflowDetails(dataflowId);
+    setDataflowName(dataflowData.name);
   };
 
   const getMetadata = async ids => {
     try {
       return await MetadataUtils.getMetadata(ids);
     } catch (error) {
-      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
+      notificationContext.add({
+        type: 'GET_METADATA_ERROR',
+        content: {
+          dataflowId,
+          datasetId
+        }
+      });
     }
   };
 
-  const isLoading = value => designerDispatch({ type: 'IS_LOADING', payload: { value } });
-
-  const manageDialogs = (dialog, value, secondDialog, secondValue) => {
-    designerDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value, secondDialog, secondValue } });
-  };
+  const renderSwitchView = () => (
+    <div className={styles.switchDivInput}>
+      <div className={styles.switchDiv}>
+        <span className={styles.switchTextInput}>{resources.messages['design']}</span>
+        <InputSwitch
+          checked={isPreviewModeOn}
+          // disabled={true}
+          // disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
+          onChange={e => setIsPreviewModeOn(e.value)}
+        />
+        <span className={styles.switchTextInput}>{resources.messages['preview']}</span>
+      </div>
+    </div>
+  );
 
   const onBlurDescription = description => {
-    if (description !== designerState.initialDatasetDescription) {
+    if (description !== initialDatasetDescription) {
       onUpdateDescription(description);
     }
   };
 
   const onChangeReference = (tabs, datasetSchemaId) => {
-    const inmDatasetSchemas = [...designerState.datasetSchemas];
+    const inmDatasetSchemas = [...datasetSchemas];
     const datasetSchemaIndex = DatasetDesignerUtils.getIndexById(datasetSchemaId, inmDatasetSchemas);
     inmDatasetSchemas[datasetSchemaIndex].tables = tabs;
     if (!isNil(inmDatasetSchemas)) {
@@ -229,20 +258,20 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         })
       );
     }
-    designerDispatch({ type: 'LOAD_DATASET_SCHEMAS', payload: { schemas: inmDatasetSchemas } });
+    setDatasetSchemas(inmDatasetSchemas);
   };
 
   const onConfirmValidate = async () => {
-    manageDialogs('validateDialogVisible', false);
     try {
+      setValidateDialogVisible(false);
       await DatasetService.validateDataById(datasetId);
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
         content: {
           dataflowId,
-          dataflowName: designerState.dataflowName,
           datasetId,
-          datasetName: designerState.datasetSchemaName
+          dataflowName,
+          datasetName: datasetSchemaName
         }
       });
     } catch (error) {
@@ -250,42 +279,84 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         type: 'VALIDATE_DATA_BY_ID_ERROR',
         content: {
           dataflowId,
-          dataflowName: designerState.dataflowName,
           datasetId,
-          datasetName: designerState.datasetSchemaName
+          dataflowName,
+          datasetName: datasetSchemaName
         }
       });
     }
   };
 
-  const onHideValidationsDialog = () => {
-    if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener) {
-      validationContext.onResetOpener();
-    }
-    manageDialogs('validationListDialogVisible', false);
-  };
+  const onLoadTableData = hasData => setDatasetHasData(hasData);
+
+  const onUpdateTable = tables => setDatasetSchemaAllTables(tables);
 
   const onKeyChange = event => {
     if (event.key === 'Escape') {
-      designerDispatch({ type: 'ON_UPDATE_DESCRIPTION', payload: { value: designerState.initialDatasetDescription } });
+      setDatasetDescription(initialDatasetDescription);
     } else if (event.key == 'Enter') {
       event.preventDefault();
       onBlurDescription(event.target.value);
     }
   };
 
-  const onLoadTableData = hasData => designerDispatch({ type: 'SET_DATASET_HAS_DATA', payload: { hasData } });
+  const onLoadDatasetSchemaName = async () => {
+    setIsLoading(true);
+    try {
+      const dataset = await DatasetService.getMetaData(datasetId);
+      setDatasetSchemaName(dataset.datasetSchemaName);
+    } catch (error) {
+      console.error(`Error while getting datasetSchemaName: ${error}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const onUpdateDescription = async description => {
     try {
-      await DatasetService.updateDatasetDescriptionDesign(datasetId, description);
+      const response = await DatasetService.updateDatasetDescriptionDesign(datasetId, description);
+      if (response.status < 200 || response.status > 299) {
+        console.error('Error during datasetSchema Description update');
+      }
     } catch (error) {
       console.error('Error during datasetSchema Description update: ', error);
     } finally {
     }
   };
 
-  const onUpdateTable = tables => designerDispatch({ type: 'ON_UPDATE_TABLES', payload: { tables } });
+  const onHideUniqueConstraintsDialog = () => {
+    if (validationContext.opener == 'uniqueConstraintListDialog' && validationContext.reOpenOpener) {
+      validationContext.onResetOpener();
+    }
+    setUniqueConstraintListDialogVisible(false);
+  };
+
+  const onHideValidationsDialog = () => {
+    if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener) {
+      validationContext.onResetOpener();
+    }
+    setValidationListDialogVisible(false);
+  };
+
+  const actionButtonsUniqueConstraintDialog = (
+    <>
+      <Button
+        className="p-button-primary p-button-animated-blink"
+        icon={'plus'}
+        label={resources.messages['create']}
+        onClick={() => {
+          validationContext.onOpenModalFronOpener('uniqueConstraintsListDialog');
+          onHideUniqueConstraintsDialog();
+        }}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => onHideUniqueConstraintsDialog()}
+      />
+    </>
+  );
 
   const actionButtonsValidationDialog = (
     <>
@@ -307,47 +378,42 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     </>
   );
 
-  const renderSwitchView = () => (
-    <div className={styles.switchDivInput}>
-      <div className={styles.switchDiv}>
-        <span className={styles.switchTextInput}>{resources.messages['design']}</span>
-        <InputSwitch
-          checked={designerState.isPreviewModeOn}
-          // disabled={true}
-          // disabled={!isUndefined(fields) ? (fields.length === 0 ? true : false) : false}
-          // onChange={e => setIsPreviewModeOn(e.value)}
-          onChange={event => designerDispatch({ type: 'IS_PREVIEW_MODE_ON', payload: { value: event.value } })}
-        />
-        <span className={styles.switchTextInput}>{resources.messages['preview']}</span>
-      </div>
-    </div>
-  );
-
-  const renderUniqueConstraintsDialog = () => (
-    <Dialog
-      header={resources.messages['uniqueConstraints']}
-      onHide={() => manageDialogs('uniqueConstraintListDialogVisible', false)}
-      style={{ width: '90%' }}
-      visible={designerState.uniqueConstraintListDialogVisible}>
-      <UniqueConstraints datasetSchemaId={designerState.datasetSchemaId} />
-    </Dialog>
-  );
+  const uniqueConstraintsListDialog = () => {
+    if (uniqueConstraintListDialogVisible) {
+      return (
+        <Dialog
+          className={styles.paginatorValidationViewer}
+          dismissableMask={true}
+          footer={actionButtonsUniqueConstraintDialog}
+          header={resources.messages['uniqueConstraints']}
+          onHide={() => {
+            onHideUniqueConstraintsDialog();
+          }}
+          style={{ width: '90%' }}
+          visible={uniqueConstraintListDialogVisible}>
+          <UniqueConstraints datasetSchemaId={datasetSchemaId} />
+        </Dialog>
+      );
+    }
+  };
 
   const validationsListDialog = () => {
-    if (designerState.validationListDialogVisible) {
+    if (validationListDialogVisible) {
       return (
         <Dialog
           className={styles.paginatorValidationViewer}
           dismissableMask={true}
           footer={actionButtonsValidationDialog}
           header={resources.messages['qcRules']}
-          onHide={() => onHideValidationsDialog()}
+          onHide={() => {
+            onHideValidationsDialog();
+          }}
           style={{ width: '90%' }}
-          visible={designerState.validationListDialogVisible}>
+          visible={validationListDialogVisible}>
           <TabsValidations
-            dataset={designerState.metaData.dataset}
-            datasetSchemaAllTables={designerState.datasetSchemaAllTables}
-            datasetSchemaId={designerState.datasetSchemaId}
+            dataset={metaData.dataset}
+            datasetSchemaAllTables={datasetSchemaAllTables}
+            datasetSchemaId={datasetSchemaId}
             onHideValidationsDialog={onHideValidationsDialog}
           />
         </Dialog>
@@ -361,7 +427,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     </MainLayout>
   );
 
-  if (designerState.isLoading || isEmpty(designerState.datasetSchemas)) return layout(<Spinner />);
+  if (isLoading) {
+    return layout(<Spinner />);
+  }
 
   return layout(
     <SnapshotContext.Provider
@@ -375,8 +443,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         <Title
           icon="pencilRuler"
           iconSize="3.4rem"
-          subtitle={designerState.dataflowName}
-          title={`${resources.messages['datasetSchema']}: ${designerState.datasetSchemaName}`}
+          subtitle={dataflowName}
+          title={`${resources.messages['datasetSchema']}: ${datasetSchemaName}`}
         />
         <h4 className={styles.descriptionLabel}>{resources.messages['newDatasetSchemaDescriptionPlaceHolder']}</h4>
         <div className={styles.ButtonsBar}>
@@ -386,11 +454,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             expandableOnClick={true}
             key="datasetDescription"
             onBlur={e => onBlurDescription(e.target.value)}
-            onChange={e => designerDispatch({ type: 'ON_UPDATE_DESCRIPTION', payload: { value: e.target.value } })}
-            onFocus={e => designerDispatch({ type: 'INITIAL_DATASET_DESCRIPTION', payload: { value: e.target.value } })}
+            onChange={e => setDatasetDescription(e.target.value)}
+            onFocus={e => {
+              setInitialDatasetDescription(e.target.value);
+            }}
             onKeyDown={e => onKeyChange(e)}
             placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
-            value={designerState.datasetDescription || ''}
+            value={datasetDescription || ''}
           />
 
           <Toolbar>
@@ -404,13 +474,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             /> */}
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetHasData ? ' p-button-animated-blink' : null
+                  datasetHasData ? ' p-button-animated-blink' : null
                 }`}
-                disabled={!designerState.datasetHasData}
+                disabled={!datasetHasData}
                 icon={'validate'}
                 iconClasses={null}
                 label={resources.messages['validate']}
-                onClick={() => manageDialogs('validateDialogVisible', true)}
+                onClick={() => setValidateDialogVisible(true)}
                 ownButtonClasses={null}
               />
 
@@ -420,16 +490,19 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 icon={'list'}
                 iconClasses={null}
                 label={resources.messages['qcRules']}
-                onClick={() => manageDialogs('validationListDialogVisible', true)}
+                onClick={() => setValidationListDialogVisible(true)}
                 ownButtonClasses={null}
               />
-              {/* 
+
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                disabled={false}
                 icon={'list'}
+                iconClasses={null}
                 label={resources.messages['uniqueConstraints']}
-                onClick={() => manageDialogs('uniqueConstraintListDialogVisible', true)}
-              /> */}
+                onClick={() => setUniqueConstraintListDialogVisible(true)}
+                ownButtonClasses={null}
+              />
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent`}
@@ -440,9 +513,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               />
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  !designerState.hasWritePermissions ? 'p-button-animated-blink' : null
+                  !hasWritePermissions ? 'p-button-animated-blink' : null
                 }`}
-                disabled={designerState.hasWritePermissions}
+                disabled={hasWritePermissions}
                 icon={'camera'}
                 label={resources.messages['snapshots']}
                 onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
@@ -452,10 +525,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         </div>
         {renderSwitchView()}
         <TabsDesigner
-          datasetSchemas={designerState.datasetSchemas}
+          datasetSchemas={datasetSchemas}
           editable={true}
           history={history}
-          isPreviewModeOn={designerState.isPreviewModeOn}
+          isPreviewModeOn={isPreviewModeOn}
           onChangeReference={onChangeReference}
           onLoadTableData={onLoadTableData}
           onUpdateTable={onUpdateTable}
@@ -467,7 +540,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           snapshotListData={snapshotListData}
         />
         {validationsListDialog()}
-        {renderUniqueConstraintsDialog()}
+        {uniqueConstraintsListDialog()}
 
         <ConfirmDialog
           header={resources.messages['validateDataset']}
@@ -475,8 +548,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           labelConfirm={resources.messages['yes']}
           maximizable={false}
           onConfirm={onConfirmValidate}
-          onHide={() => manageDialogs('validateDialogVisible', false)}
-          visible={designerState.validateDialogVisible}>
+          onHide={() => setValidateDialogVisible(false)}
+          visible={validateDialogVisible}>
           {resources.messages['validateDatasetConfirm']}
         </ConfirmDialog>
       </div>

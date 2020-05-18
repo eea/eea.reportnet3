@@ -194,7 +194,7 @@ const Tab = ({
         onInputBlur(event.target.value, index, initialTitleHeader);
       } else {
         if (!isUndefined(onTabNameError)) {
-          onTabNameError(resources.messages['emptyTabHeader'], resources.messages['emptyTitleValidationError']);
+          onTabAddCancel();
         }
       }
     }
