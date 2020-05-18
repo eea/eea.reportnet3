@@ -175,7 +175,7 @@ function boolean isPhone(String value){
  //////////////////////////////////////////DEFAULT VALIDATIONS END BLOCK////////////////////////////////////////////////////////////
  
  //////////////////////////////////////////VALIDATION PK////////////////////////////////////////////////////////////
-function boolean isfieldPK(DatasetValue datasetId, String idFieldSchema,String idRule){	
+function boolean isfieldFK(DatasetValue datasetId, String idFieldSchema,String idRule,Boolean pkMustBeUsed){	
 
-		return PKValidationUtils.isfieldPK(datasetId,idFieldSchema,idRule);
+		return FKValidationUtils.isfieldFK(datasetId,idFieldSchema,idRule,pkMustBeUsed);
  }

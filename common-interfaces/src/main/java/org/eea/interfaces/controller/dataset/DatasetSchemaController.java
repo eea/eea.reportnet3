@@ -211,4 +211,13 @@ public interface DatasetSchemaController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataSetSchemaVO> findDataSchemasByIdDataflow(@PathVariable("idDataflow") Long idDataflow);
 
+  /**
+   * Gets the unique fields.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the unique fields
+   */
+  @GetMapping(value = "{schemaId}/getUniqueFields", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<FieldSchemaVO> getUniqueFields(@PathVariable("schemaId") String datasetSchemaId);
+
 }

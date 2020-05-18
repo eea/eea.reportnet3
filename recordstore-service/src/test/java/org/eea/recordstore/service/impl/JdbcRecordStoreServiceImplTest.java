@@ -1,5 +1,6 @@
 package org.eea.recordstore.service.impl;
 
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.times;
 import java.io.File;
 import java.io.IOException;
@@ -72,10 +73,6 @@ public class JdbcRecordStoreServiceImplTest {
         "jdbc:postgresql://localhost/datasets");
     ReflectionTestUtils.setField(jdbcRecordStoreService, "sqlGetDatasetsName",
         "select * from pg_namespace where nspname like 'dataset%'");
-
-    ReflectionTestUtils.setField(jdbcRecordStoreService,
-        "timeToWaitBeforeReleasingNotificationDesign", 1000L);
-
   }
 
   @Rule
@@ -89,7 +86,6 @@ public class JdbcRecordStoreServiceImplTest {
   @Test
   public void createEmptyDataSet() throws RecordStoreAccessException {
     jdbcRecordStoreService.createEmptyDataSet("", "");
-    Mockito.verify(kafkaSender, Mockito.times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
     Mockito.verify(jdbcTemplate, Mockito.times(91)).execute(Mockito.anyString());
   }
 
@@ -197,7 +193,8 @@ public class JdbcRecordStoreServiceImplTest {
   public void testDeleteSnapshot() throws SQLException, IOException {
 
     jdbcRecordStoreService.deleteDataSnapshot(1L, 1L);
-
+    File file = new File("./snapshot_" + 1L + "-dataset_" + 1L + "_table_DatasetValue.snap");
+    assertFalse(file.exists());
   }
 
   @After

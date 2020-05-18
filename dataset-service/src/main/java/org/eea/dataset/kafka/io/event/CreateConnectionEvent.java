@@ -1,4 +1,4 @@
-package org.eea.dataset.io.kafka.commands;
+package org.eea.dataset.kafka.io.event;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,11 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+
 /**
- * The Class CreateConnectionCommand.
+ * The Class CreateConnectionEvent.
  */
 @Component
-public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
+public class CreateConnectionEvent extends AbstractEEAEventHandlerCommand {
 
   /**
    * The Constant LOG_ERROR.
@@ -53,12 +54,6 @@ public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
   @Override
   public void execute(EEAEventVO eeaEventVO) {
 
-    // When there is a new dataset created, if there is idSchema in the event, call to
-    // datasetService.insertSchema
-    // to insert that values into the dataset_X.dataset_value and dataset_X.table_value
-
-
-    // if there is idDatasetSchema, insert it into the corresponding dataset_value
     String dataset = (String) eeaEventVO.getData().get("dataset_id");
     String idDatasetSchema = (String) eeaEventVO.getData().get("idDatasetSchema");
     if (StringUtils.isNotBlank(dataset) && StringUtils.isNotBlank(idDatasetSchema)) {
@@ -66,8 +61,9 @@ public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
         String[] aux = dataset.split("_");
         Long idDataset = Long.valueOf(aux[aux.length - 1]);
         TenantResolver.setTenantName(String.format("dataset_%s", idDataset));
+        // Initialize the dataset values (insert datasetId and tables into dataset_value and
+        // table_value of the new schema)
         datasetService.insertSchema(idDataset, idDatasetSchema);
-
         // First insert of the statistics
         datasetService.saveStatistics(idDataset);
 

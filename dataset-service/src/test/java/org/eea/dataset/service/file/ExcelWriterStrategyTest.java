@@ -77,6 +77,8 @@ public class ExcelWriterStrategyTest {
     excelWriterStrategy.setMimeType("xls");
     excelWriterStrategy.writeFile(1L, 1L, "");
     excelWriterStrategy.getMimeType();
+    Mockito.verify(fileCommon, times(1)).getRecordValues(Mockito.any(), Mockito.any());
+    assertEquals("failed assertion", "xls", excelWriterStrategy.getMimeType());
   }
 
   @Test
