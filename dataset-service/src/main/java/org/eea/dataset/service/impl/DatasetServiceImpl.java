@@ -1667,11 +1667,11 @@ public class DatasetServiceImpl implements DatasetService {
               field.setRecord(recordValue);
               fieldValues.add(field);
               idSchema.add(field.getIdFieldSchema());
-              setMissingField(
-                  tableMap.get(etlTable.getTableName()).getRecordSchema().getFieldSchema(),
-                  fieldValues, idSchema, recordValue);
             }
           }
+          // set the fields if not declared in the records
+          setMissingField(tableMap.get(etlTable.getTableName()).getRecordSchema().getFieldSchema(),
+              fieldValues, idSchema, recordValue);
           recordValue.setFields(fieldValues);
           recordValue.setDatasetPartitionId(partition.getId());
           recordValue.setDataProviderCode(provider.getCode());
