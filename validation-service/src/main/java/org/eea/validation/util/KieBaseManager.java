@@ -242,7 +242,7 @@ public class KieBaseManager {
     DataType dataType = DataType.valueOf(documentField.get("typeData").toString());
     RuleExpressionVO ruleExpressionVO = new RuleExpressionVO(rule.getWhenCondition());
 
-    if (!ruleExpressionVO.isDataTypeCompatible(dataType)) {
+    if (!ruleExpressionVO.isDataTypeCompatible(rule.getType(), dataType)) {
       rule.setVerified(false);
       rule.setEnabled(false);
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);

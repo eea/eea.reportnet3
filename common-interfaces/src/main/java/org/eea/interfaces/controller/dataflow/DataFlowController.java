@@ -5,6 +5,8 @@ import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleExpressionVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleExpressionVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -152,4 +154,10 @@ public interface DataFlowController {
   void updateDataFlowStatus(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("status") TypeStatusEnum status,
       @RequestParam(value = "deadLineDate", required = false) Date deadLineDate);
+
+  @PostMapping("/metodoDePrueba")
+  RuleExpressionVO metodoDePrueba(@RequestBody RuleExpressionVO casa);
+
+  @PostMapping("/metodoDePrueba2")
+  RuleExpressionVO metodoDePrueba2(@RequestBody RuleExpressionVO casa);
 }

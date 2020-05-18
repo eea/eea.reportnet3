@@ -2,110 +2,114 @@ package org.eea.interfaces.vo.dataset.schemas.rule.enums;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 
 /**
  * The Enum RuleOperatorEnum.
  */
 public enum RuleOperatorEnum {
 
-  // Number operators
-  /** Equals. */
-  EQ("==", "Boolean", "Number", "Number"),
-  /** Distinct. */
-  DIST("!=", "Boolean", "Number", "Number"),
-  /** Greater than. */
-  GT(">", "Boolean", "Number", "Number"),
-  /** Less than. */
-  LT("<", "Boolean", "Number", "Number"),
-  /** Greater than or equals. */
-  GTEQ(">=", "Boolean", "Number", "Number"),
-  /** Less than or equals. */
-  LTEQ("<=", "Boolean", "Number", "Number"),
-  /** The num match. */
-  NUM_MATCH("numberMatch", "Boolean", "Number", "String"),
-
   // Logical operators
   /** And. */
-  AND("&&", "Boolean", "Boolean", "Boolean"),
+  F_AND(EntityTypeEnum.FIELD, "fAnd", "Boolean", "Boolean", "Boolean"),
   /** Or. */
-  OR("||", "Boolean", "Boolean", "Boolean"),
+  F_OR(EntityTypeEnum.FIELD, "fOr", "Boolean", "Boolean", "Boolean"),
   /** Not. */
-  NOT("!", "Boolean", "Boolean", "Boolean"),
+  F_NOT(EntityTypeEnum.FIELD, "not", "Boolean", "Boolean"),
+
+  // Number operators
+  /** Equals. */
+  F_EQ(EntityTypeEnum.FIELD, "numberEquals", "Boolean", "Number", "Number"),
+  /** Distinct. */
+  F_DIST(EntityTypeEnum.FIELD, "distinct", "Boolean", "Number", "Number"),
+  /** Greater than. */
+  F_GT(EntityTypeEnum.FIELD, ">", "greaterThanNumber", "Number", "Number"),
+  /** Less than. */
+  F_LT(EntityTypeEnum.FIELD, "<", "lessThanNumber", "Number", "Number"),
+  /** Greater than or equals. */
+  F_GTEQ(EntityTypeEnum.FIELD, ">=", "greaterThanOrEqualsThanNumber", "Number", "Number"),
+  /** Less than or equals. */
+  F_LTEQ(EntityTypeEnum.FIELD, "<=", "lessThanOrEqualsThanNumber", "Number", "Number"),
+  /** The num match. */
+  F_NUM_MATCH(EntityTypeEnum.FIELD, "numberMatch", "Boolean", "Number", "String"),
 
   // String operators
   /** Length. */
-  LEN("length", "Number", "String"),
+  F_LEN(EntityTypeEnum.FIELD, "length", "Number", "String"),
   /** Equals for strings. */
-  SEQ("equals", "Boolean", "String", "String"),
+  F_SEQ(EntityTypeEnum.FIELD, "equals", "Boolean", "String", "String"),
   /** Equals for string ignoring case. */
-  SEQIC("equalsIgnoreCase", "Boolean", "String", "String"),
+  F_SEQIC(EntityTypeEnum.FIELD, "equalsIgnoreCase", "Boolean", "String", "String"),
   /** Match. */
-  MATCH("matches", "Boolean", "String", "String"),
+  F_MATCH(EntityTypeEnum.FIELD, "matches", "Boolean", "String", "String"),
 
   // Day operators
   /** The eq day. */
-  EQ_DAY("equalDay", "Boolean", "Date", "Number"),
+  F_EQ_DAY(EntityTypeEnum.FIELD, "equalDay", "Boolean", "Date", "Number"),
   /** The dist day. */
-  DIST_DAY("distinctDay", "Boolean", "Date", "Number"),
+  F_DIST_DAY(EntityTypeEnum.FIELD, "distinctDay", "Boolean", "Date", "Number"),
   /** The gt day. */
-  GT_DAY("greaterThanDay", "Boolean", "Date", "Number"),
+  F_GT_DAY(EntityTypeEnum.FIELD, "greaterThanDay", "Boolean", "Date", "Number"),
   /** The lt day. */
-  LT_DAY("lessThanDay", "Boolean", "Date", "Number"),
+  F_LT_DAY(EntityTypeEnum.FIELD, "lessThanDay", "Boolean", "Date", "Number"),
   /** The gteq day. */
-  GTEQ_DAY("greaterThanOrEqualsThanDay", "Boolean", "Date", "Number"),
+  F_GTEQ_DAY(EntityTypeEnum.FIELD, "greaterThanOrEqualsThanDay", "Boolean", "Date", "Number"),
   /** The lteq day. */
-  LTEQ_DAY("lessThanOrEqualsThanDay", "Boolean", "Date", "Number"),
+  F_LTEQ_DAY(EntityTypeEnum.FIELD, "lessThanOrEqualsThanDay", "Boolean", "Date", "Number"),
 
   // Month operators
   /** The eq month. */
-  EQ_MONTH("equalMonth", "Boolean", "Date", "Number"),
+  F_EQ_MONTH(EntityTypeEnum.FIELD, "equalMonth", "Boolean", "Date", "Number"),
   /** The dist month. */
-  DIST_MONTH("distinctMonth", "Boolean", "Date", "Number"),
+  F_DIST_MONTH(EntityTypeEnum.FIELD, "distinctMonth", "Boolean", "Date", "Number"),
   /** The gt month. */
-  GT_MONTH("greaterThanMonth", "Boolean", "Date", "Number"),
+  F_GT_MONTH(EntityTypeEnum.FIELD, "greaterThanMonth", "Boolean", "Date", "Number"),
   /** The lt month. */
-  LT_MONTH("lessThanMonth", "Boolean", "Date", "Number"),
+  F_LT_MONTH(EntityTypeEnum.FIELD, "lessThanMonth", "Boolean", "Date", "Number"),
   /** The gteq month. */
-  GTEQ_MONTH("greaterThanOrEqualsThanMonth", "Boolean", "Date", "Number"),
+  F_GTEQ_MONTH(EntityTypeEnum.FIELD, "greaterThanOrEqualsThanMonth", "Boolean", "Date", "Number"),
   /** The lteq month. */
-  LTEQ_MONTH("lessThanOrEqualsThanMonth", "Boolean", "Date", "Number"),
+  F_LTEQ_MONTH(EntityTypeEnum.FIELD, "lessThanOrEqualsThanMonth", "Boolean", "Date", "Number"),
 
   // Year operators
   /** The eq year. */
-  EQ_YEAR("equalYear", "Boolean", "Date", "Number"),
+  F_EQ_YEAR(EntityTypeEnum.FIELD, "equalYear", "Boolean", "Date", "Number"),
   /** The dist year. */
-  DIST_YEAR("distinctYear", "Boolean", "Date", "Number"),
+  F_DIST_YEAR(EntityTypeEnum.FIELD, "distinctYear", "Boolean", "Date", "Number"),
   /** The gt year. */
-  GT_YEAR("greaterThanYear", "Boolean", "Date", "Number"),
+  F_GT_YEAR(EntityTypeEnum.FIELD, "greaterThanYear", "Boolean", "Date", "Number"),
   /** The lt year. */
-  LT_YEAR("lessThanYear", "Boolean", "Date", "Number"),
+  F_LT_YEAR(EntityTypeEnum.FIELD, "lessThanYear", "Boolean", "Date", "Number"),
   /** The gteq year. */
-  GTEQ_YEAR("greaterThanOrEqualsThanYear", "Boolean", "Date", "Number"),
+  F_GTEQ_YEAR(EntityTypeEnum.FIELD, "greaterThanOrEqualsThanYear", "Boolean", "Date", "Number"),
   /** The lteq year. */
-  LTEQ_YEAR("lessThanOrEqualsThanYear", "Boolean", "Date", "Number"),
+  F_LTEQ_YEAR(EntityTypeEnum.FIELD, "lessThanOrEqualsThanYear", "Boolean", "Date", "Number"),
 
   // Date operators
   /** The eq date. */
-  EQ_DATE("equalDate", "Boolean", "Date", "Date"),
+  F_EQ_DATE(EntityTypeEnum.FIELD, "equalDate", "Boolean", "Date", "Date"),
   /** The dist date. */
-  DIST_DATE("distinctDate", "Boolean", "Date", "Date"),
+  F_DIST_DATE(EntityTypeEnum.FIELD, "distinctDate", "Boolean", "Date", "Date"),
   /** The gt date. */
-  GT_DATE("greaterThanDate", "Boolean", "Date", "Date"),
+  F_GT_DATE(EntityTypeEnum.FIELD, "greaterThanDate", "Boolean", "Date", "Date"),
   /** The lt date. */
-  LT_DATE("lessThanDate", "Boolean", "Date", "Date"),
+  F_LT_DATE(EntityTypeEnum.FIELD, "lessThanDate", "Boolean", "Date", "Date"),
   /** The gteq date. */
-  GTEQ_DATE("greaterThanOrEqualsThanDate", "Boolean", "Date", "Date"),
+  F_GTEQ_DATE(EntityTypeEnum.FIELD, "greaterThanOrEqualsThanDate", "Boolean", "Date", "Date"),
   /** The lteq date. */
-  LTEQ_DATE("lessThanOrEqualsThanDate", "Boolean", "Date", "Date");
+  F_LTEQ_DATE(EntityTypeEnum.FIELD, "lessThanOrEqualsThanDate", "Boolean", "Date", "Date");
+
+  /** The entity type. */
+  private final EntityTypeEnum entityType;
 
   /** Operator's Java representation. */
-  private final String label;
+  private final String functionName;
 
   /** The return type. */
   private final String returnType;
 
   /** The input types. */
-  private final String[] inputTypes;
+  private final String[] paramTypes;
 
   /** Transformation between RuleOperatorEnum and Java representation. */
   private static final Map<String, RuleOperatorEnum> map;
@@ -113,21 +117,24 @@ public enum RuleOperatorEnum {
   static {
     map = new HashMap<>();
     for (RuleOperatorEnum e : values()) {
-      map.put(e.getLabel(), e);
+      map.put(e.getFunctionName(), e);
     }
   }
 
   /**
    * Instantiates a new RuleOperatorEnum. Should not be used.
    *
-   * @param label the label
+   * @param entityType the entity type
+   * @param functionName the function name
    * @param returnType the return type
-   * @param inputTypes the input types
+   * @param paramTypes the param types
    */
-  private RuleOperatorEnum(String label, String returnType, String... inputTypes) {
-    this.label = label;
+  private RuleOperatorEnum(EntityTypeEnum entityType, String functionName, String returnType,
+      String... paramTypes) {
+    this.entityType = entityType;
+    this.functionName = functionName;
     this.returnType = returnType;
-    this.inputTypes = inputTypes;
+    this.paramTypes = paramTypes;
   }
 
   /**
@@ -136,17 +143,26 @@ public enum RuleOperatorEnum {
    * @param label the label
    * @return the rule operator enum
    */
-  public static RuleOperatorEnum valueOfLabel(String label) {
+  public static RuleOperatorEnum valueOfFunctionName(String label) {
     return map.get(label);
   }
 
   /**
-   * Gets the label.
+   * Gets the entity type.
    *
-   * @return the label
+   * @return the entity type
    */
-  public String getLabel() {
-    return label;
+  public EntityTypeEnum getEntityType() {
+    return entityType;
+  }
+
+  /**
+   * Gets the function name.
+   *
+   * @return the function name
+   */
+  public String getFunctionName() {
+    return functionName;
   }
 
   /**
@@ -159,11 +175,11 @@ public enum RuleOperatorEnum {
   }
 
   /**
-   * Gets the input types.
+   * Gets the param types.
    *
-   * @return the input types
+   * @return the param types
    */
-  public String[] getInputTypes() {
-    return inputTypes;
+  public String[] getParamTypes() {
+    return paramTypes;
   }
 }

@@ -106,6 +106,66 @@ public class FieldValue {
         && idFieldSchema.equals(field.idFieldSchema) && record.equals(field.record);
   }
 
+  public boolean fAnd(boolean arg1, boolean arg2) {
+    return arg1 && arg2;
+  }
+
+  public boolean fOr(boolean arg1, boolean arg2) {
+    return arg1 || arg2;
+  }
+
+  public boolean not(boolean arg) {
+    return !arg;
+  }
+
+  public boolean numberEquals(Number arg1, Number arg2) {
+    return arg1.equals(arg2);
+  }
+
+  public boolean distinct(Number arg1, Number arg2) {
+    return !arg1.equals(arg2);
+  }
+
+  public boolean lessThanNumber(Number arg1, Number arg2) {
+    if (arg1 instanceof Long && arg2 instanceof Long) {
+      return arg1.longValue() < arg2.longValue();
+    }
+    if (arg1 instanceof Double && arg2 instanceof Double) {
+      return arg1.doubleValue() < arg2.doubleValue();
+    }
+    return false;
+  }
+
+  public boolean greaterThanNumber(Number arg1, Number arg2) {
+    if (arg1 instanceof Long && arg2 instanceof Long) {
+      return arg1.longValue() > arg2.longValue();
+    }
+    if (arg1 instanceof Double && arg2 instanceof Double) {
+      return arg1.doubleValue() > arg2.doubleValue();
+    }
+    return false;
+  }
+
+  public boolean lessThanOrEqualsThanNumber(Number arg1, Number arg2) {
+    if (arg1 instanceof Long && arg2 instanceof Long) {
+      return arg1.longValue() <= arg2.longValue();
+    }
+    if (arg1 instanceof Long && arg2 instanceof Long) {
+      return arg1.doubleValue() <= arg2.doubleValue();
+    }
+    return false;
+  }
+
+  public boolean greaterThanOrEqualsThanNumber(Number arg1, Number arg2) {
+    if (arg1 instanceof Long && arg2 instanceof Long) {
+      return arg1.longValue() >= arg2.longValue();
+    }
+    if (arg1 instanceof Long && arg2 instanceof Long) {
+      return arg1.doubleValue() >= arg2.doubleValue();
+    }
+    return false;
+  }
+
   /**
    * Equal date used by drools. Value must not be null.
    *
