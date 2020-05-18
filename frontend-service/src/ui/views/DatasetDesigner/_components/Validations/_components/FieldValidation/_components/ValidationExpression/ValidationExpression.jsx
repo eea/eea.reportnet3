@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
-import moment from 'moment';
 
 import styles from './ValidationExpression.module.scss';
 

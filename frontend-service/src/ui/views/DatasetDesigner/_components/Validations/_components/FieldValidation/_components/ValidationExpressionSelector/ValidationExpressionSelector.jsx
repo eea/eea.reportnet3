@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { ValidationExpression } from 'ui/views/DatasetDesigner/_components/CreateValidation/_components/ValidationExpression';
-import { ValidationExpressionGroup } from 'ui/views/DatasetDesigner/_components/CreateValidation/_components/ValidationExpressionGroup';
+import { ValidationExpression } from 'ui/views/DatasetDesigner/_components/Validations/_components/FieldValidation/_components/ValidationExpression';
+import { ValidationExpressionGroup } from 'ui/views/DatasetDesigner/_components/Validations/_components/FieldValidation/_components/ValidationExpressionGroup';
 
 export const ValidationExpressionSelector = props => {
   if (props.expressionValues.expressions.length > 0) {

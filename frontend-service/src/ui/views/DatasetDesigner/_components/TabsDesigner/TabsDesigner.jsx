@@ -6,7 +6,6 @@ import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
 import { Button } from 'ui/views/_components/Button';
-// import { CreateValidation } from 'ui/views/DatasetDesigner/_components/CreateValidation';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldsDesigner } from './_components/FieldsDesigner';
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -445,7 +444,6 @@ export const TabsDesigner = withRouter(
       <React.Fragment>
         {renderTabViews()}
         {renderErrors(errorMessageTitle, errorMessage)}
-        {/* {datasetSchema && tabs && validationContext.isVisible && <CreateValidation tabs={tabs} datasetId={datasetId} />} */}
         {datasetSchema && tabs && validationContext.isVisible && <Validations tabs={tabs} datasetId={datasetId} />}
       </React.Fragment>
     );

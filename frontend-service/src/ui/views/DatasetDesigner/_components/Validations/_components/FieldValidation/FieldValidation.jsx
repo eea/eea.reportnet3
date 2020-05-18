@@ -6,7 +6,7 @@ import pull from 'lodash/pull';
 
 import { config } from 'conf';
 
-import styles from './CreateValidation.module.scss';
+import styles from './FieldValidation.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -29,14 +29,14 @@ import {
 import { checkExpressions } from './_functions/utils/checkExpressions';
 import { checkValidation } from './_functions/utils/checkValidation';
 import { deleteExpression } from './_functions/utils/deleteExpression';
-import { deleteExpressionRecursivily } from './_functions/utils/deleteExpressionRecursivily';
+import { deleteExpressionRecursively } from './_functions/utils/deleteExpressionRecursively';
 import { getDatasetSchemaTableFields } from './_functions/utils/getDatasetSchemaTableFields';
 import { getExpressionString } from './_functions/utils/getExpressionString';
-import { getEmptyExpression } from 'ui/views/DatasetDesigner/_components/CreateValidation/_functions/utils/getEmptyExpression.js';
-import { getSelectedFieldById } from './_functions/utils/getSeletedFieldById';
+import { getEmptyExpression } from './_functions/utils/getEmptyExpression.js';
+import { getSelectedFieldById } from './_functions/utils/getSelectedFieldById';
 import { getSelectedTableByFieldId } from './_functions/utils/getSelectedTablebyFieldId';
-import { getSelectedTableBytableSchemaId } from './_functions/utils/getSelectedTableBytableSchemaId';
-import { groupExpressions } from 'ui/views/DatasetDesigner/_components/CreateValidation/_functions/utils/groupExpressions';
+import { getSelectedTableByTableSchemaId } from './_functions/utils/getSelectedTableByTableSchemaId';
+import { groupExpressions } from './_functions/utils/groupExpressions';
 import { initValidationRuleCreation } from './_functions/utils/initValidationRuleCreation';
 import { resetValidationRuleCreation } from './_functions/utils/resetValidationRuleCreation';
 import { setValidationExpression } from './_functions/utils/setValidationExpression';
@@ -161,7 +161,7 @@ const FieldValidation = ({ toggleVisibility, datasetId, tabs }) => {
     let table = null;
     if (validationContext.fieldId) {
       if (!isNil(validationContext.tableSchemaId)) {
-        table = getSelectedTableBytableSchemaId(validationContext.tableSchemaId, tabs);
+        table = getSelectedTableByTableSchemaId(validationContext.tableSchemaId, tabs);
       } else {
         table = getSelectedTableByFieldId(validationContext.fieldId, tabs);
       }
@@ -192,7 +192,7 @@ const FieldValidation = ({ toggleVisibility, datasetId, tabs }) => {
         type: 'SET_ARE_RULES_DISABLED',
         payload: false
       });
-    } else if (checkDesactivateRules()) {
+    } else if (checkDeactivateRules()) {
       creationFormDispatch({
         type: 'SET_ARE_RULES_DISABLED',
         payload: true
@@ -248,7 +248,7 @@ const FieldValidation = ({ toggleVisibility, datasetId, tabs }) => {
     return creationFormState.candidateRule.table && creationFormState.candidateRule.field;
   };
 
-  const checkDesactivateRules = () => {
+  const checkDeactivateRules = () => {
     return (
       (!creationFormState.candidateRule.table || !creationFormState.candidateRule.field) &&
       !creationFormState.areRulesDisabled
@@ -291,7 +291,7 @@ const FieldValidation = ({ toggleVisibility, datasetId, tabs }) => {
     const {
       candidateRule: { expressions, allExpressions }
     } = creationFormState;
-    const parsedExpressions = deleteExpressionRecursivily(expressionId, expressions);
+    const parsedExpressions = deleteExpressionRecursively(expressionId, expressions);
     const parsedAllExpressions = deleteExpression(expressionId, allExpressions);
     creationFormDispatch({
       type: 'UPDATE_RULES',

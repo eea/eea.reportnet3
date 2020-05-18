@@ -79,11 +79,12 @@ export const ValidationProvider = ({ children }) => {
             type: 'ON_OPEN_QC_CREATION_MODAL'
           });
         },
-        onOpenModalFronOpener: opener => {
+        onOpenModalFromOpener: (level, opener) => {
           dispatch({
             type: 'ON_OPEN_QC_CREATION_MODAL_FROM_OPENER',
             payload: {
-              opener
+              opener,
+              level
             }
           });
         },

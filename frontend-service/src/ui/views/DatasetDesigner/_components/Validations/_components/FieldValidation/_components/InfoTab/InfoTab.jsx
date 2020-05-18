@@ -24,7 +24,7 @@ export const InfoTab = ({
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
 
-  const [fieldsDropdown, setfieldsDropdown] = useState();
+  const [fieldsDropdown, setFieldsDropdown] = useState();
   const [tableFieldOptions, setTableFieldOptions] = useState({
     disabled: true,
     placeholder: resourcesContext.messages.fieldConstraintTableFieldNoOptions
@@ -66,7 +66,7 @@ export const InfoTab = ({
       fieldDropdownOptions.onChange = e => onInfoFieldChange('field', e.target.value);
       fieldDropdownOptions.value = creationFormState.candidateRule.field;
     }
-    setfieldsDropdown(
+    setFieldsDropdown(
       <Dropdown
         id={`${componentName}__field`}
         disabled={fieldDropdownOptions.disabled}

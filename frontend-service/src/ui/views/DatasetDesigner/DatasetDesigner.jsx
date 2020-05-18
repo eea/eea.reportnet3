@@ -331,7 +331,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         icon={'plus'}
         label={resources.messages['createRowValidationBtn']}
         onClick={() => {
-          validationContext.onOpenModalFronOpener('validationsListDialog');
+          validationContext.onOpenModalFromOpener('row', 'validationsListDialog');
           onHideValidationsDialog();
         }}
       />
@@ -340,7 +340,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         icon={'plus'}
         label={resources.messages['createFieldValidationBtn']}
         onClick={() => {
-          validationContext.onOpenModalFronOpener('validationsListDialog');
+          validationContext.onOpenModalFromOpener('field', 'validationsListDialog');
           onHideValidationsDialog();
         }}
       />

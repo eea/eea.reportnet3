@@ -5,7 +5,7 @@ import isNil from 'lodash/isNil';
 import styles from './ExpressionsTab.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
-import { ValidationExpressionSelector } from 'ui/views/DatasetDesigner/_components/CreateValidation/_components/ValidationExpressionSelector';
+import { ValidationExpressionSelector } from 'ui/views/DatasetDesigner/_components/Validations/_components/FieldValidation/_components/ValidationExpressionSelector';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
