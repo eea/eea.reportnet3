@@ -234,7 +234,7 @@ const Dataflow = withRouter(({ history, match }) => {
     setIsPageLoading(true);
     onLoadReportingDataflow();
     onLoadSchemasValidations();
-  }, [dataflowId, dataflowState.isDataUpdated]);
+  }, [dataflowId, dataflowState.isDataUpdated, representativeId]);
 
   const handleRedirect = target => history.push(target);
 
