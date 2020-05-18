@@ -58,6 +58,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
   const [tabsChanges, setTabsChanges] = useState({});
   const [showErrorOnInfoTab, setShowErrorOnInfoTab] = useState(true);
   const [showErrorOnExpressionTab, setShowErrorOnExpressionTab] = useState(false);
+  const [expressionsErrors, setExpressionsErrors] = useState({});
 
   const ruleDisablingCheckListener = [creationFormState.candidateRule.table, creationFormState.candidateRule.field];
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
@@ -88,7 +89,8 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
         </TabPanel>,
         <TabPanel
           header={resourcesContext.messages.tabMenuExpression}
-          leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}>
+          leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}
+          headerClassName={showErrorOnExpressionTab ? styles.error : ''}>
           <ExpressionsTab
             componentName={componentName}
             creationFormState={creationFormState}
@@ -98,6 +100,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
             onExpressionMarkToGroup={onExpressionMarkToGroup}
             tabsChanges={tabsChanges}
             onAddNewExpression={onAddNewExpression}
+            onExpressionsErrors={onExpressionsErrors}
           />
         </TabPanel>
       ]);
@@ -138,6 +141,21 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
       });
     }
   }, [creationFormState.candidateRule.table]);
+
+  useEffect(() => {
+    const expressionsKeys = Object.keys(expressionsErrors);
+    let hasErrors = false;
+    expressionsKeys.forEach(expressionKey => {
+      if (expressionsErrors[expressionKey]) {
+        hasErrors = true;
+      }
+    });
+    if (hasErrors) {
+      setShowErrorOnExpressionTab(true);
+    } else {
+      setShowErrorOnExpressionTab(false);
+    }
+  }, [expressionsErrors]);
 
   useEffect(() => {
     let table = null;
@@ -389,6 +407,13 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
           allExpressions: [...creationFormState.candidateRule.allExpressions, groupingResult.newGroup]
         }
       });
+  };
+
+  const onExpressionsErrors = (expression, value) => {
+    setExpressionsErrors({
+      ...expressionsErrors,
+      [expression]: value
+    });
   };
 
   const dialogLayout = children => (

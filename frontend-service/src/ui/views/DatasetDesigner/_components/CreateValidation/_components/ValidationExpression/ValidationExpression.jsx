@@ -22,7 +22,9 @@ const ValidationExpression = ({
   onExpressionDelete,
   onExpressionFieldUpdate,
   onExpressionGroup,
-  position
+  onExpressionsErrors,
+  position,
+  showRequiredFields
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const { expressionId } = expressionValues;
@@ -32,6 +34,7 @@ const ValidationExpression = ({
   const {
     validations: { operatorTypes: operatorTypesConf }
   } = config;
+
   useEffect(() => {
     if (expressionValues.operatorType) {
       setOperatorValues(operatorTypesConf[expressionValues.operatorType].values);
@@ -45,6 +48,30 @@ const ValidationExpression = ({
     }
     setOperatorTypes(options);
   }, []);
+
+  useEffect(() => {
+    if (showRequiredFields) {
+      const fieldsToAdd = [];
+      ['union', 'operatorType', 'operatorValue', 'expressionValue'].forEach(field => {
+        if (!clickedFields.includes(field)) fieldsToAdd.push(field);
+      });
+      setClickedFields([...clickedFields, ...fieldsToAdd]);
+    }
+  }, [showRequiredFields]);
+
+  useEffect(() => {
+    let errors = false;
+    clickedFields.forEach(clickedField => {
+      if (printRequiredFieldError(clickedField) == 'error') {
+        errors = true;
+      }
+    });
+    if (errors) {
+      onExpressionsErrors(expressionId, true);
+    } else {
+      onExpressionsErrors(expressionId, false);
+    }
+  }, [clickedFields, showRequiredFields]);
 
   const printRequiredFieldError = field => {
     let conditions = false;

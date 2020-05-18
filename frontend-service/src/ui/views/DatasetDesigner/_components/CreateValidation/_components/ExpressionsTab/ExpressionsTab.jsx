@@ -17,7 +17,8 @@ export const ExpressionsTab = ({
   onExpressionMarkToGroup,
   tabsChanges,
   onAddNewExpression,
-  onExpressionGroup
+  onExpressionGroup,
+  onExpressionsErrors
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   return (
@@ -33,6 +34,7 @@ export const ExpressionsTab = ({
                 onExpressionDelete={onExpressionDelete}
                 onExpressionFieldUpdate={onExpressionFieldUpdate}
                 onExpressionGroup={onExpressionMarkToGroup}
+                onExpressionsErrors={onExpressionsErrors}
                 position={i}
                 showRequiredFields={tabsChanges.expression}
               />
