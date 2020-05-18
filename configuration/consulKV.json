@@ -1202,5 +1202,9 @@
   {
     "key": "config/apiGateway/zuul.routes.obligation_issue.stripPrefix",
     "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/recordstore/snapshot.bufferSize",
+    "value": "NjU1MzY="
   }
 ]

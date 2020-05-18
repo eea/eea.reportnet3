@@ -56,7 +56,7 @@ public class ValidationDroolsUtils {
     // position(that is really dificult to happend but we put it just in case)
     if (',' != value.charAt(value.length() - 1)) {
       // we delete the first character and the last one because we receive a string with [] values
-      final List<String> arrayValue = Arrays.asList(value.split(","));
+      final List<String> arrayValue = Arrays.asList(value.split(", "));
       final List<String> arrayItems =
           Arrays.asList(codelistItems.substring(1, codelistItems.length() - 1).split(", "));
       if (!arrayValue.isEmpty() && arrayItems.containsAll(arrayValue)) {

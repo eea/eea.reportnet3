@@ -1,1 +1,0 @@
-export { Representative } from './Representative';

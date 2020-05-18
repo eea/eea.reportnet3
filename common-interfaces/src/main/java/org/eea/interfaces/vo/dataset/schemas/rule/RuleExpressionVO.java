@@ -393,7 +393,7 @@ public class RuleExpressionVO implements Serializable {
 
   /**
    * Classifies a character: 0 (whitespace), 1 (number), 2 (logical operator), 3 (function
-   * operator), 4 (end of expression) and 5 (other element)
+   * operator), 4 (end of expression) and 5 (other element).
    *
    * @param actual the actual
    * @param lastInputType the last input type
@@ -508,6 +508,7 @@ public class RuleExpressionVO implements Serializable {
         case LT_YEAR:
         case GTEQ_YEAR:
         case LTEQ_YEAR:
+        case NUM_MATCH:
           return "this." + operator.getLabel() + "(" + toStringBranch(arg2) + ")";
       }
     }
@@ -516,45 +517,73 @@ public class RuleExpressionVO implements Serializable {
     throw new IllegalStateException("Operator cannot be null");
   }
 
-  public boolean isDataTypeCompatible(DataType dataType) {
+  /**
+   * Checks if is arg data type compatible.
+   *
+   * @param arg the arg
+   * @param superInputType the super input type
+   * @param dataType the data type
+   * @return true, if is arg data type compatible
+   */
+  private boolean isArgDataTypeCompatible(Object arg, String superInputType, DataType dataType) {
 
-    // TODO.
-    return true;
+    if (arg instanceof RuleExpressionVO) {
+      RuleExpressionVO rule = (RuleExpressionVO) arg;
+      String ruleReturnType = rule.getOperator().getReturnType();
+      return ruleReturnType.equals(superInputType) && rule.isDataTypeCompatible(dataType);
+    }
 
-    // switch (dataType) {
-    // // DataType: Boolean
-    // case BOOLEAN:
-    // return Boolean.TRUE.equals(isDataTypeCompatibleRecursive("Boolean", this));
-    // // DataType: String
-    // case TEXT:
-    // case LONG_TEXT:
-    // case CODELIST:
-    // case LINK:
-    // case LINK_DATA:
-    // case URL:
-    // case PHONE:
-    // case EMAIL:
-    // return Boolean.TRUE.equals(isDataTypeCompatibleRecursive("String", this));
-    // // DataType: Number
-    // case NUMBER_INTEGER:
-    // case NUMBER_DECIMAL:
-    // case COORDINATE_LAT:
-    // case COORDINATE_LONG:
-    // return Boolean.TRUE.equals(isDataTypeCompatibleRecursive("Number", this));
-    // // DataType: Date
-    // case DATE:
-    // return Boolean.TRUE.equals(isDataTypeCompatibleRecursive("Date", this));
-    // // DataType: Unsupported
-    // default:
-    // LOG_ERROR.error("Unsupported DataType: {}", dataType);
-    // return false;
-    // }
+    if ("VALUE".equals(arg)) {
+      String valueType = dataType.getJavaType();
+      return valueType.equals(superInputType);
+    }
+
+    if (arg instanceof Number) {
+      return "Number".equals(superInputType);
+    }
+
+    if (arg instanceof String) {
+
+      if ("Date".equals(superInputType)) {
+        return ((String) arg).matches("[0-9]{4}-(?:0[0-9]|1[0-2])-(?:[0-2][0-9]|3[01])");
+      }
+
+      if ("String".equals(superInputType)) {
+        return true;
+      }
+    }
+
+    LOG_ERROR.error("Arg DataType does not match any case: arg={}, superInputType={}, dataType={}",
+        arg, superInputType, dataType);
+    return false;
   }
 
-  private Boolean isDataTypeCompatibleRecursive(String type, RuleExpressionVO ruleExpressionVO) {
-    Boolean rtn = null;
-    // TODO.
-    return rtn;
+  /**
+   * Checks if is data type compatible.
+   *
+   * @param dataType the data type
+   * @return true, if is data type compatible
+   */
+  public boolean isDataTypeCompatible(DataType dataType) {
+
+    String[] inputTypes = operator.getInputTypes();
+
+    if ("Unsupported".equals(dataType.getJavaType())) {
+      LOG_ERROR.error("Unsupported DataType: {}", dataType);
+      return true;
+    }
+
+    if (inputTypes.length == 1) {
+      return isArgDataTypeCompatible(arg1, inputTypes[0], dataType);
+    }
+
+    if (inputTypes.length == 2) {
+      boolean arg1IsCompatible = isArgDataTypeCompatible(arg1, inputTypes[0], dataType);
+      boolean arg2IsCompatible = isArgDataTypeCompatible(arg2, inputTypes[1], dataType);
+      return arg1IsCompatible && arg2IsCompatible;
+    }
+
+    return false;
   }
 
   /**

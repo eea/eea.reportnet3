@@ -37,6 +37,6 @@ public class EeaFeignSecurityInterceptorTest {
     eeaFeignSecurityInterceptor.apply(template);
 
     Assert.assertTrue(template.headers().get("FeignInvocationUser").contains("user"));
-    Assert.assertTrue(template.headers().get("Authorization").contains("Bearer 123"));
+    Assert.assertTrue(template.headers().get("Authorization").contains("123"));
   }
 }

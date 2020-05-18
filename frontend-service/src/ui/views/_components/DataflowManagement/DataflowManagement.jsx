@@ -29,10 +29,10 @@ export const DataflowManagement = ({
   dataflowId,
   history,
   isEditForm,
-  onConfirmDelete,
   onCreateDataflow,
   onEditDataflow,
-  onManageDialogs,
+  onConfirmDeleteDataflow,
+  manageDialogs,
   state
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
@@ -45,11 +45,14 @@ export const DataflowManagement = ({
   const dataflowManagementInitialState = {
     description: isEditForm ? state.description : '',
     isSubmitting: false,
+
     name: isEditForm ? state.name : '',
+
     obligation:
       isEditForm && state.obligations
         ? { id: state.obligations.obligationId, title: state.obligations.title }
         : { id: null, title: '' },
+
     obligationPrevState:
       isEditForm && state.obligations
         ? { id: state.obligations.obligationId, title: state.obligations.title }
@@ -65,7 +68,7 @@ export const DataflowManagement = ({
     if (!isNil(deleteInputRef.current) && state.isDeleteDialogVisible) deleteInputRef.current.element.focus();
   }, [state.isDeleteDialogVisible]);
 
-  const isDialogVisible = isEditForm ? 'isEditDialogVisible' : 'isAddDialogVisible';
+  const secondaryDialog = isEditForm ? 'isEditDialogVisible' : 'isAddDialogVisible';
 
   const getPrevState = data =>
     dataflowManagementDispatch({ type: 'PREV_STATE', payload: { id: data.id, title: data.title } });
@@ -73,7 +76,7 @@ export const DataflowManagement = ({
   const onSubmit = value => dataflowManagementDispatch({ type: 'ON_SUBMIT', payload: { submit: value } });
 
   const onDeleteDataflow = async () => {
-    onManageDialogs('isDeleteDialogVisible', false, isDialogVisible, true);
+    manageDialogs('isDeleteDialogVisible', false, secondaryDialog, true);
     showLoading();
     try {
       const response = await DataflowService.deleteById(dataflowId);
@@ -91,12 +94,12 @@ export const DataflowManagement = ({
   };
 
   const onHideDataflowDialog = () => {
-    onManageDialogs(isDialogVisible, false);
+    manageDialogs(secondaryDialog, false);
     onResetData();
   };
 
   const onHideObligationDialog = () => {
-    onManageDialogs('isRepObDialogVisible', false, isDialogVisible, true);
+    manageDialogs('isRepObDialogVisible', false, secondaryDialog, true);
     onResetObl();
   };
 
@@ -133,7 +136,7 @@ export const DataflowManagement = ({
             className="p-button-danger p-button-animated-blink"
             icon="trash"
             label={resources.messages['deleteDataflowButton']}
-            onClick={() => onManageDialogs('isDeleteDialogVisible', true, isDialogVisible, false)}
+            onClick={() => manageDialogs('isDeleteDialogVisible', true, secondaryDialog, false)}
           />
         )}
       </div>
@@ -153,7 +156,7 @@ export const DataflowManagement = ({
         icon="check"
         label={resources.messages['ok']}
         onClick={() => {
-          onManageDialogs('isRepObDialogVisible', false, isDialogVisible, true);
+          manageDialogs('isRepObDialogVisible', false, secondaryDialog, true);
           getPrevState(dataflowManagementState.obligation);
         }}
       />
@@ -188,7 +191,7 @@ export const DataflowManagement = ({
             isEditForm={isEditForm}
             onCreate={onCreateDataflow}
             onEdit={onEditDataflow}
-            onSearch={() => onManageDialogs('isRepObDialogVisible', true, isDialogVisible, false)}
+            onSearch={() => manageDialogs('isRepObDialogVisible', true, secondaryDialog, false)}
             onSubmit={onSubmit}
             ref={formRef}
             refresh={isEditForm ? state.isEditDialogVisible : state.isAddDialogVisible}
@@ -204,7 +207,7 @@ export const DataflowManagement = ({
           labelConfirm={resources.messages['yes']}
           disabledConfirm={state.deleteInput.toLowerCase() !== state.name.toLowerCase()}
           onConfirm={() => onDeleteDataflow()}
-          onHide={() => onManageDialogs('isDeleteDialogVisible', false, isDialogVisible, true)}
+          onHide={() => manageDialogs('isDeleteDialogVisible', false, secondaryDialog, true)}
           visible={state.isDeleteDialogVisible}>
           <p>{resources.messages['deleteDataflow']}</p>
           <p
@@ -217,7 +220,7 @@ export const DataflowManagement = ({
             <InputText
               autoFocus={true}
               className={`${styles.inputText}`}
-              onChange={event => onConfirmDelete(event)}
+              onChange={event => onConfirmDeleteDataflow(event)}
               ref={deleteInputRef}
               value={state.deleteInput}
             />

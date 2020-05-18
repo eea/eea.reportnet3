@@ -65,7 +65,7 @@ public class ApiKeyAuthenticationFilterTest {
         (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
             .getAuthentication();
     Assert.assertNotNull(authenticationToken);
-    Assert.assertEquals("Retrieved ApiKey is different from expected", apiKey,
+    Assert.assertEquals("Retrieved ApiKey is different from expected", "ApiKey " + apiKey,
         authenticationToken.getCredentials());
     Assert.assertEquals("Retrieved User is different from expected", "userName1",
         ((EeaUserDetails) authenticationToken.getPrincipal()).getUsername());
