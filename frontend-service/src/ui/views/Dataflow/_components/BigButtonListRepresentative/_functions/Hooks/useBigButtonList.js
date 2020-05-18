@@ -5,22 +5,13 @@ import isUndefined from 'lodash/isUndefined';
 
 import { routes } from 'ui/routes';
 
-import { getUrl } from 'core/infrastructure/CoreUtils';
-
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const useBigButtonList = ({
-  dataflowData,
-  dataflowId,
-  handleRedirect,
-  hasWritePermissions,
-  isCustodian,
-  onLoadReceiptData,
-  receiptState,
-  representative,
-  showReleaseSnapshotDialog
-}) => {
+import { getUrl } from 'core/infrastructure/CoreUtils';
+
+const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, onShowSnapshotDialog, match }) => {
   const resources = useContext(ResourcesContext);
+
   const helpButton = {
     layout: 'defaultBigButton',
     buttonClass: 'dataflowHelp',
@@ -31,7 +22,7 @@ const useBigButtonList = ({
         getUrl(
           routes.DOCUMENTS,
           {
-            dataflowId: dataflowId
+            dataflowId: dataflowState.id
           },
           true
         )
@@ -40,22 +31,21 @@ const useBigButtonList = ({
     onWheel: getUrl(
       routes.DOCUMENTS,
       {
-        dataflowId: dataflowId
+        dataflowId: dataflowState.id
       },
       true
     ),
     visibility: true
   };
 
-  const groupByRepresentativeModels = dataflowData.datasets
-    .filter(dataset => dataset.datasetSchemaName === representative)
+  const groupByRepresentativeModels = dataflowState.data.datasets
+    .filter(dataset => dataset.dataProviderId === parseInt(match.params.representativeId))
     .map(dataset => {
-      const datasetName = dataset.name || representative;
       return {
         layout: 'defaultBigButton',
         buttonClass: 'dataset',
         buttonIcon: 'dataset',
-        caption: datasetName,
+        caption: dataset.name,
         infoStatus: dataset.isReleased,
         infoStatusIcon: dataset.isReleased,
         handleRedirect: () => {
@@ -63,7 +53,7 @@ const useBigButtonList = ({
             getUrl(
               routes.DATASET,
               {
-                dataflowId: dataflowId,
+                dataflowId: dataflowState.id,
                 datasetId: dataset.datasetId
               },
               true
@@ -74,17 +64,17 @@ const useBigButtonList = ({
         onWheel: getUrl(
           routes.DATASET,
           {
-            dataflowId: dataflowId,
+            dataflowId: dataflowState.id,
             datasetId: dataset.datasetId
           },
           true
         ),
-        model: hasWritePermissions
+        model: dataflowState.hasWritePermissions
           ? [
               {
                 label: resources.messages['releaseDataCollection'],
                 icon: 'cloudUpload',
-                command: () => showReleaseSnapshotDialog(dataset.datasetId),
+                command: () => onShowSnapshotDialog(dataset.datasetId),
                 disabled: false
               }
             ]
@@ -95,26 +85,33 @@ const useBigButtonList = ({
                 disabled: true
               }
             ],
-        visibility: !isEmpty(dataflowData.datasets)
+        visibility: !isEmpty(dataflowState.data.datasets)
       };
     });
 
-  const receiptBigButton = [
-    {
-      buttonClass: 'schemaDataset',
-      buttonIcon: receiptState.isLoading ? 'spinner' : 'fileDownload',
-      buttonIconClass: receiptState.isLoading ? 'spinner' : 'fileDownload',
-      caption: resources.messages['confirmationReceipt'],
-      handleRedirect: receiptState.isLoading ? () => {} : () => onLoadReceiptData(),
-      infoStatus: receiptState.isOutdated,
-      layout: 'defaultBigButton',
-      visibility:
-        !isCustodian &&
-        !isUndefined(receiptState.isReleased) &&
-        !receiptState.isReleased.includes(false) &&
-        !receiptState.isReleased.includes(null)
-    }
-  ];
+  const onBuildReceiptButton = () => {
+    const { datasets } = dataflowState.data;
+    const releasedStates = datasets.map(dataset => dataset.isReleased);
+
+    return [
+      {
+        buttonClass: 'schemaDataset',
+        buttonIcon: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
+        buttonIconClass: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
+        caption: resources.messages['confirmationReceipt'],
+        handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onLoadReceiptData(),
+        infoStatus: dataflowState.isReceiptOutdated,
+        layout: 'defaultBigButton',
+        visibility:
+          !dataflowState.isCustodian &&
+          !isUndefined(releasedStates) &&
+          !releasedStates.includes(false) &&
+          !releasedStates.includes(null)
+      }
+    ];
+  };
+
+  const receiptBigButton = onBuildReceiptButton();
 
   return [helpButton, ...groupByRepresentativeModels, ...receiptBigButton];
 };
