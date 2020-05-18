@@ -18,17 +18,17 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
 export const SnapshotsDialog = ({
-  dataflowData,
   dataflowId,
   datasetId,
   hideSnapshotDialog,
   isSnapshotDialogVisible,
-  setSnapshotDialog
+  manageDialogs
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const [isActiveReleaseSnapshotConfirmDialog, setIsActiveReleaseSnapshotConfirmDialog] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
   const [isReleased, setIsReleased] = useState(false);
   const [isSnapshotInputActive, setIsSnapshotInputActive] = useState(false);
@@ -78,7 +78,7 @@ export const SnapshotsDialog = ({
   const onHideReleaseDialog = () => {
     setIsActiveReleaseSnapshotConfirmDialog(false);
     setIsReleased(false);
-    setSnapshotDialog(true);
+    manageDialogs('isSnapshotDialogVisible', true);
     setSnapshotDescription('');
   };
 
@@ -95,7 +95,7 @@ export const SnapshotsDialog = ({
 
   const onShowReleaseDialog = ({ isReleased }) => {
     setIsActiveReleaseSnapshotConfirmDialog(true);
-    setSnapshotDialog(false);
+    manageDialogs('isSnapshotDialogVisible', false);
     setIsReleased(isReleased);
   };
 
@@ -104,7 +104,7 @@ export const SnapshotsDialog = ({
       className="p-button-secondary p-button-animated-blink"
       icon="cancel"
       label={resources.messages['close']}
-      onClick={() => hideSnapshotDialog()}
+      onClick={() => manageDialogs('isSnapshotDialogVisible', false)}
     />
   );
 
@@ -115,7 +115,7 @@ export const SnapshotsDialog = ({
         footer={snapshotDialogFooter}
         header={`${resources.messages['snapshots']}`}
         onHide={() => {
-          hideSnapshotDialog();
+          manageDialogs('isSnapshotDialogVisible', false);
           setIsSnapshotInputActive(false);
         }}
         style={{ width: '30vw' }}
