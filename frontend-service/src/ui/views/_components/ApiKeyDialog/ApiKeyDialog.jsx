@@ -11,7 +11,15 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { DataflowService } from 'core/services/Dataflow';
 
-const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onManageDialogs }) => {
+const ApiKeyDialog = ({
+  dataflowId,
+  dataProviderId,
+  isApiKeyDialogVisible,
+  manageDialogs,
+  match: {
+    params: { representativeId }
+  }
+}) => {
   const resources = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
@@ -23,7 +31,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
     onGetApiKey();
   }, []);
 
-  const onCloseDialog = () => onManageDialogs('isApiKeyDialogVisible', false);
+  const onCloseDialog = () => manageDialogs('isApiKeyDialogVisible', false);
 
   const onCopyToClipboard = () => {
     const textArea = textAreaRef;
@@ -123,7 +131,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, onMan
                 <p className={styles.ids_info}>
                   <span className={styles.ids_label}>{resources.messages['dataflow']}: </span> <b>{dataflowId} </b>
                   <span className={styles.ids_label}>{resources.messages['apiKeyDataProviderIdLabel']}: </span>
-                  <b>{dataProviderId} </b>
+                  <b>{representativeId ? representativeId : dataProviderId} </b>
                 </p>
               </div>
             </div>

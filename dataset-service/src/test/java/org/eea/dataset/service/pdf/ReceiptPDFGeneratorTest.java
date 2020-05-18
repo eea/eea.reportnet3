@@ -1,5 +1,6 @@
 package org.eea.dataset.service.pdf;
 
+import static org.mockito.Mockito.times;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 /**
@@ -49,7 +51,9 @@ public class ReceiptPDFGeneratorTest {
     ReleaseReceiptVO receipt = new ReleaseReceiptVO();
     receipt.setDataflowName("");
     receipt.setDatasets(datasets);
-    receiptPDFGenerator.generatePDF(receipt, out);
+    ReceiptPDFGenerator spyClass = Mockito.spy(receiptPDFGenerator);
+    spyClass.generatePDF(receipt, out);
+    Mockito.verify(spyClass, times(1)).generatePDF(Mockito.any(), Mockito.any());
   }
 
 }
