@@ -137,7 +137,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
           + ipPostgreDb + " -U " + userPostgreDb + " -p 5432 -d datasets -f /pgwal/init.sql ");
     } catch (final InterruptedException e) {
       LOG_ERROR.error("Error executing docker command to create the dataset. {}", e.getMessage());
-      Thread.currentThread().interrupt();
       throw new RecordStoreAccessException(
           String.format("Error executing docker command to create the dataset. %s", e.getMessage()),
           e);
