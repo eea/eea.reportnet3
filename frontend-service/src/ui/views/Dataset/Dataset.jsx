@@ -115,16 +115,9 @@ export const Dataset = withRouter(({ match, history }) => {
             },
             true
           ),
-          command: () =>
-            history.push(
-              getUrl(
-                routes.DATAFLOW,
-                {
-                  dataflowId
-                },
-                true
-              )
-            )
+          command: () => {
+            history.goBack();
+          }
         }
       ];
       if (breadCrumbContext.model.find(model => model.icon === 'representative')) {

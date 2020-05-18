@@ -2,9 +2,9 @@ import React, { useContext, useEffect, useRef } from 'react';
 
 import isUndefined from 'lodash/isUndefined';
 
-import styles from './BigButtonList.module.css';
+import styles from '../BigButtonList/BigButtonList.module.css';
 
-import { BigButton } from './_components/BigButton';
+import { BigButton } from '../BigButton';
 
 import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
@@ -13,17 +13,13 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 
-export const BigButtonList = ({
-  dataflowData,
-  dataflowId,
-  dataProviderId,
+export const BigButtonListRepresentative = ({
+  dataflowState,
   handleRedirect,
-  hasWritePermissions,
-  isCustodian,
-  receiptDispatch,
-  receiptState,
-  representative,
-  showReleaseSnapshotDialog
+  match,
+  onCleanUpReceipt,
+  onShowSnapshotDialog,
+  setIsReceiptLoading
 }) => {
   const notificationContext = useContext(NotificationContext);
 
@@ -32,16 +28,13 @@ export const BigButtonList = ({
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
     if (response) {
-      receiptDispatch({
-        type: 'ON_DOWNLOAD',
-        payload: { isLoading: false }
-      });
+      setIsReceiptLoading(false);
     }
   }, [notificationContext]);
 
   const downloadPdf = response => {
     if (!isUndefined(response)) {
-      DownloadFile(response, `${dataflowData.name}_${Date.now()}.pdf`);
+      DownloadFile(response, `${dataflowState.data.name}_${Date.now()}.pdf`);
 
       const url = window.URL.createObjectURL(new Blob([response]));
 
@@ -59,32 +52,18 @@ export const BigButtonList = ({
 
   const onLoadReceiptData = async () => {
     try {
-      receiptDispatch({
-        type: 'ON_DOWNLOAD',
-        payload: { isLoading: true }
-      });
-      const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
-
+      setIsReceiptLoading(true);
+      const response = await ConfirmationReceiptService.get(dataflowState.id, match.params.representativeId);
       downloadPdf(response);
-      removeNew();
+      onCleanUpReceipt();
     } catch (error) {
       console.error(error);
       notificationContext.add({
         type: 'LOAD_RECEIPT_DATA_ERROR'
       });
     } finally {
-      receiptDispatch({
-        type: 'ON_DOWNLOAD',
-        payload: { isLoading: false }
-      });
+      setIsReceiptLoading(false);
     }
-  };
-
-  const removeNew = () => {
-    receiptDispatch({
-      type: 'ON_CLEAN_UP',
-      payload: { isLoading: false, isOutdated: false }
-    });
   };
 
   return (
@@ -93,21 +72,17 @@ export const BigButtonList = ({
         <div className={styles.splitButtonWrapper}>
           <div className={styles.datasetItem}>
             {useBigButtonList({
-              dataflowData,
-              dataflowId,
+              dataflowState,
               handleRedirect,
-              hasWritePermissions,
-              isCustodian,
-              onLoadReceiptData: onLoadReceiptData,
-              receiptState,
-              representative,
-              showReleaseSnapshotDialog
+              match,
+              onLoadReceiptData,
+              onShowSnapshotDialog
             }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <></>))}
           </div>
         </div>
       </div>
 
-      {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
+      <button ref={receiptBtnRef} style={{ display: 'none' }} />
     </>
   );
 };
