@@ -18,6 +18,7 @@ const Chips = ({
   className = null,
   disabled = null,
   deleteWhiteSpaces = false,
+  forbiddenCommas = false,
   id = null,
   inputClassName = null,
   itemTemplate = null,
@@ -114,7 +115,13 @@ const Chips = ({
   const onBlurChips = event => {
     DomHandler.removeClass(listElement.current, 'p-focus');
 
-    const inputValue = deleteWhiteSpaces ? event.target.value.trim() : event.target.value;
+    const inputValue = deleteWhiteSpaces
+      ? forbiddenCommas
+        ? event.target.value.trim().split(',').join('')
+        : event.target.value.trim()
+      : event.target.value;
+
+    console.log({ inputValue });
 
     if (inputValue && inputValue.trim().length && (!max || max > value.length)) {
       let values = [...value];
@@ -202,6 +209,7 @@ const Chips = ({
           aria-labelledby={ariaLabelledBy}
           className={hasErrors ? styles.chipsTokenError : ''}
           disabled={disabled || isMaxedOut()}
+          keyfilter={forbiddenCommas ? 'noComma' : ''}
           name={name}
           onBlur={onBlurChips}
           onFocus={onFocusChips}
