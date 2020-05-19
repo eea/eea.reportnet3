@@ -61,8 +61,12 @@ export const FieldsDesigner = ({
   useEffect(() => {
     if (!isUndefined(fields)) {
       setIsCodelistOrLink(
-        fields.filter(field => field.type.toUpperCase() === 'CODELIST' || field.type.toUpperCase() === 'LINK').length >
-          0
+        fields.filter(
+          field =>
+            field.type.toUpperCase() === 'CODELIST' ||
+            field.type.toUpperCase() === 'MULTISELECT_CODELIST' ||
+            field.type.toUpperCase() === 'LINK'
+        ).length > 0
       );
     }
   }, [fields]);
@@ -71,10 +75,14 @@ export const FieldsDesigner = ({
     setIsCodelistOrLink(
       fields.filter(field => {
         return (
-          (field.type.toUpperCase() === 'CODELIST' || field.type.toUpperCase() === 'LINK') && field.fieldId !== fieldId
+          (field.type.toUpperCase() === 'CODELIST' ||
+            field.type.toUpperCase() === 'MULTISELECT_CODELIST' ||
+            field.type.toUpperCase() === 'LINK') &&
+          field.fieldId !== fieldId
         );
       }).length > 0 ||
         selectedField.fieldType.toUpperCase() === 'CODELIST' ||
+        selectedField.fieldType.toUpperCase() === 'MULTISELECT_CODELIST' ||
         selectedField.fieldType.toUpperCase() === 'LINK'
     );
   };

@@ -128,6 +128,16 @@ const getLinkValue = (linkOptions, value) => {
   }
 };
 
+const getMultiselectValues = (multiselectItemsOptions, value) => {
+  console.log(
+    { multiselectItemsOptions, value },
+    multiselectItemsOptions.filter(item => item.value === value[0])
+  );
+  if (!isUndefined(value) && !isUndefined(value[0])) {
+    return multiselectItemsOptions.filter(item => value.includes(item.value)).map(item => item.value);
+  }
+};
+
 const getNumCopiedRecords = pastedData => {
   if (!isUndefined(pastedData)) {
     const copiedClipboardRecords = pastedData
@@ -194,6 +204,7 @@ export const RecordUtils = {
   getCodelistValue,
   getInitialRecordValues,
   getLinkValue,
+  getMultiselectValues,
   getNumCopiedRecords,
   getRecordId,
   getTextWidth

@@ -7,6 +7,7 @@ import isUndefined from 'lodash/isUndefined';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import { MultiSelect } from 'primereact/multiselect';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -319,6 +320,34 @@ const FieldEditor = ({
             optionLabel="itemType"
             options={getCodelistItemsWithEmptyOption()}
             value={RecordUtils.getCodelistValue(codelistItemsOptions, codelistItemValue)}
+          />
+        );
+      case 'MULTISELECT_CODELIST':
+        return (
+          <MultiSelect
+            // onChange={e => onChangeForm(field, e.value)}
+            appendTo={document.body}
+            maxSelectedLabels={10}
+            onChange={e => {
+              try {
+                setCodelistItemValue(e.value);
+                onEditorValueChange(cells, e.value);
+                onEditorSubmitValue(cells, e.value, record);
+              } catch (error) {
+                console.error(error);
+              }
+            }}
+            onFocus={e => {
+              console.log(codelistItemValue);
+              e.preventDefault();
+              if (!isUndefined(codelistItemValue)) {
+                onEditorValueFocus(cells, codelistItemValue);
+              }
+            }}
+            options={RecordUtils.getCodelistItems(colsSchema, cells.field)}
+            optionLabel="itemType"
+            styles={{ border: 'var(--dropdown-border)', borderColor: 'red' }}
+            value={RecordUtils.getMultiselectValues(codelistItemsOptions, codelistItemValue)}
           />
         );
       default:

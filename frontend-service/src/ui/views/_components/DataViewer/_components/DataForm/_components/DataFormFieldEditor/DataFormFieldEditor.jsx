@@ -6,6 +6,7 @@ import isUndefined from 'lodash/isUndefined';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import { MultiSelect } from 'primereact/multiselect';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -114,10 +115,26 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
         onChangeForm(field, e.target.value.value);
       }}
       optionLabel="itemType"
-      options={getCodelistItemsWithEmptyOption(field)}
+      options={getCodelistItemsWithEmptyOption()}
       value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
     />
   );
+
+  const renderMultiselectCodelist = (field, fieldValue) => {
+    return (
+      <MultiSelect
+        maxSelectedLabels={10}
+        onChange={e => onChangeForm(field, e.value)}
+        options={column.codelistItems.map(codelistItem => {
+          return { itemType: codelistItem, value: codelistItem };
+        })}
+        optionLabel="itemType"
+        styles={{ border: 'var(--dropdown-border)', borderColor: 'red' }}
+        value={RecordUtils.getMultiselectValues(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
+        // hasSelectedItemsLabel={false}
+      />
+    );
+  };
 
   const getMaxCharactersByType = type => {
     const longCharacters = 20;
@@ -158,6 +175,8 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
   const renderFieldEditor = () =>
     type === 'CODELIST' ? (
       renderCodelistDropdown(field, fieldValue)
+    ) : type === 'MULTISELECT_CODELIST' ? (
+      renderMultiselectCodelist(field, fieldValue)
     ) : type === 'LINK' ? (
       renderLinkDropdown(field, fieldValue)
     ) : type === 'DATE' ? (
@@ -176,7 +195,6 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     );
 
   const renderCalendar = (field, fieldValue) => {
-    console.log(field, fieldValue);
     return (
       <Calendar
         onChange={e => onChangeForm(field, formatDate(e.target.value))}

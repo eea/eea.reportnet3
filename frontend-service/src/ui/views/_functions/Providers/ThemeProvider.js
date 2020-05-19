@@ -216,7 +216,7 @@ export const ThemeProvider = ({ children }) => {
         'chart-bg': 'var(--bg)',
         'chart-color': 'var(--main-font-color)',
         'multiselect-bg': 'var(--white)',
-        'multiselect-border': '1px solid var(--gray-15)',
+        'multiselect-border': '1px solid var(--gray-50)',
         'multiselect-bg-hover': 'var(--gray-110)',
         'multiselect-label-color': 'var(--gray-110)',
         'multiselect-trigger-bg': 'var(--white)',

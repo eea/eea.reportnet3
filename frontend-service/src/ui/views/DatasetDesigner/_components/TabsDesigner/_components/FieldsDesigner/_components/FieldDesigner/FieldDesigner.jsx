@@ -69,6 +69,7 @@ export const FieldDesigner = ({
     // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
     // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
+    { fieldType: 'Multiselect_Codelist', value: 'Multiselect', fieldTypeIcon: 'multiselect' },
     { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' }
     // { fieldType: 'Reference', value: 'Reference', fieldTypeIcon: 'link' }
     // { fieldType: 'URL', value: 'Url', fieldTypeIcon: 'url' },
@@ -175,7 +176,7 @@ export const FieldDesigner = ({
 
   const onChangeFieldType = type => {
     dispatchFieldDesigner({ type: 'SET_TYPE', payload: { type, previousType: fieldDesignerState.fieldTypeValue } });
-    if (type.fieldType.toLowerCase() === 'codelist') {
+    if (type.fieldType.toLowerCase() === 'codelist' || type.fieldType.toLowerCase() === 'multiselect_codelist') {
       onCodelistDropdownSelected(type);
     } else if (type.fieldType.toLowerCase() === 'link') {
       onLinkDropdownSelected(type);
@@ -458,9 +459,9 @@ export const FieldDesigner = ({
     } else {
       if (!isUndefined(fieldId)) {
         if (fieldId.toString() === '-1') {
-          onFieldAdd({ codelistItems, type: 'CODELIST' });
+          onFieldAdd({ codelistItems });
         } else {
-          fieldUpdate({ codelistItems, type: 'CODELIST' });
+          fieldUpdate({ codelistItems });
         }
       }
     }
@@ -620,7 +621,8 @@ export const FieldDesigner = ({
 
   const renderCodelistAndLinkButtons = () => {
     return !isUndefined(fieldDesignerState.fieldTypeValue) &&
-      fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ? (
+      (fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ||
+        fieldDesignerState.fieldTypeValue.fieldType === 'Multiselect_Codelist') ? (
       <Button
         className={`${styles.codelistButton} p-button-secondary-transparent`}
         label={
