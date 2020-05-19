@@ -32,7 +32,7 @@ export const Filters = ({
   dropDownList,
   dropdownOptions,
   filterByList,
-  getFiltredData,
+  getFilteredData,
   inputOptions,
   searchAll,
   searchBy = [],
@@ -60,7 +60,7 @@ export const Filters = ({
   }, [data]);
 
   useEffect(() => {
-    if (getFiltredData) getFiltredData(filterState.filteredData);
+    if (getFilteredData) getFilteredData(filterState.filteredData);
   }, [filterState.filteredData]);
 
   useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[dateOptions]) && onAnimateLabel([dateOptions], false));
