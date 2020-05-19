@@ -633,7 +633,15 @@
     "pending": "Pending",
     "dashboardWarning": "Chart shows percentage of records classified by&nbsp<u>highest</u>&nbspQC level found for each record.",
     "qcDescription": "Description (optional)",
+    "uniqueConstraints": "Unique Constraints",
+    "noConstraintsWithSelectedParameters": "There are no constraints with the selected parameters",
+    "noConstraints": "There are not unique constraints yet",
     "apiKeyDataProviderIdLabel": "Data provider",
-    "fieldTypeColumnTooltip": "Field type"
+    "fieldTypeColumnTooltip": "Field type",
+    "deleteUniqueConstraintConfirm": "Are you sure you want to delete the unique constraint?",
+    "deleteUniqueConstraintHeader": "Delete unique constraint",
+    "totalUniqueConstraints": "Total unique constraints: ",
+    "loadUniqueConstraintsError": "Error loading unique constraints",
+    "deleteUniqueConstraintError": "Error unique constraint"
   }
 }
