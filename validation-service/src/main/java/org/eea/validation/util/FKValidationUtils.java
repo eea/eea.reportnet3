@@ -3,8 +3,10 @@ package org.eea.validation.util;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
@@ -29,7 +31,7 @@ import org.springframework.stereotype.Component;
  * The Class PKValidation.
  */
 @Component
-public class PKValidationUtils {
+public class FKValidationUtils {
 
   /**
    * The data set controller zuul.
@@ -64,7 +66,7 @@ public class PKValidationUtils {
    */
   @Autowired
   private void setDatasetController(DataSetControllerZuul dataSetControllerZuul) {
-    PKValidationUtils.dataSetControllerZuul = dataSetControllerZuul;
+    FKValidationUtils.dataSetControllerZuul = dataSetControllerZuul;
   }
 
 
@@ -75,7 +77,7 @@ public class PKValidationUtils {
    */
   @Autowired
   private void setRulesRepository(RulesRepository rulesRepository) {
-    PKValidationUtils.rulesRepository = rulesRepository;
+    FKValidationUtils.rulesRepository = rulesRepository;
   }
 
   /**
@@ -86,7 +88,7 @@ public class PKValidationUtils {
   @Autowired
   private void setDataSetMetabaseControllerZuul(
       DataSetMetabaseControllerZuul datasetMetabaseControllerZuul) {
-    PKValidationUtils.datasetMetabaseControllerZuul = datasetMetabaseControllerZuul;
+    FKValidationUtils.datasetMetabaseControllerZuul = datasetMetabaseControllerZuul;
   }
 
   /**
@@ -96,7 +98,7 @@ public class PKValidationUtils {
    */
   @Autowired
   private void setSchemasRepository(SchemasRepository schemasRepository) {
-    PKValidationUtils.schemasRepository = schemasRepository;
+    FKValidationUtils.schemasRepository = schemasRepository;
   }
 
   /**
@@ -106,7 +108,7 @@ public class PKValidationUtils {
    */
   @Autowired
   private void setFieldRepository(FieldRepository fieldRepository) {
-    PKValidationUtils.fieldRepository = fieldRepository;
+    FKValidationUtils.fieldRepository = fieldRepository;
   }
 
   /**
@@ -125,7 +127,8 @@ public class PKValidationUtils {
    *
    * @return the boolean
    */
-  public static Boolean isfieldPK(DatasetValue datasetValue, String idFieldSchema, String idRule) {
+  public static Boolean isfieldFK(DatasetValue datasetValue, String idFieldSchema, String idRule,
+      Boolean pkMustBeUsed) {
     // Id dataset to Validate
     long datasetIdReference = datasetValue.getId();
 
@@ -134,6 +137,8 @@ public class PKValidationUtils {
     DataSetSchema datasetSchemaFK =
         schemasRepository.findByIdDataSetSchema(new ObjectId(fkSchemaId));
     String idFieldSchemaPk = getPKFieldFromFKField(datasetSchemaFK, idFieldSchema);
+
+    FieldSchema fkFieldSchema = getPKFieldSchemaFromSchema(datasetSchemaFK, idFieldSchema);
 
     // Id Dataset contains PK list
     Long datasetIdRefered =
@@ -156,26 +161,42 @@ public class PKValidationUtils {
 
     // GetValidationData
     Validation pkValidation = createValidation(idRule, fkSchemaId, origname);
-
     List<FieldValue> errorFields = new ArrayList<>();
 
-    for (FieldValue field : fkFields) {
-      if (checkPK(pkList, field)) {
-        List<FieldValidation> fieldValidationList = new ArrayList<>();
-        FieldValidation fieldValidation = new FieldValidation();
-        fieldValidation.setValidation(pkValidation);
-        FieldValue fieldValue = new FieldValue();
-        fieldValue.setId(field.getId());
-        fieldValidation.setFieldValue(fieldValue);
-        fieldValidationList.add(fieldValidation);
-        field.setFieldValidations(fieldValidationList);
-        errorFields.add(field);
+    if (!pkMustBeUsed) {
+
+      for (FieldValue field : fkFields) {
+        if (checkPK(pkList, field)) {
+          List<FieldValidation> fieldValidationList = new ArrayList<>();
+          FieldValidation fieldValidation = new FieldValidation();
+          fieldValidation.setValidation(pkValidation);
+          FieldValue fieldValue = new FieldValue();
+          fieldValue.setId(field.getId());
+          fieldValidation.setFieldValue(fieldValue);
+          fieldValidationList.add(fieldValidation);
+          field.setFieldValidations(fieldValidationList);
+          errorFields.add(field);
+        }
       }
+
+      saveFieldValidations(errorFields);
+
+      // Force true because we only need Field Validations
+      return true;
+
+    } else {
+      if (null != fkFieldSchema && null != fkFieldSchema.getPkMustBeUsed()
+          && fkFieldSchema.getPkMustBeUsed()) {
+
+        // Values must be
+        Set<String> pkSet = new HashSet<>();
+        pkSet.addAll(pkList);
+        // Values must check
+        fkFields.stream().forEach(field -> pkSet.remove(field.getValue()));
+        return pkSet.isEmpty();
+      }
+
     }
-
-    saveFieldValidations(errorFields);
-
-    // Force true because we only need Field Validations
     return true;
   }
 
@@ -194,31 +215,32 @@ public class PKValidationUtils {
     Rule rule = rulesRepository.findRule(new ObjectId(idDatasetSchema), new ObjectId(idRule));
 
     Validation validation = new Validation();
-    validation.setIdRule(rule.getRuleId().toString());
+    if (rule != null) {
+      validation.setIdRule(rule.getRuleId().toString());
 
-    switch (rule.getThenCondition().get(1)) {
-      case "WARNING":
-        validation.setLevelError(ErrorTypeEnum.WARNING);
-        break;
-      case "ERROR":
-        validation.setLevelError(ErrorTypeEnum.ERROR);
-        break;
-      case "INFO":
-        validation.setLevelError(ErrorTypeEnum.INFO);
-        break;
-      case "BLOCKER":
-        validation.setLevelError(ErrorTypeEnum.BLOCKER);
-        break;
-      default:
-        validation.setLevelError(ErrorTypeEnum.BLOCKER);
-        break;
+      switch (rule.getThenCondition().get(1)) {
+        case "WARNING":
+          validation.setLevelError(ErrorTypeEnum.WARNING);
+          break;
+        case "ERROR":
+          validation.setLevelError(ErrorTypeEnum.ERROR);
+          break;
+        case "INFO":
+          validation.setLevelError(ErrorTypeEnum.INFO);
+          break;
+        case "BLOCKER":
+          validation.setLevelError(ErrorTypeEnum.BLOCKER);
+          break;
+        default:
+          validation.setLevelError(ErrorTypeEnum.BLOCKER);
+          break;
+      }
+
+      validation.setMessage(rule.getThenCondition().get(0));
+      validation.setTypeEntity(EntityTypeEnum.FIELD);
+      validation.setValidationDate(new Date().toString());
+      validation.setOriginName(origname.getNameTableSchema());
     }
-
-    validation.setMessage(rule.getThenCondition().get(0));
-    validation.setTypeEntity(EntityTypeEnum.FIELD);
-    validation.setValidationDate(new Date().toString());
-    validation.setOriginName(origname.getNameTableSchema());
-
     return validation;
   }
 
@@ -392,6 +414,28 @@ public class PKValidationUtils {
       }
     }
     return pkField;
+  }
+
+
+  private static FieldSchema getPKFieldSchemaFromSchema(DataSetSchema schema,
+      String idFieldSchema) {
+
+    FieldSchema field = null;
+    Boolean locatedPK = false;
+
+    for (TableSchema table : schema.getTableSchemas()) {
+      for (FieldSchema fieldAux : table.getRecordSchema().getFieldSchema()) {
+        if (fieldAux.getIdFieldSchema().toString().equals(idFieldSchema)) {
+          field = fieldAux;
+          locatedPK = Boolean.TRUE;
+          break;
+        }
+      }
+      if (locatedPK.equals(Boolean.TRUE)) {
+        break;
+      }
+    }
+    return field;
   }
 
 

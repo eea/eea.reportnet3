@@ -37,10 +37,23 @@ end template
 
 //////////////////////////////////////////VALIDATION CODELIST////////////////////////////////////////////////////////////
 function boolean isCodelist( String value , String codelistItems){
+	if(!isBlank(value)){
+		return true;
+	}	
 	return ValidationDroolsUtils.codelistValidate(value,codelistItems,true);
 }
 
+function boolean isMultiSelectCodelistValidate( String value , String codelistItems){
+	if(!isBlank(value)){
+		return true;
+	}	
+	return ValidationDroolsUtils.multiSelectCodelistValidate(value,codelistItems);
+}
+
 function boolean isCodelistInsensitive( String value ,  String codelistItems){
+	if(!isBlank(value)){
+		return true;
+	}	
 	return ValidationDroolsUtils.codelistValidate(value,codelistItems,false);
 }
 
@@ -162,7 +175,7 @@ function boolean isPhone(String value){
  //////////////////////////////////////////DEFAULT VALIDATIONS END BLOCK////////////////////////////////////////////////////////////
  
  //////////////////////////////////////////VALIDATION PK////////////////////////////////////////////////////////////
-function boolean isfieldPK(DatasetValue datasetId, String idFieldSchema,String idRule){	
+function boolean isfieldFK(DatasetValue datasetId, String idFieldSchema,String idRule,Boolean pkMustBeUsed){	
 
-		return PKValidationUtils.isfieldPK(datasetId,idFieldSchema,idRule);
+		return FKValidationUtils.isfieldFK(datasetId,idFieldSchema,idRule,pkMustBeUsed);
  }

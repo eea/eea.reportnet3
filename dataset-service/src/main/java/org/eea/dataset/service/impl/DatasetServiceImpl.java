@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -284,9 +285,11 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void saveTable(@DatasetId Long datasetId, TableValue tableValue) {
     TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
-    DatasetValue datasetValue = datasetRepository.findById(datasetId).get();
-    tableValue.setDatasetId(datasetValue);
-    tableRepository.saveAndFlush(tableValue);
+    Optional<DatasetValue> datasetValue = datasetRepository.findById(datasetId);
+    if (datasetValue.isPresent()) {
+      tableValue.setDatasetId(datasetValue.get());
+      tableRepository.saveAndFlush(tableValue);
+    }
   }
 
 
@@ -489,6 +492,7 @@ public class DatasetServiceImpl implements DatasetService {
           } else {
             sortField.setTypefield(typefield.getType());
           }
+
           sortFieldsArray.add(sortField);
         }
         newFields = sortFieldsArray.stream().toArray(SortField[]::new);
@@ -1108,6 +1112,14 @@ public class DatasetServiceImpl implements DatasetService {
             field.setValue(field.getValue().substring(0, fieldMaxLength));
           }
         }
+        // if the type is multiselect codelist we sort the values in lexicographic order
+        if (DataType.MULTISELECT_CODELIST.equals(field.getType()) && null != field.getValue()) {
+          List<String> values = new ArrayList<>();
+          Arrays.asList(field.getValue().split(",")).stream()
+              .forEach(value -> values.add(value.trim()));
+          Collections.sort(values);
+          field.setValue(values.toString().substring(1, values.toString().length() - 1));
+        }
       }
 
     });
@@ -1229,6 +1241,14 @@ public class DatasetServiceImpl implements DatasetService {
     if (datasetId == null || field == null) {
       throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
 
+    }
+    // if the type is multiselect codelist we sort the values in lexicographic order
+    if (DataType.MULTISELECT_CODELIST.equals(field.getType()) && null != field.getValue()) {
+      List<String> values = new ArrayList<>();
+      Arrays.asList(field.getValue().split(",")).stream()
+          .forEach(value -> values.add(value.trim()));
+      Collections.sort(values);
+      field.setValue(values.toString().substring(1, values.toString().length() - 1));
     }
     fieldRepository.saveValue(field.getId(), field.getValue());
   }
@@ -1585,16 +1605,18 @@ public class DatasetServiceImpl implements DatasetService {
     return etlDatasetVO;
   }
 
+
   /**
    * Etl import dataset.
    *
    * @param datasetId the dataset id
    * @param etlDatasetVO the etl dataset VO
-   * @throws EEAException
+   * @param providerId the provider id
+   * @throws EEAException the EEA exception
    */
   @Override
-  public void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO)
-      throws EEAException {
+  public void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO,
+      Long providerId) throws EEAException {
     // Get the datasetSchemaId by the datasetId
     String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
     if (null == datasetSchemaId) {
@@ -1610,11 +1632,6 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     // Obtain the data provider code to insert into the record
-    Long providerId = 0L;
-    DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(datasetId);
-    if (metabase.getDataProviderId() != null) {
-      providerId = metabase.getDataProviderId();
-    }
     DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
 
     // Get the partition for the partiton id
@@ -1659,11 +1676,11 @@ public class DatasetServiceImpl implements DatasetService {
               field.setRecord(recordValue);
               fieldValues.add(field);
               idSchema.add(field.getIdFieldSchema());
-              setMissingField(
-                  tableMap.get(etlTable.getTableName()).getRecordSchema().getFieldSchema(),
-                  fieldValues, idSchema, recordValue);
             }
           }
+          // set the fields if not declared in the records
+          setMissingField(tableMap.get(etlTable.getTableName()).getRecordSchema().getFieldSchema(),
+              fieldValues, idSchema, recordValue);
           recordValue.setFields(fieldValues);
           recordValue.setDatasetPartitionId(partition.getId());
           recordValue.setDataProviderCode(provider.getCode());

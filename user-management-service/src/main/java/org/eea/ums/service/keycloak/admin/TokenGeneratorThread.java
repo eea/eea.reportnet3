@@ -1,11 +1,11 @@
 package org.eea.ums.service.keycloak.admin;
 
 import java.util.Optional;
-import lombok.extern.slf4j.Slf4j;
 import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * The type Token generator thread. This Thread will refresh the admin token based on the frenquency
@@ -35,9 +35,8 @@ public class TokenGeneratorThread implements Runnable {
    * @param adminPass the admin pass
    * @param tokenExpiration the token expiration
    */
-  public TokenGeneratorThread(
-      KeycloakConnectorService keycloakConnectorService, String adminUser, String adminPass,
-      Long tokenExpiration) {
+  public TokenGeneratorThread(KeycloakConnectorService keycloakConnectorService, String adminUser,
+      String adminPass, Long tokenExpiration) {
 
     this.keycloakConnectorService = keycloakConnectorService;
     this.adminUser = adminUser;
@@ -50,12 +49,13 @@ public class TokenGeneratorThread implements Runnable {
   public void run() {
 
     log.info("Starting token generator thread");
-    //First attemp to retrieve an admin token during ums initialization
+    // First attemp to retrieve an admin token during ums initialization
     TokenInfo firstToken = keycloakConnectorService.generateAdminToken(adminUser, adminPass);
     if (null != firstToken) {
       manageTokenInfo(firstToken);
     }
-    //from this point on the thread will be retrieving admin token (using refresh tokens) every tokenExpiration ms
+    // from this point on the thread will be retrieving admin token (using refresh tokens) every
+    // tokenExpiration ms
     while (!exit) {
       TokenInfo tokenInfo = keycloakConnectorService.refreshToken(refreshToken);
       manageTokenInfo(tokenInfo);
@@ -71,8 +71,8 @@ public class TokenGeneratorThread implements Runnable {
       TokenMonitor.updateAdminToken(accessToken);
       sleepThread(this.tokenExpiration);
     } else {
-      LOG_ERROR.error(
-          "Error getting admin access token, finishing Token Generator thread ");
+      LOG_ERROR.error("Error getting admin access token, finishing Token Generator thread ");
+      Thread.currentThread().interrupt();
       stopThread();
     }
   }

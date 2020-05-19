@@ -60,7 +60,6 @@ public class FieldSchema {
   @Field(value = "pk")
   private Boolean pk;
 
-
   /** The is P kreferenced. */
   @Field(value = "pkReferenced")
   private Boolean pkReferenced;
@@ -68,6 +67,10 @@ public class FieldSchema {
   /** The reference FK. */
   @Field(value = "referencedField")
   private ReferencedFieldSchema referencedField;
+
+  /** The pk must be used. */
+  @Field(value = "pkMustBeUsed")
+  private Boolean pkMustBeUsed;
 
   /**
    * Hash code.
@@ -77,7 +80,7 @@ public class FieldSchema {
   @Override
   public int hashCode() {
     return Objects.hash(headerName, idFieldSchema, idRecord, type, codelistItems, required,
-        description, pk);
+        description, pk, pkMustBeUsed);
   }
 
 
@@ -99,7 +102,8 @@ public class FieldSchema {
     return Objects.equals(headerName, other.headerName)
         && Objects.equals(idFieldSchema, other.idFieldSchema)
         && Objects.equals(idRecord, other.idRecord) && Objects.equals(required, other.required)
-        && Objects.equals(pk, other.pk) && Objects.equals(description, other.description);
+        && Objects.equals(pk, other.pk) && Objects.equals(description, other.description)
+        && Objects.equals(pkMustBeUsed, other.pkMustBeUsed);
   }
 
 

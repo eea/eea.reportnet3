@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.rule.enums.RuleOperatorEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,7 +159,6 @@ public class RuleExpressionVO implements Serializable {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid type: " + arg2);
     }
   }
-
 
   /**
    * Tokenize a function. A function starts with ".", the first word is the operator, and the
@@ -393,7 +393,7 @@ public class RuleExpressionVO implements Serializable {
 
   /**
    * Classifies a character: 0 (whitespace), 1 (number), 2 (logical operator), 3 (function
-   * operator), 4 (end of expression) and 5 (other element)
+   * operator), 4 (end of expression) and 5 (other element).
    *
    * @param actual the actual
    * @param lastInputType the last input type
@@ -490,12 +490,100 @@ public class RuleExpressionVO implements Serializable {
         case LT_DATE:
         case GTEQ_DATE:
         case LTEQ_DATE:
+        case EQ_DAY:
+        case DIST_DAY:
+        case GT_DAY:
+        case LT_DAY:
+        case GTEQ_DAY:
+        case LTEQ_DAY:
+        case EQ_MONTH:
+        case DIST_MONTH:
+        case GT_MONTH:
+        case LT_MONTH:
+        case GTEQ_MONTH:
+        case LTEQ_MONTH:
+        case EQ_YEAR:
+        case DIST_YEAR:
+        case GT_YEAR:
+        case LT_YEAR:
+        case GTEQ_YEAR:
+        case LTEQ_YEAR:
+        case NUM_MATCH:
           return "this." + operator.getLabel() + "(" + toStringBranch(arg2) + ")";
       }
     }
 
     LOG_ERROR.error("Error stringifying RuleExpressionVO: operator is null");
     throw new IllegalStateException("Operator cannot be null");
+  }
+
+  /**
+   * Checks if is arg data type compatible.
+   *
+   * @param arg the arg
+   * @param superInputType the super input type
+   * @param dataType the data type
+   * @return true, if is arg data type compatible
+   */
+  private boolean isArgDataTypeCompatible(Object arg, String superInputType, DataType dataType) {
+
+    if (arg instanceof RuleExpressionVO) {
+      RuleExpressionVO rule = (RuleExpressionVO) arg;
+      String ruleReturnType = rule.getOperator().getReturnType();
+      return ruleReturnType.equals(superInputType) && rule.isDataTypeCompatible(dataType);
+    }
+
+    if ("VALUE".equals(arg)) {
+      String valueType = dataType.getJavaType();
+      return valueType.equals(superInputType);
+    }
+
+    if (arg instanceof Number) {
+      return "Number".equals(superInputType);
+    }
+
+    if (arg instanceof String) {
+
+      if ("Date".equals(superInputType)) {
+        return ((String) arg).matches("[0-9]{4}-(?:0[0-9]|1[0-2])-(?:[0-2][0-9]|3[01])");
+      }
+
+      if ("String".equals(superInputType)) {
+        return true;
+      }
+    }
+
+    LOG_ERROR.error("Arg DataType does not match any case: arg={}, superInputType={}, dataType={}",
+        arg, superInputType, dataType);
+    return false;
+  }
+
+  /**
+   * Checks if is data type compatible.
+   *
+   * @param dataType the data type
+   * @return true, if is data type compatible
+   */
+  public boolean isDataTypeCompatible(DataType dataType) {
+
+    String[] inputTypes = operator.getInputTypes();
+
+    if ("Unsupported".equals(dataType.getJavaType())) {
+      LOG_ERROR.error("Unsupported DataType: {}", dataType);
+      return true;
+    }
+
+    if (inputTypes.length == 1) {
+      return isArgDataTypeCompatible(arg1, inputTypes[0], dataType);
+    }
+
+    if (inputTypes.length == 2) {
+      boolean arg1IsCompatible = isArgDataTypeCompatible(arg1, inputTypes[0], dataType);
+      boolean arg2IsCompatible = isArgDataTypeCompatible(arg2, inputTypes[1], dataType);
+      return arg1IsCompatible && arg2IsCompatible;
+    }
+
+    return false;
   }
 
   /**
