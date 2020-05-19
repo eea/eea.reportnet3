@@ -107,300 +107,448 @@ public class FieldValue {
   }
 
   /**
-   * Equal date used by drools. Value must not be null.
+   * Field and.
    *
-   * @param date the date, not null
-   * @return true, if passes the validation
+   * @param arg1 the arg 1
+   * @param arg2 the arg 2
+   * @return true, if successful
    */
-  public boolean equalDate(String date) {
+  public boolean fieldAnd(boolean arg1, boolean arg2) {
+    return arg1 && arg2;
+  }
+
+  /**
+   * Field or.
+   *
+   * @param arg1 the arg 1
+   * @param arg2 the arg 2
+   * @return true, if successful
+   */
+  public boolean fieldOr(boolean arg1, boolean arg2) {
+    return arg1 || arg2;
+  }
+
+  /**
+   * Field not.
+   *
+   * @param arg the arg
+   * @return true, if successful
+   */
+  public boolean fieldNot(boolean arg) {
+    return !arg;
+  }
+
+  /**
+   * Number equals.
+   *
+   * @param value the value
+   * @param arg2 the arg 2
+   * @return true, if successful
+   */
+  public boolean numberEquals(String value, Number arg2) {
+    return Double.valueOf(value).equals(arg2.doubleValue());
+  }
+
+  /**
+   * Number distinct.
+   *
+   * @param value the value
+   * @param arg2 the arg 2
+   * @return true, if successful
+   */
+  public boolean numberDistinct(String value, Number arg2) {
+    return !Double.valueOf(value).equals(arg2.doubleValue());
+  }
+
+  /**
+   * Number greater than.
+   *
+   * @param value the value
+   * @param arg2 the arg 2
+   * @return true, if successful
+   */
+  public boolean numberGreaterThan(String value, Number arg2) {
+    return Double.valueOf(value) > arg2.doubleValue();
+  }
+
+  /**
+   * Number less than.
+   *
+   * @param value the value
+   * @param arg2 the arg 2
+   * @return true, if successful
+   */
+  public boolean numberLessThan(String value, Number arg2) {
+    return Double.valueOf(value) < arg2.doubleValue();
+  }
+
+  /**
+   * Number greater than or equals than.
+   *
+   * @param value the value
+   * @param arg2 the arg 2
+   * @return true, if successful
+   */
+  public boolean numberGreaterThanOrEqualsThan(String value, Number arg2) {
+    return Double.valueOf(value) >= arg2.doubleValue();
+  }
+
+  /**
+   * Number less than or equals than.
+   *
+   * @param value the value
+   * @param arg2 the arg 2
+   * @return true, if successful
+   */
+  public boolean numberLessThanOrEqualsThan(String value, Number arg2) {
+    return Double.valueOf(value) <= arg2.doubleValue();
+  }
+
+  /**
+   * Number matches.
+   *
+   * @param value the value
+   * @param regex the regex
+   * @return true, if successful
+   */
+  public boolean numberMatches(String value, String regex) {
+    return value.matches(regex);
+  }
+
+  /**
+   * String length.
+   *
+   * @param value the value
+   * @return the long
+   */
+  public Long stringLength(String value) {
+    return Long.valueOf(value.length());
+  }
+
+  /**
+   * String equals.
+   *
+   * @param value the value
+   * @param arg2 the arg 2
+   * @return true, if successful
+   */
+  public boolean stringEquals(String value, String arg2) {
+    return value.equals(arg2);
+  }
+
+  /**
+   * String equals ignore case.
+   *
+   * @param value the value
+   * @param arg2 the arg 2
+   * @return true, if successful
+   */
+  public boolean stringEqualsIgnoreCase(String value, String arg2) {
+    return value.equalsIgnoreCase(arg2);
+  }
+
+  /**
+   * String matches.
+   *
+   * @param value the value
+   * @param arg2 the arg 2
+   * @return true, if successful
+   */
+  public boolean stringMatches(String value, String arg2) {
+    return value.matches(arg2);
+  }
+
+  /**
+   * Day equals.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean dayEquals(String value, Number number) {
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+    return fieldDate.getDayOfMonth() == number.longValue();
+  }
+
+  /**
+   * Day distinct.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean dayDistinct(String value, Number number) {
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+    return fieldDate.getDayOfMonth() != number.longValue();
+  }
+
+  /**
+   * Day greater than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean dayGreaterThan(String value, Number number) {
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+    return fieldDate.getDayOfMonth() > number.longValue();
+  }
+
+  /**
+   * Day less than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean dayLessThan(String value, Number number) {
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+    return fieldDate.getDayOfMonth() < number.longValue();
+  }
+
+  /**
+   * Day greater than or equals than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean dayGreaterThanOrEqualsThan(String value, Number number) {
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+    return fieldDate.getDayOfMonth() >= number.longValue();
+  }
+
+  /**
+   * Day less than or equals than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean dayLessThanOrEqualsThan(String value, Number number) {
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+    return fieldDate.getDayOfMonth() <= number.longValue();
+  }
+
+  /**
+   * Month equals.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean monthEquals(String value, Number number) {
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+    return fieldDate.getMonthValue() == number.longValue();
+  }
+
+  /**
+   * Month distinct.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean monthDistinct(String value, Number number) {
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+    return fieldDate.getMonthValue() != number.longValue();
+  }
+
+  /**
+   * Month greater than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean monthGreaterThan(String value, Number number) {
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+    return fieldDate.getMonthValue() > number.longValue();
+  }
+
+  /**
+   * Month less than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean monthLessThan(String value, Number number) {
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+    return fieldDate.getMonthValue() < number.longValue();
+  }
+
+  /**
+   * Month greater than or equals than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean monthGreaterThanOrEqualsThan(String value, Number number) {
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+    return fieldDate.getMonthValue() >= number.longValue();
+  }
+
+  /**
+   * Month less than or equals than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean monthLessThanOrEqualsThan(String value, Number number) {
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+    return fieldDate.getMonthValue() <= number.longValue();
+  }
+
+  /**
+   * Year equals.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean yearEquals(String value, Number number) {
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+    return fieldDate.getYear() == number.longValue();
+  }
+
+  /**
+   * Year distinct.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean yearDistinct(String value, Number number) {
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+    return fieldDate.getYear() != number.longValue();
+  }
+
+  /**
+   * Year greater than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean yearGreaterThan(String value, Number number) {
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+    return fieldDate.getYear() > number.longValue();
+  }
+
+  /**
+   * Year less than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean yearLessThan(String value, Number number) {
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+    return fieldDate.getYear() < number.longValue();
+  }
+
+  /**
+   * Year greater than or equals than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean yearGreaterThanOrEqualsThan(String value, Number number) {
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+    return fieldDate.getYear() >= number.longValue();
+  }
+
+  /**
+   * Year less than or equals than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean yearLessThanOrEqualsThan(String value, Number number) {
+    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+    return fieldDate.getYear() <= number.longValue();
+  }
+
+  /**
+   * Date equals.
+   *
+   * @param value the value
+   * @param date the date
+   * @return true, if successful
+   */
+  public boolean dateEquals(String value, String date) {
     LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
     LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
     return fieldDate.equals(ruleDate);
   }
 
   /**
-   * Distinct date used by drools. Value must not be null.
+   * Date distinct.
    *
-   * @param date the date, not null
-   * @return true, if passes the validation
+   * @param value the value
+   * @param date the date
+   * @return true, if successful
    */
-  public boolean distinctDate(String date) {
+  public boolean dateDistinct(String value, String date) {
     LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
     LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
     return !fieldDate.equals(ruleDate);
   }
 
   /**
-   * Greater than date used by drools. Value must not be null.
+   * Date greater than.
    *
-   * @param date the date, not null
-   * @return true, if passes the validation
+   * @param value the value
+   * @param date the date
+   * @return true, if successful
    */
-  public boolean greaterThanDate(String date) {
+  public boolean dateGreaterThan(String value, String date) {
     LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
     LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
     return fieldDate.isAfter(ruleDate);
   }
 
   /**
-   * Less than date used by drools. Value must not be null.
+   * Date less than.
    *
-   * @param date the date, not null
-   * @return true, if passes the validation
+   * @param value the value
+   * @param date the date
+   * @return true, if successful
    */
-  public boolean lessThanDate(String date) {
+  public boolean dateLessThan(String value, String date) {
     LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
     LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
     return fieldDate.isBefore(ruleDate);
   }
 
   /**
-   * Greater than or equals than date used by drools. Value must not be null.
+   * Date greater than or equals than.
    *
-   * @param date the date, not null
-   * @return true, if passes the validation
+   * @param value the value
+   * @param date the date
+   * @return true, if successful
    */
-  public boolean greaterThanOrEqualsThanDate(String date) {
+  public boolean dateGreaterThanOrEqualsThan(String value, String date) {
     LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
     LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
     return fieldDate.isAfter(ruleDate) || fieldDate.equals(ruleDate);
   }
 
   /**
-   * Less than or equals than date used by drools. Value must not be null.
+   * Date less than or equals than.
    *
-   * @param date the date, not null
-   * @return true, if passes the validation
+   * @param value the value
+   * @param date the date
+   * @return true, if successful
    */
-  public boolean lessThanOrEqualsThanDate(String date) {
+  public boolean dateLessThanOrEqualsThan(String value, String date) {
     LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
     LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
     return fieldDate.isBefore(ruleDate) || fieldDate.equals(ruleDate);
-  }
-
-  /**
-   * Equal day used by drools. Value must not be null.
-   *
-   * @param number the number, not null. Its class type is Number because it is possible to call
-   *        this method using Long and Double.
-   * @return true, if passes the validation
-   */
-  public boolean equalDay(Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getDayOfMonth() == number.longValue();
-  }
-
-  /**
-   * Distinct day used by drools. Value must not be null.
-   *
-   * @param number the number, not null. Its class type is Number because it is possible to call
-   *        this method using Long and Double.
-   * @return true, if passes the validation
-   */
-  public boolean distinctDay(Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getDayOfMonth() != number.longValue();
-  }
-
-  /**
-   * Greater than day used by drools. Value must not be null.
-   *
-   * @param number the number, not null. Its class type is Number because it is possible to call
-   *        this method using Long and Double.
-   * @return true, if passes the validation
-   */
-  public boolean greaterThanDay(Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getDayOfMonth() > number.longValue();
-  }
-
-  /**
-   * Less than day used by drools. Value must not be null.
-   *
-   * @param number the number, not null. Its class type is Number because it is possible to call
-   *        this method using Long and Double.
-   * @return true, if passes the validation
-   */
-  public boolean lessThanDay(Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getDayOfMonth() < number.longValue();
-  }
-
-  /**
-   * Greater than or equals than day used by drools. Value must not be null.
-   *
-   * @param number the number, not null. Its class type is Number because it is possible to call
-   *        this method using Long and Double.
-   * @return true, if passes the validation
-   */
-  public boolean greaterThanOrEqualsThanDay(Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getDayOfMonth() >= number.longValue();
-  }
-
-  /**
-   * Less than or equals than day used by drools. Value must not be null.
-   *
-   * @param number the number, not null. Its class type is Number because it is possible to call
-   *        this method using Long and Double.
-   * @return true, if passes the validation
-   */
-  public boolean lessThanOrEqualsThanDay(Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getDayOfMonth() <= number.longValue();
-  }
-
-  /**
-   * Equal month used by drools. Value must not be null.
-   *
-   * @param number the number, not null. Its class type is Number because it is possible to call
-   *        this method using Long and Double.
-   * @return true, if passes the validation
-   */
-  public boolean equalMonth(Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getMonthValue() == number.longValue();
-  }
-
-  /**
-   * Distinct month used by drools. Value must not be null.
-   *
-   * @param number the number, not null. Its class type is Number because it is possible to call
-   *        this method using Long and Double.
-   * @return true, if passes the validation
-   */
-  public boolean distinctMonth(Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getMonthValue() != number.longValue();
-  }
-
-  /**
-   * Greater than month used by drools. Value must not be null.
-   *
-   * @param number the number, not null. Its class type is Number because it is possible to call
-   *        this method using Long and Double.
-   * @return true, if passes the validation
-   */
-  public boolean greaterThanMonth(Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getMonthValue() > number.longValue();
-  }
-
-  /**
-   * Less than month used by drools. Value must not be null.
-   *
-   * @param number the number, not null. Its class type is Number because it is possible to call
-   *        this method using Long and Double.
-   * @return true, if passes the validation
-   */
-  public boolean lessThanMonth(Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getMonthValue() < number.longValue();
-  }
-
-  /**
-   * Greater than or equals than month used by drools. Value must not be null.
-   *
-   * @param number the number, not null. Its class type is Number because it is possible to call
-   *        this method using Long and Double.
-   * @return true, if passes the validation
-   */
-  public boolean greaterThanOrEqualsThanMonth(Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getMonthValue() >= number.longValue();
-  }
-
-  /**
-   * Less than or equals than month used by drools. Value must not be null.
-   *
-   * @param number the number, not null. Its class type is Number because it is possible to call
-   *        this method using Long and Double.
-   * @return true, if passes the validation
-   */
-  public boolean lessThanOrEqualsThanMonth(Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getMonthValue() <= number.longValue();
-  }
-
-  /**
-   * Equal year used by drools. Value must not be null.
-   *
-   * @param number the number, not null. Its class type is Number because it is possible to call
-   *        this method using Long and Double.
-   * @return true, if passes the validation
-   */
-  public boolean equalYear(Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getYear() == number.longValue();
-  }
-
-  /**
-   * Distinct year used by drools. Value must not be null.
-   *
-   * @param number the number, not null. Its class type is Number because it is possible to call
-   *        this method using Long and Double.
-   * @return true, if passes the validation
-   */
-  public boolean distinctYear(Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getYear() != number.longValue();
-  }
-
-  /**
-   * Greater than year used by drools. Value must not be null.
-   *
-   * @param number the number, not null. Its class type is Number because it is possible to call
-   *        this method using Long and Double.
-   * @return true, if passes the validation
-   */
-  public boolean greaterThanYear(Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getYear() > number.longValue();
-  }
-
-  /**
-   * Less than year used by drools. Value must not be null.
-   *
-   * @param number the number, not null. Its class type is Number because it is possible to call
-   *        this method using Long and Double.
-   * @return true, if passes the validation
-   */
-  public boolean lessThanYear(Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getYear() < number.longValue();
-  }
-
-  /**
-   * Greater than or equals than year used by drools. Value must not be null.
-   *
-   * @param number the number, not null. Its class type is Number because it is possible to call
-   *        this method using Long and Double.
-   * @return true, if passes the validation
-   */
-  public boolean greaterThanOrEqualsThanYear(Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getYear() >= number.longValue();
-  }
-
-  /**
-   * Less than or equals than year used by drools. Value must not be null.
-   *
-   * @param number the number, not null. Its class type is Number because it is possible to call
-   *        this method using Long and Double.
-   * @return true, if passes the validation
-   */
-  public boolean lessThanOrEqualsThanYear(Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getYear() <= number.longValue();
-  }
-
-  /**
-   * Number match.
-   *
-   * @param regex the regex, not null.
-   * @return true, if successful
-   */
-  public boolean numberMatch(String regex) {
-    return value.matches(regex);
   }
 }
