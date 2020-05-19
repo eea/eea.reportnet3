@@ -6,34 +6,69 @@ import java.util.Map;
 import java.util.Objects;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.enums.JavaType;
 import org.eea.interfaces.vo.dataset.schemas.rule.enums.RuleOperatorEnum;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * The Class RuleExpressionVO.
+ */
 public class RuleExpressionVO {
 
+  /** The operator. */
   private RuleOperatorEnum operator;
 
+  /** The params. */
   private List<Object> params;
 
+  /**
+   * Instantiates a new RuleExpressionVO. Used by SpringMVC to cast JSON into a RuleExpressionVO
+   * object.
+   */
   public RuleExpressionVO() {}
 
+  /**
+   * Instantiates a new RuleExpressionVO throw its string serialization.
+   *
+   * @param expression the expression
+   */
   public RuleExpressionVO(String expression) {
     constructor(expression, 0, this);
   }
 
+  /**
+   * Gets the operator. Used by SpringMVC to cast RuleExpressionVO object into JSON.
+   *
+   * @return the operator
+   */
   public RuleOperatorEnum getOperator() {
     return operator;
   }
 
+  /**
+   * Gets the params. Used by SpringMVC to cast RuleExpressionVO object into JSON.
+   *
+   * @return the params
+   */
   public List<Object> getParams() {
     return params;
   }
 
+  /**
+   * Sets the operator. Used by SpringMVC to cast JSON into a RuleExpressionVO object.
+   *
+   * @param operator the new operator
+   */
   public void setOperator(RuleOperatorEnum operator) {
     this.operator = operator;
   }
 
+  /**
+   * Sets the params. Used by SpringMVC to cast JSON into a RuleExpressionVO object.
+   *
+   * @param params the new params
+   */
   @SuppressWarnings("unchecked")
   public void setParams(Object[] params) {
 
@@ -51,11 +86,22 @@ public class RuleExpressionVO {
     }
   }
 
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
   @Override
   public int hashCode() {
     return Objects.hash(operator != null ? operator.ordinal() : null, params);
   }
 
+  /**
+   * Equals.
+   *
+   * @param obj the obj
+   * @return true, if successful
+   */
   @Override
   public boolean equals(Object obj) {
 
@@ -88,6 +134,11 @@ public class RuleExpressionVO {
     return false;
   }
 
+  /**
+   * Serialize the object to generate a java compilable string instruction.
+   *
+   * @return the string
+   */
   @Override
   public String toString() {
 
@@ -116,6 +167,14 @@ public class RuleExpressionVO {
     throw new IllegalStateException("toString - Malformed RuleExpressionVO");
   }
 
+  /**
+   * Checks if data type is compatible. Used to verify that function input types match given
+   * arguments.
+   *
+   * @param entityType the entity type
+   * @param dataType the data type
+   * @return true, if is data type compatible
+   */
   public boolean isDataTypeCompatible(EntityTypeEnum entityType, DataType dataType) {
 
     int index = 0;
@@ -147,6 +206,11 @@ public class RuleExpressionVO {
     return rtn;
   }
 
+  /**
+   * Instantiates a new rule expression VO.
+   *
+   * @param map the map
+   */
   private RuleExpressionVO(Map<String, ?> map) {
 
     Object o = map.get("operator");
@@ -160,12 +224,28 @@ public class RuleExpressionVO {
     }
   }
 
+  /**
+   * Constructor.
+   *
+   * @param expression the expression
+   * @param index the index
+   * @param rule the rule
+   * @return the int
+   */
   private int constructor(String expression, int index, RuleExpressionVO rule) {
     index = readOperator(expression, index, rule);
     index = readParams(expression, index, rule);
     return index;
   }
 
+  /**
+   * Read operator.
+   *
+   * @param expression the expression
+   * @param index the index
+   * @param rule the rule
+   * @return the int
+   */
   private int readOperator(String expression, int index, RuleExpressionVO rule) {
     int beginIndex = index + "this.".length();
     int endIndex = expression.indexOf('(', beginIndex);
@@ -174,6 +254,14 @@ public class RuleExpressionVO {
     return endIndex;
   }
 
+  /**
+   * Read params.
+   *
+   * @param expression the expression
+   * @param index the index
+   * @param rule the rule
+   * @return the int
+   */
   private int readParams(String expression, int index, RuleExpressionVO rule) {
 
     rule.params = new ArrayList<>();
@@ -217,6 +305,14 @@ public class RuleExpressionVO {
     throw new IllegalStateException("readParams - Invalid expression: " + expression);
   }
 
+  /**
+   * Read number.
+   *
+   * @param expression the expression
+   * @param index the index
+   * @param rule the rule
+   * @return the int
+   */
   private int readNumber(String expression, int index, RuleExpressionVO rule) {
 
     char actual;
@@ -248,6 +344,14 @@ public class RuleExpressionVO {
     throw new IllegalStateException("readNumber - Invalid expression: " + expression);
   }
 
+  /**
+   * Read function.
+   *
+   * @param expression the expression
+   * @param index the index
+   * @param rule the rule
+   * @return the int
+   */
   private int readFunction(String expression, int index, RuleExpressionVO rule) {
     RuleExpressionVO otherRule = new RuleExpressionVO();
     index = constructor(expression, index, otherRule);
@@ -255,11 +359,26 @@ public class RuleExpressionVO {
     return index;
   }
 
+  /**
+   * Read value.
+   *
+   * @param index the index
+   * @param rule the rule
+   * @return the int
+   */
   private int readValue(int index, RuleExpressionVO rule) {
     rule.params.add("VALUE");
     return index + "value".length();
   }
 
+  /**
+   * Read string.
+   *
+   * @param expression the expression
+   * @param index the index
+   * @param rule the rule
+   * @return the int
+   */
   private int readString(String expression, int index, RuleExpressionVO rule) {
 
     int length = expression.length();
@@ -292,6 +411,15 @@ public class RuleExpressionVO {
     throw new IllegalStateException("readString - Invalid expression: " + expression);
   }
 
+  /**
+   * Checks if is data type compatible rule.
+   *
+   * @param entityType the entity type
+   * @param dataType the data type
+   * @param superInputType the super input type
+   * @param rule the rule
+   * @return true, if is data type compatible rule
+   */
   private boolean isDataTypeCompatibleRule(EntityTypeEnum entityType, DataType dataType,
       String superInputType, RuleExpressionVO rule) {
     boolean typesMatch = rule.getOperator().getReturnType().equals(superInputType);
@@ -299,10 +427,24 @@ public class RuleExpressionVO {
     return typesMatch && ruleDataTypeCompatible;
   }
 
+  /**
+   * Checks if is data type compatible number.
+   *
+   * @param superInputType the super input type
+   * @return true, if is data type compatible number
+   */
   private boolean isDataTypeCompatibleNumber(String superInputType) {
-    return superInputType.equals("Number");
+    return superInputType.equals(JavaType.NUMBER);
   }
 
+  /**
+   * Checks if is data type compatible string.
+   *
+   * @param dataType the data type
+   * @param superInputType the super input type
+   * @param string the string
+   * @return true, if is data type compatible string
+   */
   private boolean isDataTypeCompatibleString(DataType dataType, String superInputType,
       String string) {
 
@@ -310,13 +452,19 @@ public class RuleExpressionVO {
       return superInputType.equals(dataType.getJavaType());
     }
 
-    if (superInputType.equals("Date")) {
+    if (superInputType.equals(JavaType.DATE)) {
       return string.matches("[0-9]{4}-(?:0[0-9]|1[0-2])-(?:[0-2][0-9]|3[01])");
     }
 
-    return superInputType.equals("String");
+    return superInputType.equals(JavaType.STRING);
   }
 
+  /**
+   * To string branch.
+   *
+   * @param branch the branch
+   * @return the string
+   */
   private String toStringBranch(Object branch) {
 
     if (branch instanceof String) {
