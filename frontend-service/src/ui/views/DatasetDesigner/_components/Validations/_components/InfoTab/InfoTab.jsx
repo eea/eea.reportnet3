@@ -31,56 +31,56 @@ export const InfoTab = ({
   });
 
   useEffect(() => {
-    if (validationContext.level === 'field') {
-      if (creationFormState.schemaTables.length > 0) {
-        setTableFieldOptions({
-          disabled: false,
-          placeholder: resourcesContext.messages.table
-        });
-      } else {
-        setTableFieldOptions({
-          disabled: true,
-          placeholder: resourcesContext.messages.fieldConstraintTableFieldNoOptions
-        });
-      }
+    if (creationFormState.schemaTables.length > 0) {
+      setTableFieldOptions({
+        disabled: false,
+        placeholder: resourcesContext.messages.table
+      });
+    } else {
+      setTableFieldOptions({
+        disabled: true,
+        placeholder: resourcesContext.messages.fieldConstraintTableFieldNoOptions
+      });
     }
   }, [creationFormState.schemaTables]);
 
   useEffect(() => {
-    const { tableFields } = creationFormState;
-    const fieldDropdownOptions = {
-      disabled: true,
-      placeholder: resourcesContext.messages.field,
-      options: [],
-      onChange: () => {},
-      value: null
-    };
-    if (isNil(tableFields)) {
-      fieldDropdownOptions.value = null;
+    if (validationContext.level === 'field') {
+      const { tableFields } = creationFormState;
+      const fieldDropdownOptions = {
+        disabled: true,
+        placeholder: resourcesContext.messages.field,
+        options: [],
+        onChange: () => {},
+        value: null
+      };
+      if (isNil(tableFields)) {
+        fieldDropdownOptions.value = null;
+      }
+      if (!isNil(tableFields) && tableFields.length == 0) {
+        fieldDropdownOptions.placeholder = resourcesContext.messages.designSchemaTabNoFields;
+        fieldDropdownOptions.value = null;
+      }
+      if (!isNil(tableFields) && tableFields.length > 0) {
+        fieldDropdownOptions.options = tableFields;
+        fieldDropdownOptions.disabled = false;
+        fieldDropdownOptions.onChange = e => onInfoFieldChange('field', e.target.value);
+        fieldDropdownOptions.value = creationFormState.candidateRule.field;
+      }
+      setFieldsDropdown(
+        <Dropdown
+          id={`${componentName}__field`}
+          disabled={fieldDropdownOptions.disabled}
+          appendTo={document.body}
+          filterPlaceholder={fieldDropdownOptions.placeholder}
+          placeholder={fieldDropdownOptions.placeholder}
+          optionLabel="label"
+          options={fieldDropdownOptions.options}
+          onChange={fieldDropdownOptions.onChange}
+          value={fieldDropdownOptions.value}
+        />
+      );
     }
-    if (!isNil(tableFields) && tableFields.length == 0) {
-      fieldDropdownOptions.placeholder = resourcesContext.messages.designSchemaTabNoFields;
-      fieldDropdownOptions.value = null;
-    }
-    if (!isNil(tableFields) && tableFields.length > 0) {
-      fieldDropdownOptions.options = tableFields;
-      fieldDropdownOptions.disabled = false;
-      fieldDropdownOptions.onChange = e => onInfoFieldChange('field', e.target.value);
-      fieldDropdownOptions.value = creationFormState.candidateRule.field;
-    }
-    setFieldsDropdown(
-      <Dropdown
-        id={`${componentName}__field`}
-        disabled={fieldDropdownOptions.disabled}
-        appendTo={document.body}
-        filterPlaceholder={fieldDropdownOptions.placeholder}
-        placeholder={fieldDropdownOptions.placeholder}
-        optionLabel="label"
-        options={fieldDropdownOptions.options}
-        onChange={fieldDropdownOptions.onChange}
-        value={fieldDropdownOptions.value}
-      />
-    );
   }, [
     creationFormState.tableFields,
     validationContext.isVisible,
