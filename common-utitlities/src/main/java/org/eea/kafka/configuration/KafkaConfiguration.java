@@ -164,7 +164,9 @@ public class KafkaConfiguration {
       } catch (final InterruptedException | ExecutionException e) {
         // NOPMD false positive, I really need the thread to go on since this is a healtchecker.
         // Exception is managed by Spring Actuator
-        Thread.currentThread().interrupt();
+        if (e instanceof InterruptedException) {
+          Thread.currentThread().interrupt();
+        }
         return Health.down().withException(e).build();
       }
     };
