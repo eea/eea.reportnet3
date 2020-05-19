@@ -2,11 +2,12 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import isNil from 'lodash/isNil';
 import remove from 'lodash/remove';
+import uniqBy from 'lodash/uniqBy';
 import moment from 'moment';
 
 import styles from './BigButtonList.module.css';
 
-import { BigButton } from './_components/BigButton';
+import { BigButton } from '../BigButton';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar/Calendar';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -30,21 +31,14 @@ import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const BigButtonList = ({
-  dataflowData,
-  dataflowDataState,
-  dataflowId,
-  dataProviderId,
-  designDatasetSchemas,
+  dataflowState,
   handleRedirect,
-  hasWritePermissions,
-  isCustodian,
-  isDataSchemaCorrect,
+  onCleanUpReceipt,
   onSaveName,
+  onShowSnapshotDialog,
   onUpdateData,
-  receiptDispatch,
-  receiptState,
+  setIsReceiptLoading,
   setUpdatedDatasetSchema,
-  showReleaseSnapshotDialog,
   updatedDatasetSchema
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
@@ -61,9 +55,11 @@ export const BigButtonList = ({
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isUpdateDatacollectionDialogVisible, setIsUpdateDatacollectionDialogVisible] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
-  const hasExpirationDate = new Date(dataflowDataState.obligations.expirationDate) > new Date();
 
+  const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
   const receiptBtnRef = useRef(null);
+
+  const dataflowId = dataflowState.id;
 
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
@@ -73,17 +69,17 @@ export const BigButtonList = ({
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
 
     if (response) {
-      receiptDispatch({ type: 'ON_DOWNLOAD', payload: { isLoading: false } });
+      setIsReceiptLoading(false);
     }
   }, [notificationContext]);
 
   useEffect(() => {
     getExpirationDate();
-  }, [dataflowDataState.obligations.expirationDate]);
+  }, [dataflowState.obligations.expirationDate]);
 
   const downloadPdf = response => {
     if (!isNil(response)) {
-      DownloadFile(response, `${dataflowData.name}_${Date.now()}.pdf`);
+      DownloadFile(response, `${dataflowState.data.name}_${Date.now()}.pdf`);
 
       const url = window.URL.createObjectURL(new Blob([response]));
 
@@ -96,13 +92,6 @@ export const BigButtonList = ({
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     }
-  };
-
-  const removeNew = () => {
-    receiptDispatch({
-      type: 'ON_CLEAN_UP',
-      payload: { isLoading: false, isOutdated: false }
-    });
   };
 
   const errorDialogFooter = (
@@ -120,28 +109,28 @@ export const BigButtonList = ({
 
   // const exportDatatableSchema = async (datasetId, datasetName) => {
   //   const schema = await DatasetService.schemaById(datasetId);
-    // console.log(datasetId, datasetName, schema);
+  // console.log(datasetId, datasetName, schema);
 
-    // let blob = new Blob([csv], {
-    //   type: 'text/csv;charset=utf-8;'
-    // });
+  // let blob = new Blob([csv], {
+  //   type: 'text/csv;charset=utf-8;'
+  // });
 
-    // if (window.navigator.msSaveOrOpenBlob) {
-    //   navigator.msSaveOrOpenBlob(blob, this.props.exportFilename + '.csv');
-    // } else {
-    //   let link = document.createElement('a');
-    //   link.style.display = 'none';
-    //   document.body.appendChild(link);
-    //   if (link.download !== undefined) {
-    //     link.setAttribute('href', URL.createObjectURL(blob));
-    //     link.setAttribute('download', this.props.exportFilename + '.csv');
-    //     link.click();
-    //   } else {
-    //     csv = 'data:text/csv;charset=utf-8,' + csv;
-    //     window.open(encodeURI(csv));
-    //   }
-    //   document.body.removeChild(link);
-    // }
+  // if (window.navigator.msSaveOrOpenBlob) {
+  //   navigator.msSaveOrOpenBlob(blob, this.props.exportFilename + '.csv');
+  // } else {
+  //   let link = document.createElement('a');
+  //   link.style.display = 'none';
+  //   document.body.appendChild(link);
+  //   if (link.download !== undefined) {
+  //     link.setAttribute('href', URL.createObjectURL(blob));
+  //     link.setAttribute('download', this.props.exportFilename + '.csv');
+  //     link.click();
+  //   } else {
+  //     csv = 'data:text/csv;charset=utf-8,' + csv;
+  //     window.open(encodeURI(csv));
+  //   }
+  //   document.body.removeChild(link);
+  // }
   // };
 
   const getDeleteSchemaIndex = index => {
@@ -151,9 +140,9 @@ export const BigButtonList = ({
 
   const getExpirationDate = () => {
     setDataCollectionDueDate(
-      !isNil(dataflowDataState.obligations.expirationDate) &&
-        new Date(dataflowDataState.obligations.expirationDate) > new Date()
-        ? new Date(dataflowDataState.obligations.expirationDate)
+      !isNil(dataflowState.obligations.expirationDate) &&
+        new Date(dataflowState.obligations.expirationDate) > new Date()
+        ? new Date(dataflowState.obligations.expirationDate)
         : null
     );
   };
@@ -192,6 +181,7 @@ export const BigButtonList = ({
       const {
         dataflow: { name: dataflowName }
       } = await getMetadata({ dataflowId });
+
       notificationContext.add({
         type: 'CREATE_DATA_COLLECTION_ERROR',
         content: {
@@ -226,7 +216,7 @@ export const BigButtonList = ({
 
     showLoading();
     try {
-      const response = await DatasetService.deleteSchemaById(designDatasetSchemas[index].datasetId);
+      const response = await DatasetService.deleteSchemaById(dataflowState.designDatasetSchemas[index].datasetId);
       if (response >= 200 && response <= 299) {
         onUpdateData();
         setUpdatedDatasetSchema(remove(updatedDatasetSchema, event => event.schemaIndex != index));
@@ -254,24 +244,18 @@ export const BigButtonList = ({
 
   const onLoadReceiptData = async () => {
     try {
-      receiptDispatch({
-        type: 'ON_DOWNLOAD',
-        payload: { isLoading: true }
-      });
-      const response = await ConfirmationReceiptService.get(dataflowId, dataProviderId);
+      setIsReceiptLoading(true);
+      const response = await ConfirmationReceiptService.get(dataflowId, dataflowState.dataProviderId);
 
       downloadPdf(response);
-      removeNew();
+      onCleanUpReceipt();
     } catch (error) {
       console.error(error);
       notificationContext.add({
         type: 'LOAD_RECEIPT_DATA_ERROR'
       });
     } finally {
-      receiptDispatch({
-        type: 'ON_DOWNLOAD',
-        payload: { isLoading: false }
-      });
+      setIsReceiptLoading(false);
     }
   };
 
@@ -287,28 +271,26 @@ export const BigButtonList = ({
     setIsUpdateDatacollectionDialogVisible(true);
   };
 
-  const bigButtonList = useBigButtonList({
-    dataflowData,
-    dataflowDataState,
-    dataflowId,
-    // exportDatatableSchema,
-    getDeleteSchemaIndex,
-    handleRedirect,
-    hasWritePermissions,
-    isActiveButton,
-    isCustodian,
-    isDataSchemaCorrect,
-    onDatasetSchemaNameError,
-    onDuplicateName,
-    onLoadReceiptData,
-    onSaveName,
-    onShowDataCollectionModal,
-    onShowNewSchemaDialog,
-    onShowUpdateDataCollectionModal,
-    receiptState,
-    showReleaseSnapshotDialog,
-    updatedDatasetSchema
-  })
+  const bigButtonList = uniqBy(
+    useBigButtonList({
+      dataflowId,
+      dataflowState,
+      // exportDatatableSchema,
+      getDeleteSchemaIndex,
+      handleRedirect,
+      isActiveButton,
+      onDatasetSchemaNameError,
+      onDuplicateName,
+      onLoadReceiptData,
+      onSaveName,
+      onShowDataCollectionModal,
+      onShowNewSchemaDialog,
+      onShowSnapshotDialog,
+      onShowUpdateDataCollectionModal,
+      updatedDatasetSchema
+    }),
+    'caption'
+  )
     .filter(button => button.visibility)
     .map((button, i) => <BigButton key={i} {...button} />);
 
@@ -375,8 +357,8 @@ export const BigButtonList = ({
       </ConfirmDialog>
 
       <ConfirmDialog
-        header={resources.messages['createDataCollection']}
         disabledConfirm={isNil(dataCollectionDueDate)}
+        header={resources.messages['createDataCollection']}
         labelCancel={resources.messages['close']}
         labelConfirm={resources.messages['create']}
         onConfirm={() =>
@@ -388,7 +370,7 @@ export const BigButtonList = ({
           <p
             dangerouslySetInnerHTML={{
               __html: TextUtils.parseText(resources.messages['dataCollectionExpirationDate'], {
-                expirationData: moment(dataflowDataState.obligations.expirationDate).format(user.userProps.dateFormat)
+                expirationData: moment(dataflowState.obligations.expirationDate).format(user.userProps.dateFormat)
               })
             }}></p>
         ) : (
@@ -398,8 +380,8 @@ export const BigButtonList = ({
           className={styles.calendar}
           disabledDates={[new Date()]}
           inline={true}
-          monthNavigator={true}
           minDate={new Date()}
+          monthNavigator={true}
           onChange={event => setDataCollectionDueDate(event.target.value)}
           showWeek={true}
           value={dataCollectionDueDate}
@@ -408,7 +390,7 @@ export const BigButtonList = ({
         />
       </ConfirmDialog>
 
-      {({ loading }) => !loading && <button ref={receiptBtnRef} style={{ display: 'none' }} />}
+      <button ref={receiptBtnRef} style={{ display: 'none' }} />
     </>
   );
 };

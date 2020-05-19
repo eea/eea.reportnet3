@@ -6,6 +6,7 @@ export const routes = {
   DASHBOARDS: '/dataflow/:dataflowId/dashboards',
   DATA_COLLECTION: '/dataflow/:dataflowId/dataCollection/:datasetId',
   DATAFLOW: '/dataflow/:dataflowId',
+  DATAFLOW_REPRESENTATIVE: '/dataflow/:dataflowId/representativeId/:representativeId',
   DATAFLOWS: '/dataflows',
   DATASET: '/dataflow/:dataflowId/dataset/:datasetId',
   DATASET_SCHEMA: '/dataflow/:dataflowId/datasetSchema/:datasetId',

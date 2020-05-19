@@ -13,7 +13,7 @@ const parseObligationsData = (data, format) => {
           description: data.obligations.description,
           comment: data.obligations.comment,
           reportingFrequency: data.obligations.reportingFrequency,
-          expirationDate: !isNil(data.obligations.expirationDate)
+          nextReportDue: !isNil(data.obligations.expirationDate)
             ? moment(data.obligations.expirationDate).format(format)
             : '-'
         }

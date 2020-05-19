@@ -56,6 +56,8 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
           groupable: true,
           invisible: ['datasetSchemaId', 'id'],
           names: {
+            tableName: 'Table',
+            fieldName: 'Field',
             entityType: 'Entity type',
             levelError: 'Level error',
             ruleName: 'Rule name'
@@ -109,6 +111,7 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
     parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
     parsedDataset.levelErrorTypes = design.levelErrorTypes;
     parsedDataset.validations = validationList;
+
     if (!isUndefined(design.tables) && !isNull(design.tables) && design.tables.length > 0) {
       const tables = design.tables.map(tableDTO => {
         const table = {};
@@ -118,7 +121,9 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
         table.tableSchemaToPrefill = !isNil(tableDTO.tableSchemaToPrefill);
         if (!isNull(tableDTO.records) && !isNil(tableDTO.records[0].fields) && tableDTO.records[0].fields.length > 0) {
           const containsCodelists = !isEmpty(
-            tableDTO.records[0].fields.filter(fieldElmt => fieldElmt.type === 'CODELIST')
+            tableDTO.records[0].fields.filter(
+              fieldElmt => fieldElmt.type === 'CODELIST' || fieldElmt.type === 'MULTISELECT_CODELIST'
+            )
           );
           const fields = tableDTO.records[0].fields.map(fieldDTO => {
             const field = {};
@@ -128,7 +133,7 @@ const DatasetSchema = ({ designDataset, index, validationList }) => {
             field.description = !isNull(fieldDTO.description) ? fieldDTO.description : '-';
             field.type = fieldDTO.type;
             if (containsCodelists) {
-              if (fieldDTO.type === 'CODELIST') {
+              if (fieldDTO.type === 'CODELIST' || fieldDTO.type === 'MULTISELECT_CODELIST') {
                 field.codelistItems = fieldDTO.codelistItems;
               } else {
                 field.codelistItems = [];

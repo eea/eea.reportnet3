@@ -165,7 +165,7 @@ const DataViewer = withRouter(
       return getIconsValidationsErrors(validationsGroup);
     };
 
-    const { columns, setColumns, originalColumns, selectedHeader } = useSetColumns(
+    const { columns, getTooltipMessage, onShowFieldInfo, originalColumns, selectedHeader, setColumns } = useSetColumns(
       actionTemplate,
       cellDataEditor,
       colsSchema,
@@ -327,6 +327,15 @@ const DataViewer = withRouter(
       }
     }, [confirmPasteVisible]);
 
+    const parseMultiselect = record => {
+      record.dataRow.forEach(field => {
+        if (field.fieldData.type === 'MULTISELECT_CODELIST') {
+          field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(',');
+        }
+      });
+      return record;
+    };
+
     const showValidationFilter = filteredKeys => {
       // length of errors in data schema rules of validation
       const filteredKeysWithoutSelectAll = filteredKeys.filter(key => key !== 'selectAll');
@@ -419,9 +428,8 @@ const DataViewer = withRouter(
       }
     };
 
-    const onDeletePastedRecord = recordIndex => {
+    const onDeletePastedRecord = recordIndex =>
       dispatchRecords({ type: 'DELETE_PASTED_RECORDS', payload: { recordIndex } });
-    };
 
     const onEditAddFormInput = (property, value) => {
       dispatchRecords({ type: !isNewRecord ? 'SET_EDITED_RECORD' : 'SET_NEW_RECORD', payload: { property, value } });
@@ -442,8 +450,15 @@ const DataViewer = withRouter(
     };
 
     const onEditorSubmitValue = async (cell, value, record) => {
+      console.log({ cell, value, record });
       if (!isEmpty(record)) {
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
+        console.log(
+          { field, initialCellValue, selectedCellId },
+          RecordUtils.getCellId(cell, cell.field),
+          record.recordId,
+          records.selectedRecord.recordId
+        );
         if (
           value !== initialCellValue &&
           selectedCellId === RecordUtils.getCellId(cell, cell.field) &&
@@ -451,7 +466,13 @@ const DataViewer = withRouter(
         ) {
           try {
             //without await. We don't have to wait for the response.
-            const fieldUpdated = DatasetService.updateFieldById(datasetId, cell.field, field.id, field.type, value);
+            const fieldUpdated = DatasetService.updateFieldById(
+              datasetId,
+              cell.field,
+              field.id,
+              field.type,
+              field.type === 'MULTISELECT_CODELIST' ? value.join(',') : value
+            );
             if (!fieldUpdated) {
               throw new Error('UPDATE_FIELD_BY_ID_ERROR');
             }
@@ -566,7 +587,7 @@ const DataViewer = withRouter(
       if (isNewRecord) {
         try {
           setIsSaving(true);
-          await DatasetService.addRecordsById(datasetId, tableId, [record]);
+          await DatasetService.addRecordsById(datasetId, tableId, [parseMultiselect(record)]);
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           setIsTableDeleted(false);
           onRefresh();
@@ -592,7 +613,7 @@ const DataViewer = withRouter(
         }
       } else {
         try {
-          await DatasetService.updateRecordsById(datasetId, record);
+          await DatasetService.updateRecordsById(datasetId, parseMultiselect(record));
           onRefresh();
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         } catch (error) {
@@ -661,6 +682,10 @@ const DataViewer = withRouter(
           label={resources.messages['cancel']}
           icon="cancel"
           onClick={() => {
+            dispatchRecords({
+              type: 'SET_NEW_RECORD',
+              payload: RecordUtils.createEmptyObject(colsSchema, undefined)
+            });
             setAddDialogVisible(false);
           }}
         />
@@ -892,6 +917,7 @@ const DataViewer = withRouter(
             footer={columnInfoDialogFooter}
             header={resources.messages['columnInfo']}
             onHide={() => setIsColumnInfoVisible(false)}
+            style={{ minWidth: '40vw', maxWidth: '80vw', maxHeight: '80vh' }}
             visible={isColumnInfoVisible}>
             <DataTable
               autoLayout={true}
@@ -944,7 +970,7 @@ const DataViewer = withRouter(
         {addDialogVisible && (
           <div onKeyPress={onKeyPress}>
             <Dialog
-              className="edit-table"
+              className={'edit-table calendar-table'}
               blockScroll={false}
               footer={addRowDialogFooter}
               header={resources.messages['addRecord']}
@@ -959,7 +985,9 @@ const DataViewer = withRouter(
                   colsSchema={colsSchema}
                   datasetId={datasetId}
                   formType="NEW"
+                  getTooltipMessage={getTooltipMessage}
                   onChangeForm={onEditAddFormInput}
+                  onShowFieldInfo={onShowFieldInfo}
                   records={records}
                 />
               </div>
@@ -970,7 +998,7 @@ const DataViewer = withRouter(
         {editDialogVisible && (
           <Dialog
             blockScroll={false}
-            className="edit-table"
+            className="edit-table calendar-table"
             closeOnEscape={false}
             footer={editRowDialogFooter}
             header={resources.messages['editRow']}
@@ -985,7 +1013,9 @@ const DataViewer = withRouter(
                 datasetId={datasetId}
                 editDialogVisible={editDialogVisible}
                 formType="EDIT"
+                getTooltipMessage={getTooltipMessage}
                 onChangeForm={onEditAddFormInput}
+                onShowFieldInfo={onShowFieldInfo}
                 records={records}
               />
             </div>
