@@ -22,6 +22,7 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -273,7 +274,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   @Transactional
   public void validateDataSet(Long datasetId, KieBase kieBase) throws EEAException {
-    TenantResolver.setTenantName("dataset_" + datasetId);
+    TenantResolver.setTenantName(LiteralConstants.DATASET_ + datasetId);
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
@@ -303,7 +304,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Transactional
   public void validateTable(Long datasetId, Long idTable, KieBase kieBase) throws EEAException {
     // Validating tables
-    TenantResolver.setTenantName("dataset_" + datasetId);
+    TenantResolver.setTenantName(LiteralConstants.DATASET_ + datasetId);
     TableValue table = tableRepository.findById(idTable).orElse(null);
     // dataset.getTableValues().stream().forEach(table -> {
     KieSession session = kieBase.newKieSession();
@@ -334,7 +335,7 @@ public class ValidationServiceImpl implements ValidationService {
   public void validateRecord(Long datasetId, KieBase kieBase, Pageable pageable)
       throws EEAException {
 
-    TenantResolver.setTenantName("dataset_" + datasetId);
+    TenantResolver.setTenantName(LiteralConstants.DATASET_ + datasetId);
     List<RecordValue> records = this.recordRepository.findAll(pageable).getContent();
     List<RecordValidation> recordValidations = new ArrayList<>();
     KieSession session = kieBase.newKieSession();
@@ -348,7 +349,7 @@ public class ValidationServiceImpl implements ValidationService {
             rowValidation.setRecordValue(row);
           });
         }
-        TenantResolver.setTenantName("dataset_" + datasetId);
+        TenantResolver.setTenantName(LiteralConstants.DATASET_ + datasetId);
         recordValidations.addAll(validations);
       });
       if (recordValidations.size() > 0) {
@@ -386,7 +387,7 @@ public class ValidationServiceImpl implements ValidationService {
             fieldVal.setFieldValue(field);
           });
         }
-        TenantResolver.setTenantName("dataset_" + datasetId);
+        TenantResolver.setTenantName(LiteralConstants.DATASET_ + datasetId);
         fieldValidations.addAll(resultFields);
       });
       if (fieldValidations.size() > 0) {

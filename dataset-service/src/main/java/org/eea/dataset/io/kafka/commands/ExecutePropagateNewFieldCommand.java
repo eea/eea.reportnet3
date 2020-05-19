@@ -8,6 +8,7 @@ import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +84,7 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
 
     try {
       Pageable pageable = PageRequest.of(numPag, fieldBatchSize);
-      TenantResolver.setTenantName("dataset_" + datasetId);
+      TenantResolver.setTenantName(LiteralConstants.DATASET_ + datasetId);
       datasetService.saveNewFieldPropagation(datasetId, idTableSchema, pageable, idFieldSchema,
           typeField);
 

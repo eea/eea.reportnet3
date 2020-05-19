@@ -57,6 +57,7 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -404,7 +405,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param idDataset the new tenant
    */
   private void setTenant(Long idDataset) {
-    TenantResolver.setTenantName(String.format("dataset_%s", idDataset));
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_2, idDataset));
   }
 
   /**
@@ -466,7 +467,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       DataSetSchema schema = schemaRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
       ObjectMapper objectMapper = new ObjectMapper();
       Long idSnapshot = snap.getId();
-      String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
+      String nameFile =
+          String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + LiteralConstants.SNAP;
       objectMapper.writeValue(outStream, schema);
       documentControllerZuul.uploadSchemaSnapshotDocument(outStream.toByteArray(), idDataset,
           nameFile);
@@ -476,7 +478,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // RulesSchema rules = rulesControllerZuul.findRuleSchemaByDatasetId(idDatasetSchema);
       ObjectMapper objectMapperRules = new ObjectMapper();
       String nameFileRules =
-          String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset) + ".snap";
+          String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset) + LiteralConstants.SNAP;
       outStream.reset();
       objectMapperRules.writeValue(outStream, rules);
       documentControllerZuul.uploadSchemaSnapshotDocument(outStream.toByteArray(), idDataset,
@@ -523,7 +525,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     LOG.info("Schema class recovered");
 
     // Get the rules document to mapper it to DataSchema class
-    String nameFileRules = String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset) + ".snap";
+    String nameFileRules =
+        String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset) + LiteralConstants.SNAP;
     ObjectMapper objectMapperRules = new ObjectMapper();
     objectMapperRules.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     byte[] contentRules = documentControllerZuul.getSnapshotDocument(idDataset, nameFileRules);
@@ -562,11 +565,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     snapshotSchemaRepository.deleteSnapshotSchemaById(idSnapshot);
     metabaseRepository.deleteSnapshotDatasetByIdSnapshot(idSnapshot);
     // Delete the schema file
-    String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
+    String nameFile =
+        String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + LiteralConstants.SNAP;
     documentControllerZuul.deleteSnapshotSchemaDocument(idDataset, nameFile);
 
     // Delete the rules file
-    String nameRulesFile = String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset) + ".snap";
+    String nameRulesFile =
+        String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset) + LiteralConstants.SNAP;
     documentControllerZuul.deleteSnapshotSchemaDocument(idDataset, nameRulesFile);
 
     // Delete the file values

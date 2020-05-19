@@ -10,6 +10,7 @@ import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,7 @@ public class CreateConnectionEvent extends AbstractEEAEventHandlerCommand {
       try {
         String[] aux = dataset.split("_");
         Long idDataset = Long.valueOf(aux[aux.length - 1]);
-        TenantResolver.setTenantName(String.format("dataset_%s", idDataset));
+        TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_2, idDataset));
         // Initialize the dataset values (insert datasetId and tables into dataset_value and
         // table_value of the new schema)
         datasetService.insertSchema(idDataset, idDatasetSchema);
