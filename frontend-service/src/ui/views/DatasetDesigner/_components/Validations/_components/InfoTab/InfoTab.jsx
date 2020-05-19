@@ -31,16 +31,18 @@ export const InfoTab = ({
   });
 
   useEffect(() => {
-    if (creationFormState.schemaTables.length > 0) {
-      setTableFieldOptions({
-        disabled: false,
-        placeholder: resourcesContext.messages.table
-      });
-    } else {
-      setTableFieldOptions({
-        disabled: true,
-        placeholder: resourcesContext.messages.fieldConstraintTableFieldNoOptions
-      });
+    if (validationContext.level === 'field') {
+      if (creationFormState.schemaTables.length > 0) {
+        setTableFieldOptions({
+          disabled: false,
+          placeholder: resourcesContext.messages.table
+        });
+      } else {
+        setTableFieldOptions({
+          disabled: true,
+          placeholder: resourcesContext.messages.fieldConstraintTableFieldNoOptions
+        });
+      }
     }
   }, [creationFormState.schemaTables]);
 
@@ -106,13 +108,15 @@ export const InfoTab = ({
             onChange={e => onInfoFieldChange('table', e.target.value)}
           />
         </div>
-        <div
-          onBlur={e => onAddToClickedFields('field')}
-          onFocus={e => onDeleteFromClickedFields('field')}
-          className={`${styles.field} ${styles.qcField} formField ${printError('field')}`}>
-          <label htmlFor="field">{resourcesContext.messages.field}</label>
-          {fieldsDropdown}
-        </div>
+        {validationContext.level === 'field' && (
+          <div
+            onBlur={e => onAddToClickedFields('field')}
+            onFocus={e => onDeleteFromClickedFields('field')}
+            className={`${styles.field} ${styles.qcField} formField ${printError('field')}`}>
+            <label htmlFor="field">{resourcesContext.messages.field}</label>
+            {fieldsDropdown}
+          </div>
+        )}
         <div
           onBlur={e => onAddToClickedFields('shortCode')}
           onFocus={e => onDeleteFromClickedFields('shortCode')}

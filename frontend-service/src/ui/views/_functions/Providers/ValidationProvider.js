@@ -25,7 +25,8 @@ const validationReducer = (state, { type, payload }) => {
         isVisible: true,
         fieldId: payload.fieldId,
         tableSchemaId: payload.tableSchemaId,
-        opener: null
+        opener: null,
+        level: 'field'
       };
     case 'ON_OPENER_RESET':
       return {
