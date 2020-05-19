@@ -293,7 +293,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       );
     }
 
-    const paginatorRightText = `${resources.messages['fieldRecords']} ${tabsValidationsState.validationList.validations.length}`;
+    const paginatorRightText = `${resources.messages['fieldRecords']} ${tabsValidationsState.filteredData.length}`;
 
     return (
       <Fragment>
@@ -301,7 +301,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
           <Filters
             className="filter-lines"
             data={tabsValidationsState.validationList.validations}
-            getFiltredData={onLoadFilteredData}
+            getFilteredData={onLoadFilteredData}
             searchAll
             searchBy={['name', 'description', 'message']}
             selectOptions={['table', 'field', 'entityType', 'levelError', 'automatic', 'enabled', 'isCorrect']}
