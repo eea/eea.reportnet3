@@ -112,5 +112,8 @@
     { "label": "AND", "value": "AND" },
     { "label": "OR", "value": "OR" }
   ],
-  "requiredFields": ["table", "field", "shortCode", "name", "errorLevel", "errorMessage"]
+  "requiredFields": {
+    "field": ["table", "field", "shortCode", "name", "errorLevel", "errorMessage"],
+    "row": ["table", "shortCode", "name", "errorLevel", "errorMessage"]
+  }
 }

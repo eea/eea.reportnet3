@@ -345,7 +345,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
   const onTabChange = tabIndex => {
     if (tabIndex != tabMenuActiveItem) {
       if (tabIndex == 1) {
-        setClickedFields([...config.validations.requiredFields]);
+        setClickedFields([...config.validations.requiredFields[validationContext.level]]);
       } else {
         setTabsChanges({
           expression: true
