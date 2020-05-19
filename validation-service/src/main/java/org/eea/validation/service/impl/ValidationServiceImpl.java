@@ -309,7 +309,7 @@ public class ValidationServiceImpl implements ValidationService {
     KieSession session = kieBase.newKieSession();
     try {
       List<TableValidation> validations = runTableValidations(table, session);
-      if (table.getTableValidations() != null) {
+      if (table != null && table.getTableValidations() != null) {
         table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
           tableValidation.setTableValue(table);
         });
