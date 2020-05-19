@@ -589,8 +589,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (fieldSchemaVO.getName() != null) {
           fieldSchema.put("headerName", fieldSchemaVO.getName());
         }
+        // that if control the codelist to add new items when codelist had already been created
+        // this method work for codelist and multiselect_codedlist
         if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
-            && fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")) {
+            && (fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")
+                || fieldSchemaVO.getType().getValue().equalsIgnoreCase("MULTISELECT_CODELIST"))) {
           fieldSchema.put("codelistItems", Arrays.asList(fieldSchemaVO.getCodelistItems()));
           typeModified = true;
         }
@@ -599,6 +602,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
         if (fieldSchemaVO.getPk() != null) {
           fieldSchema.put("pk", fieldSchemaVO.getPk());
+        }
+        if (fieldSchemaVO.getPkMustBeUsed() != null) {
+          fieldSchema.put("pkMustBeUsed", fieldSchemaVO.getPkMustBeUsed());
         }
         if (fieldSchemaVO.getReferencedField() != null) {
           Document referenced = new Document();

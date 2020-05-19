@@ -49,25 +49,20 @@ public class SaveStatisticsCommand extends AbstractEEAEventHandlerCommand {
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) {
+    final Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
+    new Thread(new Runnable() {
 
-    if (EventType.VALIDATION_FINISHED_EVENT.equals(eeaEventVO.getEventType())) {
-
-      final Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
-      new Thread(new Runnable() {
-
-        @Override
-        public void run() {
-          try {
-            datasetService.saveStatistics(datasetId);
-          } catch (EEAException e) {
-            LOG_ERROR.error("Error saving statistics. Error message: {}", e.getMessage(), e);
-          }
-
+      @Override
+      public void run() {
+        try {
+          datasetService.saveStatistics(datasetId);
+        } catch (EEAException e) {
+          LOG_ERROR.error("Error saving statistics. Error message: {}", e.getMessage(), e);
         }
 
-      }).start();
+      }
 
-    }
+    }).start();
 
   }
 

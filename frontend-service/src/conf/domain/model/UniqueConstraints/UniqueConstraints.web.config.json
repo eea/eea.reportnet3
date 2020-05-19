@@ -1,0 +1,6 @@
+{
+  "all": "/dataschema/{:datasetSchemaId}/getUniqueFields",
+  "create": "/dataschema/{:datasetSchemaId}/uniqueField",
+  "delete": "/dataschema/{:datasetSchemaId}/deleteUniqueField?fieldId={:fieldId}",
+  "update": "/dataschema/{:datasetSchemaId}/updateUniqueField"
+}
