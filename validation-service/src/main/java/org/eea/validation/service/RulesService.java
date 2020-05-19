@@ -137,13 +137,4 @@ public interface RulesService {
    */
   void updateAutomaticRule(long datasetId, RuleVO ruleVO) throws EEAException;
 
-
-  /**
-   * Creates the new row rule.
-   *
-   * @param datasetId the dataset id
-   * @param ruleVO the rule VO
-   * @throws EEAException the EEA exception
-   */
-  void createNewRowRule(long datasetId, RuleVO ruleVO) throws EEAException;
 }

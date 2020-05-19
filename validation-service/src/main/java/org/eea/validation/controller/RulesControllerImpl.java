@@ -314,30 +314,4 @@ public class RulesControllerImpl implements RulesController {
       @RequestParam("referenceId") String referenceId) {
     rulesService.deleteRuleRequired(datasetSchemaId, referenceId);
   }
-
-  /**
-   * Creates the new record rule.
-   *
-   * @param datasetId the dataset id
-   * @param ruleVO the rule VO
-   * @return the response entity
-   */
-  @Override
-  public ResponseEntity<?> createNewRecordRule(long datasetId, RuleVO ruleVO) {
-    String message = "";
-    HttpStatus status = HttpStatus.OK;
-    try {
-      // Set the user name on the thread
-      ThreadPropertiesManager.setVariable("user",
-          SecurityContextHolder.getContext().getAuthentication().getName());
-
-      rulesService.createNewRule(datasetId, ruleVO);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error creating  row rule: {}", e.getMessage());
-      message = e.getMessage();
-      status = HttpStatus.BAD_REQUEST;
-    }
-
-    return new ResponseEntity<>(message, status);
-  }
 }
