@@ -150,31 +150,21 @@ public class KieBaseManager {
               switch (dataType) {
                 case NUMBER_INTEGER:
                   expression.append("( !isBlank(value) || isNumberInteger(value) && ");
-                  rule.setWhenCondition(
-                      rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
                 case NUMBER_DECIMAL:
                   expression.append("( !isBlank(value) || isNumberDecimal(value) && ");
-                  rule.setWhenCondition(
-                      rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
                 case DATE:
                   expression.append("( !isBlank(value) || isDateYYYYMMDD(value) && ");
-                  rule.setWhenCondition(rule.getWhenCondition().replaceAll("EQUALS", "=="));
                   break;
                 case BOOLEAN:
-                  expression.append("( !isBlank(value) || isBoolean(value) && ");
-                  rule.setWhenCondition(rule.getWhenCondition().replaceAll("EQUALS", "=="));
+                  expression.append("( !isBlank(value) || isBoolean(value) && ");;
                   break;
                 case COORDINATE_LAT:
                   expression.append("( !isBlank(value) || isCordenateLat(value) && ");
-                  rule.setWhenCondition(
-                      rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
                 case COORDINATE_LONG:
                   expression.append("( !isBlank(value) || isCordenateLong(value) && ");
-                  rule.setWhenCondition(
-                      rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
                 default:
                   expression.append("( !isBlank(value) || ");
@@ -258,27 +248,21 @@ public class KieBaseManager {
       switch (dataType) {
         case NUMBER_INTEGER:
           expression.append("( !isBlank(value) || isNumberInteger(value) && ");
-          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
           break;
         case NUMBER_DECIMAL:
           expression.append("( !isBlank(value) || isNumberDecimal(value) && ");
-          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
           break;
         case DATE:
           expression.append("( !isBlank(value) || isDateYYYYMMDD(value) && ");
-          whenCondition = whenCondition.replaceAll("EQUALS", "==");
           break;
         case BOOLEAN:
           expression.append("( !isBlank(value) || isBoolean(value) && ");
-          whenCondition = whenCondition.replaceAll("EQUALS", "==");
           break;
         case COORDINATE_LAT:
           expression.append("( !isBlank(value) || isCordenateLat(value) && ");
-          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
           break;
         case COORDINATE_LONG:
           expression.append("( !isBlank(value) || isCordenateLong(value) && ");
-          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
           break;
         default:
           expression.append("( !isBlank(value) || ");
