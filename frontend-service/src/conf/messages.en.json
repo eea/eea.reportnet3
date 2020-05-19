@@ -644,6 +644,8 @@
     "deleteUniqueConstraintHeader": "Delete unique constraint",
     "totalUniqueConstraints": "Total unique constraints: ",
     "loadUniqueConstraintsError": "Error loading unique constraints",
-    "deleteUniqueConstraintError": "Error unique constraint"
+    "deleteUniqueConstraintError": "Error unique constraint",
+    "editRowConstraint": "Edit row constraint",
+    "createRowConstraint": "Create row constraint"
   }
 }

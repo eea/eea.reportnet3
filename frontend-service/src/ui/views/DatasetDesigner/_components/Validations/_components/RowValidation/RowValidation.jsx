@@ -420,8 +420,8 @@ export const RowValidation = ({ datasetId, tabs }) => {
       className={styles.dialog}
       header={
         validationContext.ruleEdit
-          ? resourcesContext.messages.editFieldConstraint
-          : resourcesContext.messages.createFieldConstraintTitle
+          ? resourcesContext.messages.editRowConstraint
+          : resourcesContext.messages.createRowConstraint
       }
       visible={validationContext.isVisible}
       style={{ width: '975px' }}
