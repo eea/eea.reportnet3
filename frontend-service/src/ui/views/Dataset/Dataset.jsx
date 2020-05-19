@@ -387,6 +387,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const onLoadDatasetSchema = async () => {
     try {
+      setLoading(true);
       const datasetSchema = await getDataSchema();
       const datasetStatistics = await getStatisticsById(
         datasetId,
@@ -629,6 +630,12 @@ export const Dataset = withRouter(({ match, history }) => {
               icon={'camera'}
               label={resources.messages['snapshots']}
               onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+              icon={'refresh'}
+              label={resources.messages['refresh']}
+              onClick={() => onLoadDatasetSchema()}
             />
           </div>
         </Toolbar>
