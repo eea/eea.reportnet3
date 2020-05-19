@@ -10,8 +10,8 @@ import styles from './FieldValidation.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { InfoTab } from './_components/InfoTab';
-import { ExpressionsTab } from './_components/ExpressionsTab';
+import { InfoTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/InfoTab';
+import { ExpressionsTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionsTab';
 import ReactTooltip from 'react-tooltip';
 import { TabView, TabPanel } from 'primereact/tabview';
 
