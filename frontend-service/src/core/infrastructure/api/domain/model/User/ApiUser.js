@@ -7,6 +7,7 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 const parseUserConfiguration = userConfiguration => {
+  userConfiguration.userImage = userConfiguration.userImage.map((token, i) => `${('000' + i).substr(-3)}~${token}`);
   Object.keys(userConfiguration).forEach(
     key =>
       (userConfiguration[key] = !isUndefined(userConfiguration[key])
@@ -18,6 +19,12 @@ const parseUserConfiguration = userConfiguration => {
         : [])
   );
   return userConfiguration;
+};
+
+const parseUserImage = data => {
+  data.userImage.sort();
+  data.userImage = data.userImage.map(token => token.split('~')[1]);
+  return data;
 };
 
 export const apiUser = {
@@ -75,7 +82,7 @@ export const apiUser = {
       },
       queryString: {}
     });
-    return response.data;
+    return parseUserImage(response.data);
   },
 
   updateAttributes: async userConfiguration => {
