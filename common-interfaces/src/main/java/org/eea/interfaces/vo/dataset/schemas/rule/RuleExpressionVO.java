@@ -237,6 +237,7 @@ public class RuleExpressionVO {
         case '.':
           index++;
           isDouble = true;
+          number.append(actual);
           break;
         default:
           index++;

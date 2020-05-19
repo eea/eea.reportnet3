@@ -11,93 +11,93 @@ public enum RuleOperatorEnum {
 
   // Logical operators
   /** And. */
-  F_AND(EntityTypeEnum.FIELD, "fAnd", "Boolean", "Boolean", "Boolean"),
+  F_AND(EntityTypeEnum.FIELD, "fieldAnd", "Boolean", "Boolean", "Boolean"),
   /** Or. */
-  F_OR(EntityTypeEnum.FIELD, "fOr", "Boolean", "Boolean", "Boolean"),
+  F_OR(EntityTypeEnum.FIELD, "fieldOr", "Boolean", "Boolean", "Boolean"),
   /** Not. */
-  F_NOT(EntityTypeEnum.FIELD, "not", "Boolean", "Boolean"),
+  F_NOT(EntityTypeEnum.FIELD, "fieldNot", "Boolean", "Boolean"),
 
   // Number operators
   /** Equals. */
   F_EQ(EntityTypeEnum.FIELD, "numberEquals", "Boolean", "Number", "Number"),
   /** Distinct. */
-  F_DIST(EntityTypeEnum.FIELD, "distinct", "Boolean", "Number", "Number"),
+  F_DIST(EntityTypeEnum.FIELD, "numberDistinct", "Boolean", "Number", "Number"),
   /** Greater than. */
-  F_GT(EntityTypeEnum.FIELD, ">", "greaterThanNumber", "Number", "Number"),
+  F_GT(EntityTypeEnum.FIELD, "numberGreaterThan", "Boolean", "Number", "Number"),
   /** Less than. */
-  F_LT(EntityTypeEnum.FIELD, "<", "lessThanNumber", "Number", "Number"),
+  F_LT(EntityTypeEnum.FIELD, "numberLessThan", "Boolean", "Number", "Number"),
   /** Greater than or equals. */
-  F_GTEQ(EntityTypeEnum.FIELD, ">=", "greaterThanOrEqualsThanNumber", "Number", "Number"),
+  F_GTEQ(EntityTypeEnum.FIELD, "numberGreaterThanOrEqualsThan", "Boolean", "Number", "Number"),
   /** Less than or equals. */
-  F_LTEQ(EntityTypeEnum.FIELD, "<=", "lessThanOrEqualsThanNumber", "Number", "Number"),
+  F_LTEQ(EntityTypeEnum.FIELD, "numberLessThanOrEqualsThan", "Boolean", "Number", "Number"),
   /** The num match. */
-  F_NUM_MATCH(EntityTypeEnum.FIELD, "numberMatch", "Boolean", "Number", "String"),
+  F_NUM_MATCH(EntityTypeEnum.FIELD, "numberMatches", "Boolean", "Number", "String"),
 
   // String operators
   /** Length. */
-  F_LEN(EntityTypeEnum.FIELD, "length", "Number", "String"),
+  F_LEN(EntityTypeEnum.FIELD, "stringLength", "Number", "String"),
   /** Equals for strings. */
-  F_SEQ(EntityTypeEnum.FIELD, "equals", "Boolean", "String", "String"),
+  F_SEQ(EntityTypeEnum.FIELD, "stringEquals", "Boolean", "String", "String"),
   /** Equals for string ignoring case. */
-  F_SEQIC(EntityTypeEnum.FIELD, "equalsIgnoreCase", "Boolean", "String", "String"),
+  F_SEQIC(EntityTypeEnum.FIELD, "stringEqualsIgnoreCase", "Boolean", "String", "String"),
   /** Match. */
-  F_MATCH(EntityTypeEnum.FIELD, "matches", "Boolean", "String", "String"),
+  F_MATCH(EntityTypeEnum.FIELD, "stringMatches", "Boolean", "String", "String"),
 
   // Day operators
   /** The eq day. */
-  F_EQ_DAY(EntityTypeEnum.FIELD, "equalDay", "Boolean", "Date", "Number"),
+  F_EQ_DAY(EntityTypeEnum.FIELD, "dayEquals", "Boolean", "Date", "Number"),
   /** The dist day. */
-  F_DIST_DAY(EntityTypeEnum.FIELD, "distinctDay", "Boolean", "Date", "Number"),
+  F_DIST_DAY(EntityTypeEnum.FIELD, "dayDistinct", "Boolean", "Date", "Number"),
   /** The gt day. */
-  F_GT_DAY(EntityTypeEnum.FIELD, "greaterThanDay", "Boolean", "Date", "Number"),
+  F_GT_DAY(EntityTypeEnum.FIELD, "dayGreaterThan", "Boolean", "Date", "Number"),
   /** The lt day. */
-  F_LT_DAY(EntityTypeEnum.FIELD, "lessThanDay", "Boolean", "Date", "Number"),
+  F_LT_DAY(EntityTypeEnum.FIELD, "dayLessThan", "Boolean", "Date", "Number"),
   /** The gteq day. */
-  F_GTEQ_DAY(EntityTypeEnum.FIELD, "greaterThanOrEqualsThanDay", "Boolean", "Date", "Number"),
+  F_GTEQ_DAY(EntityTypeEnum.FIELD, "dayGreaterThanOrEqualsThan", "Boolean", "Date", "Number"),
   /** The lteq day. */
-  F_LTEQ_DAY(EntityTypeEnum.FIELD, "lessThanOrEqualsThanDay", "Boolean", "Date", "Number"),
+  F_LTEQ_DAY(EntityTypeEnum.FIELD, "dayLessThanOrEqualsThan", "Boolean", "Date", "Number"),
 
   // Month operators
   /** The eq month. */
-  F_EQ_MONTH(EntityTypeEnum.FIELD, "equalMonth", "Boolean", "Date", "Number"),
+  F_EQ_MONTH(EntityTypeEnum.FIELD, "monthEquals", "Boolean", "Date", "Number"),
   /** The dist month. */
-  F_DIST_MONTH(EntityTypeEnum.FIELD, "distinctMonth", "Boolean", "Date", "Number"),
+  F_DIST_MONTH(EntityTypeEnum.FIELD, "monthDistinct", "Boolean", "Date", "Number"),
   /** The gt month. */
-  F_GT_MONTH(EntityTypeEnum.FIELD, "greaterThanMonth", "Boolean", "Date", "Number"),
+  F_GT_MONTH(EntityTypeEnum.FIELD, "monthGreaterThan", "Boolean", "Date", "Number"),
   /** The lt month. */
-  F_LT_MONTH(EntityTypeEnum.FIELD, "lessThanMonth", "Boolean", "Date", "Number"),
+  F_LT_MONTH(EntityTypeEnum.FIELD, "monthLessThan", "Boolean", "Date", "Number"),
   /** The gteq month. */
-  F_GTEQ_MONTH(EntityTypeEnum.FIELD, "greaterThanOrEqualsThanMonth", "Boolean", "Date", "Number"),
+  F_GTEQ_MONTH(EntityTypeEnum.FIELD, "monthGreaterThanOrEqualsThan", "Boolean", "Date", "Number"),
   /** The lteq month. */
-  F_LTEQ_MONTH(EntityTypeEnum.FIELD, "lessThanOrEqualsThanMonth", "Boolean", "Date", "Number"),
+  F_LTEQ_MONTH(EntityTypeEnum.FIELD, "monthLessThanOrEqualsThan", "Boolean", "Date", "Number"),
 
   // Year operators
   /** The eq year. */
-  F_EQ_YEAR(EntityTypeEnum.FIELD, "equalYear", "Boolean", "Date", "Number"),
+  F_EQ_YEAR(EntityTypeEnum.FIELD, "yearEquals", "Boolean", "Date", "Number"),
   /** The dist year. */
-  F_DIST_YEAR(EntityTypeEnum.FIELD, "distinctYear", "Boolean", "Date", "Number"),
+  F_DIST_YEAR(EntityTypeEnum.FIELD, "yearDistinct", "Boolean", "Date", "Number"),
   /** The gt year. */
-  F_GT_YEAR(EntityTypeEnum.FIELD, "greaterThanYear", "Boolean", "Date", "Number"),
+  F_GT_YEAR(EntityTypeEnum.FIELD, "yearGreaterThan", "Boolean", "Date", "Number"),
   /** The lt year. */
-  F_LT_YEAR(EntityTypeEnum.FIELD, "lessThanYear", "Boolean", "Date", "Number"),
+  F_LT_YEAR(EntityTypeEnum.FIELD, "yearLessThan", "Boolean", "Date", "Number"),
   /** The gteq year. */
-  F_GTEQ_YEAR(EntityTypeEnum.FIELD, "greaterThanOrEqualsThanYear", "Boolean", "Date", "Number"),
+  F_GTEQ_YEAR(EntityTypeEnum.FIELD, "yearGreaterThanOrEqualsThan", "Boolean", "Date", "Number"),
   /** The lteq year. */
-  F_LTEQ_YEAR(EntityTypeEnum.FIELD, "lessThanOrEqualsThanYear", "Boolean", "Date", "Number"),
+  F_LTEQ_YEAR(EntityTypeEnum.FIELD, "yearLessThanOrEqualsThan", "Boolean", "Date", "Number"),
 
   // Date operators
   /** The eq date. */
-  F_EQ_DATE(EntityTypeEnum.FIELD, "equalDate", "Boolean", "Date", "Date"),
+  F_EQ_DATE(EntityTypeEnum.FIELD, "dateEquals", "Boolean", "Date", "Date"),
   /** The dist date. */
-  F_DIST_DATE(EntityTypeEnum.FIELD, "distinctDate", "Boolean", "Date", "Date"),
+  F_DIST_DATE(EntityTypeEnum.FIELD, "dateDistinct", "Boolean", "Date", "Date"),
   /** The gt date. */
-  F_GT_DATE(EntityTypeEnum.FIELD, "greaterThanDate", "Boolean", "Date", "Date"),
+  F_GT_DATE(EntityTypeEnum.FIELD, "dateGreaterThan", "Boolean", "Date", "Date"),
   /** The lt date. */
-  F_LT_DATE(EntityTypeEnum.FIELD, "lessThanDate", "Boolean", "Date", "Date"),
+  F_LT_DATE(EntityTypeEnum.FIELD, "dateLessThan", "Boolean", "Date", "Date"),
   /** The gteq date. */
-  F_GTEQ_DATE(EntityTypeEnum.FIELD, "greaterThanOrEqualsThanDate", "Boolean", "Date", "Date"),
+  F_GTEQ_DATE(EntityTypeEnum.FIELD, "dateGreaterThanOrEqualsThan", "Boolean", "Date", "Date"),
   /** The lteq date. */
-  F_LTEQ_DATE(EntityTypeEnum.FIELD, "lessThanOrEqualsThanDate", "Boolean", "Date", "Date");
+  F_LTEQ_DATE(EntityTypeEnum.FIELD, "dateLessThanOrEqualsThan", "Boolean", "Date", "Date");
 
   /** The entity type. */
   private final EntityTypeEnum entityType;
