@@ -14,8 +14,6 @@ import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.eea.interfaces.vo.dataset.schemas.rule.RuleExpressionVO;
-import org.eea.interfaces.vo.dataset.schemas.rule.RuleExpressionVO;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -328,21 +326,5 @@ public class DataFlowControllerImpl implements DataFlowController {
       }
     }
     return false;
-  }
-
-  @Override
-  @PostMapping("/metodoDePrueba")
-  public RuleExpressionVO metodoDePrueba(@RequestBody RuleExpressionVO casa) {
-    RuleExpressionVO otraCasa = new RuleExpressionVO(casa.toString());
-    System.out.println("casa: " + casa);
-    System.out.println("otraCasa: " + otraCasa);
-    return otraCasa;
-  }
-
-  @Override
-  @PostMapping("/metodoDePrueba2")
-  public RuleExpressionVO metodoDePrueba2(@RequestBody RuleExpressionVO casa) {
-    System.out.println(casa);
-    return casa;
   }
 }
