@@ -173,13 +173,10 @@ const ActionsToolbar = ({
           label={resources.messages['import']}
           onClick={() => setImportDialogVisible(true)}
         />
-
         <Button
           id="buttonExportTable"
-          className={`p-button-rounded p-button-secondary-transparent ${
-            !hasWritePermissions ? null : 'p-button-animated-blink'
-          }`}
-          disabled={!hasWritePermissions}
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+          // disabled={!hasWritePermissions}
           icon={isLoadingFile ? 'spinnerAnimate' : 'import'}
           label={resources.messages['exportTable']}
           onClick={event => {
@@ -280,7 +277,7 @@ const ActionsToolbar = ({
           onClick={() => {}
           /> */}
       </div>
-      <div className="p-toolbar-group-right">
+      {/* <div className="p-toolbar-group-right">
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
             isLoading ? 'p-button-animated-spin' : ''
@@ -289,7 +286,7 @@ const ActionsToolbar = ({
           label={resources.messages['refresh']}
           onClick={() => onRefresh()}
         />
-      </div>
+      </div> */}
     </Toolbar>
   );
 };

@@ -35,6 +35,7 @@ export const FieldDesigner = ({
   fieldPK,
   fieldPKReferenced,
   fieldLink,
+  fieldMustBeUsed,
   fieldRequired,
   fieldType,
   hasPK,
@@ -68,6 +69,7 @@ export const FieldDesigner = ({
     // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
     // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
+    { fieldType: 'Multiselect_Codelist', value: 'Multiselect', fieldTypeIcon: 'multiselect' },
     { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' }
     // { fieldType: 'Reference', value: 'Reference', fieldTypeIcon: 'link' }
     // { fieldType: 'URL', value: 'Url', fieldTypeIcon: 'url' },
@@ -93,6 +95,7 @@ export const FieldDesigner = ({
     codelistItems: codelistItems,
     fieldDescriptionValue: fieldDescription,
     fieldLinkValue: fieldLink || null,
+    fieldPkMustBeUsed: fieldMustBeUsed || false,
     fieldPKReferencedValue: fieldPKReferenced || false,
     fieldPKValue: fieldPK,
     fieldPreviousTypeValue: getFieldTypeValue(fieldType) || '',
@@ -173,7 +176,7 @@ export const FieldDesigner = ({
 
   const onChangeFieldType = type => {
     dispatchFieldDesigner({ type: 'SET_TYPE', payload: { type, previousType: fieldDesignerState.fieldTypeValue } });
-    if (type.fieldType.toLowerCase() === 'codelist') {
+    if (type.fieldType.toLowerCase() === 'codelist' || type.fieldType.toLowerCase() === 'multiselect_codelist') {
       onCodelistDropdownSelected(type);
     } else if (type.fieldType.toLowerCase() === 'link') {
       onLinkDropdownSelected(type);
@@ -195,6 +198,7 @@ export const FieldDesigner = ({
       }
       dispatchFieldDesigner({ type: 'SET_CODELIST_ITEMS', payload: [] });
       dispatchFieldDesigner({ type: 'SET_LINK', payload: null });
+      dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: false });
     }
     onCodelistAndLinkShow(fieldId, type);
   };
@@ -293,6 +297,7 @@ export const FieldDesigner = ({
     codelistItems = fieldDesignerState.codelistItems,
     description = fieldDesignerState.fieldDescriptionValue,
     pk = fieldDesignerState.fieldPKValue,
+    pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
     name = fieldDesignerState.fieldValue,
     recordId = recordSchemaId,
     referencedField = fieldDesignerState.fieldLinkValue,
@@ -304,6 +309,7 @@ export const FieldDesigner = ({
         codelistItems,
         description,
         pk,
+        pkMustBeUsed,
         name,
         recordId,
         referencedField: !isNil(referencedField)
@@ -322,6 +328,7 @@ export const FieldDesigner = ({
           fieldId: response.data,
           fieldLinkValue: null,
           pk,
+          pkMustBeUsed,
           name,
           recordId,
           referencedField,
@@ -452,17 +459,18 @@ export const FieldDesigner = ({
     } else {
       if (!isUndefined(fieldId)) {
         if (fieldId.toString() === '-1') {
-          onFieldAdd({ codelistItems, type: 'CODELIST' });
+          onFieldAdd({ codelistItems });
         } else {
-          fieldUpdate({ codelistItems, type: 'CODELIST' });
+          fieldUpdate({ codelistItems });
         }
       }
     }
     dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: false });
   };
 
-  const onSaveLink = link => {
+  const onSaveLink = (link, pkMustBeUsed) => {
     dispatchFieldDesigner({ type: 'SET_LINK', payload: link });
+    dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: pkMustBeUsed });
     if (fieldDesignerState.fieldValue === '') {
       onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
     } else {
@@ -471,14 +479,16 @@ export const FieldDesigner = ({
           onFieldAdd({
             codelistItems,
             type: 'LINK',
-            referencedField: link
+            referencedField: link,
+            pkMustBeUsed
           });
         } else {
           fieldUpdate({
             codelistItems,
             isLinkChange: true,
             type: 'LINK',
-            referencedField: link
+            referencedField: link,
+            pkMustBeUsed
           });
         }
       }
@@ -516,6 +526,7 @@ export const FieldDesigner = ({
     fieldSchemaId = fieldId,
     isLinkChange = false,
     pk = fieldDesignerState.fieldPKValue,
+    pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
     name = fieldDesignerState.fieldValue,
     referencedField = fieldDesignerState.fieldLinkValue,
     required = fieldDesignerState.fieldRequiredValue,
@@ -527,6 +538,7 @@ export const FieldDesigner = ({
         description,
         fieldSchemaId,
         pk,
+        pkMustBeUsed,
         name,
         referencedField: !isNil(referencedField)
           ? parseReferenceField(referencedField)
@@ -544,6 +556,7 @@ export const FieldDesigner = ({
           id: fieldId,
           isLinkChange,
           pk,
+          pkMustBeUsed,
           name,
           referencedField,
           required,
@@ -608,7 +621,8 @@ export const FieldDesigner = ({
 
   const renderCodelistAndLinkButtons = () => {
     return !isUndefined(fieldDesignerState.fieldTypeValue) &&
-      fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ? (
+      (fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ||
+        fieldDesignerState.fieldTypeValue.fieldType === 'Multiselect_Codelist') ? (
       <Button
         className={`${styles.codelistButton} p-button-secondary-transparent`}
         label={
@@ -783,6 +797,7 @@ export const FieldDesigner = ({
       {fieldDesignerState.isLinkSelectorVisible ? (
         <LinkSelector
           isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
+          mustBeUsed={fieldDesignerState.fieldPkMustBeUsed}
           onCancelSaveLink={onCancelSaveLink}
           onSaveLink={onSaveLink}
           selectedLink={fieldDesignerState.fieldLinkValue}

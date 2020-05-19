@@ -101,7 +101,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
 
   const linkTemplate = rowData => {
     return (
-      <a href={getValidUrl(rowData.redirectionUrl)} target="_blank" rel="noopener noreferrer">
+      <a href={getValidUrl(rowData.redirectionUrl)} target="_self" rel="noopener noreferrer">
         {rowData.redirectionUrl}
       </a>
     );

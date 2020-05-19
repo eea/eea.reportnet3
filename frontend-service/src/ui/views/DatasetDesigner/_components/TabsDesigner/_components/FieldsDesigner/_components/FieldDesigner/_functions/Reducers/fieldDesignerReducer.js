@@ -21,6 +21,7 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
         fieldRequiredValue: false,
         fieldDesignerState: '',
         fieldLinkValue: null,
+        fieldPkMustBeUsed: false,
         fieldTypeValue: '',
         fieldValue: '',
         fieldDescriptionValue: '',
@@ -38,6 +39,8 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
       return { ...state, fieldValue: payload };
     case 'SET_LINK':
       return { ...state, fieldLinkValue: payload };
+    case 'SET_PK_MUST_BE_USED':
+      return { ...state, fieldPkMustBeUsed: payload };
     case 'SET_PK':
       return { ...state, fieldPKValue: payload, fieldRequiredValue: payload ? true : state.fieldRequiredValue };
     case 'SET_PK_REFERENCED':
@@ -47,7 +50,17 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
     case 'SET_REQUIRED':
       return { ...state, fieldRequiredValue: payload };
     case 'SET_TYPE':
-      return { ...state, fieldTypeValue: payload.type, fieldPreviousTypeValue: payload.previousType };
+      console.log(payload.type.fieldType.toUpperCase());
+      return {
+        ...state,
+        fieldTypeValue: payload.type,
+        codelistItems:
+          payload.type.fieldType.toUpperCase() !== 'MULTISELECT_CODELIST' &&
+          payload.type.fieldType.toUpperCase() !== 'CODELIST'
+            ? []
+            : state.codelistItems,
+        fieldPreviousTypeValue: payload.previousType
+      };
     case 'TOGGLE_CODELIST_EDITOR_VISIBLE':
       return { ...state, isCodelistEditorVisible: payload, isLinkSelectorVisible: false };
     case 'TOGGLE_LINK_SELECTOR_VISIBLE':
