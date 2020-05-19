@@ -245,7 +245,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
   }, [clickedFields]);
 
   const checkActivateRules = () => {
-    return creationFormState.candidateRule.table && creationFormState.candidateRule.field;
+    return !isEmpty(creationFormState.candidateRule.table);
   };
 
   const checkDeactivateRules = () => {
