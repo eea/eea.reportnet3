@@ -28,8 +28,8 @@ export const UniqueConstraints = ({ datasetSchemaId }) => {
 
   const [constraintsState, constraintsDispatch] = useReducer(constraintsReducer, {
     data: {},
-    filteredData: [],
     fieldId: '',
+    filteredData: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
     isLoading: true
