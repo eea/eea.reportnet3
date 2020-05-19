@@ -121,8 +121,6 @@ const Chips = ({
         : event.target.value.trim()
       : event.target.value;
 
-    console.log({ inputValue });
-
     if (inputValue && inputValue.trim().length && (!max || max > value.length)) {
       let values = [...value];
       if (checkForDuplicates && values.indexOf(inputValue) > -1) {

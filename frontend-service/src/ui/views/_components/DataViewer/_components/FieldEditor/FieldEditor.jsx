@@ -249,6 +249,7 @@ const FieldEditor = ({
               e.preventDefault();
               onEditorValueFocus(cells, e.target.value);
             }}
+            onKeyDown={e => onEditorKeyChange(cells, e, record)}
             maxLength={emailCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
@@ -257,13 +258,14 @@ const FieldEditor = ({
         return (
           <InputText
             keyfilter={getFilter(type)}
+            maxLength={urlCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
               e.preventDefault();
               onEditorValueFocus(cells, e.target.value);
             }}
-            maxLength={urlCharacters}
+            onKeyDown={e => onEditorKeyChange(cells, e, record)}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -271,13 +273,14 @@ const FieldEditor = ({
         return (
           <InputText
             keyfilter={getFilter(type)}
+            maxLength={phoneCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
               e.preventDefault();
               onEditorValueFocus(cells, e.target.value);
             }}
-            maxLength={phoneCharacters}
+            onKeyDown={e => onEditorKeyChange(cells, e, record)}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -338,7 +341,6 @@ const FieldEditor = ({
               }
             }}
             onFocus={e => {
-              console.log(codelistItemValue);
               e.preventDefault();
               if (!isUndefined(codelistItemValue)) {
                 onEditorValueFocus(cells, codelistItemValue);
