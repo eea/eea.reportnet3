@@ -85,6 +85,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       "grant all privileges on all tables in schema %s to %s;";
 
   /**
+   * The constant GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA.
+   */
+  private static final String GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA =
+      "grant all privileges on all sequences in schema %s to %s;";
+
+  /**
    * The user postgre db.
    */
   @Value("${spring.datasource.dataset.username}")
@@ -211,6 +217,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             LiteralConstants.DATASET_PREFIX + datasetId, datasetUsers));
         statement.addBatch(String.format(GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA,
             LiteralConstants.DATASET_PREFIX + datasetId, datasetUsers));
+        statement.addBatch(String.format(GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA,
+            LiteralConstants.DATASET_PREFIX + datasetId, datasetUsers));
       }
 
       // Execute queries and commit results
@@ -276,6 +284,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     jdbcTemplate.execute(String.format(GRANT_ALL_PRIVILEGES_ON_SCHEMA, datasetName, datasetUsers));
     jdbcTemplate.execute(
         String.format(GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA, datasetName, datasetUsers));
+    jdbcTemplate.execute(
+        String.format(GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA, datasetName, datasetUsers));
+
     LOG.info("Empty design dataset created");
 
     // Now we insert the values into the dataset_value table of the brand new schema
@@ -735,7 +746,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private void releaseConnectionCreatedEvents(Map<Long, String> datasetIdAndSchemaId) {
     for (Map.Entry<Long, String> entry : datasetIdAndSchemaId.entrySet()) {
       Map<String, Object> result = new HashMap<>();
-      String datasetName = LiteralConstants.DATASET_PREFIX + entry.getKey();
+      String datasetName = "dataset_" + entry.getKey();
       result.put("connectionDataVO", createConnectionDataVO(datasetName));
       result.put(LiteralConstants.DATASET_ID, datasetName);
       result.put(LiteralConstants.ID_DATASET_SCHEMA, entry.getValue());

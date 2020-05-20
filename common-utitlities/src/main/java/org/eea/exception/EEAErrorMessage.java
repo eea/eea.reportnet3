@@ -35,6 +35,9 @@ public final class EEAErrorMessage {
   /** The Constant IDTABLESCHEMA_INCORRECT: {@value}. */
   public static final String IDTABLESCHEMA_INCORRECT = "TableSchemaId incorrect";
 
+  /** The Constant IDUNQUECONSTRAINT_INCORRECT: {@value}. */
+  public static final String IDUNQUECONSTRAINT_INCORRECT = "Unique Constraint Id incorrect";
+
   /** The Constant IDDATASETSCHEMA_INCORRECT: {@value}. */
   public static final String IDDATASETSCHEMA_INCORRECT = "DatasetSchemaId incorrect";
 
@@ -209,6 +212,9 @@ public final class EEAErrorMessage {
   /** The Constant DATASET_NOT_BELONG_DATAFLOW: {@value}. */
   public static final String DATASET_NOT_BELONG_DATAFLOW =
       "Forbidden: Dataset %d does not belongs to dataflow %d";
+
+  /** The Constant UNREPORTED_DATA: {@value}. */
+  public static final String UNREPORTED_DATA = "Unreported data";
 
   /**
    * Instantiates a new EEA error message.
