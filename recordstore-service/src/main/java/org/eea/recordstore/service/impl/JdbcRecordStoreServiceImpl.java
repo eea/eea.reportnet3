@@ -64,31 +64,34 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private static final String FILE_PATTERN_NAME = "snapshot_%s%s";
 
   /**
-   * The kafka sender utils.
+   * The Constant LOG_ERROR.
    */
-  @Autowired
-  private KafkaSenderUtils kafkaSenderUtils;
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
-   * The data collection controller zuul.
+   * The Constant LOG.
    */
-  @Autowired
-  private DataCollectionControllerZuul dataCollectionControllerZuul;
+  private static final Logger LOG = LoggerFactory.getLogger(JdbcRecordStoreServiceImpl.class);
 
-  /** The dataset controller zuul. */
-  @Autowired
-  private DataSetControllerZuul datasetControllerZuul;
+  /**
+   * The constant GRANT_ALL_PRIVILEGES_ON_SCHEMA.
+   */
+  private static final String GRANT_ALL_PRIVILEGES_ON_SCHEMA = "grant all privileges on schema %s to %s;";
+  /**
+   * The constant GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA.
+   */
+  private static final String GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA = "grant all privileges on all tables in schema %s to %s;";
 
   /**
    * The user postgre db.
    */
-  @Value("${spring.datasource.username}")
+  @Value("${spring.datasource.dataset.username}")
   private String userPostgreDb;
 
   /**
    * The pass postgre db.
    */
-  @Value("${spring.datasource.password}")
+  @Value("${spring.datasource.dataset.password}")
   private String passPostgreDb;
 
   /**
@@ -104,10 +107,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private String sqlGetDatasetsName;
 
   /**
-   * The jdbc template.
+   * the dataset users
    */
-  @Autowired
-  private JdbcTemplate jdbcTemplate;
+
+  @Value("${dataset.users}")
+  private String datasetUsers;
+
 
   /**
    * The resource file.
@@ -121,14 +126,24 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("${pathSnapshot}")
   private String pathSnapshot;
 
-  /** The time to wait before releasing notification. */
+  /**
+   * The time to wait before releasing notification.
+   */
   @Value("${dataset.creation.notification.ms}")
   private Long timeToWaitBeforeReleasingNotification;
 
 
-  /** The buffer file. */
+  /**
+   * The buffer file.
+   */
   @Value("${snapshot.bufferSize}")
   private Integer bufferFile;
+
+  /**
+   * The jdbc template.
+   */
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
 
   /**
    * The data source.
@@ -142,16 +157,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Autowired
   private LockService lockService;
 
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
-   * The Constant LOG.
+   * The kafka sender utils.
    */
-  private static final Logger LOG = LoggerFactory.getLogger(JdbcRecordStoreServiceImpl.class);
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
+  /**
+   * The data collection controller zuul.
+   */
+  @Autowired
+  private DataCollectionControllerZuul dataCollectionControllerZuul;
 
 
   /**
@@ -182,6 +199,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           statement.addBatch(command.replace("%dataset_name%", "dataset_" + datasetId)
               .replace("%user%", userPostgreDb));
         }
+      }
+
+      //granting access to the rest of the database users. This way all the micros will be able to use their users
+      for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
+        statement.addBatch(
+            String.format(GRANT_ALL_PRIVILEGES_ON_SCHEMA, "dataset_" + datasetId, datasetUsers));
+        statement.addBatch(
+            String.format(GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA, "dataset_" + datasetId,
+                datasetUsers));
       }
 
       // Execute queries and commit results
@@ -243,8 +269,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       command = command.replace("%user%", userPostgreDb);
       jdbcTemplate.execute(command);
     }
-
+    //Granting rights to the rest of the users, so every microservice is able to use its own user
+    jdbcTemplate.execute(String.format(GRANT_ALL_PRIVILEGES_ON_SCHEMA, datasetName, datasetUsers));
+    jdbcTemplate.execute(
+        String.format(GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA, datasetName, datasetUsers));
     LOG.info("Empty design dataset created");
+
     // Now we insert the values into the dataset_value table of the brand new schema
     StringBuilder insertSql = new StringBuilder("INSERT INTO ");
     insertSql.append(datasetName).append(".dataset_value(id, id_dataset_schema) values (?, ?)");
@@ -381,17 +411,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     String signature =
         deleteData
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-                : LockSignature.RESTORE_SNAPSHOT.getValue()
+            : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", idReportingDataset);
@@ -504,17 +534,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     String signature =
         deleteData
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-                : LockSignature.RESTORE_SNAPSHOT.getValue()
+            : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
 
     ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
@@ -597,7 +627,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       lockService.removeLockByCriteria(criteria);
     }
   }
-
 
 
   /**
@@ -817,8 +846,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         from.close();
       }
       cp.endCopy();
-      if (cp.isActive())
+      if (cp.isActive()) {
         cp.cancelCopy();
+      }
     }
   }
 

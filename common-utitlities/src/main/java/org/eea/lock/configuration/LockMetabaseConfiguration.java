@@ -29,31 +29,45 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
     basePackages = "org.eea.lock.persistence.repository")
 public class LockMetabaseConfiguration implements WebMvcConfigurer {
 
-  /** The dll. */
+  /**
+   * The dll.
+   */
   @Value("${spring.jpa.hibernate.metabase.ddl-auto}")
   private String dll;
 
-  /** The dialect. */
+  /**
+   * The dialect.
+   */
   @Value("${spring.jpa.properties.hibernate.dialect}")
   private String dialect;
 
-  /** The create clob propertie. */
+  /**
+   * The create clob propertie.
+   */
   @Value("${spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation}")
   private String createClobPropertie;
 
-  /** The url. */
+  /**
+   * The url.
+   */
   @Value("${spring.datasource.metasource.url}")
   private String url;
 
-  /** The username. */
+  /**
+   * The username.
+   */
   @Value("${spring.datasource.metasource.username}")
   private String username;
 
-  /** The password. */
+  /**
+   * The password.
+   */
   @Value("${spring.datasource.metasource.password}")
   private String password;
 
-  /** The driver. */
+  /**
+   * The driver.
+   */
   @Value("${spring.datasource.metasource.driver-class-name}")
   private String driver;
 
@@ -80,7 +94,6 @@ public class LockMetabaseConfiguration implements WebMvcConfigurer {
    * @return the local container entity manager factory bean
    */
   @Bean
-  @Autowired
   @Qualifier("lockEntityManagerFactory")
   public LocalContainerEntityManagerFactoryBean lockEntityManagerFactory() {
     LocalContainerEntityManagerFactoryBean lcemfb = new LocalContainerEntityManagerFactoryBean();
@@ -111,7 +124,6 @@ public class LockMetabaseConfiguration implements WebMvcConfigurer {
    * @return the platform transaction manager
    */
   @Bean
-  @Autowired
   public PlatformTransactionManager lockTransactionManager() {
 
     JpaTransactionManager locktransactionManager = new JpaTransactionManager();
