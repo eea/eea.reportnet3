@@ -18,7 +18,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Document(collection = "UniqueConstraintsCatalogue")
-public class UniqueConstraintCatalogueSchema {
+public class UniqueConstraintSchema {
 
   /** The dataset schema id. */
   @Field(value = "datasetSchemaId")
