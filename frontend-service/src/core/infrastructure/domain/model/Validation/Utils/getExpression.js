@@ -3,6 +3,8 @@ import moment from 'moment';
 
 import { config } from 'conf';
 
+import { getCreationDTO } from './getCreationDTO';
+
 const getOperatorEquivalence = (operatorType, operatorValue = null) => {
   const {
     validations: { operatorEquivalences }
@@ -21,26 +23,30 @@ export const getExpression = expression => {
   const {
     validations: { nonNumericOperators }
   } = config;
-  if (operatorType === 'LEN') {
+  if (expression.expressions.length > 1) {
+    return getCreationDTO(expression.expressions);
+  } else {
+    if (operatorType === 'LEN') {
+      return {
+        operator: getOperatorEquivalence(operatorType, operatorValue),
+        params: [
+          {
+            operator: getOperatorEquivalence(operatorType),
+            params: ['VALUE']
+          },
+          Number(expressionValue)
+        ]
+      };
+    }
+    if (operatorType === 'date') {
+      return {
+        operator: getOperatorEquivalence(operatorType, operatorValue),
+        params: ['VALUE', moment(expressionValue).format('YYYY-MM-DD')]
+      };
+    }
     return {
       operator: getOperatorEquivalence(operatorType, operatorValue),
-      params: [
-        {
-          operator: getOperatorEquivalence(operatorType),
-          params: ['VALUE']
-        },
-        Number(expressionValue)
-      ]
+      params: ['VALUE', !nonNumericOperators.includes(operatorType) ? Number(expressionValue) : expressionValue]
     };
   }
-  if (operatorType === 'date') {
-    return {
-      operator: getOperatorEquivalence(operatorType, operatorValue),
-      params: ['VALUE', moment(expressionValue).format('YYYY-MM-DD')]
-    };
-  }
-  return {
-    operator: getOperatorEquivalence(operatorType, operatorValue),
-    params: ['VALUE', !nonNumericOperators.includes(operatorType) ? Number(expressionValue) : expressionValue]
-  };
 };
