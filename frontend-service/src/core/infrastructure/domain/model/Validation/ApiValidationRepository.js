@@ -20,8 +20,8 @@ const create = async (datasetSchemaId, validationRule) => {
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
     whenCondition: getCreationDTO(expressions)
   };
-
-  return await apiValidation.create(datasetSchemaId, validation);
+  console.log('Validation: ', validation);
+  //return await apiValidation.create(datasetSchemaId, validation);
 };
 
 const deleteById = async (datasetSchemaId, ruleId) => {
