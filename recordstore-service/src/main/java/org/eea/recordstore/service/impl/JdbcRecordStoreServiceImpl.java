@@ -83,6 +83,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private static final String GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA = "grant all privileges on all tables in schema %s to %s;";
 
   /**
+   * The constant GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA.
+   */
+  private static final String GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA = "grant all privileges on all sequences in schema %s to %s;";
+
+  /**
    * The user postgre db.
    */
   @Value("${spring.datasource.dataset.username}")
@@ -208,6 +213,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         statement.addBatch(
             String.format(GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA, "dataset_" + datasetId,
                 datasetUsers));
+        statement.addBatch(
+            String.format(GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA, "dataset_" + datasetId,
+                datasetUsers));
       }
 
       // Execute queries and commit results
@@ -273,6 +281,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     jdbcTemplate.execute(String.format(GRANT_ALL_PRIVILEGES_ON_SCHEMA, datasetName, datasetUsers));
     jdbcTemplate.execute(
         String.format(GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA, datasetName, datasetUsers));
+    jdbcTemplate.execute(
+        String.format(GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA, datasetName,
+            datasetUsers));
+
     LOG.info("Empty design dataset created");
 
     // Now we insert the values into the dataset_value table of the brand new schema
