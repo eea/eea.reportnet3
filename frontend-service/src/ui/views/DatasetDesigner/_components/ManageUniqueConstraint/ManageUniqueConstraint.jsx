@@ -35,12 +35,16 @@ export const ManageUniqueConstraint = ({ allTables, isUpdate, isVisible, manageD
   const getFieldOptions = () => {
     if (selectedTable) {
       const table = allTables.filter(table => table.tableSchemaId === selectedTable.value)[0];
-      return table.records[0].fields.map(field => {
-        return {
-          name: `${field.name}`,
-          value: `${field.fieldId}`
-        };
-      });
+      if (table.records) {
+        if (!isEmpty(table.records[0].fields)) {
+          return table.records[0].fields.map(field => {
+            return {
+              name: `${field.name}`,
+              value: `${field.fieldId}`
+            };
+          });
+        } else return [{ name: 'There are no fields to select', disabled: true }];
+      }
     }
   };
 
