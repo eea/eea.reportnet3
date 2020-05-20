@@ -87,6 +87,7 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -284,7 +285,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void saveTable(@DatasetId Long datasetId, TableValue tableValue) {
-    TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_NAME, datasetId));
     Optional<DatasetValue> datasetValue = datasetRepository.findById(datasetId);
     if (datasetValue.isPresent()) {
       tableValue.setDatasetId(datasetValue.get());
@@ -1293,7 +1294,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void saveTablePropagation(Long datasetId, TableSchemaVO tableSchema) throws EEAException {
     TableValue table = new TableValue();
-    TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_NAME, datasetId));
     Optional<DatasetValue> dataset = datasetRepository.findById(datasetId);
     if (dataset.isPresent()) {
       table.setIdTableSchema(tableSchema.getIdTableSchema());
@@ -1487,7 +1488,8 @@ public class DatasetServiceImpl implements DatasetService {
   public List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue) {
     Long idDatasetDestination =
         datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
-    TenantResolver.setTenantName(String.format("dataset_%s", idDatasetDestination));
+    TenantResolver
+        .setTenantName(String.format(LiteralConstants.DATASET_NAME, idDatasetDestination));
     // Pageable of 15 to take an equivalent to sql Limit. 15 because is the size of the results we
     // want to show on the screen
     List<FieldValue> fields = fieldRepository.findByIdFieldSchemaAndValueContaining(idPk,

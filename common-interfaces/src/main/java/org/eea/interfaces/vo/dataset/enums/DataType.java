@@ -43,14 +43,14 @@ public enum DataType {
    *
    * Cast in JPA. CAST(VALUE as java.sql.Date) Supports any date
    */
-  DATE(JavaType.DATE, JavaType.DATE),
+  DATE("DATE", JavaType.DATE),
 
   /**
    * The Boolean.
    *
    * Cast in JPA: java.lang.Boolean
    */
-  BOOLEAN(JavaType.BOOLEAN, JavaType.BOOLEAN),
+  BOOLEAN("BOOLEAN", JavaType.BOOLEAN),
 
   /**
    * The coordinate lat. that value is a float

@@ -49,6 +49,7 @@ import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -757,7 +758,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
           fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
       // update the dataset field value
-      TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
+      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_NAME, datasetId));
       datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
     } else {
       if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
