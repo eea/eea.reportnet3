@@ -137,7 +137,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       datasetId.get();
     } catch (InterruptedException | ExecutionException | EEAException e) {
       LOG.error("Aborted DataSetSchema creation: {}", e.getMessage());
-      Thread.currentThread().interrupt();
+      if (e instanceof InterruptedException) {
+        Thread.currentThread().interrupt();
+      }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           "Error creating design dataset", e);
     }

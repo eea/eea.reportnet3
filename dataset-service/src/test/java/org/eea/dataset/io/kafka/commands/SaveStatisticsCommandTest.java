@@ -68,30 +68,12 @@ public class SaveStatisticsCommandTest {
     data.put("dataset_id", 1);
     eeaEventVO.setData(data);
 
-    Mockito.doNothing().when(datasetService).saveStatistics(Mockito.any());
+    SaveStatisticsCommand spyClass = Mockito.spy(saveStatisticsCommand);
+    spyClass.execute(eeaEventVO);
+    Mockito.verify(spyClass, times(1)).execute(Mockito.any());
 
-    saveStatisticsCommand.execute(eeaEventVO);
-    Mockito.verify(datasetService, times(1)).saveStatistics(Mockito.anyLong());
   }
 
-
-  /**
-   * Test execute save statistics 3.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void testExecuteSaveStatistics3() throws EEAException {
-
-    eeaEventVO = new EEAEventVO();
-    eeaEventVO.setEventType(EventType.VALIDATION_FINISHED_EVENT);
-    data = new HashMap<>();
-    data.put("dataset_id", 1L);
-    eeaEventVO.setData(data);
-
-    Mockito.doThrow(EEAException.class).when(datasetService).saveStatistics(Mockito.any());
-    saveStatisticsCommand.execute(eeaEventVO);
-  }
 
   /**
    * Gets the event type test.

@@ -277,7 +277,7 @@ const ActionsToolbar = ({
           onClick={() => {}
           /> */}
       </div>
-      <div className="p-toolbar-group-right">
+      {/* <div className="p-toolbar-group-right">
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
             isLoading ? 'p-button-animated-spin' : ''
@@ -286,7 +286,7 @@ const ActionsToolbar = ({
           label={resources.messages['refresh']}
           onClick={() => onRefresh()}
         />
-      </div>
+      </div> */}
     </Toolbar>
   );
 };

@@ -327,6 +327,15 @@ const DataViewer = withRouter(
       }
     }, [confirmPasteVisible]);
 
+    const parseMultiselect = record => {
+      record.dataRow.forEach(field => {
+        if (field.fieldData.type === 'MULTISELECT_CODELIST') {
+          field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(',');
+        }
+      });
+      return record;
+    };
+
     const showValidationFilter = filteredKeys => {
       // length of errors in data schema rules of validation
       const filteredKeysWithoutSelectAll = filteredKeys.filter(key => key !== 'selectAll');
@@ -422,8 +431,9 @@ const DataViewer = withRouter(
     const onDeletePastedRecord = recordIndex =>
       dispatchRecords({ type: 'DELETE_PASTED_RECORDS', payload: { recordIndex } });
 
-    const onEditAddFormInput = (property, value) =>
+    const onEditAddFormInput = (property, value) => {
       dispatchRecords({ type: !isNewRecord ? 'SET_EDITED_RECORD' : 'SET_NEW_RECORD', payload: { property, value } });
+    };
 
     //When pressing "Escape" cell data resets to initial value
     //on "Enter" and "Tab" the value submits
@@ -449,7 +459,13 @@ const DataViewer = withRouter(
         ) {
           try {
             //without await. We don't have to wait for the response.
-            const fieldUpdated = DatasetService.updateFieldById(datasetId, cell.field, field.id, field.type, value);
+            const fieldUpdated = DatasetService.updateFieldById(
+              datasetId,
+              cell.field,
+              field.id,
+              field.type,
+              field.type === 'MULTISELECT_CODELIST' ? value.join(',') : value
+            );
             if (!fieldUpdated) {
               throw new Error('UPDATE_FIELD_BY_ID_ERROR');
             }
@@ -564,7 +580,7 @@ const DataViewer = withRouter(
       if (isNewRecord) {
         try {
           setIsSaving(true);
-          await DatasetService.addRecordsById(datasetId, tableId, [record]);
+          await DatasetService.addRecordsById(datasetId, tableId, [parseMultiselect(record)]);
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           setIsTableDeleted(false);
           onRefresh();
@@ -590,7 +606,7 @@ const DataViewer = withRouter(
         }
       } else {
         try {
-          await DatasetService.updateRecordsById(datasetId, record);
+          await DatasetService.updateRecordsById(datasetId, parseMultiselect(record));
           onRefresh();
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         } catch (error) {

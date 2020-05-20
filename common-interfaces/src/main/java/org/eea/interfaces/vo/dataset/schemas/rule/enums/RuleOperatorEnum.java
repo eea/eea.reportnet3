@@ -2,110 +2,146 @@ package org.eea.interfaces.vo.dataset.schemas.rule.enums;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 
 /**
  * The Enum RuleOperatorEnum.
  */
 public enum RuleOperatorEnum {
 
-  // Number operators
-  /** Equals. */
-  EQ("==", "Boolean", "Number", "Number"),
-  /** Distinct. */
-  DIST("!=", "Boolean", "Number", "Number"),
-  /** Greater than. */
-  GT(">", "Boolean", "Number", "Number"),
-  /** Less than. */
-  LT("<", "Boolean", "Number", "Number"),
-  /** Greater than or equals. */
-  GTEQ(">=", "Boolean", "Number", "Number"),
-  /** Less than or equals. */
-  LTEQ("<=", "Boolean", "Number", "Number"),
-  /** The num match. */
-  NUM_MATCH("numberMatch", "Boolean", "Number", "String"),
-
   // Logical operators
   /** And. */
-  AND("&&", "Boolean", "Boolean", "Boolean"),
+  FIELD_AND(EntityTypeEnum.FIELD, "fieldAnd", JavaType.BOOLEAN, JavaType.BOOLEAN, JavaType.BOOLEAN),
   /** Or. */
-  OR("||", "Boolean", "Boolean", "Boolean"),
+  FIELD_OR(EntityTypeEnum.FIELD, "fieldOr", JavaType.BOOLEAN, JavaType.BOOLEAN, JavaType.BOOLEAN),
   /** Not. */
-  NOT("!", "Boolean", "Boolean", "Boolean"),
+  FIELD_NOT(EntityTypeEnum.FIELD, "fieldNot", JavaType.BOOLEAN, JavaType.BOOLEAN),
+
+  // Number operators
+  /** Equals. */
+  FIELD_EQ(EntityTypeEnum.FIELD, "numberEquals", JavaType.BOOLEAN, JavaType.NUMBER,
+      JavaType.NUMBER),
+  /** Distinct. */
+  FIELD_DIST(EntityTypeEnum.FIELD, "numberDistinct", JavaType.BOOLEAN, JavaType.NUMBER,
+      JavaType.NUMBER),
+  /** Greater than. */
+  FIELD_GT(EntityTypeEnum.FIELD, "numberGreaterThan", JavaType.BOOLEAN, JavaType.NUMBER,
+      JavaType.NUMBER),
+  /** Less than. */
+  FIELD_LT(EntityTypeEnum.FIELD, "numberLessThan", JavaType.BOOLEAN, JavaType.NUMBER,
+      JavaType.NUMBER),
+  /** Greater than or equals. */
+  FIELD_GTEQ(EntityTypeEnum.FIELD, "numberGreaterThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.NUMBER, JavaType.NUMBER),
+  /** Less than or equals. */
+  FIELD_LTEQ(EntityTypeEnum.FIELD, "numberLessThanOrEqualsThan", JavaType.BOOLEAN, JavaType.NUMBER,
+      JavaType.NUMBER),
+  /** The num match. */
+  FIELD_NUM_MATCH(EntityTypeEnum.FIELD, "numberMatches", JavaType.BOOLEAN, JavaType.NUMBER,
+      JavaType.STRING),
 
   // String operators
   /** Length. */
-  LEN("length", "Number", "String"),
+  FIELD_LEN(EntityTypeEnum.FIELD, "stringLength", JavaType.NUMBER, JavaType.STRING),
   /** Equals for strings. */
-  SEQ("equals", "Boolean", "String", "String"),
+  FIELD_SEQ(EntityTypeEnum.FIELD, "stringEquals", JavaType.BOOLEAN, JavaType.STRING,
+      JavaType.STRING),
   /** Equals for string ignoring case. */
-  SEQIC("equalsIgnoreCase", "Boolean", "String", "String"),
+  FIELD_SEQIC(EntityTypeEnum.FIELD, "stringEqualsIgnoreCase", JavaType.BOOLEAN, JavaType.STRING,
+      JavaType.STRING),
   /** Match. */
-  MATCH("matches", "Boolean", "String", "String"),
+  FIELD_MATCH(EntityTypeEnum.FIELD, "stringMatches", JavaType.BOOLEAN, JavaType.STRING,
+      JavaType.STRING),
 
   // Day operators
   /** The eq day. */
-  EQ_DAY("equalDay", "Boolean", "Date", "Number"),
+  FIELD_EQ_DAY(EntityTypeEnum.FIELD, "dayEquals", JavaType.BOOLEAN, JavaType.DATE, JavaType.NUMBER),
   /** The dist day. */
-  DIST_DAY("distinctDay", "Boolean", "Date", "Number"),
+  FIELD_DIST_DAY(EntityTypeEnum.FIELD, "dayDistinct", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.NUMBER),
   /** The gt day. */
-  GT_DAY("greaterThanDay", "Boolean", "Date", "Number"),
+  FIELD_GT_DAY(EntityTypeEnum.FIELD, "dayGreaterThan", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.NUMBER),
   /** The lt day. */
-  LT_DAY("lessThanDay", "Boolean", "Date", "Number"),
+  FIELD_LT_DAY(EntityTypeEnum.FIELD, "dayLessThan", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.NUMBER),
   /** The gteq day. */
-  GTEQ_DAY("greaterThanOrEqualsThanDay", "Boolean", "Date", "Number"),
+  FIELD_GTEQ_DAY(EntityTypeEnum.FIELD, "dayGreaterThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.DATE, JavaType.NUMBER),
   /** The lteq day. */
-  LTEQ_DAY("lessThanOrEqualsThanDay", "Boolean", "Date", "Number"),
+  FIELD_LTEQ_DAY(EntityTypeEnum.FIELD, "dayLessThanOrEqualsThan", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.NUMBER),
 
   // Month operators
   /** The eq month. */
-  EQ_MONTH("equalMonth", "Boolean", "Date", "Number"),
+  FIELD_EQ_MONTH(EntityTypeEnum.FIELD, "monthEquals", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.NUMBER),
   /** The dist month. */
-  DIST_MONTH("distinctMonth", "Boolean", "Date", "Number"),
+  FIELD_DIST_MONTH(EntityTypeEnum.FIELD, "monthDistinct", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.NUMBER),
   /** The gt month. */
-  GT_MONTH("greaterThanMonth", "Boolean", "Date", "Number"),
+  FIELD_GT_MONTH(EntityTypeEnum.FIELD, "monthGreaterThan", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.NUMBER),
   /** The lt month. */
-  LT_MONTH("lessThanMonth", "Boolean", "Date", "Number"),
+  FIELD_LT_MONTH(EntityTypeEnum.FIELD, "monthLessThan", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.NUMBER),
   /** The gteq month. */
-  GTEQ_MONTH("greaterThanOrEqualsThanMonth", "Boolean", "Date", "Number"),
+  FIELD_GTEQ_MONTH(EntityTypeEnum.FIELD, "monthGreaterThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.DATE, JavaType.NUMBER),
   /** The lteq month. */
-  LTEQ_MONTH("lessThanOrEqualsThanMonth", "Boolean", "Date", "Number"),
+  FIELD_LTEQ_MONTH(EntityTypeEnum.FIELD, "monthLessThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.DATE, JavaType.NUMBER),
 
   // Year operators
   /** The eq year. */
-  EQ_YEAR("equalYear", "Boolean", "Date", "Number"),
+  FIELD_EQ_YEAR(EntityTypeEnum.FIELD, "yearEquals", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.NUMBER),
   /** The dist year. */
-  DIST_YEAR("distinctYear", "Boolean", "Date", "Number"),
+  FIELD_DIST_YEAR(EntityTypeEnum.FIELD, "yearDistinct", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.NUMBER),
   /** The gt year. */
-  GT_YEAR("greaterThanYear", "Boolean", "Date", "Number"),
+  FIELD_GT_YEAR(EntityTypeEnum.FIELD, "yearGreaterThan", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.NUMBER),
   /** The lt year. */
-  LT_YEAR("lessThanYear", "Boolean", "Date", "Number"),
+  FIELD_LT_YEAR(EntityTypeEnum.FIELD, "yearLessThan", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.NUMBER),
   /** The gteq year. */
-  GTEQ_YEAR("greaterThanOrEqualsThanYear", "Boolean", "Date", "Number"),
+  FIELD_GTEQ_YEAR(EntityTypeEnum.FIELD, "yearGreaterThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.DATE, JavaType.NUMBER),
   /** The lteq year. */
-  LTEQ_YEAR("lessThanOrEqualsThanYear", "Boolean", "Date", "Number"),
+  FIELD_LTEQ_YEAR(EntityTypeEnum.FIELD, "yearLessThanOrEqualsThan", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.NUMBER),
 
   // Date operators
   /** The eq date. */
-  EQ_DATE("equalDate", "Boolean", "Date", "Date"),
+  FIELD_EQ_DATE(EntityTypeEnum.FIELD, "dateEquals", JavaType.BOOLEAN, JavaType.DATE, JavaType.DATE),
   /** The dist date. */
-  DIST_DATE("distinctDate", "Boolean", "Date", "Date"),
+  FIELD_DIST_DATE(EntityTypeEnum.FIELD, "dateDistinct", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.DATE),
   /** The gt date. */
-  GT_DATE("greaterThanDate", "Boolean", "Date", "Date"),
+  FIELD_GT_DATE(EntityTypeEnum.FIELD, "dateGreaterThan", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.DATE),
   /** The lt date. */
-  LT_DATE("lessThanDate", "Boolean", "Date", "Date"),
+  FIELD_LT_DATE(EntityTypeEnum.FIELD, "dateLessThan", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.DATE),
   /** The gteq date. */
-  GTEQ_DATE("greaterThanOrEqualsThanDate", "Boolean", "Date", "Date"),
+  FIELD_GTEQ_DATE(EntityTypeEnum.FIELD, "dateGreaterThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.DATE, JavaType.DATE),
   /** The lteq date. */
-  LTEQ_DATE("lessThanOrEqualsThanDate", "Boolean", "Date", "Date");
+  FIELD_LTEQ_DATE(EntityTypeEnum.FIELD, "dateLessThanOrEqualsThan", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.DATE);
+
+  /** The entity type. */
+  private final EntityTypeEnum entityType;
 
   /** Operator's Java representation. */
-  private final String label;
+  private final String functionName;
 
   /** The return type. */
   private final String returnType;
 
   /** The input types. */
-  private final String[] inputTypes;
+  private final String[] paramTypes;
 
   /** Transformation between RuleOperatorEnum and Java representation. */
   private static final Map<String, RuleOperatorEnum> map;
@@ -113,21 +149,24 @@ public enum RuleOperatorEnum {
   static {
     map = new HashMap<>();
     for (RuleOperatorEnum e : values()) {
-      map.put(e.getLabel(), e);
+      map.put(e.getFunctionName(), e);
     }
   }
 
   /**
    * Instantiates a new RuleOperatorEnum. Should not be used.
    *
-   * @param label the label
+   * @param entityType the entity type
+   * @param functionName the function name
    * @param returnType the return type
-   * @param inputTypes the input types
+   * @param paramTypes the param types
    */
-  private RuleOperatorEnum(String label, String returnType, String... inputTypes) {
-    this.label = label;
+  private RuleOperatorEnum(EntityTypeEnum entityType, String functionName, String returnType,
+      String... paramTypes) {
+    this.entityType = entityType;
+    this.functionName = functionName;
     this.returnType = returnType;
-    this.inputTypes = inputTypes;
+    this.paramTypes = paramTypes;
   }
 
   /**
@@ -136,17 +175,26 @@ public enum RuleOperatorEnum {
    * @param label the label
    * @return the rule operator enum
    */
-  public static RuleOperatorEnum valueOfLabel(String label) {
+  public static RuleOperatorEnum valueOfFunctionName(String label) {
     return map.get(label);
   }
 
   /**
-   * Gets the label.
+   * Gets the entity type.
    *
-   * @return the label
+   * @return the entity type
    */
-  public String getLabel() {
-    return label;
+  public EntityTypeEnum getEntityType() {
+    return entityType;
+  }
+
+  /**
+   * Gets the function name.
+   *
+   * @return the function name
+   */
+  public String getFunctionName() {
+    return functionName;
   }
 
   /**
@@ -159,11 +207,11 @@ public enum RuleOperatorEnum {
   }
 
   /**
-   * Gets the input types.
+   * Gets the param types.
    *
-   * @return the input types
+   * @return the param types
    */
-  public String[] getInputTypes() {
-    return inputTypes;
+  public String[] getParamTypes() {
+    return paramTypes;
   }
 }
