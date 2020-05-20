@@ -1,6 +1,7 @@
 package org.eea.interfaces.vo.rod;
 
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import lombok.Getter;
@@ -13,7 +14,10 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class ObligationVO {
+public class ObligationVO implements Serializable {
+
+  /** The Constant serialVersionUID. */
+  private static final long serialVersionUID = 7701565743974885554L;
 
   /** The obligation id. */
   private Integer obligationId;

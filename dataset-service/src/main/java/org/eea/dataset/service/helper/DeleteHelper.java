@@ -12,6 +12,7 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +83,7 @@ public class DeleteHelper {
     NotificationVO notificationVO =
         NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
             .datasetId(datasetId).tableSchemaId(tableSchemaId).build();
-    value.put("dataset_id", datasetId);
+    value.put(LiteralConstants.DATASET_ID, datasetId);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
     kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
   }
@@ -110,7 +111,7 @@ public class DeleteHelper {
     NotificationVO notificationVO =
         NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
             .datasetId(datasetId).build();
-    value.put("dataset_id", datasetId);
+    value.put(LiteralConstants.DATASET_ID, datasetId);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATASET_DATA_COMPLETED_EVENT,
         value, notificationVO);
