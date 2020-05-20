@@ -12,6 +12,7 @@ import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
+import org.eea.dataset.mapper.UniqueConstraintMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
@@ -22,6 +23,7 @@ import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
+import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
@@ -143,6 +145,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
   @Autowired
   private UniqueConstraintRepository uniqueConstraintRepository;
+
+  @Autowired
+  private UniqueConstraintMapper uniqueConstraintMapper;
 
   /**
    * Creates the empty data set schema.
@@ -1233,8 +1238,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param uniqueConstraint the unique constraint
    */
   @Override
-  public void createUniqueConstraint(UniqueConstraintVO uniqueConstraint) {
-
+  public void createUniqueConstraint(UniqueConstraintVO uniqueConstraintVO) {
+    UniqueConstraintSchema entity = uniqueConstraintMapper.classToEntity(uniqueConstraintVO);
+    uniqueConstraintRepository.save(entity);
   }
 
   /**
