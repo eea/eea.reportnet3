@@ -40,27 +40,64 @@
         { "label": "=", "value": "=" },
         { "label": "!=", "value": "!=" }
       ]
+    },
+    "year": {
+      "option": { "label": "Year (Date)", "value": "year" },
+      "values": [
+        { "label": ">", "value": ">" },
+        { "label": "<", "value": "<" },
+        { "label": ">=", "value": ">=" },
+        { "label": "<=", "value": "<=" },
+        { "label": "=", "value": "=" },
+        { "label": "!=", "value": "!=" }
+      ]
+    },
+    "month": {
+      "option": { "label": "Month (Date)", "value": "month" },
+      "values": [
+        { "label": ">", "value": ">" },
+        { "label": "<", "value": "<" },
+        { "label": ">=", "value": ">=" },
+        { "label": "<=", "value": "<=" },
+        { "label": "=", "value": "=" },
+        { "label": "!=", "value": "!=" }
+      ]
+    },
+    "day": {
+      "option": { "label": "Day (Date)", "value": "day" },
+      "values": [
+        { "label": ">", "value": ">" },
+        { "label": "<", "value": "<" },
+        { "label": ">=", "value": ">=" },
+        { "label": "<=", "value": "<=" },
+        { "label": "=", "value": "=" },
+        { "label": "!=", "value": "!=" }
+      ]
     }
   },
   "nonNumericOperators": ["string", "date"],
   "operatorEquivalences": {
-    "default": {
+    "logicalOperators": {
+      "AND": "FIELD_AND",
+      "OR": "FIELD_OR"
+    },
+    "number": {
       ">": "FIELD_GT",
       "<": "FIELD_LT",
       ">=": "FIELD_GTEQ",
       "<=": "FIELD_LTEQ",
       "=": "FIELD_EQ",
       "!=": "FIELD_DIST",
-      "GT": "FIELD_GT",
-      "LT": "FIELD_LT",
-      "LTEQ": "FIELD_LTEQ",
-      "EQ": "FIELD_EQ",
-      "DIST": "FIELD_DIST",
-      "SEQ": "FIELD_SEQ",
-      "=(Ignore case)": "FIELD_SEQIC",
-      "GTEQ": "FIELD_GTEQ",
-      "LEN= ": "FIELD_LEN",
-      "MATCH": "FIELD_MATCH"
+      "MATCH": "FIELD_NUM_MATCH"
+    },
+    "LEN": {
+      "type": "FIELD_LEN",
+      ">": "FIELD_GT",
+      "<": "FIELD_LT",
+      ">=": "FIELD_GTEQ",
+      "<=": "FIELD_LTEQ",
+      "=": "FIELD_EQ",
+      "!=": "FIELD_DIST"
     },
     "string": {
       "=": "FIELD_SEQ",

@@ -1,12 +1,15 @@
+import isEmpty from 'lodash/isEmpty';
+
 import { getExpression } from './getExpression';
 import { getExpressionsNode } from './getExpressionsNode';
 
-export const getCreationDTO = (expression, index, expressions) => {
-  if (expressions.length > 1) {
-    return getExpressionsNode(expression, index, expressions);
+export const getCreationDTO = expressions => {
+  if (!isEmpty(expressions)) {
+    // comprobar que haya más de una
+    if (expressions.length > 1) {
+      // si todos los operadores lógicos son iguales
+      //
+    }
+    // comprobar si solo hay una
   }
-  if (expression.expressions.length > 1) {
-    return getExpressionsNode(expression.expressions[0], 0, expression.expressions);
-  }
-  return getExpression(expression);
 };

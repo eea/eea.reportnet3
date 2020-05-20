@@ -2,14 +2,17 @@ import moment from 'moment';
 
 import { config } from 'conf';
 
-const getOperatorEquivalence = (operatorType, operatorValue) => {
+const getOperatorEquivalence = (operatorType, operatorValue = null) => {
   const {
     validations: { operatorEquivalences }
   } = config;
-  if (operatorEquivalences[operatorType]) {
-    return operatorEquivalences[operatorType][operatorValue];
+  if (isNil(operatorValue)) {
+    return operatorEquivalences[operatorType].type;
+  } else {
+    if (operatorEquivalences[operatorType]) {
+      return operatorEquivalences[operatorType][operatorValue];
+    }
   }
-  return operatorEquivalences.default[operatorValue];
 };
 
 export const getExpression = expression => {
@@ -17,26 +20,25 @@ export const getExpression = expression => {
   const {
     validations: { nonNumericOperators }
   } = config;
-  if (operatorType == 'LEN') {
+  if (operatorType === 'LEN') {
     return {
       operator: getOperatorEquivalence(operatorType, operatorValue),
-      arg1: {
-        operator: 'LEN',
-        arg1: 'VALUE'
-      },
-      arg2: Number(expressionValue)
+      params: [
+        {
+          operator: getOperatorEquivalence(operatorType),
+          params: ['VALUE', operatorValue]
+        }
+      ]
     };
   }
-  if (operatorType == 'date') {
+  if (operatorType === 'date') {
     return {
-      arg1: 'VALUE',
       operator: getOperatorEquivalence(operatorType, operatorValue),
-      arg2: moment(expressionValue).format('YYYY-MM-DD')
+      params: ['VALUE', moment(expressionValue).format('YYYY-MM-DD')]
     };
   }
   return {
-    arg1: 'VALUE',
     operator: getOperatorEquivalence(operatorType, operatorValue),
-    arg2: !nonNumericOperators.includes(operatorType) ? Number(expressionValue) : expressionValue
+    params: ['VALUE', !nonNumericOperators.includes(operatorType) ? Number(expressionValue) : expressionValue]
   };
 };
