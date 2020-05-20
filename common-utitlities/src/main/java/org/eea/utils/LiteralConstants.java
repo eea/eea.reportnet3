@@ -14,20 +14,20 @@ public final class LiteralConstants {
   /** The Constant BROADCAST_TOPIC. */
   public static final String BROADCAST_TOPIC = "BROADCAST_TOPIC";
 
-  /** The Constant DATASET_. */
-  public static final String DATASET_ = "dataset_";
+  /** The Constant DATASET_PREFIX. */
+  public static final String DATASET_PREFIX = "dataset_";
 
-  /** The Constant DATASET_2. */
-  public static final String DATASET_2 = "dataset_%s";
+  /** The Constant DATASET_NAME. */
+  public static final String DATASET_NAME = "dataset_%s";
 
-  /** The Constant SNAP. */
-  public static final String SNAP = ".snap";
+  /** The Constant SNAPSHOT_EXTENSION. */
+  public static final String SNAPSHOT_EXTENSION = ".snap";
 
-  /** The Constant BEARER. */
-  public static final String BEARER = "Bearer ";
+  /** The Constant BEARER_TOKEN. */
+  public static final String BEARER_TOKEN = "Bearer ";
 
-  /** The Constant AUTHORIZATION. */
-  public static final String AUTHORIZATION = "Authorization";
+  /** The Constant AUTHORIZATION_HEADER. */
+  public static final String AUTHORIZATION_HEADER = "Authorization";
 
   /** The Constant ID_DATASET_SCHEMA. */
   public static final String ID_DATASET_SCHEMA = "idDatasetSchema";

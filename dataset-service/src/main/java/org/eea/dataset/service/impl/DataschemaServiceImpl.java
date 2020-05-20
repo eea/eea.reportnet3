@@ -758,7 +758,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
           fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
       // update the dataset field value
-      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_2, datasetId));
+      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_NAME, datasetId));
       datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
     } else {
       if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {

@@ -496,8 +496,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
             dataset = new DesignDataset();
             fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
             designDatasetRepository.save((DesignDataset) dataset);
-            recordStoreControllerZull
-                .createEmptyDataset(LiteralConstants.DATASET_ + dataset.getId(), datasetSchemaId);
+            recordStoreControllerZull.createEmptyDataset(
+                LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
             this.createSchemaGroupAndAddUser(dataset.getId());
             idDesignDataset = dataset.getId();
             break;
@@ -506,8 +506,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
             fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
             ((DataCollection) dataset).setDueDate(dueDate);
             dataCollectionRepository.save((DataCollection) dataset);
-            recordStoreControllerZull
-                .createEmptyDataset(LiteralConstants.DATASET_ + dataset.getId(), datasetSchemaId);
+            recordStoreControllerZull.createEmptyDataset(
+                LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
             LOG.info("New Data Collection created into the dataflow {}. DatasetId {} with name {}",
                 dataflowId, dataset.getId(), datasetName);
             this.createGroupDcAndAddUser(dataset.getId());
@@ -576,7 +576,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     dataset.setDataProviderId(representative.getDataProviderId());
     Long idDataset = reportingDatasetRepository.save(dataset).getId();
     datasetIdsEmail.put(idDataset, representative.getProviderAccount());
-    recordStoreControllerZull.createEmptyDataset(LiteralConstants.DATASET_ + idDataset,
+    recordStoreControllerZull.createEmptyDataset(LiteralConstants.DATASET_PREFIX + idDataset,
         datasetSchemaId);
     LOG.info("New Reporting Dataset into the dataflow {}. DatasetId {} with name {}", dataflowId,
         idDataset, provider.getLabel());

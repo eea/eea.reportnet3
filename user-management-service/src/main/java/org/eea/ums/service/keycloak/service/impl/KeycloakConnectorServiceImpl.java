@@ -778,7 +778,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    */
   private ClientInfo getReportnetClientInfo(String adminToken) {
     Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Authorization", LiteralConstants.BEARER + adminToken);
+    headerInfo.put(LiteralConstants.AUTHORIZATION_HEADER,
+        LiteralConstants.BEARER_TOKEN + adminToken);
     HttpHeaders headers = createBasicHeaders(headerInfo);
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put(URI_PARAM_REALM, realmName);
@@ -815,7 +816,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   private List<ResourceInfo> getResourceInfo(String adminToken) {
     // First Get all the Resource sets
     Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put(LiteralConstants.AUTHORIZATION, LiteralConstants.BEARER + adminToken);
+    headerInfo.put(LiteralConstants.AUTHORIZATION_HEADER,
+        LiteralConstants.BEARER_TOKEN + adminToken);
     HttpHeaders headers = createBasicHeaders(headerInfo);
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put(URI_PARAM_REALM, realmName);
@@ -883,8 +885,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    */
   private <T> HttpEntity<T> createHttpRequest(T body, Map<String, String> uriParams) {
     Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put(LiteralConstants.AUTHORIZATION,
-        LiteralConstants.BEARER + TokenMonitor.getToken());
+    headerInfo.put(LiteralConstants.AUTHORIZATION_HEADER,
+        LiteralConstants.BEARER_TOKEN + TokenMonitor.getToken());
 
     HttpHeaders headers = createBasicHeaders(headerInfo);
 
@@ -903,8 +905,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    */
   private <T> HttpEntity<T> createHttpRequestPOST(T body, Map<String, String> uriParams) {
     Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put(LiteralConstants.AUTHORIZATION,
-        LiteralConstants.BEARER + TokenMonitor.getToken());
+    headerInfo.put(LiteralConstants.AUTHORIZATION_HEADER,
+        LiteralConstants.BEARER_TOKEN + TokenMonitor.getToken());
     headerInfo.put("Content-Type", "application/json");
     HttpHeaders headers = createBasicHeaders(headerInfo);
 

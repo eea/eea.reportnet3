@@ -84,7 +84,7 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
 
     try {
       Pageable pageable = PageRequest.of(numPag, fieldBatchSize);
-      TenantResolver.setTenantName(LiteralConstants.DATASET_ + datasetId);
+      TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
       datasetService.saveNewFieldPropagation(datasetId, idTableSchema, pageable, idFieldSchema,
           typeField);
 

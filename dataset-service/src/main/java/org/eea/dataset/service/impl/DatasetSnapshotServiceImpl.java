@@ -405,7 +405,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param idDataset the new tenant
    */
   private void setTenant(Long idDataset) {
-    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_2, idDataset));
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_NAME, idDataset));
   }
 
   /**
@@ -467,8 +467,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       DataSetSchema schema = schemaRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
       ObjectMapper objectMapper = new ObjectMapper();
       Long idSnapshot = snap.getId();
-      String nameFile =
-          String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + LiteralConstants.SNAP;
+      String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset)
+          + LiteralConstants.SNAPSHOT_EXTENSION;
       objectMapper.writeValue(outStream, schema);
       documentControllerZuul.uploadSchemaSnapshotDocument(outStream.toByteArray(), idDataset,
           nameFile);
@@ -477,8 +477,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       RulesSchema rules = rulesRepository.findByIdDatasetSchema(new ObjectId(idDatasetSchema));
       // RulesSchema rules = rulesControllerZuul.findRuleSchemaByDatasetId(idDatasetSchema);
       ObjectMapper objectMapperRules = new ObjectMapper();
-      String nameFileRules =
-          String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset) + LiteralConstants.SNAP;
+      String nameFileRules = String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset)
+          + LiteralConstants.SNAPSHOT_EXTENSION;
       outStream.reset();
       objectMapperRules.writeValue(outStream, rules);
       documentControllerZuul.uploadSchemaSnapshotDocument(outStream.toByteArray(), idDataset,
@@ -525,8 +525,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     LOG.info("Schema class recovered");
 
     // Get the rules document to mapper it to DataSchema class
-    String nameFileRules =
-        String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset) + LiteralConstants.SNAP;
+    String nameFileRules = String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset)
+        + LiteralConstants.SNAPSHOT_EXTENSION;
     ObjectMapper objectMapperRules = new ObjectMapper();
     objectMapperRules.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     byte[] contentRules = documentControllerZuul.getSnapshotDocument(idDataset, nameFileRules);
@@ -565,13 +565,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     snapshotSchemaRepository.deleteSnapshotSchemaById(idSnapshot);
     metabaseRepository.deleteSnapshotDatasetByIdSnapshot(idSnapshot);
     // Delete the schema file
-    String nameFile =
-        String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + LiteralConstants.SNAP;
+    String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset)
+        + LiteralConstants.SNAPSHOT_EXTENSION;
     documentControllerZuul.deleteSnapshotSchemaDocument(idDataset, nameFile);
 
     // Delete the rules file
-    String nameRulesFile =
-        String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset) + LiteralConstants.SNAP;
+    String nameRulesFile = String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset)
+        + LiteralConstants.SNAPSHOT_EXTENSION;
     documentControllerZuul.deleteSnapshotSchemaDocument(idDataset, nameRulesFile);
 
     // Delete the file values

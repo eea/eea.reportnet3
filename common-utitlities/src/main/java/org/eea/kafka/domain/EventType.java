@@ -10,9 +10,6 @@ public enum EventType {
 
   SPREAD_DATA_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "connection_key", true),
 
-  /** The hello kafka event. */
-  HELLO_KAFKA_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "hello_kafka_key", true),
-
   /** The validation finished event. */
   VALIDATION_FINISHED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_finished_key", true),
 

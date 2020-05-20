@@ -141,7 +141,7 @@ public class ValidationHelper {
     synchronized (processesMap) {
       processesMap.put(uuId, 0);
     }
-    TenantResolver.setTenantName(LiteralConstants.DATASET_ + datasetId);
+    TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     LOG.info("Deleting all Validations");
     validationService.deleteAllValidation(datasetId);
     LOG.info("Validating Dataset");
@@ -194,7 +194,7 @@ public class ValidationHelper {
    * @param uuId the uu id
    */
   private void releaseTableValidation(Long datasetId, String uuId) {
-    TenantResolver.setTenantName(LiteralConstants.DATASET_ + datasetId);
+    TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     Integer totalTables = tableRepository.findAllTables().size();
     List<TableValue> tableList = tableRepository.findAll();
     for (int i = 0; totalTables > 0; totalTables = totalTables - 1) {
