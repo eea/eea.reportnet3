@@ -9,7 +9,7 @@ import org.mapstruct.Mapper;
 /**
  * The Interface RulesSchemaMapper.
  */
-@Mapper
+@Mapper(componentModel = "spring")
 public interface UniqueConstraintMapper
     extends IMapper<UniqueConstraintSchema, UniqueConstraintVO> {
 
@@ -30,6 +30,10 @@ public interface UniqueConstraintMapper
    * @return the object id
    */
   default ObjectId map(String value) {
-    return new ObjectId(value);
+    if (value != null) {
+      return new ObjectId(value);
+    } else {
+      return null;
+    }
   }
 }

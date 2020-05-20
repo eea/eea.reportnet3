@@ -34,7 +34,7 @@ public class UniqueConstraintSchema {
   private ObjectId uniqueId;
 
   /** The referenced. */
-  @Field(value = "uniquesConstraints")
-  private List<ObjectId> uniquesConstraints;
+  @Field(value = "fieldSchemaIds")
+  private List<ObjectId> fieldSchemaIds;
 
 }
