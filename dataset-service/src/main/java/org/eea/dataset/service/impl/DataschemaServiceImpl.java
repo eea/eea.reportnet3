@@ -43,6 +43,7 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
@@ -1222,4 +1223,45 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
 
+  /**
+   * Creates the unique constraint.
+   *
+   * @param uniqueConstraint the unique constraint
+   */
+  @Override
+  public void createUniqueConstraint(UniqueConstraintVO uniqueConstraint) {
+
+  }
+
+  /**
+   * Delete unique constraint.
+   *
+   * @param uniqueId the unique id
+   */
+  @Override
+  public void deleteUniqueConstraint(String uniqueId) {
+
+  }
+
+  /**
+   * Update unique constraint.
+   *
+   * @param uniequeConstraint the unieque constraint
+   */
+  @Override
+  public void updateUniqueConstraint(UniqueConstraintVO uniqueConstraint) {
+
+  }
+
+  /**
+   * Gets the unique constraints.
+   *
+   * @param schemaId the schema id
+   * @return the unique constraints
+   */
+  @Override
+  public List<UniqueConstraintVO> getUniqueConstraints(String schemaId) {
+
+    return null;
+  }
 }

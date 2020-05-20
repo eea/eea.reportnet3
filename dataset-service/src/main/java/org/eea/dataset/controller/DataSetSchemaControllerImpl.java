@@ -672,6 +672,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     uniqueConstraint2.setFieldSchemaIds(idFieldSchema2);
     uniques.add(uniqueConstraint1);
     uniques.add(uniqueConstraint2);
+    ////////////////////////
+
+    dataschemaService.getUniqueConstraints(datasetSchemaId);
+
     return uniques;
   }
 
@@ -695,6 +699,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     } else {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UNREPORTED_DATA);
     }
+    dataschemaService.createUniqueConstraint(uniqueConstraint);
   }
 
   /**
@@ -711,6 +716,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT);
     }
+    dataschemaService.deleteUniqueConstraint(uniqueConstraintId);
   }
 
   /**
@@ -732,6 +738,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     } else {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UNREPORTED_DATA);
     }
+
+    dataschemaService.updateUniqueConstraint(uniqueConstraint);
   }
 
 }
