@@ -492,6 +492,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         {renderUniqueConstraintsDialog()}
 
         <ManageUniqueConstraint
+          allTables={designerState.datasetSchemaAllTables}
           isVisible={designerState.manageUniqueConstraintDialogVisible}
           manageDialogs={manageDialogs}
         />
