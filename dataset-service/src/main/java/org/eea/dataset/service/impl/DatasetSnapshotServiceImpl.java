@@ -405,7 +405,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param idDataset the new tenant
    */
   private void setTenant(Long idDataset) {
-    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_NAME, idDataset));
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataset));
   }
 
   /**

@@ -222,7 +222,7 @@ public class ValidationHelper {
    */
   public void releaseDatasetValidation(final Long datasetId, final String uuid) {
     Map<String, Object> value = new HashMap<>();
-    value.put("dataset_id", datasetId);
+    value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", uuid);
     synchronized (processesMap) {
       processesMap.merge(uuid, 1, Integer::sum);
@@ -239,7 +239,7 @@ public class ValidationHelper {
    */
   public void releaseTableValidation(final Long datasetId, final String uuid, Long Tablenum) {
     Map<String, Object> value = new HashMap<>();
-    value.put("dataset_id", datasetId);
+    value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", uuid);
     value.put("idTable", Tablenum);
     synchronized (processesMap) {
@@ -258,7 +258,7 @@ public class ValidationHelper {
    */
   public void releaseRecordValidation(final Long datasetId, final String uuid, int numPag) {
     Map<String, Object> value = new HashMap<>();
-    value.put("dataset_id", datasetId);
+    value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", uuid);
     value.put("numPag", numPag);
     synchronized (processesMap) {
@@ -276,7 +276,7 @@ public class ValidationHelper {
    */
   public void releaseFieldValidation(final Long datasetId, final String uuid, int numPag) {
     Map<String, Object> value = new HashMap<>();
-    value.put("dataset_id", datasetId);
+    value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", uuid);
     value.put("numPag", numPag);
     synchronized (processesMap) {
@@ -309,7 +309,7 @@ public class ValidationHelper {
 
       // after last dataset validations have been saved, an event is sent to notify it
       Map<String, Object> value = new HashMap<>();
-      value.put("dataset_id", datasetId);
+      value.put(LiteralConstants.DATASET_ID, datasetId);
       value.put("uuid", uuid);
       this.removeKieBase(uuid);
       kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);

@@ -552,12 +552,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       if (fieldSchema != null) {
         // First of all, we update the previous data in the catalog
-        if (DataType.LINK.getValue().equals(fieldSchema.get("typeData"))) {
+        if (DataType.LINK.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))) {
           // Proceed to the changes needed. Remove the previous reference
           String previousId = fieldSchema.get("_id").toString();
-          Document previousReferenced = (Document) fieldSchema.get("referencedField");
+          Document previousReferenced =
+              (Document) fieldSchema.get(LiteralConstants.REFERENCED_FIELD);
           String previousIdPk = previousReferenced.get("idPk").toString();
-          String previousIdDatasetReferenced = previousReferenced.get("idDatasetSchema").toString();
+          String previousIdDatasetReferenced =
+              previousReferenced.get(LiteralConstants.ID_DATASET_SCHEMA).toString();
           PkCatalogueSchema catalogue =
               pkCatalogueRepository.findByIdPk(new ObjectId(previousIdPk));
           if (catalogue != null) {
@@ -576,12 +578,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
         // Modify it based on FieldSchemaVO data received
         if (fieldSchemaVO.getType() != null
-            && !fieldSchema.put("typeData", fieldSchemaVO.getType().getValue())
+            && !fieldSchema.put(LiteralConstants.TYPE_DATA, fieldSchemaVO.getType().getValue())
                 .equals(fieldSchemaVO.getType().getValue())) {
           typeModified = true;
           if (!fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")
-              && fieldSchema.containsKey("codelistItems")) {
-            fieldSchema.remove("codelistItems");
+              && fieldSchema.containsKey(LiteralConstants.CODELIST_ITEMS)) {
+            fieldSchema.remove(LiteralConstants.CODELIST_ITEMS);
           }
         }
         if (fieldSchemaVO.getDescription() != null) {
@@ -595,7 +597,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
             && (fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")
                 || fieldSchemaVO.getType().getValue().equalsIgnoreCase("MULTISELECT_CODELIST"))) {
-          fieldSchema.put("codelistItems", Arrays.asList(fieldSchemaVO.getCodelistItems()));
+          fieldSchema.put(LiteralConstants.CODELIST_ITEMS,
+              Arrays.asList(fieldSchemaVO.getCodelistItems()));
           typeModified = true;
         }
         if (fieldSchemaVO.getRequired() != null) {
@@ -609,10 +612,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
         if (fieldSchemaVO.getReferencedField() != null) {
           Document referenced = new Document();
-          referenced.put("idDatasetSchema",
+          referenced.put(LiteralConstants.ID_DATASET_SCHEMA,
               new ObjectId(fieldSchemaVO.getReferencedField().getIdDatasetSchema()));
           referenced.put("idPk", new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
-          fieldSchema.put("referencedField", referenced);
+          fieldSchema.put(LiteralConstants.REFERENCED_FIELD, referenced);
           // We need to update the fieldSchema that is referenced, the property isPKreferenced to
           // true
           this.updateIsPkReferencedInFieldSchema(
@@ -758,7 +761,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
           fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
       // update the dataset field value
-      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_NAME, datasetId));
+      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
       datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
     } else {
       if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
@@ -997,11 +1000,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       String datasetSchemaId) {
     Document fieldSchema =
         schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
-    if (fieldSchema != null && DataType.LINK.getValue().equals(fieldSchema.get("typeData"))) {
+    if (fieldSchema != null
+        && DataType.LINK.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))) {
       // First of all, we delete the previous relation on the Metabase, if applies
-      Document previousReferenced = (Document) fieldSchema.get("referencedField");
+      Document previousReferenced = (Document) fieldSchema.get(LiteralConstants.REFERENCED_FIELD);
       String previousIdPk = previousReferenced.get("idPk").toString();
-      String previousIdDatasetReferenced = previousReferenced.get("idDatasetSchema").toString();
+      String previousIdDatasetReferenced =
+          previousReferenced.get(LiteralConstants.ID_DATASET_SCHEMA).toString();
       datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
           this.getDesignDatasetIdDestinationFromFk(previousIdDatasetReferenced), previousIdPk,
           fieldSchemaVO.getId());
