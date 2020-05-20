@@ -79,7 +79,8 @@ import {
   faAlignRight,
   faDiceFour,
   faPhone,
-  faDice
+  faDice,
+  faTasks
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -347,6 +348,8 @@ export const AwesomeIcons = icon => {
       return faDiceFour;
     case 'mobile':
       return faPhone;
+    case 'multiselect':
+      return faTasks;
     default:
       return faFileAlt;
   }

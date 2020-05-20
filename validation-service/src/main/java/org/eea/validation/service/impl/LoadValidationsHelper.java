@@ -105,6 +105,9 @@ public class LoadValidationsHelper {
         errors.putAll(fieldErrors.get());
       } catch (InterruptedException | ExecutionException e) {
         LOG_ERROR.error("Error obtaining the errors ", e);
+        if (e instanceof InterruptedException) {
+          Thread.currentThread().interrupt();
+        }
       }
     }
     validation

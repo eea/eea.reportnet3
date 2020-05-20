@@ -35,7 +35,7 @@
     "closeSidebar": "Close sidebar",
     "codelistEditor": "Single select editor",
     "codelistEditorItems": "Single select items",
-    "codelistEditorItemsMessage": "(press enter or tab to add new item)",
+    "codelistEditorItemsMessage": "(press enter, tab or paste here your selected list to add new item/s)",
     "codelistEditorMessage": "Enter your single select items",
     "codelists": "Single select items",
     "codelistSelection": "No single select item selected",
@@ -644,6 +644,8 @@
     "loadUniqueConstraintsError": "Error loading unique constraints",
     "deleteUniqueConstraintError": "Error unique constraint",
     "selectedTable": "Selected table",
-    "selectedFields": "Selected fields"
+    "selectedFields": "Selected fields",
+    "multiselectCodelists": "Multiselect items",
+    "pkValuesMustBeUsed": "All PK values must be used on link"
   }
 }
