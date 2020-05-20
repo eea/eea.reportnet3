@@ -45,35 +45,59 @@
   "nonNumericOperators": ["string", "date"],
   "operatorEquivalences": {
     "default": {
-      ">": "GT",
-      "<": "LT",
-      ">=": "GTEQ",
-      "<=": "LTEQ",
-      "=": "EQ",
-      "!=": "DIST",
-      "GT": "GT",
-      "LT": "LT",
-      "LTEQ": "LTEQ",
-      "EQ": "EQ",
-      "DIST": "DIST",
-      "SEQ": "SEQ",
-      "=(Ignore case)": "SEQIC",
-      "GTEQ": "GTEQ",
-      "LEN=": "LEN=",
-      "MATCH": "MATCH"
+      ">": "FIELD_GT",
+      "<": "FIELD_LT",
+      ">=": "FIELD_GTEQ",
+      "<=": "FIELD_LTEQ",
+      "=": "FIELD_EQ",
+      "!=": "FIELD_DIST",
+      "GT": "FIELD_GT",
+      "LT": "FIELD_LT",
+      "LTEQ": "FIELD_LTEQ",
+      "EQ": "FIELD_EQ",
+      "DIST": "FIELD_DIST",
+      "SEQ": "FIELD_SEQ",
+      "=(Ignore case)": "FIELD_SEQIC",
+      "GTEQ": "FIELD_GTEQ",
+      "LEN= ": "FIELD_LEN",
+      "MATCH": "FIELD_MATCH"
     },
     "string": {
-      "=": "SEQ",
-      "=(Ignore case)": "SEQIC",
-      "MATCH": "MATCH"
+      "=": "FIELD_SEQ",
+      "=(Ignore case)": "FIELD_SEQIC",
+      "MATCH": "FIELD_MATCH"
     },
     "date": {
-      ">": "GT_DATE",
-      "<": "LT_DATE",
-      ">=": "GTEQ_DATE",
-      "<=": "LTEQ_DATE",
-      "=": "EQ_DATE",
-      "!=": "DIST_DATE"
+      ">": "FIELD_GT_DATE",
+      "<": "FIELD_LT_DATE",
+      ">=": "FIELD_GTEQ_DATE",
+      "<=": "FIELD_LTEQ_DATE",
+      "=": "FIELD_EQ_DATE",
+      "!=": "FIELD_DIST_DATE"
+    },
+    "day": {
+      ">": "FIELD_GT_DAY",
+      "<": "FIELD_LT_DAY",
+      ">=": "FIELD_GTEQ_DAY",
+      "<=": "FIELD_LTEQ_DAY",
+      "=": "FIELD_EQ_DAY",
+      "!=": "FIELD_DIST_DAY"
+    },
+    "month": {
+      ">": "FIELD_GT_MONTH",
+      "<": "FIELD_LT_MONTH",
+      ">=": "FIELD_GTEQ_MONTH",
+      "<=": "FIELD_LTEQ_MONTH",
+      "=": "FIELD_EQ_MONTH",
+      "!=": "FIELD_DIST_MONTH"
+    },
+    "year": {
+      ">": "FIELD_GT_YEAR",
+      "<": "FIELD_LT_YEAR",
+      ">=": "FIELD_GTEQ_YEAR",
+      "<=": "FIELD_LTEQ_YEAR",
+      "=": "FIELD_EQ_YEAR",
+      "!=": "FIELD_DIST_YEAR"
     }
   },
   "operatorsTypesFromDTO": [

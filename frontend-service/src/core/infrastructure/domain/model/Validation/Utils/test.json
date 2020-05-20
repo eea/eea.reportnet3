@@ -1,0 +1,205 @@
+{
+    "operator": "F_AND",
+    "params": [{
+        "operator": "F_GT",
+        "params": ["VALUE",100]
+    },{        
+        "operator": "F_LT",
+        "params": ["VALUE",200]
+    }]
+}
+
+(field > 100) AND (field < 200)
+
+(field != 50) OR (field != 100) AND (field > 10) AND (field < 200);
+((field != 50) OR (field != 100)) AND (field > 10) AND (field < 200);
+
+{
+  "operator": "FIELD_AND",
+  "params":[
+    {
+      "operator": "FIELD_OR",
+      "params":[
+        {
+          "operator":"FIELD_DIST",
+          "params":[
+            "VALUE",
+            50
+          ]
+        },
+        {
+          "operator":"FIELD_DIST",
+          "params":[
+            "VALUE",
+            100
+          ]
+        }
+      ]
+    },
+    {
+      "operator":"FIELD_GT",
+      "params":[
+        "VALUE",
+        10
+      ]
+    },
+    {
+      "operator":"FIELD_LT",
+      "params":[
+        "VALUE",
+        200
+      ]
+    },
+  ]
+}
+
+() AND () AND () AND ()
+
+{
+  "operator":"AND",
+  "params":[
+    {},
+    {},
+    {},
+    {}
+  ]
+}
+
+(() OR ()) AND () AND ()
+{
+  "operator": "AND",
+  "params":[
+    {
+      "operator":"OR",
+      "params": [{},{}]
+    },
+    {
+      "operator":'...',
+      "params":[
+        "VALUE",
+        "..."
+      ]
+    },
+    {
+      "operator":'...',
+      "params":[
+        "VALUE",
+        "..."
+      ]
+    }
+  ]
+}
+(() AND ()) OR (() AND ())
+{
+  "operator": "OR",
+  "params":[
+    {
+      "operator":"AND",
+      "params": [...]
+    },
+    {
+      "operator":"AND",
+      "params":[...]
+    }
+  ]
+}
+
+() AND (() OR ()) AND ()
+() AND () AND (() OR ())
+(() OR ()) AND () AND ()
+
+() AND () AND (() OR ()) AND ()
+(() AND ()) OR (() AND ())
+
+
+{
+  "operator": "AND",
+  "params":[
+    {"operator":"",
+      "params":[
+        "VALUE",
+        ""
+      ]
+    },
+    {
+      "operator":"OR",
+      "params": [
+        {"operator":"",
+          "params":[
+            "VALUE",
+            ""
+          ]
+        },
+        {"operator":"",
+          "params":[
+            "VALUE",
+            ""
+          ]
+        }
+      ]
+    },
+    {"operator":"",
+      "params":[
+        "VALUE",
+        ""
+      ]
+    }
+  ]
+}
+() AND () AND (() OR ())
+{
+  "operator": "AND",
+  "params":[
+    {"operator":"",
+      "params":[
+        "VALUE",
+        ""
+      ]
+    },
+    {"operator":"",
+      "params":[
+        "VALUE",
+        ""
+      ]
+    },
+    {
+      "operator":"OR",
+      "params": [
+        {"operator":"",
+          "params":[
+            "VALUE",
+            ""
+          ]
+        },
+        {"operator":"",
+          "params":[
+            "VALUE",
+            ""
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+/*FE*/
+() AND () AND (() OR ())
+[
+  {"union":"NULL","operatorType":"NUMBER","operator":">", "expressionValue":100, "expressions":[]},
+  {"union":"AND","operatorType":"NUMBER","operator":">", "expressionValue":100, "expressions":[]},
+  {"union":"AND","operatorType":"","operator":"", "expressionValue":100, "expressions":[
+    {"union":"NULL","operatorType":"NUMBER","operator":">", "expressionValue":100, "expressions":[]},
+    {"union":"OR","operatorType":"NUMBER","operator":">", "expressionValue":100, "expressions":[]}
+  ]},
+]
+
+[
+  {"union":"NULL","operatorType":"NUMBER","operator":">", "expressionValue":100, "expressions":[]},
+  {"union":"AND","operatorType":"NUMBER","operator":">", "expressionValue":100, "expressions":[]},
+  {"union":"AND","operatorType":"","operator":"", "expressionValue":100, "expressions":[
+  {"union":"NULL","operatorType":"NUMBER","operator":">", "expressionValue":100, "expressions":[]},
+  {"union":"OR","operatorType":"NUMBER","operator":">", "expressionValue":100, "expressions":[]}
+  ]}
+  {"union":"NULL","operatorType":"NUMBER","operator":">", "expressionValue":100, "expressions":[]},
+    {"union":"OR","operatorType":"NUMBER","operator":">", "expressionValue":100, "expressions":[]}
+]
