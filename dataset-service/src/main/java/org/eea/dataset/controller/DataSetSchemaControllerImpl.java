@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.apache.commons.lang3.StringUtils;
-import org.bson.types.ObjectId;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -652,31 +651,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   public List<UniqueConstraintVO> getUniqueConstraints(
       @PathVariable("schemaId") String datasetSchemaId) {
-    // Return dummy data to mock the service
-    UniqueConstraintVO uniqueConstraint1 = new UniqueConstraintVO();
-    UniqueConstraintVO uniqueConstraint2 = new UniqueConstraintVO();
-    List<String> idFieldSchema1 = new ArrayList<>();
-    List<String> idFieldSchema2 = new ArrayList<>();
-    List<UniqueConstraintVO> uniques = new ArrayList<>();
-    uniqueConstraint1.setDatasetSchemaId(datasetSchemaId);
-    uniqueConstraint2.setDatasetSchemaId(datasetSchemaId);
-    uniqueConstraint1.setTableSchemaId(new ObjectId().toString());
-    uniqueConstraint2.setTableSchemaId(new ObjectId().toString());
-    uniqueConstraint1.setUniqueId(new ObjectId().toString());
-    uniqueConstraint2.setUniqueId(new ObjectId().toString());
-    idFieldSchema1.add(new ObjectId().toString());
-    idFieldSchema1.add(new ObjectId().toString());
-    idFieldSchema2.add(new ObjectId().toString());
-    idFieldSchema2.add(new ObjectId().toString());
-    uniqueConstraint1.setFieldSchemaIds(idFieldSchema1);
-    uniqueConstraint2.setFieldSchemaIds(idFieldSchema2);
-    uniques.add(uniqueConstraint1);
-    uniques.add(uniqueConstraint2);
-    ////////////////////////
+    if (datasetSchemaId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+    }
 
-    dataschemaService.getUniqueConstraints(datasetSchemaId);
-
-    return uniques;
+    return dataschemaService.getUniqueConstraints(datasetSchemaId);
   }
 
 

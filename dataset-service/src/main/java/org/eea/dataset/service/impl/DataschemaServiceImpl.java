@@ -24,6 +24,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -139,6 +140,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
+
+  @Autowired
+  private UniqueConstraintRepository uniqueConstraintRepository;
 
   /**
    * Creates the empty data set schema.
@@ -1240,7 +1244,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void deleteUniqueConstraint(String uniqueId) {
-
+    uniqueConstraintRepository.deleteByUniqueId(new ObjectId(uniqueId));
   }
 
   /**

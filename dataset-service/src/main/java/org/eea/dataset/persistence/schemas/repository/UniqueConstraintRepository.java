@@ -21,4 +21,12 @@ public interface UniqueConstraintRepository
    */
   List<UniqueConstraintSchema> findByDatasetSchemaId(ObjectId datasetSchemaId);
 
+  /**
+   * Delete by unique id.
+   *
+   * @param id the id
+   * @return true, if successful
+   */
+  boolean deleteByUniqueId(ObjectId id);
+
 }
