@@ -29,4 +29,12 @@ public interface UniqueConstraintRepository
    */
   boolean deleteByUniqueId(ObjectId id);
 
+  /**
+   * Update.
+   *
+   * @param uniqueConstraint the unique constraint
+   * @return the boolean
+   */
+  Boolean update(UniqueConstraintSchema uniqueConstraint);
+
 }
