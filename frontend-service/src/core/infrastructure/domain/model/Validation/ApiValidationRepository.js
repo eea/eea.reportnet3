@@ -18,7 +18,7 @@ const create = async (datasetSchemaId, validationRule) => {
     shortCode: validationRule.shortCode,
     type: 'FIELD',
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
-    whenCondition: getCreationDTO(expressions[0], 0, expressions)
+    whenCondition: getCreationDTO(expressions)
   };
 
   return await apiValidation.create(datasetSchemaId, validation);

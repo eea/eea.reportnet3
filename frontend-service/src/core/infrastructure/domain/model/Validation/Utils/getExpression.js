@@ -1,3 +1,4 @@
+import isNil from 'lodash/isNil';
 import moment from 'moment';
 
 import { config } from 'conf';
@@ -26,8 +27,9 @@ export const getExpression = expression => {
       params: [
         {
           operator: getOperatorEquivalence(operatorType),
-          params: ['VALUE', operatorValue]
-        }
+          params: ['VALUE']
+        },
+        Number(expressionValue)
       ]
     };
   }

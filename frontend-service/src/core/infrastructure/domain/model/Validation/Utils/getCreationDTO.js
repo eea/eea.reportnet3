@@ -10,6 +10,8 @@ export const getCreationDTO = expressions => {
       // si todos los operadores lógicos son iguales
       //
     }
-    // comprobar si solo hay una
+    // si solo hay una
+    const [expression] = expressions;
+    return getExpression(expression);
   }
 };
