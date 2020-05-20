@@ -4,8 +4,6 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMI
 import static org.apache.kafka.clients.consumer.ConsumerConfig.ISOLATION_LEVEL_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.RETRIES_CONFIG;
-import static org.apache.kafka.clients.producer.ProducerConfig.TRANSACTIONAL_ID_CONFIG;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -166,6 +164,9 @@ public class KafkaConfiguration {
       } catch (final InterruptedException | ExecutionException e) {
         // NOPMD false positive, I really need the thread to go on since this is a healtchecker.
         // Exception is managed by Spring Actuator
+        if (e instanceof InterruptedException) {
+          Thread.currentThread().interrupt();
+        }
         return Health.down().withException(e).build();
       }
     };

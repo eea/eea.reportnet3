@@ -492,6 +492,7 @@ public class DatasetServiceImpl implements DatasetService {
           } else {
             sortField.setTypefield(typefield.getType());
           }
+
           sortFieldsArray.add(sortField);
         }
         newFields = sortFieldsArray.stream().toArray(SortField[]::new);
@@ -1111,6 +1112,14 @@ public class DatasetServiceImpl implements DatasetService {
             field.setValue(field.getValue().substring(0, fieldMaxLength));
           }
         }
+        // if the type is multiselect codelist we sort the values in lexicographic order
+        if (DataType.MULTISELECT_CODELIST.equals(field.getType()) && null != field.getValue()) {
+          List<String> values = new ArrayList<>();
+          Arrays.asList(field.getValue().split(",")).stream()
+              .forEach(value -> values.add(value.trim()));
+          Collections.sort(values);
+          field.setValue(values.toString().substring(1, values.toString().length() - 1));
+        }
       }
 
     });
@@ -1667,11 +1676,11 @@ public class DatasetServiceImpl implements DatasetService {
               field.setRecord(recordValue);
               fieldValues.add(field);
               idSchema.add(field.getIdFieldSchema());
-              setMissingField(
-                  tableMap.get(etlTable.getTableName()).getRecordSchema().getFieldSchema(),
-                  fieldValues, idSchema, recordValue);
             }
           }
+          // set the fields if not declared in the records
+          setMissingField(tableMap.get(etlTable.getTableName()).getRecordSchema().getFieldSchema(),
+              fieldValues, idSchema, recordValue);
           recordValue.setFields(fieldValues);
           recordValue.setDatasetPartitionId(partition.getId());
           recordValue.setDataProviderCode(provider.getCode());

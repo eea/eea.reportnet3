@@ -194,6 +194,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         Thread.sleep(timeToWaitBeforeReleasingNotification);
       } catch (InterruptedException e) {
         LOG_ERROR.error("Error sleeping thread before releasing notification kafka events", e);
+        Thread.currentThread().interrupt();
       }
 
       LOG.info("Releasing notifications via Kafka");
@@ -812,7 +813,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           "Error restoring the file {} executing query {}. Restoring snapshot continues", fileName,
           query, e);
     } finally {
-      from.close();
+      if (null != from) {
+        from.close();
+      }
       cp.endCopy();
       if (cp.isActive())
         cp.cancelCopy();
