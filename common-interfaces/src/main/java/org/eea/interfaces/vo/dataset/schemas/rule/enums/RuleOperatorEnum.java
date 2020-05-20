@@ -10,6 +10,14 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 public enum RuleOperatorEnum {
 
   // ***************************
+  // ***** RECORD OPERATORS ****
+  // ***************************
+
+  /** The record if. */
+  RECORD_IF(EntityTypeEnum.RECORD, "recordIfThen", JavaType.BOOLEAN, JavaType.BOOLEAN,
+      JavaType.BOOLEAN),
+
+  // ***************************
   // ***** FIELD OPERATORS *****
   // ***************************
 
@@ -23,117 +31,119 @@ public enum RuleOperatorEnum {
 
   // Number operators
   /** Equals. */
-  FIELD_EQ(EntityTypeEnum.FIELD, "numberEquals", JavaType.BOOLEAN, JavaType.NUMBER,
+  FIELD_EQ(EntityTypeEnum.FIELD, "fieldNumberEquals", JavaType.BOOLEAN, JavaType.NUMBER,
       JavaType.NUMBER),
   /** Distinct. */
-  FIELD_DIST(EntityTypeEnum.FIELD, "numberDistinct", JavaType.BOOLEAN, JavaType.NUMBER,
+  FIELD_DIST(EntityTypeEnum.FIELD, "fieldNumberDistinct", JavaType.BOOLEAN, JavaType.NUMBER,
       JavaType.NUMBER),
   /** Greater than. */
-  FIELD_GT(EntityTypeEnum.FIELD, "numberGreaterThan", JavaType.BOOLEAN, JavaType.NUMBER,
+  FIELD_GT(EntityTypeEnum.FIELD, "fieldNumberGreaterThan", JavaType.BOOLEAN, JavaType.NUMBER,
       JavaType.NUMBER),
   /** Less than. */
-  FIELD_LT(EntityTypeEnum.FIELD, "numberLessThan", JavaType.BOOLEAN, JavaType.NUMBER,
+  FIELD_LT(EntityTypeEnum.FIELD, "fieldNumberLessThan", JavaType.BOOLEAN, JavaType.NUMBER,
       JavaType.NUMBER),
   /** Greater than or equals. */
-  FIELD_GTEQ(EntityTypeEnum.FIELD, "numberGreaterThanOrEqualsThan", JavaType.BOOLEAN,
+  FIELD_GTEQ(EntityTypeEnum.FIELD, "fieldNumberGreaterThanOrEqualsThan", JavaType.BOOLEAN,
       JavaType.NUMBER, JavaType.NUMBER),
   /** Less than or equals. */
-  FIELD_LTEQ(EntityTypeEnum.FIELD, "numberLessThanOrEqualsThan", JavaType.BOOLEAN, JavaType.NUMBER,
-      JavaType.NUMBER),
+  FIELD_LTEQ(EntityTypeEnum.FIELD, "fieldNumberLessThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.NUMBER, JavaType.NUMBER),
   /** The num match. */
-  FIELD_NUM_MATCH(EntityTypeEnum.FIELD, "numberMatches", JavaType.BOOLEAN, JavaType.NUMBER,
+  FIELD_NUM_MATCH(EntityTypeEnum.FIELD, "fieldNumberMatches", JavaType.BOOLEAN, JavaType.NUMBER,
       JavaType.STRING),
 
   // String operators
   /** Length. */
-  FIELD_LEN(EntityTypeEnum.FIELD, "stringLength", JavaType.NUMBER, JavaType.STRING),
+  FIELD_LEN(EntityTypeEnum.FIELD, "fieldStringLength", JavaType.NUMBER, JavaType.STRING),
   /** Equals for strings. */
-  FIELD_SEQ(EntityTypeEnum.FIELD, "stringEquals", JavaType.BOOLEAN, JavaType.STRING,
+  FIELD_SEQ(EntityTypeEnum.FIELD, "fieldStringEquals", JavaType.BOOLEAN, JavaType.STRING,
       JavaType.STRING),
   /** Equals for string ignoring case. */
-  FIELD_SEQIC(EntityTypeEnum.FIELD, "stringEqualsIgnoreCase", JavaType.BOOLEAN, JavaType.STRING,
-      JavaType.STRING),
+  FIELD_SEQIC(EntityTypeEnum.FIELD, "fieldStringEqualsIgnoreCase", JavaType.BOOLEAN,
+      JavaType.STRING, JavaType.STRING),
   /** Match. */
-  FIELD_MATCH(EntityTypeEnum.FIELD, "stringMatches", JavaType.BOOLEAN, JavaType.STRING,
+  FIELD_MATCH(EntityTypeEnum.FIELD, "fieldStringMatches", JavaType.BOOLEAN, JavaType.STRING,
       JavaType.STRING),
 
   // Day operators
   /** The eq day. */
-  FIELD_EQ_DAY(EntityTypeEnum.FIELD, "dayEquals", JavaType.BOOLEAN, JavaType.DATE, JavaType.NUMBER),
+  FIELD_EQ_DAY(EntityTypeEnum.FIELD, "fieldDayEquals", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.NUMBER),
   /** The dist day. */
-  FIELD_DIST_DAY(EntityTypeEnum.FIELD, "dayDistinct", JavaType.BOOLEAN, JavaType.DATE,
+  FIELD_DIST_DAY(EntityTypeEnum.FIELD, "fieldDayDistinct", JavaType.BOOLEAN, JavaType.DATE,
       JavaType.NUMBER),
   /** The gt day. */
-  FIELD_GT_DAY(EntityTypeEnum.FIELD, "dayGreaterThan", JavaType.BOOLEAN, JavaType.DATE,
+  FIELD_GT_DAY(EntityTypeEnum.FIELD, "fieldDayGreaterThan", JavaType.BOOLEAN, JavaType.DATE,
       JavaType.NUMBER),
   /** The lt day. */
-  FIELD_LT_DAY(EntityTypeEnum.FIELD, "dayLessThan", JavaType.BOOLEAN, JavaType.DATE,
+  FIELD_LT_DAY(EntityTypeEnum.FIELD, "fieldDayLessThan", JavaType.BOOLEAN, JavaType.DATE,
       JavaType.NUMBER),
   /** The gteq day. */
-  FIELD_GTEQ_DAY(EntityTypeEnum.FIELD, "dayGreaterThanOrEqualsThan", JavaType.BOOLEAN,
+  FIELD_GTEQ_DAY(EntityTypeEnum.FIELD, "fieldDayGreaterThanOrEqualsThan", JavaType.BOOLEAN,
       JavaType.DATE, JavaType.NUMBER),
   /** The lteq day. */
-  FIELD_LTEQ_DAY(EntityTypeEnum.FIELD, "dayLessThanOrEqualsThan", JavaType.BOOLEAN, JavaType.DATE,
-      JavaType.NUMBER),
+  FIELD_LTEQ_DAY(EntityTypeEnum.FIELD, "fieldDayLessThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.DATE, JavaType.NUMBER),
 
   // Month operators
   /** The eq month. */
-  FIELD_EQ_MONTH(EntityTypeEnum.FIELD, "monthEquals", JavaType.BOOLEAN, JavaType.DATE,
+  FIELD_EQ_MONTH(EntityTypeEnum.FIELD, "fieldMonthEquals", JavaType.BOOLEAN, JavaType.DATE,
       JavaType.NUMBER),
   /** The dist month. */
-  FIELD_DIST_MONTH(EntityTypeEnum.FIELD, "monthDistinct", JavaType.BOOLEAN, JavaType.DATE,
+  FIELD_DIST_MONTH(EntityTypeEnum.FIELD, "fieldMonthDistinct", JavaType.BOOLEAN, JavaType.DATE,
       JavaType.NUMBER),
   /** The gt month. */
-  FIELD_GT_MONTH(EntityTypeEnum.FIELD, "monthGreaterThan", JavaType.BOOLEAN, JavaType.DATE,
+  FIELD_GT_MONTH(EntityTypeEnum.FIELD, "fieldMonthGreaterThan", JavaType.BOOLEAN, JavaType.DATE,
       JavaType.NUMBER),
   /** The lt month. */
-  FIELD_LT_MONTH(EntityTypeEnum.FIELD, "monthLessThan", JavaType.BOOLEAN, JavaType.DATE,
+  FIELD_LT_MONTH(EntityTypeEnum.FIELD, "fieldMonthLessThan", JavaType.BOOLEAN, JavaType.DATE,
       JavaType.NUMBER),
   /** The gteq month. */
-  FIELD_GTEQ_MONTH(EntityTypeEnum.FIELD, "monthGreaterThanOrEqualsThan", JavaType.BOOLEAN,
+  FIELD_GTEQ_MONTH(EntityTypeEnum.FIELD, "fieldMonthGreaterThanOrEqualsThan", JavaType.BOOLEAN,
       JavaType.DATE, JavaType.NUMBER),
   /** The lteq month. */
-  FIELD_LTEQ_MONTH(EntityTypeEnum.FIELD, "monthLessThanOrEqualsThan", JavaType.BOOLEAN,
+  FIELD_LTEQ_MONTH(EntityTypeEnum.FIELD, "fieldMonthLessThanOrEqualsThan", JavaType.BOOLEAN,
       JavaType.DATE, JavaType.NUMBER),
 
   // Year operators
   /** The eq year. */
-  FIELD_EQ_YEAR(EntityTypeEnum.FIELD, "yearEquals", JavaType.BOOLEAN, JavaType.DATE,
+  FIELD_EQ_YEAR(EntityTypeEnum.FIELD, "fieldYearEquals", JavaType.BOOLEAN, JavaType.DATE,
       JavaType.NUMBER),
   /** The dist year. */
-  FIELD_DIST_YEAR(EntityTypeEnum.FIELD, "yearDistinct", JavaType.BOOLEAN, JavaType.DATE,
+  FIELD_DIST_YEAR(EntityTypeEnum.FIELD, "fieldYearDistinct", JavaType.BOOLEAN, JavaType.DATE,
       JavaType.NUMBER),
   /** The gt year. */
-  FIELD_GT_YEAR(EntityTypeEnum.FIELD, "yearGreaterThan", JavaType.BOOLEAN, JavaType.DATE,
+  FIELD_GT_YEAR(EntityTypeEnum.FIELD, "fieldYearGreaterThan", JavaType.BOOLEAN, JavaType.DATE,
       JavaType.NUMBER),
   /** The lt year. */
-  FIELD_LT_YEAR(EntityTypeEnum.FIELD, "yearLessThan", JavaType.BOOLEAN, JavaType.DATE,
+  FIELD_LT_YEAR(EntityTypeEnum.FIELD, "fieldYearLessThan", JavaType.BOOLEAN, JavaType.DATE,
       JavaType.NUMBER),
   /** The gteq year. */
-  FIELD_GTEQ_YEAR(EntityTypeEnum.FIELD, "yearGreaterThanOrEqualsThan", JavaType.BOOLEAN,
+  FIELD_GTEQ_YEAR(EntityTypeEnum.FIELD, "fieldYearGreaterThanOrEqualsThan", JavaType.BOOLEAN,
       JavaType.DATE, JavaType.NUMBER),
   /** The lteq year. */
-  FIELD_LTEQ_YEAR(EntityTypeEnum.FIELD, "yearLessThanOrEqualsThan", JavaType.BOOLEAN, JavaType.DATE,
-      JavaType.NUMBER),
+  FIELD_LTEQ_YEAR(EntityTypeEnum.FIELD, "fieldYearLessThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.DATE, JavaType.NUMBER),
 
   // Date operators
   /** The eq date. */
-  FIELD_EQ_DATE(EntityTypeEnum.FIELD, "dateEquals", JavaType.BOOLEAN, JavaType.DATE, JavaType.DATE),
+  FIELD_EQ_DATE(EntityTypeEnum.FIELD, "fieldDateEquals", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.DATE),
   /** The dist date. */
-  FIELD_DIST_DATE(EntityTypeEnum.FIELD, "dateDistinct", JavaType.BOOLEAN, JavaType.DATE,
+  FIELD_DIST_DATE(EntityTypeEnum.FIELD, "fieldDateDistinct", JavaType.BOOLEAN, JavaType.DATE,
       JavaType.DATE),
   /** The gt date. */
-  FIELD_GT_DATE(EntityTypeEnum.FIELD, "dateGreaterThan", JavaType.BOOLEAN, JavaType.DATE,
+  FIELD_GT_DATE(EntityTypeEnum.FIELD, "fieldDateGreaterThan", JavaType.BOOLEAN, JavaType.DATE,
       JavaType.DATE),
   /** The lt date. */
-  FIELD_LT_DATE(EntityTypeEnum.FIELD, "dateLessThan", JavaType.BOOLEAN, JavaType.DATE,
+  FIELD_LT_DATE(EntityTypeEnum.FIELD, "fieldDateLessThan", JavaType.BOOLEAN, JavaType.DATE,
       JavaType.DATE),
   /** The gteq date. */
-  FIELD_GTEQ_DATE(EntityTypeEnum.FIELD, "dateGreaterThanOrEqualsThan", JavaType.BOOLEAN,
+  FIELD_GTEQ_DATE(EntityTypeEnum.FIELD, "fieldDateGreaterThanOrEqualsThan", JavaType.BOOLEAN,
       JavaType.DATE, JavaType.DATE),
   /** The lteq date. */
-  FIELD_LTEQ_DATE(EntityTypeEnum.FIELD, "dateLessThanOrEqualsThan", JavaType.BOOLEAN, JavaType.DATE,
-      JavaType.DATE);
+  FIELD_LTEQ_DATE(EntityTypeEnum.FIELD, "fieldDateLessThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.DATE, JavaType.DATE);
 
   /** The entity type. */
   private final EntityTypeEnum entityType;

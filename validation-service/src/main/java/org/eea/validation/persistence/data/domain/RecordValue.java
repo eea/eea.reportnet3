@@ -1,6 +1,8 @@
 package org.eea.validation.persistence.data.domain;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -29,9 +31,7 @@ import lombok.ToString;
 @Table(name = "RECORD_VALUE")
 public class RecordValue {
 
-  /**
-   * The id.
-   */
+  /** The id. */
   @Id
   @SequenceGenerator(name = "record_sequence_generator", sequenceName = "record_sequence",
       allocationSize = 1)
@@ -39,52 +39,43 @@ public class RecordValue {
   @Column(name = "ID", columnDefinition = "serial")
   private String id;
 
-  /**
-   * The id mongo.
-   */
+  /** The id record schema. */
   @Column(name = "ID_RECORD_SCHEMA")
   private String idRecordSchema;
 
-  /**
-   * The id partition.
-   */
+  /** The dataset partition id. */
   @Column(name = "DATASET_PARTITION_ID")
   private Long datasetPartitionId;
-
 
   /** The data provider code. */
   @Column(name = "DATA_PROVIDER_CODE")
   private String dataProviderCode;
 
-
-  /**
-   * The table value.
-   */
+  /** The table value. */
   @ManyToOne
   @JoinColumn(name = "ID_TABLE")
   private TableValue tableValue;
 
-  /**
-   * The fields.
-   */
+  /** The fields. */
   @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<FieldValue> fields;
 
-  /**
-   * The record validations.
-   */
+  /** The record validations. */
   @OneToMany(mappedBy = "recordValue",
       cascade = {CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, orphanRemoval = false)
   private List<RecordValidation> recordValidations;
 
-  /**
-   * The sort criteria.
-   */
+  /** The sort criteria. */
   @Transient
   private String sortCriteria;
 
+  /** The level error. */
   @Transient
   private ErrorTypeEnum levelError;
+
+  /** The fields map. */
+  @Transient
+  private Map<String, String> fieldsMap;
 
   /**
    * Hash code.
@@ -121,5 +112,30 @@ public class RecordValue {
         && Objects.equals(tableValue, other.tableValue);
   }
 
+  /**
+   * Initialize fields map.
+   */
+  public void initializeFieldsMap() {
+    fieldsMap = new HashMap<>();
+    if (null != fields && !fields.isEmpty()) {
+      for (FieldValue field : fields) {
+        fieldsMap.put(field.getIdFieldSchema(), field.getValue());
+      }
+    }
+  }
 
+  /**
+   * Record if then.
+   *
+   * @param argIf the arg if
+   * @param argThen the arg then
+   * @return true, if successful
+   */
+  public boolean recordIfThen(boolean argIf, boolean argThen) {
+    if (argIf) {
+      return argThen;
+    } else {
+      return false;
+    }
+  }
 }
