@@ -177,6 +177,7 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const onLoadDatasetSchema = async () => {
     try {
+      setLoading(true);
       const datasetSchema = await DatasetService.schemaById(datasetId);
       setDatasetSchemaName(datasetSchema.dataCollectionName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
@@ -329,6 +330,12 @@ export const DataCollection = withRouter(({ match, history }) => {
               disabled={true}
               icon={'camera'}
               label={resources.messages['snapshots']}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+              icon={'refresh'}
+              label={resources.messages['refresh']}
+              onClick={() => onLoadDatasetSchema()}
             />
           </div>
         </Toolbar>

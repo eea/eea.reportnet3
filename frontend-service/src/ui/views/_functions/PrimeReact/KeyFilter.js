@@ -15,7 +15,8 @@ export default class KeyFilter {
     phone: /^(\(?\+?[0-9]*\)?)?[0-9_\- \(\)]*$/,
     pint: /[\d]/,
     pnum: /[\d\.]/,
-    url: /^\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/
+    url: /^\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/,
+    noComma: /[^,]+/
   };
   /* eslint-enable */
 

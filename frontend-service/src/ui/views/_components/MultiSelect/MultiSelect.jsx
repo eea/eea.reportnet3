@@ -23,6 +23,7 @@ export class MultiSelect extends Component {
     optionValue: null,
     style: null,
     className: null,
+    hasSelectedItemsLabel: true,
     inputClassName: null,
     scrollHeight: '200px',
     placeholder: null,
@@ -60,6 +61,7 @@ export class MultiSelect extends Component {
     optionValue: PropTypes.string,
     style: PropTypes.object,
     className: PropTypes.string,
+    hasSelectedItemsLabel: PropTypes.bool,
     inputClassName: PropTypes.string,
     scrollHeight: PropTypes.string,
     placeholder: PropTypes.string,
@@ -429,10 +431,12 @@ export class MultiSelect extends Component {
         label += this.findLabelByValue(this.props.value[i]);
       }
 
-      if (this.props.value.length <= this.props.maxSelectedLabels) {
-        return label;
-      } else {
-        return this.getSelectedItemsLabel();
+      if (this.props.hasSelectedItemsLabel) {
+        if (this.props.value.length <= this.props.maxSelectedLabels) {
+          return label;
+        } else {
+          return this.getSelectedItemsLabel();
+        }
       }
     }
 
@@ -490,11 +494,11 @@ export class MultiSelect extends Component {
       'p-multiselect-label-empty': empty && !this.props.placeholder && !this.props.selectedItemTemplate
     });
 
-    return (
+    return this.props.hasSelectedItemsLabel ? (
       <div className="p-multiselect-label-container" style={{ position: 'absolute', top: '0', paddingTop: '0.1rem' }}>
         <label className={className}>{content || this.props.placeholder || 'empty'}</label>
       </div>
-    );
+    ) : null;
   }
 
   render() {

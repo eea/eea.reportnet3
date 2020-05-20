@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import styles from './CodelistEditor.module.scss';
 
@@ -12,6 +12,27 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
   const resources = useContext(ResourcesContext);
   const [codelistItems, setCodelistItems] = useState(selectedCodelist);
   const [isVisible, setIsVisible] = useState(isCodelistEditorVisible);
+
+  const divChipsRef = useRef(null);
+
+  useEffect(() => {
+    divChipsRef.current.focus();
+    console.log(document.activeElement);
+    // divChipsRef.current.onClick();
+  }, [isCodelistEditorVisible]);
+
+  const onPasteChips = event => {
+    if (event) {
+      const clipboardData = event.clipboardData;
+      const pastedData = clipboardData.getData('Text');
+      console.log(pastedData);
+      const inmCodelistItems = [...codelistItems];
+      inmCodelistItems.push(...pastedData.split(',').filter(value => value.trim() !== ''));
+      // event.preventDefault();
+      setCodelistItems([...new Set(inmCodelistItems)]);
+      // dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
+    }
+  };
 
   const codelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -39,19 +60,21 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
 
   const renderChips = () => {
     return (
-      <React.Fragment>
+      <div ref={divChipsRef} onPaste={onPasteChips}>
         <div className={styles.inputTitleWrapper}>
           <span>{resources.messages['codelistEditorItems']} </span>
           <span className={styles.subIndex}>{resources.messages['codelistEditorItemsMessage']}</span>
         </div>
         <Chips
           checkForDuplicates={true}
+          deleteWhiteSpaces={true}
+          forbiddenCommas={true}
           inputClassName={styles.codelistChips}
           onChange={e => setCodelistItems(e.value)}
           tooltip={resources.messages['codelistEditorMessage']}
           tooltipOptions={{ position: 'bottom' }}
           value={codelistItems}></Chips>
-      </React.Fragment>
+      </div>
     );
   };
 
@@ -60,6 +83,7 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
       blockScroll={false}
       contentStyle={{ overflow: 'auto' }}
       closeOnEscape={false}
+      focusOnShow={false}
       footer={codelistDialogFooter}
       header={resources.messages['codelistEditor']}
       modal={true}

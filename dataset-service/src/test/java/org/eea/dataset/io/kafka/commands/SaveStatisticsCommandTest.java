@@ -1,6 +1,7 @@
 package org.eea.dataset.io.kafka.commands;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.times;
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.dataset.service.DatasetService;
@@ -15,8 +16,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class SaveStatisticsCommandTest.
@@ -69,34 +68,12 @@ public class SaveStatisticsCommandTest {
     data.put("dataset_id", 1);
     eeaEventVO.setData(data);
 
-    Mockito.doNothing().when(datasetService).saveStatistics(Mockito.any());
-    saveStatisticsCommand.execute(eeaEventVO);
-    Mockito.verify(datasetService, Mockito.timeout(0)).saveStatistics(Mockito.anyLong());
+    SaveStatisticsCommand spyClass = Mockito.spy(saveStatisticsCommand);
+    spyClass.execute(eeaEventVO);
+    Mockito.verify(spyClass, times(1)).execute(Mockito.any());
+
   }
 
-
-  /**
-   * Test execute save statistics 3.
-   *
-   * @throws EEAException the EEA exception
-   * @throws InterruptedException
-   */
-  @Test
-  public void testExecuteSaveStatistics3() throws EEAException {
-
-    eeaEventVO = new EEAEventVO();
-    eeaEventVO.setEventType(EventType.VALIDATION_FINISHED_EVENT);
-    data = new HashMap<>();
-    data.put("dataset_id", 1L);
-    eeaEventVO.setData(data);
-
-    try {
-      saveStatisticsCommand.execute(eeaEventVO);
-    } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
-      throw e;
-    }
-  }
 
   /**
    * Gets the event type test.

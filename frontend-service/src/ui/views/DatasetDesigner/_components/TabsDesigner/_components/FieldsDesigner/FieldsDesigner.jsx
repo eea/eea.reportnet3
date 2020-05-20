@@ -61,8 +61,12 @@ export const FieldsDesigner = ({
   useEffect(() => {
     if (!isUndefined(fields)) {
       setIsCodelistOrLink(
-        fields.filter(field => field.type.toUpperCase() === 'CODELIST' || field.type.toUpperCase() === 'LINK').length >
-          0
+        fields.filter(
+          field =>
+            field.type.toUpperCase() === 'CODELIST' ||
+            field.type.toUpperCase() === 'MULTISELECT_CODELIST' ||
+            field.type.toUpperCase() === 'LINK'
+        ).length > 0
       );
     }
   }, [fields]);
@@ -71,21 +75,37 @@ export const FieldsDesigner = ({
     setIsCodelistOrLink(
       fields.filter(field => {
         return (
-          (field.type.toUpperCase() === 'CODELIST' || field.type.toUpperCase() === 'LINK') && field.fieldId !== fieldId
+          (field.type.toUpperCase() === 'CODELIST' ||
+            field.type.toUpperCase() === 'MULTISELECT_CODELIST' ||
+            field.type.toUpperCase() === 'LINK') &&
+          field.fieldId !== fieldId
         );
       }).length > 0 ||
         selectedField.fieldType.toUpperCase() === 'CODELIST' ||
+        selectedField.fieldType.toUpperCase() === 'MULTISELECT_CODELIST' ||
         selectedField.fieldType.toUpperCase() === 'LINK'
     );
   };
 
-  const onFieldAdd = ({ codelistItems, description, fieldId, pk, name, recordId, referencedField, required, type }) => {
+  const onFieldAdd = ({
+    codelistItems,
+    description,
+    fieldId,
+    pk,
+    pkMustBeUsed,
+    name,
+    recordId,
+    referencedField,
+    required,
+    type
+  }) => {
     const inmFields = [...fields];
     inmFields.splice(inmFields.length, 0, {
       codelistItems,
       description,
       fieldId,
       pk,
+      pkMustBeUsed,
       name,
       recordId,
       referencedField,
@@ -109,6 +129,7 @@ export const FieldsDesigner = ({
     id,
     isLinkChange,
     pk,
+    pkMustBeUsed,
     name,
     referencedField,
     required,
@@ -125,6 +146,7 @@ export const FieldsDesigner = ({
       inmFields[fieldIndex].referencedField = referencedField;
       inmFields[fieldIndex].required = required;
       inmFields[fieldIndex].pk = pk;
+      inmFields[fieldIndex].pkMustBeUsed = pkMustBeUsed;
       onChangeFields(inmFields, isLinkChange, table.tableSchemaId);
       setFields(inmFields);
     }
@@ -308,6 +330,7 @@ export const FieldsDesigner = ({
           fieldId="-1"
           fieldName=""
           fieldLink={null}
+          fieldMustBeUsed={false}
           fieldRequired={false}
           fieldType=""
           fieldValue=""
@@ -342,7 +365,9 @@ export const FieldsDesigner = ({
                 fieldId={field.fieldId}
                 fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
                 fieldName={field.name}
+                fieldMustBeUsed={field.pkMustBeUsed}
                 fieldPK={field.pk}
+                fieldPkMustBeUsed={field.pkMustBeUsed}
                 fieldPKReferenced={field.pkReferenced}
                 fieldRequired={Boolean(field.required)}
                 fieldType={field.type}

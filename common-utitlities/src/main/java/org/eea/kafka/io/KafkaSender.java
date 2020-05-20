@@ -76,7 +76,9 @@ public class KafkaSender {
         LOG_ERROR.error("Unable to send message=[ {} ] to topic=[ {} ] due to: {} ", event,
             event.getEventType().getTopic(), e.getMessage());
         sendResult = false;
-        Thread.currentThread().interrupt();
+        if (e instanceof InterruptedException) {
+          Thread.currentThread().interrupt();
+        }
       }
       return sendResult;
     });
