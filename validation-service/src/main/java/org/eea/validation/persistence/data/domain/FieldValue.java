@@ -219,10 +219,10 @@ public class FieldValue {
    * String length.
    *
    * @param value the value
-   * @return the long
+   * @return the string
    */
-  public Long stringLength(String value) {
-    return Long.valueOf(value.length());
+  public String stringLength(String value) {
+    return "" + value.length();
   }
 
   /**

@@ -9,6 +9,10 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
  */
 public enum RuleOperatorEnum {
 
+  // ***************************
+  // ***** FIELD OPERATORS *****
+  // ***************************
+
   // Logical operators
   /** And. */
   FIELD_AND(EntityTypeEnum.FIELD, "fieldAnd", JavaType.BOOLEAN, JavaType.BOOLEAN, JavaType.BOOLEAN),
