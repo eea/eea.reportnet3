@@ -1259,7 +1259,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param uniequeConstraint the unieque constraint
    */
   @Override
-  public void updateUniqueConstraint(UniqueConstraintVO uniqueConstraint) {
+  public void updateUniqueConstraint(UniqueConstraintVO uniqueConstraintVO) {
+    uniqueConstraintRepository.update(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
 
   }
 
@@ -1272,6 +1273,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public List<UniqueConstraintVO> getUniqueConstraints(String schemaId) {
 
-    return null;
+    return uniqueConstraintMapper.entityListToClass(
+        uniqueConstraintRepository.findByDatasetSchemaId(new ObjectId(schemaId)));
   }
 }

@@ -27,6 +27,14 @@ public interface UniqueConstraintRepository
    * @param id the id
    * @return true, if successful
    */
-  boolean deleteByUniqueId(ObjectId id);
+  Long deleteByUniqueId(ObjectId id);
+
+  /**
+   * Update.
+   *
+   * @param uniqueConstraint the unique constraint
+   * @return the boolean
+   */
+  Long update(UniqueConstraintSchema uniqueConstraint);
 
 }
