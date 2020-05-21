@@ -720,8 +720,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     }
     if (uniqueConstraint.getUniqueId() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+          EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT);
     }
+
     dataschemaService.updateUniqueConstraint(uniqueConstraint);
   }
 

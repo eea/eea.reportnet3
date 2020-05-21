@@ -23,7 +23,6 @@ import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
-import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
@@ -1240,8 +1239,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public void createUniqueConstraint(UniqueConstraintVO uniqueConstraintVO) {
     LOG.info("Creating unique contraint");
-    UniqueConstraintSchema entity = uniqueConstraintMapper.classToEntity(uniqueConstraintVO);
-    uniqueConstraintRepository.save(entity);
+    uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
   }
 
   /**
@@ -1262,8 +1260,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void updateUniqueConstraint(UniqueConstraintVO uniqueConstraintVO) {
-    // uniqueConstraintRepository.update(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
-
+    LOG.info("updating constraint {}", uniqueConstraintVO.getUniqueId());
+    uniqueConstraintRepository.deleteByUniqueId(new ObjectId(uniqueConstraintVO.getUniqueId()));
+    uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
   }
 
   /**
