@@ -792,6 +792,7 @@ export const FieldDesigner = ({
           onCancelSaveCodelist={onCancelSaveCodelist}
           onSaveCodelist={onSaveCodelist}
           selectedCodelist={fieldDesignerState.codelistItems}
+          type={fieldDesignerState.fieldTypeValue.value}
         />
       ) : null}
       {fieldDesignerState.isLinkSelectorVisible ? (

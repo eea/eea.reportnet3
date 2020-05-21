@@ -35,7 +35,7 @@
     "closeSidebar": "Close sidebar",
     "codelistEditor": "Single select editor",
     "codelistEditorItems": "Single select items",
-    "codelistEditorItemsMessage": "(press enter, tab or paste here your selected list to add new item/s)",
+    "codelistEditorItemsMessage": "(press enter, tab or paste here your selected list (separated by commas) to add new item/s)",
     "codelistEditorMessage": "Enter your single select items",
     "codelists": "Single select items",
     "codelistSelection": "No single select item selected",
@@ -643,7 +643,10 @@
     "totalUniqueConstraints": "Total unique constraints: ",
     "loadUniqueConstraintsError": "Error loading unique constraints",
     "deleteUniqueConstraintError": "Error unique constraint",
-    "multiselectCodelists": "Multiselect items",
-    "pkValuesMustBeUsed": "All PK values must be used on link"
+    "multiselectCodelists": "Multiselect items ",
+    "pkValuesMustBeUsed": "All PK values must be used on link",
+    "multiselectCodelistEditorMessage": "Enter your multiselect items",
+    "multiselectCodelistEditor": "Multiselect editor",
+    "duplicatedItem": "Duplicated item"
   }
 }

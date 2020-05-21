@@ -83,7 +83,7 @@ const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirs
 const getCodelistItems = (colsSchema, field) => {
   const codelistItems = getCellItems(colsSchema, field);
   return !isNil(codelistItems)
-    ? codelistItems.map(codelistItem => {
+    ? codelistItems.sort().map(codelistItem => {
         return { itemType: codelistItem, value: codelistItem };
       })
     : [];
@@ -92,7 +92,7 @@ const getCodelistItems = (colsSchema, field) => {
 const getCodelistItemsInSingleColumn = column => {
   const codelistItems = column.codelistItems;
   return !isNil(codelistItems)
-    ? codelistItems.map(codelistItem => {
+    ? codelistItems.sort().map(codelistItem => {
         return { itemType: codelistItem, value: codelistItem };
       })
     : [];
