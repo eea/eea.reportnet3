@@ -21,7 +21,7 @@ const create = async (datasetSchemaId, validationRule) => {
     whenCondition: getCreationDTO(expressions)
   };
   console.log('Validation: ', validation);
-  //return await apiValidation.create(datasetSchemaId, validation);
+  return await apiValidation.create(datasetSchemaId, validation);
 };
 
 const deleteById = async (datasetSchemaId, ruleId) => {
@@ -58,7 +58,7 @@ const update = async (datasetId, validationRule) => {
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value]
   };
   if (!validationRule.automatic) {
-    validation.whenCondition = getCreationDTO(expressions[0], 0, expressions);
+    validation.whenCondition = getCreationDTO(expressions);
   }
   return await apiValidation.update(datasetId, validation);
 };
