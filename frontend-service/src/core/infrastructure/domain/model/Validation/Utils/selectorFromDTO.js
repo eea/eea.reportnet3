@@ -1,12 +1,9 @@
-import isNil from 'lodash/isNil';
-import isEmpty from 'lodash/isEmpty';
 import isObject from 'lodash/isObject';
 
 import { config } from 'conf';
 
 import { getExpressionFromDTO } from './getExpressionFromDTO';
 import { getGroupFromDTO } from './getGroupFromDTO';
-import { getExpression } from './getExpression';
 
 export const selectorFromDTO = (expression, expressions, allExpressions) => {
   const {

@@ -5,13 +5,10 @@ import uniq from 'lodash/uniq';
 import { config } from 'conf';
 
 import { getExpression } from './getExpression';
-import { getExpressionsNode } from './getExpressionsNode';
 
 export const getCreationDTO = expressions => {
   if (!isEmpty(expressions)) {
-    // comprobar que haya más de una
     if (expressions.length > 1) {
-      // si todos los operadores lógicos son iguales
       const unions = expressions.filter(expression => expression.union !== '').map(expression => expression.union);
       if (uniq(unions).length === 1) {
         const [union] = unions;
@@ -42,7 +39,6 @@ export const getCreationDTO = expressions => {
         };
       }
     }
-    // si solo hay una
     const [expression] = expressions;
     return getExpression(expression);
   }

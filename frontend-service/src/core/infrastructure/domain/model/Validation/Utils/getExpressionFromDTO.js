@@ -1,10 +1,10 @@
-import { config } from 'conf';
-
+import isNil from 'lodash/isNil';
+import isObject from 'lodash/isObject';
 import uuid from 'uuid';
 
+import { config } from 'conf';
+
 import { getExpressionOperatorType } from './getExpressionOperatorType';
-import isNil from 'lodash/isNil';
-import { isObject } from 'formik';
 
 export const getExpressionFromDTO = (expression, allExpressions, parentUnion) => {
   const union = !isNil(parentUnion) ? config.validations.reverseEquivalences[parentUnion] : '';
