@@ -167,7 +167,7 @@ public class RulesControllerImpl implements RulesController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   @PutMapping("/createNewRule")
-  public ResponseEntity<?> createNewRule(@RequestParam("datasetId") long datasetId,
+  public ResponseEntity createNewRule(@RequestParam("datasetId") long datasetId,
       @RequestBody RuleVO ruleVO) {
     String message = "";
     HttpStatus status = HttpStatus.OK;

@@ -104,7 +104,7 @@ public class ObligationServiceImpl implements ObligationService {
       Client client = clients.stream()
           .filter(
               clientValue -> clientValue.getClientId().toString().equals(obligation.getClientId()))
-          .findFirst().get();
+          .findFirst().orElse(new Client());
       obligationVO.setClient(clientMapper.entityToClass(client));
     }
     // Find countries from rod. These are the countries bounded to the obligation. Might be several.

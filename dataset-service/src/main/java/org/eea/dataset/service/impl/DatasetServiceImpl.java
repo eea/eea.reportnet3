@@ -1797,6 +1797,8 @@ public class DatasetServiceImpl implements DatasetService {
           }
         }
         break;
+      case DATASET:
+        break;
     }
     return readOnly;
   }
