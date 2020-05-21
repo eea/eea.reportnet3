@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useRef, useEffect, useContext, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -28,8 +28,8 @@ const UserImg = () => {
 
   const [isAvatarDialogVisible, setIsAvatarDialogVisible] = useState(false);
 
-  const imageUploader = React.useRef(null);
-  const uploadedImage = React.useRef();
+  const imageUploader = useRef(null);
+  const uploadedImage = useRef();
 
   useEffect(() => {
     if (!isEmpty(userContext.userProps.userImage) && userContext.userProps.userImage.join('') !== '') {
