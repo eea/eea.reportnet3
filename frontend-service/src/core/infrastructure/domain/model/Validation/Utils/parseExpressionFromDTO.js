@@ -3,7 +3,6 @@ import isNil from 'lodash/isNil';
 import { selectorFromDTO } from './selectorFromDTO';
 
 export const parseExpressionFromDTO = expression => {
-  console.log('parseExpressionFromDTO', expression);
   const expressions = [];
   const allExpressions = [];
   if (!isNil(expression)) {
