@@ -45,7 +45,6 @@ export const apiValidation = {
     return response.data;
   },
   update: async (datasetId, validation) => {
-    console.log('update', validation);
     const tokens = userStorage.get();
     let url = getUrl(ValidationConfig.update, { datasetId });
     if (validation.automatic) {

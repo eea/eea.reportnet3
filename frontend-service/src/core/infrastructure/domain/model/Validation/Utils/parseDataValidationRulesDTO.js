@@ -8,7 +8,6 @@ export const parseDataValidationRulesDTO = validations => {
   const validationsData = {};
   const entityTypes = [];
   try {
-    console.log('validations: ', validations);
     validationsData.validations = validations.map(validationDTO => {
       entityTypes.push(validationDTO.type);
       const { expressions, allExpressions } = parseExpressionFromDTO(validationDTO.whenCondition);

@@ -20,7 +20,6 @@ const create = async (datasetSchemaId, validationRule) => {
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
     whenCondition: getCreationDTO(expressions)
   };
-  console.log('Validation: ', validation);
   return await apiValidation.create(datasetSchemaId, validation);
 };
 

@@ -7,8 +7,6 @@ import isNil from 'lodash/isNil';
 import { isObject } from 'formik';
 
 export const getExpressionFromDTO = (expression, allExpressions, parentUnion) => {
-  console.log('getExpressionFromDTO ', expression, allExpressions, parentUnion);
-
   const union = !isNil(parentUnion) ? config.validations.reverseEquivalences[parentUnion] : '';
   const newExpression = {};
   newExpression.expressionId = uuid.v4();
@@ -22,7 +20,6 @@ export const getExpressionFromDTO = (expression, allExpressions, parentUnion) =>
     newExpression.operatorType = getExpressionOperatorType(expression.params[0].operator);
     newExpression.expressionValue = expression.params[0].params[1];
   }
-  console.log('newExpression', newExpression);
   if (newExpression.operatorType === 'FIELD_DATE') {
     newExpression.expressionValue = new Date(expression.params[1]);
   }
