@@ -643,10 +643,11 @@
     "totalUniqueConstraints": "Total unique constraints: ",
     "loadUniqueConstraintsError": "Error loading unique constraints",
     "deleteUniqueConstraintError": "Error unique constraint",
-    "multiselectCodelists": "Multiselect items ",
+    "multiselectCodelists": "Multiple select items ",
     "pkValuesMustBeUsed": "All PK values must be used on link",
-    "multiselectCodelistEditorMessage": "Enter your multiselect items",
-    "multiselectCodelistEditor": "Multiselect editor",
-    "duplicatedItem": "Duplicated item"
+    "multiselectCodelistEditorMessage": "Enter your multiple select items",
+    "multiselectCodelistEditor": "Multiple select editor",
+    "duplicatedItem": "Duplicated item",
+    "multiselectCodelistSelection": "No multiple select item selected"
   }
 }

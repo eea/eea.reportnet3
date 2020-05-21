@@ -69,7 +69,7 @@ export const FieldDesigner = ({
     // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
     // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
-    { fieldType: 'Multiselect_Codelist', value: 'Multiselect', fieldTypeIcon: 'multiselect' },
+    { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
     { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' }
     // { fieldType: 'Reference', value: 'Reference', fieldTypeIcon: 'link' }
     // { fieldType: 'URL', value: 'Url', fieldTypeIcon: 'url' },
@@ -628,14 +628,18 @@ export const FieldDesigner = ({
         label={
           !isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
             ? `${fieldDesignerState.codelistItems.join(', ')}`
-            : resources.messages['codelistSelection']
+            : fieldDesignerState.fieldTypeValue.fieldType === 'Codelist'
+            ? resources.messages['codelistSelection']
+            : resources.messages['multiselectCodelistSelection']
         }
         onClick={() => onCodelistDropdownSelected()}
         style={{ pointerEvents: 'auto' }}
         tooltip={
           !isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
             ? `${fieldDesignerState.codelistItems.join(', ')}`
-            : resources.messages['codelistSelection']
+            : fieldDesignerState.fieldTypeValue.fieldType === 'Codelist'
+            ? resources.messages['codelistSelection']
+            : resources.messages['multiselectCodelistSelection']
         }
         tooltipOptions={{ position: 'top' }}
       />
