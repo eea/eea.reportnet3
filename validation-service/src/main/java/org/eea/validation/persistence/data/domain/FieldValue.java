@@ -146,7 +146,11 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldNumberEquals(String value, Number arg2) {
-    return Double.valueOf(value).equals(arg2.doubleValue());
+    try {
+      return Double.valueOf(value).equals(arg2.doubleValue());
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -157,7 +161,11 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldNumberDistinct(String value, Number arg2) {
-    return !Double.valueOf(value).equals(arg2.doubleValue());
+    try {
+      return !Double.valueOf(value).equals(arg2.doubleValue());
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -168,7 +176,11 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldNumberGreaterThan(String value, Number arg2) {
-    return Double.valueOf(value) > arg2.doubleValue();
+    try {
+      return Double.valueOf(value) > arg2.doubleValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -179,7 +191,11 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldNumberLessThan(String value, Number arg2) {
-    return Double.valueOf(value) < arg2.doubleValue();
+    try {
+      return Double.valueOf(value) < arg2.doubleValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -190,7 +206,11 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldNumberGreaterThanOrEqualsThan(String value, Number arg2) {
-    return Double.valueOf(value) >= arg2.doubleValue();
+    try {
+      return Double.valueOf(value) >= arg2.doubleValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -201,7 +221,11 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldNumberLessThanOrEqualsThan(String value, Number arg2) {
-    return Double.valueOf(value) <= arg2.doubleValue();
+    try {
+      return Double.valueOf(value) <= arg2.doubleValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -212,7 +236,11 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldNumberMatches(String value, String regex) {
-    return value.matches(regex);
+    try {
+      return value.matches(regex);
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -222,7 +250,11 @@ public class FieldValue {
    * @return the string
    */
   public String fieldStringLength(String value) {
-    return "" + value.length();
+    try {
+      return "" + value.length();
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   /**
@@ -233,7 +265,11 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldStringEquals(String value, String arg2) {
-    return value.equals(arg2);
+    try {
+      return value.equals(arg2);
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -244,7 +280,11 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldStringEqualsIgnoreCase(String value, String arg2) {
-    return value.equalsIgnoreCase(arg2);
+    try {
+      return value.equalsIgnoreCase(arg2);
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -255,7 +295,11 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldStringMatches(String value, String arg2) {
-    return value.matches(arg2);
+    try {
+      return value.matches(arg2);
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -266,8 +310,12 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldDayEquals(String value, Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getDayOfMonth() == number.longValue();
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getDayOfMonth() == number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -278,8 +326,12 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldDayDistinct(String value, Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getDayOfMonth() != number.longValue();
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getDayOfMonth() != number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -290,8 +342,12 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldDayGreaterThan(String value, Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getDayOfMonth() > number.longValue();
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getDayOfMonth() > number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -302,8 +358,12 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldDayLessThan(String value, Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getDayOfMonth() < number.longValue();
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getDayOfMonth() < number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -314,8 +374,12 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldDayGreaterThanOrEqualsThan(String value, Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getDayOfMonth() >= number.longValue();
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getDayOfMonth() >= number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -326,8 +390,12 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldDayLessThanOrEqualsThan(String value, Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getDayOfMonth() <= number.longValue();
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getDayOfMonth() <= number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -338,8 +406,12 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldMonthEquals(String value, Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getMonthValue() == number.longValue();
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getMonthValue() == number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -350,8 +422,12 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldMonthDistinct(String value, Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getMonthValue() != number.longValue();
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getMonthValue() != number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -362,8 +438,12 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldMonthGreaterThan(String value, Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getMonthValue() > number.longValue();
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getMonthValue() > number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -374,8 +454,12 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldMonthLessThan(String value, Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getMonthValue() < number.longValue();
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getMonthValue() < number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -386,8 +470,12 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldMonthGreaterThanOrEqualsThan(String value, Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getMonthValue() >= number.longValue();
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getMonthValue() >= number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -398,8 +486,12 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldMonthLessThanOrEqualsThan(String value, Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getMonthValue() <= number.longValue();
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getMonthValue() <= number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -410,8 +502,12 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldYearEquals(String value, Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getYear() == number.longValue();
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getYear() == number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -422,8 +518,12 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldYearDistinct(String value, Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getYear() != number.longValue();
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getYear() != number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -434,8 +534,12 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldYearGreaterThan(String value, Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getYear() > number.longValue();
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getYear() > number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -446,8 +550,12 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldYearLessThan(String value, Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getYear() < number.longValue();
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getYear() < number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -458,8 +566,12 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldYearGreaterThanOrEqualsThan(String value, Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getYear() >= number.longValue();
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getYear() >= number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -470,8 +582,13 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldYearLessThanOrEqualsThan(String value, Number number) {
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.getYear() <= number.longValue();
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getYear() <= number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+
   }
 
   /**
@@ -482,9 +599,13 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldDateEquals(String value, String date) {
-    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.equals(ruleDate);
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.equals(ruleDate);
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -495,9 +616,13 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldDateDistinct(String value, String date) {
-    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return !fieldDate.equals(ruleDate);
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return !fieldDate.equals(ruleDate);
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -508,9 +633,13 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldDateGreaterThan(String value, String date) {
-    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.isAfter(ruleDate);
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.isAfter(ruleDate);
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -521,9 +650,13 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldDateLessThan(String value, String date) {
-    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.isBefore(ruleDate);
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.isBefore(ruleDate);
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -534,9 +667,13 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldDateGreaterThanOrEqualsThan(String value, String date) {
-    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.isAfter(ruleDate) || fieldDate.equals(ruleDate);
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.isAfter(ruleDate) || fieldDate.equals(ruleDate);
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
@@ -547,8 +684,12 @@ public class FieldValue {
    * @return true, if successful
    */
   public boolean fieldDateLessThanOrEqualsThan(String value, String date) {
-    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-    return fieldDate.isBefore(ruleDate) || fieldDate.equals(ruleDate);
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.isBefore(ruleDate) || fieldDate.equals(ruleDate);
+    } catch (Exception e) {
+      return true;
+    }
   }
 }

@@ -177,7 +177,7 @@ public class RulesControllerImpl implements RulesController {
 
       rulesService.createNewRule(datasetId, ruleVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error creating rule: {}", e.getMessage());
+      LOG_ERROR.error("Error creating rule: {}", e.getMessage(), e);
       message = e.getMessage();
       status = HttpStatus.BAD_REQUEST;
     }
