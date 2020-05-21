@@ -647,6 +647,7 @@
     "selectedFields": "Selected fields",
     "tableSchemaName": "Table name",
     "fieldData": "Field name",
+    "filterFieldsNames": "Field name",
     "multiselectCodelists": "Multiple select items ",
     "pkValuesMustBeUsed": "All PK values must be used on link",
     "multiselectCodelistEditorMessage": "Enter your multiple select items",
