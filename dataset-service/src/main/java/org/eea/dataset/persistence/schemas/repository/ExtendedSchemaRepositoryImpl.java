@@ -9,6 +9,7 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.exception.EEAException;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +50,8 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
    */
   @Override
   public void deleteTableSchemaById(String idTableSchema) {
-    Update update =
-        new Update().pull("tableSchemas", new BasicDBObject("_id", new ObjectId(idTableSchema)));
+    Update update = new Update().pull(LiteralConstants.TABLE_SCHEMAS,
+        new BasicDBObject("_id", new ObjectId(idTableSchema)));
     mongoOperations.updateMulti(new Query(), update, DataSetSchema.class);
   }
 
@@ -72,7 +73,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
    */
   @Override
   public void insertTableSchema(TableSchema table, String idDatasetSchema) {
-    Update update = new Update().push("tableSchemas", table);
+    Update update = new Update().push(LiteralConstants.TABLE_SCHEMAS, table);
     Query query = new Query();
     query.addCriteria(new Criteria("_id").is(new ObjectId(idDatasetSchema)));
     mongoOperations.updateMulti(query, update, DataSetSchema.class);
@@ -115,7 +116,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   public UpdateResult updateFieldSchema(String datasetSchemaId, Document fieldSchema)
       throws EEAException {
     try {
-      return mongoDatabase.getCollection("DataSetSchema").updateMany(
+      return mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA).updateMany(
           new Document("_id", new ObjectId(datasetSchemaId))
               .append("tableSchemas.recordSchema.fieldSchemas._id", fieldSchema.get("_id")),
           new Document("$set",
@@ -164,7 +165,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   public UpdateResult updateTableSchema(String datasetSchemaId, Document tableSchema)
       throws EEAException {
     try {
-      return mongoDatabase.getCollection("DataSetSchema").updateOne(
+      return mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA).updateOne(
           new Document("_id", new ObjectId(datasetSchemaId)).append("tableSchemas._id",
               tableSchema.get("_id")),
           new Document("$set", new Document("tableSchemas.$[tableSchemaId]", tableSchema)),
@@ -191,9 +192,9 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     try {
       List<Document> list = new ArrayList<>();
       list.add(tableSchema);
-      return mongoDatabase.getCollection("DataSetSchema").updateOne(
+      return mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA).updateOne(
           new Document("_id", new ObjectId(idDatasetSchema)),
-          new Document("$push", new Document("tableSchemas",
+          new Document("$push", new Document(LiteralConstants.TABLE_SCHEMAS,
               new Document("$each", list).append("$position", position))));
     } catch (IllegalArgumentException e) {
       LOG_ERROR.error("error inserting table: ", e);
@@ -216,7 +217,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     try {
       List<Document> list = new ArrayList<>();
       list.add(fieldSchema);
-      return mongoDatabase.getCollection("DataSetSchema").updateMany(
+      return mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA).updateMany(
           new Document("_id", new ObjectId(idDatasetSchema)).append("tableSchemas.recordSchema._id",
               fieldSchema.get("idRecord")),
           new Document("$push", new Document("tableSchemas.$.recordSchema.fieldSchemas",
@@ -237,13 +238,13 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   @Override
   public Document findTableSchema(String datasetSchemaId, String tableSchemaId) {
 
-    Document document = mongoDatabase.getCollection("DataSetSchema")
+    Document document = mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA)
         .find(new Document("_id", new ObjectId(datasetSchemaId)).append("tableSchemas._id",
             new ObjectId(tableSchemaId)))
         .projection(new Document("_id", 0).append("tableSchemas.$", 1)).first();
 
     if (document != null) {
-      Object tableSchemas = document.get("tableSchemas");
+      Object tableSchemas = document.get(LiteralConstants.TABLE_SCHEMAS);
       if (tableSchemas != null && tableSchemas.getClass().equals(ArrayList.class)) {
         Object tableSchema =
             !((ArrayList<?>) tableSchemas).isEmpty() ? ((ArrayList<?>) tableSchemas).get(0) : null;
@@ -266,7 +267,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   @Override
   public Document findFieldSchema(String datasetSchemaId, String fieldSchemaId) {
 
-    Object document = mongoDatabase.getCollection("DataSetSchema")
+    Object document = mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA)
         .find(new Document("_id", new ObjectId(datasetSchemaId))
             .append("tableSchemas.recordSchema.fieldSchemas._id", new ObjectId(fieldSchemaId)))
         .projection(new Document("_id", 0).append("tableSchemas.$", 1)).first();
@@ -276,7 +277,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
 
     if (null != document) {
       // Get TableSchemas
-      document = ((Document) document).get("tableSchemas");
+      document = ((Document) document).get(LiteralConstants.TABLE_SCHEMAS);
 
       // Get the TableSchema
       document = ((ArrayList<?>) document).get(0);
@@ -305,7 +306,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
    */
   @Override
   public UpdateResult updateDatasetSchemaDescription(String datasetSchemaId, String description) {
-    return mongoDatabase.getCollection("DataSetSchema").updateOne(
+    return mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA).updateOne(
         new Document("_id", new ObjectId(datasetSchemaId)),
         new Document("$set", new Document("description", description)));
   }
@@ -320,7 +321,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   @Override
   public Document findRecordSchema(String datasetSchemaId, String tableSchemaId) {
 
-    Object document = mongoDatabase.getCollection("DataSetSchema")
+    Object document = mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA)
         .find(new Document("_id", new ObjectId(datasetSchemaId)).append("tableSchemas._id",
             new ObjectId(tableSchemaId)))
         .projection(new Document("_id", 0).append("tableSchemas.$", 1)).first();
@@ -330,7 +331,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
 
     if (null != document) {
       // Get TableSchemas
-      document = ((Document) document).get("tableSchemas");
+      document = ((Document) document).get(LiteralConstants.TABLE_SCHEMAS);
 
       // Get the TableSchema
       document = ((ArrayList<?>) document).get(0);

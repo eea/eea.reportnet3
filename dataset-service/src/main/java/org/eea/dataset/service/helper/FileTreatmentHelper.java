@@ -23,6 +23,7 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,7 +152,7 @@ public class FileTreatmentHelper {
             : EventType.LOAD_SCHEMA_COMPLETED_EVENT;
     try {
       Map<String, Object> value = new HashMap<>();
-      value.put("dataset_id", datasetId);
+      value.put(LiteralConstants.DATASET_ID, datasetId);
       kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, NotificationVO.builder()
           .user(user).datasetId(datasetId).tableSchemaId(tableSchemaId).fileName(fileName).build());
@@ -176,7 +177,7 @@ public class FileTreatmentHelper {
             : EventType.LOAD_SCHEMA_FAILED_EVENT;
     try {
       Map<String, Object> value = new HashMap<>();
-      value.put("dataset_id", datasetId);
+      value.put(LiteralConstants.DATASET_ID, datasetId);
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value,
           NotificationVO.builder().user(user).datasetId(datasetId).tableSchemaId(tableSchemaId)
               .fileName(fileName).error(error).build());
