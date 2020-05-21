@@ -15,6 +15,7 @@ import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
+import org.eea.dataset.mapper.UniqueConstraintMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
@@ -27,6 +28,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.dataset.validate.commands.ValidationSchemaCommand;
 import org.eea.dataset.validate.commands.ValidationSchemaIntegrityCommand;
@@ -45,6 +47,7 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ReferencedFieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Assert;
 import org.junit.Before;
@@ -193,6 +196,14 @@ public class DatasetSchemaServiceTest {
   /** The dataset metabase service. */
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
+
+  /** The unique constraint repository. */
+  @Mock
+  private UniqueConstraintRepository uniqueConstraintRepository;
+
+  /** The unique constraint mapper. */
+  @Mock
+  private UniqueConstraintMapper uniqueConstraintMapper;
 
   /**
    * Inits the mocks.
@@ -1432,4 +1443,33 @@ public class DatasetSchemaServiceTest {
     Mockito.verify(pkCatalogueRepository, times(1)).findByIdPk(Mockito.any());
   }
 
+  @Test
+  public void createUniqueConstraintTest() {
+    dataSchemaServiceImpl.createUniqueConstraint(new UniqueConstraintVO());
+    Mockito.verify(uniqueConstraintRepository, times(1)).save(Mockito.any());
+  }
+
+  @Test
+  public void deleteUniqueConstraintTest() {
+    dataSchemaServiceImpl.deleteUniqueConstraint(new ObjectId().toString());
+    Mockito.verify(uniqueConstraintRepository, times(1)).deleteByUniqueId(Mockito.any());
+  }
+
+  @Test
+  public void updateUniqueConstraintTest() {
+    UniqueConstraintVO unique = new UniqueConstraintVO();
+    unique.setUniqueId(new ObjectId().toString());
+    dataSchemaServiceImpl.updateUniqueConstraint(unique);
+    Mockito.verify(uniqueConstraintRepository, times(1)).deleteByUniqueId(Mockito.any());
+    Mockito.verify(uniqueConstraintRepository, times(1)).save(Mockito.any());
+  }
+
+  @Test
+  public void getUniqueConstraintsTest() {
+    List<UniqueConstraintVO> uniques = new ArrayList<>();
+    uniques.add(new UniqueConstraintVO());
+    Mockito.when(uniqueConstraintMapper.entityListToClass(Mockito.any())).thenReturn(uniques);
+    assertEquals(uniques, dataSchemaServiceImpl.getUniqueConstraints(new ObjectId().toString()));
+
+  }
 }

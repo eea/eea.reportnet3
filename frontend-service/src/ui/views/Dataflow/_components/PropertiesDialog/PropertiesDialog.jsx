@@ -12,7 +12,7 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { PropertiesUtils } from './_functions/Utils/PropertiesUtils';
 
-export const PropertiesDialog = ({ dataflowDataState, onManageDialogs }) => {
+export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
@@ -21,34 +21,34 @@ export const PropertiesDialog = ({ dataflowDataState, onManageDialogs }) => {
   const propertiesRef = useRef(null);
 
   useEffect(() => {
-    if (propertiesRef.current && dataflowDataState.isPropertiesDialogVisible) {
+    if (propertiesRef.current && dataflowState.isPropertiesDialogVisible) {
       setDialogHeight(propertiesRef.current.getBoundingClientRect().height);
     }
-  }, [propertiesRef.current, dataflowDataState.isPropertiesDialogVisible]);
+  }, [propertiesRef.current, dataflowState.isPropertiesDialogVisible]);
 
   const parsedDataflowData = {
-    dataflowName: dataflowDataState.name,
-    dataflowDescription: dataflowDataState.description,
-    dataflowStatus: dataflowDataState.data.status
+    dataflowName: dataflowState.name,
+    dataflowDescription: dataflowState.description,
+    dataflowStatus: dataflowState.data.status
   };
-  const parsedObligationsData = PropertiesUtils.parseObligationsData(dataflowDataState, user.userProps.dateFormat);
+  const parsedObligationsData = PropertiesUtils.parseObligationsData(dataflowState, user.userProps.dateFormat);
 
   const dialogFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink"
       icon="cancel"
       label={resources.messages['close']}
-      onClick={() => onManageDialogs('isPropertiesDialogVisible', false)}
+      onClick={() => manageDialogs('isPropertiesDialogVisible', false)}
     />
   );
 
-  return dataflowDataState.isPropertiesDialogVisible ? (
+  return dataflowState.isPropertiesDialogVisible ? (
     <Dialog
       className={styles.propertiesDialog}
       footer={dialogFooter}
       header={resources.messages['properties']}
-      onHide={() => onManageDialogs('isPropertiesDialogVisible', false)}
-      visible={dataflowDataState.isPropertiesDialogVisible}>
+      onHide={() => manageDialogs('isPropertiesDialogVisible', false)}
+      visible={dataflowState.isPropertiesDialogVisible}>
       <div className={styles.propertiesWrap} ref={propertiesRef} style={{ height: dialogHeight }}>
         <div style={{ marginTop: '1rem', marginBottom: '2rem' }}>
           <TreeViewExpandableItem items={[{ label: resources.messages['dataflowDetails'] }]}>
@@ -67,8 +67,8 @@ export const PropertiesDialog = ({ dataflowDataState, onManageDialogs }) => {
                   onMouseDown: () =>
                     window.open(
                       data.label === 'obligation'
-                        ? `http://rod3.devel1dub.eionet.europa.eu/obligations/${dataflowDataState.obligations.obligationId}`
-                        : `http://rod3.devel1dub.eionet.europa.eu/instruments/${dataflowDataState.obligations.legalInstruments.id}`
+                        ? `http://rod3.devel1dub.eionet.europa.eu/obligations/${dataflowState.obligations.obligationId}`
+                        : `http://rod3.devel1dub.eionet.europa.eu/instruments/${dataflowState.obligations.legalInstruments.id}`
                     )
                 }
               ]}>

@@ -215,31 +215,32 @@ public class FKValidationUtils {
     Rule rule = rulesRepository.findRule(new ObjectId(idDatasetSchema), new ObjectId(idRule));
 
     Validation validation = new Validation();
-    validation.setIdRule(rule.getRuleId().toString());
+    if (rule != null) {
+      validation.setIdRule(rule.getRuleId().toString());
 
-    switch (rule.getThenCondition().get(1)) {
-      case "WARNING":
-        validation.setLevelError(ErrorTypeEnum.WARNING);
-        break;
-      case "ERROR":
-        validation.setLevelError(ErrorTypeEnum.ERROR);
-        break;
-      case "INFO":
-        validation.setLevelError(ErrorTypeEnum.INFO);
-        break;
-      case "BLOCKER":
-        validation.setLevelError(ErrorTypeEnum.BLOCKER);
-        break;
-      default:
-        validation.setLevelError(ErrorTypeEnum.BLOCKER);
-        break;
+      switch (rule.getThenCondition().get(1)) {
+        case "WARNING":
+          validation.setLevelError(ErrorTypeEnum.WARNING);
+          break;
+        case "ERROR":
+          validation.setLevelError(ErrorTypeEnum.ERROR);
+          break;
+        case "INFO":
+          validation.setLevelError(ErrorTypeEnum.INFO);
+          break;
+        case "BLOCKER":
+          validation.setLevelError(ErrorTypeEnum.BLOCKER);
+          break;
+        default:
+          validation.setLevelError(ErrorTypeEnum.BLOCKER);
+          break;
+      }
+
+      validation.setMessage(rule.getThenCondition().get(0));
+      validation.setTypeEntity(EntityTypeEnum.FIELD);
+      validation.setValidationDate(new Date().toString());
+      validation.setOriginName(origname.getNameTableSchema());
     }
-
-    validation.setMessage(rule.getThenCondition().get(0));
-    validation.setTypeEntity(EntityTypeEnum.FIELD);
-    validation.setValidationDate(new Date().toString());
-    validation.setOriginName(origname.getNameTableSchema());
-
     return validation;
   }
 

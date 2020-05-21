@@ -4,9 +4,10 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
-// import { Calendar } from 'ui/views/_components/Calendar';
+import { Calendar } from 'ui/views/_components/Calendar';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import { MultiSelect } from 'primereact/multiselect';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -73,8 +74,21 @@ const FieldEditor = ({
     setLinkItemsOptions(linkItems);
   };
 
+  const formatDate = date => {
+    let d = new Date(date),
+      month = '' + (d.getMonth() + 1),
+      day = '' + d.getDate(),
+      year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
+  };
+
   const getCodelistItemsWithEmptyOption = () => {
     const codelistsItems = RecordUtils.getCodelistItems(colsSchema, cells.field);
+    codelistsItems.sort();
     codelistsItems.unshift({
       itemType: resources.messages['noneCodelist'],
       value: ''
@@ -131,7 +145,7 @@ const FieldEditor = ({
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
             type="text"
             value={RecordUtils.getCellValue(cells, cells.field)}
-            maxlength={textCharacters}
+            maxLength={textCharacters}
           />
         );
       case 'LONG_TEXT':
@@ -147,7 +161,7 @@ const FieldEditor = ({
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
             type="text"
             value={RecordUtils.getCellValue(cells, cells.field)}
-            maxlength={longTextCharacters}
+            maxLength={longTextCharacters}
           />
         );
       case 'NUMBER_INTEGER':
@@ -161,7 +175,7 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
-            maxlength={longCharacters}
+            maxLength={longCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -176,7 +190,7 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
-            maxlength={decimalCharacters}
+            maxLength={decimalCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -199,27 +213,32 @@ const FieldEditor = ({
         );
       case 'DATE':
         return (
-          <InputText
-            keyfilter={getFilter(type)}
-            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
-            onChange={e => onEditorValueChange(cells, e.target.value)}
-            onFocus={e => {
-              e.preventDefault();
-              onEditorValueFocus(cells, e.target.value);
+          // <InputText
+          //   keyfilter={getFilter(type)}
+          //   onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+          //   onChange={e => onEditorValueChange(cells, e.target.value)}
+          //   onFocus={e => {
+          //     e.preventDefault();
+          //     onEditorValueFocus(cells, e.target.value);
+          //   }}
+          //   // type="date"
+          //   maxLength={dateCharacters}
+          //   placeHolder="YYYY-MM-DD"
+          //   value={RecordUtils.getCellValue(cells, cells.field)}
+          // />
+          <Calendar
+            onChange={e => {
+              onEditorValueChange(cells, formatDate(e.target.value));
+              onEditorSubmitValue(cells, formatDate(e.target.value), record);
             }}
-            // type="date"
-            maxlength={dateCharacters}
-            placeHolder="YYYY-MM-DD"
-            value={RecordUtils.getCellValue(cells, cells.field)}
+            onFocus={e => onEditorValueFocus(cells, formatDate(e.target.value))}
+            appendTo={document.body}
+            dateFormat="yy-mm-dd"
+            monthNavigator={true}
+            value={new Date(RecordUtils.getCellValue(cells, cells.field))}
+            yearNavigator={true}
+            yearRange="2010:2030"
           />
-          //   <Calendar
-          //     //   onChange={e => onEditorValueChange(cells, e.value)}
-          //     dateFormat="yy-mm-dd"
-          //     monthNavigator={true}
-          //     value={RecordUtils.getCellValue(cells, cells.field)}
-          //     yearNavigator={true}
-          //     yearRange="2010:2030"
-          //   />
         );
       case 'EMAIL':
         return (
@@ -231,7 +250,8 @@ const FieldEditor = ({
               e.preventDefault();
               onEditorValueFocus(cells, e.target.value);
             }}
-            maxlength={emailCharacters}
+            onKeyDown={e => onEditorKeyChange(cells, e, record)}
+            maxLength={emailCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -239,13 +259,14 @@ const FieldEditor = ({
         return (
           <InputText
             keyfilter={getFilter(type)}
+            maxLength={urlCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
               e.preventDefault();
               onEditorValueFocus(cells, e.target.value);
             }}
-            maxlength={urlCharacters}
+            onKeyDown={e => onEditorKeyChange(cells, e, record)}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -253,13 +274,14 @@ const FieldEditor = ({
         return (
           <InputText
             keyfilter={getFilter(type)}
+            maxLength={phoneCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
               e.preventDefault();
               onEditorValueFocus(cells, e.target.value);
             }}
-            maxlength={phoneCharacters}
+            onKeyDown={e => onEditorKeyChange(cells, e, record)}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -302,6 +324,33 @@ const FieldEditor = ({
             optionLabel="itemType"
             options={getCodelistItemsWithEmptyOption()}
             value={RecordUtils.getCodelistValue(codelistItemsOptions, codelistItemValue)}
+          />
+        );
+      case 'MULTISELECT_CODELIST':
+        return (
+          <MultiSelect
+            // onChange={e => onChangeForm(field, e.value)}
+            appendTo={document.body}
+            maxSelectedLabels={10}
+            onChange={e => {
+              try {
+                setCodelistItemValue(e.value);
+                onEditorValueChange(cells, e.value);
+                onEditorSubmitValue(cells, e.value, record);
+              } catch (error) {
+                console.error(error);
+              }
+            }}
+            onFocus={e => {
+              e.preventDefault();
+              if (!isUndefined(codelistItemValue)) {
+                onEditorValueFocus(cells, codelistItemValue);
+              }
+            }}
+            options={RecordUtils.getCodelistItems(colsSchema, cells.field)}
+            optionLabel="itemType"
+            styles={{ border: 'var(--dropdown-border)', borderColor: 'red' }}
+            value={RecordUtils.getMultiselectValues(codelistItemsOptions, codelistItemValue)}
           />
         );
       default:

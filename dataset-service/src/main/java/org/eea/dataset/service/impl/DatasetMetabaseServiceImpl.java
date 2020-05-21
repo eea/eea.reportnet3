@@ -50,6 +50,7 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -495,8 +496,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
             dataset = new DesignDataset();
             fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
             designDatasetRepository.save((DesignDataset) dataset);
-            recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(),
-                datasetSchemaId);
+            recordStoreControllerZull.createEmptyDataset(
+                LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
             this.createSchemaGroupAndAddUser(dataset.getId());
             idDesignDataset = dataset.getId();
             break;
@@ -505,8 +506,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
             fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
             ((DataCollection) dataset).setDueDate(dueDate);
             dataCollectionRepository.save((DataCollection) dataset);
-            recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(),
-                datasetSchemaId);
+            recordStoreControllerZull.createEmptyDataset(
+                LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
             LOG.info("New Data Collection created into the dataflow {}. DatasetId {} with name {}",
                 dataflowId, dataset.getId(), datasetName);
             this.createGroupDcAndAddUser(dataset.getId());
@@ -575,7 +576,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     dataset.setDataProviderId(representative.getDataProviderId());
     Long idDataset = reportingDatasetRepository.save(dataset).getId();
     datasetIdsEmail.put(idDataset, representative.getProviderAccount());
-    recordStoreControllerZull.createEmptyDataset("dataset_" + idDataset, datasetSchemaId);
+    recordStoreControllerZull.createEmptyDataset(LiteralConstants.DATASET_PREFIX + idDataset,
+        datasetSchemaId);
     LOG.info("New Reporting Dataset into the dataflow {}. DatasetId {} with name {}", dataflowId,
         idDataset, provider.getLabel());
 

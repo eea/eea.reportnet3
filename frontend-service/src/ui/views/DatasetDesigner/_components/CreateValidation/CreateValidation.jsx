@@ -482,7 +482,7 @@ const CreateValidation = ({ toggleVisibility, datasetId, tabs }) => {
                     />
                   </div>
                   <div className={`${styles.field} ${styles.qcDescription} formField`}>
-                    <label htmlFor="description">{resourcesContext.messages.description}</label>
+                    <label htmlFor="description">{resourcesContext.messages.qcDescription}</label>
                     <InputText
                       id={`${componentName}__description`}
                       placeholder={resourcesContext.messages.description}

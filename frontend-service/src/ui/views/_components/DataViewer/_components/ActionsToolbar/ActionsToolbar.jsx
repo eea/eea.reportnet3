@@ -22,20 +22,21 @@ import { MetadataUtils } from 'ui/views/_functions/Utils';
 
 const ActionsToolbar = ({
   colsSchema,
-  datasetId,
   dataflowId,
+  datasetId,
   hasWritePermissions,
-  isTableDeleted,
+  isDataCollection = false,
   isFilterValidationsActive,
   isLoading,
+  isTableDeleted,
   isValidationSelected,
   isWebFormMMR,
   levelErrorTypesWithCorrects,
   onRefresh,
-  setColumns,
   onSetVisible,
   originalColumns,
   records,
+  setColumns,
   setDeleteDialogVisible,
   setImportDialogVisible,
   showValidationFilter,
@@ -173,13 +174,13 @@ const ActionsToolbar = ({
           label={resources.messages['import']}
           onClick={() => setImportDialogVisible(true)}
         />
-
         <Button
           id="buttonExportTable"
           className={`p-button-rounded p-button-secondary-transparent ${
-            !hasWritePermissions ? null : 'p-button-animated-blink'
+            isDataCollection ? null : 'p-button-animated-blink'
           }`}
-          disabled={!hasWritePermissions}
+          // disabled={!hasWritePermissions}
+          disabled={isDataCollection}
           icon={isLoadingFile ? 'spinnerAnimate' : 'import'}
           label={resources.messages['exportTable']}
           onClick={event => {
@@ -280,7 +281,7 @@ const ActionsToolbar = ({
           onClick={() => {}
           /> */}
       </div>
-      <div className="p-toolbar-group-right">
+      {/* <div className="p-toolbar-group-right">
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
             isLoading ? 'p-button-animated-spin' : ''
@@ -289,7 +290,7 @@ const ActionsToolbar = ({
           label={resources.messages['refresh']}
           onClick={() => onRefresh()}
         />
-      </div>
+      </div> */}
     </Toolbar>
   );
 };

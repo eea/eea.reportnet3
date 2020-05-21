@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.apache.commons.lang3.StringUtils;
-import org.bson.types.ObjectId;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -28,6 +27,7 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,7 +137,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       datasetId.get();
     } catch (InterruptedException | ExecutionException | EEAException e) {
       LOG.error("Aborted DataSetSchema creation: {}", e.getMessage());
-      Thread.currentThread().interrupt();
+      if (e instanceof InterruptedException) {
+        Thread.currentThread().interrupt();
+      }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           "Error creating design dataset", e);
     }
@@ -637,28 +639,95 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     return schemas;
   }
 
+
   /**
-   * Gets the unique fields.
+   * Gets the unique constraints.
    *
    * @param datasetSchemaId the dataset schema id
-   * @return the unique fields
+   * @return the unique constraints
    */
   @Override
-  @GetMapping(value = "{schemaId}/getUniqueFields", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<FieldSchemaVO> getUniqueFields(@PathVariable("schemaId") String datasetSchemaId) {
-    // Return dummy data to mock the service
-    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
-    fieldSchemaVO.setName("schema1");
-    fieldSchemaVO.setUnique(true);
-    fieldSchemaVO.setId(new ObjectId().toString());
-    FieldSchemaVO fieldSchemaVO2 = new FieldSchemaVO();
-    fieldSchemaVO2.setName("schema1");
-    fieldSchemaVO2.setUnique(true);
-    fieldSchemaVO2.setId(new ObjectId().toString());
-    List<FieldSchemaVO> uniqueFields = new ArrayList<>();
-    uniqueFields.add(fieldSchemaVO);
-    uniqueFields.add(fieldSchemaVO2);
-    return uniqueFields;
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @GetMapping(value = "{schemaId}/getUniqueConstraints",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<UniqueConstraintVO> getUniqueConstraints(
+      @PathVariable("schemaId") String datasetSchemaId) {
+    if (datasetSchemaId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+    }
+
+    return dataschemaService.getUniqueConstraints(datasetSchemaId);
+  }
+
+
+  /**
+   * Creates the unique constraint.
+   *
+   * @param uniqueConstraint the unique constraint
+   */
+  @Override
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PostMapping(value = "/createUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void createUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
+    if (uniqueConstraint != null) {
+      if (uniqueConstraint.getDatasetSchemaId() == null) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+      } else if (uniqueConstraint.getTableSchemaId() == null) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
+      }
+    } else {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UNREPORTED_DATA);
+    }
+    dataschemaService.createUniqueConstraint(uniqueConstraint);
+  }
+
+  /**
+   * Delete unique constraint.
+   *
+   * @param uniqueConstraintId the unique constraint id
+   */
+  @Override
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @DeleteMapping(value = "/deleteUniqueConstraint/{uniqueConstraintId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public void deleteUniqueConstraint(
+      @PathVariable("uniqueConstraintId") String uniqueConstraintId) {
+    if (uniqueConstraintId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT);
+    }
+    dataschemaService.deleteUniqueConstraint(uniqueConstraintId);
+  }
+
+  /**
+   * Update unique constraint.
+   *
+   * @param uniqueConstraint the unique constraint
+   */
+  @Override
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PutMapping(value = "/updateUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void updateUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
+    if (uniqueConstraint == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UNREPORTED_DATA);
+    }
+    if (uniqueConstraint.getDatasetSchemaId() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+    }
+    if (uniqueConstraint.getTableSchemaId() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
+    }
+    if (uniqueConstraint.getUniqueId() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT);
+    }
+
+    dataschemaService.updateUniqueConstraint(uniqueConstraint);
   }
 
 }

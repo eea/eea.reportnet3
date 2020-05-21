@@ -113,7 +113,7 @@ public interface DataFlowController {
    * @return the response entity
    */
   @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-  ResponseEntity<?> createDataFlow(@RequestBody DataFlowVO dataFlowVO);
+  ResponseEntity createDataFlow(@RequestBody DataFlowVO dataFlowVO);
 
   /**
    * Update data flow.
@@ -122,7 +122,7 @@ public interface DataFlowController {
    * @return the response entity
    */
   @PutMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-  ResponseEntity<?> updateDataFlow(@RequestBody DataFlowVO dataFlowVO);
+  ResponseEntity updateDataFlow(@RequestBody DataFlowVO dataFlowVO);
 
   /**
    * Gets the metabase by id.

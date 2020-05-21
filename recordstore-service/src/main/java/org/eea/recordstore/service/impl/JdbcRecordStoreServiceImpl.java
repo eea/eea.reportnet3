@@ -23,7 +23,6 @@ import javax.sql.DataSource;
 import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -35,6 +34,7 @@ import org.eea.lock.service.LockService;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.postgresql.copy.CopyIn;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.copy.CopyOut;
@@ -64,31 +64,42 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private static final String FILE_PATTERN_NAME = "snapshot_%s%s";
 
   /**
-   * The kafka sender utils.
+   * The Constant LOG_ERROR.
    */
-  @Autowired
-  private KafkaSenderUtils kafkaSenderUtils;
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
-   * The data collection controller zuul.
+   * The Constant LOG.
    */
-  @Autowired
-  private DataCollectionControllerZuul dataCollectionControllerZuul;
+  private static final Logger LOG = LoggerFactory.getLogger(JdbcRecordStoreServiceImpl.class);
 
-  /** The dataset controller zuul. */
-  @Autowired
-  private DataSetControllerZuul datasetControllerZuul;
+  /**
+   * The constant GRANT_ALL_PRIVILEGES_ON_SCHEMA.
+   */
+  private static final String GRANT_ALL_PRIVILEGES_ON_SCHEMA =
+      "grant all privileges on schema %s to %s;";
+  /**
+   * The constant GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA.
+   */
+  private static final String GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA =
+      "grant all privileges on all tables in schema %s to %s;";
+
+  /**
+   * The constant GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA.
+   */
+  private static final String GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA =
+      "grant all privileges on all sequences in schema %s to %s;";
 
   /**
    * The user postgre db.
    */
-  @Value("${spring.datasource.username}")
+  @Value("${spring.datasource.dataset.username}")
   private String userPostgreDb;
 
   /**
    * The pass postgre db.
    */
-  @Value("${spring.datasource.password}")
+  @Value("${spring.datasource.dataset.password}")
   private String passPostgreDb;
 
   /**
@@ -104,10 +115,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private String sqlGetDatasetsName;
 
   /**
-   * The jdbc template.
+   * the dataset users
    */
-  @Autowired
-  private JdbcTemplate jdbcTemplate;
+
+  @Value("${dataset.users}")
+  private String datasetUsers;
+
 
   /**
    * The resource file.
@@ -121,14 +134,24 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("${pathSnapshot}")
   private String pathSnapshot;
 
-  /** The time to wait before releasing notification. */
+  /**
+   * The time to wait before releasing notification.
+   */
   @Value("${dataset.creation.notification.ms}")
   private Long timeToWaitBeforeReleasingNotification;
 
 
-  /** The buffer file. */
+  /**
+   * The buffer file.
+   */
   @Value("${snapshot.bufferSize}")
   private Integer bufferFile;
+
+  /**
+   * The jdbc template.
+   */
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
 
   /**
    * The data source.
@@ -142,16 +165,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Autowired
   private LockService lockService;
 
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
-   * The Constant LOG.
+   * The kafka sender utils.
    */
-  private static final Logger LOG = LoggerFactory.getLogger(JdbcRecordStoreServiceImpl.class);
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
+  /**
+   * The data collection controller zuul.
+   */
+  @Autowired
+  private DataCollectionControllerZuul dataCollectionControllerZuul;
 
 
   /**
@@ -179,9 +204,21 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       String command;
       while ((command = br.readLine()) != null) {
         for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
-          statement.addBatch(command.replace("%dataset_name%", "dataset_" + datasetId)
-              .replace("%user%", userPostgreDb));
+          statement.addBatch(
+              command.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId)
+                  .replace("%user%", userPostgreDb));
         }
+      }
+
+      // granting access to the rest of the database users. This way all the micros will be able to
+      // use their users
+      for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
+        statement.addBatch(String.format(GRANT_ALL_PRIVILEGES_ON_SCHEMA,
+            LiteralConstants.DATASET_PREFIX + datasetId, datasetUsers));
+        statement.addBatch(String.format(GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA,
+            LiteralConstants.DATASET_PREFIX + datasetId, datasetUsers));
+        statement.addBatch(String.format(GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA,
+            LiteralConstants.DATASET_PREFIX + datasetId, datasetUsers));
       }
 
       // Execute queries and commit results
@@ -194,6 +231,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         Thread.sleep(timeToWaitBeforeReleasingNotification);
       } catch (InterruptedException e) {
         LOG_ERROR.error("Error sleeping thread before releasing notification kafka events", e);
+        Thread.currentThread().interrupt();
       }
 
       LOG.info("Releasing notifications via Kafka");
@@ -242,8 +280,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       command = command.replace("%user%", userPostgreDb);
       jdbcTemplate.execute(command);
     }
+    // Granting rights to the rest of the users, so every microservice is able to use its own user
+    jdbcTemplate.execute(String.format(GRANT_ALL_PRIVILEGES_ON_SCHEMA, datasetName, datasetUsers));
+    jdbcTemplate.execute(
+        String.format(GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA, datasetName, datasetUsers));
+    jdbcTemplate.execute(
+        String.format(GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA, datasetName, datasetUsers));
 
     LOG.info("Empty design dataset created");
+
     // Now we insert the values into the dataset_value table of the brand new schema
     StringBuilder insertSql = new StringBuilder("INSERT INTO ");
     insertSql.append(datasetName).append(".dataset_value(id, id_dataset_schema) values (?, ?)");
@@ -307,7 +352,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       throws SQLException, IOException {
 
     ConnectionDataVO connectionDataVO =
-        getConnectionDataForDataset("dataset_" + idReportingDataset);
+        getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
     Connection con = null;
     try {
       con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
@@ -316,15 +361,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       CopyManager cm = new CopyManager((BaseConnection) con);
 
       // Copy dataset_value
-      String nameFileDatasetValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_DatasetValue.snap");
+      String nameFileDatasetValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX);
       String copyQueryDataset = "COPY (SELECT id, id_dataset_schema FROM dataset_"
           + idReportingDataset + ".dataset_value) to STDOUT";
 
       printToFile(nameFileDatasetValue, copyQueryDataset, cm);
       // Copy table_value
-      String nameFileTableValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_TableValue.snap");
+      String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
 
       String copyQueryTable = "COPY (SELECT id, id_table_schema, dataset_id FROM dataset_"
           + idReportingDataset + ".table_value) to STDOUT";
@@ -332,8 +377,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       printToFile(nameFileTableValue, copyQueryTable, cm);
 
       // Copy record_value
-      String nameFileRecordValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_RecordValue.snap");
+      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
       String copyQueryRecord =
           "COPY (SELECT id, id_record_schema, id_table, dataset_partition_id,data_provider_code FROM dataset_"
               + idReportingDataset + ".record_value WHERE dataset_partition_id="
@@ -342,8 +387,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       printToFile(nameFileRecordValue, copyQueryRecord, cm);
 
       // Copy field_value
-      String nameFileFieldValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_FieldValue.snap");
+      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
       String copyQueryField =
           "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
               + idReportingDataset + ".field_value fv inner join dataset_" + idReportingDataset
@@ -393,8 +438,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
     Map<String, Object> value = new HashMap<>();
-    value.put("dataset_id", idReportingDataset);
-    ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
+    value.put(LiteralConstants.DATASET_ID, idReportingDataset);
+    ConnectionDataVO conexion =
+        getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
     Connection con = null;
     Statement stmt = null;
     try {
@@ -412,6 +458,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           case DESIGN:
             sql = "DELETE FROM dataset_" + idReportingDataset + ".table_value";
             break;
+          default:
+            break;
         }
         stmt = con.createStatement();
         LOG.info("Deleting previous data");
@@ -424,25 +472,27 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         case DESIGN:
           // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
           // not neccesary
-          String nameFileTableValue =
-              pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_TableValue.snap");
+          String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+              LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
 
           String copyQueryTable = "COPY dataset_" + idReportingDataset
               + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
           copyFromFile(copyQueryTable, nameFileTableValue, cm);
           break;
+        default:
+          break;
       }
       // Record value
-      String nameFileRecordValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_RecordValue.snap");
+      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
 
       String copyQueryRecord = "COPY dataset_" + idReportingDataset
           + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
       copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
 
       // Field value
-      String nameFileFieldValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_FieldValue.snap");
+      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
 
       String copyQueryField = "COPY dataset_" + idReportingDataset
           + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
@@ -516,7 +566,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
 
-    ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
+    ConnectionDataVO conexion =
+        getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
     Connection con = null;
     Statement stmt = null;
     try {
@@ -534,6 +585,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           case DESIGN:
             sql = "DELETE FROM dataset_" + idReportingDataset + ".table_value";
             break;
+          default:
+            break;
         }
         stmt = con.createStatement();
         LOG.info("Deleting previous data");
@@ -547,25 +600,27 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         case DESIGN:
           // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
           // not neccesary
-          String nameFileTableValue =
-              pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_TableValue.snap");
+          String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+              LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
 
           String copyQueryTable = "COPY dataset_" + idReportingDataset
               + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
           copyFromFile(copyQueryTable, nameFileTableValue, cm);
           break;
+        default:
+          break;
       }
       // Record value
-      String nameFileRecordValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_RecordValue.snap");
+      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
 
       String copyQueryRecord = "COPY dataset_" + idReportingDataset
           + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
       copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
 
       // Field value
-      String nameFileFieldValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_FieldValue.snap");
+      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
 
       String copyQueryField = "COPY dataset_" + idReportingDataset
           + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
@@ -598,7 +653,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
 
-
   /**
    * Delete data snapshot.
    *
@@ -610,14 +664,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Override
   public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {
 
-    String nameFileDatasetValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_DatasetValue.snap";
-    String nameFileTableValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_TableValue.snap";
-    String nameFileRecordValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_RecordValue.snap";
-    String nameFileFieldValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_FieldValue.snap";
+    String nameFileDatasetValue = "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset
+        + LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX;
+    String nameFileTableValue = "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset
+        + LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX;
+    String nameFileRecordValue = "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset
+        + LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX;
+    String nameFileFieldValue = "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset
+        + LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX;
 
     Path path1 = Paths.get(pathSnapshot + nameFileDatasetValue);
     Files.deleteIfExists(path1);
@@ -702,8 +756,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       Map<String, Object> result = new HashMap<>();
       String datasetName = "dataset_" + entry.getKey();
       result.put("connectionDataVO", createConnectionDataVO(datasetName));
-      result.put("dataset_id", datasetName);
-      result.put("idDatasetSchema", entry.getValue());
+      result.put(LiteralConstants.DATASET_ID, datasetName);
+      result.put(LiteralConstants.ID_DATASET_SCHEMA, entry.getValue());
 
       kafkaSenderUtils.releaseKafkaEvent(EventType.CONNECTION_CREATED_EVENT, result);
     }
@@ -812,10 +866,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           "Error restoring the file {} executing query {}. Restoring snapshot continues", fileName,
           query, e);
     } finally {
-      from.close();
+      if (null != from) {
+        from.close();
+      }
       cp.endCopy();
-      if (cp.isActive())
+      if (cp.isActive()) {
         cp.cancelCopy();
+      }
     }
   }
 

@@ -12,6 +12,7 @@ import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
+import org.eea.dataset.mapper.UniqueConstraintMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
@@ -24,6 +25,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -43,12 +45,14 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,6 +141,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
+
+  @Autowired
+  private UniqueConstraintRepository uniqueConstraintRepository;
+
+  @Autowired
+  private UniqueConstraintMapper uniqueConstraintMapper;
 
   /**
    * Creates the empty data set schema.
@@ -551,12 +561,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       if (fieldSchema != null) {
         // First of all, we update the previous data in the catalog
-        if (DataType.LINK.getValue().equals(fieldSchema.get("typeData"))) {
+        if (DataType.LINK.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))) {
           // Proceed to the changes needed. Remove the previous reference
           String previousId = fieldSchema.get("_id").toString();
-          Document previousReferenced = (Document) fieldSchema.get("referencedField");
+          Document previousReferenced =
+              (Document) fieldSchema.get(LiteralConstants.REFERENCED_FIELD);
           String previousIdPk = previousReferenced.get("idPk").toString();
-          String previousIdDatasetReferenced = previousReferenced.get("idDatasetSchema").toString();
+          String previousIdDatasetReferenced =
+              previousReferenced.get(LiteralConstants.ID_DATASET_SCHEMA).toString();
           PkCatalogueSchema catalogue =
               pkCatalogueRepository.findByIdPk(new ObjectId(previousIdPk));
           if (catalogue != null) {
@@ -575,12 +587,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
         // Modify it based on FieldSchemaVO data received
         if (fieldSchemaVO.getType() != null
-            && !fieldSchema.put("typeData", fieldSchemaVO.getType().getValue())
+            && !fieldSchema.put(LiteralConstants.TYPE_DATA, fieldSchemaVO.getType().getValue())
                 .equals(fieldSchemaVO.getType().getValue())) {
           typeModified = true;
           if (!fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")
-              && fieldSchema.containsKey("codelistItems")) {
-            fieldSchema.remove("codelistItems");
+              && fieldSchema.containsKey(LiteralConstants.CODELIST_ITEMS)) {
+            fieldSchema.remove(LiteralConstants.CODELIST_ITEMS);
           }
         }
         if (fieldSchemaVO.getDescription() != null) {
@@ -594,7 +606,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
             && (fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")
                 || fieldSchemaVO.getType().getValue().equalsIgnoreCase("MULTISELECT_CODELIST"))) {
-          fieldSchema.put("codelistItems", Arrays.asList(fieldSchemaVO.getCodelistItems()));
+          fieldSchema.put(LiteralConstants.CODELIST_ITEMS,
+              Arrays.asList(fieldSchemaVO.getCodelistItems()));
           typeModified = true;
         }
         if (fieldSchemaVO.getRequired() != null) {
@@ -608,10 +621,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
         if (fieldSchemaVO.getReferencedField() != null) {
           Document referenced = new Document();
-          referenced.put("idDatasetSchema",
+          referenced.put(LiteralConstants.ID_DATASET_SCHEMA,
               new ObjectId(fieldSchemaVO.getReferencedField().getIdDatasetSchema()));
           referenced.put("idPk", new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
-          fieldSchema.put("referencedField", referenced);
+          fieldSchema.put(LiteralConstants.REFERENCED_FIELD, referenced);
           // We need to update the fieldSchema that is referenced, the property isPKreferenced to
           // true
           this.updateIsPkReferencedInFieldSchema(
@@ -757,7 +770,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
           fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
       // update the dataset field value
-      TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
+      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
       datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
     } else {
       if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
@@ -996,11 +1009,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       String datasetSchemaId) {
     Document fieldSchema =
         schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
-    if (fieldSchema != null && DataType.LINK.getValue().equals(fieldSchema.get("typeData"))) {
+    if (fieldSchema != null
+        && DataType.LINK.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))) {
       // First of all, we delete the previous relation on the Metabase, if applies
-      Document previousReferenced = (Document) fieldSchema.get("referencedField");
+      Document previousReferenced = (Document) fieldSchema.get(LiteralConstants.REFERENCED_FIELD);
       String previousIdPk = previousReferenced.get("idPk").toString();
-      String previousIdDatasetReferenced = previousReferenced.get("idDatasetSchema").toString();
+      String previousIdDatasetReferenced =
+          previousReferenced.get(LiteralConstants.ID_DATASET_SCHEMA).toString();
       datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
           this.getDesignDatasetIdDestinationFromFk(previousIdDatasetReferenced), previousIdPk,
           fieldSchemaVO.getId());
@@ -1221,4 +1236,50 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
 
+  /**
+   * Creates the unique constraint.
+   *
+   * @param uniqueConstraint the unique constraint
+   */
+  @Override
+  public void createUniqueConstraint(UniqueConstraintVO uniqueConstraintVO) {
+    LOG.info("Creating unique contraint");
+    uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
+  }
+
+  /**
+   * Delete unique constraint.
+   *
+   * @param uniqueId the unique id
+   */
+  @Override
+  public void deleteUniqueConstraint(String uniqueId) {
+    LOG.info("deleting constraint {}", uniqueId);
+    uniqueConstraintRepository.deleteByUniqueId(new ObjectId(uniqueId));
+  }
+
+  /**
+   * Update unique constraint.
+   *
+   * @param uniequeConstraint the unique constraint
+   */
+  @Override
+  public void updateUniqueConstraint(UniqueConstraintVO uniqueConstraintVO) {
+    LOG.info("updating constraint {}", uniqueConstraintVO.getUniqueId());
+    uniqueConstraintRepository.deleteByUniqueId(new ObjectId(uniqueConstraintVO.getUniqueId()));
+    uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
+  }
+
+  /**
+   * Gets the unique constraints.
+   *
+   * @param schemaId the schema id
+   * @return the unique constraints
+   */
+  @Override
+  public List<UniqueConstraintVO> getUniqueConstraints(String schemaId) {
+    LOG.info("get all unique Constraints of dataset {}", schemaId);
+    return uniqueConstraintMapper.entityListToClass(
+        uniqueConstraintRepository.findByDatasetSchemaId(new ObjectId(schemaId)));
+  }
 }
