@@ -15,16 +15,14 @@ import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { constraintsReducer } from './_functions/Reducers/constraintsReducer';
 
 import { UniqueConstraintsUtils } from './_functions/Utils/UniqueConstraintsUtils';
 
-export const UniqueConstraints = ({ datasetSchemaId }) => {
+export const UniqueConstraints = ({ datasetSchemaId, tableData }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const userContext = useContext(UserContext);
 
   const [constraintsState, constraintsDispatch] = useReducer(constraintsReducer, {
     data: {},
@@ -80,9 +78,10 @@ export const UniqueConstraints = ({ datasetSchemaId }) => {
 
   const onLoadConstraints = async () => {
     try {
+      const response = await UniqueConstraintsService.all(datasetSchemaId);
       constraintsDispatch({
         type: 'INITIAL_LOAD',
-        payload: { data: await UniqueConstraintsService.all(datasetSchemaId) }
+        payload: { data: UniqueConstraintsUtils.parseConstraintsList(response, tableData) }
       });
     } catch (error) {
       notificationContext.add({ type: 'LOAD_UNIQUE_CONSTRAINTS_ERROR' });
@@ -104,14 +103,22 @@ export const UniqueConstraints = ({ datasetSchemaId }) => {
 
   const renderColumns = constraints => {
     const fieldColumns = Object.keys(constraints[0])
-      .filter(item => !item.includes('Id'))
+      .filter(key => !key.includes('Id'))
       .map(field => (
-        <Column columnResizeMode="expand" field={field} header={field.constraintsName} key={field} sortable={true} />
+        <Column
+          body={field === 'fieldData' ? renderFieldBody : null}
+          field={field}
+          header={resources.messages[field]}
+          key={field}
+          sortable={true}
+        />
       ));
 
     fieldColumns.push(actionButtonsColumn);
     return fieldColumns;
   };
+
+  const renderFieldBody = rowData => rowData.fieldData.map(field => field.name).join(', ');
 
   if (constraintsState.isLoading) return <Spinner style={{ top: 0 }} />;
 
@@ -119,12 +126,7 @@ export const UniqueConstraints = ({ datasetSchemaId }) => {
     <Fragment>{resources.messages['noConstraints']}</Fragment>
   ) : (
     <Fragment>
-      <Filters
-        data={constraintsState.data}
-        getFilteredData={onLoadFilteredData}
-        inputOptions={['name', 'description']}
-        selectOptions={['pkMustBeUsed', 'pkReferenced', 'unique']}
-      />
+      <Filters data={constraintsState.data} getFilteredData={onLoadFilteredData} selectOptions={['tableSchemaName']} />
 
       {!isEmpty(constraintsState.filteredData) ? (
         <DataTable

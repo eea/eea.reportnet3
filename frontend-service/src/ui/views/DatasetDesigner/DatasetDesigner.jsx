@@ -328,9 +328,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       footer={renderUniqueConstraintsFooter}
       header={resources.messages['uniqueConstraints']}
       onHide={() => manageDialogs('uniqueConstraintListDialogVisible', false)}
-      style={{ width: '90%' }}
+      style={{ width: '70%' }}
       visible={designerState.uniqueConstraintListDialogVisible}>
-      <UniqueConstraints datasetSchemaId={designerState.datasetSchemaId} />
+      <UniqueConstraints
+        datasetSchemaId={designerState.datasetSchemaId}
+        tableData={designerState.datasetSchemaAllTables}
+      />
     </Dialog>
   );
 

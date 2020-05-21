@@ -2,7 +2,7 @@ import isNil from 'lodash/isNil';
 
 import { apiUniqueConstraints } from 'core/infrastructure/api/domain/model/UniqueConstraints/ApiUniqueConstraints';
 
-import { DatasetTableField } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableField/DatasetTableField';
+import { UniqueConstraint } from 'core/domain/model/UniqueConstraints/UniqueConstraint';
 
 const all = async datasetSchemaId => parseConstraintsList(await apiUniqueConstraints.all(datasetSchemaId));
 
@@ -17,21 +17,7 @@ const update = async (description, fieldId, fieldSchemaId, name) => {
   await apiUniqueConstraints.update(description, fieldId, fieldSchemaId, name);
 };
 
-const parseConstraint = constraintDTO =>
-  new DatasetTableField({
-    codelistItems: constraintDTO.codelistItems,
-    description: constraintDTO.description,
-    fieldId: constraintDTO.id,
-    name: constraintDTO.name,
-    pk: !isNil(constraintDTO.pk) ? constraintDTO.pk : false,
-    pkMustBeUsed: !isNil(constraintDTO.pkMustBeUsed) ? constraintDTO.pkMustBeUsed : false,
-    pkReferenced: !isNil(constraintDTO.pkReferenced) ? constraintDTO.pkReferenced : false,
-    recordId: constraintDTO.idRecord,
-    referencedField: constraintDTO.referencedField,
-    required: constraintDTO.required,
-    type: constraintDTO.type,
-    unique: constraintDTO.unique
-  });
+const parseConstraint = constraintDTO => new UniqueConstraint(constraintDTO);
 
 const parseConstraintsList = constraintsDTO => {
   if (!isNil(constraintsDTO)) {

@@ -646,6 +646,8 @@
     "selectedTable": "Selected table",
     "selectedFields": "Selected fields",
     "multiselectCodelists": "Multiselect items",
-    "pkValuesMustBeUsed": "All PK values must be used on link"
+    "pkValuesMustBeUsed": "All PK values must be used on link",
+    "tableSchemaName": "Table name",
+    "fieldData": "Field name"
   }
 }
