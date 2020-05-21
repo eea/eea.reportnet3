@@ -63,6 +63,22 @@ public final class LiteralConstants {
   /** The Constant CODELIST_ITEMS. */
   public static final String CODELIST_ITEMS = "codelistItems";
 
+  /** The Constant NOT_FOUND. */
+  public static final String NOT_FOUND = "not_found";
+
+  /** The Constant GRANT_TYPE. */
+  public static final String GRANT_TYPE = "grant_type";
+
+  /** The Constant CLIENT_SECRET. */
+  public static final String CLIENT_SECRET = "client_secret";
+
+  /** The Constant REFRESH_TOKEN. */
+  public static final String REFRESH_TOKEN = "refresh_token";
+
+  /** The Constant CLIENT_ID. */
+  public static final String CLIENT_ID = "client_id";
+
+
   /**
    * Instantiates a new literal constants.
    */

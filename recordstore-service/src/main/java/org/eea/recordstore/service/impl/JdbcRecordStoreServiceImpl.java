@@ -458,6 +458,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           case DESIGN:
             sql = "DELETE FROM dataset_" + idReportingDataset + ".table_value";
             break;
+          default:
+            break;
         }
         stmt = con.createStatement();
         LOG.info("Deleting previous data");
@@ -476,6 +478,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           String copyQueryTable = "COPY dataset_" + idReportingDataset
               + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
           copyFromFile(copyQueryTable, nameFileTableValue, cm);
+          break;
+        default:
           break;
       }
       // Record value
@@ -581,6 +585,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           case DESIGN:
             sql = "DELETE FROM dataset_" + idReportingDataset + ".table_value";
             break;
+          default:
+            break;
         }
         stmt = con.createStatement();
         LOG.info("Deleting previous data");
@@ -600,6 +606,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           String copyQueryTable = "COPY dataset_" + idReportingDataset
               + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
           copyFromFile(copyQueryTable, nameFileTableValue, cm);
+          break;
+        default:
           break;
       }
       // Record value
