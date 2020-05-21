@@ -2,5 +2,5 @@
   "all": "/dataschema/{:datasetSchemaId}/getUniqueConstraints",
   "create": "/dataschema/createUniqueConstraint",
   "delete": "/dataschema/{:datasetSchemaId}/deleteUniqueField?fieldId={:fieldId}",
-  "update": "/dataschema/{:datasetSchemaId}/updateUniqueField"
+  "update": "/dataschema/createUniqueConstraint"
 }

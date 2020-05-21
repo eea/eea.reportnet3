@@ -13,13 +13,21 @@ import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const ManageUniqueConstraint = ({ designerState, isUpdate, manageDialogs }) => {
+export const ManageUniqueConstraint = ({ allTables, designerState, isUpdate, isVisible, manageDialogs }) => {
   const resources = useContext(ResourcesContext);
 
   const [selectedFields, setSelectedFields] = useState([]);
   const [selectedTable, setSelectedTable] = useState(null);
 
-  const { datasetSchemaAllTables, datasetSchemaId, isManageUniqueConstraintDialogVisible } = designerState;
+  const {
+    datasetSchemaAllTables,
+    datasetSchemaId,
+    isManageUniqueConstraintDialogVisible,
+    manageUniqueConstraintData
+  } = designerState;
+
+  console.log('designerState', designerState);
+  console.log('manageUniqueConstraintData', manageUniqueConstraintData);
 
   useEffect(() => {
     getTableOptions();
@@ -67,6 +75,22 @@ export const ManageUniqueConstraint = ({ designerState, isUpdate, manageDialogs 
     }
   };
 
+  const onUpdateConstraint = async () => {
+    manageDialogs('isManageUniqueConstraintDialogVisible', false, 'uniqueConstraintListDialogVisible', true);
+    try {
+      await UniqueConstraintsService.update(
+        datasetSchemaId,
+        selectedFields.map(field => field.value),
+        selectedTable.value,
+        manageUniqueConstraintData.uniqueId
+      );
+    } catch (error) {
+      console.log('error', error);
+    } finally {
+      onResetConstraintValues();
+    }
+  };
+
   const onResetConstraintValues = () => {
     setSelectedFields([]);
     setSelectedTable(null);
@@ -77,7 +101,11 @@ export const ManageUniqueConstraint = ({ designerState, isUpdate, manageDialogs 
       <Dialog
         className={styles.dialog}
         footer={renderFooter}
-        header={isUpdate ? 'update' : 'Create unique constraint'}
+        header={
+          !isNil(designerState.manageUniqueConstraintData)
+            ? resources.messages['editUniqueConstraint']
+            : resources.messages['createUniqueConstraint']
+        }
         onHide={() =>
           manageDialogs('isManageUniqueConstraintDialogVisible', false, 'uniqueConstraintListDialogVisible', true)
         }
@@ -91,9 +119,11 @@ export const ManageUniqueConstraint = ({ designerState, isUpdate, manageDialogs 
     <Fragment>
       <Button
         className="p-button-primary p-button-animated-blink"
-        icon={'plus'}
-        label={resources.messages['create']}
-        onClick={() => onCreateConstraint()}
+        icon={!isNil(designerState.manageUniqueConstraintData) ? 'check' : 'plus'}
+        label={
+          !isNil(designerState.manageUniqueConstraintData) ? resources.messages['edit'] : resources.messages['create']
+        }
+        onClick={() => (!isNil(designerState.manageUniqueConstraintData) ? onUpdateConstraint() : onCreateConstraint())}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
@@ -145,11 +175,29 @@ export const ManageUniqueConstraint = ({ designerState, isUpdate, manageDialogs 
       </div>
       <div className={styles.selected}>
         <span className={styles.title}>{`${resources.messages['selectedTable']}: `}</span>
-        <span>{!isNil(selectedTable) ? selectedTable.name : ''}</span>
+        <span>
+          {!isNil(manageUniqueConstraintData.uniqueId)
+            ? !isNil(selectedTable)
+              ? selectedTable.name
+              : manageUniqueConstraintData.tableSchemaName
+            : !isNil(selectedTable)
+            ? selectedTable.name
+            : ''}
+        </span>
+        {/* <span>{!isNil(selectedTable) ? selectedTable.name : ''}</span> */}
       </div>
       <div className={`${styles.selected} ${styles.fields}`}>
         <span className={styles.title}>{`${resources.messages['selectedFields']}: `}</span>
-        <span>{!isEmpty(selectedFields) ? selectedFields.map(field => field.name) : ''}</span>
+        <span>
+          {!isNil(manageUniqueConstraintData.uniqueId)
+            ? !isEmpty(selectedFields)
+              ? selectedFields.map(field => field.name)
+              : manageUniqueConstraintData.fieldData.map(field => field.name)
+            : !isEmpty(selectedFields)
+            ? selectedFields.map(field => field.name)
+            : ''}
+        </span>
+        {/* <span>{!isEmpty(selectedFields) ? selectedFields.map(field => field.name) : ''}</span> */}
         {/* <textarea name="" id="" cols="30" readOnly rows="2" value={selectedFields.map(field => field.name)}></textarea> */}
       </div>
     </form>

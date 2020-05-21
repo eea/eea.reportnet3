@@ -69,6 +69,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     isLoading: true,
     isPreviewModeOn: DatasetDesignerUtils.getUrlParamValue('design'),
     isManageUniqueConstraintDialogVisible: false,
+    manageUniqueConstraintData: {},
     metaData: {},
     uniqueConstraintListDialogVisible: false,
     validateDialogVisible: false,
@@ -170,6 +171,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       isLoading(false);
     }
   };
+
+  const getUniqueConstraint = data => designerDispatch({ type: 'GET_UNIQUE_CONSTRAINT_DATA', payload: { data } });
 
   const isLoading = value => designerDispatch({ type: 'IS_LOADING', payload: { value } });
 
@@ -337,6 +340,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       visible={designerState.uniqueConstraintListDialogVisible}>
       <UniqueConstraints
         datasetSchemaId={designerState.datasetSchemaId}
+        getManageUniqueConstraint={getUniqueConstraint}
+        manageDialogs={manageDialogs}
         tableData={designerState.datasetSchemaAllTables}
       />
     </Dialog>

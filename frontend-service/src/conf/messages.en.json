@@ -652,6 +652,8 @@
     "multiselectCodelistEditorMessage": "Enter your multiple select items",
     "multiselectCodelistEditor": "Multiple select editor",
     "duplicatedItem": "Duplicated item",
-    "multiselectCodelistSelection": "No multiple select item selected"
+    "multiselectCodelistSelection": "No multiple select item selected",
+    "editUniqueConstraint": "Edit unique constraint",
+    "createUniqueConstraint": "Create unique constraint"
   }
 }

@@ -1,2 +1,6 @@
-export const Update = ({ uniqueConstraintsRepository }) => async (description, fieldId, fieldSchemaId, name) =>
-  uniqueConstraintsRepository.update(description, fieldId, fieldSchemaId, name);
+export const Update = ({ uniqueConstraintsRepository }) => async (
+  datasetSchemaId,
+  fieldSchemaIds,
+  tableSchemaId,
+  uniqueID
+) => uniqueConstraintsRepository.update(datasetSchemaId, fieldSchemaIds, tableSchemaId, uniqueID);

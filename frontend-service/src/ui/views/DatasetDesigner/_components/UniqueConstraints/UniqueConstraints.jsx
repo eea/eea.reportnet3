@@ -20,17 +20,27 @@ import { constraintsReducer } from './_functions/Reducers/constraintsReducer';
 
 import { UniqueConstraintsUtils } from './_functions/Utils/UniqueConstraintsUtils';
 
-export const UniqueConstraints = ({ datasetSchemaId, tableData }) => {
+export const UniqueConstraints = ({
+  allTables,
+  datasetSchemaId,
+  designerState,
+  getManageUniqueConstraint,
+  manageDialogs,
+  tableData
+}) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const [constraintsState, constraintsDispatch] = useReducer(constraintsReducer, {
     data: {},
-    fieldId: '',
+    uniqueConstraintId: '',
     filteredData: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
-    isLoading: true
+    isEditClicked: false,
+    isLoading: true,
+    isManageDialogVisible: false,
+    uniqueConstraintListDialogVisible: true
   });
 
   useEffect(() => {
@@ -50,31 +60,29 @@ export const UniqueConstraints = ({ datasetSchemaId, tableData }) => {
 
   const actionsTemplate = row => (
     <ActionsColumn
-      onDeleteClick={() => onManageDialog(true)}
-      onEditClick={() => console.log('editar constraint', row)}
+      onDeleteClick={() => isDeleteDialogVisible(true)}
+      onEditClick={() => {
+        manageDialogs('uniqueConstraintListDialogVisible', false, 'isManageUniqueConstraintDialogVisible', true);
+      }}
     />
   );
-
-  const fieldId = value => constraintsDispatch({ type: 'ON_LOAD_CONSTRAINT_ID', payload: { value } });
 
   const isDeleteDialogVisible = value => constraintsDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
 
   const isDataUpdated = value => constraintsDispatch({ type: 'IS_DATA_UPDATED', payload: { value } });
 
+  const isLoading = value => constraintsDispatch({ type: 'IS_LOADING', payload: value });
+
   const onDeleteConstraint = async () => {
     try {
-      onUpdateData();
-      const response = await UniqueConstraintsService.deleteById(datasetSchemaId, constraintsState.fieldId);
+      const response = await UniqueConstraintsService.deleteById('1234');
       if (response.status >= 200 && response.status <= 299) onUpdateData();
     } catch (error) {
       notificationContext.add({ type: 'DELETE_UNIQUE_CONSTRAINT_ERROR' });
-      console.log('error', error);
     } finally {
-      onManageDialog(false);
+      isDeleteDialogVisible(false);
     }
   };
-
-  const isLoading = value => constraintsDispatch({ type: 'IS_LOADING', payload: value });
 
   const onLoadConstraints = async () => {
     try {
@@ -85,17 +93,12 @@ export const UniqueConstraints = ({ datasetSchemaId, tableData }) => {
       });
     } catch (error) {
       notificationContext.add({ type: 'LOAD_UNIQUE_CONSTRAINTS_ERROR' });
-      console.log('error', error);
     } finally {
       isLoading(false);
     }
   };
 
   const onLoadFilteredData = data => constraintsDispatch({ type: 'FILTERED_DATA', payload: { data } });
-
-  const onManageDialog = value => {
-    isDeleteDialogVisible(value);
-  };
 
   const onUpdateData = () => {
     isDataUpdated(!constraintsState.isDataUpdated);
@@ -131,7 +134,7 @@ export const UniqueConstraints = ({ datasetSchemaId, tableData }) => {
       {!isEmpty(constraintsState.filteredData) ? (
         <DataTable
           autoLayout={true}
-          onRowClick={event => fieldId(event.data.fieldId)}
+          onRowClick={event => getManageUniqueConstraint(event.data)}
           paginator={true}
           paginatorRight={`${resources.messages['totalUniqueConstraints']} ${constraintsState.filteredData.length}`}
           rows={10}
@@ -151,7 +154,7 @@ export const UniqueConstraints = ({ datasetSchemaId, tableData }) => {
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteConstraint()}
-          onHide={() => onManageDialog(false)}
+          onHide={() => isDeleteDialogVisible(false)}
           visible={constraintsState.isDeleteDialogVisible}
           maximizable={false}>
           {resources.messages['deleteUniqueConstraintConfirm']}

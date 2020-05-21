@@ -40,6 +40,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'SET_DATASET_HAS_DATA':
       return { ...state, datasetHasData: payload.hasData };
 
+    case 'GET_UNIQUE_CONSTRAINT_DATA':
+      return { ...state, manageUniqueConstraintData: payload.data };
+
     default:
       return state;
   }
