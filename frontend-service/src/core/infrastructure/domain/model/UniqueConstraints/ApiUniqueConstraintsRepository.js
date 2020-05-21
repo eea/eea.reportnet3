@@ -6,8 +6,8 @@ import { UniqueConstraint } from 'core/domain/model/UniqueConstraints/UniqueCons
 
 const all = async datasetSchemaId => parseConstraintsList(await apiUniqueConstraints.all(datasetSchemaId));
 
-const create = async (description, fieldSchemaId, name) =>
-  await apiUniqueConstraints.create(description, fieldSchemaId, name);
+const create = async (datasetSchemaId, fieldSchemaIds, tableSchemaId) =>
+  await apiUniqueConstraints.create(datasetSchemaId, fieldSchemaIds, tableSchemaId);
 
 const deleteById = async (datasetSchemaId, fieldId) => {
   return await apiUniqueConstraints.deleteById(datasetSchemaId, fieldId);

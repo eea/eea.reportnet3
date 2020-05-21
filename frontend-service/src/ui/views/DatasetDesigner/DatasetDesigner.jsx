@@ -68,7 +68,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     initialDatasetDescription: '',
     isLoading: true,
     isPreviewModeOn: DatasetDesignerUtils.getUrlParamValue('design'),
-    manageUniqueConstraintDialogVisible: false,
+    isManageUniqueConstraintDialogVisible: false,
     metaData: {},
     uniqueConstraintListDialogVisible: false,
     validateDialogVisible: false,
@@ -345,7 +345,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           icon={'plus'}
           label={resources.messages['add']}
           onClick={() =>
-            manageDialogs('uniqueConstraintListDialogVisible', false, 'manageUniqueConstraintDialogVisible', true)
+            manageDialogs('uniqueConstraintListDialogVisible', false, 'isManageUniqueConstraintDialogVisible', true)
           }
         />
       </div>
@@ -494,11 +494,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         {validationsListDialog()}
         {renderUniqueConstraintsDialog()}
 
-        <ManageUniqueConstraint
-          allTables={designerState.datasetSchemaAllTables}
-          isVisible={designerState.manageUniqueConstraintDialogVisible}
-          manageDialogs={manageDialogs}
-        />
+        <ManageUniqueConstraint designerState={designerState} manageDialogs={manageDialogs} />
 
         <ConfirmDialog
           header={resources.messages['validateDataset']}

@@ -9,13 +9,17 @@ import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { ListBox } from '../TabsDesigner/_components/FieldsDesigner/_components/FieldDesigner/_components/LinkSelector/_components/ListBox';
 
+import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
+
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const ManageUniqueConstraint = ({ allTables, isUpdate, isVisible, manageDialogs }) => {
+export const ManageUniqueConstraint = ({ designerState, isUpdate, manageDialogs }) => {
   const resources = useContext(ResourcesContext);
 
   const [selectedFields, setSelectedFields] = useState([]);
   const [selectedTable, setSelectedTable] = useState(null);
+
+  const { datasetSchemaAllTables, datasetSchemaId, isManageUniqueConstraintDialogVisible } = designerState;
 
   useEffect(() => {
     getTableOptions();
@@ -23,7 +27,7 @@ export const ManageUniqueConstraint = ({ allTables, isUpdate, isVisible, manageD
   }, [selectedTable]);
 
   const getTableOptions = () => {
-    const tables = allTables.filter(table => table.index >= 0);
+    const tables = datasetSchemaAllTables.filter(table => table.index >= 0);
     return tables.map(table => {
       return {
         name: `${table.tableSchemaName}`,
@@ -34,7 +38,7 @@ export const ManageUniqueConstraint = ({ allTables, isUpdate, isVisible, manageD
 
   const getFieldOptions = () => {
     if (selectedTable) {
-      const table = allTables.filter(table => table.tableSchemaId === selectedTable.value)[0];
+      const table = datasetSchemaAllTables.filter(table => table.tableSchemaId === selectedTable.value)[0];
       if (table.records) {
         if (!isEmpty(table.records[0].fields)) {
           return table.records[0].fields.map(field => {
@@ -48,17 +52,37 @@ export const ManageUniqueConstraint = ({ allTables, isUpdate, isVisible, manageD
     }
   };
 
+  const onCreateConstraint = async () => {
+    manageDialogs('isManageUniqueConstraintDialogVisible', false, 'uniqueConstraintListDialogVisible', true);
+    try {
+      await UniqueConstraintsService.create(
+        datasetSchemaId,
+        selectedFields.map(field => field.value),
+        selectedTable.value
+      );
+    } catch (error) {
+      console.log('error', error);
+    } finally {
+      onResetConstraintValues();
+    }
+  };
+
+  const onResetConstraintValues = () => {
+    setSelectedFields([]);
+    setSelectedTable(null);
+  };
+
   const renderDialogLayout = children =>
-    isVisible && (
+    isManageUniqueConstraintDialogVisible && (
       <Dialog
         className={styles.dialog}
         footer={renderFooter}
         header={isUpdate ? 'update' : 'Create unique constraint'}
         onHide={() =>
-          manageDialogs('manageUniqueConstraintDialogVisible', false, 'uniqueConstraintListDialogVisible', true)
+          manageDialogs('isManageUniqueConstraintDialogVisible', false, 'uniqueConstraintListDialogVisible', true)
         }
         style={{ width: '975px' }}
-        visible={isVisible}>
+        visible={isManageUniqueConstraintDialogVisible}>
         {children}
       </Dialog>
     );
@@ -69,17 +93,16 @@ export const ManageUniqueConstraint = ({ allTables, isUpdate, isVisible, manageD
         className="p-button-primary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['create']}
-        onClick={() =>
-          manageDialogs('manageUniqueConstraintDialogVisible', false, 'uniqueConstraintListDialogVisible', true)
-        }
+        onClick={() => onCreateConstraint()}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
         label={resources.messages['close']}
-        onClick={() =>
-          manageDialogs('manageUniqueConstraintDialogVisible', false, 'uniqueConstraintListDialogVisible', true)
-        }
+        onClick={() => {
+          manageDialogs('isManageUniqueConstraintDialogVisible', false, 'uniqueConstraintListDialogVisible', true);
+          onResetConstraintValues();
+        }}
       />
     </Fragment>
   );

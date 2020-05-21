@@ -14,19 +14,13 @@ export const apiUniqueConstraints = {
     return response.data;
   },
 
-  create: async (description, fieldSchemaId, name) => {
+  create: async (datasetSchemaId, fieldSchemaIds, tableSchemaId) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.post({
       url: getUrl(UniqueConstraintsConfig.create),
-      data: {
-        description,
-        fieldSchemaId,
-        name
-      },
+      data: { datasetSchemaId, fieldSchemaIds, tableSchemaId },
       queryString: {},
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      }
+      headers: { Authorization: `Bearer ${tokens.accessToken}` }
     });
     return response;
   },
