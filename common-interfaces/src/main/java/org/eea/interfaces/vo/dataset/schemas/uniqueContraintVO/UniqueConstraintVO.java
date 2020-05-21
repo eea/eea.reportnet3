@@ -53,10 +53,7 @@ public class UniqueConstraintVO {
     if (getClass() != obj.getClass())
       return false;
     UniqueConstraintVO other = (UniqueConstraintVO) obj;
-    return Objects.equals(fieldSchemaIds, other.fieldSchemaIds)
-        && Objects.equals(datasetSchemaId, other.datasetSchemaId)
-        && Objects.equals(tableSchemaId, other.tableSchemaId)
-        && Objects.equals(uniqueId, other.uniqueId);
+    return Objects.equals(uniqueId, other.uniqueId);
   }
 
 

@@ -12,6 +12,7 @@ import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
+import org.eea.dataset.mapper.UniqueConstraintMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
@@ -24,6 +25,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -43,6 +45,7 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
@@ -138,6 +141,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
+
+  @Autowired
+  private UniqueConstraintRepository uniqueConstraintRepository;
+
+  @Autowired
+  private UniqueConstraintMapper uniqueConstraintMapper;
 
   /**
    * Creates the empty data set schema.
@@ -1227,4 +1236,50 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
 
+  /**
+   * Creates the unique constraint.
+   *
+   * @param uniqueConstraint the unique constraint
+   */
+  @Override
+  public void createUniqueConstraint(UniqueConstraintVO uniqueConstraintVO) {
+    LOG.info("Creating unique contraint");
+    uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
+  }
+
+  /**
+   * Delete unique constraint.
+   *
+   * @param uniqueId the unique id
+   */
+  @Override
+  public void deleteUniqueConstraint(String uniqueId) {
+    LOG.info("deleting constraint {}", uniqueId);
+    uniqueConstraintRepository.deleteByUniqueId(new ObjectId(uniqueId));
+  }
+
+  /**
+   * Update unique constraint.
+   *
+   * @param uniequeConstraint the unique constraint
+   */
+  @Override
+  public void updateUniqueConstraint(UniqueConstraintVO uniqueConstraintVO) {
+    LOG.info("updating constraint {}", uniqueConstraintVO.getUniqueId());
+    uniqueConstraintRepository.deleteByUniqueId(new ObjectId(uniqueConstraintVO.getUniqueId()));
+    uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
+  }
+
+  /**
+   * Gets the unique constraints.
+   *
+   * @param schemaId the schema id
+   * @return the unique constraints
+   */
+  @Override
+  public List<UniqueConstraintVO> getUniqueConstraints(String schemaId) {
+    LOG.info("get all unique Constraints of dataset {}", schemaId);
+    return uniqueConstraintMapper.entityListToClass(
+        uniqueConstraintRepository.findByDatasetSchemaId(new ObjectId(schemaId)));
+  }
 }
