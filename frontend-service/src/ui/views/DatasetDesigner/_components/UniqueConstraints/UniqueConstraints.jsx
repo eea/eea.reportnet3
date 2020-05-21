@@ -103,7 +103,7 @@ export const UniqueConstraints = ({ datasetSchemaId, tableData }) => {
 
   const renderColumns = constraints => {
     const fieldColumns = Object.keys(constraints[0])
-      .filter(key => !key.includes('Id'))
+      .filter(key => !key.includes('Id') && !key.includes('filter'))
       .map(field => (
         <Column
           body={field === 'fieldData' ? renderFieldBody : null}
@@ -126,7 +126,12 @@ export const UniqueConstraints = ({ datasetSchemaId, tableData }) => {
     <Fragment>{resources.messages['noConstraints']}</Fragment>
   ) : (
     <Fragment>
-      <Filters data={constraintsState.data} getFilteredData={onLoadFilteredData} selectOptions={['tableSchemaName']} />
+      <Filters
+        data={constraintsState.data}
+        getFilteredData={onLoadFilteredData}
+        inputOptions={['filterFieldsNames']}
+        selectOptions={['tableSchemaName']}
+      />
 
       {!isEmpty(constraintsState.filteredData) ? (
         <DataTable
