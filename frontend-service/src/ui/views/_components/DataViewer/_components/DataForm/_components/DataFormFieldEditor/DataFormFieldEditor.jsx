@@ -97,7 +97,7 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
   };
 
   const getCodelistItemsWithEmptyOption = () => {
-    const codelistItems = column.codelistItems.map(codelistItem => {
+    const codelistItems = column.codelistItems.sort().map(codelistItem => {
       return { itemType: codelistItem, value: codelistItem };
     });
 
@@ -125,7 +125,7 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
       <MultiSelect
         maxSelectedLabels={10}
         onChange={e => onChangeForm(field, e.value)}
-        options={column.codelistItems.map(codelistItem => {
+        options={column.codelistItems.sort().map(codelistItem => {
           return { itemType: codelistItem, value: codelistItem };
         })}
         optionLabel="itemType"

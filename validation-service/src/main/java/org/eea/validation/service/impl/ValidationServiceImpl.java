@@ -421,16 +421,16 @@ public class ValidationServiceImpl implements ValidationService {
     String countryCode = "''";
     String dataCallYear = "" + new LocalDate().getYear();
     if (null != resourceInfoVO.getAttributes() && resourceInfoVO.getAttributes().size() > 0) {
-      if (resourceInfoVO.getAttributes().containsKey("countryCode")) {
-        countryCode = resourceInfoVO.getAttributes().get("countryCode").get(0);
+      if (resourceInfoVO.getAttributes().containsKey(LiteralConstants.COUNTRY_CODE)) {
+        countryCode = resourceInfoVO.getAttributes().get(LiteralConstants.COUNTRY_CODE).get(0);
       }
 
-      if (resourceInfoVO.getAttributes().containsKey("dataCallYear")) {
-        dataCallYear = resourceInfoVO.getAttributes().get("dataCallYear").get(0);
+      if (resourceInfoVO.getAttributes().containsKey(LiteralConstants.DATA_CALL_YEAR)) {
+        dataCallYear = resourceInfoVO.getAttributes().get(LiteralConstants.DATA_CALL_YEAR).get(0);
       }
     }
-    ThreadPropertiesManager.setVariable("dataCallYear", dataCallYear);
-    ThreadPropertiesManager.setVariable("countryCode", countryCode);
+    ThreadPropertiesManager.setVariable(LiteralConstants.DATA_CALL_YEAR, dataCallYear);
+    ThreadPropertiesManager.setVariable(LiteralConstants.COUNTRY_CODE, countryCode);
   }
 
   /**

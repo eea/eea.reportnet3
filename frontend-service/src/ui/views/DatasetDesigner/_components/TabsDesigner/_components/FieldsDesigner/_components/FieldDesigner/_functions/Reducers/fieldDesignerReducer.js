@@ -50,7 +50,6 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
     case 'SET_REQUIRED':
       return { ...state, fieldRequiredValue: payload };
     case 'SET_TYPE':
-      console.log(payload.type.fieldType.toUpperCase());
       return {
         ...state,
         fieldTypeValue: payload.type,
