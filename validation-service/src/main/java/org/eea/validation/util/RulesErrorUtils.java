@@ -194,7 +194,9 @@ public class RulesErrorUtils {
     ruleValidation
         .setOriginName(null == dataSetMetabaseVO ? "" : dataSetMetabaseVO.getDataSetName());
 
-    ruleValidation.setMessage(MESSAGE_ERROR_VALIDATION + ruleDataset.getShortCode());
+    if (ruleDataset != null) {
+      ruleValidation.setMessage(MESSAGE_ERROR_VALIDATION + ruleDataset.getShortCode());
+    }
     return datasetValue;
   }
 
@@ -218,12 +220,14 @@ public class RulesErrorUtils {
         new ObjectId(tableValue.getDatasetId().getIdDatasetSchema()), new ObjectId(idRule));
 
     // we put the origin name for the new validation
-    for (TableSchema table : dataSetSchemaTable.getTableSchemas()) {
-      if (table.getIdTableSchema().equals(ruleTable.getReferenceId())) {
-        ruleValidation.setOriginName(table.getNameTableSchema());
+    if (ruleTable != null) {
+      for (TableSchema table : dataSetSchemaTable.getTableSchemas()) {
+        if (table.getIdTableSchema().equals(ruleTable.getReferenceId())) {
+          ruleValidation.setOriginName(table.getNameTableSchema());
+        }
       }
+      ruleValidation.setMessage(MESSAGE_ERROR_VALIDATION + ruleTable.getShortCode());
     }
-    ruleValidation.setMessage(MESSAGE_ERROR_VALIDATION + ruleTable.getShortCode());
     return tableValue;
   }
 
@@ -248,13 +252,15 @@ public class RulesErrorUtils {
         rulesRepository.findRule(dataSetSchemaRecord.getIdDataSetSchema(), new ObjectId(idRule));
 
     // we put the origin name for the new validation
-    for (TableSchema table : dataSetSchemaRecord.getTableSchemas()) {
-      if (table.getRecordSchema().getIdRecordSchema().equals(ruleRecord.getReferenceId())) {
-        ruleValidation.setOriginName(table.getNameTableSchema());
+    if (ruleRecord != null) {
+      for (TableSchema table : dataSetSchemaRecord.getTableSchemas()) {
+        if (table.getRecordSchema().getIdRecordSchema().equals(ruleRecord.getReferenceId())) {
+          ruleValidation.setOriginName(table.getNameTableSchema());
+        }
       }
-    }
 
-    ruleValidation.setMessage(MESSAGE_ERROR_VALIDATION + ruleRecord.getShortCode());
+      ruleValidation.setMessage(MESSAGE_ERROR_VALIDATION + ruleRecord.getShortCode());
+    }
     return recordValue;
   }
 
@@ -279,15 +285,17 @@ public class RulesErrorUtils {
         rulesRepository.findRule(dataSetSchemaField.getIdDataSetSchema(), new ObjectId(idRule));
 
     // we put the origin name for the new validation
-    for (TableSchema table : dataSetSchemaField.getTableSchemas()) {
-      for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-        if (field.getIdFieldSchema().equals(ruleField.getReferenceId())) {
-          ruleValidation.setOriginName(table.getNameTableSchema());
+    if (ruleField != null) {
+      for (TableSchema table : dataSetSchemaField.getTableSchemas()) {
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          if (field.getIdFieldSchema().equals(ruleField.getReferenceId())) {
+            ruleValidation.setOriginName(table.getNameTableSchema());
+          }
         }
       }
-    }
 
-    ruleValidation.setMessage(MESSAGE_ERROR_VALIDATION + ruleField.getShortCode());
+      ruleValidation.setMessage(MESSAGE_ERROR_VALIDATION + ruleField.getShortCode());
+    }
     return fieldValue;
   }
 }

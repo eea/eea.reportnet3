@@ -40,67 +40,199 @@
         { "label": "=", "value": "=" },
         { "label": "!=", "value": "!=" }
       ]
+    },
+    "year": {
+      "option": { "label": "Year (Date)", "value": "year" },
+      "values": [
+        { "label": ">", "value": ">" },
+        { "label": "<", "value": "<" },
+        { "label": ">=", "value": ">=" },
+        { "label": "<=", "value": "<=" },
+        { "label": "=", "value": "=" },
+        { "label": "!=", "value": "!=" }
+      ]
+    },
+    "month": {
+      "option": { "label": "Month (Date)", "value": "month" },
+      "values": [
+        { "label": ">", "value": ">" },
+        { "label": "<", "value": "<" },
+        { "label": ">=", "value": ">=" },
+        { "label": "<=", "value": "<=" },
+        { "label": "=", "value": "=" },
+        { "label": "!=", "value": "!=" }
+      ]
+    },
+    "day": {
+      "option": { "label": "Day (Date)", "value": "day" },
+      "values": [
+        { "label": ">", "value": ">" },
+        { "label": "<", "value": "<" },
+        { "label": ">=", "value": ">=" },
+        { "label": "<=", "value": "<=" },
+        { "label": "=", "value": "=" },
+        { "label": "!=", "value": "!=" }
+      ]
     }
   },
   "nonNumericOperators": ["string", "date"],
   "operatorEquivalences": {
-    "default": {
-      ">": "GT",
-      "<": "LT",
-      ">=": "GTEQ",
-      "<=": "LTEQ",
-      "=": "EQ",
-      "!=": "DIST",
-      "GT": "GT",
-      "LT": "LT",
-      "LTEQ": "LTEQ",
-      "EQ": "EQ",
-      "DIST": "DIST",
-      "SEQ": "SEQ",
-      "=(Ignore case)": "SEQIC",
-      "GTEQ": "GTEQ",
-      "LEN=": "LEN=",
-      "MATCH": "MATCH"
+    "logicalOperators": {
+      "AND": "FIELD_AND",
+      "OR": "FIELD_OR"
+    },
+    "number": {
+      ">": "FIELD_GT",
+      "<": "FIELD_LT",
+      ">=": "FIELD_GTEQ",
+      "<=": "FIELD_LTEQ",
+      "=": "FIELD_EQ",
+      "!=": "FIELD_DIST",
+      "MATCH": "FIELD_NUM_MATCH"
+    },
+    "LEN": {
+      "type": "FIELD_LEN",
+      ">": "FIELD_GT",
+      "<": "FIELD_LT",
+      ">=": "FIELD_GTEQ",
+      "<=": "FIELD_LTEQ",
+      "=": "FIELD_EQ",
+      "!=": "FIELD_DIST"
     },
     "string": {
-      "=": "SEQ",
-      "=(Ignore case)": "SEQIC",
-      "MATCH": "MATCH"
+      "=": "FIELD_SEQ",
+      "=(Ignore case)": "FIELD_SEQIC",
+      "MATCH": "FIELD_MATCH"
     },
     "date": {
-      ">": "GT_DATE",
-      "<": "LT_DATE",
-      ">=": "GTEQ_DATE",
-      "<=": "LTEQ_DATE",
-      "=": "EQ_DATE",
-      "!=": "DIST_DATE"
+      ">": "FIELD_GT_DATE",
+      "<": "FIELD_LT_DATE",
+      ">=": "FIELD_GTEQ_DATE",
+      "<=": "FIELD_LTEQ_DATE",
+      "=": "FIELD_EQ_DATE",
+      "!=": "FIELD_DIST_DATE"
+    },
+    "day": {
+      ">": "FIELD_GT_DAY",
+      "<": "FIELD_LT_DAY",
+      ">=": "FIELD_GTEQ_DAY",
+      "<=": "FIELD_LTEQ_DAY",
+      "=": "FIELD_EQ_DAY",
+      "!=": "FIELD_DIST_DAY"
+    },
+    "month": {
+      ">": "FIELD_GT_MONTH",
+      "<": "FIELD_LT_MONTH",
+      ">=": "FIELD_GTEQ_MONTH",
+      "<=": "FIELD_LTEQ_MONTH",
+      "=": "FIELD_EQ_MONTH",
+      "!=": "FIELD_DIST_MONTH"
+    },
+    "year": {
+      ">": "FIELD_GT_YEAR",
+      "<": "FIELD_LT_YEAR",
+      ">=": "FIELD_GTEQ_YEAR",
+      "<=": "FIELD_LTEQ_YEAR",
+      "=": "FIELD_EQ_YEAR",
+      "!=": "FIELD_DIST_YEAR"
     }
   },
   "operatorsTypesFromDTO": [
     {
       "operatorType": "number",
-      "operators": ["GT", "LT", "GTEQ", "LTEQ", "EQ", "DIST", "GT", "LT", "LTEQ", "EQ", "DIST"]
+      "operators": [
+        "FIELD_GT",
+        "FIELD_LT",
+        "FIELD_GTEQ",
+        "FIELD_LTEQ",
+        "FIELD_EQ",
+        "FIELD_DIST",
+        "FIELD_GT",
+        "FIELD_LT",
+        "FIELD_LTEQ",
+        "FIELD_EQ",
+        "FIELD_DIST"
+      ]
     },
-    { "operatorType": "string", "operators": ["SEQ", "SEQIC", "MATCH"] },
-    { "operatorType": "date", "operators": ["GT_DATE", "LT_DATE", "GTEQ_DATE", "LTEQ_DATE", "EQ_DATE", "DIST_DATE"] }
+    { "operatorType": "string", "operators": ["FIELD_SEQ", "FIELD_SEQIC", "FIELD_MATCH"] },
+    { "operatorType": "LEN", "operators": ["FIELD_LEN"] },
+    {
+      "operatorType": "date",
+      "operators": [
+        "FIELD_GT_DATE",
+        "FIELD_LT_DATE",
+        "FIELD_GTEQ_DATE",
+        "FIELD_LTEQ_DATE",
+        "FIELD_EQ_DATE",
+        "FIELD_DIST_DATE"
+      ]
+    },
+    {
+      "operatorType": "day",
+      "operators": [
+        "FIELD_GT_DAY",
+        "FIELD_LT_DAY",
+        "FIELD_GTEQ_DAY",
+        "FIELD_LTEQ_DAY",
+        "FIELD_EQ_DAY",
+        "FIELD_DIST_DAY"
+      ]
+    },
+    {
+      "operatorType": "month",
+      "operators": [
+        "FIELD_GT_MONTH",
+        "FIELD_LT_MONTH",
+        "FIELD_GTEQ_MONTH",
+        "FIELD_LTEQ_MONTH",
+        "FIELD_EQ_MONTH",
+        "FIELD_DIST_MONTH"
+      ]
+    },
+    {
+      "operatorType": "year",
+      "operators": [
+        "FIELD_GT_YEAR",
+        "FIELD_LT_YEAR",
+        "FIELD_GTEQ_YEAR",
+        "FIELD_LTEQ_YEAR",
+        "FIELD_EQ_YEAR",
+        "FIELD_DIST_YEAR"
+      ]
+    }
   ],
   "reverseEquivalences": {
-    "GT": ">",
-    "LT": "<",
-    "GTEQ": ">=",
-    "LTEQ": "<=",
-    "EQ": "=",
-    "DIST": "!=",
-    "SEQ": "=",
-    "SEQIC": "=(Ignore case)",
-    "LEN": "LEN",
-    "MATCH": "MATCH",
-    "GT_DATE": ">",
-    "LT_DATE": "<",
-    "GTEQ_DATE": ">=",
-    "LTEQ_DATE": "<=",
-    "EQ_DATE": "=",
-    "DIST_DATE": "!="
+    "FIELD_GT": ">",
+    "FIELD_LT": "<",
+    "FIELD_GTEQ": ">=",
+    "FIELD_LTEQ": "<=",
+    "FIELD_EQ": "=",
+    "FIELD_DIST": "!=",
+    "FIELD_SEQ": "=",
+    "FIELD_SEQIC": "=(Ignore case)",
+    "FIELD_LEN": "LEN",
+    "FIELD_MATCH": "MATCH",
+    "FIELD_GT_DATE": ">",
+    "FIELD_LT_DATE": "<",
+    "FIELD_GTEQ_DATE": ">=",
+    "FIELD_LTEQ_DATE": "<=",
+    "FIELD_EQ_DATE": "=",
+    "FIELD_DIST_DATE": "!=",
+    "FIELD_NUMBER_MATCH": "MATCH",
+    "FIELD_GT_MONTH": ">",
+    "FIELD_LT_MONTH": "<",
+    "FIELD_GTEQ_MONTH": ">=",
+    "FIELD_LTEQ_MONTH": "<=",
+    "FIELD_EQ_MONTH": "=",
+    "FIELD_DIST_MONTH": "!=",
+    "FIELD_GT_YEAR": ">",
+    "FIELD_LT_YEAR": "<",
+    "FIELD_GTEQ_YEAR": ">=",
+    "FIELD_LTEQ_YEAR": "<=",
+    "FIELD_EQ_YEAR": "=",
+    "FIELD_DIST_YEAR": "!=",
+    "FIELD_AND": "AND",
+    "FIELD_OR": "OR"
   },
   "errorLevels": [
     { "label": "INFO", "value": "INFO" },
@@ -115,5 +247,6 @@
   "requiredFields": {
     "field": ["table", "field", "shortCode", "name", "errorLevel", "errorMessage"],
     "row": ["table", "shortCode", "name", "errorLevel", "errorMessage"]
-  }
+  },
+  "logicalOperatorFromDTO": ["FIELD_AND", "FIELD_OR"]
 }

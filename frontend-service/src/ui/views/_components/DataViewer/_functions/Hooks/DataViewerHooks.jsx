@@ -99,7 +99,6 @@ export const useSetColumns = (
   );
 
   const getFieldTypeValue = fieldType => {
-    console.log(fieldType);
     const fieldTypes = [
       { fieldType: 'Number_Integer', value: 'Number - Integer' },
       { fieldType: 'Number_Decimal', value: 'Number - Decimal' },
@@ -110,6 +109,7 @@ export const useSetColumns = (
       { fieldType: 'URL', value: 'URL' },
       { fieldType: 'Phone', value: 'Phone number' },
       { fieldType: 'Codelist', value: 'Single select' },
+      { fieldType: 'Multiselect_Codelist', value: 'Multiple select' },
       { fieldType: 'Link', value: 'Link' }
     ];
 
@@ -122,14 +122,15 @@ export const useSetColumns = (
   };
 
   const getTooltipMessage = column => {
-    console.log(column);
     return !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
       ? `<span style="font-weight:bold">Type:</span> ${getFieldTypeValue(column.type)}
         <span style="font-weight:bold">Description:</span> ${
           !isNil(column.description) && column.description !== ''
             ? column.description
             : resources.messages['noDescription']
-        }<br/><span style="font-weight:bold">${resources.messages['codelists']}: </span>
+        }<br/><span style="font-weight:bold">${
+          column.type === 'CODELIST' ? resources.messages['codelists'] : resources.messages['multiselectCodelists']
+        }: </span>
         ${column.codelistItems
           .map(codelistItem =>
             !isEmpty(codelistItem) && codelistItem.length > 15 ? `${codelistItem.substring(0, 15)}...` : codelistItem
@@ -158,13 +159,23 @@ export const useSetColumns = (
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
-          {field ? field.fieldData[column.field] : null}
+          {field
+            ? Array.isArray(field.fieldData[column.field])
+              ? field.fieldData[column.field].join(', ')
+              : field.fieldData[column.field]
+            : null}
           <IconTooltip levelError={levelError} message={message} />
         </div>
       );
     } else {
       return (
-        <div style={{ display: 'flex', alignItems: 'center' }}>{field ? field.fieldData[column.field] : null}</div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {field
+            ? Array.isArray(field.fieldData[column.field])
+              ? field.fieldData[column.field].join(', ')
+              : field.fieldData[column.field]
+            : null}
+        </div>
       );
     }
   };

@@ -1,4 +1,4 @@
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 
 import isUndefined from 'lodash/isUndefined';
 
@@ -18,9 +18,8 @@ const create = async (datasetSchemaId, validationRule) => {
     shortCode: validationRule.shortCode,
     type: 'FIELD',
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
-    whenCondition: getCreationDTO(expressions[0], 0, expressions)
+    whenCondition: getCreationDTO(expressions)
   };
-
   return await apiValidation.create(datasetSchemaId, validation);
 };
 
@@ -58,7 +57,7 @@ const update = async (datasetId, validationRule) => {
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value]
   };
   if (!validationRule.automatic) {
-    validation.whenCondition = getCreationDTO(expressions[0], 0, expressions);
+    validation.whenCondition = getCreationDTO(expressions);
   }
   return await apiValidation.update(datasetId, validation);
 };

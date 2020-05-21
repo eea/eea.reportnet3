@@ -15,6 +15,7 @@ import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.service.ValidationService;
@@ -140,7 +141,7 @@ public class ValidationHelper {
     synchronized (processesMap) {
       processesMap.put(uuId, 0);
     }
-    TenantResolver.setTenantName("dataset_" + datasetId);
+    TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     LOG.info("Deleting all Validations");
     validationService.deleteAllValidation(datasetId);
     LOG.info("Validating Dataset");
@@ -193,7 +194,7 @@ public class ValidationHelper {
    * @param uuId the uu id
    */
   private void releaseTableValidation(Long datasetId, String uuId) {
-    TenantResolver.setTenantName("dataset_" + datasetId);
+    TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     Integer totalTables = tableRepository.findAllTables().size();
     List<TableValue> tableList = tableRepository.findAll();
     for (int i = 0; totalTables > 0; totalTables = totalTables - 1) {
@@ -221,7 +222,7 @@ public class ValidationHelper {
    */
   public void releaseDatasetValidation(final Long datasetId, final String uuid) {
     Map<String, Object> value = new HashMap<>();
-    value.put("dataset_id", datasetId);
+    value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", uuid);
     synchronized (processesMap) {
       processesMap.merge(uuid, 1, Integer::sum);
@@ -238,7 +239,7 @@ public class ValidationHelper {
    */
   public void releaseTableValidation(final Long datasetId, final String uuid, Long Tablenum) {
     Map<String, Object> value = new HashMap<>();
-    value.put("dataset_id", datasetId);
+    value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", uuid);
     value.put("idTable", Tablenum);
     synchronized (processesMap) {
@@ -257,7 +258,7 @@ public class ValidationHelper {
    */
   public void releaseRecordValidation(final Long datasetId, final String uuid, int numPag) {
     Map<String, Object> value = new HashMap<>();
-    value.put("dataset_id", datasetId);
+    value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", uuid);
     value.put("numPag", numPag);
     synchronized (processesMap) {
@@ -275,7 +276,7 @@ public class ValidationHelper {
    */
   public void releaseFieldValidation(final Long datasetId, final String uuid, int numPag) {
     Map<String, Object> value = new HashMap<>();
-    value.put("dataset_id", datasetId);
+    value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", uuid);
     value.put("numPag", numPag);
     synchronized (processesMap) {
@@ -308,7 +309,7 @@ public class ValidationHelper {
 
       // after last dataset validations have been saved, an event is sent to notify it
       Map<String, Object> value = new HashMap<>();
-      value.put("dataset_id", datasetId);
+      value.put(LiteralConstants.DATASET_ID, datasetId);
       value.put("uuid", uuid);
       this.removeKieBase(uuid);
       kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);

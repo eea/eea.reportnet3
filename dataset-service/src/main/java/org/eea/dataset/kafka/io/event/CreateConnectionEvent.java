@@ -10,6 +10,7 @@ import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,13 +55,14 @@ public class CreateConnectionEvent extends AbstractEEAEventHandlerCommand {
   @Override
   public void execute(EEAEventVO eeaEventVO) {
 
-    String dataset = (String) eeaEventVO.getData().get("dataset_id");
-    String idDatasetSchema = (String) eeaEventVO.getData().get("idDatasetSchema");
+    String dataset = (String) eeaEventVO.getData().get(LiteralConstants.DATASET_ID);
+    String idDatasetSchema = (String) eeaEventVO.getData().get(LiteralConstants.ID_DATASET_SCHEMA);
     if (StringUtils.isNotBlank(dataset) && StringUtils.isNotBlank(idDatasetSchema)) {
       try {
         String[] aux = dataset.split("_");
         Long idDataset = Long.valueOf(aux[aux.length - 1]);
-        TenantResolver.setTenantName(String.format("dataset_%s", idDataset));
+        TenantResolver
+            .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataset));
         // Initialize the dataset values (insert datasetId and tables into dataset_value and
         // table_value of the new schema)
         datasetService.insertSchema(idDataset, idDatasetSchema);
@@ -68,8 +70,8 @@ public class CreateConnectionEvent extends AbstractEEAEventHandlerCommand {
         datasetService.saveStatistics(idDataset);
 
         Map<String, Object> result = new HashMap<>();
-        result.put("dataset_id", idDataset.toString());
-        result.put("idDatasetSchema", idDatasetSchema);
+        result.put(LiteralConstants.DATASET_ID, idDataset.toString());
+        result.put(LiteralConstants.ID_DATASET_SCHEMA, idDatasetSchema);
         sendEvent(result);
 
       } catch (EEAException e) {

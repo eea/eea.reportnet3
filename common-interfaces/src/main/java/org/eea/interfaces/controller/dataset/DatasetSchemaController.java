@@ -5,6 +5,7 @@ import org.eea.interfaces.vo.dataset.OrderVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -211,13 +212,41 @@ public interface DatasetSchemaController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataSetSchemaVO> findDataSchemasByIdDataflow(@PathVariable("idDataflow") Long idDataflow);
 
+
   /**
-   * Gets the unique fields.
+   * Gets the unique constraints.
    *
    * @param datasetSchemaId the dataset schema id
-   * @return the unique fields
+   * @return the unique constraints
    */
-  @GetMapping(value = "{schemaId}/getUniqueFields", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<FieldSchemaVO> getUniqueFields(@PathVariable("schemaId") String datasetSchemaId);
+  @GetMapping(value = "{schemaId}/getUniqueConstraints",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<UniqueConstraintVO> getUniqueConstraints(@PathVariable("schemaId") String datasetSchemaId);
+
+
+  /**
+   * Creates the unique constraint.
+   *
+   * @param uniqueConstraint the unique constraint
+   */
+  @PostMapping(value = "/createUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
+  void createUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint);
+
+  /**
+   * Delete unique constraint.
+   *
+   * @param uniqueConstraintId the unique constraint id
+   */
+  @DeleteMapping(value = "/deleteUniqueConstraint/{uniqueConstraintId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void deleteUniqueConstraint(@PathVariable("uniqueConstraintId") String uniqueConstraintId);
+
+  /**
+   * Update unique constraint.
+   *
+   * @param uniqueConstraint the unique constraint
+   */
+  @PutMapping(value = "/updateUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void updateUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint);
 
 }

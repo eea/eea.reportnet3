@@ -87,6 +87,7 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -284,7 +285,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void saveTable(@DatasetId Long datasetId, TableValue tableValue) {
-    TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     Optional<DatasetValue> datasetValue = datasetRepository.findById(datasetId);
     if (datasetValue.isPresent()) {
       tableValue.setDatasetId(datasetValue.get());
@@ -492,6 +493,7 @@ public class DatasetServiceImpl implements DatasetService {
           } else {
             sortField.setTypefield(typefield.getType());
           }
+
           sortFieldsArray.add(sortField);
         }
         newFields = sortFieldsArray.stream().toArray(SortField[]::new);
@@ -1111,6 +1113,14 @@ public class DatasetServiceImpl implements DatasetService {
             field.setValue(field.getValue().substring(0, fieldMaxLength));
           }
         }
+        // if the type is multiselect codelist we sort the values in lexicographic order
+        if (DataType.MULTISELECT_CODELIST.equals(field.getType()) && null != field.getValue()) {
+          List<String> values = new ArrayList<>();
+          Arrays.asList(field.getValue().split(",")).stream()
+              .forEach(value -> values.add(value.trim()));
+          Collections.sort(values);
+          field.setValue(values.toString().substring(1, values.toString().length() - 1));
+        }
       }
 
     });
@@ -1284,7 +1294,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void saveTablePropagation(Long datasetId, TableSchemaVO tableSchema) throws EEAException {
     TableValue table = new TableValue();
-    TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     Optional<DatasetValue> dataset = datasetRepository.findById(datasetId);
     if (dataset.isPresent()) {
       table.setIdTableSchema(tableSchema.getIdTableSchema());
@@ -1478,7 +1488,8 @@ public class DatasetServiceImpl implements DatasetService {
   public List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue) {
     Long idDatasetDestination =
         datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
-    TenantResolver.setTenantName(String.format("dataset_%s", idDatasetDestination));
+    TenantResolver
+        .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDatasetDestination));
     // Pageable of 15 to take an equivalent to sql Limit. 15 because is the size of the results we
     // want to show on the screen
     List<FieldValue> fields = fieldRepository.findByIdFieldSchemaAndValueContaining(idPk,
@@ -1667,11 +1678,11 @@ public class DatasetServiceImpl implements DatasetService {
               field.setRecord(recordValue);
               fieldValues.add(field);
               idSchema.add(field.getIdFieldSchema());
-              setMissingField(
-                  tableMap.get(etlTable.getTableName()).getRecordSchema().getFieldSchema(),
-                  fieldValues, idSchema, recordValue);
             }
           }
+          // set the fields if not declared in the records
+          setMissingField(tableMap.get(etlTable.getTableName()).getRecordSchema().getFieldSchema(),
+              fieldValues, idSchema, recordValue);
           recordValue.setFields(fieldValues);
           recordValue.setDatasetPartitionId(partition.getId());
           recordValue.setDataProviderCode(provider.getCode());

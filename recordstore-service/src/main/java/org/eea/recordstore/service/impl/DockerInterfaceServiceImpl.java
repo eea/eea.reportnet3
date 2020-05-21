@@ -1,13 +1,5 @@
 package org.eea.recordstore.service.impl;
 
-import com.github.dockerjava.api.command.CreateContainerCmd;
-import com.github.dockerjava.api.command.ExecCreateCmdResponse;
-import com.github.dockerjava.api.model.Binds;
-import com.github.dockerjava.api.model.Container;
-import com.github.dockerjava.api.model.ExposedPort;
-import com.github.dockerjava.api.model.HostConfig;
-import com.github.dockerjava.api.model.Ports;
-import com.github.dockerjava.core.command.ExecStartResultCallback;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
@@ -26,12 +18,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import com.github.dockerjava.api.command.CreateContainerCmd;
+import com.github.dockerjava.api.command.ExecCreateCmdResponse;
+import com.github.dockerjava.api.model.Binds;
+import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.api.model.Ports;
+import com.github.dockerjava.core.command.ExecStartResultCallback;
 
 
 /**
  * The type Docker interface service.
  */
-//@Service
+// @Service
 public class DockerInterfaceServiceImpl implements DockerInterfaceService, Closeable {
 
   /**
@@ -183,6 +183,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
 
     } catch (final InterruptedException e) {
       LOG_ERROR.error(e.getMessage());
+      Thread.currentThread().interrupt();
     }
     final String outcomeOk = new String(((ByteArrayOutputStream) output).toByteArray());
     final String outcomeKo = new String(((ByteArrayOutputStream) errorOutput).toByteArray());
@@ -242,6 +243,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
       // start
     } catch (final InterruptedException e) {
       LOG_ERROR.error("Error starting container {}", container.getId(), e);
+      Thread.currentThread().interrupt();
     }
   }
 
