@@ -83,7 +83,17 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    */
   @Value("${spring.jpa.properties.hibernate.order_inserts}")
   private String orderInserts;
+  /**
+   * /** The username.
+   */
+  @Value("${spring.datasource.dataset.username}")
+  private String username;
 
+  /**
+   * The password.
+   */
+  @Value("${spring.datasource.dataset.password}")
+  private String password;
 
   /**
    * The record store controller zull.
@@ -127,8 +137,9 @@ public class DatasetConfiguration implements WebMvcConfigurer {
 
     EeaDataSource ds = new EeaDataSource();
     ds.setUrl(connectionDataVO.getConnectionString());
-    ds.setUsername(connectionDataVO.getUser());
-    ds.setPassword(connectionDataVO.getPassword());
+    //set validation microservice credentials
+    ds.setUsername(this.username);
+    ds.setPassword(this.password);
     ds.setDriverClassName("org.postgresql.Driver");
 
     return ds;

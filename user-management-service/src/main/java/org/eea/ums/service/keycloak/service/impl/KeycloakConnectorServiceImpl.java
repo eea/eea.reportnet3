@@ -22,6 +22,7 @@ import org.eea.ums.service.keycloak.model.Resource;
 import org.eea.ums.service.keycloak.model.ResourceInfo;
 import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
+import org.eea.utils.LiteralConstants;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
@@ -777,7 +778,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    */
   private ClientInfo getReportnetClientInfo(String adminToken) {
     Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Authorization", "Bearer " + adminToken);
+    headerInfo.put(LiteralConstants.AUTHORIZATION_HEADER,
+        LiteralConstants.BEARER_TOKEN + adminToken);
     HttpHeaders headers = createBasicHeaders(headerInfo);
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put(URI_PARAM_REALM, realmName);
@@ -814,7 +816,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   private List<ResourceInfo> getResourceInfo(String adminToken) {
     // First Get all the Resource sets
     Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Authorization", "Bearer " + adminToken);
+    headerInfo.put(LiteralConstants.AUTHORIZATION_HEADER,
+        LiteralConstants.BEARER_TOKEN + adminToken);
     HttpHeaders headers = createBasicHeaders(headerInfo);
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put(URI_PARAM_REALM, realmName);
@@ -882,7 +885,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    */
   private <T> HttpEntity<T> createHttpRequest(T body, Map<String, String> uriParams) {
     Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Authorization", "Bearer " + TokenMonitor.getToken());
+    headerInfo.put(LiteralConstants.AUTHORIZATION_HEADER,
+        LiteralConstants.BEARER_TOKEN + TokenMonitor.getToken());
 
     HttpHeaders headers = createBasicHeaders(headerInfo);
 
@@ -901,7 +905,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    */
   private <T> HttpEntity<T> createHttpRequestPOST(T body, Map<String, String> uriParams) {
     Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Authorization", "Bearer " + TokenMonitor.getToken());
+    headerInfo.put(LiteralConstants.AUTHORIZATION_HEADER,
+        LiteralConstants.BEARER_TOKEN + TokenMonitor.getToken());
     headerInfo.put("Content-Type", "application/json");
     HttpHeaders headers = createBasicHeaders(headerInfo);
 

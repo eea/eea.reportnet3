@@ -44,6 +44,14 @@
     "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1BBU1NXT1JEOnJvb3R9"
   },
   {
+    "key": "config/application/spring.datasource.dataset.username",
+    "value": "JHtEQVRBU0VUU19VU0VSTkFNRTpyb290fQ=="
+  },
+  {
+    "key": "config/application/spring.datasource.dataset.password",
+    "value": "JHtEQVRBU0VUU19QQVNTV09SRDpyb290fQ=="
+  },
+  {
     "key": "config/application/spring.datasource.metasource.driver-class-name",
     "value": "JHtNRVRBQkFTRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
   },
@@ -220,14 +228,6 @@
     "value": "JHtSRUNPUkRTVE9SRV9DT05ORUNUSU9OX1NUUklORzpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvZGF0YXNldHN9"
   },
   {
-    "key": "config/recordstore/spring.datasource.username",
-    "value": "JHtSRUNPUkRTVE9SRV9VU0VSTkFNRTpyb290fQ=="
-  },
-  {
-    "key": "config/recordstore/spring.datasource.password",
-    "value": "JHtSRUNPUkRTVE9SRV9QQVNTV09SRDpyb290fQ=="
-  },
-  {
     "key": "config/recordstore/spring.datasource.driverClassName",
     "value": "JHtSRUNPUkRTVE9SRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
   },
@@ -310,6 +310,10 @@
   {
     "key": "config/recordstore/design.creation.notification.ms",
     "value": "JHtERVNJR05fQ1JFQVRJT05fTk9USUZJQ0FUSU9OX01TOjUwMH0="
+  },
+  {
+    "key": "config/recordstore/dataset.users",
+    "value": "JHtEQVRBU0VUX1VTRVJTOnJlY29yZHN0b3JlLHZhbGlkYXRpb24sZGF0YXNldH0="
   },
   {
     "key": "config/apiGateway/feign.client.config.default.connectTimeout",

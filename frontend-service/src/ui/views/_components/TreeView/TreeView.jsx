@@ -234,7 +234,7 @@ const getFieldTypeValue = value => {
     // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
     // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
-    { fieldType: 'Multiselect_Codelist', value: 'Multiselect', fieldTypeIcon: 'multiselect' },
+    { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
     { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' }
   ];
 
