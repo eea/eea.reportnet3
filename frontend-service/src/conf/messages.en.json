@@ -35,7 +35,7 @@
     "closeSidebar": "Close sidebar",
     "codelistEditor": "Single select editor",
     "codelistEditorItems": "Single select items",
-    "codelistEditorItemsMessage": "(press enter, tab or paste here your selected list to add new item/s)",
+    "codelistEditorItemsMessage": "(press enter, tab or paste here your selected list (separated by commas) to add new item/s)",
     "codelistEditorMessage": "Enter your single select items",
     "codelists": "Single select items",
     "codelistSelection": "No single select item selected",
@@ -645,9 +645,13 @@
     "deleteUniqueConstraintError": "Error unique constraint",
     "selectedTable": "Selected table",
     "selectedFields": "Selected fields",
-    "multiselectCodelists": "Multiselect items",
-    "pkValuesMustBeUsed": "All PK values must be used on link",
     "tableSchemaName": "Table name",
-    "fieldData": "Field name"
+    "fieldData": "Field name",
+    "multiselectCodelists": "Multiple select items ",
+    "pkValuesMustBeUsed": "All PK values must be used on link",
+    "multiselectCodelistEditorMessage": "Enter your multiple select items",
+    "multiselectCodelistEditor": "Multiple select editor",
+    "duplicatedItem": "Duplicated item",
+    "multiselectCodelistSelection": "No multiple select item selected"
   }
 }

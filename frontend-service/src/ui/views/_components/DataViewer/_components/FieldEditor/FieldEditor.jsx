@@ -88,6 +88,7 @@ const FieldEditor = ({
 
   const getCodelistItemsWithEmptyOption = () => {
     const codelistsItems = RecordUtils.getCodelistItems(colsSchema, cells.field);
+    codelistsItems.sort();
     codelistsItems.unshift({
       itemType: resources.messages['noneCodelist'],
       value: ''

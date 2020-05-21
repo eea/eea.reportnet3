@@ -23,13 +23,13 @@ public class RecordStoreConfiguration {
   /**
    * The connection username.
    */
-  @Value("${spring.datasource.username}")
+  @Value("${spring.datasource.dataset.username}")
   private String connectionUsername;
 
   /**
    * The connection password.
    */
-  @Value("${spring.datasource.password}")
+  @Value("${spring.datasource.dataset.password}")
   private String connectionPassword;
 
   /**

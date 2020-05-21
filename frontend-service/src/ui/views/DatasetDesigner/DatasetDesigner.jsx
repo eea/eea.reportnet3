@@ -72,7 +72,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     metaData: {},
     uniqueConstraintListDialogVisible: false,
     validateDialogVisible: false,
-    validationListDialogVisible: false
+    validationListDialogVisible: false,
+    refresh: false
   });
 
   const {
@@ -87,29 +88,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   } = useDatasetDesigner(dataflowId, datasetId, designerState.datasetSchemaId);
 
   useEffect(() => {
-    try {
-      const getDatasetSchemaId = async () => {
-        const dataset = await DatasetService.schemaById(datasetId);
-        designerDispatch({
-          type: 'GET_DATASET_DATA',
-          payload: {
-            description: dataset.datasetSchemaDescription,
-            schemaId: dataset.datasetSchemaId,
-            tables: dataset.tables
-          }
-        });
-      };
-      const getDatasetSchemas = async () => {
-        designerDispatch({
-          type: 'LOAD_DATASET_SCHEMAS',
-          payload: { schemas: await DataflowService.getAllSchemas(dataflowId) }
-        });
-      };
-      getDatasetSchemaId();
-      getDatasetSchemas();
-    } catch (error) {
-      console.error(`Error while loading schema: ${error}`);
-    }
+    onLoadSchema();
   }, []);
 
   useEffect(() => {
@@ -271,6 +250,32 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     } else if (event.key == 'Enter') {
       event.preventDefault();
       onBlurDescription(event.target.value);
+    }
+  };
+
+  const onLoadSchema = () => {
+    try {
+      const getDatasetSchemaId = async () => {
+        const dataset = await DatasetService.schemaById(datasetId);
+        designerDispatch({
+          type: 'GET_DATASET_DATA',
+          payload: {
+            description: dataset.datasetSchemaDescription,
+            schemaId: dataset.datasetSchemaId,
+            tables: dataset.tables
+          }
+        });
+      };
+      const getDatasetSchemas = async () => {
+        designerDispatch({
+          type: 'LOAD_DATASET_SCHEMAS',
+          payload: { schemas: await DataflowService.getAllSchemas(dataflowId) }
+        });
+      };
+      getDatasetSchemaId();
+      getDatasetSchemas();
+    } catch (error) {
+      console.error(`Error while loading schema: ${error}`);
     }
   };
 
@@ -471,6 +476,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 icon={'camera'}
                 label={resources.messages['snapshots']}
                 onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
+              />
+              <Button
+                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                icon={'refresh'}
+                label={resources.messages['refresh']}
+                onClick={() => onLoadSchema()}
               />
             </div>
           </Toolbar>
