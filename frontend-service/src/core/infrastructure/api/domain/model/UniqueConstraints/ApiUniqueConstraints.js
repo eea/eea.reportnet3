@@ -25,13 +25,11 @@ export const apiUniqueConstraints = {
     return response;
   },
 
-  // parameters in url
-  deleteById: async (datasetSchemaId, fieldId) => {
+  deleteById: async uniqueConstraintId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.delete({
       url: getUrl(UniqueConstraintsConfig.delete, {
-        datasetSchemaId,
-        fieldId
+        uniqueConstraintId
       }),
       queryString: {},
       headers: {

@@ -9,8 +9,8 @@ const all = async datasetSchemaId => parseConstraintsList(await apiUniqueConstra
 const create = async (datasetSchemaId, fieldSchemaIds, tableSchemaId) =>
   await apiUniqueConstraints.create(datasetSchemaId, fieldSchemaIds, tableSchemaId);
 
-const deleteById = async (datasetSchemaId, fieldId) => {
-  return await apiUniqueConstraints.deleteById(datasetSchemaId, fieldId);
+const deleteById = async uniqueConstraintId => {
+  return await apiUniqueConstraints.deleteById(uniqueConstraintId);
 };
 
 const update = async (description, fieldId, fieldSchemaId, name) => {
