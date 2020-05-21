@@ -1256,7 +1256,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /**
    * Update unique constraint.
    *
-   * @param uniequeConstraint the unieque constraint
+   * @param uniequeConstraint the unique constraint
    */
   @Override
   public void updateUniqueConstraint(UniqueConstraintVO uniqueConstraintVO) {

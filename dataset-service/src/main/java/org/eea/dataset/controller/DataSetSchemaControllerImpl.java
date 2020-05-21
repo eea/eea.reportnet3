@@ -647,6 +647,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @return the unique constraints
    */
   @Override
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @GetMapping(value = "{schemaId}/getUniqueConstraints",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public List<UniqueConstraintVO> getUniqueConstraints(
@@ -666,6 +667,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @param uniqueConstraint the unique constraint
    */
   @Override
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @PostMapping(value = "/createUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
   public void createUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
     if (uniqueConstraint != null) {
@@ -688,6 +690,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @param uniqueConstraintId the unique constraint id
    */
   @Override
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @DeleteMapping(value = "/deleteUniqueConstraint/{uniqueConstraintId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public void deleteUniqueConstraint(
@@ -705,6 +708,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @param uniqueConstraint the unique constraint
    */
   @Override
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @PutMapping(value = "/updateUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
   public void updateUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
     if (uniqueConstraint == null) {
