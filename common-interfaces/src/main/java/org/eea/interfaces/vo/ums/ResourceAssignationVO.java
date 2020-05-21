@@ -60,17 +60,22 @@ public class ResourceAssignationVO {
       return false;
     ResourceAssignationVO other = (ResourceAssignationVO) obj;
     if (email == null) {
-      if (other.email != null)
+      if (other.email != null) {
         return false;
-    } else if (!email.equals(other.email))
+      }
+    } else if (!email.equals(other.email)) {
       return false;
-    if (resourceGroup != other.resourceGroup)
+    }
+    if (resourceGroup != other.resourceGroup) {
       return false;
+    }
     if (resourceId == null) {
-      if (other.resourceId != null)
+      if (other.resourceId != null) {
         return false;
-    } else if (!resourceId.equals(other.resourceId))
+      }
+    } else if (!resourceId.equals(other.resourceId)) {
       return false;
+    }
     return true;
   }
 

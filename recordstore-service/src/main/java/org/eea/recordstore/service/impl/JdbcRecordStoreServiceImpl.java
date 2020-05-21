@@ -23,7 +23,6 @@ import javax.sql.DataSource;
 import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -35,6 +34,7 @@ import org.eea.lock.service.LockService;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.postgresql.copy.CopyIn;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.copy.CopyOut;
@@ -76,16 +76,19 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /**
    * The constant GRANT_ALL_PRIVILEGES_ON_SCHEMA.
    */
-  private static final String GRANT_ALL_PRIVILEGES_ON_SCHEMA = "grant all privileges on schema %s to %s;";
+  private static final String GRANT_ALL_PRIVILEGES_ON_SCHEMA =
+      "grant all privileges on schema %s to %s;";
   /**
    * The constant GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA.
    */
-  private static final String GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA = "grant all privileges on all tables in schema %s to %s;";
+  private static final String GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA =
+      "grant all privileges on all tables in schema %s to %s;";
 
   /**
    * The constant GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA.
    */
-  private static final String GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA = "grant all privileges on all sequences in schema %s to %s;";
+  private static final String GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA =
+      "grant all privileges on all sequences in schema %s to %s;";
 
   /**
    * The user postgre db.
@@ -201,21 +204,21 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       String command;
       while ((command = br.readLine()) != null) {
         for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
-          statement.addBatch(command.replace("%dataset_name%", "dataset_" + datasetId)
-              .replace("%user%", userPostgreDb));
+          statement.addBatch(
+              command.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId)
+                  .replace("%user%", userPostgreDb));
         }
       }
 
-      //granting access to the rest of the database users. This way all the micros will be able to use their users
+      // granting access to the rest of the database users. This way all the micros will be able to
+      // use their users
       for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
-        statement.addBatch(
-            String.format(GRANT_ALL_PRIVILEGES_ON_SCHEMA, "dataset_" + datasetId, datasetUsers));
-        statement.addBatch(
-            String.format(GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA, "dataset_" + datasetId,
-                datasetUsers));
-        statement.addBatch(
-            String.format(GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA, "dataset_" + datasetId,
-                datasetUsers));
+        statement.addBatch(String.format(GRANT_ALL_PRIVILEGES_ON_SCHEMA,
+            LiteralConstants.DATASET_PREFIX + datasetId, datasetUsers));
+        statement.addBatch(String.format(GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA,
+            LiteralConstants.DATASET_PREFIX + datasetId, datasetUsers));
+        statement.addBatch(String.format(GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA,
+            LiteralConstants.DATASET_PREFIX + datasetId, datasetUsers));
       }
 
       // Execute queries and commit results
@@ -277,13 +280,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       command = command.replace("%user%", userPostgreDb);
       jdbcTemplate.execute(command);
     }
-    //Granting rights to the rest of the users, so every microservice is able to use its own user
+    // Granting rights to the rest of the users, so every microservice is able to use its own user
     jdbcTemplate.execute(String.format(GRANT_ALL_PRIVILEGES_ON_SCHEMA, datasetName, datasetUsers));
     jdbcTemplate.execute(
         String.format(GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA, datasetName, datasetUsers));
     jdbcTemplate.execute(
-        String.format(GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA, datasetName,
-            datasetUsers));
+        String.format(GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA, datasetName, datasetUsers));
 
     LOG.info("Empty design dataset created");
 
@@ -350,7 +352,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       throws SQLException, IOException {
 
     ConnectionDataVO connectionDataVO =
-        getConnectionDataForDataset("dataset_" + idReportingDataset);
+        getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
     Connection con = null;
     try {
       con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
@@ -423,21 +425,22 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     String signature =
         deleteData
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-            : LockSignature.RESTORE_SNAPSHOT.getValue()
+                : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
     Map<String, Object> value = new HashMap<>();
-    value.put("dataset_id", idReportingDataset);
-    ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
+    value.put(LiteralConstants.DATASET_ID, idReportingDataset);
+    ConnectionDataVO conexion =
+        getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
     Connection con = null;
     Statement stmt = null;
     try {
@@ -546,20 +549,21 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     String signature =
         deleteData
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-            : LockSignature.RESTORE_SNAPSHOT.getValue()
+                : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
 
-    ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
+    ConnectionDataVO conexion =
+        getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
     Connection con = null;
     Statement stmt = null;
     try {
@@ -744,8 +748,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       Map<String, Object> result = new HashMap<>();
       String datasetName = "dataset_" + entry.getKey();
       result.put("connectionDataVO", createConnectionDataVO(datasetName));
-      result.put("dataset_id", datasetName);
-      result.put("idDatasetSchema", entry.getValue());
+      result.put(LiteralConstants.DATASET_ID, datasetName);
+      result.put(LiteralConstants.ID_DATASET_SCHEMA, entry.getValue());
 
       kafkaSenderUtils.releaseKafkaEvent(EventType.CONNECTION_CREATED_EVENT, result);
     }
