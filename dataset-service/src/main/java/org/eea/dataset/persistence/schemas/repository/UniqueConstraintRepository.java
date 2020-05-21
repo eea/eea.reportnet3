@@ -21,19 +21,21 @@ public interface UniqueConstraintRepository
    */
   List<UniqueConstraintSchema> findByDatasetSchemaId(ObjectId datasetSchemaId);
 
+
   /**
    * Delete by unique id.
    *
    * @param id the id
-   * @return true, if successful
+   * @return the long
    */
   Long deleteByUniqueId(ObjectId id);
+
 
   /**
    * Update.
    *
    * @param uniqueConstraint the unique constraint
-   * @return the boolean
+   * @return the long
    */
   Long update(UniqueConstraintSchema uniqueConstraint);
 
