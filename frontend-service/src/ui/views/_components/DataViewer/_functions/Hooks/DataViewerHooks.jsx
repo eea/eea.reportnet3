@@ -109,7 +109,7 @@ export const useSetColumns = (
       { fieldType: 'URL', value: 'URL' },
       { fieldType: 'Phone', value: 'Phone number' },
       { fieldType: 'Codelist', value: 'Single select' },
-      { fieldType: 'Multiselect_Codelist', value: 'Multiselect' },
+      { fieldType: 'Multiselect_Codelist', value: 'Multiple select' },
       { fieldType: 'Link', value: 'Link' }
     ];
 
@@ -148,7 +148,6 @@ export const useSetColumns = (
 
   const dataTemplate = (rowData, column) => {
     let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.field)[0];
-    console.log(column.type, field);
     if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
       const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
       const message = DataViewerUtils.formatValidations(validations);

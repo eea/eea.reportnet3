@@ -22,20 +22,21 @@ import { MetadataUtils } from 'ui/views/_functions/Utils';
 
 const ActionsToolbar = ({
   colsSchema,
-  datasetId,
   dataflowId,
+  datasetId,
   hasWritePermissions,
-  isTableDeleted,
+  isDataCollection = false,
   isFilterValidationsActive,
   isLoading,
+  isTableDeleted,
   isValidationSelected,
   isWebFormMMR,
   levelErrorTypesWithCorrects,
   onRefresh,
-  setColumns,
   onSetVisible,
   originalColumns,
   records,
+  setColumns,
   setDeleteDialogVisible,
   setImportDialogVisible,
   showValidationFilter,
@@ -175,8 +176,11 @@ const ActionsToolbar = ({
         />
         <Button
           id="buttonExportTable"
-          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+          className={`p-button-rounded p-button-secondary-transparent ${
+            isDataCollection ? null : 'p-button-animated-blink'
+          }`}
           // disabled={!hasWritePermissions}
+          disabled={isDataCollection}
           icon={isLoadingFile ? 'spinnerAnimate' : 'import'}
           label={resources.messages['exportTable']}
           onClick={event => {
