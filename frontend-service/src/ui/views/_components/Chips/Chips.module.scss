@@ -2,3 +2,8 @@
   box-shadow: var(--chips-input-box-shadow-error) !important;
   border-radius: 3px !important;
 }
+
+.errorMessage {
+  color: var(--errors);
+  font-style: italic;
+}

@@ -450,15 +450,8 @@ const DataViewer = withRouter(
     };
 
     const onEditorSubmitValue = async (cell, value, record) => {
-      console.log({ cell, value, record });
       if (!isEmpty(record)) {
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
-        console.log(
-          { field, initialCellValue, selectedCellId },
-          RecordUtils.getCellId(cell, cell.field),
-          record.recordId,
-          records.selectedRecord.recordId
-        );
         if (
           value !== initialCellValue &&
           selectedCellId === RecordUtils.getCellId(cell, cell.field) &&
@@ -829,6 +822,7 @@ const DataViewer = withRouter(
           dataflowId={dataflowId}
           datasetId={datasetId}
           hasWritePermissions={hasWritePermissions}
+          isDataCollection={isDataCollection}
           isFilterValidationsActive={isFilterValidationsActive}
           isTableDeleted={isTableDeleted}
           isLoading={isLoading}
