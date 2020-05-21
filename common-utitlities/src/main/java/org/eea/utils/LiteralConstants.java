@@ -78,6 +78,18 @@ public final class LiteralConstants {
   /** The Constant CLIENT_ID. */
   public static final String CLIENT_ID = "client_id";
 
+  /** The Constant SNAPSHOT_FILE_DATASET_SUFFIX. */
+  public static final String SNAPSHOT_FILE_DATASET_SUFFIX = "_table_DatasetValue.snap";
+
+  /** The Constant SNAPSHOT_FILE_TABLE_SUFFIX. */
+  public static final String SNAPSHOT_FILE_TABLE_SUFFIX = "_table_TableValue.snap";
+
+  /** The Constant SNAPSHOT_FILE_RECORD_SUFFIX. */
+  public static final String SNAPSHOT_FILE_RECORD_SUFFIX = "_table_RecordValue.snap";
+
+  /** The Constant SNAPSHOT_FILE_FIELD_SUFFIX. */
+  public static final String SNAPSHOT_FILE_FIELD_SUFFIX = "_table_FieldValue.snap";
+
 
   /**
    * Instantiates a new literal constants.

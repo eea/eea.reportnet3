@@ -361,15 +361,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       CopyManager cm = new CopyManager((BaseConnection) con);
 
       // Copy dataset_value
-      String nameFileDatasetValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_DatasetValue.snap");
+      String nameFileDatasetValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX);
       String copyQueryDataset = "COPY (SELECT id, id_dataset_schema FROM dataset_"
           + idReportingDataset + ".dataset_value) to STDOUT";
 
       printToFile(nameFileDatasetValue, copyQueryDataset, cm);
       // Copy table_value
-      String nameFileTableValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_TableValue.snap");
+      String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
 
       String copyQueryTable = "COPY (SELECT id, id_table_schema, dataset_id FROM dataset_"
           + idReportingDataset + ".table_value) to STDOUT";
@@ -377,8 +377,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       printToFile(nameFileTableValue, copyQueryTable, cm);
 
       // Copy record_value
-      String nameFileRecordValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_RecordValue.snap");
+      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
       String copyQueryRecord =
           "COPY (SELECT id, id_record_schema, id_table, dataset_partition_id,data_provider_code FROM dataset_"
               + idReportingDataset + ".record_value WHERE dataset_partition_id="
@@ -387,8 +387,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       printToFile(nameFileRecordValue, copyQueryRecord, cm);
 
       // Copy field_value
-      String nameFileFieldValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_FieldValue.snap");
+      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
       String copyQueryField =
           "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
               + idReportingDataset + ".field_value fv inner join dataset_" + idReportingDataset
@@ -472,8 +472,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         case DESIGN:
           // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
           // not neccesary
-          String nameFileTableValue =
-              pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_TableValue.snap");
+          String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+              LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
 
           String copyQueryTable = "COPY dataset_" + idReportingDataset
               + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
@@ -483,16 +483,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           break;
       }
       // Record value
-      String nameFileRecordValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_RecordValue.snap");
+      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
 
       String copyQueryRecord = "COPY dataset_" + idReportingDataset
           + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
       copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
 
       // Field value
-      String nameFileFieldValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_FieldValue.snap");
+      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
 
       String copyQueryField = "COPY dataset_" + idReportingDataset
           + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
@@ -600,8 +600,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         case DESIGN:
           // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
           // not neccesary
-          String nameFileTableValue =
-              pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_TableValue.snap");
+          String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+              LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
 
           String copyQueryTable = "COPY dataset_" + idReportingDataset
               + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
@@ -611,16 +611,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           break;
       }
       // Record value
-      String nameFileRecordValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_RecordValue.snap");
+      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
 
       String copyQueryRecord = "COPY dataset_" + idReportingDataset
           + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
       copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
 
       // Field value
-      String nameFileFieldValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_FieldValue.snap");
+      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
 
       String copyQueryField = "COPY dataset_" + idReportingDataset
           + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
@@ -664,14 +664,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Override
   public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {
 
-    String nameFileDatasetValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_DatasetValue.snap";
-    String nameFileTableValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_TableValue.snap";
-    String nameFileRecordValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_RecordValue.snap";
-    String nameFileFieldValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_FieldValue.snap";
+    String nameFileDatasetValue = "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset
+        + LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX;
+    String nameFileTableValue = "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset
+        + LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX;
+    String nameFileRecordValue = "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset
+        + LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX;
+    String nameFileFieldValue = "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset
+        + LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX;
 
     Path path1 = Paths.get(pathSnapshot + nameFileDatasetValue);
     Files.deleteIfExists(path1);
