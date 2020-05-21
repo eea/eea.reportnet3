@@ -1,0 +1,32 @@
+{
+  "steps": [
+    {
+      "content": "dataflowHelpHelpStep1",
+      "target": ".dataflowHelp-documents-help-step"
+    },
+    {
+      "content": "dataflowHelpHelpStep2",
+      "target": ".dataflowHelp-weblinks-help-step"
+    },
+    {
+      "content": "dataflowHelpHelpStep3",
+      "target": ".dataflowHelp-schemas-help-step"
+    },
+    {
+      "content": "dataflowHelpHelpStep4",
+      "target": ".dataflowHelp-document-upload-help-step"
+    },
+    {
+      "content": "dataflowHelpHelpStep5",
+      "target": ".dataflowHelp-document-refresh-help-step"
+    },
+    {
+      "content": "dataflowHelpHelpStep6",
+      "target": ".dataflowHelp-document-edit-delete-help-step"
+    },
+    {
+      "content": "dataflowHelpHelpStep7",
+      "target": ".dataflowHelp-document-icon-help-step"
+    }
+  ]
+}

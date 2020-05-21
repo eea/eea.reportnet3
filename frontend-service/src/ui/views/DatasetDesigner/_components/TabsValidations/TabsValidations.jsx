@@ -84,9 +84,9 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
 
       if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
         validationsServiceList.validations.forEach(validation => {
-          const aditionalInfo = getAditionalValidationInfo(validation.referenceId);
-          validation.table = aditionalInfo.tableName;
-          validation.field = aditionalInfo.fieldName;
+          const additionalInfo = getAditionalValidationInfo(validation.referenceId);
+          validation.table = additionalInfo.tableName;
+          validation.field = additionalInfo.fieldName;
         });
       }
 
@@ -130,22 +130,22 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   );
 
   const getAditionalValidationInfo = referenceId => {
-    const aditionalInfo = {};
+    const additionalInfo = {};
     datasetSchemaAllTables.forEach(table => {
       if (!isUndefined(table.records)) {
         table.records.forEach(record =>
           record.fields.forEach(field => {
             if (!isNil(field)) {
               if (field.fieldId === referenceId) {
-                aditionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
-                aditionalInfo.fieldName = field.name;
+                additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
+                additionalInfo.fieldName = field.name;
               }
             }
           })
         );
       }
     });
-    return aditionalInfo;
+    return additionalInfo;
   };
 
   const getHeader = fieldHeader => {
