@@ -244,5 +244,6 @@
     { "label": "AND", "value": "AND" },
     { "label": "OR", "value": "OR" }
   ],
+  "logicalOperatorFromDTO": ["FIELD_AND", "FIELD_OR"],
   "requiredFields": ["table", "field", "shortCode", "name", "errorLevel", "errorMessage"]
 }
