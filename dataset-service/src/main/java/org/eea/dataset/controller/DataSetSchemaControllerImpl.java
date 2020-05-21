@@ -660,6 +660,26 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     return dataschemaService.getUniqueConstraints(datasetSchemaId);
   }
 
+  /**
+   * Gets the unique constraints.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the unique constraints
+   */
+  @Override
+  @GetMapping(value = "/private/getUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
+  public UniqueConstraintVO getUniqueConstraint(@PathVariable("uniqueId") String uniqueId) {
+    if (uniqueId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT);
+    }
+    try {
+      return dataschemaService.getUniqueConstraint(uniqueId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+  }
+
 
   /**
    * Creates the unique constraint.

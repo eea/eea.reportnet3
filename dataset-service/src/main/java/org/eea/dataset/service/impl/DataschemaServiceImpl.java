@@ -23,6 +23,7 @@ import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
+import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
@@ -1276,5 +1277,27 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     LOG.info("get all unique Constraints of dataset {}", schemaId);
     return uniqueConstraintMapper.entityListToClass(
         uniqueConstraintRepository.findByDatasetSchemaId(new ObjectId(schemaId)));
+  }
+
+
+  /**
+   * Gets the unique constraint.
+   *
+   * @param uniqueId the unique id
+   * @return the unique constraint
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public UniqueConstraintVO getUniqueConstraint(String uniqueId) throws EEAException {
+    LOG.info("get unique Constraints {}", uniqueId);
+    Optional<UniqueConstraintSchema> uniqueResult =
+        uniqueConstraintRepository.findById(new ObjectId(uniqueId));
+    if (uniqueResult.isPresent()) {
+      return uniqueConstraintMapper.entityToClass(uniqueResult.get());
+    } else {
+      LOG_ERROR.error("Error find the unique constraint from the catalogue. UniqueId: {}",
+          uniqueId);
+      throw new EEAException(String.format(EEAErrorMessage.UNIQUE_NOT_FOUND, uniqueId));
+    }
   }
 }

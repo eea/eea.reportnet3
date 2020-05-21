@@ -383,4 +383,13 @@ public interface DatasetSchemaService {
    */
   List<UniqueConstraintVO> getUniqueConstraints(String schemaId);
 
+  /**
+   * Gets the unique constraint.
+   *
+   * @param uniqueId the unique id
+   * @return the unique constraint
+   * @throws EEAException
+   */
+  UniqueConstraintVO getUniqueConstraint(String uniqueId) throws EEAException;
+
 }

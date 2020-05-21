@@ -249,4 +249,13 @@ public interface DatasetSchemaController {
   @PutMapping(value = "/updateUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
   public void updateUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint);
 
+  /**
+   * Gets the unique constraint.
+   *
+   * @param uniqueId the unique id
+   * @return the unique constraint
+   */
+  @GetMapping(value = "/private/getUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
+  UniqueConstraintVO getUniqueConstraint(String uniqueId);
+
 }
