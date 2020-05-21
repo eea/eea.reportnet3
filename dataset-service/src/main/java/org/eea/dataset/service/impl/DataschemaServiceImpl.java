@@ -1260,7 +1260,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void updateUniqueConstraint(UniqueConstraintVO uniqueConstraintVO) {
-    uniqueConstraintRepository.update(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
+    // uniqueConstraintRepository.update(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
 
   }
 
@@ -1272,7 +1272,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public List<UniqueConstraintVO> getUniqueConstraints(String schemaId) {
-
+    LOG.debug("get all unique Constraints of dataset {}", schemaId);
     return uniqueConstraintMapper.entityListToClass(
         uniqueConstraintRepository.findByDatasetSchemaId(new ObjectId(schemaId)));
   }
