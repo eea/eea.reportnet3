@@ -106,7 +106,6 @@ public class RulesControllerImpl implements RulesController {
    * Delete rule by id.
    *
    * @param datasetId the dataset id
-   * @param datasetSchemaId the dataset schema id
    * @param ruleId the rule id
    */
   @Override
@@ -126,7 +125,6 @@ public class RulesControllerImpl implements RulesController {
   /**
    * Delete rule by reference id.
    *
-   * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
    */
@@ -162,6 +160,7 @@ public class RulesControllerImpl implements RulesController {
    *
    * @param datasetId the dataset id
    * @param ruleVO the rule VO
+   * @return the response entity
    */
   @Override
   @HystrixCommand
@@ -193,6 +192,7 @@ public class RulesControllerImpl implements RulesController {
    * @param referenceId the reference id
    * @param typeData the type data
    * @param typeEntityEnum the type entity enum
+   * @param datasetId the dataset id
    * @param requiredRule the required rule
    */
   @Override
@@ -313,5 +313,26 @@ public class RulesControllerImpl implements RulesController {
   public void deleteRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId) {
     rulesService.deleteRuleRequired(datasetSchemaId, referenceId);
+  }
+
+  /**
+   * Creates the unique constraint.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @param uniqueId the unique id
+   */
+  @Override
+  @PostMapping("/private/createUniqueConstraint")
+  public void createUniqueConstraint(String datasetSchemaId, String tableSchemaId,
+      String uniqueId) {
+    rulesService.createUniqueConstraint(datasetSchemaId, tableSchemaId, uniqueId);
+  }
+
+  @DeleteMapping("/private/deleteUniqueConstraint")
+  public void deleteUniqueConstraint(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("uniqueId") String uniqueId) {
+
+    rulesService.deleteUniqueConstraint(datasetSchemaId, uniqueId);
   }
 }

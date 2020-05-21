@@ -573,4 +573,20 @@ public class RulesServiceImpl implements RulesService {
       rule.setThenCondition(ruleVO.getThenCondition());
     }
   }
+
+  @Override
+  public void createUniqueConstraint(String datasetSchemaId, String tableSchemaId,
+      String uniqueId) {
+    Long shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
+    Rule rule = AutomaticRules.createUniqueConstraintAutomaticRule(tableSchemaId,
+        EntityTypeEnum.TABLE, "Table type uniqueConstraint", "TU" + shortcode,
+        "Checks if either one field or combination of fields are unique within table", uniqueId);
+    rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
+  }
+
+  @Override
+  public void deleteUniqueConstraint(String datasetSchemaId, String uniqueId) {
+    boolean dato = rulesRepository.deleteByUniqueConstraintId(new ObjectId(datasetSchemaId),
+        new ObjectId(uniqueId));
+  }
 }

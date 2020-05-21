@@ -299,4 +299,12 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
 
     return result.isEmpty() ? null : result.get(0);
   }
+
+  @Override
+  public boolean deleteByUniqueConstraintId(ObjectId datasetSchemaId, ObjectId uniqueConstraintId) {
+    Document pullCriteria = new Document("uniqueConstraintId", uniqueConstraintId);
+    Update update = new Update().pull("rules", pullCriteria);
+    Query query = new Query(new Criteria("idDatasetSchema").is(datasetSchemaId));
+    return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
+  }
 }

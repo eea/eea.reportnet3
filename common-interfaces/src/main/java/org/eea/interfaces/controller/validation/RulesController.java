@@ -177,4 +177,26 @@ public interface RulesController {
    */
   @PutMapping("/updateAutomaticRule/{datasetId}")
   void updateAutomaticRule(@PathVariable("datasetId") long datasetId, @RequestBody RuleVO ruleVO);
+
+  /**
+   * Creates the unique constraint.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @param uniqueId the unique id
+   */
+  @PostMapping("/private/createUniqueConstraint")
+  void createUniqueConstraint(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("tableSchemaId") String tableSchemaId,
+      @RequestParam("uniqueId") String uniqueId);
+
+  /**
+   * Delete unique constraint.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param uniqueId the unique id
+   */
+  @DeleteMapping("/private/deleteUniqueConstraint")
+  void deleteUniqueConstraint(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("uniqueId") String uniqueId);
 }

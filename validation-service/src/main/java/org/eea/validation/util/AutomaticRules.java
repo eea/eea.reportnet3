@@ -267,6 +267,23 @@ public class AutomaticRules {
         ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
 
+  public static Rule createUniqueConstraintAutomaticRule(String referenceId,
+      EntityTypeEnum typeEntityEnum, String nameRule, String shortCode, String description,
+      String uniqueId) {
+
+    Rule rule = composeRule(referenceId, typeEntityEnum, nameRule,
+        "isUniqueConstraint('" + uniqueId + "',",
+        "Uniqueness and multiplicity constraints - either one field or combination of fields are unique within table",
+        ErrorTypeEnum.ERROR.getValue(), shortCode, description);
+
+    StringBuilder whenCondition = new StringBuilder(rule.getWhenCondition());
+    whenCondition = whenCondition.append("'").append(rule.getRuleId().toString()).append("')");
+    rule.setWhenCondition(whenCondition.toString());
+    rule.setReferenceFieldSchemaPKId(new ObjectId(referenceId));
+    rule.setUniqueConstraintId(new ObjectId(uniqueId));
+    return rule;
+  }
+
   /**
    * Compose rule.
    *
