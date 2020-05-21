@@ -69,7 +69,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     isLoading: true,
     isPreviewModeOn: DatasetDesignerUtils.getUrlParamValue('design'),
     isManageUniqueConstraintDialogVisible: false,
-    manageUniqueConstraintData: {},
+    manageUniqueConstraintData: { tableSchemaId: null, tableSchemaName: '', fieldData: [], uniqueId: null },
     metaData: {},
     uniqueConstraintListDialogVisible: false,
     validateDialogVisible: false,

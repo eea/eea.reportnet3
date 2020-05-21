@@ -13,11 +13,8 @@ import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const ManageUniqueConstraint = ({ allTables, designerState, isUpdate, isVisible, manageDialogs }) => {
+export const ManageUniqueConstraint = ({ designerState, manageDialogs }) => {
   const resources = useContext(ResourcesContext);
-
-  const [selectedFields, setSelectedFields] = useState([]);
-  const [selectedTable, setSelectedTable] = useState(null);
 
   const {
     datasetSchemaAllTables,
@@ -26,8 +23,18 @@ export const ManageUniqueConstraint = ({ allTables, designerState, isUpdate, isV
     manageUniqueConstraintData
   } = designerState;
 
-  console.log('designerState', designerState);
-  console.log('manageUniqueConstraintData', manageUniqueConstraintData);
+  const { tableSchemaId, tableSchemaName, fieldData, uniqueId } = manageUniqueConstraintData;
+
+  const [selectedFields, setSelectedFields] = useState([]);
+  const [selectedTable, setSelectedTable] = useState({ name: '', value: null });
+
+  useEffect(() => {
+    if (isManageUniqueConstraintDialogVisible) {
+      const fields = fieldData.map(field => ({ name: field.name, value: field.fieldId }));
+      setSelectedFields(fields);
+      setSelectedTable({ name: tableSchemaName, value: tableSchemaId });
+    }
+  }, [isManageUniqueConstraintDialogVisible, manageUniqueConstraintData]);
 
   useEffect(() => {
     getTableOptions();
@@ -36,26 +43,16 @@ export const ManageUniqueConstraint = ({ allTables, designerState, isUpdate, isV
 
   const getTableOptions = () => {
     const tables = datasetSchemaAllTables.filter(table => table.index >= 0);
-    return tables.map(table => {
-      return {
-        name: `${table.tableSchemaName}`,
-        value: `${table.tableSchemaId}`
-      };
-    });
+    return tables.map(table => ({ name: `${table.tableSchemaName}`, value: `${table.tableSchemaId}` }));
   };
 
   const getFieldOptions = () => {
-    if (selectedTable) {
+    if (selectedTable.value) {
       const table = datasetSchemaAllTables.filter(table => table.tableSchemaId === selectedTable.value)[0];
       if (table.records) {
-        if (!isEmpty(table.records[0].fields)) {
-          return table.records[0].fields.map(field => {
-            return {
-              name: `${field.name}`,
-              value: `${field.fieldId}`
-            };
-          });
-        } else return [{ name: 'There are no fields to select', disabled: true }];
+        return !isEmpty(table.records[0].fields)
+          ? table.records[0].fields.map(field => ({ name: `${field.name}`, value: `${field.fieldId}` }))
+          : [{ name: 'There are no fields to select', disabled: true }];
       }
     }
   };
@@ -93,7 +90,7 @@ export const ManageUniqueConstraint = ({ allTables, designerState, isUpdate, isV
 
   const onResetConstraintValues = () => {
     setSelectedFields([]);
-    setSelectedTable(null);
+    setSelectedTable({ name: '', value: null });
   };
 
   const renderDialogLayout = children =>
@@ -175,30 +172,11 @@ export const ManageUniqueConstraint = ({ allTables, designerState, isUpdate, isV
       </div>
       <div className={styles.selected}>
         <span className={styles.title}>{`${resources.messages['selectedTable']}: `}</span>
-        <span>
-          {!isNil(manageUniqueConstraintData.uniqueId)
-            ? !isNil(selectedTable)
-              ? selectedTable.name
-              : manageUniqueConstraintData.tableSchemaName
-            : !isNil(selectedTable)
-            ? selectedTable.name
-            : ''}
-        </span>
-        {/* <span>{!isNil(selectedTable) ? selectedTable.name : ''}</span> */}
+        <span>{!isNil(selectedTable.value) ? selectedTable.name : ''}</span>
       </div>
       <div className={`${styles.selected} ${styles.fields}`}>
         <span className={styles.title}>{`${resources.messages['selectedFields']}: `}</span>
-        <span>
-          {!isNil(manageUniqueConstraintData.uniqueId)
-            ? !isEmpty(selectedFields)
-              ? selectedFields.map(field => field.name)
-              : manageUniqueConstraintData.fieldData.map(field => field.name)
-            : !isEmpty(selectedFields)
-            ? selectedFields.map(field => field.name)
-            : ''}
-        </span>
-        {/* <span>{!isEmpty(selectedFields) ? selectedFields.map(field => field.name) : ''}</span> */}
-        {/* <textarea name="" id="" cols="30" readOnly rows="2" value={selectedFields.map(field => field.name)}></textarea> */}
+        <span>{!isEmpty(selectedFields) ? selectedFields.map(field => field.name) : ''}</span>
       </div>
     </form>
   );
