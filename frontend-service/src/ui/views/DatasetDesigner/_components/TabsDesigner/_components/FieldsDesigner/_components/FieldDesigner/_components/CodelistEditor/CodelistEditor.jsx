@@ -19,7 +19,7 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
       const pastedData = clipboardData.getData('Text');
       const inmCodelistItems = [...codelistItems];
       inmCodelistItems.push(...pastedData.split(',').filter(value => value.trim() !== ''));
-      setCodelistItems([...new Set(inmCodelistItems)]);
+      setCodelistItems([...new Set(inmCodelistItems.map(value => value.trim()))]);
     }
   };
 
