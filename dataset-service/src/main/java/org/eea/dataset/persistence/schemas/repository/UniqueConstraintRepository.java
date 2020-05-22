@@ -30,5 +30,13 @@ public interface UniqueConstraintRepository
    */
   Long deleteByUniqueId(ObjectId id);
 
+  /**
+   * Delete by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the long
+   */
+  Long deleteByDatasetSchemaId(ObjectId datasetSchemaId);
+
 
 }
