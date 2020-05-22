@@ -27,8 +27,10 @@ import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotSchemaRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
+import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
 import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -64,6 +66,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -162,11 +165,17 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private ReceiptPDFGenerator receiptPDFGenerator;
 
+  @Autowired
+  private UniqueConstraintRepository uniqueConstraintRepository;
+
   /** The Constant FILE_PATTERN_NAME. */
   private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
 
   /** The Constant FILE_PATTERN_NAME_RULES. */
   private static final String FILE_PATTERN_NAME_RULES = "rulesSnapshot_%s-DesignDataset_%s";
+
+  /** The Constant FILE_PATTERN_NAME_UNIQUE. */
+  private static final String FILE_PATTERN_NAME_UNIQUE = "uniqueSnapshot_%s-DesignDataset_%s";
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseServiceImpl.class);
@@ -484,6 +493,17 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       documentControllerZuul.uploadSchemaSnapshotDocument(outStream.toByteArray(), idDataset,
           nameFileRules);
 
+      // We need to create a file related to the Unique catalogue
+      List<UniqueConstraintSchema> listUnique =
+          uniqueConstraintRepository.findByDatasetSchemaId(new ObjectId(idDatasetSchema));
+      ObjectMapper objectMapperUnique = new ObjectMapper();
+      String nameFileUnique = String.format(FILE_PATTERN_NAME_UNIQUE, idSnapshot, idDataset)
+          + LiteralConstants.SNAPSHOT_EXTENSION;
+      outStream.reset();
+      objectMapperUnique.writeValue(outStream, listUnique);
+      documentControllerZuul.uploadSchemaSnapshotDocument(outStream.toByteArray(), idDataset,
+          nameFileUnique);
+
       // 3. Create the data file of the snapshot, calling to recordstore-service
       // we need the partitionId. By now only consider the user root
       Long idPartition = obtainPartition(idDataset, "root").getId();
@@ -531,9 +551,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     objectMapperRules.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     byte[] contentRules = documentControllerZuul.getSnapshotDocument(idDataset, nameFileRules);
     RulesSchema rules = objectMapperRules.readValue(contentRules, RulesSchema.class);
-    LOG.info("Schema rules class recovered");
     rulesControllerZuul.deleteRulesSchema(schema.getIdDataSetSchema().toString());
     rulesRepository.save(rules);
+    LOG.info("Schema rules class recovered");
 
     // First we delete all the entries in the catalogue of the previous schema, before replacing it
     // by the one of the snapshot
@@ -546,6 +566,19 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // also the table foreign_relations
     schemaService.updatePKCatalogueAndForeignsAfterSnapshot(schema.getIdDataSetSchema().toString(),
         idDataset);
+
+    // Since there's the Unique property, we need to restore that file too
+    String nameFileUnique = String.format(FILE_PATTERN_NAME_UNIQUE, idSnapshot, idDataset)
+        + LiteralConstants.SNAPSHOT_EXTENSION;
+    ObjectMapper objectMapperUnique = new ObjectMapper();
+    objectMapperUnique.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    // objectMapperUnique.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+    byte[] contentUnique = documentControllerZuul.getSnapshotDocument(idDataset, nameFileUnique);
+    List<UniqueConstraintSchema> listUnique = objectMapperUnique.readValue(contentUnique,
+        new TypeReference<List<UniqueConstraintSchema>>() {});
+    uniqueConstraintRepository.deleteByDatasetSchemaId(schema.getIdDataSetSchema());
+    uniqueConstraintRepository.saveAll(listUnique);
+    LOG.info("Schema Unique class recovered");
 
     LOG.info("Schema Snapshot {} totally restored", idSnapshot);
   }
