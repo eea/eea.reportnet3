@@ -166,7 +166,11 @@ public class RulesControllerImpl implements RulesController {
 
       rulesService.createNewRule(datasetId, ruleVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error creating rule: {} - {}", e.getMessage(), ruleVO, e);
+      LOG_ERROR.error(
+          "Error creating rule: {} - referenceId={} - description={} - ruleName={} - whenCondition={} - thenCondition={} - shortCode={} - type={}",
+          e.getMessage(), ruleVO.getReferenceId(), ruleVO.getDescription(), ruleVO.getRuleName(),
+          ruleVO.getWhenCondition(), ruleVO.getThenCondition(), ruleVO.getShortCode(),
+          ruleVO.getType(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
@@ -230,7 +234,11 @@ public class RulesControllerImpl implements RulesController {
 
       rulesService.updateRule(datasetId, ruleVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error updating rule: {} - {}", e.getMessage(), ruleVO, e);
+      LOG_ERROR.error(
+          "Error updating rule: {} - ruleId={} - referenceId={} - description={} - ruleName={} - whenCondition={} - thenCondition={} - shortCode={} - type={}",
+          e.getMessage(), ruleVO.getRuleId(), ruleVO.getReferenceId(), ruleVO.getDescription(),
+          ruleVO.getRuleName(), ruleVO.getWhenCondition(), ruleVO.getThenCondition(),
+          ruleVO.getShortCode(), ruleVO.getType(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
