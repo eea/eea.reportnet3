@@ -253,8 +253,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onLoadSchema = () => {
     try {
+      isLoading(true);
       const getDatasetSchemaId = async () => {
         const dataset = await DatasetService.schemaById(datasetId);
+        isLoading(false);
         designerDispatch({
           type: 'GET_DATASET_DATA',
           payload: {
