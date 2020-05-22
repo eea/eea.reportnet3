@@ -435,11 +435,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     value.put(LiteralConstants.DATASET_ID, idReportingDataset);
     ConnectionDataVO conexion =
         getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
-    Connection con = null;
-    Statement stmt = null;
-    try {
-      con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
-          conexion.getPassword());
+
+    try (Connection con = DriverManager
+        .getConnection(conexion.getConnectionString(), conexion.getUser(),
+            conexion.getPassword());
+        Statement stmt = con.createStatement()) {
       con.setAutoCommit(true);
 
       if (deleteData) {
@@ -455,7 +455,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           default:
             break;
         }
-        stmt = con.createStatement();
         LOG.info("Deleting previous data");
         stmt.executeUpdate(sql);
       }
@@ -508,9 +507,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       LOG.info("Snapshot {} restored", idSnapshot);
     } catch (Exception e) {
-      if (null != con) {
-        LOG_ERROR.error("Error restoring the snapshot data due to error {}.", e.getMessage(), e);
-      }
+      LOG_ERROR.error("Error restoring the snapshot data due to error {}.", e.getMessage(), e);
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(failEventType, value,
             NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
@@ -520,13 +517,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         LOG.error("Error realeasing event {} due to error {}", failEventType, ex.getMessage(), ex);
       }
     } finally {
-      if (null != stmt) {
-        stmt.close();
-      }
-      if (null != con) {
-        // if autocommit is true, you don't have to commit mannually
-        con.close();
-      }
       // Release the lock manually
       List<Object> criteria = new ArrayList<>();
       criteria.add(signature);
@@ -562,11 +552,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     ConnectionDataVO conexion =
         getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
-    Connection con = null;
+
     Statement stmt = null;
-    try {
-      con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
-          conexion.getPassword());
+    try (Connection con = DriverManager
+        .getConnection(conexion.getConnectionString(), conexion.getUser(),
+            conexion.getPassword())) {
+
       con.setAutoCommit(true);
 
       if (deleteData) {
@@ -624,15 +615,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       LOG.info("Snapshot {} restored for dataset {}", idSnapshot, idReportingDataset);
     } catch (Exception e) {
-      if (null != con) {
-        LOG_ERROR.error("Error restoring the snapshot data due to error {}", e.getMessage(), e);
-      }
+      LOG_ERROR.error("Error restoring the snapshot data due to error {}", e.getMessage(), e);
     } finally {
       if (null != stmt) {
         stmt.close();
-      }
-      if (null != con) {
-        con.close();
       }
       // Release the lock manually
       List<Object> criteria = new ArrayList<>();
@@ -869,5 +855,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
     }
   }
+
 
 }
