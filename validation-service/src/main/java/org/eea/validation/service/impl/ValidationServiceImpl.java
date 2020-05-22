@@ -346,7 +346,7 @@ public class ValidationServiceImpl implements ValidationService {
     KieSession session = kieBase.newKieSession();
     try {
       records.stream().filter(Objects::nonNull).forEach(row -> {
-
+        row.initializeFieldsMap();
         runRecordValidations(row, session);
         List<RecordValidation> validations = row.getRecordValidations();
         if (null != validations) {
