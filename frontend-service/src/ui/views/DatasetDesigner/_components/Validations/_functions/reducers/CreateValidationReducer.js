@@ -13,7 +13,6 @@ export const createValidationReducerInitState = {
   },
   datasetSchema: {},
   schemaTables: [],
-  errorLevels: [],
   validationRuleString: '',
   areRulesDisabled: true,
   isRuleAddingDisabled: true,
@@ -29,6 +28,15 @@ export const createValidationReducer = (state, { type, payload }) => {
         candidateRule: {
           ...state.candidateRule,
           [payload.key]: payload.value
+        }
+      };
+    case 'SET_FIELD_AND_FIELD_TYPE':
+      return {
+        ...state,
+        candidateRule: {
+          ...state.candidateRule,
+          [payload.key]: payload.value,
+          fieldType: payload.fieldType
         }
       };
     case 'SET_TABLES':
@@ -123,7 +131,6 @@ export const createValidationReducer = (state, { type, payload }) => {
       return {
         ...state,
         schemaTables: payload.tables,
-        errorLevels: payload.errorLevels,
         candidateRule: payload.candidateRule
       };
     case 'RESET_CREATION_FORM':

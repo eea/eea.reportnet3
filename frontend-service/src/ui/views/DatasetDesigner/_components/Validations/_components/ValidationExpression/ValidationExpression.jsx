@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
-import moment from 'moment';
 
 import styles from './ValidationExpression.module.scss';
 
@@ -14,6 +13,7 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import isNil from 'lodash/isNil';
 
 const ValidationExpression = ({
   expressionValues,
@@ -22,8 +22,10 @@ const ValidationExpression = ({
   onExpressionDelete,
   onExpressionFieldUpdate,
   onExpressionGroup,
+  onExpressionsErrors,
   position,
-  showRequiredFields
+  showRequiredFields,
+  fieldType
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const { expressionId } = expressionValues;
@@ -31,8 +33,9 @@ const ValidationExpression = ({
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [clickedFields, setClickedFields] = useState([]);
   const {
-    validations: { operatorTypes: operatorTypesConf }
+    validations: { operatorTypes: operatorTypesConf, operatorByType }
   } = config;
+
   useEffect(() => {
     if (expressionValues.operatorType) {
       setOperatorValues(operatorTypesConf[expressionValues.operatorType].values);
@@ -41,21 +44,51 @@ const ValidationExpression = ({
 
   useEffect(() => {
     const options = [];
-    for (let type in operatorTypesConf) {
-      options.push(operatorTypesConf[type].option);
+    let operatorOfType = null;
+    if (!isNil(fieldType)) {
+      operatorByType[fieldType].forEach(key => {
+        options.push(operatorTypesConf[key].option);
+      });
+    } else {
+      for (let type in operatorTypesConf) {
+        options.push(operatorTypesConf[type].option);
+      }
     }
     setOperatorTypes(options);
-  }, []);
+  }, [fieldType]);
+
+  useEffect(() => {
+    if (showRequiredFields) {
+      const fieldsToAdd = [];
+      ['union', 'operatorType', 'operatorValue', 'expressionValue'].forEach(field => {
+        if (!clickedFields.includes(field)) fieldsToAdd.push(field);
+      });
+      setClickedFields([...clickedFields, ...fieldsToAdd]);
+    }
+  }, [showRequiredFields]);
+
+  useEffect(() => {
+    let errors = false;
+    clickedFields.forEach(clickedField => {
+      if (printRequiredFieldError(clickedField) === 'error') {
+        errors = true;
+      }
+    });
+    if (errors) {
+      onExpressionsErrors(expressionId, true);
+    } else {
+      onExpressionsErrors(expressionId, false);
+    }
+  }, [clickedFields, showRequiredFields]);
 
   const printRequiredFieldError = field => {
     let conditions = false;
-    if (field == 'union') {
-      conditions =
-        (showRequiredFields || clickedFields.includes(field)) && position != 0 && isEmpty(expressionValues[field]);
-    } else if (field == 'expressionValue') {
-      conditions = (showRequiredFields || clickedFields.includes(field)) && isEmpty(expressionValues[field].toString());
+    if (field === 'union') {
+      conditions = clickedFields.includes(field) && position != 0 && isEmpty(expressionValues[field]);
+    } else if (field === 'expressionValue') {
+      conditions = clickedFields.includes(field) && isEmpty(expressionValues[field].toString());
     } else {
-      conditions = (showRequiredFields || clickedFields.includes(field)) && isEmpty(expressionValues[field]);
+      conditions = clickedFields.includes(field) && isEmpty(expressionValues[field]);
     }
     return conditions ? 'error' : '';
   };
