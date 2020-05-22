@@ -193,13 +193,13 @@ public class ValidationHelper {
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     LOG.info("Deleting all Validations");
     validationService.deleteAllValidation(datasetId);
-    LOG.info("Collection Dataset Validation tasks");
+    LOG.info("Collecting Dataset Validation tasks");
     releaseDatasetValidation(datasetId, processId);
-    LOG.info("Collection Table Validation tasks");
+    LOG.info("Collecting Table Validation tasks");
     releaseTableValidation(datasetId, processId);
-    LOG.info("Collection Record Validation tasks");
+    LOG.info("Collecting Record Validation tasks");
     releaseRecordsValidation(datasetId, processId);
-    LOG.info("Collection Field Validation tasks");
+    LOG.info("Collecting Field Validation tasks");
     releaseFieldsValidation(datasetId, processId);
     try {
       startProcess(processId);

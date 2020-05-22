@@ -353,10 +353,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     ConnectionDataVO connectionDataVO =
         getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
-    Connection con = null;
-    try {
-      con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
-          connectionDataVO.getUser(), connectionDataVO.getPassword());
+    try (Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
+        connectionDataVO.getUser(), connectionDataVO.getPassword())) {
 
       CopyManager cm = new CopyManager((BaseConnection) con);
 
@@ -396,10 +394,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               + idPartitionDataset + ") to STDOUT";
 
       printToFile(nameFileFieldValue, copyQueryField, cm);
-    } finally {
-      if (null != con) {
-        con.close();
-      }
     }
   }
 
@@ -425,17 +419,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     String signature =
         deleteData
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-                : LockSignature.RESTORE_SNAPSHOT.getValue()
+            : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, idReportingDataset);
@@ -553,17 +547,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     String signature =
         deleteData
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-                : LockSignature.RESTORE_SNAPSHOT.getValue()
+            : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
 
     ConnectionDataVO conexion =

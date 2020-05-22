@@ -104,7 +104,7 @@ public class ValidationHelperTest {
     processesMap.put("1", new ValidationProcessVO(0, null, null, true));
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
 
-    validationHelper.isProcessCoordinator("1");
+    Assert.assertTrue(validationHelper.isProcessCoordinator("1"));
   }
 
   @Test(expected = EEAException.class)
@@ -116,6 +116,7 @@ public class ValidationHelperTest {
   public void finishProcess() {
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
     validationHelper.finishProcess("1");
+    Assert.assertNull(processesMap.get("1"));
   }
 
   @Test
