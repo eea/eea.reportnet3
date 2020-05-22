@@ -81,6 +81,11 @@ public class ValidationHelper {
   @Value("${validation.recordBatchSize}")
   private int recordBatchSize;
 
+  @Value("${validation.tasks.release.tax")
+  private int taskReleasedTax;
+
+  @Value("${validation.tasks.initial.tax")
+  private int initialTax;
 
   /**
    * The table repository.
@@ -214,7 +219,7 @@ public class ValidationHelper {
     ConsumerGroupVO consumerGroupVO = kafkaAdminUtils.getConsumerGroupInfo();
     //get the number of validation instances in the system.
     //at least there should be one, the coordinator node :)
-    Integer initialTasks = consumerGroupVO.getMembers().size();
+    Integer initialTasks = consumerGroupVO.getMembers().size() * this.initialTax;
     synchronized (processesMap) {
 
       //Sending initial tasks, 1 per validation instance in the system
@@ -313,13 +318,19 @@ public class ValidationHelper {
         //remember pendingOks > pendingValidations.size()
         Integer pendingValidations = processesMap.get(processId).getPendingValidations().size();
         if (pendingValidations > 0) {
-          //there are more tasks to be sent, just send it out
-          this.kafkaSenderUtils
-              .releaseKafkaEvent(processesMap.get(processId).getPendingValidations().poll());
+          //there are more tasks to be sent, just send them out, at least, one more task
+          int tasksToBeSent = this.taskReleasedTax;
+          while (tasksToBeSent > 0) {
+            if (processesMap.get(processId).getPendingValidations().size() >= 1) {
+              this.kafkaSenderUtils
+                  .releaseKafkaEvent(processesMap.get(processId).getPendingValidations().poll());
+            }
+            tasksToBeSent--;
+          }
           LOG.info(
-              "Sent next task for process {}. There are still {} tasks to be sent and {} pending Ok's ro be received",
+              "Sent next tasks for process {}. There are still {} tasks to be sent and {} pending Ok's to be received",
               processId,
-              pendingValidations, pendingOk);
+              processesMap.get(processId).getPendingValidations().size(), pendingOk);
         }
       }
     }
