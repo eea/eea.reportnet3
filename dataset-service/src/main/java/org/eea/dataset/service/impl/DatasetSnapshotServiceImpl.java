@@ -165,6 +165,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private ReceiptPDFGenerator receiptPDFGenerator;
 
+  /** The unique constraint repository. */
   @Autowired
   private UniqueConstraintRepository uniqueConstraintRepository;
 
