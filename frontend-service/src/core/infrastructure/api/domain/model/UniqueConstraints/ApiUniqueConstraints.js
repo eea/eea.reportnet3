@@ -14,30 +14,22 @@ export const apiUniqueConstraints = {
     return response.data;
   },
 
-  create: async (description, fieldSchemaId, name) => {
+  create: async (datasetSchemaId, fieldSchemaIds, tableSchemaId) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.post({
       url: getUrl(UniqueConstraintsConfig.create),
-      data: {
-        description,
-        fieldSchemaId,
-        name
-      },
+      data: { datasetSchemaId, fieldSchemaIds, tableSchemaId },
       queryString: {},
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      }
+      headers: { Authorization: `Bearer ${tokens.accessToken}` }
     });
     return response;
   },
 
-  // parameters in url
-  deleteById: async (datasetSchemaId, fieldId) => {
+  deleteById: async uniqueConstraintId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.delete({
       url: getUrl(UniqueConstraintsConfig.delete, {
-        datasetSchemaId,
-        fieldId
+        uniqueConstraintId
       }),
       queryString: {},
       headers: {
@@ -47,20 +39,13 @@ export const apiUniqueConstraints = {
     return response;
   },
 
-  update: async (description, fieldId, fieldSchemaId, name) => {
+  update: async (datasetSchemaId, fieldSchemaIds, tableSchemaId, uniqueId) => {
     const tokens = userStorage.get();
-    const response = await HTTPRequester.post({
-      url: getUrl(UniqueConstraintsConfig.create),
-      data: {
-        description,
-        fieldId,
-        fieldSchemaId,
-        name
-      },
+    const response = await HTTPRequester.update({
+      url: getUrl(UniqueConstraintsConfig.update),
+      data: { datasetSchemaId, fieldSchemaIds, tableSchemaId, uniqueId },
       queryString: {},
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      }
+      headers: { Authorization: `Bearer ${tokens.accessToken}` }
     });
     return response;
   }

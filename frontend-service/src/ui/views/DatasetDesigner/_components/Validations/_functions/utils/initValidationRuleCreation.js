@@ -1,5 +1,3 @@
-import { config } from 'conf/';
-
 import { getEmptyExpression } from './getEmptyExpression';
 
 export const initValidationRuleCreation = rawTables => {
@@ -8,11 +6,9 @@ export const initValidationRuleCreation = rawTables => {
     .map(table => {
       return { label: table.header, code: table.tableSchemaId };
     });
-  const errorLevels = config.validations.errorLevels;
   const newExpression = getEmptyExpression();
   return {
     tables,
-    errorLevels,
     candidateRule: {
       table: undefined,
       field: undefined,

@@ -15,21 +15,24 @@ import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { constraintsReducer } from './_functions/Reducers/constraintsReducer';
 
 import { UniqueConstraintsUtils } from './_functions/Utils/UniqueConstraintsUtils';
 
-export const UniqueConstraints = ({ datasetSchemaId }) => {
+export const UniqueConstraints = ({ designerState, getManageUniqueConstraint, manageDialogs }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const userContext = useContext(UserContext);
+
+  const {
+    datasetSchemaId,
+    datasetSchemaAllTables,
+    manageUniqueConstraintData: { uniqueId }
+  } = designerState;
 
   const [constraintsState, constraintsDispatch] = useReducer(constraintsReducer, {
     data: {},
     filteredData: [],
-    fieldId: '',
     isDataUpdated: false,
     isDeleteDialogVisible: false,
     isLoading: true
@@ -39,54 +42,42 @@ export const UniqueConstraints = ({ datasetSchemaId }) => {
     onLoadConstraints();
   }, [constraintsState.isDataUpdated]);
 
-  const actionButtonsColumn = (
-    <Column
-      body={row => actionsTemplate(row)}
-      className={styles.validationCol}
-      header={resources.messages['actions']}
-      key="actions"
-      sortable={false}
-      style={{ width: '100px' }}
-    />
-  );
-
-  const actionsTemplate = row => (
+  const actionsTemplate = () => (
     <ActionsColumn
-      onDeleteClick={() => onManageDialog(true)}
-      onEditClick={() => console.log('editar constraint', row)}
+      onDeleteClick={() => isDeleteDialogVisible(true)}
+      onEditClick={() => {
+        manageDialogs('isUniqueConstraintsListDialogVisible', false, 'isManageUniqueConstraintDialogVisible', true);
+      }}
     />
   );
-
-  const fieldId = value => constraintsDispatch({ type: 'ON_LOAD_CONSTRAINT_ID', payload: { value } });
-
-  const isDeleteDialogVisible = value => constraintsDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
 
   const isDataUpdated = value => constraintsDispatch({ type: 'IS_DATA_UPDATED', payload: { value } });
 
-  const onDeleteConstraint = async () => {
-    try {
-      onUpdateData();
-      const response = await UniqueConstraintsService.deleteById(datasetSchemaId, constraintsState.fieldId);
-      if (response.status >= 200 && response.status <= 299) onUpdateData();
-    } catch (error) {
-      notificationContext.add({ type: 'DELETE_UNIQUE_CONSTRAINT_ERROR' });
-      console.log('error', error);
-    } finally {
-      onManageDialog(false);
-    }
-  };
+  const isDeleteDialogVisible = value => constraintsDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
 
   const isLoading = value => constraintsDispatch({ type: 'IS_LOADING', payload: value });
 
+  const onDeleteConstraint = async () => {
+    try {
+      const response = await UniqueConstraintsService.deleteById(uniqueId);
+      if (response.status >= 200 && response.status <= 299) onUpdateData();
+    } catch (error) {
+      notificationContext.add({ type: 'DELETE_UNIQUE_CONSTRAINT_ERROR' });
+    } finally {
+      isDeleteDialogVisible(false);
+      getManageUniqueConstraint({ tableSchemaId: null, tableSchemaName: '', fieldData: [], uniqueId: null });
+    }
+  };
+
   const onLoadConstraints = async () => {
     try {
+      const response = await UniqueConstraintsService.all(datasetSchemaId);
       constraintsDispatch({
         type: 'INITIAL_LOAD',
-        payload: { data: await UniqueConstraintsService.all(datasetSchemaId) }
+        payload: { data: UniqueConstraintsUtils.parseConstraintsList(response, datasetSchemaAllTables) }
       });
     } catch (error) {
       notificationContext.add({ type: 'LOAD_UNIQUE_CONSTRAINTS_ERROR' });
-      console.log('error', error);
     } finally {
       isLoading(false);
     }
@@ -94,42 +85,55 @@ export const UniqueConstraints = ({ datasetSchemaId }) => {
 
   const onLoadFilteredData = data => constraintsDispatch({ type: 'FILTERED_DATA', payload: { data } });
 
-  const onManageDialog = value => {
-    isDeleteDialogVisible(value);
-  };
+  const onUpdateData = () => isDataUpdated(!constraintsState.isDataUpdated);
 
-  const onUpdateData = () => {
-    isDataUpdated(!constraintsState.isDataUpdated);
-  };
+  const renderActionButtonsColumn = (
+    <Column
+      body={row => actionsTemplate(row)}
+      className={styles.validationCol}
+      header={resources.messages['actions']}
+      key="actions"
+      style={{ width: '100px' }}
+    />
+  );
 
   const renderColumns = constraints => {
     const fieldColumns = Object.keys(constraints[0])
-      .filter(item => !item.includes('Id'))
+      .filter(key => !key.includes('Id') && !key.includes('filter'))
       .map(field => (
-        <Column columnResizeMode="expand" field={field} header={field.constraintsName} key={field} sortable={true} />
+        <Column
+          body={field === 'fieldData' ? renderFieldBody : null}
+          field={field}
+          header={resources.messages[field]}
+          key={field}
+          sortable={true}
+        />
       ));
 
-    fieldColumns.push(actionButtonsColumn);
+    fieldColumns.push(renderActionButtonsColumn);
     return fieldColumns;
   };
+
+  const renderFieldBody = rowData => rowData.fieldData.map(field => field.name).join(', ');
 
   if (constraintsState.isLoading) return <Spinner style={{ top: 0 }} />;
 
   return isEmpty(constraintsState.data) ? (
-    <Fragment>{resources.messages['noConstraints']}</Fragment>
+    <div className={styles.noConstraints}>{resources.messages['noConstraints']}</div>
   ) : (
     <Fragment>
       <Filters
+        className={'uniqueConstraint'}
         data={constraintsState.data}
         getFilteredData={onLoadFilteredData}
-        inputOptions={['name', 'description']}
-        selectOptions={['pkMustBeUsed', 'pkReferenced', 'unique']}
+        inputOptions={['filterFieldsNames']}
+        selectOptions={['tableSchemaName']}
       />
 
       {!isEmpty(constraintsState.filteredData) ? (
         <DataTable
           autoLayout={true}
-          onRowClick={event => fieldId(event.data.fieldId)}
+          onRowClick={event => getManageUniqueConstraint(event.data)}
           paginator={true}
           paginatorRight={`${resources.messages['totalUniqueConstraints']} ${constraintsState.filteredData.length}`}
           rows={10}
@@ -149,9 +153,8 @@ export const UniqueConstraints = ({ datasetSchemaId }) => {
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteConstraint()}
-          onHide={() => onManageDialog(false)}
-          visible={constraintsState.isDeleteDialogVisible}
-          maximizable={false}>
+          onHide={() => isDeleteDialogVisible(false)}
+          visible={constraintsState.isDeleteDialogVisible}>
           {resources.messages['deleteUniqueConstraintConfirm']}
         </ConfirmDialog>
       )}
