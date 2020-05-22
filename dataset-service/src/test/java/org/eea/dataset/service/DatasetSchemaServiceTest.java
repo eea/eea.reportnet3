@@ -26,6 +26,7 @@ import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
+import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
@@ -1450,7 +1451,11 @@ public class DatasetSchemaServiceTest {
   }
 
   @Test
-  public void deleteUniqueConstraintTest() {
+  public void deleteUniqueConstraintTest() throws EEAException {
+    Mockito.when(uniqueConstraintRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new UniqueConstraintSchema()));
+    Mockito.when(uniqueConstraintMapper.entityToClass(Mockito.any()))
+        .thenReturn(new UniqueConstraintVO());
     dataSchemaServiceImpl.deleteUniqueConstraint(new ObjectId().toString());
     Mockito.verify(uniqueConstraintRepository, times(1)).deleteByUniqueId(Mockito.any());
   }
@@ -1472,4 +1477,17 @@ public class DatasetSchemaServiceTest {
     assertEquals(uniques, dataSchemaServiceImpl.getUniqueConstraints(new ObjectId().toString()));
 
   }
+
+  @Test(expected = EEAException.class)
+  public void getUniqueConstraintTest() throws EEAException {
+    String id = new ObjectId().toString();
+    try {
+      dataSchemaServiceImpl.getUniqueConstraint(id);
+    } catch (EEAException e) {
+      assertEquals(String.format(EEAErrorMessage.UNIQUE_NOT_FOUND, id), e.getMessage());
+      throw e;
+    }
+  }
+
+
 }

@@ -1240,18 +1240,26 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public void createUniqueConstraint(UniqueConstraintVO uniqueConstraintVO) {
     LOG.info("Creating unique contraint");
+    uniqueConstraintVO.setUniqueId(new ObjectId().toString());
     uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
+    rulesControllerZuul.createUniqueConstraint(uniqueConstraintVO.getDatasetSchemaId(),
+        uniqueConstraintVO.getTableSchemaId(), uniqueConstraintVO.getUniqueId());
+    LOG.info("unique constraint created with id {}", uniqueConstraintVO.getUniqueId());
   }
 
   /**
    * Delete unique constraint.
    *
    * @param uniqueId the unique id
+   * @throws EEAException
    */
   @Override
-  public void deleteUniqueConstraint(String uniqueId) {
+  public void deleteUniqueConstraint(String uniqueId) throws EEAException {
     LOG.info("deleting constraint {}", uniqueId);
+    UniqueConstraintVO uniqueConstraint = getUniqueConstraint(uniqueId);
     uniqueConstraintRepository.deleteByUniqueId(new ObjectId(uniqueId));
+    rulesControllerZuul.deleteUniqueConstraint(uniqueConstraint.getDatasetSchemaId(), uniqueId);
+    LOG.info("unique constraint deleted with id {}", uniqueId);
   }
 
   /**
@@ -1263,7 +1271,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public void updateUniqueConstraint(UniqueConstraintVO uniqueConstraintVO) {
     LOG.info("updating constraint {}", uniqueConstraintVO.getUniqueId());
     uniqueConstraintRepository.deleteByUniqueId(new ObjectId(uniqueConstraintVO.getUniqueId()));
+    rulesControllerZuul.deleteUniqueConstraint(uniqueConstraintVO.getDatasetSchemaId(),
+        uniqueConstraintVO.getUniqueId());
     uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
+    rulesControllerZuul.createUniqueConstraint(uniqueConstraintVO.getDatasetSchemaId(),
+        uniqueConstraintVO.getTableSchemaId(), uniqueConstraintVO.getUniqueId());
+    LOG.info("unique constraint updated with id {}", uniqueConstraintVO.getUniqueId());
   }
 
   /**
