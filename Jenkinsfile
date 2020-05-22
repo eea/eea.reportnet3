@@ -149,7 +149,7 @@ pipeline {
         stage('Push to EEA GitHub') {
             when {
                 expression {
-                   return BRANCH_NAME == "develop" || BRANCH_NAME == "release/3.0.0-RC.1.1" || BRANCH_NAME == "release/3.0.0-RC.2.0" || BRANCH_NAME == "release/3.0.0-RC.2.1" || BRANCH_NAME == "release/3.0.0-RC.2.2"
+                   return BRANCH_NAME == "develop" || BRANCH_NAME == "release/3.0.0-RC.1.1" || BRANCH_NAME == "release/3.0.0-RC.2.0" || BRANCH_NAME == "release/3.0.0-RC.2.1" || BRANCH_NAME == "release/3.0.0-RC.2.2" || BRANCH_NAME == "release/3.0.0-RC2.3-SNAPSHOT"
                 }
             }
             steps {
@@ -189,7 +189,7 @@ pipeline {
         stage('Build Docker Images') {
             when {
                 expression {
-                   return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox" ||  BRANCH_NAME == "release/3.0.0-RC.1.1" || BRANCH_NAME == "release/3.0.0-RC.2.0" || BRANCH_NAME == "release/3.0.0-RC.2.1" || BRANCH_NAME == "release/3.0.0-RC.2.2"
+                   return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox" ||  BRANCH_NAME == "release/3.0.0-RC.1.1" || BRANCH_NAME == "release/3.0.0-RC.2.0" || BRANCH_NAME == "release/3.0.0-RC.2.1" || BRANCH_NAME == "release/3.0.0-RC.2.2" || BRANCH_NAME == "release/3.0.0-RC2.3-SNAPSHOT"
                 }
             }
             parallel {
