@@ -12,26 +12,20 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const useBigButtonList = ({
-  dataflowDataState,
-  dataflowData,
   dataflowId,
+  dataflowState,
   // exportDatatableSchema,
   getDeleteSchemaIndex,
   handleRedirect,
-  onShowUpdateDataCollectionModal,
-  hasWritePermissions,
   isActiveButton,
-  isCustodian,
-  isDataSchemaCorrect,
   onDatasetSchemaNameError,
   onDuplicateName,
   onLoadReceiptData,
   onSaveName,
   onShowDataCollectionModal,
   onShowNewSchemaDialog,
-  receiptState,
-  showReleaseSnapshotDialog,
-  updatedDatasetSchema
+  onShowSnapshotDialog,
+  onShowUpdateDataCollectionModal
 }) => {
   const resources = useContext(ResourcesContext);
 
@@ -51,7 +45,7 @@ const useBigButtonList = ({
         },
         { label: resources.messages['createNewDatasetFromTemplate'], icon: 'add', disabled: true }
       ],
-      visibility: isCustodian && dataflowDataState.status === DataflowConf.dataflowStatus['DESIGN']
+      visibility: dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']
     },
     {
       buttonClass: 'dataflowHelp',
@@ -65,12 +59,12 @@ const useBigButtonList = ({
     }
   ];
 
-  const designDatasetModels = dataflowData.designDatasets.map(newDatasetSchema => ({
+  const designDatasetModels = dataflowState.data.designDatasets.map(newDatasetSchema => ({
     buttonClass: 'schemaDataset',
     buttonIcon: 'pencilRuler',
     caption: newDatasetSchema.datasetSchemaName,
-    dataflowStatus: dataflowDataState.status,
-    datasetSchemaInfo: updatedDatasetSchema,
+    dataflowStatus: dataflowState.status,
+    datasetSchemaInfo: dataflowState.updatedDatasetSchema,
     handleRedirect: () => {
       handleRedirect(getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true));
     },
@@ -88,18 +82,18 @@ const useBigButtonList = ({
       {
         label: resources.messages['rename'],
         icon: 'pencil',
-        disabled: dataflowDataState.status !== DataflowConf.dataflowStatus['DESIGN']
+        disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN']
       },
       {
         label: resources.messages['delete'],
         icon: 'trash',
-        disabled: dataflowDataState.status !== DataflowConf.dataflowStatus['DESIGN'],
+        disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'],
         command: () => getDeleteSchemaIndex(newDatasetSchema.index)
       }
       // {
       //   label: resources.messages['exportDatasetSchema'],
       //   icon: 'import',
-      //   // disabled: dataflowDataState.status !== DataflowConf.dataflowStatus['DESIGN'],
+      //   // disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'],
       //   command: () => exportDatatableSchema(newDatasetSchema.datasetId, newDatasetSchema.datasetSchemaName)
       // }
     ],
@@ -108,17 +102,22 @@ const useBigButtonList = ({
     onSaveName: onSaveName,
     onWheel: getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true),
     placeholder: resources.messages['datasetSchemaNamePlaceholder'],
-    visibility: !isUndefined(dataflowData.designDatasets) && isEmpty(dataflowData.dataCollections) && isCustodian
+    visibility:
+      !isUndefined(dataflowState.data.designDatasets) &&
+      isEmpty(dataflowState.data.dataCollections) &&
+      dataflowState.isCustodian
   }));
 
   const buildGroupByRepresentativeModels = dataflowData => {
     const { datasets } = dataflowData;
 
-    const uniqRepresentatives = uniq(datasets.map(dataset => dataset.datasetSchemaName));
+    const allDatasets = datasets.map(dataset => {
+      return { name: dataset.datasetSchemaName, id: dataset.dataProviderId };
+    });
 
-    if (uniqRepresentatives.length === 1 && !isCustodian) {
-      const [representative] = uniqRepresentatives;
+    const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.id)).length === 1;
 
+    if (isUniqRepresentative && !dataflowState.isCustodian) {
       return datasets.map(dataset => {
         const datasetName = dataset.name;
         return {
@@ -132,36 +131,40 @@ const useBigButtonList = ({
           infoStatus: dataset.isReleased,
           infoStatusIcon: true,
           layout: 'defaultBigButton',
-          model: hasWritePermissions
+          model: dataflowState.hasWritePermissions
             ? [
                 {
                   label: resources.messages['releaseDataCollection'],
                   icon: 'cloudUpload',
-                  command: () => showReleaseSnapshotDialog(dataset.datasetId),
+                  command: () => onShowSnapshotDialog(dataset.datasetId),
                   disabled: false
                 }
               ]
             : [{ label: resources.messages['properties'], icon: 'info', disabled: true }],
           onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
-          visibility: !isEmpty(dataflowData.datasets)
+          visibility: !isEmpty(dataflowState.data.datasets)
         };
       });
     }
-    return uniqRepresentatives.map(representative => ({
+
+    return allDatasets.map(representative => ({
       buttonClass: 'dataset',
       buttonIcon: 'representative',
-      caption: representative,
+      caption: representative.name,
       handleRedirect: () => {
-        handleRedirect(getUrl(routes.REPRESENTATIVE, { dataflowId, representative }, true));
+        handleRedirect(
+          getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: representative.id }, true)
+        );
       },
+
       helpClassName: 'dataflow-dataset-container-help-step',
       layout: 'defaultBigButton',
-      onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representative }, true),
-      visibility: !isEmpty(dataflowData.datasets)
+      onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representativeId: representative.id }, true),
+      visibility: !isEmpty(dataflowState.data.datasets)
     }));
   };
 
-  const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowData);
+  const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState.data);
 
   const dashboardModels = [
     {
@@ -172,7 +175,7 @@ const useBigButtonList = ({
       helpClassName: 'dataflow-dashboards-help-step',
       layout: 'defaultBigButton',
       onWheel: getUrl(routes.DASHBOARDS, { dataflowId }, true),
-      visibility: isCustodian && !isEmpty(dataflowData.datasets)
+      visibility: dataflowState.isCustodian && !isEmpty(dataflowState.data.datasets)
     }
   ];
 
@@ -186,7 +189,9 @@ const useBigButtonList = ({
       handleRedirect: isActiveButton ? () => onShowDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
       visibility:
-        isEmpty(dataflowData.dataCollections) && isDataSchemaCorrect && dataflowDataState.formHasRepresentatives
+        isEmpty(dataflowState.data.dataCollections) &&
+        dataflowState.isDataSchemaCorrect &&
+        dataflowState.formHasRepresentatives
     }
   ];
 
@@ -199,11 +204,11 @@ const useBigButtonList = ({
       helpClassName: 'dataflow-datacollection-help-step',
       handleRedirect: isActiveButton ? () => onShowUpdateDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
-      visibility: dataflowDataState.status === 'DRAFT' && dataflowDataState.hasRepresentativesWithoutDatasets
+      visibility: dataflowState.status === 'DRAFT' && dataflowState.hasRepresentativesWithoutDatasets
     }
   ];
 
-  const dataCollectionModels = dataflowData.dataCollections.map(dataCollection => ({
+  const dataCollectionModels = dataflowState.data.dataCollections.map(dataCollection => ({
     buttonClass: 'schemaDataset',
     buttonIcon: 'dataCollection',
     caption: dataCollection.dataCollectionName,
@@ -234,25 +239,24 @@ const useBigButtonList = ({
     //     disabled: true
     //   }
     // ],
-    visibility: !isEmpty(dataflowData.dataCollections)
+    visibility: !isEmpty(dataflowState.data.dataCollections)
   }));
 
   const onBuildReceiptButton = () => {
-    const { datasets } = dataflowData;
+    const { datasets } = dataflowState.data;
     const representativeNames = datasets.map(dataset => dataset.datasetSchemaName);
     const releasedStates = datasets.map(dataset => dataset.isReleased);
-
     return [
       {
         buttonClass: 'schemaDataset',
-        buttonIcon: receiptState.isLoading ? 'spinner' : 'fileDownload',
-        buttonIconClass: receiptState.isLoading ? 'spinner' : 'fileDownload',
+        buttonIcon: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
+        buttonIconClass: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
         caption: resources.messages['confirmationReceipt'],
-        handleRedirect: receiptState.isLoading ? () => {} : () => onLoadReceiptData(),
-        infoStatus: receiptState.isOutdated,
+        handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onLoadReceiptData(),
+        infoStatus: dataflowState.isReceiptOutdated,
         layout: 'defaultBigButton',
         visibility:
-          !isCustodian &&
+          !dataflowState.isCustodian &&
           uniq(representativeNames).length === 1 &&
           !releasedStates.includes(false) &&
           !releasedStates.includes(null)

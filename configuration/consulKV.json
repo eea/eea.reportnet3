@@ -44,6 +44,14 @@
     "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1BBU1NXT1JEOnJvb3R9"
   },
   {
+    "key": "config/application/spring.datasource.dataset.username",
+    "value": "JHtEQVRBU0VUU19VU0VSTkFNRTpyb290fQ=="
+  },
+  {
+    "key": "config/application/spring.datasource.dataset.password",
+    "value": "JHtEQVRBU0VUU19QQVNTV09SRDpyb290fQ=="
+  },
+  {
     "key": "config/application/spring.datasource.metasource.driver-class-name",
     "value": "JHtNRVRBQkFTRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
   },
@@ -220,14 +228,6 @@
     "value": "JHtSRUNPUkRTVE9SRV9DT05ORUNUSU9OX1NUUklORzpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvZGF0YXNldHN9"
   },
   {
-    "key": "config/recordstore/spring.datasource.username",
-    "value": "JHtSRUNPUkRTVE9SRV9VU0VSTkFNRTpyb290fQ=="
-  },
-  {
-    "key": "config/recordstore/spring.datasource.password",
-    "value": "JHtSRUNPUkRTVE9SRV9QQVNTV09SRDpyb290fQ=="
-  },
-  {
     "key": "config/recordstore/spring.datasource.driverClassName",
     "value": "JHtSRUNPUkRTVE9SRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
   },
@@ -310,6 +310,10 @@
   {
     "key": "config/recordstore/design.creation.notification.ms",
     "value": "JHtERVNJR05fQ1JFQVRJT05fTk9USUZJQ0FUSU9OX01TOjUwMH0="
+  },
+  {
+    "key": "config/recordstore/dataset.users",
+    "value": "JHtEQVRBU0VUX1VTRVJTOnJlY29yZHN0b3JlLHZhbGlkYXRpb24sZGF0YXNldH0="
   },
   {
     "key": "config/apiGateway/feign.client.config.default.connectTimeout",
@@ -754,6 +758,14 @@
   {
     "key": "config/validation/spring.datasource.hikari.maxLifetime",
     "value": "JHtEQVRBU0VUX0hJS0FSSV9NQVhfTElGRV9USU1FOjI1MDAwfQ=="
+  },
+  {
+    "key": "config/validation/validation.tasks.release.tax",
+    "value": "JHtWQUxJREFUSU9OX1RBU0tTX1JFTEVBU0VfVEFYOjF9"
+  },
+  {
+    "key": "config/validation/validation.tasks.initial.tax",
+    "value": "JHtWQUxJREFUSU9OX1RBU0tTX0lOSVRJQUxfVEFYOjF9"
   },
   {
     "key": "config/ums/management.endpoints.web.exposure.include",
@@ -1202,5 +1214,9 @@
   {
     "key": "config/apiGateway/zuul.routes.obligation_issue.stripPrefix",
     "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/recordstore/snapshot.bufferSize",
+    "value": "NjU1MzY="
   }
 ]

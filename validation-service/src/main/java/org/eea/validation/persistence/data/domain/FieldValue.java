@@ -107,80 +107,589 @@ public class FieldValue {
   }
 
   /**
-   * Equal date used by drools. Value must not be null.
+   * Field and.
    *
-   * @param date the date, not null
-   * @return true, if passes the validation
+   * @param arg1 the arg 1
+   * @param arg2 the arg 2
+   * @return true, if successful
    */
-  public boolean equalDate(String date) {
-    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-
-    return fieldDate.equals(ruleDate);
+  public boolean fieldAnd(boolean arg1, boolean arg2) {
+    return arg1 && arg2;
   }
 
   /**
-   * Distinct date used by drools. Value must not be null.
+   * Field or.
    *
-   * @param date the date, not null
-   * @return true, if passes the validation
+   * @param arg1 the arg 1
+   * @param arg2 the arg 2
+   * @return true, if successful
    */
-  public boolean distinctDate(String date) {
-    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-
-    return !fieldDate.equals(ruleDate);
+  public boolean fieldOr(boolean arg1, boolean arg2) {
+    return arg1 || arg2;
   }
 
   /**
-   * Greater than date used by drools. Value must not be null.
+   * Field not.
    *
-   * @param date the date, not null
-   * @return true, if passes the validation
+   * @param arg the arg
+   * @return true, if successful
    */
-  public boolean greaterThanDate(String date) {
-    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-
-    return fieldDate.isAfter(ruleDate);
+  public boolean fieldNot(boolean arg) {
+    return !arg;
   }
 
   /**
-   * Less than date used by drools. Value must not be null.
+   * Field number equals.
    *
-   * @param date the date, not null
-   * @return true, if passes the validation
+   * @param value the value
+   * @param arg2 the arg 2
+   * @return true, if successful
    */
-  public boolean lessThanDate(String date) {
-    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-
-    return fieldDate.isBefore(ruleDate);
+  public boolean fieldNumberEquals(String value, Number arg2) {
+    try {
+      return Double.valueOf(value).equals(arg2.doubleValue());
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
-   * Greater than or equals than date used by drools. Value must not be null.
+   * Field number distinct.
    *
-   * @param date the date, not null
-   * @return true, if passes the validation
+   * @param value the value
+   * @param arg2 the arg 2
+   * @return true, if successful
    */
-  public boolean greaterThanOrEqualsThanDate(String date) {
-    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
-
-    return fieldDate.isAfter(ruleDate) || fieldDate.equals(ruleDate);
+  public boolean fieldNumberDistinct(String value, Number arg2) {
+    try {
+      return !Double.valueOf(value).equals(arg2.doubleValue());
+    } catch (Exception e) {
+      return true;
+    }
   }
 
   /**
-   * Less than or equals than date used by drools. Value must not be null.
+   * Field number greater than.
    *
-   * @param date the date, not null
-   * @return true, if passes the validation
+   * @param value the value
+   * @param arg2 the arg 2
+   * @return true, if successful
    */
-  public boolean lessThanOrEqualsThanDate(String date) {
-    LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+  public boolean fieldNumberGreaterThan(String value, Number arg2) {
+    try {
+      return Double.valueOf(value) > arg2.doubleValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
 
-    return fieldDate.isBefore(ruleDate) || fieldDate.equals(ruleDate);
+  /**
+   * Field number less than.
+   *
+   * @param value the value
+   * @param arg2 the arg 2
+   * @return true, if successful
+   */
+  public boolean fieldNumberLessThan(String value, Number arg2) {
+    try {
+      return Double.valueOf(value) < arg2.doubleValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field number greater than or equals than.
+   *
+   * @param value the value
+   * @param arg2 the arg 2
+   * @return true, if successful
+   */
+  public boolean fieldNumberGreaterThanOrEqualsThan(String value, Number arg2) {
+    try {
+      return Double.valueOf(value) >= arg2.doubleValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field number less than or equals than.
+   *
+   * @param value the value
+   * @param arg2 the arg 2
+   * @return true, if successful
+   */
+  public boolean fieldNumberLessThanOrEqualsThan(String value, Number arg2) {
+    try {
+      return Double.valueOf(value) <= arg2.doubleValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field number matches.
+   *
+   * @param value the value
+   * @param regex the regex
+   * @return true, if successful
+   */
+  public boolean fieldNumberMatches(String value, String regex) {
+    try {
+      return value.matches(regex);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field string length.
+   *
+   * @param value the value
+   * @return the string
+   */
+  public String fieldStringLength(String value) {
+    try {
+      return "" + value.length();
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  /**
+   * Field string equals.
+   *
+   * @param value the value
+   * @param arg2 the arg 2
+   * @return true, if successful
+   */
+  public boolean fieldStringEquals(String value, String arg2) {
+    try {
+      return value.equals(arg2);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field string equals ignore case.
+   *
+   * @param value the value
+   * @param arg2 the arg 2
+   * @return true, if successful
+   */
+  public boolean fieldStringEqualsIgnoreCase(String value, String arg2) {
+    try {
+      return value.equalsIgnoreCase(arg2);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field string matches.
+   *
+   * @param value the value
+   * @param arg2 the arg 2
+   * @return true, if successful
+   */
+  public boolean fieldStringMatches(String value, String arg2) {
+    try {
+      return value.matches(arg2);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field day equals.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean fieldDayEquals(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getDayOfMonth() == number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field day distinct.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean fieldDayDistinct(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getDayOfMonth() != number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field day greater than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean fieldDayGreaterThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getDayOfMonth() > number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field day less than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean fieldDayLessThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getDayOfMonth() < number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field day greater than or equals than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean fieldDayGreaterThanOrEqualsThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getDayOfMonth() >= number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field day less than or equals than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean fieldDayLessThanOrEqualsThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getDayOfMonth() <= number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field month equals.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean fieldMonthEquals(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getMonthValue() == number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field month distinct.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean fieldMonthDistinct(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getMonthValue() != number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field month greater than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean fieldMonthGreaterThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getMonthValue() > number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field month less than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean fieldMonthLessThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getMonthValue() < number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field month greater than or equals than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean fieldMonthGreaterThanOrEqualsThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getMonthValue() >= number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field month less than or equals than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean fieldMonthLessThanOrEqualsThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getMonthValue() <= number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field year equals.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean fieldYearEquals(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getYear() == number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field year distinct.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean fieldYearDistinct(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getYear() != number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field year greater than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean fieldYearGreaterThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getYear() > number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field year less than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean fieldYearLessThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getYear() < number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field year greater than or equals than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean fieldYearGreaterThanOrEqualsThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getYear() >= number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field year less than or equals than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean fieldYearLessThanOrEqualsThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getYear() <= number.longValue();
+    } catch (Exception e) {
+      return true;
+    }
+
+  }
+
+  /**
+   * Field date equals.
+   *
+   * @param value the value
+   * @param date the date
+   * @return true, if successful
+   */
+  public boolean fieldDateEquals(String value, String date) {
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.equals(ruleDate);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field date distinct.
+   *
+   * @param value the value
+   * @param date the date
+   * @return true, if successful
+   */
+  public boolean fieldDateDistinct(String value, String date) {
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return !fieldDate.equals(ruleDate);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field date greater than.
+   *
+   * @param value the value
+   * @param date the date
+   * @return true, if successful
+   */
+  public boolean fieldDateGreaterThan(String value, String date) {
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.isAfter(ruleDate);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field date less than.
+   *
+   * @param value the value
+   * @param date the date
+   * @return true, if successful
+   */
+  public boolean fieldDateLessThan(String value, String date) {
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.isBefore(ruleDate);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field date greater than or equals than.
+   *
+   * @param value the value
+   * @param date the date
+   * @return true, if successful
+   */
+  public boolean fieldDateGreaterThanOrEqualsThan(String value, String date) {
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.isAfter(ruleDate) || fieldDate.equals(ruleDate);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Field date less than or equals than.
+   *
+   * @param value the value
+   * @param date the date
+   * @return true, if successful
+   */
+  public boolean fieldDateLessThanOrEqualsThan(String value, String date) {
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.isBefore(ruleDate) || fieldDate.equals(ruleDate);
+    } catch (Exception e) {
+      return true;
+    }
   }
 }

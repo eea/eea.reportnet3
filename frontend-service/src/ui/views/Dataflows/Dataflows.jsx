@@ -115,7 +115,7 @@ const Dataflows = withRouter(({ match, history }) => {
           className: 'dataflowList-create-dataflow-help-step',
           icon: 'plus',
           label: 'createNewDataflow',
-          onClick: () => onManageDialogs('isAddDialogVisible', true),
+          onClick: () => manageDialogs('isAddDialogVisible', true),
           title: 'createNewDataflow'
         }
       ]);
@@ -152,7 +152,7 @@ const Dataflows = withRouter(({ match, history }) => {
 
   const onCreateDataflow = () => {
     dataFetch();
-    onManageDialogs('isAddDialogVisible', false);
+    manageDialogs('isAddDialogVisible', false);
     onRefreshToken();
   };
 
@@ -161,7 +161,7 @@ const Dataflows = withRouter(({ match, history }) => {
     dataflowsDispatch({ type: 'HAS_PERMISSION', payload: { isCustodian } });
   };
 
-  const onManageDialogs = (dialog, value, secondDialog, secondValue, data = {}) =>
+  const manageDialogs = (dialog, value, secondDialog, secondValue, data = {}) =>
     dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value, secondDialog, secondValue, data } });
 
   const onRefreshToken = async () => {
@@ -222,7 +222,7 @@ const Dataflows = withRouter(({ match, history }) => {
       <DataflowManagement
         isEditForm={false}
         onCreateDataflow={onCreateDataflow}
-        onManageDialogs={onManageDialogs}
+        manageDialogs={manageDialogs}
         state={dataflowsState}
       />
     </div>

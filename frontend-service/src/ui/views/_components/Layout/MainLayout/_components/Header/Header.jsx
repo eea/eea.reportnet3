@@ -137,7 +137,7 @@ const Header = withRouter(({ history }) => {
         {userProfileSettingsButton}
       </div>
 
-      <div className={styles.logoutWrapper}>{logout}</div>
+      <div className={styles.logoutBtnContainer}>{logout}</div>
     </>
   );
 

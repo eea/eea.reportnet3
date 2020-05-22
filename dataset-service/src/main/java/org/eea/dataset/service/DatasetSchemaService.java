@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 
 /**
@@ -352,5 +353,34 @@ public interface DatasetSchemaService {
    */
   void updatePKCatalogueAndForeignsAfterSnapshot(String idDatasetSchema, Long idDataset)
       throws EEAException;
+
+  /**
+   * Creates the unique constraint.
+   *
+   * @param uniqueConstraint the unique constraint
+   */
+  void createUniqueConstraint(UniqueConstraintVO uniqueConstraint);
+
+  /**
+   * Delete unique constraint.
+   *
+   * @param uniqueId the unique id
+   */
+  void deleteUniqueConstraint(String uniqueId);
+
+  /**
+   * Update unique constraint.
+   *
+   * @param uniequeConstraint the unique constraint
+   */
+  void updateUniqueConstraint(UniqueConstraintVO uniqueConstraint);
+
+  /**
+   * Gets the unique constraints.
+   *
+   * @param schemaId the schema id
+   * @return the unique constraints
+   */
+  List<UniqueConstraintVO> getUniqueConstraints(String schemaId);
 
 }

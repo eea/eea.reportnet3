@@ -22,6 +22,7 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -136,7 +137,9 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private ResourceManagementControllerZull resourceManagementController;
 
-  /** The dataset schema controller. */
+  /**
+   * The dataset schema controller.
+   */
   @Autowired
   private DatasetSchemaController datasetSchemaController;
 
@@ -235,6 +238,7 @@ public class ValidationServiceImpl implements ValidationService {
 
   }
 
+
   /**
    * Load rules knowledge base.
    *
@@ -261,7 +265,6 @@ public class ValidationServiceImpl implements ValidationService {
     return kieBase;
   }
 
-
   /**
    * Validate data set.
    *
@@ -273,7 +276,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   @Transactional
   public void validateDataSet(Long datasetId, KieBase kieBase) throws EEAException {
-    TenantResolver.setTenantName("dataset_" + datasetId);
+    TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
@@ -303,18 +306,21 @@ public class ValidationServiceImpl implements ValidationService {
   @Transactional
   public void validateTable(Long datasetId, Long idTable, KieBase kieBase) throws EEAException {
     // Validating tables
-    TenantResolver.setTenantName("dataset_" + datasetId);
+    TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     TableValue table = tableRepository.findById(idTable).orElse(null);
     // dataset.getTableValues().stream().forEach(table -> {
     KieSession session = kieBase.newKieSession();
+    List<TableValidation> validations = new ArrayList<>();
     try {
-      List<TableValidation> validations = runTableValidations(table, session);
-      if (table.getTableValidations() != null) {
-        table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
-          tableValidation.setTableValue(table);
-        });
+      if (table != null) {
+        validations = runTableValidations(table, session);
+        if (table.getTableValidations() != null) {
+          table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
+            tableValidation.setTableValue(table);
+          });
+        }
+        tableValidationRepository.saveAll(validations);
       }
-      tableValidationRepository.saveAll(validations);
     } finally {
       session.destroy();
     }
@@ -334,13 +340,13 @@ public class ValidationServiceImpl implements ValidationService {
   public void validateRecord(Long datasetId, KieBase kieBase, Pageable pageable)
       throws EEAException {
 
-    TenantResolver.setTenantName("dataset_" + datasetId);
+    TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     List<RecordValue> records = this.recordRepository.findAll(pageable).getContent();
     List<RecordValidation> recordValidations = new ArrayList<>();
     KieSession session = kieBase.newKieSession();
     try {
       records.stream().filter(Objects::nonNull).forEach(row -> {
-
+        row.initializeFieldsMap();
         runRecordValidations(row, session);
         List<RecordValidation> validations = row.getRecordValidations();
         if (null != validations) {
@@ -348,7 +354,7 @@ public class ValidationServiceImpl implements ValidationService {
             rowValidation.setRecordValue(row);
           });
         }
-        TenantResolver.setTenantName("dataset_" + datasetId);
+        TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
         recordValidations.addAll(validations);
       });
       if (recordValidations.size() > 0) {
@@ -386,7 +392,7 @@ public class ValidationServiceImpl implements ValidationService {
             fieldVal.setFieldValue(field);
           });
         }
-        TenantResolver.setTenantName("dataset_" + datasetId);
+        TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
         fieldValidations.addAll(resultFields);
       });
       if (fieldValidations.size() > 0) {
@@ -420,16 +426,16 @@ public class ValidationServiceImpl implements ValidationService {
     String countryCode = "''";
     String dataCallYear = "" + new LocalDate().getYear();
     if (null != resourceInfoVO.getAttributes() && resourceInfoVO.getAttributes().size() > 0) {
-      if (resourceInfoVO.getAttributes().containsKey("countryCode")) {
-        countryCode = resourceInfoVO.getAttributes().get("countryCode").get(0);
+      if (resourceInfoVO.getAttributes().containsKey(LiteralConstants.COUNTRY_CODE)) {
+        countryCode = resourceInfoVO.getAttributes().get(LiteralConstants.COUNTRY_CODE).get(0);
       }
 
-      if (resourceInfoVO.getAttributes().containsKey("dataCallYear")) {
-        dataCallYear = resourceInfoVO.getAttributes().get("dataCallYear").get(0);
+      if (resourceInfoVO.getAttributes().containsKey(LiteralConstants.DATA_CALL_YEAR)) {
+        dataCallYear = resourceInfoVO.getAttributes().get(LiteralConstants.DATA_CALL_YEAR).get(0);
       }
     }
-    ThreadPropertiesManager.setVariable("dataCallYear", dataCallYear);
-    ThreadPropertiesManager.setVariable("countryCode", countryCode);
+    ThreadPropertiesManager.setVariable(LiteralConstants.DATA_CALL_YEAR, dataCallYear);
+    ThreadPropertiesManager.setVariable(LiteralConstants.COUNTRY_CODE, countryCode);
   }
 
   /**

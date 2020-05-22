@@ -12,6 +12,7 @@ import org.drools.template.ObjectDataCompiler;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleExpressionVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -142,38 +143,28 @@ public class KieBaseManager {
             // data are correct
             Document documentField = schemasRepository.findFieldSchema(datasetSchemaId,
                 rule.getReferenceId().toString());
-            DataType datatype = DataType.valueOf(documentField.get("typeData").toString());
+            DataType dataType = DataType.valueOf(documentField.get("typeData").toString());
 
             // that switch clear the validations , and check if the datas in values are correct
-            if (null != datatype && !rule.isAutomatic()) {
-              switch (datatype) {
+            if (null != dataType && !rule.isAutomatic()) {
+              switch (dataType) {
                 case NUMBER_INTEGER:
                   expression.append("( !isBlank(value) || isNumberInteger(value) && ");
-                  rule.setWhenCondition(
-                      rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
                 case NUMBER_DECIMAL:
                   expression.append("( !isBlank(value) || isNumberDecimal(value) && ");
-                  rule.setWhenCondition(
-                      rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
                 case DATE:
                   expression.append("( !isBlank(value) || isDateYYYYMMDD(value) && ");
-                  rule.setWhenCondition(rule.getWhenCondition().replaceAll("EQUALS", "=="));
                   break;
                 case BOOLEAN:
-                  expression.append("( !isBlank(value) || isBoolean(value) && ");
-                  rule.setWhenCondition(rule.getWhenCondition().replaceAll("EQUALS", "=="));
+                  expression.append("( !isBlank(value) || isBoolean(value) && ");;
                   break;
                 case COORDINATE_LAT:
                   expression.append("( !isBlank(value) || isCordenateLat(value) && ");
-                  rule.setWhenCondition(
-                      rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
                 case COORDINATE_LONG:
                   expression.append("( !isBlank(value) || isCordenateLong(value) && ");
-                  rule.setWhenCondition(
-                      rule.getWhenCondition().replaceAll("value", "doubleData(value)"));
                   break;
                 default:
                   expression.append("( !isBlank(value) || ");
@@ -238,34 +229,40 @@ public class KieBaseManager {
 
     Document documentField =
         schemasRepository.findFieldSchema(datasetSchemaId, rule.getReferenceId().toString());
-    DataType datatype = DataType.valueOf(documentField.get("typeData").toString());
+    DataType dataType = DataType.valueOf(documentField.get("typeData").toString());
+    RuleExpressionVO ruleExpressionVO = new RuleExpressionVO(rule.getWhenCondition());
+
+    if (!ruleExpressionVO.isDataTypeCompatible(rule.getType(), dataType)) {
+      rule.setVerified(false);
+      rule.setEnabled(false);
+      rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.INVALIDATED_QC_RULE_EVENT, null,
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .datasetSchemaId(datasetSchemaId).error("The QC Rule is disabled")
+              .shortCode(rule.getShortCode()).build());
+      return;
+    }
 
     // we do the same thing like in kiebase validation part
-    if (null != datatype) {
-      switch (datatype) {
+    if (null != dataType) {
+      switch (dataType) {
         case NUMBER_INTEGER:
           expression.append("( !isBlank(value) || isNumberInteger(value) && ");
-          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
           break;
         case NUMBER_DECIMAL:
           expression.append("( !isBlank(value) || isNumberDecimal(value) && ");
-          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
           break;
         case DATE:
           expression.append("( !isBlank(value) || isDateYYYYMMDD(value) && ");
-          whenCondition = whenCondition.replaceAll("EQUALS", "==");
           break;
         case BOOLEAN:
           expression.append("( !isBlank(value) || isBoolean(value) && ");
-          whenCondition = whenCondition.replaceAll("EQUALS", "==");
           break;
         case COORDINATE_LAT:
           expression.append("( !isBlank(value) || isCordenateLat(value) && ");
-          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
           break;
         case COORDINATE_LONG:
           expression.append("( !isBlank(value) || isCordenateLong(value) && ");
-          whenCondition = whenCondition.replaceAll("value", "doubleData(value)");
           break;
         default:
           expression.append("( !isBlank(value) || ");

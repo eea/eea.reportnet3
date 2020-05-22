@@ -1,7 +1,7 @@
 package org.eea.dataset.io.kafka.commands;
 
 import static org.junit.Assert.assertEquals;
-
+import static org.mockito.Mockito.times;
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.dataset.service.DatasetService;
@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -67,48 +68,12 @@ public class SaveStatisticsCommandTest {
     data.put("dataset_id", 1);
     eeaEventVO.setData(data);
 
-    // doNothing().when(datasetService).saveStatistics(Mockito.any());
+    SaveStatisticsCommand spyClass = Mockito.spy(saveStatisticsCommand);
+    spyClass.execute(eeaEventVO);
+    Mockito.verify(spyClass, times(1)).execute(Mockito.any());
 
-    saveStatisticsCommand.execute(eeaEventVO);
   }
 
-
-  /**
-   * Test execute save statistics 2.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void testExecuteSaveStatistics2() throws EEAException {
-
-    eeaEventVO = new EEAEventVO();
-    eeaEventVO.setEventType(EventType.CONNECTION_CREATED_EVENT);
-    data = new HashMap<>();
-    data.put("dataset_id", 1L);
-    eeaEventVO.setData(data);
-
-    saveStatisticsCommand.execute(eeaEventVO);
-  }
-
-
-  /**
-   * Test execute save statistics 3.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void testExecuteSaveStatistics3() throws EEAException {
-
-    eeaEventVO = new EEAEventVO();
-    eeaEventVO.setEventType(EventType.VALIDATION_FINISHED_EVENT);
-    data = new HashMap<>();
-    data.put("dataset_id", 1L);
-    eeaEventVO.setData(data);
-
-    // doThrow(EEAException.class).when(datasetService).saveStatistics(Mockito.any());
-
-    saveStatisticsCommand.execute(eeaEventVO);
-  }
 
   /**
    * Gets the event type test.

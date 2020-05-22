@@ -4,15 +4,17 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMI
 import static org.apache.kafka.clients.consumer.ConsumerConfig.ISOLATION_LEVEL_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.RETRIES_CONFIG;
-import static org.apache.kafka.clients.producer.ProducerConfig.TRANSACTIONAL_ID_CONFIG;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.admin.ConsumerGroupDescription;
 import org.apache.kafka.clients.admin.DescribeClusterOptions;
 import org.apache.kafka.clients.admin.DescribeClusterResult;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -151,10 +153,11 @@ public class KafkaConfiguration {
    * @return the health indicator
    */
   @Bean
-  public HealthIndicator kafkaHealthIndicator() {
+  public HealthIndicator kafkaHealthIndicator() throws ExecutionException, InterruptedException {
     final DescribeClusterOptions describeClusterOptions =
         new DescribeClusterOptions().timeoutMs(1000);
     final AdminClient adminClient = kafkaAdminClient();
+
     return () -> {
       final DescribeClusterResult describeCluster =
           adminClient.describeCluster(describeClusterOptions);
@@ -166,6 +169,9 @@ public class KafkaConfiguration {
       } catch (final InterruptedException | ExecutionException e) {
         // NOPMD false positive, I really need the thread to go on since this is a healtchecker.
         // Exception is managed by Spring Actuator
+        if (e instanceof InterruptedException) {
+          Thread.currentThread().interrupt();
+        }
         return Health.down().withException(e).build();
       }
     };

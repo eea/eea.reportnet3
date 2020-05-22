@@ -3,8 +3,10 @@ import React, { useContext, useEffect, useState } from 'react';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
+import { Calendar } from 'ui/views/_components/Calendar';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import { MultiSelect } from 'primereact/multiselect';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -31,6 +33,18 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     const linkItems = await getLinkItemsWithEmptyOption(filter, type, column.referencedField);
     inmColumn.linkItems = linkItems;
     setColumnWithLinks(inmColumn);
+  };
+
+  const formatDate = date => {
+    let d = new Date(date),
+      month = '' + (d.getMonth() + 1),
+      day = '' + d.getDate(),
+      year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
   };
 
   const getFilter = type => {
@@ -83,7 +97,7 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
   };
 
   const getCodelistItemsWithEmptyOption = () => {
-    const codelistItems = column.codelistItems.map(codelistItem => {
+    const codelistItems = column.codelistItems.sort().map(codelistItem => {
       return { itemType: codelistItem, value: codelistItem };
     });
 
@@ -101,10 +115,26 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
         onChangeForm(field, e.target.value.value);
       }}
       optionLabel="itemType"
-      options={getCodelistItemsWithEmptyOption(field)}
+      options={getCodelistItemsWithEmptyOption()}
       value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
     />
   );
+
+  const renderMultiselectCodelist = (field, fieldValue) => {
+    return (
+      <MultiSelect
+        maxSelectedLabels={10}
+        onChange={e => onChangeForm(field, e.value)}
+        options={column.codelistItems.sort().map(codelistItem => {
+          return { itemType: codelistItem, value: codelistItem };
+        })}
+        optionLabel="itemType"
+        styles={{ border: 'var(--dropdown-border)', borderColor: 'red' }}
+        value={RecordUtils.getMultiselectValues(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
+        // hasSelectedItemsLabel={false}
+      />
+    );
+  };
 
   const getMaxCharactersByType = type => {
     const longCharacters = 20;
@@ -145,13 +175,17 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
   const renderFieldEditor = () =>
     type === 'CODELIST' ? (
       renderCodelistDropdown(field, fieldValue)
+    ) : type === 'MULTISELECT_CODELIST' ? (
+      renderMultiselectCodelist(field, fieldValue)
     ) : type === 'LINK' ? (
       renderLinkDropdown(field, fieldValue)
+    ) : type === 'DATE' ? (
+      renderCalendar(field, fieldValue)
     ) : (
       <InputText
         id={field}
         keyfilter={getFilter(type)}
-        maxlength={getMaxCharactersByType(type)}
+        maxLength={getMaxCharactersByType(type)}
         onChange={e => onChangeForm(field, e.target.value)}
         value={fieldValue}
         // type={type === 'DATE' ? 'date' : 'text'}
@@ -159,6 +193,21 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
         type="text"
       />
     );
+
+  const renderCalendar = (field, fieldValue) => {
+    return (
+      <Calendar
+        onChange={e => onChangeForm(field, formatDate(e.target.value))}
+        appendTo={document.getElementById('pr_id_11')}
+        dateFormat="yy-mm-dd"
+        monthNavigator={true}
+        style={{ width: '60px' }}
+        value={new Date(formatDate(fieldValue))}
+        yearNavigator={true}
+        yearRange="2010:2030"
+      />
+    );
+  };
 
   const renderLinkDropdown = (field, fieldValue) => (
     <Dropdown

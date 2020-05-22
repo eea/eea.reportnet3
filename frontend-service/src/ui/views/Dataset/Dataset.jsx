@@ -115,16 +115,9 @@ export const Dataset = withRouter(({ match, history }) => {
             },
             true
           ),
-          command: () =>
-            history.push(
-              getUrl(
-                routes.DATAFLOW,
-                {
-                  dataflowId
-                },
-                true
-              )
-            )
+          command: () => {
+            history.goBack();
+          }
         }
       ];
       if (breadCrumbContext.model.find(model => model.icon === 'representative')) {
@@ -394,6 +387,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const onLoadDatasetSchema = async () => {
     try {
+      setLoading(true);
       const datasetSchema = await getDataSchema();
       const datasetStatistics = await getStatisticsById(
         datasetId,
@@ -562,10 +556,8 @@ export const Dataset = withRouter(({ match, history }) => {
         <Toolbar>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary-transparent ${
-                !hasWritePermissions ? null : 'p-button-animated-blink'
-              }`}
-              disabled={!hasWritePermissions}
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+              // disabled={!hasWritePermissions}
               icon={loadingFile ? 'spinnerAnimate' : 'import'}
               label={resources.messages['export']}
               onClick={event => exportMenuRef.current.show(event)}
@@ -636,6 +628,12 @@ export const Dataset = withRouter(({ match, history }) => {
               icon={'camera'}
               label={resources.messages['snapshots']}
               onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+              icon={'refresh'}
+              label={resources.messages['refresh']}
+              onClick={() => onLoadDatasetSchema()}
             />
           </div>
         </Toolbar>

@@ -37,9 +37,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-/**
- * The Class RulesServiceImplTest.
- */
+/** The Class RulesServiceImplTest. */
 @RunWith(MockitoJUnitRunner.class)
 public class RulesServiceImplTest {
 
@@ -286,6 +284,26 @@ public class RulesServiceImplTest {
   }
 
   /**
+   * Creates the automatic rules codelist test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createAutomaticRulesMultiCodelistTest() throws EEAException {
+    Document doc = new Document();
+    doc.put("codelistItems", "[2, 2]");
+    Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+    when(schemasRepository.findFieldSchema("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac"))
+        .thenReturn(doc);
+    RulesSchema ruleSchema = new RulesSchema();
+    ruleSchema.setRules(new ArrayList<Rule>());
+    rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
+        DataType.MULTISELECT_CODELIST, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
+    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+
+  }
+
+  /**
    * Creates the automatic rules long test.
    *
    * @throws EEAException the EEA exception
@@ -444,6 +462,7 @@ public class RulesServiceImplTest {
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.TEXT, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
+    Mockito.verify(rulesSequenceRepository, times(1)).updateSequence(Mockito.any());
 
   }
 
@@ -473,6 +492,8 @@ public class RulesServiceImplTest {
   public void deleteEmptyRulesScehmaNoSchemaTest() {
     when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(null);
     rulesServiceImpl.deleteEmptyRulesSchema("5e44110d6a9e3a270ce13fac");
+
+    Mockito.verify(rulesRepository, times(1)).findByIdDatasetSchema(Mockito.any());
   }
 
   /**
@@ -490,6 +511,7 @@ public class RulesServiceImplTest {
     rule.setRuleName("ruleName");
     rule.setWhenCondition("whenCondition");
     rule.setThenCondition(Arrays.asList("success", "error"));
+    rule.setType(EntityTypeEnum.FIELD);
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");
     Mockito.when(rulesRepository.createNewRule(Mockito.any(), Mockito.any())).thenReturn(true);
@@ -530,6 +552,7 @@ public class RulesServiceImplTest {
     rule.setDescription("description");
     rule.setRuleName("ruleName");
     rule.setWhenCondition("whenCondition");
+    rule.setType(EntityTypeEnum.FIELD);
     rule.setThenCondition(Arrays.asList("success", "error"));
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");
@@ -543,6 +566,58 @@ public class RulesServiceImplTest {
     }
   }
 
+  /**
+   * Creates the new rule short code null exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void createNewRuleShortCodeNullExceptionTest() throws EEAException {
+
+    Rule rule = new Rule();
+    rule.setReferenceId(new ObjectId());
+    rule.setDescription("description");
+    rule.setRuleName("ruleName");
+    rule.setWhenCondition("whenCondition");
+    rule.setThenCondition(Arrays.asList("success", "error"));
+
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    try {
+      rulesServiceImpl.createNewRule(1L, new RuleVO());
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.SHORT_CODE_REQUIRED, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the new rule entity type null exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void createNewRuleEntityTypeNullExceptionTest() throws EEAException {
+
+    Rule rule = new Rule();
+    rule.setReferenceId(new ObjectId());
+    rule.setShortCode("shortCode");
+    rule.setDescription("description");
+    rule.setRuleName("ruleName");
+    rule.setWhenCondition("whenCondition");
+    rule.setThenCondition(Arrays.asList("success", "error"));
+
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    try {
+      rulesServiceImpl.createNewRule(1L, new RuleVO());
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.ENTITY_TYPE_REQUIRED, e.getMessage());
+      throw e;
+    }
+  }
 
   /**
    * Creates the new rule then condition size exception test.
@@ -718,6 +793,7 @@ public class RulesServiceImplTest {
     rule.setRuleName("ruleName");
     rule.setWhenCondition("whenCondition");
     rule.setThenCondition(Arrays.asList("success", "error"));
+    rule.setType(EntityTypeEnum.FIELD);
 
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");
@@ -761,6 +837,7 @@ public class RulesServiceImplTest {
     rule.setRuleName("ruleName");
     rule.setWhenCondition("whenCondition");
     rule.setThenCondition(Arrays.asList("success", "error"));
+    rule.setType(EntityTypeEnum.FIELD);
 
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");
@@ -816,6 +893,7 @@ public class RulesServiceImplTest {
     when(rulesRepository.deleteRuleById(Mockito.any(), Mockito.any())).thenReturn(false);
     rulesServiceImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         0);
+    Mockito.verify(rulesRepository, times(1)).deleteRuleById(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -829,6 +907,8 @@ public class RulesServiceImplTest {
         .thenReturn(false);
     rulesServiceImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         0);
+    Mockito.verify(rulesRepository, times(1)).insertRuleInPosition(Mockito.any(), Mockito.any(),
+        Mockito.anyInt());
   }
 
   /**
@@ -841,6 +921,11 @@ public class RulesServiceImplTest {
         "5e44110d6a9e3a270ce13fac", 0));
   }
 
+  /**
+   * Udate automatic rule all properties updated test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void udateAutomaticRuleAllPropertiesUpdatedTest() throws EEAException {
 
@@ -861,6 +946,11 @@ public class RulesServiceImplTest {
     Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Udate automatic rule only enabled property updated test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void udateAutomaticRuleOnlyEnabledPropertyUpdatedTest() throws EEAException {
 
@@ -877,6 +967,11 @@ public class RulesServiceImplTest {
     Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Udate automatic rule empty then condition array test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void udateAutomaticRuleEmptyThenConditionArrayTest() throws EEAException {
 
@@ -894,6 +989,11 @@ public class RulesServiceImplTest {
     Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Update automatic rule invalid dataset id exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void updateAutomaticRuleInvalidDatasetIdExceptionTest() throws EEAException {
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
@@ -906,6 +1006,11 @@ public class RulesServiceImplTest {
     }
   }
 
+  /**
+   * Update automatic rule invalid rule id exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void updateAutomaticRuleInvalidRuleIdExceptionTest() throws EEAException {
 
@@ -922,6 +1027,11 @@ public class RulesServiceImplTest {
     }
   }
 
+  /**
+   * Udate automatic rule rule not found exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void udateAutomaticRuleRuleNotFoundExceptionTest() throws EEAException {
 

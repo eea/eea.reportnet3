@@ -32,7 +32,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, title,
       <Filters
         data={dataToFilter}
         dateOptions={DataflowConf.filterItems['date']}
-        getFiltredData={onLoadFiltredData}
+        getFilteredData={onLoadFiltredData}
         inputOptions={DataflowConf.filterItems['input']}
         selectOptions={DataflowConf.filterItems['select']}
         sortable={true}

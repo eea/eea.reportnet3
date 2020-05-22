@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -86,6 +87,7 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -283,10 +285,12 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void saveTable(@DatasetId Long datasetId, TableValue tableValue) {
-    TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
-    DatasetValue datasetValue = datasetRepository.findById(datasetId).get();
-    tableValue.setDatasetId(datasetValue);
-    tableRepository.saveAndFlush(tableValue);
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+    Optional<DatasetValue> datasetValue = datasetRepository.findById(datasetId);
+    if (datasetValue.isPresent()) {
+      tableValue.setDatasetId(datasetValue.get());
+      tableRepository.saveAndFlush(tableValue);
+    }
   }
 
 
@@ -489,6 +493,7 @@ public class DatasetServiceImpl implements DatasetService {
           } else {
             sortField.setTypefield(typefield.getType());
           }
+
           sortFieldsArray.add(sortField);
         }
         newFields = sortFieldsArray.stream().toArray(SortField[]::new);
@@ -1108,6 +1113,14 @@ public class DatasetServiceImpl implements DatasetService {
             field.setValue(field.getValue().substring(0, fieldMaxLength));
           }
         }
+        // if the type is multiselect codelist we sort the values in lexicographic order
+        if (DataType.MULTISELECT_CODELIST.equals(field.getType()) && null != field.getValue()) {
+          List<String> values = new ArrayList<>();
+          Arrays.asList(field.getValue().split(",")).stream()
+              .forEach(value -> values.add(value.trim()));
+          Collections.sort(values);
+          field.setValue(values.toString().substring(1, values.toString().length() - 1));
+        }
       }
 
     });
@@ -1230,6 +1243,14 @@ public class DatasetServiceImpl implements DatasetService {
       throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
 
     }
+    // if the type is multiselect codelist we sort the values in lexicographic order
+    if (DataType.MULTISELECT_CODELIST.equals(field.getType()) && null != field.getValue()) {
+      List<String> values = new ArrayList<>();
+      Arrays.asList(field.getValue().split(",")).stream()
+          .forEach(value -> values.add(value.trim()));
+      Collections.sort(values);
+      field.setValue(values.toString().substring(1, values.toString().length() - 1));
+    }
     fieldRepository.saveValue(field.getId(), field.getValue());
   }
 
@@ -1273,7 +1294,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void saveTablePropagation(Long datasetId, TableSchemaVO tableSchema) throws EEAException {
     TableValue table = new TableValue();
-    TenantResolver.setTenantName(String.format("dataset_%s", datasetId));
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     Optional<DatasetValue> dataset = datasetRepository.findById(datasetId);
     if (dataset.isPresent()) {
       table.setIdTableSchema(tableSchema.getIdTableSchema());
@@ -1467,7 +1488,8 @@ public class DatasetServiceImpl implements DatasetService {
   public List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue) {
     Long idDatasetDestination =
         datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
-    TenantResolver.setTenantName(String.format("dataset_%s", idDatasetDestination));
+    TenantResolver
+        .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDatasetDestination));
     // Pageable of 15 to take an equivalent to sql Limit. 15 because is the size of the results we
     // want to show on the screen
     List<FieldValue> fields = fieldRepository.findByIdFieldSchemaAndValueContaining(idPk,
@@ -1585,17 +1607,20 @@ public class DatasetServiceImpl implements DatasetService {
     return etlDatasetVO;
   }
 
+
   /**
    * Etl import dataset.
    *
    * @param datasetId the dataset id
    * @param etlDatasetVO the etl dataset VO
-   * @throws EEAException
+   * @param providerId the provider id
+   * @throws EEAException the EEA exception
    */
   @Override
-  public void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO)
-      throws EEAException {
+  public void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO,
+      Long providerId) throws EEAException {
     // Get the datasetSchemaId by the datasetId
+    LOG.info("Import data into dataset {}", datasetId);
     String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
     if (null == datasetSchemaId) {
       throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, datasetId));
@@ -1610,11 +1635,6 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     // Obtain the data provider code to insert into the record
-    Long providerId = 0L;
-    DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(datasetId);
-    if (metabase.getDataProviderId() != null) {
-      providerId = metabase.getDataProviderId();
-    }
     DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
 
     // Get the partition for the partiton id
@@ -1624,10 +1644,10 @@ public class DatasetServiceImpl implements DatasetService {
     Map<String, TableSchema> tableMap = new HashMap<>();
     Map<String, FieldSchema> fieldMap = new HashMap<>();
     for (TableSchema tableSchema : datasetSchema.getTableSchemas()) {
-      tableMap.put(tableSchema.getNameTableSchema(), tableSchema);
+      tableMap.put(tableSchema.getNameTableSchema().toLowerCase(), tableSchema);
       // Match each fieldSchemaId with its headerName
       for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
-        fieldMap.put(field.getHeaderName(), field);
+        fieldMap.put(field.getHeaderName().toLowerCase() + tableSchema.getIdTableSchema(), field);
       }
     }
 
@@ -1638,20 +1658,21 @@ public class DatasetServiceImpl implements DatasetService {
     // Loops to build the entity
     for (ETLTableVO etlTable : etlDatasetVO.getTables()) {
       TableValue table = new TableValue();
-      TableSchema tableSchema = tableMap.get(etlTable.getTableName());
+      TableSchema tableSchema = tableMap.get(etlTable.getTableName().toLowerCase());
       if (tableSchema != null) {
         table.setIdTableSchema(tableSchema.getIdTableSchema().toString());
         List<RecordValue> records = new ArrayList<>();
         for (ETLRecordVO etlRecord : etlTable.getRecords()) {
           RecordValue recordValue = new RecordValue();
-          recordValue.setIdRecordSchema(tableMap.get(etlTable.getTableName()).getRecordSchema()
-              .getIdRecordSchema().toString());
+          recordValue.setIdRecordSchema(tableMap.get(etlTable.getTableName().toLowerCase())
+              .getRecordSchema().getIdRecordSchema().toString());
           recordValue.setTableValue(table);
           List<FieldValue> fieldValues = new ArrayList<>();
           List<String> idSchema = new ArrayList<>();
           for (ETLFieldVO etlField : etlRecord.getFields()) {
             FieldValue field = new FieldValue();
-            FieldSchema fieldSchema = fieldMap.get(etlField.getFieldName());
+            FieldSchema fieldSchema = fieldMap
+                .get(etlField.getFieldName().toLowerCase() + tableSchema.getIdTableSchema());
             if (fieldSchema != null) {
               field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
               field.setType(fieldSchema.getType());
@@ -1659,11 +1680,11 @@ public class DatasetServiceImpl implements DatasetService {
               field.setRecord(recordValue);
               fieldValues.add(field);
               idSchema.add(field.getIdFieldSchema());
-              setMissingField(
-                  tableMap.get(etlTable.getTableName()).getRecordSchema().getFieldSchema(),
-                  fieldValues, idSchema, recordValue);
             }
           }
+          // set the fields if not declared in the records
+          setMissingField(tableMap.get(etlTable.getTableName().toLowerCase()).getRecordSchema()
+              .getFieldSchema(), fieldValues, idSchema, recordValue);
           recordValue.setFields(fieldValues);
           recordValue.setDatasetPartitionId(partition.getId());
           recordValue.setDataProviderCode(provider.getCode());
@@ -1690,6 +1711,7 @@ public class DatasetServiceImpl implements DatasetService {
       }
     }
     recordRepository.saveAll(allRecords);
+    LOG.info("Data saved into dataset {}", datasetId);
 
   }
 
@@ -1777,6 +1799,8 @@ public class DatasetServiceImpl implements DatasetService {
             }
           }
         }
+        break;
+      case DATASET:
         break;
     }
     return readOnly;

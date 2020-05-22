@@ -1,23 +1,13 @@
 package org.eea.validation.kafka.command;
 
-import java.util.concurrent.ConcurrentHashMap;
-import org.eea.exception.EEAException;
-import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
-import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.multitenancy.TenantResolver;
-import org.eea.validation.service.ValidationService;
-import org.eea.validation.util.ValidationHelper;
 import org.kie.api.KieBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
@@ -25,30 +15,7 @@ import org.springframework.stereotype.Component;
  * Object[EventHandlerReceiver] and the operation[Close] together as command.
  */
 @Component
-public class ExecuteRecordValidationCommand extends AbstractEEAEventHandlerCommand {
-
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-  /**
-   * The validation helper.
-   */
-  @Autowired
-  private ValidationHelper validationHelper;
-  /**
-   * The validation service.
-   */
-  @Autowired
-  @Qualifier("proxyValidationService")
-  private ValidationService validationService;
-
-  /**
-   * The kafka sender utils.
-   */
-  @Autowired
-  private KafkaSenderUtils kafkaSenderUtils;
+public class ExecuteRecordValidationCommand extends ExecuteValidationCommand {
 
   /**
    * The record batch size.
@@ -56,51 +23,23 @@ public class ExecuteRecordValidationCommand extends AbstractEEAEventHandlerComma
   @Value("${validation.recordBatchSize}")
   private int recordBatchSize;
 
-  /**
-   * Gets the event type.
-   *
-   * @return the event type
-   */
+  @Override
+  public EventType getNotificationEventType() {
+    return EventType.COMMAND_VALIDATED_RECORD_COMPLETED;
+  }
+
+  @Override
+  public Validator getValidationAction() {
+    return (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase) -> {
+      final int numPag = (int) eeaEventVO.getData().get("numPag");
+      Pageable pageable = PageRequest.of(numPag, recordBatchSize);
+      validationService.validateRecord(datasetId, kieBase, pageable);
+    };
+  }
+
   @Override
   public EventType getEventType() {
     return EventType.COMMAND_VALIDATE_RECORD;
   }
 
-  /**
-   * Perform action.
-   *
-   * @param eeaEventVO the eea event VO
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Async
-  public void execute(final EEAEventVO eeaEventVO) throws EEAException {
-    final Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
-    final String uuid = (String) eeaEventVO.getData().get("uuid");
-    TenantResolver.setTenantName("dataset_" + datasetId);
-    final int numPag = (int) eeaEventVO.getData().get("numPag");
-    try {
-      KieBase kieBase = validationHelper.getKieBase(uuid, datasetId);
-      Pageable pageable = PageRequest.of(numPag, recordBatchSize);
-      validationService.validateRecord(datasetId, kieBase, pageable);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error processing validations for dataset {} due to exception {}", datasetId,
-          e);
-      eeaEventVO.getData().put("error", e);
-    } finally {
-      // if this is the coordinator validation instance, then no need to send message, just updates
-      // expected validations and verify if process is finished
-      ConcurrentHashMap<String, Integer> processMap = validationHelper.getProcessesMap();
-      synchronized (processMap) {
-        if (processMap.containsKey(uuid)) {
-          processMap.merge(uuid, -1, Integer::sum);
-          validationHelper.checkFinishedValidations(datasetId, uuid);
-        } else {// send the message to coordinator validation instance
-          kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATED_RECORD_COMPLETED,
-              eeaEventVO.getData());
-        }
-      }
-    }
-  }
 }

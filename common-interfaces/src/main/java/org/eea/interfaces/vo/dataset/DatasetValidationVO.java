@@ -1,5 +1,6 @@
 package org.eea.interfaces.vo.dataset;
 
+import java.io.Serializable;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,7 +12,11 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class DatasetValidationVO {
+public class DatasetValidationVO implements Serializable {
+
+  /** The Constant serialVersionUID. */
+  private static final long serialVersionUID = 7412301149515906080L;
+
 
   /** The id. */
   private Long id;
