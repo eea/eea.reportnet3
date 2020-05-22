@@ -231,7 +231,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataFlowVO.id,'DATAFLOW_CUSTODIAN')")
   @PutMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> updateDataFlow(@RequestBody DataFlowVO dataFlowVO) {
+  public ResponseEntity updateDataFlow(@RequestBody DataFlowVO dataFlowVO) {
     final Timestamp dateToday = java.sql.Timestamp.valueOf(LocalDateTime.now());
 
     String message = "";

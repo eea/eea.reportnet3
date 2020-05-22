@@ -1,4 +1,3 @@
-
 package org.eea.kafka.utils;
 
 import java.util.HashMap;
@@ -59,11 +58,21 @@ public class KafkaSenderUtils {
   }
 
   /**
+   * Release kafka event.
+   *
+   * @param event the event
+   */
+  public void releaseKafkaEvent(EEAEventVO event) {
+    kafkaSender.sendMessage(event);
+  }
+
+  /**
    * Release notificable kafka event.
    *
    * @param eventType the event type
    * @param value the value
    * @param notificationVO the notification VO
+   *
    * @throws EEAException the EEA exception
    */
   public void releaseNotificableKafkaEvent(final EventType eventType, Map<String, Object> value,

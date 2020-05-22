@@ -106,7 +106,7 @@ public interface RulesController {
    * @return the response entity
    */
   @PutMapping("/createNewRule")
-  ResponseEntity<?> createNewRule(@RequestParam("datasetId") long datasetId,
+  ResponseEntity createNewRule(@RequestParam("datasetId") long datasetId,
       @RequestBody RuleVO ruleVO);
 
 
