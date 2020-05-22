@@ -365,8 +365,9 @@ public interface DatasetSchemaService {
    * Delete unique constraint.
    *
    * @param uniqueId the unique id
+   * @throws EEAException
    */
-  void deleteUniqueConstraint(String uniqueId);
+  void deleteUniqueConstraint(String uniqueId) throws EEAException;
 
   /**
    * Update unique constraint.

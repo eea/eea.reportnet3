@@ -720,7 +720,11 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT);
     }
-    dataschemaService.deleteUniqueConstraint(uniqueConstraintId);
+    try {
+      dataschemaService.deleteUniqueConstraint(uniqueConstraintId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
   }
 
   /**
