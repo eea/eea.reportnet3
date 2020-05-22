@@ -137,7 +137,9 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private ResourceManagementControllerZull resourceManagementController;
 
-  /** The dataset schema controller. */
+  /**
+   * The dataset schema controller.
+   */
   @Autowired
   private DatasetSchemaController datasetSchemaController;
 
@@ -236,6 +238,7 @@ public class ValidationServiceImpl implements ValidationService {
 
   }
 
+
   /**
    * Load rules knowledge base.
    *
@@ -261,7 +264,6 @@ public class ValidationServiceImpl implements ValidationService {
     }
     return kieBase;
   }
-
 
   /**
    * Validate data set.
@@ -308,14 +310,17 @@ public class ValidationServiceImpl implements ValidationService {
     TableValue table = tableRepository.findById(idTable).orElse(null);
     // dataset.getTableValues().stream().forEach(table -> {
     KieSession session = kieBase.newKieSession();
+    List<TableValidation> validations = new ArrayList<>();
     try {
-      List<TableValidation> validations = runTableValidations(table, session);
-      if (table != null && table.getTableValidations() != null) {
-        table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
-          tableValidation.setTableValue(table);
-        });
+      if (table != null) {
+        validations = runTableValidations(table, session);
+        if (table.getTableValidations() != null) {
+          table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
+            tableValidation.setTableValue(table);
+          });
+        }
+        tableValidationRepository.saveAll(validations);
       }
-      tableValidationRepository.saveAll(validations);
     } finally {
       session.destroy();
     }
@@ -341,7 +346,7 @@ public class ValidationServiceImpl implements ValidationService {
     KieSession session = kieBase.newKieSession();
     try {
       records.stream().filter(Objects::nonNull).forEach(row -> {
-
+        row.initializeFieldsMap();
         runRecordValidations(row, session);
         List<RecordValidation> validations = row.getRecordValidations();
         if (null != validations) {

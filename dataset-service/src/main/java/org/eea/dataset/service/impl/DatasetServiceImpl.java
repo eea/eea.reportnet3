@@ -1620,6 +1620,7 @@ public class DatasetServiceImpl implements DatasetService {
   public void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO,
       Long providerId) throws EEAException {
     // Get the datasetSchemaId by the datasetId
+    LOG.info("Import data into dataset {}", datasetId);
     String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
     if (null == datasetSchemaId) {
       throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, datasetId));
@@ -1643,10 +1644,10 @@ public class DatasetServiceImpl implements DatasetService {
     Map<String, TableSchema> tableMap = new HashMap<>();
     Map<String, FieldSchema> fieldMap = new HashMap<>();
     for (TableSchema tableSchema : datasetSchema.getTableSchemas()) {
-      tableMap.put(tableSchema.getNameTableSchema(), tableSchema);
+      tableMap.put(tableSchema.getNameTableSchema().toLowerCase(), tableSchema);
       // Match each fieldSchemaId with its headerName
       for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
-        fieldMap.put(field.getHeaderName(), field);
+        fieldMap.put(field.getHeaderName().toLowerCase() + tableSchema.getIdTableSchema(), field);
       }
     }
 
@@ -1657,20 +1658,21 @@ public class DatasetServiceImpl implements DatasetService {
     // Loops to build the entity
     for (ETLTableVO etlTable : etlDatasetVO.getTables()) {
       TableValue table = new TableValue();
-      TableSchema tableSchema = tableMap.get(etlTable.getTableName());
+      TableSchema tableSchema = tableMap.get(etlTable.getTableName().toLowerCase());
       if (tableSchema != null) {
         table.setIdTableSchema(tableSchema.getIdTableSchema().toString());
         List<RecordValue> records = new ArrayList<>();
         for (ETLRecordVO etlRecord : etlTable.getRecords()) {
           RecordValue recordValue = new RecordValue();
-          recordValue.setIdRecordSchema(tableMap.get(etlTable.getTableName()).getRecordSchema()
-              .getIdRecordSchema().toString());
+          recordValue.setIdRecordSchema(tableMap.get(etlTable.getTableName().toLowerCase())
+              .getRecordSchema().getIdRecordSchema().toString());
           recordValue.setTableValue(table);
           List<FieldValue> fieldValues = new ArrayList<>();
           List<String> idSchema = new ArrayList<>();
           for (ETLFieldVO etlField : etlRecord.getFields()) {
             FieldValue field = new FieldValue();
-            FieldSchema fieldSchema = fieldMap.get(etlField.getFieldName());
+            FieldSchema fieldSchema = fieldMap
+                .get(etlField.getFieldName().toLowerCase() + tableSchema.getIdTableSchema());
             if (fieldSchema != null) {
               field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
               field.setType(fieldSchema.getType());
@@ -1681,8 +1683,8 @@ public class DatasetServiceImpl implements DatasetService {
             }
           }
           // set the fields if not declared in the records
-          setMissingField(tableMap.get(etlTable.getTableName()).getRecordSchema().getFieldSchema(),
-              fieldValues, idSchema, recordValue);
+          setMissingField(tableMap.get(etlTable.getTableName().toLowerCase()).getRecordSchema()
+              .getFieldSchema(), fieldValues, idSchema, recordValue);
           recordValue.setFields(fieldValues);
           recordValue.setDatasetPartitionId(partition.getId());
           recordValue.setDataProviderCode(provider.getCode());
@@ -1709,6 +1711,7 @@ public class DatasetServiceImpl implements DatasetService {
       }
     }
     recordRepository.saveAll(allRecords);
+    LOG.info("Data saved into dataset {}", datasetId);
 
   }
 
@@ -1796,6 +1799,8 @@ public class DatasetServiceImpl implements DatasetService {
             }
           }
         }
+        break;
+      case DATASET:
         break;
     }
     return readOnly;

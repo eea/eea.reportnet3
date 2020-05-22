@@ -67,7 +67,6 @@ const Chips = ({
       case 13:
         if (inputValue && inputValue.trim().length && (!max || max > value.length)) {
           let values = [...value];
-          console.log({ inputValue });
           if (checkForDuplicates && values.indexOf(inputValue) > -1) {
             setHasErrors(true);
             return;

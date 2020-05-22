@@ -84,7 +84,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
 
       if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
         validationsServiceList.validations.forEach(validation => {
-          const additionalInfo = getAditionalValidationInfo(validation.referenceId);
+          const additionalInfo = getAdditionalValidationInfo(validation.referenceId);
           validation.table = additionalInfo.tableName;
           validation.field = additionalInfo.fieldName;
         });
@@ -129,7 +129,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     </div>
   );
 
-  const getAditionalValidationInfo = referenceId => {
+  const getAdditionalValidationInfo = referenceId => {
     const additionalInfo = {};
     datasetSchemaAllTables.forEach(table => {
       if (!isUndefined(table.records)) {

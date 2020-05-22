@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useContext, useRef, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
@@ -330,7 +331,13 @@ const DataViewer = withRouter(
     const parseMultiselect = record => {
       record.dataRow.forEach(field => {
         if (field.fieldData.type === 'MULTISELECT_CODELIST') {
-          field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(',');
+          if (
+            !isNil(field.fieldData[field.fieldData.fieldSchemaId]) &&
+            field.fieldData[field.fieldData.fieldSchemaId] !== '' &&
+            Array.isArray(field.fieldData[field.fieldData.fieldSchemaId])
+          ) {
+            field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(',');
+          }
         }
       });
       return record;

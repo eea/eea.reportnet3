@@ -760,6 +760,14 @@
     "value": "JHtEQVRBU0VUX0hJS0FSSV9NQVhfTElGRV9USU1FOjI1MDAwfQ=="
   },
   {
+    "key": "config/validation/validation.tasks.release.tax",
+    "value": "JHtWQUxJREFUSU9OX1RBU0tTX1JFTEVBU0VfVEFYOjF9"
+  },
+  {
+    "key": "config/validation/validation.tasks.initial.tax",
+    "value": "JHtWQUxJREFUSU9OX1RBU0tTX0lOSVRJQUxfVEFYOjF9"
+  },
+  {
     "key": "config/ums/management.endpoints.web.exposure.include",
     "value": "Kg=="
   },

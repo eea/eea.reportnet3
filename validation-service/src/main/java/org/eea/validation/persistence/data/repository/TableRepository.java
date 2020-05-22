@@ -10,13 +10,6 @@ import org.springframework.data.jpa.repository.Query;
  */
 public interface TableRepository extends JpaRepository<TableValue, Long> {
 
-  /**
-   * Find all tables.
-   *
-   * @return the list
-   */
-  @Query(value = "SELECT u FROM TableValue u")
-  List<TableValue> findAllTables();
 
 }
 

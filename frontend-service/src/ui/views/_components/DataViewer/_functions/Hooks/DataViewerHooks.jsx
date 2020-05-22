@@ -152,6 +152,7 @@ export const useSetColumns = (
       const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
       const message = DataViewerUtils.formatValidations(validations);
       const levelError = DataViewerUtils.getLevelError(validations);
+
       return (
         <div
           style={{
@@ -161,7 +162,11 @@ export const useSetColumns = (
           }}>
           {field
             ? Array.isArray(field.fieldData[column.field])
-              ? field.fieldData[column.field].join(', ')
+              ? field.fieldData[column.field].sort().join(', ')
+              : !isNil(field.fieldData[column.field]) &&
+                field.fieldData[column.field] !== '' &&
+                field.fieldData.type === 'MULTISELECT_CODELIST'
+              ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData[column.field]
             : null}
           <IconTooltip levelError={levelError} message={message} />
@@ -172,7 +177,11 @@ export const useSetColumns = (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {field
             ? Array.isArray(field.fieldData[column.field])
-              ? field.fieldData[column.field].join(', ')
+              ? field.fieldData[column.field].sort().join(', ')
+              : !isNil(field.fieldData[column.field]) &&
+                field.fieldData[column.field] !== '' &&
+                field.fieldData.type === 'MULTISELECT_CODELIST'
+              ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData[column.field]
             : null}
         </div>

@@ -363,6 +363,12 @@
         },
         {
           "key": "DELETE_UNIQUE_CONSTRAINT_ERROR"
+        },
+        {
+          "key": "CREATE_UNIQUE_CONSTRAINT_ERROR"
+        },
+        {
+          "key": "UPDATE_UNIQUE_CONSTRAINT_ERROR"
         }
       ]
     },

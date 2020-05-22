@@ -33,6 +33,7 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -828,7 +829,148 @@ public class DataSetSchemaControllerImplTest {
         dataSchemaControllerImpl.findDataSchemasByIdDataflow(1L));
   }
 
+  @Test
+  public void testCreateUniqueConstraintTest() {
+    UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
+    uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
+    uniqueConstraint.setTableSchemaId(new ObjectId().toString());
+    dataSchemaControllerImpl.createUniqueConstraint(uniqueConstraint);
+    Mockito.verify(dataschemaService, times(1)).createUniqueConstraint(Mockito.any());
+  }
 
+  @Test(expected = ResponseStatusException.class)
+  public void createUniqueConstraintSchemaIdErrorTest() {
+    UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
+    try {
+      dataSchemaControllerImpl.createUniqueConstraint(uniqueConstraint);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createUniqueConstraintTableSchemaIdErrorTest() {
+    UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
+    uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
+    try {
+      dataSchemaControllerImpl.createUniqueConstraint(uniqueConstraint);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.IDTABLESCHEMA_INCORRECT, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createUniqueConstraintUnreportedDataErrorTest() {
+    try {
+      dataSchemaControllerImpl.createUniqueConstraint(null);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.UNREPORTED_DATA, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test
+  public void deleteUniqueConstraintTest() {
+    dataSchemaControllerImpl.deleteUniqueConstraint(new ObjectId().toString());
+    Mockito.verify(dataschemaService, times(1)).deleteUniqueConstraint(Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void deleteUniqueConstraintErrorTest() {
+    try {
+      dataSchemaControllerImpl.deleteUniqueConstraint(null);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test
+  public void updateUniqueConstraintTest() {
+    UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
+    uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
+    uniqueConstraint.setTableSchemaId(new ObjectId().toString());
+    uniqueConstraint.setUniqueId(new ObjectId().toString());
+    dataSchemaControllerImpl.updateUniqueConstraint(uniqueConstraint);
+    Mockito.verify(dataschemaService, times(1)).updateUniqueConstraint(Mockito.any());
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateUniqueConstraintSchemaIdErrorTest() {
+    UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
+    uniqueConstraint.setUniqueId(new ObjectId().toString());
+    try {
+      dataSchemaControllerImpl.updateUniqueConstraint(uniqueConstraint);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateUniqueConstraintTableSchemaIdErrorTest() {
+    UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
+    uniqueConstraint.setUniqueId(new ObjectId().toString());
+    uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
+    try {
+      dataSchemaControllerImpl.updateUniqueConstraint(uniqueConstraint);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.IDTABLESCHEMA_INCORRECT, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateUniqueConstraintIdErrorTest() {
+    UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
+    uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
+    uniqueConstraint.setTableSchemaId(new ObjectId().toString());
+    try {
+      dataSchemaControllerImpl.updateUniqueConstraint(uniqueConstraint);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateUniqueConstraintUnreportedDataErrorTest() {
+    try {
+      dataSchemaControllerImpl.updateUniqueConstraint(null);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.UNREPORTED_DATA, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test
+  public void getUniqueConstraintsTests() {
+    List<UniqueConstraintVO> uniques = new ArrayList<>();
+    Mockito.when(dataschemaService.getUniqueConstraints(Mockito.any())).thenReturn(uniques);
+    assertEquals(uniques, dataSchemaControllerImpl.getUniqueConstraints(new ObjectId().toString()));
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getUniqueConstraintsErrorTest() {
+    try {
+      dataSchemaControllerImpl.getUniqueConstraints(null);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
+      throw e;
+    }
+  }
 }
 
 

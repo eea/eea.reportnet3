@@ -1,8 +1,6 @@
 package org.eea.exception;
 
-/**
- * The Class EEAErrorMessage.
- */
+/** The Class EEAErrorMessage. */
 public final class EEAErrorMessage {
 
   /** The Constant FILE_FORMAT: {@value}. */
@@ -215,6 +213,9 @@ public final class EEAErrorMessage {
 
   /** The Constant UNREPORTED_DATA: {@value}. */
   public static final String UNREPORTED_DATA = "Unreported data";
+
+  /** The Constant ENTITY_TYPE_REQUIRED: {@value}. */
+  public static final String ENTITY_TYPE_REQUIRED = "Type is required";
 
   /**
    * Instantiates a new EEA error message.
