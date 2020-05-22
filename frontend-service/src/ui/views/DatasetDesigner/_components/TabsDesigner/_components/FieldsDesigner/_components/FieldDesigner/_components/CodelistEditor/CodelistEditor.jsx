@@ -12,14 +12,14 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
   const resources = useContext(ResourcesContext);
   const [codelistItems, setCodelistItems] = useState(selectedCodelist);
   const [isVisible, setIsVisible] = useState(isCodelistEditorVisible);
-  console.log({ type });
+
   const onPasteChips = event => {
     if (event) {
       const clipboardData = event.clipboardData;
       const pastedData = clipboardData.getData('Text');
       const inmCodelistItems = [...codelistItems];
       inmCodelistItems.push(...pastedData.split(',').filter(value => value.trim() !== ''));
-      setCodelistItems([...new Set(inmCodelistItems)]);
+      setCodelistItems([...new Set(inmCodelistItems.map(value => value.trim()))]);
     }
   };
 
