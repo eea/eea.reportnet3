@@ -37,6 +37,7 @@ export const ExpressionsTab = ({
                 onExpressionsErrors={onExpressionsErrors}
                 position={i}
                 showRequiredFields={tabsChanges.expression}
+                fieldType={creationFormState.candidateRule.fieldType}
               />
             ))}
         </ul>

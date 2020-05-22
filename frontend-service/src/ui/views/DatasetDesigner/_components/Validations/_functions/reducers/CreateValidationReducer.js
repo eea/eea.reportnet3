@@ -30,6 +30,15 @@ export const createValidationReducer = (state, { type, payload }) => {
           [payload.key]: payload.value
         }
       };
+    case 'SET_FIELD_AND_FIELD_TYPE':
+      return {
+        ...state,
+        candidateRule: {
+          ...state.candidateRule,
+          [payload.key]: payload.value,
+          fieldType: payload.fieldType
+        }
+      };
     case 'SET_TABLES':
       return {
         ...state,

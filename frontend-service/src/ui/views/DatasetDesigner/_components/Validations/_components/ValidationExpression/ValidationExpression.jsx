@@ -13,6 +13,7 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import isNil from 'lodash/isNil';
 
 const ValidationExpression = ({
   expressionValues,
@@ -23,7 +24,8 @@ const ValidationExpression = ({
   onExpressionGroup,
   onExpressionsErrors,
   position,
-  showRequiredFields
+  showRequiredFields,
+  fieldType
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const { expressionId } = expressionValues;
@@ -31,7 +33,7 @@ const ValidationExpression = ({
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [clickedFields, setClickedFields] = useState([]);
   const {
-    validations: { operatorTypes: operatorTypesConf }
+    validations: { operatorTypes: operatorTypesConf, operatorByType }
   } = config;
 
   useEffect(() => {
@@ -42,11 +44,18 @@ const ValidationExpression = ({
 
   useEffect(() => {
     const options = [];
-    for (let type in operatorTypesConf) {
-      options.push(operatorTypesConf[type].option);
+    let operatorOfType = null;
+    if (!isNil(fieldType)) {
+      operatorByType[fieldType].forEach(key => {
+        options.push(operatorTypesConf[key].option);
+      });
+    } else {
+      for (let type in operatorTypesConf) {
+        options.push(operatorTypesConf[type].option);
+      }
     }
     setOperatorTypes(options);
-  }, []);
+  }, [fieldType]);
 
   useEffect(() => {
     if (showRequiredFields) {
@@ -61,7 +70,7 @@ const ValidationExpression = ({
   useEffect(() => {
     let errors = false;
     clickedFields.forEach(clickedField => {
-      if (printRequiredFieldError(clickedField) == 'error') {
+      if (printRequiredFieldError(clickedField) === 'error') {
         errors = true;
       }
     });
@@ -74,9 +83,9 @@ const ValidationExpression = ({
 
   const printRequiredFieldError = field => {
     let conditions = false;
-    if (field == 'union') {
+    if (field === 'union') {
       conditions = clickedFields.includes(field) && position != 0 && isEmpty(expressionValues[field]);
-    } else if (field == 'expressionValue') {
+    } else if (field === 'expressionValue') {
       conditions = clickedFields.includes(field) && isEmpty(expressionValues[field].toString());
     } else {
       conditions = clickedFields.includes(field) && isEmpty(expressionValues[field]);

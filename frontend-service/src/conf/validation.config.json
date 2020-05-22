@@ -1,4 +1,17 @@
 {
+  "operatorByType": {
+    "NUMBER_INTEGER": ["number"],
+    "NUMBER_DECIMAL": ["number"],
+    "DATE": ["date", "year", "month", "day"],
+    "TEXT": ["string", "LEN"],
+    "LONG_TEXT": ["string", "LEN"],
+    "EMAIL": ["string", "LEN"],
+    "URL": ["string", "LEN"],
+    "PHONE": ["string", "LEN"],
+    "CODELIST": ["string", "LEN"],
+    "MULTISELECT_CODELIST": ["string", "LEN"],
+    "LINK": ["string", "LEN"]
+  },
   "operatorTypes": {
     "number": {
       "option": { "label": "Number", "value": "number" },
@@ -8,7 +21,8 @@
         { "label": ">=", "value": ">=" },
         { "label": "<=", "value": "<=" },
         { "label": "=", "value": "=" },
-        { "label": "!=", "value": "!=" }
+        { "label": "!=", "value": "!=" },
+        { "label": "MATCH", "value": "MATCH" }
       ]
     },
     "LEN": {

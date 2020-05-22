@@ -33,6 +33,7 @@ import { deleteExpressionRecursively } from 'ui/views/DatasetDesigner/_component
 import { getDatasetSchemaTableFields } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getDatasetSchemaTableFields';
 import { getExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getExpressionString';
 import { getEmptyExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getEmptyExpression';
+import { getFieldType } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getFieldType';
 import { getSelectedFieldById } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedFieldById';
 import { getSelectedTableByFieldId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTablebyFieldId';
 import { getSelectedTableByTableSchemaId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTableByTableSchemaId';
@@ -165,11 +166,13 @@ const FieldValidation = ({ datasetId, tabs }) => {
       } else {
         table = getSelectedTableByFieldId(validationContext.fieldId, tabs);
       }
+      const fieldType = getFieldType(table, { code: validationContext.fieldId }, tabs);
       creationFormDispatch({
-        type: 'SET_FORM_FIELD',
+        type: 'SET_FIELD_AND_FIELD_TYPE',
         payload: {
           key: 'table',
-          value: table
+          value: table,
+          fieldType
         }
       });
     }
@@ -357,13 +360,26 @@ const FieldValidation = ({ datasetId, tabs }) => {
 
   const onInfoFieldChange = (fieldKey, fieldValue) => {
     onDeleteFromClickedFields(fieldKey);
-    creationFormDispatch({
-      type: 'SET_FORM_FIELD',
-      payload: {
-        key: fieldKey,
-        value: fieldValue
-      }
-    });
+    let payload = {};
+    if (fieldKey === 'field') {
+      const fieldType = getFieldType(creationFormState.candidateRule.table, fieldValue, tabs);
+      creationFormDispatch({
+        type: 'SET_FIELD_AND_FIELD_TYPE',
+        payload: {
+          key: fieldKey,
+          value: fieldValue,
+          fieldType
+        }
+      });
+    } else {
+      creationFormDispatch({
+        type: 'SET_FORM_FIELD',
+        payload: {
+          key: fieldKey,
+          value: fieldValue
+        }
+      });
+    }
   };
 
   const onAddToClickedFields = field => {
