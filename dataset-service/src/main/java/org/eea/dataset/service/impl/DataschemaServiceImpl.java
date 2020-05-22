@@ -531,13 +531,18 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
             fieldSchemaVO.getReferencedField().getIdPk(), true);
       }
-      // we create this if to clean blank space in codelist and multiselect
+      // we create this if to clean blank space at begining and end of any codelistItem
+      // n codelist and multiselect
       if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
-          && (fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")
-              || fieldSchemaVO.getType().getValue().equalsIgnoreCase("MULTISELECT_CODELIST"))) {
-        Arrays.stream(fieldSchemaVO.getCodelistItems()).map(String::trim)
-            .toArray(data -> fieldSchemaVO.getCodelistItems());
+          && (DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
+              || DataType.CODELIST.equals(fieldSchemaVO.getType()))) {
+        String[] codelistItems = fieldSchemaVO.getCodelistItems();
+        for (int i = 0; i < codelistItems.length; i++) {
+          codelistItems[i] = codelistItems[i].trim();
+        }
+        fieldSchemaVO.setCodelistItems(codelistItems);
       }
+
       return schemasRepository
           .createFieldSchema(datasetSchemaId, fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO))
           .getModifiedCount() == 1 ? fieldSchemaVO.getId() : "";
@@ -596,8 +601,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             && !fieldSchema.put(LiteralConstants.TYPE_DATA, fieldSchemaVO.getType().getValue())
                 .equals(fieldSchemaVO.getType().getValue())) {
           typeModified = true;
-          if (!(fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")
-              || fieldSchemaVO.getType().getValue().equalsIgnoreCase("MULTISELECT_CODELIST"))
+          if (!(DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
+              || DataType.CODELIST.equals(fieldSchemaVO.getType()))
               && fieldSchema.containsKey(LiteralConstants.CODELIST_ITEMS)) {
             fieldSchema.remove(LiteralConstants.CODELIST_ITEMS);
           }
@@ -611,13 +616,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         // that if control the codelist to add new items when codelist had already been created
         // this method work for codelist and multiselect_codedlist
         if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
-            && (fieldSchemaVO.getType().getValue().equalsIgnoreCase("CODELIST")
-                || fieldSchemaVO.getType().getValue().equalsIgnoreCase("MULTISELECT_CODELIST"))) {
+            && (DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
+                || DataType.CODELIST.equals(fieldSchemaVO.getType()))) {
           // we clean blank space in codelist and multiselect
-          Arrays.stream(fieldSchemaVO.getCodelistItems()).map(String::trim)
-              .toArray(data -> fieldSchemaVO.getCodelistItems());
-          fieldSchema.put(LiteralConstants.CODELIST_ITEMS,
-              Arrays.asList(fieldSchemaVO.getCodelistItems()));
+          String[] codelistItems = fieldSchemaVO.getCodelistItems();
+          for (int i = 0; i < codelistItems.length; i++) {
+            codelistItems[i] = codelistItems[i].trim();
+          }
+          fieldSchema.put(LiteralConstants.CODELIST_ITEMS, Arrays.asList(codelistItems));
           typeModified = true;
         }
         if (fieldSchemaVO.getRequired() != null) {
