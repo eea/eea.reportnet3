@@ -311,12 +311,15 @@ public class ValidationHelper {
       if (!this.checkFinishedValidations(datasetId, processId)) {
         //process is not over, but still it could happen that there is no task to be sent
         //remember pendingOks > pendingValidations.size()
-        if (processesMap.get(processId).getPendingValidations().size() > 0) {
+        Integer pendingValidations = processesMap.get(processId).getPendingValidations().size();
+        if (pendingValidations > 0) {
           //there are more tasks to be sent, just send it out
           this.kafkaSenderUtils
               .releaseKafkaEvent(processesMap.get(processId).getPendingValidations().poll());
-          LOG.info("Sent next task for process {}. There are still {} tasks to be sent", processId,
-              processesMap.get(processId).getPendingValidations().size());
+          LOG.info(
+              "Sent next task for process {}. There are still {} tasks to be sent and {} pending Ok's ro be received",
+              processId,
+              pendingValidations, pendingOk);
         }
       }
     }
