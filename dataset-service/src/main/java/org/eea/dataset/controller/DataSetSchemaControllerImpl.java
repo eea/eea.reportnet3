@@ -690,18 +690,19 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @PostMapping(value = "/createUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
   public void createUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
-    if (uniqueConstraint != null) {
-      if (uniqueConstraint.getDatasetSchemaId() == null) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
-      } else if (uniqueConstraint.getTableSchemaId() == null) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
-      }
-    } else {
+    if (uniqueConstraint == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UNREPORTED_DATA);
     }
+    if (uniqueConstraint.getDatasetSchemaId() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+    }
+    if (uniqueConstraint.getTableSchemaId() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
+    }
     dataschemaService.createUniqueConstraint(uniqueConstraint);
+
   }
 
   /**
