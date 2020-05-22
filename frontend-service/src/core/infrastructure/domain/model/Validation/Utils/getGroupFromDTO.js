@@ -1,10 +1,16 @@
 import isNil from 'lodash/isNil';
 import uuid from 'uuid';
 
+import { config } from 'conf';
+
 import { selectorFromDTO } from './selectorFromDTO';
 
 export const getGroupFromDTO = (expression, allExpressions, parentOperator) => {
-  const union = !isNil(parentOperator) ? parentOperator : '';
+  const {
+    validations: { reverseEquivalences }
+  } = config;
+  const union = !isNil(parentOperator) ? reverseEquivalences[parentOperator] : '';
+
   const newExpression = {};
   newExpression.expressionId = uuid.v4();
   newExpression.group = false;
@@ -12,10 +18,10 @@ export const getGroupFromDTO = (expression, allExpressions, parentOperator) => {
   newExpression.operator = '';
   newExpression.operatorValue = '';
   newExpression.expressionValue = '';
-  //expressions
   const subExpressions = [];
-  selectorFromDTO(expression.arg1, subExpressions, allExpressions);
-  selectorFromDTO(expression.arg2, subExpressions, allExpressions, expression.operator);
+
+  selectorFromDTO({ operator: expression.operator, params: expression.params }, subExpressions, allExpressions);
+
   newExpression.expressions = subExpressions;
   allExpressions.push(newExpression);
 

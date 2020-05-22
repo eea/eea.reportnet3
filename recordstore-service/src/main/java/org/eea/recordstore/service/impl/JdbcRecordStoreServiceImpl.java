@@ -353,10 +353,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     ConnectionDataVO connectionDataVO =
         getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
-    Connection con = null;
-    try {
-      con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
-          connectionDataVO.getUser(), connectionDataVO.getPassword());
+    try (Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
+        connectionDataVO.getUser(), connectionDataVO.getPassword())) {
 
       CopyManager cm = new CopyManager((BaseConnection) con);
 
@@ -396,10 +394,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               + idPartitionDataset + ") to STDOUT";
 
       printToFile(nameFileFieldValue, copyQueryField, cm);
-    } finally {
-      if (null != con) {
-        con.close();
-      }
     }
   }
 
@@ -425,27 +419,27 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     String signature =
         deleteData
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-                : LockSignature.RESTORE_SNAPSHOT.getValue()
+            : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, idReportingDataset);
     ConnectionDataVO conexion =
         getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
-    Connection con = null;
-    Statement stmt = null;
-    try {
-      con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
-          conexion.getPassword());
+
+    try (Connection con = DriverManager
+        .getConnection(conexion.getConnectionString(), conexion.getUser(),
+            conexion.getPassword());
+        Statement stmt = con.createStatement()) {
       con.setAutoCommit(true);
 
       if (deleteData) {
@@ -461,7 +455,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           default:
             break;
         }
-        stmt = con.createStatement();
         LOG.info("Deleting previous data");
         stmt.executeUpdate(sql);
       }
@@ -514,9 +507,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       LOG.info("Snapshot {} restored", idSnapshot);
     } catch (Exception e) {
-      if (null != con) {
-        LOG_ERROR.error("Error restoring the snapshot data due to error {}.", e.getMessage(), e);
-      }
+      LOG_ERROR.error("Error restoring the snapshot data due to error {}.", e.getMessage(), e);
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(failEventType, value,
             NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
@@ -526,13 +517,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         LOG.error("Error realeasing event {} due to error {}", failEventType, ex.getMessage(), ex);
       }
     } finally {
-      if (null != stmt) {
-        stmt.close();
-      }
-      if (null != con) {
-        // if autocommit is true, you don't have to commit mannually
-        con.close();
-      }
       // Release the lock manually
       List<Object> criteria = new ArrayList<>();
       criteria.add(signature);
@@ -553,26 +537,27 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     String signature =
         deleteData
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-                : LockSignature.RESTORE_SNAPSHOT.getValue()
+            : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
 
     ConnectionDataVO conexion =
         getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
-    Connection con = null;
+
     Statement stmt = null;
-    try {
-      con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
-          conexion.getPassword());
+    try (Connection con = DriverManager
+        .getConnection(conexion.getConnectionString(), conexion.getUser(),
+            conexion.getPassword())) {
+
       con.setAutoCommit(true);
 
       if (deleteData) {
@@ -630,15 +615,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       LOG.info("Snapshot {} restored for dataset {}", idSnapshot, idReportingDataset);
     } catch (Exception e) {
-      if (null != con) {
-        LOG_ERROR.error("Error restoring the snapshot data due to error {}", e.getMessage(), e);
-      }
+      LOG_ERROR.error("Error restoring the snapshot data due to error {}", e.getMessage(), e);
     } finally {
       if (null != stmt) {
         stmt.close();
-      }
-      if (null != con) {
-        con.close();
       }
       // Release the lock manually
       List<Object> criteria = new ArrayList<>();
@@ -875,5 +855,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
     }
   }
+
 
 }

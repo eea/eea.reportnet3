@@ -137,7 +137,9 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private ResourceManagementControllerZull resourceManagementController;
 
-  /** The dataset schema controller. */
+  /**
+   * The dataset schema controller.
+   */
   @Autowired
   private DatasetSchemaController datasetSchemaController;
 
@@ -236,6 +238,7 @@ public class ValidationServiceImpl implements ValidationService {
 
   }
 
+
   /**
    * Load rules knowledge base.
    *
@@ -261,7 +264,6 @@ public class ValidationServiceImpl implements ValidationService {
     }
     return kieBase;
   }
-
 
   /**
    * Validate data set.
