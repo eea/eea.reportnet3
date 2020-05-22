@@ -10,7 +10,7 @@ import styles from './LinkSelector.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'primereact/checkbox';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { ListBox } from './_components/ListBox';
+import { ListBox } from 'ui/views/DatasetDesigner/_components/ListBox';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DataflowService } from 'core/services/Dataflow';

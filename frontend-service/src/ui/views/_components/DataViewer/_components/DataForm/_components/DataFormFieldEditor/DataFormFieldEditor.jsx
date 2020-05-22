@@ -189,7 +189,7 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
         onChange={e => onChangeForm(field, e.target.value)}
         value={fieldValue}
         // type={type === 'DATE' ? 'date' : 'text'}
-        placeHolder={type === 'DATE' ? 'YYYY-MM-DD' : ''}
+        placeholder={type === 'DATE' ? 'YYYY-MM-DD' : ''}
         type="text"
       />
     );

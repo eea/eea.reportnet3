@@ -1,6 +1,6 @@
 {
-  "all": "/dataschema/{:datasetSchemaId}/getUniqueFields",
-  "create": "/dataschema/{:datasetSchemaId}/uniqueField",
-  "delete": "/dataschema/{:datasetSchemaId}/deleteUniqueField?fieldId={:fieldId}",
-  "update": "/dataschema/{:datasetSchemaId}/updateUniqueField"
+  "all": "/dataschema/{:datasetSchemaId}/getUniqueConstraints",
+  "create": "/dataschema/createUniqueConstraint",
+  "delete": "/dataschema/deleteUniqueConstraint/{:uniqueConstraintId}",
+  "update": "/dataschema/updateUniqueConstraint"
 }
