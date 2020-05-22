@@ -3,7 +3,7 @@ import pullAt from 'lodash/pullAt';
 
 import { isAGroup } from './isAGroup';
 
-export const deleteExpressionRecursivily = (expressionId, expressionColection, isInAGroup = false) => {
+export const deleteExpressionRecursively = (expressionId, expressionColection, isInAGroup = false) => {
   expressionColection.forEach((expression, i) => {
     //the expression is not part of a group, is not a group, there are more than one expressions,
     //it matches and it is not the only one
@@ -25,7 +25,7 @@ export const deleteExpressionRecursivily = (expressionId, expressionColection, i
     //the expression is a group, the ID of the expression does not match
     //continue searching for a match
     if (isAGroup(expression) && expression.expressionId != expressionId) {
-      const resultingExpressions = deleteExpressionRecursivily(expressionId, expression.expressions, true);
+      const resultingExpressions = deleteExpressionRecursively(expressionId, expression.expressions, true);
       if (!isEmpty(resultingExpressions) && resultingExpressions.length < 2) {
         pullAt(expressionColection, i);
         resultingExpressions.forEach((subexpression, index) => {

@@ -16,7 +16,8 @@ const validationReducer = (state, { type, payload }) => {
       return {
         ...state,
         isVisible: true,
-        opener: payload.opener
+        opener: payload.opener,
+        level: payload.level
       };
     case 'ON_OPEN_QC_CREATION_MODAL_FROM_FIELD':
       return {
@@ -24,7 +25,8 @@ const validationReducer = (state, { type, payload }) => {
         isVisible: true,
         fieldId: payload.fieldId,
         tableSchemaId: payload.tableSchemaId,
-        opener: null
+        opener: null,
+        level: 'field'
       };
     case 'ON_OPENER_RESET':
       return {
@@ -51,7 +53,7 @@ const validationReducer = (state, { type, payload }) => {
         ruleEdit: true,
         ruleToEdit: payload.ruleToEdit
       };
-    case 'RESET_REOPENOPENER':
+    case 'RESET_REOPEN_OPENER':
       return {
         ...state,
         reOpenOpener: false
@@ -65,6 +67,7 @@ const initialState = {
   isVisible: false,
   fieldId: null,
   opener: null,
+  level: null,
   reOpenOpener: false,
   ruleEdit: false
 };
@@ -79,11 +82,12 @@ export const ValidationProvider = ({ children }) => {
             type: 'ON_OPEN_QC_CREATION_MODAL'
           });
         },
-        onOpenModalFronOpener: opener => {
+        onOpenModalFromOpener: (level, opener) => {
           dispatch({
             type: 'ON_OPEN_QC_CREATION_MODAL_FROM_OPENER',
             payload: {
-              opener
+              opener,
+              level
             }
           });
         },
@@ -115,7 +119,7 @@ export const ValidationProvider = ({ children }) => {
         },
         resetReOpenOpener: () => {
           dispatch({
-            type: 'RESET_REOPENOPENER'
+            type: 'RESET_REOPEN_OPENER'
           });
         }
       }}>
