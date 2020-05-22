@@ -1,4 +1,4 @@
-.schemaWrapper {
+.listBoxWrap {
   display: flex;
   flex-direction: row;
   overflow-x: scroll;
@@ -23,19 +23,19 @@
   }
 }
 
-.schemaWrapper::-webkit-scrollbar {
+.listBoxWrap::-webkit-scrollbar {
   width: 10px;
   height: 8px;
 }
 
-.schemaWrapper::-webkit-scrollbar-track {
+.listBoxWrap::-webkit-scrollbar-track {
   background: var(--bg);
 }
 
-.schemaWrapper::-webkit-scrollbar-thumb {
+.listBoxWrap::-webkit-scrollbar-thumb {
   background: var(--gray-75);
 }
 
-.schemaWrapper::-webkit-scrollbar-thumb:hover {
+.listBoxWrap::-webkit-scrollbar-thumb:hover {
   background: var(--gray-50);
 }

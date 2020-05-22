@@ -1,10 +1,10 @@
 export const constraintsReducer = (state, { type, payload }) => {
   switch (type) {
-    case 'FILTERED_DATA':
-      return { ...state, filteredData: payload.data };
-
     case 'INITIAL_LOAD':
       return { ...state, ...payload };
+
+    case 'FILTERED_DATA':
+      return { ...state, filteredData: payload.data };
 
     case 'IS_DATA_UPDATED':
       return { ...state, isDataUpdated: payload.value };
