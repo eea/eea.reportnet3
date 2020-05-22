@@ -58,13 +58,15 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs }) => {
   };
 
   const onCreateConstraint = async () => {
-    manageDialogs('isManageUniqueConstraintDialogVisible', false, 'uniqueConstraintListDialogVisible', true);
     try {
-      await UniqueConstraintsService.create(
+      const response = await UniqueConstraintsService.create(
         datasetSchemaId,
         selectedFields.map(field => field.value),
         selectedTable.value
       );
+      if (response.status >= 200 && response.status <= 299) {
+        manageDialogs('isManageUniqueConstraintDialogVisible', false, 'uniqueConstraintListDialogVisible', true);
+      }
     } catch (error) {
       console.log('error', error);
     } finally {
@@ -73,14 +75,16 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs }) => {
   };
 
   const onUpdateConstraint = async () => {
-    manageDialogs('isManageUniqueConstraintDialogVisible', false, 'uniqueConstraintListDialogVisible', true);
     try {
-      await UniqueConstraintsService.update(
+      const response = await UniqueConstraintsService.update(
         datasetSchemaId,
         selectedFields.map(field => field.value),
         selectedTable.value,
         manageUniqueConstraintData.uniqueId
       );
+      if (response.status >= 200 && response.status <= 299) {
+        manageDialogs('isManageUniqueConstraintDialogVisible', false, 'uniqueConstraintListDialogVisible', true);
+      }
     } catch (error) {
       console.log('error', error);
     } finally {
@@ -99,9 +103,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs }) => {
         className={styles.dialog}
         footer={renderFooter}
         header={
-          !isNil(designerState.manageUniqueConstraintData)
-            ? resources.messages['editUniqueConstraint']
-            : resources.messages['createUniqueConstraint']
+          !isNil(uniqueId) ? resources.messages['editUniqueConstraint'] : resources.messages['createUniqueConstraint']
         }
         onHide={() =>
           manageDialogs('isManageUniqueConstraintDialogVisible', false, 'uniqueConstraintListDialogVisible', true)
@@ -116,11 +118,9 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs }) => {
     <Fragment>
       <Button
         className="p-button-primary p-button-animated-blink"
-        icon={!isNil(designerState.manageUniqueConstraintData) ? 'check' : 'plus'}
-        label={
-          !isNil(designerState.manageUniqueConstraintData) ? resources.messages['edit'] : resources.messages['create']
-        }
-        onClick={() => (!isNil(designerState.manageUniqueConstraintData) ? onUpdateConstraint() : onCreateConstraint())}
+        icon={!isNil(uniqueId) ? 'check' : 'plus'}
+        label={!isNil(uniqueId) ? resources.messages['edit'] : resources.messages['create']}
+        onClick={() => (!isNil(uniqueId) ? onUpdateConstraint() : onCreateConstraint())}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
@@ -150,9 +150,10 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs }) => {
   const renderListBoxField = () => {
     return (
       <ListBox
-        // filterProp={true}
         // filterPlaceholder="Search"
+        // filterProp={true}
         disabled={isNil(selectedTable)}
+        listStyle={{ height: '200px' }}
         multiple={true}
         onChange={event => !isNil(event.value) && setSelectedFields(event.value)}
         optionLabel="name"
@@ -176,7 +177,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs }) => {
       </div>
       <div className={`${styles.selected} ${styles.fields}`}>
         <span className={styles.title}>{`${resources.messages['selectedFields']}: `}</span>
-        <span>{!isEmpty(selectedFields) ? selectedFields.map(field => field.name) : ''}</span>
+        <span>{!isEmpty(selectedFields) ? selectedFields.map(field => field.name).join(', ') : ''}</span>
       </div>
     </form>
   );

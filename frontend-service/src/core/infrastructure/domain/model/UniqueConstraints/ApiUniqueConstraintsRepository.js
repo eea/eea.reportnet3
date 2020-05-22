@@ -13,8 +13,8 @@ const deleteById = async uniqueConstraintId => {
   return await apiUniqueConstraints.deleteById(uniqueConstraintId);
 };
 
-const update = async (datasetSchemaId, fieldSchemaIds, tableSchemaId, uniqueID) => {
-  await apiUniqueConstraints.update(datasetSchemaId, fieldSchemaIds, tableSchemaId, uniqueID);
+const update = async (datasetSchemaId, fieldSchemaIds, tableSchemaId, uniqueId) => {
+  await apiUniqueConstraints.update(datasetSchemaId, fieldSchemaIds, tableSchemaId, uniqueId);
 };
 
 const parseConstraint = constraintDTO => new UniqueConstraint(constraintDTO);

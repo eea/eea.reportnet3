@@ -39,20 +39,13 @@ export const apiUniqueConstraints = {
     return response;
   },
 
-  update: async (datasetSchemaId, fieldSchemaIds, tableSchemaId, uniqueID) => {
+  update: async (datasetSchemaId, fieldSchemaIds, tableSchemaId, uniqueId) => {
     const tokens = userStorage.get();
-    const response = await HTTPRequester.post({
+    const response = await HTTPRequester.update({
       url: getUrl(UniqueConstraintsConfig.update),
-      data: {
-        datasetSchemaId,
-        fieldSchemaIds,
-        tableSchemaId,
-        uniqueID
-      },
+      data: { datasetSchemaId, fieldSchemaIds, tableSchemaId, uniqueId },
       queryString: {},
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      }
+      headers: { Authorization: `Bearer ${tokens.accessToken}` }
     });
     return response;
   }

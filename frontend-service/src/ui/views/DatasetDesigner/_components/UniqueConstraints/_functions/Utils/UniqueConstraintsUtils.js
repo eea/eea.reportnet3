@@ -1,8 +1,13 @@
 const parseConstraintsList = (constraintsData, tableData) => {
-  const allData = constraintsData.map((constraint, index) => Object.assign({}, constraint, tableData[index]));
   const constraints = [];
-  allData.forEach(constraintDTO => constraints.push(parseConstraint(constraintDTO)));
-
+  for (let i = 0; i < constraintsData.length; i++) {
+    constraints.push(
+      parseConstraint({
+        ...constraintsData[i],
+        ...tableData.find(table => table.tableSchemaId === constraintsData[i].tableSchemaId)
+      })
+    );
+  }
   return constraints;
 };
 
@@ -16,6 +21,6 @@ const parseConstraint = data => ({
     .join(', ')
 });
 
-const parseFieldsData = (fields, record) => record.fields.filter(field => !fields.includes(field));
+const parseFieldsData = (fields, record) => record.fields.filter(field => fields.includes(field.fieldId));
 
 export const UniqueConstraintsUtils = { parseConstraintsList };
