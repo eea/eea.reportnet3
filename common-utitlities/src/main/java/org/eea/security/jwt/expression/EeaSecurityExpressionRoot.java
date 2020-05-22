@@ -10,13 +10,14 @@ import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.AuthenticationDetails;
+import org.eea.utils.LiteralConstants;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.server.ResponseStatusException;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +56,7 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
   public boolean secondLevelAuthorize(Long idEntity, ObjectAccessRoleEnum... objectAccessRoles) {
     boolean canAccess = false;
     if (SecurityContextHolder.getContext().getAuthentication().getAuthorities()
-        .contains("ROLE_FEIGN")) {
+        .contains(new SimpleGrantedAuthority("ROLE_FEIGN"))) {
       log.warn("Invocation was made from a feign client with a due token. Letting it go");
       canAccess = true;
     } else {
@@ -68,8 +69,8 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
           .map(objectAccessRoleEnum -> objectAccessRoleEnum.getAccessRole(idEntity))
           .collect(Collectors.toList());
 
-      canAccess = !roles.stream().filter(authorities::contains).findFirst().orElse("not_found")
-          .equals("not_found");
+      canAccess = !roles.stream().filter(authorities::contains).findFirst()
+          .orElse(LiteralConstants.NOT_FOUND).equals(LiteralConstants.NOT_FOUND);
       if (!canAccess) {// No authority found in the current token. Check against keycloak to finde
         // if there were some change at User rights that wasn't be propagated to the
         // token yet
@@ -87,8 +88,8 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
               .append(resourceAccessVO.getId()).append("-").append(resourceAccessVO.getRole())
               .toString().toUpperCase();
         }).collect(Collectors.toList());
-        canAccess = !roles.stream().filter(resourceRoles::contains).findFirst().orElse("not_found")
-            .equals("not_found");
+        canAccess = !roles.stream().filter(resourceRoles::contains).findFirst()
+            .orElse(LiteralConstants.NOT_FOUND).equals(LiteralConstants.NOT_FOUND);
       }
     }
     return canAccess;
@@ -106,7 +107,7 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
   public boolean checkPermission(String resource, AccessScopeEnum... accessScopeEnums) {
     boolean canAccess = false;
     if (SecurityContextHolder.getContext().getAuthentication().getAuthorities()
-        .contains("ROLE_FEIGN")) {
+        .contains(new SimpleGrantedAuthority("ROLE_FEIGN"))) {
       log.warn("Invocation was made from a feign client with a due token. Letting it go");
       canAccess = true;
     } else {

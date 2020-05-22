@@ -353,23 +353,21 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     ConnectionDataVO connectionDataVO =
         getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
-    Connection con = null;
-    try {
-      con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
-          connectionDataVO.getUser(), connectionDataVO.getPassword());
+    try (Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
+        connectionDataVO.getUser(), connectionDataVO.getPassword())) {
 
       CopyManager cm = new CopyManager((BaseConnection) con);
 
       // Copy dataset_value
-      String nameFileDatasetValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_DatasetValue.snap");
+      String nameFileDatasetValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX);
       String copyQueryDataset = "COPY (SELECT id, id_dataset_schema FROM dataset_"
           + idReportingDataset + ".dataset_value) to STDOUT";
 
       printToFile(nameFileDatasetValue, copyQueryDataset, cm);
       // Copy table_value
-      String nameFileTableValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_TableValue.snap");
+      String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
 
       String copyQueryTable = "COPY (SELECT id, id_table_schema, dataset_id FROM dataset_"
           + idReportingDataset + ".table_value) to STDOUT";
@@ -377,8 +375,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       printToFile(nameFileTableValue, copyQueryTable, cm);
 
       // Copy record_value
-      String nameFileRecordValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_RecordValue.snap");
+      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
       String copyQueryRecord =
           "COPY (SELECT id, id_record_schema, id_table, dataset_partition_id,data_provider_code FROM dataset_"
               + idReportingDataset + ".record_value WHERE dataset_partition_id="
@@ -387,8 +385,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       printToFile(nameFileRecordValue, copyQueryRecord, cm);
 
       // Copy field_value
-      String nameFileFieldValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_FieldValue.snap");
+      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
       String copyQueryField =
           "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
               + idReportingDataset + ".field_value fv inner join dataset_" + idReportingDataset
@@ -396,10 +394,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               + idPartitionDataset + ") to STDOUT";
 
       printToFile(nameFileFieldValue, copyQueryField, cm);
-    } finally {
-      if (null != con) {
-        con.close();
-      }
     }
   }
 
@@ -425,27 +419,27 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     String signature =
         deleteData
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-                : LockSignature.RESTORE_SNAPSHOT.getValue()
+            : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, idReportingDataset);
     ConnectionDataVO conexion =
         getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
-    Connection con = null;
-    Statement stmt = null;
-    try {
-      con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
-          conexion.getPassword());
+
+    try (Connection con = DriverManager
+        .getConnection(conexion.getConnectionString(), conexion.getUser(),
+            conexion.getPassword());
+        Statement stmt = con.createStatement()) {
       con.setAutoCommit(true);
 
       if (deleteData) {
@@ -458,8 +452,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           case DESIGN:
             sql = "DELETE FROM dataset_" + idReportingDataset + ".table_value";
             break;
+          default:
+            break;
         }
-        stmt = con.createStatement();
         LOG.info("Deleting previous data");
         stmt.executeUpdate(sql);
       }
@@ -470,25 +465,27 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         case DESIGN:
           // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
           // not neccesary
-          String nameFileTableValue =
-              pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_TableValue.snap");
+          String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+              LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
 
           String copyQueryTable = "COPY dataset_" + idReportingDataset
               + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
           copyFromFile(copyQueryTable, nameFileTableValue, cm);
           break;
+        default:
+          break;
       }
       // Record value
-      String nameFileRecordValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_RecordValue.snap");
+      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
 
       String copyQueryRecord = "COPY dataset_" + idReportingDataset
           + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
       copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
 
       // Field value
-      String nameFileFieldValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_FieldValue.snap");
+      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
 
       String copyQueryField = "COPY dataset_" + idReportingDataset
           + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
@@ -510,9 +507,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       LOG.info("Snapshot {} restored", idSnapshot);
     } catch (Exception e) {
-      if (null != con) {
-        LOG_ERROR.error("Error restoring the snapshot data due to error {}.", e.getMessage(), e);
-      }
+      LOG_ERROR.error("Error restoring the snapshot data due to error {}.", e.getMessage(), e);
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(failEventType, value,
             NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
@@ -522,13 +517,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         LOG.error("Error realeasing event {} due to error {}", failEventType, ex.getMessage(), ex);
       }
     } finally {
-      if (null != stmt) {
-        stmt.close();
-      }
-      if (null != con) {
-        // if autocommit is true, you don't have to commit mannually
-        con.close();
-      }
       // Release the lock manually
       List<Object> criteria = new ArrayList<>();
       criteria.add(signature);
@@ -549,26 +537,27 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
     String signature =
         deleteData
             ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-                : LockSignature.RESTORE_SNAPSHOT.getValue()
+            : LockSignature.RESTORE_SNAPSHOT.getValue()
             : LockSignature.RELEASE_SNAPSHOT.getValue();
 
     ConnectionDataVO conexion =
         getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
-    Connection con = null;
+
     Statement stmt = null;
-    try {
-      con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
-          conexion.getPassword());
+    try (Connection con = DriverManager
+        .getConnection(conexion.getConnectionString(), conexion.getUser(),
+            conexion.getPassword())) {
+
       con.setAutoCommit(true);
 
       if (deleteData) {
@@ -580,6 +569,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             break;
           case DESIGN:
             sql = "DELETE FROM dataset_" + idReportingDataset + ".table_value";
+            break;
+          default:
             break;
         }
         stmt = con.createStatement();
@@ -594,25 +585,27 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         case DESIGN:
           // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
           // not neccesary
-          String nameFileTableValue =
-              pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_TableValue.snap");
+          String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+              LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
 
           String copyQueryTable = "COPY dataset_" + idReportingDataset
               + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
           copyFromFile(copyQueryTable, nameFileTableValue, cm);
           break;
+        default:
+          break;
       }
       // Record value
-      String nameFileRecordValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_RecordValue.snap");
+      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
 
       String copyQueryRecord = "COPY dataset_" + idReportingDataset
           + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
       copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
 
       // Field value
-      String nameFileFieldValue =
-          pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, "_table_FieldValue.snap");
+      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
 
       String copyQueryField = "COPY dataset_" + idReportingDataset
           + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
@@ -622,15 +615,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       LOG.info("Snapshot {} restored for dataset {}", idSnapshot, idReportingDataset);
     } catch (Exception e) {
-      if (null != con) {
-        LOG_ERROR.error("Error restoring the snapshot data due to error {}", e.getMessage(), e);
-      }
+      LOG_ERROR.error("Error restoring the snapshot data due to error {}", e.getMessage(), e);
     } finally {
       if (null != stmt) {
         stmt.close();
-      }
-      if (null != con) {
-        con.close();
       }
       // Release the lock manually
       List<Object> criteria = new ArrayList<>();
@@ -656,14 +644,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Override
   public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {
 
-    String nameFileDatasetValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_DatasetValue.snap";
-    String nameFileTableValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_TableValue.snap";
-    String nameFileRecordValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_RecordValue.snap";
-    String nameFileFieldValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_FieldValue.snap";
+    String nameFileDatasetValue = "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset
+        + LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX;
+    String nameFileTableValue = "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset
+        + LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX;
+    String nameFileRecordValue = "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset
+        + LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX;
+    String nameFileFieldValue = "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset
+        + LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX;
 
     Path path1 = Paths.get(pathSnapshot + nameFileDatasetValue);
     Files.deleteIfExists(path1);
@@ -867,5 +855,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
     }
   }
+
 
 }

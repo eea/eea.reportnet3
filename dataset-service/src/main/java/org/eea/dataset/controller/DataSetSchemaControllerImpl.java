@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.apache.commons.lang3.StringUtils;
-import org.bson.types.ObjectId;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -648,31 +647,17 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @return the unique constraints
    */
   @Override
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @GetMapping(value = "{schemaId}/getUniqueConstraints",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public List<UniqueConstraintVO> getUniqueConstraints(
       @PathVariable("schemaId") String datasetSchemaId) {
-    // Return dummy data to mock the service
-    UniqueConstraintVO uniqueConstraint1 = new UniqueConstraintVO();
-    UniqueConstraintVO uniqueConstraint2 = new UniqueConstraintVO();
-    List<String> idFieldSchema1 = new ArrayList<>();
-    List<String> idFieldSchema2 = new ArrayList<>();
-    List<UniqueConstraintVO> uniques = new ArrayList<>();
-    uniqueConstraint1.setDatasetSchemaId(datasetSchemaId);
-    uniqueConstraint2.setDatasetSchemaId(datasetSchemaId);
-    uniqueConstraint1.setTableSchemaId(new ObjectId().toString());
-    uniqueConstraint2.setTableSchemaId(new ObjectId().toString());
-    uniqueConstraint1.setUniqueId(new ObjectId().toString());
-    uniqueConstraint2.setUniqueId(new ObjectId().toString());
-    idFieldSchema1.add(new ObjectId().toString());
-    idFieldSchema1.add(new ObjectId().toString());
-    idFieldSchema2.add(new ObjectId().toString());
-    idFieldSchema2.add(new ObjectId().toString());
-    uniqueConstraint1.setFieldSchemaIds(idFieldSchema1);
-    uniqueConstraint2.setFieldSchemaIds(idFieldSchema2);
-    uniques.add(uniqueConstraint1);
-    uniques.add(uniqueConstraint2);
-    return uniques;
+    if (datasetSchemaId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+    }
+
+    return dataschemaService.getUniqueConstraints(datasetSchemaId);
   }
 
 
@@ -682,6 +667,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @param uniqueConstraint the unique constraint
    */
   @Override
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @PostMapping(value = "/createUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
   public void createUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
     if (uniqueConstraint != null) {
@@ -695,6 +681,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     } else {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UNREPORTED_DATA);
     }
+    dataschemaService.createUniqueConstraint(uniqueConstraint);
   }
 
   /**
@@ -703,6 +690,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @param uniqueConstraintId the unique constraint id
    */
   @Override
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @DeleteMapping(value = "/deleteUniqueConstraint/{uniqueConstraintId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public void deleteUniqueConstraint(
@@ -711,6 +699,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT);
     }
+    dataschemaService.deleteUniqueConstraint(uniqueConstraintId);
   }
 
   /**
@@ -719,19 +708,26 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @param uniqueConstraint the unique constraint
    */
   @Override
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @PutMapping(value = "/updateUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
   public void updateUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
-    if (uniqueConstraint != null) {
-      if (uniqueConstraint.getDatasetSchemaId() == null) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
-      } else if (uniqueConstraint.getTableSchemaId() == null) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
-      }
-    } else {
+    if (uniqueConstraint == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UNREPORTED_DATA);
     }
+    if (uniqueConstraint.getDatasetSchemaId() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+    }
+    if (uniqueConstraint.getTableSchemaId() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
+    }
+    if (uniqueConstraint.getUniqueId() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT);
+    }
+
+    dataschemaService.updateUniqueConstraint(uniqueConstraint);
   }
 
 }
