@@ -68,7 +68,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs }) => {
         manageDialogs('isManageUniqueConstraintDialogVisible', false, 'uniqueConstraintListDialogVisible', true);
       }
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     } finally {
       onResetConstraintValues();
     }
@@ -86,7 +86,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs }) => {
         manageDialogs('isManageUniqueConstraintDialogVisible', false, 'uniqueConstraintListDialogVisible', true);
       }
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     } finally {
       onResetConstraintValues();
     }

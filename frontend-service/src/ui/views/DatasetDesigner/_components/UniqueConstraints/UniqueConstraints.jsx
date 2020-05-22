@@ -47,6 +47,10 @@ export const UniqueConstraints = ({
     onLoadConstraints();
   }, [constraintsState.isDataUpdated]);
 
+  const { manageUniqueConstraintData } = designerState;
+
+  const { uniqueId } = manageUniqueConstraintData;
+
   const actionButtonsColumn = (
     <Column
       body={row => actionsTemplate(row)}
@@ -75,7 +79,7 @@ export const UniqueConstraints = ({
 
   const onDeleteConstraint = async () => {
     try {
-      const response = await UniqueConstraintsService.deleteById('1234');
+      const response = await UniqueConstraintsService.deleteById(uniqueId);
       if (response.status >= 200 && response.status <= 299) onUpdateData();
     } catch (error) {
       notificationContext.add({ type: 'DELETE_UNIQUE_CONSTRAINT_ERROR' });
