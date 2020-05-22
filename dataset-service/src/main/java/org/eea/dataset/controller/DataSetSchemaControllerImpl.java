@@ -697,6 +697,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       } else if (uniqueConstraint.getTableSchemaId() == null) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
             EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
+      } else if (uniqueConstraint.getFieldSchemaIds() == null
+          || uniqueConstraint.getFieldSchemaIds().isEmpty()) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.UNREPORTED_FIELDSCHEMAS);
       }
     } else {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UNREPORTED_DATA);
@@ -749,6 +753,11 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     if (uniqueConstraint.getUniqueId() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT);
+    }
+    if (uniqueConstraint.getFieldSchemaIds() == null
+        || uniqueConstraint.getFieldSchemaIds().isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.UNREPORTED_FIELDSCHEMAS);
     }
 
     dataschemaService.updateUniqueConstraint(uniqueConstraint);
