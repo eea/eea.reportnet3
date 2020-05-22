@@ -53,17 +53,6 @@ export const TabsDesigner = withRouter(
     const resources = useContext(ResourcesContext);
 
     useEffect(() => {
-      leftSideBarContext.addModels([
-        {
-          label: 'createQcRule',
-          icon: 'plus',
-          onClick: e => {
-            validationContext.onOpenModal();
-          },
-          title: 'createQcRule'
-        }
-      ]);
-
       onLoadSchema(datasetId);
     }, []);
 
