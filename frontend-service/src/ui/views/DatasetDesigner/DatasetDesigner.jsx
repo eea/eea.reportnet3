@@ -70,7 +70,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     isManageUniqueConstraintDialogVisible: false,
     isPreviewModeOn: DatasetDesignerUtils.getUrlParamValue('design'),
     isUniqueConstraintsListDialogVisible: false,
-    manageUniqueConstraintData: { tableSchemaId: null, tableSchemaName: '', fieldData: [], uniqueId: null },
+    manageUniqueConstraintData: {
+      fieldData: [],
+      isTableCreationMode: false,
+      tableSchemaId: null,
+      tableSchemaName: '',
+      uniqueId: null
+    },
     metaData: {},
     refresh: false,
     validateDialogVisible: false,
@@ -508,6 +514,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           editable={true}
           history={history}
           isPreviewModeOn={designerState.isPreviewModeOn}
+          manageDialogs={manageDialogs}
+          manageUniqueConstraint={manageUniqueConstraint}
           onChangeReference={onChangeReference}
           onLoadTableData={onLoadTableData}
           onUpdateTable={onUpdateTable}

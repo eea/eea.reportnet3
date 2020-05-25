@@ -25,10 +25,12 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
     manageUniqueConstraintData
   } = designerState;
 
-  const { fieldData, tableSchemaId, tableSchemaName, uniqueId } = manageUniqueConstraintData;
+  const { fieldData, isTableCreationMode, tableSchemaId, tableSchemaName, uniqueId } = manageUniqueConstraintData;
 
   const [selectedFields, setSelectedFields] = useState([]);
   const [selectedTable, setSelectedTable] = useState({ name: '', value: null });
+
+  const uniqueListDialog = isTableCreationMode ? '' : 'isUniqueConstraintsListDialogVisible';
 
   useEffect(() => {
     if (isManageUniqueConstraintDialogVisible) {
@@ -67,7 +69,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
         selectedTable.value
       );
       if (response.status >= 200 && response.status <= 299) {
-        manageDialogs('isManageUniqueConstraintDialogVisible', false, 'isUniqueConstraintsListDialogVisible', true);
+        manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
       }
     } catch (error) {
       notificationContext.add({ type: 'CREATE_UNIQUE_CONSTRAINT_ERROR' });
@@ -85,7 +87,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
         manageUniqueConstraintData.uniqueId
       );
       if (response.status >= 200 && response.status <= 299) {
-        manageDialogs('isManageUniqueConstraintDialogVisible', false, 'isUniqueConstraintsListDialogVisible', true);
+        manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
       }
     } catch (error) {
       notificationContext.add({ type: 'UPDATE_UNIQUE_CONSTRAINT_ERROR' });
@@ -94,7 +96,15 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
     }
   };
 
-  const onResetValues = () => resetUniques({ tableSchemaId: null, tableSchemaName: '', fieldData: [], uniqueId: null });
+  const onResetValues = () => {
+    resetUniques({
+      fieldData: [],
+      isTableCreationMode: false,
+      tableSchemaId: null,
+      tableSchemaName: '',
+      uniqueId: null
+    });
+  };
 
   const renderDialogLayout = children =>
     isManageUniqueConstraintDialogVisible && (
@@ -104,9 +114,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
         header={
           !isNil(uniqueId) ? resources.messages['editUniqueConstraint'] : resources.messages['createUniqueConstraint']
         }
-        onHide={() =>
-          manageDialogs('isManageUniqueConstraintDialogVisible', false, 'isUniqueConstraintsListDialogVisible', true)
-        }
+        onHide={() => manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true)}
         style={{ width: '975px' }}
         visible={isManageUniqueConstraintDialogVisible}>
         {children}
@@ -127,7 +135,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => {
-          manageDialogs('isManageUniqueConstraintDialogVisible', false, 'isUniqueConstraintsListDialogVisible', true);
+          manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
           onResetValues();
         }}
       />
