@@ -22,9 +22,11 @@ const parseUserConfiguration = userConfiguration => {
 };
 
 const parseUserImage = data => {
-  data.userImage.sort();
-  data.userImage = data.userImage.map(token => token.split('~')[1]);
-  return data;
+  if (!isUndefined(data) && !isEmpty(data)) {
+    data.userImage.sort();
+    data.userImage = data.userImage.map(token => token.split('~')[1]);
+    return data;
+  }
 };
 
 export const apiUser = {
