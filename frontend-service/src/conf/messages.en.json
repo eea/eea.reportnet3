@@ -645,6 +645,11 @@
     "totalUniqueConstraints": "Total unique constraints: ",
     "loadUniqueConstraintsError": "Error loading unique constraints",
     "deleteUniqueConstraintError": "Error unique constraint",
+    "selectedTable": "Selected table",
+    "selectedFields": "Selected fields",
+    "tableSchemaName": "Table name",
+    "fieldData": "Field name",
+    "filterFieldsNames": "Field name",
     "editRowConstraint": "Edit row constraint",
     "createRowConstraint": "Create row constraint",
     "multiselectCodelists": "Multiple select items ",
@@ -652,6 +657,10 @@
     "multiselectCodelistEditorMessage": "Enter your multiple select items",
     "multiselectCodelistEditor": "Multiple select editor",
     "duplicatedItem": "Duplicated item",
-    "multiselectCodelistSelection": "No multiple select item selected"
+    "multiselectCodelistSelection": "No multiple select item selected",
+    "editUniqueConstraint": "Edit unique constraint",
+    "createUniqueConstraint": "Create unique constraint",
+    "noFieldsToSelect": "There are no fields to select",
+    "noTableSelected": "Please, select a table first"
   }
 }

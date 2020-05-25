@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -70,10 +71,6 @@ public class ExecuteFieldValidationCommandTest {
    */
   private EEAEventVO eeaEventVO;
 
-  /**
-   * The processes map.
-   */
-  private Map<String, Integer> processesMap;
 
   /**
    * Inits the mocks.
@@ -88,7 +85,6 @@ public class ExecuteFieldValidationCommandTest {
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.COMMAND_VALIDATE_FIELD);
     eeaEventVO.setData(data);
-    processesMap = new ConcurrentHashMap<>();
     MockitoAnnotations.initMocks(this);
   }
 
@@ -102,6 +98,12 @@ public class ExecuteFieldValidationCommandTest {
     assertEquals(EventType.COMMAND_VALIDATE_FIELD, executeFieldValidationCommand.getEventType());
   }
 
+  @Test
+  public void getNotificationEventType() {
+    assertEquals(EventType.COMMAND_VALIDATED_FIELD_COMPLETED,
+        executeFieldValidationCommand.getNotificationEventType());
+  }
+
   /**
    * Execute test.
    *
@@ -109,11 +111,9 @@ public class ExecuteFieldValidationCommandTest {
    */
   @Test
   public void executeTest() throws EEAException {
-    // self uuid
-    processesMap.put("uuid", 1);
     ReflectionTestUtils.setField(executeFieldValidationCommand, "fieldBatchSize", 20);
     doNothing().when(validationService).validateFields(Mockito.any(), Mockito.any(), Mockito.any());
-    Mockito.when(validationHelper.getProcessesMap()).thenReturn(new ConcurrentHashMap<>());
+    Mockito.when(validationHelper.isProcessCoordinator(Mockito.anyString())).thenReturn(false);
     executeFieldValidationCommand.execute(eeaEventVO);
 
     Mockito.verify(validationService, times(1)).validateFields(Mockito.any(), Mockito.any(),
@@ -132,7 +132,7 @@ public class ExecuteFieldValidationCommandTest {
     ReflectionTestUtils.setField(executeFieldValidationCommand, "fieldBatchSize", 20);
     doThrow(new EEAException()).when(validationService).validateFields(Mockito.any(), Mockito.any(),
         Mockito.any());
-    Mockito.when(validationHelper.getProcessesMap()).thenReturn(new ConcurrentHashMap<>());
+    Mockito.when(validationHelper.isProcessCoordinator(Mockito.anyString())).thenReturn(false);
     executeFieldValidationCommand.execute(eeaEventVO);
 
     Mockito.verify(validationService, times(1)).validateFields(Mockito.any(), Mockito.any(),
@@ -148,17 +148,14 @@ public class ExecuteFieldValidationCommandTest {
    */
   @Test
   public void executeTestContainsKey() throws EEAException {
-    processesMap.put("uuid", 1);
     ReflectionTestUtils.setField(executeFieldValidationCommand, "fieldBatchSize", 20);
     doNothing().when(validationService).validateFields(Mockito.any(), Mockito.any(), Mockito.any());
-    ConcurrentHashMap<String, Integer> processMap = new ConcurrentHashMap<>();
-    processMap.put("uuid", 1);
-    Mockito.when(validationHelper.getProcessesMap()).thenReturn(processMap);
+    Mockito.when(validationHelper.isProcessCoordinator(Mockito.anyString())).thenReturn(true);
     executeFieldValidationCommand.execute(eeaEventVO);
 
     Mockito.verify(validationService, times(1)).validateFields(Mockito.any(), Mockito.any(),
         Mockito.any());
-    Mockito.verify(validationHelper, times(1)).checkFinishedValidations(Mockito.any(),
+    Mockito.verify(validationHelper, times(1)).reducePendingTasks(Mockito.any(),
         Mockito.any());
   }
 }

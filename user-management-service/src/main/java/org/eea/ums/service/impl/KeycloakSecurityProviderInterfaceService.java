@@ -432,7 +432,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
               user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
           .findFirst();
     }
-    contributor.orElseThrow(() -> new EEAException("Error, user not found"));
+    if (!contributor.isPresent()) {
+      throw new EEAException("Error, user not found");
+    }
     if (contributor.isPresent()) {
       LOG.info("New contributor, the email and the group to be assigned is: {}, {}",
           contributor.get().getEmail(), groupName);

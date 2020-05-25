@@ -255,7 +255,10 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     TokenInfo tokenInfo = this.generateToken(adminUser, adminPass);
 
     String adminToken = Optional.ofNullable(tokenInfo).map(TokenInfo::getAccessToken).orElse("");
-    this.internalClientId = getReportnetClientInfo(adminToken).getId();
+    ClientInfo clientInfo = getReportnetClientInfo(adminToken);
+    if (clientInfo != null) {
+      this.internalClientId = clientInfo.getId();
+    }
     List<ResourceInfo> resources = this.getResourceInfo(adminToken);
     resourceTypes = new HashMap<>();
     resources.stream()
@@ -379,10 +382,10 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
       Boolean admin) {
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
     map.add("username", username);
-    map.add("grant_type", "password");
+    map.add(LiteralConstants.GRANT_TYPE, "password");
     map.add("password", password);
-    map.add("client_secret", secret);
-    map.add("client_id", clientId);
+    map.add(LiteralConstants.CLIENT_SECRET, secret);
+    map.add(LiteralConstants.CLIENT_ID, clientId);
     if (admin) {
       map.add("scope", "openid info offline_access");
     }
@@ -401,9 +404,9 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
     map.add("code", code);
-    map.add("grant_type", "authorization_code");
-    map.add("client_secret", secret);
-    map.add("client_id", clientId);
+    map.add(LiteralConstants.GRANT_TYPE, "authorization_code");
+    map.add(LiteralConstants.CLIENT_SECRET, secret);
+    map.add(LiteralConstants.CLIENT_ID, clientId);
     map.add("redirect_uri", redirectUri);
 
     return retrieveTokenFromKeycloak(map);
@@ -420,10 +423,10 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   @Override
   public TokenInfo refreshToken(String refreshToken) {
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-    map.add("refresh_token", refreshToken);
-    map.add("grant_type", "refresh_token");
-    map.add("client_secret", secret);
-    map.add("client_id", clientId);
+    map.add(LiteralConstants.REFRESH_TOKEN, refreshToken);
+    map.add(LiteralConstants.GRANT_TYPE, "refresh_token");
+    map.add(LiteralConstants.CLIENT_SECRET, secret);
+    map.add(LiteralConstants.CLIENT_ID, clientId);
 
     return retrieveTokenFromKeycloak(map);
   }
@@ -439,9 +442,9 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-    map.add("refresh_token", refreshToken);
-    map.add("client_secret", secret);
-    map.add("client_id", clientId);
+    map.add(LiteralConstants.REFRESH_TOKEN, refreshToken);
+    map.add(LiteralConstants.CLIENT_SECRET, secret);
+    map.add(LiteralConstants.CLIENT_ID, clientId);
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put(URI_PARAM_REALM, realmName);
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
