@@ -1,3 +1,4 @@
 import DataflowConfig from './Dataflow.web.config';
 import DataflowHelpConfig from './Dataflow.help.config';
-export { DataflowConfig, DataflowHelpConfig };
+import DataflowsHelpConfig from './Dataflows.help.config';
+export { DataflowConfig, DataflowHelpConfig, DataflowsHelpConfig };

@@ -6,6 +6,7 @@ import isNil from 'lodash/isNil';
 import styles from './Dataflows.module.scss';
 
 import { config } from 'conf';
+import { DataflowsHelpConfig } from 'conf/domain/model/Dataflow';
 
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { DataflowsList } from './_components/DataflowsList';
@@ -22,6 +23,8 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
+
+import { useHelpSteps } from 'ui/views/_functions/Hooks/useHelpSteps';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
@@ -75,40 +78,9 @@ const Dataflows = withRouter(({ match, history }) => {
     if (!isNil(user.contextRoles)) onLoadPermissions();
   }, [user]);
 
-  useEffect(() => {
-    const steps = [
-      {
-        content: <h2>{resources.messages['dataflowListHelp']}</h2>,
-        locale: { skip: <strong aria-label="skip">{resources.messages['skipHelp']}</strong> },
-        placement: 'center',
-        target: 'body'
-      },
-      {
-        content: <h2>{resources.messages['dataflowListHelpStep1']}</h2>,
-        target: '.dataflowList-help-step'
-      },
-      {
-        content: <h2>{resources.messages['dataflowListHelpStep2']}</h2>,
-        target: '.dataflowList-pending-help-step'
-      },
-      {
-        content: <h2>{resources.messages['dataflowListHelpStep3']}</h2>,
-        target: '.dataflowList-accepted-help-step'
-      },
-      {
-        content: <h2>{resources.messages['dataflowListHelpStep4']}</h2>,
-        target: '.dataflowList-delivery-date-help-step'
-      },
-      {
-        content: <h2>{resources.messages['dataflowListHelpStep5']}</h2>,
-        target: '.dataflowList-name-description-help-step'
-      },
-      {
-        content: <h2>{resources.messages['dataflowListHelpStep6']}</h2>,
-        target: '.dataflowList-status-help-step'
-      }
-    ];
+  useHelpSteps([], DataflowsHelpConfig, 'dataflowListHelp', ['isCustodian']);
 
+  useEffect(() => {
     if (dataflowsState.isCustodian) {
       leftSideBarContext.addModels([
         {
@@ -119,14 +91,9 @@ const Dataflows = withRouter(({ match, history }) => {
           title: 'createNewDataflow'
         }
       ]);
-      steps.push({
-        content: <h2>{resources.messages['dataflowListHelpStep7']}</h2>,
-        target: '.dataflowList-create-dataflow-help-step'
-      });
     } else {
       leftSideBarContext.removeModels();
     }
-    leftSideBarContext.addHelpSteps('dataflowListHelp', steps);
   }, [dataflowsState.isCustodian]);
 
   const dataFetch = async () => {
