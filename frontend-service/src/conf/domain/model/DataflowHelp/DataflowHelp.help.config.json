@@ -27,6 +27,14 @@
     {
       "content": "dataflowHelpHelpStep7",
       "target": ".dataflowHelp-document-icon-help-step"
+    },
+    {
+      "content": "dataflowHelpHelpStep8",
+      "target": ".dataflowHelp-weblink-upload-help-step"
+    },
+    {
+      "content": "dataflowHelpHelpStep9",
+      "target": ".dataflowHelp-datasetSchema-help-step"
     }
   ]
 }

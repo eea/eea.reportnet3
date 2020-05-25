@@ -24,8 +24,6 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 
-import { useHelpSteps } from 'ui/views/_functions/Hooks/useHelpSteps';
-
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
@@ -78,8 +76,6 @@ const Dataflows = withRouter(({ match, history }) => {
     if (!isNil(user.contextRoles)) onLoadPermissions();
   }, [user]);
 
-  useHelpSteps([], DataflowsHelpConfig, 'dataflowListHelp', ['isCustodian']);
-
   useEffect(() => {
     if (dataflowsState.isCustodian) {
       leftSideBarContext.addModels([
@@ -95,6 +91,10 @@ const Dataflows = withRouter(({ match, history }) => {
       leftSideBarContext.removeModels();
     }
   }, [dataflowsState.isCustodian]);
+
+  useEffect(() => {
+    leftSideBarContext.addHelpSteps(DataflowsHelpConfig, 'dataflowListHelp');
+  }, [dataflowsState]);
 
   const dataFetch = async () => {
     isLoading(true);

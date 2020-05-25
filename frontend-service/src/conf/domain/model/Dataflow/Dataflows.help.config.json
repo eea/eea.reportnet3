@@ -6,26 +6,24 @@
     },
     {
       "content": "dataflowListHelpStep2",
-      "target": ".dataflowList-pending-help-step"
+      "target": ".dataflowList-filters-help-step"
     },
     {
       "content": "dataflowListHelpStep3",
-      "target": ".dataflowList-accepted-help-step"
-    },
-    {
-      "content": "dataflowListHelpStep4",
       "target": ".dataflowList-delivery-date-help-step"
     },
     {
-      "content": "dataflowListHelpStep5",
+      "content": "dataflowListHelpStep4",
       "target": ".dataflowList-name-description-help-step"
+    },
+    {
+      "content": "dataflowListHelpStep5",
+      "target": ".dataflowList-obligation-description-help-step"
     },
     {
       "content": "dataflowListHelpStep6",
       "target": ".dataflowList-status-help-step"
-    }
-  ],
-  "isCustodian": [
+    },
     {
       "content": "dataflowListHelpStep7",
       "target": ".dataflowList-create-dataflow-help-step"

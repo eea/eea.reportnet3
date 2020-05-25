@@ -30,11 +30,11 @@
     },
     {
       "content": "dataflowHelpStep8",
-      "target": ".dataflow-edit-help-step"
+      "target": ".dataflow-properties-provider-help-step"
     },
     {
       "content": "dataflowHelpStep9",
-      "target": ".dataflow-manage-roles-help-step"
+      "target": ".dataflow-edit-help-step"
     },
     {
       "content": "dataflowHelpStep10",
@@ -42,7 +42,7 @@
     },
     {
       "content": "dataflowHelpStep11",
-      "target": ".dataflow-properties-provider-help-step"
+      "target": ".dataflow-manage-roles-help-step"
     }
   ]
 }

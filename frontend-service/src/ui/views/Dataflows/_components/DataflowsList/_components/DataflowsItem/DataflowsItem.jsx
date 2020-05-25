@@ -110,7 +110,7 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
       </div>
 
       <div className={`${styles.obligation} `}>
-        <p>
+        <p className="dataflowList-obligation-description-help-step">
           {!isNil(itemContent.legalInstrument) ? (
             <>
               <span>{`${resources.messages['legalInstrumentDataflowItem']}:`}</span> {itemContent.legalInstrument}

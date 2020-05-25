@@ -92,19 +92,31 @@ const Dataflow = withRouter(({ history, match }) => {
     if (!isNil(user.contextRoles)) onLoadPermission();
   }, [user]);
 
-  useHelpSteps(
-    [
-      dataflowState.data,
-      dataflowState.designDatasetSchemas,
-      dataflowState.formHasRepresentatives,
-      dataflowState.isCustodian,
-      dataflowState.isDataSchemaCorrect,
-      dataflowState.status,
-      dataflowState.id
-    ],
-    DataflowHelpConfig,
-    'dataflowHelp'
-  );
+  useEffect(() => {
+    leftSideBarContext.addHelpSteps(DataflowHelpConfig, 'dataflowHelp');
+  }, [
+    dataflowState.data,
+    dataflowState.designDatasetSchemas,
+    dataflowState.formHasRepresentatives,
+    dataflowState.isCustodian,
+    dataflowState.isDataSchemaCorrect,
+    dataflowState.status,
+    dataflowState.id
+  ]);
+
+  // useHelpSteps(
+  //   [
+  //     dataflowState.data,
+  //     dataflowState.designDatasetSchemas,
+  //     dataflowState.formHasRepresentatives,
+  //     dataflowState.isCustodian,
+  //     dataflowState.isDataSchemaCorrect,
+  //     dataflowState.status,
+  //     dataflowState.id
+  //   ],
+  //   DataflowHelpConfig,
+  //   'dataflowHelp'
+  // );
 
   //Bread Crumbs settings
   useEffect(() => {
