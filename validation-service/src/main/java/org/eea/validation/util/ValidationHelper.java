@@ -81,10 +81,10 @@ public class ValidationHelper {
   @Value("${validation.recordBatchSize}")
   private int recordBatchSize;
 
-  @Value("${validation.tasks.release.tax")
+  @Value("${validation.tasks.release.tax}")
   private int taskReleasedTax;
 
-  @Value("${validation.tasks.initial.tax")
+  @Value("${validation.tasks.initial.tax}")
   private int initialTax;
 
   /**
