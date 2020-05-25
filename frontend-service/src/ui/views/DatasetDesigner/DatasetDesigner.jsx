@@ -299,16 +299,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const renderActionButtonsValidationDialog = (
     <Fragment>
-      {/*  <Button
+      <Button
         className="p-button-primary p-button-animated-blink"
-        
         icon={'plus'}
         label={resources.messages['createRowValidationBtn']}
         onClick={() => {
           validationContext.onOpenModalFromOpener('row', 'validationsListDialog');
           onHideValidationsDialog();
         }}
-      /> */}
+      />
       <Button
         className="p-button-primary p-button-animated-blink"
         icon={'plus'}

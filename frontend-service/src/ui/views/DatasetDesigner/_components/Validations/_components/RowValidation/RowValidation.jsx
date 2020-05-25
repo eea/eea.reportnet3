@@ -12,6 +12,7 @@ import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InfoTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/InfoTab';
 import { ExpressionsTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionsTab';
+import { ExpressionSelector } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionSelector';
 import ReactTooltip from 'react-tooltip';
 import { TabView, TabPanel } from 'primereact/tabview';
 
@@ -91,17 +92,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
           header={resourcesContext.messages.tabMenuExpression}
           leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}
           headerClassName={showErrorOnExpressionTab ? styles.error : ''}>
-          <ExpressionsTab
-            componentName={componentName}
-            creationFormState={creationFormState}
-            onExpressionDelete={onExpressionDelete}
-            onExpressionFieldUpdate={onExpressionFieldUpdate}
-            onExpressionGroup={onExpressionGroup}
-            onExpressionMarkToGroup={onExpressionMarkToGroup}
-            tabsChanges={tabsChanges}
-            onAddNewExpression={onAddNewExpression}
-            onExpressionsErrors={onExpressionsErrors}
-          />
+          <ExpressionSelector creationFormState={creationFormState} onExpressionTypeToggle={onExpressionTypeToggle} />
         </TabPanel>
       ]);
     } else {
@@ -412,6 +403,13 @@ export const RowValidation = ({ datasetId, tabs }) => {
     setExpressionsErrors({
       ...expressionsErrors,
       [expression]: value
+    });
+  };
+
+  const onExpressionTypeToggle = expressionType => {
+    creationFormDispatch({
+      type: 'ON_EXPRESSION_TYPE_TOGGLE',
+      payload: expressionType
     });
   };
 

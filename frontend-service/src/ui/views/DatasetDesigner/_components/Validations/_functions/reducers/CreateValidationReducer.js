@@ -9,7 +9,8 @@ export const createValidationReducerInitState = {
     active: true,
     expressions: [],
     allExpressions: [],
-    allGroups: []
+    allGroups: [],
+    expressionType: ''
   },
   datasetSchema: {},
   schemaTables: [],
@@ -164,6 +165,14 @@ export const createValidationReducer = (state, { type, payload }) => {
           active: payload.enabled,
           expressions: payload.expressions,
           allExpressions: payload.allExpressions
+        }
+      };
+    case 'ON_EXPRESSION_TYPE_TOGGLE':
+      return {
+        ...state,
+        candidateRule: {
+          ...state.candidateRule,
+          expressionType: payload
         }
       };
     default:
