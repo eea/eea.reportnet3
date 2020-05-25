@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -137,7 +138,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
 
     EeaDataSource ds = new EeaDataSource();
     ds.setUrl(connectionDataVO.getConnectionString());
-    //set validation microservice credentials
+    // set validation microservice credentials
     ds.setUsername(this.username);
     ds.setPassword(this.password);
     ds.setDriverClassName("org.postgresql.Driver");
@@ -199,5 +200,13 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     return schemastransactionManager;
   }
 
+  @Bean
+  public LocalSessionFactoryBean sessionFactory() {
+    LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
+    sessionFactory.setDataSource(datasetDataSource());
+    sessionFactory.setPackagesToScan("org.eea.validation.persistence.data.domain");
+    sessionFactory.setHibernateProperties(additionalProperties());
 
+    return sessionFactory;
+  }
 }

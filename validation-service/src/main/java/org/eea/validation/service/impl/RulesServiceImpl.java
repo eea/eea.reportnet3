@@ -89,7 +89,7 @@ public class RulesServiceImpl implements RulesService {
    * Gets the rules schema by dataset id.
    *
    * @param datasetSchemaId the dataset schema id
-   * 
+   *
    * @return the rules schema by dataset id
    */
   @Override
@@ -574,6 +574,13 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
+  /**
+   * Creates the unique constraint.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @param uniqueId the unique id
+   */
   @Override
   public void createUniqueConstraint(String datasetSchemaId, String tableSchemaId,
       String uniqueId) {
@@ -584,9 +591,15 @@ public class RulesServiceImpl implements RulesService {
     rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
   }
 
+  /**
+   * Delete unique constraint.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param uniqueId the unique id
+   */
   @Override
   public void deleteUniqueConstraint(String datasetSchemaId, String uniqueId) {
-    boolean dato = rulesRepository.deleteByUniqueConstraintId(new ObjectId(datasetSchemaId),
+    rulesRepository.deleteByUniqueConstraintId(new ObjectId(datasetSchemaId),
         new ObjectId(uniqueId));
   }
 }

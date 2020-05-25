@@ -40,7 +40,9 @@ public class UniqueValidationUtils {
    */
   private static SchemasRepository schemasRepository;
 
-  /** The record repository. */
+  /**
+   * The record repository.
+   */
   private static RecordRepository recordRepository;
 
   /**
@@ -85,6 +87,11 @@ public class UniqueValidationUtils {
     UniqueValidationUtils.recordRepository = recordRepository;
   }
 
+  /**
+   * Sets the data set schema controller zuul.
+   *
+   * @param dataSetSchemaControllerZuul the new data set schema controller zuul
+   */
   @Autowired
   private void setDataSetSchemaControllerZuul(
       DataSetSchemaControllerZuul dataSetSchemaControllerZuul) {
@@ -213,6 +220,10 @@ public class UniqueValidationUtils {
     // Get Schema
     String schemaId = uniqueConstraint.getDatasetSchemaId();
     schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
+
+    List<RecordValue> duplicatedRecords =
+        recordRepository.getDuplicatedRecordsByFields(uniqueConstraint.getFieldSchemaIds());
+    duplicatedRecords.size();
 
     // get Orig name
     // TableSchema origname = getTableSchemaFromIdFieldSchema(datasetSchema, idFieldSchema);
