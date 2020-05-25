@@ -333,10 +333,16 @@ const DataViewer = withRouter(
         if (field.fieldData.type === 'MULTISELECT_CODELIST') {
           if (
             !isNil(field.fieldData[field.fieldData.fieldSchemaId]) &&
-            field.fieldData[field.fieldData.fieldSchemaId] !== '' &&
-            Array.isArray(field.fieldData[field.fieldData.fieldSchemaId])
+            field.fieldData[field.fieldData.fieldSchemaId] !== ''
           ) {
-            field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(',');
+            if (Array.isArray(field.fieldData[field.fieldData.fieldSchemaId])) {
+              field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(',');
+            } else {
+              field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId]
+                .split(',')
+                .map(item => item.trim())
+                .join(',');
+            }
           }
         }
       });
