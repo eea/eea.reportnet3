@@ -39,7 +39,6 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';
 
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
-import { useHelpSteps } from 'ui/views/_functions/Hooks/useHelpSteps';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
@@ -103,20 +102,6 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowState.status,
     dataflowState.id
   ]);
-
-  // useHelpSteps(
-  //   [
-  //     dataflowState.data,
-  //     dataflowState.designDatasetSchemas,
-  //     dataflowState.formHasRepresentatives,
-  //     dataflowState.isCustodian,
-  //     dataflowState.isDataSchemaCorrect,
-  //     dataflowState.status,
-  //     dataflowState.id
-  //   ],
-  //   DataflowHelpConfig,
-  //   'dataflowHelp'
-  // );
 
   //Bread Crumbs settings
   useEffect(() => {
