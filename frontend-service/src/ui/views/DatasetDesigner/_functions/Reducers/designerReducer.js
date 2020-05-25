@@ -16,6 +16,9 @@ export const designerReducer = (state, { type, payload }) => {
         metaData: payload.metaData
       };
 
+    case 'GET_UNIQUES':
+      return { ...state, uniqueConstraintsList: payload.data };
+
     case 'INITIAL_DATASET_DESCRIPTION':
       return { ...state, initialDatasetDescription: payload.value };
 

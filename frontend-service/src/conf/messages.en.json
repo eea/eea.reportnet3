@@ -661,6 +661,9 @@
     "editUniqueConstraint": "Edit unique constraint",
     "createUniqueConstraint": "Create unique constraint",
     "noFieldsToSelect": "There are no fields to select",
-    "noTableSelected": "Please, select a table first"
+    "noTableSelected": "Please, select a table first",
+    "duplicatedUniqueConstraint": "The unique constraint already exists",
+    "selectUniqueFieldsTitle": "Select unique fields",
+    "selectUniqueTableTitle": "Select a table"
   }
 }

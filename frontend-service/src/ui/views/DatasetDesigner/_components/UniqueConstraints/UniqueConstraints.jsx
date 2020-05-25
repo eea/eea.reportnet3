@@ -20,7 +20,7 @@ import { constraintsReducer } from './_functions/Reducers/constraintsReducer';
 
 import { UniqueConstraintsUtils } from './_functions/Utils/UniqueConstraintsUtils';
 
-export const UniqueConstraints = ({ designerState, getManageUniqueConstraint, manageDialogs }) => {
+export const UniqueConstraints = ({ designerState, getManageUniqueConstraint, getUniques, manageDialogs }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -31,16 +31,22 @@ export const UniqueConstraints = ({ designerState, getManageUniqueConstraint, ma
   } = designerState;
 
   const [constraintsState, constraintsDispatch] = useReducer(constraintsReducer, {
-    data: {},
+    data: [],
     filteredData: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
     isLoading: true
   });
 
+  // console.log('constraintsState', constraintsState);
+
   useEffect(() => {
     onLoadConstraints();
   }, [constraintsState.isDataUpdated]);
+
+  useEffect(() => {
+    if (getUniques) getUniques(constraintsState.data);
+  }, [constraintsState.data]);
 
   const actionsTemplate = () => (
     <ActionsColumn

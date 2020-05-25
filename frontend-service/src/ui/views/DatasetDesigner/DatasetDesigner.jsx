@@ -79,6 +79,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     },
     metaData: {},
     refresh: false,
+    uniqueConstraintsList: [],
     validateDialogVisible: false,
     validationListDialogVisible: false
   });
@@ -177,6 +178,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       isLoading(false);
     }
   };
+
+  const getUniqueConstraintsList = data => designerDispatch({ type: 'GET_UNIQUES', payload: { data } });
 
   const isLoading = value => designerDispatch({ type: 'IS_LOADING', payload: { value } });
 
@@ -359,6 +362,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       <UniqueConstraints
         designerState={designerState}
         getManageUniqueConstraint={manageUniqueConstraint}
+        getUniques={getUniqueConstraintsList}
         manageDialogs={manageDialogs}
       />
     </Dialog>

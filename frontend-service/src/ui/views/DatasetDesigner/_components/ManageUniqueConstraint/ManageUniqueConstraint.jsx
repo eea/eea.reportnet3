@@ -1,6 +1,8 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
+import ReactTooltip from 'react-tooltip';
 
 import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
 import isNil from 'lodash/isNil';
 
 import styles from './ManageUniqueConstraint.module.scss';
@@ -22,11 +24,13 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
     datasetSchemaAllTables,
     datasetSchemaId,
     isManageUniqueConstraintDialogVisible,
-    manageUniqueConstraintData
+    manageUniqueConstraintData,
+    uniqueConstraintsList
   } = designerState;
 
   const { fieldData, isTableCreationMode, tableSchemaId, tableSchemaName, uniqueId } = manageUniqueConstraintData;
 
+  const [isDuplicated, setIsDuplicated] = useState(false);
   const [selectedFields, setSelectedFields] = useState([]);
   const [selectedTable, setSelectedTable] = useState({ name: '', value: null });
 
@@ -44,6 +48,22 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
   useEffect(() => {
     getFieldOptions();
   }, [selectedTable]);
+
+  useEffect(() => {
+    if (!isEmpty(uniqueConstraintsList)) setIsDuplicated(checkDuplicates());
+  }, [selectedFields]);
+
+  const checkDuplicates = () => {
+    const updatedFields = fieldData.map(field => field.fieldId);
+    const totalFields = uniqueConstraintsList.map(unique => unique.fieldData.map(item => item.fieldId));
+    const filteredFields = totalFields.filter(field => !isEqual(field.sort(), updatedFields.sort()));
+    const fields = selectedFields.map(field => field.value);
+    const duplicated = [];
+    for (let index = 0; index < filteredFields.length; index++) {
+      duplicated.push(isEqual(filteredFields[index].sort(), fields.sort()));
+    }
+    return duplicated.includes(true);
+  };
 
   const getTableOptions = () => {
     const tables = datasetSchemaAllTables.filter(table => table.index >= 0);
@@ -123,13 +143,15 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
 
   const renderFooter = (
     <Fragment>
-      <Button
-        className="p-button-primary p-button-animated-blink"
-        disabled={isEmpty(selectedFields)}
-        icon={!isNil(uniqueId) ? 'check' : 'plus'}
-        label={!isNil(uniqueId) ? resources.messages['edit'] : resources.messages['create']}
-        onClick={() => (!isNil(uniqueId) ? onUpdateConstraint() : onCreateConstraint())}
-      />
+      <span data-tip data-for="createTooltip">
+        <Button
+          className="p-button-primary p-button-animated-blink"
+          disabled={isEmpty(selectedFields) || isDuplicated}
+          icon={!isNil(uniqueId) ? 'check' : 'plus'}
+          label={!isNil(uniqueId) ? resources.messages['edit'] : resources.messages['create']}
+          onClick={() => (!isNil(uniqueId) ? onUpdateConstraint() : onCreateConstraint())}
+        />
+      </span>
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
@@ -139,6 +161,11 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
           onResetValues();
         }}
       />
+      {isDuplicated && (
+        <ReactTooltip effect="solid" id="createTooltip" place="top">
+          {resources.messages['duplicatedUniqueConstraint']}
+        </ReactTooltip>
+      )}
     </Fragment>
   );
 
@@ -151,7 +178,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
       optionLabel="name"
       options={getTableOptions()}
       optionValue="value"
-      title={'Select a table'}
+      title={resources.messages['selectUniqueTableTitle']}
       value={selectedTable}
     />
   );
@@ -165,7 +192,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
       optionLabel="name"
       options={getFieldOptions()}
       optionValue="value"
-      title={'Select unique fields'}
+      title={resources.messages['selectUniqueFieldsTitle']}
       value={selectedFields}
     />
   );
