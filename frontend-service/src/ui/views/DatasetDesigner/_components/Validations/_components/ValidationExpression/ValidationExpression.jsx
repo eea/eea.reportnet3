@@ -146,7 +146,7 @@ const ValidationExpression = ({
   const checkField = (field, fieldValue) => {
     if (field === 'year') {
       const yearInt = parseInt(fieldValue);
-      if (yearInt < 1900 || yearInt > 2500) {
+      if (yearInt < 1000 || yearInt > 9999) {
         onUpdateExpressionField('expressionValue', 0);
       }
     }
