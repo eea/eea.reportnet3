@@ -329,9 +329,12 @@ public class ValidationHelper {
             tasksToBeSent--;
           }
           LOG.info(
-              "Sent next tasks for process {}. There are still {} tasks to be sent and {} pending Ok's to be received",
-              processId, processesMap.get(processId).getPendingValidations().size(), pendingOk);
+              "Sent next tasks for process {}",
+              processId);
         }
+        LOG.info(
+            "There are still {} tasks to be sent and {} pending Ok's to be received",
+            processesMap.get(processId).getPendingValidations().size(), pendingOk);
       }
     }
   }
