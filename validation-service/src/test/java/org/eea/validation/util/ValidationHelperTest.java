@@ -139,6 +139,7 @@ public class ValidationHelperTest {
   public void executeValidation() {
     ReflectionTestUtils.setField(validationHelper, "fieldBatchSize", 20);
     ReflectionTestUtils.setField(validationHelper, "recordBatchSize", 20);
+    ReflectionTestUtils.setField(validationHelper, "initialTax", 2);
     List<TableValue> tables = new ArrayList<>();
     TableValue table = new TableValue();
     table.setId(1l);
@@ -158,7 +159,7 @@ public class ValidationHelperTest {
 
     validationHelper.executeValidation(1l, "1");
     Mockito.verify(validationService, Mockito.times(1)).deleteAllValidation(Mockito.eq(1l));
-    Mockito.verify(kafkaSenderUtils, Mockito.times(1))
+    Mockito.verify(kafkaSenderUtils, Mockito.times(2))
         .releaseKafkaEvent(Mockito.any(EEAEventVO.class));
   }
 
@@ -214,9 +215,30 @@ public class ValidationHelperTest {
 
     processesMap.put("1", new ValidationProcessVO(2, pendingValidations, null, true));
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
+    ReflectionTestUtils.setField(validationHelper, "taskReleasedTax", 2);
 
     validationHelper.reducePendingTasks(1l, "1");
     Mockito.verify(kafkaSenderUtils, Mockito.times(1))
+        .releaseKafkaEvent(Mockito.eq(eeaEventVO));
+    //Checking that no VALIDATION_FINISHED_EVENT message has been sent since process is not over yet
+    Mockito.verify(kafkaSenderUtils, Mockito.times(0))
+        .releaseNotificableKafkaEvent(Mockito.eq(EventType.VALIDATION_FINISHED_EVENT),
+            Mockito.anyMap(), Mockito.any(
+                NotificationVO.class));
+    Assert.assertNotNull(processesMap.get("1"));
+  }
+
+  @Test
+  public void reducePendingTasksProcessNotFinishedSendSeveralTasks() throws EEAException {
+    Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
+    pendingValidations.add(eeaEventVO);
+    pendingValidations.add(eeaEventVO);
+    processesMap.put("1", new ValidationProcessVO(2, pendingValidations, null, true));
+    ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
+    ReflectionTestUtils.setField(validationHelper, "taskReleasedTax", 2);
+
+    validationHelper.reducePendingTasks(1l, "1");
+    Mockito.verify(kafkaSenderUtils, Mockito.times(2))
         .releaseKafkaEvent(Mockito.eq(eeaEventVO));
     //Checking that no VALIDATION_FINISHED_EVENT message has been sent since process is not over yet
     Mockito.verify(kafkaSenderUtils, Mockito.times(0))

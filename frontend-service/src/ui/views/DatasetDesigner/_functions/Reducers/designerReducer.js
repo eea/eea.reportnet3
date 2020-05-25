@@ -31,6 +31,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'MANAGE_DIALOGS':
       return { ...state, [payload.dialog]: payload.value, [payload.secondDialog]: payload.secondValue };
 
+    case 'MANAGE_UNIQUE_CONSTRAINT_DATA':
+      return { ...state, manageUniqueConstraintData: payload.data };
+
     case 'ON_UPDATE_DESCRIPTION':
       return { ...state, datasetDescription: payload.value };
 

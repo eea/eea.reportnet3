@@ -103,25 +103,25 @@ const ListBox = ({
   const onOptionClickMultiple = (event, option) => {
     let selected = isSelected(option);
     let valueChanged = false;
-    let value = null;
+    let values = null;
     let metaSelection = optionTouched ? false : metaKeySelection;
 
     if (metaSelection) {
       let metaKey = event.metaKey || event.ctrlKey;
 
       if (selected) {
-        if (metaKey) value = removeOption(option);
-        else value = [getOptionValue(option)];
+        if (metaKey) values = removeOption(option);
+        else values = [getOptionValue(option)];
 
         valueChanged = true;
       } else {
-        value = metaKey ? value || [] : [];
-        value = [...value, getOptionValue(option)];
+        values = metaKey ? value || [] : [];
+        values = [...values, getOptionValue(option)];
         valueChanged = true;
       }
     } else {
-      if (selected) value = removeOption(option);
-      else value = [...(value || []), getOptionValue(option)];
+      if (selected) values = removeOption(option);
+      else values = [...(value || []), getOptionValue(option)];
 
       valueChanged = true;
     }
@@ -129,13 +129,13 @@ const ListBox = ({
     if (valueChanged) {
       onChange({
         originalEvent: event,
-        value: value,
+        value: values,
         stopPropagation: () => {},
         preventDefault: () => {},
         target: {
           name,
           id,
-          value
+          value: values
         }
       });
     }

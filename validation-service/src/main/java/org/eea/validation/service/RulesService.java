@@ -133,7 +133,8 @@ public interface RulesService {
    *
    * @param datasetId the dataset id
    * @param ruleVO the rule VO
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   void updateAutomaticRule(long datasetId, RuleVO ruleVO) throws EEAException;
+
 }

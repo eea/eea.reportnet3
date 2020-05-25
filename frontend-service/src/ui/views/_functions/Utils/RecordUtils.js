@@ -1,3 +1,4 @@
+import intersection from 'lodash/intersection';
 import isEqual from 'lodash/isEqual';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -130,7 +131,11 @@ const getLinkValue = (linkOptions, value) => {
 
 const getMultiselectValues = (multiselectItemsOptions, value) => {
   if (!isUndefined(value) && !isUndefined(value[0])) {
-    return multiselectItemsOptions.filter(item => value.includes(item.value)).map(item => item.value);
+    const splittedValue = !Array.isArray(value) ? value.split(',').map(item => item.trim()) : value;
+    return intersection(
+      splittedValue,
+      multiselectItemsOptions.map(item => item.value)
+    );
   }
 };
 

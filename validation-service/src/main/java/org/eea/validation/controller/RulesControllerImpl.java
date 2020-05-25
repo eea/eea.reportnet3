@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -106,7 +105,6 @@ public class RulesControllerImpl implements RulesController {
    * Delete rule by id.
    *
    * @param datasetId the dataset id
-   * @param datasetSchemaId the dataset schema id
    * @param ruleId the rule id
    */
   @Override
@@ -126,7 +124,6 @@ public class RulesControllerImpl implements RulesController {
   /**
    * Delete rule by reference id.
    *
-   * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
    */
@@ -157,20 +154,11 @@ public class RulesControllerImpl implements RulesController {
         referenceFieldSchemaPKId, datasetSchemaId);
   }
 
-  /**
-   * Creates the new rule.
-   *
-   * @param datasetId the dataset id
-   * @param ruleVO the rule VO
-   */
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   @PutMapping("/createNewRule")
-  public ResponseEntity createNewRule(@RequestParam("datasetId") long datasetId,
-      @RequestBody RuleVO ruleVO) {
-    String message = "";
-    HttpStatus status = HttpStatus.OK;
+  public void createNewRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO) {
     try {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
@@ -178,12 +166,13 @@ public class RulesControllerImpl implements RulesController {
 
       rulesService.createNewRule(datasetId, ruleVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error creating rule: {}", e.getMessage());
-      message = e.getMessage();
-      status = HttpStatus.BAD_REQUEST;
+      LOG_ERROR.error(
+          "Error creating rule: {} - referenceId={} - description={} - ruleName={} - whenCondition={} - thenCondition={} - shortCode={} - type={}",
+          e.getMessage(), ruleVO.getReferenceId(), ruleVO.getDescription(), ruleVO.getRuleName(),
+          ruleVO.getWhenCondition(), ruleVO.getThenCondition(), ruleVO.getShortCode(),
+          ruleVO.getType(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
-
-    return new ResponseEntity<>(message, status);
   }
 
   /**
@@ -193,6 +182,7 @@ public class RulesControllerImpl implements RulesController {
    * @param referenceId the reference id
    * @param typeData the type data
    * @param typeEntityEnum the type entity enum
+   * @param datasetId the dataset id
    * @param requiredRule the required rule
    */
   @Override
@@ -244,7 +234,11 @@ public class RulesControllerImpl implements RulesController {
 
       rulesService.updateRule(datasetId, ruleVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error updating rule: {}", e.getMessage());
+      LOG_ERROR.error(
+          "Error updating rule: {} - ruleId={} - referenceId={} - description={} - ruleName={} - whenCondition={} - thenCondition={} - shortCode={} - type={}",
+          e.getMessage(), ruleVO.getRuleId(), ruleVO.getReferenceId(), ruleVO.getDescription(),
+          ruleVO.getRuleName(), ruleVO.getWhenCondition(), ruleVO.getThenCondition(),
+          ruleVO.getShortCode(), ruleVO.getType(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
