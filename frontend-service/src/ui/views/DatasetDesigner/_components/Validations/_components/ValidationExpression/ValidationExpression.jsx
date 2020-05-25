@@ -121,6 +121,7 @@ const ValidationExpression = ({
   };
 
   const onUpdateExpressionField = (key, value) => {
+    checkField(key, value.value);
     onDeleteFromClickedFields(key);
     onExpressionFieldUpdate(expressionId, {
       key,
@@ -142,14 +143,22 @@ const ValidationExpression = ({
       setClickedFields(cClickedFields);
     }
   };
-  const checkYearFormat = yearValue => {
-    const yearInt = parseInt(yearValue);
-    if (yearInt < 1900 || yearInt > 2500) {
-      onUpdateExpressionField('expressionValue', 0);
+  const checkField = (field, fieldValue) => {
+    if (field === 'year') {
+      const yearInt = parseInt(fieldValue);
+      if (yearInt < 1900 || yearInt > 2500) {
+        onUpdateExpressionField('expressionValue', 0);
+      }
+    }
+    if (expressionValues.operatorType === 'number' && field === 'operatorValue' && fieldValue !== 'MATCH') {
+      const number = Number(fieldValue);
+      if (!number) {
+        onUpdateExpressionField('expressionValue', '');
+      }
     }
   };
   const buildValueInput = () => {
-    const { operatorType } = expressionValues;
+    const { operatorType, operatorValue } = expressionValues;
     if (operatorType === 'date') {
       return (
         <Calendar
@@ -182,6 +191,16 @@ const ValidationExpression = ({
       );
     }
     if (operatorType === 'number') {
+      if (operatorValue === 'MATCH') {
+        return (
+          <InputText
+            disabled={isDisabled}
+            placeholder={resourcesContext.messages.value}
+            value={expressionValues.expressionValue}
+            onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
+          />
+        );
+      }
       return (
         <InputNumber
           disabled={isDisabled}
@@ -192,6 +211,9 @@ const ValidationExpression = ({
           format={false}
           useGrouping={false}
           mode="decimal"
+          onBlur={e => {
+            checkField('number', e.target.value);
+          }}
         />
       );
     }
@@ -203,7 +225,7 @@ const ValidationExpression = ({
           value={expressionValues.expressionValue}
           onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
           onBlur={e => {
-            checkYearFormat(e.target.value);
+            checkField('year', e.target.value);
           }}
           steps={0}
           useGrouping={false}
@@ -294,28 +316,6 @@ const ValidationExpression = ({
       <span
         onBlur={e => onAddToClickedFields('expressionValue')}
         className={`${styles.expressionValue} formField ${printRequiredFieldError('expressionValue')}`}>
-        {/* {expressionValues.operatorType === 'date' ? (
-          <Calendar
-            appendTo={document.body}
-            baseZIndex={6000}
-            dateFormat="yy-mm-dd"
-            placeholder="YYYY-MM-DD"
-            monthNavigator={true}
-            readOnlyInput={false}
-            onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
-            value={expressionValues.expressionValue}
-            yearNavigator={true}
-            yearRange="1900:2500"></Calendar>
-        ) : expression.operatorType === ''(
-          <InputText
-            disabled={isDisabled}
-            placeholder={resourcesContext.messages.value}
-            value={expressionValues.expressionValue}
-            onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
-            keyfilter={valueKeyFilter}
-            {...valueInputProps}
-          />
-        )} */}
         {buildValueInput()}
       </span>
       <span>
