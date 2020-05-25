@@ -11,6 +11,7 @@ import { Calendar } from 'ui/views/_components/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import { InputNumber } from 'primereact/inputnumber';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import isNil from 'lodash/isNil';
@@ -32,6 +33,8 @@ const ValidationExpression = ({
   const [operatorValues, setOperatorValues] = useState([]);
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [clickedFields, setClickedFields] = useState([]);
+  const [valueInputProps, setValueInputProps] = useState();
+  const [valueKeyFilter, setValueKeyFilter] = useState();
   const {
     validations: { operatorTypes: operatorTypesConf, operatorByType }
   } = config;
@@ -56,6 +59,30 @@ const ValidationExpression = ({
     }
     setOperatorTypes(options);
   }, [fieldType]);
+
+  useEffect(() => {
+    const { operatorType } = expressionValues;
+    const cValueProps = { steps: 0, format: false, useGrouping: false };
+    if (operatorType === 'number' || operatorType === 'LEN') {
+      setValueKeyFilter('num');
+    }
+
+    if (fieldType === 'DATE') {
+      if (operatorType === 'year') {
+        cValueProps.min = 1900;
+        cValueProps.max = 2500;
+      }
+      if (operatorType === 'month') {
+        cValueProps.min = 1;
+        cValueProps.max = 12;
+      }
+      if (operatorType === 'day') {
+        cValueProps.min = 1;
+        cValueProps.max = 31;
+      }
+      setValueInputProps(cValueProps);
+    }
+  }, [expressionValues.operatorType]);
 
   useEffect(() => {
     if (showRequiredFields) {
@@ -115,6 +142,101 @@ const ValidationExpression = ({
       setClickedFields(cClickedFields);
     }
   };
+  const checkYearFormat = yearValue => {
+    const yearInt = parseInt(yearValue);
+    if (yearInt < 1900 || yearInt > 2500) {
+      onUpdateExpressionField('expressionValue', 0);
+    }
+  };
+  const buildValueInput = () => {
+    const { operatorType } = expressionValues;
+    if (operatorType === 'date') {
+      return (
+        <Calendar
+          appendTo={document.body}
+          baseZIndex={6000}
+          dateFormat="yy-mm-dd"
+          placeholder="YYYY-MM-DD"
+          monthNavigator={true}
+          readOnlyInput={false}
+          onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
+          value={expressionValues.expressionValue}
+          yearNavigator={true}
+          yearRange="1900:2500"></Calendar>
+      );
+    }
+    if (operatorType === 'day') {
+      return (
+        <InputNumber
+          disabled={isDisabled}
+          placeholder={resourcesContext.messages.value}
+          value={expressionValues.expressionValue}
+          onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
+          steps={0}
+          format={false}
+          useGrouping={false}
+          min={0}
+          max={32}
+          mode="decimal"
+        />
+      );
+    }
+    if (operatorType === 'number') {
+      return (
+        <InputNumber
+          disabled={isDisabled}
+          placeholder={resourcesContext.messages.value}
+          value={expressionValues.expressionValue}
+          onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
+          steps={0}
+          format={false}
+          useGrouping={false}
+          mode="decimal"
+        />
+      );
+    }
+    if (operatorType === 'year') {
+      return (
+        <InputNumber
+          disabled={isDisabled}
+          placeholder={resourcesContext.messages.value}
+          value={expressionValues.expressionValue}
+          onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
+          onBlur={e => {
+            checkYearFormat(e.target.value);
+          }}
+          steps={0}
+          useGrouping={false}
+          mode="decimal"
+        />
+      );
+    }
+    if (operatorType === 'month') {
+      return (
+        <InputNumber
+          disabled={isDisabled}
+          placeholder={resourcesContext.messages.value}
+          value={expressionValues.expressionValue}
+          onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
+          steps={0}
+          format={false}
+          useGrouping={false}
+          min={0}
+          max={13}
+          mode="decimal"
+        />
+      );
+    }
+    return (
+      <InputText
+        disabled={isDisabled}
+        placeholder={resourcesContext.messages.value}
+        value={expressionValues.expressionValue}
+        onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
+        keyfilter={valueKeyFilter}
+      />
+    );
+  };
 
   // layouts
   const defaultLayout = (
@@ -172,7 +294,7 @@ const ValidationExpression = ({
       <span
         onBlur={e => onAddToClickedFields('expressionValue')}
         className={`${styles.expressionValue} formField ${printRequiredFieldError('expressionValue')}`}>
-        {expressionValues.operatorType == 'date' ? (
+        {/* {expressionValues.operatorType === 'date' ? (
           <Calendar
             appendTo={document.body}
             baseZIndex={6000}
@@ -184,15 +306,17 @@ const ValidationExpression = ({
             value={expressionValues.expressionValue}
             yearNavigator={true}
             yearRange="1900:2500"></Calendar>
-        ) : (
+        ) : expression.operatorType === ''(
           <InputText
             disabled={isDisabled}
             placeholder={resourcesContext.messages.value}
             value={expressionValues.expressionValue}
-            keyfilter={expressionValues.operatorType == 'LEN' || expressionValues.operatorType == 'number' ? 'num' : ''}
             onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
+            keyfilter={valueKeyFilter}
+            {...valueInputProps}
           />
-        )}
+        )} */}
+        {buildValueInput()}
       </span>
       <span>
         <Button
