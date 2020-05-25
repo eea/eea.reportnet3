@@ -144,7 +144,10 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
 
   const renderListBox = () => (
     <ListBox
-      onChange={event => !isNil(event.value) && setSelectedTable(event.value)}
+      onChange={event => {
+        !isNil(event.value) && setSelectedTable(event.value);
+        setSelectedFields([]);
+      }}
       optionLabel="name"
       options={getTableOptions()}
       optionValue="value"
