@@ -4,9 +4,13 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Calendar } from 'ui/views/_components/Calendar';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'ui/views/_components/InputText';
+import { Map } from 'ui/views/_components/Map';
 import { MultiSelect } from 'primereact/multiselect';
 
 import { DatasetService } from 'core/services/Dataset';
@@ -23,13 +27,13 @@ const FieldEditor = ({
   onEditorSubmitValue,
   onEditorValueChange,
   onEditorValueFocus,
+  onMapOpen,
   record
 }) => {
   const resources = useContext(ResourcesContext);
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
   const [codelistItemValue, setCodelistItemValue] = useState();
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
-
   const [linkItemsValue, setLinkItemsValue] = useState([]);
 
   useEffect(() => {
@@ -102,6 +106,7 @@ const FieldEditor = ({
         return 'int';
       case 'NUMBER_DECIMAL':
       case 'POINT':
+        return 'any';
       case 'COORDINATE_LONG':
       case 'COORDINATE_LAT':
         return 'num';
@@ -195,6 +200,32 @@ const FieldEditor = ({
           />
         );
       case 'POINT':
+        return (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <FontAwesomeIcon
+              icon={AwesomeIcons('point')}
+              onClick={e => {
+                if (!isNil(onMapOpen)) {
+                  console.log({ cells });
+                  onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells);
+                }
+              }}
+            />
+            <InputText
+              keyfilter={getFilter(type)}
+              onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+              onChange={e => onEditorValueChange(cells, e.target.value)}
+              onFocus={e => {
+                e.preventDefault();
+                onEditorValueFocus(cells, e.target.value);
+              }}
+              onKeyDown={e => onEditorKeyChange(cells, e, record)}
+              type="text"
+              value={RecordUtils.getCellValue(cells, cells.field)}
+            />
+          </div>
+        );
+      // <Map coordinates={RecordUtils.getCellValue(cells, cells.field)}></Map>;
       case 'COORDINATE_LONG':
       case 'COORDINATE_LAT':
         return (

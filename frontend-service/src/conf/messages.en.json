@@ -663,6 +663,10 @@
     "noFieldsToSelect": "There are no fields to select",
     "noTableSelected": "Please, select a table first",
     "dataflowListHelpStep2": "You can filter them by multiple parameteres",
-    "dataflowListHelpStep5": "...the legal instrument and obligation..."
+    "dataflowListHelpStep5": "...the legal instrument and obligation...",
+    "2d": "2D",
+    "3d": "3D",
+    "geospatialData": "Geospatial data",
+    "selectGeographicalData": "Select point"
   }
 }

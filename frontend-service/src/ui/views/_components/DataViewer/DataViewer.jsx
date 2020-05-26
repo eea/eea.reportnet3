@@ -29,6 +29,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Footer } from './_components/Footer';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { InfoTable } from './_components/InfoTable';
+import { Map } from 'ui/views/_components/Map';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -106,12 +107,15 @@ const DataViewer = withRouter(
       firstPageRecord: 0,
       initialRecordValue: undefined,
       isAllDataDeleted: isDatasetDeleted,
+      isMapOpen: false,
       isRecordAdded: false,
       isRecordDeleted: false,
+      mapCoordinates: '',
       newRecord: {},
       numCopiedRecords: undefined,
       pastedRecords: undefined,
       recordsPerPage: userContext.userProps.rowsPerPage,
+      selectedMapCells: {},
       selectedRecord: {},
       totalFilteredRecords: 0,
       totalRecords: 0
@@ -142,6 +146,7 @@ const DataViewer = withRouter(
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
           onEditorValueFocus={onEditorValueFocus}
+          onMapOpen={onMapOpen}
           record={record}
         />
       );
@@ -508,6 +513,7 @@ const DataViewer = withRouter(
     };
 
     const onEditorValueChange = (props, value) => {
+      console.log({ props });
       const updatedData = RecordUtils.changeCellValue([...props.value], props.rowIndex, props.field, value);
       setFetchedData(updatedData);
     };
@@ -518,6 +524,11 @@ const DataViewer = withRouter(
       if (!isEditing) {
         setIsEditing(true);
       }
+    };
+
+    const onMapOpen = (coordinates, mapCells) => {
+      console.log({ coordinates, mapCells });
+      dispatchRecords({ type: 'OPEN_MAP', payload: { coordinates, mapCells } });
     };
 
     const onPaste = event => {
@@ -645,6 +656,13 @@ const DataViewer = withRouter(
       }
     };
 
+    const onSelectPoint = coordinates => {
+      console.log({ coordinates, selected: records.selectedRecord, selectedCells: records.selectedMapCells });
+      dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false });
+      onEditorValueChange(records.selectedMapCells, coordinates);
+      // onEditorSubmitValue(cells, coordinates.join(', '));
+    };
+
     const onSetVisible = (fnUseState, visible) => {
       fnUseState(visible);
     };
@@ -752,6 +770,10 @@ const DataViewer = withRouter(
       return <div className={styles.iconTooltipWrapper}>{icons}</div>;
     };
 
+    const mapRender = () => (
+      <Map coordinates={records.mapCoordinates} onSelectPoint={onSelectPoint} selectButton={true}></Map>
+    );
+
     const rowClassName = rowData => {
       let id = rowData.dataRow.filter(record => Object.keys(record.fieldData)[0] === 'id')[0].fieldData.id;
       return {
@@ -821,6 +843,7 @@ const DataViewer = withRouter(
         }
       }
     };
+
     const onKeyPress = event => {
       if (event.key === 'Enter' && !isSaving) {
         event.preventDefault();
@@ -1083,6 +1106,26 @@ const DataViewer = withRouter(
               onDeletePastedRecord={onDeletePastedRecord}
             />
           </ConfirmDialog>
+        )}
+        {records.isMapOpen && (
+          <Dialog
+            className={'map-data'}
+            // maximizable={true}
+            blockScroll={false}
+            dismissableMask={false}
+            // contentStyle={
+            //   isMapOpen
+            //     ? { height: '80%', maxHeight: '80%', width: '100%' }
+            //     : { height: '80%', maxHeight: '80%', overflow: 'auto' }
+            // }
+            // footer={isMapOpen ? null : addDialogVisible ? addRowDialogFooter : editRowDialogFooter}
+            header={resources.messages['geospatialData']}
+            modal={true}
+            onHide={() => dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })}
+            // style={isMapOpen ? { width: '80%' } : { width: '50%', height: '80%' }}
+            visible={records.isMapOpen}>
+            <div className="p-grid p-fluid">{mapRender()}</div>
+          </Dialog>
         )}
       </SnapshotContext.Provider>
     );

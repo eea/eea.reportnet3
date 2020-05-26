@@ -474,6 +474,9 @@
   --calendar-header-next-prev-color: var(--gray-75);
   --calendar-header-bg: var(--bg);
   --calendar-header-color: var(--gray-75);
+
+  /* Map */
+  --map-marker-color: var(--c-corporate-blue-lighter);
 }
 body {
   margin: 0px;
