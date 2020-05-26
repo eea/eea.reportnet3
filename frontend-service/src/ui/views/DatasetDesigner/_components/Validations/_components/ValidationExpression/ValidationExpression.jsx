@@ -9,7 +9,8 @@ import { config } from 'conf/';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
-import { Dropdown } from 'ui/views/_components/Dropdown';
+// import { Dropdown } from 'ui/views/_components/Dropdown';
+import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputNumber } from 'primereact/inputnumber';
 
@@ -121,7 +122,7 @@ const ValidationExpression = ({
   };
 
   const onUpdateExpressionField = (key, value) => {
-    checkField(key, value.value);
+    checkField(key, value);
     onDeleteFromClickedFields(key);
     onExpressionFieldUpdate(expressionId, {
       key,
@@ -168,7 +169,7 @@ const ValidationExpression = ({
           placeholder="YYYY-MM-DD"
           monthNavigator={true}
           readOnlyInput={false}
-          onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
+          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
           value={expressionValues.expressionValue}
           yearNavigator={true}
           yearRange="1900:2500"></Calendar>
@@ -180,7 +181,7 @@ const ValidationExpression = ({
           disabled={isDisabled}
           placeholder={resourcesContext.messages.value}
           value={expressionValues.expressionValue}
-          onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
+          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
           steps={0}
           format={false}
           useGrouping={false}
@@ -197,7 +198,7 @@ const ValidationExpression = ({
             disabled={isDisabled}
             placeholder={resourcesContext.messages.value}
             value={expressionValues.expressionValue}
-            onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
+            onChange={e => onUpdateExpressionField('expressionValue', e.value)}
           />
         );
       }
@@ -206,7 +207,7 @@ const ValidationExpression = ({
           disabled={isDisabled}
           placeholder={resourcesContext.messages.value}
           value={expressionValues.expressionValue}
-          onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
+          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
           steps={0}
           format={false}
           useGrouping={false}
@@ -223,7 +224,7 @@ const ValidationExpression = ({
           disabled={isDisabled}
           placeholder={resourcesContext.messages.value}
           value={expressionValues.expressionValue}
-          onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
+          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
           onBlur={e => {
             checkField('year', e.target.value);
           }}
@@ -239,7 +240,7 @@ const ValidationExpression = ({
           disabled={isDisabled}
           placeholder={resourcesContext.messages.value}
           value={expressionValues.expressionValue}
-          onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
+          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
           steps={0}
           format={false}
           useGrouping={false}
@@ -254,7 +255,7 @@ const ValidationExpression = ({
         disabled={isDisabled}
         placeholder={resourcesContext.messages.value}
         value={expressionValues.expressionValue}
-        onChange={e => onUpdateExpressionField('expressionValue', { value: e.target.value })}
+        onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
         keyfilter={valueKeyFilter}
       />
     );
@@ -275,7 +276,7 @@ const ValidationExpression = ({
         className={`${styles.union} formField ${printRequiredFieldError('union')}`}>
         <Dropdown
           disabled={isDisabled || position == 0}
-          appendTo={document.body}
+          // appendTo={document.body}
           placeholder={resourcesContext.messages.union}
           optionLabel="label"
           options={config.validations.logicalOperators}
@@ -288,12 +289,12 @@ const ValidationExpression = ({
         className={`${styles.operatorType} formField ${printRequiredFieldError('operatorType')}`}>
         <Dropdown
           disabled={isDisabled}
-          appendTo={document.body}
+          // appendTo={document.body}
           placeholder={resourcesContext.messages.operatorType}
           optionLabel="label"
           options={operatorTypes}
           onChange={e => onUpdateExpressionField('operatorType', e.target.value)}
-          value={!isEmpty(expressionValues.operatorType) ? operatorTypesConf[expressionValues.operatorType].option : ''}
+          value={expressionValues.operatorType}
         />
       </span>
       <span
@@ -301,16 +302,12 @@ const ValidationExpression = ({
         className={`${styles.operatorValue} formField ${printRequiredFieldError('operatorValue')}`}>
         <Dropdown
           disabled={isDisabled}
-          appendTo={document.body}
+          // appendTo={document.body}
           placeholder={resourcesContext.messages.operator}
           optionLabel="label"
           options={operatorValues}
           onChange={e => onUpdateExpressionField('operatorValue', e.target.value)}
-          value={
-            !isEmpty(expressionValues.operatorValue)
-              ? { label: expressionValues.operatorValue, value: expressionValues.operatorValue }
-              : ''
-          }
+          value={expressionValues.operatorValue}
         />
       </span>
       <span

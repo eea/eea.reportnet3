@@ -157,7 +157,7 @@ const ComparisonExpression = ({
         />
       </span>
       <span
-        onBlur={e => onAddToClickedFields('union')}
+        onBlur={() => onAddToClickedFields('union')}
         className={`${styles.union} formField ${printRequiredFieldError('union')}`}>
         <Dropdown
           disabled={isDisabled || position === 0}
@@ -170,7 +170,7 @@ const ComparisonExpression = ({
         />
       </span>
       <span
-        onBlur={e => onAddToClickedFields('field1')}
+        onBlur={() => onAddToClickedFields('field1')}
         className={`${styles.operatorType} formField ${printRequiredFieldError('field1')}`}>
         <Dropdown
           id={`${componentName}__field1`}
@@ -179,26 +179,28 @@ const ComparisonExpression = ({
           placeholder={'Select first field'}
           optionLabel={'label'}
           options={tableFields}
-          onChange={e => onUpdateExpressionField('field1', e.target.value)}
-          value={expressionValues.value}
+          onChange={e => onUpdateExpressionField('field1', e.value)}
+          value={expressionValues.field1}
         />
       </span>
+
       <span
-        onBlur={e => onAddToClickedFields('operatorType')}
+        onBlur={() => onAddToClickedFields('operatorType')}
         className={`${styles.operatorType} formField ${printRequiredFieldError('operatorType')}`}>
         <Dropdown
           disabled={isDisabled}
           // appendTo={document.body}
           placeholder={resourcesContext.messages.operatorType}
           optionLabel="label"
-          optionValue="value"
           options={operatorTypes}
-          onChange={e => onUpdateExpressionField('operatorType', e.target.value)}
-          value={!isEmpty(expressionValues.operatorType) ? operatorTypesConf[expressionValues.operatorType].option : ''}
+          onChange={e => onUpdateExpressionField('operatorType', e.value)}
+          // value={!isEmpty(expressionValues.operatorType) ? operatorTypesConf[expressionValues.operatorType].option : ''}
+          value={expressionValues.operatorType}
         />
       </span>
+
       <span
-        onBlur={e => onAddToClickedFields('operatorValue')}
+        onBlur={() => onAddToClickedFields('operatorValue')}
         className={`${styles.operatorValue} formField ${printRequiredFieldError('operatorValue')}`}>
         <Dropdown
           disabled={isDisabled}
@@ -207,17 +209,20 @@ const ComparisonExpression = ({
           optionLabel="label"
           optionValue="value"
           options={operatorValues}
-          onChange={e => onUpdateExpressionField('operatorValue', e.target.value)}
-          value={
+          onChange={e => onUpdateExpressionField('operatorValue', e.value)}
+          /* value={
             !isEmpty(expressionValues.operatorValue)
               ? { label: expressionValues.operatorValue, value: expressionValues.operatorValue }
               : ''
-          }
+          } */
+          value={expressionValues.operatorValue}
         />
       </span>
+
       <span
-        onBlur={e => onAddToClickedFields('field2')}
+        onBlur={() => onAddToClickedFields('field2')}
         className={`${styles.operatorType} formField ${printRequiredFieldError('field2')}`}>
+        {console.log('expressionValues', expressionValues)}
         <Dropdown
           id={`${componentName}__field2`}
           disabled={false}
@@ -226,12 +231,12 @@ const ComparisonExpression = ({
           placeholder={'Select second field'}
           optionLabel="label"
           options={tableFields}
-          onChange={e => onUpdateExpressionField('field2', e.target.value)}
-          value={expressionValues.value}
+          onChange={e => onUpdateExpressionField('field2', e.value)}
+          value={expressionValues.field2}
         />
       </span>
       <span
-        onBlur={e => onAddToClickedFields('expressionValue')}
+        onBlur={() => onAddToClickedFields('expressionValue')}
         className={`${styles.expressionValue} formField ${printRequiredFieldError('expressionValue')}`}></span>
       <span>
         <Button
