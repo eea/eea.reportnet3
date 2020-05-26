@@ -5,6 +5,7 @@ import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 
 
 /**
@@ -40,11 +41,20 @@ public class DataSetMetabaseVO implements Serializable {
    */
   private Long dataflowId;
 
-  /** The dataset schema. */
+  /**
+   * The dataset schema.
+   */
   private String datasetSchema;
 
 
-  /** The data provider id. */
+  /**
+   * The data provider id.
+   */
   private Long dataProviderId;
+
+  /**
+   * The dataset type enum
+   */
+  private DatasetTypeEnum datasetTypeEnum;
 
 }
