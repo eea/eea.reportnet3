@@ -56,7 +56,6 @@
 .switchDiv {
   display: flex;
   align-items: flex-end;
-  margin-left: auto;
   flex-direction: column;
 }
 
@@ -66,6 +65,7 @@
 .switchDivInput {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   margin: 0 0 2vw 1vw;
 }
 .switchTextInput {
@@ -78,7 +78,7 @@
   color: var(--main-font-color);
 }
 .tableDescriptionInput {
-  width: 68vw;
+  width: 65vw;
   transition: 0.5s !important;
 }
 

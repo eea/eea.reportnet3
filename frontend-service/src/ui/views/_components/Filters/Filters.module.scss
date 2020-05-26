@@ -55,22 +55,32 @@
   }
 }
 
-.uniqueConstraint {
-  display: grid;
-  grid-row-gap: 2.5rem;
-  grid-template-areas: 'table field reset';
-  grid-template-columns: calc(90% / 2) calc(90% / 2) auto;
-  margin: 1.5rem 0;
+.uniqueConstraints {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 2rem 0;
+  width: 100%;
 
   .dataflowInput {
     display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    font-size: 10pt;
+    width: 30% !important;
 
-    &:nth-child(1) {
-      grid-area: field;
+    > div {
+      border-bottom: var(--inputtext-border) !important;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      width: 100% !important;
     }
-    &:nth-child(2) {
-      grid-area: table;
-    }
+  }
+
+  .checkbox {
+    width: auto !important;
   }
 }
 

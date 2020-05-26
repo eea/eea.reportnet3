@@ -79,9 +79,11 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
             userContext.userProps.amPm24h ? '' : ' A'
           }`
         ),
-        redirectionUrl: `${window.location.protocol}//${window.location.hostname}${
-          window.location.port !== '' && window.location.port.toString() !== '80' ? `:${window.location.port}` : ''
-        }${!isNil(notification.redirectionUrl) ? notification.redirectionUrl : ''}`
+        redirectionUrl: !isNil(notification.redirectionUrl)
+          ? `${window.location.protocol}//${window.location.hostname}${
+              window.location.port !== '' && window.location.port.toString() !== '80' ? `:${window.location.port}` : ''
+            }${notification.redirectionUrl}`
+          : ''
       };
     });
     // console.info('notifications: %o', notificationsArray);

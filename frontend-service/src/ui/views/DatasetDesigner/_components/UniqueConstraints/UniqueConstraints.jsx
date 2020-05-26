@@ -20,7 +20,7 @@ import { constraintsReducer } from './_functions/Reducers/constraintsReducer';
 
 import { UniqueConstraintsUtils } from './_functions/Utils/UniqueConstraintsUtils';
 
-export const UniqueConstraints = ({ designerState, getManageUniqueConstraint, manageDialogs }) => {
+export const UniqueConstraints = ({ designerState, getManageUniqueConstraint, getUniques, manageDialogs }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -31,7 +31,7 @@ export const UniqueConstraints = ({ designerState, getManageUniqueConstraint, ma
   } = designerState;
 
   const [constraintsState, constraintsDispatch] = useReducer(constraintsReducer, {
-    data: {},
+    data: [],
     filteredData: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
@@ -41,6 +41,10 @@ export const UniqueConstraints = ({ designerState, getManageUniqueConstraint, ma
   useEffect(() => {
     onLoadConstraints();
   }, [constraintsState.isDataUpdated]);
+
+  useEffect(() => {
+    if (getUniques) getUniques(constraintsState.data);
+  }, [constraintsState.data]);
 
   const actionsTemplate = () => (
     <ActionsColumn
@@ -121,13 +125,14 @@ export const UniqueConstraints = ({ designerState, getManageUniqueConstraint, ma
   return isEmpty(constraintsState.data) ? (
     <div className={styles.noConstraints}>{resources.messages['noConstraints']}</div>
   ) : (
-    <Fragment>
+    <div className={styles.constraints}>
       <Filters
-        className={'uniqueConstraint'}
+        className={'uniqueConstraints'}
         data={constraintsState.data}
         getFilteredData={onLoadFilteredData}
-        inputOptions={['filterFieldsNames']}
-        selectOptions={['tableSchemaName']}
+        matchMode={true}
+        selectList={{ fieldData: UniqueConstraintsUtils.getFieldsOptions(constraintsState.data) }}
+        selectOptions={['tableSchemaName', 'fieldData']}
       />
 
       {!isEmpty(constraintsState.filteredData) ? (
@@ -158,6 +163,6 @@ export const UniqueConstraints = ({ designerState, getManageUniqueConstraint, ma
           {resources.messages['deleteUniqueConstraintConfirm']}
         </ConfirmDialog>
       )}
-    </Fragment>
+    </div>
   );
 };

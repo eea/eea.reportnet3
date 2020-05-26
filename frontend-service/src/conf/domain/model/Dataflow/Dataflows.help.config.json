@@ -1,0 +1,32 @@
+{
+  "steps": [
+    {
+      "content": "dataflowListHelpStep1",
+      "target": ".dataflowList-help-step"
+    },
+    {
+      "content": "dataflowListHelpStep2",
+      "target": ".dataflowList-filters-help-step"
+    },
+    {
+      "content": "dataflowListHelpStep3",
+      "target": ".dataflowList-delivery-date-help-step"
+    },
+    {
+      "content": "dataflowListHelpStep4",
+      "target": ".dataflowList-name-description-help-step"
+    },
+    {
+      "content": "dataflowListHelpStep5",
+      "target": ".dataflowList-obligation-description-help-step"
+    },
+    {
+      "content": "dataflowListHelpStep6",
+      "target": ".dataflowList-status-help-step"
+    },
+    {
+      "content": "dataflowListHelpStep7",
+      "target": ".dataflowList-create-dataflow-help-step"
+    }
+  ]
+}

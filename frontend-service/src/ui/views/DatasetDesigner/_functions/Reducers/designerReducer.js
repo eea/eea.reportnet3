@@ -16,6 +16,9 @@ export const designerReducer = (state, { type, payload }) => {
         metaData: payload.metaData
       };
 
+    case 'GET_UNIQUES':
+      return { ...state, uniqueConstraintsList: payload.data };
+
     case 'INITIAL_DATASET_DESCRIPTION':
       return { ...state, initialDatasetDescription: payload.value };
 
@@ -32,7 +35,7 @@ export const designerReducer = (state, { type, payload }) => {
       return { ...state, [payload.dialog]: payload.value, [payload.secondDialog]: payload.secondValue };
 
     case 'MANAGE_UNIQUE_CONSTRAINT_DATA':
-      return { ...state, manageUniqueConstraintData: payload.data };
+      return { ...state, manageUniqueConstraintData: { ...state.manageUniqueConstraintData, ...payload.data } };
 
     case 'ON_UPDATE_DESCRIPTION':
       return { ...state, datasetDescription: payload.value };
