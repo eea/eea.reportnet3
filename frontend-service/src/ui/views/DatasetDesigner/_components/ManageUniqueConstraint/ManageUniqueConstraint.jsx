@@ -90,11 +90,10 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
       );
       if (response.status >= 200 && response.status <= 299) {
         manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
+        onResetValues();
       }
     } catch (error) {
       notificationContext.add({ type: 'CREATE_UNIQUE_CONSTRAINT_ERROR' });
-    } finally {
-      onResetValues();
     }
   };
 
@@ -108,11 +107,10 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
       );
       if (response.status >= 200 && response.status <= 299) {
         manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
+        onResetValues();
       }
     } catch (error) {
       notificationContext.add({ type: 'UPDATE_UNIQUE_CONSTRAINT_ERROR' });
-    } finally {
-      onResetValues();
     }
   };
 
@@ -171,6 +169,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
 
   const renderListBox = () => (
     <ListBox
+      listStyle={{ height: '200px' }}
       onChange={event => {
         !isNil(event.value) && setSelectedTable(event.value);
         setSelectedFields([]);

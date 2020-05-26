@@ -33,14 +33,20 @@ const checkSearched = (state, data, searchedKeys = []) => {
 
 const checkSelected = (state, data, selectedKeys = []) => {
   for (let index = 0; index < selectedKeys.length; index++) {
-    if (!isEmpty(state.filterBy[selectedKeys[index]])) {
-      if (!isNil(data[selectedKeys[index]])) {
-        if (
-          ![...state.filterBy[selectedKeys[index]].map(option => option.toString().toLowerCase())].includes(
-            data[selectedKeys[index]].toString().toLowerCase()
-          )
-        ) {
-          return false;
+    const selectedKey = selectedKeys[index];
+    const value = state.filterBy[selectedKey];
+
+    if (!isEmpty(value)) {
+      if (!isNil(data[selectedKey])) {
+        const selectedData = data[selectedKey];
+
+        if (Array.isArray(selectedData)) return onApplyGroupFilters(data, selectedKey, state.matchMode, value);
+        else {
+          const isFiltered = ![...value.map(option => option.toString().toLowerCase())].includes(
+            selectedData.toString().toLowerCase()
+          );
+
+          if (isFiltered) return false;
         }
       }
     }
@@ -70,13 +76,8 @@ const onApplyFilters = ({
   ...state.data.filter(data => {
     if (selectOptions.includes(filter) && !isNil(data[filter])) {
       return (
-        checkDates(state.filterBy[dateOptions], data[dateOptions]) &&
-        checkFilters(filteredKeys, data, state) &&
-        checkSearched(state, data, searchedKeys) &&
-        checkSelected(state, data, selectedKeys) &&
-        (isEmpty(value)
-          ? true
-          : [...value.map(type => type.toString().toLowerCase())].includes(data[filter].toString().toLowerCase()))
+        onApplySelected(data, filter, state, value) &&
+        onCheckFilters(data, dateOptions, filteredKeys, searchedKeys, selectedKeys, state)
       );
     } else if (dateOptions.includes(filter)) {
       let dates;
@@ -103,6 +104,19 @@ const onApplyFilters = ({
   })
 ];
 
+const onApplyGroupFilters = (data, filter, matchMode, value) => {
+  const resultData = [];
+  const dataValues = data[filter].map(item => item.fieldId.toString().toLowerCase());
+
+  if (matchMode) resultData.push(value.every(value => dataValues.includes(value)));
+  else {
+    for (let index = 0; index < value.length; index++) {
+      resultData.push(dataValues.includes(value[index].toString().toLowerCase()));
+    }
+  }
+  return resultData.includes(true);
+};
+
 const onApplySearch = (data, searchBy = [], value, state, inputKeys, selectedKeys) => [
   ...data.filter(data => {
     const searchedParams = !isEmpty(searchBy) ? searchBy : getSearchKeys(data);
@@ -117,6 +131,24 @@ const onApplySearch = (data, searchBy = [], value, state, inputKeys, selectedKey
     );
   })
 ];
+
+const onApplySelected = (data, filter, state, value) => {
+  if (!isEmpty(value)) {
+    return Array.isArray(data[filter])
+      ? onApplyGroupFilters(data, filter, state.matchMode, value)
+      : [...value.map(type => type.toString().toLowerCase())].includes(data[filter].toString().toLowerCase());
+  }
+  return true;
+};
+
+const onCheckFilters = (data, dateOptions, filteredKeys, searchedKeys, selectedKeys, state) => {
+  return (
+    checkDates(state.filterBy[dateOptions], data[dateOptions]) &&
+    checkFilters(filteredKeys, data, state) &&
+    checkSearched(state, data, searchedKeys) &&
+    checkSelected(state, data, selectedKeys)
+  );
+};
 
 const onClearLabelState = (input = [], select = [], date = [], dropDown = []) => {
   const labelByGroup = input.concat(select, date, dropDown);

@@ -8,6 +8,7 @@ import styles from './Filters.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
@@ -34,6 +35,7 @@ export const Filters = ({
   filterByList,
   getFilteredData,
   inputOptions,
+  matchMode,
   searchAll,
   searchBy = [],
   selectList,
@@ -51,6 +53,7 @@ export const Filters = ({
     filterBy: {},
     filteredData: [],
     labelAnimations: {},
+    matchMode: true,
     orderBy: {},
     searchBy: ''
   });
@@ -151,6 +154,11 @@ export const Filters = ({
     filterDispatch({ type: 'ON_SEARCH_DATA', payload: { searchedValues, value } });
   };
 
+  const onToggleMatchMode = () => {
+    filterDispatch({ type: 'TOGGLE_MATCH_MODE', payload: !filterState.matchMode });
+    onClearAllFilters();
+  };
+
   const renderCalendarFilter = (property, i) => (
     <span key={i} className={styles.dataflowInput} ref={dateRef}>
       {renderOrderFilter(property)}
@@ -184,6 +192,18 @@ export const Filters = ({
           {resources.messages[property]}
         </label>
       </span>
+    </span>
+  );
+
+  const renderCheckbox = id => (
+    <span className={styles.checkbox}>
+      Strict mode filter
+      <Checkbox
+        id={`${id}_checkbox`}
+        isChecked={filterState.matchMode}
+        onChange={() => onToggleMatchMode()}
+        role="checkbox"
+      />
     </span>
   );
 
@@ -314,6 +334,7 @@ export const Filters = ({
       {selectOptions && selectOptions.map((option, i) => renderSelectFilter(option, i))}
       {dropdownOptions && dropdownOptions.map((option, i) => renderDropdown(option, i))}
       {dateOptions && dateOptions.map((option, i) => renderCalendarFilter(option, i))}
+      {matchMode && renderCheckbox()}
 
       <div className={styles.buttonWrapper} style={{ width: sendData ? 'inherit' : '' }}>
         {sendData ? (

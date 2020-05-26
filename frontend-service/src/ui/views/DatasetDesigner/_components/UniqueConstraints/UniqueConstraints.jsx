@@ -38,8 +38,6 @@ export const UniqueConstraints = ({ designerState, getManageUniqueConstraint, ge
     isLoading: true
   });
 
-  // console.log('constraintsState', constraintsState);
-
   useEffect(() => {
     onLoadConstraints();
   }, [constraintsState.isDataUpdated]);
@@ -127,13 +125,13 @@ export const UniqueConstraints = ({ designerState, getManageUniqueConstraint, ge
   return isEmpty(constraintsState.data) ? (
     <div className={styles.noConstraints}>{resources.messages['noConstraints']}</div>
   ) : (
-    <Fragment>
+    <div className={styles.constraints}>
       <Filters
-        className={'uniqueConstraint'}
         data={constraintsState.data}
         getFilteredData={onLoadFilteredData}
-        inputOptions={['filterFieldsNames']}
-        selectOptions={['tableSchemaName']}
+        matchMode={true}
+        selectList={{ fieldData: UniqueConstraintsUtils.getFieldsOptions(constraintsState.data) }}
+        selectOptions={['tableSchemaName', 'fieldData']}
       />
 
       {!isEmpty(constraintsState.filteredData) ? (
@@ -164,6 +162,6 @@ export const UniqueConstraints = ({ designerState, getManageUniqueConstraint, ge
           {resources.messages['deleteUniqueConstraintConfirm']}
         </ConfirmDialog>
       )}
-    </Fragment>
+    </div>
   );
 };

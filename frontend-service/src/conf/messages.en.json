@@ -649,7 +649,6 @@
     "selectedFields": "Selected fields",
     "tableSchemaName": "Table name",
     "fieldData": "Field name",
-    "filterFieldsNames": "Field name",
     "editRowConstraint": "Edit row constraint",
     "createRowConstraint": "Create row constraint",
     "multiselectCodelists": "Multiple select items ",
@@ -664,6 +663,8 @@
     "noTableSelected": "Please, select a table first",
     "duplicatedUniqueConstraint": "The unique constraint already exists",
     "selectUniqueFieldsTitle": "Select unique fields",
-    "selectUniqueTableTitle": "Select a table"
+    "selectUniqueTableTitle": "Select a table",
+    "updateUniqueConstraintError": "Error updating constraint",
+    "createUniqueConstraintError": "Error creating constraint"
   }
 }
