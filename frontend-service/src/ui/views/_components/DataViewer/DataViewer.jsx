@@ -513,7 +513,6 @@ const DataViewer = withRouter(
     };
 
     const onEditorValueChange = (props, value) => {
-      console.log({ props });
       const updatedData = RecordUtils.changeCellValue([...props.value], props.rowIndex, props.field, value);
       setFetchedData(updatedData);
     };
@@ -526,10 +525,8 @@ const DataViewer = withRouter(
       }
     };
 
-    const onMapOpen = (coordinates, mapCells) => {
-      console.log({ coordinates, mapCells });
+    const onMapOpen = (coordinates, mapCells) =>
       dispatchRecords({ type: 'OPEN_MAP', payload: { coordinates, mapCells } });
-    };
 
     const onPaste = event => {
       if (event) {
@@ -657,10 +654,9 @@ const DataViewer = withRouter(
     };
 
     const onSelectPoint = coordinates => {
-      console.log({ coordinates, selected: records.selectedRecord, selectedCells: records.selectedMapCells });
       dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false });
       onEditorValueChange(records.selectedMapCells, coordinates);
-      // onEditorSubmitValue(cells, coordinates.join(', '));
+      onEditorSubmitValue(records.selectedMapCells, coordinates.join(', '), records.selectedRecord);
     };
 
     const onSetVisible = (fnUseState, visible) => {

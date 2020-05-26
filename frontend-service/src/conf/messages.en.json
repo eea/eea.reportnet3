@@ -667,6 +667,7 @@
     "2d": "2D",
     "3d": "3D",
     "geospatialData": "Geospatial data",
-    "selectGeographicalData": "Select point"
+    "selectGeographicalData": "Select point",
+    "selectGeographicalDataOnMap": "Select point on map"
   }
 }

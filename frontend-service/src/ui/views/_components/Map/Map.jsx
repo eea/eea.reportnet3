@@ -180,7 +180,7 @@ export const Map = ({
           ? parseCoordinates(coordinates)
           : popUpCoordinates
       }
-      containerStyle={{ height: '70vh' }}
+      containerStyle={{ height: '60vh' }}
       onClick={(map, e) => {
         onUpdatePopupCoordinates(e);
       }}

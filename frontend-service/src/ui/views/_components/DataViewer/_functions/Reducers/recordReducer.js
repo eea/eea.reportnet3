@@ -73,7 +73,6 @@ export const recordReducer = (state, { type, payload }) => {
     case 'SET_TOTAL':
       return { ...state, totalRecords: payload };
     case 'OPEN_MAP':
-      console.log(payload.coordinates);
       return { ...state, isMapOpen: true, mapCoordinates: payload.coordinates, selectedMapCells: payload.mapCells };
     case 'TOGGLE_MAP_VISIBILITY':
       return { ...state, isMapOpen: payload };

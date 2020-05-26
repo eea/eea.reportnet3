@@ -3,9 +3,12 @@ import React, { useContext, useEffect, useState } from 'react';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
+import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import { Map } from 'ui/views/_components/Map';
 import { MultiSelect } from 'primereact/multiselect';
 
 import { DatasetService } from 'core/services/Dataset';
@@ -17,6 +20,8 @@ import { RecordUtils } from 'ui/views/_functions/Utils';
 const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChangeForm, type }) => {
   const resources = useContext(ResourcesContext);
   const [columnWithLinks, setColumnWithLinks] = useState([]);
+  const [isMapOpen, setIsMapOpen] = useState(false);
+  const [mapCoordinates, setMapCoordinates] = useState();
 
   useEffect(() => {
     if (!isUndefined(fieldValue)) {
@@ -33,6 +38,18 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     const linkItems = await getLinkItemsWithEmptyOption(filter, type, column.referencedField);
     inmColumn.linkItems = linkItems;
     setColumnWithLinks(inmColumn);
+  };
+
+  const onMapOpen = coordinates => {
+    setIsMapOpen(true);
+    setMapCoordinates(coordinates);
+  };
+
+  const onSelectPoint = coordinates => {
+    setIsMapOpen(false);
+    onChangeForm(field, coordinates.join(', '));
+
+    // onEditorSubmitValue(cells, coordinates.join(', '));
   };
 
   const formatDate = date => {
@@ -53,6 +70,7 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
         return 'int';
       case 'NUMBER_DECIMAL':
       case 'POINT':
+        return 'money';
       case 'COORDINATE_LONG':
       case 'COORDINATE_LAT':
         return 'num';
@@ -129,7 +147,6 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
           return { itemType: codelistItem, value: codelistItem };
         })}
         optionLabel="itemType"
-        styles={{ border: 'var(--dropdown-border)', borderColor: 'red' }}
         value={RecordUtils.getMultiselectValues(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
         // hasSelectedItemsLabel={false}
       />
@@ -181,16 +198,19 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
       renderLinkDropdown(field, fieldValue)
     ) : type === 'DATE' ? (
       renderCalendar(field, fieldValue)
+    ) : type === 'POINT' ? (
+      renderMapType(field, fieldValue)
     ) : (
       <InputText
         id={field}
         keyfilter={getFilter(type)}
         maxLength={getMaxCharactersByType(type)}
         onChange={e => onChangeForm(field, e.target.value)}
-        value={fieldValue}
         // type={type === 'DATE' ? 'date' : 'text'}
         placeholder={type === 'DATE' ? 'YYYY-MM-DD' : ''}
+        style={{ width: '35%' }}
         type="text"
+        value={fieldValue}
       />
     );
 
@@ -227,7 +247,53 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     />
   );
 
-  return <React.Fragment>{renderFieldEditor()}</React.Fragment>;
+  const renderMap = () => <Map coordinates={mapCoordinates} onSelectPoint={onSelectPoint} selectButton={true}></Map>;
+
+  const renderMapType = (field, fieldValue) => (
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <InputText
+        keyfilter={getFilter(type)}
+        // onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+        onChange={e => onChangeForm(field, e.target.value)}
+        // onFocus={e => {
+        //   e.preventDefault();
+        //   onEditorValueFocus(cells, e.target.value);
+        // }}
+        // onKeyDown={e => onEditorKeyChange(cells, e, record)}
+        style={{ width: '35%' }}
+        type="text"
+        value={fieldValue}
+      />
+      <Button
+        className={`p-button-secondary-transparent button`}
+        icon="marker"
+        onClick={() => onMapOpen(fieldValue)}
+        // style={{ marginLeft: '0.4rem', alignSelf: !fieldDesignerState.isEditing ? 'center' : 'baseline' }}
+        style={{ width: '2.357em', marginLeft: '0.5rem' }}
+        tooltip={resources.messages['selectGeographicalDataOnMap']}
+        tooltipOptions={{ position: 'bottom' }}
+      />
+    </div>
+  );
+
+  return (
+    <React.Fragment>
+      {renderFieldEditor()}
+      {isMapOpen && (
+        <Dialog
+          className={'map-data'}
+          blockScroll={false}
+          dismissableMask={false}
+          header={resources.messages['geospatialData']}
+          modal={true}
+          onHide={() => setIsMapOpen(false)}
+          // style={{ height: '90vh', width: '80%' }}
+          visible={isMapOpen}>
+          <div className="p-grid p-fluid">{renderMap()}</div>
+        </Dialog>
+      )}
+    </React.Fragment>
+  );
 };
 
 export { DataFormFieldEditor };
