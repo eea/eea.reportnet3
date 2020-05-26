@@ -19,14 +19,12 @@ public interface FieldExtendedRepository {
    */
   List<String> queryExecution(String generatedQuery);
 
-
   /**
-   * Gets the duplicated records by fields.
+   * Query execution record.
    *
-   * @param fieldSchemaIds the field schema ids
-   * @return the duplicated records by fields
+   * @param query the query
+   * @return the list
    */
-  List<RecordValue> getDuplicatedRecordsByFields(List<String> fieldSchemaIds);
-
+  List<RecordValue> queryExecutionRecord(String query);
 
 }

@@ -229,7 +229,7 @@ public interface DatasetSchemaController {
    *
    * @param uniqueConstraint the unique constraint
    */
-  @PostMapping(value = "/createUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/createUniqueConstraint")
   void createUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint);
 
   /**
@@ -246,8 +246,8 @@ public interface DatasetSchemaController {
    *
    * @param uniqueConstraint the unique constraint
    */
-  @PutMapping(value = "/updateUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void updateUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint);
+  @PutMapping(value = "/updateUniqueConstraint")
+  void updateUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint);
 
   /**
    * Gets the unique constraint.
@@ -256,6 +256,6 @@ public interface DatasetSchemaController {
    * @return the unique constraint
    */
   @GetMapping(value = "/private/getUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
-  UniqueConstraintVO getUniqueConstraint(String uniqueId);
+  UniqueConstraintVO getUniqueConstraint(@RequestParam("uniqueId") String uniqueId);
 
 }

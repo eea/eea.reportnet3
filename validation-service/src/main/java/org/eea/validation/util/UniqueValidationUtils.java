@@ -1,8 +1,9 @@
 package org.eea.validation.util;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -10,14 +11,13 @@ import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSche
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
-import org.eea.validation.persistence.data.domain.FieldValue;
+import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
-import org.eea.validation.persistence.schemas.FieldSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,7 +107,7 @@ public class UniqueValidationUtils {
    * @return the validation
    */
   private static Validation createValidation(String idRule, String idDatasetSchema,
-      TableSchema origname) {
+      String origname) {
 
     Rule rule = rulesRepository.findRule(new ObjectId(idDatasetSchema), new ObjectId(idRule));
 
@@ -133,9 +133,9 @@ public class UniqueValidationUtils {
     }
 
     validation.setMessage(rule.getThenCondition().get(0));
-    validation.setTypeEntity(EntityTypeEnum.FIELD);
+    validation.setTypeEntity(EntityTypeEnum.RECORD);
     validation.setValidationDate(new Date().toString());
-    validation.setOriginName(origname.getNameTableSchema());
+    validation.setOriginName(origname);
 
     return validation;
   }
@@ -159,49 +159,52 @@ public class UniqueValidationUtils {
    *
    * @return the table schema from id field schema
    */
-  private static TableSchema getTableSchemaFromIdFieldSchema(DataSetSchema schema,
-      String idFieldSchema) {
+  private static String getTableSchemaFromIdTableSchema(DataSetSchema schema,
+      String idTableSchema) {
 
-    TableSchema tableSchema = new TableSchema();
-    Boolean locatedTable = false;
-
+    String tableSchemaName = "";
     for (TableSchema table : schema.getTableSchemas()) {
-      for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-        if (field.getIdFieldSchema().toString().equals(idFieldSchema)) {
-          tableSchema = table;
-          locatedTable = Boolean.TRUE;
-          break;
-        }
-      }
-      if (locatedTable.equals(Boolean.TRUE)) {
+      if (table.getIdTableSchema().toString().equals(idTableSchema)) {
+        tableSchemaName = table.getNameTableSchema();
         break;
       }
     }
-    return tableSchema;
+    return tableSchemaName;
   }
 
   /**
-   * Check if field values are duplicated.
+   * Mount query.
    *
-   * @param mapFields the map fields
-   * @param fieldsToFilter the fields to filter
-   * @param field the field to check
-   * @return true, if successful
+   * @param fieldSchemaIds the field schema ids
+   * @return the string
    */
-  private static boolean checkduplicated(Map<String, FieldValue> mapFields,
-      List<FieldValue> fieldsToFilter, FieldValue field) {
-    fieldsToFilter.remove(field);
-    for (FieldValue fieldValue : fieldsToFilter) {
-      if (mapFields.get(field.getValue()) != null) {
-        return true;
-      } else {
-        if (field.getValue().equals(fieldValue.getValue())) {
-          mapFields.put(field.getValue(), field);
-          return true;
-        }
+  private static String mountQuery(List<String> fieldSchemaIds) {
+    StringBuilder stringQuery = new StringBuilder("with table_1 as(select rv.id, ");
+    Iterator<String> iterator = fieldSchemaIds.iterator();
+    int i = 1;
+    while (iterator.hasNext()) {
+      String schemaId = iterator.next();
+      stringQuery.append(
+          "(select fv.value from field_value fv where fv.id_record=rv.id and fv.id_field_schema = '")
+          .append(schemaId).append("') AS ").append("column_" + (i++));
+      if (iterator.hasNext()) {
+        stringQuery.append(",");
       }
     }
-    return false;
+    stringQuery.append(
+        " from record_value rv) select rv.* from record_value rv where rv.id in (select t.id from (select *,count(*) over(partition by ");
+    iterator = fieldSchemaIds.iterator();
+    i = 1;
+    while (iterator.hasNext()) {
+      iterator.next();
+      stringQuery.append("column_" + (i++));
+      if (iterator.hasNext()) {
+        stringQuery.append(",");
+      }
+    }
+    stringQuery.append(") as N from table_1 ) as t where n>1);");
+    return stringQuery.toString();
+
   }
 
   /**
@@ -217,44 +220,39 @@ public class UniqueValidationUtils {
     UniqueConstraintVO uniqueConstraint =
         dataSetSchemaControllerZuul.getUniqueConstraint(uniqueIdConstraint);
 
+
     // Get Schema
     String schemaId = uniqueConstraint.getDatasetSchemaId();
-    schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
 
-    List<RecordValue> duplicatedRecords =
-        recordRepository.getDuplicatedRecordsByFields(uniqueConstraint.getFieldSchemaIds());
-    duplicatedRecords.size();
+    DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
 
     // get Orig name
-    // TableSchema origname = getTableSchemaFromIdFieldSchema(datasetSchema, idFieldSchema);
-    //
-    // // GetValidationData
-    // Validation validation = createValidation(idRule, idFieldSchema, origname);
-    // List<FieldValue> errorFields = new ArrayList<>();
-    //
-    // List<FieldValue> fieldsToFilter = fieldRepository.findByIdFieldSchema(idFieldSchema);
-    //
-    // Map<String, FieldValue> mapFields = new HashMap<>();
-    //
-    // for (FieldValue field : fieldsToFilter) {
-    // if (checkduplicated(mapFields, fieldsToFilter, field)) {
-    // List<FieldValidation> fieldValidationList = new ArrayList<>();
-    // FieldValidation fieldValidation = new FieldValidation();
-    // fieldValidation.setValidation(validation);
-    // FieldValue fieldValue = new FieldValue();
-    // fieldValue.setId(field.getId());
-    // fieldValidation.setFieldValue(fieldValue);
-    // fieldValidationList.add(fieldValidation);
-    // field.setFieldValidations(fieldValidationList);
-    // errorFields.add(field);
-    // }
-    // }
+    String origname =
+        getTableSchemaFromIdTableSchema(datasetSchema, uniqueConstraint.getTableSchemaId());
 
-    // saveFieldValidations(errorFields);
+    // GetValidationData
+    Validation validation = createValidation(idRule, schemaId, origname);
 
-    // Force true because we only need Field Validations
-    return true;
+    // get duplicated records
+    List<RecordValue> duplicatedRecords =
+        recordRepository.queryExecutionRecord(mountQuery(uniqueConstraint.getFieldSchemaIds()));
 
+    List<RecordValue> recordValues = new ArrayList<>();
+    for (RecordValue record : duplicatedRecords) {
+      RecordValidation recordValidation = new RecordValidation();
+      recordValidation.setValidation(validation);
+      recordValidation.setRecordValue(record);
+      List<RecordValidation> recordValidations =
+          record.getRecordValidations() != null ? record.getRecordValidations() : new ArrayList<>();
+      recordValidations.add(recordValidation);
+      record.setRecordValidations(recordValidations);
+      recordValues.add(record);
+    }
 
+    // save records
+    saveRecordValidations(recordValues);
+
+    return duplicatedRecords.isEmpty();
   }
+
 }

@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -198,15 +197,5 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     final JpaTransactionManager schemastransactionManager = new JpaTransactionManager();
     schemastransactionManager.setEntityManagerFactory(dataSetsEntityManagerFactory().getObject());
     return schemastransactionManager;
-  }
-
-  @Bean
-  public LocalSessionFactoryBean sessionFactory() {
-    LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-    sessionFactory.setDataSource(datasetDataSource());
-    sessionFactory.setPackagesToScan("org.eea.validation.persistence.data.domain");
-    sessionFactory.setHibernateProperties(additionalProperties());
-
-    return sessionFactory;
   }
 }

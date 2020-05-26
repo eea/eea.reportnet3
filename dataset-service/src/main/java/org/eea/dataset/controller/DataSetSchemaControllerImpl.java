@@ -668,7 +668,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @GetMapping(value = "/private/getUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
-  public UniqueConstraintVO getUniqueConstraint(@PathVariable("uniqueId") String uniqueId) {
+  public UniqueConstraintVO getUniqueConstraint(@RequestParam("uniqueId") String uniqueId) {
     if (uniqueId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT);
@@ -688,7 +688,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  @PostMapping(value = "/createUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/createUniqueConstraint")
   public void createUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
     if (uniqueConstraint != null) {
       if (uniqueConstraint.getDatasetSchemaId() == null) {
@@ -715,8 +715,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  @DeleteMapping(value = "/deleteUniqueConstraint/{uniqueConstraintId}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @DeleteMapping(value = "/deleteUniqueConstraint/{uniqueConstraintId}")
   public void deleteUniqueConstraint(
       @PathVariable("uniqueConstraintId") String uniqueConstraintId) {
     if (uniqueConstraintId == null) {

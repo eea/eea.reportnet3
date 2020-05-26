@@ -182,6 +182,5 @@ function boolean isfieldFK(DatasetValue datasetId, String idFieldSchema,String i
  
   //////////////////////////////////////////VALIDATION UNIQUE CONSTRAINT////////////////////////////////////////////////////////////
 function boolean isUniqueConstraint(String uniqueIdConstraint,String idRule){
-		UniqueValidationUtils.uniqueConstraint(uniqueIdConstraint,idRule);
-return true;
+	return UniqueValidationUtils.uniqueConstraint(uniqueIdConstraint,idRule);
 }
