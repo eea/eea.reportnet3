@@ -478,7 +478,7 @@ public class RulesControllerImplTest {
 
   @Test
   public void createUniqueConstraintTest() {
-    rulesControllerImpl.createUniqueConstraint("5e44110d6a9e3a270ce13fac",
+    rulesControllerImpl.createUniqueConstraintRule("5e44110d6a9e3a270ce13fac",
         "5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");
     Mockito.verify(rulesService, times(1)).createUniqueConstraint(Mockito.any(), Mockito.any(),
         Mockito.any());
@@ -486,7 +486,7 @@ public class RulesControllerImplTest {
 
   @Test
   public void deleteUniqueConstraintTest() {
-    rulesControllerImpl.deleteUniqueConstraint("5e44110d6a9e3a270ce13fac",
+    rulesControllerImpl.deleteUniqueConstraintRule("5e44110d6a9e3a270ce13fac",
         "5e44110d6a9e3a270ce13fac");
     Mockito.verify(rulesService, times(1)).deleteUniqueConstraint(Mockito.any(), Mockito.any());
   }

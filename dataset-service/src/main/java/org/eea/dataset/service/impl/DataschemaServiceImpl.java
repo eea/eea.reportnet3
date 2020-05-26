@@ -1263,7 +1263,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     LOG.info("Creating unique contraint");
     uniqueConstraintVO.setUniqueId(new ObjectId().toString());
     uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
-    rulesControllerZuul.createUniqueConstraint(uniqueConstraintVO.getDatasetSchemaId(),
+    rulesControllerZuul.createUniqueConstraintRule(uniqueConstraintVO.getDatasetSchemaId(),
         uniqueConstraintVO.getTableSchemaId(), uniqueConstraintVO.getUniqueId());
     LOG.info("unique constraint created with id {}", uniqueConstraintVO.getUniqueId());
   }
@@ -1279,7 +1279,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     LOG.info("deleting constraint {}", uniqueId);
     UniqueConstraintVO uniqueConstraint = getUniqueConstraint(uniqueId);
     uniqueConstraintRepository.deleteByUniqueId(new ObjectId(uniqueId));
-    rulesControllerZuul.deleteUniqueConstraint(uniqueConstraint.getDatasetSchemaId(), uniqueId);
+    rulesControllerZuul.deleteUniqueConstraintRule(uniqueConstraint.getDatasetSchemaId(), uniqueId);
     LOG.info("unique constraint deleted with id {}", uniqueId);
   }
 
@@ -1292,10 +1292,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public void updateUniqueConstraint(UniqueConstraintVO uniqueConstraintVO) {
     LOG.info("updating constraint {}", uniqueConstraintVO.getUniqueId());
     uniqueConstraintRepository.deleteByUniqueId(new ObjectId(uniqueConstraintVO.getUniqueId()));
-    rulesControllerZuul.deleteUniqueConstraint(uniqueConstraintVO.getDatasetSchemaId(),
+    rulesControllerZuul.deleteUniqueConstraintRule(uniqueConstraintVO.getDatasetSchemaId(),
         uniqueConstraintVO.getUniqueId());
     uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
-    rulesControllerZuul.createUniqueConstraint(uniqueConstraintVO.getDatasetSchemaId(),
+    rulesControllerZuul.createUniqueConstraintRule(uniqueConstraintVO.getDatasetSchemaId(),
         uniqueConstraintVO.getTableSchemaId(), uniqueConstraintVO.getUniqueId());
     LOG.info("unique constraint updated with id {}", uniqueConstraintVO.getUniqueId());
   }

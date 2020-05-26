@@ -154,7 +154,13 @@ public class RulesControllerImpl implements RulesController {
         referenceFieldSchemaPKId, datasetSchemaId);
   }
 
+  /**
+   * Creates the new rule.
+   *
+   * @param datasetId the dataset id
+   * @param ruleVO the rule VO
    * @return the response entity
+   */
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
@@ -318,8 +324,8 @@ public class RulesControllerImpl implements RulesController {
    * @param uniqueId the unique id
    */
   @Override
-  @PostMapping("/private/createUniqueConstraint")
-  public void createUniqueConstraint(String datasetSchemaId, String tableSchemaId,
+  @PostMapping("/private/createUniqueConstraintRule")
+  public void createUniqueConstraintRule(String datasetSchemaId, String tableSchemaId,
       String uniqueId) {
     rulesService.createUniqueConstraint(datasetSchemaId, tableSchemaId, uniqueId);
   }
@@ -331,8 +337,8 @@ public class RulesControllerImpl implements RulesController {
    * @param uniqueId the unique id
    */
   @Override
-  @DeleteMapping("/private/deleteUniqueConstraint")
-  public void deleteUniqueConstraint(@RequestParam("datasetSchemaId") String datasetSchemaId,
+  @DeleteMapping("/private/deleteUniqueConstraintRule")
+  public void deleteUniqueConstraintRule(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("uniqueId") String uniqueId) {
 
     rulesService.deleteUniqueConstraint(datasetSchemaId, uniqueId);

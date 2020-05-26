@@ -1,5 +1,5 @@
 /*
- * 
+ *
  */
 package org.eea.interfaces.controller.validation;
 
@@ -139,7 +139,7 @@ public interface RulesController {
    * @return the boolean
    */
   @PutMapping("/private/existsRuleRequired")
-  public boolean existsRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
+  boolean existsRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId);
 
   /**
@@ -159,7 +159,7 @@ public interface RulesController {
    * @param datasetSchemaId the dataset schema id
    */
   @PutMapping("/updatePositionRule")
-  public void insertRuleInPosition(@RequestParam("ruleId") String ruleId,
+  void insertRuleInPosition(@RequestParam("ruleId") String ruleId,
       @RequestParam("position") int position,
       @RequestParam("datasetSchemaId") String datasetSchemaId);
 
@@ -179,8 +179,8 @@ public interface RulesController {
    * @param tableSchemaId the table schema id
    * @param uniqueId the unique id
    */
-  @PostMapping("/private/createUniqueConstraint")
-  void createUniqueConstraint(@RequestParam("datasetSchemaId") String datasetSchemaId,
+  @PostMapping("/private/createUniqueConstraintRule")
+  void createUniqueConstraintRule(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("tableSchemaId") String tableSchemaId,
       @RequestParam("uniqueId") String uniqueId);
 
@@ -190,7 +190,7 @@ public interface RulesController {
    * @param datasetSchemaId the dataset schema id
    * @param uniqueId the unique id
    */
-  @DeleteMapping("/private/deleteUniqueConstraint")
-  void deleteUniqueConstraint(@RequestParam("datasetSchemaId") String datasetSchemaId,
+  @DeleteMapping("/private/deleteUniqueConstraintRule")
+  void deleteUniqueConstraintRule(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("uniqueId") String uniqueId);
 }
