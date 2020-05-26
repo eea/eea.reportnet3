@@ -189,7 +189,7 @@ export const WebLinks = ({
         <Toolbar className={styles.weblinksToolbar}>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink dataflowHelp-weblink-upload-help-step`}
               icon="add"
               label={resources.messages['add']}
               onClick={() => {

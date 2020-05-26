@@ -1,0 +1,48 @@
+{
+  "steps": [
+    {
+      "content": "dataflowHelpStep1",
+      "target": ".dataflow-new-item-help-step"
+    },
+    {
+      "content": "dataflowHelpStep2",
+      "target": ".dataflow-documents-weblinks-help-step"
+    },
+    {
+      "content": "dataflowHelpStep3",
+      "target": ".dataflow-schema-help-step"
+    },
+    {
+      "content": "dataflowHelpStep4",
+      "target": ".dataflow-dataset-container-help-step"
+    },
+    {
+      "content": "dataflowHelpStep5",
+      "target": ".dataflow-dataset-help-step"
+    },
+    {
+      "content": "dataflowHelpStep6",
+      "target": ".dataflow-datacollection-help-step"
+    },
+    {
+      "content": "dataflowHelpStep7",
+      "target": ".dataflow-dashboards-help-step"
+    },
+    {
+      "content": "dataflowHelpStep8",
+      "target": ".dataflow-properties-provider-help-step"
+    },
+    {
+      "content": "dataflowHelpStep9",
+      "target": ".dataflow-edit-help-step"
+    },
+    {
+      "content": "dataflowHelpStep10",
+      "target": ".dataflow-properties-help-step"
+    },
+    {
+      "content": "dataflowHelpStep11",
+      "target": ".dataflow-manage-roles-help-step"
+    }
+  ]
+}

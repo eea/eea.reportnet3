@@ -29,14 +29,16 @@ const DataflowsList = ({ className, content = [], dataFetch, description, title,
     <div className={`${styles.wrap} ${className}`}>
       <h2>{title}</h2>
       <p>{description}</p>
-      <Filters
-        data={dataToFilter}
-        dateOptions={DataflowConf.filterItems['date']}
-        getFilteredData={onLoadFiltredData}
-        inputOptions={DataflowConf.filterItems['input']}
-        selectOptions={DataflowConf.filterItems['select']}
-        sortable={true}
-      />
+      <div className="dataflowList-filters-help-step">
+        <Filters
+          data={dataToFilter}
+          dateOptions={DataflowConf.filterItems['date']}
+          getFilteredData={onLoadFiltredData}
+          inputOptions={DataflowConf.filterItems['input']}
+          selectOptions={DataflowConf.filterItems['select']}
+          sortable={true}
+        />
+      </div>
       {!isEmpty(content) ? (
         !isEmpty(filteredData) ? (
           filteredData.map(dataflow => (

@@ -152,6 +152,7 @@ const LeftSideBar = withRouter(({ history }) => {
         steps={leftSideBarContext.steps}
         styles={{
           options: {
+            primaryColor: 'var(--c-corporate-blue)',
             zIndex: 10000
           }
         }}

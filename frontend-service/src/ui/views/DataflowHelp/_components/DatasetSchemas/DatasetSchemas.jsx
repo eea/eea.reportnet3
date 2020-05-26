@@ -140,17 +140,19 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
 
   const renderDatasetSchemas = () => {
     return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (
-      datasetsSchemas.map((designDataset, i) => {
-        return (
-          <DatasetSchema
-            designDataset={designDataset}
-            key={i}
-            index={i}
-            isCustodian={isCustodian}
-            validationList={validationList}
-          />
-        );
-      })
+      <div className="dataflowHelp-datasetSchema-help-step">
+        {datasetsSchemas.map((designDataset, i) => {
+          return (
+            <DatasetSchema
+              designDataset={designDataset}
+              key={i}
+              index={i}
+              isCustodian={isCustodian}
+              validationList={validationList}
+            />
+          );
+        })}
+      </div>
     ) : (
       <h3>{`${resources.messages['noDesignSchemasCreated']}`}</h3>
     );
