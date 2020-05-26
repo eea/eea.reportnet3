@@ -1,11 +1,9 @@
 package org.eea.validation.kafka.command;
 
-import java.util.concurrent.ConcurrentHashMap;
 import org.eea.exception.EEAException;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.validation.util.ValidationHelper;
-import org.eea.validation.util.model.ValidationProcessVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -35,6 +36,7 @@ import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceMa
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.domain.EventType;
@@ -61,58 +63,84 @@ import org.springframework.web.server.ResponseStatusException;
 public class DatasetMetabaseServiceTest {
 
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @InjectMocks
   private DatasetMetabaseServiceImpl datasetMetabaseService;
 
-  /** The data set metabase repository. */
+  /**
+   * The data set metabase repository.
+   */
   @Mock
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
 
-  /** The data set metabase mapper. */
+  /**
+   * The data set metabase mapper.
+   */
   @Mock
   private DataSetMetabaseMapper dataSetMetabaseMapper;
 
-  /** The record store controller zull. */
+  /**
+   * The record store controller zull.
+   */
   @Mock
   private RecordStoreControllerZull recordStoreControllerZull;
 
-  /** The reporting dataset repository. */
+  /**
+   * The reporting dataset repository.
+   */
   @Mock
   private ReportingDatasetRepository reportingDatasetRepository;
 
-  /** The design dataset repository. */
+  /**
+   * The design dataset repository.
+   */
   @Mock
   private DesignDatasetRepository designDatasetRepository;
 
-  /** The statistics repository. */
+  /**
+   * The statistics repository.
+   */
   @Mock
   private StatisticsRepository statisticsRepository;
 
-  /** The user management controller zuul. */
+  /**
+   * The user management controller zuul.
+   */
   @Mock
   private UserManagementControllerZull userManagementControllerZuul;
 
-  /** The resource management controller zuul. */
+  /**
+   * The resource management controller zuul.
+   */
   @Mock
   private ResourceManagementControllerZull resourceManagementControllerZuul;
 
-  /** The representative controller zuul. */
+  /**
+   * The representative controller zuul.
+   */
   @Mock
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /** The data collection repository. */
+  /**
+   * The data collection repository.
+   */
   @Mock
   private DataCollectionRepository dataCollectionRepository;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
   @Mock
   private ForeignRelationsRepository foreingRelationsRepository;
 
+  @Mock
+  private DatasetService datasetService;
 
   /**
    * Inits the mocks.
@@ -213,8 +241,15 @@ public class DatasetMetabaseServiceTest {
   public void findDatasetMetabase() throws Exception {
     when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(new DataSetMetabase()));
-    datasetMetabaseService.findDatasetMetabase(Mockito.anyLong());
+    when(datasetService.getDatasetType(Mockito.anyLong())).thenReturn(DatasetTypeEnum.DESIGN);
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    when(dataSetMetabaseMapper.entityToClass(Mockito.any(DataSetMetabase.class)))
+        .thenReturn(datasetMetabaseVO);
+    DataSetMetabaseVO result = datasetMetabaseService.findDatasetMetabase(1l);
     Mockito.verify(dataSetMetabaseRepository, times(1)).findById(Mockito.anyLong());
+    Assert.assertNotNull(result);
+    Assert.assertNotNull(result.getDatasetTypeEnum());
+    Assert.assertEquals(DatasetTypeEnum.DESIGN, result.getDatasetTypeEnum());
   }
 
   /**
@@ -389,7 +424,7 @@ public class DatasetMetabaseServiceTest {
 
     doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any(), Mockito.any());
     datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.COLLECTION, "testName",
-        "5d0c822ae1ccd34cfcd97e20", 1L, new Date(), new ArrayList<RepresentativeVO>(), 0);
+        "5d0c822ae1ccd34cfcd97e20", 1L, new Date(), new ArrayList<>(), 0);
     Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any());
   }
