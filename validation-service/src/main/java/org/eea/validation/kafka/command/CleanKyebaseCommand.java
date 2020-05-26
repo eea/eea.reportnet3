@@ -1,6 +1,5 @@
 package org.eea.validation.kafka.command;
 
-import org.eea.exception.EEAException;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;

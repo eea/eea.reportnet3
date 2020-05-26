@@ -25,10 +25,12 @@ import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 export const FieldsDesigner = ({
   datasetId,
   datasetSchemas,
+  isPreviewModeOn,
+  manageDialogs,
+  manageUniqueConstraint,
   onChangeFields,
   onChangeTableProperties,
   onLoadTableData,
-  isPreviewModeOn,
   table
 }) => {
   const [toPrefill, setToPrefill] = useState(false);
@@ -464,6 +466,21 @@ export const FieldsDesigner = ({
           // style={{ transition: '0.5s' }}
           value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : ''}
         />
+        <div className={styles.constraintsButtons}>
+          <Button
+            className={`p-button-secondary p-button-animated-blink`}
+            icon={'horizontalSliders'}
+            tooltip={'Create table level unique constraint'}
+            onClick={() => {
+              manageDialogs('isManageUniqueConstraintDialogVisible', true);
+              manageUniqueConstraint({
+                isTableCreationMode: true,
+                tableSchemaId: table.tableSchemaId,
+                tableSchemaName: table.tableSchemaName
+              });
+            }}
+          />
+        </div>
         <div className={styles.switchDiv}>
           <div>
             <span className={styles.switchTextInput}>{resources.messages['readOnlyTable']}</span>
