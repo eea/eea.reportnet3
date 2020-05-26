@@ -35,7 +35,7 @@
     "closeSidebar": "Close sidebar",
     "codelistEditor": "Single select editor",
     "codelistEditorItems": "Single select items",
-    "codelistEditorItemsMessage": "(press enter, tab or paste here your selected list (separated by commas) to add new item/s)",
+    "codelistEditorItemsMessage": "Press <strong>enter</strong>, <strong>tab</strong> or <strong>paste your list</strong> (separated by commas) <u><strong>to add</strong></u> new items.",
     "codelistEditorMessage": "Enter your single select items",
     "codelists": "Single select items",
     "codelistSelection": "No single select item selected",
@@ -671,6 +671,11 @@
     "strictModeCheckboxFilter": "Strict mode filter",
     "expressionTypeDropdownPlaceholder": "expressionTypeDropdownPlaceholder",
     "fieldComparisonLabel": "Field comparison",
-    "ifThenLabel": "If-then clause"
+    "ifThenLabel": "If-then clause",
+    "2d": "2D",
+    "3d": "3D",
+    "geospatialData": "Geospatial data",
+    "selectGeographicalData": "Select point",
+    "selectGeographicalDataOnMap": "Select point on map"
   }
 }
