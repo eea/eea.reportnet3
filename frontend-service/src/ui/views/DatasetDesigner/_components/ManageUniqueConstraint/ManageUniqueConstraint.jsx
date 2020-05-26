@@ -101,11 +101,9 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
     const fieldsInUniqueConstraint = fieldData.map(field => field.fieldId);
     const selectedFieldsInUniqueConstraint = selectedFields.map(field => field.value);
 
-    const noChangedConstraint =
-      (tableSchemaId == selectedTable.value) &
-      isEqual(fieldsInUniqueConstraint.sort(), selectedFieldsInUniqueConstraint.sort());
+    const noChangedConstraint = isEqual(fieldsInUniqueConstraint.sort(), selectedFieldsInUniqueConstraint.sort());
 
-    if (noChangedConstraint == true) {
+    if (noChangedConstraint) {
       manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
       onResetValues();
     } else {
@@ -114,15 +112,14 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
           datasetSchemaId,
           selectedFields.map(field => field.value),
           selectedTable.value,
-          manageUniqueConstraintData.uniqueId
+          uniqueId
         );
         if (response.status >= 200 && response.status <= 299) {
           manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
+          onResetValues();
         }
       } catch (error) {
         notificationContext.add({ type: 'UPDATE_UNIQUE_CONSTRAINT_ERROR' });
-      } finally {
-        onResetValues();
       }
     }
   };

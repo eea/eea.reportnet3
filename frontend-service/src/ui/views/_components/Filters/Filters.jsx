@@ -1,4 +1,5 @@
 import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import ReactTooltip from 'react-tooltip';
 
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
@@ -195,16 +196,20 @@ export const Filters = ({
     </span>
   );
 
-  const renderCheckbox = id => (
-    <span className={styles.checkbox}>
-      Strict mode filter
-      <Checkbox
-        id={`${id}_checkbox`}
-        isChecked={filterState.matchMode}
-        onChange={() => onToggleMatchMode()}
-        role="checkbox"
-      />
-    </span>
+  const renderCheckbox = () => (
+    <Fragment>
+      <span className={styles.checkbox} data-tip data-for="checkboxTooltip">
+        <Checkbox
+          id={`matchMode_checkbox`}
+          isChecked={filterState.matchMode}
+          onChange={() => onToggleMatchMode()}
+          role="checkbox"
+        />
+      </span>
+      <ReactTooltip effect="solid" id="checkboxTooltip" place="top">
+        {resources.messages['strictModeCheckboxFilter']}
+      </ReactTooltip>
+    </Fragment>
   );
 
   const renderDropdown = (property, i) => (

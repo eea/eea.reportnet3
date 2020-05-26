@@ -127,6 +127,7 @@ export const UniqueConstraints = ({ designerState, getManageUniqueConstraint, ge
   ) : (
     <div className={styles.constraints}>
       <Filters
+        className={'uniqueConstraints'}
         data={constraintsState.data}
         getFilteredData={onLoadFilteredData}
         matchMode={true}
