@@ -82,9 +82,11 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
         .getResourcesByUser(ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN);
 
     // get idDataflow
-    resources.stream().filter(resourceAccessVO -> {
+    if (!resources.stream().filter(resourceAccessVO -> {
       return resourceAccessVO.getId().equals(dataFlowId);
-    }).findFirst().orElseThrow(() -> new ResourceNoFoundException(EEAErrorMessage.FORBIDDEN));
+    }).findFirst().isPresent()) {
+      throw new ResourceNoFoundException(EEAErrorMessage.FORBIDDEN);
+    }
 
     Optional<Weblink> idLinkData = webLinkRepository.findById(idLink);
     LOG.info("get the links with id : {}", idLink);
@@ -147,9 +149,11 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
         .getResourcesByUser(ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN);
 
     // get idDataflow
-    resources.stream().filter(resourceAccessVO -> {
+    if (!resources.stream().filter(resourceAccessVO -> {
       return resourceAccessVO.getId().equals(dataFlowId);
-    }).findFirst().orElseThrow(() -> new ResourceNoFoundException(EEAErrorMessage.FORBIDDEN));
+    }).findFirst().isPresent()) {
+      throw new ResourceNoFoundException(EEAErrorMessage.FORBIDDEN);
+    }
 
     try {
       webLinkRepository.deleteById(webLinkId);
@@ -188,9 +192,11 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
       throw new WrongDataExceptions(EEAErrorMessage.URL_FORMAT_INCORRECT);
     }
     // get idDataflow
-    resources.stream().filter(resourceAccessVO -> {
+    if (!resources.stream().filter(resourceAccessVO -> {
       return resourceAccessVO.getId().equals(dataFlowId);
-    }).findFirst().orElseThrow(() -> new ResourceNoFoundException(EEAErrorMessage.FORBIDDEN));
+    }).findFirst().isPresent()) {
+      throw new ResourceNoFoundException(EEAErrorMessage.FORBIDDEN);
+    }
 
     Optional<Weblink> webLinkFound = webLinkRepository.findById(weblink.getId());
     if (!webLinkFound.isPresent()) {

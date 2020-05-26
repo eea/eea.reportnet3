@@ -1,15 +1,21 @@
+import isNil from 'lodash/isNil';
 import moment from 'moment';
 
 import { config } from 'conf';
 
-const getOperatorEquivalence = (operatorType, operatorValue) => {
+import { getCreationDTO } from './getCreationDTO';
+
+const getOperatorEquivalence = (operatorType, operatorValue = null) => {
   const {
     validations: { operatorEquivalences }
   } = config;
-  if (operatorEquivalences[operatorType]) {
-    return operatorEquivalences[operatorType][operatorValue];
+  if (isNil(operatorValue)) {
+    return operatorEquivalences[operatorType].type;
+  } else {
+    if (operatorEquivalences[operatorType]) {
+      return operatorEquivalences[operatorType][operatorValue];
+    }
   }
-  return operatorEquivalences.default[operatorValue];
 };
 
 export const getExpression = expression => {
@@ -17,26 +23,30 @@ export const getExpression = expression => {
   const {
     validations: { nonNumericOperators }
   } = config;
-  if (operatorType == 'LEN') {
+  if (expression.expressions.length > 1) {
+    return getCreationDTO(expression.expressions);
+  } else {
+    if (operatorType === 'LEN') {
+      return {
+        operator: getOperatorEquivalence(operatorType, operatorValue),
+        params: [
+          {
+            operator: getOperatorEquivalence(operatorType),
+            params: ['VALUE']
+          },
+          Number(expressionValue)
+        ]
+      };
+    }
+    if (operatorType === 'date') {
+      return {
+        operator: getOperatorEquivalence(operatorType, operatorValue),
+        params: ['VALUE', moment(expressionValue).format('YYYY-MM-DD')]
+      };
+    }
     return {
       operator: getOperatorEquivalence(operatorType, operatorValue),
-      arg1: {
-        operator: 'LEN',
-        arg1: 'VALUE'
-      },
-      arg2: Number(expressionValue)
+      params: ['VALUE', !nonNumericOperators.includes(operatorType) ? Number(expressionValue) : expressionValue]
     };
   }
-  if (operatorType == 'date') {
-    return {
-      arg1: 'VALUE',
-      operator: getOperatorEquivalence(operatorType, operatorValue),
-      arg2: moment(expressionValue).format('YYYY-MM-DD')
-    };
-  }
-  return {
-    arg1: 'VALUE',
-    operator: getOperatorEquivalence(operatorType, operatorValue),
-    arg2: !nonNumericOperators.includes(operatorType) ? Number(expressionValue) : expressionValue
-  };
 };

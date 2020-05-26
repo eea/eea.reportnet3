@@ -188,7 +188,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @LockMethod
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_REQUESTER')")
   @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> createDataFlow(
+  public ResponseEntity createDataFlow(
       @RequestBody @LockCriteria(name = "name", path = "name") DataFlowVO dataFlowVO) {
 
     String message = "";
@@ -231,7 +231,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataFlowVO.id,'DATAFLOW_CUSTODIAN')")
   @PutMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> updateDataFlow(@RequestBody DataFlowVO dataFlowVO) {
+  public ResponseEntity updateDataFlow(@RequestBody DataFlowVO dataFlowVO) {
     final Timestamp dateToday = java.sql.Timestamp.valueOf(LocalDateTime.now());
 
     String message = "";

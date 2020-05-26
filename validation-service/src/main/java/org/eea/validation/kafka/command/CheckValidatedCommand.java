@@ -1,6 +1,5 @@
 package org.eea.validation.kafka.command;
 
-import java.util.concurrent.ConcurrentHashMap;
 import org.eea.exception.EEAException;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
@@ -29,15 +28,13 @@ public abstract class CheckValidatedCommand extends AbstractEEAEventHandlerComma
   @Override
   @Async
   public void execute(final EEAEventVO eeaEventVO) throws EEAException {
-    final String uuid = (String) eeaEventVO.getData().get("uuid");
-    final Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
-    ConcurrentHashMap<String, Integer> processMap = validationHelper.getProcessesMap();
-    synchronized (processMap) {
-      if (processMap.containsKey(uuid)) {
-        processMap.merge(uuid, -1, Integer::sum);
-        validationHelper.checkFinishedValidations(datasetId, uuid);
-      }
+
+    final String processId = (String) eeaEventVO.getData().get("uuid");
+    if (validationHelper.isProcessCoordinator(processId)) {
+      final Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
+      validationHelper.reducePendingTasks(datasetId, processId);
     }
+
   }
 
 }

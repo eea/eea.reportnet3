@@ -23,6 +23,7 @@ public class AutomaticRules {
    * @param nameRule the name rule
    * @param shortCode the short code
    * @param description the description
+   *
    * @return the rule
    */
   public static Rule createRequiredRule(String referenceId, EntityTypeEnum typeEntityEnum,
@@ -41,6 +42,7 @@ public class AutomaticRules {
    * @param nameRule the name rule
    * @param shortCode the short code
    * @param description the description
+   *
    * @return the rule
    */
   public static Rule createNumberIntegerAutomaticRule(String referenceId,
@@ -58,6 +60,7 @@ public class AutomaticRules {
    * @param nameRule the name rule
    * @param shortCode the short code
    * @param description the description
+   *
    * @return the rule
    */
   public static Rule createNumberDecimalAutomaticRule(String referenceId,
@@ -75,6 +78,7 @@ public class AutomaticRules {
    * @param nameRule the name rule
    * @param shortCode the short code
    * @param description the description
+   *
    * @return the rule
    */
   public static Rule createDateAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
@@ -85,7 +89,6 @@ public class AutomaticRules {
   }
 
 
-
   /**
    * Creates the automatic boolean rule.
    *
@@ -94,6 +97,7 @@ public class AutomaticRules {
    * @param nameRule the name rule
    * @param shortCode the short code
    * @param description the description
+   *
    * @return the rule
    */
   public static Rule createBooleanAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
@@ -110,6 +114,7 @@ public class AutomaticRules {
    * @param nameRule the name rule
    * @param shortCode the short code
    * @param description the description
+   *
    * @return the rule
    */
   public static Rule createLatAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
@@ -127,6 +132,7 @@ public class AutomaticRules {
    * @param nameRule the name rule
    * @param shortCode the short code
    * @param description the description
+   *
    * @return the rule
    */
   public static Rule createLongAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
@@ -146,6 +152,7 @@ public class AutomaticRules {
    * @param codelistItems the code list items
    * @param shortCode the short code
    * @param description the description
+   *
    * @return the list
    */
   public static List<Rule> createCodelistAutomaticRule(String referenceId,
@@ -169,6 +176,7 @@ public class AutomaticRules {
    * @param codelistItems the codelist items
    * @param shortCode the short code
    * @param description the description
+   *
    * @return the list
    */
   public static List<Rule> createMultiSelectCodelistAutomaticRule(String referenceId,
@@ -192,7 +200,8 @@ public class AutomaticRules {
    * @param shortCode the short code
    * @param description the description
    * @param tableSchemaId the table schema id
-   * @param datasetId the dataset id
+   * @param pkMustBeUsed the pk must be used
+   *
    * @return the rule
    */
   public static Rule createFKAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
@@ -224,6 +233,7 @@ public class AutomaticRules {
    * @param nameRule the name rule
    * @param shortCode the short code
    * @param description the description
+   *
    * @return the rule
    */
   public static Rule createUrlAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
@@ -241,6 +251,7 @@ public class AutomaticRules {
    * @param nameRule the name rule
    * @param shortCode the short code
    * @param description the description
+   *
    * @return the rule
    */
   public static Rule createPhoneAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
@@ -258,6 +269,7 @@ public class AutomaticRules {
    * @param nameRule the name rule
    * @param shortCode the short code
    * @param description the description
+   *
    * @return the rule
    */
   public static Rule createEmailAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,

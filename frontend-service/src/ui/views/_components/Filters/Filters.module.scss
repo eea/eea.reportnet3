@@ -55,6 +55,35 @@
   }
 }
 
+.uniqueConstraints {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 2rem 0;
+  width: 100%;
+
+  .dataflowInput {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    font-size: 10pt;
+    width: 30% !important;
+
+    > div {
+      border-bottom: var(--inputtext-border) !important;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      width: 100% !important;
+    }
+  }
+
+  .checkbox {
+    width: auto !important;
+  }
+}
+
 .header {
   align-items: center;
   display: flex;

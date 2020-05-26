@@ -1,6 +1,5 @@
 package org.eea.validation.controller;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -21,7 +20,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -327,16 +325,19 @@ public class RulesControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void createNewRuleExceptionTest() throws EEAException {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.doThrow(EEAException.class).when(rulesService).createNewRule(Mockito.anyLong(),
         Mockito.any());
 
-    ResponseEntity<?> value = rulesControllerImpl.createNewRule(1L, new RuleVO());
-    assertEquals(null, value.getBody());
-    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
+    try {
+      rulesControllerImpl.createNewRule(1L, new RuleVO());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
   }
 
   /**

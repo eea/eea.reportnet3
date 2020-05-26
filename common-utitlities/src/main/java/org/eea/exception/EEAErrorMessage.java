@@ -216,6 +216,9 @@ public final class EEAErrorMessage {
   /** The Constant UNREPORTED_DATA: {@value}. */
   public static final String UNREPORTED_DATA = "Unreported data";
 
+  /** The Constant ENTITY_TYPE_REQUIRED: {@value}. */
+  public static final String ENTITY_TYPE_REQUIRED = "Type is required";
+
   /** The Constant UNIQUE_NOT_FOUND: {@value}. */
   public static final String UNIQUE_NOT_FOUND = "Unique Constraint with id %s not found";
 

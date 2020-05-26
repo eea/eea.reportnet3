@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -79,7 +80,9 @@ public class ValidationServiceTest {
   private ValidationServiceImpl validationServiceImpl;
 
 
-  /** The resource management controller. */
+  /**
+   * The resource management controller.
+   */
   @Mock
   private ResourceManagementControllerZull resourceManagementController;
   /**
@@ -118,11 +121,6 @@ public class ValidationServiceTest {
   @Mock
   private ValidationDatasetRepository validationDatasetRepository;
 
-  /**
-   * The validation table repository.
-   */
-  @Mock
-  private TableValidationRepository validationTableRepository;
 
   /**
    * The record repository.
@@ -211,26 +209,38 @@ public class ValidationServiceTest {
   private Validation validation;
 
 
-  /** The id list. */
+  /**
+   * The id list.
+   */
   List<Long> idList;
 
 
-  /** The attributes. */
+  /**
+   * The attributes.
+   */
   private Map<String, List<String>> attributes;
 
-  /** The field repository. */
+  /**
+   * The field repository.
+   */
   @Mock
   private FieldRepository fieldRepository;
 
-  /** The table repository. */
+  /**
+   * The table repository.
+   */
   @Mock
   private TableRepository tableRepository;
 
-  /** The dataset schema controller. */
+  /**
+   * The dataset schema controller.
+   */
   @Mock
   private DatasetSchemaController datasetSchemaController;
 
-  /** The rules error utils. */
+  /**
+   * The rules error utils.
+   */
   @Mock
   private RulesErrorUtils rulesErrorUtils;
 

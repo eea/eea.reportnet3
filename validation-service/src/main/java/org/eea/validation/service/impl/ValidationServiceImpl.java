@@ -137,7 +137,9 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private ResourceManagementControllerZull resourceManagementController;
 
-  /** The dataset schema controller. */
+  /**
+   * The dataset schema controller.
+   */
   @Autowired
   private DatasetSchemaController datasetSchemaController;
 
@@ -236,6 +238,7 @@ public class ValidationServiceImpl implements ValidationService {
 
   }
 
+
   /**
    * Load rules knowledge base.
    *
@@ -261,7 +264,6 @@ public class ValidationServiceImpl implements ValidationService {
     }
     return kieBase;
   }
-
 
   /**
    * Validate data set.
@@ -308,14 +310,17 @@ public class ValidationServiceImpl implements ValidationService {
     TableValue table = tableRepository.findById(idTable).orElse(null);
     // dataset.getTableValues().stream().forEach(table -> {
     KieSession session = kieBase.newKieSession();
+    List<TableValidation> validations = new ArrayList<>();
     try {
-      List<TableValidation> validations = runTableValidations(table, session);
-      if (table != null && table.getTableValidations() != null) {
-        table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
-          tableValidation.setTableValue(table);
-        });
+      if (table != null) {
+        validations = runTableValidations(table, session);
+        if (table.getTableValidations() != null) {
+          table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
+            tableValidation.setTableValue(table);
+          });
+        }
+        tableValidationRepository.saveAll(validations);
       }
-      tableValidationRepository.saveAll(validations);
     } finally {
       session.destroy();
     }
@@ -341,7 +346,7 @@ public class ValidationServiceImpl implements ValidationService {
     KieSession session = kieBase.newKieSession();
     try {
       records.stream().filter(Objects::nonNull).forEach(row -> {
-
+        row.initializeFieldsMap();
         runRecordValidations(row, session);
         List<RecordValidation> validations = row.getRecordValidations();
         if (null != validations) {
@@ -421,16 +426,16 @@ public class ValidationServiceImpl implements ValidationService {
     String countryCode = "''";
     String dataCallYear = "" + new LocalDate().getYear();
     if (null != resourceInfoVO.getAttributes() && resourceInfoVO.getAttributes().size() > 0) {
-      if (resourceInfoVO.getAttributes().containsKey("countryCode")) {
-        countryCode = resourceInfoVO.getAttributes().get("countryCode").get(0);
+      if (resourceInfoVO.getAttributes().containsKey(LiteralConstants.COUNTRY_CODE)) {
+        countryCode = resourceInfoVO.getAttributes().get(LiteralConstants.COUNTRY_CODE).get(0);
       }
 
-      if (resourceInfoVO.getAttributes().containsKey("dataCallYear")) {
-        dataCallYear = resourceInfoVO.getAttributes().get("dataCallYear").get(0);
+      if (resourceInfoVO.getAttributes().containsKey(LiteralConstants.DATA_CALL_YEAR)) {
+        dataCallYear = resourceInfoVO.getAttributes().get(LiteralConstants.DATA_CALL_YEAR).get(0);
       }
     }
-    ThreadPropertiesManager.setVariable("dataCallYear", dataCallYear);
-    ThreadPropertiesManager.setVariable("countryCode", countryCode);
+    ThreadPropertiesManager.setVariable(LiteralConstants.DATA_CALL_YEAR, dataCallYear);
+    ThreadPropertiesManager.setVariable(LiteralConstants.COUNTRY_CODE, countryCode);
   }
 
   /**

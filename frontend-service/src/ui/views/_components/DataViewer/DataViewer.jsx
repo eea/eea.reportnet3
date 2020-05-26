@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useContext, useRef, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
@@ -330,7 +331,19 @@ const DataViewer = withRouter(
     const parseMultiselect = record => {
       record.dataRow.forEach(field => {
         if (field.fieldData.type === 'MULTISELECT_CODELIST') {
-          field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(',');
+          if (
+            !isNil(field.fieldData[field.fieldData.fieldSchemaId]) &&
+            field.fieldData[field.fieldData.fieldSchemaId] !== ''
+          ) {
+            if (Array.isArray(field.fieldData[field.fieldData.fieldSchemaId])) {
+              field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(',');
+            } else {
+              field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId]
+                .split(',')
+                .map(item => item.trim())
+                .join(',');
+            }
+          }
         }
       });
       return record;
@@ -450,15 +463,8 @@ const DataViewer = withRouter(
     };
 
     const onEditorSubmitValue = async (cell, value, record) => {
-      console.log({ cell, value, record });
       if (!isEmpty(record)) {
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
-        console.log(
-          { field, initialCellValue, selectedCellId },
-          RecordUtils.getCellId(cell, cell.field),
-          record.recordId,
-          records.selectedRecord.recordId
-        );
         if (
           value !== initialCellValue &&
           selectedCellId === RecordUtils.getCellId(cell, cell.field) &&
@@ -829,6 +835,7 @@ const DataViewer = withRouter(
           dataflowId={dataflowId}
           datasetId={datasetId}
           hasWritePermissions={hasWritePermissions}
+          isDataCollection={isDataCollection}
           isFilterValidationsActive={isFilterValidationsActive}
           isTableDeleted={isTableDeleted}
           isLoading={isLoading}

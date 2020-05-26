@@ -37,9 +37,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-/**
- * The Class RulesServiceImplTest.
- */
+/** The Class RulesServiceImplTest. */
 @RunWith(MockitoJUnitRunner.class)
 public class RulesServiceImplTest {
 
@@ -513,6 +511,7 @@ public class RulesServiceImplTest {
     rule.setRuleName("ruleName");
     rule.setWhenCondition("whenCondition");
     rule.setThenCondition(Arrays.asList("success", "error"));
+    rule.setType(EntityTypeEnum.FIELD);
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");
     Mockito.when(rulesRepository.createNewRule(Mockito.any(), Mockito.any())).thenReturn(true);
@@ -553,6 +552,7 @@ public class RulesServiceImplTest {
     rule.setDescription("description");
     rule.setRuleName("ruleName");
     rule.setWhenCondition("whenCondition");
+    rule.setType(EntityTypeEnum.FIELD);
     rule.setThenCondition(Arrays.asList("success", "error"));
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");
@@ -566,6 +566,58 @@ public class RulesServiceImplTest {
     }
   }
 
+  /**
+   * Creates the new rule short code null exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void createNewRuleShortCodeNullExceptionTest() throws EEAException {
+
+    Rule rule = new Rule();
+    rule.setReferenceId(new ObjectId());
+    rule.setDescription("description");
+    rule.setRuleName("ruleName");
+    rule.setWhenCondition("whenCondition");
+    rule.setThenCondition(Arrays.asList("success", "error"));
+
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    try {
+      rulesServiceImpl.createNewRule(1L, new RuleVO());
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.SHORT_CODE_REQUIRED, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the new rule entity type null exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void createNewRuleEntityTypeNullExceptionTest() throws EEAException {
+
+    Rule rule = new Rule();
+    rule.setReferenceId(new ObjectId());
+    rule.setShortCode("shortCode");
+    rule.setDescription("description");
+    rule.setRuleName("ruleName");
+    rule.setWhenCondition("whenCondition");
+    rule.setThenCondition(Arrays.asList("success", "error"));
+
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    try {
+      rulesServiceImpl.createNewRule(1L, new RuleVO());
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.ENTITY_TYPE_REQUIRED, e.getMessage());
+      throw e;
+    }
+  }
 
   /**
    * Creates the new rule then condition size exception test.
@@ -741,6 +793,7 @@ public class RulesServiceImplTest {
     rule.setRuleName("ruleName");
     rule.setWhenCondition("whenCondition");
     rule.setThenCondition(Arrays.asList("success", "error"));
+    rule.setType(EntityTypeEnum.FIELD);
 
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");
@@ -784,6 +837,7 @@ public class RulesServiceImplTest {
     rule.setRuleName("ruleName");
     rule.setWhenCondition("whenCondition");
     rule.setThenCondition(Arrays.asList("success", "error"));
+    rule.setType(EntityTypeEnum.FIELD);
 
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");

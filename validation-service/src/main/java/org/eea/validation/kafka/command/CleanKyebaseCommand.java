@@ -1,6 +1,5 @@
 package org.eea.validation.kafka.command;
 
-import org.eea.exception.EEAException;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -49,9 +48,9 @@ public class CleanKyebaseCommand extends AbstractEEAEventHandlerCommand {
    */
   @Override
   public void execute(final EEAEventVO eeaEventVO) {
-    final String uuid = (String) eeaEventVO.getData().get("uuid");
-    LOG.info("Removing kieBase for process {}", uuid);
-    validationHelper.removeKieBase(uuid);
+    final String processId = (String) eeaEventVO.getData().get("uuid");
+    LOG.info("Removing kieBase for process {}", processId);
+    validationHelper.finishProcess(processId);
   }
 
 

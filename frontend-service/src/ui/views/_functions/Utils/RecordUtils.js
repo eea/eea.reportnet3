@@ -1,3 +1,4 @@
+import intersection from 'lodash/intersection';
 import isEqual from 'lodash/isEqual';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -83,7 +84,7 @@ const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirs
 const getCodelistItems = (colsSchema, field) => {
   const codelistItems = getCellItems(colsSchema, field);
   return !isNil(codelistItems)
-    ? codelistItems.map(codelistItem => {
+    ? codelistItems.sort().map(codelistItem => {
         return { itemType: codelistItem, value: codelistItem };
       })
     : [];
@@ -92,7 +93,7 @@ const getCodelistItems = (colsSchema, field) => {
 const getCodelistItemsInSingleColumn = column => {
   const codelistItems = column.codelistItems;
   return !isNil(codelistItems)
-    ? codelistItems.map(codelistItem => {
+    ? codelistItems.sort().map(codelistItem => {
         return { itemType: codelistItem, value: codelistItem };
       })
     : [];
@@ -129,12 +130,12 @@ const getLinkValue = (linkOptions, value) => {
 };
 
 const getMultiselectValues = (multiselectItemsOptions, value) => {
-  console.log(
-    { multiselectItemsOptions, value },
-    multiselectItemsOptions.filter(item => item.value === value[0])
-  );
   if (!isUndefined(value) && !isUndefined(value[0])) {
-    return multiselectItemsOptions.filter(item => value.includes(item.value)).map(item => item.value);
+    const splittedValue = !Array.isArray(value) ? value.split(',').map(item => item.trim()) : value;
+    return intersection(
+      splittedValue,
+      multiselectItemsOptions.map(item => item.value)
+    );
   }
 };
 

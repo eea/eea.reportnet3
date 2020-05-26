@@ -556,9 +556,7 @@ export const Dataset = withRouter(({ match, history }) => {
         <Toolbar>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary-transparent ${
-                !hasWritePermissions ? null : 'p-button-animated-blink'
-              }`}
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
               // disabled={!hasWritePermissions}
               icon={loadingFile ? 'spinnerAnimate' : 'import'}
               label={resources.messages['export']}

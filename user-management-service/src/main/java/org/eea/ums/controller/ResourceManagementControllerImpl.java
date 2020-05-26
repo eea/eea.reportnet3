@@ -8,6 +8,8 @@ import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.ums.service.SecurityProviderInterfaceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,7 +30,11 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping(value = "/resource")
 public class ResourceManagementControllerImpl implements ResourceManagementController {
 
-  /** The security provider interface service. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /**
+   * The security provider interface service.
+   */
   @Autowired
   private SecurityProviderInterfaceService securityProviderInterfaceService;
 
@@ -45,8 +51,10 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
     try {
       securityProviderInterfaceService.createResourceInstance(resourceInfoVO);
     } catch (EEAException e) {
+      LOG_ERROR.error("Error creating resource {} due to reason {}", resourceInfoVO.getName(),
+          e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.PERMISSION_NOT_CREATED);
+          EEAErrorMessage.PERMISSION_NOT_CREATED, e);
     }
   }
 
@@ -88,6 +96,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
    *
    * @param idResource the id resource
    * @param resourceGroupEnum the resource group enum
+   *
    * @return the resource detail
    */
   @Override
@@ -105,6 +114,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
    *
    * @param idResource the id resource
    * @param resourceType the resource type
+   *
    * @return the groups by id resource type
    */
   @Override
@@ -129,8 +139,9 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
     try {
       securityProviderInterfaceService.createResourceInstance(resourceInfoVOs);
     } catch (EEAException e) {
+      LOG_ERROR.error("Error creating resources due to reason {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.PERMISSION_NOT_CREATED);
+          EEAErrorMessage.PERMISSION_NOT_CREATED, e);
     }
   }
 }

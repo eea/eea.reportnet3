@@ -76,12 +76,16 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   private GroupInfoMapper groupInfoMapper;
 
 
-  /** The security redis template. */
+  /**
+   * The security redis template.
+   */
   @Autowired
   @Qualifier("securityRedisTemplate")
   private RedisTemplate<String, CacheTokenVO> securityRedisTemplate;
 
-  /** The jwt token provider. */
+  /**
+   * The jwt token provider.
+   */
   @Autowired
   private JwtTokenProvider jwtTokenProvider;
 
@@ -230,6 +234,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * Creates the resource instance.
    *
    * @param resourceInfoVO the resource info vo
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -319,6 +324,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    *
    * @param userId the user resourceId
    * @param groupName the group name
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -420,6 +426,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * @param contributor the contributor
    * @param userMail the user mail
    * @param groupName the group name
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -432,7 +439,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
               user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
           .findFirst();
     }
-    contributor.orElseThrow(() -> new EEAException("Error, user not found"));
+    if (!contributor.isPresent()) {
+      throw new EEAException("Error, user not found");
+    }
     if (contributor.isPresent()) {
       LOG.info("New contributor, the email and the group to be assigned is: {}, {}",
           contributor.get().getEmail(), groupName);
@@ -485,6 +494,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * Creates the resource instance.
    *
    * @param resourceInfoVOs the resource info V os
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -501,7 +511,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       try {
         keycloakConnectorService.createGroupDetail(groupInfo);
       } catch (EEAException e) {
-        LOG_ERROR.error("Creation error");
+        LOG_ERROR
+            .error("Error creating group {} due to reason {}", groupInfo.getName(), e.getMessage(),
+                e);
         deleteResourceInstances(resourceInfoVOs.subList(0, i));
         throw e;
       }
@@ -513,6 +525,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * Authenticate api key.
    *
    * @param apiKey the api key
+   *
    * @return the token VO
    */
   @Override
@@ -567,7 +580,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * @param userId the user id
    * @param dataflowId the dataflow id
    * @param dataProvider the data provider
+   *
    * @return the string
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -607,7 +622,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * @param userId the user id
    * @param dataflowId the dataflow id
    * @param dataProvider the data provider
+   *
    * @return the api key
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -657,13 +674,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       Optional.ofNullable(token.getOtherClaims())
           .map(claims -> (List<String>) claims.get("user_groups"))
           .filter(groups -> groups.size() > 0).ifPresent(groups -> {
-            groups.stream().map(group -> {
-              if (group.startsWith("/")) {
-                group = group.substring(1);
-              }
-              return group.toUpperCase();
-            }).forEach(eeaGroups::add);
-          });
+        groups.stream().map(group -> {
+          if (group.startsWith("/")) {
+            group = group.substring(1);
+          }
+          return group.toUpperCase();
+        }).forEach(eeaGroups::add);
+      });
 
       tokenVO.setRoles(token.getRoles());
       tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
@@ -681,6 +698,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    *
    * @param tokenVO the token VO
    * @param cacheExpireIn the cache expire in
+   *
    * @return the string
    */
   private String addTokenInfoToCache(TokenVO tokenVO, Long cacheExpireIn) {
@@ -697,6 +715,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * Gets the user without keys.
    *
    * @param userId the user id
+   *
    * @return the user without keys
    */
   @Override
@@ -713,6 +732,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    *
    * @param user the user
    * @param attributes the attributes
+   *
    * @return the user representation
    */
   @Override
