@@ -25,9 +25,11 @@ export const TabsDesigner = withRouter(
   ({
     datasetSchemas,
     editable = false,
-    match,
     history,
     isPreviewModeOn,
+    manageDialogs,
+    manageUniqueConstraint,
+    match,
     onChangeReference,
     onLoadTableData,
     onUpdateTable
@@ -376,14 +378,16 @@ export const TabsDesigner = withRouter(
                           autoFocus={false}
                           dataflowId={dataflowId}
                           datasetId={datasetId}
+                          datasetSchemaId={datasetSchema.datasetSchemaId}
                           datasetSchemas={datasetSchemas}
                           isPreviewModeOn={isPreviewModeOn}
-                          onLoadTableData={onLoadTableData}
-                          datasetSchemaId={datasetSchema.datasetSchemaId}
                           key={tab.index}
+                          manageDialogs={manageDialogs}
+                          manageUniqueConstraint={manageUniqueConstraint}
                           onChangeFields={onChangeFields}
                           onChangeReference={onChangeReference}
                           onChangeTableProperties={onChangeTableProperties}
+                          onLoadTableData={onLoadTableData}
                           table={tabs[i]}
                         />
                       ) : (

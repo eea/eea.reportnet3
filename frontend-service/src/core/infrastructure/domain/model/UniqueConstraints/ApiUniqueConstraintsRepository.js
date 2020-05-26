@@ -1,4 +1,5 @@
 import isNil from 'lodash/isNil';
+import sortBy from 'lodash/sortBy';
 
 import { apiUniqueConstraints } from 'core/infrastructure/api/domain/model/UniqueConstraints/ApiUniqueConstraints';
 
@@ -23,7 +24,7 @@ const parseConstraintsList = constraintsDTO => {
   if (!isNil(constraintsDTO)) {
     const constraints = [];
     constraintsDTO.forEach(constraintDTO => constraints.push(parseConstraint(constraintDTO)));
-    return constraints;
+    return sortBy(constraints, ['uniqueId']);
   }
   return;
 };

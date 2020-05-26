@@ -1,6 +1,8 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
+import ReactTooltip from 'react-tooltip';
 
 import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
 import isNil from 'lodash/isNil';
 
 import styles from './ManageUniqueConstraint.module.scss';
@@ -22,13 +24,17 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
     datasetSchemaAllTables,
     datasetSchemaId,
     isManageUniqueConstraintDialogVisible,
-    manageUniqueConstraintData
+    manageUniqueConstraintData,
+    uniqueConstraintsList
   } = designerState;
 
-  const { fieldData, tableSchemaId, tableSchemaName, uniqueId } = manageUniqueConstraintData;
+  const { fieldData, isTableCreationMode, tableSchemaId, tableSchemaName, uniqueId } = manageUniqueConstraintData;
 
+  const [isDuplicated, setIsDuplicated] = useState(false);
   const [selectedFields, setSelectedFields] = useState([]);
   const [selectedTable, setSelectedTable] = useState({ name: '', value: null });
+
+  const uniqueListDialog = isTableCreationMode ? '' : 'isUniqueConstraintsListDialogVisible';
 
   useEffect(() => {
     if (isManageUniqueConstraintDialogVisible) {
@@ -42,6 +48,22 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
   useEffect(() => {
     getFieldOptions();
   }, [selectedTable]);
+
+  useEffect(() => {
+    if (!isEmpty(uniqueConstraintsList)) setIsDuplicated(checkDuplicates());
+  }, [selectedFields]);
+
+  const checkDuplicates = () => {
+    const updatedFields = fieldData.map(field => field.fieldId);
+    const totalFields = uniqueConstraintsList.map(unique => unique.fieldData.map(item => item.fieldId));
+    const filteredFields = totalFields.filter(field => !isEqual(field.sort(), updatedFields.sort()));
+    const fields = selectedFields.map(field => field.value);
+    const duplicated = [];
+    for (let index = 0; index < filteredFields.length; index++) {
+      duplicated.push(isEqual(filteredFields[index].sort(), fields.sort()));
+    }
+    return duplicated.includes(true);
+  };
 
   const getTableOptions = () => {
     const tables = datasetSchemaAllTables.filter(table => table.index >= 0);
@@ -67,34 +89,50 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
         selectedTable.value
       );
       if (response.status >= 200 && response.status <= 299) {
-        manageDialogs('isManageUniqueConstraintDialogVisible', false, 'isUniqueConstraintsListDialogVisible', true);
+        manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
+        onResetValues();
       }
     } catch (error) {
       notificationContext.add({ type: 'CREATE_UNIQUE_CONSTRAINT_ERROR' });
-    } finally {
-      onResetValues();
     }
   };
 
   const onUpdateConstraint = async () => {
-    try {
-      const response = await UniqueConstraintsService.update(
-        datasetSchemaId,
-        selectedFields.map(field => field.value),
-        selectedTable.value,
-        manageUniqueConstraintData.uniqueId
-      );
-      if (response.status >= 200 && response.status <= 299) {
-        manageDialogs('isManageUniqueConstraintDialogVisible', false, 'isUniqueConstraintsListDialogVisible', true);
-      }
-    } catch (error) {
-      notificationContext.add({ type: 'UPDATE_UNIQUE_CONSTRAINT_ERROR' });
-    } finally {
+    const fieldsInUniqueConstraint = fieldData.map(field => field.fieldId);
+    const selectedFieldsInUniqueConstraint = selectedFields.map(field => field.value);
+
+    const noChangedConstraint = isEqual(fieldsInUniqueConstraint.sort(), selectedFieldsInUniqueConstraint.sort());
+
+    if (noChangedConstraint) {
+      manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
       onResetValues();
+    } else {
+      try {
+        const response = await UniqueConstraintsService.update(
+          datasetSchemaId,
+          selectedFields.map(field => field.value),
+          selectedTable.value,
+          uniqueId
+        );
+        if (response.status >= 200 && response.status <= 299) {
+          manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
+          onResetValues();
+        }
+      } catch (error) {
+        notificationContext.add({ type: 'UPDATE_UNIQUE_CONSTRAINT_ERROR' });
+      }
     }
   };
 
-  const onResetValues = () => resetUniques({ tableSchemaId: null, tableSchemaName: '', fieldData: [], uniqueId: null });
+  const onResetValues = () => {
+    resetUniques({
+      fieldData: [],
+      isTableCreationMode: false,
+      tableSchemaId: null,
+      tableSchemaName: '',
+      uniqueId: null
+    });
+  };
 
   const renderDialogLayout = children =>
     isManageUniqueConstraintDialogVisible && (
@@ -104,9 +142,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
         header={
           !isNil(uniqueId) ? resources.messages['editUniqueConstraint'] : resources.messages['createUniqueConstraint']
         }
-        onHide={() =>
-          manageDialogs('isManageUniqueConstraintDialogVisible', false, 'isUniqueConstraintsListDialogVisible', true)
-        }
+        onHide={() => manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true)}
         style={{ width: '975px' }}
         visible={isManageUniqueConstraintDialogVisible}>
         {children}
@@ -115,32 +151,43 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
 
   const renderFooter = (
     <Fragment>
-      <Button
-        className="p-button-primary p-button-animated-blink"
-        disabled={isEmpty(selectedFields)}
-        icon={!isNil(uniqueId) ? 'check' : 'plus'}
-        label={!isNil(uniqueId) ? resources.messages['edit'] : resources.messages['create']}
-        onClick={() => (!isNil(uniqueId) ? onUpdateConstraint() : onCreateConstraint())}
-      />
+      <span data-tip data-for="createTooltip">
+        <Button
+          className="p-button-primary p-button-animated-blink"
+          disabled={isEmpty(selectedFields) || isDuplicated}
+          icon={!isNil(uniqueId) ? 'check' : 'plus'}
+          label={!isNil(uniqueId) ? resources.messages['edit'] : resources.messages['create']}
+          onClick={() => (!isNil(uniqueId) ? onUpdateConstraint() : onCreateConstraint())}
+        />
+      </span>
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => {
-          manageDialogs('isManageUniqueConstraintDialogVisible', false, 'isUniqueConstraintsListDialogVisible', true);
+          manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
           onResetValues();
         }}
       />
+      {isDuplicated && (
+        <ReactTooltip effect="solid" id="createTooltip" place="top">
+          {resources.messages['duplicatedUniqueConstraint']}
+        </ReactTooltip>
+      )}
     </Fragment>
   );
 
   const renderListBox = () => (
     <ListBox
-      onChange={event => !isNil(event.value) && setSelectedTable(event.value)}
+      listStyle={{ height: '200px' }}
+      onChange={event => {
+        !isNil(event.value) && setSelectedTable(event.value);
+        setSelectedFields([]);
+      }}
       optionLabel="name"
       options={getTableOptions()}
       optionValue="value"
-      title={'Select a table'}
+      title={resources.messages['selectUniqueTableTitle']}
       value={selectedTable}
     />
   );
@@ -154,7 +201,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
       optionLabel="name"
       options={getFieldOptions()}
       optionValue="value"
-      title={'Select unique fields'}
+      title={resources.messages['selectUniqueFieldsTitle']}
       value={selectedFields}
     />
   );

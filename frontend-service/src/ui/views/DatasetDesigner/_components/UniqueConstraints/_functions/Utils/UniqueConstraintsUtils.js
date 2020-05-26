@@ -1,3 +1,14 @@
+import uniqBy from 'lodash/uniqBy';
+
+const getFieldsOptions = data => {
+  const parsedFields = data.map(unique => unique.fieldData.map(item => ({ id: item.fieldId, name: item.name })));
+  const allFields = [];
+  for (let index = 0; index < parsedFields.length; index++) {
+    allFields.push(...parsedFields[index]);
+  }
+  return uniqBy(allFields, 'id');
+};
+
 const parseConstraintsList = (constraintsData, tableData) => {
   const constraints = [];
   for (let i = 0; i < constraintsData.length; i++) {
@@ -15,12 +26,9 @@ const parseConstraint = data => ({
   tableSchemaId: data.tableSchemaId,
   tableSchemaName: data.tableSchemaName,
   fieldData: parseFieldsData(data.fieldSchemaIds, data.records[0]),
-  uniqueId: data.uniqueId,
-  filterFieldsNames: parseFieldsData(data.fieldSchemaIds, data.records[0])
-    .map(field => field.name)
-    .join(', ')
+  uniqueId: data.uniqueId
 });
 
 const parseFieldsData = (fields, record) => record.fields.filter(field => fields.includes(field.fieldId));
 
-export const UniqueConstraintsUtils = { parseConstraintsList };
+export const UniqueConstraintsUtils = { getFieldsOptions, parseConstraintsList };

@@ -33,7 +33,7 @@ const getLabelInitialState = (input = [], select = [], date = [], dropDown = [],
 };
 
 const getOptionTypes = (data, option, list, order) => {
-  if (list) {
+  if (list && list[option]) {
     return list[option].map(item => ({
       type: item.acronym ? `${item.acronym} - ${item.name}` : item.name,
       value: item.id
