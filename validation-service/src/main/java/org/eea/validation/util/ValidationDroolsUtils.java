@@ -10,14 +10,20 @@ import java.util.regex.Pattern;
  */
 public class ValidationDroolsUtils {
 
-  /** The Constant REG_EXP_URL. */
+  /**
+   * The Constant REG_EXP_URL.
+   */
   private static final String REG_EXP_URL =
       "^(sftp:\\/\\/www\\.|sftp:\\/\\/|ftp:\\/\\/www\\.|ftp:\\/\\/|http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,63}(:[0-9]{1,5})?(\\/.*)?$";
 
-  /** The Constant REG_EXP_EMAIL. */
+  /**
+   * The Constant REG_EXP_EMAIL.
+   */
   private static final String REG_EXP_EMAIL = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
 
-  /** The Constant REG_EXP_PHONE. */
+  /**
+   * The Constant REG_EXP_PHONE.
+   */
   private static final String REG_EXP_PHONE = "^(\\(?\\+?[0-9]*\\)?)?[0-9_\\- \\(\\)]*$";
 
   /**
@@ -27,12 +33,13 @@ public class ValidationDroolsUtils {
    * @param value the value
    * @param codelistItems the code list items
    * @param sensitive the sensitive
+   *
    * @return the boolean
    */
   public static Boolean codelistValidate(final String value, String codelistItems,
       final boolean sensitive) {
     Boolean validationResult = false;
-    // we delete the first character and the last one because we receive a string with [] values
+    // we delete the first character and the last one because we receive a string surrounded by [] symbols
     final String[] arrayItems = codelistItems.substring(1, codelistItems.length() - 1).split(",");
     for (int i = 0; i < arrayItems.length; i++) {
       if (arrayItems[i].trim().equalsIgnoreCase(value)) {
@@ -48,6 +55,7 @@ public class ValidationDroolsUtils {
    *
    * @param value the value
    * @param codelistItems the codelist items
+   *
    * @return the boolean
    */
   public static Boolean multiSelectCodelistValidate(final String value, String codelistItems) {
@@ -77,6 +85,7 @@ public class ValidationDroolsUtils {
    *
    * @param value the value
    * @param regExp the reg exp
+   *
    * @return the boolean
    */
   public static Boolean validateRegExpression(final String value, final String regExp) {
