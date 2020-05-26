@@ -49,7 +49,7 @@ export const FieldComparison = ({
             type="button"
             label={resourcesContext.messages.addNewRule}
             icon="plus"
-            onClick={e => onAddNewExpression()}
+            onClick={() => onAddNewExpression()}
           />
           {creationFormState.groupExpressionsActive >= 2 && (
             <Button
@@ -58,7 +58,7 @@ export const FieldComparison = ({
               type="button"
               label="Group"
               icon="plus"
-              onClick={e => onExpressionGroup()}
+              onClick={() => onExpressionGroup()}
             />
           )}
         </div>

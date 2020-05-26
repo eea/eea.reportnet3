@@ -666,8 +666,11 @@
     "selectUniqueTableTitle": "Select a table",
     "updateUniqueConstraintError": "Error updating constraint",
     "createUniqueConstraintError": "Error creating constraint",
-    "dataflowListHelpStep2": "You can filter them by multiple parameteres",
+    "dataflowListHelpStep2": "You can filter them by multiple parameters",
     "dataflowListHelpStep5": "...the legal instrument and obligation...",
-    "strictModeCheckboxFilter": "Strict mode filter"
+    "strictModeCheckboxFilter": "Strict mode filter",
+    "expressionTypeDropdownPlaceholder": "expressionTypeDropdownPlaceholder",
+    "fieldComparisonLabel": "Field comparison",
+    "ifThenLabel": "If-then clause"
   }
 }

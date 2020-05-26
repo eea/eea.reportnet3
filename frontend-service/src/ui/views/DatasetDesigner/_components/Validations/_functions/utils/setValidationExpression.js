@@ -1,10 +1,8 @@
 import { config } from 'conf';
 export const setValidationExpression = (expressionId, field, expressions) => {
-  console.log('setValidationExpression', expressionId, field, expressions);
-  console.log('field', field);
-
   const [targetExpression] = expressions.filter(expression => expressionId === expression.expressionId);
 
+  console.log('field', field);
   console.log('targetExpression', targetExpression);
   switch (field.key) {
     case 'expressionValue':

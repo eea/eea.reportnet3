@@ -232,7 +232,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
     let errors = false;
 
     clickedFields.forEach(clickedField => {
-      if (printError(clickedField) == 'error') errors = true;
+      if (printError(clickedField) === 'error') errors = true;
     });
 
     if (errors) {

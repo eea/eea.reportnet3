@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -7,6 +7,8 @@ import styles from './ExpressionSelector.module.scss';
 import { Dropdown } from 'primereact/dropdown';
 import { FieldComparison } from 'ui/views/DatasetDesigner/_components/Validations/_components/FieldComparison';
 import { IfThenClause } from 'ui/views/DatasetDesigner/_components/Validations/_components/IfThenClause';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const ExpressionSelector = ({
   onExpressionTypeToggle,
@@ -20,9 +22,10 @@ export const ExpressionSelector = ({
   onExpressionGroup,
   onExpressionsErrors
 }) => {
+  const resources = useContext(ResourcesContext);
   const options = [
-    { label: 'Field comparison', value: 'fieldComparison' },
-    { label: 'If-then clause', value: 'ifThenClause' }
+    { label: resources.messages['fieldComparisonLabel'], value: 'fieldComparison' },
+    { label: resources.messages['ifThenLabel'], value: 'ifThenClause' }
   ];
   const {
     candidateRule: { expressionType }
@@ -34,13 +37,13 @@ export const ExpressionSelector = ({
           <FieldComparison
             componentName={componentName}
             creationFormState={creationFormState}
+            onAddNewExpression={onAddNewExpression}
             onExpressionDelete={onExpressionDelete}
             onExpressionFieldUpdate={onExpressionFieldUpdate}
             onExpressionGroup={onExpressionGroup}
             onExpressionMarkToGroup={onExpressionMarkToGroup}
-            tabsChanges={tabsChanges}
-            onAddNewExpression={onAddNewExpression}
             onExpressionsErrors={onExpressionsErrors}
+            tabsChanges={tabsChanges}
           />
         </>
       );
@@ -57,7 +60,7 @@ export const ExpressionSelector = ({
           value={expressionType}
           options={options}
           onChange={e => onExpressionTypeToggle(e.value)}
-          placeholder={'Select Expression type'}
+          placeholder={resources.messages['expressionTypeDropdownPlaceholder']}
           optionLabel="label"
         />
       </div>

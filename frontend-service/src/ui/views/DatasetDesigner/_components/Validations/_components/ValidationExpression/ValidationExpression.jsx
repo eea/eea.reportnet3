@@ -112,7 +112,7 @@ const ValidationExpression = ({
   const printRequiredFieldError = field => {
     let conditions = false;
     if (field === 'union') {
-      conditions = clickedFields.includes(field) && position != 0 && isEmpty(expressionValues[field]);
+      conditions = clickedFields.includes(field) && position !== 0 && isEmpty(expressionValues[field]);
     } else if (field === 'expressionValue') {
       conditions = clickedFields.includes(field) && isEmpty(expressionValues[field].toString());
     } else {
@@ -213,7 +213,7 @@ const ValidationExpression = ({
           useGrouping={false}
           mode="decimal"
           onBlur={e => {
-            checkField('number', e.target.value);
+            checkField('number', e.value);
           }}
         />
       );
@@ -224,9 +224,9 @@ const ValidationExpression = ({
           disabled={isDisabled}
           placeholder={resourcesContext.messages.value}
           value={expressionValues.expressionValue}
-          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
+          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
           onBlur={e => {
-            checkField('year', e.target.value);
+            checkField('year', e.value);
           }}
           steps={0}
           useGrouping={false}
@@ -240,7 +240,7 @@ const ValidationExpression = ({
           disabled={isDisabled}
           placeholder={resourcesContext.messages.value}
           value={expressionValues.expressionValue}
-          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
+          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
           steps={0}
           format={false}
           useGrouping={false}
@@ -255,7 +255,7 @@ const ValidationExpression = ({
         disabled={isDisabled}
         placeholder={resourcesContext.messages.value}
         value={expressionValues.expressionValue}
-        onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
+        onChange={e => onUpdateExpressionField('expressionValue', e.value)}
         keyfilter={valueKeyFilter}
       />
     );
@@ -272,20 +272,20 @@ const ValidationExpression = ({
         />
       </span>
       <span
-        onBlur={e => onAddToClickedFields('union')}
+        onBlur={() => onAddToClickedFields('union')}
         className={`${styles.union} formField ${printRequiredFieldError('union')}`}>
         <Dropdown
-          disabled={isDisabled || position == 0}
+          disabled={isDisabled || position === 0}
           // appendTo={document.body}
           placeholder={resourcesContext.messages.union}
           optionLabel="label"
           options={config.validations.logicalOperators}
-          onChange={e => onUpdateExpressionField('union', e.target.value)}
-          value={{ label: expressionValues.union, value: expressionValues.union }}
+          onChange={e => onUpdateExpressionField('union', e.value)}
+          value={expressionValues.union}
         />
       </span>
       <span
-        onBlur={e => onAddToClickedFields('operatorType')}
+        onBlur={() => onAddToClickedFields('operatorType')}
         className={`${styles.operatorType} formField ${printRequiredFieldError('operatorType')}`}>
         <Dropdown
           disabled={isDisabled}
@@ -293,12 +293,12 @@ const ValidationExpression = ({
           placeholder={resourcesContext.messages.operatorType}
           optionLabel="label"
           options={operatorTypes}
-          onChange={e => onUpdateExpressionField('operatorType', e.target.value)}
+          onChange={e => onUpdateExpressionField('operatorType', e.value)}
           value={expressionValues.operatorType}
         />
       </span>
       <span
-        onBlur={e => onAddToClickedFields('operatorValue')}
+        onBlur={() => onAddToClickedFields('operatorValue')}
         className={`${styles.operatorValue} formField ${printRequiredFieldError('operatorValue')}`}>
         <Dropdown
           disabled={isDisabled}
@@ -306,12 +306,12 @@ const ValidationExpression = ({
           placeholder={resourcesContext.messages.operator}
           optionLabel="label"
           options={operatorValues}
-          onChange={e => onUpdateExpressionField('operatorValue', e.target.value)}
+          onChange={e => onUpdateExpressionField('operatorValue', e.value)}
           value={expressionValues.operatorValue}
         />
       </span>
       <span
-        onBlur={e => onAddToClickedFields('expressionValue')}
+        onBlur={() => onAddToClickedFields('expressionValue')}
         className={`${styles.expressionValue} formField ${printRequiredFieldError('expressionValue')}`}>
         {buildValueInput()}
       </span>
@@ -321,7 +321,7 @@ const ValidationExpression = ({
           disabled={isDisabled}
           type="button"
           icon="trash"
-          onClick={e => {
+          onClick={() => {
             onExpressionDelete(expressionId);
           }}
         />

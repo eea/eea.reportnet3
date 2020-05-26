@@ -109,7 +109,6 @@ const ComparisonExpression = ({
   };
 
   const onUpdateExpressionField = (key, value) => {
-    console.log('onUpdateExpressionField', expressionId, key, value);
     checkField(key, value.value);
     onDeleteFromClickedFields(key);
     onExpressionFieldUpdate(expressionId, {
@@ -244,7 +243,7 @@ const ComparisonExpression = ({
           disabled={isDisabled}
           type="button"
           icon="trash"
-          onClick={e => {
+          onClick={() => {
             onExpressionDelete(expressionId);
           }}
         />
