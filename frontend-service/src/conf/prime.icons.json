@@ -68,6 +68,8 @@
     "users": "pi pi-users",
     "validate": "pi pi-check-circle",
     "warning": "pi pi-exclamation-triangle",
-    "warningCircle": "pi pi-exclamation-circle"
+    "warningCircle": "pi pi-exclamation-circle",
+    "marker": "pi pi-map-marker",
+    "compass": "pi pi-compass"
   }
 }

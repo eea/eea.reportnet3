@@ -230,7 +230,7 @@ const getFieldTypeValue = value => {
     { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
     { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
     // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
-    // { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
+    { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
     // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
     // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
