@@ -9,7 +9,7 @@ import { config } from 'conf/';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
-import { Dropdown } from 'ui/views/_components/Dropdown';
+import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputNumber } from 'primereact/inputnumber';
 
@@ -147,8 +147,6 @@ const ComparisonExpression = ({
     }
   };
 
-  console.log('tableFields', tableFields);
-
   return (
     <li className={styles.expression}>
       <span className={styles.group}>
@@ -177,8 +175,7 @@ const ComparisonExpression = ({
         <Dropdown
           id={`${componentName}__field1`}
           disabled={false}
-          appendTo={document.body}
-          filterPlaceholder={'Select first field'}
+          // appendTo={document.body}
           placeholder={'Select first field'}
           optionLabel={'label'}
           options={tableFields}
@@ -191,7 +188,7 @@ const ComparisonExpression = ({
         className={`${styles.operatorType} formField ${printRequiredFieldError('operatorType')}`}>
         <Dropdown
           disabled={isDisabled}
-          appendTo={document.body}
+          // appendTo={document.body}
           placeholder={resourcesContext.messages.operatorType}
           optionLabel="label"
           optionValue="value"
@@ -205,7 +202,7 @@ const ComparisonExpression = ({
         className={`${styles.operatorValue} formField ${printRequiredFieldError('operatorValue')}`}>
         <Dropdown
           disabled={isDisabled}
-          appendTo={document.body}
+          // appendTo={document.body}
           placeholder={resourcesContext.messages.operator}
           optionLabel="label"
           optionValue="value"
@@ -224,7 +221,7 @@ const ComparisonExpression = ({
         <Dropdown
           id={`${componentName}__field2`}
           disabled={false}
-          appendTo={document.body}
+          // appendTo={document.body}
           filterPlaceholder={'Select second field'}
           placeholder={'Select second field'}
           optionLabel="label"
