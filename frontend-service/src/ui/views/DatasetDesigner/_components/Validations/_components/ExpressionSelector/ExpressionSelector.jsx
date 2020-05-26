@@ -8,7 +8,18 @@ import { Dropdown } from 'primereact/dropdown';
 import { FieldComparison } from 'ui/views/DatasetDesigner/_components/Validations/_components/FieldComparison';
 import { IfThenClause } from 'ui/views/DatasetDesigner/_components/Validations/_components/IfThenClause';
 
-export const ExpressionSelector = ({ onExpressionTypeToggle, creationFormState }) => {
+export const ExpressionSelector = ({
+  onExpressionTypeToggle,
+  componentName,
+  creationFormState,
+  onExpressionDelete,
+  onExpressionFieldUpdate,
+  onExpressionMarkToGroup,
+  tabsChanges,
+  onAddNewExpression,
+  onExpressionGroup,
+  onExpressionsErrors
+}) => {
   const options = [
     { label: 'Field comparison', value: 'fieldComparison' },
     { label: 'If-then clause', value: 'ifThenClause' }
@@ -18,7 +29,21 @@ export const ExpressionSelector = ({ onExpressionTypeToggle, creationFormState }
   } = creationFormState;
   const expressionsTypeView = () => {
     if (!isEmpty(expressionType) && expressionType === 'fieldComparison') {
-      return <FieldComparison />;
+      return (
+        <>
+          <FieldComparison
+            componentName={componentName}
+            creationFormState={creationFormState}
+            onExpressionDelete={onExpressionDelete}
+            onExpressionFieldUpdate={onExpressionFieldUpdate}
+            onExpressionGroup={onExpressionGroup}
+            onExpressionMarkToGroup={onExpressionMarkToGroup}
+            tabsChanges={tabsChanges}
+            onAddNewExpression={onAddNewExpression}
+            onExpressionsErrors={onExpressionsErrors}
+          />
+        </>
+      );
     }
     if (!isEmpty(expressionType) && expressionType === 'ifThenClause') {
       return <IfThenClause />;

@@ -92,7 +92,18 @@ export const RowValidation = ({ datasetId, tabs }) => {
           header={resourcesContext.messages.tabMenuExpression}
           leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}
           headerClassName={showErrorOnExpressionTab ? styles.error : ''}>
-          <ExpressionSelector creationFormState={creationFormState} onExpressionTypeToggle={onExpressionTypeToggle} />
+          <ExpressionSelector
+            componentName={componentName}
+            creationFormState={creationFormState}
+            onExpressionDelete={onExpressionDelete}
+            onExpressionFieldUpdate={onExpressionFieldUpdate}
+            onExpressionGroup={onExpressionGroup}
+            onExpressionMarkToGroup={onExpressionMarkToGroup}
+            tabsChanges={tabsChanges}
+            onAddNewExpression={onAddNewExpression}
+            onExpressionsErrors={onExpressionsErrors}
+            onExpressionTypeToggle={onExpressionTypeToggle}
+          />
         </TabPanel>
       ]);
     } else {
