@@ -98,19 +98,32 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
   };
 
   const onUpdateConstraint = async () => {
-    try {
-      const response = await UniqueConstraintsService.update(
-        datasetSchemaId,
-        selectedFields.map(field => field.value),
-        selectedTable.value,
-        manageUniqueConstraintData.uniqueId
-      );
-      if (response.status >= 200 && response.status <= 299) {
-        manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
+    const fieldsInUniqueConstraint = fieldData.map(field => field.fieldId);
+    const selectedFieldsInUniqueConstraint = selectedFields.map(field => field.value);
+
+    const noChangedConstraint =
+      (tableSchemaId == selectedTable.value) &
+      isEqual(fieldsInUniqueConstraint.sort(), selectedFieldsInUniqueConstraint.sort());
+
+    if (noChangedConstraint == true) {
+      manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
+      onResetValues();
+    } else {
+      try {
+        const response = await UniqueConstraintsService.update(
+          datasetSchemaId,
+          selectedFields.map(field => field.value),
+          selectedTable.value,
+          manageUniqueConstraintData.uniqueId
+        );
+        if (response.status >= 200 && response.status <= 299) {
+          manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
+        }
+      } catch (error) {
+        notificationContext.add({ type: 'UPDATE_UNIQUE_CONSTRAINT_ERROR' });
+      } finally {
         onResetValues();
       }
-    } catch (error) {
-      notificationContext.add({ type: 'UPDATE_UNIQUE_CONSTRAINT_ERROR' });
     }
   };
 
