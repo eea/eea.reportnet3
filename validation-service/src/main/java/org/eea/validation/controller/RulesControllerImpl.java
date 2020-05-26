@@ -329,6 +329,13 @@ public class RulesControllerImpl implements RulesController {
     rulesService.createUniqueConstraint(datasetSchemaId, tableSchemaId, uniqueId);
   }
 
+  /**
+   * Delete unique constraint.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param uniqueId the unique id
+   */
+  @Override
   @DeleteMapping("/private/deleteUniqueConstraint")
   public void deleteUniqueConstraint(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("uniqueId") String uniqueId) {

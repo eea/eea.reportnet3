@@ -996,4 +996,19 @@ public class RulesServiceImplTest {
       throw e;
     }
   }
+
+  @Test
+  public void deleteUniqueConstraintTest() {
+    rulesServiceImpl.deleteUniqueConstraint("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesRepository, times(1)).deleteByUniqueConstraintId(Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test
+  public void createUniqueConstraintTest() {
+    when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+    rulesServiceImpl.createUniqueConstraint("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
+        "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+  }
 }
