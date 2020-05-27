@@ -1,47 +1,47 @@
 {
   "steps": [
     {
-      "content": "dataflowHelpStep1",
+      "content": "Create new empty dataset schema",
       "target": ".dataflow-new-item-help-step"
     },
     {
-      "content": "dataflowHelpStep2",
+      "content": "Manage your documents and weblinks and check your dataset schemas",
       "target": ".dataflow-documents-weblinks-help-step"
     },
     {
-      "content": "dataflowHelpStep3",
+      "content": "Edit, rename or delete your dataset schema",
       "target": ".dataflow-schema-help-step"
     },
     {
-      "content": "dataflowHelpStep4",
+      "content": "This is a dataset container",
       "target": ".dataflow-dataset-container-help-step"
     },
     {
-      "content": "dataflowHelpStep5",
+      "content": "This, a dataset",
       "target": ".dataflow-dataset-help-step"
     },
     {
-      "content": "dataflowHelpStep6",
+      "content": "and this a Datacollection",
       "target": ".dataflow-datacollection-help-step"
     },
     {
-      "content": "dataflowHelpStep7",
+      "content": "You can see all your dashboards",
       "target": ".dataflow-dashboards-help-step"
     },
     {
-      "content": "dataflowHelpStep8",
+      "content": "View the dataflow settings",
       "target": ".dataflow-properties-provider-help-step"
     },
     {
-      "content": "dataflowHelpStep9",
+      "content": "Edit the dataflow properties",
       "target": ".dataflow-edit-help-step"
     },
     {
-      "content": "dataflowHelpStep10",
+      "content": "View the dataflow settings. Here you can delete your design dataflow",
       "target": ".dataflow-properties-help-step"
     },
     {
-      "content": "dataflowHelpStep11",
+      "content": "And manage the providers roles.",
       "target": ".dataflow-manage-roles-help-step"
     }
   ]

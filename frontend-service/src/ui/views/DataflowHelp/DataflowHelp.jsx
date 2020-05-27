@@ -7,7 +7,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import isUndefined from 'lodash/isUndefined';
 import sortBy from 'lodash/sortBy';
 
-import { DataflowHelpHelpConfig } from 'conf/domain/model/DataflowHelp';
+import { DataflowHelpHelpConfig } from 'conf/help/dataflowHelp';
 import { config } from 'conf';
 import { routes } from 'ui/routes';
 
