@@ -660,6 +660,23 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     return dataschemaService.getUniqueConstraints(datasetSchemaId);
   }
 
+  /**
+   * Gets the unique constraints.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the unique constraints
+   */
+  @Override
+  @GetMapping(value = "/private/getUniqueConstraint/{uniqueId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public UniqueConstraintVO getUniqueConstraint(@PathVariable("uniqueId") String uniqueId) {
+    try {
+      return dataschemaService.getUniqueConstraint(uniqueId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+  }
+
 
   /**
    * Creates the unique constraint.
@@ -668,7 +685,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  @PostMapping(value = "/createUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/createUniqueConstraint")
   public void createUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
     if (uniqueConstraint != null) {
       if (uniqueConstraint.getDatasetSchemaId() == null) {
@@ -677,6 +694,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       } else if (uniqueConstraint.getTableSchemaId() == null) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
             EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
+      } else if (uniqueConstraint.getFieldSchemaIds() == null
+          || uniqueConstraint.getFieldSchemaIds().isEmpty()) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.UNREPORTED_FIELDSCHEMAS);
       }
     } else {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UNREPORTED_DATA);
@@ -691,15 +712,18 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  @DeleteMapping(value = "/deleteUniqueConstraint/{uniqueConstraintId}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @DeleteMapping(value = "/deleteUniqueConstraint/{uniqueConstraintId}")
   public void deleteUniqueConstraint(
       @PathVariable("uniqueConstraintId") String uniqueConstraintId) {
     if (uniqueConstraintId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT);
     }
-    dataschemaService.deleteUniqueConstraint(uniqueConstraintId);
+    try {
+      dataschemaService.deleteUniqueConstraint(uniqueConstraintId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
   }
 
   /**
@@ -725,6 +749,11 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     if (uniqueConstraint.getUniqueId() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT);
+    }
+    if (uniqueConstraint.getFieldSchemaIds() == null
+        || uniqueConstraint.getFieldSchemaIds().isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.UNREPORTED_FIELDSCHEMAS);
     }
 
     dataschemaService.updateUniqueConstraint(uniqueConstraint);

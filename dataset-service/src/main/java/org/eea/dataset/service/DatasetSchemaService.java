@@ -365,8 +365,9 @@ public interface DatasetSchemaService {
    * Delete unique constraint.
    *
    * @param uniqueId the unique id
+   * @throws EEAException
    */
-  void deleteUniqueConstraint(String uniqueId);
+  void deleteUniqueConstraint(String uniqueId) throws EEAException;
 
   /**
    * Update unique constraint.
@@ -382,5 +383,14 @@ public interface DatasetSchemaService {
    * @return the unique constraints
    */
   List<UniqueConstraintVO> getUniqueConstraints(String schemaId);
+
+  /**
+   * Gets the unique constraint.
+   *
+   * @param uniqueId the unique id
+   * @return the unique constraint
+   * @throws EEAException
+   */
+  UniqueConstraintVO getUniqueConstraint(String uniqueId) throws EEAException;
 
 }

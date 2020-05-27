@@ -23,6 +23,7 @@ import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
+import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
@@ -1255,35 +1256,48 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /**
    * Creates the unique constraint.
    *
-   * @param uniqueConstraint the unique constraint
+   * @param uniqueConstraintVO the unique constraint VO
    */
   @Override
   public void createUniqueConstraint(UniqueConstraintVO uniqueConstraintVO) {
     LOG.info("Creating unique contraint");
+    uniqueConstraintVO.setUniqueId(new ObjectId().toString());
     uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
+    rulesControllerZuul.createUniqueConstraintRule(uniqueConstraintVO.getDatasetSchemaId(),
+        uniqueConstraintVO.getTableSchemaId(), uniqueConstraintVO.getUniqueId());
+    LOG.info("unique constraint created with id {}", uniqueConstraintVO.getUniqueId());
   }
 
   /**
    * Delete unique constraint.
    *
    * @param uniqueId the unique id
+   * @throws EEAException
    */
   @Override
-  public void deleteUniqueConstraint(String uniqueId) {
+  public void deleteUniqueConstraint(String uniqueId) throws EEAException {
     LOG.info("deleting constraint {}", uniqueId);
+    UniqueConstraintVO uniqueConstraint = getUniqueConstraint(uniqueId);
     uniqueConstraintRepository.deleteByUniqueId(new ObjectId(uniqueId));
+    rulesControllerZuul.deleteUniqueConstraintRule(uniqueConstraint.getDatasetSchemaId(), uniqueId);
+    LOG.info("unique constraint deleted with id {}", uniqueId);
   }
 
   /**
    * Update unique constraint.
    *
-   * @param uniequeConstraint the unique constraint
+   * @param uniqueConstraintVO the unique constraint
    */
   @Override
   public void updateUniqueConstraint(UniqueConstraintVO uniqueConstraintVO) {
     LOG.info("updating constraint {}", uniqueConstraintVO.getUniqueId());
     uniqueConstraintRepository.deleteByUniqueId(new ObjectId(uniqueConstraintVO.getUniqueId()));
+    rulesControllerZuul.deleteUniqueConstraintRule(uniqueConstraintVO.getDatasetSchemaId(),
+        uniqueConstraintVO.getUniqueId());
     uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
+    rulesControllerZuul.createUniqueConstraintRule(uniqueConstraintVO.getDatasetSchemaId(),
+        uniqueConstraintVO.getTableSchemaId(), uniqueConstraintVO.getUniqueId());
+    LOG.info("unique constraint updated with id {}", uniqueConstraintVO.getUniqueId());
   }
 
   /**
@@ -1297,5 +1311,28 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     LOG.info("get all unique Constraints of dataset {}", schemaId);
     return uniqueConstraintMapper.entityListToClass(
         uniqueConstraintRepository.findByDatasetSchemaId(new ObjectId(schemaId)));
+  }
+
+
+  /**
+   * Gets the unique constraint.
+   *
+   * @param uniqueId the unique id
+   * @return the unique constraint
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public UniqueConstraintVO getUniqueConstraint(String uniqueId) throws EEAException {
+    LOG.info("get unique Constraints {}", uniqueId);
+    Optional<UniqueConstraintSchema> uniqueResult =
+        uniqueConstraintRepository.findById(new ObjectId(uniqueId));
+    if (uniqueResult.isPresent()) {
+      return uniqueConstraintMapper.entityToClass(uniqueResult.get());
+    } else {
+      LOG_ERROR.error(
+          "Error finding the unique constraint from the catalogue. UniqueId: {} not found",
+          uniqueId);
+      throw new EEAException(String.format(EEAErrorMessage.UNIQUE_NOT_FOUND, uniqueId));
+    }
   }
 }
