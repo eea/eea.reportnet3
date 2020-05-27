@@ -644,6 +644,8 @@
     "selectGeographicalData": "Select point",
     "selectGeographicalDataOnMap": "Select point on map",
     "noWebLinks": "No weblinks added",
-    "noDocuments": "No documents uploaded"
+    "noDocuments": "No documents uploaded",
+    "dataFiltered": "- filtered: ",
+    "addUniqueConstraint": "Add unique constraint"
   }
 }
