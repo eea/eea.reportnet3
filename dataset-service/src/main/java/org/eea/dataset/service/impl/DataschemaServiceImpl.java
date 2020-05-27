@@ -1329,7 +1329,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (uniqueResult.isPresent()) {
       return uniqueConstraintMapper.entityToClass(uniqueResult.get());
     } else {
-      LOG_ERROR.error("Error find the unique constraint from the catalogue. UniqueId: {}",
+      LOG_ERROR.error(
+          "Error finding the unique constraint from the catalogue. UniqueId: {} not found",
           uniqueId);
       throw new EEAException(String.format(EEAErrorMessage.UNIQUE_NOT_FOUND, uniqueId));
     }

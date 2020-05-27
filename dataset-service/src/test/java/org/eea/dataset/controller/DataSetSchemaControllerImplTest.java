@@ -1028,17 +1028,6 @@ public class DataSetSchemaControllerImplTest {
   }
 
   @Test(expected = ResponseStatusException.class)
-  public void getUniqueConstraintIdErrorTest() throws EEAException {
-    try {
-      dataSchemaControllerImpl.getUniqueConstraint(null);
-    } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      assertEquals(EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT, e.getReason());
-      throw e;
-    }
-  }
-
-  @Test(expected = ResponseStatusException.class)
   public void getUniqueConstraintErrorTest() throws EEAException {
     doThrow(EEAException.class).when(dataschemaService).getUniqueConstraint(Mockito.any());
     try {

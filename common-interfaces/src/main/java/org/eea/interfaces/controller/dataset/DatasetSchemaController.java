@@ -255,7 +255,8 @@ public interface DatasetSchemaController {
    * @param uniqueId the unique id
    * @return the unique constraint
    */
-  @GetMapping(value = "/private/getUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
-  UniqueConstraintVO getUniqueConstraint(@RequestParam("uniqueId") String uniqueId);
+  @GetMapping(value = "/private/getUniqueConstraint/{uniqueId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  UniqueConstraintVO getUniqueConstraint(@PathVariable("uniqueId") String uniqueId);
 
 }

@@ -51,6 +51,11 @@ public class UniqueValidationUtils {
   private static DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
 
+  /**
+   * Sets the rules repository.
+   *
+   * @param rulesRepository the new rules repository
+   */
   @Autowired
   private void setRulesRepository(RulesRepository rulesRepository) {
     UniqueValidationUtils.rulesRepository = rulesRepository;
