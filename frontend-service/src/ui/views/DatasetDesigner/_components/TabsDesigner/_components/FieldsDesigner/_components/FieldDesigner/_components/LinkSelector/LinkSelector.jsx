@@ -18,13 +18,23 @@ import { DataflowService } from 'core/services/Dataflow';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const LinkSelector = withRouter(
-  ({ isLinkSelectorVisible, match, mustBeUsed, onCancelSaveLink, onSaveLink, selectedLink, tableSchemaId }) => {
+  ({
+    isLinkSelectorVisible,
+    match,
+    multipleValues = false,
+    mustBeUsed = false,
+    onCancelSaveLink,
+    onSaveLink,
+    selectedLink,
+    tableSchemaId
+  }) => {
     const resources = useContext(ResourcesContext);
     const [datasetSchemas, setDatasetSchemas] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
     const [isVisible, setIsVisible] = useState(isLinkSelectorVisible);
     const [link, setLink] = useState(selectedLink);
+    const [pkMultipleValues, setPkMultipleValues] = useState(multipleValues);
     const [pkMustBeUsed, setPkMustBeUsed] = useState(mustBeUsed);
-    const [isLoading, setIsLoading] = useState(false);
 
     const {
       params: { dataflowId }
@@ -121,6 +131,14 @@ const LinkSelector = withRouter(
               inputId={'pkMustBeUsed_check'}
               label="Default"
               onChange={e => setPkMustBeUsed(e.checked)}
+              style={{ width: '70px', marginLeft: '0.5rem' }}
+            />
+            <span className={styles.switchTextInput}>{resources.messages['pkMultipleValues']}</span>
+            <Checkbox
+              checked={pkMultipleValues}
+              inputId={'pkMultipleValues_check'}
+              label="Default"
+              onChange={e => setPkMultipleValues(e.checked)}
               style={{ width: '70px', marginLeft: '0.5rem' }}
             />
           </div>

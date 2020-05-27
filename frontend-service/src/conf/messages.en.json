@@ -647,6 +647,7 @@
     "noDocuments": "No documents uploaded",
     "dataFiltered": "- filtered: ",
     "addUniqueConstraint": "Add unique constraint",
-    "strictModeTooltip": "Associated selected values"
+    "strictModeTooltip": "Associated selected values",
+    "pkMultipleValues": "Multiple values"
   }
 }
