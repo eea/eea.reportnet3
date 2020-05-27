@@ -1,5 +1,4 @@
 import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
-import ReactTooltip from 'react-tooltip';
 
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
@@ -66,6 +65,10 @@ export const Filters = ({
   useEffect(() => {
     if (getFilteredData) getFilteredData(filterState.filteredData);
   }, [filterState.filteredData]);
+
+  useEffect(() => {
+    onReApplyFilters();
+  }, [filterState.matchMode]);
 
   useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[dateOptions]) && onAnimateLabel([dateOptions], false));
 
@@ -155,9 +158,16 @@ export const Filters = ({
     filterDispatch({ type: 'ON_SEARCH_DATA', payload: { searchedValues, value } });
   };
 
-  const onToggleMatchMode = () => {
-    filterDispatch({ type: 'TOGGLE_MATCH_MODE', payload: !filterState.matchMode });
-    onClearAllFilters();
+  const onToggleMatchMode = () => filterDispatch({ type: 'TOGGLE_MATCH_MODE', payload: !filterState.matchMode });
+
+  const onReApplyFilters = () => {
+    const keys = Object.keys(filterState.filterBy);
+    for (let index = 0; index < keys.length; index++) {
+      const filter = keys[index];
+      const value = filterState.filterBy[filter];
+
+      if (!isEmpty(value)) onFilterData(filter, filterState.filterBy[filter]);
+    }
   };
 
   const renderCalendarFilter = (property, i) => (
@@ -198,17 +208,23 @@ export const Filters = ({
 
   const renderCheckbox = () => (
     <Fragment>
-      <span className={styles.checkbox} data-tip data-for="checkboxTooltip">
-        <Checkbox
-          id={`matchMode_checkbox`}
-          isChecked={filterState.matchMode}
-          onChange={() => onToggleMatchMode()}
-          role="checkbox"
-        />
-      </span>
-      <ReactTooltip effect="solid" id="checkboxTooltip" place="top">
+      <span className={styles.checkboxWrap} data-tip data-for="checkboxTooltip">
         {resources.messages['strictModeCheckboxFilter']}
-      </ReactTooltip>
+        <Button
+          className={`${styles.strictModeInfoButton} p-button-rounded p-button-secondary-transparent`}
+          icon="infoCircle"
+          tooltip={resources.messages['strictModeTooltip']}
+          tooltipOptions={{ position: 'top' }}
+        />
+        <span className={styles.checkbox}>
+          <Checkbox
+            id={`matchMode_checkbox`}
+            isChecked={filterState.matchMode}
+            onChange={() => onToggleMatchMode()}
+            role="checkbox"
+          />
+        </span>
+      </span>
     </Fragment>
   );
 
