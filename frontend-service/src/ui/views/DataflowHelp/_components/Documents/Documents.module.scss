@@ -49,6 +49,14 @@
   margin-left: 3px !important;
 }
 
+.noDataWrapper {
+  display: flex;
+  justify-content: center;
+  h4 {
+    font-style: italic;
+  }
+}
+
 @keyframes downloadFile {
   0% {
     opacity: 1;

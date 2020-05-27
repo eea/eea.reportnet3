@@ -277,6 +277,11 @@ const Documents = ({
           <Column className={styles.hideColumn} />
         )}
       </DataTable>
+      {documents.length === 0 && (
+        <div className={styles.noDataWrapper}>
+          <h4>{resources.messages['noDocuments']}</h4>
+        </div>
+      )}
 
       {isUploadDialogVisible && (
         <Dialog

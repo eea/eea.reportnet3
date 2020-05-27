@@ -9,7 +9,7 @@ import uniq from 'lodash/uniq';
 import styles from './Dataflow.module.scss';
 
 import { config } from 'conf';
-import { DataflowHelpConfig } from 'conf/domain/model/Dataflow';
+import { DataflowHelpConfig } from 'conf/help/dataflow';
 import { routes } from 'ui/routes';
 import DataflowConf from 'conf/dataflow.config.json';
 
