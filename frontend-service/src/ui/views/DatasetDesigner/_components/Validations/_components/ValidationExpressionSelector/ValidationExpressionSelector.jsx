@@ -5,11 +5,7 @@ import { ValidationExpression } from 'ui/views/DatasetDesigner/_components/Valid
 import { ValidationExpressionGroup } from 'ui/views/DatasetDesigner/_components/Validations/_components/ValidationExpressionGroup';
 
 export const ValidationExpressionSelector = props => {
-  console.log('ValidationExpressionSelector');
-
   if (props.expressionValues.expressions.length > 0) {
-    console.log('kk');
-
     return <ValidationExpressionGroup {...props} />;
   }
   if (props.expressionType === 'fieldComparison') {
@@ -18,6 +14,5 @@ export const ValidationExpressionSelector = props => {
   if (props.expressionType === 'ifThenClause') {
     return <ComparisonExpression {...props} />;
   }
-  console.log('kkk');
   return <ValidationExpression {...props} />;
 };

@@ -1,16 +1,29 @@
 {
   "operatorByType": {
-    "NUMBER_INTEGER": ["number"],
+    "CODELIST": ["LEN", "string"],
+    "DATE": ["date", "day", "month", "year"],
+    "EMAIL": ["LEN", "string"],
+    "LINK": ["LEN", "string"],
+    "LONG_TEXT": ["LEN", "string"],
+    "MULTISELECT_CODELIST": ["LEN", "string"],
     "NUMBER_DECIMAL": ["number"],
-    "DATE": ["date", "year", "month", "day"],
-    "TEXT": ["string", "LEN"],
-    "LONG_TEXT": ["string", "LEN"],
-    "EMAIL": ["string", "LEN"],
-    "URL": ["string", "LEN"],
-    "PHONE": ["string", "LEN"],
-    "CODELIST": ["string", "LEN"],
-    "MULTISELECT_CODELIST": ["string", "LEN"],
-    "LINK": ["string", "LEN"]
+    "NUMBER_INTEGER": ["number"],
+    "PHONE": ["LEN", "string"],
+    "TEXT": ["LEN", "string"],
+    "URL": ["LEN", "string"]
+  },
+  "fieldByFieldType": {
+    "CODELIST": ["NUMBER", "TEXT"],
+    "DATE": ["DATE", "NUMBER"],
+    "EMAIL": ["EMAIL", "NUMBER", "TEXT"],
+    "LINK": ["LINK", "NUMBER", "TEXT"],
+    "LONG_TEXT": ["LONG_TEXT", "NUMBER", "TEXT"],
+    "MULTISELECT_CODELIST": ["NUMBER", "TEXT"],
+    "NUMBER_DECIMAL": ["NUMBER_DECIMAL"],
+    "NUMBER_INTEGER": ["DATE", "NUMBER_INTEGER"],
+    "PHONE": ["NUMBER", "PHONE", "STRING"],
+    "TEXT": ["LONG_TEXT", "NUMBER", "TEXT"],
+    "URL": ["NUMBER", "TEXT", "URL"]
   },
   "operatorTypes": {
     "number": {

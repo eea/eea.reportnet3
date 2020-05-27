@@ -9,16 +9,16 @@ import { config } from 'conf/';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
-// import { Dropdown } from 'ui/views/_components/Dropdown';
 import { Dropdown } from 'primereact/dropdown';
-import { InputText } from 'ui/views/_components/InputText';
 import { InputNumber } from 'primereact/inputnumber';
+import { InputText } from 'ui/views/_components/InputText';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import isNil from 'lodash/isNil';
 
 const ValidationExpression = ({
   expressionValues,
+  fieldType,
   isDisabled,
   layout,
   onExpressionDelete,
@@ -26,14 +26,13 @@ const ValidationExpression = ({
   onExpressionGroup,
   onExpressionsErrors,
   position,
-  showRequiredFields,
-  fieldType
+  showRequiredFields
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const { expressionId } = expressionValues;
-  const [operatorValues, setOperatorValues] = useState([]);
-  const [operatorTypes, setOperatorTypes] = useState([]);
   const [clickedFields, setClickedFields] = useState([]);
+  const [operatorTypes, setOperatorTypes] = useState([]);
+  const [operatorValues, setOperatorValues] = useState([]);
   const [valueInputProps, setValueInputProps] = useState();
   const [valueKeyFilter, setValueKeyFilter] = useState();
   const {
@@ -148,9 +147,7 @@ const ValidationExpression = ({
   const checkField = (field, fieldValue) => {
     if (field === 'year') {
       const yearInt = parseInt(fieldValue);
-      if (yearInt < 1000 || yearInt > 9999) {
-        onUpdateExpressionField('expressionValue', 0);
-      }
+      if (yearInt < 1000 || yearInt > 9999) onUpdateExpressionField('expressionValue', 0);
     }
     if (
       expressionValues.operatorType === 'number' &&
@@ -159,24 +156,21 @@ const ValidationExpression = ({
       !Number(expressionValues.expressionValue)
     ) {
       const number = Number(fieldValue);
-      if (!number) {
-        onUpdateExpressionField('expressionValue', '');
-      }
+      if (!number) onUpdateExpressionField('expressionValue', '');
     }
   };
   const buildValueInput = () => {
     const { operatorType, operatorValue } = expressionValues;
     if (operatorType === 'date') {
-      console.log('operatorType === date', expressionValues.expressionValue);
       return (
         <Calendar
           appendTo={document.body}
           baseZIndex={6000}
           dateFormat="yy-mm-dd"
-          placeholder="YYYY-MM-DD"
           monthNavigator={true}
-          readOnlyInput={false}
           onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+          placeholder="YYYY-MM-DD"
+          readOnlyInput={false}
           value={expressionValues.expressionValue}
           yearNavigator={true}
           yearRange="1900:2500"></Calendar>
@@ -186,15 +180,15 @@ const ValidationExpression = ({
       return (
         <InputNumber
           disabled={isDisabled}
-          placeholder={resourcesContext.messages.value}
-          value={expressionValues.expressionValue}
-          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
-          steps={0}
           format={false}
-          useGrouping={false}
-          min={0}
           max={32}
+          min={0}
           mode="decimal"
+          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+          placeholder={resourcesContext.messages.value}
+          steps={0}
+          useGrouping={false}
+          value={expressionValues.expressionValue}
         />
       );
     }
@@ -203,29 +197,24 @@ const ValidationExpression = ({
         return (
           <InputText
             disabled={isDisabled}
+            onChange={e => onUpdateExpressionField('expressionValue', e.value)}
             placeholder={resourcesContext.messages.value}
             value={expressionValues.expressionValue}
-            onChange={e => onUpdateExpressionField('expressionValue', e.value)}
           />
         );
       }
-      console.log('number input expressionValue', expressionValues.expressionValue);
 
       return (
         <InputNumber
           disabled={isDisabled}
-          placeholder={resourcesContext.messages.value}
-          value={expressionValues.expressionValue}
-          onChange={e => {
-            onUpdateExpressionField('expressionValue', e.value);
-          }}
-          steps={0}
           format={false}
-          useGrouping={false}
           mode="decimal"
-          onBlur={e => {
-            checkField('number', e.value);
-          }}
+          onBlur={e => checkField('number', e.value)}
+          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+          placeholder={resourcesContext.messages.value}
+          steps={0}
+          useGrouping={false}
+          value={expressionValues.expressionValue}
         />
       );
     }
@@ -233,15 +222,13 @@ const ValidationExpression = ({
       return (
         <InputNumber
           disabled={isDisabled}
-          placeholder={resourcesContext.messages.value}
-          value={expressionValues.expressionValue}
+          mode="decimal"
+          onBlur={e => checkField('year', e.value)}
           onChange={e => onUpdateExpressionField('expressionValue', e.value)}
-          onBlur={e => {
-            checkField('year', e.value);
-          }}
+          placeholder={resourcesContext.messages.value}
           steps={0}
           useGrouping={false}
-          mode="decimal"
+          value={expressionValues.expressionValue}
         />
       );
     }
@@ -249,50 +236,48 @@ const ValidationExpression = ({
       return (
         <InputNumber
           disabled={isDisabled}
-          placeholder={resourcesContext.messages.value}
-          value={expressionValues.expressionValue}
-          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
-          steps={0}
           format={false}
-          useGrouping={false}
-          min={0}
           max={13}
+          min={0}
           mode="decimal"
+          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+          placeholder={resourcesContext.messages.value}
+          steps={0}
+          useGrouping={false}
+          value={expressionValues.expressionValue}
         />
       );
     }
     return (
       <InputText
         disabled={isDisabled}
+        keyfilter={valueKeyFilter}
+        onChange={e => onUpdateExpressionField('expressionValue', e.value)}
         placeholder={resourcesContext.messages.value}
         value={expressionValues.expressionValue}
-        onChange={e => onUpdateExpressionField('expressionValue', e.value)}
-        keyfilter={valueKeyFilter}
       />
     );
   };
 
-  // layouts
-  const defaultLayout = (
+  return (
     <li className={styles.expression}>
-      {console.log('expressionValues.expressionValue', expressionValues.expressionValue)}
       <span className={styles.group}>
         <Checkbox
-          onChange={e => onExpressionGroup(expressionId, { key: 'group', value: e.checked })}
-          isChecked={expressionValues.group}
           disabled={isDisabled}
+          isChecked={expressionValues.group}
+          onChange={e => onExpressionGroup(expressionId, { key: 'group', value: e.checked })}
         />
       </span>
       <span
         onBlur={() => onAddToClickedFields('union')}
         className={`${styles.union} formField ${printRequiredFieldError('union')}`}>
         <Dropdown
-          disabled={isDisabled || position === 0}
           // appendTo={document.body}
-          placeholder={resourcesContext.messages.union}
+          disabled={isDisabled || position === 0}
+          onChange={e => onUpdateExpressionField('union', e.value)}
           optionLabel="label"
           options={config.validations.logicalOperators}
-          onChange={e => onUpdateExpressionField('union', e.value)}
+          placeholder={resourcesContext.messages.union}
           value={expressionValues.union}
         />
       </span>
@@ -300,12 +285,12 @@ const ValidationExpression = ({
         onBlur={() => onAddToClickedFields('operatorType')}
         className={`${styles.operatorType} formField ${printRequiredFieldError('operatorType')}`}>
         <Dropdown
-          disabled={isDisabled}
           // appendTo={document.body}
-          placeholder={resourcesContext.messages.operatorType}
+          disabled={isDisabled}
+          onChange={e => onUpdateExpressionField('operatorType', e.value)}
           optionLabel="label"
           options={operatorTypes}
-          onChange={e => onUpdateExpressionField('operatorType', e.value)}
+          placeholder={resourcesContext.messages.operatorType}
           value={expressionValues.operatorType}
         />
       </span>
@@ -313,12 +298,12 @@ const ValidationExpression = ({
         onBlur={() => onAddToClickedFields('operatorValue')}
         className={`${styles.operatorValue} formField ${printRequiredFieldError('operatorValue')}`}>
         <Dropdown
-          disabled={isDisabled}
           // appendTo={document.body}
-          placeholder={resourcesContext.messages.operator}
+          disabled={isDisabled}
+          onChange={e => onUpdateExpressionField('operatorValue', e.value)}
           optionLabel="label"
           options={operatorValues}
-          onChange={e => onUpdateExpressionField('operatorValue', e.value)}
+          placeholder={resourcesContext.messages.operator}
           value={expressionValues.operatorValue}
         />
       </span>
@@ -331,19 +316,12 @@ const ValidationExpression = ({
         <Button
           className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton} p-button-animated-blink`}
           disabled={isDisabled}
-          type="button"
           icon="trash"
-          onClick={() => {
-            onExpressionDelete(expressionId);
-          }}
+          onClick={() => onExpressionDelete(expressionId)}
+          type="button"
         />
       </span>
     </li>
   );
-  const layouts = {
-    default: defaultLayout
-  };
-
-  return layout ? layouts[layout] : layouts['default'];
 };
 export { ValidationExpression };

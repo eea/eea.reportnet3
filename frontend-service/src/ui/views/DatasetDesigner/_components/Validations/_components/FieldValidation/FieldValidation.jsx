@@ -74,8 +74,6 @@ const FieldValidation = ({ datasetId, tabs }) => {
 
   useEffect(() => {
     if (!creationFormState.candidateRule.automatic) {
-      console.log('not automatic');
-
       setTabContents([
         <TabPanel
           header={resourcesContext.messages.tabMenuConstraintData}

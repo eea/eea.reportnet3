@@ -20,7 +20,8 @@ export const ExpressionSelector = ({
   tabsChanges,
   onAddNewExpression,
   onExpressionGroup,
-  onExpressionsErrors
+  onExpressionsErrors,
+  onGetFieldType
 }) => {
   const resources = useContext(ResourcesContext);
   const options = [
@@ -44,6 +45,7 @@ export const ExpressionSelector = ({
             onExpressionMarkToGroup={onExpressionMarkToGroup}
             onExpressionsErrors={onExpressionsErrors}
             tabsChanges={tabsChanges}
+            onGetFieldType={onGetFieldType}
           />
         </>
       );
