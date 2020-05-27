@@ -99,6 +99,7 @@ const Dashboard = withRouter(
       };
 
       const onLoadStatistics = async () => {
+        console.log('eeee');
         setIsLoading(true);
         const dataset = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
         setLevelErrorTypes(dataset.levelErrorTypes);
