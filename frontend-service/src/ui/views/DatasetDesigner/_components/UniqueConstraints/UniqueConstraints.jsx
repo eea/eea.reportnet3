@@ -140,7 +140,11 @@ export const UniqueConstraints = ({ designerState, getManageUniqueConstraint, ge
           autoLayout={true}
           onRowClick={event => getManageUniqueConstraint(event.data)}
           paginator={true}
-          paginatorRight={`${resources.messages['totalUniqueConstraints']} ${constraintsState.filteredData.length}`}
+          paginatorRight={`${resources.messages['totalUniqueConstraints']} ${constraintsState.data.length} ${
+            constraintsState.filteredData.length !== constraintsState.data.length
+              ? ` ${resources.messages['dataFiltered']}  ${constraintsState.filteredData.length}`
+              : ''
+          }`}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           totalRecords={constraintsState.filteredData.length}
