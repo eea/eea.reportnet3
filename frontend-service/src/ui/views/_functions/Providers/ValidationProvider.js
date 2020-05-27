@@ -51,7 +51,8 @@ const validationReducer = (state, { type, payload }) => {
         fieldId: payload.fieldId,
         opener: payload.opener,
         ruleEdit: true,
-        ruleToEdit: payload.ruleToEdit
+        ruleToEdit: payload.ruleToEdit,
+        level: payload.level
       };
     case 'RESET_REOPEN_OPENER':
       return {
@@ -107,13 +108,14 @@ export const ValidationProvider = ({ children }) => {
             type: 'ON_OPENER_RESET'
           });
         },
-        onOpenToEdit: (rule, opener) => {
+        onOpenToEdit: (rule, opener, level) => {
           dispatch({
             type: 'ON_OPEN_TO_EDIT',
             payload: {
               ruleToEdit: { ...rule },
               fieldId: rule.referenceId,
-              opener
+              opener,
+              level
             }
           });
         },

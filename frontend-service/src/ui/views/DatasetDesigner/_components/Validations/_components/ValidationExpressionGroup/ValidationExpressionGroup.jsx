@@ -23,7 +23,9 @@ const ValidationExpressionGroup = ({
   onExpressionFieldUpdate,
   onExpressionGroup,
   position,
-  showRequiredFields
+  showRequiredFields,
+  onExpressionsErrors,
+  fieldType
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const { expressionId } = expressionValues;
@@ -64,6 +66,8 @@ const ValidationExpressionGroup = ({
           onExpressionFieldUpdate={onExpressionFieldUpdate}
           onExpressionGroup={onExpressionGroup}
           position={i}
+          onExpressionsErrors={onExpressionsErrors}
+          fieldType={fieldType}
         />
       ));
     }

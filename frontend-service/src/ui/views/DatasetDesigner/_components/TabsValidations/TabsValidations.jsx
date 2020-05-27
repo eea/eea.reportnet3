@@ -198,7 +198,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     <ActionsColumn
       onDeleteClick={() => onShowDeleteDialog()}
       onEditClick={() => {
-        validationContext.onOpenToEdit(row, 'validationsListDialog');
+        validationContext.onOpenToEdit(row, 'validationsListDialog', 'field');
         onHideValidationsDialog();
       }}
     />
@@ -207,7 +207,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   const editTemplate = row => (
     <ActionsColumn
       onEditClick={() => {
-        validationContext.onOpenToEdit(row, 'validationsListDialog');
+        validationContext.onOpenToEdit(row, 'validationsListDialog', 'field');
         onHideValidationsDialog();
       }}
     />

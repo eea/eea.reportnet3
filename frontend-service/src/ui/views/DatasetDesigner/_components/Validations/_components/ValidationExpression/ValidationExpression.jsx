@@ -114,7 +114,8 @@ const ValidationExpression = ({
     if (field === 'union') {
       conditions = clickedFields.includes(field) && position !== 0 && isEmpty(expressionValues[field]);
     } else if (field === 'expressionValue') {
-      conditions = clickedFields.includes(field) && isEmpty(expressionValues[field].toString());
+      conditions =
+        clickedFields.includes(field) && !isNil(expressionValues[field]) && isEmpty(expressionValues[field].toString());
     } else {
       conditions = clickedFields.includes(field) && isEmpty(expressionValues[field]);
     }
@@ -151,7 +152,12 @@ const ValidationExpression = ({
         onUpdateExpressionField('expressionValue', 0);
       }
     }
-    if (expressionValues.operatorType === 'number' && field === 'operatorValue' && fieldValue !== 'MATCH') {
+    if (
+      expressionValues.operatorType === 'number' &&
+      field === 'operatorValue' &&
+      fieldValue !== 'MATCH' &&
+      !Number(expressionValues.expressionValue)
+    ) {
       const number = Number(fieldValue);
       if (!number) {
         onUpdateExpressionField('expressionValue', '');
@@ -161,6 +167,7 @@ const ValidationExpression = ({
   const buildValueInput = () => {
     const { operatorType, operatorValue } = expressionValues;
     if (operatorType === 'date') {
+      console.log('operatorType === date', expressionValues.expressionValue);
       return (
         <Calendar
           appendTo={document.body}
@@ -202,12 +209,16 @@ const ValidationExpression = ({
           />
         );
       }
+      console.log('number input expressionValue', expressionValues.expressionValue);
+
       return (
         <InputNumber
           disabled={isDisabled}
           placeholder={resourcesContext.messages.value}
           value={expressionValues.expressionValue}
-          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+          onChange={e => {
+            onUpdateExpressionField('expressionValue', e.value);
+          }}
           steps={0}
           format={false}
           useGrouping={false}
@@ -264,6 +275,7 @@ const ValidationExpression = ({
   // layouts
   const defaultLayout = (
     <li className={styles.expression}>
+      {console.log('expressionValues.expressionValue', expressionValues.expressionValue)}
       <span className={styles.group}>
         <Checkbox
           onChange={e => onExpressionGroup(expressionId, { key: 'group', value: e.checked })}

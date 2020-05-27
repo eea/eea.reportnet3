@@ -164,7 +164,7 @@ const ComparisonExpression = ({
           placeholder={resourcesContext.messages.union}
           optionLabel="label"
           options={config.validations.logicalOperators}
-          onChange={e => onUpdateExpressionField('union', e.target.value)}
+          onChange={e => onUpdateExpressionField('union', e.value)}
           value={{ label: expressionValues.union, value: expressionValues.union }}
         />
       </span>

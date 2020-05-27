@@ -669,7 +669,7 @@
     "dataflowListHelpStep2": "You can filter them by multiple parameters",
     "dataflowListHelpStep5": "...the legal instrument and obligation...",
     "strictModeCheckboxFilter": "Strict mode filter",
-    "expressionTypeDropdownPlaceholder": "expressionTypeDropdownPlaceholder",
+    "expressionTypeDropdownPlaceholder": "Select type",
     "fieldComparisonLabel": "Field comparison",
     "ifThenLabel": "If-then clause",
     "2d": "2D",
