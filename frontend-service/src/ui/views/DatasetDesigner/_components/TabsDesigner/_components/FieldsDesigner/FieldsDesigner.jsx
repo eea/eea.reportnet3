@@ -468,9 +468,9 @@ export const FieldsDesigner = ({
         />
         <div className={styles.constraintsButtons}>
           <Button
-            className={`p-button-secondary p-button-animated-blink`}
-            icon={'horizontalSliders'}
-            tooltip={'Create table level unique constraint'}
+            className={`${`p-button-secondary p-button-animated-blink ${styles.constraintsTextButtons}`}`}
+            icon={'key'}
+            label={resources.messages['addUniqueConstraint']}
             onClick={() => {
               manageDialogs('isManageUniqueConstraintDialogVisible', true);
               manageUniqueConstraint({

@@ -473,7 +473,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
                 disabled={false}
-                icon={'list'}
+                icon={'horizontalSliders'}
                 iconClasses={null}
                 label={resources.messages['qcRules']}
                 onClick={() => manageDialogs('validationListDialogVisible', true)}
@@ -482,7 +482,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-                icon={'horizontalSliders'}
+                icon={'key'}
                 label={resources.messages['uniqueConstraints']}
                 onClick={() => manageDialogs('isUniqueConstraintsListDialogVisible', true)}
               />
