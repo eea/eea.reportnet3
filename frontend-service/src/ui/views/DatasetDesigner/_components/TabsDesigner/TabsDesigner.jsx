@@ -334,6 +334,7 @@ export const TabsDesigner = withRouter(
         const datasetStatistics = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
         return datasetStatistics;
       } catch (error) {
+        console.error(error);
         throw new Error('ERROR_STATISTICS_BY_ID_ERROR');
       }
     };
