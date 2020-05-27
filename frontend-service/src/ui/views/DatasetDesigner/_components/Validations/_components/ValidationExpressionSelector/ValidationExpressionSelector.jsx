@@ -5,13 +5,14 @@ import { ValidationExpression } from 'ui/views/DatasetDesigner/_components/Valid
 import { ValidationExpressionGroup } from 'ui/views/DatasetDesigner/_components/Validations/_components/ValidationExpressionGroup';
 
 export const ValidationExpressionSelector = props => {
+  const { expressionType } = props;
   if (props.expressionValues.expressions.length > 0) {
     return <ValidationExpressionGroup {...props} />;
   }
-  if (props.expressionType === 'fieldComparison') {
+  if (expressionType === 'fieldComparison') {
     return <ComparisonExpression {...props} />;
   }
-  if (props.expressionType === 'ifThenClause') {
+  if (expressionType === 'ifThenClause') {
     return <ComparisonExpression {...props} />;
   }
   return <ValidationExpression {...props} />;

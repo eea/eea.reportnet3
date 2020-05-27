@@ -27,8 +27,8 @@ import {
   createValidationReducer
 } from 'ui/views/DatasetDesigner/_components/Validations/_functions/reducers/CreateValidationReducer';
 
-import { checkExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkExpressions';
-import { checkValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkValidation';
+import { checkComparisonExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonExpressions';
+import { checkComparisonValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonValidation';
 import { deleteExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpression';
 import { deleteExpressionRecursively } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpressionRecursively';
 import { getDatasetSchemaTableFields } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getDatasetSchemaTableFields';
@@ -210,14 +210,14 @@ export const RowValidation = ({ datasetId, tabs }) => {
     } = creationFormState;
     creationFormDispatch({
       type: 'SET_IS_VALIDATION_ADDING_DISABLED',
-      payload: checkExpressions(expressions)
+      payload: checkComparisonExpressions(expressions)
     });
   }, [...ruleAdditionCheckListener]);
 
   useEffect(() => {
     creationFormDispatch({
       type: 'SET_IS_VALIDATION_CREATION_DISABLED',
-      payload: !checkValidation(creationFormState.candidateRule)
+      payload: !checkComparisonValidation(creationFormState.candidateRule)
     });
   }, [creationFormState.candidateRule]);
 
@@ -347,8 +347,8 @@ export const RowValidation = ({ datasetId, tabs }) => {
   };
 
   const onTabChange = tabIndex => {
-    if (tabIndex != tabMenuActiveItem) {
-      if (tabIndex == 1) {
+    if (tabIndex !== tabMenuActiveItem) {
+      if (tabIndex === 1) {
         setClickedFields([...config.validations.requiredFields[validationContext.level]]);
       } else {
         setTabsChanges({

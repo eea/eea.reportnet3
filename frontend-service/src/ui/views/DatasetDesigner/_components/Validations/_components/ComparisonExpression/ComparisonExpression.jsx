@@ -96,7 +96,7 @@ const ComparisonExpression = ({
   useEffect(() => {
     if (showRequiredFields) {
       const fieldsToAdd = [];
-      ['union', 'operatorType', 'operatorValue', 'expressionValue'].forEach(field => {
+      ['union', 'field1', 'operatorType', 'operatorValue', 'field2'].forEach(field => {
         if (!clickedFields.includes(field)) fieldsToAdd.push(field);
       });
       setClickedFields([...clickedFields, ...fieldsToAdd]);
@@ -180,13 +180,12 @@ const ComparisonExpression = ({
         onBlur={() => onAddToClickedFields('union')}
         className={`${styles.union} formField ${printRequiredFieldError('union')}`}>
         <Dropdown
-          appendTo={document.body}
           disabled={isDisabled || position === 0}
           onChange={e => onUpdateExpressionField('union', e.value)}
           optionLabel="label"
           options={config.validations.logicalOperators}
           placeholder={resourcesContext.messages.union}
-          value={{ label: expressionValues.union, value: expressionValues.union }}
+          value={expressionValues.union}
         />
       </span>
       <span

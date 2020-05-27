@@ -13,17 +13,17 @@
     "URL": ["LEN", "string"]
   },
   "fieldByFieldType": {
-    "CODELIST": ["NUMBER", "TEXT"],
-    "DATE": ["DATE", "NUMBER"],
-    "EMAIL": ["EMAIL", "NUMBER", "TEXT"],
-    "LINK": ["LINK", "NUMBER", "TEXT"],
-    "LONG_TEXT": ["LONG_TEXT", "NUMBER", "TEXT"],
-    "MULTISELECT_CODELIST": ["NUMBER", "TEXT"],
+    "CODELIST": ["NUMBER_INTEGER", "TEXT"],
+    "DATE": ["DATE", "NUMBER_INTEGER"],
+    "EMAIL": ["EMAIL", "NUMBER_INTEGER", "TEXT"],
+    "LINK": ["LINK", "NUMBER_INTEGER", "TEXT"],
+    "LONG_TEXT": ["LONG_TEXT", "NUMBER_INTEGER", "TEXT"],
+    "MULTISELECT_CODELIST": ["NUMBER_INTEGER", "TEXT"],
     "NUMBER_DECIMAL": ["NUMBER_DECIMAL"],
     "NUMBER_INTEGER": ["DATE", "NUMBER_INTEGER"],
-    "PHONE": ["NUMBER", "PHONE", "STRING"],
-    "TEXT": ["LONG_TEXT", "NUMBER", "TEXT"],
-    "URL": ["NUMBER", "TEXT", "URL"]
+    "PHONE": ["NUMBER_INTEGER", "PHONE", "STRING"],
+    "TEXT": ["LONG_TEXT", "NUMBER_INTEGER", "TEXT"],
+    "URL": ["NUMBER_INTEGER", "TEXT", "URL"]
   },
   "operatorTypes": {
     "number": {

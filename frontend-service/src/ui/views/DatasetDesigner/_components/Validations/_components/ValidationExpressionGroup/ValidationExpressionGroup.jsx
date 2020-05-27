@@ -16,16 +16,18 @@ import { ValidationExpressionSelector } from '../ValidationExpressionSelector';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const ValidationExpressionGroup = ({
+  expressionType,
   expressionValues,
+  fieldType,
   isDisabled,
   layout,
   onExpressionDelete,
   onExpressionFieldUpdate,
   onExpressionGroup,
-  position,
-  showRequiredFields,
   onExpressionsErrors,
-  fieldType
+  onGetFieldType,
+  position,
+  showRequiredFields
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const { expressionId } = expressionValues;
@@ -60,14 +62,16 @@ const ValidationExpressionGroup = ({
     if (expressionValues.expressions.length > 0) {
       return expressionValues.expressions.map((expression, i) => (
         <ValidationExpressionSelector
+          expressionType={expressionType}
           expressionValues={expression}
+          fieldType={fieldType}
           isDisabled={false}
           onExpressionDelete={onExpressionDelete}
           onExpressionFieldUpdate={onExpressionFieldUpdate}
           onExpressionGroup={onExpressionGroup}
-          position={i}
           onExpressionsErrors={onExpressionsErrors}
-          fieldType={fieldType}
+          onGetFieldType={onGetFieldType}
+          position={i}
         />
       ));
     }
