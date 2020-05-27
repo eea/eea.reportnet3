@@ -73,8 +73,7 @@ public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
    */
   @Bean
   @Primary
-  @Qualifier("metabaseDataSource")
-  public DataSource metaBaseDataSource() {
+  public DataSource metabaseDatasource() {
     DriverManagerDataSource metaDataSource = new DriverManagerDataSource();
     metaDataSource.setDriverClassName(driver);
     metaDataSource.setUrl(url);
@@ -94,7 +93,7 @@ public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
   public LocalContainerEntityManagerFactoryBean metadataSetsEntityManagerFactory() {
     LocalContainerEntityManagerFactoryBean metadataSetsEM =
         new LocalContainerEntityManagerFactoryBean();
-    metadataSetsEM.setDataSource(metaBaseDataSource());
+    metadataSetsEM.setDataSource(metabaseDatasource());
     metadataSetsEM.setPackagesToScan("org.eea.dataset.persistence.metabase.domain");
     JpaVendorAdapter vendorMetabaseAdapter = new HibernateJpaVendorAdapter();
     metadataSetsEM.setJpaVendorAdapter(vendorMetabaseAdapter);
