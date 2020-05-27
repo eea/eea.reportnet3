@@ -117,7 +117,6 @@ export const TabsDesigner = withRouter(
           datasetId,
           datasetSchemaDTO.tables.map(tableSchema => tableSchema.tableSchemaName)
         );
-        console.log(datasetStatistics);
 
         const inmDatasetSchema = { ...datasetSchemaDTO };
 
@@ -332,9 +331,7 @@ export const TabsDesigner = withRouter(
 
     const getStatisticsById = async (datasetId, tableSchemaNames) => {
       try {
-        console.log('LLEGO');
         const datasetStatistics = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
-        console.log({ datasetStatistics });
         return datasetStatistics;
       } catch (error) {
         throw new Error('ERROR_STATISTICS_BY_ID_ERROR');
