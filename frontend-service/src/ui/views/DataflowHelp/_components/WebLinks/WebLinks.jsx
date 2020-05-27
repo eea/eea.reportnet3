@@ -234,6 +234,11 @@ export const WebLinks = ({
         value={webLinks}>
         {!isEmpty(webLinks) ? webLinksColumns : emptyWebLinkColumns}
       </DataTable>
+      {webLinks.length === 0 && (
+        <div className={styles.noDataWrapper}>
+          <h4>{resources.messages['noWebLinks']}</h4>
+        </div>
+      )}
       {isAddOrEditWeblinkDialogVisible && (
         <Dialog
           className={styles.dialog}

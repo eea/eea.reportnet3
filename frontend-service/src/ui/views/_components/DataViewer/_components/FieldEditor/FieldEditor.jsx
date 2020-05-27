@@ -4,6 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
+import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
@@ -23,13 +24,13 @@ const FieldEditor = ({
   onEditorSubmitValue,
   onEditorValueChange,
   onEditorValueFocus,
+  onMapOpen,
   record
 }) => {
   const resources = useContext(ResourcesContext);
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
   const [codelistItemValue, setCodelistItemValue] = useState();
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
-
   const [linkItemsValue, setLinkItemsValue] = useState([]);
 
   useEffect(() => {
@@ -102,6 +103,7 @@ const FieldEditor = ({
         return 'int';
       case 'NUMBER_DECIMAL':
       case 'POINT':
+        return 'money';
       case 'COORDINATE_LONG':
       case 'COORDINATE_LAT':
         return 'num';
@@ -195,6 +197,35 @@ const FieldEditor = ({
           />
         );
       case 'POINT':
+        return (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <InputText
+              keyfilter={getFilter(type)}
+              onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+              onChange={e => onEditorValueChange(cells, e.target.value)}
+              onFocus={e => {
+                e.preventDefault();
+                onEditorValueFocus(cells, e.target.value);
+              }}
+              onKeyDown={e => onEditorKeyChange(cells, e, record)}
+              type="text"
+              value={RecordUtils.getCellValue(cells, cells.field)}
+            />
+            <Button
+              className={`p-button-secondary-transparent button`}
+              icon="marker"
+              onClick={e => {
+                if (!isNil(onMapOpen)) {
+                  onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells);
+                }
+              }}
+              style={{ width: '2.357em', marginLeft: '0.5rem' }}
+              tooltip={resources.messages['selectGeographicalDataOnMap']}
+              tooltipOptions={{ position: 'bottom' }}
+            />
+          </div>
+        );
+      // <Map coordinates={RecordUtils.getCellValue(cells, cells.field)}></Map>;
       case 'COORDINATE_LONG':
       case 'COORDINATE_LAT':
         return (
@@ -349,7 +380,6 @@ const FieldEditor = ({
             }}
             options={RecordUtils.getCodelistItems(colsSchema, cells.field)}
             optionLabel="itemType"
-            styles={{ border: 'var(--dropdown-border)', borderColor: 'red' }}
             value={RecordUtils.getMultiselectValues(codelistItemsOptions, codelistItemValue)}
           />
         );

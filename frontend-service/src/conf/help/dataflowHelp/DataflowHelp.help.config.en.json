@@ -1,39 +1,39 @@
 {
   "steps": [
     {
-      "content": "dataflowHelpHelpStep1",
+      "content": "Upload, edit and delete supporting documents",
       "target": ".dataflowHelp-documents-help-step"
     },
     {
-      "content": "dataflowHelpHelpStep2",
+      "content": "Add, edit and delete weblinks",
       "target": ".dataflowHelp-weblinks-help-step"
     },
     {
-      "content": "dataflowHelpHelpStep3",
+      "content": "Check all your dataset schemas structure",
       "target": ".dataflowHelp-schemas-help-step"
     },
     {
-      "content": "dataflowHelpHelpStep4",
+      "content": "You can upload a file",
       "target": ".dataflowHelp-document-upload-help-step"
     },
     {
-      "content": "dataflowHelpHelpStep5",
+      "content": "and refresh the documents",
       "target": ".dataflowHelp-document-refresh-help-step"
     },
     {
-      "content": "dataflowHelpHelpStep6",
+      "content": "You can edit and delete your supporting documents",
       "target": ".dataflowHelp-document-edit-delete-help-step"
     },
     {
-      "content": "dataflowHelpHelpStep7",
+      "content": "and download them",
       "target": ".dataflowHelp-document-icon-help-step"
     },
     {
-      "content": "dataflowHelpHelpStep8",
+      "content": "You can also add, edit and delete weblinks",
       "target": ".dataflowHelp-weblink-upload-help-step"
     },
     {
-      "content": "dataflowHelpHelpStep9",
+      "content": "On this page you can check all the dataset schema info",
       "target": ".dataflowHelp-datasetSchema-help-step"
     }
   ]

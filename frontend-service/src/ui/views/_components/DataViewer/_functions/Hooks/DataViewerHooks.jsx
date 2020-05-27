@@ -108,6 +108,7 @@ export const useSetColumns = (
       { fieldType: 'Email', value: 'Email' },
       { fieldType: 'URL', value: 'URL' },
       { fieldType: 'Phone', value: 'Phone number' },
+      { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
       { fieldType: 'Codelist', value: 'Single select' },
       { fieldType: 'Multiselect_Codelist', value: 'Multiple select' },
       { fieldType: 'Link', value: 'Link' }

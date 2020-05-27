@@ -48,7 +48,7 @@ const LeftSideBarProvider = ({ children }) => {
     if (!isNil(config)) {
       config.steps.forEach(step =>
         steps.push({
-          content: <h3>{resources.messages[step.content]}</h3>,
+          content: <h3>{step.content}</h3>,
           target: step.target
         })
       );

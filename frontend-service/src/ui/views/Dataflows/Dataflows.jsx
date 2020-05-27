@@ -6,7 +6,7 @@ import isNil from 'lodash/isNil';
 import styles from './Dataflows.module.scss';
 
 import { config } from 'conf';
-import { DataflowsHelpConfig } from 'conf/domain/model/Dataflow';
+import { DataflowsHelpConfig } from 'conf/help/dataflows';
 
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { DataflowsList } from './_components/DataflowsList';

@@ -474,6 +474,9 @@
   --calendar-header-next-prev-color: var(--gray-75);
   --calendar-header-bg: var(--bg);
   --calendar-header-color: var(--gray-75);
+
+  /* Map */
+  --map-marker-color: var(--c-corporate-blue-lighter);
 }
 body {
   margin: 0px;
@@ -2274,7 +2277,6 @@ body .p-dialog.edit-table .p-dialog-content {
 }
 body .p-dialog.edit-table.calendar-table .p-dialog-content {
   overflow-y: visible !important;
-  overflow: inherit !important;
 }
 /* buttons */
 
