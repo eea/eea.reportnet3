@@ -193,4 +193,15 @@ public interface RulesController {
   @DeleteMapping("/private/deleteUniqueConstraintRule")
   void deleteUniqueConstraintRule(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("uniqueId") String uniqueId);
+
+
+  /**
+   * Delete rule high level like.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   */
+  @DeleteMapping("/private/deleteRuleHighLevelLike")
+  void deleteRuleHighLevelLike(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("fieldSchemaId") String fieldSchemaId);
 }

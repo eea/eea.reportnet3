@@ -30,7 +30,7 @@ public class TokenMonitorTest {
 
 
   @Test
-  public void getToken() {
+  public void getTokenRefreshing() {
     TokenInfo tokenInfo = new TokenInfo();
     tokenInfo.setAccessToken("accessToken");
     tokenInfo.setRefreshToken("refreshToken2");
@@ -44,6 +44,25 @@ public class TokenMonitorTest {
     Assert.assertEquals("accessToken", result);
     Assert.assertEquals(ReflectionTestUtils.getField(tokenMonitor, "refreshToken").toString(),
         "refreshToken2");
+  }
+
+  @Test
+  public void getTokenNoRefreshing() {
+    TokenInfo tokenInfo = new TokenInfo();
+    tokenInfo.setAccessToken("accessToken");
+    tokenInfo.setRefreshToken("refreshToken2");
+    ReflectionTestUtils.setField(tokenMonitor, "refreshToken", "refreshToken");
+    ReflectionTestUtils.setField(tokenMonitor, "tokenExpirationTime", Long.MAX_VALUE);
+    ReflectionTestUtils.setField(tokenMonitor, "lastUpdateTime", System.currentTimeMillis());
+
+    ReflectionTestUtils.setField(tokenMonitor, "adminToken", "accessToken");
+
+    String result = tokenMonitor.getToken();
+    Assert.assertNotNull(result);
+    Assert.assertEquals("accessToken", result);
+    Assert.assertEquals(ReflectionTestUtils.getField(tokenMonitor, "refreshToken").toString(),
+        "refreshToken");
+    Mockito.verify(keycloakConnectorService, Mockito.times(0)).refreshToken(Mockito.anyString());
   }
 
 
