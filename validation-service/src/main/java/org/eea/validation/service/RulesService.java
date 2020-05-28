@@ -137,4 +137,20 @@ public interface RulesService {
    */
   void updateAutomaticRule(long datasetId, RuleVO ruleVO) throws EEAException;
 
+  /**
+   * Creates the unique constraint.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @param uniqueId the unique id
+   */
+  void createUniqueConstraint(String datasetSchemaId, String tableSchemaId, String uniqueId);
+
+  /**
+   * Creates the unique constraint.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param uniqueId the unique id
+   */
+  void deleteUniqueConstraint(String datasetSchemaId, String uniqueId);
 }

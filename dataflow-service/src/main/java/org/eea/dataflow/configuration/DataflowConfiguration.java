@@ -63,7 +63,7 @@ public class DataflowConfiguration implements WebMvcConfigurer {
    * @return the data source
    */
   @Bean
-  public DataSource metaBaseDataSource() {
+  public DataSource metabaseDatasource() {
     DriverManagerDataSource metaDataSource = new DriverManagerDataSource();
     metaDataSource.setDriverClassName(driver);
     metaDataSource.setUrl(url);
@@ -84,7 +84,7 @@ public class DataflowConfiguration implements WebMvcConfigurer {
   public LocalContainerEntityManagerFactoryBean dataFlowsEntityManagerFactory() {
     final LocalContainerEntityManagerFactoryBean dataFlowEM =
         new LocalContainerEntityManagerFactoryBean();
-    dataFlowEM.setDataSource(metaBaseDataSource());
+    dataFlowEM.setDataSource(metabaseDatasource());
     dataFlowEM.setPackagesToScan("org.eea.dataflow.persistence.domain");
     final JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
     dataFlowEM.setJpaVendorAdapter(vendorAdapter);
@@ -96,6 +96,7 @@ public class DataflowConfiguration implements WebMvcConfigurer {
    * Data flows transaction manager.
    *
    * @param entityManagerFactory the entity manager factory
+   *
    * @return the platform transaction manager
    */
   @Bean

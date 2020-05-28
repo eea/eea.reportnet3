@@ -5,6 +5,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -73,12 +74,14 @@ public class LockMetabaseConfiguration implements WebMvcConfigurer {
 
 
   /**
-   * Lock data source.
+   * Creates a data source to the database where Lock entities are created. This datasource will be
+   * created only if there are not a metabase datasource already created
    *
    * @return the data source
    */
   @Bean
-  public DataSource lockDataSource() {
+  @ConditionalOnMissingBean(name = {"metabaseDatasource"})
+  public DataSource metabaseDatasource() {
     DriverManagerDataSource lockDataSource = new DriverManagerDataSource();
     lockDataSource.setDriverClassName(driver);
     lockDataSource.setUrl(url);
@@ -91,19 +94,24 @@ public class LockMetabaseConfiguration implements WebMvcConfigurer {
   /**
    * Lock entity manager factory.
    *
+   * @param dataSource the data source
+   *
    * @return the local container entity manager factory bean
    */
   @Bean
   @Qualifier("lockEntityManagerFactory")
-  public LocalContainerEntityManagerFactoryBean lockEntityManagerFactory() {
+  @Autowired
+  public LocalContainerEntityManagerFactoryBean lockEntityManagerFactory(
+      @Qualifier("metabaseDatasource") DataSource dataSource) {
     LocalContainerEntityManagerFactoryBean lcemfb = new LocalContainerEntityManagerFactoryBean();
-    lcemfb.setDataSource(lockDataSource());
+    lcemfb.setDataSource(dataSource);
     lcemfb.setPackagesToScan("org.eea.lock.persistence.domain");
     JpaVendorAdapter vendorMetabaseAdapter = new HibernateJpaVendorAdapter();
     lcemfb.setJpaVendorAdapter(vendorMetabaseAdapter);
     lcemfb.setJpaProperties(additionalMetaProperties());
     return lcemfb;
   }
+
 
   /**
    * Additional meta properties.
@@ -121,13 +129,18 @@ public class LockMetabaseConfiguration implements WebMvcConfigurer {
   /**
    * Lock transaction manager.
    *
+   * @param dataSource the data source
+   *
    * @return the platform transaction manager
    */
   @Bean
-  public PlatformTransactionManager lockTransactionManager() {
+  @Autowired
+  public PlatformTransactionManager lockTransactionManager(
+      @Qualifier("metabaseDatasource") DataSource dataSource) {
 
     JpaTransactionManager locktransactionManager = new JpaTransactionManager();
-    locktransactionManager.setEntityManagerFactory(lockEntityManagerFactory().getObject());
+    locktransactionManager
+        .setEntityManagerFactory(lockEntityManagerFactory(dataSource).getObject());
     return locktransactionManager;
   }
 }

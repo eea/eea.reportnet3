@@ -127,4 +127,12 @@ public interface ExtendedRulesRepository {
    * @return the active and verified rules
    */
   RulesSchema getActiveAndVerifiedRules(ObjectId datasetSchemaId);
+
+  /**
+   * Delete by unique constraint id.
+   *
+   * @param rulesSchemaId the rules schema id
+   * @param uniqueConstraintId the unique constraint id
+   */
+  boolean deleteByUniqueConstraintId(ObjectId datasetSchemaId, ObjectId uniqueConstraintId);
 }
