@@ -12,6 +12,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
+import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
 import { ValidationService } from 'core/services/Validation';
 
 const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
@@ -19,11 +20,13 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
   const notificationContext = useContext(NotificationContext);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [uniqueList, setUniqueList] = useState();
   const [validationList, setValidationList] = useState();
 
   useEffect(() => {
     if (!isEmpty(datasetsSchemas)) {
       getValidationList(datasetsSchemas);
+      getUniqueList(datasetsSchemas);
     }
   }, [datasetsSchemas]);
 
@@ -33,7 +36,7 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
 
   const getFieldName = (referenceId, datasetSchemaId, datasets) => {
     const fieldObj = {};
-    const dataset = datasets.filter(datasetSchema => datasetSchema.idDataSetSchema === datasetSchemaId);
+    const dataset = datasets.filter(datasetSchema => datasetSchema.datasetSchemaId === datasetSchemaId);
     if (dataset.length > 0) {
       if (!isUndefined(dataset[0].tables)) {
         dataset[0].tables.forEach(table =>
@@ -51,6 +54,60 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
     }
   };
 
+  const getUniqueList = async datasetsSchemas => {
+    try {
+      const datasetUniques = datasetsSchemas.map(async datasetSchema => {
+        return await UniqueConstraintsService.all(datasetSchema.datasetSchemaId);
+      });
+
+      Promise.all(datasetUniques).then(allUniques => {
+        // console.log({ allUniques });
+
+        const parseUniques = uniques => {
+          const parsedUniques = [];
+          uniques.forEach(unique => {
+            unique.fieldSchemaIds.forEach(fieldSchema => {
+              parsedUniques.push({
+                referenceId: fieldSchema,
+                datasetSchemaId: unique.datasetSchemaId,
+                tableSchemaId: unique.tableSchemaId
+              });
+            });
+          });
+
+          return parsedUniques;
+        };
+
+        const parsedUniques = parseUniques(allUniques.flat());
+        // console.log({ parsedUniques });
+        setUniqueList(
+          !isUndefined(parsedUniques)
+            ? parsedUniques.map(unique => {
+                if (!isEmpty(unique)) {
+                  // console.log({ unique });
+                  // debugger;
+                  const uniqueTableAndField = getFieldName(unique.referenceId, unique.datasetSchemaId, datasetsSchemas);
+                  // console.log({ uniqueTableAndField });
+                  if (!isUndefined(uniqueTableAndField)) {
+                    unique.tableName = uniqueTableAndField.tableName;
+                    unique.fieldName = uniqueTableAndField.fieldName;
+                  }
+                  return pick(unique, 'tableName', 'fieldName');
+                }
+              })
+            : []
+        );
+      });
+    } catch (error) {
+      const schemaError = {
+        type: error.message
+      };
+      notificationContext.add(schemaError);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getValidationList = async datasetsSchemas => {
     try {
       const datasetValidations = datasetsSchemas.map(async datasetSchema => {
@@ -62,12 +119,15 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
             validation => validation.enabled !== false
           );
         }
+        // console.log(allValidations[0]);
         setValidationList(
           !isUndefined(allValidations[0])
             ? allValidations[0].validations.map(validation => {
+                // debugger;
                 const validationTableAndField = getFieldName(
                   validation.referenceId,
-                  validation.idDatasetSchema,
+                  //validation.idDatasetSchema,
+                  allValidations[0].datasetSchemaId,
                   datasetsSchemas
                 );
                 validation.tableName = validationTableAndField.tableName;
@@ -148,7 +208,8 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
               key={i}
               index={i}
               isCustodian={isCustodian}
-              validationList={validationList}
+              uniqueList={!isUndefined(uniqueList) ? [...uniqueList] : []}
+              validationList={!isUndefined(validationList) ? [...validationList] : []}
             />
           );
         })}
