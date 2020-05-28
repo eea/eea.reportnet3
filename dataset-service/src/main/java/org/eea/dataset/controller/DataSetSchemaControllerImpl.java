@@ -258,6 +258,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         // delete the schema in Mongo
         dataschemaService.deleteDatasetSchema(schemaId);
 
+        // delete from the UniqueConstraint catalog
+        dataschemaService.deleteUniquesConstraintFromDataset(schemaId);
+
         // delete the schema to dataset
         rulesControllerZuul.deleteRulesSchema(schemaId);
         // delete the metabase
@@ -344,6 +347,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
       // Delete the Pk if needed from the catalogue, for all the fields of the table
       dataschemaService.deleteFromPkCatalogue(datasetSchemaId, tableSchemaId);
+
+      // Delete the Uniques constraints in table
+      dataschemaService.deleteUniquesConstraintFromTable(tableSchemaId);
 
       dataschemaService.deleteTableSchema(datasetSchemaId, tableSchemaId);
 
@@ -501,6 +507,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         }
         // Delete the rules from the fieldSchema
         rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, fieldSchemaId);
+
+        // Delete uniques constraints
+        dataschemaService.deleteUniquesConstraintFromField(datasetSchemaId, fieldSchemaId);
 
         // Delete FK rules
         if (null != fieldVO && fieldVO.getType().equals(DataType.LINK)) {
