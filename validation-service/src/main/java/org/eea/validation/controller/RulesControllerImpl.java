@@ -343,4 +343,17 @@ public class RulesControllerImpl implements RulesController {
 
     rulesService.deleteUniqueConstraint(datasetSchemaId, uniqueId);
   }
+
+  /**
+   * Delete rule row like.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   */
+  @Override
+  @DeleteMapping("/private/deleteRuleRowLike")
+  public void deleteRuleRowLike(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("fieldSchemaId") String fieldSchemaId) {
+    rulesService.deleteRuleRowLike(datasetSchemaId, fieldSchemaId);
+  }
 }
