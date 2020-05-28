@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -29,11 +28,6 @@ public class UniqueValidationUtils {
    * The rules repository.
    */
   private static RulesRepository rulesRepository;
-
-  /**
-   * The dataset metabase controller zuul.
-   */
-  private static DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
   /**
    * The schemas repository.
@@ -59,17 +53,6 @@ public class UniqueValidationUtils {
   @Autowired
   private void setRulesRepository(RulesRepository rulesRepository) {
     UniqueValidationUtils.rulesRepository = rulesRepository;
-  }
-
-  /**
-   * Sets the data set metabase controller zuul.
-   *
-   * @param datasetMetabaseControllerZuul the new data set metabase controller zuul
-   */
-  @Autowired
-  private void setDataSetMetabaseControllerZuul(
-      DataSetMetabaseControllerZuul datasetMetabaseControllerZuul) {
-    UniqueValidationUtils.datasetMetabaseControllerZuul = datasetMetabaseControllerZuul;
   }
 
   /**
@@ -207,7 +190,7 @@ public class UniqueValidationUtils {
         stringQuery.append(",");
       }
     }
-    stringQuery.append(") as N from table_1 ) as t where n>1);");
+    stringQuery.append(") as N from table_1 where column_1 is not null) as t where n>1);");
     return stringQuery.toString();
 
   }
