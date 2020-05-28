@@ -62,7 +62,8 @@ public class TokenMonitor {
         tokenInfo = keycloakConnectorService.refreshToken(refreshToken);
       } catch (Exception e) {
         log.warn(
-            "Error trying to refresh admin token, using admin credentials to get a new admin token");
+            "Error trying to refresh admin token, using admin credentials to get a new admin token due to {}",
+            e.getMessage(), e);
         tokenInfo = keycloakConnectorService.generateToken(adminUser, adminPass);
       }
       manageTokenInfo(tokenInfo);
