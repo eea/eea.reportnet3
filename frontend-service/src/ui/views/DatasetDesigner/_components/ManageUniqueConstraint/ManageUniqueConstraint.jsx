@@ -156,7 +156,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
           className="p-button-primary p-button-animated-blink"
           disabled={isEmpty(selectedFields) || isDuplicated}
           icon={!isNil(uniqueId) ? 'check' : 'plus'}
-          label={!isNil(uniqueId) ? resources.messages['edit'] : resources.messages['create']}
+          label={!isNil(uniqueId) ? resources.messages['accept'] : resources.messages['add']}
           onClick={() => (!isNil(uniqueId) ? onUpdateConstraint() : onCreateConstraint())}
         />
       </span>

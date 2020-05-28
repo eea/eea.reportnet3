@@ -55,96 +55,142 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-/** The Class DataCollectionServiceImpl. */
+/**
+ * The Class DataCollectionServiceImpl.
+ */
 @Service("dataCollectionService")
 public class DataCollectionServiceImpl implements DataCollectionService {
 
-  /** The metabase data source. */
+  /**
+   * The metabase data source.
+   */
   @Autowired
-  @Qualifier("metabaseDataSource")
+  @Qualifier("metabaseDatasource")
   private DataSource metabaseDataSource;
 
-  /** The data collection repository. */
+  /**
+   * The data collection repository.
+   */
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
 
-  /** The data collection mapper. */
+  /**
+   * The data collection mapper.
+   */
   @Autowired
   private DataCollectionMapper dataCollectionMapper;
 
-  /** The design dataset service. */
+  /**
+   * The design dataset service.
+   */
   @Autowired
   private DesignDatasetService designDatasetService;
 
-  /** The representative controller zuul. */
+  /**
+   * The representative controller zuul.
+   */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /** The record store controller zull. */
+  /**
+   * The record store controller zull.
+   */
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
-  /** The dataflow controller zuul. */
+  /**
+   * The dataflow controller zuul.
+   */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
-  /** The resource management controller zuul. */
+  /**
+   * The resource management controller zuul.
+   */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZuul;
 
-  /** The user management controller zuul. */
+  /**
+   * The user management controller zuul.
+   */
   @Autowired
   private UserManagementControllerZull userManagementControllerZuul;
 
-  /** The lock service. */
+  /**
+   * The lock service.
+   */
   @Autowired
   private LockService lockService;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The dataset schema service. */
+  /**
+   * The dataset schema service.
+   */
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
-  /** The foreign relations repository. */
+  /**
+   * The foreign relations repository.
+   */
   @Autowired
   private ForeignRelationsRepository foreignRelationsRepository;
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(DataCollectionServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant NAME_DC. */
+  /**
+   * The Constant NAME_DC.
+   */
   private static final String NAME_DC = "Data Collection - %s";
 
-  /** The Constant UPDATE_DATAFLOW_STATUS. */
+  /**
+   * The Constant UPDATE_DATAFLOW_STATUS.
+   */
   private static final String UPDATE_DATAFLOW_STATUS =
       "update dataflow set status = '%s', deadline_date = '%s' where id = %d";
 
   private static final String UPDATE_REPRESENTATIVE_HAS_DATASETS =
       "update representative set has_datasets = %b where id = %d;";
 
-  /** The Constant INSERT_DC_INTO_DATASET. */
+  /**
+   * The Constant INSERT_DC_INTO_DATASET.
+   */
   private static final String INSERT_DC_INTO_DATASET =
       "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema) values ('%s', %d, '%s', '%s') returning id";
 
-  /** The Constant INSERT_DC_INTO_DATA_COLLECTION. */
+  /**
+   * The Constant INSERT_DC_INTO_DATA_COLLECTION.
+   */
   private static final String INSERT_DC_INTO_DATA_COLLECTION =
       "insert into data_collection (id, due_date) values (%d, '%s')";
 
-  /** The Constant INSERT_RD_INTO_DATASET. */
+  /**
+   * The Constant INSERT_RD_INTO_DATASET.
+   */
   private static final String INSERT_RD_INTO_DATASET =
       "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema, data_provider_id) values ('%s', %d, '%s', '%s', %d) returning id";
 
-  /** The Constant INSERT_RD_INTO_REPORTING_DATASET. */
+  /**
+   * The Constant INSERT_RD_INTO_REPORTING_DATASET.
+   */
   private static final String INSERT_RD_INTO_REPORTING_DATASET =
       "insert into reporting_dataset (id) values (%d)";
 
-  /** The Constant INSERT_INTO_PARTITION_DATASET. */
+  /**
+   * The Constant INSERT_INTO_PARTITION_DATASET.
+   */
   private static final String INSERT_INTO_PARTITION_DATASET =
       "insert into partition_dataset (user_name, id_dataset) values ('root', %d)";
 
@@ -152,6 +198,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * Gets the dataflow status.
    *
    * @param dataflowId the dataflow id
+   *
    * @return the dataflow status
    */
   @Override
@@ -169,6 +216,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * Gets the data collection id by dataflow id.
    *
    * @param idFlow the id flow
+   *
    * @return the data collection id by dataflow id
    */
   @Override
@@ -289,7 +337,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     Map<Long, String> datasetIdsAndSchemaIds = new HashMap<>();
 
     try (Connection connection = metabaseDataSource.getConnection();
-        Statement statement = connection.createStatement();) {
+        Statement statement = connection.createStatement()) {
 
       try {
         connection.setAutoCommit(false);
@@ -365,6 +413,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    *
    * @param connection the connection
    * @param dataflowId the dataflow id
+   *
    * @throws SQLException the SQL exception
    */
   private void releaseLockAndRollback(Connection connection, Long dataflowId, boolean isCreation)
@@ -382,7 +431,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param time the time
    * @param dataflowId the dataflow id
    * @param dueDate the due date
+   *
    * @return the long
+   *
    * @throws SQLException the SQL exception
    */
   private Long persistDC(Statement metabaseStatement, DesignDatasetVO design, String time,
@@ -407,7 +458,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param time the time
    * @param dataflowId the dataflow id
    * @param dataProviderLabel the data provider label
+   *
    * @return the long
+   *
    * @throws SQLException the SQL exception
    */
   private Long persistRD(Statement metabaseStatement, DesignDatasetVO design,
@@ -430,6 +483,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param datasetIdsEmails the dataset ids emails
    * @param dataCollectionIds the data collection ids
    * @param dataflowId the dataflow id
+   *
    * @throws EEAException the EEA exception
    */
   private void createPermissions(Map<Long, String> datasetIdsEmails, List<Long> dataCollectionIds,
@@ -506,6 +560,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param datasetId the dataset id
    * @param type the type
    * @param role the role
+   *
    * @return the resource info VO
    */
   private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
@@ -525,6 +580,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param id the id
    * @param email the email
    * @param group the group
+   *
    * @return the resource assignation VO
    */
   private ResourceAssignationVO createAssignments(Long id, String email, ResourceGroupEnum group) {
@@ -538,12 +594,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   }
 
 
-
   /**
    * Find id dataset destination.
    *
    * @param idDatasetSchemaDestination the id dataset schema destination
    * @param listFkData the list fk data
+   *
    * @return the long
    */
   private Long findIdDatasetDestination(String idDatasetSchemaDestination,

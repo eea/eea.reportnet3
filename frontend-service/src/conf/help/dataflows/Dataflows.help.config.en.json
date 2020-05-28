@@ -1,31 +1,31 @@
 {
   "steps": [
     {
-      "content": "dataflowListHelpStep1",
+      "content": "This is your dataflow list",
       "target": ".dataflowList-help-step"
     },
     {
-      "content": "dataflowListHelpStep2",
+      "content": "You can filter them by multiple parameteres",
       "target": ".dataflowList-filters-help-step"
     },
     {
-      "content": "dataflowListHelpStep3",
+      "content": "Here you will see the dataflow delivery date...",
       "target": ".dataflowList-delivery-date-help-step"
     },
     {
-      "content": "dataflowListHelpStep4",
+      "content": "...the name and description...",
       "target": ".dataflowList-name-description-help-step"
     },
     {
-      "content": "dataflowListHelpStep5",
+      "content": "...the legal instrument and obligation...",
       "target": ".dataflowList-obligation-description-help-step"
     },
     {
-      "content": "dataflowListHelpStep6",
+      "content": "...and the status",
       "target": ".dataflowList-status-help-step"
     },
     {
-      "content": "dataflowListHelpStep7",
+      "content": "You can create a new dataflow",
       "target": ".dataflowList-create-dataflow-help-step"
     }
   ]
