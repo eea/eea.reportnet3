@@ -10,8 +10,7 @@ import styles from './DatasetSchema.module.scss';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { TreeView } from 'ui/views/_components/TreeView';
 
-const DatasetSchema = ({ designDataset, index, uniqueList, validationList }) => {
-  console.log(uniqueList, validationList, designDataset, index);
+const DatasetSchema = ({ designDataset, index, uniqueList = [], validationList }) => {
   const resources = useContext(ResourcesContext);
   const renderDatasetSchema = () => {
     if (!isUndefined(designDataset) && !isNull(designDataset)) {
@@ -31,6 +30,7 @@ const DatasetSchema = ({ designDataset, index, uniqueList, validationList }) => 
         uniques: {
           filtered: true,
           groupable: true,
+          invisible: ['datasetSchemaId'],
           names: {
             tableName: 'Table',
             fieldName: 'Field'
@@ -121,7 +121,6 @@ const DatasetSchema = ({ designDataset, index, uniqueList, validationList }) => 
     parsedDataset.levelErrorTypes = design.levelErrorTypes;
     parsedDataset.uniques = uniqueList;
     parsedDataset.validations = validationList;
-    console.log({ parsedDataset });
     if (!isUndefined(design.tables) && !isNull(design.tables) && design.tables.length > 0) {
       const tables = design.tables.map(tableDTO => {
         const table = {};
