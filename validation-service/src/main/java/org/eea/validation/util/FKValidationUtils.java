@@ -167,8 +167,7 @@ public class FKValidationUtils {
 
       for (FieldValue field : fkFields) {
         if (Boolean.TRUE.equals(checkPK(pkList, field))) {
-          List<FieldValidation> fieldValidationList =
-              field.getFieldValidations() != null ? field.getFieldValidations() : new ArrayList<>();
+          List<FieldValidation> fieldValidationList = new ArrayList<>();
           FieldValidation fieldValidation = new FieldValidation();
           fieldValidation.setValidation(pkValidation);
           FieldValue fieldValue = new FieldValue();
