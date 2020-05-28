@@ -87,6 +87,30 @@ public enum RuleOperatorEnum {
   /** The record len. */
   RECORD_LEN(EntityTypeEnum.RECORD, "recordStringLength", JavaType.NUMBER, JavaType.STRING),
 
+  /** The record len eq. */
+  RECORD_LEN_EQ(EntityTypeEnum.RECORD, "recordStringLengthEquals", JavaType.BOOLEAN,
+      JavaType.STRING, JavaType.NUMBER),
+
+  /** The record len dist. */
+  RECORD_LEN_DIST(EntityTypeEnum.RECORD, "recordStringLengthDistinct", JavaType.BOOLEAN,
+      JavaType.STRING, JavaType.NUMBER),
+
+  /** The record len gt. */
+  RECORD_LEN_GT(EntityTypeEnum.RECORD, "recordStringLengthGreaterThan", JavaType.BOOLEAN,
+      JavaType.STRING, JavaType.NUMBER),
+
+  /** The record len lt. */
+  RECORD_LEN_LT(EntityTypeEnum.RECORD, "recordStringLengthLessThan", JavaType.BOOLEAN,
+      JavaType.STRING, JavaType.NUMBER),
+
+  /** The record len gteq. */
+  RECORD_LEN_GTEQ(EntityTypeEnum.RECORD, "recordStringLengthGreaterThanOrEqualsThan",
+      JavaType.BOOLEAN, JavaType.STRING, JavaType.NUMBER),
+
+  /** The record len lteq. */
+  RECORD_LEN_LTEQ(EntityTypeEnum.RECORD, "recordStringLengthLessThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.STRING, JavaType.NUMBER),
+
   /** The record seq. */
   RECORD_SEQ(EntityTypeEnum.RECORD, "recordStringEquals", JavaType.BOOLEAN, JavaType.STRING,
       JavaType.STRING),
