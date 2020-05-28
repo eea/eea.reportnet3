@@ -49,6 +49,7 @@ public class ValidationHelper {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  private static final String ERROR_ADDING_TASK_TO_PROCESS = "Error trying to add task {} of type {} to process {}";
 
   /**
    * The kafka sender utils.
@@ -354,7 +355,7 @@ public class ValidationHelper {
     try {
       addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_DATASET, value);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error trying to add task {} of type {} to process {}", value,
+      LOG_ERROR.error(ERROR_ADDING_TASK_TO_PROCESS, value,
           EventType.COMMAND_VALIDATE_FIELD.getKey(), processId, e);
     }
 
@@ -376,7 +377,7 @@ public class ValidationHelper {
     try {
       addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_TABLE, value);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error trying to add task {} of type {} to process {}", value,
+      LOG_ERROR.error(ERROR_ADDING_TASK_TO_PROCESS, value,
           EventType.COMMAND_VALIDATE_FIELD.getKey(), processId, e);
     }
 
@@ -398,7 +399,7 @@ public class ValidationHelper {
     try {
       addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_RECORD, value);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error trying to add task {} of type {} to process {}", value,
+      LOG_ERROR.error(ERROR_ADDING_TASK_TO_PROCESS, value,
           EventType.COMMAND_VALIDATE_FIELD.getKey(), processId, e);
     }
   }
@@ -419,7 +420,7 @@ public class ValidationHelper {
     try {
       addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_FIELD, value);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error trying to add task {} of type {} to process {}", value,
+      LOG_ERROR.error(ERROR_ADDING_TASK_TO_PROCESS, value,
           EventType.COMMAND_VALIDATE_FIELD.getKey(), processId, e);
     }
 
@@ -479,10 +480,10 @@ public class ValidationHelper {
     synchronized (processesMap) {
       Integer pendingOk = processesMap.get(processId).getPendingOks();
       if (null == pendingOk) {
-        pendingOk = 1;
-      } else {
-        pendingOk++;
+        pendingOk = 0;
       }
+
+      pendingOk++;
       processesMap.get(processId).setPendingOks(pendingOk);
       EEAEventVO eeaEventVO = new EEAEventVO();
       eeaEventVO.setEventType(eventType);
