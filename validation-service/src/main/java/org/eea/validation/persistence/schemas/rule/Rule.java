@@ -73,6 +73,9 @@ public class Rule {
   @Field(value = "shortCode")
   private String shortCode;
 
+  @Field(value = "uniqueConstraintId")
+  private ObjectId uniqueConstraintId;
+
   /**
    * Hash code.
    *
@@ -81,7 +84,7 @@ public class Rule {
   @Override
   public int hashCode() {
     return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, activationGroup, type,
-        whenCondition, thenCondition, description, shortCode);
+        whenCondition, thenCondition, description, shortCode, uniqueConstraintId);
   }
 
   /**
@@ -106,6 +109,7 @@ public class Rule {
         && Objects.equals(type, other.type) && Objects.equals(whenCondition, other.whenCondition)
         && Objects.equals(thenCondition, other.thenCondition)
         && Objects.equals(description, other.description)
-        && Objects.equals(shortCode, other.shortCode);
+        && Objects.equals(shortCode, other.shortCode)
+        && Objects.equals(uniqueConstraintId, other.uniqueConstraintId);
   }
 }

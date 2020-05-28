@@ -137,7 +137,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
 
     EeaDataSource ds = new EeaDataSource();
     ds.setUrl(connectionDataVO.getConnectionString());
-    //set validation microservice credentials
+    // set validation microservice credentials
     ds.setUsername(this.username);
     ds.setPassword(this.password);
     ds.setDriverClassName("org.postgresql.Driver");
@@ -198,6 +198,4 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     schemastransactionManager.setEntityManagerFactory(dataSetsEntityManagerFactory().getObject());
     return schemastransactionManager;
   }
-
-
 }

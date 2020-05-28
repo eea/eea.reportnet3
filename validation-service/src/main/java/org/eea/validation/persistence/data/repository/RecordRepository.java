@@ -12,8 +12,8 @@ import org.springframework.data.repository.query.Param;
 /**
  * The Interface RecordRepository.
  */
-public interface RecordRepository
-    extends PagingAndSortingRepository<RecordValue, Integer>, RecordRepositoryPaginated {
+public interface RecordRepository extends PagingAndSortingRepository<RecordValue, Integer>,
+    RecordRepositoryPaginated, FieldExtendedRepository {
 
   /**
    * Find by table value id.
@@ -89,5 +89,6 @@ public interface RecordRepository
    */
   @Query(nativeQuery = true, value = "SELECT count(*) from field_value")
   Integer countFieldsDataset();
+
 
 }
