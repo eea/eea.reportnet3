@@ -194,15 +194,19 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
 
   const actionsTemplate = row => (row.automatic ? editTemplate(row) : editAndDeleteTemplate(row));
 
-  const editAndDeleteTemplate = row => (
-    <ActionsColumn
-      onDeleteClick={() => onShowDeleteDialog()}
-      onEditClick={() => {
-        validationContext.onOpenToEdit(row, 'validationsListDialog', 'field');
-        onHideValidationsDialog();
-      }}
-    />
-  );
+  const editAndDeleteTemplate = row => {
+    let rowType = 'field';
+    if (row.entityType === 'RECORD') rowType = 'row';
+    return (
+      <ActionsColumn
+        onDeleteClick={() => onShowDeleteDialog()}
+        onEditClick={() => {
+          validationContext.onOpenToEdit(row, 'validationsListDialog', rowType);
+          onHideValidationsDialog();
+        }}
+      />
+    );
+  };
 
   const editTemplate = row => (
     <ActionsColumn

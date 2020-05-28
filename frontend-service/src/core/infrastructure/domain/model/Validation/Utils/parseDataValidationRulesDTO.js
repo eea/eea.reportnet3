@@ -9,8 +9,14 @@ export const parseDataValidationRulesDTO = validations => {
   const entityTypes = [];
   try {
     validationsData.validations = validations.map(validationDTO => {
+      let newExpressions = [];
+      let newAllExpressions = [];
       entityTypes.push(validationDTO.type);
-      const { expressions, allExpressions } = parseExpressionFromDTO(validationDTO.whenCondition);
+      if (validationDTO.type === 'FIELD') {
+        const { expressions, allExpressions } = parseExpressionFromDTO(validationDTO.whenCondition);
+        newExpressions = expressions;
+        newAllExpressions = allExpressions;
+      }
       return new Validation({
         activationGroup: validationDTO.activationGroup,
         automatic: validationDTO.automatic,
@@ -32,8 +38,8 @@ export const parseDataValidationRulesDTO = validations => {
         name: validationDTO.ruleName,
         referenceId: validationDTO.referenceId,
         shortCode: validationDTO.shortCode,
-        expressions,
-        allExpressions
+        expressions: newExpressions,
+        allExpressions: newAllExpressions
       });
     });
   } catch (error) {

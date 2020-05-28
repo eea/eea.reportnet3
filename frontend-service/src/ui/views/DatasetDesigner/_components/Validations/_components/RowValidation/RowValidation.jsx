@@ -135,12 +135,12 @@ export const RowValidation = ({ datasetId, tabs }) => {
       });
     }
 
-    if (validationContext.fieldId) {
+    if (validationContext.referenceId) {
       creationFormDispatch({
         type: 'SET_FORM_FIELD',
         payload: {
           key: 'field',
-          value: getSelectedFieldById(validationContext.fieldId, tabs)
+          value: getSelectedFieldById(validationContext.referenceId, tabs)
         }
       });
     }
@@ -163,11 +163,11 @@ export const RowValidation = ({ datasetId, tabs }) => {
 
   useEffect(() => {
     let table = null;
-    if (validationContext.fieldId) {
+    if (validationContext.referenceId) {
       if (!isNil(validationContext.tableSchemaId)) {
         table = getSelectedTableByTableSchemaId(validationContext.tableSchemaId, tabs);
       } else {
-        table = getSelectedTableByFieldId(validationContext.fieldId, tabs);
+        table = getSelectedTableByFieldId(validationContext.referenceId, tabs);
       }
       creationFormDispatch({
         type: 'SET_FORM_FIELD',
@@ -177,7 +177,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
         }
       });
     }
-  }, [validationContext.fieldId]);
+  }, [validationContext.referenceId]);
 
   useEffect(() => {
     const {
