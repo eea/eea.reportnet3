@@ -58,7 +58,7 @@ const LinkSelector = withRouter(
           icon="check"
           label={resources.messages['save']}
           onClick={() => {
-            onSaveLink(link, pkMustBeUsed);
+            onSaveLink(link, pkMustBeUsed, pkMultipleValues);
             setIsVisible(false);
           }}
         />

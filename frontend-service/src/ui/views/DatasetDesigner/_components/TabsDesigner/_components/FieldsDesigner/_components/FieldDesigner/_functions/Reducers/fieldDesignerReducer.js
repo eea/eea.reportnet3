@@ -21,6 +21,7 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
         fieldRequiredValue: false,
         fieldDesignerState: '',
         fieldLinkValue: null,
+        fieldPkMultipleValues: false,
         fieldPkMustBeUsed: false,
         fieldTypeValue: '',
         fieldValue: '',
@@ -41,6 +42,8 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
       return { ...state, fieldLinkValue: payload };
     case 'SET_PK_MUST_BE_USED':
       return { ...state, fieldPkMustBeUsed: payload };
+    case 'SET_PK_MULTIPLE_VALUES':
+      return { ...state, fieldPkMultipleValues: payload };
     case 'SET_PK':
       return { ...state, fieldPKValue: payload, fieldRequiredValue: payload ? true : state.fieldRequiredValue };
     case 'SET_PK_REFERENCED':

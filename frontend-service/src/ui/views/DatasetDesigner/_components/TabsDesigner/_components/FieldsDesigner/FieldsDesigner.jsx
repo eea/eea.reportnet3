@@ -94,6 +94,7 @@ export const FieldsDesigner = ({
     description,
     fieldId,
     pk,
+    pkMultipleValues,
     pkMustBeUsed,
     name,
     recordId,
@@ -107,6 +108,7 @@ export const FieldsDesigner = ({
       description,
       fieldId,
       pk,
+      pkMultipleValues,
       pkMustBeUsed,
       name,
       recordId,
@@ -131,6 +133,7 @@ export const FieldsDesigner = ({
     id,
     isLinkChange,
     pk,
+    pkMultipleValues,
     pkMustBeUsed,
     name,
     referencedField,
@@ -148,6 +151,7 @@ export const FieldsDesigner = ({
       inmFields[fieldIndex].referencedField = referencedField;
       inmFields[fieldIndex].required = required;
       inmFields[fieldIndex].pk = pk;
+      inmFields[fieldIndex].pkMultipleValues = pkMultipleValues;
       inmFields[fieldIndex].pkMustBeUsed = pkMustBeUsed;
       onChangeFields(inmFields, isLinkChange, table.tableSchemaId);
       setFields(inmFields);
@@ -332,6 +336,7 @@ export const FieldsDesigner = ({
           fieldId="-1"
           fieldName=""
           fieldLink={null}
+          fieldMultipleValues={false}
           fieldMustBeUsed={false}
           fieldRequired={false}
           fieldType=""
@@ -367,9 +372,9 @@ export const FieldsDesigner = ({
                 fieldId={field.fieldId}
                 fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
                 fieldName={field.name}
+                fieldMultipleValues={field.pkMultipleValues}
                 fieldMustBeUsed={field.pkMustBeUsed}
                 fieldPK={field.pk}
-                fieldPkMustBeUsed={field.pkMustBeUsed}
                 fieldPKReferenced={field.pkReferenced}
                 fieldRequired={Boolean(field.required)}
                 fieldType={field.type}

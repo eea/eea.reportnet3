@@ -35,6 +35,7 @@ export const FieldDesigner = ({
   fieldPK,
   fieldPKReferenced,
   fieldLink,
+  fieldMultipleValues,
   fieldMustBeUsed,
   fieldRequired,
   fieldType,
@@ -95,6 +96,7 @@ export const FieldDesigner = ({
     codelistItems: codelistItems,
     fieldDescriptionValue: fieldDescription,
     fieldLinkValue: fieldLink || null,
+    fieldPkMultipleValues: fieldMultipleValues || false,
     fieldPkMustBeUsed: fieldMustBeUsed || false,
     fieldPKReferencedValue: fieldPKReferenced || false,
     fieldPKValue: fieldPK,
@@ -297,6 +299,7 @@ export const FieldDesigner = ({
     codelistItems = fieldDesignerState.codelistItems,
     description = fieldDesignerState.fieldDescriptionValue,
     pk = fieldDesignerState.fieldPKValue,
+    pkMultipleValues = fieldDesignerState.pkMultipleValues,
     pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
     name = fieldDesignerState.fieldValue,
     recordId = recordSchemaId,
@@ -309,6 +312,7 @@ export const FieldDesigner = ({
         codelistItems,
         description,
         pk,
+        pkMultipleValues,
         pkMustBeUsed,
         name,
         recordId,
@@ -328,6 +332,7 @@ export const FieldDesigner = ({
           fieldId: response.data,
           fieldLinkValue: null,
           pk,
+          pkMultipleValues,
           pkMustBeUsed,
           name,
           recordId,
@@ -468,9 +473,10 @@ export const FieldDesigner = ({
     dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: false });
   };
 
-  const onSaveLink = (link, pkMustBeUsed) => {
+  const onSaveLink = (link, pkMustBeUsed, pkMultipleValues) => {
     dispatchFieldDesigner({ type: 'SET_LINK', payload: link });
     dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: pkMustBeUsed });
+    dispatchFieldDesigner({ type: 'SET_PK_MULTIPLE_VALUES', payload: pkMultipleValues });
     if (fieldDesignerState.fieldValue === '') {
       onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
     } else {
@@ -480,7 +486,8 @@ export const FieldDesigner = ({
             codelistItems,
             type: 'LINK',
             referencedField: link,
-            pkMustBeUsed
+            pkMustBeUsed,
+            pkMultipleValues
           });
         } else {
           fieldUpdate({
@@ -488,7 +495,8 @@ export const FieldDesigner = ({
             isLinkChange: true,
             type: 'LINK',
             referencedField: link,
-            pkMustBeUsed
+            pkMustBeUsed,
+            pkMultipleValues
           });
         }
       }
@@ -526,6 +534,7 @@ export const FieldDesigner = ({
     fieldSchemaId = fieldId,
     isLinkChange = false,
     pk = fieldDesignerState.fieldPKValue,
+    pkMultipleValues = fieldDesignerState.pkMultipleValues,
     pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
     name = fieldDesignerState.fieldValue,
     referencedField = fieldDesignerState.fieldLinkValue,
@@ -538,6 +547,7 @@ export const FieldDesigner = ({
         description,
         fieldSchemaId,
         pk,
+        pkMultipleValues,
         pkMustBeUsed,
         name,
         referencedField: !isNil(referencedField)
@@ -556,6 +566,7 @@ export const FieldDesigner = ({
           id: fieldId,
           isLinkChange,
           pk,
+          pkMultipleValues,
           pkMustBeUsed,
           name,
           referencedField,
@@ -802,6 +813,7 @@ export const FieldDesigner = ({
       {fieldDesignerState.isLinkSelectorVisible ? (
         <LinkSelector
           isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
+          multipleValues={fieldDesignerState.fieldPkMultipleValues}
           mustBeUsed={fieldDesignerState.fieldPkMustBeUsed}
           onCancelSaveLink={onCancelSaveLink}
           onSaveLink={onSaveLink}
