@@ -30,6 +30,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
 
   const { fieldData, isTableCreationMode, tableSchemaId, tableSchemaName, uniqueId } = manageUniqueConstraintData;
 
+  const [duplicatedList, setDuplicatedList] = useState([]);
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [selectedFields, setSelectedFields] = useState([]);
   const [selectedTable, setSelectedTable] = useState({ name: '', value: null });
@@ -43,6 +44,8 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
       setSelectedFields(fields);
       setSelectedTable({ name: tableSchemaName, value: tableSchemaId });
     }
+
+    if (isTableCreationMode) onLoadUniquesList();
   }, [isManageUniqueConstraintDialogVisible, manageUniqueConstraintData]);
 
   useEffect(() => {
@@ -50,13 +53,16 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
   }, [selectedTable]);
 
   useEffect(() => {
-    if (!isEmpty(uniqueConstraintsList)) setIsDuplicated(checkDuplicates());
-  }, [selectedFields]);
+    if (!isEmpty(uniqueConstraintsList) || !isEmpty(duplicatedList)) setIsDuplicated(checkDuplicates());
+  }, [selectedFields, duplicatedList]);
 
   const checkDuplicates = () => {
     const updatedFields = fieldData.map(field => field.fieldId);
+    const creationFields = duplicatedList.map(unique => unique.fieldSchemaIds);
     const totalFields = uniqueConstraintsList.map(unique => unique.fieldData.map(item => item.fieldId));
-    const filteredFields = totalFields.filter(field => !isEqual(field.sort(), updatedFields.sort()));
+    const filteredFields = (isTableCreationMode ? creationFields : totalFields).filter(
+      field => !isEqual(field.sort(), updatedFields.sort())
+    );
     const fields = selectedFields.map(field => field.value);
     const duplicated = [];
     for (let index = 0; index < filteredFields.length; index++) {
@@ -94,6 +100,14 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
       }
     } catch (error) {
       notificationContext.add({ type: 'CREATE_UNIQUE_CONSTRAINT_ERROR' });
+    }
+  };
+
+  const onLoadUniquesList = async () => {
+    try {
+      setDuplicatedList(await UniqueConstraintsService.all(datasetSchemaId));
+    } catch (error) {
+      console.error('error', error);
     }
   };
 
