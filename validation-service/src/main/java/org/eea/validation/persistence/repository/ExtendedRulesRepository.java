@@ -138,12 +138,13 @@ public interface ExtendedRulesRepository {
   boolean deleteByUniqueConstraintId(ObjectId datasetSchemaId, ObjectId uniqueConstraintId);
 
 
+
   /**
-   * Delete rule row like.
+   * Delete rule high level like.
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaLike the field schema like
    * @return true, if successful
    */
-  boolean deleteRuleRowLike(ObjectId datasetSchemaId, String fieldSchemaLike);
+  boolean deleteRuleHighLevelLike(ObjectId datasetSchemaId, String fieldSchemaLike);
 }

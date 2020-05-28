@@ -510,12 +510,14 @@ public class RulesControllerImplTest {
     Mockito.verify(rulesService, times(1)).deleteUniqueConstraint(Mockito.any(), Mockito.any());
   }
 
+
   /**
-   * Delete rule row like.
+   * Delete rule high level like.
    */
   @Test
-  public void deleteRuleRowLike() {
-    rulesControllerImpl.deleteRuleRowLike("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");
-    Mockito.verify(rulesService, times(1)).deleteRuleRowLike(Mockito.any(), Mockito.any());
+  public void deleteRuleHighLevelLike() {
+    rulesControllerImpl.deleteRuleHighLevelLike("5e44110d6a9e3a270ce13fac",
+        "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesService, times(1)).deleteRuleHighLevelLike(Mockito.any(), Mockito.any());
   }
 }

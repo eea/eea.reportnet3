@@ -301,14 +301,14 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   }
 
   /**
-   * Delete rule row like.
+   * Delete rule high level like.
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaLike the field schema like
    * @return true, if successful
    */
   @Override
-  public boolean deleteRuleRowLike(ObjectId datasetSchemaId, String fieldSchemaLike) {
+  public boolean deleteRuleHighLevelLike(ObjectId datasetSchemaId, String fieldSchemaLike) {
     Document pullCriteria =
         new Document("whenCondition", java.util.regex.Pattern.compile(fieldSchemaLike));
     Update update = new Update().pull(LiteralConstants.RULES, pullCriteria);

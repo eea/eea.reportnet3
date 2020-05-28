@@ -676,7 +676,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       throws EEAException {
 
     // now we find if we have any record rule related with that fieldSchema to delete it
-    rulesControllerZuul.deleteRuleRowLike(datasetSchemaId, fieldSchemaId);
+    rulesControllerZuul.deleteRuleHighLevelLike(datasetSchemaId, fieldSchemaId);
 
 
     return schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaId)

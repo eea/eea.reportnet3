@@ -1072,27 +1072,30 @@ public class RulesServiceImplTest {
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }
 
+
   /**
-   * Delete rule row like test.
+   * Delete rule high level like like test.
    */
   @Test
-  public void deleteRuleRowLikeTest() {
-    when(rulesRepository.deleteRuleRowLike(new ObjectId("5e44110d6a9e3a270ce13fac"),
+  public void deleteRuleHighLevelLikeLikeTest() {
+    when(rulesRepository.deleteRuleHighLevelLike(new ObjectId("5e44110d6a9e3a270ce13fac"),
         "5e44110d6a9e3a270ce13fac")).thenReturn(true);
-    rulesServiceImpl.deleteRuleRowLike("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");
-    Mockito.verify(rulesRepository, times(1))
-        .deleteRuleRowLike(new ObjectId("5e44110d6a9e3a270ce13fac"), "5e44110d6a9e3a270ce13fac");
+    rulesServiceImpl.deleteRuleHighLevelLike("5e44110d6a9e3a270ce13fac",
+        "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesRepository, times(1)).deleteRuleHighLevelLike(
+        new ObjectId("5e44110d6a9e3a270ce13fac"), "5e44110d6a9e3a270ce13fac");
   }
 
   /**
-   * Delete rule row like non delete test.
+   * Delete rule high level like non delete test.
    */
   @Test
-  public void deleteRuleRowLikeNonDeleteTest() {
-    when(rulesRepository.deleteRuleRowLike(new ObjectId("5e44110d6a9e3a270ce13fac"),
+  public void deleteRuleHighLevelLikeNonDeleteTest() {
+    when(rulesRepository.deleteRuleHighLevelLike(new ObjectId("5e44110d6a9e3a270ce13fac"),
         "5e44110d6a9e3a270ce13fac")).thenReturn(false);
-    rulesServiceImpl.deleteRuleRowLike("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");
-    Mockito.verify(rulesRepository, times(1))
-        .deleteRuleRowLike(new ObjectId("5e44110d6a9e3a270ce13fac"), "5e44110d6a9e3a270ce13fac");
+    rulesServiceImpl.deleteRuleHighLevelLike("5e44110d6a9e3a270ce13fac",
+        "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesRepository, times(1)).deleteRuleHighLevelLike(
+        new ObjectId("5e44110d6a9e3a270ce13fac"), "5e44110d6a9e3a270ce13fac");
   }
 }
