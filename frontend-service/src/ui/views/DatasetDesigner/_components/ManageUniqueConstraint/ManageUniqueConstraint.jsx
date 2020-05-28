@@ -45,7 +45,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
       setSelectedTable({ name: tableSchemaName, value: tableSchemaId });
     }
 
-    if (isTableCreationMode) onLoadList();
+    if (isTableCreationMode) onLoadUniquesList();
   }, [isManageUniqueConstraintDialogVisible, manageUniqueConstraintData]);
 
   useEffect(() => {
@@ -103,7 +103,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
     }
   };
 
-  const onLoadList = async () => {
+  const onLoadUniquesList = async () => {
     try {
       setDuplicatedList(await UniqueConstraintsService.all(datasetSchemaId));
     } catch (error) {
