@@ -190,7 +190,7 @@ public class UniqueValidationUtils {
         stringQuery.append(",");
       }
     }
-    stringQuery.append(") as N from table_1 ) as t where n>1);");
+    stringQuery.append(") as N from table_1 where column_1 is not null) as t where n>1);");
     return stringQuery.toString();
 
   }
@@ -230,7 +230,8 @@ public class UniqueValidationUtils {
       RecordValidation recordValidation = new RecordValidation();
       recordValidation.setValidation(validation);
       recordValidation.setRecordValue(record);
-      List<RecordValidation> recordValidations = new ArrayList<>();
+      List<RecordValidation> recordValidations =
+          record.getRecordValidations() != null ? record.getRecordValidations() : new ArrayList<>();
       recordValidations.add(recordValidation);
       record.setRecordValidations(recordValidations);
       recordValues.add(record);
