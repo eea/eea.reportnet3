@@ -290,8 +290,8 @@ public class DocumentServiceImpl implements DocumentService {
       LOG.info("File snapshot added... {}", filename);
 
     } catch (RepositoryException | EEAException e) {
-      LOG_ERROR.error("Error in uploadSnapshotSchema, document {} due to", filename, e.getMessage(),
-          e);
+      LOG_ERROR.error("Error in uploadSnapshotSchema, document {} due to {}", filename,
+          e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     } finally {
       inputStream.close();
