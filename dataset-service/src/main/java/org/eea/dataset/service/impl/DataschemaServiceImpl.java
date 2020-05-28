@@ -1284,6 +1284,53 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
+   * Delete uniques constraint from table.
+   *
+   * @param tableSchemaId the table schema id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void deleteUniquesConstraintFromTable(String tableSchemaId) throws EEAException {
+    List<UniqueConstraintSchema> constraints =
+        uniqueConstraintRepository.findByTableSchemaId(new ObjectId(tableSchemaId));
+    for (UniqueConstraintSchema uniqueConstraintSchema : constraints) {
+      deleteUniqueConstraint(uniqueConstraintSchema.getUniqueId().toString());
+    }
+  }
+
+  /**
+   * Delete uniques constraint from field.
+   *
+   * @param schemaId the schema id
+   * @param fieldSchemaId the field schema id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void deleteUniquesConstraintFromField(String schemaId, String fieldSchemaId)
+      throws EEAException {
+    List<UniqueConstraintVO> constraints = getUniqueConstraints(schemaId);
+    for (UniqueConstraintVO uniqueConstraintVO : constraints) {
+      if (uniqueConstraintVO.getFieldSchemaIds().contains(fieldSchemaId)) {
+        deleteUniqueConstraint(uniqueConstraintVO.getUniqueId());
+      }
+    }
+  }
+
+  /**
+   * Delete uniques constraint from dataset.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void deleteUniquesConstraintFromDataset(String datasetSchemaId) throws EEAException {
+    List<UniqueConstraintVO> constraints = getUniqueConstraints(datasetSchemaId);
+    for (UniqueConstraintVO uniqueConstraint : constraints) {
+      deleteUniqueConstraint(uniqueConstraint.getUniqueId());
+    }
+  }
+
+  /**
    * Update unique constraint.
    *
    * @param uniqueConstraintVO the unique constraint
