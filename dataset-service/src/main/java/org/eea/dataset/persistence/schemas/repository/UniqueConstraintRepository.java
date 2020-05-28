@@ -39,4 +39,13 @@ public interface UniqueConstraintRepository
   Long deleteByDatasetSchemaId(ObjectId datasetSchemaId);
 
 
+  /**
+   * Find by table schema id.
+   *
+   * @param tableSchemaId the table schema id
+   * @return the list
+   */
+  List<UniqueConstraintSchema> findByTableSchemaId(ObjectId tableSchemaId);
+
+
 }
