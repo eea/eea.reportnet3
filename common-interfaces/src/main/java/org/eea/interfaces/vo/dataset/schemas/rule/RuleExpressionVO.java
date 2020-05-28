@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.enums.JavaType;
@@ -168,14 +169,14 @@ public class RuleExpressionVO {
   }
 
   /**
-   * Checks if data type is compatible. Used to verify that function input types match given
-   * arguments.
+   * Checks if is data type compatible.
    *
    * @param entityType the entity type
-   * @param dataType the data type
+   * @param dataTypeMap the data type map
    * @return true, if is data type compatible
    */
-  public boolean isDataTypeCompatible(EntityTypeEnum entityType, DataType dataType) {
+  public boolean isDataTypeCompatible(EntityTypeEnum entityType,
+      Map<String, DataType> dataTypeMap) {
 
     int index = 0;
     boolean rtn = false;
@@ -189,12 +190,12 @@ public class RuleExpressionVO {
         Object param = params.get(index);
 
         if (param instanceof RuleExpressionVO) {
-          rtn = isDataTypeCompatibleRule(entityType, dataType, superInputType,
+          rtn = isDataTypeCompatibleRule(entityType, dataTypeMap, superInputType,
               (RuleExpressionVO) param);
         } else if (param instanceof Number) {
           rtn = isDataTypeCompatibleNumber(superInputType);
         } else if (param instanceof String) {
-          rtn = isDataTypeCompatibleString(dataType, superInputType, (String) param);
+          rtn = isDataTypeCompatibleString(dataTypeMap, superInputType, (String) param);
         } else {
           rtn = false;
         }
@@ -415,15 +416,15 @@ public class RuleExpressionVO {
    * Checks if is data type compatible rule.
    *
    * @param entityType the entity type
-   * @param dataType the data type
+   * @param dataTypeMap the data type map
    * @param superInputType the super input type
    * @param rule the rule
    * @return true, if is data type compatible rule
    */
-  private boolean isDataTypeCompatibleRule(EntityTypeEnum entityType, DataType dataType,
-      String superInputType, RuleExpressionVO rule) {
+  private boolean isDataTypeCompatibleRule(EntityTypeEnum entityType,
+      Map<String, DataType> dataTypeMap, String superInputType, RuleExpressionVO rule) {
     boolean typesMatch = rule.getOperator().getReturnType().equals(superInputType);
-    boolean ruleDataTypeCompatible = rule.isDataTypeCompatible(entityType, dataType);
+    boolean ruleDataTypeCompatible = rule.isDataTypeCompatible(entityType, dataTypeMap);
     return typesMatch && ruleDataTypeCompatible;
   }
 
@@ -440,16 +441,16 @@ public class RuleExpressionVO {
   /**
    * Checks if is data type compatible string.
    *
-   * @param dataType the data type
+   * @param dataTypeMap the data type map
    * @param superInputType the super input type
    * @param string the string
    * @return true, if is data type compatible string
    */
-  private boolean isDataTypeCompatibleString(DataType dataType, String superInputType,
-      String string) {
+  private boolean isDataTypeCompatibleString(Map<String, DataType> dataTypeMap,
+      String superInputType, String string) {
 
-    if (string.equals("VALUE")) {
-      return superInputType.equals(dataType.getJavaType());
+    if (string.equals("VALUE") || ObjectId.isValid(string)) {
+      return superInputType.equals(dataTypeMap.get(string).getJavaType());
     }
 
     if (superInputType.equals(JavaType.DATE)) {
