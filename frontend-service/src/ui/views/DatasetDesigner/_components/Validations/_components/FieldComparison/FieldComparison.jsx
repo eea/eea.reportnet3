@@ -24,7 +24,7 @@ export const FieldComparison = ({
   return (
     <React.Fragment>
       <div className={styles.section}>
-        <ul>
+        <ul className={styles.list}>
           {creationFormState.candidateRule.expressions &&
             creationFormState.candidateRule.expressions.map((expression, i) => (
               <ValidationExpressionSelector

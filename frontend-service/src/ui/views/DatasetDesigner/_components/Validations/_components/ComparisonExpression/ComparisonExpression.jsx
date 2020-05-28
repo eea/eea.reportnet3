@@ -247,10 +247,10 @@ const ComparisonExpression = ({
           value={expressionValues.field2}
         />
       </span>
-      <span
+      {/* <span
         onBlur={() => onAddToClickedFields('expressionValue')}
-        className={`${styles.expressionValue} formField ${printRequiredFieldError('expressionValue')}`}></span>
-      <span>
+        className={`${styles.expressionValue} formField ${printRequiredFieldError('expressionValue')}`}></span> */}
+      <div className={styles.deleteBtnWrap}>
         <Button
           className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton} p-button-animated-blink`}
           disabled={isDisabled}
@@ -258,7 +258,7 @@ const ComparisonExpression = ({
           onClick={() => onExpressionDelete(expressionId)}
           type="button"
         />
-      </span>
+      </div>
     </li>
   );
 };

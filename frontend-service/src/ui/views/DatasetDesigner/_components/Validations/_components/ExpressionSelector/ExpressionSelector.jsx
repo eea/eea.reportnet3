@@ -66,7 +66,8 @@ export const ExpressionSelector = ({
           optionLabel="label"
         />
       </div>
-      <div className={styles.section}>{expressionsTypeView()}</div>
+
+      <div className={styles.section}>{expressionsTypeView()} </div>
     </>
   );
 };
