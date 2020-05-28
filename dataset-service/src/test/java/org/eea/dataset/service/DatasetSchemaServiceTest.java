@@ -455,6 +455,7 @@ public class DatasetSchemaServiceTest {
   @Test
   public void deleteFieldSchemaTest1() throws EEAException {
     UpdateResult updateResult = UpdateResult.acknowledged(1L, 1L, null);
+    doNothing().when(rulesControllerZuul).deleteRuleRowLike(Mockito.any(), Mockito.any());
     Mockito.when(schemasRepository.deleteFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(updateResult);
     Assert.assertTrue(dataSchemaServiceImpl.deleteFieldSchema("datasetSchemaId", "fieldSchemaId"));
@@ -468,6 +469,7 @@ public class DatasetSchemaServiceTest {
   @Test
   public void deleteFieldSchemaTest2() throws EEAException {
     UpdateResult updateResult = UpdateResult.acknowledged(1L, 0L, null);
+    doNothing().when(rulesControllerZuul).deleteRuleRowLike(Mockito.any(), Mockito.any());
     Mockito.when(schemasRepository.deleteFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(updateResult);
     Assert.assertFalse(dataSchemaServiceImpl.deleteFieldSchema("datasetSchemaId", "fieldSchemaId"));
@@ -641,8 +643,6 @@ public class DatasetSchemaServiceTest {
 
     Mockito.when(schemasRepository.findRecordSchema(id.toString(), id.toString()))
         .thenReturn(documentRecord);
-    doNothing().when(rulesController).deleteRuleByReferenceId(id.toString(),
-        objIdRecord.toString());
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     dataSchemaServiceImpl.deleteTableSchema(id.toString(), id.toString());
     Mockito.verify(schemasRepository, times(1)).deleteTableSchemaById(Mockito.any());
