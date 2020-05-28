@@ -231,8 +231,10 @@ public class KieBaseManager {
         schemasRepository.findFieldSchema(datasetSchemaId, rule.getReferenceId().toString());
     DataType dataType = DataType.valueOf(documentField.get("typeData").toString());
     RuleExpressionVO ruleExpressionVO = new RuleExpressionVO(rule.getWhenCondition());
+    Map<String, DataType> dataTypeMap = new HashMap<>();
+    dataTypeMap.put("VALUE", dataType);
 
-    if (!ruleExpressionVO.isDataTypeCompatible(rule.getType(), dataType)) {
+    if (!ruleExpressionVO.isDataTypeCompatible(rule.getType(), dataTypeMap)) {
       rule.setVerified(false);
       rule.setEnabled(false);
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
