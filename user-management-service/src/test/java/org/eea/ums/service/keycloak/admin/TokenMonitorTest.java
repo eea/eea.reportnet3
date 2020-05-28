@@ -1,8 +1,8 @@
 package org.eea.ums.service.keycloak.admin;
 
-import static org.mockito.internal.verification.VerificationModeFactory.times;
-import java.util.concurrent.ExecutorService;
+import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.impl.KeycloakConnectorServiceImpl;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,11 +22,6 @@ public class TokenMonitorTest {
   @Mock
   private KeycloakConnectorServiceImpl keycloakConnectorService;
 
-  @Mock
-  private ExecutorService executorService;
-
-  @Mock
-  private TokenGeneratorThread tokenGeneratorThread;
 
   @Before
   public void init() {
@@ -35,18 +30,21 @@ public class TokenMonitorTest {
 
 
   @Test
-  public void startTokenGeneratorThread() {
-    ReflectionTestUtils.invokeMethod(tokenMonitor, "startTokenGeneratorThread");
-    Mockito.verify(executorService, times(1)).submit(Mockito.any(TokenGeneratorThread.class));
+  public void getToken() {
+    TokenInfo tokenInfo = new TokenInfo();
+    tokenInfo.setAccessToken("accessToken");
+    tokenInfo.setRefreshToken("refreshToken2");
+    ReflectionTestUtils.setField(tokenMonitor, "refreshToken", "refreshToken");
+    ReflectionTestUtils.setField(tokenMonitor, "tokenExpirationTime", 300000l);
+
+    Mockito.when(keycloakConnectorService.refreshToken(Mockito.eq("refreshToken")))
+        .thenReturn(tokenInfo);
+    String result = tokenMonitor.getToken();
+    Assert.assertNotNull(result);
+    Assert.assertEquals("accessToken", result);
+    Assert.assertEquals(ReflectionTestUtils.getField(tokenMonitor, "refreshToken").toString(),
+        "refreshToken2");
   }
 
-  @Test
-  public void destroy() {
-    ReflectionTestUtils.setField(tokenMonitor, "tokenGeneratorThread", tokenGeneratorThread);
-    Mockito.when(executorService.isShutdown()).thenReturn(false);
-    tokenMonitor.destroy();
-    Mockito.verify(tokenGeneratorThread, Mockito.times(1)).stopThread();
-    Mockito.verify(executorService, Mockito.times(1)).shutdown();
-  }
 
 }
