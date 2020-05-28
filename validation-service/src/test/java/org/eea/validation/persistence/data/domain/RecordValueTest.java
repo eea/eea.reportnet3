@@ -2,6 +2,7 @@ package org.eea.validation.persistence.data.domain;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -107,7 +108,113 @@ public class RecordValueTest {
   }
 
   @Test
-  public void recordNumberEqualsTest() {
+  public void recordNumberEqualsLongTrueTest() {
     Assert.assertTrue(recordValue.recordNumberEquals(fieldId1, 1));
+  }
+
+  @Test
+  public void recordNumberEqualsLongFalseTest() {
+    Assert.assertFalse(recordValue.recordNumberEquals(fieldId1, 1.1));
+  }
+
+  @Test
+  public void recordNumberEqualsDoubleTrueTest() {
+    Assert.assertTrue(recordValue.recordNumberEquals(fieldId2, 2.0));
+  }
+
+  @Test
+  public void recordNumberEqualsFieldNotFoundTest() {
+    Assert.assertTrue(recordValue.recordNumberEquals(new ObjectId().toString(), 1));
+  }
+
+  @Test
+  public void recordNumberDistinctLongTrueTest() {
+    Assert.assertTrue(recordValue.recordNumberDistinct(fieldId1, 2));
+  }
+
+  @Test
+  public void recordNumberDistinctLongFalseTest() {
+    Assert.assertFalse(recordValue.recordNumberDistinct(fieldId1, 1.0));
+  }
+
+  @Test
+  public void recordNumberDistinctDoubleTrueTest() {
+    Assert.assertTrue(recordValue.recordNumberDistinct(fieldId2, 2.1));
+  }
+
+  @Test
+  public void recordNumberDistinctFieldNotFoundTest() {
+    Assert.assertTrue(recordValue.recordNumberDistinct(new ObjectId().toString(), 1));
+  }
+
+  @Test
+  public void recordNumberGreaterThanLongTrueThanTest() {
+    Assert.assertTrue(recordValue.recordNumberGreaterThan(fieldId1, 0.5));
+  }
+
+  @Test
+  public void recordNumberGreaterThanLongFalseThanTest() {
+    Assert.assertFalse(recordValue.recordNumberGreaterThan(fieldId1, 1.0));
+  }
+
+  @Test
+  public void recordNumberGreaterThanFieldNotFoundTrueThanTest() {
+    Assert.assertTrue(recordValue.recordNumberGreaterThan(new ObjectId().toString(), 1.0));
+  }
+
+  @Test
+  public void recordNumberLessThanLongTrueThanTest() {
+    Assert.assertTrue(recordValue.recordNumberLessThan(fieldId1, 1.5));
+  }
+
+  @Test
+  public void recordNumberLessThanLongFalseThanTest() {
+    Assert.assertFalse(recordValue.recordNumberLessThan(fieldId1, 0.5));
+  }
+
+  @Test
+  public void recordNumberLessThanFieldNotFoundTrueThanTest() {
+    Assert.assertTrue(recordValue.recordNumberLessThan(new ObjectId().toString(), 1.0));
+  }
+
+  @Test
+  public void recordNumberGreaterThanOrEqualsThanLongTrueThanTest() {
+    Assert.assertTrue(recordValue.recordNumberGreaterThanOrEqualsThan(fieldId1, 0.5));
+  }
+
+  @Test
+  public void recordNumberGreaterThanOrEqualsThanDoubleTrueThanTest() {
+    Assert.assertTrue(recordValue.recordNumberGreaterThanOrEqualsThan(fieldId1, 1.0));
+  }
+
+  @Test
+  public void recordNumberGreaterThanOrEqualsThanLongFalseThanTest() {
+    Assert.assertFalse(recordValue.recordNumberGreaterThanOrEqualsThan(fieldId1, 1.5));
+  }
+
+  @Test
+  public void recordNumberGreaterThanOrEqualsThanFieldNotFoundTrueThanTest() {
+    Assert.assertTrue(
+        recordValue.recordNumberGreaterThanOrEqualsThan(new ObjectId().toString(), 1.0));
+  }
+
+  @Test
+  public void recordNumberLessThanOrEqualsThanLongTrueThanTest() {
+    Assert.assertTrue(recordValue.recordNumberLessThanOrEqualsThan(fieldId1, 1.5));
+  }
+
+  @Test
+  public void recordNumberLessThanOrEqualsThanDoubleTrueThanTest() {
+    Assert.assertTrue(recordValue.recordNumberLessThanOrEqualsThan(fieldId1, 1.0));
+  }
+
+  @Test
+  public void recordNumberLessThanOrEqualsThanLongFalseThanTest() {
+    Assert.assertFalse(recordValue.recordNumberLessThanOrEqualsThan(fieldId1, 0.5));
+  }
+
+  @Test
+  public void recordNumberLessThanOrEqualsThanFieldNotFoundTrueThanTest() {
+    Assert.assertTrue(recordValue.recordNumberLessThanOrEqualsThan(new ObjectId().toString(), 1.0));
   }
 }
