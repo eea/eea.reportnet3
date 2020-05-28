@@ -197,62 +197,51 @@ public class KieBaseManager {
    * @throws EEAException
    */
   @Async
+  @SuppressWarnings("unchecked")
   public void textRuleCorrect(String datasetSchemaId, Rule rule) throws EEAException {
-    DataType dataType = null;
+
     Map<String, DataType> dataTypeMap = new HashMap<>();
     RuleExpressionVO ruleExpressionVO = new RuleExpressionVO(rule.getWhenCondition());
+
     switch (rule.getType()) {
       case DATASET:
         break;
       case TABLE:
         break;
       case RECORD:
-
+        List<Document> fields = (ArrayList<Document>) schemasRepository
+            .findRecordSchema(datasetSchemaId, rule.getReferenceId().toString())
+            .get("fieldSchemas");
+        for (Document field : fields) {
+          String fieldSchemaId = field.get("_id").toString();
+          DataType dataType = DataType.valueOf(field.get("typeData").toString());
+          dataTypeMap.put(fieldSchemaId, dataType);
+        }
         break;
       case FIELD:
         Document document =
             schemasRepository.findFieldSchema(datasetSchemaId, rule.getReferenceId().toString());
-        dataType = DataType.valueOf(document.get("typeData").toString());
+        DataType dataType = DataType.valueOf(document.get("typeData").toString());
         dataTypeMap.put("VALUE", dataType);
         break;
     }
 
 
-    if (!ruleExpressionVO.isDataTypeCompatible(rule.getType(), dataTypeMap)) {
+    if (ruleExpressionVO.isDataTypeCompatible(rule.getType(), dataTypeMap)) {
       rule.setVerified(false);
       rule.setEnabled(false);
-      rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.INVALIDATED_QC_RULE_EVENT, null,
           NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
               .datasetSchemaId(datasetSchemaId).error("The QC Rule is disabled")
               .shortCode(rule.getShortCode()).build());
+    } else {
+      rule.setVerified(true);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATED_QC_RULE_EVENT, null,
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build());
     }
-    // ruleAttribute.add(passDataToMap(rule.getReferenceId().toString(),
-    // rule.getRuleId().toString(),
-    // typeValidation, schemasDrools, expression.toString(), rule.getThenCondition().get(0),
-    // rule.getThenCondition().get(1), ""));
-    //
-    // // We create the same text like in kiebase and with that part we check if the rule is correct
-    // KieHelper kieHelperTest = kiebaseAssemble(compiler, kieServices, ruleAttribute);
-    //
-    // // Check rule integrity
-    // Results results = kieHelperTest.verify();
-    //
-    // if (results.hasMessages(Message.Level.ERROR)) {
-    // rule.setVerified(false);
-    // rule.setEnabled(false);
-    // rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
-    // kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.INVALIDATED_QC_RULE_EVENT, null,
-    // NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-    // .datasetSchemaId(datasetSchemaId).error("The QC Rule is disabled")
-    // .shortCode(rule.getShortCode()).build());
-    // } else {
-    // rule.setVerified(true);
-    // rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
-    // kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATED_QC_RULE_EVENT, null,
-    // NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-    // .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build());
-    // }
+
+    rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
   }
 
   /**

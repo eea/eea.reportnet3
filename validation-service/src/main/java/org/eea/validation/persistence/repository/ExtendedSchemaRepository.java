@@ -20,8 +20,8 @@ public interface ExtendedSchemaRepository {
    * Find record schema.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param tableSchemaId the table schema id
+   * @param recordSchemaId the record schema id
    * @return the document
    */
-  Document findRecordSchema(String datasetSchemaId, String tableSchemaId);
+  Document findRecordSchema(String datasetSchemaId, String recordSchemaId);
 }
