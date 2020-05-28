@@ -57,7 +57,15 @@ public class TokenMonitor {
     Long currentTime = System.currentTimeMillis();
     Long difference = currentTime - lastUpdateTime;
     if ((difference) > tokenExpirationTime) {
-      TokenInfo tokenInfo = keycloakConnectorService.refreshToken(refreshToken);
+      TokenInfo tokenInfo = null;
+      try {
+        tokenInfo = keycloakConnectorService.refreshToken(refreshToken);
+      } catch (Exception e) {
+        log.warn(
+            "Error trying to refresh admin token, using admin credentials to get a new admin token due to {}",
+            e.getMessage(), e);
+        tokenInfo = keycloakConnectorService.generateToken(adminUser, adminPass);
+      }
       manageTokenInfo(tokenInfo);
       lastUpdateTime = currentTime;
       log.info("Admin Token refreshed successfully");

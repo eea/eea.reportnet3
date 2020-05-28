@@ -275,7 +275,7 @@ public class DocumentServiceImpl implements DocumentService {
         throw new EEAException(EEAErrorMessage.FILE_FORMAT);
       }
 
-      LOG.info("Adding the file...");
+      LOG.info("Adding the file... {}", filename);
       // Initialize the session
       ns = oakRepositoryUtils.initializeNodeStore();
       Repository repository = oakRepositoryUtils.initializeRepository(ns);
@@ -287,10 +287,11 @@ public class DocumentServiceImpl implements DocumentService {
       if (StringUtils.isBlank(modifiedFilename)) {
         throw new EEAException(EEAErrorMessage.FILE_NAME);
       }
-      LOG.info("File snapshot added...");
+      LOG.info("File snapshot added... {}", filename);
 
     } catch (RepositoryException | EEAException e) {
-      LOG_ERROR.error("Error in uploadSnapshotSchema document due to", e);
+      LOG_ERROR.error("Error in uploadSnapshotSchema, document {} due to {}", filename,
+          e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     } finally {
       inputStream.close();
@@ -325,7 +326,7 @@ public class DocumentServiceImpl implements DocumentService {
       // retrieve the file to the controller
       fileResponse = oakRepositoryUtils.getFileContents(session,
           PATH_DELIMITER_SNAPSHOT + idDesignDataset, documentName);
-      LOG.info("Fething the file...");
+      LOG.info("Fething the file... {}", documentName);
     } catch (IOException | RepositoryException e) {
       LOG_ERROR.error("Error in getDocument due to", e);
       if (e.getClass().equals(PathNotFoundException.class)) {
