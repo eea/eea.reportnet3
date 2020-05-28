@@ -29,8 +29,6 @@ import org.eea.validation.util.drools.compose.SchemasDrools;
 import org.eea.validation.util.drools.compose.TypeValidation;
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
-import org.kie.api.builder.Message;
-import org.kie.api.builder.Results;
 import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
 import org.kie.internal.utils.KieHelper;
@@ -200,39 +198,25 @@ public class KieBaseManager {
    */
   @Async
   public void textRuleCorrect(String datasetSchemaId, Rule rule) throws EEAException {
-
-    KieServices kieServices = KieServices.Factory.get();
-    ObjectDataCompiler compiler = new ObjectDataCompiler();
-    List<Map<String, String>> ruleAttribute = new ArrayList<>();
-    TypeValidation typeValidation = TypeValidation.DATASET;
-    String schemasDrools = "";
-    String whenCondition = rule.getWhenCondition();
-    StringBuilder expression = new StringBuilder("");
+    DataType dataType = null;
+    Map<String, DataType> dataTypeMap = new HashMap<>();
+    RuleExpressionVO ruleExpressionVO = new RuleExpressionVO(rule.getWhenCondition());
     switch (rule.getType()) {
       case DATASET:
-        schemasDrools = SchemasDrools.ID_DATASET_SCHEMA.getValue();
-        typeValidation = TypeValidation.DATASET;
         break;
       case TABLE:
-        schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
-        typeValidation = TypeValidation.TABLE;
         break;
       case RECORD:
-        schemasDrools = SchemasDrools.ID_RECORD_SCHEMA.getValue();
-        typeValidation = TypeValidation.RECORD;
+
         break;
       case FIELD:
-        schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
-        typeValidation = TypeValidation.FIELD;
+        Document document =
+            schemasRepository.findFieldSchema(datasetSchemaId, rule.getReferenceId().toString());
+        dataType = DataType.valueOf(document.get("typeData").toString());
+        dataTypeMap.put("VALUE", dataType);
         break;
     }
 
-    Document documentField =
-        schemasRepository.findFieldSchema(datasetSchemaId, rule.getReferenceId().toString());
-    DataType dataType = DataType.valueOf(documentField.get("typeData").toString());
-    RuleExpressionVO ruleExpressionVO = new RuleExpressionVO(rule.getWhenCondition());
-    Map<String, DataType> dataTypeMap = new HashMap<>();
-    dataTypeMap.put("VALUE", dataType);
 
     if (!ruleExpressionVO.isDataTypeCompatible(rule.getType(), dataTypeMap)) {
       rule.setVerified(false);
@@ -242,65 +226,33 @@ public class KieBaseManager {
           NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
               .datasetSchemaId(datasetSchemaId).error("The QC Rule is disabled")
               .shortCode(rule.getShortCode()).build());
-      return;
     }
-
-    // we do the same thing like in kiebase validation part
-    if (null != dataType) {
-      switch (dataType) {
-        case NUMBER_INTEGER:
-          expression.append("( !isBlank(value) || isNumberInteger(value) && ");
-          break;
-        case NUMBER_DECIMAL:
-          expression.append("( !isBlank(value) || isNumberDecimal(value) && ");
-          break;
-        case DATE:
-          expression.append("( !isBlank(value) || isDateYYYYMMDD(value) && ");
-          break;
-        case BOOLEAN:
-          expression.append("( !isBlank(value) || isBoolean(value) && ");
-          break;
-        case COORDINATE_LAT:
-          expression.append("( !isBlank(value) || isCordenateLat(value) && ");
-          break;
-        case COORDINATE_LONG:
-          expression.append("( !isBlank(value) || isCordenateLong(value) && ");
-          break;
-        default:
-          expression.append("( !isBlank(value) || ");
-          break;
-      }
-    }
-    if (!StringUtils.isBlank(expression.toString())) {
-      String whenConditionWithParenthesis =
-          new StringBuilder("").append("(").append(whenCondition).append(")").toString();
-      expression.append(whenConditionWithParenthesis).append(")").toString();
-    }
-    ruleAttribute.add(passDataToMap(rule.getReferenceId().toString(), rule.getRuleId().toString(),
-        typeValidation, schemasDrools, expression.toString(), rule.getThenCondition().get(0),
-        rule.getThenCondition().get(1), ""));
-
-    // We create the same text like in kiebase and with that part we check if the rule is correct
-    KieHelper kieHelperTest = kiebaseAssemble(compiler, kieServices, ruleAttribute);
-
-    // Check rule integrity
-    Results results = kieHelperTest.verify();
-
-    if (results.hasMessages(Message.Level.ERROR)) {
-      rule.setVerified(false);
-      rule.setEnabled(false);
-      rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.INVALIDATED_QC_RULE_EVENT, null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .datasetSchemaId(datasetSchemaId).error("The QC Rule is disabled")
-              .shortCode(rule.getShortCode()).build());
-    } else {
-      rule.setVerified(true);
-      rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATED_QC_RULE_EVENT, null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build());
-    }
+    // ruleAttribute.add(passDataToMap(rule.getReferenceId().toString(),
+    // rule.getRuleId().toString(),
+    // typeValidation, schemasDrools, expression.toString(), rule.getThenCondition().get(0),
+    // rule.getThenCondition().get(1), ""));
+    //
+    // // We create the same text like in kiebase and with that part we check if the rule is correct
+    // KieHelper kieHelperTest = kiebaseAssemble(compiler, kieServices, ruleAttribute);
+    //
+    // // Check rule integrity
+    // Results results = kieHelperTest.verify();
+    //
+    // if (results.hasMessages(Message.Level.ERROR)) {
+    // rule.setVerified(false);
+    // rule.setEnabled(false);
+    // rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+    // kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.INVALIDATED_QC_RULE_EVENT, null,
+    // NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+    // .datasetSchemaId(datasetSchemaId).error("The QC Rule is disabled")
+    // .shortCode(rule.getShortCode()).build());
+    // } else {
+    // rule.setVerified(true);
+    // rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+    // kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATED_QC_RULE_EVENT, null,
+    // NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+    // .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build());
+    // }
   }
 
   /**
