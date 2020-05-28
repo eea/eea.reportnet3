@@ -7,15 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.jdbc.DataSourceHealthIndicator;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.stereotype.Component;
 
 
 @Slf4j
 public class EEADataSourceHealthIndicator extends DataSourceHealthIndicator {
 
   private Long lastExecutionTimeStamp = 0l;
-  private Health.Builder lasResult = null;
+  private Health lastResult = null;
 
   @Value("${spring.health.db.check.frequency}")
   private Long checkFrenquency;
@@ -34,11 +32,12 @@ public class EEADataSourceHealthIndicator extends DataSourceHealthIndicator {
         log.debug("Performing data base health check");
         lastExecutionTimeStamp = currentTime;
         super.doHealthCheck(builder);
-        lasResult = builder;
+        lastResult = builder.build();
       } else {
-        builder = lasResult;
+        builder.up().withDetails(lastResult.getDetails());
       }
     }
 
   }
+
 }
