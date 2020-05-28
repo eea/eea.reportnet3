@@ -832,8 +832,11 @@ public class DataSetSchemaControllerImplTest {
   @Test
   public void testCreateUniqueConstraintTest() {
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
+    List<String> fields = new ArrayList<>();
+    fields.add(new ObjectId().toString());
     uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
     uniqueConstraint.setTableSchemaId(new ObjectId().toString());
+    uniqueConstraint.setFieldSchemaIds(fields);
     dataSchemaControllerImpl.createUniqueConstraint(uniqueConstraint);
     Mockito.verify(dataschemaService, times(1)).createUniqueConstraint(Mockito.any());
   }
@@ -849,6 +852,21 @@ public class DataSetSchemaControllerImplTest {
       throw e;
     }
   }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createUniqueConstraintNofieldsErrorTest() {
+    UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
+    uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
+    uniqueConstraint.setTableSchemaId(new ObjectId().toString());
+    try {
+      dataSchemaControllerImpl.createUniqueConstraint(uniqueConstraint);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.UNREPORTED_FIELDSCHEMAS, e.getReason());
+      throw e;
+    }
+  }
+
 
   @Test(expected = ResponseStatusException.class)
   public void createUniqueConstraintTableSchemaIdErrorTest() {
@@ -875,13 +893,13 @@ public class DataSetSchemaControllerImplTest {
   }
 
   @Test
-  public void deleteUniqueConstraintTest() {
+  public void deleteUniqueConstraintTest() throws EEAException {
     dataSchemaControllerImpl.deleteUniqueConstraint(new ObjectId().toString());
     Mockito.verify(dataschemaService, times(1)).deleteUniqueConstraint(Mockito.any());
   }
 
   @Test(expected = ResponseStatusException.class)
-  public void deleteUniqueConstraintErrorTest() {
+  public void deleteUniqueConstraintIdErrorTest() {
     try {
       dataSchemaControllerImpl.deleteUniqueConstraint(null);
     } catch (ResponseStatusException e) {
@@ -891,12 +909,26 @@ public class DataSetSchemaControllerImplTest {
     }
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void deleteUniqueConstraintErrorTest() throws EEAException {
+    doThrow(EEAException.class).when(dataschemaService).deleteUniqueConstraint(Mockito.any());
+    try {
+      dataSchemaControllerImpl.deleteUniqueConstraint(new ObjectId().toString());
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
   @Test
   public void updateUniqueConstraintTest() {
+    List<String> fields = new ArrayList<>();
+    fields.add(new ObjectId().toString());
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
     uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
     uniqueConstraint.setTableSchemaId(new ObjectId().toString());
     uniqueConstraint.setUniqueId(new ObjectId().toString());
+    uniqueConstraint.setFieldSchemaIds(fields);
     dataSchemaControllerImpl.updateUniqueConstraint(uniqueConstraint);
     Mockito.verify(dataschemaService, times(1)).updateUniqueConstraint(Mockito.any());
   }
@@ -944,6 +976,22 @@ public class DataSetSchemaControllerImplTest {
   }
 
   @Test(expected = ResponseStatusException.class)
+  public void updateUniqueConstraintFieldErrorTest() {
+    UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
+    uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
+    uniqueConstraint.setTableSchemaId(new ObjectId().toString());
+    uniqueConstraint.setUniqueId(new ObjectId().toString());
+    try {
+      dataSchemaControllerImpl.updateUniqueConstraint(uniqueConstraint);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.UNREPORTED_FIELDSCHEMAS, e.getReason());
+      throw e;
+    }
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
   public void updateUniqueConstraintUnreportedDataErrorTest() {
     try {
       dataSchemaControllerImpl.updateUniqueConstraint(null);
@@ -968,6 +1016,24 @@ public class DataSetSchemaControllerImplTest {
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test
+  public void getUniqueConstraintTest() throws EEAException {
+    UniqueConstraintVO unique = new UniqueConstraintVO();
+    Mockito.when(dataschemaService.getUniqueConstraint(Mockito.any())).thenReturn(unique);
+    assertEquals(unique, dataSchemaControllerImpl.getUniqueConstraint(new ObjectId().toString()));
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getUniqueConstraintErrorTest() throws EEAException {
+    doThrow(EEAException.class).when(dataschemaService).getUniqueConstraint(Mockito.any());
+    try {
+      dataSchemaControllerImpl.getUniqueConstraint(new ObjectId().toString());
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;
     }
   }
