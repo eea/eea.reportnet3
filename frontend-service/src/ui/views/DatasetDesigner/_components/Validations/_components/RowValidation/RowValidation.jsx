@@ -259,11 +259,18 @@ export const RowValidation = ({ datasetId, tabs }) => {
     );
   };
 
+  const getRecordIdByTableSchemaId = tableSchemaId => {
+    const filteredTables = tabs.filter(tab => tab.tableSchemaId === tableSchemaId);
+    const [filteredTable] = filteredTables;
+    return filteredTable.recordSchemaId;
+  };
+
   const onCreateValidationRule = async () => {
     try {
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
-      await ValidationService.create(datasetId, candidateRule);
+      candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
+      await ValidationService.createRowRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
       notificationContext.add({

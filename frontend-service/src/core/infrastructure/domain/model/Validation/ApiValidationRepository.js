@@ -5,20 +5,37 @@ import isUndefined from 'lodash/isUndefined';
 import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
 
 import { getCreationDTO } from './Utils/getCreationDTO';
+import { getCreationComparisonDTO } from './Utils/getCreationComparisonDTO';
 import { parseDataValidationRulesDTO } from './Utils/parseDataValidationRulesDTO';
 
 const create = async (datasetSchemaId, validationRule) => {
   const { expressions } = validationRule;
   const validation = {
-    description: validationRule.description,
     automatic: false,
+    description: validationRule.description,
     enabled: validationRule.active ? validationRule.active : false,
     referenceId: validationRule.field.code,
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
-    type: 'FIELD',
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
+    type: 'FIELD',
     whenCondition: getCreationDTO(expressions)
+  };
+  return await apiValidation.create(datasetSchemaId, validation);
+};
+
+const createRowRule = async (datasetSchemaId, validationRule) => {
+  const { expressions } = validationRule;
+  const validation = {
+    automatic: false,
+    description: validationRule.description,
+    enabled: validationRule.active ? validationRule.active : false,
+    referenceId: validationRule.recordSchemaId,
+    ruleName: validationRule.name,
+    shortCode: validationRule.shortCode,
+    thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
+    type: 'RECORD',
+    whenCondition: getCreationComparisonDTO(expressions)
   };
   return await apiValidation.create(datasetSchemaId, validation);
 };
@@ -64,6 +81,7 @@ const update = async (datasetId, validationRule) => {
 
 export const ApiValidationRepository = {
   create,
+  createRowRule,
   deleteById,
   getAll,
   update
