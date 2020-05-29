@@ -593,6 +593,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           }
         }
 
+        // Update UniqueConstraints
+        if (fieldSchemaVO.getPk() != fieldSchema.get(LiteralConstants.PK)) {
+          if (fieldSchemaVO.getPk()) {
+            createUniqueConstraintPK(datasetSchemaId, fieldSchemaVO);
+          } else {
+            // delete
+          }
+        }
+
         // Modify it based on FieldSchemaVO data received
         if (fieldSchemaVO.getType() != null
             && !fieldSchema.put(LiteralConstants.TYPE_DATA, fieldSchemaVO.getType().getValue())
@@ -1399,7 +1408,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
       ObjectId idTableSchema = null;
       for (TableSchema table : datasetSchema.getTableSchemas()) {
-        if (table.getRecordSchema().toString().equals(fieldSchemaVO.getIdRecord())) {
+        if (table.getRecordSchema().getIdRecordSchema().toString()
+            .equals(fieldSchemaVO.getIdRecord())) {
           idTableSchema = table.getIdTableSchema();
         }
       }
