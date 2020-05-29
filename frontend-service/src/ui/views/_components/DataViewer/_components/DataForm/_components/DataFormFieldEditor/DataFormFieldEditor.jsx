@@ -218,7 +218,8 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     return (
       <Calendar
         onChange={e => onChangeForm(field, formatDate(e.target.value))}
-        appendTo={document.getElementById('pr_id_11')}
+        appendTo={document.body}
+        baseZIndex={9999}
         dateFormat="yy-mm-dd"
         monthNavigator={true}
         style={{ width: '60px' }}
