@@ -38,6 +38,7 @@ import { getFieldType } from '../../_functions/utils/getFieldType';
 import { getSelectedFieldById } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedFieldById';
 import { getSelectedTableByFieldId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTablebyFieldId';
 import { getSelectedTableByTableSchemaId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTableByTableSchemaId';
+import { getSelectedTableByRecordId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTableByRecordId';
 import { groupExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/groupExpressions';
 import { initValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/initValidationRuleCreation';
 import { resetValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/resetValidationRuleCreation';
@@ -135,15 +136,15 @@ export const RowValidation = ({ datasetId, tabs }) => {
       });
     }
 
-    if (validationContext.referenceId) {
-      creationFormDispatch({
-        type: 'SET_FORM_FIELD',
-        payload: {
-          key: 'field',
-          value: getSelectedFieldById(validationContext.referenceId, tabs)
-        }
-      });
-    }
+    // if (validationContext.referenceId) {
+    //   creationFormDispatch({
+    //     type: 'SET_FORM_FIELD',
+    //     payload: {
+    //       key: 'field',
+    //       value: getSelectedFieldById(validationContext.referenceId, tabs)
+    //     }
+    //   });
+    // }
   }, [creationFormState.candidateRule.table]);
 
   useEffect(() => {
@@ -162,13 +163,13 @@ export const RowValidation = ({ datasetId, tabs }) => {
   }, [expressionsErrors]);
 
   useEffect(() => {
-    let table = null;
     if (validationContext.referenceId) {
-      if (!isNil(validationContext.tableSchemaId)) {
-        table = getSelectedTableByTableSchemaId(validationContext.tableSchemaId, tabs);
-      } else {
-        table = getSelectedTableByFieldId(validationContext.referenceId, tabs);
-      }
+      // if (!isNil(validationContext.tableSchemaId)) {
+      //   table = getSelectedTableByTableSchemaId(validationContext.tableSchemaId, tabs);
+      // } else {
+      //   table = getSelectedTableByFieldId(validationContext.referenceId, tabs);
+      // }
+      const table = getSelectedTableByRecordId(validationContext.referenceId, tabs);
       creationFormDispatch({
         type: 'SET_FORM_FIELD',
         payload: {
