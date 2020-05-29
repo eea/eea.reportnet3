@@ -417,4 +417,14 @@ public interface DatasetSchemaService {
    */
   void deleteUniquesConstraintFromField(String schemaId, String fieldSchemaId) throws EEAException;
 
+  /**
+   * Creates the unique constraint PK.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @param idField the id field
+   */
+  void createUniqueConstraintPK(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
+      String idField);
+
 }
