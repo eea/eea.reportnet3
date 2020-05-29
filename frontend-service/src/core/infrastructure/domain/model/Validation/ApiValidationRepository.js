@@ -79,10 +79,30 @@ const update = async (datasetId, validationRule) => {
   return await apiValidation.update(datasetId, validation);
 };
 
+const updateRowRule = async (datasetId, validationRule) => {
+  const { expressions } = validationRule;
+  const validation = {
+    ruleId: validationRule.id,
+    description: validationRule.description,
+    automatic: validationRule.automatic,
+    enabled: validationRule.active ? validationRule.active : false,
+    referenceId: validationRule.recordSchemaId,
+    ruleName: validationRule.name,
+    shortCode: validationRule.shortCode,
+    type: 'RECORD',
+    thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value]
+  };
+  if (!validationRule.automatic) {
+    validation.whenCondition = getCreationComparisonDTO(expressions);
+  }
+  return await apiValidation.update(datasetId, validation);
+};
+
 export const ApiValidationRepository = {
   create,
   createRowRule,
   deleteById,
   getAll,
-  update
+  update,
+  updateRowRule
 };

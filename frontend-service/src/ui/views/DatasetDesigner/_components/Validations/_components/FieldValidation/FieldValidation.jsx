@@ -160,15 +160,14 @@ const FieldValidation = ({ datasetId, tabs }) => {
 
   useEffect(() => {
     let table = null;
-    console.log('validationContext.referenceId', validationContext.referenceId);
+
     if (validationContext.referenceId) {
-      console.log('kkk');
       if (!isNil(validationContext.tableSchemaId)) {
         table = getSelectedTableByTableSchemaId(validationContext.tableSchemaId, tabs);
       } else {
         table = getSelectedTableByFieldId(validationContext.referenceId, tabs);
       }
-      console.log('table', table);
+
       const fieldType = getFieldType(table, { code: validationContext.referenceId }, tabs);
       creationFormDispatch({
         type: 'SET_FIELD_AND_FIELD_TYPE',

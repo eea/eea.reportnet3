@@ -169,7 +169,6 @@ const ComparisonExpression = ({
 
   return (
     <li className={styles.expression}>
-      {console.log('expressionValues', expressionValues)}
       <span className={styles.group}>
         <Checkbox
           disabled={isDisabled}
@@ -193,7 +192,6 @@ const ComparisonExpression = ({
         onBlur={() => onAddToClickedFields('field1')}
         className={`${styles.operatorType} formField ${printRequiredFieldError('field1')}`}>
         <Dropdown
-          // appendTo={document.body}
           disabled={false}
           id={`${componentName}__field1`}
           onChange={e => onUpdateExpressionField('field1', e.value)}
@@ -208,7 +206,6 @@ const ComparisonExpression = ({
         onBlur={() => onAddToClickedFields('operatorType')}
         className={`${styles.operatorType} formField ${printRequiredFieldError('operatorType')}`}>
         <Dropdown
-          // appendTo={document.body}
           disabled={isDisabled}
           onChange={e => onUpdateExpressionField('operatorType', e.value)}
           optionLabel="label"
@@ -222,7 +219,6 @@ const ComparisonExpression = ({
         onBlur={() => onAddToClickedFields('operatorValue')}
         className={`${styles.operatorValue} formField ${printRequiredFieldError('operatorValue')}`}>
         <Dropdown
-          // appendTo={document.body}
           disabled={isDisabled}
           onChange={e => onUpdateExpressionField('operatorValue', e.value)}
           optionLabel="label"
@@ -237,7 +233,6 @@ const ComparisonExpression = ({
         onBlur={() => onAddToClickedFields('field2')}
         className={`${styles.operatorType} formField ${printRequiredFieldError('field2')}`}>
         <Dropdown
-          // appendTo={document.body}
           disabled={false}
           filterPlaceholder={'Select second field'}
           id={`${componentName}__field2`}
@@ -248,9 +243,6 @@ const ComparisonExpression = ({
           value={expressionValues.field2}
         />
       </span>
-      {/* <span
-        onBlur={() => onAddToClickedFields('expressionValue')}
-        className={`${styles.expressionValue} formField ${printRequiredFieldError('expressionValue')}`}></span> */}
       <div className={styles.deleteBtnWrap}>
         <Button
           className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton} p-button-animated-blink`}

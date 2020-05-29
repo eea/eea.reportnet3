@@ -287,7 +287,8 @@ export const RowValidation = ({ datasetId, tabs }) => {
     try {
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
-      await ValidationService.update(datasetId, candidateRule);
+      candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
+      await ValidationService.updateRowRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
       notificationContext.add({

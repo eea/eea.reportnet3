@@ -7,7 +7,7 @@ import { getRowGroupFromDTO } from './getRowGroupFromDTO';
 
 export const selectorRowFromDTO = (expression, expressions, allExpressions) => {
   const {
-    validations: { logicalOperatorFromDTO }
+    validations: { logicalRowOperatorFromDTO }
   } = config;
   if (!isObject(expression.params[0])) {
     expressions.push(getRowExpressionFromDTO(expression, allExpressions, null));
@@ -19,7 +19,7 @@ export const selectorRowFromDTO = (expression, expressions, allExpressions) => {
       if (index === 0) {
         operator = null;
       }
-      if (logicalOperatorFromDTO.includes(param.operator)) {
+      if (logicalRowOperatorFromDTO.includes(param.operator)) {
         expressions.push(getRowGroupFromDTO(param, allExpressions, expression.operator));
       } else {
         expressions.push(getRowExpressionFromDTO(param, allExpressions, operator));

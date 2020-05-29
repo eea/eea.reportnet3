@@ -2,7 +2,7 @@ import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
 
-import { getCreationDTO } from './getCreationDTO';
+import { getCreationComparisonDTO } from './getCreationComparisonDTO';
 
 const getOperatorEquivalence = (operatorType, operatorValue = null) => {
   const {
@@ -20,7 +20,7 @@ const getOperatorEquivalence = (operatorType, operatorValue = null) => {
 export const getComparisonExpression = expression => {
   const { operatorType, operatorValue, field1, field2 } = expression;
   if (expression.expressions.length > 1) {
-    return getCreationDTO(expression.expressions);
+    return getCreationComparisonDTO(expression.expressions);
   } else {
     if (operatorType === 'LEN') {
       return {

@@ -3,6 +3,7 @@ import { CreateRowRule } from './CreateRowRule';
 import { Delete } from './Delete';
 import { GetAll } from './GetAll';
 import { Update } from './Update';
+import { UpdateRowRule } from './UpdateRowRule';
 
 import { validationRepository } from 'core/domain/model/Validation/ValidationRepository';
 
@@ -11,5 +12,6 @@ export const ValidationService = {
   createRowRule: CreateRowRule({ validationRepository }),
   deleteById: Delete({ validationRepository }),
   getAll: GetAll({ validationRepository }),
-  update: Update({ validationRepository })
+  update: Update({ validationRepository }),
+  updateRowRule: UpdateRowRule({ validationRepository })
 };
