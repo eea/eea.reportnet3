@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useContext, useState } from 'react';
+import React, { Fragment, useEffect, useReducer, useContext, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -121,7 +121,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
         </TabPanel>
       ]);
     }
-  }, [creationFormState, clickedFields, showErrorOnInfoTab, showErrorOnExpressionTab]);
+  }, [clickedFields, creationFormState, showErrorOnExpressionTab, showErrorOnInfoTab]);
 
   useEffect(() => {
     const { table } = creationFormState.candidateRule;
@@ -132,12 +132,12 @@ const FieldValidation = ({ datasetId, tabs }) => {
       });
     }
 
-    if (validationContext.fieldId) {
+    if (validationContext.referenceId) {
       creationFormDispatch({
         type: 'SET_FORM_FIELD',
         payload: {
           key: 'field',
-          value: getSelectedFieldById(validationContext.fieldId, tabs)
+          value: getSelectedFieldById(validationContext.referenceId, tabs)
         }
       });
     }
@@ -160,13 +160,15 @@ const FieldValidation = ({ datasetId, tabs }) => {
 
   useEffect(() => {
     let table = null;
-    if (validationContext.fieldId) {
+
+    if (validationContext.referenceId) {
       if (!isNil(validationContext.tableSchemaId)) {
         table = getSelectedTableByTableSchemaId(validationContext.tableSchemaId, tabs);
       } else {
-        table = getSelectedTableByFieldId(validationContext.fieldId, tabs);
+        table = getSelectedTableByFieldId(validationContext.referenceId, tabs);
       }
-      const fieldType = getFieldType(table, { code: validationContext.fieldId }, tabs);
+
+      const fieldType = getFieldType(table, { code: validationContext.referenceId }, tabs);
       creationFormDispatch({
         type: 'SET_FIELD_AND_FIELD_TYPE',
         payload: {
@@ -176,7 +178,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
         }
       });
     }
-  }, [validationContext.fieldId]);
+  }, [validationContext.referenceId]);
 
   useEffect(() => {
     const {
@@ -333,9 +335,9 @@ const FieldValidation = ({ datasetId, tabs }) => {
     creationFormDispatch({
       type: 'GROUP_RULES_ACTIVATOR',
       payload: {
-        groupExpressionsActive: field.value ? 1 : -1,
+        allExpressions,
         groupCandidate,
-        allExpressions
+        groupExpressionsActive: field.value ? 1 : -1
       }
     });
   };

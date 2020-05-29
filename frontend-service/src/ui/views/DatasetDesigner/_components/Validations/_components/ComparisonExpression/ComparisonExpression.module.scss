@@ -1,0 +1,57 @@
+.expression {
+  display: flex;
+  // justify-content: space-between;
+  // flex-wrap: nowrap;
+  --unionWidth: 80px;
+  --operatorsWidth: 150px;
+  --fieldsGap: 1rem;
+  list-style: none !important;
+  .group {
+    margin-right: 1rem;
+    // margin-left: 0.5rem;
+    :global .p-checkbox {
+      width: 29px !important;
+      height: 29px !important;
+    }
+    :global .p-checkbox-box {
+      width: 29px !important;
+      height: 29px !important;
+      :global .p-checkbox-icon {
+        font-size: 27px;
+      }
+    }
+  }
+  .union {
+    width: var(--unionWidth);
+    :global .p-dropdown {
+      width: 100%;
+    }
+  }
+  .operatorType {
+    width: var(--operatorsWidth);
+    :global .p-dropdown {
+      width: 100%;
+    }
+  }
+  .operatorValue {
+    width: var(--operatorsWidth);
+    :global .p-dropdown {
+      width: 100%;
+    }
+  }
+  .expressionValue {
+    width: calc(100% - (var(--operatorsWidth) * 2) - var(--unionWidth) - (var(--fieldsGap) * 5));
+  }
+  > span {
+    margin-right: var(--fieldsGap);
+  }
+  .deleteBtnWrap {
+    margin-left: auto;
+  }
+  .deleteButton {
+    border: 1px solid var(--c-custom-gray) !important;
+    box-shadow: 0 0 0 0em var(--blue-120) !important;
+    color: var(--errors) !important;
+    margin: 0 !important;
+  }
+}

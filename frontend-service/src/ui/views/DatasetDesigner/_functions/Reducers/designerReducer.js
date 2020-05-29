@@ -5,7 +5,9 @@ export const designerReducer = (state, { type, payload }) => {
         ...state,
         datasetDescription: payload.description,
         datasetSchemaAllTables: payload.tables,
-        datasetSchemaId: payload.schemaId
+        datasetSchemaId: payload.schemaId,
+        levelErrorTypes: payload.levelErrorTypes,
+        tableSchemaNames: payload.tableSchemaNames
       };
 
     case 'GET_METADATA':
@@ -45,7 +47,8 @@ export const designerReducer = (state, { type, payload }) => {
 
     case 'SET_DATASET_HAS_DATA':
       return { ...state, datasetHasData: payload.hasData };
-
+    case 'TOGGLE_DASHBOARD_VISIBILITY':
+      return { ...state, dashDialogVisible: payload };
     default:
       return state;
   }

@@ -343,4 +343,18 @@ public class RulesControllerImpl implements RulesController {
 
     rulesService.deleteUniqueConstraint(datasetSchemaId, uniqueId);
   }
+
+
+  /**
+   * Delete rule high level like.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   */
+  @Override
+  @DeleteMapping("/private/deleteRuleHighLevelLike")
+  public void deleteRuleHighLevelLike(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("fieldSchemaId") String fieldSchemaId) {
+    rulesService.deleteRuleHighLevelLike(datasetSchemaId, fieldSchemaId);
+  }
 }

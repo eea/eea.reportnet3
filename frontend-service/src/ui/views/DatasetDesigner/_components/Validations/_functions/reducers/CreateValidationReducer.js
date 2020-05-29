@@ -9,7 +9,8 @@ export const createValidationReducerInitState = {
     active: true,
     expressions: [],
     allExpressions: [],
-    allGroups: []
+    allGroups: [],
+    expressionType: ''
   },
   datasetSchema: {},
   schemaTables: [],
@@ -154,16 +155,24 @@ export const createValidationReducer = (state, { type, payload }) => {
         ...state,
         candidateRule: {
           ...state.candidateRule,
-          id: payload.id,
-          automatic: payload.automatic,
-          shortCode: payload.shortCode,
-          description: payload.description,
-          errorMessage: payload.message,
-          errorLevel: { label: payload.levelError, value: payload.levelError },
-          name: payload.name,
           active: payload.enabled,
+          allExpressions: payload.allExpressions,
+          automatic: payload.automatic,
+          description: payload.description,
+          errorLevel: { label: payload.levelError, value: payload.levelError },
+          errorMessage: payload.message,
           expressions: payload.expressions,
-          allExpressions: payload.allExpressions
+          id: payload.id,
+          name: payload.name,
+          shortCode: payload.shortCode
+        }
+      };
+    case 'ON_EXPRESSION_TYPE_TOGGLE':
+      return {
+        ...state,
+        candidateRule: {
+          ...state.candidateRule,
+          expressionType: payload
         }
       };
     default:
