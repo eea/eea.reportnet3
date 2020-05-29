@@ -67,14 +67,12 @@ const ComparisonExpression = ({
   useEffect(() => {
     if (!isEmpty(expressionValues.field1) && !isEmpty(fieldType)) {
       const compatibleFieldTypes = fieldByFieldType[fieldType];
-
-      setSecondFieldOptions(
-        tableFields.filter(field => {
-          const cFieldType = onGetFieldType(field.value);
-          const result = compatibleFieldTypes.includes(cFieldType);
-          return result;
-        })
-      );
+      const allFields = tableFields.filter(field => {
+        const cFieldType = onGetFieldType(field.value);
+        const result = compatibleFieldTypes.includes(cFieldType);
+        return result;
+      });
+      setSecondFieldOptions(allFields.filter(cField => cField.value !== expressionValues.field1));
     }
   }, [expressionValues.field1, fieldType]);
 
