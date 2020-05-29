@@ -228,17 +228,17 @@ public class KieBaseManager {
 
 
     if (ruleExpressionVO.isDataTypeCompatible(rule.getType(), dataTypeMap)) {
+      rule.setVerified(true);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATED_QC_RULE_EVENT, null,
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build());
+    } else {
       rule.setVerified(false);
       rule.setEnabled(false);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.INVALIDATED_QC_RULE_EVENT, null,
           NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
               .datasetSchemaId(datasetSchemaId).error("The QC Rule is disabled")
               .shortCode(rule.getShortCode()).build());
-    } else {
-      rule.setVerified(true);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATED_QC_RULE_EVENT, null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build());
     }
 
     rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
