@@ -432,7 +432,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       dataschemaService.addForeignRelation(datasetId, fieldSchemaVO);
 
       // Add UniqueConstraint if needed
-      dataschemaService.createUniqueConstraintPK(datasetSchemaId, fieldSchemaVO, response);
+      dataschemaService.createUniqueConstraintPK(datasetSchemaId, fieldSchemaVO);
 
 
       return (response);

@@ -1384,9 +1384,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
 
+  /**
+   * Creates the unique constraint PK.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   */
   @Override
-  public void createUniqueConstraintPK(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
-      String idField) {
+  public void createUniqueConstraintPK(String datasetSchemaId, FieldSchemaVO fieldSchemaVO) {
     // if field is Pk we create a unique Constraint
     if (fieldSchemaVO.getPk()) {
       // Get TableSchemaId
@@ -1394,18 +1399,20 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
       ObjectId idTableSchema = null;
       for (TableSchema table : datasetSchema.getTableSchemas()) {
-        if (table.getRecordSchema().equals(fieldSchemaVO.getIdRecord())) {
+        if (table.getRecordSchema().toString().equals(fieldSchemaVO.getIdRecord())) {
           idTableSchema = table.getIdTableSchema();
         }
       }
       // Create Unique Constraint
-      UniqueConstraintVO unique = new UniqueConstraintVO();
-      ArrayList<String> fieldSchemaIds = new ArrayList<>();
-      fieldSchemaIds.add(idField);
-      unique.setDatasetSchemaId(datasetSchemaId);
-      unique.setTableSchemaId(idTableSchema.toString());
-      unique.setFieldSchemaIds(fieldSchemaIds);
-      createUniqueConstraint(unique);
+      if (idTableSchema != null) {
+        UniqueConstraintVO unique = new UniqueConstraintVO();
+        ArrayList<String> fieldSchemaIds = new ArrayList<>();
+        fieldSchemaIds.add(fieldSchemaVO.getId());
+        unique.setDatasetSchemaId(datasetSchemaId);
+        unique.setTableSchemaId(idTableSchema.toString());
+        unique.setFieldSchemaIds(fieldSchemaIds);
+        createUniqueConstraint(unique);
+      }
     }
   }
 }
