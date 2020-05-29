@@ -3,6 +3,7 @@ import isNil from 'lodash/isNil';
 import { Validation } from 'core/domain/model/Validation/Validation';
 
 import { parseExpressionFromDTO } from './parseExpressionFromDTO';
+import { parseRowExpressionFromDTO } from './parseRowExpressionFromDTO';
 
 export const parseDataValidationRulesDTO = validations => {
   const validationsData = {};
@@ -14,6 +15,12 @@ export const parseDataValidationRulesDTO = validations => {
       entityTypes.push(validationDTO.type);
       if (validationDTO.type === 'FIELD') {
         const { expressions, allExpressions } = parseExpressionFromDTO(validationDTO.whenCondition);
+        newExpressions = expressions;
+        newAllExpressions = allExpressions;
+      }
+
+      if (validationDTO.type === 'RECORD') {
+        const { expressions, allExpressions } = parseRowExpressionFromDTO(validationDTO.whenCondition);
         newExpressions = expressions;
         newAllExpressions = allExpressions;
       }

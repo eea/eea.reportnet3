@@ -286,7 +286,7 @@
       "!=": "RECORD_DIST_YEAR"
     }
   },
-  "operatorsTypesFromDTO": [
+  "fieldOperatorsTypesFromDTO": [
     {
       "operatorType": "number",
       "operators": [
@@ -350,6 +350,77 @@
       ]
     }
   ],
+  "rowOperatorsTypesFromDTO": [
+    {
+      "operatorType": "number",
+      "operators": [
+        "RECORD_GT_RECORD",
+        "RECORD_LT_RECORD",
+        "RECORD_GTEQ_RECORD",
+        "RECORD_LTEQ_RECORD",
+        "RECORD_EQ_RECORD",
+        "RECORD_DIST_RECORD",
+        "RECORD_NUM_MATCH"
+      ]
+    },
+    { "operatorType": "string", "operators": ["RECORD_SEQ_RECORD", "RECORD_SEQIC_RECORD", "RECORD_MATCH_RECORD"] },
+    {
+      "operatorType": "LEN",
+      "operators": [
+        "RECORD_LEN",
+        "RECORD_LEN_GT",
+        "RECORD_LEN_LT",
+        "RECORD_LEN_GTEQ",
+        "RECORD_LEN_LTEQ",
+        "RECORD_LEN_EQ",
+        "RECORD_LEN_DIST"
+      ]
+    },
+    {
+      "operatorType": "date",
+      "operators": [
+        "RECORD_GT_DATE_RECORD",
+        "RECORD_LT_DATE_RECORD",
+        "RECORD_GTEQ_DATE_RECORD",
+        "RECORD_LTEQ_DATE_RECORD",
+        "RECORD_EQ_DATE_RECORD",
+        "RECORD_DIST_DATE_RECORD"
+      ]
+    },
+    {
+      "operatorType": "day",
+      "operators": [
+        "RECORD_GT_DAY_RECORD",
+        "RECORD_LT_DAY_RECORD",
+        "RECORD_GTEQ_DAY_RECORD",
+        "RECORD_LTEQ_DAY_RECORD",
+        "RECORD_EQ_DAY_RECORD",
+        "RECORD_DIST_DAY_RECORD"
+      ]
+    },
+    {
+      "operatorType": "month",
+      "operators": [
+        "RECORD_GT_MONTH_RECORD",
+        "RECORD_LT_MONTH_RECORD",
+        "RECORD_GTEQ_MONTH_RECORD",
+        "RECORD_LTEQ_MONTH_RECORD",
+        "RECORD_EQ_MONTH_RECORD",
+        "RECORD_DIST_MONTH_RECORD"
+      ]
+    },
+    {
+      "operatorType": "year",
+      "operators": [
+        "RECORD_GT_YEAR_RECORD",
+        "RECORD_LT_YEAR_RECORD",
+        "RECORD_GTEQ_YEAR_RECORD",
+        "RECORD_LTEQ_YEAR_RECORD",
+        "RECORD_EQ_YEAR_RECORD",
+        "RECORD_DIST_YEAR_RECORD"
+      ]
+    }
+  ],
   "reverseEquivalences": {
     "FIELD_GT": ">",
     "FIELD_LT": "<",
@@ -381,7 +452,50 @@
     "FIELD_EQ_YEAR": "=",
     "FIELD_DIST_YEAR": "!=",
     "FIELD_AND": "AND",
-    "FIELD_OR": "OR"
+    "FIELD_OR": "OR",
+    "RECORD_AND": "AND",
+    "RECORD_OR": "OR",
+    "RECORD_GT_RECORD": ">",
+    "RECORD_LT_RECORD": "<",
+    "RECORD_GTEQ_RECORD": ">=",
+    "RECORD_LTEQ_RECORD": "<=",
+    "RECORD_EQ_RECORD": "=",
+    "RECORD_DIST_RECORD": "!=",
+    "RECORD_NUM_MATCH": "MATCH",
+    "RECORD_LEN": "type",
+    "RECORD_LEN_GT": ">",
+    "RECORD_LEN_LT": "<",
+    "RECORD_LEN_GTEQ": ">=",
+    "RECORD_LEN_LTEQ": "<=",
+    "RECORD_LEN_EQ": "=",
+    "RECORD_LEN_DIST": "!=",
+    "RECORD_SEQ_RECORD": "=",
+    "RECORD_SEQIC_RECORD": "=(Ignore case)",
+    "RECORD_MATCH_RECORD": "MATCH",
+    "RECORD_GT_DATE_RECORD": ">",
+    "RECORD_LT_DATE_RECORD": "<",
+    "RECORD_GTEQ_DATE_RECORD": ">=",
+    "RECORD_LTEQ_DATE_RECORD": "<=",
+    "RECORD_EQ_DATE_RECORD": "=",
+    "RECORD_DIST_DATE_RECORD": "!=",
+    "RECORD_GT_DAY_RECORD": ">",
+    "RECORD_LT_DAY_RECORD": "<",
+    "RECORD_GTEQ_DAY_RECORD": ">=",
+    "RECORD_LTEQ_DAY_RECORD": "<=",
+    "RECORD_EQ_DAY_RECORD": "=",
+    "RECORD_DIST_DAY_RECORD": "!=",
+    "RECORD_GT_MONTH_RECORD": ">",
+    "RECORD_LT_MONTH_RECORD": "<",
+    "RECORD_GTEQ_MONTH_RECORD": ">=",
+    "RECORD_LTEQ_MONTH_RECORD": "<=",
+    "RECORD_EQ_MONTH_RECORD": "=",
+    "RECORD_DIST_MONTH_RECORD": "!=",
+    "RECORD_GT_YEAR_RECORD": ">",
+    "RECORD_LT_YEAR_RECORD": "<",
+    "RECORD_GTEQ_YEAR_RECORD": ">=",
+    "RECORD_LTEQ_YEAR_RECORD": "<=",
+    "RECORD_EQ_YEAR_RECORD": "=",
+    "RECORD_DIST_YEAR_RECORD": "!="
   },
   "errorLevels": [
     { "label": "INFO", "value": "INFO" },
