@@ -261,8 +261,8 @@ const getAllSchemas = async dataflowId => {
                     description: DataTableFieldDTO.description,
                     fieldId: DataTableFieldDTO.id,
                     pk: !isNull(DataTableFieldDTO.pk) ? DataTableFieldDTO.pk : false,
-                    pkMultipleValues: !isNull(DataTableFieldDTO.pkMultipleValues)
-                      ? DataTableFieldDTO.pkMultipleValues
+                    pkHasMultipleValues: !isNull(DataTableFieldDTO.pkHasMultipleValues)
+                      ? DataTableFieldDTO.pkHasMultipleValues
                       : false,
                     pkMustBeUsed: !isNull(DataTableFieldDTO.pkMustBeUsed) ? DataTableFieldDTO.pkMustBeUsed : false,
                     pkReferenced: !isNull(DataTableFieldDTO.pkReferenced) ? DataTableFieldDTO.pkReferenced : false,

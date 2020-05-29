@@ -19,9 +19,9 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 const LinkSelector = withRouter(
   ({
+    hasMultipleValues = false,
     isLinkSelectorVisible,
     match,
-    multipleValues = false,
     mustBeUsed = false,
     onCancelSaveLink,
     onSaveLink,
@@ -33,7 +33,7 @@ const LinkSelector = withRouter(
     const [isLoading, setIsLoading] = useState(false);
     const [isVisible, setIsVisible] = useState(isLinkSelectorVisible);
     const [link, setLink] = useState(selectedLink);
-    const [pkMultipleValues, setPkMultipleValues] = useState(multipleValues);
+    const [pkHasMultipleValues, setPkHasMultipleValues] = useState(hasMultipleValues);
     const [pkMustBeUsed, setPkMustBeUsed] = useState(mustBeUsed);
 
     const {
@@ -58,7 +58,7 @@ const LinkSelector = withRouter(
           icon="check"
           label={resources.messages['save']}
           onClick={() => {
-            onSaveLink(link, pkMustBeUsed, pkMultipleValues);
+            onSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
             setIsVisible(false);
           }}
         />
@@ -133,12 +133,12 @@ const LinkSelector = withRouter(
               onChange={e => setPkMustBeUsed(e.checked)}
               style={{ width: '70px', marginLeft: '0.5rem' }}
             />
-            <span className={styles.switchTextInput}>{resources.messages['pkMultipleValues']}</span>
+            <span className={styles.switchTextInput}>{resources.messages['pkHasMultipleValues']}</span>
             <Checkbox
-              checked={pkMultipleValues}
-              inputId={'pkMultipleValues_check'}
+              checked={pkHasMultipleValues}
+              inputId={'pkHasMultipleValues_check'}
               label="Default"
-              onChange={e => setPkMultipleValues(e.checked)}
+              onChange={e => setPkHasMultipleValues(e.checked)}
               style={{ width: '70px', marginLeft: '0.5rem' }}
             />
           </div>

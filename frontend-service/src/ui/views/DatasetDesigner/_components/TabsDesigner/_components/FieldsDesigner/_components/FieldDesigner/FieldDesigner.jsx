@@ -35,7 +35,7 @@ export const FieldDesigner = ({
   fieldPK,
   fieldPKReferenced,
   fieldLink,
-  fieldMultipleValues,
+  fieldHasMultipleValues,
   fieldMustBeUsed,
   fieldRequired,
   fieldType,
@@ -96,7 +96,7 @@ export const FieldDesigner = ({
     codelistItems: codelistItems,
     fieldDescriptionValue: fieldDescription,
     fieldLinkValue: fieldLink || null,
-    fieldPkMultipleValues: fieldMultipleValues || false,
+    fieldPkHasMultipleValues: fieldHasMultipleValues || false,
     fieldPkMustBeUsed: fieldMustBeUsed || false,
     fieldPKReferencedValue: fieldPKReferenced || false,
     fieldPKValue: fieldPK,
@@ -299,7 +299,7 @@ export const FieldDesigner = ({
     codelistItems = fieldDesignerState.codelistItems,
     description = fieldDesignerState.fieldDescriptionValue,
     pk = fieldDesignerState.fieldPKValue,
-    pkMultipleValues = fieldDesignerState.pkMultipleValues,
+    pkHasMultipleValues = fieldDesignerState.pkHasMultipleValues,
     pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
     name = fieldDesignerState.fieldValue,
     recordId = recordSchemaId,
@@ -312,7 +312,7 @@ export const FieldDesigner = ({
         codelistItems,
         description,
         pk,
-        pkMultipleValues,
+        pkHasMultipleValues,
         pkMustBeUsed,
         name,
         recordId,
@@ -332,7 +332,7 @@ export const FieldDesigner = ({
           fieldId: response.data,
           fieldLinkValue: null,
           pk,
-          pkMultipleValues,
+          pkHasMultipleValues,
           pkMustBeUsed,
           name,
           recordId,
@@ -473,10 +473,10 @@ export const FieldDesigner = ({
     dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: false });
   };
 
-  const onSaveLink = (link, pkMustBeUsed, pkMultipleValues) => {
+  const onSaveLink = (link, pkMustBeUsed, pkHasMultipleValues) => {
     dispatchFieldDesigner({ type: 'SET_LINK', payload: link });
     dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: pkMustBeUsed });
-    dispatchFieldDesigner({ type: 'SET_PK_MULTIPLE_VALUES', payload: pkMultipleValues });
+    dispatchFieldDesigner({ type: 'SET_PK_HAS_MULTIPLE_VALUES', payload: pkHasMultipleValues });
     if (fieldDesignerState.fieldValue === '') {
       onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
     } else {
@@ -487,7 +487,7 @@ export const FieldDesigner = ({
             type: 'LINK',
             referencedField: link,
             pkMustBeUsed,
-            pkMultipleValues
+            pkHasMultipleValues
           });
         } else {
           fieldUpdate({
@@ -496,7 +496,7 @@ export const FieldDesigner = ({
             type: 'LINK',
             referencedField: link,
             pkMustBeUsed,
-            pkMultipleValues
+            pkHasMultipleValues
           });
         }
       }
@@ -534,7 +534,7 @@ export const FieldDesigner = ({
     fieldSchemaId = fieldId,
     isLinkChange = false,
     pk = fieldDesignerState.fieldPKValue,
-    pkMultipleValues = fieldDesignerState.pkMultipleValues,
+    pkHasMultipleValues = fieldDesignerState.pkHasMultipleValues,
     pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
     name = fieldDesignerState.fieldValue,
     referencedField = fieldDesignerState.fieldLinkValue,
@@ -547,7 +547,7 @@ export const FieldDesigner = ({
         description,
         fieldSchemaId,
         pk,
-        pkMultipleValues,
+        pkHasMultipleValues,
         pkMustBeUsed,
         name,
         referencedField: !isNil(referencedField)
@@ -566,7 +566,7 @@ export const FieldDesigner = ({
           id: fieldId,
           isLinkChange,
           pk,
-          pkMultipleValues,
+          pkHasMultipleValues,
           pkMustBeUsed,
           name,
           referencedField,
@@ -812,8 +812,8 @@ export const FieldDesigner = ({
       ) : null}
       {fieldDesignerState.isLinkSelectorVisible ? (
         <LinkSelector
+          hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
           isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
-          multipleValues={fieldDesignerState.fieldPkMultipleValues}
           mustBeUsed={fieldDesignerState.fieldPkMustBeUsed}
           onCancelSaveLink={onCancelSaveLink}
           onSaveLink={onSaveLink}

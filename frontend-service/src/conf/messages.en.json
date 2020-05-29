@@ -648,6 +648,6 @@
     "dataFiltered": "- filtered: ",
     "addUniqueConstraint": "Add unique constraint",
     "strictModeTooltip": "Associated selected values",
-    "pkMultipleValues": "Multiple values"
+    "pkHasMultipleValues": "Multiple values"
   }
 }
