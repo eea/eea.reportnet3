@@ -5,6 +5,8 @@ import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
+import { config } from 'conf';
+
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldsDesigner } from './_components/FieldsDesigner';
@@ -42,6 +44,7 @@ export const TabsDesigner = withRouter(
     const validationContext = useContext(ValidationContext);
 
     const [activeIndex, setActiveIndex] = useState(0);
+
     const [datasetSchema, setDatasetSchema] = useState();
     const [errorMessage, setErrorMessage] = useState();
     const [errorMessageTitle, setErrorMessageTitle] = useState();
@@ -109,6 +112,12 @@ export const TabsDesigner = withRouter(
       try {
         setIsLoading(true);
         const datasetSchemaDTO = await DatasetService.schemaById(datasetId);
+
+        const datasetStatistics = await getStatisticsById(
+          datasetId,
+          datasetSchemaDTO.tables.map(tableSchema => tableSchema.tableSchemaName)
+        );
+
         const inmDatasetSchema = { ...datasetSchemaDTO };
 
         inmDatasetSchema.tables.forEach((table, idx) => {
@@ -116,7 +125,9 @@ export const TabsDesigner = withRouter(
           table.toPrefill = table.tableSchemaToPrefill;
           table.description = table.tableSchemaDescription;
           table.editable = editable;
-          table.hasErrors = true;
+          table.hasErrors = {
+            ...datasetStatistics.tables.filter(tab => tab['tableSchemaId'] === table['tableSchemaId'])[0]
+          }.hasErrors;
           table.header = table.tableSchemaName;
           table.index = idx;
           table.levelErrorTypes = inmDatasetSchema.levelErrorTypes;
@@ -318,6 +329,16 @@ export const TabsDesigner = withRouter(
       return Math.max(...tabsArray.map(tab => tab.index));
     };
 
+    const getStatisticsById = async (datasetId, tableSchemaNames) => {
+      try {
+        const datasetStatistics = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
+        return datasetStatistics;
+      } catch (error) {
+        console.error(error);
+        throw new Error('ERROR_STATISTICS_BY_ID_ERROR');
+      }
+    };
+
     // const getSchemaIndexById = (datasetSchemaId, datasetSchemasArray) => {
     //   return datasetSchemasArray
     //     .map(datasetSchema => {
@@ -372,7 +393,8 @@ export const TabsDesigner = withRouter(
                       header={tab.header}
                       index={tab.index}
                       key={tab.index}
-                      newTab={tab.newTab}>
+                      newTab={tab.newTab}
+                      rightIcon={tab.hasErrors ? config.icons['warning'] : null}>
                       {tabs.length > 1 ? (
                         <FieldsDesigner
                           autoFocus={false}

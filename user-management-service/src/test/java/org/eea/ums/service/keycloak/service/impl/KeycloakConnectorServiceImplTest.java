@@ -1,12 +1,14 @@
 package org.eea.ums.service.keycloak.service.impl;
 
 import static org.junit.Assert.assertEquals;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.security.jwt.utils.AuthenticationDetails;
+import org.eea.ums.service.keycloak.admin.TokenMonitor;
 import org.eea.ums.service.keycloak.model.CheckResourcePermissionResult;
 import org.eea.ums.service.keycloak.model.ClientInfo;
 import org.eea.ums.service.keycloak.model.GroupInfo;
@@ -42,6 +44,9 @@ public class KeycloakConnectorServiceImplTest {
   private KeycloakConnectorServiceImpl keycloakConnectorService;
   @Mock
   private RestTemplate restTemplate;
+
+  @Mock
+  private TokenMonitor tokenMonitor;
 
 
   @Before
@@ -134,7 +139,7 @@ public class KeycloakConnectorServiceImplTest {
   public void getReportnetClientInfo() {
     ClientInfo info = new ClientInfo();
     info.setClientId("reportnet");
-    ClientInfo[] body = new ClientInfo[] {info};
+    ClientInfo[] body = new ClientInfo[]{info};
 
     ResponseEntity<ClientInfo[]> clientInfoResult = new ResponseEntity<>(body, HttpStatus.OK);
     Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
@@ -148,7 +153,7 @@ public class KeycloakConnectorServiceImplTest {
   @Test
   public void getResourceInfo() {
 
-    String[] bodyResourceSet = new String[] {"resource1"};
+    String[] bodyResourceSet = new String[]{"resource1"};
 
     ResponseEntity<String[]> resourceSetInfo = new ResponseEntity<>(bodyResourceSet, HttpStatus.OK);
 
@@ -188,7 +193,7 @@ public class KeycloakConnectorServiceImplTest {
     groupInfo.setId("1");
     groupInfo.setName("Dataflow-1-DATA_PROVIDER");
     groupInfo.setPath("/path");
-    GroupInfo[] groupInfos = new GroupInfo[] {groupInfo};
+    GroupInfo[] groupInfos = new GroupInfo[]{groupInfo};
 
     ResponseEntity<GroupInfo[]> responseGroupInfos =
         new ResponseEntity<>(groupInfos, HttpStatus.OK);

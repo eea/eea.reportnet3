@@ -37,7 +37,6 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
-import org.eea.interfaces.controller.validation.RulesController;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -84,10 +83,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The data flow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
-
-  /** The rules controller. */
-  @Autowired
-  private RulesController rulesController;
 
   /** The data schema mapper. */
   @Autowired
@@ -479,9 +474,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     // if the table havent got any record he hasnt any document too
     if (null != recordSchemadocument) {
       List<?> fieldSchemasList = (ArrayList<?>) recordSchemadocument.get("fieldSchemas");
-      fieldSchemasList.stream().forEach(document -> rulesController
+      fieldSchemasList.stream().forEach(document -> rulesControllerZuul
           .deleteRuleByReferenceId(datasetSchemaId, ((Document) document).get("_id").toString()));
-      rulesController.deleteRuleByReferenceId(datasetSchemaId,
+      rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId,
           recordSchemadocument.get("_id").toString());
     }
     schemasRepository.deleteTableSchemaById(idTableSchema);
@@ -679,6 +674,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId)
       throws EEAException {
+
+    // now we find if we have any record rule related with that fieldSchema to delete it
+    rulesControllerZuul.deleteRuleHighLevelLike(datasetSchemaId, fieldSchemaId);
+
+
     return schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaId)
         .getModifiedCount() == 1;
   }

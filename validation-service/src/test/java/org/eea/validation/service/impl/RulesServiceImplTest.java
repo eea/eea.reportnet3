@@ -1051,6 +1051,9 @@ public class RulesServiceImplTest {
     }
   }
 
+  /**
+   * Delete unique constraint test.
+   */
   @Test
   public void deleteUniqueConstraintTest() {
     rulesServiceImpl.deleteUniqueConstraint("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");
@@ -1058,11 +1061,41 @@ public class RulesServiceImplTest {
         Mockito.any());
   }
 
+  /**
+   * Creates the unique constraint test.
+   */
   @Test
   public void createUniqueConstraintTest() {
     when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createUniqueConstraint("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         "5e44110d6a9e3a270ce13fac");
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+  }
+
+
+  /**
+   * Delete rule high level like like test.
+   */
+  @Test
+  public void deleteRuleHighLevelLikeLikeTest() {
+    when(rulesRepository.deleteRuleHighLevelLike(new ObjectId("5e44110d6a9e3a270ce13fac"),
+        "5e44110d6a9e3a270ce13fac")).thenReturn(true);
+    rulesServiceImpl.deleteRuleHighLevelLike("5e44110d6a9e3a270ce13fac",
+        "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesRepository, times(1)).deleteRuleHighLevelLike(
+        new ObjectId("5e44110d6a9e3a270ce13fac"), "5e44110d6a9e3a270ce13fac");
+  }
+
+  /**
+   * Delete rule high level like non delete test.
+   */
+  @Test
+  public void deleteRuleHighLevelLikeNonDeleteTest() {
+    when(rulesRepository.deleteRuleHighLevelLike(new ObjectId("5e44110d6a9e3a270ce13fac"),
+        "5e44110d6a9e3a270ce13fac")).thenReturn(false);
+    rulesServiceImpl.deleteRuleHighLevelLike("5e44110d6a9e3a270ce13fac",
+        "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesRepository, times(1)).deleteRuleHighLevelLike(
+        new ObjectId("5e44110d6a9e3a270ce13fac"), "5e44110d6a9e3a270ce13fac");
   }
 }

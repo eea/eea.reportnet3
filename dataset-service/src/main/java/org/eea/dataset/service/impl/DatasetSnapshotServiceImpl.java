@@ -69,6 +69,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 
 /**
  * The Class DatasetSnapshotServiceImpl.
@@ -536,52 +537,65 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   public void restoreSchemaSnapshot(Long idDataset, Long idSnapshot)
       throws EEAException, IOException {
 
-    // Get the schema document to mapper it to DataSchema class
-    String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
+    try {
+      // Get the schema document to mapper it to DataSchema class
+      String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      byte[] content = documentControllerZuul.getSnapshotDocument(idDataset, nameFile);
+      DataSetSchema schema = objectMapper.readValue(content, DataSetSchema.class);
+      LOG.info("Schema class recovered");
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    byte[] content = documentControllerZuul.getSnapshotDocument(idDataset, nameFile);
-    DataSetSchema schema = objectMapper.readValue(content, DataSetSchema.class);
-    LOG.info("Schema class recovered");
+      // Get the rules document to mapper it to RulesSchema class
+      String nameFileRules = String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset)
+          + LiteralConstants.SNAPSHOT_EXTENSION;
+      ObjectMapper objectMapperRules = new ObjectMapper();
+      objectMapperRules.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      byte[] contentRules = documentControllerZuul.getSnapshotDocument(idDataset, nameFileRules);
+      RulesSchema rules = objectMapperRules.readValue(contentRules, RulesSchema.class);
+      LOG.info("Schema rules class recovered");
 
-    // Get the rules document to mapper it to DataSchema class
-    String nameFileRules = String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset)
-        + LiteralConstants.SNAPSHOT_EXTENSION;
-    ObjectMapper objectMapperRules = new ObjectMapper();
-    objectMapperRules.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    byte[] contentRules = documentControllerZuul.getSnapshotDocument(idDataset, nameFileRules);
-    RulesSchema rules = objectMapperRules.readValue(contentRules, RulesSchema.class);
-    rulesControllerZuul.deleteRulesSchema(schema.getIdDataSetSchema().toString());
-    rulesRepository.save(rules);
-    LOG.info("Schema rules class recovered");
+      // Since there's the Unique property, we need to restore that file too
+      // Get the unique document to mapper it into the List of UniqueConstraintSchema
+      String nameFileUnique = String.format(FILE_PATTERN_NAME_UNIQUE, idSnapshot, idDataset)
+          + LiteralConstants.SNAPSHOT_EXTENSION;
+      ObjectMapper objectMapperUnique = new ObjectMapper();
+      objectMapperUnique.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      byte[] contentUnique = documentControllerZuul.getSnapshotDocument(idDataset, nameFileUnique);
+      List<UniqueConstraintSchema> listUnique = objectMapperUnique.readValue(contentUnique,
+          new TypeReference<List<UniqueConstraintSchema>>() {});
+      LOG.info("Schema Unique class recovered");
 
-    // First we delete all the entries in the catalogue of the previous schema, before replacing it
-    // by the one of the snapshot
-    schemaService.updatePkCatalogueDeletingSchema(schema.getIdDataSetSchema().toString());
-    // Replace the schema: delete the older and save the new we have already recovered on step
-    // Also in the service we call the recordstore to do the restore of the dataset_X data
-    schemaService.replaceSchema(schema.getIdDataSetSchema().toString(), schema, idDataset,
-        idSnapshot);
-    // fill the PK catalogue with the new schema
-    // also the table foreign_relations
-    schemaService.updatePKCatalogueAndForeignsAfterSnapshot(schema.getIdDataSetSchema().toString(),
-        idDataset);
 
-    // Since there's the Unique property, we need to restore that file too
-    String nameFileUnique = String.format(FILE_PATTERN_NAME_UNIQUE, idSnapshot, idDataset)
-        + LiteralConstants.SNAPSHOT_EXTENSION;
-    ObjectMapper objectMapperUnique = new ObjectMapper();
-    objectMapperUnique.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    // objectMapperUnique.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-    byte[] contentUnique = documentControllerZuul.getSnapshotDocument(idDataset, nameFileUnique);
-    List<UniqueConstraintSchema> listUnique = objectMapperUnique.readValue(contentUnique,
-        new TypeReference<List<UniqueConstraintSchema>>() {});
-    uniqueConstraintRepository.deleteByDatasetSchemaId(schema.getIdDataSetSchema());
-    uniqueConstraintRepository.saveAll(listUnique);
-    LOG.info("Schema Unique class recovered");
+      rulesControllerZuul.deleteRulesSchema(schema.getIdDataSetSchema().toString());
+      rulesRepository.save(rules);
 
-    LOG.info("Schema Snapshot {} totally restored", idSnapshot);
+      uniqueConstraintRepository.deleteByDatasetSchemaId(schema.getIdDataSetSchema());
+      uniqueConstraintRepository.saveAll(listUnique);
+
+
+      // First we delete all the entries in the catalogue of the previous schema, before replacing
+      // it
+      // by the one of the snapshot
+      schemaService.updatePkCatalogueDeletingSchema(schema.getIdDataSetSchema().toString());
+      // Replace the schema: delete the older and save the new we have already recovered on step
+      // Also in the service we call the recordstore to do the restore of the dataset_X data
+      schemaService.replaceSchema(schema.getIdDataSetSchema().toString(), schema, idDataset,
+          idSnapshot);
+      // fill the PK catalogue with the new schema
+      // also the table foreign_relations
+      schemaService.updatePKCatalogueAndForeignsAfterSnapshot(
+          schema.getIdDataSetSchema().toString(), idDataset);
+
+      LOG.info("Schema Snapshot {} totally restored", idSnapshot);
+    } catch (EEAException | FeignException e) {
+      LOG_ERROR.error("Error restoring a schema snapshot. IdDataset {}, IdSnapshot {}.Message: ",
+          idDataset, idSnapshot, e.getMessage(), e);
+      releaseEvent(EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT, idDataset,
+          "Error restoring the schema snapshot");
+      // Release the lock manually
+      removeLock(idDataset, LockSignature.RESTORE_SCHEMA_SNAPSHOT);
+    }
   }
 
   /**

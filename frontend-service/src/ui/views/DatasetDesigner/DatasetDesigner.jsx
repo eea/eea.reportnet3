@@ -11,6 +11,7 @@ import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
@@ -57,6 +58,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const validationContext = useContext(ValidationContext);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
+    dashDialogVisible: false,
     dataflowName: '',
     datasetDescription: '',
     datasetHasData: false,
@@ -70,6 +72,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     isManageUniqueConstraintDialogVisible: false,
     isPreviewModeOn: DatasetDesignerUtils.getUrlParamValue('design'),
     isUniqueConstraintsListDialogVisible: false,
+    levelErrorTypes: [],
     manageUniqueConstraintData: {
       fieldData: [],
       isTableCreationMode: false,
@@ -79,6 +82,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     },
     metaData: {},
     refresh: false,
+    tableSchemaNames: [],
     uniqueConstraintsList: [],
     validateDialogVisible: false,
     validationListDialogVisible: false
@@ -270,13 +274,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       isLoading(true);
       const getDatasetSchemaId = async () => {
         const dataset = await DatasetService.schemaById(datasetId);
+        const tableSchemaNamesList = [];
+        dataset.tables.forEach(table => tableSchemaNamesList.push(table.tableSchemaName));
+
         isLoading(false);
         designerDispatch({
           type: 'GET_DATASET_DATA',
           payload: {
             description: dataset.datasetSchemaDescription,
+            levelErrorTypes: dataset.levelErrorTypes,
             schemaId: dataset.datasetSchemaId,
-            tables: dataset.tables
+            tables: dataset.tables,
+            tableSchemaNames: tableSchemaNamesList
           }
         });
       };
@@ -488,10 +497,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent`}
-                disabled={true}
+                disabled={!designerState.datasetHasData}
                 icon={'dashboard'}
                 label={resources.messages['dashboards']}
-                onClick={() => null}
+                onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: true })}
               />
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
@@ -548,6 +557,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           visible={designerState.validateDialogVisible}>
           {resources.messages['validateDatasetConfirm']}
         </ConfirmDialog>
+        <Dialog
+          dismissableMask={true}
+          header={resources.messages['titleDashboard']}
+          onHide={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
+          style={{ width: '70vw' }}
+          visible={designerState.dashDialogVisible}>
+          <Dashboard
+            refresh={designerState.dashDialogVisible}
+            levelErrorTypes={designerState.levelErrorTypes}
+            tableSchemaNames={designerState.tableSchemaNames}
+          />
+        </Dialog>
       </div>
     </SnapshotContext.Provider>
   );
