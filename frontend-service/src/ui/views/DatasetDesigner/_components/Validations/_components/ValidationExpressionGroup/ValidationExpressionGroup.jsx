@@ -9,7 +9,7 @@ import isEmpty from 'lodash/isEmpty';
 
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
-import { Dropdown } from 'ui/views/_components/Dropdown';
+import { Dropdown } from 'primereact/dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ValidationExpressionSelector } from '../ValidationExpressionSelector';
 
@@ -99,17 +99,13 @@ const ValidationExpressionGroup = ({
               }`}>
               <Dropdown
                 disabled={isDisabled || position == 0}
-                appendTo={document.body}
                 placeholder={resourcesContext.messages.union}
                 optionLabel="label"
                 options={config.validations.logicalOperators}
-                onChange={e =>
-                  onExpressionFieldUpdate(expressionId, {
-                    key: 'union',
-                    value: e.target.value
-                  })
-                }
-                value={{ label: expressionValues.union, value: expressionValues.union }}
+                onChange={e => {
+                  onExpressionFieldUpdate(expressionId, { key: 'union', value: e.value });
+                }}
+                value={expressionValues.union}
               />
             </span>
             <span className={styles.groupToggler}>
