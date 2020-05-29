@@ -1499,6 +1499,8 @@ public class DatasetSchemaServiceTest {
     unique.setUniqueId(new ObjectId().toString());
     unique.setFieldSchemaIds(fields);
     uniques.add(unique);
+    Mockito.when(uniqueConstraintRepository.findByDatasetSchemaId(Mockito.any()))
+        .thenReturn(new ArrayList<>());
     Mockito.when(uniqueConstraintMapper.entityListToClass(Mockito.any())).thenReturn(uniques);
     Mockito.when(uniqueConstraintRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new UniqueConstraintSchema()));
@@ -1541,5 +1543,42 @@ public class DatasetSchemaServiceTest {
         .thenReturn(new UniqueConstraintVO());
     dataSchemaServiceImpl.deleteUniquesConstraintFromDataset(id);
     Mockito.verify(uniqueConstraintRepository, times(1)).deleteByUniqueId(Mockito.any());
+  }
+
+  @Test
+  public void deleteOnlyUniqueConstraintFromFieldOneTest() throws EEAException {
+    List<UniqueConstraintVO> uniques = new ArrayList<>();
+    String id = new ObjectId().toString();
+    List<String> fields = new ArrayList<>();
+    fields.add(id);
+    UniqueConstraintVO unique = new UniqueConstraintVO();
+    unique.setUniqueId(new ObjectId().toString());
+    unique.setFieldSchemaIds(fields);
+    uniques.add(unique);
+    Mockito.when(uniqueConstraintRepository.findByDatasetSchemaId(Mockito.any()))
+        .thenReturn(new ArrayList<>());
+    Mockito.when(uniqueConstraintMapper.entityListToClass(Mockito.any())).thenReturn(uniques);
+    Mockito.when(uniqueConstraintRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new UniqueConstraintSchema()));
+    Mockito.when(uniqueConstraintMapper.entityToClass(Mockito.any()))
+        .thenReturn(new UniqueConstraintVO());
+    dataSchemaServiceImpl.deleteOnlyUniqueConstraintFromField(new ObjectId().toString(), id);
+    Mockito.verify(uniqueConstraintRepository, times(1)).deleteByUniqueId(Mockito.any());
+  }
+
+  @Test
+  public void deleteOnlyUniqueConstraintFromFieldNotFoundTest() throws EEAException {
+    List<UniqueConstraintVO> uniques = new ArrayList<>();
+    String id = new ObjectId().toString();
+    List<String> fields = new ArrayList<>();
+    UniqueConstraintVO unique = new UniqueConstraintVO();
+    unique.setUniqueId(new ObjectId().toString());
+    unique.setFieldSchemaIds(fields);
+    uniques.add(unique);
+    Mockito.when(uniqueConstraintRepository.findByDatasetSchemaId(Mockito.any()))
+        .thenReturn(new ArrayList<>());
+    Mockito.when(uniqueConstraintMapper.entityListToClass(Mockito.any())).thenReturn(uniques);
+    dataSchemaServiceImpl.deleteOnlyUniqueConstraintFromField(new ObjectId().toString(), id);
+    Mockito.verify(uniqueConstraintRepository, times(0)).deleteByUniqueId(Mockito.any());
   }
 }

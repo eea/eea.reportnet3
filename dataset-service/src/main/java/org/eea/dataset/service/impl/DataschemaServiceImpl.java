@@ -1318,6 +1318,25 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
+   * Delete only unique constraint from field.
+   *
+   * @param schemaId the schema id
+   * @param fieldSchemaId the field schema id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void deleteOnlyUniqueConstraintFromField(String schemaId, String fieldSchemaId)
+      throws EEAException {
+    List<UniqueConstraintVO> constraints = getUniqueConstraints(schemaId);
+    for (UniqueConstraintVO uniqueConstraintVO : constraints) {
+      if (uniqueConstraintVO.getFieldSchemaIds().size() == 1
+          && uniqueConstraintVO.getFieldSchemaIds().contains(fieldSchemaId)) {
+        deleteUniqueConstraint(uniqueConstraintVO.getUniqueId());
+      }
+    }
+  }
+
+  /**
    * Delete uniques constraint from dataset.
    *
    * @param datasetSchemaId the dataset schema id
