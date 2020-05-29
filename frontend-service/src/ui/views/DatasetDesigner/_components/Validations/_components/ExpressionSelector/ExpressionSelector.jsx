@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -31,6 +31,11 @@ export const ExpressionSelector = ({
   const {
     candidateRule: { expressionType }
   } = creationFormState;
+
+  useEffect(() => {
+    onExpressionTypeToggle('fieldComparison');
+  }, []);
+
   const expressionsTypeView = () => {
     if (!isEmpty(expressionType) && expressionType === 'fieldComparison') {
       return (
@@ -55,18 +60,23 @@ export const ExpressionSelector = ({
     }
     return <></>;
   };
+  // return (
+  //   <>
+  //     <div className={styles.section}>
+  //       <Dropdown
+  //         value={expressionType}
+  //         options={options}
+  //         onChange={e => onExpressionTypeToggle(e.value)}
+  //         placeholder={resources.messages['expressionTypeDropdownPlaceholder']}
+  //         optionLabel="label"
+  //       />
+  //     </div>
+
+  //     <div className={styles.section}>{expressionsTypeView()} </div>
+  //   </>
+  // );
   return (
     <>
-      <div className={styles.section}>
-        <Dropdown
-          value={expressionType}
-          options={options}
-          onChange={e => onExpressionTypeToggle(e.value)}
-          placeholder={resources.messages['expressionTypeDropdownPlaceholder']}
-          optionLabel="label"
-        />
-      </div>
-
       <div className={styles.section}>{expressionsTypeView()} </div>
     </>
   );
