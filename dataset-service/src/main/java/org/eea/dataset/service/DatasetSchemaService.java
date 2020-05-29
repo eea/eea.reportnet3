@@ -422,10 +422,8 @@ public interface DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
-   * @param idField the id field
    */
-  void createUniqueConstraintPK(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
-      String idField);
+  void createUniqueConstraintPK(String datasetSchemaId, FieldSchemaVO fieldSchemaVO);
 
   /**
    * Delete only unique constraint from field.

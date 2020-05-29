@@ -1581,4 +1581,23 @@ public class DatasetSchemaServiceTest {
     dataSchemaServiceImpl.deleteOnlyUniqueConstraintFromField(new ObjectId().toString(), id);
     Mockito.verify(uniqueConstraintRepository, times(0)).deleteByUniqueId(Mockito.any());
   }
+
+  @Test
+  public void createUniqueConstraintPKTest() {
+    ObjectId idRecord = new ObjectId();
+    FieldSchemaVO field = new FieldSchemaVO();
+    field.setIdRecord(idRecord.toString());
+    ArrayList<TableSchema> tableSchemas = new ArrayList<>();
+    TableSchema table = new TableSchema();
+    table.setIdTableSchema(new ObjectId());
+    RecordSchema record = new RecordSchema();
+    record.setIdRecordSchema(idRecord);
+    table.setRecordSchema(record);
+    tableSchemas.add(table);
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setTableSchemas(tableSchemas);
+    field.setPk(true);
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
+    dataSchemaServiceImpl.createUniqueConstraintPK(new ObjectId().toString(), field);
+  }
 }
