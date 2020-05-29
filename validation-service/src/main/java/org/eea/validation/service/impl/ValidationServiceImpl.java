@@ -161,7 +161,7 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       kieSession.fireAllRules();
     } catch (RuntimeException e) {
-      LOG_ERROR.error("The Dataset Validation fail: ", e.getMessage(), e);
+      LOG_ERROR.error("The Dataset Validation failed: {}", e.getMessage(), e);
       rulesErrorUtils.createRuleErrorException(dataset, e);
     }
     return dataset.getDatasetValidations();
@@ -181,7 +181,7 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       kieSession.fireAllRules();
     } catch (RuntimeException e) {
-      LOG_ERROR.error("The Table Validation fail: ", e.getMessage(), e);
+      LOG_ERROR.error("The Table Validation failed: {}", e.getMessage(), e);
       rulesErrorUtils.createRuleErrorException(table, e);
     }
     return table.getTableValidations() == null ? new ArrayList<>() : table.getTableValidations();
@@ -204,7 +204,7 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       kieSession.fireAllRules();
     } catch (RuntimeException e) {
-      LOG_ERROR.error("The Record Validation fail: ", e.getMessage(), e);
+      LOG_ERROR.error("The Record Validation failed: {}", e.getMessage(), e);
       rulesErrorUtils.createRuleErrorException(record, e);
     }
 
@@ -229,7 +229,7 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       kieSession.fireAllRules();
     } catch (RuntimeException e) {
-      LOG_ERROR.error("The Field Validation fail: ", e.getMessage(), e);
+      LOG_ERROR.error("The Field Validation failed: {}", e.getMessage(), e);
       rulesErrorUtils.createRuleErrorException(field, e);
     }
     return null == field.getFieldValidations() || field.getFieldValidations().isEmpty()
@@ -299,12 +299,10 @@ public class ValidationServiceImpl implements ValidationService {
    * @param datasetId the dataset id
    * @param idTable the id table
    * @param kieBase the kie base
-   *
-   * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void validateTable(Long datasetId, Long idTable, KieBase kieBase) throws EEAException {
+  public void validateTable(Long datasetId, Long idTable, KieBase kieBase) {
     // Validating tables
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     TableValue table = tableRepository.findById(idTable).orElse(null);
@@ -332,13 +330,10 @@ public class ValidationServiceImpl implements ValidationService {
    * @param datasetId the dataset id
    * @param kieBase the kie base
    * @param pageable the pageable
-   *
-   * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void validateRecord(Long datasetId, KieBase kieBase, Pageable pageable)
-      throws EEAException {
+  public void validateRecord(Long datasetId, KieBase kieBase, Pageable pageable) {
 
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     List<RecordValue> records = this.recordRepository.findAll(pageable).getContent();
@@ -371,13 +366,10 @@ public class ValidationServiceImpl implements ValidationService {
    * @param datasetId the dataset id
    * @param kieBase the kie base
    * @param pageable the pageable
-   *
-   * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void validateFields(Long datasetId, KieBase kieBase, Pageable pageable)
-      throws EEAException {
+  public void validateFields(Long datasetId, KieBase kieBase, Pageable pageable) {
 
     List<FieldValue> fields = fieldRepository.findAll(pageable).getContent();
     List<FieldValidation> fieldValidations = new ArrayList<>();
