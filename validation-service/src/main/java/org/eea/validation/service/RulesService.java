@@ -153,4 +153,14 @@ public interface RulesService {
    * @param uniqueId the unique id
    */
   void deleteUniqueConstraint(String datasetSchemaId, String uniqueId);
+
+
+
+  /**
+   * Delete rule high level like.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   */
+  void deleteRuleHighLevelLike(String datasetSchemaId, String fieldSchemaId);
 }

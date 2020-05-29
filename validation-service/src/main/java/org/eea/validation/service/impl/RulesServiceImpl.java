@@ -604,4 +604,27 @@ public class RulesServiceImpl implements RulesService {
     rulesRepository.deleteByUniqueConstraintId(new ObjectId(datasetSchemaId),
         new ObjectId(uniqueId));
   }
+
+  /**
+   * Delete rule high level like. That service delete the rules with high level
+   * (record,table,dataset) for a deleted fieldSchemaId
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   */
+  @Override
+  public void deleteRuleHighLevelLike(String datasetSchemaId, String fieldSchemaId) {
+    boolean deleted =
+        rulesRepository.deleteRuleHighLevelLike(new ObjectId(datasetSchemaId), fieldSchemaId);
+
+    if (deleted) {
+      LOG.info(
+          "Rules associated with fieldSchemaId {} in datasetSchemaId {} , were deleted in high level(record,table,dataset)",
+          fieldSchemaId, datasetSchemaId);
+    } else {
+      LOG.info(
+          "No rules associated with fieldSchemaId {} in datasetSchemaId {} in high level(record,table,dataset)",
+          fieldSchemaId, datasetSchemaId);
+    }
+  }
 }
