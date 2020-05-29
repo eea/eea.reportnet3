@@ -237,28 +237,20 @@ public class KieBaseManager {
         break;
     }
 
-
-    if (ruleExpressionVO.isDataTypeCompatible(rule.getType(), dataTypeMap)) {
-      rule.setVerified(true);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATED_QC_RULE_EVENT, null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build());
-    } else {
+    if (!ruleExpressionVO.isDataTypeCompatible(rule.getType(), dataTypeMap)) {
       rule.setVerified(false);
       rule.setEnabled(false);
+      rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.INVALIDATED_QC_RULE_EVENT, null,
           NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
               .datasetSchemaId(datasetSchemaId).error("The QC Rule is disabled")
               .shortCode(rule.getShortCode()).build());
+      return;
     }
-
-
-    rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
 
     KieServices kieServices = KieServices.Factory.get();
     ObjectDataCompiler compiler = new ObjectDataCompiler();
     List<Map<String, String>> ruleAttribute = new ArrayList<>();
-
 
     ruleAttribute.add(passDataToMap(rule.getReferenceId().toString(), rule.getRuleId().toString(),
         typeValidation, schemasDrools, rule.getWhenCondition(), rule.getThenCondition().get(0),
