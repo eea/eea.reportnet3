@@ -1,9 +1,11 @@
 .expression {
   display: flex;
-  justify-content: flex-start;
+  // justify-content: space-between;
+  // flex-wrap: nowrap;
   --unionWidth: 80px;
   --operatorsWidth: 150px;
   --fieldsGap: 1rem;
+  list-style: none !important;
   .group {
     margin-right: 1rem;
     // margin-left: 0.5rem;
@@ -42,9 +44,9 @@
   }
   > span {
     margin-right: var(--fieldsGap);
-    &:last-of-type {
-      margin-right: 0;
-    }
+  }
+  .deleteBtnWrap {
+    margin-left: auto;
   }
   .deleteButton {
     border: 1px solid var(--c-custom-gray) !important;

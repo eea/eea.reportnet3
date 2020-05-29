@@ -3,9 +3,9 @@ import uuid from 'uuid';
 
 import { config } from 'conf';
 
-import { selectorFromDTO } from './selectorFromDTO';
+import { selectorRowFromDTO } from './selectorRowFromDTO';
 
-export const getGroupFromDTO = (expression, allExpressions, parentOperator) => {
+export const getRowGroupFromDTO = (expression, allExpressions, parentOperator) => {
   const {
     validations: { reverseEquivalences }
   } = config;
@@ -20,7 +20,7 @@ export const getGroupFromDTO = (expression, allExpressions, parentOperator) => {
   newExpression.expressionValue = '';
   const subExpressions = [];
 
-  selectorFromDTO({ operator: expression.operator, params: expression.params }, subExpressions, allExpressions);
+  selectorRowFromDTO({ operator: expression.operator, params: expression.params }, subExpressions, allExpressions);
   newExpression.expressions = subExpressions;
   allExpressions.push(newExpression);
 

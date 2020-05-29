@@ -7,10 +7,10 @@ import moment from 'moment';
 
 const printExpression = (expression, field) => {
   if (!isNil(expression.operatorValue) && !isEmpty(expression.operatorValue)) {
-    if (expression.operatorType == 'LEN') {
+    if (expression.operatorType === 'LEN') {
       return `( LEN( ${field} ) ${expression.operatorValue} ${expression.expressionValue} )`;
     }
-    if (expression.operatorType == 'date') {
+    if (expression.operatorType === 'date') {
       return `( ${field} ${expression.operatorValue} ${moment(expression.expressionValue).format('YYYY-MM-DD')} )`;
     }
     return `( ${field} ${expression.operatorValue} ${expression.expressionValue} )`;

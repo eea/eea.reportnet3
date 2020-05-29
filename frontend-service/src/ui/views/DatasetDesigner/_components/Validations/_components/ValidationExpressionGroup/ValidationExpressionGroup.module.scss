@@ -1,4 +1,5 @@
 .groupExpression {
+  list-style: none;
   > ul {
     list-style: none;
     padding-left: 0;
@@ -12,7 +13,7 @@
         > span {
           margin-right: 1rem;
           &:first-of-type {
-            margin-right: 2rem;
+            margin-right: 1.5rem;
           }
           &:last-of-type {
             margin-right: 0;
@@ -48,7 +49,7 @@
         > span {
           > ul {
             padding-left: 0px;
-            margin-left: 3.1rem;
+            margin-left: 2.8rem;
             margin-top: 1rem;
           }
         }
