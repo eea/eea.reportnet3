@@ -27,7 +27,8 @@ const ValidationExpressionGroup = ({
   onExpressionsErrors,
   onGetFieldType,
   position,
-  showRequiredFields
+  showRequiredFields,
+  rawTableFields
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const { expressionId } = expressionValues;
@@ -72,6 +73,7 @@ const ValidationExpressionGroup = ({
           onExpressionsErrors={onExpressionsErrors}
           onGetFieldType={onGetFieldType}
           position={i}
+          rawTableFields={rawTableFields}
         />
       ));
     }

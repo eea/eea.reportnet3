@@ -169,6 +169,7 @@ const ComparisonExpression = ({
 
   return (
     <li className={styles.expression}>
+      {console.log('expressionValues', expressionValues)}
       <span className={styles.group}>
         <Checkbox
           disabled={isDisabled}
