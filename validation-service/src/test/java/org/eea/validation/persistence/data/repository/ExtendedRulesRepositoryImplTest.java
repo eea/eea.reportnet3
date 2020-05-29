@@ -290,7 +290,7 @@ public class ExtendedRulesRepositoryImplTest {
     Mockito.when(
         mongoTemplate.aggregate(Mockito.any(), Mockito.any(Class.class), Mockito.any(Class.class)))
         .thenReturn(aggregationResults);
-    Mockito.when(aggregationResults.getMappedResults()).thenReturn(new ArrayList<Object>());
+    Mockito.when(aggregationResults.getMappedResults()).thenReturn(new ArrayList<>());
     Assert.assertNull(
         extendedRulesRepositoryImpl.getRulesWithTypeRuleCriteria(new ObjectId(), false));
   }
@@ -337,5 +337,13 @@ public class ExtendedRulesRepositoryImplTest {
     Mockito.when(aggregationResults.getMappedResults()).thenReturn(rulesSchemas);
     Assert.assertEquals(rulesSchema,
         extendedRulesRepositoryImpl.getActiveAndVerifiedRules(new ObjectId()));
+  }
+
+  @Test
+  public void deleteByUniqueConstraintIdTest() {
+    Mockito.when(mongoTemplate.updateMulti(Mockito.any(), Mockito.any(), Mockito.any(Class.class)))
+        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
+    Assert.assertEquals(false,
+        extendedRulesRepositoryImpl.deleteByUniqueConstraintId(new ObjectId(), new ObjectId()));
   }
 }

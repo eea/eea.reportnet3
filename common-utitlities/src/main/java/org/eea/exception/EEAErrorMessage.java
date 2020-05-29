@@ -1,6 +1,8 @@
 package org.eea.exception;
 
-/** The Class EEAErrorMessage. */
+/**
+ * The Class EEAErrorMessage.
+ */
 public final class EEAErrorMessage {
 
   /** The Constant FILE_FORMAT: {@value}. */
@@ -216,6 +218,12 @@ public final class EEAErrorMessage {
 
   /** The Constant ENTITY_TYPE_REQUIRED: {@value}. */
   public static final String ENTITY_TYPE_REQUIRED = "Type is required";
+
+  /** The Constant UNIQUE_NOT_FOUND: {@value}. */
+  public static final String UNIQUE_NOT_FOUND = "Unique Constraint with id %s not found";
+
+  /** The Constant UNREPORTED_FIELDSCHEMAS: {@value}. */
+  public static final String UNREPORTED_FIELDSCHEMAS = "Unreported fieldSchemas";
 
   /**
    * Instantiates a new EEA error message.

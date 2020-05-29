@@ -166,8 +166,9 @@ public class FKValidationUtils {
     if (!pkMustBeUsed) {
 
       for (FieldValue field : fkFields) {
-        if (checkPK(pkList, field)) {
-          List<FieldValidation> fieldValidationList = new ArrayList<>();
+        if (Boolean.TRUE.equals(checkPK(pkList, field))) {
+          List<FieldValidation> fieldValidationList =
+              field.getFieldValidations() != null ? field.getFieldValidations() : new ArrayList<>();
           FieldValidation fieldValidation = new FieldValidation();
           fieldValidation.setValidation(pkValidation);
           FieldValue fieldValue = new FieldValue();
@@ -266,11 +267,7 @@ public class FKValidationUtils {
    */
   private static Boolean checkPK(List<String> pkValues, FieldValue value) {
 
-    if (!pkValues.contains(value.getValue())) {
-      return true;
-    } else {
-      return false;
-    }
+    return !pkValues.contains(value.getValue());
   }
 
 
