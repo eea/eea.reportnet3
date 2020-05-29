@@ -285,11 +285,34 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     return result.isEmpty() ? null : result.get(0);
   }
 
+  /**
+   * Delete by unique constraint id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param uniqueConstraintId the unique constraint id
+   * @return true, if successful
+   */
   @Override
   public boolean deleteByUniqueConstraintId(ObjectId datasetSchemaId, ObjectId uniqueConstraintId) {
     Document pullCriteria = new Document("uniqueConstraintId", uniqueConstraintId);
     Update update = new Update().pull("rules", pullCriteria);
-    Query query = new Query(new Criteria("idDatasetSchema").is(datasetSchemaId));
+    Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId));
+    return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
+  }
+
+  /**
+   * Delete rule high level like.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaLike the field schema like
+   * @return true, if successful
+   */
+  @Override
+  public boolean deleteRuleHighLevelLike(ObjectId datasetSchemaId, String fieldSchemaLike) {
+    Document pullCriteria =
+        new Document("whenCondition", java.util.regex.Pattern.compile(fieldSchemaLike));
+    Update update = new Update().pull(LiteralConstants.RULES, pullCriteria);
+    Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId));
     return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
   }
 }
