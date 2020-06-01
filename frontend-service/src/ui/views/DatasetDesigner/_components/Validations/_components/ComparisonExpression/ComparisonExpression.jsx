@@ -7,15 +7,11 @@ import styles from './ComparisonExpression.module.scss';
 import { config } from 'conf/';
 
 import { Button } from 'ui/views/_components/Button';
-import { Calendar } from 'ui/views/_components/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dropdown } from 'primereact/dropdown';
-import { InputText } from 'ui/views/_components/InputText';
-import { InputNumber } from 'primereact/inputnumber';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import isNil from 'lodash/isNil';
-import { getFieldType } from '../../_functions/utils/getFieldType';
 
 const ComparisonExpression = ({
   expressionValues,
