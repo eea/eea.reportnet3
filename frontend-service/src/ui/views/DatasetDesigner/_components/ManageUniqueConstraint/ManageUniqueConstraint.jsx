@@ -73,13 +73,15 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
 
   const getTableOptions = () => {
     const tables = datasetSchemaAllTables.filter(table => table.index >= 0);
-    return tables.map(table => ({ name: table.tableSchemaName, value: table.tableSchemaId }));
+    return isEmpty(tables)
+      ? [{ name: resources.messages['noTablesToSelect'], disabled: true }]
+      : tables.map(table => ({ name: table.tableSchemaName, value: table.tableSchemaId }));
   };
 
   const getFieldOptions = () => {
     if (selectedTable.value) {
       const table = datasetSchemaAllTables.filter(table => table.tableSchemaId === selectedTable.value)[0];
-      if (table.records) {
+      if (table && table.records) {
         return !isEmpty(table.records[0].fields)
           ? table.records[0].fields.map(field => ({ name: field.name, value: field.fieldId }))
           : [{ name: resources.messages['noFieldsToSelect'], disabled: true }];
