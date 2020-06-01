@@ -528,6 +528,7 @@ export const FieldDesigner = ({
     pk = fieldDesignerState.fieldPKValue,
     pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
     name = fieldDesignerState.fieldValue,
+    recordId = recordSchemaId,
     referencedField = fieldDesignerState.fieldLinkValue,
     required = fieldDesignerState.fieldRequiredValue,
     type = parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType)
@@ -540,6 +541,7 @@ export const FieldDesigner = ({
         pk,
         pkMustBeUsed,
         name,
+        recordId,
         referencedField: !isNil(referencedField)
           ? parseReferenceField(referencedField)
           : fieldDesignerState.fieldLinkValue,
@@ -558,6 +560,7 @@ export const FieldDesigner = ({
           pk,
           pkMustBeUsed,
           name,
+          recordId,
           referencedField,
           required,
           type

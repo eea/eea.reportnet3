@@ -10,8 +10,9 @@ import styles from './RowValidation.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { InfoTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/InfoTab';
+import { ExpressionSelector } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionSelector';
 import { ExpressionsTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionsTab';
+import { InfoTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/InfoTab';
 import ReactTooltip from 'react-tooltip';
 import { TabView, TabPanel } from 'primereact/tabview';
 
@@ -26,16 +27,18 @@ import {
   createValidationReducer
 } from 'ui/views/DatasetDesigner/_components/Validations/_functions/reducers/CreateValidationReducer';
 
-import { checkExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkExpressions';
-import { checkValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkValidation';
+import { checkComparisonExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonExpressions';
+import { checkComparisonValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonValidation';
 import { deleteExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpression';
 import { deleteExpressionRecursively } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpressionRecursively';
 import { getDatasetSchemaTableFields } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getDatasetSchemaTableFields';
-import { getExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getExpressionString';
 import { getEmptyExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getEmptyExpression';
+import { getExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getExpressionString';
+import { getFieldType } from '../../_functions/utils/getFieldType';
 import { getSelectedFieldById } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedFieldById';
 import { getSelectedTableByFieldId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTablebyFieldId';
 import { getSelectedTableByTableSchemaId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTableByTableSchemaId';
+import { getSelectedTableByRecordId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTableByRecordId';
 import { groupExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/groupExpressions';
 import { initValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/initValidationRuleCreation';
 import { resetValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/resetValidationRuleCreation';
@@ -52,16 +55,16 @@ export const RowValidation = ({ datasetId, tabs }) => {
   );
 
   const [clickedFields, setClickedFields] = useState([]);
-  const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
-  const [tabMenuActiveItem, setTabMenuActiveItem] = useState(0);
-  const [tabContents, setTabContents] = useState();
-  const [tabsChanges, setTabsChanges] = useState({});
-  const [showErrorOnInfoTab, setShowErrorOnInfoTab] = useState(true);
-  const [showErrorOnExpressionTab, setShowErrorOnExpressionTab] = useState(false);
   const [expressionsErrors, setExpressionsErrors] = useState({});
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
+  const [showErrorOnExpressionTab, setShowErrorOnExpressionTab] = useState(false);
+  const [showErrorOnInfoTab, setShowErrorOnInfoTab] = useState(true);
+  const [tabContents, setTabContents] = useState();
+  const [tabMenuActiveItem, setTabMenuActiveItem] = useState(0);
+  const [tabsChanges, setTabsChanges] = useState({});
 
-  const ruleDisablingCheckListener = [creationFormState.candidateRule.table, creationFormState.candidateRule.field];
   const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
+  const ruleDisablingCheckListener = [creationFormState.candidateRule.table, creationFormState.candidateRule.field];
 
   const componentName = 'createValidation';
 
@@ -76,8 +79,8 @@ export const RowValidation = ({ datasetId, tabs }) => {
       setTabContents([
         <TabPanel
           header={resourcesContext.messages.tabMenuConstraintData}
-          leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}
-          headerClassName={showErrorOnInfoTab ? styles.error : ''}>
+          headerClassName={showErrorOnInfoTab ? styles.error : ''}
+          leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
           <InfoTab
             componentName={componentName}
             creationFormState={creationFormState}
@@ -89,18 +92,20 @@ export const RowValidation = ({ datasetId, tabs }) => {
         </TabPanel>,
         <TabPanel
           header={resourcesContext.messages.tabMenuExpression}
-          leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}
-          headerClassName={showErrorOnExpressionTab ? styles.error : ''}>
-          <ExpressionsTab
+          headerClassName={showErrorOnExpressionTab ? styles.error : ''}
+          leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}>
+          <ExpressionSelector
             componentName={componentName}
             creationFormState={creationFormState}
+            onAddNewExpression={onAddNewExpression}
             onExpressionDelete={onExpressionDelete}
             onExpressionFieldUpdate={onExpressionFieldUpdate}
             onExpressionGroup={onExpressionGroup}
             onExpressionMarkToGroup={onExpressionMarkToGroup}
-            tabsChanges={tabsChanges}
-            onAddNewExpression={onAddNewExpression}
             onExpressionsErrors={onExpressionsErrors}
+            onExpressionTypeToggle={onExpressionTypeToggle}
+            onGetFieldType={onGetFieldType}
+            tabsChanges={tabsChanges}
           />
         </TabPanel>
       ]);
@@ -131,15 +136,15 @@ export const RowValidation = ({ datasetId, tabs }) => {
       });
     }
 
-    if (validationContext.fieldId) {
-      creationFormDispatch({
-        type: 'SET_FORM_FIELD',
-        payload: {
-          key: 'field',
-          value: getSelectedFieldById(validationContext.fieldId, tabs)
-        }
-      });
-    }
+    // if (validationContext.referenceId) {
+    //   creationFormDispatch({
+    //     type: 'SET_FORM_FIELD',
+    //     payload: {
+    //       key: 'field',
+    //       value: getSelectedFieldById(validationContext.referenceId, tabs)
+    //     }
+    //   });
+    // }
   }, [creationFormState.candidateRule.table]);
 
   useEffect(() => {
@@ -158,13 +163,13 @@ export const RowValidation = ({ datasetId, tabs }) => {
   }, [expressionsErrors]);
 
   useEffect(() => {
-    let table = null;
-    if (validationContext.fieldId) {
-      if (!isNil(validationContext.tableSchemaId)) {
-        table = getSelectedTableByTableSchemaId(validationContext.tableSchemaId, tabs);
-      } else {
-        table = getSelectedTableByFieldId(validationContext.fieldId, tabs);
-      }
+    if (validationContext.referenceId) {
+      // if (!isNil(validationContext.tableSchemaId)) {
+      //   table = getSelectedTableByTableSchemaId(validationContext.tableSchemaId, tabs);
+      // } else {
+      //   table = getSelectedTableByFieldId(validationContext.referenceId, tabs);
+      // }
+      const table = getSelectedTableByRecordId(validationContext.referenceId, tabs);
       creationFormDispatch({
         type: 'SET_FORM_FIELD',
         payload: {
@@ -173,7 +178,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
         }
       });
     }
-  }, [validationContext.fieldId]);
+  }, [validationContext.referenceId]);
 
   useEffect(() => {
     const {
@@ -206,14 +211,14 @@ export const RowValidation = ({ datasetId, tabs }) => {
     } = creationFormState;
     creationFormDispatch({
       type: 'SET_IS_VALIDATION_ADDING_DISABLED',
-      payload: checkExpressions(expressions)
+      payload: checkComparisonExpressions(expressions)
     });
   }, [...ruleAdditionCheckListener]);
 
   useEffect(() => {
     creationFormDispatch({
       type: 'SET_IS_VALIDATION_CREATION_DISABLED',
-      payload: !checkValidation(creationFormState.candidateRule)
+      payload: !checkComparisonValidation(creationFormState.candidateRule)
     });
   }, [creationFormState.candidateRule]);
 
@@ -230,7 +235,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
     let errors = false;
 
     clickedFields.forEach(clickedField => {
-      if (printError(clickedField) == 'error') errors = true;
+      if (printError(clickedField) === 'error') errors = true;
     });
 
     if (errors) {
@@ -255,11 +260,18 @@ export const RowValidation = ({ datasetId, tabs }) => {
     );
   };
 
+  const getRecordIdByTableSchemaId = tableSchemaId => {
+    const filteredTables = tabs.filter(tab => tab.tableSchemaId === tableSchemaId);
+    const [filteredTable] = filteredTables;
+    return filteredTable.recordSchemaId;
+  };
+
   const onCreateValidationRule = async () => {
     try {
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
-      await ValidationService.create(datasetId, candidateRule);
+      candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
+      await ValidationService.createRowRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
       notificationContext.add({
@@ -275,7 +287,8 @@ export const RowValidation = ({ datasetId, tabs }) => {
     try {
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
-      await ValidationService.update(datasetId, candidateRule);
+      candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
+      await ValidationService.updateRowRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
       notificationContext.add({
@@ -330,9 +343,9 @@ export const RowValidation = ({ datasetId, tabs }) => {
     creationFormDispatch({
       type: 'GROUP_RULES_ACTIVATOR',
       payload: {
-        groupExpressionsActive: field.value ? 1 : -1,
+        allExpressions,
         groupCandidate,
-        allExpressions
+        groupExpressionsActive: field.value ? 1 : -1
       }
     });
   };
@@ -343,8 +356,8 @@ export const RowValidation = ({ datasetId, tabs }) => {
   };
 
   const onTabChange = tabIndex => {
-    if (tabIndex != tabMenuActiveItem) {
-      if (tabIndex == 1) {
+    if (tabIndex !== tabMenuActiveItem) {
+      if (tabIndex === 1) {
         setClickedFields([...config.validations.requiredFields[validationContext.level]]);
       } else {
         setTabsChanges({
@@ -415,6 +428,17 @@ export const RowValidation = ({ datasetId, tabs }) => {
     });
   };
 
+  const onExpressionTypeToggle = expressionType => {
+    creationFormDispatch({
+      type: 'ON_EXPRESSION_TYPE_TOGGLE',
+      payload: expressionType
+    });
+  };
+
+  const onGetFieldType = field => {
+    return getFieldType(creationFormState.candidateRule.table, { code: field }, tabs);
+  };
+
   const dialogLayout = children => (
     <Dialog
       className={styles.dialog}
@@ -425,7 +449,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
       }
       visible={validationContext.isVisible}
       style={{ width: '975px' }}
-      onHide={e => onHide()}>
+      onHide={() => onHide()}>
       {children}
     </Dialog>
   );
@@ -436,8 +460,8 @@ export const RowValidation = ({ datasetId, tabs }) => {
         <div id={styles.QCFormWrapper}>
           <div className={styles.body}>
             <TabView
-              className={styles.tabView}
               activeIndex={tabMenuActiveItem}
+              className={styles.tabView}
               onTabChange={e => onTabChange(e.index)}
               renderActiveOnly={false}>
               {tabContents}
@@ -449,25 +473,25 @@ export const RowValidation = ({ datasetId, tabs }) => {
                 {validationContext.ruleEdit ? (
                   <span data-tip data-for="createTooltip">
                     <Button
-                      id={`${componentName}__update`}
-                      disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
                       className="p-button-primary p-button-text-icon-left"
-                      type="button"
-                      label={resourcesContext.messages.update}
+                      disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
                       icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
-                      onClick={e => onUpdateValidationRule()}
+                      id={`${componentName}__update`}
+                      label={resourcesContext.messages.update}
+                      onClick={() => onUpdateValidationRule()}
+                      type="button"
                     />
                   </span>
                 ) : (
                   <span data-tip data-for="createTooltip">
                     <Button
-                      id={`${componentName}__create`}
-                      disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
                       className="p-button-primary p-button-text-icon-left"
-                      type="button"
-                      label={resourcesContext.messages.create}
+                      disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
                       icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
-                      onClick={e => onCreateValidationRule()}
+                      id={`${componentName}__create`}
+                      label={resourcesContext.messages.create}
+                      onClick={() => onCreateValidationRule()}
+                      type="button"
                     />
                   </span>
                 )}
@@ -478,12 +502,12 @@ export const RowValidation = ({ datasetId, tabs }) => {
                 )}
 
                 <Button
-                  id={`${componentName}__cancel`}
                   className="p-button-secondary p-button-text-icon-left"
-                  type="button"
-                  label={resourcesContext.messages.cancel}
                   icon="cancel"
-                  onClick={e => onHide()}
+                  id={`${componentName}__cancel`}
+                  label={resourcesContext.messages.cancel}
+                  onClick={() => onHide()}
+                  type="button"
                 />
               </div>
             </div>

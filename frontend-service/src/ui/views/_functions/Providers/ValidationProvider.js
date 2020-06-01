@@ -23,10 +23,18 @@ const validationReducer = (state, { type, payload }) => {
       return {
         ...state,
         isVisible: true,
-        fieldId: payload.fieldId,
+        referenceId: payload.fieldId,
         tableSchemaId: payload.tableSchemaId,
         opener: null,
         level: 'field'
+      };
+    case 'ON_OPEN_QC_CREATION_MODAL_FROM_ROW':
+      return {
+        ...state,
+        isVisible: true,
+        referenceId: payload.recordId,
+        opener: null,
+        level: 'row'
       };
     case 'ON_OPENER_RESET':
       return {
@@ -38,7 +46,7 @@ const validationReducer = (state, { type, payload }) => {
       return {
         ...state,
         isVisible: false,
-        fieldId: null,
+        referenceId: null,
         tableSchemaId: null,
         reOpenOpener: !isNil(state.opener) ? true : false,
         ruleEdit: false,
@@ -48,10 +56,11 @@ const validationReducer = (state, { type, payload }) => {
       return {
         ...state,
         isVisible: true,
-        fieldId: payload.fieldId,
+        referenceId: payload.referenceId,
         opener: payload.opener,
         ruleEdit: true,
-        ruleToEdit: payload.ruleToEdit
+        ruleToEdit: payload.ruleToEdit,
+        level: payload.level
       };
     case 'RESET_REOPEN_OPENER':
       return {
@@ -65,7 +74,7 @@ const validationReducer = (state, { type, payload }) => {
 
 const initialState = {
   isVisible: false,
-  fieldId: null,
+  referenceId: null,
   opener: null,
   level: null,
   reOpenOpener: false,
@@ -97,6 +106,12 @@ export const ValidationProvider = ({ children }) => {
             payload: { fieldId, tableSchemaId }
           });
         },
+        onOpenModalFromRow: recordId => {
+          dispatch({
+            type: 'ON_OPEN_QC_CREATION_MODAL_FROM_ROW',
+            payload: { recordId }
+          });
+        },
         onCloseModal: () => {
           dispatch({
             type: 'ON_CLOSE_QC_CREATION_MODAL'
@@ -107,13 +122,14 @@ export const ValidationProvider = ({ children }) => {
             type: 'ON_OPENER_RESET'
           });
         },
-        onOpenToEdit: (rule, opener) => {
+        onOpenToEdit: (rule, opener, level) => {
           dispatch({
             type: 'ON_OPEN_TO_EDIT',
             payload: {
               ruleToEdit: { ...rule },
-              fieldId: rule.referenceId,
-              opener
+              referenceId: rule.referenceId,
+              opener,
+              level
             }
           });
         },
