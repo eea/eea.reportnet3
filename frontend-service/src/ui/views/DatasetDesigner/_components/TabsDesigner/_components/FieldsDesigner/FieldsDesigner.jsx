@@ -471,7 +471,7 @@ export const FieldsDesigner = ({
         />
         <div className={styles.constraintsButtons}>
           <Button
-            className={`p-button-secondary p-button-animated-blink ${styles.constraintsTextButtons}`}
+            className={`p-button-secondary p-button-animated-blink`}
             icon={'key'}
             label={resources.messages['addUniqueConstraint']}
             onClick={() => {
@@ -485,7 +485,7 @@ export const FieldsDesigner = ({
           />
           <Button
             className="p-button-secondary p-button-animated-blink"
-            icon={'plus'}
+            icon={'horizontalSliders'}
             label={resources.messages['addRowConstraint']}
             onClick={() => validationContext.onOpenModalFromRow(table.tableSchemaId)}
           />
