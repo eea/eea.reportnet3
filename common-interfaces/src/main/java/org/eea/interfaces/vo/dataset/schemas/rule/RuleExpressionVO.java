@@ -484,7 +484,7 @@ public class RuleExpressionVO {
    * @param hexString the hex string
    * @return true, if is valid
    */
-  public static boolean isValid(final String hexString) {
+  private static boolean isValid(final String hexString) {
     if (hexString == null) {
       throw new IllegalArgumentException();
     }
