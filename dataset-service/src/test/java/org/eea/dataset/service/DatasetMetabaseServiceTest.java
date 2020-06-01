@@ -464,4 +464,53 @@ public class DatasetMetabaseServiceTest {
     Mockito.verify(foreingRelationsRepository, times(1))
         .findDatasetDestinationByOriginAndPk(Mockito.any(), Mockito.any());
   }
+
+  /**
+   * Gets the dataset type enum return design test.
+   *
+   * @return the dataset type enum return design test
+   */
+  @Test
+  public void getDatasetTypeEnumReturnDesignTest() {
+    Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(true);
+    Assert.assertEquals(DatasetTypeEnum.DESIGN, datasetMetabaseService.getDatasetType(1L));
+  }
+
+  /**
+   * Gets the dataset type enum return reporting test.
+   *
+   * @return the dataset type enum return reporting test
+   */
+  @Test
+  public void getDatasetTypeEnumReturnReportingTest() {
+    Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(true);
+    Assert.assertEquals(DatasetTypeEnum.REPORTING, datasetMetabaseService.getDatasetType(1L));
+  }
+
+  /**
+   * Gets the dataset type enum return collection test.
+   *
+   * @return the dataset type enum return collection test
+   */
+  @Test
+  public void getDatasetTypeEnumReturnCollectionTest() {
+    Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(true);
+    Assert.assertEquals(DatasetTypeEnum.COLLECTION, datasetMetabaseService.getDatasetType(1L));
+  }
+
+  /**
+   * Gets the dataset type enum return null test.
+   *
+   * @return the dataset type enum return null test
+   */
+  @Test
+  public void getDatasetTypeEnumReturnNullTest() {
+    Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(false);
+    Assert.assertNull(datasetMetabaseService.getDatasetType(1L));
+  }
 }
