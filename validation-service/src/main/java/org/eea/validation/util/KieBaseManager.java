@@ -199,15 +199,13 @@ public class KieBaseManager {
    * @throws EEAException
    */
   @Async
+  @SuppressWarnings("unchecked")
   public void textRuleCorrect(String datasetSchemaId, Rule rule) throws EEAException {
 
-    KieServices kieServices = KieServices.Factory.get();
-    ObjectDataCompiler compiler = new ObjectDataCompiler();
-    List<Map<String, String>> ruleAttribute = new ArrayList<>();
+    Map<String, DataType> dataTypeMap = new HashMap<>();
+    RuleExpressionVO ruleExpressionVO = new RuleExpressionVO(rule.getWhenCondition());
     TypeValidation typeValidation = TypeValidation.DATASET;
     String schemasDrools = "";
-    String whenCondition = rule.getWhenCondition();
-    StringBuilder expression = new StringBuilder("");
     switch (rule.getType()) {
       case DATASET:
         schemasDrools = SchemasDrools.ID_DATASET_SCHEMA.getValue();
@@ -220,19 +218,26 @@ public class KieBaseManager {
       case RECORD:
         schemasDrools = SchemasDrools.ID_RECORD_SCHEMA.getValue();
         typeValidation = TypeValidation.RECORD;
+        List<Document> fields = (ArrayList<Document>) schemasRepository
+            .findRecordSchema(datasetSchemaId, rule.getReferenceId().toString())
+            .get("fieldSchemas");
+        for (Document field : fields) {
+          String fieldSchemaId = field.get("_id").toString();
+          DataType dataType = DataType.valueOf(field.get("typeData").toString());
+          dataTypeMap.put(fieldSchemaId, dataType);
+        }
         break;
       case FIELD:
         schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
         typeValidation = TypeValidation.FIELD;
+        Document document =
+            schemasRepository.findFieldSchema(datasetSchemaId, rule.getReferenceId().toString());
+        DataType dataType = DataType.valueOf(document.get("typeData").toString());
+        dataTypeMap.put("VALUE", dataType);
         break;
     }
 
-    Document documentField =
-        schemasRepository.findFieldSchema(datasetSchemaId, rule.getReferenceId().toString());
-    DataType dataType = DataType.valueOf(documentField.get("typeData").toString());
-    RuleExpressionVO ruleExpressionVO = new RuleExpressionVO(rule.getWhenCondition());
-
-    if (!ruleExpressionVO.isDataTypeCompatible(rule.getType(), dataType)) {
+    if (!ruleExpressionVO.isDataTypeCompatible(rule.getType(), dataTypeMap)) {
       rule.setVerified(false);
       rule.setEnabled(false);
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
@@ -243,39 +248,12 @@ public class KieBaseManager {
       return;
     }
 
-    // we do the same thing like in kiebase validation part
-    if (null != dataType) {
-      switch (dataType) {
-        case NUMBER_INTEGER:
-          expression.append("( !isBlank(value) || isNumberInteger(value) && ");
-          break;
-        case NUMBER_DECIMAL:
-          expression.append("( !isBlank(value) || isNumberDecimal(value) && ");
-          break;
-        case DATE:
-          expression.append("( !isBlank(value) || isDateYYYYMMDD(value) && ");
-          break;
-        case BOOLEAN:
-          expression.append("( !isBlank(value) || isBoolean(value) && ");
-          break;
-        case COORDINATE_LAT:
-          expression.append("( !isBlank(value) || isCordenateLat(value) && ");
-          break;
-        case COORDINATE_LONG:
-          expression.append("( !isBlank(value) || isCordenateLong(value) && ");
-          break;
-        default:
-          expression.append("( !isBlank(value) || ");
-          break;
-      }
-    }
-    if (!StringUtils.isBlank(expression.toString())) {
-      String whenConditionWithParenthesis =
-          new StringBuilder("").append("(").append(whenCondition).append(")").toString();
-      expression.append(whenConditionWithParenthesis).append(")").toString();
-    }
+    KieServices kieServices = KieServices.Factory.get();
+    ObjectDataCompiler compiler = new ObjectDataCompiler();
+    List<Map<String, String>> ruleAttribute = new ArrayList<>();
+
     ruleAttribute.add(passDataToMap(rule.getReferenceId().toString(), rule.getRuleId().toString(),
-        typeValidation, schemasDrools, expression.toString(), rule.getThenCondition().get(0),
+        typeValidation, schemasDrools, rule.getWhenCondition(), rule.getThenCondition().get(0),
         rule.getThenCondition().get(1), ""));
 
     // We create the same text like in kiebase and with that part we check if the rule is correct

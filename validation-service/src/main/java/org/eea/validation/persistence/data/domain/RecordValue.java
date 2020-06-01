@@ -387,6 +387,96 @@ public class RecordValue {
   }
 
   /**
+   * Record string length equals.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthEquals(String fieldSchemaId, Number number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() == number.intValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length distinct.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthDistinct(String fieldSchemaId, Number number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() != number.intValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length greater than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthGreaterThan(String fieldSchemaId, Number number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() > number.intValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length less than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthLessThan(String fieldSchemaId, Number number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() < number.intValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length greater than or equals than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthGreaterThanOrEqualsThan(String fieldSchemaId, Number number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() >= number.intValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length less than or equals than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthLessThanOrEqualsThan(String fieldSchemaId, Number number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() <= number.intValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
    * Record string equals.
    *
    * @param fieldSchemaId the field schema id
