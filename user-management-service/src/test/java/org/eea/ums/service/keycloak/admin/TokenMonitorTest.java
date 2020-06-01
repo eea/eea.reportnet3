@@ -12,6 +12,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.RestClientException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TokenMonitorTest {
@@ -63,6 +64,34 @@ public class TokenMonitorTest {
     Assert.assertEquals(ReflectionTestUtils.getField(tokenMonitor, "refreshToken").toString(),
         "refreshToken");
     Mockito.verify(keycloakConnectorService, Mockito.times(0)).refreshToken(Mockito.anyString());
+  }
+
+  @Test
+  public void getTokenErrorOnKeycloak() {
+    TokenInfo tokenInfo = new TokenInfo();
+    tokenInfo.setAccessToken("accessToken");
+    tokenInfo.setRefreshToken("refreshToken2");
+    ReflectionTestUtils.setField(tokenMonitor, "adminUser", "adminUser");
+    ReflectionTestUtils.setField(tokenMonitor, "adminPass", "adminPass");
+    ReflectionTestUtils.setField(tokenMonitor, "refreshToken", "refreshToken");
+    ReflectionTestUtils.setField(tokenMonitor, "tokenExpirationTime", 300000l);
+
+    Mockito.doThrow(new RestClientException("Error"))
+        .when(keycloakConnectorService).refreshToken(Mockito.eq("refreshToken"));
+    Mockito.when(
+        keycloakConnectorService
+            .generateAdminToken(Mockito.eq("adminUser"), Mockito.eq("adminPass")))
+        .thenReturn(tokenInfo);
+
+    String result = tokenMonitor.getToken();
+    Assert.assertNotNull(result);
+    Assert.assertEquals("accessToken", result);
+    Assert.assertEquals(ReflectionTestUtils.getField(tokenMonitor, "refreshToken").toString(),
+        "refreshToken2");
+    Mockito.verify(keycloakConnectorService, Mockito.times(1))
+        .refreshToken(Mockito.eq("refreshToken"));
+    Mockito.verify(keycloakConnectorService, Mockito.times(1))
+        .generateAdminToken(Mockito.eq("adminUser"), Mockito.eq("adminPass"));
   }
 
 

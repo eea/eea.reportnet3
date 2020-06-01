@@ -1,6 +1,8 @@
 package org.eea.utils;
 
-/** The Class LiteralConstants. */
+/**
+ * The Class LiteralConstants.
+ */
 public final class LiteralConstants {
 
   /** The Constant DATA_REPORTING_TOPIC: {@value}. */
@@ -15,7 +17,10 @@ public final class LiteralConstants {
   /** The Constant DATASET_PREFIX: {@value}. */
   public static final String DATASET_PREFIX = "dataset_";
 
-  /** The Constant DATASET_FORMAT_NAME: {@value}. */
+  /** The Constant PK: {@value}. */
+  public static final String PK = "pk";
+
+  /** The Constant DATASET_FORMAT_NAME. */
   public static final String DATASET_FORMAT_NAME = "dataset_%s";
 
   /** The Constant SNAPSHOT_EXTENSION: {@value}. */
@@ -86,6 +91,7 @@ public final class LiteralConstants {
 
   /** The Constant SNAPSHOT_FILE_FIELD_SUFFIX: {@value}. */
   public static final String SNAPSHOT_FILE_FIELD_SUFFIX = "_table_FieldValue.snap";
+
 
   /**
    * Instantiates a new literal constants.

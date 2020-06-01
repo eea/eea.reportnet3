@@ -7,11 +7,13 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
@@ -60,30 +62,47 @@ public class DataSetControllerImplTest {
    * The dataset service.
    */
   @Mock
-  DatasetServiceImpl datasetService;
+  private DatasetServiceImpl datasetService;
 
-  /** The design dataset service. */
+  @Mock
+  private DatasetMetabaseService datasetMetabaseService;
+
+  /**
+   * The design dataset service.
+   */
   @Mock
   DesignDatasetServiceImpl designDatasetService;
 
-  /** The records. */
+  /**
+   * The records.
+   */
   List<RecordVO> records;
 
-  /** The record ids. */
+  /**
+   * The record ids.
+   */
   String recordId;
 
-  /** The update record helper. */
+  /**
+   * The update record helper.
+   */
   @Mock
   UpdateRecordHelper updateRecordHelper;
 
-  /** The file treatment helper. */
+  /**
+   * The file treatment helper.
+   */
   @Mock
   private FileTreatmentHelper fileTreatmentHelper;
 
-  /** The security context. */
+  /**
+   * The security context.
+   */
   SecurityContext securityContext;
 
-  /** The authentication. */
+  /**
+   * The authentication.
+   */
   Authentication authentication;
 
   /**
@@ -154,7 +173,7 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testLoadDataReadOnlyException() throws Exception {
     try {
-      Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
+      Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
           .thenReturn(DatasetTypeEnum.REPORTING);
       Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
           .thenReturn(true);
@@ -231,7 +250,7 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testGetDataTablesValuesExceptionEntry1() throws Exception {
     String fields = "field_1,fields_2,fields_3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     dataSetControllerImpl.getDataTablesValues(null, "mongoId", 1, 1, fields, errorfilter);
   }
 
@@ -245,7 +264,7 @@ public class DataSetControllerImplTest {
     List<Boolean> order = new ArrayList<>(Arrays.asList(new Boolean[2]));
     Collections.fill(order, Boolean.TRUE);
     String fields = "field_1,fields_2,fields_3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     dataSetControllerImpl.getDataTablesValues(1L, null, 1, 1, fields, errorfilter);
   }
 
@@ -284,7 +303,7 @@ public class DataSetControllerImplTest {
     when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any())).thenReturn(new TableVO());
     String fields = "field_1,fields_2,fields_3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields, errorfilter);
   }
 
@@ -300,7 +319,7 @@ public class DataSetControllerImplTest {
     List<Boolean> order = new ArrayList<>(Arrays.asList(new Boolean[2]));
     Collections.fill(order, Boolean.TRUE);
     String fields = "field_1,fields_2,fields_3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields, errorfilter);
 
     Mockito.verify(datasetService, times(1)).getTableValuesById(Mockito.any(), Mockito.any(),
@@ -443,7 +462,9 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.getPositionFromAnyObjectId("1L", null, null);
   }
 
-  /** The delete helper. */
+  /**
+   * The delete helper.
+   */
   @Mock
   private DeleteHelper deleteHelper;
 
@@ -477,7 +498,6 @@ public class DataSetControllerImplTest {
   }
 
 
-
   /**
    * Test delete import table read only exception.
    *
@@ -486,7 +506,7 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testDeleteImportTableReadOnlyException() throws Exception {
     try {
-      Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
+      Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
           .thenReturn(DatasetTypeEnum.REPORTING);
       Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
           .thenReturn(true);
@@ -508,7 +528,7 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testupdateRecordsNullEntry() throws Exception {
-    dataSetControllerImpl.updateRecords(null, new ArrayList<RecordVO>());
+    dataSetControllerImpl.updateRecords(null, new ArrayList<>());
   }
 
   /**
@@ -528,7 +548,7 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testupdateRecordsEmpty() throws Exception {
-    dataSetControllerImpl.updateRecords(1L, new ArrayList<RecordVO>());
+    dataSetControllerImpl.updateRecords(1L, new ArrayList<>());
   }
 
   /**
@@ -551,7 +571,7 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testUpdateRecordsReadOnlyException() throws Exception {
     try {
-      Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
+      Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
           .thenReturn(DatasetTypeEnum.REPORTING);
       Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
           .thenReturn(true);
@@ -576,7 +596,6 @@ public class DataSetControllerImplTest {
   }
 
 
-
   /**
    * Testdelete record success.
    *
@@ -597,7 +616,7 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testDeleteRecordReadOnlyException() throws Exception {
     try {
-      Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
+      Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
           .thenReturn(DatasetTypeEnum.REPORTING);
       Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
           .thenReturn(true);
@@ -628,7 +647,7 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testinsertRecordsNullEntry() throws Exception {
-    dataSetControllerImpl.insertRecords(null, "id", new ArrayList<RecordVO>());
+    dataSetControllerImpl.insertRecords(null, "id", new ArrayList<>());
   }
 
   /**
@@ -648,7 +667,7 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testinsertRecordsEmpty() throws Exception {
-    dataSetControllerImpl.insertRecords(1L, "id", new ArrayList<RecordVO>());
+    dataSetControllerImpl.insertRecords(1L, "id", new ArrayList<>());
   }
 
   /**
@@ -686,7 +705,7 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testinsertRecordsTableReadOnlyException() throws Exception {
     try {
-      Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
+      Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
           .thenReturn(DatasetTypeEnum.REPORTING);
       Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
           .thenReturn(true);
@@ -746,7 +765,6 @@ public class DataSetControllerImplTest {
   }
 
 
-
   /**
    * Testupdate field success.
    *
@@ -780,7 +798,7 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testUpdateFieldReadOnlyException() throws Exception {
     try {
-      Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
+      Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
           .thenReturn(DatasetTypeEnum.REPORTING);
       Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
           .thenReturn(true);
@@ -823,7 +841,8 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void getDatasetTypeTest() {
-    Mockito.when(datasetService.getDatasetType(Mockito.any())).thenReturn(DatasetTypeEnum.DESIGN);
+    Mockito.when(datasetMetabaseService.getDatasetType(Mockito.any()))
+        .thenReturn(DatasetTypeEnum.DESIGN);
     Assert.assertEquals(DatasetTypeEnum.DESIGN, dataSetControllerImpl.getDatasetType(1L));
   }
 
