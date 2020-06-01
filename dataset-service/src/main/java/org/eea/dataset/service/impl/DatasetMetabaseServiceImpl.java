@@ -699,7 +699,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @return the dataset type
    */
 
-  private DatasetTypeEnum getDatasetType(Long datasetId) {
+  @Override
+  public DatasetTypeEnum getDatasetType(Long datasetId) {
     DatasetTypeEnum type = null;
 
     if (designDatasetRepository.existsById(datasetId)) {
