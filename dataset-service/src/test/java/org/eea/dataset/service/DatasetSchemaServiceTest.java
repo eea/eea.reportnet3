@@ -493,7 +493,7 @@ public class DatasetSchemaServiceTest {
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
 
     Assert.assertEquals(DataType.NUMBER_DECIMAL,
-        dataSchemaServiceImpl.updateFieldSchema("<id>", fieldSchemaVO));
+        dataSchemaServiceImpl.updateFieldSchema(new ObjectId().toString(), fieldSchemaVO));
   }
 
   /**
@@ -512,7 +512,8 @@ public class DatasetSchemaServiceTest {
     Mockito.when(fieldSchemaVO.getName()).thenReturn(null);
     Mockito.when(schemasRepository.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
-    Assert.assertNull(dataSchemaServiceImpl.updateFieldSchema("<id>", fieldSchemaVO));
+    Assert.assertNull(
+        dataSchemaServiceImpl.updateFieldSchema(new ObjectId().toString(), fieldSchemaVO));
   }
 
   /**
@@ -540,7 +541,7 @@ public class DatasetSchemaServiceTest {
     Mockito.when(schemasRepository.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
     try {
-      dataSchemaServiceImpl.updateFieldSchema("<id>", fieldSchemaVO);
+      dataSchemaServiceImpl.updateFieldSchema(new ObjectId().toString(), fieldSchemaVO);
     } catch (EEAException e) {
       Assert.assertEquals(EEAErrorMessage.FIELD_NOT_FOUND, e.getMessage());
     }
