@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.enums.JavaType;
@@ -449,7 +448,7 @@ public class RuleExpressionVO {
   private boolean isDataTypeCompatibleString(Map<String, DataType> dataTypeMap,
       String superInputType, String string) {
 
-    if (string.equals("VALUE") || ObjectId.isValid(string)) {
+    if (string.equals("VALUE") || isValid(string)) {
       return superInputType.equals(dataTypeMap.get(string).getJavaType());
     }
 
@@ -477,5 +476,39 @@ public class RuleExpressionVO {
     }
 
     return branch.toString();
+  }
+
+  /**
+   * Checks if is valid objectId. We create that method to evaluate if the value is valid objectId
+   *
+   * @param hexString the hex string
+   * @return true, if is valid
+   */
+  public static boolean isValid(final String hexString) {
+    if (hexString == null) {
+      throw new IllegalArgumentException();
+    }
+
+    int len = hexString.length();
+    if (len != 24) {
+      return false;
+    }
+
+    for (int i = 0; i < len; i++) {
+      char c = hexString.charAt(i);
+      if (c >= '0' && c <= '9') {
+        continue;
+      }
+      if (c >= 'a' && c <= 'f') {
+        continue;
+      }
+      if (c >= 'A' && c <= 'F') {
+        continue;
+      }
+
+      return false;
+    }
+
+    return true;
   }
 }
