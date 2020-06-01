@@ -1423,8 +1423,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void createUniqueConstraintPK(String datasetSchemaId, FieldSchemaVO fieldSchemaVO) {
+    LOG.info("Creating Unique Constraint for field {}", fieldSchemaVO.getId());
     // if field is Pk we create a unique Constraint
-    if (fieldSchemaVO.getPk()) {
+    if (fieldSchemaVO.getPk() != null && fieldSchemaVO.getPk()) {
       // Get TableSchemaId
       DataSetSchema datasetSchema =
           schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
