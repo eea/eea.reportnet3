@@ -144,12 +144,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private ForeignRelationsRepository foreignRelationsRepository;
 
-  /**
-   * The dataset service.
-   */
-  @Autowired
-  @Qualifier("proxyDatasetService")
-  private DatasetService datasetService;
 
   /**
    * The Constant LOG.
@@ -213,7 +207,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     DataSetMetabaseVO metabaseVO = new DataSetMetabaseVO();
     if (datasetMetabase.isPresent()) {
       metabaseVO = dataSetMetabaseMapper.entityToClass(datasetMetabase.get());
-      metabaseVO.setDatasetTypeEnum(this.datasetService.getDatasetType(idDataset));
+      metabaseVO.setDatasetTypeEnum(getDatasetType(idDataset));
 
     }
     return metabaseVO;
@@ -257,13 +251,12 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    *
    * @return the statistics
    *
-   * @throws EEAException the EEA exception
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
    */
   @Override
   public StatisticsVO getStatistics(final Long datasetId)
-      throws EEAException, InstantiationException, IllegalAccessException {
+      throws InstantiationException, IllegalAccessException {
 
     List<Statistics> statistics = statisticsRepository.findStatisticsByIdDataset(datasetId);
     return processStatistics(statistics);
@@ -696,6 +689,28 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       idDestination = datasetsId.get(0);
     }
     return idDestination;
+  }
+
+  /**
+   * Gets the dataset type.
+   *
+   * @param datasetId the dataset id
+   *
+   * @return the dataset type
+   */
+
+  private DatasetTypeEnum getDatasetType(Long datasetId) {
+    DatasetTypeEnum type = null;
+
+    if (designDatasetRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.DESIGN;
+    } else if (reportingDatasetRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.REPORTING;
+    } else if (dataCollectionRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.COLLECTION;
+    }
+
+    return type;
   }
 
 

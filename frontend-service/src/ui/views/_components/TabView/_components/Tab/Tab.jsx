@@ -359,7 +359,7 @@ const Tab = ({
           ) : (
             <span className="p-tabview-title">{!isUndefined(titleHeader) ? titleHeader : header}</span>
           )}
-          {rightIcon && <span className={classNames('p-tabview-right-icon ', rightIcon)}></span>}
+          {rightIcon && !editingHeader && <span className={classNames('p-tabview-right-icon ', rightIcon)}></span>}
           {designMode && !hasPKReferenced ? (
             <div
               onClick={e => {
