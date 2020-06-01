@@ -28,6 +28,14 @@ const validationReducer = (state, { type, payload }) => {
         opener: null,
         level: 'field'
       };
+    case 'ON_OPEN_QC_CREATION_MODAL_FROM_ROW':
+      return {
+        ...state,
+        isVisible: true,
+        referenceId: payload.recordId,
+        opener: null,
+        level: 'row'
+      };
     case 'ON_OPENER_RESET':
       return {
         ...state,
@@ -96,6 +104,12 @@ export const ValidationProvider = ({ children }) => {
           dispatch({
             type: 'ON_OPEN_QC_CREATION_MODAL_FROM_FIELD',
             payload: { fieldId, tableSchemaId }
+          });
+        },
+        onOpenModalFromRow: recordId => {
+          dispatch({
+            type: 'ON_OPEN_QC_CREATION_MODAL_FROM_ROW',
+            payload: { recordId }
           });
         },
         onCloseModal: () => {
