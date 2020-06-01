@@ -596,6 +596,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         // Update UniqueConstraints
         if (fieldSchemaVO.getPk() != fieldSchema.get(LiteralConstants.PK)) {
           if (fieldSchemaVO.getPk()) {
+            if (null != fieldSchemaVO && null == fieldSchemaVO.getIdRecord()) {
+              fieldSchemaVO.setIdRecord(fieldSchema.get("idRecord").toString());
+            }
             createUniqueConstraintPK(datasetSchemaId, fieldSchemaVO);
           } else {
             deleteOnlyUniqueConstraintFromField(datasetSchemaId, fieldSchemaVO.getId());
