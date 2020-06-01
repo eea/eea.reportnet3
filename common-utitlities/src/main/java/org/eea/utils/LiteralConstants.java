@@ -17,6 +17,8 @@ public final class LiteralConstants {
   /** The Constant DATASET_PREFIX. */
   public static final String DATASET_PREFIX = "dataset_";
 
+  /** The Constant PK: {@value}. */
+  public static final String PK = "pk";
 
   /** The Constant DATASET_FORMAT_NAME. */
   public static final String DATASET_FORMAT_NAME = "dataset_%s";
@@ -89,6 +91,7 @@ public final class LiteralConstants {
 
   /** The Constant SNAPSHOT_FILE_FIELD_SUFFIX. */
   public static final String SNAPSHOT_FILE_FIELD_SUFFIX = "_table_FieldValue.snap";
+
 
 
   /**

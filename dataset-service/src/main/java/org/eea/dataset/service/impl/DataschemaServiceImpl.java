@@ -539,6 +539,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         fieldSchemaVO.setCodelistItems(codelistItems);
       }
 
+
       return schemasRepository
           .createFieldSchema(datasetSchemaId, fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO))
           .getModifiedCount() == 1 ? fieldSchemaVO.getId() : "";
@@ -589,6 +590,18 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
                   false);
             }
 
+          }
+        }
+
+        // Update UniqueConstraints
+        if (fieldSchemaVO.getPk() != fieldSchema.get(LiteralConstants.PK)) {
+          if (fieldSchemaVO.getPk()) {
+            if (null != fieldSchemaVO && null == fieldSchemaVO.getIdRecord()) {
+              fieldSchemaVO.setIdRecord(fieldSchema.get("idRecord").toString());
+            }
+            createUniqueConstraintPK(datasetSchemaId, fieldSchemaVO);
+          } else {
+            deleteOnlyUniqueConstraintFromField(datasetSchemaId, fieldSchemaVO.getId());
           }
         }
 
@@ -1317,6 +1330,25 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
+   * Delete only unique constraint from field.
+   *
+   * @param schemaId the schema id
+   * @param fieldSchemaId the field schema id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void deleteOnlyUniqueConstraintFromField(String schemaId, String fieldSchemaId)
+      throws EEAException {
+    List<UniqueConstraintVO> constraints = getUniqueConstraints(schemaId);
+    for (UniqueConstraintVO uniqueConstraintVO : constraints) {
+      if (uniqueConstraintVO.getFieldSchemaIds().size() == 1
+          && uniqueConstraintVO.getFieldSchemaIds().contains(fieldSchemaId)) {
+        deleteUniqueConstraint(uniqueConstraintVO.getUniqueId());
+      }
+    }
+  }
+
+  /**
    * Delete uniques constraint from dataset.
    *
    * @param datasetSchemaId the dataset schema id
@@ -1380,6 +1412,40 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           "Error finding the unique constraint from the catalogue. UniqueId: {} not found",
           uniqueId);
       throw new EEAException(String.format(EEAErrorMessage.UNIQUE_NOT_FOUND, uniqueId));
+    }
+  }
+
+  /**
+   * Creates the unique constraint PK.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   */
+  @Override
+  public void createUniqueConstraintPK(String datasetSchemaId, FieldSchemaVO fieldSchemaVO) {
+    LOG.info("Creating Unique Constraint for field {}", fieldSchemaVO.getId());
+    // if field is Pk we create a unique Constraint
+    if (fieldSchemaVO.getPk() != null && fieldSchemaVO.getPk()) {
+      // Get TableSchemaId
+      DataSetSchema datasetSchema =
+          schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
+      ObjectId idTableSchema = null;
+      for (TableSchema table : datasetSchema.getTableSchemas()) {
+        if (table.getRecordSchema().getIdRecordSchema().toString()
+            .equals(fieldSchemaVO.getIdRecord())) {
+          idTableSchema = table.getIdTableSchema();
+        }
+      }
+      // Create Unique Constraint
+      if (idTableSchema != null) {
+        UniqueConstraintVO unique = new UniqueConstraintVO();
+        ArrayList<String> fieldSchemaIds = new ArrayList<>();
+        fieldSchemaIds.add(fieldSchemaVO.getId());
+        unique.setDatasetSchemaId(datasetSchemaId);
+        unique.setTableSchemaId(idTableSchema.toString());
+        unique.setFieldSchemaIds(fieldSchemaIds);
+        createUniqueConstraint(unique);
+      }
     }
   }
 }
