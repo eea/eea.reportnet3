@@ -387,6 +387,186 @@ public class RecordValue {
   }
 
   /**
+   * Record string length equals.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthEquals(String fieldSchemaId, Number number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() == number.intValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length equals.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthEquals(String fieldSchemaId, String number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() != Integer.valueOf(number);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length distinct.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthDistinct(String fieldSchemaId, Number number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() != number.intValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length distinct.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthDistinct(String fieldSchemaId, String number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() != Integer.valueOf(number);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length greater than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthGreaterThan(String fieldSchemaId, Number number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() > number.intValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length greater than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthGreaterThan(String fieldSchemaId, String number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() > Integer.valueOf(number);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length less than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthLessThan(String fieldSchemaId, Number number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() < number.intValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length less than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthLessThan(String fieldSchemaId, String number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() < Integer.valueOf(number);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length greater than or equals than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthGreaterThanOrEqualsThan(String fieldSchemaId, Number number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() >= number.intValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length greater than or equals than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthGreaterThanOrEqualsThan(String fieldSchemaId, String number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() >= Integer.valueOf(number);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length less than or equals than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthLessThanOrEqualsThan(String fieldSchemaId, Number number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() <= number.intValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length less than or equals than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthLessThanOrEqualsThan(String fieldSchemaId, String number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() <= Integer.valueOf(number);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
    * Record string equals.
    *
    * @param fieldSchemaId the field schema id
@@ -676,6 +856,110 @@ public class RecordValue {
   }
 
   /**
+   * Record day equals record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordDayEqualsRecordNumber(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(fieldsMap.get(fieldSchemaId2));
+      return date.getDayOfMonth() == number;
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record day distinct record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordDayDistinctRecordNumber(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(fieldsMap.get(fieldSchemaId2));
+      return date.getDayOfMonth() != number;
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record day greater than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordDayGreaterThanRecordNumber(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(fieldsMap.get(fieldSchemaId2));
+      return date.getDayOfMonth() > number;
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record day less than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordDayLessThanRecordNumber(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(fieldsMap.get(fieldSchemaId2));
+      return date.getDayOfMonth() < number;
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record day greater than or equals than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordDayGreaterThanOrEqualsThanRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(fieldsMap.get(fieldSchemaId2));
+      return date.getDayOfMonth() >= number;
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record day less than or equals than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordDayLessThanOrEqualsThanRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(fieldsMap.get(fieldSchemaId2));
+      return date.getDayOfMonth() <= number;
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
    * Record month equals.
    *
    * @param fieldSchemaId the field schema id
@@ -876,6 +1160,110 @@ public class RecordValue {
   }
 
   /**
+   * Record month equals record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordMonthEqualsRecordNumber(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(fieldsMap.get(fieldSchemaId2));
+      return date.getMonthValue() == number;
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record month distinct record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordMonthDistinctRecordNumber(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(fieldsMap.get(fieldSchemaId2));
+      return date.getMonthValue() != number;
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record month greater than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordMonthGreaterThanRecordNumber(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(fieldsMap.get(fieldSchemaId2));
+      return date.getMonthValue() > number;
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record month less than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordMonthLessThanRecordNumber(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(fieldsMap.get(fieldSchemaId2));
+      return date.getMonthValue() < number;
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record month greater than or equals than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordMonthGreaterThanOrEqualsThanRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(fieldsMap.get(fieldSchemaId2));
+      return date.getMonthValue() >= number;
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record month less than or equals than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordMonthLessThanOrEqualsThanRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(fieldsMap.get(fieldSchemaId2));
+      return date.getMonthValue() <= number;
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
    * Record year equals.
    *
    * @param fieldSchemaId the field schema id
@@ -972,13 +1360,13 @@ public class RecordValue {
   }
 
   /**
-   * Record year equals.
+   * Record year equals record.
    *
    * @param fieldSchemaId1 the field schema id 1
    * @param fieldSchemaId2 the field schema id 2
    * @return true, if successful
    */
-  public boolean recordYearEquals(String fieldSchemaId1, String fieldSchemaId2) {
+  public boolean recordYearEqualsRecord(String fieldSchemaId1, String fieldSchemaId2) {
     try {
       LocalDate date1 = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(fieldsMap.get(fieldSchemaId2), DATE_FORMAT);
@@ -1070,6 +1458,110 @@ public class RecordValue {
       LocalDate date1 = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(fieldsMap.get(fieldSchemaId2), DATE_FORMAT);
       return date1.getYear() <= date2.getYear();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record year equals record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordYearEqualsRecordNumber(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(fieldsMap.get(fieldSchemaId2));
+      return date.getYear() == number;
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record year distinct record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordYearDistinctRecordNumber(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(fieldsMap.get(fieldSchemaId2));
+      return date.getYear() != number;
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record year greater than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordYearGreaterThanRecordNumber(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(fieldsMap.get(fieldSchemaId2));
+      return date.getYear() > number;
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record year less than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordYearLessThanRecordNumber(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(fieldsMap.get(fieldSchemaId2));
+      return date.getYear() < number;
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record year greater than or equals than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordYearGreaterThanOrEqualsThanRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(fieldsMap.get(fieldSchemaId2));
+      return date.getYear() >= number;
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record year less than or equals than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordYearLessThanOrEqualsThanRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(fieldsMap.get(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(fieldsMap.get(fieldSchemaId2));
+      return date.getYear() <= number;
     } catch (Exception e) {
       return true;
     }

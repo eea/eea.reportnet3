@@ -127,4 +127,24 @@ public interface ExtendedRulesRepository {
    * @return the active and verified rules
    */
   RulesSchema getActiveAndVerifiedRules(ObjectId datasetSchemaId);
+
+  /**
+   * Delete by unique constraint id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param uniqueConstraintId the unique constraint id
+   * @return true, if successful
+   */
+  boolean deleteByUniqueConstraintId(ObjectId datasetSchemaId, ObjectId uniqueConstraintId);
+
+
+
+  /**
+   * Delete rule high level like.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaLike the field schema like
+   * @return true, if successful
+   */
+  boolean deleteRuleHighLevelLike(ObjectId datasetSchemaId, String fieldSchemaLike);
 }

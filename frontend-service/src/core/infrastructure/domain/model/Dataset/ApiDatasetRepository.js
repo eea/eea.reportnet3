@@ -169,14 +169,20 @@ const errorStatisticsById = async (datasetId, tableSchemaNames) => {
       tableSchemaName: datasetTableDTO.nameTableSchema
     });
   });
-  const tableBarStatisticValues = tableStatisticValuesWithErrors(tableStatisticValues);
+
+  //In design datasets the statistics are not generated until validation is executed, so we have to do a sanity check for those cases
+  const tableBarStatisticValues = !isEmpty(tableStatisticValues)
+    ? tableStatisticValuesWithErrors(tableStatisticValues)
+    : [];
   levelErrors = [...new Set(CoreUtils.orderLevelErrors(allDatasetLevelErrors.flat()))];
   dataset.levelErrorTypes = levelErrors;
 
-  let transposedValues = CoreUtils.transposeMatrix(tableStatisticValues);
+  let transposedValues = !isEmpty(tableStatisticValues) ? CoreUtils.transposeMatrix(tableStatisticValues) : [];
 
-  dataset.tableStatisticValues = CoreUtils.transposeMatrix(tableBarStatisticValues);
-  dataset.tableStatisticPercentages = CoreUtils.getPercentage(transposedValues);
+  dataset.tableStatisticValues = !isEmpty(tableStatisticValues)
+    ? CoreUtils.transposeMatrix(tableBarStatisticValues)
+    : [];
+  dataset.tableStatisticPercentages = !isEmpty(tableStatisticValues) ? CoreUtils.getPercentage(transposedValues) : [];
 
   dataset.tables = datasetTables;
   return dataset;
@@ -469,6 +475,7 @@ const updateRecordFieldDesign = async (datasetId, record) => {
   datasetTableFieldDesign.type = record.type;
   datasetTableFieldDesign.description = record.description;
   datasetTableFieldDesign.codelistItems = record.codelistItems;
+  datasetTableFieldDesign.idRecord = record.recordId;
   datasetTableFieldDesign.referencedField = record.referencedField;
   datasetTableFieldDesign.required = record.required;
   datasetTableFieldDesign.pk = record.pk;

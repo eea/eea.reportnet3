@@ -154,6 +154,13 @@ public class RulesControllerImpl implements RulesController {
         referenceFieldSchemaPKId, datasetSchemaId);
   }
 
+  /**
+   * Creates the new rule.
+   *
+   * @param datasetId the dataset id
+   * @param ruleVO the rule VO
+   * @return the response entity
+   */
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
@@ -307,5 +314,47 @@ public class RulesControllerImpl implements RulesController {
   public void deleteRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("referenceId") String referenceId) {
     rulesService.deleteRuleRequired(datasetSchemaId, referenceId);
+  }
+
+  /**
+   * Creates the unique constraint.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @param uniqueId the unique id
+   */
+  @Override
+  @PostMapping("/private/createUniqueConstraintRule")
+  public void createUniqueConstraintRule(String datasetSchemaId, String tableSchemaId,
+      String uniqueId) {
+    rulesService.createUniqueConstraint(datasetSchemaId, tableSchemaId, uniqueId);
+  }
+
+  /**
+   * Delete unique constraint.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param uniqueId the unique id
+   */
+  @Override
+  @DeleteMapping("/private/deleteUniqueConstraintRule")
+  public void deleteUniqueConstraintRule(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("uniqueId") String uniqueId) {
+
+    rulesService.deleteUniqueConstraint(datasetSchemaId, uniqueId);
+  }
+
+
+  /**
+   * Delete rule high level like.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   */
+  @Override
+  @DeleteMapping("/private/deleteRuleHighLevelLike")
+  public void deleteRuleHighLevelLike(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("fieldSchemaId") String fieldSchemaId) {
+    rulesService.deleteRuleHighLevelLike(datasetSchemaId, fieldSchemaId);
   }
 }

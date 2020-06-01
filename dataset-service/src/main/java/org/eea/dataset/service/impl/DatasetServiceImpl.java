@@ -97,124 +97,186 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 
-/** The type Dataset service. */
+/**
+ * The type Dataset service.
+ */
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
 
-  /** The Constant ROOT. */
+  /**
+   * The Constant ROOT.
+   */
   private static final String ROOT = "root";
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The field max length. */
+  /**
+   * The field max length.
+   */
   @Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength;
 
-  /** The dataset repository. */
+  /**
+   * The dataset repository.
+   */
   @Autowired
   private DatasetRepository datasetRepository;
 
-  /** The data set metabase repository. */
+  /**
+   * The data set metabase repository.
+   */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  /** The partition data set metabase repository. */
+  /**
+   * The partition data set metabase repository.
+   */
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
-  /** The design dataset repository. */
+  /**
+   * The design dataset repository.
+   */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
 
-  /** The reporting dataset repository. */
+  /**
+   * The reporting dataset repository.
+   */
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
 
-  /** The data collection repository. */
+  /**
+   * The data collection repository.
+   */
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
 
-  /** The table repository. */
+  /**
+   * The table repository.
+   */
   @Autowired
   private TableRepository tableRepository;
 
-  /** The record repository. */
+  /**
+   * The record repository.
+   */
   @Autowired
   private RecordRepository recordRepository;
 
-  /** The record validation repository. */
+  /**
+   * The record validation repository.
+   */
   @Autowired
   private RecordValidationRepository recordValidationRepository;
 
-  /** The field repository. */
+  /**
+   * The field repository.
+   */
   @Autowired
   private FieldRepository fieldRepository;
 
-  /** The field validation repository. */
+  /**
+   * The field validation repository.
+   */
   @Autowired
   private FieldValidationRepository fieldValidationRepository;
 
-  /** The statistics repository. */
+  /**
+   * The statistics repository.
+   */
   @Autowired
   private StatisticsRepository statisticsRepository;
 
-  /** The schemas repository. */
+  /**
+   * The schemas repository.
+   */
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /** The data set mapper. */
+  /**
+   * The data set mapper.
+   */
   @Autowired
   private DataSetMapper dataSetMapper;
 
-  /** The record mapper. */
+  /**
+   * The record mapper.
+   */
   @Autowired
   private RecordMapper recordMapper;
 
-  /** The parse common. */
+  /**
+   * The parse common.
+   */
   @Autowired
   private FileCommonUtils fileCommon;
 
-  /** The file parser factory. */
+  /**
+   * The file parser factory.
+   */
   @Autowired
   private IFileParserFactory fileParserFactory;
 
-  /** The file export factory. */
+  /**
+   * The file export factory.
+   */
   @Autowired
   private IFileExportFactory fileExportFactory;
 
-  /** The record no validation. */
+  /**
+   * The record no validation.
+   */
   @Autowired
   private RecordNoValidationMapper recordNoValidationMapper;
 
-  /** The field validation mapper. */
+  /**
+   * The field validation mapper.
+   */
   @Autowired
   private FieldValidationMapper fieldValidationMapper;
 
-  /** The record validation mapper. */
+  /**
+   * The record validation mapper.
+   */
   @Autowired
   private RecordValidationMapper recordValidationMapper;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /** The representative controller zuul. */
+  /**
+   * The representative controller zuul.
+   */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /** The field no validation mapper. */
+  /**
+   * The field no validation mapper.
+   */
   @Autowired
   private FieldNoValidationMapper fieldNoValidationMapper;
 
-  /** The lock service. */
+  /**
+   * The lock service.
+   */
   @Autowired
   private LockService lockService;
 
@@ -1521,32 +1583,14 @@ public class DatasetServiceImpl implements DatasetService {
     return datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
   }
 
-  /**
-   * Gets the dataset type.
-   *
-   * @param datasetId the dataset id
-   * @return the dataset type
-   */
-  @Override
-  public DatasetTypeEnum getDatasetType(Long datasetId) {
-    DatasetTypeEnum type = null;
-
-    if (designDatasetRepository.existsById(datasetId)) {
-      type = DatasetTypeEnum.DESIGN;
-    } else if (reportingDatasetRepository.existsById(datasetId)) {
-      type = DatasetTypeEnum.REPORTING;
-    } else if (dataCollectionRepository.existsById(datasetId)) {
-      type = DatasetTypeEnum.COLLECTION;
-    }
-
-    return type;
-  }
 
   /**
    * Etl export dataset.
    *
    * @param datasetId the dataset id
+   *
    * @return the ETL dataset VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1614,6 +1658,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param etlDatasetVO the etl dataset VO
    * @param providerId the provider id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1758,10 +1803,11 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the table read only. Receives by parameter the datasetId, the objectId and the type
    * (table, record, field). In example, if receives an objectId that is a Record (that's a record
    * schema id), find the property readOnly of the table that belongs to the record
-   * 
+   *
    * @param datasetId the dataset id
    * @param objectId the object id
    * @param type the type
+   *
    * @return the table read only
    */
   @Override

@@ -15,22 +15,29 @@ import { DataViewer } from 'ui/views/_components/DataViewer';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldDesigner } from './_components/FieldDesigner';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DatasetService } from 'core/services/Dataset';
+
+import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 
 export const FieldsDesigner = ({
   datasetId,
   datasetSchemas,
+  isPreviewModeOn,
+  manageDialogs,
+  manageUniqueConstraint,
   onChangeFields,
   onChangeTableProperties,
   onLoadTableData,
-  isPreviewModeOn,
   table
 }) => {
+  const validationContext = useContext(ValidationContext);
+  const resources = useContext(ResourcesContext);
+
   const [toPrefill, setToPrefill] = useState(false);
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState([]);
@@ -44,8 +51,6 @@ export const FieldsDesigner = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
   const [tableDescriptionValue, setTableDescriptionValue] = useState('');
-
-  const resources = useContext(ResourcesContext);
 
   useEffect(() => {
     if (!isUndefined(table) && !isNil(table.records) && !isNull(table.records[0].fields)) {
@@ -464,6 +469,27 @@ export const FieldsDesigner = ({
           // style={{ transition: '0.5s' }}
           value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : ''}
         />
+        <div className={styles.constraintsButtons}>
+          <Button
+            className={`p-button-secondary p-button-animated-blink`}
+            icon={'key'}
+            label={resources.messages['addUniqueConstraint']}
+            onClick={() => {
+              manageDialogs('isManageUniqueConstraintDialogVisible', true);
+              manageUniqueConstraint({
+                isTableCreationMode: true,
+                tableSchemaId: table.tableSchemaId,
+                tableSchemaName: table.tableSchemaName
+              });
+            }}
+          />
+          <Button
+            className="p-button-secondary p-button-animated-blink"
+            icon={'horizontalSliders'}
+            label={resources.messages['addRowConstraint']}
+            onClick={() => validationContext.onOpenModalFromRow(table.records[0].recordSchemaId)}
+          />
+        </div>
         <div className={styles.switchDiv}>
           <div>
             <span className={styles.switchTextInput}>{resources.messages['readOnlyTable']}</span>

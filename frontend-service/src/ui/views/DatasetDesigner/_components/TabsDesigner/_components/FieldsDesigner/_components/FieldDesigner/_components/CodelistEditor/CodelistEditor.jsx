@@ -51,12 +51,16 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
     return (
       <div onPaste={onPasteChips}>
         <div className={styles.inputTitleWrapper}>
-          <span>
+          {/* <span>
             {type.toUpperCase() === 'SINGLE SELECT'
               ? resources.messages['codelistEditorItems']
               : resources.messages['multiselectCodelists']}
-          </span>
-          <span className={styles.subIndex}>{resources.messages['codelistEditorItemsMessage']}</span>
+          </span> */}
+          <span
+            dangerouslySetInnerHTML={{
+              __html: resources.messages['codelistEditorItemsMessage']
+            }}></span>
+          {/* <span>{resources.messages['codelistEditorItemsMessage']}</span> */}
         </div>
         <Chips
           checkForDuplicates={true}

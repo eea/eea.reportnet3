@@ -11,10 +11,12 @@ import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MainLayout } from 'ui/views/_components/Layout';
+import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
@@ -56,6 +58,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const validationContext = useContext(ValidationContext);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
+    dashDialogVisible: false,
     dataflowName: '',
     datasetDescription: '',
     datasetHasData: false,
@@ -66,12 +69,23 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     hasWritePermissions: false,
     initialDatasetDescription: '',
     isLoading: true,
+    isManageUniqueConstraintDialogVisible: false,
     isPreviewModeOn: DatasetDesignerUtils.getUrlParamValue('design'),
+    isUniqueConstraintsListDialogVisible: false,
+    levelErrorTypes: [],
+    manageUniqueConstraintData: {
+      fieldData: [],
+      isTableCreationMode: false,
+      tableSchemaId: null,
+      tableSchemaName: '',
+      uniqueId: null
+    },
     metaData: {},
-    uniqueConstraintListDialogVisible: false,
+    refresh: false,
+    tableSchemaNames: [],
+    uniqueConstraintsList: [],
     validateDialogVisible: false,
-    validationListDialogVisible: false,
-    refresh: false
+    validationListDialogVisible: false
   });
 
   const {
@@ -169,11 +183,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
+  const getUniqueConstraintsList = data => designerDispatch({ type: 'GET_UNIQUES', payload: { data } });
+
   const isLoading = value => designerDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const manageDialogs = (dialog, value, secondDialog, secondValue) => {
     designerDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value, secondDialog, secondValue } });
   };
+
+  const manageUniqueConstraint = data => designerDispatch({ type: 'MANAGE_UNIQUE_CONSTRAINT_DATA', payload: { data } });
 
   const onBlurDescription = description => {
     if (description !== designerState.initialDatasetDescription) {
@@ -253,14 +271,21 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onLoadSchema = () => {
     try {
+      isLoading(true);
       const getDatasetSchemaId = async () => {
         const dataset = await DatasetService.schemaById(datasetId);
+        const tableSchemaNamesList = [];
+        dataset.tables.forEach(table => tableSchemaNamesList.push(table.tableSchemaName));
+
+        isLoading(false);
         designerDispatch({
           type: 'GET_DATASET_DATA',
           payload: {
             description: dataset.datasetSchemaDescription,
+            levelErrorTypes: dataset.levelErrorTypes,
             schemaId: dataset.datasetSchemaId,
-            tables: dataset.tables
+            tables: dataset.tables,
+            tableSchemaNames: tableSchemaNamesList
           }
         });
       };
@@ -295,9 +320,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       <Button
         className="p-button-primary p-button-animated-blink"
         icon={'plus'}
-        label={resources.messages['create']}
+        label={resources.messages['createRowValidationBtn']}
         onClick={() => {
-          validationContext.onOpenModalFronOpener('validationsListDialog');
+          validationContext.onOpenModalFromOpener('row', 'validationsListDialog');
+          onHideValidationsDialog();
+        }}
+      />
+      <Button
+        className="p-button-primary p-button-animated-blink"
+        icon={'plus'}
+        label={resources.messages['createFieldValidationBtn']}
+        onClick={() => {
+          validationContext.onOpenModalFromOpener('field', 'validationsListDialog');
           onHideValidationsDialog();
         }}
       />
@@ -328,12 +362,39 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const renderUniqueConstraintsDialog = () => (
     <Dialog
+      footer={renderUniqueConstraintsFooter}
       header={resources.messages['uniqueConstraints']}
-      onHide={() => manageDialogs('uniqueConstraintListDialogVisible', false)}
-      style={{ width: '90%' }}
-      visible={designerState.uniqueConstraintListDialogVisible}>
-      <UniqueConstraints datasetSchemaId={designerState.datasetSchemaId} />
+      onHide={() => manageDialogs('isUniqueConstraintsListDialogVisible', false)}
+      style={{ width: '70%' }}
+      visible={designerState.isUniqueConstraintsListDialogVisible}>
+      <UniqueConstraints
+        designerState={designerState}
+        getManageUniqueConstraint={manageUniqueConstraint}
+        getUniques={getUniqueConstraintsList}
+        manageDialogs={manageDialogs}
+      />
     </Dialog>
+  );
+
+  const renderUniqueConstraintsFooter = (
+    <Fragment>
+      <div className="p-toolbar-group-left">
+        <Button
+          className="p-button-secondary p-button-animated-blink"
+          icon={'plus'}
+          label={resources.messages['addUniqueConstraint']}
+          onClick={() =>
+            manageDialogs('isUniqueConstraintsListDialogVisible', false, 'isManageUniqueConstraintDialogVisible', true)
+          }
+        />
+      </div>
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => manageDialogs('isUniqueConstraintsListDialogVisible', false)}
+      />
+    </Fragment>
   );
 
   const validationsListDialog = () => {
@@ -420,26 +481,26 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
                 disabled={false}
-                icon={'list'}
+                icon={'horizontalSliders'}
                 iconClasses={null}
                 label={resources.messages['qcRules']}
                 onClick={() => manageDialogs('validationListDialogVisible', true)}
                 ownButtonClasses={null}
               />
 
-              {/* <Button
+              <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-                icon={'list'}
+                icon={'key'}
                 label={resources.messages['uniqueConstraints']}
-                onClick={() => manageDialogs('uniqueConstraintListDialogVisible', true)}
-              /> */}
+                onClick={() => manageDialogs('isUniqueConstraintsListDialogVisible', true)}
+              />
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent`}
-                disabled={true}
+                disabled={!designerState.datasetHasData}
                 icon={'dashboard'}
                 label={resources.messages['dashboards']}
-                onClick={() => null}
+                onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: true })}
               />
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
@@ -465,6 +526,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           editable={true}
           history={history}
           isPreviewModeOn={designerState.isPreviewModeOn}
+          manageDialogs={manageDialogs}
+          manageUniqueConstraint={manageUniqueConstraint}
           onChangeReference={onChangeReference}
           onLoadTableData={onLoadTableData}
           onUpdateTable={onUpdateTable}
@@ -478,6 +541,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         {validationsListDialog()}
         {renderUniqueConstraintsDialog()}
 
+        <ManageUniqueConstraint
+          designerState={designerState}
+          manageDialogs={manageDialogs}
+          resetUniques={manageUniqueConstraint}
+        />
+
         <ConfirmDialog
           header={resources.messages['validateDataset']}
           labelCancel={resources.messages['no']}
@@ -488,6 +557,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           visible={designerState.validateDialogVisible}>
           {resources.messages['validateDatasetConfirm']}
         </ConfirmDialog>
+        <Dialog
+          dismissableMask={true}
+          header={resources.messages['titleDashboard']}
+          onHide={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
+          style={{ width: '70vw' }}
+          visible={designerState.dashDialogVisible}>
+          <Dashboard
+            refresh={designerState.dashDialogVisible}
+            levelErrorTypes={designerState.levelErrorTypes}
+            tableSchemaNames={designerState.tableSchemaNames}
+          />
+        </Dialog>
       </div>
     </SnapshotContext.Provider>
   );

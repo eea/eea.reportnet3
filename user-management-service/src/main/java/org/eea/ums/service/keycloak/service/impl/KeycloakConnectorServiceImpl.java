@@ -50,71 +50,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
   /**
-   * The realm name.
+   * The Constant LOG_ERROR.
    */
-  @Value("${eea.keycloak.realmName}")
-  private String realmName;
-
-  /**
-   * The secret.
-   */
-  @Value("${eea.keycloak.secret}")
-  private String secret;
-
-  /**
-   * The client id.
-   */
-  @Value("${eea.keycloak.clientId}")
-  private String clientId;
-
-  /**
-   * The keycloak host.
-   */
-  @Value("${eea.keycloak.host}")
-  private String keycloakHost;
-
-  /**
-   * The keycloak scheme.
-   */
-  @Value("${eea.keycloak.scheme}")
-  private String keycloakScheme;
-
-  /**
-   * The redirect uri.
-   */
-  @Value("${eea.keycloak.redirect_uri}")
-  private String redirectUri;
-
-
-  /**
-   * The admin user.
-   */
-  @Value("${eea.keycloak.admin.user}")
-  private String adminUser;
-
-  /**
-   * The admin pass.
-   */
-  @Value("${eea.keycloak.admin.password}")
-  private String adminPass;
-
-
-  /**
-   * The internal client id.
-   */
-  private String internalClientId;
-
-  /**
-   * The resource types.
-   */
-  private Map<String, String> resourceTypes;
-
-  /**
-   * The rest template.
-   */
-  @Autowired
-  private RestTemplate restTemplate;
-
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
   /**
    * The Constant GENERATE_TOKEN_URL.
    */
@@ -238,10 +176,78 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    */
   private static final String USER_ROLES_URL =
       "/auth/admin/realms/{realm}/users/{userId}/role-mappings/realm/composite";
+
   /**
-   * The Constant LOG_ERROR.
+   * The realm name.
    */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+  @Value("${eea.keycloak.realmName}")
+  private String realmName;
+
+  /**
+   * The secret.
+   */
+  @Value("${eea.keycloak.secret}")
+  private String secret;
+
+  /**
+   * The client id.
+   */
+  @Value("${eea.keycloak.clientId}")
+  private String clientId;
+
+  /**
+   * The keycloak host.
+   */
+  @Value("${eea.keycloak.host}")
+  private String keycloakHost;
+
+  /**
+   * The keycloak scheme.
+   */
+  @Value("${eea.keycloak.scheme}")
+  private String keycloakScheme;
+
+  /**
+   * The redirect uri.
+   */
+  @Value("${eea.keycloak.redirect_uri}")
+  private String redirectUri;
+
+
+  /**
+   * The admin user.
+   */
+  @Value("${eea.keycloak.admin.user}")
+  private String adminUser;
+
+  /**
+   * The admin pass.
+   */
+  @Value("${eea.keycloak.admin.password}")
+  private String adminPass;
+
+
+  /**
+   * The internal client id.
+   */
+  private String internalClientId;
+
+  /**
+   * The resource types.
+   */
+  private Map<String, String> resourceTypes;
+
+  /**
+   * The rest template.
+   */
+  @Autowired
+  private RestTemplate restTemplate;
+
+  /**
+   * the token monitor
+   */
+  @Autowired
+  private TokenMonitor tokenMonitor;
 
 
   /**
@@ -652,7 +658,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-        .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+            .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 
@@ -713,7 +719,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-        .path(ADD_ROLE_TO_USER).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+            .path(ADD_ROLE_TO_USER).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 
@@ -767,6 +773,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
       LOG_ERROR.error(
           "Error retrieving token from Keycloak host {} due to reason {} with following values {}",
           keycloakHost, e.getMessage(), map, e);
+      throw e;
     }
 
     return responseBody;
@@ -889,7 +896,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   private <T> HttpEntity<T> createHttpRequest(T body, Map<String, String> uriParams) {
     Map<String, String> headerInfo = new HashMap<>();
     headerInfo.put(LiteralConstants.AUTHORIZATION_HEADER,
-        LiteralConstants.BEARER_TOKEN + TokenMonitor.getToken());
+        LiteralConstants.BEARER_TOKEN + tokenMonitor.getToken());
 
     HttpHeaders headers = createBasicHeaders(headerInfo);
 
@@ -909,7 +916,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   private <T> HttpEntity<T> createHttpRequestPOST(T body, Map<String, String> uriParams) {
     Map<String, String> headerInfo = new HashMap<>();
     headerInfo.put(LiteralConstants.AUTHORIZATION_HEADER,
-        LiteralConstants.BEARER_TOKEN + TokenMonitor.getToken());
+        LiteralConstants.BEARER_TOKEN + tokenMonitor.getToken());
     headerInfo.put("Content-Type", "application/json");
     HttpHeaders headers = createBasicHeaders(headerInfo);
 

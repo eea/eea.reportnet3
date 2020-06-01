@@ -121,8 +121,8 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   @Override
   public boolean existsRuleRequired(ObjectId datasetSchemaId, ObjectId referenceId) {
     Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId))
-        .addCriteria(new Criteria("rules.$.referenceId").is(referenceId))
-        .addCriteria(new Criteria("rules.$.whenCondition").is("isBlank(value)"));
+        .addCriteria(Criteria.where(LiteralConstants.RULES).elemMatch(Criteria.where("referenceId")
+            .is(referenceId).and("whenCondition").is("isBlank(value)")));
     return mongoTemplate.count(query, RulesSchema.class) == 1;
   }
 
@@ -283,5 +283,36 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
         RulesSchema.class, RulesSchema.class).getMappedResults();
 
     return result.isEmpty() ? null : result.get(0);
+  }
+
+  /**
+   * Delete by unique constraint id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param uniqueConstraintId the unique constraint id
+   * @return true, if successful
+   */
+  @Override
+  public boolean deleteByUniqueConstraintId(ObjectId datasetSchemaId, ObjectId uniqueConstraintId) {
+    Document pullCriteria = new Document("uniqueConstraintId", uniqueConstraintId);
+    Update update = new Update().pull("rules", pullCriteria);
+    Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId));
+    return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
+  }
+
+  /**
+   * Delete rule high level like.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaLike the field schema like
+   * @return true, if successful
+   */
+  @Override
+  public boolean deleteRuleHighLevelLike(ObjectId datasetSchemaId, String fieldSchemaLike) {
+    Document pullCriteria =
+        new Document("whenCondition", java.util.regex.Pattern.compile(fieldSchemaLike));
+    Update update = new Update().pull(LiteralConstants.RULES, pullCriteria);
+    Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId));
+    return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
   }
 }

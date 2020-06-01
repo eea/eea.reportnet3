@@ -9,6 +9,7 @@ import uniq from 'lodash/uniq';
 import styles from './Dataflow.module.scss';
 
 import { config } from 'conf';
+import { DataflowHelpConfig } from 'conf/help/dataflow';
 import { routes } from 'ui/routes';
 import DataflowConf from 'conf/dataflow.config.json';
 
@@ -35,14 +36,12 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-import { dataflowDataReducer } from './_functions/dataflowDataReducer';
+import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';
 
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
-import { useFilterHelpSteps } from './_functions/Hooks/useFilterHelpSteps';
-import { useHelpSteps } from 'ui/views/Dataflow/_functions/Hooks/useHelpSteps';
 
 const Dataflow = withRouter(({ history, match }) => {
   const {
@@ -92,7 +91,17 @@ const Dataflow = withRouter(({ history, match }) => {
     if (!isNil(user.contextRoles)) onLoadPermission();
   }, [user]);
 
-  useHelpSteps(useFilterHelpSteps, leftSideBarContext, dataflowState);
+  useEffect(() => {
+    leftSideBarContext.addHelpSteps(DataflowHelpConfig, 'dataflowHelp');
+  }, [
+    dataflowState.data,
+    dataflowState.designDatasetSchemas,
+    dataflowState.formHasRepresentatives,
+    dataflowState.isCustodian,
+    dataflowState.isDataSchemaCorrect,
+    dataflowState.status,
+    dataflowState.id
+  ]);
 
   //Bread Crumbs settings
   useEffect(() => {

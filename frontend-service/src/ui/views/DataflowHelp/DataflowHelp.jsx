@@ -7,6 +7,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import isUndefined from 'lodash/isUndefined';
 import sortBy from 'lodash/sortBy';
 
+import { DataflowHelpHelpConfig } from 'conf/help/dataflowHelp';
 import { config } from 'conf';
 import { routes } from 'ui/routes';
 
@@ -53,11 +54,11 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [sortFieldDocuments, setSortFieldDocuments] = useState();
   const [sortFieldWeblinks, setSortFieldWeblinks] = useState();
   const [sortOrderDocuments, setSortOrderDocuments] = useState();
   const [sortOrderWeblinks, setSortOrderWeblinks] = useState();
-  const [steps, setSteps] = useState([]);
   const [webLinks, setWebLinks] = useState([]);
 
   useEffect(() => {
@@ -101,31 +102,18 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       { label: resources.messages['dataflowHelp'], icon: 'info' }
     ]);
     leftSideBarContext.removeModels();
-    filterHelpSteps('initial');
+    // filterHelpSteps('initial');
   }, []);
 
   useEffect(() => {
-    if (!isEmpty(steps)) {
-      leftSideBarContext.addHelpSteps('dataflowHelpHelp', steps);
-    }
-  }, [steps]);
+    leftSideBarContext.addHelpSteps(DataflowHelpHelpConfig, 'dataflowHelpHelp', []);
+  }, [documents, webLinks, datasetsSchemas, selectedIndex]);
 
-  useEffect(() => {
-    if (!isEmpty(documents)) {
-      const inmSteps = cloneDeep(steps);
-      inmSteps.push(
-        {
-          content: <h3>{resources.messages['dataflowHelpHelpStep6']}</h3>,
-          target: '.dataflowHelp-document-edit-delete-help-step'
-        },
-        {
-          content: <h3>{resources.messages['dataflowHelpHelpStep7']}</h3>,
-          target: '.dataflowHelp-document-icon-help-step'
-        }
-      );
-      setSteps(inmSteps);
-    }
-  }, [documents]);
+  // useEffect(() => {
+  //   if (!isEmpty(steps)) {
+  //     leftSideBarContext.addHelpSteps('dataflowHelpHelp', steps);
+  //   }
+  // }, [steps]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -264,99 +252,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       }
     }
   };
-
-  const setHelpSteps = e => {
-    switch (e.index) {
-      case 0:
-        filterHelpSteps('documents');
-        break;
-      case 1:
-        filterHelpSteps('weblinks');
-        break;
-      case 2:
-        filterHelpSteps('schemas');
-        break;
-      default:
-        break;
-    }
-  };
-
-  const filterHelpSteps = type => {
-    const dataflowSteps = [];
-
-    switch (type) {
-      case 'initial':
-        dataflowSteps.push(
-          {
-            content: <h2>{resources.messages['dataflowHelp']}</h2>,
-            locale: { skip: <strong aria-label="skip">{resources.messages['skipHelp']}</strong> },
-            placement: 'center',
-            target: 'body'
-          },
-          {
-            content: <h3>{resources.messages['dataflowHelpHelpStep1']}</h3>,
-            target: '.dataflowHelp-documents-help-step'
-          },
-          {
-            content: <h3>{resources.messages['dataflowHelpHelpStep2']}</h3>,
-            target: '.dataflowHelp-weblinks-help-step'
-          },
-          {
-            content: <h3>{resources.messages['dataflowHelpHelpStep3']}</h3>,
-            target: '.dataflowHelp-schemas-help-step'
-          },
-          {
-            content: <h3>{resources.messages['dataflowHelpHelpStep4']}</h3>,
-            target: '.dataflowHelp-document-upload-help-step'
-          },
-          {
-            content: <h3>{resources.messages['dataflowHelpHelpStep5']}</h3>,
-            target: '.dataflowHelp-document-refresh-help-step'
-          }
-        );
-        break;
-      case 'documents':
-        dataflowSteps.push(
-          {
-            content: <h3>{resources.messages['dataflowHelpHelpStep4']}</h3>,
-            target: '.dataflowHelp-document-upload-help-step'
-          },
-          {
-            content: <h3>{resources.messages['dataflowHelpHelpStep5']}</h3>,
-            target: '.dataflowHelp-document-refresh-help-step'
-          }
-        );
-        if (!isEmpty(documents)) {
-          dataflowSteps.push(
-            {
-              content: <h3>{resources.messages['dataflowHelpHelpStep6']}</h3>,
-              target: '.dataflowHelp-document-edit-delete-help-step'
-            },
-            {
-              content: <h3>{resources.messages['dataflowHelpHelpStep7']}</h3>,
-              target: '.dataflowHelp-document-icon-help-step'
-            }
-          );
-        }
-        break;
-      case 'weblinks':
-        break;
-      case 'schemas':
-        break;
-
-      default:
-        break;
-    }
-
-    // const loadedClassesSteps = [...dataflowSteps].filter(
-    //   dataflowStep =>
-    //     !isUndefined(
-    //       document.getElementsByClassName(dataflowStep.target.substring(1, dataflowStep.target.length))[0]
-    //     ) || dataflowStep.target === 'body'
-    // );
-    setSteps(dataflowSteps);
-  };
-
   const layout = children => {
     return (
       <MainLayout>
@@ -373,7 +268,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     return layout(
       <>
         <Title title={`${resources.messages['dataflowHelp']} `} subtitle={dataflowName} icon="info" iconSize="3.5rem" />
-        <TabView activeIndex={0} hasQueryString={false} onTabClick={e => setHelpSteps(e)}>
+        <TabView activeIndex={0} hasQueryString={false} onTabClick={e => setSelectedIndex(e)}>
           <TabPanel
             headerClassName="dataflowHelp-documents-help-step"
             header={resources.messages['supportingDocuments']}>

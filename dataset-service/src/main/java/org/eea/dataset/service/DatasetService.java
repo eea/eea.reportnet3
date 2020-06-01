@@ -21,7 +21,9 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
 
-/** The interface Dataset service. */
+/**
+ * The interface Dataset service.
+ */
 public interface DatasetService {
 
   /**
@@ -62,7 +64,9 @@ public interface DatasetService {
    * @param pageable the pageable
    * @param fields the fields
    * @param levelError the level error
+   *
    * @return the table values by id
+   *
    * @throws EEAException the EEA exception
    */
   TableVO getTableValuesById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
@@ -224,6 +228,7 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param idSchema the id schema
+   *
    * @return the long
    */
   Long findTableIdByTableSchema(@DatasetId Long datasetId, String idSchema);
@@ -233,6 +238,7 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param partitionId the partition id
+   *
    * @throws EEAException the EEA exception
    */
   void deleteRecordValuesToRestoreSnapshot(@DatasetId Long datasetId, Long partitionId)
@@ -242,6 +248,7 @@ public interface DatasetService {
    * Save statistics.
    *
    * @param datasetId the dataset id
+   *
    * @throws EEAException the EEA exception
    */
   void saveStatistics(@DatasetId Long datasetId) throws EEAException;
@@ -259,7 +266,9 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param tableSchema the table schema
+   *
    * @return the table VO
+   *
    * @throws EEAException the EEA exception
    */
   void saveTablePropagation(@DatasetId Long datasetId, TableSchemaVO tableSchema)
@@ -293,6 +302,7 @@ public interface DatasetService {
    * Checks if is reporting dataset.
    *
    * @param datasetId the dataset id
+   *
    * @return true, if is reporting dataset
    */
   boolean isReportingDataset(Long datasetId);
@@ -302,6 +312,7 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
+   *
    * @throws EEAException the EEA exception
    */
   void prepareNewFieldPropagation(@DatasetId Long datasetId, FieldSchemaVO fieldSchemaVO)
@@ -333,6 +344,7 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param idPk the id pk
    * @param searchValue the search value
+   *
    * @return the field values referenced
    */
   List<FieldVO> getFieldValuesReferenced(Long datasetId, String idPk, String searchValue);
@@ -342,23 +354,19 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param idPk the id pk
+   *
    * @return the referenced dataset id
    */
   Long getReferencedDatasetId(Long datasetId, String idPk);
 
-  /**
-   * Gets the dataset type.
-   *
-   * @param datasetId the dataset id
-   * @return the dataset type
-   */
-  DatasetTypeEnum getDatasetType(Long datasetId);
 
   /**
    * Etl export dataset.
    *
    * @param datasetId the dataset id
+   *
    * @return the ETL dataset VO
+   *
    * @throws EEAException the EEA exception
    */
   ETLDatasetVO etlExportDataset(@DatasetId Long datasetId) throws EEAException;
@@ -370,6 +378,7 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param etlDatasetVO the etl dataset VO
    * @param providerId the provider id
+   *
    * @throws EEAException the EEA exception
    */
   void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO, Long providerId)
@@ -381,6 +390,7 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    * @param type the type
+   *
    * @return the table read only
    */
   Boolean getTableReadOnly(Long datasetId, String tableSchemaId, EntityTypeEnum type);

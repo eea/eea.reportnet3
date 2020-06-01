@@ -84,9 +84,9 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
 
       if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
         validationsServiceList.validations.forEach(validation => {
-          const aditionalInfo = getAditionalValidationInfo(validation.referenceId);
-          validation.table = aditionalInfo.tableName;
-          validation.field = aditionalInfo.fieldName;
+          const additionalInfo = getAdditionalValidationInfo(validation.referenceId);
+          validation.table = additionalInfo.tableName;
+          validation.field = additionalInfo.fieldName;
         });
       }
 
@@ -129,23 +129,23 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     </div>
   );
 
-  const getAditionalValidationInfo = referenceId => {
-    const aditionalInfo = {};
+  const getAdditionalValidationInfo = referenceId => {
+    const additionalInfo = {};
     datasetSchemaAllTables.forEach(table => {
       if (!isUndefined(table.records)) {
         table.records.forEach(record =>
           record.fields.forEach(field => {
             if (!isNil(field)) {
               if (field.fieldId === referenceId) {
-                aditionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
-                aditionalInfo.fieldName = field.name;
+                additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
+                additionalInfo.fieldName = field.name;
               }
             }
           })
         );
       }
     });
-    return aditionalInfo;
+    return additionalInfo;
   };
 
   const getHeader = fieldHeader => {
@@ -194,20 +194,24 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
 
   const actionsTemplate = row => (row.automatic ? editTemplate(row) : editAndDeleteTemplate(row));
 
-  const editAndDeleteTemplate = row => (
-    <ActionsColumn
-      onDeleteClick={() => onShowDeleteDialog()}
-      onEditClick={() => {
-        validationContext.onOpenToEdit(row, 'validationsListDialog');
-        onHideValidationsDialog();
-      }}
-    />
-  );
+  const editAndDeleteTemplate = row => {
+    let rowType = 'field';
+    if (row.entityType === 'RECORD') rowType = 'row';
+    return (
+      <ActionsColumn
+        onDeleteClick={() => onShowDeleteDialog()}
+        onEditClick={() => {
+          validationContext.onOpenToEdit(row, 'validationsListDialog', rowType);
+          onHideValidationsDialog();
+        }}
+      />
+    );
+  };
 
   const editTemplate = row => (
     <ActionsColumn
       onEditClick={() => {
-        validationContext.onOpenToEdit(row, 'validationsListDialog');
+        validationContext.onOpenToEdit(row, 'validationsListDialog', 'field');
         onHideValidationsDialog();
       }}
     />

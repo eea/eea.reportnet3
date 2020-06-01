@@ -365,8 +365,9 @@ public interface DatasetSchemaService {
    * Delete unique constraint.
    *
    * @param uniqueId the unique id
+   * @throws EEAException
    */
-  void deleteUniqueConstraint(String uniqueId);
+  void deleteUniqueConstraint(String uniqueId) throws EEAException;
 
   /**
    * Update unique constraint.
@@ -382,5 +383,56 @@ public interface DatasetSchemaService {
    * @return the unique constraints
    */
   List<UniqueConstraintVO> getUniqueConstraints(String schemaId);
+
+  /**
+   * Gets the unique constraint.
+   *
+   * @param uniqueId the unique id
+   * @return the unique constraint
+   * @throws EEAException
+   */
+  UniqueConstraintVO getUniqueConstraint(String uniqueId) throws EEAException;
+
+  /**
+   * Delete uniques constraint from table.
+   *
+   * @param tableSchemaId the table schema id
+   */
+  void deleteUniquesConstraintFromTable(String tableSchemaId) throws EEAException;
+
+  /**
+   * Delete uniques constraint from dataset.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @throws EEAException
+   */
+  void deleteUniquesConstraintFromDataset(String datasetSchemaId) throws EEAException;
+
+  /**
+   * Delete uniques constraint from field.
+   *
+   * @param schemaId the schema id
+   * @param fieldSchemaId the field schema id
+   * @throws EEAException
+   */
+  void deleteUniquesConstraintFromField(String schemaId, String fieldSchemaId) throws EEAException;
+
+  /**
+   * Creates the unique constraint PK.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   */
+  void createUniqueConstraintPK(String datasetSchemaId, FieldSchemaVO fieldSchemaVO);
+
+  /**
+   * Delete only unique constraint from field.
+   *
+   * @param schemaId the schema id
+   * @param fieldSchemaId the field schema id
+   * @throws EEAException the EEA exception
+   */
+  void deleteOnlyUniqueConstraintFromField(String schemaId, String fieldSchemaId)
+      throws EEAException;
 
 }

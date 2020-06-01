@@ -114,9 +114,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("${sqlGetAllDatasetsName}")
   private String sqlGetDatasetsName;
 
-  /**
-   * the dataset users
-   */
+  /** the dataset users. */
 
   @Value("${dataset.users}")
   private String datasetUsers;
@@ -419,217 +417,41 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
     EventType failEventType = deleteData
         ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
-    String signature =
-        deleteData
-            ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-            : LockSignature.RESTORE_SNAPSHOT.getValue()
-            : LockSignature.RELEASE_SNAPSHOT.getValue();
-    Map<String, Object> value = new HashMap<>();
-    value.put(LiteralConstants.DATASET_ID, idReportingDataset);
-    ConnectionDataVO conexion =
-        getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
+    // Call to the private method restoreSnapshot. Method shared with public restoreDataSnapshotPoc.
+    // The main difference
+    // between both methods is this one releases a notification
+    restoreSnapshot(idReportingDataset, idSnapshot, partitionId, datasetType, isSchemaSnapshot,
+        deleteData, successEventType, failEventType, true);
 
-    try (Connection con = DriverManager
-        .getConnection(conexion.getConnectionString(), conexion.getUser(),
-            conexion.getPassword());
-        Statement stmt = con.createStatement()) {
-      con.setAutoCommit(true);
-
-      if (deleteData) {
-        String sql = "";
-        switch (datasetType) {
-          case REPORTING:
-            sql = "DELETE FROM dataset_" + idReportingDataset
-                + ".record_value WHERE dataset_partition_id=" + partitionId;
-            break;
-          case DESIGN:
-            sql = "DELETE FROM dataset_" + idReportingDataset + ".table_value";
-            break;
-          default:
-            break;
-        }
-        LOG.info("Deleting previous data");
-        stmt.executeUpdate(sql);
-      }
-
-      CopyManager cm = new CopyManager((BaseConnection) con);
-      LOG.info("Init restoring the snapshot files from Snapshot {}", idSnapshot);
-      switch (datasetType) {
-        case DESIGN:
-          // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
-          // not neccesary
-          String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-              LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
-
-          String copyQueryTable = "COPY dataset_" + idReportingDataset
-              + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
-          copyFromFile(copyQueryTable, nameFileTableValue, cm);
-          break;
-        default:
-          break;
-      }
-      // Record value
-      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
-
-      String copyQueryRecord = "COPY dataset_" + idReportingDataset
-          + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
-      copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
-
-      // Field value
-      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
-
-      String copyQueryField = "COPY dataset_" + idReportingDataset
-          + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
-      copyFromFile(copyQueryField, nameFileFieldValue, cm);
-
-      // Send kafka event to launch Validation
-      final EEAEventVO event = new EEAEventVO();
-      event.setEventType(successEventType);
-
-      kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION,
-          idReportingDataset);
-      try {
-        kafkaSenderUtils.releaseNotificableKafkaEvent(successEventType, value,
-            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-                .datasetId(idReportingDataset).build());
-      } catch (EEAException e) {
-        LOG.error("Error realeasing event {}: ", successEventType, e);
-      }
-
-      LOG.info("Snapshot {} restored", idSnapshot);
-    } catch (Exception e) {
-      LOG_ERROR.error("Error restoring the snapshot data due to error {}.", e.getMessage(), e);
-      try {
-        kafkaSenderUtils.releaseNotificableKafkaEvent(failEventType, value,
-            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-                .datasetId(idSnapshot).error("Error restoring the snapshot data. Rollback")
-                .build());
-      } catch (EEAException ex) {
-        LOG.error("Error realeasing event {} due to error {}", failEventType, ex.getMessage(), ex);
-      }
-    } finally {
-      // Release the lock manually
-      List<Object> criteria = new ArrayList<>();
-      criteria.add(signature);
-      if (deleteData) {
-        criteria.add(idReportingDataset);
-      } else {
-        criteria.add(idSnapshot);
-      }
-      lockService.removeLockByCriteria(criteria);
-    }
   }
 
+  /**
+   * Restore data snapshot poc.
+   *
+   * @param idReportingDataset the id reporting dataset
+   * @param idSnapshot the id snapshot
+   * @param partitionId the partition id
+   * @param datasetType the dataset type
+   * @param isSchemaSnapshot the is schema snapshot
+   * @param deleteData the delete data
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Override
   @Async
   public void restoreDataSnapshotPoc(Long idReportingDataset, Long idSnapshot, Long partitionId,
       DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
       throws SQLException, IOException {
 
-    EventType successEventType = deleteData
-        ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-        : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
-        : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
-    EventType failEventType = deleteData
-        ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-        : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
-        : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
-
-    String signature =
-        deleteData
-            ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
-            : LockSignature.RESTORE_SNAPSHOT.getValue()
-            : LockSignature.RELEASE_SNAPSHOT.getValue();
-
-    ConnectionDataVO conexion =
-        getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
-
-    Statement stmt = null;
-    try (Connection con = DriverManager
-        .getConnection(conexion.getConnectionString(), conexion.getUser(),
-            conexion.getPassword())) {
-
-      con.setAutoCommit(true);
-
-      if (deleteData) {
-        String sql = "";
-        switch (datasetType) {
-          case REPORTING:
-            sql = "DELETE FROM dataset_" + idReportingDataset
-                + ".record_value WHERE dataset_partition_id=" + partitionId;
-            break;
-          case DESIGN:
-            sql = "DELETE FROM dataset_" + idReportingDataset + ".table_value";
-            break;
-          default:
-            break;
-        }
-        stmt = con.createStatement();
-        LOG.info("Deleting previous data");
-        stmt.executeUpdate(sql);
-      }
-
-      CopyManager cm = new CopyManager((BaseConnection) con);
-      LOG.info("Init restoring the snapshot files from Snapshot {} and dataset {}", idSnapshot,
-          idReportingDataset);
-      switch (datasetType) {
-        case DESIGN:
-          // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
-          // not neccesary
-          String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-              LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
-
-          String copyQueryTable = "COPY dataset_" + idReportingDataset
-              + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
-          copyFromFile(copyQueryTable, nameFileTableValue, cm);
-          break;
-        default:
-          break;
-      }
-      // Record value
-      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
-
-      String copyQueryRecord = "COPY dataset_" + idReportingDataset
-          + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
-      copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
-
-      // Field value
-      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
-
-      String copyQueryField = "COPY dataset_" + idReportingDataset
-          + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
-      copyFromFile(copyQueryField, nameFileFieldValue, cm);
-
-      // Send kafka event to launch Validation
-
-      LOG.info("Snapshot {} restored for dataset {}", idSnapshot, idReportingDataset);
-    } catch (Exception e) {
-      LOG_ERROR.error("Error restoring the snapshot data due to error {}", e.getMessage(), e);
-    } finally {
-      if (null != stmt) {
-        stmt.close();
-      }
-      // Release the lock manually
-      List<Object> criteria = new ArrayList<>();
-      criteria.add(signature);
-      if (deleteData) {
-        criteria.add(idReportingDataset);
-      } else {
-        criteria.add(idSnapshot);
-      }
-      lockService.removeLockByCriteria(criteria);
-    }
+    restoreSnapshot(idReportingDataset, idSnapshot, partitionId, datasetType, isSchemaSnapshot,
+        deleteData, null, null, false);
   }
 
 
@@ -698,9 +520,137 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
 
   /**
+   * Restore snapshot.
+   *
+   * @param idReportingDataset the id reporting dataset
+   * @param idSnapshot the id snapshot
+   * @param partitionId the partition id
+   * @param datasetType the dataset type
+   * @param isSchemaSnapshot the is schema snapshot
+   * @param deleteData the delete data
+   * @param successEventType the success event type
+   * @param failEventType the fail event type
+   * @param launchEvent the launch event
+   */
+  private void restoreSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
+      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
+      EventType successEventType, EventType failEventType, Boolean launchEvent) {
+
+    String signature =
+        deleteData
+            ? isSchemaSnapshot ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
+                : LockSignature.RESTORE_SNAPSHOT.getValue()
+            : LockSignature.RELEASE_SNAPSHOT.getValue();
+    Map<String, Object> value = new HashMap<>();
+    value.put(LiteralConstants.DATASET_ID, idReportingDataset);
+    ConnectionDataVO conexion =
+        getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
+
+    try (
+        Connection con = DriverManager.getConnection(conexion.getConnectionString(),
+            conexion.getUser(), conexion.getPassword());
+        Statement stmt = con.createStatement()) {
+      con.setAutoCommit(true);
+
+      if (deleteData) {
+        String sql = "";
+        switch (datasetType) {
+          case REPORTING:
+            sql = "DELETE FROM dataset_" + idReportingDataset
+                + ".record_value WHERE dataset_partition_id=" + partitionId;
+            break;
+          case DESIGN:
+            sql = "DELETE FROM dataset_" + idReportingDataset + ".table_value";
+            break;
+          default:
+            break;
+        }
+        LOG.info("Deleting previous data");
+        stmt.executeUpdate(sql);
+      }
+
+      CopyManager cm = new CopyManager((BaseConnection) con);
+      LOG.info("Init restoring the snapshot files from Snapshot {}", idSnapshot);
+      switch (datasetType) {
+        case DESIGN:
+          // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
+          // not neccesary
+          String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+              LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
+
+          String copyQueryTable = "COPY dataset_" + idReportingDataset
+              + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
+          copyFromFile(copyQueryTable, nameFileTableValue, cm);
+          break;
+        default:
+          break;
+      }
+      // Record value
+      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
+
+      String copyQueryRecord = "COPY dataset_" + idReportingDataset
+          + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
+      copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
+
+      // Field value
+      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+
+      String copyQueryField = "COPY dataset_" + idReportingDataset
+          + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
+      copyFromFile(copyQueryField, nameFileFieldValue, cm);
+
+      if (launchEvent) {
+        // Send kafka event to launch Validation
+        final EEAEventVO event = new EEAEventVO();
+        event.setEventType(successEventType);
+
+        kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION,
+            idReportingDataset);
+        try {
+          kafkaSenderUtils.releaseNotificableKafkaEvent(successEventType, value,
+              NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+                  .datasetId(idReportingDataset).build());
+        } catch (EEAException e) {
+          LOG.error("Error realeasing event {}: ", successEventType, e);
+        }
+      }
+
+      LOG.info("Snapshot {} restored", idSnapshot);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error restoring the snapshot data due to error {}.", e.getMessage(), e);
+      if (launchEvent) {
+        try {
+          kafkaSenderUtils.releaseNotificableKafkaEvent(failEventType, value,
+              NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+                  .datasetId(idSnapshot).error("Error restoring the snapshot data").build());
+        } catch (EEAException ex) {
+          LOG.error("Error realeasing event {} due to error {}", failEventType, ex.getMessage(),
+              ex);
+        }
+      }
+    } finally {
+      // Release the lock manually
+      List<Object> criteria = new ArrayList<>();
+      criteria.add(signature);
+      if (deleteData) {
+        criteria.add(idReportingDataset);
+      } else {
+        criteria.add(idSnapshot);
+      }
+      lockService.removeLockByCriteria(criteria);
+    }
+
+
+  }
+
+
+  /**
    * Release lock and notification.
    *
    * @param dataflowId the dataflow id
+   * @param isCreation the is creation
    */
   private void releaseLockAndNotification(Long dataflowId, boolean isCreation) {
 

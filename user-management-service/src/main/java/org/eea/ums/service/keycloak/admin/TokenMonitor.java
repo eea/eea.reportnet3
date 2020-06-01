@@ -1,10 +1,15 @@
 package org.eea.ums.service.keycloak.admin;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.annotation.PostConstruct;
 import javax.annotation.concurrent.ThreadSafe;
+import lombok.extern.slf4j.Slf4j;
+import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +20,14 @@ import org.springframework.stereotype.Component;
  */
 @ThreadSafe
 @Component
-public class TokenMonitor implements DisposableBean {
+@Slf4j
+public class TokenMonitor {
+
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
 
   @Autowired
   private KeycloakConnectorService keycloakConnectorService;
@@ -26,35 +38,14 @@ public class TokenMonitor implements DisposableBean {
   @Value("${eea.keycloak.admin.token.expiration}")
   private Long tokenExpirationTime;
 
-  private static String adminToken;
-  private TokenGeneratorThread tokenGeneratorThread;
-  private ExecutorService executor = Executors.newSingleThreadExecutor();
+  private Long lastUpdateTime = 0l;
+  private String adminToken;
+  private String refreshToken;
 
   @PostConstruct
-  private void startTokenGeneratorThread() {
-    tokenGeneratorThread = new TokenGeneratorThread(keycloakConnectorService, adminUser,
-        adminPass, tokenExpirationTime);
-    executor.submit(tokenGeneratorThread);
-  }
-
-
-  @Override
-  public void destroy() {
-    if (tokenGeneratorThread != null) {
-      tokenGeneratorThread.stopThread();
-    }
-    if (!executor.isShutdown()) {
-      executor.shutdown();
-    }
-  }
-
-  /**
-   * Update admin token.
-   *
-   * @param token the token
-   */
-  synchronized public static void updateAdminToken(String token) {
-    adminToken = token;
+  private void init() {
+    manageTokenInfo(keycloakConnectorService.generateAdminToken(adminUser, adminPass));
+    lastUpdateTime = System.currentTimeMillis();
   }
 
   /**
@@ -62,7 +53,34 @@ public class TokenMonitor implements DisposableBean {
    *
    * @return the token
    */
-  synchronized public static String getToken() {
+  synchronized public String getToken() {
+    Long currentTime = System.currentTimeMillis();
+    Long difference = currentTime - lastUpdateTime;
+    if ((difference) > tokenExpirationTime) {
+      log.info("Renewing admin token");
+      TokenInfo tokenInfo = null;
+      try {
+        tokenInfo = keycloakConnectorService.refreshToken(refreshToken);
+        log.info("New admin and refresh token generated with values {}", tokenInfo);
+      } catch (Exception e) {
+        log.warn(
+            "Error trying to refresh admin token, using admin credentials to get a new admin token due to {}",
+            e.getMessage(), e);
+        tokenInfo = keycloakConnectorService.generateAdminToken(adminUser, adminPass);
+      }
+      manageTokenInfo(tokenInfo);
+      lastUpdateTime = currentTime;
+      log.info("Admin Token refreshed successfully");
+    }
     return adminToken;
+  }
+
+  private void manageTokenInfo(TokenInfo tokenInfo) {
+    if (null != tokenInfo) {
+      this.adminToken = Optional.ofNullable(tokenInfo.getAccessToken()).orElse("");
+      this.refreshToken = Optional.ofNullable(tokenInfo.getRefreshToken()).orElse("");
+    } else {
+      LOG_ERROR.error("Error getting admin access token");
+    }
   }
 }

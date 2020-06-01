@@ -49,6 +49,7 @@ public class ValidationHelper {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  private static final String ERROR_ADDING_TASK_TO_PROCESS = "Error trying to add task {} of type {} to process {}";
 
   /**
    * The kafka sender utils.
@@ -81,10 +82,10 @@ public class ValidationHelper {
   @Value("${validation.recordBatchSize}")
   private int recordBatchSize;
 
-  @Value("${validation.tasks.release.tax")
+  @Value("${validation.tasks.release.tax}")
   private int taskReleasedTax;
 
-  @Value("${validation.tasks.initial.tax")
+  @Value("${validation.tasks.initial.tax}")
   private int initialTax;
 
   /**
@@ -174,8 +175,8 @@ public class ValidationHelper {
    * @param isCoordinator the is coordinator
    */
   public void initializeProcess(String processId, boolean isCoordinator) {
-    ValidationProcessVO process = new ValidationProcessVO(0, new ConcurrentLinkedDeque<>(), null,
-        isCoordinator);
+    ValidationProcessVO process =
+        new ValidationProcessVO(0, new ConcurrentLinkedDeque<>(), null, isCoordinator);
     synchronized (processesMap) {
       processesMap.put(processId, process);
     }
@@ -193,7 +194,7 @@ public class ValidationHelper {
   @LockMethod(removeWhenFinish = false, isController = false)
   public void executeValidation(@LockCriteria(name = "datasetId") final Long datasetId,
       String processId) {
-    //Initialize process as coordinator
+    // Initialize process as coordinator
     initializeProcess(processId, true);
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     LOG.info("Deleting all Validations");
@@ -217,20 +218,21 @@ public class ValidationHelper {
   private void startProcess(final String processId) throws EEAException {
     checkStartedProcess(processId);
     ConsumerGroupVO consumerGroupVO = kafkaAdminUtils.getConsumerGroupInfo();
-    //get the number of validation instances in the system.
-    //at least there should be one, the coordinator node :)
+    // get the number of validation instances in the system.
+    // at least there should be one, the coordinator node :)
     Integer initialTasks = consumerGroupVO.getMembers().size() * this.initialTax;
     synchronized (processesMap) {
 
-      //Sending initial tasks, 1 per validation instance in the system
-      //Due to this initial work load there will be always more pendingOks to be received than pendingValidation to be sent
-      //This will affect to the reducePendingTasks method since it will need to know whether to send more tasks or not
+      // Sending initial tasks, 1 per validation instance in the system
+      // Due to this initial work load there will be always more pendingOks to be received than
+      // pendingValidation to be sent
+      // This will affect to the reducePendingTasks method since it will need to know whether to
+      // send more tasks or not
       Deque pendingTasks = processesMap.get(processId).getPendingValidations();
       LOG.info(
           "started proces {}. Pending Ok's to be received: {}, pending tasks to be sent: {} initial workload: {}",
-          processId,
-          processesMap.get(processId).getPendingOks(), pendingTasks.size() - initialTasks,
-          initialTasks);
+          processId, processesMap.get(processId).getPendingOks(),
+          pendingTasks.size() - initialTasks, initialTasks);
       while (initialTasks > 0) {
         EEAEventVO event = (EEAEventVO) pendingTasks.poll();
         if (null != event) {
@@ -314,11 +316,11 @@ public class ValidationHelper {
       pendingOk--;
       processesMap.get(processId).setPendingOks(pendingOk);
       if (!this.checkFinishedValidations(datasetId, processId)) {
-        //process is not over, but still it could happen that there is no task to be sent
-        //remember pendingOks > pendingValidations.size()
+        // process is not over, but still it could happen that there is no task to be sent
+        // remember pendingOks > pendingValidations.size()
         Integer pendingValidations = processesMap.get(processId).getPendingValidations().size();
         if (pendingValidations > 0) {
-          //there are more tasks to be sent, just send them out, at least, one more task
+          // there are more tasks to be sent, just send them out, at least, one more task
           int tasksToBeSent = this.taskReleasedTax;
           while (tasksToBeSent > 0) {
             if (processesMap.get(processId).getPendingValidations().size() >= 1) {
@@ -328,10 +330,12 @@ public class ValidationHelper {
             tasksToBeSent--;
           }
           LOG.info(
-              "Sent next tasks for process {}. There are still {} tasks to be sent and {} pending Ok's to be received",
-              processId,
-              processesMap.get(processId).getPendingValidations().size(), pendingOk);
+              "Sent next tasks for process {}",
+              processId);
         }
+        LOG.info(
+            "There are still {} tasks to be sent and {} pending Ok's to be received",
+            processesMap.get(processId).getPendingValidations().size(), pendingOk);
       }
     }
   }
@@ -351,7 +355,7 @@ public class ValidationHelper {
     try {
       addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_DATASET, value);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error trying to add task {} of type {} to process {}", value,
+      LOG_ERROR.error(ERROR_ADDING_TASK_TO_PROCESS, value,
           EventType.COMMAND_VALIDATE_FIELD.getKey(), processId, e);
     }
 
@@ -373,7 +377,7 @@ public class ValidationHelper {
     try {
       addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_TABLE, value);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error trying to add task {} of type {} to process {}", value,
+      LOG_ERROR.error(ERROR_ADDING_TASK_TO_PROCESS, value,
           EventType.COMMAND_VALIDATE_FIELD.getKey(), processId, e);
     }
 
@@ -395,7 +399,7 @@ public class ValidationHelper {
     try {
       addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_RECORD, value);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error trying to add task {} of type {} to process {}", value,
+      LOG_ERROR.error(ERROR_ADDING_TASK_TO_PROCESS, value,
           EventType.COMMAND_VALIDATE_FIELD.getKey(), processId, e);
     }
   }
@@ -416,7 +420,7 @@ public class ValidationHelper {
     try {
       addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_FIELD, value);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error trying to add task {} of type {} to process {}", value,
+      LOG_ERROR.error(ERROR_ADDING_TASK_TO_PROCESS, value,
           EventType.COMMAND_VALIDATE_FIELD.getKey(), processId, e);
     }
 
@@ -435,7 +439,7 @@ public class ValidationHelper {
   private boolean checkFinishedValidations(final Long datasetId, final String processId)
       throws EEAException {
     boolean isFinished = false;
-    //remember pendingOks > pendingValidations.size()
+    // remember pendingOks > pendingValidations.size()
     if (processesMap.get(processId).getPendingOks() == 0) {
       // Release the lock manually
       List<Object> criteria1 = new ArrayList<>();
@@ -453,11 +457,11 @@ public class ValidationHelper {
       value.put("uuid", processId);
       Integer pendingValidations = processesMap.get(processId).getPendingValidations().size();
       if (pendingValidations > 0) {
-        //this is just a warning messages to show an abnormal situation finishing validation process
+        // this is just a warning messages to show an abnormal situation finishing validation
+        // process
         LOG.warn(
             "There are still {} pending tasks to be sent, they will not be sent as process is finished",
-            pendingValidations
-        );
+            pendingValidations);
       }
       this.finishProcess(processId);
 
@@ -471,16 +475,15 @@ public class ValidationHelper {
   }
 
   private void addValidationTaskToProcess(final String processId, final EventType eventType,
-      final Map<String, Object> value)
-      throws EEAException {
+      final Map<String, Object> value) throws EEAException {
     checkStartedProcess(processId);
     synchronized (processesMap) {
       Integer pendingOk = processesMap.get(processId).getPendingOks();
       if (null == pendingOk) {
-        pendingOk = 1;
-      } else {
-        pendingOk++;
+        pendingOk = 0;
       }
+
+      pendingOk++;
       processesMap.get(processId).setPendingOks(pendingOk);
       EEAEventVO eeaEventVO = new EEAEventVO();
       eeaEventVO.setEventType(eventType);
@@ -493,9 +496,8 @@ public class ValidationHelper {
     if (!processesMap.containsKey(processId)) {
       LOG_ERROR.error("Error, proces {} has not been initialized or it has been already finished",
           processId);
-      throw new EEAException(
-          String.format("Error, proces %s has not been initialized or it has been already finished",
-              processId));
+      throw new EEAException(String.format(
+          "Error, proces %s has not been initialized or it has been already finished", processId));
     }
   }
 }

@@ -49,6 +49,9 @@ public class RulesControllerImplTest {
   /** The authentication. */
   Authentication authentication;
 
+  /**
+   * Inits the mocks.
+   */
   @Before
   public void initMocks() {
     authentication = Mockito.mock(Authentication.class);
@@ -457,6 +460,11 @@ public class RulesControllerImplTest {
         Mockito.any());
   }
 
+  /**
+   * Update automatic rule test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateAutomaticRuleTest() throws EEAException {
     Mockito.doNothing().when(rulesService).updateAutomaticRule(Mockito.anyLong(), Mockito.any());
@@ -464,6 +472,11 @@ public class RulesControllerImplTest {
     Mockito.verify(rulesService, times(1)).updateAutomaticRule(Mockito.anyLong(), Mockito.any());
   }
 
+  /**
+   * Update automatic rule exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void updateAutomaticRuleExceptionTest() throws EEAException {
     try {
@@ -474,5 +487,37 @@ public class RulesControllerImplTest {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;
     }
+  }
+
+  /**
+   * Creates the unique constraint test.
+   */
+  @Test
+  public void createUniqueConstraintTest() {
+    rulesControllerImpl.createUniqueConstraintRule("5e44110d6a9e3a270ce13fac",
+        "5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesService, times(1)).createUniqueConstraint(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+  /**
+   * Delete unique constraint test.
+   */
+  @Test
+  public void deleteUniqueConstraintTest() {
+    rulesControllerImpl.deleteUniqueConstraintRule("5e44110d6a9e3a270ce13fac",
+        "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesService, times(1)).deleteUniqueConstraint(Mockito.any(), Mockito.any());
+  }
+
+
+  /**
+   * Delete rule high level like.
+   */
+  @Test
+  public void deleteRuleHighLevelLike() {
+    rulesControllerImpl.deleteRuleHighLevelLike("5e44110d6a9e3a270ce13fac",
+        "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesService, times(1)).deleteRuleHighLevelLike(Mockito.any(), Mockito.any());
   }
 }

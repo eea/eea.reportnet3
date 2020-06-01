@@ -29,6 +29,7 @@ import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepositor
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
@@ -54,6 +55,7 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
@@ -63,65 +65,89 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 
-
 /**
  * The Class DatasetMetabaseServiceImpl.
  */
 @Service("datasetMetabaseService")
 public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
-  /** The data set metabase repository. */
+  /**
+   * The data set metabase repository.
+   */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  /** The data set metabase mapper. */
+  /**
+   * The data set metabase mapper.
+   */
   @Autowired
   private DataSetMetabaseMapper dataSetMetabaseMapper;
 
-  /** The reporting dataset repository. */
+  /**
+   * The reporting dataset repository.
+   */
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
 
-  /** The design dataset repository. */
+  /**
+   * The design dataset repository.
+   */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
 
-  /** The record store controller zull. */
+  /**
+   * The record store controller zull.
+   */
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
-  /** The statistics repository. */
+  /**
+   * The statistics repository.
+   */
   @Autowired
   private StatisticsRepository statisticsRepository;
 
-  /** The data collection repository. */
+  /**
+   * The data collection repository.
+   */
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
 
-  /** The user management controller zuul. */
+  /**
+   * The user management controller zuul.
+   */
   @Autowired
   private UserManagementControllerZull userManagementControllerZuul;
 
-  /** The resource management controller zuul. */
+  /**
+   * The resource management controller zuul.
+   */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZuul;
 
-  /** The representative controller zuul. */
+  /**
+   * The representative controller zuul.
+   */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Autowired
   @Lazy
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The foreign relations repository. */
+  /**
+   * The foreign relations repository.
+   */
   @Autowired
   private ForeignRelationsRepository foreignRelationsRepository;
 
 
-
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseServiceImpl.class);
 
   /**
@@ -133,6 +159,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Gets the data set id by dataflow id.
    *
    * @param idFlow the id flow
+   *
    * @return the data set id by dataflow id
    */
   @Override
@@ -141,7 +168,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     List<DataSetMetabase> datasets = dataSetMetabaseRepository.findByDataflowId(idFlow);
     return dataSetMetabaseMapper.entityListToClass(datasets);
   }
-
 
 
   /**
@@ -172,6 +198,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Gets the dataset name.
    *
    * @param idDataset the id dataset
+   *
    * @return the dataset name
    */
   @Override
@@ -180,6 +207,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     DataSetMetabaseVO metabaseVO = new DataSetMetabaseVO();
     if (datasetMetabase.isPresent()) {
       metabaseVO = dataSetMetabaseMapper.entityToClass(datasetMetabase.get());
+      metabaseVO.setDatasetTypeEnum(getDatasetType(idDataset));
+
     }
     return metabaseVO;
   }
@@ -200,6 +229,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    *
    * @param datasetId the dataset id
    * @param datasetName the dataset name
+   *
    * @return true, if successful
    */
   @Override
@@ -214,19 +244,19 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   }
 
 
-
   /**
    * Gets the statistics.
    *
    * @param datasetId the dataset id
+   *
    * @return the statistics
-   * @throws EEAException the EEA exception
+   *
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
    */
   @Override
   public StatisticsVO getStatistics(final Long datasetId)
-      throws EEAException, InstantiationException, IllegalAccessException {
+      throws InstantiationException, IllegalAccessException {
 
     List<Statistics> statistics = statisticsRepository.findStatisticsByIdDataset(datasetId);
     return processStatistics(statistics);
@@ -272,7 +302,9 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Process statistics.
    *
    * @param statistics the statistics
+   *
    * @return the statistics VO
+   *
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
    */
@@ -314,12 +346,13 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   }
 
 
-
   /**
    * Gets the global statistics.
    *
    * @param dataschemaId the dataschema id
+   *
    * @return the global statistics
+   *
    * @throws EEAException the EEA exception
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
@@ -349,7 +382,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
     return statistics;
   }
-
 
 
   /**
@@ -388,7 +420,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   }
 
 
-
   /**
    * Creates the group dc and add user.
    *
@@ -399,7 +430,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
     resourceManagementControllerZuul.createResource(
         createGroup(datasetId, ResourceTypeEnum.DATA_COLLECTION, SecurityRoleEnum.DATA_CUSTODIAN));
-
 
     userManagementControllerZuul.addUserToResource(datasetId,
         ResourceGroupEnum.DATACOLLECTION_CUSTODIAN);
@@ -412,6 +442,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param datasetId the dataset id
    * @param type the type
    * @param role the role
+   *
    * @return the resource info VO
    */
   private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
@@ -423,7 +454,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
     return resourceInfoVO;
   }
-
 
 
   /**
@@ -458,7 +488,9 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param dueDate the due date
    * @param representatives the representatives
    * @param iterationDC the iteration DC
+   *
    * @return the future
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -468,7 +500,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   public Future<Long> createEmptyDataset(DatasetTypeEnum datasetType, String datasetName,
       String datasetSchemaId, Long dataflowId, Date dueDate, List<RepresentativeVO> representatives,
       Integer iterationDC) throws EEAException {
-
 
     if (datasetType != null && dataflowId != null) {
       try {
@@ -541,6 +572,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param id the id
    * @param email the email
    * @param group the group
+   *
    * @return the resource assignation VO
    */
   private ResourceAssignationVO fillResourceAssignation(Long id, String email,
@@ -555,13 +587,13 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   }
 
 
-
   /**
    * Fill and save reporting dataset.
    *
    * @param representative the representative
    * @param dataflowId the dataflow id
    * @param datasetSchemaId the dataset schema id
+   *
    * @return the map
    */
   private Map<Long, String> fillAndSaveReportingDataset(RepresentativeVO representative,
@@ -588,6 +620,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Find dataset schema id by id.
    *
    * @param datasetId the dataset id
+   *
    * @return the string
    */
   @Override
@@ -644,6 +677,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    *
    * @param datasetIdOrigin the dataset id origin
    * @param idPk the id pk
+   *
    * @return the dataset destination foreign relation
    */
   @Override
@@ -655,6 +689,29 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       idDestination = datasetsId.get(0);
     }
     return idDestination;
+  }
+
+  /**
+   * Gets the dataset type.
+   *
+   * @param datasetId the dataset id
+   *
+   * @return the dataset type
+   */
+
+  @Override
+  public DatasetTypeEnum getDatasetType(Long datasetId) {
+    DatasetTypeEnum type = null;
+
+    if (designDatasetRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.DESIGN;
+    } else if (reportingDatasetRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.REPORTING;
+    } else if (dataCollectionRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.COLLECTION;
+    }
+
+    return type;
   }
 
 

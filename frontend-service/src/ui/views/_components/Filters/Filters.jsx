@@ -8,6 +8,7 @@ import styles from './Filters.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
@@ -34,6 +35,7 @@ export const Filters = ({
   filterByList,
   getFilteredData,
   inputOptions,
+  matchMode,
   searchAll,
   searchBy = [],
   selectList,
@@ -51,6 +53,7 @@ export const Filters = ({
     filterBy: {},
     filteredData: [],
     labelAnimations: {},
+    matchMode: true,
     orderBy: {},
     searchBy: ''
   });
@@ -62,6 +65,10 @@ export const Filters = ({
   useEffect(() => {
     if (getFilteredData) getFilteredData(filterState.filteredData);
   }, [filterState.filteredData]);
+
+  useEffect(() => {
+    onReApplyFilters();
+  }, [filterState.matchMode]);
 
   useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[dateOptions]) && onAnimateLabel([dateOptions], false));
 
@@ -151,6 +158,18 @@ export const Filters = ({
     filterDispatch({ type: 'ON_SEARCH_DATA', payload: { searchedValues, value } });
   };
 
+  const onToggleMatchMode = () => filterDispatch({ type: 'TOGGLE_MATCH_MODE', payload: !filterState.matchMode });
+
+  const onReApplyFilters = () => {
+    const keys = Object.keys(filterState.filterBy);
+    for (let index = 0; index < keys.length; index++) {
+      const filter = keys[index];
+      const value = filterState.filterBy[filter];
+
+      if (!isEmpty(value)) onFilterData(filter, filterState.filterBy[filter]);
+    }
+  };
+
   const renderCalendarFilter = (property, i) => (
     <span key={i} className={styles.dataflowInput} ref={dateRef}>
       {renderOrderFilter(property)}
@@ -185,6 +204,28 @@ export const Filters = ({
         </label>
       </span>
     </span>
+  );
+
+  const renderCheckbox = () => (
+    <Fragment>
+      <span className={styles.checkboxWrap} data-tip data-for="checkboxTooltip">
+        {resources.messages['strictModeCheckboxFilter']}
+        <Button
+          className={`${styles.strictModeInfoButton} p-button-rounded p-button-secondary-transparent`}
+          icon="infoCircle"
+          tooltip={resources.messages['strictModeTooltip']}
+          tooltipOptions={{ position: 'top' }}
+        />
+        <span className={styles.checkbox}>
+          <Checkbox
+            id={`matchMode_checkbox`}
+            isChecked={filterState.matchMode}
+            onChange={() => onToggleMatchMode()}
+            role="checkbox"
+          />
+        </span>
+      </span>
+    </Fragment>
   );
 
   const renderDropdown = (property, i) => (
@@ -314,6 +355,7 @@ export const Filters = ({
       {selectOptions && selectOptions.map((option, i) => renderSelectFilter(option, i))}
       {dropdownOptions && dropdownOptions.map((option, i) => renderDropdown(option, i))}
       {dateOptions && dateOptions.map((option, i) => renderCalendarFilter(option, i))}
+      {matchMode && renderCheckbox()}
 
       <div className={styles.buttonWrapper} style={{ width: sendData ? 'inherit' : '' }}>
         {sendData ? (

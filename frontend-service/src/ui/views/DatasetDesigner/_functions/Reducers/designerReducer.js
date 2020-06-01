@@ -5,7 +5,9 @@ export const designerReducer = (state, { type, payload }) => {
         ...state,
         datasetDescription: payload.description,
         datasetSchemaAllTables: payload.tables,
-        datasetSchemaId: payload.schemaId
+        datasetSchemaId: payload.schemaId,
+        levelErrorTypes: payload.levelErrorTypes,
+        tableSchemaNames: payload.tableSchemaNames
       };
 
     case 'GET_METADATA':
@@ -15,6 +17,9 @@ export const designerReducer = (state, { type, payload }) => {
         datasetSchemaName: payload.schemaName,
         metaData: payload.metaData
       };
+
+    case 'GET_UNIQUES':
+      return { ...state, uniqueConstraintsList: payload.data };
 
     case 'INITIAL_DATASET_DESCRIPTION':
       return { ...state, initialDatasetDescription: payload.value };
@@ -31,6 +36,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'MANAGE_DIALOGS':
       return { ...state, [payload.dialog]: payload.value, [payload.secondDialog]: payload.secondValue };
 
+    case 'MANAGE_UNIQUE_CONSTRAINT_DATA':
+      return { ...state, manageUniqueConstraintData: { ...state.manageUniqueConstraintData, ...payload.data } };
+
     case 'ON_UPDATE_DESCRIPTION':
       return { ...state, datasetDescription: payload.value };
 
@@ -39,7 +47,8 @@ export const designerReducer = (state, { type, payload }) => {
 
     case 'SET_DATASET_HAS_DATA':
       return { ...state, datasetHasData: payload.hasData };
-
+    case 'TOGGLE_DASHBOARD_VISIBILITY':
+      return { ...state, dashDialogVisible: payload };
     default:
       return state;
   }

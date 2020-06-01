@@ -65,7 +65,7 @@ export const FieldDesigner = ({
     { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
     { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
     // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
-    // { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
+    { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
     // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
     // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
@@ -528,6 +528,7 @@ export const FieldDesigner = ({
     pk = fieldDesignerState.fieldPKValue,
     pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
     name = fieldDesignerState.fieldValue,
+    recordId = recordSchemaId,
     referencedField = fieldDesignerState.fieldLinkValue,
     required = fieldDesignerState.fieldRequiredValue,
     type = parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType)
@@ -540,6 +541,7 @@ export const FieldDesigner = ({
         pk,
         pkMustBeUsed,
         name,
+        recordId,
         referencedField: !isNil(referencedField)
           ? parseReferenceField(referencedField)
           : fieldDesignerState.fieldLinkValue,
@@ -558,6 +560,7 @@ export const FieldDesigner = ({
           pk,
           pkMustBeUsed,
           name,
+          recordId,
           referencedField,
           required,
           type

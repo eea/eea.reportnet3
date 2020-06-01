@@ -1,4 +1,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 org.eea.kafka.configuration.KafkaConfiguration,\
 org.eea.enums.EnumsConfiguration,\
-org.eea.notification.configuration.NotificableEventConfiguration
+org.eea.notification.configuration.NotificableEventConfiguration,\
+org.eea.health.EEAHealthIndicatorConfiguration
