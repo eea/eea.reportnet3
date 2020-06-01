@@ -239,12 +239,13 @@ public class DatasetMetabaseServiceTest {
    */
   @Test
   public void findDatasetMetabase() throws Exception {
-    when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
+    when(dataSetMetabaseRepository.findById(Mockito.eq(1l)))
         .thenReturn(Optional.of(new DataSetMetabase()));
-    when(datasetService.getDatasetType(Mockito.anyLong())).thenReturn(DatasetTypeEnum.DESIGN);
+
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     when(dataSetMetabaseMapper.entityToClass(Mockito.any(DataSetMetabase.class)))
         .thenReturn(datasetMetabaseVO);
+    when(designDatasetRepository.existsById(Mockito.eq(1l))).thenReturn(true);
     DataSetMetabaseVO result = datasetMetabaseService.findDatasetMetabase(1l);
     Mockito.verify(dataSetMetabaseRepository, times(1)).findById(Mockito.anyLong());
     Assert.assertNotNull(result);

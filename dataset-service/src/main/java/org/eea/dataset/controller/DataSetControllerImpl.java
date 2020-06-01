@@ -51,7 +51,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
-/** The type Data set controller. */
+/**
+ * The type Data set controller.
+ */
 @RestController
 @RequestMapping("/dataset")
 public class DataSetControllerImpl implements DatasetController {
@@ -96,6 +98,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Autowired
   private DesignDatasetService designDatasetService;
+  
 
   /**
    * Gets the data tables values.
@@ -182,7 +185,7 @@ public class DataSetControllerImpl implements DatasetController {
   public void loadTableData(
       @LockCriteria(name = "datasetId") @PathVariable("id") final Long datasetId,
       @RequestParam("file") final MultipartFile file, @LockCriteria(
-          name = "idTableSchema") @PathVariable(value = "idTableSchema") String idTableSchema) {
+      name = "idTableSchema") @PathVariable(value = "idTableSchema") String idTableSchema) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -555,6 +558,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetIdOrigin the dataset id origin
    * @param idFieldSchema the id field schema
    * @param searchValue the search value
+   *
    * @return the field values referenced
    */
   @Override
@@ -571,6 +575,7 @@ public class DataSetControllerImpl implements DatasetController {
    *
    * @param datasetIdOrigin the dataset id origin
    * @param idFieldSchema the id field schema
+   *
    * @return the referenced dataset id
    */
   @Override
@@ -584,6 +589,7 @@ public class DataSetControllerImpl implements DatasetController {
    * Gets the dataset type.
    *
    * @param datasetId the dataset id
+   *
    * @return the dataset type
    */
   @Override
@@ -598,6 +604,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   *
    * @return the ETL dataset VO
    */
   @Override
@@ -625,6 +632,7 @@ public class DataSetControllerImpl implements DatasetController {
    * Etl export dataset.
    *
    * @param datasetId the dataset id
+   *
    * @return the ETL dataset VO
    */
   @Override
