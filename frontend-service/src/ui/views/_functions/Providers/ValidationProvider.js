@@ -32,7 +32,7 @@ const validationReducer = (state, { type, payload }) => {
       return {
         ...state,
         isVisible: true,
-        tableSchemaId: payload.tableSchemaId,
+        referenceId: payload.recordId,
         opener: null,
         level: 'row'
       };
@@ -106,10 +106,10 @@ export const ValidationProvider = ({ children }) => {
             payload: { fieldId, tableSchemaId }
           });
         },
-        onOpenModalFromRow: tableSchemaId => {
+        onOpenModalFromRow: recordId => {
           dispatch({
             type: 'ON_OPEN_QC_CREATION_MODAL_FROM_ROW',
-            payload: { tableSchemaId }
+            payload: { recordId }
           });
         },
         onCloseModal: () => {

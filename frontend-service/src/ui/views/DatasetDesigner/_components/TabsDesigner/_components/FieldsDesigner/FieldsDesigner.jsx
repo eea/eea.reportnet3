@@ -487,7 +487,7 @@ export const FieldsDesigner = ({
             className="p-button-secondary p-button-animated-blink"
             icon={'horizontalSliders'}
             label={resources.messages['addRowConstraint']}
-            onClick={() => validationContext.onOpenModalFromRow(table.tableSchemaId)}
+            onClick={() => validationContext.onOpenModalFromRow(table.records[0].recordSchemaId)}
           />
         </div>
         <div className={styles.switchDiv}>
