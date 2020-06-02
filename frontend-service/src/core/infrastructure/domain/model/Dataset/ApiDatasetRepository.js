@@ -475,6 +475,7 @@ const updateRecordFieldDesign = async (datasetId, record) => {
   datasetTableFieldDesign.type = record.type;
   datasetTableFieldDesign.description = record.description;
   datasetTableFieldDesign.codelistItems = record.codelistItems;
+  datasetTableFieldDesign.idRecord = record.recordId;
   datasetTableFieldDesign.referencedField = record.referencedField;
   datasetTableFieldDesign.required = record.required;
   datasetTableFieldDesign.pk = record.pk;

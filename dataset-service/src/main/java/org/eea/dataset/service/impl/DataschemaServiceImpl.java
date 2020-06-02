@@ -811,6 +811,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       } else {
         rulesControllerZuul.deleteRuleRequired(datasetSchemaId, fieldSchemaVO.getId());
       }
+      // If the type is Link, delete and create again the rule, the field pkMustBeUsed maybe has
+      // changed
+      if (DataType.LINK.equals(fieldSchemaVO.getType())) {
+        // Delete previous fk rule and insert it again
+        rulesControllerZuul.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId,
+            fieldSchemaVO.getId());
+        rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
+            fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
+      }
     }
 
 

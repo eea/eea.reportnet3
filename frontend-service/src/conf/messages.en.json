@@ -637,6 +637,11 @@
     "selectUniqueTableTitle": "Select a table",
     "updateUniqueConstraintError": "Error updating constraint",
     "createUniqueConstraintError": "Error creating constraint",
+    "dataflowListHelpStep2": "You can filter them by multiple parameters",
+    "dataflowListHelpStep5": "...the legal instrument and obligation...",
+    "expressionTypeDropdownPlaceholder": "Select type",
+    "fieldComparisonLabel": "Field comparison",
+    "ifThenLabel": "If-then clause",
     "strictModeCheckboxFilter": "Strict mode",
     "2d": "2D",
     "3d": "3D",
@@ -647,6 +652,8 @@
     "noDocuments": "No documents uploaded",
     "dataFiltered": "- filtered: ",
     "addUniqueConstraint": "Add unique constraint",
-    "strictModeTooltip": "Associated selected values"
+    "strictModeTooltip": "Associated selected values",
+    "addRowConstraint": "Add row constraint",
+    "noTablesToSelect": "There are no tables to select"
   }
 }

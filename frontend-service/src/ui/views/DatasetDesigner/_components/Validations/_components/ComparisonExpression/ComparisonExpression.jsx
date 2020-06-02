@@ -2,48 +2,75 @@ import React, { useState, useEffect, useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
-import styles from './ValidationExpression.module.scss';
+import styles from './ComparisonExpression.module.scss';
 
 import { config } from 'conf/';
 
 import { Button } from 'ui/views/_components/Button';
-import { Calendar } from 'ui/views/_components/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dropdown } from 'primereact/dropdown';
-import { InputNumber } from 'primereact/inputnumber';
-import { InputText } from 'ui/views/_components/InputText';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import isNil from 'lodash/isNil';
 
-const ValidationExpression = ({
+const ComparisonExpression = ({
   expressionValues,
-  fieldType,
   isDisabled,
-  layout,
   onExpressionDelete,
   onExpressionFieldUpdate,
   onExpressionGroup,
   onExpressionsErrors,
   position,
-  showRequiredFields
+  showRequiredFields,
+  rawTableFields,
+  onGetFieldType
 }) => {
+  const componentName = 'fieldComparison';
   const resourcesContext = useContext(ResourcesContext);
   const { expressionId } = expressionValues;
-  const [clickedFields, setClickedFields] = useState([]);
-  const [operatorTypes, setOperatorTypes] = useState([]);
   const [operatorValues, setOperatorValues] = useState([]);
-  const [valueInputProps, setValueInputProps] = useState();
-  const [valueKeyFilter, setValueKeyFilter] = useState();
+  const [operatorTypes, setOperatorTypes] = useState([]);
+  const [clickedFields, setClickedFields] = useState([]);
+  const [tableFields, setTableFields] = useState([]);
+  const [fieldType, setFieldType] = useState(null);
+  const [secondFieldOptions, setSecondFieldOptions] = useState();
   const {
-    validations: { operatorTypes: operatorTypesConf, operatorByType }
+    validations: { operatorTypes: operatorTypesConf, operatorByType, fieldByFieldType }
   } = config;
+
+  useEffect(() => {
+    if (rawTableFields) {
+      const parsedTableFields = rawTableFields.map(field => {
+        return { label: field.label, value: field.code };
+      });
+      setTableFields(parsedTableFields);
+      setSecondFieldOptions(parsedTableFields);
+    }
+  }, [rawTableFields]);
 
   useEffect(() => {
     if (expressionValues.operatorType) {
       setOperatorValues(operatorTypesConf[expressionValues.operatorType].values);
     }
   }, [expressionValues.operatorType]);
+
+  useEffect(() => {
+    if (!isEmpty(expressionValues.field1)) {
+      setFieldType(onGetFieldType(expressionValues.field1));
+    }
+  }, [expressionValues.field1]);
+
+  useEffect(() => {
+    if (!isEmpty(expressionValues.field1) && !isEmpty(fieldType)) {
+      const compatibleFieldTypes = fieldByFieldType[fieldType];
+      const allFields = tableFields.filter(field => {
+        const cFieldType = onGetFieldType(field.value);
+        const result = compatibleFieldTypes.includes(cFieldType);
+        return result;
+      });
+      setSecondFieldOptions(allFields.filter(cField => cField.value !== expressionValues.field1));
+    }
+  }, [expressionValues.field1, fieldType]);
 
   useEffect(() => {
     const options = [];
@@ -61,33 +88,9 @@ const ValidationExpression = ({
   }, [fieldType]);
 
   useEffect(() => {
-    const { operatorType } = expressionValues;
-    const cValueProps = { steps: 0, format: false, useGrouping: false };
-    if (operatorType === 'number' || operatorType === 'LEN') {
-      setValueKeyFilter('num');
-    }
-
-    if (fieldType === 'DATE') {
-      if (operatorType === 'year') {
-        cValueProps.min = 1900;
-        cValueProps.max = 2500;
-      }
-      if (operatorType === 'month') {
-        cValueProps.min = 1;
-        cValueProps.max = 12;
-      }
-      if (operatorType === 'day') {
-        cValueProps.min = 1;
-        cValueProps.max = 31;
-      }
-      setValueInputProps(cValueProps);
-    }
-  }, [expressionValues.operatorType]);
-
-  useEffect(() => {
     if (showRequiredFields) {
       const fieldsToAdd = [];
-      ['union', 'operatorType', 'operatorValue', 'expressionValue'].forEach(field => {
+      ['union', 'field1', 'operatorType', 'operatorValue', 'field2'].forEach(field => {
         if (!clickedFields.includes(field)) fieldsToAdd.push(field);
       });
       setClickedFields([...clickedFields, ...fieldsToAdd]);
@@ -113,8 +116,7 @@ const ValidationExpression = ({
     if (field === 'union') {
       conditions = clickedFields.includes(field) && position !== 0 && isEmpty(expressionValues[field]);
     } else if (field === 'expressionValue') {
-      conditions =
-        clickedFields.includes(field) && !isNil(expressionValues[field]) && isEmpty(expressionValues[field].toString());
+      conditions = clickedFields.includes(field) && isEmpty(expressionValues[field].toString());
     } else {
       conditions = clickedFields.includes(field) && isEmpty(expressionValues[field]);
     }
@@ -122,7 +124,7 @@ const ValidationExpression = ({
   };
 
   const onUpdateExpressionField = (key, value) => {
-    checkField(key, value);
+    checkField(key, value.value);
     onDeleteFromClickedFields(key);
     onExpressionFieldUpdate(expressionId, {
       key,
@@ -147,116 +149,16 @@ const ValidationExpression = ({
   const checkField = (field, fieldValue) => {
     if (field === 'year') {
       const yearInt = parseInt(fieldValue);
-      if (yearInt < 1000 || yearInt > 9999) onUpdateExpressionField('expressionValue', 0);
-    }
-    if (
-      expressionValues.operatorType === 'number' &&
-      field === 'operatorValue' &&
-      fieldValue !== 'MATCH' &&
-      !Number(expressionValues.expressionValue)
-    ) {
-      const number = Number(fieldValue);
-      if (!number) onUpdateExpressionField('expressionValue', '');
-    }
-  };
-  const buildValueInput = () => {
-    const { operatorType, operatorValue } = expressionValues;
-    if (operatorType === 'date') {
-      return (
-        <Calendar
-          appendTo={document.body}
-          baseZIndex={6000}
-          dateFormat="yy-mm-dd"
-          monthNavigator={true}
-          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
-          placeholder="YYYY-MM-DD"
-          readOnlyInput={false}
-          value={expressionValues.expressionValue}
-          yearNavigator={true}
-          yearRange="1900:2500"></Calendar>
-      );
-    }
-    if (operatorType === 'day') {
-      return (
-        <InputNumber
-          disabled={isDisabled}
-          format={false}
-          max={32}
-          min={0}
-          mode="decimal"
-          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
-          placeholder={resourcesContext.messages.value}
-          steps={0}
-          useGrouping={false}
-          value={expressionValues.expressionValue}
-        />
-      );
-    }
-    if (operatorType === 'number') {
-      if (operatorValue === 'MATCH') {
-        return (
-          <InputText
-            disabled={isDisabled}
-            onChange={e => onUpdateExpressionField('expressionValue', e.value)}
-            placeholder={resourcesContext.messages.value}
-            value={expressionValues.expressionValue}
-          />
-        );
+      if (yearInt < 1000 || yearInt > 9999) {
+        onUpdateExpressionField('expressionValue', 0);
       }
-
-      return (
-        <InputNumber
-          disabled={isDisabled}
-          format={false}
-          mode="decimal"
-          onBlur={e => checkField('number', e.value)}
-          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
-          placeholder={resourcesContext.messages.value}
-          steps={0}
-          useGrouping={false}
-          value={expressionValues.expressionValue}
-        />
-      );
     }
-    if (operatorType === 'year') {
-      return (
-        <InputNumber
-          disabled={isDisabled}
-          mode="decimal"
-          onBlur={e => checkField('year', e.value)}
-          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
-          placeholder={resourcesContext.messages.value}
-          steps={0}
-          useGrouping={false}
-          value={expressionValues.expressionValue}
-        />
-      );
+    if (expressionValues.operatorType === 'number' && field === 'operatorValue' && fieldValue !== 'MATCH') {
+      const number = Number(fieldValue);
+      if (!number) {
+        onUpdateExpressionField('expressionValue', '');
+      }
     }
-    if (operatorType === 'month') {
-      return (
-        <InputNumber
-          disabled={isDisabled}
-          format={false}
-          max={13}
-          min={0}
-          mode="decimal"
-          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
-          placeholder={resourcesContext.messages.value}
-          steps={0}
-          useGrouping={false}
-          value={expressionValues.expressionValue}
-        />
-      );
-    }
-    return (
-      <InputText
-        disabled={isDisabled}
-        keyfilter={valueKeyFilter}
-        onChange={e => onUpdateExpressionField('expressionValue', e.value)}
-        placeholder={resourcesContext.messages.value}
-        value={expressionValues.expressionValue}
-      />
-    );
   };
 
   return (
@@ -272,7 +174,6 @@ const ValidationExpression = ({
         onBlur={() => onAddToClickedFields('union')}
         className={`${styles.union} formField ${printRequiredFieldError('union')}`}>
         <Dropdown
-          // appendTo={document.body}
           disabled={isDisabled || position === 0}
           onChange={e => onUpdateExpressionField('union', e.value)}
           optionLabel="label"
@@ -282,10 +183,23 @@ const ValidationExpression = ({
         />
       </span>
       <span
+        onBlur={() => onAddToClickedFields('field1')}
+        className={`${styles.operatorType} formField ${printRequiredFieldError('field1')}`}>
+        <Dropdown
+          disabled={false}
+          id={`${componentName}__field1`}
+          onChange={e => onUpdateExpressionField('field1', e.value)}
+          optionLabel={'label'}
+          options={tableFields}
+          placeholder={'Select first field'}
+          value={expressionValues.field1}
+        />
+      </span>
+
+      <span
         onBlur={() => onAddToClickedFields('operatorType')}
         className={`${styles.operatorType} formField ${printRequiredFieldError('operatorType')}`}>
         <Dropdown
-          // appendTo={document.body}
           disabled={isDisabled}
           onChange={e => onUpdateExpressionField('operatorType', e.value)}
           optionLabel="label"
@@ -294,25 +208,36 @@ const ValidationExpression = ({
           value={expressionValues.operatorType}
         />
       </span>
+
       <span
         onBlur={() => onAddToClickedFields('operatorValue')}
         className={`${styles.operatorValue} formField ${printRequiredFieldError('operatorValue')}`}>
         <Dropdown
-          // appendTo={document.body}
           disabled={isDisabled}
           onChange={e => onUpdateExpressionField('operatorValue', e.value)}
           optionLabel="label"
           options={operatorValues}
+          optionValue="value"
           placeholder={resourcesContext.messages.operator}
           value={expressionValues.operatorValue}
         />
       </span>
+
       <span
-        onBlur={() => onAddToClickedFields('expressionValue')}
-        className={`${styles.expressionValue} formField ${printRequiredFieldError('expressionValue')}`}>
-        {buildValueInput()}
+        onBlur={() => onAddToClickedFields('field2')}
+        className={`${styles.operatorType} formField ${printRequiredFieldError('field2')}`}>
+        <Dropdown
+          disabled={false}
+          filterPlaceholder={'Select second field'}
+          id={`${componentName}__field2`}
+          onChange={e => onUpdateExpressionField('field2', e.value)}
+          optionLabel="label"
+          options={secondFieldOptions}
+          placeholder={'Select second field'}
+          value={expressionValues.field2}
+        />
       </span>
-      <span>
+      <div className={styles.deleteBtnWrap}>
         <Button
           className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton} p-button-animated-blink`}
           disabled={isDisabled}
@@ -320,8 +245,8 @@ const ValidationExpression = ({
           onClick={() => onExpressionDelete(expressionId)}
           type="button"
         />
-      </span>
+      </div>
     </li>
   );
 };
-export { ValidationExpression };
+export { ComparisonExpression };
