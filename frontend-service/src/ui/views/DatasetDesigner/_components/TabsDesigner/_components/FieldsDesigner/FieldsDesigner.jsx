@@ -252,7 +252,7 @@ export const FieldsDesigner = ({
             codelistItems: field.codelistItems,
             description: field.description,
             field: field['fieldId'],
-            header: `${capitalize(field['name'])}`,
+            header: field['name'],
             recordId: field['recordId'],
             referencedField: field['referencedField'],
             required: field.required,
