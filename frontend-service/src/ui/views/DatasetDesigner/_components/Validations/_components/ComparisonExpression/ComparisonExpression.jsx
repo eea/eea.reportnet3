@@ -97,14 +97,14 @@ const ComparisonExpression = ({
     }
   }, [tableFields]);
 
-  useEffect(() => {
-    ['operatorType', 'operatorValue', 'field2'].forEach(field => {
-      onExpressionFieldUpdate(expressionId, {
-        key: field,
-        value: ''
-      });
-    });
-  }, [expressionValues.field1]);
+  // useEffect(() => {
+  //   ['operatorType', 'operatorValue', 'field2'].forEach(field => {
+  //     onExpressionFieldUpdate(expressionId, {
+  //       key: field,
+  //       value: ''
+  //     });
+  //   });
+  // }, [expressionValues.field1]);
 
   useEffect(() => {
     if (expressionValues.operatorType) {
@@ -185,6 +185,14 @@ const ComparisonExpression = ({
   const onUpdateExpressionField = (key, value) => {
     checkField(key, value.value);
     onDeleteFromClickedFields(key);
+    if (key === 'field1' && value !== expressionValues.field1) {
+      ['operatorType', 'operatorValue', 'field2'].forEach(field => {
+        onExpressionFieldUpdate(expressionId, {
+          key: field,
+          value: ''
+        });
+      });
+    }
     onExpressionFieldUpdate(expressionId, {
       key,
       value
