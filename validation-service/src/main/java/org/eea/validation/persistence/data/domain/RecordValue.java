@@ -658,7 +658,7 @@ public class RecordValue {
     boolean validateReturn;
     try {
       validateReturn =
-          -1 == fieldsMap.get(fieldSchemaId1).indexOf(fieldsMap.get(fieldSchemaId2)) ? false : true;
+          -1 == fieldsMap.get(fieldSchemaId2).indexOf(fieldsMap.get(fieldSchemaId1)) ? false : true;
     } catch (Exception e) {
       validateReturn = true;
     }
