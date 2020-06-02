@@ -1052,12 +1052,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         && DataType.LINK.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))) {
       // First of all, we delete the previous relation on the Metabase, if applies
       Document previousReferenced = (Document) fieldSchema.get(LiteralConstants.REFERENCED_FIELD);
-      String previousIdPk = previousReferenced.get("idPk").toString();
-      String previousIdDatasetReferenced =
-          previousReferenced.get(LiteralConstants.ID_DATASET_SCHEMA).toString();
-      datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
-          this.getDesignDatasetIdDestinationFromFk(previousIdDatasetReferenced), previousIdPk,
-          fieldSchemaVO.getId());
+      if (previousReferenced != null && previousReferenced.get("idPk") != null) {
+        String previousIdPk = previousReferenced.get("idPk").toString();
+        String previousIdDatasetReferenced =
+            previousReferenced.get(LiteralConstants.ID_DATASET_SCHEMA).toString();
+        datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
+            this.getDesignDatasetIdDestinationFromFk(previousIdDatasetReferenced), previousIdPk,
+            fieldSchemaVO.getId());
+      }
     }
     // If the type is Link, then we add the relation on the Metabase
     if (fieldSchemaVO.getType() != null
