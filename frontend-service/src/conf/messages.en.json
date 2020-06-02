@@ -654,6 +654,8 @@
     "addUniqueConstraint": "Add unique constraint",
     "strictModeTooltip": "Associated selected values",
     "addRowConstraint": "Add row constraint",
-    "noTablesToSelect": "There are no tables to select"
+    "noTablesToSelect": "There are no tables to select",
+    "fme": "FME",
+    "addFme": "add FME"
   }
 }

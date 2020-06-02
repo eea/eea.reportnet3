@@ -13,6 +13,7 @@ import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { FME } from './_components/FME';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -68,6 +69,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     datasetSchemas: [],
     hasWritePermissions: false,
     initialDatasetDescription: '',
+    isFMEListDialogVisible: false,
+    isFMEManageDialogVisible: false,
     isLoading: true,
     isManageUniqueConstraintDialogVisible: false,
     isPreviewModeOn: DatasetDesignerUtils.getUrlParamValue('design'),
@@ -360,6 +363,36 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     </div>
   );
 
+  const renderFMEDialog = () => (
+    <Dialog
+      footer={renderFMEFooter}
+      header={resources.messages['fme']}
+      onHide={() => manageDialogs('isFMEListDialogVisible', false)}
+      style={{ width: '70%' }}
+      visible={designerState.isFMEListDialogVisible}>
+      <FME designerState={designerState} manageDialogs={manageDialogs} />
+    </Dialog>
+  );
+
+  const renderFMEFooter = (
+    <Fragment>
+      <div className="p-toolbar-group-left">
+        <Button
+          className="p-button-secondary p-button-animated-blink"
+          icon={'plus'}
+          label={resources.messages['addFme']}
+          onClick={() => manageDialogs('isFMEListDialogVisible', false, 'isFMEManageDialogVisible', true)}
+        />
+      </div>
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => manageDialogs('isFMEListDialogVisible', false)}
+      />
+    </Fragment>
+  );
+
   const renderUniqueConstraintsDialog = () => (
     <Dialog
       footer={renderUniqueConstraintsFooter}
@@ -513,6 +546,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               />
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                icon={'key'}
+                label={resources.messages['fme']}
+                onClick={() => manageDialogs('isFMEListDialogVisible', true)}
+              />
+              <Button
+                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
                 icon={'refresh'}
                 label={resources.messages['refresh']}
                 onClick={() => onLoadSchema()}
@@ -539,6 +578,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           snapshotListData={snapshotListData}
         />
         {validationsListDialog()}
+        {renderFMEDialog()}
         {renderUniqueConstraintsDialog()}
 
         <ManageUniqueConstraint
