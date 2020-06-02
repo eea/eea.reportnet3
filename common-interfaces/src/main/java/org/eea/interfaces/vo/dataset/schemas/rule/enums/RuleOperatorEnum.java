@@ -163,27 +163,27 @@ public enum RuleOperatorEnum {
 
   /** The record eq day record. */
   RECORD_EQ_DAY_RECORD(EntityTypeEnum.RECORD, "recordDayEqualsRecord", JavaType.BOOLEAN,
-      JavaType.DATE, JavaType.NUMBER),
+      JavaType.DATE, JavaType.DATE),
 
   /** The record dist day record. */
   RECORD_DIST_DAY_RECORD(EntityTypeEnum.RECORD, "recordDayDistinctRecord", JavaType.BOOLEAN,
-      JavaType.DATE, JavaType.NUMBER),
+      JavaType.DATE, JavaType.DATE),
 
   /** The record gt day record. */
   RECORD_GT_DAY_RECORD(EntityTypeEnum.RECORD, "recordDayGreaterThanRecord", JavaType.BOOLEAN,
-      JavaType.DATE, JavaType.NUMBER),
+      JavaType.DATE, JavaType.DATE),
 
   /** The record lt day record. */
   RECORD_LT_DAY_RECORD(EntityTypeEnum.RECORD, "recordDayLessThanRecord", JavaType.BOOLEAN,
-      JavaType.DATE, JavaType.NUMBER),
+      JavaType.DATE, JavaType.DATE),
 
   /** The record gteq day record. */
   RECORD_GTEQ_DAY_RECORD(EntityTypeEnum.RECORD, "recordDayGreaterThanOrEqualsThanRecord",
-      JavaType.BOOLEAN, JavaType.DATE, JavaType.NUMBER),
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.DATE),
 
   /** The record lteq day record. */
   RECORD_LTEQ_DAY_RECORD(EntityTypeEnum.RECORD, "recordDayLessThanOrEqualsThanRecord",
-      JavaType.BOOLEAN, JavaType.DATE, JavaType.NUMBER),
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.DATE),
 
   /** The record eq day record number. */
   RECORD_EQ_DAY_RECORD_NUMBER(EntityTypeEnum.RECORD, "recordDayEqualsRecordNumber",
@@ -238,27 +238,27 @@ public enum RuleOperatorEnum {
 
   /** The record eq month record. */
   RECORD_EQ_MONTH_RECORD(EntityTypeEnum.RECORD, "recordMonthEqualsRecord", JavaType.BOOLEAN,
-      JavaType.DATE, JavaType.NUMBER),
+      JavaType.DATE, JavaType.DATE),
 
   /** The record dist month record. */
   RECORD_DIST_MONTH_RECORD(EntityTypeEnum.RECORD, "recordMonthDistinctRecord", JavaType.BOOLEAN,
-      JavaType.DATE, JavaType.NUMBER),
+      JavaType.DATE, JavaType.DATE),
 
   /** The record gt month record. */
   RECORD_GT_MONTH_RECORD(EntityTypeEnum.RECORD, "recordMonthGreaterThanRecord", JavaType.BOOLEAN,
-      JavaType.DATE, JavaType.NUMBER),
+      JavaType.DATE, JavaType.DATE),
 
   /** The record lt month record. */
   RECORD_LT_MONTH_RECORD(EntityTypeEnum.RECORD, "recordMonthLessThanRecord", JavaType.BOOLEAN,
-      JavaType.DATE, JavaType.NUMBER),
+      JavaType.DATE, JavaType.DATE),
 
   /** The record gteq month record. */
   RECORD_GTEQ_MONTH_RECORD(EntityTypeEnum.RECORD, "recordMonthGreaterThanOrEqualsThanRecord",
-      JavaType.BOOLEAN, JavaType.DATE, JavaType.NUMBER),
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.DATE),
 
   /** The record lteq month record. */
   RECORD_LTEQ_MONTH_RECORD(EntityTypeEnum.RECORD, "recordMonthLessThanOrEqualsThanRecord",
-      JavaType.BOOLEAN, JavaType.DATE, JavaType.NUMBER),
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.DATE),
 
   /** The record eq month record number. */
   RECORD_EQ_MONTH_RECORD_NUMBER(EntityTypeEnum.RECORD, "recordMonthEqualsRecordNumber",
@@ -314,27 +314,27 @@ public enum RuleOperatorEnum {
 
   /** The record eq year record. */
   RECORD_EQ_YEAR_RECORD(EntityTypeEnum.RECORD, "recordYearEqualsRecord", JavaType.BOOLEAN,
-      JavaType.DATE, JavaType.NUMBER),
+      JavaType.DATE, JavaType.DATE),
 
   /** The record dist year record. */
   RECORD_DIST_YEAR_RECORD(EntityTypeEnum.RECORD, "recordYearDistinctRecord", JavaType.BOOLEAN,
-      JavaType.DATE, JavaType.NUMBER),
+      JavaType.DATE, JavaType.DATE),
 
   /** The record gt year record. */
   RECORD_GT_YEAR_RECORD(EntityTypeEnum.RECORD, "recordYearGreaterThanRecord", JavaType.BOOLEAN,
-      JavaType.DATE, JavaType.NUMBER),
+      JavaType.DATE, JavaType.DATE),
 
   /** The record lt year record. */
   RECORD_LT_YEAR_RECORD(EntityTypeEnum.RECORD, "recordYearLessThanRecord", JavaType.BOOLEAN,
-      JavaType.DATE, JavaType.NUMBER),
+      JavaType.DATE, JavaType.DATE),
 
   /** The record gteq year record. */
   RECORD_GTEQ_YEAR_RECORD(EntityTypeEnum.RECORD, "recordYearGreaterThanOrEqualsThanRecord",
-      JavaType.BOOLEAN, JavaType.DATE, JavaType.NUMBER),
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.DATE),
 
   /** The record lteq year record. */
   RECORD_LTEQ_YEAR_RECORD(EntityTypeEnum.RECORD, "recordYearLessThanOrEqualsThanRecord",
-      JavaType.BOOLEAN, JavaType.DATE, JavaType.NUMBER),
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.DATE),
 
   /** The record eq year record number. */
   RECORD_EQ_YEAR_RECORD_NUMBER(EntityTypeEnum.RECORD, "recordYearEqualsRecordNumber",
