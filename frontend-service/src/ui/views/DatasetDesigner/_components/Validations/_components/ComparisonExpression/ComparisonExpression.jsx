@@ -35,7 +35,7 @@ const ComparisonExpression = ({
   const [fieldType, setFieldType] = useState(null);
   const [secondFieldOptions, setSecondFieldOptions] = useState();
   const {
-    validations: { operatorTypes: operatorTypesConf, operatorByType, fieldByFieldType }
+    validations: { operatorTypes: operatorTypesConf, operatorByType, fieldByOperatorType }
   } = config;
   const [disabledFields, setDisabledFields] = useState({});
 
@@ -120,12 +120,13 @@ const ComparisonExpression = ({
 
   useEffect(() => {
     if (!isEmpty(expressionValues.field1) && !isEmpty(fieldType) && expressionValues.operatorType) {
-      const compatibleFieldTypes = fieldByFieldType[fieldType];
+      const compatibleFieldTypes = fieldByOperatorType[expressionValues.operatorType];
       const allFields = tableFields.filter(field => {
         const cFieldType = onGetFieldType(field.value);
         const result = compatibleFieldTypes.includes(cFieldType);
         return result;
       });
+
       setSecondFieldOptions(allFields.filter(cField => cField.value !== expressionValues.field1));
     }
   }, [expressionValues.field1, expressionValues.operatorType, fieldType]);
@@ -249,7 +250,7 @@ const ComparisonExpression = ({
           onChange={e => onUpdateExpressionField('field1', e.value)}
           optionLabel={'label'}
           options={tableFields}
-          placeholder={'Select first field'}
+          placeholder={resourcesContext.messages.selectField}
           value={expressionValues.field1}
         />
       </span>
@@ -286,12 +287,12 @@ const ComparisonExpression = ({
         className={`${styles.operatorType} formField ${printRequiredFieldError('field2')}`}>
         <Dropdown
           disabled={disabledFields.field2}
-          filterPlaceholder={'Select second field'}
+          filterPlaceholder={resourcesContext.messages.selectField}
           id={`${componentName}__field2`}
           onChange={e => onUpdateExpressionField('field2', e.value)}
           optionLabel="label"
           options={secondFieldOptions}
-          placeholder={'Select second field'}
+          placeholder={resourcesContext.messages.selectField}
           value={expressionValues.field2}
         />
       </span>
