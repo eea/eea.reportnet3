@@ -361,15 +361,18 @@ public class RecordValue {
    * Record number matches.
    *
    * @param fieldSchemaId the field schema id
-   * @param regex the regex
+   * @param dataMach the data mach
    * @return true, if successful
    */
-  public boolean recordNumberMatches(String fieldSchemaId, String regex) {
+  public boolean recordNumberMatches(String fieldSchemaId, String dataMach) {
+    boolean validateReturn;
     try {
-      return fieldsMap.get(fieldSchemaId).matches(regex);
+      validateReturn =
+          -1 == fieldsMap.get(fieldSchemaId).indexOf(fieldsMap.get(dataMach)) ? false : true;
     } catch (Exception e) {
-      return true;
+      validateReturn = true;
     }
+    return validateReturn;
   }
 
   /**
@@ -604,11 +607,14 @@ public class RecordValue {
    * @return true, if successful
    */
   public boolean recordStringMatches(String fieldSchemaId, String regex) {
+    boolean validateReturn;
     try {
-      return fieldsMap.get(fieldSchemaId).matches(regex);
+      validateReturn =
+          -1 == fieldsMap.get(fieldSchemaId).indexOf(fieldsMap.get(regex)) ? false : true;
     } catch (Exception e) {
-      return true;
+      validateReturn = true;
     }
+    return validateReturn;
   }
 
   /**
@@ -649,11 +655,14 @@ public class RecordValue {
    * @return true, if successful
    */
   public boolean recordStringMatchesRecord(String fieldSchemaId1, String fieldSchemaId2) {
+    boolean validateReturn;
     try {
-      return fieldsMap.get(fieldSchemaId1).matches(fieldsMap.get(fieldSchemaId2));
+      validateReturn =
+          -1 == fieldsMap.get(fieldSchemaId2).indexOf(fieldsMap.get(fieldSchemaId1)) ? false : true;
     } catch (Exception e) {
-      return true;
+      validateReturn = true;
     }
+    return validateReturn;
   }
 
   /**
