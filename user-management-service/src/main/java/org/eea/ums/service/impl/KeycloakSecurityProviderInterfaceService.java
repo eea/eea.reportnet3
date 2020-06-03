@@ -569,6 +569,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       tokenVO.setPreferredUsername(user.getUsername());
       LOG.info("User {} logged in and cached succesfully via api key {}",
           tokenVO.getPreferredUsername(), apiKey);
+    } else {
+      LOG_ERROR.error("{} users found with api key {} ", userRepresentations.size(), apiKey);
     }
 
     return tokenVO;
