@@ -170,7 +170,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Override
   public void doLogout(String authToken) {
     keycloakConnectorService.logout(authToken);
-    LOG.info("Auth token authToken logged out and removed from cache succesfully", authToken);
+    LOG.info("Auth token {} logged out and removed from cache succesfully", authToken);
   }
 
   /**
