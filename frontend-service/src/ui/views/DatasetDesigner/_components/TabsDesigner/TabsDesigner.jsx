@@ -218,12 +218,14 @@ export const TabsDesigner = withRouter(
     const addTable = async (header, tabIndex) => {
       try {
         const response = await DatasetService.addTableDesign(datasetId, header);
+
         if (response.status < 200 || response.status > 299) {
           console.error('Error during table Add');
         } else {
           const inmTabs = [...tabs];
           inmTabs[tabIndex].tableSchemaId = response.data.idTableSchema;
           inmTabs[tabIndex].recordId = response.data.recordSchema.idRecordSchema;
+          inmTabs[tabIndex].recordSchemaId = response.data.recordSchema.idRecordSchema;
           inmTabs[tabIndex].header = header;
           inmTabs[tabIndex].tableSchemaName = header;
           inmTabs[tabIndex].newTab = false;
