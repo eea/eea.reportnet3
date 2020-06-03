@@ -4,12 +4,12 @@
     <parent>
         <artifactId>library-pom</artifactId>
         <groupId>org.eea</groupId>
-        <version>3.0-SNAPSHOT</version>
+		<version>3.0.0</version>
         <relativePath>../parent-poms/lib</relativePath>
     </parent>
     <groupId>org.eea.interfaces</groupId>
     <artifactId>common-interfaces</artifactId>
-    <version>3.0-SNAPSHOT</version>
+	<version>${common-interfaces.version}</version>
     <properties>
         <feign_version>10.1.0</feign_version>
         <projectlombok.version>1.18.0</projectlombok.version>
