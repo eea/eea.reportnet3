@@ -134,6 +134,7 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
         return await ValidationService.getAll(datasetSchema.datasetSchemaId);
       });
       Promise.all(datasetValidations).then(allValidations => {
+        allValidations = allValidations.filter(allValidation => !isUndefined(allValidation));
         if (!isCustodian) {
           allValidations.forEach(
             allValidation =>
