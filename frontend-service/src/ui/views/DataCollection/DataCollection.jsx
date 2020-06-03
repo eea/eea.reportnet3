@@ -200,7 +200,7 @@ export const DataCollection = withRouter(({ match, history }) => {
               codelistItems: field['codelistItems'],
               description: field['description'],
               field: field['fieldId'],
-              header: `${capitalize(field['name'])}`,
+              header: field['name'],
               recordId: field['recordId'],
               referencedField: field['referencedField'],
               table: table['tableSchemaName'],

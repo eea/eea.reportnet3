@@ -9,7 +9,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { Map } from 'ui/views/_components/Map';
-import { MultiSelect } from 'primereact/multiselect';
+import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -141,12 +141,14 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
   const renderMultiselectCodelist = (field, fieldValue) => {
     return (
       <MultiSelect
+        appendTo={document.body}
         maxSelectedLabels={10}
         onChange={e => onChangeForm(field, e.value)}
         options={column.codelistItems.sort().map(codelistItem => {
           return { itemType: codelistItem, value: codelistItem };
         })}
         optionLabel="itemType"
+        style={{ height: '34px' }}
         value={RecordUtils.getMultiselectValues(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
         // hasSelectedItemsLabel={false}
       />

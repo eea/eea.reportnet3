@@ -537,6 +537,7 @@ export const FieldDesigner = ({
     pkHasMultipleValues = fieldDesignerState.pkHasMultipleValues,
     pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
     name = fieldDesignerState.fieldValue,
+    recordId = recordSchemaId,
     referencedField = fieldDesignerState.fieldLinkValue,
     required = fieldDesignerState.fieldRequiredValue,
     type = parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType)
@@ -550,6 +551,7 @@ export const FieldDesigner = ({
         pkHasMultipleValues,
         pkMustBeUsed,
         name,
+        recordId,
         referencedField: !isNil(referencedField)
           ? parseReferenceField(referencedField)
           : fieldDesignerState.fieldLinkValue,
@@ -569,6 +571,7 @@ export const FieldDesigner = ({
           pkHasMultipleValues,
           pkMustBeUsed,
           name,
+          recordId,
           referencedField,
           required,
           type
