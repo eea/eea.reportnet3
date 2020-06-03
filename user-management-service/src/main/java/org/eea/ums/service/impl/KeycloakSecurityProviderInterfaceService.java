@@ -542,7 +542,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         String userApiKey =
             apiKeys.stream().filter(value -> value.startsWith(apiKey)).findFirst().orElse("");
         if (StringUtils.isNotEmpty(userApiKey)) {
-
+          LOG.info("Found user {} with api key {}",
+              userRepresentation.getUsername(), apiKey);
           String[] apiKeyValues = userApiKey.split(",");
           dataflowId = Long.valueOf(apiKeyValues[1]);
           userRepresentations.add(userRepresentation);
