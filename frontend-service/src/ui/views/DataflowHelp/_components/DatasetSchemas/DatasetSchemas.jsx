@@ -145,7 +145,6 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
             ? allValidations
                 .map(allValidation =>
                   allValidation.validations.map(validation => {
-                    // debugger;
                     const validationTableAndField = getFieldName(
                       validation.referenceId,
                       //validation.idDatasetSchema,
