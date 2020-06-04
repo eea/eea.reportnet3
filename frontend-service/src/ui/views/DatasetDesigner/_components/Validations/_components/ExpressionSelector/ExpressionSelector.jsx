@@ -56,28 +56,41 @@ export const ExpressionSelector = ({
       );
     }
     if (!isEmpty(expressionType) && expressionType === 'ifThenClause') {
-      return <IfThenClause />;
+      return (
+        <IfThenClause
+          componentName={componentName}
+          creationFormState={creationFormState}
+          onAddNewExpression={onAddNewExpression}
+          onExpressionDelete={onExpressionDelete}
+          onExpressionFieldUpdate={onExpressionFieldUpdate}
+          onExpressionGroup={onExpressionGroup}
+          onExpressionMarkToGroup={onExpressionMarkToGroup}
+          onExpressionsErrors={onExpressionsErrors}
+          tabsChanges={tabsChanges}
+          onGetFieldType={onGetFieldType}
+        />
+      );
     }
     return <></>;
   };
-  // return (
-  //   <>
-  //     <div className={styles.section}>
-  //       <Dropdown
-  //         value={expressionType}
-  //         options={options}
-  //         onChange={e => onExpressionTypeToggle(e.value)}
-  //         placeholder={resources.messages['expressionTypeDropdownPlaceholder']}
-  //         optionLabel="label"
-  //       />
-  //     </div>
-
-  //     <div className={styles.section}>{expressionsTypeView()} </div>
-  //   </>
-  // );
   return (
     <>
+      <div className={styles.section}>
+        <Dropdown
+          value={expressionType}
+          options={options}
+          onChange={e => onExpressionTypeToggle(e.value)}
+          placeholder={resources.messages['expressionTypeDropdownPlaceholder']}
+          optionLabel="label"
+        />
+      </div>
+
       <div className={styles.section}>{expressionsTypeView()} </div>
     </>
   );
+  /* return (
+    <>
+      <div className={styles.section}>{expressionsTypeView()} </div>
+    </>
+  ); */
 };
