@@ -535,12 +535,14 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     Long dataflowId = 0l;
     for (UserRepresentation userRepresentation : keycloakConnectorService.getUsers()) {
       if (null != userRepresentation.getAttributes()
-          && 1 >= userRepresentation.getAttributes().size()) {
+          && 1 <= userRepresentation.getAttributes().size() && userRepresentation.getAttributes()
+          .containsKey("ApiKeys")) {
         List<String> apiKeys = userRepresentation.getAttributes().get("ApiKeys");
         // an api key in attributes is represented as a string where positions are:
         // ApiKeyValue,dataflowId,dataproviderId
-        String userApiKey =
-            apiKeys.stream().filter(value -> value.startsWith(apiKey)).findFirst().orElse("");
+
+        String userApiKey = apiKeys.stream()
+            .filter(value -> value.startsWith(apiKey)).findFirst().orElse("");
         if (StringUtils.isNotEmpty(userApiKey)) {
           LOG.info("Found user {} with api key {}",
               userRepresentation.getUsername(), apiKey);
