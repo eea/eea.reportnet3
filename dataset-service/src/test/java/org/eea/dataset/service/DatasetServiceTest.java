@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,188 +102,286 @@ import org.springframework.mock.web.MockMultipartFile;
 @RunWith(MockitoJUnitRunner.class)
 public class DatasetServiceTest {
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @InjectMocks
   private DatasetServiceImpl datasetService;
 
-  /** The context. */
+  /**
+   * The context.
+   */
   @Mock
   private FileParseContextImpl context;
 
-  /** The file parser factory. */
+  /**
+   * The file parser factory.
+   */
   @Mock
   private FileParserFactory fileParserFactory;
 
-  /** The data set mapper. */
+  /**
+   * The data set mapper.
+   */
   @Mock
   private DataSetMapper dataSetMapper;
 
-  /** The table value mapper. */
+  /**
+   * The table value mapper.
+   */
   @Mock
   private TableValueMapper tableValueMapper;
 
-  /** The partition data set metabase repository. */
+  /**
+   * The partition data set metabase repository.
+   */
   @Mock
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
-  /** The data set metabase repository. */
+  /**
+   * The data set metabase repository.
+   */
   @Mock
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  /** The data collection repository. */
+  /**
+   * The data collection repository.
+   */
   @Mock
   private DataCollectionRepository dataCollectionRepository;
 
-  /** The reporting dataset repository. */
+  /**
+   * The reporting dataset repository.
+   */
   @Mock
   private ReportingDatasetRepository reportingDatasetRepository;
 
-  /** The design dataset repository. */
+  /**
+   * The design dataset repository.
+   */
   @Mock
   private DesignDatasetRepository designDatasetRepository;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The schemas repository. */
+  /**
+   * The schemas repository.
+   */
   @Mock
   private SchemasRepository schemasRepository;
 
-  /** The dataset repository. */
+  /**
+   * The dataset repository.
+   */
   @Mock
   private DatasetRepository datasetRepository;
 
-  /** The table repository. */
+  /**
+   * The table repository.
+   */
   @Mock
   private TableRepository tableRepository;
 
-  /** The kafka sender. */
+  /**
+   * The kafka sender.
+   */
   @Mock
   private KafkaSender kafkaSender;
 
-  /** The record repository. */
+  /**
+   * The record repository.
+   */
   @Mock
   private RecordRepository recordRepository;
 
-  /** The record mapper. */
+  /**
+   * The record mapper.
+   */
   @Mock
   private RecordMapper recordMapper;
 
-  /** The record no validation mapper. */
+  /**
+   * The record no validation mapper.
+   */
   @Mock
   private RecordNoValidationMapper recordNoValidationMapper;
 
-  /** The pageable. */
+  /**
+   * The pageable.
+   */
   @Mock
   private Pageable pageable;
 
-  /** The field repository. */
+  /**
+   * The field repository.
+   */
   @Mock
   private FieldRepository fieldRepository;
 
-  /** The table no record mapper. */
+  /**
+   * The table no record mapper.
+   */
   @Mock
   private TableNoRecordMapper tableNoRecordMapper;
 
-  /** The field validation repository. */
+  /**
+   * The field validation repository.
+   */
   @Mock
   private FieldValidationRepository fieldValidationRepository;
 
-  /** The record validation repository. */
+  /**
+   * The record validation repository.
+   */
   @Mock
   private RecordValidationRepository recordValidationRepository;
 
-  /** The table validation repository. */
+  /**
+   * The table validation repository.
+   */
   @Mock
   private TableValidationRepository tableValidationRepository;
 
-  /** The table validation mapper. */
+  /**
+   * The table validation mapper.
+   */
   @Mock
   private TableValidationMapper tableValidationMapper;
 
-  /** The field validation mapper. */
+  /**
+   * The field validation mapper.
+   */
   @Mock
   private FieldValidationMapper fieldValidationMapper;
 
-  /** The record validation mapper. */
+  /**
+   * The record validation mapper.
+   */
   @Mock
   private RecordValidationMapper recordValidationMapper;
 
-  /** The validation repository. */
+  /**
+   * The validation repository.
+   */
   @Mock
   private ValidationRepository validationRepository;
 
-  /** The dataset validation repository. */
+  /**
+   * The dataset validation repository.
+   */
   @Mock
   private DatasetValidationRepository datasetValidationRepository;
 
-  /** The file export factory. */
+  /**
+   * The file export factory.
+   */
   @Mock
   private IFileExportFactory fileExportFactory;
 
-  /** The context export. */
+  /**
+   * The context export.
+   */
   @Mock
   private IFileExportContext contextExport;
 
-  /** The file common. */
+  /**
+   * The file common.
+   */
   @Mock
   private FileCommonUtils fileCommon;
 
-  /** The statistics repository. */
+  /**
+   * The statistics repository.
+   */
   @Mock
   private StatisticsRepository statisticsRepository;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
 
-  /** The representative controller zuul. */
+  /**
+   * The representative controller zuul.
+   */
   @Mock
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /** The field no validation mapper. */
+  /**
+   * The field no validation mapper.
+   */
   @Mock
   private FieldNoValidationMapper fieldNoValidationMapper;
 
-  /** The lock service. */
+  /**
+   * The lock service.
+   */
   @Mock
   private LockService lockService;
 
-  /** The field value. */
+  /**
+   * The field value.
+   */
   private FieldValue fieldValue;
 
-  /** The record value. */
+  /**
+   * The record value.
+   */
   private RecordValue recordValue;
 
-  /** The record values. */
+  /**
+   * The record values.
+   */
   private ArrayList<RecordValue> recordValues;
 
-  /** The table value. */
+  /**
+   * The table value.
+   */
   private TableValue tableValue;
 
-  /** The table values. */
+  /**
+   * The table values.
+   */
   private ArrayList<TableValue> tableValues;
 
-  /** The dataset value. */
+  /**
+   * The dataset value.
+   */
   private DatasetValue datasetValue;
 
-  /** The data set VO. */
+  /**
+   * The data set VO.
+   */
   private DataSetVO dataSetVO;
 
-  /** The table V os. */
+  /**
+   * The table V os.
+   */
   private ArrayList<TableVO> tableVOs;
 
-  /** The table VO. */
+  /**
+   * The table VO.
+   */
   private TableVO tableVO;
 
-  /** The field list. */
+  /**
+   * The field list.
+   */
   private List<FieldValue> fieldList;
 
-  /** The sorted list. */
+  /**
+   * The sorted list.
+   */
   private List<FieldValue> sortedList;
 
-  /** The field. */
+  /**
+   * The field.
+   */
   private FieldValue field;
 
   /**
@@ -549,7 +648,7 @@ public class DatasetServiceTest {
     when(recordRepository.findByTableValueNoOrder(Mockito.any(), Mockito.any()))
         .thenReturn(recordValues);
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING,
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING,
         ErrorTypeEnum.CORRECT, ErrorTypeEnum.BLOCKER, ErrorTypeEnum.INFO};
     datasetService.getTableValuesById(1L, "mongoId", pageable, null, errorfilter);
     Mockito.verify(recordNoValidationMapper, times(1)).entityListToClass(Mockito.any());
@@ -584,7 +683,7 @@ public class DatasetServiceTest {
     recV.add(recValidation);
     pageable = PageRequest.of(0, 1);
     String listFields = "field_1:1,fields_2:2,fields_3:3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
     when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
     when(fieldValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
@@ -624,7 +723,7 @@ public class DatasetServiceTest {
     recV.add(recValidation);
     pageable = PageRequest.of(0, 1);
     String listFields = "field_1:1,fields_2:2,fields_3:3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
     when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
     when(fieldValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
@@ -664,7 +763,7 @@ public class DatasetServiceTest {
     recV.add(recValidation);
     pageable = null;
     String listFields = "field_1:1,fields_2:2,fields_3:3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
     when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
     when(fieldValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
@@ -704,7 +803,7 @@ public class DatasetServiceTest {
     recV.add(recValidation);
     pageable = null;
     String listFields = "field_1:1,fields_2:2,fields_3:3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
     when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
     when(fieldValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
@@ -743,8 +842,8 @@ public class DatasetServiceTest {
     recV.add(recValidation);
     pageable = null;
     String listFields = "field_1:1,fields_2:2,fields_3:3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
-    List<FieldValidationVO> valFieldVO = new ArrayList<FieldValidationVO>();
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    List<FieldValidationVO> valFieldVO = new ArrayList<>();
     FieldValidationVO fieldVO = new FieldValidationVO();
     ValidationVO validation = new ValidationVO();
     validation.setLevelError(ErrorTypeEnum.ERROR);
@@ -787,7 +886,7 @@ public class DatasetServiceTest {
     recV.add(recValidation);
     pageable = null;
     String listFields = "field_1:1,fields_2:2,fields_3:3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
     when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
     when(fieldValidationMapper.entityListToClass(Mockito.any())).thenReturn(null);
@@ -826,7 +925,7 @@ public class DatasetServiceTest {
     recV.add(recValidation);
     pageable = null;
     String listFields = "field_1:1,fields_2:2,fields_3:3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
     when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
     when(fieldValidationMapper.entityListToClass(Mockito.any())).thenReturn(null);
@@ -865,14 +964,14 @@ public class DatasetServiceTest {
     recV.add(recValidation);
     pageable = null;
     String listFields = "field_1:1,fields_2:2,fields_3:3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
-    List<FieldValidationVO> valFieldVO = new ArrayList<FieldValidationVO>();
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    List<FieldValidationVO> valFieldVO = new ArrayList<>();
     FieldValidationVO fieldVO = new FieldValidationVO();
     ValidationVO validation = new ValidationVO();
     validation.setLevelError(ErrorTypeEnum.ERROR);
     fieldVO.setValidation(validation);
     valFieldVO.add(fieldVO);
-    List<RecordValidationVO> valRecordsVO = new ArrayList<RecordValidationVO>();
+    List<RecordValidationVO> valRecordsVO = new ArrayList<>();
     RecordValidationVO recordvalVO = new RecordValidationVO();
     ValidationVO validationRec = new ValidationVO();
     validationRec.setLevelError(ErrorTypeEnum.ERROR);
@@ -1064,7 +1163,7 @@ public class DatasetServiceTest {
   @Test
   public void updateRecordsTest() throws EEAException {
     when(recordMapper.classListToEntity(Mockito.any())).thenReturn(recordValues);
-    datasetService.updateRecords(1L, new ArrayList<RecordVO>());
+    datasetService.updateRecords(1L, new ArrayList<>());
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
 
@@ -1103,7 +1202,9 @@ public class DatasetServiceTest {
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
 
-  /** The thrown. */
+  /**
+   * The thrown.
+   */
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
@@ -1115,7 +1216,7 @@ public class DatasetServiceTest {
   @Test
   public void createRecordsExceptionTest() throws EEAException {
     thrown.expectMessage(EEAErrorMessage.TABLE_NOT_FOUND);
-    datasetService.createRecords(1L, new ArrayList<RecordVO>(), "");
+    datasetService.createRecords(1L, new ArrayList<>(), "");
   }
 
   /**
@@ -1126,7 +1227,7 @@ public class DatasetServiceTest {
   @Test
   public void createRecordsException2Test() throws EEAException {
     thrown.expectMessage(EEAErrorMessage.RECORD_NOTFOUND);
-    datasetService.createRecords(1L, new ArrayList<RecordVO>(), null);
+    datasetService.createRecords(1L, new ArrayList<>(), null);
   }
 
   /**
@@ -1148,7 +1249,7 @@ public class DatasetServiceTest {
   @Test
   public void createRecordsException4Test() throws EEAException {
     thrown.expectMessage(EEAErrorMessage.RECORD_NOTFOUND);
-    datasetService.createRecords(null, new ArrayList<RecordVO>(), "");
+    datasetService.createRecords(null, new ArrayList<>(), "");
   }
 
   /**
@@ -1176,6 +1277,7 @@ public class DatasetServiceTest {
    * Gets the file name test.
    *
    * @return the file name test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -1555,54 +1657,6 @@ public class DatasetServiceTest {
         .getDatasetDestinationForeignRelation(Mockito.any(), Mockito.any());
   }
 
-  /**
-   * Gets the dataset type enum return design test.
-   *
-   * @return the dataset type enum return design test
-   */
-  @Test
-  public void getDatasetTypeEnumReturnDesignTest() {
-    Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(true);
-    Assert.assertEquals(DatasetTypeEnum.DESIGN, datasetService.getDatasetType(1L));
-  }
-
-  /**
-   * Gets the dataset type enum return reporting test.
-   *
-   * @return the dataset type enum return reporting test
-   */
-  @Test
-  public void getDatasetTypeEnumReturnReportingTest() {
-    Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
-    Mockito.when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(true);
-    Assert.assertEquals(DatasetTypeEnum.REPORTING, datasetService.getDatasetType(1L));
-  }
-
-  /**
-   * Gets the dataset type enum return collection test.
-   *
-   * @return the dataset type enum return collection test
-   */
-  @Test
-  public void getDatasetTypeEnumReturnCollectionTest() {
-    Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
-    Mockito.when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
-    Mockito.when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(true);
-    Assert.assertEquals(DatasetTypeEnum.COLLECTION, datasetService.getDatasetType(1L));
-  }
-
-  /**
-   * Gets the dataset type enum return null test.
-   *
-   * @return the dataset type enum return null test
-   */
-  @Test
-  public void getDatasetTypeEnumReturnNullTest() {
-    Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
-    Mockito.when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
-    Mockito.when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(false);
-    Assert.assertNull(datasetService.getDatasetType(1L));
-  }
 
   /**
    * Test get table read only.
@@ -1644,7 +1698,6 @@ public class DatasetServiceTest {
     table.setReadOnly(false);
     table.setIdTableSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
     schema.setTableSchemas(Arrays.asList(table));
-
 
     Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5ce524fad31fc52540abae73");
@@ -1853,7 +1906,7 @@ public class DatasetServiceTest {
    */
   @Test(expected = EEAException.class)
   public void updateRecordsNullTest() throws Exception {
-    datasetService.updateRecords(null, new ArrayList<RecordVO>());
+    datasetService.updateRecords(null, new ArrayList<>());
   }
 
   /**
@@ -1878,7 +1931,7 @@ public class DatasetServiceTest {
     fieldValue.setValue("Lorem ipsum");
     recordValue.setFields(Arrays.asList(fieldValue));
     when(recordMapper.classListToEntity(Mockito.any())).thenReturn(Arrays.asList(recordValue));
-    datasetService.updateRecords(1L, new ArrayList<RecordVO>());
+    datasetService.updateRecords(1L, new ArrayList<>());
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
 

@@ -134,6 +134,7 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
         return await ValidationService.getAll(datasetSchema.datasetSchemaId);
       });
       Promise.all(datasetValidations).then(allValidations => {
+        allValidations = allValidations.filter(allValidation => !isUndefined(allValidation));
         if (!isCustodian) {
           allValidations.forEach(
             allValidation =>
@@ -145,7 +146,6 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
             ? allValidations
                 .map(allValidation =>
                   allValidation.validations.map(validation => {
-                    // debugger;
                     const validationTableAndField = getFieldName(
                       validation.referenceId,
                       //validation.idDatasetSchema,

@@ -25,7 +25,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
-import { ValidationViewer } from './_components/ValidationViewer';
+import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
 import { WebFormData } from './_components/WebFormData/WebFormData';
 
 import { DataflowService } from 'core/services/Dataflow';
