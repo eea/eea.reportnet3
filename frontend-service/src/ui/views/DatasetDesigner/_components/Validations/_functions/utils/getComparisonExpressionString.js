@@ -1,50 +1,45 @@
-import { config } from 'conf';
-
-import camelCase from 'lodash/camelCase';
 import isNil from 'lodash/isNil';
 import isEmpty from 'lodash/isEmpty';
-import moment from 'moment';
+import { getSelectedFieldById } from './getSelectedFieldById';
 
-const printExpression = expression => {
+const printExpression = (expression, tabs) => {
   if (!isNil(expression.operatorValue) && !isEmpty(expression.operatorValue)) {
     if (expression.operatorType === 'LEN') {
       return `( LEN( ${expression.field1.label} ) ${expression.operatorValue} ${expression.field2.label} )`;
     }
-    // if (expression.operatorType === 'date') {
-    //   return `( ${field} ${expression.operatorValue} ${moment(expression.expressionValue).format('YYYY-MM-DD')} )`;
-    // }
-    return `( ${expression.field1.label} ${expression.operatorValue} ${expression.field2.label} )`;
+    return `( ${getSelectedFieldById(expression.field1, tabs).label} ${expression.operatorValue} ${
+      getSelectedFieldById(expression.field2, tabs).label
+    } )`;
   }
   return '';
 };
-const printNode = (expression, index, expressions) => {
+const printNode = (expression, index, expressions, tabs) => {
   let expressionString = '';
-  expressionString = `${printSelector(expression, 0, [])} ${
+  expressionString = `${printSelector(expression, 0, [], tabs)} ${
     !isNil(expressions[index + 1].union) ? expressions[index + 1].union : ''
   }`;
   if (expressions.length - 1 > index + 1) {
-    expressionString = `${expressionString} ${printSelector(expressions[index + 1], index + 1, expressions)}`;
+    expressionString = `${expressionString} ${printSelector(expressions[index + 1], index + 1, expressions, tabs)}`;
   } else {
-    expressionString = `${expressionString} ${printSelector(expressions[index + 1], 0, [])}`;
+    expressionString = `${expressionString} ${printSelector(expressions[index + 1], 0, [], tabs)}`;
   }
   return expressionString;
 };
 
-const printSelector = (expression, index, expressions) => {
+const printSelector = (expression, index, expressions, tabs) => {
   if (expressions.length > 1) {
-    return printNode(expression, index, expressions);
+    return printNode(expression, index, expressions, tabs);
   }
   if (expression.expressions.length > 1) {
-    return `( ${printNode(expression.expressions[0], 0, expression.expressions)} )`;
+    return `( ${printNode(expression.expressions[0], 0, expression.expressions, tabs)} )`;
   }
-  return printExpression(expression);
+  return printExpression(expression, tabs);
 };
 
-export const getComparisonsExpressionString = (expressions, field) => {
+export const getComparisonExpressionString = (expressions, tabs) => {
   let expressionString = '';
-  if (!isNil(field) && expressions.length > 0) {
-    const { label: fieldLabel } = field;
-    expressionString = printSelector(expressions[0], 0, expressions);
+  if (expressions.length > 0) {
+    expressionString = printSelector(expressions[0], 0, expressions, tabs);
   }
   return expressionString;
 };

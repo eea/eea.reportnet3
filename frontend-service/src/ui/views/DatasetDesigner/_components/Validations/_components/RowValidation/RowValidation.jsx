@@ -33,11 +33,8 @@ import { deleteExpression } from 'ui/views/DatasetDesigner/_components/Validatio
 import { deleteExpressionRecursively } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpressionRecursively';
 import { getDatasetSchemaTableFields } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getDatasetSchemaTableFields';
 import { getEmptyExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getEmptyExpression';
-import { getExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getExpressionString';
+import { getComparisonExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getComparisonExpressionString';
 import { getFieldType } from '../../_functions/utils/getFieldType';
-import { getSelectedFieldById } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedFieldById';
-import { getSelectedTableByFieldId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTablebyFieldId';
-import { getSelectedTableByTableSchemaId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTableByTableSchemaId';
 import { getSelectedTableByRecordId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTableByRecordId';
 import { groupExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/groupExpressions';
 import { initValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/initValidationRuleCreation';
@@ -182,12 +179,12 @@ export const RowValidation = ({ datasetId, tabs }) => {
 
   useEffect(() => {
     const {
-      candidateRule: { field, expressions }
+      candidateRule: { table, expressions }
     } = creationFormState;
 
     creationFormDispatch({
       type: 'SET_EXPRESSIONS_STRING',
-      payload: getExpressionString(expressions, field)
+      payload: getComparisonExpressionString(expressions, tabs)
     });
   }, [creationFormState.candidateRule]);
 
