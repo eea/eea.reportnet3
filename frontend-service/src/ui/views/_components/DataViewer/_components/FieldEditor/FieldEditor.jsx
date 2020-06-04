@@ -45,6 +45,7 @@ const FieldEditor = ({
 
   let fieldType = {};
   if (!isEmpty(record)) {
+    console.log(record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cells.field)[0], colsSchema);
     fieldType = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cells.field)[0].fieldData.type;
   }
 
@@ -317,28 +318,58 @@ const FieldEditor = ({
           />
         );
       case 'LINK':
-        return (
-          <Dropdown
-            appendTo={document.body}
-            currentValue={RecordUtils.getCellValue(cells, cells.field)}
-            filter={true}
-            filterPlaceholder={resources.messages['linkFilterPlaceholder']}
-            filterBy="itemType,value"
-            onChange={e => {
-              setLinkItemsValue(e.target.value.value);
-              onEditorValueChange(cells, e.target.value.value);
-              onEditorSubmitValue(cells, e.target.value.value, record);
-            }}
-            onFilterInputChangeBackend={onFilter}
-            onMouseDown={e => {
-              onEditorValueFocus(cells, e.target.value);
-            }}
-            optionLabel="itemType"
-            options={linkItemsOptions}
-            showFilterClear={true}
-            value={RecordUtils.getLinkValue(linkItemsOptions, linkItemsValue)}
-          />
-        );
+        const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
+        console.log(hasMultipleValues);
+        if (hasMultipleValues) {
+          return (
+            <MultiSelect
+              // onChange={e => onChangeForm(field, e.value)}
+              appendTo={document.body}
+              maxSelectedLabels={10}
+              onChange={e => {
+                try {
+                  setCodelistItemValue(e.value);
+                  onEditorValueChange(cells, e.value);
+                  onEditorSubmitValue(cells, e.value, record);
+                } catch (error) {
+                  console.error(error);
+                }
+              }}
+              onFocus={e => {
+                e.preventDefault();
+                if (!isUndefined(codelistItemValue)) {
+                  onEditorValueFocus(cells, codelistItemValue);
+                }
+              }}
+              options={[2, 3, 4]}
+              optionLabel="itemType"
+              value={RecordUtils.getMultiselectValues(codelistItemsOptions, codelistItemValue)}
+            />
+          );
+        } else {
+          return (
+            <Dropdown
+              appendTo={document.body}
+              currentValue={RecordUtils.getCellValue(cells, cells.field)}
+              filter={true}
+              filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+              filterBy="itemType,value"
+              onChange={e => {
+                setLinkItemsValue(e.target.value.value);
+                onEditorValueChange(cells, e.target.value.value);
+                onEditorSubmitValue(cells, e.target.value.value, record);
+              }}
+              onFilterInputChangeBackend={onFilter}
+              onMouseDown={e => {
+                onEditorValueFocus(cells, e.target.value);
+              }}
+              optionLabel="itemType"
+              options={linkItemsOptions}
+              showFilterClear={true}
+              value={RecordUtils.getLinkValue(linkItemsOptions, linkItemsValue)}
+            />
+          );
+        }
       case 'CODELIST':
         return (
           <Dropdown

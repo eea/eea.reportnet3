@@ -44,6 +44,11 @@ const getCellId = (tableData, field) => {
   return !isUndefined(completeField) ? completeField.fieldData.id : undefined;
 };
 
+const getCellInfo = (colSchemaData, field) => {
+  const completeField = colSchemaData.filter(data => data.field === field)[0];
+  return !isUndefined(completeField) ? completeField : undefined;
+};
+
 const getCellItems = (colSchemaData, field) => {
   const completeField = colSchemaData.filter(data => data.field === field)[0];
   return !isUndefined(completeField) ? completeField.codelistItems : undefined;
@@ -197,6 +202,7 @@ export const RecordUtils = {
   createEmptyObject,
   getCellFieldSchemaId,
   getCellId,
+  getCellInfo,
   getCellItems,
   getCellValue,
   getClipboardData,
