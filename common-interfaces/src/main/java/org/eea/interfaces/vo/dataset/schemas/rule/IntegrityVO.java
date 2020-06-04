@@ -6,16 +6,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-/**
- * The Class IntegrityConstraintVO.
- */
 @Getter
 @Setter
 @ToString
-public class IntegrityConstraintVO {
-
-  /** The id. */
-  private String id;
+public class IntegrityVO extends RuleVO {
 
   /** The origin. */
   private List<String> originFields;
@@ -32,10 +26,11 @@ public class IntegrityConstraintVO {
   /** The referenced dataset schema id. */
   private String referencedDatasetSchemaId;
 
+
   @Override
   public int hashCode() {
-    return Objects.hash(id, originFields, referencedFields, isDoubleReferenced,
-        originDatasetSchemaId, referencedDatasetSchemaId);
+    return Objects.hash(originFields, referencedFields, isDoubleReferenced, originDatasetSchemaId,
+        referencedDatasetSchemaId);
   }
 
   /**
@@ -52,11 +47,11 @@ public class IntegrityConstraintVO {
     if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
-    IntegrityConstraintVO other = (IntegrityConstraintVO) obj;
-    return Objects.equals(id, other.id) && Objects.equals(originFields, other.originFields)
+    IntegrityVO other = (IntegrityVO) obj;
+    return Objects.equals(originFields, other.originFields)
         && Objects.equals(referencedFields, other.referencedFields)
         && Objects.equals(isDoubleReferenced, other.isDoubleReferenced)
-        && Objects.equals(originDatasetSchemaId, other.originDatasetSchemaId)
-        && Objects.equals(referencedDatasetSchemaId, other.referencedDatasetSchemaId);
+        && Objects.equals(originDatasetSchemaId, other.originDatasetSchemaId);
   }
+
 }

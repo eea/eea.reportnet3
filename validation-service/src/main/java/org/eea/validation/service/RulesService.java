@@ -3,6 +3,7 @@ package org.eea.validation.service;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 
@@ -163,4 +164,14 @@ public interface RulesService {
    * @param fieldSchemaId the field schema id
    */
   void deleteRuleHighLevelLike(String datasetSchemaId, String fieldSchemaId);
+
+
+  /**
+   * Creates the new dataset rule.
+   *
+   * @param datasetId the dataset id
+   * @param integrityVO the integrity VO
+   * @throws EEAException the EEA exception
+   */
+  void createNewDatasetRule(long datasetId, IntegrityVO integrityVO) throws EEAException;
 }

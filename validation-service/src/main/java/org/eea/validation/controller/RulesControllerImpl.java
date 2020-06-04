@@ -5,6 +5,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.validation.RulesController;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.thread.ThreadPropertiesManager;
@@ -357,5 +358,31 @@ public class RulesControllerImpl implements RulesController {
   public void deleteRuleHighLevelLike(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("fieldSchemaId") String fieldSchemaId) {
     rulesService.deleteRuleHighLevelLike(datasetSchemaId, fieldSchemaId);
+  }
+
+  /**
+   * Creates the new dataset rule.
+   *
+   * @param datasetId the dataset id
+   * @param integrityVO the integrity VO
+   */
+  @Override
+  @PutMapping("/createNewDatasetRule")
+  public void createNewDatasetRule(@RequestParam("datasetId") long datasetId,
+      @RequestBody IntegrityVO integrityVO) {
+    try {
+      // Set the user name on the thread
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
+
+      rulesService.createNewDatasetRule(datasetId, integrityVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error(
+          "Error creating rule: {} - referenceId={} - description={} - ruleName={} - whenCondition={} - thenCondition={} - shortCode={} - type={}",
+          e.getMessage(), integrityVO.getReferenceId(), integrityVO.getDescription(),
+          integrityVO.getRuleName(), integrityVO.getWhenCondition(), integrityVO.getThenCondition(),
+          integrityVO.getShortCode(), integrityVO.getType(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
   }
 }

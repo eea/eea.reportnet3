@@ -264,8 +264,7 @@ public class UniqueValidationUtils {
     return duplicatedRecords.isEmpty();
   }
 
-  public static Boolean isIntegrityConstraint(Long datasetId, String originFields,
-      String referencedFields, String idRule, boolean isDoubleReferenced) {
+  public static Boolean isIntegrityConstraint(Long datasetId, String integrityId) {
     return true;
   }
 }

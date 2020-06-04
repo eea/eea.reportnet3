@@ -5,6 +5,7 @@ package org.eea.interfaces.controller.validation;
 
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -204,4 +205,14 @@ public interface RulesController {
   @DeleteMapping("/private/deleteRuleHighLevelLike")
   void deleteRuleHighLevelLike(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("fieldSchemaId") String fieldSchemaId);
+
+  /**
+   * Creates the new dataset rule.
+   *
+   * @param datasetId the dataset id
+   * @param integrityVO the integrity VO
+   */
+  @PutMapping("/createNewDatasetRule")
+  void createNewDatasetRule(@RequestParam("datasetId") long datasetId,
+      @RequestBody IntegrityVO integrityVO);
 }

@@ -9,15 +9,18 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
+import org.eea.validation.persistence.repository.IntegritySchemaRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.RulesSequenceRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.FieldSchema;
+import org.eea.validation.persistence.schemas.IntegritySchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
@@ -58,6 +61,10 @@ public class RulesServiceImpl implements RulesService {
   /** The rule mapper. */
   @Autowired
   private RuleMapper ruleMapper;
+
+  /** The integrity schema repository. */
+  @Autowired
+  private IntegritySchemaRepository integritySchemaRepository;
 
   /** The kie base manager. */
   @Autowired
@@ -246,7 +253,6 @@ public class RulesServiceImpl implements RulesService {
     rule.setActivationGroup(null);
     rule.setVerified(null);
     // we create the whencondition Integrity for the rule
-    createWhenConditionDatasetIntegrity(ruleVO, rule);
     validateRule(rule);
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
@@ -254,27 +260,6 @@ public class RulesServiceImpl implements RulesService {
 
     // Check if rule is valid
     kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
-  }
-
-  /**
-   * Creates the when condition dataset integrity.
-   *
-   * @param ruleVO the rule VO
-   * @param rule the rule
-   */
-  private void createWhenConditionDatasetIntegrity(RuleVO ruleVO, Rule rule) {
-    if (EntityTypeEnum.DATASET.equals(ruleVO.getType())
-        && null != ruleVO.getIntegrityConstraintVO().getReferencedFields()
-        && null != ruleVO.getIntegrityConstraintVO().getOriginFields()) {
-      StringBuilder whenConditionIntegrity = new StringBuilder("isIntegrityConstraint(id, ");
-      whenConditionIntegrity = whenConditionIntegrity.append("'")
-          .append(String.join(", ", ruleVO.getIntegrityConstraintVO().getOriginFields()))
-          .append("',").append("'")
-          .append(String.join(", ", ruleVO.getIntegrityConstraintVO().getReferencedFields()))
-          .append("',").append("'").append(rule.getRuleId().toString()).append("',")
-          .append(ruleVO.getIntegrityConstraintVO().getIsDoubleReferenced()).append(")");
-      rule.setWhenCondition(whenConditionIntegrity.toString());
-    }
   }
 
   /**
@@ -647,5 +632,46 @@ public class RulesServiceImpl implements RulesService {
           "No rules associated with fieldSchemaId {} in datasetSchemaId {} in high level(record,table,dataset)",
           fieldSchemaId, datasetSchemaId);
     }
+  }
+
+  /**
+   * Creates the new dataset rule.
+   *
+   * @param datasetId the dataset id
+   * @param integrityVO the integrity VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void createNewDatasetRule(long datasetId, IntegrityVO integrityVO) throws EEAException {
+
+    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+    if (datasetSchemaId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
+    Rule rule = ruleMapper.classToEntity(integrityVO);
+    rule.setIntegrityConstraintId(new ObjectId());
+    rule.setRuleId(new ObjectId());
+    rule.setAutomatic(false);
+    rule.setActivationGroup(null);
+    rule.setVerified(null);
+    IntegritySchema integritySchema = new IntegritySchema();
+    integritySchema.setIsDoubleReferenced(integrityVO.getIsDoubleReferenced());
+    integritySchema.setId(rule.getIntegrityConstraintId());
+    integritySchema.setOriginDatasetSchemaId(new ObjectId(integrityVO.getOriginDatasetSchemaId()));
+    integritySchema
+        .setReferencedDatasetSchemaId(new ObjectId(integrityVO.getReferencedDatasetSchemaId()));
+    integritySchema.setIsDoubleReferenced(integrityVO.getIsDoubleReferenced());
+    integritySchema.setOriginFields(integrityVO.getOriginFields());
+    integritySchema.setReferencedFields(integrityVO.getReferencedFields());
+    integritySchemaRepository.save(integritySchema);
+
+    validateRule(rule);
+    if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
+      throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
+    }
+
+    // Check if rule is valid
+    kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
   }
 }
