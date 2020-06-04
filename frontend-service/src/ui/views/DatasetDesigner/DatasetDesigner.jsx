@@ -15,7 +15,7 @@ import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
-import { Integration } from './_components/Integration';
+import { Integrations } from './_components/Integrations';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
 import { Snapshots } from 'ui/views/_components/Snapshots';
@@ -363,38 +363,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     </div>
   );
 
-  const renderIntegrationDialog = () => (
-    <Dialog
-      footer={renderIntegrationFooter}
-      header={resources.messages['integration']}
-      onHide={() => manageDialogs('isIntegrationListDialogVisible', false)}
-      style={{ width: '70%' }}
-      visible={designerState.isIntegrationListDialogVisible}>
-      <Integration designerState={designerState} manageDialogs={manageDialogs} />
-    </Dialog>
-  );
-
-  const renderIntegrationFooter = (
-    <Fragment>
-      <div className="p-toolbar-group-left">
-        <Button
-          className="p-button-secondary p-button-animated-blink"
-          icon={'plus'}
-          label={resources.messages['addIntegration']}
-          onClick={() =>
-            manageDialogs('isIntegrationListDialogVisible', false, 'isIntegrationManageDialogVisible', true)
-          }
-        />
-      </div>
-      <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon={'cancel'}
-        label={resources.messages['close']}
-        onClick={() => manageDialogs('isIntegrationListDialogVisible', false)}
-      />
-    </Fragment>
-  );
-
   const renderUniqueConstraintsDialog = () => (
     <Dialog
       footer={renderUniqueConstraintsFooter}
@@ -580,8 +548,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           snapshotListData={snapshotListData}
         />
         {validationsListDialog()}
-        {renderIntegrationDialog()}
         {renderUniqueConstraintsDialog()}
+
+        <Integrations dataflowId={dataflowId} designerState={designerState} manageDialogs={manageDialogs} />
 
         <ManageUniqueConstraint
           designerState={designerState}
