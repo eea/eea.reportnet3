@@ -54,14 +54,8 @@ public class RuleVO {
   /** The short code. */
   private String shortCode;
 
-  /** The origin fields. */
-  private List<String> originFields;
-
-  /** The referenced. */
-  private List<String> referencedFields;
-
-  /** if the dataset rule is being referenced at the same tame */
-  private boolean isDoubleReferenced;
+  /** The integrity constraint VO. */
+  private IntegrityConstraintVO integrityConstraintVO;
 
   /**
    * Hash code.
@@ -71,8 +65,8 @@ public class RuleVO {
   @Override
   public int hashCode() {
     return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, salience,
-        activationGroup, type, whenCondition, thenCondition, description, shortCode, originFields,
-        referencedFields, isDoubleReferenced);
+        activationGroup, type, whenCondition, thenCondition, description, shortCode,
+        integrityConstraintVO);
   }
 
   /**
@@ -98,8 +92,6 @@ public class RuleVO {
         && Objects.equals(whenCondition, other.whenCondition)
         && Objects.equals(description, other.description)
         && Objects.equals(shortCode, other.shortCode)
-        && Objects.equals(originFields, other.originFields)
-        && Objects.equals(referencedFields, other.referencedFields)
-        && Objects.equals(isDoubleReferenced, other.isDoubleReferenced);
+        && Objects.equals(integrityConstraintVO, other.integrityConstraintVO);
   }
 }

@@ -263,14 +263,16 @@ public class RulesServiceImpl implements RulesService {
    * @param rule the rule
    */
   private void createWhenConditionDatasetIntegrity(RuleVO ruleVO, Rule rule) {
-    if (EntityTypeEnum.DATASET.equals(ruleVO.getType()) && null != ruleVO.getReferencedFields()
-        && null != ruleVO.getOriginFields()) {
+    if (EntityTypeEnum.DATASET.equals(ruleVO.getType())
+        && null != ruleVO.getIntegrityConstraintVO().getReferencedFields()
+        && null != ruleVO.getIntegrityConstraintVO().getOriginFields()) {
       StringBuilder whenConditionIntegrity = new StringBuilder("isIntegrityConstraint(id, ");
-      whenConditionIntegrity =
-          whenConditionIntegrity.append("'").append(String.join(", ", ruleVO.getOriginFields()))
-              .append("',").append("'").append(String.join(", ", ruleVO.getReferencedFields()))
-              .append("',").append("'").append(rule.getRuleId().toString()).append("',")
-              .append(ruleVO.isDoubleReferenced()).append(")");
+      whenConditionIntegrity = whenConditionIntegrity.append("'")
+          .append(String.join(", ", ruleVO.getIntegrityConstraintVO().getOriginFields()))
+          .append("',").append("'")
+          .append(String.join(", ", ruleVO.getIntegrityConstraintVO().getReferencedFields()))
+          .append("',").append("'").append(rule.getRuleId().toString()).append("',")
+          .append(ruleVO.getIntegrityConstraintVO().getIsDoubleReferenced()).append(")");
       rule.setWhenCondition(whenConditionIntegrity.toString());
     }
   }
