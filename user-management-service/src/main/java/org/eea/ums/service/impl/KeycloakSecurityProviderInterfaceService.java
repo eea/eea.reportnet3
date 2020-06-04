@@ -170,7 +170,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Override
   public void doLogout(String authToken) {
     keycloakConnectorService.logout(authToken);
-    LOG.info("Auth token authToken logged out and removed from cache succesfully", authToken);
+    LOG.info("Auth token {} logged out and removed from cache succesfully", authToken);
   }
 
   /**
@@ -535,12 +535,14 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     Long dataflowId = 0l;
     for (UserRepresentation userRepresentation : keycloakConnectorService.getUsers()) {
       if (null != userRepresentation.getAttributes()
-          && 1 >= userRepresentation.getAttributes().size()) {
+          && 1 <= userRepresentation.getAttributes().size() && userRepresentation.getAttributes()
+          .containsKey("ApiKeys")) {
         List<String> apiKeys = userRepresentation.getAttributes().get("ApiKeys");
         // an api key in attributes is represented as a string where positions are:
         // ApiKeyValue,dataflowId,dataproviderId
-        String userApiKey =
-            apiKeys.stream().filter(value -> value.startsWith(apiKey)).findFirst().orElse("");
+
+        String userApiKey = apiKeys.stream()
+            .filter(value -> value.startsWith(apiKey)).findFirst().orElse("");
         if (StringUtils.isNotEmpty(userApiKey)) {
 
           String[] apiKeyValues = userApiKey.split(",");
@@ -552,7 +554,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     TokenVO tokenVO = null;
     if (1 == userRepresentations.size()) {
       UserRepresentation user = userRepresentations.get(0);
-
+      LOG.info("Found user {} with api key {}",
+          user.getUsername(), apiKey);
       tokenVO = new TokenVO();
       tokenVO.setUserId(user.getId());
       Set<String> userGroups = new HashSet<>();
@@ -569,6 +572,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       tokenVO.setPreferredUsername(user.getUsername());
       LOG.info("User {} logged in and cached succesfully via api key {}",
           tokenVO.getPreferredUsername(), apiKey);
+    } else {
+      LOG_ERROR.error("{} users found with api key {} ", userRepresentations.size(), apiKey);
     }
 
     return tokenVO;
