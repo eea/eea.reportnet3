@@ -61,7 +61,7 @@ public class RuleVO {
   private List<String> referencedFields;
 
   /** if the dataset rule is being referenced at the same tame */
-  private Boolean isDoubleReferenced;
+  private boolean isDoubleReferenced;
 
   /**
    * Hash code.
@@ -71,7 +71,8 @@ public class RuleVO {
   @Override
   public int hashCode() {
     return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, salience,
-        activationGroup, type, whenCondition, thenCondition, description, shortCode);
+        activationGroup, type, whenCondition, thenCondition, description, shortCode, originFields,
+        referencedFields, isDoubleReferenced);
   }
 
   /**
@@ -96,6 +97,9 @@ public class RuleVO {
         && Objects.equals(type, other.type) && Objects.equals(thenCondition, other.thenCondition)
         && Objects.equals(whenCondition, other.whenCondition)
         && Objects.equals(description, other.description)
-        && Objects.equals(shortCode, other.shortCode);
+        && Objects.equals(shortCode, other.shortCode)
+        && Objects.equals(originFields, other.originFields)
+        && Objects.equals(referencedFields, other.referencedFields)
+        && Objects.equals(isDoubleReferenced, other.isDoubleReferenced);
   }
 }
