@@ -170,7 +170,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Override
   public void doLogout(String authToken) {
     keycloakConnectorService.logout(authToken);
-    LOG.info("Auth token authToken logged out and removed from cache succesfully", authToken);
+    LOG.info("Auth token {} logged out and removed from cache succesfully", authToken);
   }
 
   /**
@@ -542,7 +542,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         String userApiKey =
             apiKeys.stream().filter(value -> value.startsWith(apiKey)).findFirst().orElse("");
         if (StringUtils.isNotEmpty(userApiKey)) {
-
+          LOG.info("Found user {} with api key {}",
+              userRepresentation.getUsername(), apiKey);
           String[] apiKeyValues = userApiKey.split(",");
           dataflowId = Long.valueOf(apiKeyValues[1]);
           userRepresentations.add(userRepresentation);
@@ -569,6 +570,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       tokenVO.setPreferredUsername(user.getUsername());
       LOG.info("User {} logged in and cached succesfully via api key {}",
           tokenVO.getPreferredUsername(), apiKey);
+    } else {
+      LOG_ERROR.error("{} users found with api key {} ", userRepresentations.size(), apiKey);
     }
 
     return tokenVO;

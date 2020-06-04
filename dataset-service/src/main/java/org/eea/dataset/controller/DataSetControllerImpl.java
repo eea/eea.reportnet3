@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import javax.ws.rs.Produces;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.helper.DeleteHelper;
@@ -51,7 +52,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
-/** The type Data set controller. */
+/**
+ * The type Data set controller.
+ */
 @RestController
 @RequestMapping("/dataset")
 public class DataSetControllerImpl implements DatasetController {
@@ -96,6 +99,9 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Autowired
   private DesignDatasetService designDatasetService;
+
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
 
   /**
    * Gets the data tables values.
@@ -182,7 +188,7 @@ public class DataSetControllerImpl implements DatasetController {
   public void loadTableData(
       @LockCriteria(name = "datasetId") @PathVariable("id") final Long datasetId,
       @RequestParam("file") final MultipartFile file, @LockCriteria(
-          name = "idTableSchema") @PathVariable(value = "idTableSchema") String idTableSchema) {
+      name = "idTableSchema") @PathVariable(value = "idTableSchema") String idTableSchema) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -195,7 +201,7 @@ public class DataSetControllerImpl implements DatasetController {
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
-    if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
+    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE)) {
       datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
       LOG_ERROR.error(
@@ -338,7 +344,8 @@ public class DataSetControllerImpl implements DatasetController {
           "Error updating records. The datasetId or the records to update are emtpy or null");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
-    if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId)) && datasetService
+    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
+        && datasetService
         .getTableReadOnly(datasetId, records.get(0).getIdRecordSchema(), EntityTypeEnum.RECORD)) {
       LOG_ERROR.error("Error updating records in the datasetId {}. The table is read only",
           datasetId);
@@ -367,7 +374,7 @@ public class DataSetControllerImpl implements DatasetController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void deleteRecord(@PathVariable("id") final Long datasetId,
       @PathVariable("recordId") final String recordId) {
-    if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
+    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && datasetService.getTableReadOnly(datasetId, recordId, EntityTypeEnum.RECORD)) {
       LOG_ERROR.error("Error deleting record in the datasetId {}. The table is read only",
           datasetId);
@@ -403,7 +410,7 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
     // Not allow insert if the table is marked as read only. This not applies to design datasets
-    if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
+    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE)) {
       LOG_ERROR.error("Error inserting records in the datasetId {}. The table is read only",
           datasetId);
@@ -437,7 +444,7 @@ public class DataSetControllerImpl implements DatasetController {
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
-    if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId))
+    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && datasetService.getTableReadOnly(datasetId, tableSchemaId, EntityTypeEnum.TABLE)) {
       datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
           datasetId);
@@ -534,7 +541,8 @@ public class DataSetControllerImpl implements DatasetController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN')")
   public void updateField(@PathVariable("id") final Long datasetId,
       @RequestBody final FieldVO field) {
-    if (!DatasetTypeEnum.DESIGN.equals(datasetService.getDatasetType(datasetId)) && datasetService
+    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
+        && datasetService
         .getTableReadOnly(datasetId, field.getIdFieldSchema(), EntityTypeEnum.FIELD)) {
       LOG_ERROR.error("Error updating a field in the dataset {}. The table is read only",
           datasetId);
@@ -555,6 +563,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetIdOrigin the dataset id origin
    * @param idFieldSchema the id field schema
    * @param searchValue the search value
+   *
    * @return the field values referenced
    */
   @Override
@@ -571,6 +580,7 @@ public class DataSetControllerImpl implements DatasetController {
    *
    * @param datasetIdOrigin the dataset id origin
    * @param idFieldSchema the id field schema
+   *
    * @return the referenced dataset id
    */
   @Override
@@ -584,12 +594,13 @@ public class DataSetControllerImpl implements DatasetController {
    * Gets the dataset type.
    *
    * @param datasetId the dataset id
+   *
    * @return the dataset type
    */
   @Override
   @GetMapping("/private/datasetType/{datasetId}")
   public DatasetTypeEnum getDatasetType(@PathVariable("datasetId") Long datasetId) {
-    return datasetService.getDatasetType(datasetId);
+    return datasetMetabaseService.getDatasetType(datasetId);
   }
 
   /**
@@ -598,6 +609,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   *
    * @return the ETL dataset VO
    */
   @Override
@@ -625,6 +637,7 @@ public class DataSetControllerImpl implements DatasetController {
    * Etl export dataset.
    *
    * @param datasetId the dataset id
+   *
    * @return the ETL dataset VO
    */
   @Override

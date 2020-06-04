@@ -773,6 +773,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
       LOG_ERROR.error(
           "Error retrieving token from Keycloak host {} due to reason {} with following values {}",
           keycloakHost, e.getMessage(), map, e);
+      throw e;
     }
 
     return responseBody;

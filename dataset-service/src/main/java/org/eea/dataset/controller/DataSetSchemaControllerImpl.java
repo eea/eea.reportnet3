@@ -431,6 +431,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       // Add the register into the metabase fieldRelations
       dataschemaService.addForeignRelation(datasetId, fieldSchemaVO);
 
+      // Add UniqueConstraint if needed
+      dataschemaService.createUniqueConstraintPK(datasetSchemaId, fieldSchemaVO);
+
+
       return (response);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
