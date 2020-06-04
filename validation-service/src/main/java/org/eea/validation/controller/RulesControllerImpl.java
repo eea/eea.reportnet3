@@ -171,6 +171,9 @@ public class RulesControllerImpl implements RulesController {
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
 
+      // if (EntityTypeEnum.DATASET.equals(ruleVO.getType())) {
+      //
+      // }
       rulesService.createNewRule(datasetId, ruleVO);
     } catch (EEAException e) {
       LOG_ERROR.error(

@@ -54,6 +54,15 @@ public class RuleVO {
   /** The short code. */
   private String shortCode;
 
+  /** The origin fields. */
+  private List<String> originFields;
+
+  /** The referenced. */
+  private List<String> referencedFields;
+
+  /** if the dataset rule is being referenced at the same tame */
+  private Boolean isDoubleReferenced;
+
   /**
    * Hash code.
    *
