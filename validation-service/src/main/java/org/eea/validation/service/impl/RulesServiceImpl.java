@@ -245,15 +245,34 @@ public class RulesServiceImpl implements RulesService {
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
     rule.setVerified(null);
-
+    // we create the whencondition Integrity for the rule
+    createWhenConditionDatasetIntegrity(ruleVO, rule);
     validateRule(rule);
-
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     }
 
     // Check if rule is valid
     kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
+  }
+
+  /**
+   * Creates the when condition dataset integrity.
+   *
+   * @param ruleVO the rule VO
+   * @param rule the rule
+   */
+  private void createWhenConditionDatasetIntegrity(RuleVO ruleVO, Rule rule) {
+    if (EntityTypeEnum.DATASET.equals(ruleVO.getType()) && null != ruleVO.getReferencedFields()
+        && null != ruleVO.getOriginFields()) {
+      StringBuilder whenConditionIntegrity = new StringBuilder("isIntegrityConstraint(id, ");
+      whenConditionIntegrity =
+          whenConditionIntegrity.append("'").append(String.join(", ", ruleVO.getOriginFields()))
+              .append("',").append("'").append(String.join(", ", ruleVO.getReferencedFields()))
+              .append("',").append("'").append(rule.getRuleId().toString()).append("',")
+              .append(ruleVO.isDoubleReferenced()).append(")");
+      rule.setWhenCondition(whenConditionIntegrity.toString());
+    }
   }
 
   /**

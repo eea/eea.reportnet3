@@ -12,8 +12,10 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.RecordValue;
+import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.RecordRepository;
+import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
@@ -44,6 +46,9 @@ public class UniqueValidationUtils {
    */
   private static DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
+
+  /** The table repository. */
+  private static TableRepository tableRepository;
 
   /**
    * Sets the rules repository.
@@ -86,6 +91,17 @@ public class UniqueValidationUtils {
     UniqueValidationUtils.dataSetSchemaControllerZuul = dataSetSchemaControllerZuul;
   }
 
+
+  /**
+   * Sets the table repository.
+   *
+   * @param tableRepository the new table repository
+   */
+  @Autowired
+  private void setTableRepository(TableRepository tableRepository) {
+    UniqueValidationUtils.tableRepository = tableRepository;
+  }
+
   /**
    * Creates the validation.
    *
@@ -94,8 +110,8 @@ public class UniqueValidationUtils {
    *
    * @return the validation
    */
-  private static Validation createValidation(String idRule, String idDatasetSchema,
-      String origname) {
+  private static Validation createValidation(String idRule, String idDatasetSchema, String origname,
+      EntityTypeEnum typeEnum) {
 
     Rule rule = rulesRepository.findRule(new ObjectId(idDatasetSchema), new ObjectId(idRule));
 
@@ -121,7 +137,7 @@ public class UniqueValidationUtils {
     }
 
     validation.setMessage(rule.getThenCondition().get(0));
-    validation.setTypeEntity(EntityTypeEnum.RECORD);
+    validation.setTypeEntity(typeEnum);
     validation.setValidationDate(new Date().toString());
     validation.setOriginName(origname);
 
@@ -137,6 +153,11 @@ public class UniqueValidationUtils {
   @Transactional
   private static void saveRecordValidations(List<RecordValue> recordValues) {
     recordRepository.saveAll(recordValues);
+  }
+
+  @Transactional
+  private static void saveTableValidations(List<TableValue> tableValues) {
+    tableRepository.saveAll(tableValues);
   }
 
   /**
@@ -219,7 +240,7 @@ public class UniqueValidationUtils {
         getTableSchemaFromIdTableSchema(datasetSchema, uniqueConstraint.getTableSchemaId());
 
     // GetValidationData
-    Validation validation = createValidation(idRule, schemaId, origname);
+    Validation validation = createValidation(idRule, schemaId, origname, EntityTypeEnum.RECORD);
 
     // get duplicated records
     List<RecordValue> duplicatedRecords =
