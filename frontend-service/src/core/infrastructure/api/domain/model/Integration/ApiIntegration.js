@@ -8,24 +8,32 @@ const data = {
   data: {
     list: [
       {
-        datasetSchemaId: 777,
+        externalParameters: { parameter1: 'parameter1', parameter2: 'parameter2' },
         externalTool: 'External first tool',
         externalUrl: 'www.Integration.com',
-        fileExtension: 'csv',
         integrationId: '001',
         integrationName: 'First Integration',
-        operation: 'import',
-        parameters: { parameter1: 'parameter1', parameter2: 'parameter2' }
+        internalParameters: {
+          datasetSchemaId: 777,
+          fileExtension: 'csv',
+          processName: 'whatever',
+          otroParametro: 'suValor'
+        },
+        operation: 'import'
       },
       {
-        datasetSchemaId: 777,
+        externalParameters: { parameter1: 'parameter1', parameter2: 'parameter2' },
         externalTool: 'External second tool',
         externalUrl: 'www.Integration.com',
-        fileExtension: 'xlsx',
         integrationId: '002',
         integrationName: 'Second Integration',
-        operation: 'export',
-        parameters: { parameter1: 'parameter1', parameter2: 'parameter2' }
+        internalParameters: {
+          datasetSchemaId: 777,
+          fileExtension: 'json',
+          processName: 'whatever',
+          otroParametro: 'suValor'
+        },
+        operation: 'export'
       }
     ]
   }

@@ -17,13 +17,13 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-import { IntegrationReducer } from './_functions/Reducers/IntegrationReducer';
+import { integrationReducer } from './_functions/Reducers/integrationReducer';
 
-export const Integration = (designerState, manageDialogs) => {
+export const Integration = ({ dataflowId, designerState }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
-  const [IntegrationState, IntegrationDispatch] = useReducer(IntegrationReducer, {
+  const [integrationState, integrationDispatch] = useReducer(integrationReducer, {
     integrations: [],
     data: {},
     integrationId: '',
@@ -39,25 +39,28 @@ export const Integration = (designerState, manageDialogs) => {
     <ActionsColumn
       onDeleteClick={() => isDeleteDialogVisible(true)}
       onEditClick={() => {
-        console.log('edit the integration', IntegrationState.integrationId);
+        console.log('edit the integration', integrationState.integrationId);
       }}
     />
   );
 
-  const integrationId = value => IntegrationDispatch({ type: 'ON_LOAD_INTEGRATION_ID', payload: { value } });
+  console.log('designerState en integration', designerState);
 
-  const isDeleteDialogVisible = value => IntegrationDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
+  const integrationId = value => integrationDispatch({ type: 'ON_LOAD_INTEGRATION_ID', payload: { value } });
 
-  const isLoading = value => IntegrationDispatch({ type: 'IS_LOADING', payload: value });
+  const isDeleteDialogVisible = value => integrationDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
+
+  const isLoading = value => integrationDispatch({ type: 'IS_LOADING', payload: value });
 
   const onDeleteConstraint = async () => {
-    console.log('delete the integration', IntegrationState.integrationId);
+    console.log('delete the integration', integrationState.integrationId);
   };
 
   const onLoadIntegrations = async () => {
     try {
       const response = await IntegrationService.all();
-      IntegrationDispatch({ type: 'INITIAL_LOAD', payload: { data: response, integrations: response.list } });
+      // const response = await IntegrationService.all(dataflowId);
+      integrationDispatch({ type: 'INITIAL_LOAD', payload: { data: response, integrations: response.list } });
     } catch (error) {
       console.log('error', error);
     } finally {
@@ -84,38 +87,38 @@ export const Integration = (designerState, manageDialogs) => {
     return fieldColumns;
   };
 
-  if (IntegrationState.isLoading) {
+  if (integrationState.isLoading) {
     return <Spinner className={styles.positioning} />;
   } else {
     return (
       <div>
-        {!isEmpty(IntegrationState.data) ? (
+        {!isEmpty(integrationState.data) ? (
           <DataTable
             autoLayout={true}
             onRowClick={event => {
               integrationId(event.data.integrationId);
             }}
             paginator={true}
-            paginatorRight={`${resources.messages['totalRecords']} ${IntegrationState.integrations.length}`}
+            paginatorRight={`${resources.messages['totalRecords']} ${integrationState.integrations.length}`}
             rows={10}
             rowsPerPageOptions={[5, 10, 15]}
-            totalRecords={IntegrationState.integrations.length}
-            value={IntegrationState.integrations}>
-            {renderColumns(IntegrationState.integrations)}
+            totalRecords={integrationState.integrations.length}
+            value={integrationState.integrations}>
+            {renderColumns(integrationState.integrations)}
           </DataTable>
         ) : (
           <div className={styles.emptyFilteredData}>No with selected parameters</div>
         )}
 
-        {IntegrationState.isDeleteDialogVisible && (
+        {integrationState.isDeleteDialogVisible && (
           <ConfirmDialog
             classNameConfirm={'p-button-danger'}
             header={resources.messages['deleteIntegrationHeader']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
-            onConfirm={() => onDeleteConstraint(IntegrationState.integrationId)}
+            onConfirm={() => onDeleteConstraint(integrationState.integrationId)}
             onHide={() => isDeleteDialogVisible(false)}
-            visible={IntegrationState.isDeleteDialogVisible}>
+            visible={integrationState.isDeleteDialogVisible}>
             {resources.messages['deleteIntegrationConfirm']}
           </ConfirmDialog>
         )}

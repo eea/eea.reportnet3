@@ -1,4 +1,4 @@
-export const IntegrationReducer = (state, { type, payload }) => {
+export const integrationReducer = (state, { type, payload }) => {
   switch (type) {
     case 'INITIAL_LOAD':
       return { ...state, ...payload };
