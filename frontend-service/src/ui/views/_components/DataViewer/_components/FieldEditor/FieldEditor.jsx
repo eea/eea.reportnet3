@@ -319,7 +319,6 @@ const FieldEditor = ({
         );
       case 'LINK':
         const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
-        console.log(hasMultipleValues, linkItemsOptions, RecordUtils.getLinkValue(linkItemsOptions, linkItemsValue));
         if (hasMultipleValues) {
           return (
             <MultiSelect
@@ -343,7 +342,7 @@ const FieldEditor = ({
               }}
               options={linkItemsOptions}
               optionLabel="itemType"
-              value={[]}
+              value={RecordUtils.getMultiselectValues(linkItemsOptions, linkItemsValue)}
             />
           );
         } else {
@@ -389,6 +388,7 @@ const FieldEditor = ({
           />
         );
       case 'MULTISELECT_CODELIST':
+        console.log(RecordUtils.getMultiselectValues(codelistItemsOptions, codelistItemValue));
         return (
           <MultiSelect
             // onChange={e => onChangeForm(field, e.value)}
