@@ -60,9 +60,6 @@ export const RowValidation = ({ datasetId, tabs }) => {
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(0);
   const [tabsChanges, setTabsChanges] = useState({});
 
-  const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
-  const ruleDisablingCheckListener = [creationFormState.candidateRule.table, creationFormState.candidateRule.field];
-
   const componentName = 'createValidation';
 
   useEffect(() => {
@@ -200,17 +197,18 @@ export const RowValidation = ({ datasetId, tabs }) => {
         payload: true
       });
     }
-  }, [...ruleDisablingCheckListener]);
+  }, [creationFormState.candidateRule.table, creationFormState.candidateRule.field]);
 
   useEffect(() => {
     const {
       candidateRule: { expressions }
     } = creationFormState;
+
     creationFormDispatch({
       type: 'SET_IS_VALIDATION_ADDING_DISABLED',
       payload: checkComparisonExpressions(expressions)
     });
-  }, [...ruleAdditionCheckListener]);
+  }, [creationFormState.areRulesDisabled, creationFormState.candidateRule]);
 
   useEffect(() => {
     creationFormDispatch({
