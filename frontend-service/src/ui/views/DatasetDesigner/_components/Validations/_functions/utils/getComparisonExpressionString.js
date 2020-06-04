@@ -3,9 +3,11 @@ import isEmpty from 'lodash/isEmpty';
 import { getSelectedFieldById } from './getSelectedFieldById';
 
 const printExpression = (expression, tabs) => {
-  if (!isNil(expression.operatorValue) && !isEmpty(expression.operatorValue)) {
+  if (!isNil(expression.operatorValue) && !isEmpty(expression.operatorValue) && !isEmpty(expression.field2)) {
     if (expression.operatorType === 'LEN') {
-      return `( LEN( ${expression.field1.label} ) ${expression.operatorValue} ${expression.field2.label} )`;
+      return `( LEN( ${getSelectedFieldById(expression.field1, tabs).label} ) ${expression.operatorValue} ${
+        getSelectedFieldById(expression.field2, tabs).label
+      } )`;
     }
     return `( ${getSelectedFieldById(expression.field1, tabs).label} ${expression.operatorValue} ${
       getSelectedFieldById(expression.field2, tabs).label
