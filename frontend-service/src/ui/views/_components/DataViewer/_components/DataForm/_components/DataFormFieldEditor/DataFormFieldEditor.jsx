@@ -232,23 +232,41 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     );
   };
 
-  const renderLinkDropdown = (field, fieldValue) => (
-    <Dropdown
-      appendTo={document.body}
-      currentValue={fieldValue}
-      filter={true}
-      filterPlaceholder={resources.messages['linkFilterPlaceholder']}
-      filterBy="itemType,value"
-      onChange={e => {
-        onChangeForm(field, e.target.value.value);
-      }}
-      onFilterInputChangeBackend={onFilter}
-      optionLabel="itemType"
-      options={columnWithLinks.linkItems}
-      showFilterClear={true}
-      value={RecordUtils.getLinkValue(columnWithLinks.linkItems, fieldValue)}
-    />
-  );
+  const renderLinkDropdown = (field, fieldValue) => {
+    console.log({ column });
+    if (column.pkHasMultipleValues) {
+      return (
+        <MultiSelect
+          appendTo={document.body}
+          maxSelectedLabels={10}
+          onChange={e => onChangeForm(field, e.value)}
+          options={columnWithLinks.linkItems}
+          optionLabel="itemType"
+          style={{ height: '34px' }}
+          value={RecordUtils.getLinkValue(columnWithLinks.linkItems, fieldValue)}
+          // hasSelectedItemsLabel={false}
+        />
+      );
+    } else {
+      return (
+        <Dropdown
+          appendTo={document.body}
+          currentValue={fieldValue}
+          filter={true}
+          filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+          filterBy="itemType,value"
+          onChange={e => {
+            onChangeForm(field, e.target.value.value);
+          }}
+          onFilterInputChangeBackend={onFilter}
+          optionLabel="itemType"
+          options={columnWithLinks.linkItems}
+          showFilterClear={true}
+          value={RecordUtils.getLinkValue(columnWithLinks.linkItems, fieldValue)}
+        />
+      );
+    }
+  };
 
   const renderMap = () => <Map coordinates={mapCoordinates} onSelectPoint={onSelectPoint} selectButton={true}></Map>;
 
