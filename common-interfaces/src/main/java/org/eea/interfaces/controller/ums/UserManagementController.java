@@ -217,7 +217,7 @@ public interface UserManagementController {
    */
   @PostMapping("/createApiKey")
   String createApiKey(@RequestParam("dataflowId") Long dataflowId,
-      @RequestParam("dataProvider") Long dataProvider);
+      @RequestParam(value = "dataProvider", required = false) Long dataProvider);
 
   /**
    * Gets the api key.

@@ -188,7 +188,7 @@ public class DataSetControllerImpl implements DatasetController {
   public void loadTableData(
       @LockCriteria(name = "datasetId") @PathVariable("id") final Long datasetId,
       @RequestParam("file") final MultipartFile file, @LockCriteria(
-      name = "idTableSchema") @PathVariable(value = "idTableSchema") String idTableSchema) {
+          name = "idTableSchema") @PathVariable(value = "idTableSchema") String idTableSchema) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -345,8 +345,8 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-        && datasetService
-        .getTableReadOnly(datasetId, records.get(0).getIdRecordSchema(), EntityTypeEnum.RECORD)) {
+        && datasetService.getTableReadOnly(datasetId, records.get(0).getIdRecordSchema(),
+            EntityTypeEnum.RECORD)) {
       LOG_ERROR.error("Error updating records in the datasetId {}. The table is read only",
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
@@ -542,8 +542,8 @@ public class DataSetControllerImpl implements DatasetController {
   public void updateField(@PathVariable("id") final Long datasetId,
       @RequestBody final FieldVO field) {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-        && datasetService
-        .getTableReadOnly(datasetId, field.getIdFieldSchema(), EntityTypeEnum.FIELD)) {
+        && datasetService.getTableReadOnly(datasetId, field.getIdFieldSchema(),
+            EntityTypeEnum.FIELD)) {
       LOG_ERROR.error("Error updating a field in the dataset {}. The table is read only",
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
@@ -603,20 +603,21 @@ public class DataSetControllerImpl implements DatasetController {
     return datasetMetabaseService.getDatasetType(datasetId);
   }
 
+
   /**
    * Etl export dataset.
    *
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
-   *
    * @return the ETL dataset VO
    */
   @Override
   @GetMapping("/{datasetId}/etlExport")
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId) OR secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN')")
   public ETLDatasetVO etlExportDataset(@PathVariable("datasetId") Long datasetId,
-      @RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId) {
+      @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId) {
 
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       LOG_ERROR
@@ -633,19 +634,21 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+
   /**
-   * Etl export dataset.
+   * Etl import dataset.
    *
    * @param datasetId the dataset id
-   *
-   * @return the ETL dataset VO
+   * @param etlDatasetVO the etl dataset VO
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    */
   @Override
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId) OR secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN')")
   @PostMapping("/{datasetId}/etlImport")
   public void etlImportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
-      @RequestParam("providerId") Long providerId) {
+      @RequestParam(value = "providerId", required = false) Long providerId) {
 
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       LOG_ERROR
