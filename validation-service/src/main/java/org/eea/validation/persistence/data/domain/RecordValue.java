@@ -361,15 +361,18 @@ public class RecordValue {
    * Record number matches.
    *
    * @param fieldSchemaId the field schema id
-   * @param regex the regex
+   * @param dataMach the data mach
    * @return true, if successful
    */
-  public boolean recordNumberMatches(String fieldSchemaId, String regex) {
+  public boolean recordNumberMatches(String fieldSchemaId, String dataMach) {
+    boolean validateReturn;
     try {
-      return fieldsMap.get(fieldSchemaId).matches(regex);
+      validateReturn =
+          -1 == fieldsMap.get(fieldSchemaId).indexOf(fieldsMap.get(dataMach)) ? false : true;
     } catch (Exception e) {
-      return true;
+      validateReturn = true;
     }
+    return validateReturn;
   }
 
   /**
@@ -383,6 +386,186 @@ public class RecordValue {
       return "" + fieldsMap.get(fieldSchemaId).length();
     } catch (Exception e) {
       return null;
+    }
+  }
+
+  /**
+   * Record string length equals.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthEquals(String fieldSchemaId, Number number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() == number.intValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length equals.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthEquals(String fieldSchemaId, String number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() != Integer.valueOf(number);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length distinct.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthDistinct(String fieldSchemaId, Number number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() != number.intValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length distinct.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthDistinct(String fieldSchemaId, String number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() != Integer.valueOf(number);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length greater than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthGreaterThan(String fieldSchemaId, Number number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() > number.intValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length greater than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthGreaterThan(String fieldSchemaId, String number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() > Integer.valueOf(number);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length less than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthLessThan(String fieldSchemaId, Number number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() < number.intValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length less than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthLessThan(String fieldSchemaId, String number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() < Integer.valueOf(number);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length greater than or equals than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthGreaterThanOrEqualsThan(String fieldSchemaId, Number number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() >= number.intValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length greater than or equals than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthGreaterThanOrEqualsThan(String fieldSchemaId, String number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() >= Integer.valueOf(number);
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length less than or equals than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthLessThanOrEqualsThan(String fieldSchemaId, Number number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() <= number.intValue();
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record string length less than or equals than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param number the number
+   * @return true, if successful
+   */
+  public boolean recordStringLengthLessThanOrEqualsThan(String fieldSchemaId, String number) {
+    try {
+      return fieldsMap.get(fieldSchemaId).length() <= Integer.valueOf(number);
+    } catch (Exception e) {
+      return true;
     }
   }
 
@@ -424,11 +607,14 @@ public class RecordValue {
    * @return true, if successful
    */
   public boolean recordStringMatches(String fieldSchemaId, String regex) {
+    boolean validateReturn;
     try {
-      return fieldsMap.get(fieldSchemaId).matches(regex);
+      validateReturn =
+          -1 == fieldsMap.get(fieldSchemaId).indexOf(fieldsMap.get(regex)) ? false : true;
     } catch (Exception e) {
-      return true;
+      validateReturn = true;
     }
+    return validateReturn;
   }
 
   /**
@@ -469,11 +655,14 @@ public class RecordValue {
    * @return true, if successful
    */
   public boolean recordStringMatchesRecord(String fieldSchemaId1, String fieldSchemaId2) {
+    boolean validateReturn;
     try {
-      return fieldsMap.get(fieldSchemaId1).matches(fieldsMap.get(fieldSchemaId2));
+      validateReturn =
+          -1 == fieldsMap.get(fieldSchemaId2).indexOf(fieldsMap.get(fieldSchemaId1)) ? false : true;
     } catch (Exception e) {
-      return true;
+      validateReturn = true;
     }
+    return validateReturn;
   }
 
   /**

@@ -4,8 +4,10 @@ export const designerReducer = (state, { type, payload }) => {
       return {
         ...state,
         datasetDescription: payload.description,
+        datasetSchema: payload.datasetSchema,
         datasetSchemaAllTables: payload.tables,
         datasetSchemaId: payload.schemaId,
+        datasetStatistics: payload.datasetStatistics,
         levelErrorTypes: payload.levelErrorTypes,
         tableSchemaNames: payload.tableSchemaNames
       };
@@ -47,8 +49,35 @@ export const designerReducer = (state, { type, payload }) => {
 
     case 'SET_DATASET_HAS_DATA':
       return { ...state, datasetHasData: payload.hasData };
+
+    case 'SET_DATAVIEWER_OPTIONS':
+      return {
+        ...state,
+        dataViewerOptions: {
+          ...state.dataViewerOptions,
+          activeIndex: payload.activeIndex,
+          isValidationSelected: payload.isValidationSelected,
+          recordPositionId: payload.recordPositionId,
+          selectedRecordErrorId: payload.selectedRecordErrorId
+        },
+        isValidationViewerVisible: false
+      };
+
+    case 'SET_IS_VALIDATION_SELECTED':
+      return {
+        ...state,
+        dataViewerOptions: {
+          ...state.dataViewerOptions,
+          isValidationSelected: payload
+        }
+      };
+
     case 'TOGGLE_DASHBOARD_VISIBILITY':
       return { ...state, dashDialogVisible: payload };
+
+    case 'TOGGLE_VALIDATION_VIEWER_VISIBILITY':
+      return { ...state, isValidationViewerVisible: payload };
+
     default:
       return state;
   }
