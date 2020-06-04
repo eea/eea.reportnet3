@@ -121,8 +121,8 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   @Override
   public boolean existsRuleRequired(ObjectId datasetSchemaId, ObjectId referenceId) {
     Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId))
-        .addCriteria(new Criteria("rules.$.referenceId").is(referenceId))
-        .addCriteria(new Criteria("rules.$.whenCondition").is("isBlank(value)"));
+        .addCriteria(Criteria.where(LiteralConstants.RULES).elemMatch(Criteria.where("referenceId")
+            .is(referenceId).and("whenCondition").is("isBlank(value)")));
     return mongoTemplate.count(query, RulesSchema.class) == 1;
   }
 
