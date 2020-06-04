@@ -381,6 +381,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
       setClickedFields(cClickedFields);
     }
   };
+
   const onDeleteFromClickedFields = field => {
     const cClickedFields = [...clickedFields];
     if (cClickedFields.includes(field)) {

@@ -64,10 +64,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     dataflowName: '',
     datasetDescription: '',
     datasetHasData: false,
+    datasetSchema: {},
     datasetSchemaAllTables: [],
     datasetSchemaId: '',
     datasetSchemaName: '',
-    datasetSchema: {},
     datasetSchemas: [],
     datasetStatistics: [],
     dataViewerOptions: { activeIndex: 0, isValidationSelected: false, recordPositionId: -1, selectedRecordErrorId: -1 },
@@ -313,13 +313,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         designerDispatch({
           type: 'GET_DATASET_DATA',
           payload: {
+            datasetSchema: dataset,
+            datasetStatistics: datasetStatisticsDTO,
             description: dataset.datasetSchemaDescription,
             levelErrorTypes: dataset.levelErrorTypes,
             schemaId: dataset.datasetSchemaId,
             tables: dataset.tables,
-            tableSchemaNames: tableSchemaNamesList,
-            datasetStatistics: datasetStatisticsDTO,
-            datasetSchema: dataset
+            tableSchemaNames: tableSchemaNamesList
           }
         });
       };
@@ -343,10 +343,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     designerDispatch({
       type: 'SET_DATAVIEWER_OPTIONS',
       payload: {
-        recordPositionId: posIdRecord,
-        selectedRecordErrorId: selectedRecordErrorId,
         activeIndex: tableSchemaId,
-        isValidationSelected: true
+        isValidationSelected: true,
+        recordPositionId: posIdRecord,
+        selectedRecordErrorId
       }
     });
   };
