@@ -318,9 +318,9 @@ const FieldEditor = ({
           />
         );
       case 'LINK':
-        const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).required;
+        const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
         console.log(hasMultipleValues, linkItemsOptions, RecordUtils.getLinkValue(linkItemsOptions, linkItemsValue));
-        if (!hasMultipleValues) {
+        if (hasMultipleValues) {
           return (
             <MultiSelect
               // onChange={e => onChangeForm(field, e.value)}
