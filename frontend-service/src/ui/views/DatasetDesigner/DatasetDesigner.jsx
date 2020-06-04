@@ -13,9 +13,9 @@ import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { FME } from './_components/FME';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
+import { Integration } from './_components/Integration';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
 import { Snapshots } from 'ui/views/_components/Snapshots';
@@ -69,8 +69,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     datasetSchemas: [],
     hasWritePermissions: false,
     initialDatasetDescription: '',
-    isFMEListDialogVisible: false,
-    isFMEManageDialogVisible: false,
+    isIntegrationListDialogVisible: false,
+    isIntegrationManageDialogVisible: false,
     isLoading: true,
     isManageUniqueConstraintDialogVisible: false,
     isPreviewModeOn: DatasetDesignerUtils.getUrlParamValue('design'),
@@ -363,32 +363,34 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     </div>
   );
 
-  const renderFMEDialog = () => (
+  const renderIntegrationDialog = () => (
     <Dialog
-      footer={renderFMEFooter}
-      header={resources.messages['fme']}
-      onHide={() => manageDialogs('isFMEListDialogVisible', false)}
+      footer={renderIntegrationFooter}
+      header={resources.messages['integration']}
+      onHide={() => manageDialogs('isIntegrationListDialogVisible', false)}
       style={{ width: '70%' }}
-      visible={designerState.isFMEListDialogVisible}>
-      <FME designerState={designerState} manageDialogs={manageDialogs} />
+      visible={designerState.isIntegrationListDialogVisible}>
+      <Integration designerState={designerState} manageDialogs={manageDialogs} />
     </Dialog>
   );
 
-  const renderFMEFooter = (
+  const renderIntegrationFooter = (
     <Fragment>
       <div className="p-toolbar-group-left">
         <Button
           className="p-button-secondary p-button-animated-blink"
           icon={'plus'}
-          label={resources.messages['addFme']}
-          onClick={() => manageDialogs('isFMEListDialogVisible', false, 'isFMEManageDialogVisible', true)}
+          label={resources.messages['addIntegration']}
+          onClick={() =>
+            manageDialogs('isIntegrationListDialogVisible', false, 'isIntegrationManageDialogVisible', true)
+          }
         />
       </div>
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
         label={resources.messages['close']}
-        onClick={() => manageDialogs('isFMEListDialogVisible', false)}
+        onClick={() => manageDialogs('isIntegrationListDialogVisible', false)}
       />
     </Fragment>
   );
@@ -547,8 +549,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
                 icon={'key'}
-                label={resources.messages['fme']}
-                onClick={() => manageDialogs('isFMEListDialogVisible', true)}
+                label={resources.messages['integration']}
+                onClick={() => manageDialogs('isIntegrationListDialogVisible', true)}
               />
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
@@ -578,7 +580,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           snapshotListData={snapshotListData}
         />
         {validationsListDialog()}
-        {renderFMEDialog()}
+        {renderIntegrationDialog()}
         {renderUniqueConstraintsDialog()}
 
         <ManageUniqueConstraint

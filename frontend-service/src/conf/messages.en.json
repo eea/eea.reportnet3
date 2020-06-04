@@ -655,7 +655,11 @@
     "strictModeTooltip": "Associated selected values",
     "addRowConstraint": "Add row constraint",
     "noTablesToSelect": "There are no tables to select",
-    "fme": "FME",
-    "addFme": "add FME"
+    "integration": "Integration",
+    "addIntegration": "add Integration",
+    "integrationName": "Integration name",
+    "operation": "Operation name",
+    "deleteIntegrationHeader": "Delete integration",
+    "deleteIntegrationConfirm": "Are you sure you want to delete the integration?"
   }
 }
