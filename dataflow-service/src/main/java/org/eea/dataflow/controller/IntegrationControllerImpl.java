@@ -3,7 +3,8 @@ package org.eea.dataflow.controller;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.interfaces.controller.dataflow.IntegrationController;
-import org.eea.interfaces.vo.dataset.enums.IntegrationOperationTypeEnum;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,24 +31,23 @@ public class IntegrationControllerImpl implements IntegrationController {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+
   /**
-   * Find all integrations by dataset.
+   * Find all integrations by criteria.
    *
-   * @param idDatasetSchema the id dataset schema
+   * @param integration the integration
    * @return the list
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/dataset/{idDatasetSchema}/listIntegrations",
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<IntegrationVO> findAllIntegrationsByDataset(
-      @PathVariable("idDatasetSchema") String idDatasetSchema) {
+  @GetMapping(value = "/listIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<IntegrationVO> findAllIntegrationsByCriteria(@RequestBody IntegrationVO integration) {
     IntegrationVO integration1 = new IntegrationVO();
     integration1.setId(1L);
     integration1.setName("Integration dummy 1");
     integration1.setDescription("This is a description");
     integration1.setOperation(IntegrationOperationTypeEnum.EXPORT);
-    integration1.setTool("FME");
+    integration1.setTool(IntegrationToolTypeEnum.FME);
     integration1.getInternalParameters().put("fileExtension", "csv");
     integration1.getInternalParameters().put("datasetSchemaId", "5ce524fad31fc52540abae73");
     integration1.getExternalParameters().put("name1", "value1");
@@ -57,7 +57,7 @@ public class IntegrationControllerImpl implements IntegrationController {
     integration2.setName("Integration dummy 2");
     integration2.setDescription("This is a description");
     integration2.setOperation(IntegrationOperationTypeEnum.IMPORT);
-    integration2.setTool("FME");
+    integration2.setTool(IntegrationToolTypeEnum.FME);
     integration2.getInternalParameters().put("datasetSchemaId", "5ce524fad31fc52540abae73");
     integration2.getInternalParameters().put("parameter2Name", "paramValue2");
     integration2.getExternalParameters().put("name1", "value1");
@@ -85,7 +85,7 @@ public class IntegrationControllerImpl implements IntegrationController {
     integration1.setName("Integration dummy 3");
     integration1.setDescription("This is a description");
     integration1.setOperation(IntegrationOperationTypeEnum.EXPORT);
-    integration1.setTool("FME");
+    integration1.setTool(IntegrationToolTypeEnum.FME);
     integration1.getInternalParameters().put("datasetSchemaId", "5ce524fad31fc52540abae73");
     integration1.getInternalParameters().put("fileExtension", "json");
     integration1.getExternalParameters().put("name1", "value1");

@@ -1,4 +1,4 @@
-package org.eea.interfaces.vo.dataset.enums;
+package org.eea.interfaces.vo.dataflow.enums;
 
 
 

@@ -28,16 +28,15 @@ public interface IntegrationController {
   }
 
 
+
   /**
-   * Find all integrations by dataset.
+   * Find all integrations by criteria.
    *
-   * @param idDatasetSchema the id dataset schema
+   * @param integration the integration
    * @return the list
    */
-  @GetMapping(value = "/dataset/{idDatasetSchema}/listIntegrations",
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  List<IntegrationVO> findAllIntegrationsByDataset(
-      @PathVariable("idDatasetSchema") String idDatasetSchema);
+  @GetMapping(value = "/listIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<IntegrationVO> findAllIntegrationsByCriteria(@RequestBody IntegrationVO integration);
 
   /**
    * Find integration by id.

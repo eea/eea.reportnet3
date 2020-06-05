@@ -3,7 +3,8 @@ package org.eea.interfaces.vo.integration;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import org.eea.interfaces.vo.dataset.enums.IntegrationOperationTypeEnum;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -30,7 +31,7 @@ public class IntegrationVO implements Serializable {
   private String description;
 
   /** The tool. */
-  private String tool;
+  private IntegrationToolTypeEnum tool;
 
   /** The operation. */
   private IntegrationOperationTypeEnum operation;
