@@ -39,6 +39,7 @@ import { getSelectedTableByRecordId } from 'ui/views/DatasetDesigner/_components
 import { groupExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/groupExpressions';
 import { initValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/initValidationRuleCreation';
 import { resetValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/resetValidationRuleCreation';
+import { setExpressionsfieldsTypes } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/setExpressionsfieldsTypes';
 import { setValidationExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/setValidationExpression';
 
 export const RowValidation = ({ datasetId, tabs }) => {
@@ -276,6 +277,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
+      setExpressionsfieldsTypes(candidateRule.expressions, candidateRule.table, tabs);
       await ValidationService.createRowRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
@@ -293,6 +295,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
+      setExpressionsfieldsTypes(candidateRule.expressions, candidateRule.table, tabs);
       await ValidationService.updateRowRule(datasetId, candidateRule);
       onHide();
     } catch (error) {

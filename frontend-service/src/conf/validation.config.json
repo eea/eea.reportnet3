@@ -16,6 +16,8 @@
     "number": ["NUMBER_INTEGER", "NUMBER_DECIMAL"],
     "LEN": ["NUMBER_INTEGER"],
     "string": ["EMAIL", "TEXT", "PHONE", "LONG_TEXT", "URL", "CODELIST"],
+    "stringMatch": ["TEXT"],
+    "numberMatch": ["TEXT"],
     "date": ["DATE"],
     "month": ["DATE", "NUMBER_INTEGER"],
     "year": ["DATE", "NUMBER_INTEGER"],
@@ -220,6 +222,30 @@
       "<=": "RECORD_LTEQ_YEAR_RECORD",
       "=": "RECORD_EQ_YEAR_RECORD",
       "!=": "RECORD_DIST_YEAR_RECORD"
+    },
+    "dayNumber": {
+      ">": "RECORD_GT_DAY_RECORD_NUMBER",
+      "<": "RECORD_LT_DAY_RECORD_NUMBER",
+      ">=": "RECORD_GTEQ_DAY_RECORD_NUMBER",
+      "<=": "RECORD_LTEQ_DAY_RECORD_NUMBER",
+      "=": "RECORD_EQ_DAY_RECORD_NUMBER",
+      "!=": "RECORD_DIST_DAY_RECORD_NUMBER"
+    },
+    "monthNumber": {
+      ">": "RECORD_GT_MONTH_RECORD_NUMBER",
+      "<": "RECORD_LT_MONTH_RECORD_NUMBER",
+      ">=": "RECORD_GTEQ_MONTH_RECORD_NUMBER",
+      "<=": "RECORD_LTEQ_MONTH_RECORD_NUMBER",
+      "=": "RECORD_EQ_MONTH_RECORD_NUMBER",
+      "!=": "RECORD_DIST_MONTH_RECORD_NUMBER"
+    },
+    "yearNumber": {
+      ">": "RECORD_GT_YEAR_RECORD_NUMBER",
+      "<": "RECORD_LT_YEAR_RECORD_NUMBER",
+      ">=": "RECORD_GTEQ_YEAR_RECORD_NUMBER",
+      "<=": "RECORD_LTEQ_YEAR_RECORD_NUMBER",
+      "=": "RECORD_EQ_YEAR_RECORD_NUMBER",
+      "!=": "RECORD_DIST_YEAR_RECORD_NUMBER"
     }
   },
   "ifThenOperatorEquivalences": {
@@ -274,13 +300,29 @@
       "=": "RECORD_EQ_MONTH",
       "!=": "RECORD_DIST_MONTH"
     },
-    "year": {
-      ">": "RECORD_GT_YEAR",
-      "<": "RECORD_LT_YEAR",
-      ">=": "RECORD_GTEQ_YEAR",
-      "<=": "RECORD_LTEQ_YEAR",
-      "=": "RECORD_EQ_YEAR",
-      "!=": "RECORD_DIST_YEAR"
+    "dayNumber": {
+      ">": "RECORD_GT_DAY_RECORD_NUMBER",
+      "<": "RECORD_LT_DAY_RECORD_NUMBER",
+      ">=": "RECORD_GTEQ_DAY_RECORD_NUMBER",
+      "<=": "RECORD_LTEQ_DAY_RECORD_NUMBER",
+      "=": "RECORD_EQ_DAY_RECORD_NUMBER",
+      "!=": "RECORD_DIST_DAY_RECORD_NUMBER"
+    },
+    "monthNumber": {
+      ">": "RECORD_GT_MONTH_RECORD_NUMBER",
+      "<": "RECORD_LT_MONTH_RECORD_NUMBER",
+      ">=": "RECORD_GTEQ_MONTH_RECORD_NUMBER",
+      "<=": "RECORD_LTEQ_MONTH_RECORD_NUMBER",
+      "=": "RECORD_EQ_MONTH_RECORD_NUMBER",
+      "!=": "RECORD_DIST_MONTH_RECORD_NUMBER"
+    },
+    "yearNumber": {
+      ">": "RECORD_GT_YEAR_RECORD_NUMBER",
+      "<": "RECORD_LT_YEAR_RECORD_NUMBER",
+      ">=": "RECORD_GTEQ_YEAR_RECORD_NUMBER",
+      "<=": "RECORD_LTEQ_YEAR_RECORD_NUMBER",
+      "=": "RECORD_EQ_YEAR_RECORD_NUMBER",
+      "!=": "RECORD_DIST_YEAR_RECORD_NUMBER"
     }
   },
   "fieldOperatorsTypesFromDTO": [
@@ -392,7 +434,13 @@
         "RECORD_GTEQ_DAY_RECORD",
         "RECORD_LTEQ_DAY_RECORD",
         "RECORD_EQ_DAY_RECORD",
-        "RECORD_DIST_DAY_RECORD"
+        "RECORD_DIST_DAY_RECORD",
+        "RECORD_GT_DAY_RECORD_NUMBER",
+        "RECORD_LT_DAY_RECORD_NUMBER",
+        "RECORD_GTEQ_DAY_RECORD_NUMBER",
+        "RECORD_LTEQ_DAY_RECORD_NUMBER",
+        "RECORD_EQ_DAY_RECORD_NUMBER",
+        "RECORD_DIST_DAY_RECORD_NUMBER"
       ]
     },
     {
@@ -403,7 +451,13 @@
         "RECORD_GTEQ_MONTH_RECORD",
         "RECORD_LTEQ_MONTH_RECORD",
         "RECORD_EQ_MONTH_RECORD",
-        "RECORD_DIST_MONTH_RECORD"
+        "RECORD_DIST_MONTH_RECORD",
+        "RECORD_GT_MONTH_RECORD_NUMBER",
+        "RECORD_LT_MONTH_RECORD_NUMBER",
+        "RECORD_GTEQ_MONTH_RECORD_NUMBER",
+        "RECORD_LTEQ_MONTH_RECORD_NUMBER",
+        "RECORD_EQ_MONTH_RECORD_NUMBER",
+        "RECORD_DIST_MONTH_RECORD_NUMBER"
       ]
     },
     {
@@ -414,7 +468,13 @@
         "RECORD_GTEQ_YEAR_RECORD",
         "RECORD_LTEQ_YEAR_RECORD",
         "RECORD_EQ_YEAR_RECORD",
-        "RECORD_DIST_YEAR_RECORD"
+        "RECORD_DIST_YEAR_RECORD",
+        "RECORD_GT_YEAR_RECORD_NUMBER",
+        "RECORD_LT_YEAR_RECORD_NUMBER",
+        "RECORD_GTEQ_YEAR_RECORD_NUMBER",
+        "RECORD_LTEQ_YEAR_RECORD_NUMBER",
+        "RECORD_EQ_YEAR_RECORD_NUMBER",
+        "RECORD_DIST_YEAR_RECORD_NUMBER"
       ]
     }
   ],
@@ -492,7 +552,25 @@
     "RECORD_GTEQ_YEAR_RECORD": ">=",
     "RECORD_LTEQ_YEAR_RECORD": "<=",
     "RECORD_EQ_YEAR_RECORD": "=",
-    "RECORD_DIST_YEAR_RECORD": "!="
+    "RECORD_DIST_YEAR_RECORD": "!=",
+    "RECORD_GT_DAY_RECORD_NUMBER": ">",
+    "RECORD_LT_DAY_RECORD_NUMBER": "<",
+    "RECORD_GTEQ_DAY_RECORD_NUMBER": ">=",
+    "RECORD_LTEQ_DAY_RECORD_NUMBER": "<=",
+    "RECORD_EQ_DAY_RECORD_NUMBER": "=",
+    "RECORD_DIST_DAY_RECORD_NUMBER": "!=",
+    "RECORD_GT_MONTH_RECORD_NUMBER": ">",
+    "RECORD_LT_MONTH_RECORD_NUMBER": "<",
+    "RECORD_GTEQ_MONTH_RECORD_NUMBER": ">=",
+    "RECORD_LTEQ_MONTH_RECORD_NUMBER": "<=",
+    "RECORD_EQ_MONTH_RECORD_NUMBER": "=",
+    "RECORD_DIST_MONTH_RECORD_NUMBER": "!=",
+    "RECORD_GT_YEAR_RECORD_NUMBER": ">",
+    "RECORD_LT_YEAR_RECORD_NUMBER": "<",
+    "RECORD_GTEQ_YEAR_RECORD_NUMBER": ">=",
+    "RECORD_LTEQ_YEAR_RECORD_NUMBER": "<=",
+    "RECORD_EQ_YEAR_RECORD_NUMBER": "=",
+    "RECORD_DIST_YEAR_RECORD_NUMBER": "!="
   },
   "errorLevels": [
     { "label": "INFO", "value": "INFO" },
