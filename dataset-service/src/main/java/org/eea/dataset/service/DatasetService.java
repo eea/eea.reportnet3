@@ -13,7 +13,6 @@ import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -402,4 +401,12 @@ public interface DatasetService {
    * @param criteria the criteria
    */
   void releaseLock(Object... criteria);
+
+  /**
+   * Checks if is draft dataflow schema.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
+  Boolean isDraftDataflowSchema(Long idDataset);
 }

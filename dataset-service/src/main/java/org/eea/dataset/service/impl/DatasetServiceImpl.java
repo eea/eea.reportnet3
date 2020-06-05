@@ -38,6 +38,7 @@ import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
@@ -60,8 +61,11 @@ import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
@@ -76,7 +80,6 @@ import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -159,6 +162,9 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
+
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZull;
 
   /**
    * The table repository.
@@ -1680,7 +1686,8 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     // Obtain the data provider code to insert into the record
-    DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
+    DataProviderVO provider =
+        providerId != null ? representativeControllerZuul.findDataProviderById(providerId) : null;
 
     // Get the partition for the partiton id
     final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
@@ -1732,7 +1739,7 @@ public class DatasetServiceImpl implements DatasetService {
               .getFieldSchema(), fieldValues, idSchema, recordValue);
           recordValue.setFields(fieldValues);
           recordValue.setDatasetPartitionId(partition.getId());
-          recordValue.setDataProviderCode(provider.getCode());
+          recordValue.setDataProviderCode(provider != null ? provider.getCode() : null);
           records.add(recordValue);
         }
         table.setRecords(records);
@@ -1866,6 +1873,27 @@ public class DatasetServiceImpl implements DatasetService {
     }
     lockService.removeLockByCriteria(criteriaList);
 
+  }
+
+  /**
+   * Checks if is draft dataflow schema.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
+  @Override
+  public Boolean isDraftDataflowSchema(Long idDataset) {
+    final Optional<DesignDataset> designDataset = designDatasetRepository.findById(idDataset);
+    if (designDataset.isPresent()) {
+      // Get the dataFlowId from the metabase
+      Long dataflowId = getDataFlowIdById(idDataset);
+      // get de dataflow
+      DataFlowVO dataflow = dataflowControllerZull.findById(dataflowId);
+      if (!dataflow.getStatus().equals(TypeStatusEnum.DESIGN)) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }

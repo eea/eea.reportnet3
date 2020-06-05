@@ -193,6 +193,12 @@ public class DataSetControllerImpl implements DatasetController {
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
+    // check if dataset is a schema and dataflow is draft
+    if (datasetService.isDraftDataflowSchema(datasetId)) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.NOT_DESIGN_DATAFLOW);
+    }
+
     // filter if the file is empty
     if (file == null || file.isEmpty()) {
       datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
@@ -655,6 +661,11 @@ public class DataSetControllerImpl implements DatasetController {
           .error(String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+    }
+    // check if dataset is a schema and dataflow is draft
+    if (datasetService.isDraftDataflowSchema(datasetId)) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.NOT_DESIGN_DATAFLOW);
     }
 
     try {
