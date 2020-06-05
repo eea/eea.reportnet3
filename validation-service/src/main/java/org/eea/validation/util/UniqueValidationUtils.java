@@ -9,6 +9,7 @@ import org.bson.types.ObjectId;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.RecordValue;
@@ -21,6 +22,7 @@ import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
+import org.eea.validation.service.RulesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,6 +51,10 @@ public class UniqueValidationUtils {
 
   /** The table repository. */
   private static TableRepository tableRepository;
+
+
+  /** The rules service. */
+  private static RulesService rulesService;
 
   /**
    * Sets the rules repository.
@@ -100,6 +106,11 @@ public class UniqueValidationUtils {
   @Autowired
   private void setTableRepository(TableRepository tableRepository) {
     UniqueValidationUtils.tableRepository = tableRepository;
+  }
+
+  @Autowired
+  private void setRulesService(RulesService rulesService) {
+    UniqueValidationUtils.rulesService = rulesService;
   }
 
   /**
@@ -264,7 +275,17 @@ public class UniqueValidationUtils {
     return duplicatedRecords.isEmpty();
   }
 
-  public static Boolean isIntegrityConstraint(Long datasetId, String integrityId) {
+  public static Boolean isIntegrityConstraint(String integrityId, String idRule) {
+    // GetValidationData
+    IntegrityVO integrityVO = rulesService.getIntegrityConstraint(integrityId);
+
+    String schemaId = integrityVO.getOriginDatasetSchemaId();
+    DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
+
+    String origname =
+        getTableSchemaFromIdTableSchema(datasetSchema, uniqueConstraint.getTableSchemaId());
+
+    Validation validation = createValidation(idRule, schemaId, origname, EntityTypeEnum.DATASET);
     return true;
   }
 }
