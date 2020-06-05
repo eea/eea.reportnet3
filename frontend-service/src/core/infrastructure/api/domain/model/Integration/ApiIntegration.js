@@ -1,6 +1,6 @@
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
-import { UniqueConstraintsConfig } from 'conf/domain/model/UniqueConstraints';
+import { IntegrationConfig } from 'conf/domain/model/Integration';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 const data = {
@@ -8,30 +8,26 @@ const data = {
   data: {
     list: [
       {
-        externalParameters: { parameter1: 'parameter1', parameter2: 'parameter2' },
+        externalParameters: { parameter1: 'parameter1', parameter2: 'parameter2', parameter3: 'parameter3' },
         externalTool: 'External first tool',
-        externalUrl: 'www.Integration.com',
+        integrationDescription: 'This is the first description',
         integrationId: '001',
         integrationName: 'First Integration',
         internalParameters: {
           datasetSchemaId: 777,
-          fileExtension: 'csv',
-          processName: 'whatever',
-          otroParametro: 'suValor'
+          fileExtension: 'csv'
         },
         operation: 'import'
       },
       {
-        externalParameters: { parameter1: 'parameter1', parameter2: 'parameter2' },
+        externalParameters: { parameter1: 'parameter1', parameter2: 'parameter2', parameter3: 'parameter3' },
         externalTool: 'External second tool',
-        externalUrl: 'www.Integration.com',
+        integrationDescription: 'This is a description',
         integrationId: '002',
         integrationName: 'Second Integration',
         internalParameters: {
           datasetSchemaId: 777,
-          fileExtension: 'json',
-          processName: 'whatever',
-          otroParametro: 'suValor'
+          fileExtension: 'json'
         },
         operation: 'export'
       }
@@ -44,5 +40,31 @@ export const apiIntegration = {
     const tokens = userStorage.get();
     const response = await data;
     return response.data;
+  },
+
+  // all: async integration => {
+  //   console.log('integration object in the call body', integration);
+  //   const tokens = userStorage.get();
+  //   const response = await HTTPRequester.get({
+  //     url: getUrl(IntegrationConfig.all),
+  //     data: { integration },
+  //     queryString: {},
+  //     headers: { Authorization: `Bearer ${tokens.accessToken}` }
+  //   });
+  //   return response.data;
+  // },
+
+  deleteById: async integrationId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.delete({
+      url: getUrl(IntegrationConfig.delete, {
+        integrationId
+      }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response;
   }
 };

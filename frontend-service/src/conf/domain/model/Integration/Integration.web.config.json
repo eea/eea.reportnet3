@@ -1,0 +1,4 @@
+{
+  "all": "/integration/listIntegrations",
+  "delete": "/integration/{:integrationId}/delete"
+}

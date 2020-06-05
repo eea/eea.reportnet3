@@ -582,7 +582,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               />
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-                icon={'key'}
+                icon={'export'}
+                iconClasses={styles.integrationsButton}
                 label={resources.messages['integration']}
                 onClick={() => manageDialogs('isIntegrationListDialogVisible', true)}
               />

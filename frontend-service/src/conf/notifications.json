@@ -369,6 +369,12 @@
         },
         {
           "key": "UPDATE_UNIQUE_CONSTRAINT_ERROR"
+        },
+        {
+          "key": "LOAD_INTEGRATIONS_ERROR"
+        },
+        {
+          "key": "DELETE_INTEGRATION_ERROR"
         }
       ]
     },
