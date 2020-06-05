@@ -118,10 +118,13 @@ export const apiDataflow = {
     });
     return response;
   },
-  getApiKey: async (dataflowId, dataProviderId) => {
+  getApiKey: async (dataflowId, dataProviderId, isCustodian) => {
     const tokens = userStorage.get();
+    let url = isCustodian
+      ? getUrl(DataflowConfig.getApiKeyCustodian, { dataflowId })
+      : getUrl(DataflowConfig.getApiKey, { dataflowId, dataProviderId });
     const response = await HTTPRequester.get({
-      url: getUrl(DataflowConfig.getApiKey, { dataflowId, dataProviderId }),
+      url: url,
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
@@ -130,10 +133,13 @@ export const apiDataflow = {
 
     return response.data;
   },
-  generateApiKey: async (dataflowId, dataProviderId) => {
+  generateApiKey: async (dataflowId, dataProviderId, isCustodian) => {
     const tokens = userStorage.get();
+    let url = isCustodian
+      ? getUrl(DataflowConfig.generateApiKeyCustodian, { dataflowId })
+      : getUrl(DataflowConfig.getApiKey, { dataflowId, dataProviderId });
     const response = await HTTPRequester.post({
-      url: getUrl(DataflowConfig.generateApiKey, { dataflowId, dataProviderId }),
+      url: url,
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
