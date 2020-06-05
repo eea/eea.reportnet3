@@ -368,7 +368,7 @@ public class RecordValue {
     boolean validateReturn;
     try {
       validateReturn =
-          -1 == fieldsMap.get(fieldSchemaId).indexOf(fieldsMap.get(dataMach)) ? false : true;
+          -1 == fieldsMap.get(dataMach).indexOf(fieldsMap.get(fieldSchemaId)) ? false : true;
     } catch (Exception e) {
       validateReturn = true;
     }
@@ -610,7 +610,7 @@ public class RecordValue {
     boolean validateReturn;
     try {
       validateReturn =
-          -1 == fieldsMap.get(fieldSchemaId).indexOf(fieldsMap.get(regex)) ? false : true;
+          -1 == fieldsMap.get(regex).indexOf(fieldsMap.get(fieldSchemaId)) ? false : true;
     } catch (Exception e) {
       validateReturn = true;
     }
