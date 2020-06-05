@@ -1,5 +1,6 @@
-import isNil from 'lodash/isNil';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+
 import { getSelectedFieldById } from './getSelectedFieldById';
 
 const printExpression = (expression, tabs) => {
@@ -15,6 +16,7 @@ const printExpression = (expression, tabs) => {
   }
   return '';
 };
+
 const printNode = (expression, index, expressions, tabs) => {
   let expressionString = '';
   expressionString = `${printSelector(expression, 0, [], tabs)} ${

@@ -10,12 +10,17 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 export const IfThenClause = ({
   componentName,
   creationFormState,
-  onAddNewExpression,
-  onExpressionDelete,
-  onExpressionFieldUpdate,
-  onExpressionGroup,
-  onExpressionMarkToGroup,
+  onAddNewExpressionIf,
+  onAddNewExpressionThen,
+  onExpressionIfDelete,
+  onExpressionIfFieldUpdate,
+  onExpressionIfGroup,
+  onExpressionIfMarkToGroup,
   onExpressionsErrors,
+  onExpressionThenDelete,
+  onExpressionThenFieldUpdate,
+  onExpressionThenGroup,
+  onExpressionThenMarkToGroup,
   onGetFieldType,
   tabsChanges
 }) => {
@@ -26,16 +31,16 @@ export const IfThenClause = ({
       <div className={styles.section}>
         <h3 className="if">IF</h3>
         <ul className={styles.list}>
-          {creationFormState.candidateRule.expressions &&
-            creationFormState.candidateRule.expressions.map((expression, i) => (
+          {creationFormState.candidateRule.expressionsIf &&
+            creationFormState.candidateRule.expressionsIf.map((expression, i) => (
               <ValidationExpressionSelector
                 expressionType={creationFormState.candidateRule.expressionType}
                 expressionValues={expression}
                 isDisabled={creationFormState.areRulesDisabled}
                 key={expression.expressionId}
-                onExpressionDelete={onExpressionDelete}
-                onExpressionFieldUpdate={onExpressionFieldUpdate}
-                onExpressionGroup={onExpressionMarkToGroup}
+                onExpressionDelete={onExpressionIfDelete}
+                onExpressionFieldUpdate={onExpressionIfFieldUpdate}
+                onExpressionGroup={onExpressionIfMarkToGroup}
                 onExpressionsErrors={onExpressionsErrors}
                 onGetFieldType={onGetFieldType}
                 position={i}
@@ -52,7 +57,7 @@ export const IfThenClause = ({
             icon="plus"
             id={`${componentName}__addExpresion`}
             label={resourcesContext.messages.addNewRule}
-            onClick={() => onAddNewExpression()}
+            onClick={() => onAddNewExpressionIf()}
             type="button"
           />
           {creationFormState.groupExpressionsActive >= 2 && (
@@ -61,7 +66,7 @@ export const IfThenClause = ({
               icon="plus"
               id={`${componentName}__groupExpresions`}
               label="Group"
-              onClick={() => onExpressionGroup()}
+              onClick={() => onExpressionIfGroup()}
               type="button"
             />
           )}
@@ -71,16 +76,16 @@ export const IfThenClause = ({
       <div className={styles.section}>
         <h3 className="then">THEN</h3>
         <ul className={styles.list}>
-          {creationFormState.candidateRule.expressions &&
-            creationFormState.candidateRule.expressions.map((expression, i) => (
+          {creationFormState.candidateRule.expressionsThen &&
+            creationFormState.candidateRule.expressionsThen.map((expression, i) => (
               <ValidationExpressionSelector
                 expressionType={creationFormState.candidateRule.expressionType}
                 expressionValues={expression}
                 isDisabled={creationFormState.areRulesDisabled}
                 key={expression.expressionId}
-                onExpressionDelete={onExpressionDelete}
-                onExpressionFieldUpdate={onExpressionFieldUpdate}
-                onExpressionGroup={onExpressionMarkToGroup}
+                onExpressionDelete={onExpressionThenDelete}
+                onExpressionFieldUpdate={onExpressionThenFieldUpdate}
+                onExpressionGroup={onExpressionThenMarkToGroup}
                 onExpressionsErrors={onExpressionsErrors}
                 onGetFieldType={onGetFieldType}
                 position={i}
@@ -97,7 +102,7 @@ export const IfThenClause = ({
             icon="plus"
             id={`${componentName}__addExpresion`}
             label={resourcesContext.messages.addNewRule}
-            onClick={() => onAddNewExpression()}
+            onClick={() => onAddNewExpressionThen()}
             type="button"
           />
           {creationFormState.groupExpressionsActive >= 2 && (
@@ -106,7 +111,7 @@ export const IfThenClause = ({
               icon="plus"
               id={`${componentName}__groupExpresions`}
               label="Group"
-              onClick={() => onExpressionGroup()}
+              onClick={() => onExpressionThenGroup()}
               type="button"
             />
           )}

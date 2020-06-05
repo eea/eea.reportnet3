@@ -92,11 +92,21 @@ export const RowValidation = ({ datasetId, tabs }) => {
             componentName={componentName}
             creationFormState={creationFormState}
             onAddNewExpression={onAddNewExpression}
+            onAddNewExpressionIf={onAddNewExpressionIf}
+            onAddNewExpressionThen={onAddNewExpressionThen}
             onExpressionDelete={onExpressionDelete}
             onExpressionFieldUpdate={onExpressionFieldUpdate}
             onExpressionGroup={onExpressionGroup}
-            onExpressionMarkToGroup={onExpressionMarkToGroup}
+            onExpressionIfDelete={onExpressionIfDelete}
+            onExpressionIfFieldUpdate={onExpressionIfFieldUpdate}
+            onExpressionIfGroup={onExpressionIfGroup}
+            onExpressionIfMarkToGroup={onExpressionIfMarkToGroup}
             onExpressionsErrors={onExpressionsErrors}
+            onExpressionThenDelete={onExpressionThenDelete}
+            onExpressionThenFieldUpdate={onExpressionThenFieldUpdate}
+            onExpressionThenGroup={onExpressionThenGroup}
+            onExpressionMarkToGroup={onExpressionMarkToGroup}
+            onExpressionThenMarkToGroup={onExpressionThenMarkToGroup}
             onExpressionTypeToggle={onExpressionTypeToggle}
             onGetFieldType={onGetFieldType}
             tabsChanges={tabsChanges}
@@ -311,6 +321,40 @@ export const RowValidation = ({ datasetId, tabs }) => {
     });
   };
 
+  const onExpressionIfDelete = expressionId => {
+    const {
+      candidateRule: { expressionsIf, allExpressionsIf }
+    } = creationFormState;
+    const parsedExpressions = deleteExpressionRecursively(expressionId, expressionsIf);
+    const parsedAllExpressions = deleteExpression(expressionId, allExpressionsIf);
+    creationFormDispatch({
+      type: 'UPDATE_RULES',
+      payload: parsedAllExpressions
+    });
+    creationFormDispatch({
+      type: 'UPDATE_EXPRESSIONS_IF_TREE',
+      payload: parsedExpressions
+    });
+  };
+
+  const onExpressionThenDelete = expressionId => {
+    const {
+      candidateRule: { expressions, allExpressions }
+    } = creationFormState;
+    const parsedExpressions = deleteExpressionRecursively(expressionId, expressions);
+    const parsedAllExpressions = deleteExpression(expressionId, allExpressions);
+
+    creationFormDispatch({
+      type: 'UPDATE_RULES',
+      payload: parsedAllExpressions
+    });
+
+    creationFormDispatch({
+      type: 'UPDATE_EXPRESSIONS_THN_TREE',
+      payload: parsedExpressions
+    });
+  };
+
   const onExpressionFieldUpdate = (expressionId, field) => {
     const {
       candidateRule: { allExpressions }
@@ -321,13 +365,33 @@ export const RowValidation = ({ datasetId, tabs }) => {
     });
   };
 
+  const onExpressionIfFieldUpdate = (expressionId, field) => {
+    const {
+      candidateRule: { allExpressionsIf }
+    } = creationFormState;
+    creationFormDispatch({
+      type: 'UPDATE_IF_RULES',
+      payload: setValidationExpression(expressionId, field, allExpressionsIf)
+    });
+  };
+
+  const onExpressionThenFieldUpdate = (expressionId, field) => {
+    const {
+      candidateRule: { allExpressionsThen }
+    } = creationFormState;
+    creationFormDispatch({
+      type: 'UPDATE_THEN_RULES',
+      payload: setValidationExpression(expressionId, field, allExpressionsThen)
+    });
+  };
+
   const onExpressionMarkToGroup = (expressionId, field) => {
     const {
       groupCandidate,
       candidateRule: { allExpressions }
     } = creationFormState;
 
-    const [currentExpression] = allExpressions.filter(expression => expression.expressionId == expressionId);
+    const [currentExpression] = allExpressions.filter(expression => expression.expressionId === expressionId);
     currentExpression[field.key] = field.value;
 
     if (field.value) {
@@ -339,6 +403,54 @@ export const RowValidation = ({ datasetId, tabs }) => {
       type: 'GROUP_RULES_ACTIVATOR',
       payload: {
         allExpressions,
+        groupCandidate,
+        groupExpressionsActive: field.value ? 1 : -1
+      }
+    });
+  };
+
+  const onExpressionIfMarkToGroup = (expressionId, field) => {
+    const {
+      groupCandidate,
+      candidateRule: { allExpressionsIf }
+    } = creationFormState;
+
+    const [currentExpression] = allExpressionsIf.filter(expression => expression.expressionId === expressionId);
+    currentExpression[field.key] = field.value;
+
+    if (field.value) {
+      groupCandidate.push(expressionId);
+    } else {
+      pull(groupCandidate, expressionId);
+    }
+    creationFormDispatch({
+      type: 'GROUP_IF_RULES_ACTIVATOR',
+      payload: {
+        allExpressionsIf,
+        groupCandidate,
+        groupExpressionsActive: field.value ? 1 : -1
+      }
+    });
+  };
+
+  const onExpressionThenMarkToGroup = (expressionId, field) => {
+    const {
+      groupCandidate,
+      candidateRule: { allExpressionsThen }
+    } = creationFormState;
+
+    const [currentExpression] = allExpressionsThen.filter(expression => expression.expressionId === expressionId);
+    currentExpression[field.key] = field.value;
+
+    if (field.value) {
+      groupCandidate.push(expressionId);
+    } else {
+      pull(groupCandidate, expressionId);
+    }
+    creationFormDispatch({
+      type: 'GROUP_RULES_ACTIVATOR',
+      payload: {
+        allExpressionsThen,
         groupCandidate,
         groupExpressionsActive: field.value ? 1 : -1
       }
@@ -401,6 +513,20 @@ export const RowValidation = ({ datasetId, tabs }) => {
     });
   };
 
+  const onAddNewExpressionIf = () => {
+    creationFormDispatch({
+      type: 'ADD_EMPTY_IF_RULE',
+      payload: getEmptyExpression()
+    });
+  };
+
+  const onAddNewExpressionThen = () => {
+    creationFormDispatch({
+      type: 'ADD_EMPTY_THEN_RULE',
+      payload: getEmptyExpression()
+    });
+  };
+
   const onExpressionGroup = () => {
     const groupingResult = groupExpressions(
       creationFormState.candidateRule.expressions,
@@ -413,6 +539,38 @@ export const RowValidation = ({ datasetId, tabs }) => {
         payload: {
           expressions: groupingResult.expressions,
           allExpressions: [...creationFormState.candidateRule.allExpressions, groupingResult.newGroup]
+        }
+      });
+  };
+
+  const onExpressionIfGroup = () => {
+    const groupingResult = groupExpressions(
+      creationFormState.candidateRule.expressionsIf,
+      creationFormState.groupExpressionsActive,
+      creationFormState.groupCandidate
+    );
+    if (!isNil(groupingResult.newGroup))
+      creationFormDispatch({
+        type: 'GROUP_EXPRESSIONS',
+        payload: {
+          expressionsIf: groupingResult.expressionsIf,
+          allExpressionsIf: [...creationFormState.candidateRule.allExpressionsIf, groupingResult.newGroup]
+        }
+      });
+  };
+
+  const onExpressionThenGroup = () => {
+    const groupingResult = groupExpressions(
+      creationFormState.candidateRule.expressionsThen,
+      creationFormState.groupExpressionsActive,
+      creationFormState.groupCandidate
+    );
+    if (!isNil(groupingResult.newGroup))
+      creationFormDispatch({
+        type: 'GROUP_EXPRESSIONS',
+        payload: {
+          expressionsThen: groupingResult.expressionsThen,
+          allExpressionsThen: [...creationFormState.candidateRule.allExpressionsThen, groupingResult.newGroup]
         }
       });
   };

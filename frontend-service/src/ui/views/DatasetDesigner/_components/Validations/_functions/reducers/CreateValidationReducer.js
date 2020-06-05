@@ -2,11 +2,15 @@ export const createValidationReducerInitState = {
   candidateRule: {
     active: true,
     allExpressions: [],
+    allExpressionsIf: [],
+    allExpressionsThen: [],
     allGroups: [],
     description: '',
     errorLevel: undefined,
     errorMessage: '',
     expressions: [],
+    expressionsIf: [],
+    expressionsThen: [],
     expressionType: '',
     field: undefined,
     shortCode: '',
@@ -67,6 +71,24 @@ export const createValidationReducer = (state, { type, payload }) => {
         }
       };
 
+    case 'UPDATE_IF_RULES':
+      return {
+        ...state,
+        candidateRule: {
+          ...state.candidateRule,
+          allExpressionsIf: payload
+        }
+      };
+
+    case 'UPDATE_THEN_RULES':
+      return {
+        ...state,
+        candidateRule: {
+          ...state.candidateRule,
+          allExpressionsThen: payload
+        }
+      };
+
     case 'SET_ARE_RULES_DISABLED':
       return {
         ...state,
@@ -94,6 +116,24 @@ export const createValidationReducer = (state, { type, payload }) => {
           allExpressions: [...state.candidateRule.allExpressions, payload]
         }
       };
+    case 'ADD_EMPTY_IF_RULE':
+      return {
+        ...state,
+        candidateRule: {
+          ...state.candidateRule,
+          expressionsIf: [...state.candidateRule.expressionsIf, payload],
+          allExpressionsIf: [...state.candidateRule.allExpressionsIf, payload]
+        }
+      };
+    case 'ADD_EMPTY_THEN_RULE':
+      return {
+        ...state,
+        candidateRule: {
+          ...state.candidateRule,
+          expressionsThen: [...state.candidateRule.expressionsThen, payload],
+          allExpressionsThen: [...state.candidateRule.allExpressionsThen, payload]
+        }
+      };
 
     case 'DELETE_RULE':
       return {
@@ -110,6 +150,22 @@ export const createValidationReducer = (state, { type, payload }) => {
         candidateRule: {
           ...state.candidateRule,
           expressions: payload
+        }
+      };
+    case 'UPDATE_EXPRESSIONS_IF_TREE':
+      return {
+        ...state,
+        candidateRule: {
+          ...state.candidateRule,
+          expressionsIf: payload
+        }
+      };
+    case 'UPDATE_EXPRESSIONS_THEN_TREE':
+      return {
+        ...state,
+        candidateRule: {
+          ...state.candidateRule,
+          expressionsThen: payload
         }
       };
 
@@ -136,6 +192,28 @@ export const createValidationReducer = (state, { type, payload }) => {
         }
       };
 
+    case 'GROUP_IF_RULES_ACTIVATOR':
+      return {
+        ...state,
+        groupExpressionsActive: state.groupExpressionsActive + payload.groupExpressionsActive,
+        groupCandidate: payload.groupCandidate,
+        candidateRule: {
+          ...state.candidateRule,
+          allExpressionsIf: payload.allExpressionsIf
+        }
+      };
+
+    case 'GROUP_THEN_RULES_ACTIVATOR':
+      return {
+        ...state,
+        groupExpressionsActive: state.groupExpressionsActive + payload.groupExpressionsActive,
+        groupCandidate: payload.groupCandidate,
+        candidateRule: {
+          ...state.candidateRule,
+          allExpressionsThen: payload.allExpressionsThen
+        }
+      };
+
     case 'SET_EXPRESSIONS_STRING':
       return {
         ...state,
@@ -155,7 +233,7 @@ export const createValidationReducer = (state, { type, payload }) => {
         candidateRule: { ...payload },
         tableFields: []
       };
-
+    //Not in use?
     case 'UPDATE_EXPRESSIONS':
       return {
         ...state,

@@ -1,9 +1,10 @@
-import { config } from 'conf';
-
 import camelCase from 'lodash/camelCase';
-import isNil from 'lodash/isNil';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+
 import moment from 'moment';
+
+import { config } from 'conf';
 
 const printExpression = (expression, field) => {
   if (!isNil(expression.operatorValue) && !isEmpty(expression.operatorValue)) {

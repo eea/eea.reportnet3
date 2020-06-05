@@ -11,17 +11,27 @@ import { IfThenClause } from 'ui/views/DatasetDesigner/_components/Validations/_
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const ExpressionSelector = ({
-  onExpressionTypeToggle,
   componentName,
   creationFormState,
+  onAddNewExpression,
+  onAddNewExpressionIf,
+  onAddNewExpressionThen,
   onExpressionDelete,
   onExpressionFieldUpdate,
-  onExpressionMarkToGroup,
-  tabsChanges,
-  onAddNewExpression,
   onExpressionGroup,
+  onExpressionIfDelete,
+  onExpressionIfFieldUpdate,
+  onExpressionIfGroup,
+  onExpressionIfMarkToGroup,
+  onExpressionMarkToGroup,
   onExpressionsErrors,
-  onGetFieldType
+  onExpressionThenDelete,
+  onExpressionThenFieldUpdate,
+  onExpressionThenGroup,
+  onExpressionThenMarkToGroup,
+  onExpressionTypeToggle,
+  onGetFieldType,
+  tabsChanges
 }) => {
   const resources = useContext(ResourcesContext);
   const options = [
@@ -60,11 +70,16 @@ export const ExpressionSelector = ({
         <IfThenClause
           componentName={componentName}
           creationFormState={creationFormState}
-          onAddNewExpression={onAddNewExpression}
-          onExpressionDelete={onExpressionDelete}
-          onExpressionFieldUpdate={onExpressionFieldUpdate}
-          onExpressionGroup={onExpressionGroup}
-          onExpressionMarkToGroup={onExpressionMarkToGroup}
+          onAddNewExpressionIf={onAddNewExpressionIf}
+          onAddNewExpressionThen={onAddNewExpressionThen}
+          onExpressionIfDelete={onExpressionIfDelete}
+          onExpressionThenDelete={onExpressionThenDelete}
+          onExpressionIfFieldUpdate={onExpressionIfFieldUpdate}
+          onExpressionThenFieldUpdate={onExpressionThenFieldUpdate}
+          onExpressionIfGroup={onExpressionIfGroup}
+          onExpressionThenGroup={onExpressionThenGroup}
+          onExpressionIfMarkToGroup={onExpressionIfMarkToGroup}
+          onExpressionThenMarkToGroup={onExpressionThenMarkToGroup}
           onExpressionsErrors={onExpressionsErrors}
           tabsChanges={tabsChanges}
           onGetFieldType={onGetFieldType}
@@ -88,9 +103,4 @@ export const ExpressionSelector = ({
       <div className={styles.section}>{expressionsTypeView()} </div>
     </>
   );
-  /* return (
-    <>
-      <div className={styles.section}>{expressionsTypeView()} </div>
-    </>
-  ); */
 };
