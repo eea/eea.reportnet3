@@ -650,14 +650,17 @@ public class RulesServiceImpl implements RulesService {
     }
 
     Rule rule = ruleMapper.classToEntity(integrityVO);
-    rule.setIntegrityConstraintId(new ObjectId());
-    rule.setRuleId(new ObjectId());
+    ObjectId integrityConstraintId = new ObjectId();
+    ObjectId ruleId = new ObjectId();
+    rule.setIntegrityConstraintId(integrityConstraintId);
+    rule.setRuleId(ruleId);
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
     rule.setVerified(null);
+
     IntegritySchema integritySchema = new IntegritySchema();
     integritySchema.setIsDoubleReferenced(integrityVO.getIsDoubleReferenced());
-    integritySchema.setId(rule.getIntegrityConstraintId());
+    integritySchema.setId(integrityConstraintId);
     integritySchema.setOriginDatasetSchemaId(new ObjectId(integrityVO.getOriginDatasetSchemaId()));
     integritySchema
         .setReferencedDatasetSchemaId(new ObjectId(integrityVO.getReferencedDatasetSchemaId()));
@@ -666,6 +669,8 @@ public class RulesServiceImpl implements RulesService {
     integritySchema.setReferencedFields(integrityVO.getReferencedFields());
     integritySchemaRepository.save(integritySchema);
 
+    rule.setWhenCondition("isIntegrityConstraint('" + integrityConstraintId.toString() + "','"
+        + ruleId.toString() + "')");
     validateRule(rule);
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
