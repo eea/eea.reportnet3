@@ -57,7 +57,7 @@
   <repositories>
     <repository>
       <id>Boundless</id>
-      <url>http://repo.boundlessgeo.com/main/</url>
+      <url>https://download.osgeo.org/webdav/geotools/</url>
     </repository>
     <repository>
       <id>OsGeo</id>
