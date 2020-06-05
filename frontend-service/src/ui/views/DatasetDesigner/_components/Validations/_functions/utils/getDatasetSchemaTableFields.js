@@ -7,7 +7,8 @@ export const getDatasetSchemaTableFields = (candidateTable, tables) => {
     !isNil(selectedTable) && !isEmpty(selectedTable) && !isNil(selectedTable.records)
       ? selectedTable.records[0].fields.map(field => ({
           label: field.name,
-          code: field.fieldId
+          code: field.fieldId,
+          type: field.type
         }))
       : [];
   return fields;

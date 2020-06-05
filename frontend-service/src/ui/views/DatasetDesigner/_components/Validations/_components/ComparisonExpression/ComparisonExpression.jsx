@@ -81,7 +81,7 @@ const ComparisonExpression = ({
   useEffect(() => {
     if (rawTableFields) {
       const parsedTableFields = rawTableFields.map(field => {
-        return { label: field.label, value: field.code };
+        return { label: field.label, value: field.code, type: field.type };
       });
       setTableFields(parsedTableFields);
       setSecondFieldOptions(parsedTableFields);
@@ -133,7 +133,6 @@ const ComparisonExpression = ({
 
   useEffect(() => {
     const options = [];
-    let operatorOfType = null;
     if (!isNil(fieldType)) {
       operatorByType[fieldType].forEach(key => {
         options.push(operatorTypesConf[key].option);
@@ -255,7 +254,10 @@ const ComparisonExpression = ({
         <Dropdown
           disabled={disabledFields.field1}
           id={`${componentName}__field1`}
-          onChange={e => onUpdateExpressionField('field1', e.value)}
+          onChange={e => {
+            console.log('e', e);
+            onUpdateExpressionField('field1', e.value);
+          }}
           optionLabel={'label'}
           options={tableFields}
           placeholder={resourcesContext.messages.selectField}
@@ -289,7 +291,6 @@ const ComparisonExpression = ({
           value={expressionValues.operatorValue}
         />
       </span>
-
       <span
         onBlur={() => onAddToClickedFields('field2')}
         className={`${styles.operatorType} formField ${printRequiredFieldError('field2')}`}>
