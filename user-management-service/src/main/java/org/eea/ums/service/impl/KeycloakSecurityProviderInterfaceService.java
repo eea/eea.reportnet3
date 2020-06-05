@@ -535,15 +535,16 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     Long dataflowId = 0l;
     for (UserRepresentation userRepresentation : keycloakConnectorService.getUsers()) {
       if (null != userRepresentation.getAttributes()
-          && 1 >= userRepresentation.getAttributes().size()) {
+          && 1 <= userRepresentation.getAttributes().size() && userRepresentation.getAttributes()
+          .containsKey("ApiKeys")) {
         List<String> apiKeys = userRepresentation.getAttributes().get("ApiKeys");
         // an api key in attributes is represented as a string where positions are:
         // ApiKeyValue,dataflowId,dataproviderId
-        String userApiKey =
-            apiKeys.stream().filter(value -> value.startsWith(apiKey)).findFirst().orElse("");
+
+        String userApiKey = apiKeys.stream()
+            .filter(value -> value.startsWith(apiKey)).findFirst().orElse("");
         if (StringUtils.isNotEmpty(userApiKey)) {
-          LOG.info("Found user {} with api key {}",
-              userRepresentation.getUsername(), apiKey);
+
           String[] apiKeyValues = userApiKey.split(",");
           dataflowId = Long.valueOf(apiKeyValues[1]);
           userRepresentations.add(userRepresentation);
@@ -553,7 +554,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     TokenVO tokenVO = null;
     if (1 == userRepresentations.size()) {
       UserRepresentation user = userRepresentations.get(0);
-
+      LOG.info("Found user {} with api key {}",
+          user.getUsername(), apiKey);
       tokenVO = new TokenVO();
       tokenVO.setUserId(user.getId());
       Set<String> userGroups = new HashSet<>();
