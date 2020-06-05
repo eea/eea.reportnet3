@@ -1,25 +1,25 @@
 export const createValidationReducerInitState = {
   candidateRule: {
-    table: undefined,
-    field: undefined,
-    shortCode: '',
-    description: '',
-    errorMessage: '',
-    errorLevel: undefined,
     active: true,
-    expressions: [],
     allExpressions: [],
     allGroups: [],
-    expressionType: ''
+    description: '',
+    errorLevel: undefined,
+    errorMessage: '',
+    expressions: [],
+    expressionType: '',
+    field: undefined,
+    shortCode: '',
+    table: undefined
   },
-  datasetSchema: {},
-  schemaTables: [],
-  validationRuleString: '',
   areRulesDisabled: true,
+  datasetSchema: {},
+  groupCandidate: [],
+  groupExpressionsActive: 0,
   isRuleAddingDisabled: true,
   isValidationCreationDisabled: true,
-  groupExpressionsActive: 0,
-  groupCandidate: []
+  schemaTables: [],
+  validationRuleString: ''
 };
 export const createValidationReducer = (state, { type, payload }) => {
   switch (type) {
@@ -31,6 +31,7 @@ export const createValidationReducer = (state, { type, payload }) => {
           [payload.key]: payload.value
         }
       };
+
     case 'SET_FIELD_AND_FIELD_TYPE':
       return {
         ...state,
@@ -40,11 +41,13 @@ export const createValidationReducer = (state, { type, payload }) => {
           fieldType: payload.fieldType
         }
       };
+
     case 'SET_TABLES':
       return {
         ...state,
         schemaTables: payload
       };
+
     case 'SET_FIELDS':
       return {
         ...state,
@@ -54,6 +57,7 @@ export const createValidationReducer = (state, { type, payload }) => {
           field: null
         }
       };
+
     case 'UPDATE_RULES':
       return {
         ...state,
@@ -62,21 +66,25 @@ export const createValidationReducer = (state, { type, payload }) => {
           allExpressions: payload
         }
       };
+
     case 'SET_ARE_RULES_DISABLED':
       return {
         ...state,
         areRulesDisabled: payload
       };
+
     case 'SET_IS_VALIDATION_ADDING_DISABLED':
       return {
         ...state,
         isRuleAddingDisabled: payload
       };
+
     case 'SET_IS_VALIDATION_CREATION_DISABLED':
       return {
         ...state,
         isValidationCreationDisabled: payload
       };
+
     case 'ADD_EMPTY_RULE':
       return {
         ...state,
@@ -86,6 +94,7 @@ export const createValidationReducer = (state, { type, payload }) => {
           allExpressions: [...state.candidateRule.allExpressions, payload]
         }
       };
+
     case 'DELETE_RULE':
       return {
         ...state,
@@ -94,6 +103,7 @@ export const createValidationReducer = (state, { type, payload }) => {
           allExpressions: payload
         }
       };
+
     case 'UPDATE_EXPRESSIONS_TREE':
       return {
         ...state,
@@ -102,6 +112,7 @@ export const createValidationReducer = (state, { type, payload }) => {
           expressions: payload
         }
       };
+
     case 'GROUP_EXPRESSIONS':
       return {
         ...state,
@@ -113,6 +124,7 @@ export const createValidationReducer = (state, { type, payload }) => {
           allExpressions: payload.allExpressions
         }
       };
+
     case 'GROUP_RULES_ACTIVATOR':
       return {
         ...state,
@@ -123,25 +135,27 @@ export const createValidationReducer = (state, { type, payload }) => {
           allExpressions: payload.allExpressions
         }
       };
+
     case 'SET_EXPRESSIONS_STRING':
       return {
         ...state,
         validationRuleString: payload
       };
+
     case 'INIT_FORM':
       return {
         ...state,
-        schemaTables: payload.tables,
-        candidateRule: payload.candidateRule
+        candidateRule: payload.candidateRule,
+        schemaTables: payload.tables
       };
+
     case 'RESET_CREATION_FORM':
       return {
         ...state,
-        tableFields: [],
-        candidateRule: {
-          ...payload
-        }
+        candidateRule: { ...payload },
+        tableFields: []
       };
+
     case 'UPDATE_EXPRESSIONS':
       return {
         ...state,
@@ -150,6 +164,7 @@ export const createValidationReducer = (state, { type, payload }) => {
           allExpressions: payload
         }
       };
+
     case 'POPULATE_CREATE_FORM':
       return {
         ...state,
@@ -167,6 +182,7 @@ export const createValidationReducer = (state, { type, payload }) => {
           shortCode: payload.shortCode
         }
       };
+
     case 'ON_EXPRESSION_TYPE_TOGGLE':
       return {
         ...state,
