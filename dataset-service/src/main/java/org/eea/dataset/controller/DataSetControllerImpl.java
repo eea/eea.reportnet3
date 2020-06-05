@@ -194,7 +194,9 @@ public class DataSetControllerImpl implements DatasetController {
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     // check if dataset is a schema and dataflow is draft
-    if (datasetService.isDraftDataflowSchema(datasetId)) {
+    if (datasetService.isDataflowNotDesignAndDatasetSchema(datasetId)) {
+      LOG_ERROR.error("Dataset is a design dataset with Id {}, and Dataflow is not in Design State",
+          datasetId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.NOT_DESIGN_DATAFLOW);
     }
@@ -663,7 +665,10 @@ public class DataSetControllerImpl implements DatasetController {
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
     // check if dataset is a schema and dataflow is draft
-    if (datasetService.isDraftDataflowSchema(datasetId)) {
+    if (datasetService.isDataflowNotDesignAndDatasetSchema(datasetId)) {
+      LOG_ERROR.error(
+          "Dataset is a design dataset with Id {}, and Dataflow whit id {} is not in Design State",
+          datasetId, dataflowId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.NOT_DESIGN_DATAFLOW);
     }

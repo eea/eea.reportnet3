@@ -1876,13 +1876,13 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Checks if is draft dataflow schema.
+   * Checks if is not dataflow design and datasetschema.
    *
    * @param idDataset the id dataset
    * @return the boolean
    */
   @Override
-  public Boolean isDraftDataflowSchema(Long idDataset) {
+  public Boolean isDataflowNotDesignAndDatasetSchema(Long idDataset) {
     final Optional<DesignDataset> designDataset = designDatasetRepository.findById(idDataset);
     if (designDataset.isPresent()) {
       // Get the dataFlowId from the metabase

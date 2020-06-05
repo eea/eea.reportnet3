@@ -403,10 +403,10 @@ public interface DatasetService {
   void releaseLock(Object... criteria);
 
   /**
-   * Checks if is draft dataflow schema.
+   * Checks if is not dataflow design and datasetschema.
    *
    * @param idDataset the id dataset
    * @return the boolean
    */
-  Boolean isDraftDataflowSchema(Long idDataset);
+  Boolean isDataflowNotDesignAndDatasetSchema(Long idDataset);
 }

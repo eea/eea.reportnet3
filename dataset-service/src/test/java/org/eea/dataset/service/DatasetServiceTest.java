@@ -2060,11 +2060,11 @@ public class DatasetServiceTest {
         .thenReturn(Optional.of(new DesignDataset()));
     Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(dataflowControllerZull.findById(Mockito.any())).thenReturn(dataflow);
-    assertTrue(datasetService.isDraftDataflowSchema(1L));
+    assertTrue(datasetService.isDataflowNotDesignAndDatasetSchema(1L));
   }
 
   @Test
   public void isDraftDataflowNoSchemaTest() {
-    assertFalse(datasetService.isDraftDataflowSchema(1L));
+    assertFalse(datasetService.isDataflowNotDesignAndDatasetSchema(1L));
   }
 }
