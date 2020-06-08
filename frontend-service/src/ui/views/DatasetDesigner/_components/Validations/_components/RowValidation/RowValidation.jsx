@@ -29,6 +29,7 @@ import {
 
 import { checkComparisonExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonExpressions';
 import { checkComparisonValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonValidation';
+import { checkComparisonValidationIfThen } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonValidationIfThen';
 import { deleteExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpression';
 import { deleteExpressionRecursively } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpressionRecursively';
 import { getDatasetSchemaTableFields } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getDatasetSchemaTableFields';
@@ -234,17 +235,12 @@ export const RowValidation = ({ datasetId, tabs }) => {
   useEffect(() => {
     creationFormDispatch({
       type: 'SET_IS_VALIDATION_CREATION_DISABLED',
-      payload: !checkComparisonValidation(creationFormState.candidateRule)
+      payload:
+        creationFormState.candidateRule.expressionType === 'ifThenClause'
+          ? !checkComparisonValidationIfThen(creationFormState.candidateRule)
+          : !checkComparisonValidation(creationFormState.candidateRule)
     });
-    creationFormDispatch({
-      type: 'SET_IS_VALIDATION_CREATION_DISABLED_IF',
-      payload: !checkComparisonValidation(creationFormState.candidateRule)
-    });
-    creationFormDispatch({
-      type: 'SET_IS_VALIDATION_CREATION_DISABLED_THEN',
-      payload: !checkComparisonValidation(creationFormState.candidateRule)
-    });
-  }, [creationFormState.candidateRule]);
+  }, [creationFormState.candidateRule, creationFormState.candidateRule.expressionType]);
 
   useEffect(() => {
     if (validationContext.ruleEdit && !isEmpty(validationContext.ruleToEdit)) {
@@ -629,6 +625,38 @@ export const RowValidation = ({ datasetId, tabs }) => {
     </Dialog>
   );
 
+  const getRuleCreationBtn = () => {
+    const options = {
+      onClick: () => {},
+      disabled: true,
+      label: '',
+      id: ''
+    };
+
+    if (validationContext.ruleEdit) {
+      options.onClick = () => onUpdateValidationRule();
+      options.label = resourcesContext.messages.update;
+      options.id = `${componentName}__update`;
+    } else {
+      options.onClick = () => onCreateValidationRule();
+      options.label = resourcesContext.messages.create;
+      options.id = `${componentName}__create`;
+    }
+
+    return (
+      <span data-tip data-for="createTooltip">
+        <Button
+          className="p-button-primary p-button-text-icon-left"
+          disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
+          icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
+          id={options.id}
+          label={options.label}
+          onClick={options.onClick}
+          type="button"
+        />
+      </span>
+    );
+  };
   return dialogLayout(
     <>
       <form>
@@ -645,31 +673,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
           <div className={styles.footer}>
             <div className={`${styles.section} ${styles.footerToolBar}`}>
               <div className={styles.subsection}>
-                {validationContext.ruleEdit ? (
-                  <span data-tip data-for="createTooltip">
-                    <Button
-                      className="p-button-primary p-button-text-icon-left"
-                      disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
-                      icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
-                      id={`${componentName}__update`}
-                      label={resourcesContext.messages.update}
-                      onClick={() => onUpdateValidationRule()}
-                      type="button"
-                    />
-                  </span>
-                ) : (
-                  <span data-tip data-for="createTooltip">
-                    <Button
-                      className="p-button-primary p-button-text-icon-left"
-                      disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
-                      icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
-                      id={`${componentName}__create`}
-                      label={resourcesContext.messages.create}
-                      onClick={() => onCreateValidationRule()}
-                      type="button"
-                    />
-                  </span>
-                )}
+                {getRuleCreationBtn()}
                 {(creationFormState.isValidationCreationDisabled || isSubmitDisabled) && (
                   <ReactTooltip className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
                     <span>{resourcesContext.messages.fcSubmitButtonDisabled}</span>

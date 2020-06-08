@@ -27,7 +27,8 @@ export const createValidationReducerInitState = {
   isRuleAddingDisabledThen: true,
   isValidationCreationDisabled: true,
   schemaTables: [],
-  validationRuleString: ''
+  validationRuleString: '',
+  ruleType: ''
 };
 export const createValidationReducer = (state, { type, payload }) => {
   switch (type) {
@@ -38,6 +39,11 @@ export const createValidationReducer = (state, { type, payload }) => {
           ...state.candidateRule,
           [payload.key]: payload.value
         }
+      };
+    case 'SET_RULE_TYPE':
+      return {
+        ...state,
+        ruleType: payload
       };
 
     case 'SET_FIELD_AND_FIELD_TYPE':
