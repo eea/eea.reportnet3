@@ -2055,6 +2055,17 @@ public class DatasetServiceTest {
   @Test
   public void isReportableDesignTest() {
     DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(designDatasetRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new DesignDataset()));
+    Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
+    Mockito.when(dataflowControllerZull.findById(Mockito.any())).thenReturn(dataflow);
+    assertTrue(datasetService.isDatasetReportable(1L));
+  }
+
+  @Test
+  public void isNotReportableDesignTest() {
+    DataFlowVO dataflow = new DataFlowVO();
     dataflow.setStatus(TypeStatusEnum.DRAFT);
     Mockito.when(designDatasetRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new DesignDataset()));
@@ -2065,11 +2076,22 @@ public class DatasetServiceTest {
 
   @Test
   public void isReportableTest() {
-    assertTrue(datasetService.isDatasetReportable(1L));
+    assertFalse(datasetService.isDatasetReportable(1L));
   }
 
   @Test
   public void isReportableReportingTest() {
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(reportingDatasetRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new ReportingDataset()));
+    Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
+    Mockito.when(dataflowControllerZull.findById(Mockito.any())).thenReturn(dataflow);
+    assertTrue(datasetService.isDatasetReportable(1L));
+  }
+
+  @Test
+  public void isNotReportableReportingTest() {
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setStatus(TypeStatusEnum.DESIGN);
     Mockito.when(reportingDatasetRepository.findById(Mockito.any()))

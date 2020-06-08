@@ -1885,25 +1885,30 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   public Boolean isDatasetReportable(Long idDataset) {
+    Boolean result = false;
+    // Check if dataset is a designDataset
     final Optional<DesignDataset> designDataset = designDatasetRepository.findById(idDataset);
     if (designDataset.isPresent()) {
       DataFlowVO dataflow = getDataflow(idDataset);
-      if (!TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
+      if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
+        result = true;
+      } else {
         LOG.info("DesignDataset {} is not reportable because are in dataflow {} with status {}",
             idDataset, dataflow.getId(), dataflow);
-        return false;
       }
     }
+    // Check if dataset is a reportingDataset
     Optional<ReportingDataset> reportingDataset = reportingDatasetRepository.findById(idDataset);
     if (reportingDataset.isPresent()) {
       DataFlowVO dataflow = getDataflow(idDataset);
-      if (!TypeStatusEnum.DRAFT.equals(dataflow.getStatus())) {
-        LOG.info("ReportingDataset {} is not reportable because are in dataflow {} with status {}",
+      if (TypeStatusEnum.DRAFT.equals(dataflow.getStatus())) {
+        result = true;
+      } else {
+        LOG.info("DesignDataset {} is not reportable because are in dataflow {} with status {}",
             idDataset, dataflow.getId(), dataflow);
-        return false;
       }
     }
-    return true;
+    return result;
   }
 
   /**
