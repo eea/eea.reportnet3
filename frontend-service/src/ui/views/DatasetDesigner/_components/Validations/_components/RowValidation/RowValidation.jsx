@@ -208,22 +208,40 @@ export const RowValidation = ({ datasetId, tabs }) => {
         payload: true
       });
     }
-  }, [creationFormState.candidateRule.table, creationFormState.candidateRule.field]);
+  }, [creationFormState.candidateRule.table]);
 
   useEffect(() => {
     const {
-      candidateRule: { expressions }
+      candidateRule: { expressions, expressionsIf, expressionsThen }
     } = creationFormState;
 
     creationFormDispatch({
       type: 'SET_IS_VALIDATION_ADDING_DISABLED',
       payload: checkComparisonExpressions(expressions)
     });
+
+    creationFormDispatch({
+      type: 'SET_IS_VALIDATION_ADDING_DISABLED_IF',
+      payload: checkComparisonExpressions(expressionsIf)
+    });
+
+    creationFormDispatch({
+      type: 'SET_IS_VALIDATION_ADDING_DISABLED_THEN',
+      payload: checkComparisonExpressions(expressionsThen)
+    });
   }, [creationFormState.areRulesDisabled, creationFormState.candidateRule]);
 
   useEffect(() => {
     creationFormDispatch({
       type: 'SET_IS_VALIDATION_CREATION_DISABLED',
+      payload: !checkComparisonValidation(creationFormState.candidateRule)
+    });
+    creationFormDispatch({
+      type: 'SET_IS_VALIDATION_CREATION_DISABLED_IF',
+      payload: !checkComparisonValidation(creationFormState.candidateRule)
+    });
+    creationFormDispatch({
+      type: 'SET_IS_VALIDATION_CREATION_DISABLED_THEN',
       payload: !checkComparisonValidation(creationFormState.candidateRule)
     });
   }, [creationFormState.candidateRule]);

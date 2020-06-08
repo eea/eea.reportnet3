@@ -36,7 +36,7 @@ export const IfThenClause = ({
               <ValidationExpressionSelector
                 expressionType={creationFormState.candidateRule.expressionType}
                 expressionValues={expression}
-                isDisabled={creationFormState.areRulesDisabled}
+                isDisabled={creationFormState.areRulesDisabledIf}
                 key={expression.expressionId}
                 onExpressionDelete={onExpressionIfDelete}
                 onExpressionFieldUpdate={onExpressionIfFieldUpdate}
@@ -53,7 +53,7 @@ export const IfThenClause = ({
         <div className={styles.expressionsActionsBtns}>
           <Button
             className="p-button-primary p-button-text-icon-left"
-            disabled={creationFormState.isRuleAddingDisabled}
+            disabled={creationFormState.isRuleAddingDisabledIf}
             icon="plus"
             id={`${componentName}__addExpresion`}
             label={resourcesContext.messages.addNewRule}
@@ -81,7 +81,7 @@ export const IfThenClause = ({
               <ValidationExpressionSelector
                 expressionType={creationFormState.candidateRule.expressionType}
                 expressionValues={expression}
-                isDisabled={creationFormState.areRulesDisabled}
+                isDisabled={creationFormState.areRulesDisabledThen}
                 key={expression.expressionId}
                 onExpressionDelete={onExpressionThenDelete}
                 onExpressionFieldUpdate={onExpressionThenFieldUpdate}
@@ -98,7 +98,7 @@ export const IfThenClause = ({
         <div className={styles.expressionsActionsBtns}>
           <Button
             className="p-button-primary p-button-text-icon-left"
-            disabled={creationFormState.isRuleAddingDisabled}
+            disabled={creationFormState.isRuleAddingDisabledThen}
             icon="plus"
             id={`${componentName}__addExpresion`}
             label={resourcesContext.messages.addNewRule}

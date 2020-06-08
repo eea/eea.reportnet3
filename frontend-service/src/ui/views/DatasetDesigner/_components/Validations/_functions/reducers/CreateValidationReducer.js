@@ -17,10 +17,14 @@ export const createValidationReducerInitState = {
     table: undefined
   },
   areRulesDisabled: true,
+  areRulesDisabledIf: true,
+  areRulesDisabledThen: true,
   datasetSchema: {},
   groupCandidate: [],
   groupExpressionsActive: 0,
   isRuleAddingDisabled: true,
+  isRuleAddingDisabledIf: true,
+  isRuleAddingDisabledThen: true,
   isValidationCreationDisabled: true,
   schemaTables: [],
   validationRuleString: ''
@@ -92,13 +96,39 @@ export const createValidationReducer = (state, { type, payload }) => {
     case 'SET_ARE_RULES_DISABLED':
       return {
         ...state,
-        areRulesDisabled: payload
+        areRulesDisabled: payload,
+        areRulesDisabledIf: payload,
+        areRulesDisabledThen: payload
+      };
+
+    case 'SET_ARE_RULES_DISABLED_IF':
+      return {
+        ...state,
+        areRulesDisabledIf: payload
+      };
+
+    case 'SET_ARE_RULES_DISABLED_THEN':
+      return {
+        ...state,
+        areRulesDisabledThen: payload
       };
 
     case 'SET_IS_VALIDATION_ADDING_DISABLED':
       return {
         ...state,
         isRuleAddingDisabled: payload
+      };
+
+    case 'SET_IS_VALIDATION_ADDING_DISABLED_IF':
+      return {
+        ...state,
+        isRuleAddingDisabledIf: payload
+      };
+
+    case 'SET_IS_VALIDATION_ADDING_DISABLED_THEN':
+      return {
+        ...state,
+        isRuleAddingDisabledThen: payload
       };
 
     case 'SET_IS_VALIDATION_CREATION_DISABLED':
