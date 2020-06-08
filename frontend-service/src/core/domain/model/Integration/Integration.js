@@ -1,12 +1,11 @@
-export class export class Integration {
-  constructor({ datasetSchemaId, externalTool, externalUrl, fileExtension, integrationId, integrationName, operation, parameters } = {}) {
-    this.datasetSchemaId = datasetSchemaId
-    this.externalTool = externalTool;
-    this.externalUrl = externalUrl;
-    this.fileExtension = fileExtension;
-    this.integrationId = integrationId;
-    this.integrationName = integrationName;
+export class Integration {
+  constructor({ id, name, description, tool, operation, internalParameters, externalParameters } = {}) {
+    this.id = id;
+    this.name = name;
+    this.description = description;
+    this.tool = tool;
     this.operation = operation;
-    this.parameters = parameters;
+    this.internalParameters = internalParameters;
+    this.externalParameters = externalParameters;
   }
-} 
+}

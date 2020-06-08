@@ -1,3 +1,5 @@
 {
-  "create": "/integration/create"
+  "all": "/integration/listIntegrations",
+  "create": "/integration/create",
+  "delete": "/integration/{:integrationId}/delete"
 }

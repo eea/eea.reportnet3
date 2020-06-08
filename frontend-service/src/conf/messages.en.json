@@ -666,6 +666,10 @@
     "fileExtension": "File extension",
     "parameterKey": "Parameter key",
     "parameterValue": "Parameter value",
-    "createIntegrationError": "Error creating integration"
+    "createIntegrationError": "Error creating integration",
+    "noIntegrations": "There are not integrations yet",
+    "loadIntegrationsError": "Error loading integrations",
+    "deleteIntegrationError": "Error deleting integration",
+    "noIntegrationsWithSelectedParameters": "There are no integrations with the selected parameters"
   }
 }
