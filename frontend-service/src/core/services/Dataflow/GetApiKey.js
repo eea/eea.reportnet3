@@ -1,2 +1,2 @@
-export const GetApiKey = ({ dataflowRepository }) => async (dataflowId, dataProviderId) =>
-  dataflowRepository.getApiKey(dataflowId, dataProviderId);
+export const GetApiKey = ({ dataflowRepository }) => async (dataflowId, dataProviderId, isCustodian) =>
+  dataflowRepository.getApiKey(dataflowId, dataProviderId, isCustodian);
