@@ -3,6 +3,7 @@ import React, { Fragment, useContext } from 'react';
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { IntegrationsList } from './_components/IntegrationsList';
+import { ManageIntegrations } from './_components/ManageIntegrations';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -31,13 +32,24 @@ export const Integrations = ({ dataflowId, designerState, manageDialogs }) => {
   );
 
   return (
-    <Dialog
-      footer={renderIntegrationFooter}
-      header={resources.messages['integration']}
-      onHide={() => manageDialogs('isIntegrationListDialogVisible', false)}
-      style={{ width: '70%' }}
-      visible={designerState.isIntegrationListDialogVisible}>
-      <IntegrationsList dataflowId={dataflowId} designerState={designerState} />
-    </Dialog>
+    <Fragment>
+      <Dialog
+        footer={renderIntegrationFooter}
+        header={resources.messages['integration']}
+        onHide={() => manageDialogs('isIntegrationListDialogVisible', false)}
+        style={{ width: '70%' }}
+        visible={designerState.isIntegrationListDialogVisible}>
+        <IntegrationsList dataflowId={dataflowId} designerState={designerState} />
+      </Dialog>
+
+      {/* <Dialog
+        footer={renderIntegrationFooter}
+        header={resources.messages['integration']}
+        onHide={() => manageDialogs('isIntegrationListDialogVisible', false)}
+        style={{ width: '70%' }}
+        visible={true}> */}
+      <ManageIntegrations designerState={designerState} manageDialogs={manageDialogs} />
+      {/* </Dialog> */}
+    </Fragment>
   );
 };

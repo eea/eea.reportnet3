@@ -661,6 +661,10 @@
     "operation": "Operation name",
     "deleteIntegrationHeader": "Delete integration",
     "deleteIntegrationConfirm": "Are you sure you want to delete the integration?",
-    "selectField": "Select field"
+    "selectField": "Select field",
+    "processName": "Process Name",
+    "fileExtension": "File extension",
+    "parameterKey": "Parameter key",
+    "parameterValue": "Parameter value"
   }
 }
