@@ -1,7 +1,8 @@
 import { ApiIntegrationRepository } from 'core/infrastructure/domain/model/Integration/ApiIntegrationRepository';
 
 export const IntegrationRepository = {
-  all: () => Promise.reject('[UniqueConstraintsRepository#all] must be implemented')
+  all: () => Promise.reject('[IntegrationRepository#all] must be implemented'),
+  create: () => Promise.reject('[IntegrationRepository#create] must be implemented')
 };
 
 export const integrationRepository = Object.assign({}, IntegrationRepository, ApiIntegrationRepository);

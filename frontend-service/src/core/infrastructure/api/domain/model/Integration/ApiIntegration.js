@@ -1,6 +1,6 @@
+import { IntegrationConfig } from 'conf/domain/model/Integration';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
-import { UniqueConstraintsConfig } from 'conf/domain/model/UniqueConstraints';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 const data = {
@@ -44,5 +44,17 @@ export const apiIntegration = {
     const tokens = userStorage.get();
     const response = await data;
     return response.data;
+  },
+
+  create: async integration => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.post({
+      url: getUrl(IntegrationConfig.create),
+      data: integration,
+      queryString: {},
+      headers: { Authorization: `Bearer ${tokens.accessToken}` }
+    });
+
+    return response;
   }
 };

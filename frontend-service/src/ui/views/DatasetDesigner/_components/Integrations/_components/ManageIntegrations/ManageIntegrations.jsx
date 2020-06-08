@@ -14,6 +14,8 @@ import { InputText } from 'ui/views/_components/InputText';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { IntegrationService } from 'core/services/Integration';
+
 import { manageIntegrationsReducer } from './_functions/Reducers/manageIntegrationsReducer';
 
 import { ManageIntegrationsUtils } from './_functions/Utils/ManageIntegrationsUtils';
@@ -54,10 +56,17 @@ export const ManageIntegrations = ({ designerState, manageDialogs }) => {
 
   useEffect(() => {
     if (parameterRef.current) {
-      console.log('parameterRef.current', parameterRef.current);
       parameterRef.current.element.focus();
     }
   }, [parameterRef.current]);
+
+  const onCreateIntegration = async () => {
+    try {
+      await IntegrationService.create(manageIntegrationsState);
+    } catch (error) {
+      notificationContext.add({ type: 'CREATE_INTEGRATION_ERROR' });
+    }
+  };
 
   const onDeleteParameter = id => {
     const data = externalParameters.filter(parameter => parameter.id !== id);
@@ -114,13 +123,25 @@ export const ManageIntegrations = ({ designerState, manageDialogs }) => {
 
   const renderDialogFooter = (
     <Fragment>
-      <Button className="p-button-rounded  p-button-animated-blink" icon="add" label={resources.messages['save']} />
+      <span data-tip data-for="integrationTooltip">
+        <Button
+          className="p-button-rounded p-button-animated-blink"
+          icon="add"
+          // disabled={ManageIntegrationsUtils.checkEmptyForm(manageIntegrationsState).includes(true)}
+          label={resources.messages['save']}
+          onClick={() => onCreateIntegration()}
+        />
+      </span>
       <Button
         className="p-button-secondary p-button-rounded  p-button-animated-blink"
         icon="cancel"
         label={resources.messages['cancel']}
         onClick={() => manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true)}
       />
+
+      <ReactTooltip className={styles.tooltipClass} effect="solid" id="integrationTooltip" place="top">
+        {resources.messages['fcSubmitButtonDisabled']}
+      </ReactTooltip>
     </Fragment>
   );
 
@@ -191,7 +212,9 @@ export const ManageIntegrations = ({ designerState, manageDialogs }) => {
     for (let index = 0; index < externalParameters.length; index++) {
       const parameter = externalParameters[index];
       data.push(
-        <li className={`${styles.item} ${parameter.id === editorView.id ? styles.selected : undefined}`}>
+        <li
+          className={`${styles.item} ${parameter.id === editorView.id ? styles.selected : undefined}`}
+          key={parameter.id}>
           <span className={styles.key} onDoubleClick={() => onToggleEditorView(parameter.id, ['key'])}>
             {resources.messages['parameterKey']}:
             <span

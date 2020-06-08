@@ -369,6 +369,9 @@
         },
         {
           "key": "UPDATE_UNIQUE_CONSTRAINT_ERROR"
+        },
+        {
+          "key": "CREATE_INTEGRATION_ERROR"
         }
       ]
     },

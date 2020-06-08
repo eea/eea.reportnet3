@@ -665,6 +665,7 @@
     "processName": "Process Name",
     "fileExtension": "File extension",
     "parameterKey": "Parameter key",
-    "parameterValue": "Parameter value"
+    "parameterValue": "Parameter value",
+    "createIntegrationError": "Error creating integration"
   }
 }
