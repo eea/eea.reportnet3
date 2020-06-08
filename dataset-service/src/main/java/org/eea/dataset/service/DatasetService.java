@@ -13,7 +13,6 @@ import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -402,4 +401,13 @@ public interface DatasetService {
    * @param criteria the criteria
    */
   void releaseLock(Object... criteria);
+
+  /**
+   * Checks if is dataset reportable. Dataset is reportable when is designDataset in dataflow with
+   * status design or reportingDataset in state Draft.
+   * 
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
+  Boolean isDatasetReportable(Long idDataset);
 }

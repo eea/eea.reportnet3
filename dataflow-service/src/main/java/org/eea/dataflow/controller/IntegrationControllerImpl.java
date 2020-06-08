@@ -2,6 +2,7 @@ package org.eea.dataflow.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
@@ -28,6 +29,10 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/integration")
 public class IntegrationControllerImpl implements IntegrationController {
 
+  /*
+   * @Autowired private IntegrationService integrationService;
+   */
+
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
@@ -40,7 +45,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/listIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(value = "/listIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<IntegrationVO> findAllIntegrationsByCriteria(@RequestBody IntegrationVO integration) {
     IntegrationVO integration1 = new IntegrationVO();
     integration1.setId(1L);
@@ -99,12 +104,18 @@ public class IntegrationControllerImpl implements IntegrationController {
    * Creates the integration.
    *
    * @param integration the integration
+   * @throws EEAException
    */
   @Override
   @HystrixCommand
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
   public void createIntegration(@RequestBody IntegrationVO integration) {
 
+    /*
+     * try { integrationService.createIntegration(integration); } catch (EEAException e) {
+     * LOG_ERROR.error("error"); throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+     * e.getMessage(), e); }
+     */
   }
 
 
