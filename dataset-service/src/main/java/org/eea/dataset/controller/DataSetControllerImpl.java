@@ -193,12 +193,10 @@ public class DataSetControllerImpl implements DatasetController {
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
-    // check if dataset is a schema and dataflow is draft
-    if (datasetService.isDataflowNotDesignAndDatasetSchema(datasetId)) {
-      LOG_ERROR.error("Dataset is a design dataset with Id {}, and Dataflow is not in Design State",
-          datasetId);
+    // check if dataset is reportable
+    if (!datasetService.isDatasetReportable(datasetId)) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.NOT_DESIGN_DATAFLOW);
+          String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, datasetId));
     }
 
     // filter if the file is empty
@@ -664,13 +662,10 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
-    // check if dataset is a schema and dataflow is draft
-    if (datasetService.isDataflowNotDesignAndDatasetSchema(datasetId)) {
-      LOG_ERROR.error(
-          "Dataset is a design dataset with Id {}, and Dataflow whit id {} is not in Design State",
-          datasetId, dataflowId);
+    // check if dataset is reportable
+    if (!datasetService.isDatasetReportable(datasetId)) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.NOT_DESIGN_DATAFLOW);
+          String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, datasetId));
     }
 
     try {

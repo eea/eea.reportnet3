@@ -403,10 +403,11 @@ public interface DatasetService {
   void releaseLock(Object... criteria);
 
   /**
-   * Checks if is not dataflow design and datasetschema.
-   *
+   * Checks if is dataset reportable. Dataset is reportable when is designDataset in dataflow with
+   * status design or reportingDataset in state Draft.
+   * 
    * @param idDataset the id dataset
    * @return the boolean
    */
-  Boolean isDataflowNotDesignAndDatasetSchema(Long idDataset);
+  Boolean isDatasetReportable(Long idDataset);
 }

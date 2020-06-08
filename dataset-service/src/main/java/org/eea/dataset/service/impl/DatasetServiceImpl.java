@@ -1875,25 +1875,48 @@ public class DatasetServiceImpl implements DatasetService {
 
   }
 
+
   /**
-   * Checks if is not dataflow design and datasetschema.
-   *
+   * Checks if is dataset reportable. Dataset is reportable when is designDataset in dataflow with
+   * status design or reportingDataset in state Draft.
+   * 
    * @param idDataset the id dataset
    * @return the boolean
    */
   @Override
-  public Boolean isDataflowNotDesignAndDatasetSchema(Long idDataset) {
+  public Boolean isDatasetReportable(Long idDataset) {
     final Optional<DesignDataset> designDataset = designDatasetRepository.findById(idDataset);
     if (designDataset.isPresent()) {
-      // Get the dataFlowId from the metabase
-      Long dataflowId = getDataFlowIdById(idDataset);
-      // get de dataflow
-      DataFlowVO dataflow = dataflowControllerZull.findById(dataflowId);
-      if (!dataflow.getStatus().equals(TypeStatusEnum.DESIGN)) {
-        return true;
+      DataFlowVO dataflow = getDataflow(idDataset);
+      if (!TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
+        LOG.info("DesignDataset {} is not reportable because are in dataflow {} with status {}",
+            idDataset, dataflow.getId(), dataflow);
+        return false;
       }
     }
-    return false;
+    Optional<ReportingDataset> reportingDataset = reportingDatasetRepository.findById(idDataset);
+    if (reportingDataset.isPresent()) {
+      DataFlowVO dataflow = getDataflow(idDataset);
+      if (!TypeStatusEnum.DRAFT.equals(dataflow.getStatus())) {
+        LOG.info("ReportingDataset {} is not reportable because are in dataflow {} with status {}",
+            idDataset, dataflow.getId(), dataflow);
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Gets the dataflow by IdDataset.
+   *
+   * @param idDataset the id dataset
+   * @return the dataflow
+   */
+  private DataFlowVO getDataflow(Long idDataset) {
+    // Get the dataFlowId from the metabase
+    Long dataflowId = getDataFlowIdById(idDataset);
+    // get de dataflow
+    return dataflowControllerZull.findById(dataflowId);
   }
 
 }
