@@ -345,7 +345,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
     const parsedExpressions = deleteExpressionRecursively(expressionId, expressionsIf);
     const parsedAllExpressions = deleteExpression(expressionId, allExpressionsIf);
     creationFormDispatch({
-      type: 'UPDATE_RULES',
+      type: 'UPDATE_RULES_IF',
       payload: parsedAllExpressions
     });
     creationFormDispatch({
@@ -356,18 +356,18 @@ export const RowValidation = ({ datasetId, tabs }) => {
 
   const onExpressionThenDelete = expressionId => {
     const {
-      candidateRule: { expressions, allExpressions }
+      candidateRule: { expressionsThen, allExpressionsThen }
     } = creationFormState;
-    const parsedExpressions = deleteExpressionRecursively(expressionId, expressions);
-    const parsedAllExpressions = deleteExpression(expressionId, allExpressions);
+    const parsedExpressions = deleteExpressionRecursively(expressionId, expressionsThen);
+    const parsedAllExpressions = deleteExpression(expressionId, allExpressionsThen);
 
     creationFormDispatch({
-      type: 'UPDATE_RULES',
+      type: 'UPDATE_RULES_THEN',
       payload: parsedAllExpressions
     });
 
     creationFormDispatch({
-      type: 'UPDATE_EXPRESSIONS_THN_TREE',
+      type: 'UPDATE_EXPRESSIONS_THEN_TREE',
       payload: parsedExpressions
     });
   };
