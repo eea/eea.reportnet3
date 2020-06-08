@@ -225,6 +225,9 @@ public final class EEAErrorMessage {
   /** The Constant UNREPORTED_FIELDSCHEMAS: {@value}. */
   public static final String UNREPORTED_FIELDSCHEMAS = "Unreported fieldSchemas";
 
+  /** The Constant DATASET_NOT_REPORTABLE: {@value}. */
+  public static final String DATASET_NOT_REPORTABLE = "Dataset %d is not Reportable";
+
   /**
    * Instantiates a new EEA error message.
    */
