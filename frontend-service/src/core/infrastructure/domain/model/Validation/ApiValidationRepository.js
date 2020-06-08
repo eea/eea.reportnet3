@@ -21,6 +21,7 @@ const create = async (datasetSchemaId, validationRule) => {
     type: 'FIELD',
     whenCondition: getCreationDTO(expressions)
   };
+  console.log('validation', validation);
   return await apiValidation.create(datasetSchemaId, validation);
 };
 
