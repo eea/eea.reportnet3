@@ -1,23 +1,18 @@
-package org.eea.dataflow.integration.executor.fme;
+package org.eea.dataflow.integration.executor.fme.actions;
 
-import org.eea.dataflow.integration.executor.fme.repository.FMEFeignRepository;
 import org.eea.dataflow.integration.executor.service.AbstractIntegrationExecutorService;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorService {
-
-  @Autowired
-  private FMEFeignRepository fmeFeignRepository;
-
+public class FMEImportProces extends AbstractIntegrationExecutorService {
 
   @Override
   public IntegrationToolTypeEnum getExecutorType() {
-    return IntegrationToolTypeEnum.FME;
+    // TODO Auto-generated method stub
+    return null;
   }
 
   @Override
@@ -25,7 +20,6 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
       Object... executionParams) {
     // TODO Auto-generated method stub
     return null;
-
   }
 
 }
