@@ -25,6 +25,5 @@ export const getExpressionFromDTO = (expression, allExpressions, parentUnion) =>
     newExpression.expressionValue = new Date(expression.params[1]);
   }
   allExpressions.push(newExpression);
-
   return newExpression;
 };

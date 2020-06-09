@@ -4,26 +4,27 @@ import { config } from 'conf';
 
 import { getExpressionFromDTO } from './getExpressionFromDTO';
 import { getGroupFromDTO } from './getGroupFromDTO';
+import isNil from 'lodash/isNil';
 
-export const selectorFromDTO = (expression, expressions, allExpressions) => {
+export const selectorFromDTO = (expression, expressions, allExpressions, parentOperator = null) => {
   const {
     validations: { logicalOperatorFromDTO }
   } = config;
-  if (!isObject(expression.params[0])) {
-    expressions.push(getExpressionFromDTO(expression, allExpressions, null));
-  } else if (isObject(expression.params[0]) && expression.params[0].operator === 'FIELD_LEN') {
-    expressions.push(getExpressionFromDTO(expression, allExpressions, null));
+  const [firstParam, secondParam] = expression.params;
+  const { operator } = expression;
+
+  if (logicalOperatorFromDTO.includes(operator)) {
+    if (logicalOperatorFromDTO.includes(firstParam.operator)) {
+      expressions.push(getGroupFromDTO(firstParam, allExpressions, parentOperator));
+    } else {
+      expressions.push(getExpressionFromDTO(firstParam, allExpressions, parentOperator));
+    }
+    if (logicalOperatorFromDTO.includes(secondParam.operator)) {
+      selectorFromDTO(secondParam, expressions, allExpressions, operator);
+    } else {
+      expressions.push(getExpressionFromDTO(secondParam, allExpressions, operator));
+    }
   } else {
-    expression.params.map((param, index) => {
-      let operator = expression.operator;
-      if (index === 0) {
-        operator = null;
-      }
-      if (logicalOperatorFromDTO.includes(param.operator)) {
-        expressions.push(getGroupFromDTO(param, allExpressions, expression.operator));
-      } else {
-        expressions.push(getExpressionFromDTO(param, allExpressions, operator));
-      }
-    });
+    expressions.push(getExpressionFromDTO(expression, allExpressions, null));
   }
 };
