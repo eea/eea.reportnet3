@@ -35,7 +35,7 @@ public interface IntegrationController {
    * @param integration the integration
    * @return the list
    */
-  @GetMapping(value = "/listIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(value = "/listIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
   List<IntegrationVO> findAllIntegrationsByCriteria(@RequestBody IntegrationVO integration);
 
   /**
