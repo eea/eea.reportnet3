@@ -15,15 +15,26 @@ export const getCreationDTO = expressions => {
       expressions.forEach((expression, index) => {
         if (index === 0) {
           operator = expressions[index + 1].union;
-          params.push(getExpression(expression));
+
+          if (expression.expressions.length > 0) {
+            params.push(getCreationDTO(expression.expressions));
+          } else {
+            params.push(getExpression(expression));
+          }
+
           if (!isNil(expressions[index + 2])) {
             const nextExpressions = expressions.slice(index + 1);
             params.push(getCreationDTO(nextExpressions));
           } else {
-            params.push(getExpression(expressions[index + 1]));
+            if (expressions[index + 1].expressions > 0) {
+              params.push(getCreationDTO(expressions[index + 1].expressions));
+            } else {
+              params.push(getExpression(expressions[index + 1]));
+            }
           }
         }
       });
+
       return {
         operator: config.validations.operatorEquivalences.logicalOperators[operator],
         params
