@@ -20,20 +20,23 @@ import { manageIntegrationsReducer } from './_functions/Reducers/manageIntegrati
 
 import { ManageIntegrationsUtils } from './_functions/Utils/ManageIntegrationsUtils';
 
-export const ManageIntegrations = ({ designerState, manageDialogs }) => {
+export const ManageIntegrations = ({ designerState, manageDialogs, updatedData }) => {
+  const { datasetSchemaId, isIntegrationManageDialogVisible } = designerState;
+  const componentName = 'integration';
+
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const parameterRef = useRef(null);
 
-  const { datasetSchemaId, isIntegrationManageDialogVisible } = designerState;
-
   const [manageIntegrationsState, manageIntegrationsDispatch] = useReducer(manageIntegrationsReducer, {
     datasetSchemaId,
     description: '',
+    editorView: { isEditing: false, id: null },
     externalParameters: [],
     fileExtension: '',
-    editorView: { isEditing: false, id: null },
+    id: null,
+    isUpdatedVisible: false,
     name: '',
     operation: '',
     parameterKey: '',
@@ -42,23 +45,31 @@ export const ManageIntegrations = ({ designerState, manageDialogs }) => {
     tool: 'FME'
   });
 
-  const componentName = 'integration';
-
   const { editorView, externalParameters } = manageIntegrationsState;
 
-  const getOptions = {
-    operationOptions: [
-      { label: 'IMPORT', value: 'IMPORT' },
-      { label: 'EXPORT', value: 'EXPORT' }
-    ],
-    toolOptions: [{ label: 'FME', value: 'FME' }]
-  };
+  useEffect(() => {
+    if (!isEmpty(updatedData)) getUpdatedData();
+  }, [updatedData]);
 
   useEffect(() => {
-    if (parameterRef.current) {
-      parameterRef.current.element.focus();
-    }
+    if (parameterRef.current) parameterRef.current.element.focus();
   }, [parameterRef.current]);
+
+  const getUpdatedData = () => manageIntegrationsDispatch({ type: 'GET_UPDATED_DATA', payload: updatedData });
+
+  const onAddParameter = () => {
+    manageIntegrationsDispatch({
+      type: 'ON_ADD_PARAMETER',
+      payload: { data: ManageIntegrationsUtils.onAddParameter(manageIntegrationsState) }
+    });
+  };
+
+  const onChangeParameter = (value, option, id) => {
+    manageIntegrationsDispatch({
+      type: 'MANAGE_PARAMETERS',
+      payload: { data: ManageIntegrationsUtils.onUpdateData(id, option, externalParameters, value) }
+    });
+  };
 
   const onCreateIntegration = async () => {
     try {
@@ -69,9 +80,10 @@ export const ManageIntegrations = ({ designerState, manageDialogs }) => {
   };
 
   const onDeleteParameter = id => {
-    const data = externalParameters.filter(parameter => parameter.id !== id);
-
-    manageIntegrationsDispatch({ type: 'ON_DELETE_PARAMETER', payload: { data } });
+    manageIntegrationsDispatch({
+      type: 'MANAGE_PARAMETERS',
+      payload: { data: externalParameters.filter(parameter => parameter.id !== id) }
+    });
   };
 
   const onEditParameter = id => {
@@ -87,38 +99,32 @@ export const ManageIntegrations = ({ designerState, manageDialogs }) => {
     manageIntegrationsDispatch({ type: 'ON_RESET_PARAMETER', payload: { key: '', value: '' } });
   };
 
-  const onAddParameter = () => {
-    const data = ManageIntegrationsUtils.onAddParameter(manageIntegrationsState);
-
-    manageIntegrationsDispatch({ type: 'ON_ADD_PARAMETER', payload: { data } });
-  };
-
-  const onUpdate = () => {
-    const data = ManageIntegrationsUtils.onUpdateCompleteParameter(editorView.id, manageIntegrationsState);
-    onResetParameterInput();
-
-    manageIntegrationsDispatch({ type: 'ON_SAVE_PARAMETER', payload: { data } });
-  };
-
-  const onSaveParameter = () => (editorView.isEditing ? onUpdate() : onAddParameter());
+  const onSaveParameter = () => (editorView.isEditing ? onUpdateParameter() : onAddParameter());
 
   const onToggleEditorView = (id, option) => {
     if (!editorView.isEditing) {
-      const data = externalParameters.map(parameter => {
-        if (parameter.id === id) {
-          Object.assign({}, parameter, (parameter.isEditorView[option] = !parameter.isEditorView[option]));
-          return parameter;
-        } else return parameter;
+      manageIntegrationsDispatch({
+        type: 'MANAGE_PARAMETERS',
+        payload: { data: ManageIntegrationsUtils.toggleParameterEditorView(id, option, externalParameters) }
       });
-
-      manageIntegrationsDispatch({ type: 'ON_TOGGLE_EDITOR_VIEW', payload: { data } });
     }
   };
 
-  const onUpdateParameter = (value, option, id) => {
-    const data = ManageIntegrationsUtils.onUpdateData(id, option, externalParameters, value);
+  const onUpdateParameter = () => {
+    onResetParameterInput();
 
-    manageIntegrationsDispatch({ type: 'ON_UPDATE_PARAMETER', payload: { data } });
+    manageIntegrationsDispatch({
+      type: 'MANAGE_PARAMETERS',
+      payload: { data: ManageIntegrationsUtils.onUpdateCompleteParameter(editorView.id, manageIntegrationsState) }
+    });
+  };
+
+  const onUpdateIntegration = async () => {
+    try {
+      await IntegrationService.update(manageIntegrationsState);
+    } catch (error) {
+      console.log('error', error);
+    }
   };
 
   const renderDialogFooter = (
@@ -126,10 +132,10 @@ export const ManageIntegrations = ({ designerState, manageDialogs }) => {
       <span data-tip data-for="integrationTooltip">
         <Button
           className="p-button-rounded p-button-animated-blink"
-          icon="add"
+          icon="check"
           // disabled={ManageIntegrationsUtils.checkEmptyForm(manageIntegrationsState).includes(true)}
-          label={resources.messages['save']}
-          onClick={() => onCreateIntegration()}
+          label={resources.messages['create']}
+          onClick={() => (!isEmpty(updatedData) ? onUpdateIntegration() : onCreateIntegration())}
         />
       </span>
       <Button
@@ -145,35 +151,34 @@ export const ManageIntegrations = ({ designerState, manageDialogs }) => {
     </Fragment>
   );
 
-  const renderDialogLayout = children =>
-    isIntegrationManageDialogVisible && (
-      <Dialog
-        footer={renderDialogFooter}
-        header={'Create'}
-        onHide={() => manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true)}
-        style={{ width: '975px' }}
-        visible={isIntegrationManageDialogVisible}>
-        {children}
-      </Dialog>
-    );
+  const renderDialogLayout = children => (
+    <Dialog
+      footer={renderDialogFooter}
+      header={'Create'}
+      onHide={() => manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true)}
+      style={{ width: '975px' }}
+      visible={isIntegrationManageDialogVisible}>
+      {children}
+    </Dialog>
+  );
 
-  const renderDropdownLayout = (options = []) => {
-    return options.map((option, index) => (
-      <div className={`${styles.field} ${styles[option]} formField`} key={index}>
-        <Dropdown
-          appendTo={document.body}
-          disabled={option === 'tool'}
-          inputClassName={`p-float-label`}
-          inputId={`${componentName}__${option}`}
-          label={'hola'}
-          onChange={event => onFillField(event.value.value, option)}
-          optionLabel="label"
-          options={getOptions[`${option}Options`]}
-          value={manageIntegrationsState[option]}
-        />
-      </div>
-    ));
-  };
+  const renderDropdownLayout = option => (
+    <div className={`${styles.field} ${styles[option]} formField`}>
+      <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
+      <Dropdown
+        appendTo={document.body}
+        inputId={`${componentName}__${option}`}
+        placeholder={resources.messages[option]}
+        onChange={event => onFillField(event.value.value, option)}
+        optionLabel="label"
+        options={[
+          { label: 'IMPORT', value: 'IMPORT' },
+          { label: 'EXPORT', value: 'EXPORT' }
+        ]}
+        value={manageIntegrationsState[option]}
+      />
+    </div>
+  );
 
   const renderEditorInput = (option, parameter, id) => {
     return (
@@ -183,7 +188,7 @@ export const ManageIntegrations = ({ designerState, manageDialogs }) => {
           ManageIntegrationsUtils.onUpdateData(id, option, externalParameters, event.target.value);
           onToggleEditorView(id, [option]);
         }}
-        onChange={event => onUpdateParameter(event.target.value, option, id)}
+        onChange={event => onChangeParameter(event.target.value, option, id)}
         onFocus={() => {}}
         onKeyDown={() => {}}
         ref={parameterRef}
@@ -194,14 +199,15 @@ export const ManageIntegrations = ({ designerState, manageDialogs }) => {
 
   const renderInputLayout = (options = []) => {
     return options.map((option, index) => (
-      <div className={`${styles.field} ${styles[option]} p-float-label formField`} key={index}>
+      <div className={`${styles.field} ${styles[option]} formField`} key={index}>
+        <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
         <InputText
           id={`${componentName}__${option}`}
           onChange={event => onFillField(event.target.value, option)}
+          placeholder={resources.messages[option]}
           type="search"
           value={manageIntegrationsState[option]}
         />
-        <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
       </div>
     ));
   };
@@ -248,25 +254,27 @@ export const ManageIntegrations = ({ designerState, manageDialogs }) => {
       <div className={styles.group}>{renderInputLayout(['name', 'description'])}</div>
       <div className={styles.group}>
         {renderInputLayout(['processName'])}
-        {renderDropdownLayout(['tool', 'operation'])}
+        {renderDropdownLayout('operation')}
         {renderInputLayout(['fileExtension'])}
       </div>
       <div className={styles.group}>
         {renderInputLayout(['parameterKey', 'parameterValue'])}
         <span className={styles.buttonWrapper}>
           <Button
-            className="p-button-rounded  p-button-animated-blink"
+            className="p-button-rounded p-button-animated-blink"
             disabled={isEmpty(manageIntegrationsState.parameterKey) || isEmpty(manageIntegrationsState.parameterValue)}
             icon="add"
             label={editorView.isEditing ? resources.messages['update'] : resources.messages['add']}
             onClick={() => onSaveParameter()}
           />
-          <Button
-            className="p-button-secondary p-button-rounded  p-button-animated-blink"
-            icon={editorView.isEditing ? 'cancel' : 'undo'}
-            label={editorView.isEditing ? resources.messages['cancel'] : resources.messages['reset']}
-            onClick={() => onResetParameterInput()}
-          />
+          {editorView.isEditing && (
+            <Button
+              className="p-button-secondary p-button-rounded p-button-animated-blink"
+              icon={'cancel'}
+              label={resources.messages['cancel']}
+              onClick={() => onResetParameterInput()}
+            />
+          )}
         </span>
       </div>
       <div className={styles.group}>

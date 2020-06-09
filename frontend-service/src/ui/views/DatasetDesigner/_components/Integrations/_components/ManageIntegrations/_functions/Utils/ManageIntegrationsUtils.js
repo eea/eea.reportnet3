@@ -46,10 +46,20 @@ const onUpdateCompleteParameter = (id, state) => {
   });
 };
 
+const toggleParameterEditorView = (id, option, parameters) => {
+  return parameters.map(parameter => {
+    if (parameter.id === id) {
+      Object.assign({}, parameter, (parameter.isEditorView[option] = !parameter.isEditorView[option]));
+      return parameter;
+    } else return parameter;
+  });
+};
+
 export const ManageIntegrationsUtils = {
   checkEmptyForm,
   getParameterData,
   onAddParameter,
   onUpdateCompleteParameter,
-  onUpdateData
+  onUpdateData,
+  toggleParameterEditorView
 };

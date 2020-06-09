@@ -61,5 +61,16 @@ export const apiIntegration = {
       headers: { Authorization: `Bearer ${tokens.accessToken}` }
     });
     return response;
+  },
+
+  update: async integration => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.update({
+      url: getUrl(IntegrationConfig.update),
+      data: integration,
+      queryString: {},
+      headers: { Authorization: `Bearer ${tokens.accessToken}` }
+    });
+    return response;
   }
 };

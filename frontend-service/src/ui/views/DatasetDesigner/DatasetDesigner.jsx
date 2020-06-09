@@ -503,7 +503,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         <div className={styles.ButtonsBar}>
           <InputTextarea
             className={styles.datasetDescription}
-            collapsedHeight={40}
+            collapsedHeight={55}
             expandableOnClick={true}
             key="datasetDescription"
             onBlur={e => onBlurDescription(e.target.value)}

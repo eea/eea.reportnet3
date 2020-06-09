@@ -22,7 +22,7 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { integrationsListReducer } from './_functions/Reducers/integrationsListReducer';
 
-export const IntegrationsList = ({ dataflowId, designerState, manageDialogs }) => {
+export const IntegrationsList = ({ dataflowId, designerState, getUpdatedData, manageDialogs }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -43,7 +43,11 @@ export const IntegrationsList = ({ dataflowId, designerState, manageDialogs }) =
     <ActionsColumn
       onDeleteClick={() => isDeleteDialogVisible(true)}
       onEditClick={() => {
-        console.log('edit the integration with id', integrationId);
+        const updatedData = integrationListState.data.filter(
+          integration => integration.integrationId === integrationListState.integrationId
+        );
+        manageDialogs('isIntegrationManageDialogVisible', true, 'isIntegrationListDialogVisible', false);
+        getUpdatedData(updatedData);
       }}
     />
   );

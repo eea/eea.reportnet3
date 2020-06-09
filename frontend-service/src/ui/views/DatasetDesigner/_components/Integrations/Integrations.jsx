@@ -1,4 +1,4 @@
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment, useContext, useState } from 'react';
 
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -7,8 +7,16 @@ import { ManageIntegrations } from './_components/ManageIntegrations';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { IntegrationsUtils } from './_functions/Utils/IntegrationsUtils';
+
 export const Integrations = ({ dataflowId, designerState, manageDialogs }) => {
+  const { isIntegrationListDialogVisible, isIntegrationManageDialogVisible } = designerState;
+
   const resources = useContext(ResourcesContext);
+
+  const [updatedData, setUpdatedData] = useState({});
+
+  const getUpdatedData = data => setUpdatedData(IntegrationsUtils.parseIntegrationsList(data));
 
   const renderIntegrationFooter = (
     <Fragment>
@@ -38,18 +46,18 @@ export const Integrations = ({ dataflowId, designerState, manageDialogs }) => {
         header={resources.messages['integration']}
         onHide={() => manageDialogs('isIntegrationListDialogVisible', false)}
         style={{ width: '70%' }}
-        visible={designerState.isIntegrationListDialogVisible}>
-        <IntegrationsList dataflowId={dataflowId} designerState={designerState} />
+        visible={isIntegrationListDialogVisible}>
+        <IntegrationsList
+          dataflowId={dataflowId}
+          designerState={designerState}
+          getUpdatedData={getUpdatedData}
+          manageDialogs={manageDialogs}
+        />
       </Dialog>
 
-      {/* <Dialog
-        footer={renderIntegrationFooter}
-        header={resources.messages['integration']}
-        onHide={() => manageDialogs('isIntegrationListDialogVisible', false)}
-        style={{ width: '70%' }}
-        visible={true}> */}
-      <ManageIntegrations designerState={designerState} manageDialogs={manageDialogs} />
-      {/* </Dialog> */}
+      {isIntegrationManageDialogVisible && (
+        <ManageIntegrations designerState={designerState} manageDialogs={manageDialogs} updatedData={updatedData} />
+      )}
     </Fragment>
   );
 };

@@ -670,6 +670,7 @@
     "noIntegrations": "There are not integrations yet",
     "loadIntegrationsError": "Error loading integrations",
     "deleteIntegrationError": "Error deleting integration",
-    "noIntegrationsWithSelectedParameters": "There are no integrations with the selected parameters"
+    "noIntegrationsWithSelectedParameters": "There are no integrations with the selected parameters",
+    "updateIntegrationError": "Error updating integration"
   }
 }

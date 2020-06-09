@@ -7,18 +7,7 @@ import { Integration } from 'core/domain/model/Integration/Integration';
 const all = async () => apiIntegration.all();
 // const all = async integration => parseIntegrationsList(await apiIntegration.all(integration));
 
-const create = async integration => {
-  const integrationDTO = {
-    name: integration.name,
-    description: integration.description,
-    tool: integration.tool,
-    operation: integration.operation,
-    internalParameters: { fileExtension: integration.fileExtension, datasetSchemaId: integration.datasetSchemaId },
-    externalParameters: parseExternalParameters(integration.externalParameters)
-  };
-
-  return apiIntegration.create(integrationDTO);
-};
+const create = async integration => apiIntegration.create(parseManageIntegration(integration));
 
 const deleteById = async integrationId => {
   return await apiIntegration.deleteById(integrationId);
@@ -44,4 +33,16 @@ const parseIntegrationsList = integrationsDTO => {
   return;
 };
 
-export const ApiIntegrationRepository = { all, create, deleteById };
+const parseManageIntegration = integration => ({
+  description: integration.description,
+  externalParameters: parseExternalParameters(integration.externalParameters),
+  id: integration.id,
+  internalParameters: { fileExtension: integration.fileExtension, datasetSchemaId: integration.datasetSchemaId },
+  name: integration.name,
+  operation: integration.operation,
+  tool: integration.tool
+});
+
+const update = async integration => apiIntegration.update(parseManageIntegration(integration));
+
+export const ApiIntegrationRepository = { all, create, deleteById, update };

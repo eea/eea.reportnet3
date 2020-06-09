@@ -12,7 +12,11 @@
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.5rem;
+
+    &:nth-last-child(2) {
+      align-items: flex-end;
+    }
 
     &:last-child {
       margin-bottom: 0;
@@ -25,10 +29,15 @@
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-      margin-right: var(--fieldGap);
       margin-bottom: 0;
+      margin-right: var(--fieldGap);
 
-      &.name {
+      > label {
+        margin-bottom: 0.2rem;
+      }
+
+      &.name,
+      &.processName {
         width: var(--fieldWidth);
       }
 
@@ -37,10 +46,8 @@
       }
 
       &.operation,
-      &.processName,
-      &.fileExtension,
-      &.tool {
-        width: calc(100% / 4);
+      &.fileExtension {
+        width: calc(100% / 3);
       }
 
       &.description,
@@ -80,13 +87,11 @@
           float: left;
           justify-content: space-between;
           list-style: none;
+          margin: 0;
           padding: 0.5rem 1rem;
           width: 100%;
-          margin: 0;
 
           &.selected {
-            // background-color: var(--listbox-item-highlight-bg);
-            // color: var(--listbox-item-highlight-color);
             background-color: var(--gray-10);
           }
 
@@ -98,8 +103,8 @@
           .value {
             align-items: center;
             display: flex;
-            width: 50%;
             font-weight: bold;
+            width: 50%;
 
             .parameterText {
               font-weight: normal;
@@ -114,13 +119,6 @@
             }
           }
         }
-
-        // .item.selected {
-        //   &:hover {
-        //     background-color: var(--listbox-item-highlight-bg);
-        //     color: var(--listbox-item-highlight-color);
-        //   }
-        // }
       }
     }
 

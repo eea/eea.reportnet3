@@ -378,6 +378,9 @@
         },
         {
           "key": "DELETE_INTEGRATION_ERROR"
+        },
+        {
+          "key": "UPDATE_INTEGRATION_ERROR"
         }
       ]
     },
