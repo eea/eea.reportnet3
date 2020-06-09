@@ -22,12 +22,10 @@ export const Integrations = ({ dataflowId, designerState, manageDialogs }) => {
     <Fragment>
       <div className="p-toolbar-group-left">
         <Button
-          className="p-button-secondary p-button-animated-blink"
+          className="p-button-primary p-button-animated-blink"
           icon={'plus'}
-          label={resources.messages['addIntegration']}
-          onClick={() =>
-            manageDialogs('isIntegrationListDialogVisible', false, 'isIntegrationManageDialogVisible', true)
-          }
+          label={resources.messages['createExternalIntegration']}
+          onClick={() => manageDialogs('isIntegrationManageDialogVisible', true)}
         />
       </div>
       <Button
@@ -43,7 +41,7 @@ export const Integrations = ({ dataflowId, designerState, manageDialogs }) => {
     <Fragment>
       <Dialog
         footer={renderIntegrationFooter}
-        header={resources.messages['integration']}
+        header={resources.messages['externalIntegrations']}
         onHide={() => manageDialogs('isIntegrationListDialogVisible', false)}
         style={{ width: '70%' }}
         visible={isIntegrationListDialogVisible}>

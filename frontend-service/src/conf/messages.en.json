@@ -655,8 +655,8 @@
     "strictModeTooltip": "Associated selected values",
     "addRowConstraint": "Add row constraint",
     "noTablesToSelect": "There are no tables to select",
-    "integration": "Integration",
-    "addIntegration": "add Integration",
+    "externalIntegrations": "External integrations",
+    "createExternalIntegration": "Create external integrations",
     "integrationName": "Integration name",
     "operation": "Operation name",
     "deleteIntegrationHeader": "Delete integration",
@@ -671,6 +671,7 @@
     "loadIntegrationsError": "Error loading integrations",
     "deleteIntegrationError": "Error deleting integration",
     "noIntegrationsWithSelectedParameters": "There are no integrations with the selected parameters",
-    "updateIntegrationError": "Error updating integration"
+    "updateIntegrationError": "Error updating integration",
+    "tool": "Tool"
   }
 }
