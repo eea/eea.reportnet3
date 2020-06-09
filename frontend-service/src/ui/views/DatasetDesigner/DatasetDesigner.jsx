@@ -372,22 +372,24 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const renderActionButtonsValidationDialog = (
     <Fragment>
       <Button
-        className="p-button-primary p-button-animated-blink"
+        className="p-button-secondary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['createRowValidationBtn']}
         onClick={() => {
           validationContext.onOpenModalFromOpener('row', 'validationsListDialog');
           onHideValidationsDialog();
         }}
+        style={{ float: 'left' }}
       />
       <Button
-        className="p-button-primary p-button-animated-blink"
+        className="p-button-secondary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['createFieldValidationBtn']}
         onClick={() => {
           validationContext.onOpenModalFromOpener('field', 'validationsListDialog');
           onHideValidationsDialog();
         }}
+        style={{ float: 'left' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
@@ -455,12 +457,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     if (designerState.validationListDialogVisible) {
       return (
         <Dialog
-          className={styles.paginatorValidationViewer}
+          className={styles.qcRulesDialog}
           dismissableMask={true}
           footer={renderActionButtonsValidationDialog}
           header={resources.messages['qcRules']}
           onHide={() => onHideValidationsDialog()}
-          style={{ width: '90%' }}
           visible={designerState.validationListDialogVisible}>
           <TabsValidations
             dataset={designerState.metaData.dataset}
