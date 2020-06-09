@@ -18,7 +18,7 @@ export const getExpressionFromDTO = (expression, allExpressions, parentUnion) =>
   newExpression.operatorType = getExpressionOperatorType(expression.operator);
   if (isObject(expression.params[0])) {
     newExpression.operatorType = getExpressionOperatorType(expression.params[0].operator);
-    newExpression.expressionValue = expression.params[0].params[1];
+    newExpression.expressionValue = expression.params[1];
   }
 
   if (newExpression.operatorType === 'date') {
