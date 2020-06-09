@@ -11,13 +11,17 @@ const printExpression = (expression, field) => {
     if (expression.operatorType === 'LEN') {
       return `( LEN( ${field} ) ${expression.operatorValue} ${expression.expressionValue} )`;
     }
+
     if (expression.operatorType === 'date') {
       return `( ${field} ${expression.operatorValue} ${moment(expression.expressionValue).format('YYYY-MM-DD')} )`;
     }
+
     return `( ${field} ${expression.operatorValue} ${expression.expressionValue} )`;
   }
+
   return '';
 };
+
 const printNode = (expression, index, expressions, field) => {
   let expressionString = '';
   expressionString = `${printSelector(expression, 0, [], field)} ${
@@ -35,9 +39,11 @@ const printSelector = (expression, index, expressions, field) => {
   if (expressions.length > 1) {
     return printNode(expression, index, expressions, field);
   }
+
   if (expression.expressions.length > 1) {
     return `( ${printNode(expression.expressions[0], 0, expression.expressions, field)} )`;
   }
+
   return printExpression(expression, field);
 };
 
