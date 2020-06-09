@@ -137,7 +137,7 @@ export const apiDataflow = {
     const tokens = userStorage.get();
     let url = isCustodian
       ? getUrl(DataflowConfig.generateApiKeyCustodian, { dataflowId })
-      : getUrl(DataflowConfig.getApiKey, { dataflowId, dataProviderId });
+      : getUrl(DataflowConfig.generateApiKey, { dataflowId, dataProviderId });
     const response = await HTTPRequester.post({
       url: url,
       queryString: {},
