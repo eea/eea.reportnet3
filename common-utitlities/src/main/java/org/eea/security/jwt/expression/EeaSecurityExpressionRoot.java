@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
@@ -134,8 +135,8 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
     if (details instanceof Map) {
       String userId = ((Map<String, String>) details).get(AuthenticationDetails.USER_ID);
       String apiKey = this.userManagementControllerZull.getApiKey(userId, dataflowId, dataProvider);
-      return SecurityContextHolder.getContext().getAuthentication().getCredentials().toString()
-          .equals(apiKey);
+      return StringUtils.isNotBlank(apiKey) && SecurityContextHolder.getContext()
+          .getAuthentication().getCredentials().toString().contains(apiKey);
     }
 
     return false;
