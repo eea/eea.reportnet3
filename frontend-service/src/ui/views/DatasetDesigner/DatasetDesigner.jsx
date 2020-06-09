@@ -441,7 +441,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           icon={'plus'}
           label={resources.messages['addUniqueConstraint']}
           onClick={() =>
-            manageDialogs('isUniqueConstraintsListDialogVisible', true, 'isManageUniqueConstraintDialogVisible', true)
+            manageDialogs('isUniqueConstraintsListDialogVisible', false, 'isManageUniqueConstraintDialogVisible', true)
           }
         />
       </div>

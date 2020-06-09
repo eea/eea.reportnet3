@@ -672,6 +672,7 @@
     "deleteIntegrationError": "Error deleting integration",
     "noIntegrationsWithSelectedParameters": "There are no integrations with the selected parameters",
     "updateIntegrationError": "Error updating integration",
-    "tool": "Tool"
+    "tool": "Tool",
+    "editExternalIntegration": "Edit external integrations"
   }
 }

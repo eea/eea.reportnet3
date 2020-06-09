@@ -134,7 +134,7 @@ export const ManageIntegrations = ({ designerState, manageDialogs, updatedData }
           className="p-button-rounded p-button-animated-blink"
           icon="check"
           // disabled={ManageIntegrationsUtils.checkEmptyForm(manageIntegrationsState).includes(true)}
-          label={resources.messages['create']}
+          label={!isEmpty(updatedData) ? resources.messages['update'] : resources.messages['create']}
           onClick={() => (!isEmpty(updatedData) ? onUpdateIntegration() : onCreateIntegration())}
         />
       </span>
@@ -154,7 +154,11 @@ export const ManageIntegrations = ({ designerState, manageDialogs, updatedData }
   const renderDialogLayout = children => (
     <Dialog
       footer={renderDialogFooter}
-      header={'Create'}
+      header={
+        !isEmpty(updatedData)
+          ? resources.messages['editExternalIntegration']
+          : resources.messages['createExternalIntegration']
+      }
       onHide={() => manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true)}
       style={{ width: '975px' }}
       visible={isIntegrationManageDialogVisible}>

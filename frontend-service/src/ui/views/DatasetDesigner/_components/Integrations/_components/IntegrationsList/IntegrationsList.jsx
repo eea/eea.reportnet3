@@ -39,12 +39,12 @@ export const IntegrationsList = ({ dataflowId, designerState, getUpdatedData, ma
     onLoadIntegrations();
   }, [integrationListState.isDataUpdated]);
 
-  const actionsTemplate = () => (
+  const actionsTemplate = row => (
     <ActionsColumn
       onDeleteClick={() => isDeleteDialogVisible(true)}
       onEditClick={() => {
         const updatedData = integrationListState.data.filter(
-          integration => integration.integrationId === integrationListState.integrationId
+          integration => integration.integrationId === row.integrationId
         );
         manageDialogs('isIntegrationManageDialogVisible', true, 'isIntegrationListDialogVisible', false);
         getUpdatedData(updatedData);
