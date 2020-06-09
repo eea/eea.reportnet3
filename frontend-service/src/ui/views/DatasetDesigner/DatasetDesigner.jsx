@@ -437,11 +437,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     <Fragment>
       <div className="p-toolbar-group-left">
         <Button
-          className="p-button-secondary p-button-animated-blink"
+          className="p-button-primary p-button-animated-blink"
           icon={'plus'}
           label={resources.messages['addUniqueConstraint']}
           onClick={() =>
-            manageDialogs('isUniqueConstraintsListDialogVisible', false, 'isManageUniqueConstraintDialogVisible', true)
+            manageDialogs('isUniqueConstraintsListDialogVisible', true, 'isManageUniqueConstraintDialogVisible', true)
           }
         />
       </div>
@@ -536,15 +536,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               />
 
               <Button
-                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-                disabled={false}
-                icon={'horizontalSliders'}
-                iconClasses={null}
-                label={resources.messages['qcRules']}
-                onClick={() => manageDialogs('validationListDialogVisible', true)}
-                ownButtonClasses={null}
-              />
-              <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
                   designerState.datasetStatistics.datasetErrors && designerState.isPreviewModeOn
                     ? 'p-button-animated-blink'
@@ -557,11 +548,30 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 ownButtonClasses={null}
                 iconClasses={designerState.datasetStatistics.datasetErrors ? 'warning' : ''}
               />
+
+              <Button
+                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                disabled={false}
+                icon={'horizontalSliders'}
+                iconClasses={null}
+                label={resources.messages['qcRules']}
+                onClick={() => manageDialogs('validationListDialogVisible', true)}
+                ownButtonClasses={null}
+              />
+
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
                 icon={'key'}
                 label={resources.messages['uniqueConstraints']}
                 onClick={() => manageDialogs('isUniqueConstraintsListDialogVisible', true)}
+              />
+
+              <Button
+                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                icon={'export'}
+                iconClasses={styles.integrationsButton}
+                label={resources.messages['externalIntegrations']}
+                onClick={() => manageDialogs('isIntegrationListDialogVisible', true)}
               />
 
               <Button
@@ -580,13 +590,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 label={resources.messages['snapshots']}
                 onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
               />
-              <Button
-                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-                icon={'export'}
-                iconClasses={styles.integrationsButton}
-                label={resources.messages['integration']}
-                onClick={() => manageDialogs('isIntegrationListDialogVisible', true)}
-              />
+
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
                 icon={'refresh'}

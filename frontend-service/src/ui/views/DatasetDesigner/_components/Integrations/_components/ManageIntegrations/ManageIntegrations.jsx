@@ -126,7 +126,7 @@ export const ManageIntegrations = ({ designerState, manageDialogs }) => {
       <span data-tip data-for="integrationTooltip">
         <Button
           className="p-button-rounded p-button-animated-blink"
-          icon="add"
+          icon="check"
           // disabled={ManageIntegrationsUtils.checkEmptyForm(manageIntegrationsState).includes(true)}
           label={resources.messages['save']}
           onClick={() => onCreateIntegration()}
@@ -160,6 +160,7 @@ export const ManageIntegrations = ({ designerState, manageDialogs }) => {
   const renderDropdownLayout = (options = []) => {
     return options.map((option, index) => (
       <div className={`${styles.field} ${styles[option]} formField`} key={index}>
+        <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
         <Dropdown
           appendTo={document.body}
           disabled={option === 'tool'}
@@ -169,6 +170,7 @@ export const ManageIntegrations = ({ designerState, manageDialogs }) => {
           onChange={event => onFillField(event.value.value, option)}
           optionLabel="label"
           options={getOptions[`${option}Options`]}
+          placeholder={resources.messages[option]}
           value={manageIntegrationsState[option]}
         />
       </div>
@@ -194,14 +196,15 @@ export const ManageIntegrations = ({ designerState, manageDialogs }) => {
 
   const renderInputLayout = (options = []) => {
     return options.map((option, index) => (
-      <div className={`${styles.field} ${styles[option]} p-float-label formField`} key={index}>
+      <div className={`${styles.field} ${styles[option]} formField`} key={index}>
+        <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
         <InputText
           id={`${componentName}__${option}`}
           onChange={event => onFillField(event.target.value, option)}
+          placeholder={resources.messages[option]}
           type="search"
           value={manageIntegrationsState[option]}
         />
-        <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
       </div>
     ));
   };

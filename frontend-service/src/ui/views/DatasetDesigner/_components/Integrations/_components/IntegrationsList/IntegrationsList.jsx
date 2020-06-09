@@ -43,7 +43,8 @@ export const IntegrationsList = ({ dataflowId, designerState, manageDialogs }) =
     <ActionsColumn
       onDeleteClick={() => isDeleteDialogVisible(true)}
       onEditClick={() => {
-        console.log('edit the integration with id', integrationId);
+        console.log('edit the integration with id', integrationListState.integrationId);
+        manageDialogs('isIntegrationManageDialogVisible', true, 'isIntegrationListDialogVisible', true);
       }}
     />
   );
@@ -59,6 +60,7 @@ export const IntegrationsList = ({ dataflowId, designerState, manageDialogs }) =
 
   const onDeleteConstraint = async () => {
     try {
+      console.log('integrationListState.integrationId', integrationListState.integrationId);
       const response = await IntegrationService.deleteById(integrationListState.integrationId);
       if (response.status >= 200 && response.status <= 299) onUpdateData();
     } catch (error) {
