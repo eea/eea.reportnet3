@@ -610,21 +610,6 @@ export const RowValidation = ({ datasetId, tabs }) => {
     return getFieldType(creationFormState.candidateRule.table, { code: field }, tabs);
   };
 
-  const dialogLayout = children => (
-    <Dialog
-      className={styles.dialog}
-      header={
-        validationContext.ruleEdit
-          ? resourcesContext.messages.editRowConstraint
-          : resourcesContext.messages.createRowConstraint
-      }
-      visible={validationContext.isVisible}
-      style={{ width: '975px' }}
-      onHide={() => onHide()}>
-      {children}
-    </Dialog>
-  );
-
   const getRuleCreationBtn = () => {
     const options = {
       onClick: () => {},
@@ -657,6 +642,47 @@ export const RowValidation = ({ datasetId, tabs }) => {
       </span>
     );
   };
+
+  const renderRowQCsFooter = (
+    <div className={styles.footer}>
+      <div className={`${styles.section} ${styles.footerToolBar}`}>
+        <div className={styles.subsection}>
+          {getRuleCreationBtn()}
+          {(creationFormState.isValidationCreationDisabled || isSubmitDisabled) && (
+            <ReactTooltip className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
+              <span>{resourcesContext.messages.fcSubmitButtonDisabled}</span>
+            </ReactTooltip>
+          )}
+
+          <Button
+            className="p-button-secondary p-button-text-icon-left"
+            icon="cancel"
+            id={`${componentName}__cancel`}
+            label={resourcesContext.messages.cancel}
+            onClick={() => onHide()}
+            type="button"
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+  const dialogLayout = children => (
+    <Dialog
+      className={styles.dialog}
+      footer={renderRowQCsFooter}
+      header={
+        validationContext.ruleEdit
+          ? resourcesContext.messages.editRowConstraint
+          : resourcesContext.messages.createRowConstraint
+      }
+      visible={validationContext.isVisible}
+      style={{ width: '975px' }}
+      onHide={() => onHide()}>
+      {children}
+    </Dialog>
+  );
+
   return dialogLayout(
     <>
       <form>
@@ -669,27 +695,6 @@ export const RowValidation = ({ datasetId, tabs }) => {
               renderActiveOnly={false}>
               {tabContents}
             </TabView>
-          </div>
-          <div className={styles.footer}>
-            <div className={`${styles.section} ${styles.footerToolBar}`}>
-              <div className={styles.subsection}>
-                {getRuleCreationBtn()}
-                {(creationFormState.isValidationCreationDisabled || isSubmitDisabled) && (
-                  <ReactTooltip className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
-                    <span>{resourcesContext.messages.fcSubmitButtonDisabled}</span>
-                  </ReactTooltip>
-                )}
-
-                <Button
-                  className="p-button-secondary p-button-text-icon-left"
-                  icon="cancel"
-                  id={`${componentName}__cancel`}
-                  label={resourcesContext.messages.cancel}
-                  onClick={() => onHide()}
-                  type="button"
-                />
-              </div>
-            </div>
           </div>
         </div>
       </form>

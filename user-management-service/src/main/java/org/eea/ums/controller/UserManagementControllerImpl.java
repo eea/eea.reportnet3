@@ -427,10 +427,10 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER','DATAFLOW_CUSTODIAN')")
   @PostMapping("/createApiKey")
   public String createApiKey(@RequestParam("dataflowId") Long dataflowId,
-      @RequestParam("dataProvider") Long dataProvider) {
+      @RequestParam(value = "dataProvider", required = false) Long dataProvider) {
 
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
@@ -454,10 +454,10 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER','DATAFLOW_CUSTODIAN')")
   @GetMapping("/getApiKey")
   public String getApiKey(@RequestParam("dataflowId") Long dataflowId,
-      @RequestParam("dataProvider") Long dataProvider) {
+      @RequestParam(value = "dataProvider", required = false) Long dataProvider) {
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
@@ -477,7 +477,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @GetMapping("/{userId}/getApiKey")
   public String getApiKey(@PathVariable("userId") String userId,
       @RequestParam("dataflowId") Long dataflowId,
-      @RequestParam("dataProvider") Long dataProvider) {
+      @RequestParam(value = "dataProvider", required = false) Long dataProvider) {
     return retrieveApiKey(userId, dataflowId, dataProvider);
   }
 
