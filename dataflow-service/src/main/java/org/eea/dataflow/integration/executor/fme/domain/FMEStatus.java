@@ -1,4 +1,4 @@
-package org.eea.dataflow.integration.fme.domain;
+package org.eea.dataflow.integration.executor.fme.domain;
 
 import java.io.Serializable;
 import lombok.EqualsAndHashCode;
