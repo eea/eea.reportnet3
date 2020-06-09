@@ -48,7 +48,6 @@ export const IntegrationsList = ({ dataflowId, designerState, getUpdatedData, ma
         );
         manageDialogs('isIntegrationManageDialogVisible', true, 'isIntegrationListDialogVisible', false);
         getUpdatedData(updatedData);
-        console.log('edit the integration with id ', integrationListState.integrationId);
       }}
     />
   );
@@ -64,7 +63,6 @@ export const IntegrationsList = ({ dataflowId, designerState, getUpdatedData, ma
 
   const onDeleteConstraint = async () => {
     try {
-      console.log('delete the integration with id ', integrationListState.integrationId);
       const response = await IntegrationService.deleteById(integrationListState.integrationId);
       if (response.status >= 200 && response.status <= 299) onUpdateData();
     } catch (error) {
@@ -108,7 +106,7 @@ export const IntegrationsList = ({ dataflowId, designerState, getUpdatedData, ma
 
   const renderColumns = integrations => {
     const fieldColumns = Object.keys(integrations[0])
-      .filter(key => key.includes('name') || key.includes('operation'))
+      .filter(key => key.includes('integrationName') || key.includes('operation'))
       .map(field => <Column field={field} header={resources.messages[field]} key={field} sortable={true} />);
 
     fieldColumns.push(renderActionButtonsColumn);
@@ -124,7 +122,7 @@ export const IntegrationsList = ({ dataflowId, designerState, getUpdatedData, ma
       <Filters
         data={integrationListState.data}
         getFilteredData={onLoadFilteredData}
-        selectOptions={['name', 'operation']}
+        selectOptions={['integrationName', 'operation']}
       />
 
       {!isEmpty(integrationListState.filteredData) ? (

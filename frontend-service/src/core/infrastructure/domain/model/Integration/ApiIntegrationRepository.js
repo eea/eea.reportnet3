@@ -21,12 +21,24 @@ const parseExternalParameters = parameterDTO => {
   return externalParameters;
 };
 
-const parseIntegration = integrationDTO => new Integration(integrationDTO);
+const parseIntegration = integrationDTO => {
+  const integration = new Integration();
+  integration.externalParameters = integrationDTO.externalParameters;
+  integration.integrationDescription = integrationDTO.description;
+  integration.integrationId = integrationDTO.id;
+  integration.integrationName = integrationDTO.name;
+  integration.internalParameters = integrationDTO.internalParameters;
+  integration.operation = integrationDTO.operation;
+  integration.tool = integrationDTO.tool;
+
+  return integration;
+};
 
 const parseIntegrationsList = integrationsDTO => {
   if (!isNil(integrationsDTO)) {
     const integrations = [];
     integrationsDTO.forEach(integrationDTO => integrations.push(parseIntegration(integrationDTO)));
+
     return integrations;
   }
   return;
