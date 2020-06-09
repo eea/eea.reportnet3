@@ -437,7 +437,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     <Fragment>
       <div className="p-toolbar-group-left">
         <Button
-          className="p-button-primary p-button-animated-blink"
+          className="p-button-secondary p-button-animated-blink"
           icon={'plus'}
           label={resources.messages['addUniqueConstraint']}
           onClick={() =>

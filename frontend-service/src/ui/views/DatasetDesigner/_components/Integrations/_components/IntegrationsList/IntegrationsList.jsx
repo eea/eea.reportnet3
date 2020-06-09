@@ -43,7 +43,7 @@ export const IntegrationsList = ({ dataflowId, designerState, manageDialogs }) =
     <ActionsColumn
       onDeleteClick={() => isDeleteDialogVisible(true)}
       onEditClick={() => {
-        console.log('edit the integration with id', integrationListState.integrationId);
+        console.log('edit the integration with id ', integrationListState.integrationId);
         manageDialogs('isIntegrationManageDialogVisible', true, 'isIntegrationListDialogVisible', true);
       }}
     />
@@ -60,7 +60,7 @@ export const IntegrationsList = ({ dataflowId, designerState, manageDialogs }) =
 
   const onDeleteConstraint = async () => {
     try {
-      console.log('integrationListState.integrationId', integrationListState.integrationId);
+      console.log('delete the integration with id ', integrationListState.integrationId);
       const response = await IntegrationService.deleteById(integrationListState.integrationId);
       if (response.status >= 200 && response.status <= 299) onUpdateData();
     } catch (error) {
@@ -78,9 +78,8 @@ export const IntegrationsList = ({ dataflowId, designerState, manageDialogs }) =
       const integration = new Integration();
       const internalParameters = { datasetSchemaId: designerState.datasetSchemaId };
       integration.internalParameters = internalParameters;
-      const response = await IntegrationService.all();
-      // const response = await IntegrationService.all(integration);
-      integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response.list } });
+      const response = await IntegrationService.all(integration);
+      integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response } });
     } catch (error) {
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
       console.log('error', error);
@@ -105,7 +104,7 @@ export const IntegrationsList = ({ dataflowId, designerState, manageDialogs }) =
 
   const renderColumns = integrations => {
     const fieldColumns = Object.keys(integrations[0])
-      .filter(key => key.includes('integrationName') || key.includes('operation'))
+      .filter(key => key.includes('name') || key.includes('operation'))
       .map(field => <Column field={field} header={resources.messages[field]} key={field} sortable={true} />);
 
     fieldColumns.push(renderActionButtonsColumn);
@@ -121,7 +120,7 @@ export const IntegrationsList = ({ dataflowId, designerState, manageDialogs }) =
       <Filters
         data={integrationListState.data}
         getFilteredData={onLoadFilteredData}
-        selectOptions={['integrationName', 'operation']}
+        selectOptions={['name', 'operation']}
       />
 
       {!isEmpty(integrationListState.filteredData) ? (

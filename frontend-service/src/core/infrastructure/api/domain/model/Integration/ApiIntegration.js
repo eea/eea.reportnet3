@@ -3,42 +3,15 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
-const data = {
-  status: 200,
-  data: {
-    list: [
-      {
-        externalParameters: { parameter1: 'parameter1', parameter2: 'parameter2', parameter3: 'parameter3' },
-        externalTool: 'External first tool',
-        integrationDescription: 'This is the first description',
-        integrationId: '001',
-        integrationName: 'First Integration',
-        internalParameters: {
-          datasetSchemaId: 777,
-          fileExtension: 'csv'
-        },
-        operation: 'import'
-      },
-      {
-        externalParameters: { parameter1: 'parameter1', parameter2: 'parameter2', parameter3: 'parameter3' },
-        externalTool: 'External second tool',
-        integrationDescription: 'This is a description',
-        integrationId: '002',
-        integrationName: 'Second Integration',
-        internalParameters: {
-          datasetSchemaId: 777,
-          fileExtension: 'json'
-        },
-        operation: 'export'
-      }
-    ]
-  }
-};
-
 export const apiIntegration = {
-  all: async () => {
+  all: async integration => {
     const tokens = userStorage.get();
-    const response = await data;
+    const response = await HTTPRequester.update({
+      url: getUrl(IntegrationConfig.all),
+      data: { integration },
+      queryString: {},
+      headers: { Authorization: `Bearer ${tokens.accessToken}` }
+    });
     return response.data;
   },
 

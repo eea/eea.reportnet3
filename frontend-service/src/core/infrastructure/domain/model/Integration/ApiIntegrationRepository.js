@@ -4,8 +4,7 @@ import { apiIntegration } from 'core/infrastructure/api/domain/model/Integration
 
 import { Integration } from 'core/domain/model/Integration/Integration';
 
-const all = async () => apiIntegration.all();
-// const all = async integration => parseIntegrationsList(await apiIntegration.all(integration));
+const all = async integration => parseIntegrationsList(await apiIntegration.all(integration));
 
 const create = async integration => {
   const integrationDTO = {

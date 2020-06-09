@@ -14,7 +14,7 @@ export const Integrations = ({ dataflowId, designerState, manageDialogs }) => {
     <Fragment>
       <div className="p-toolbar-group-left">
         <Button
-          className="p-button-primary p-button-animated-blink"
+          className="p-button-secondary p-button-animated-blink"
           icon={'plus'}
           label={resources.messages['createExternalIntegration']}
           onClick={() => manageDialogs('isIntegrationManageDialogVisible', true)}
