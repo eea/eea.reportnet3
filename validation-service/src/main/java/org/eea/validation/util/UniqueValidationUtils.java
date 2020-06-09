@@ -13,6 +13,7 @@ import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.RecordValue;
+import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.RecordRepository;
@@ -20,6 +21,7 @@ import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
+import org.eea.validation.persistence.schemas.FieldSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.service.RulesService;
@@ -139,9 +141,6 @@ public class UniqueValidationUtils {
       case "INFO":
         validation.setLevelError(ErrorTypeEnum.INFO);
         break;
-      case "BLOCKER":
-        validation.setLevelError(ErrorTypeEnum.BLOCKER);
-        break;
       default:
         validation.setLevelError(ErrorTypeEnum.BLOCKER);
         break;
@@ -192,13 +191,25 @@ public class UniqueValidationUtils {
     return tableSchemaName;
   }
 
+  private static TableSchema getTableSchemaFromIdFieldSchema(DataSetSchema datasetSchema,
+      String idFieldSchema) {
+    for (TableSchema table : datasetSchema.getTableSchemas()) {
+      for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+        if (field.getIdFieldSchema().toString().equals(idFieldSchema)) {
+          return table;
+        }
+      }
+    }
+    return new TableSchema();
+  }
+
   /**
    * Mount query.
    *
    * @param fieldSchemaIds the field schema ids
    * @return the string
    */
-  private static String mountQuery(List<String> fieldSchemaIds) {
+  private static String mountDuplicatedQuery(List<String> fieldSchemaIds) {
     StringBuilder stringQuery = new StringBuilder("with table_1 as(select rv.id, ");
     Iterator<String> iterator = fieldSchemaIds.iterator();
     int i = 1;
@@ -254,8 +265,8 @@ public class UniqueValidationUtils {
     Validation validation = createValidation(idRule, schemaId, origname, EntityTypeEnum.RECORD);
 
     // get duplicated records
-    List<RecordValue> duplicatedRecords =
-        recordRepository.queryExecutionRecord(mountQuery(uniqueConstraint.getFieldSchemaIds()));
+    List<RecordValue> duplicatedRecords = recordRepository
+        .queryExecutionRecord(mountDuplicatedQuery(uniqueConstraint.getFieldSchemaIds()));
 
     List<RecordValue> recordValues = new ArrayList<>();
     for (RecordValue record : duplicatedRecords) {
@@ -275,17 +286,72 @@ public class UniqueValidationUtils {
     return duplicatedRecords.isEmpty();
   }
 
+  /**
+   * Checks if is integrity constraint.
+   *
+   * @param integrityId the integrity id
+   * @param idRule the id rule
+   * @return the boolean
+   */
   public static Boolean isIntegrityConstraint(String integrityId, String idRule) {
     // GetValidationData
     IntegrityVO integrityVO = rulesService.getIntegrityConstraint(integrityId);
+    if (integrityVO != null) {
 
-    String schemaId = integrityVO.getOriginDatasetSchemaId();
-    DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
+      String schemaId = integrityVO.getOriginDatasetSchemaId();
+      DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
 
-    String origname =
-        getTableSchemaFromIdTableSchema(datasetSchema, uniqueConstraint.getTableSchemaId());
+      TableSchema tableSchema =
+          getTableSchemaFromIdFieldSchema(datasetSchema, integrityVO.getOriginFields().get(0));
 
-    Validation validation = createValidation(idRule, schemaId, origname, EntityTypeEnum.DATASET);
-    return true;
+      Validation validation = createValidation(idRule, schemaId, tableSchema.getNameTableSchema(),
+          EntityTypeEnum.TABLE);
+
+      List<RecordValue> notUtilizedRecords = recordRepository.queryExecutionRecord(
+          mountIntegrityQuery(integrityVO.getOriginFields(), integrityVO.getReferencedFields()));
+      List<TableValue> tableValues = new ArrayList<>();
+      if (notUtilizedRecords.isEmpty()) {
+        TableValidation tableValidation = new TableValidation();
+        tableValidation.setValidation(validation);
+        TableValue tableValue =
+            tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
+        List<TableValidation> tableValidations =
+            tableValue.getTableValidations() != null ? tableValue.getTableValidations()
+                : new ArrayList<>();
+        tableValidations.add(tableValidation);
+        tableValue.setTableValidations(tableValidations);
+        tableValues.add(tableValue);
+      }
+      if (Boolean.TRUE.equals(integrityVO.getIsDoubleReferenced())) {
+        tableSchema = getTableSchemaFromIdFieldSchema(datasetSchema,
+            integrityVO.getReferencedFields().get(0));
+        notUtilizedRecords = recordRepository.queryExecutionRecord(
+            mountIntegrityQuery(integrityVO.getReferencedFields(), integrityVO.getOriginFields()));
+        if (notUtilizedRecords.isEmpty()) {
+          TableValidation tableValidation = new TableValidation();
+          tableValidation.setValidation(validation);
+          TableValue tableValue =
+              tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
+          List<TableValidation> tableValidations =
+              tableValue.getTableValidations() != null ? tableValue.getTableValidations()
+                  : new ArrayList<>();
+          tableValidations.add(tableValidation);
+          tableValue.setTableValidations(tableValidations);
+          tableValues.add(tableValue);
+        }
+      }
+      saveTableValidations(tableValues);
+      return !notUtilizedRecords.isEmpty();
+    }
+
+    return false;
   }
+
+  private static String mountIntegrityQuery(List<String> originFields,
+      List<String> referencedFields) {
+    // TODO Auto-generated method stub
+    // compose query depending on boolean
+    return "query";
+  }
+
 }

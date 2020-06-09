@@ -12,6 +12,7 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
 import org.eea.validation.persistence.repository.IntegritySchemaRepository;
@@ -65,6 +66,9 @@ public class RulesServiceImpl implements RulesService {
   /** The integrity schema repository. */
   @Autowired
   private IntegritySchemaRepository integritySchemaRepository;
+
+  @Autowired
+  private IntegrityMapper integrityMapper;
 
   /** The kie base manager. */
   @Autowired
@@ -253,6 +257,16 @@ public class RulesServiceImpl implements RulesService {
     rule.setActivationGroup(null);
     rule.setVerified(null);
     // we create the whencondition Integrity for the rule
+    if (EntityTypeEnum.DATASET.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
+      ObjectId integrityConstraintId = new ObjectId();
+      IntegritySchema integritySchema = integrityMapper.classToEntity(ruleVO.getIntegrityVO());
+      integritySchema.setId(integrityConstraintId);
+      integritySchemaRepository.save(integritySchema);
+
+      rule.setIntegrityConstraintId(integrityConstraintId);
+      rule.setWhenCondition("isIntegrityConstraint('" + integrityConstraintId.toString() + "','"
+          + rule.getRuleId().toString() + "')");
+    }
     validateRule(rule);
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
@@ -635,48 +649,16 @@ public class RulesServiceImpl implements RulesService {
   }
 
   /**
-   * Creates the new dataset rule.
+   * Gets the integrity constraint.
    *
-   * @param datasetId the dataset id
-   * @param integrityVO the integrity VO
-   * @throws EEAException the EEA exception
+   * @param integrityId the integrity id
+   * @return the integrity constraint
    */
   @Override
-  public void createNewDatasetRule(long datasetId, IntegrityVO integrityVO) throws EEAException {
-
-    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
-    if (datasetSchemaId == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-
-    Rule rule = ruleMapper.classToEntity(integrityVO);
-    ObjectId integrityConstraintId = new ObjectId();
-    ObjectId ruleId = new ObjectId();
-    rule.setIntegrityConstraintId(integrityConstraintId);
-    rule.setRuleId(ruleId);
-    rule.setAutomatic(false);
-    rule.setActivationGroup(null);
-    rule.setVerified(null);
-
-    IntegritySchema integritySchema = new IntegritySchema();
-    integritySchema.setIsDoubleReferenced(integrityVO.getIsDoubleReferenced());
-    integritySchema.setId(integrityConstraintId);
-    integritySchema.setOriginDatasetSchemaId(new ObjectId(integrityVO.getOriginDatasetSchemaId()));
-    integritySchema
-        .setReferencedDatasetSchemaId(new ObjectId(integrityVO.getReferencedDatasetSchemaId()));
-    integritySchema.setIsDoubleReferenced(integrityVO.getIsDoubleReferenced());
-    integritySchema.setOriginFields(integrityVO.getOriginFields());
-    integritySchema.setReferencedFields(integrityVO.getReferencedFields());
-    integritySchemaRepository.save(integritySchema);
-
-    rule.setWhenCondition("isIntegrityConstraint('" + integrityConstraintId.toString() + "','"
-        + ruleId.toString() + "')");
-    validateRule(rule);
-    if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
-      throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
-    }
-
-    // Check if rule is valid
-    kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
+  public IntegrityVO getIntegrityConstraint(String integrityId) {
+    IntegritySchema integritySchema =
+        integritySchemaRepository.findById(new ObjectId(integrityId)).orElse(null);
+    return integritySchema == null ? null : integrityMapper.entityToClass(integritySchema);
   }
+
 }

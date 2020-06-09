@@ -27,11 +27,11 @@ public class IntegritySchema {
 
   /** The origin. */
   @Field(value = "originFields")
-  private List<String> originFields;
+  private List<ObjectId> originFields;
 
   /** The referenced. */
   @Field(value = "referencedFields")
-  private List<String> referencedFields;
+  private List<ObjectId> referencedFields;
 
   /** The two way. */
   @Field(value = "isDoubleReferenced")

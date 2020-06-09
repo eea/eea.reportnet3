@@ -165,13 +165,12 @@ public interface RulesService {
    */
   void deleteRuleHighLevelLike(String datasetSchemaId, String fieldSchemaId);
 
-
   /**
-   * Creates the new dataset rule.
+   * Gets the integrity constraint.
    *
-   * @param datasetId the dataset id
-   * @param integrityVO the integrity VO
-   * @throws EEAException the EEA exception
+   * @param integrityId the integrity id
+   * @return the integrity constraint
    */
-  void createNewDatasetRule(long datasetId, IntegrityVO integrityVO) throws EEAException;
+  IntegrityVO getIntegrityConstraint(String integrityId);
+
 }

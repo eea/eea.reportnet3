@@ -51,5 +51,8 @@ public interface RuleMapper extends IMapper<Rule, RuleVO> {
     if (!rule.isAutomatic()) {
       ruleVO.setWhenCondition(new RuleExpressionVO(rule.getWhenCondition()));
     }
+    if ((rule.getIntegrityConstraintId() != null)) {
+
+    }
   }
 }

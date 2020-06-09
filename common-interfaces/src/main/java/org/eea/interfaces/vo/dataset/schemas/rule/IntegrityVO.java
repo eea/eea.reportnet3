@@ -9,7 +9,10 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class IntegrityVO extends RuleVO {
+public class IntegrityVO {
+
+  /** The id. */
+  private String id;
 
   /** The origin. */
   private List<String> originFields;
@@ -29,8 +32,8 @@ public class IntegrityVO extends RuleVO {
 
   @Override
   public int hashCode() {
-    return Objects.hash(originFields, referencedFields, isDoubleReferenced, originDatasetSchemaId,
-        referencedDatasetSchemaId);
+    return Objects.hash(id, originFields, referencedFields, isDoubleReferenced,
+        originDatasetSchemaId, referencedDatasetSchemaId);
   }
 
   /**
@@ -48,7 +51,7 @@ public class IntegrityVO extends RuleVO {
       return false;
     }
     IntegrityVO other = (IntegrityVO) obj;
-    return Objects.equals(originFields, other.originFields)
+    return Objects.equals(id, other.id) && Objects.equals(originFields, other.originFields)
         && Objects.equals(referencedFields, other.referencedFields)
         && Objects.equals(isDoubleReferenced, other.isDoubleReferenced)
         && Objects.equals(originDatasetSchemaId, other.originDatasetSchemaId);
