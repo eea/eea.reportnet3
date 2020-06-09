@@ -130,7 +130,6 @@ export const apiDataflow = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
-
     return response.data;
   },
   generateApiKey: async (dataflowId, dataProviderId, isCustodian) => {
@@ -145,7 +144,6 @@ export const apiDataflow = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
-
     return response.data;
   },
   pending: async () => {
