@@ -1,1 +1,1 @@
-export const All = ({ integrationRepository }) => async integration => integrationRepository.all(integration);
+export const All = ({ integrationRepository }) => async datasetSchemaId => integrationRepository.all(datasetSchemaId);
