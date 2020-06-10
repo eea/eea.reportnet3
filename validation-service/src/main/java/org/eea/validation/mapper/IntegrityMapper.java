@@ -4,10 +4,12 @@ import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.mapper.IMapper;
 import org.eea.validation.persistence.schemas.IntegritySchema;
+import org.mapstruct.Mapper;
 
 /**
  * The Interface RulesSchemaMapper.
  */
+@Mapper(componentModel = "spring")
 public interface IntegrityMapper extends IMapper<IntegritySchema, IntegrityVO> {
 
   /**

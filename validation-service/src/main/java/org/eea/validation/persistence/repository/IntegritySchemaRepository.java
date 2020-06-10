@@ -3,6 +3,7 @@
  */
 package org.eea.validation.persistence.repository;
 
+import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.validation.persistence.schemas.IntegritySchema;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -18,7 +19,7 @@ public interface IntegritySchemaRepository extends MongoRepository<IntegritySche
    * @param datasetSchemaId the dataset schema id
    * @return the rules schema
    */
-  IntegritySchema findByOriginDatasetSchemaId(ObjectId originDatasetSchemaId);
+  List<IntegritySchema> findByOriginDatasetId(Long originDatasetId);
 
   /**
    * Find by referenced dataset schema id.
@@ -26,6 +27,7 @@ public interface IntegritySchemaRepository extends MongoRepository<IntegritySche
    * @param referencedDatasetSchemaId the referenced dataset schema id
    * @return the integrity schema
    */
-  IntegritySchema findByReferencedDatasetSchemaId(ObjectId referencedDatasetSchemaId);
+  IntegritySchema findByReferencedDatasetId(Long referencedDatasetId);
+
 
 }

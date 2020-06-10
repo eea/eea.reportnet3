@@ -239,6 +239,61 @@ public class UniqueValidationUtils {
   }
 
   /**
+   * Mount integrity query.
+   *
+   * @param originFields the origin fields
+   * @param referencedFields the referenced fields
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @return the string
+   */
+  private static String mountIntegrityQuery(List<String> originFields,
+      List<String> referencedFields, Long datasetOriginId, Long datasetReferencedId) {
+
+    StringBuilder stringQuery = new StringBuilder("with table_1 as(select rv.id, ");
+    Iterator<String> iterator = originFields.iterator();
+    int i = 1;
+    while (iterator.hasNext()) {
+      String schemaId = iterator.next();
+      stringQuery
+          .append("(select fv.value from dataset_" + datasetOriginId
+              + ".field_value fv where fv.id_record=rv.id and fv.id_field_schema = '")
+          .append(schemaId).append("') AS ").append("column_" + (i++));
+      if (iterator.hasNext()) {
+        stringQuery.append(",");
+      }
+    }
+    stringQuery.append(
+        " from dataset_" + datasetOriginId + ".record_value rv), with table_2 as(select rv.id, ");
+    iterator = referencedFields.iterator();
+    i = 1;
+    while (iterator.hasNext()) {
+      String schemaId = iterator.next();
+      stringQuery
+          .append("(select fv.value from dataset_" + datasetReferencedId
+              + ".field_value fv where fv.id_record=rv.id and fv.id_field_schema = '")
+          .append(schemaId).append("') AS ").append("column_" + (i++));
+      if (iterator.hasNext()) {
+        stringQuery.append(",");
+      }
+    }
+    stringQuery.append(" from dataset_" + datasetReferencedId
+        + ".record_value rv) select t2.id from table_1 t1 right join table_2 t2 on t1.column_1 = t2.column_1");
+    iterator = originFields.iterator();
+    i = 2;
+    iterator.next();
+    while (iterator.hasNext()) {
+      iterator.next();
+      stringQuery.append("and t1.column_" + i + " = t2.column_ " + i);
+      i++;
+    }
+    stringQuery.append(" where t1.column_1 is null and t2.column_1 is not null ;");
+    return stringQuery.toString();
+
+  }
+
+
+  /**
    * Checks if is unique field.
    *
    * @param datasetId the dataset id
@@ -297,8 +352,9 @@ public class UniqueValidationUtils {
     // GetValidationData
     IntegrityVO integrityVO = rulesService.getIntegrityConstraint(integrityId);
     if (integrityVO != null) {
+      String schemaId =
+          dataSetSchemaControllerZuul.getDatasetSchemaId(integrityVO.getOriginDatasetId());
 
-      String schemaId = integrityVO.getOriginDatasetSchemaId();
       DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
 
       TableSchema tableSchema =
@@ -308,7 +364,8 @@ public class UniqueValidationUtils {
           EntityTypeEnum.TABLE);
 
       List<RecordValue> notUtilizedRecords = recordRepository.queryExecutionRecord(
-          mountIntegrityQuery(integrityVO.getOriginFields(), integrityVO.getReferencedFields()));
+          mountIntegrityQuery(integrityVO.getOriginFields(), integrityVO.getReferencedFields(),
+              integrityVO.getOriginDatasetId(), integrityVO.getReferencedDatasetId()));
       List<TableValue> tableValues = new ArrayList<>();
       if (notUtilizedRecords.isEmpty()) {
         TableValidation tableValidation = new TableValidation();
@@ -322,11 +379,17 @@ public class UniqueValidationUtils {
         tableValue.setTableValidations(tableValidations);
         tableValues.add(tableValue);
       }
+      if (!(integrityVO.getOriginDatasetId().equals(integrityVO.getReferencedDatasetId()))) {
+        schemaId =
+            dataSetSchemaControllerZuul.getDatasetSchemaId(integrityVO.getReferencedDatasetId());
+        datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
+      }
       if (Boolean.TRUE.equals(integrityVO.getIsDoubleReferenced())) {
         tableSchema = getTableSchemaFromIdFieldSchema(datasetSchema,
             integrityVO.getReferencedFields().get(0));
         notUtilizedRecords = recordRepository.queryExecutionRecord(
-            mountIntegrityQuery(integrityVO.getReferencedFields(), integrityVO.getOriginFields()));
+            mountIntegrityQuery(integrityVO.getReferencedFields(), integrityVO.getOriginFields(),
+                integrityVO.getOriginDatasetId(), integrityVO.getReferencedDatasetId()));
         if (notUtilizedRecords.isEmpty()) {
           validation = createValidation(idRule, schemaId, tableSchema.getNameTableSchema(),
               EntityTypeEnum.TABLE);
@@ -347,11 +410,6 @@ public class UniqueValidationUtils {
     }
 
     return false;
-  }
-
-  private static String mountIntegrityQuery(List<String> originFields,
-      List<String> referencedFields) {
-    return "with table_1 as (select rv.id,(select fv.value from field_value fv where fv.id_record=rv.id and fv.id_field_schema = '5ecb97e44e781252a890e71c') AS column_1 from record_value rv), table_2 as (select rv.id,(select fv.value from field_value fv where fv.id_record=rv.id and fv.id_field_schema = '5ecb97e94e781252a890e71d') AS column_1 from record_value rv) select t2.id from table_1 t1 right join table_2 t2 on t1.column_1 = t2.column_1 where t1.column_1 is null and t2.column_1 is not null ;";
   }
 
 }

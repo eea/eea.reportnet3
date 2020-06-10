@@ -37,13 +37,13 @@ public class IntegritySchema {
   @Field(value = "isDoubleReferenced")
   private Boolean isDoubleReferenced;
 
-  /** The dataset schema id. */
-  @Field(value = "originDatasetSchemaId")
-  private ObjectId originDatasetSchemaId;
+  /** The dataset origin id. */
+  @Field(value = "originDatasetId")
+  private Long originDatasetId;
 
-  /** The referenced dataset schema id. */
-  @Field(value = "referencedDatasetSchemaId")
-  private ObjectId referencedDatasetSchemaId;
+  /** The referenced dataset id. */
+  @Field(value = "referencedDatasetId")
+  private Long referencedDatasetId;
 
 
   /**
@@ -53,8 +53,8 @@ public class IntegritySchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(originFields, referencedFields, isDoubleReferenced, originDatasetSchemaId,
-        referencedDatasetSchemaId);
+    return Objects.hash(originFields, referencedFields, isDoubleReferenced, originDatasetId,
+        referencedDatasetId);
   }
 
   /**
@@ -75,7 +75,8 @@ public class IntegritySchema {
     return Objects.equals(originFields, other.originFields)
         && Objects.equals(referencedFields, other.referencedFields)
         && Objects.equals(isDoubleReferenced, other.isDoubleReferenced)
-        && Objects.equals(originDatasetSchemaId, other.originDatasetSchemaId);
+        && Objects.equals(originDatasetId, other.originDatasetId)
+        && Objects.equals(referencedDatasetId, other.referencedDatasetId);
   }
 
 }

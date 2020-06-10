@@ -60,7 +60,7 @@ public class Rule {
   private String whenCondition;
 
   /**
-   * The then condition. is a list with 2 redords first is a ERROR message second is a Level ERROR
+   * The then condition. is a list with 2 records first is a ERROR message second is a Level ERROR
    */
   @Field(value = "thenCondition")
   private List<String> thenCondition;
