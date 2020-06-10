@@ -271,7 +271,6 @@ const ComparisonExpression = ({
           disabled={disabledFields.field1}
           id={`${componentName}__field1`}
           onChange={e => {
-            console.log('e', e);
             onUpdateExpressionField('field1', e.value);
           }}
           optionLabel={'label'}

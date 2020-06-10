@@ -58,7 +58,6 @@ export const createValidationReducer = (state, { type, payload }) => {
       };
 
     case 'SET_TABLE_ID_FIELD_ID_AND_FIELD_TYPE':
-      console.log('SET_TABLE_ID_FIELD_ID_AND_FIELD_TYPE payload', payload);
       return {
         ...state,
         candidateRule: {
@@ -293,7 +292,6 @@ export const createValidationReducer = (state, { type, payload }) => {
       };
 
     case 'POPULATE_CREATE_FORM':
-      console.log('POPULATE_CREATE_FORM', payload);
       return {
         ...state,
         candidateRule: {

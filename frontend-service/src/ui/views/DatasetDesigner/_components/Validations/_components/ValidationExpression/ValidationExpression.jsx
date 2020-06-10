@@ -77,10 +77,12 @@ const ValidationExpression = ({
         cValueProps.min = 1900;
         cValueProps.max = 2500;
       }
+
       if (operatorType === 'month') {
         cValueProps.min = 1;
         cValueProps.max = 12;
       }
+
       if (operatorType === 'day') {
         cValueProps.min = 1;
         cValueProps.max = 31;
@@ -197,11 +199,26 @@ const ValidationExpression = ({
         />
       );
     }
+
     if (operatorType === 'number') {
       if (operatorValue === 'MATCH') {
         return (
           <InputText
             disabled={isDisabled}
+            onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+            placeholder={resourcesContext.messages.value}
+            value={expressionValues.expressionValue}
+          />
+        );
+      }
+
+      if (fieldType === 'NUMBER_DECIMAL') {
+        return (
+          <InputText
+            keyfilter={valueKeyFilter}
+            disabled={isDisabled}
+            format={false}
+            onBlur={e => checkField('number', e.value)}
             onChange={e => onUpdateExpressionField('expressionValue', e.value)}
             placeholder={resourcesContext.messages.value}
             value={expressionValues.expressionValue}
@@ -223,6 +240,7 @@ const ValidationExpression = ({
         />
       );
     }
+
     if (operatorType === 'year') {
       return (
         <InputNumber
@@ -237,6 +255,7 @@ const ValidationExpression = ({
         />
       );
     }
+
     if (operatorType === 'month') {
       return (
         <InputNumber
