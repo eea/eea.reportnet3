@@ -125,5 +125,24 @@ public class IntegrationControllerImpl implements IntegrationController {
     }
   }
 
+  /**
+   * Find extensions and operations.
+   *
+   * @param integrationVO the integration VO
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
+  @PutMapping(value = "/listExtensionsOperations", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<IntegrationVO> findExtensionsAndOperations(@RequestBody IntegrationVO integrationVO) {
+    try {
+      return integrationService.getOnlyExtensionsAndOperations(
+          integrationService.getAllIntegrationsByCriteria(integrationVO));
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error finding integrations: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
 
 }
