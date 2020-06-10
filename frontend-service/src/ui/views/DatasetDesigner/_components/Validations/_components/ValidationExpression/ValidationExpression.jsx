@@ -63,8 +63,13 @@ const ValidationExpression = ({
   useEffect(() => {
     const { operatorType } = expressionValues;
     const cValueProps = { steps: 0, format: false, useGrouping: false };
+
     if (operatorType === 'number' || operatorType === 'LEN') {
       setValueKeyFilter('num');
+    }
+
+    if (operatorType === 'string') {
+      setValueKeyFilter('');
     }
 
     if (fieldType === 'DATE') {
