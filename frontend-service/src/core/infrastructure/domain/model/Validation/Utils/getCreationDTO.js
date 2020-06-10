@@ -26,7 +26,7 @@ export const getCreationDTO = expressions => {
             const nextExpressions = expressions.slice(index + 1);
             params.push(getCreationDTO(nextExpressions));
           } else {
-            if (expressions[index + 1].expressions > 0) {
+            if (expressions[index + 1].expressions.length > 0) {
               params.push(getCreationDTO(expressions[index + 1].expressions));
             } else {
               params.push(getExpression(expressions[index + 1]));

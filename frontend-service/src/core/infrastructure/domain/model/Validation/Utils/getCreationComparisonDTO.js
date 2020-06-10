@@ -9,36 +9,35 @@ import { getComparisonExpression } from './getComparisonExpression';
 export const getCreationComparisonDTO = expressions => {
   if (!isEmpty(expressions)) {
     if (expressions.length > 1) {
-      const unions = expressions.filter(expression => expression.union !== '').map(expression => expression.union);
-      if (uniq(unions).length === 1) {
-        const [union] = unions;
-        return {
-          operator: config.validations.comparisonOperatorEquivalences.logicalOperators[union],
-          params: expressions.map(expression => getComparisonExpression(expression))
-        };
-      } else {
-        const ORExpressions = expressions.filter(expression => expression.union === 'OR');
-        const params = [];
-        expressions.forEach((expression, index) => {
-          if (!isNil(expressions[index + 1]) && ORExpressions.includes(expressions[index + 1])) {
-            params.push({
-              operator:
-                config.validations.comparisonOperatorEquivalences.logicalOperators[expressions[index + 1].union],
-              params: [getComparisonExpression(expression), getComparisonExpression(expressions[index + 1])]
-            });
-          } else if (
-            !ORExpressions.includes(expression) &&
-            !isNil(expressions[index + 1]) &&
-            !ORExpressions.includes(expressions[index + 1])
-          ) {
+      const params = [];
+      let operator = '';
+
+      expressions.forEach((expression, index) => {
+        if (index === 0) {
+          operator = expressions[index + 1].union;
+          if (expression.expressions.length > 0) {
+            params.push(getCreationComparisonDTO(expression.expressions));
+          } else {
             params.push(getComparisonExpression(expression));
           }
-        });
-        return {
-          operator: config.validations.comparisonOperatorEquivalences.logicalOperators['AND'],
-          params
-        };
-      }
+
+          if (!isNil(expressions[index + 2])) {
+            const nextExpressions = expressions.slice(index + 1);
+            params.push(getCreationComparisonDTO(nextExpressions));
+          } else {
+            if (expressions[index + 1].expressions.length > 0) {
+              params.push(getCreationComparisonDTO(expressions[index + 1].expressions));
+            } else {
+              params.push(getComparisonExpression(expressions[index + 1]));
+            }
+          }
+        }
+      });
+
+      return {
+        operator: config.validations.operatorEquivalences.logicalOperators[operator],
+        params
+      };
     }
     const [expression] = expressions;
     return getComparisonExpression(expression);
