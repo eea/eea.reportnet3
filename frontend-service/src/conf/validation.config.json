@@ -506,7 +506,8 @@
   ],
   "requiredFields": {
     "field": ["table", "field", "shortCode", "name", "errorLevel", "errorMessage"],
-    "row": ["table", "shortCode", "name", "errorLevel", "errorMessage"]
+    "row": ["table", "shortCode", "name", "errorLevel", "errorMessage"],
+    "dataset": ["table", "shortCode", "name", "errorLevel", "errorMessage"]
   },
   "logicalOperatorFromDTO": ["FIELD_AND", "FIELD_OR"],
   "logicalRowOperatorFromDTO": ["RECORD_AND", "RECORD_OR"]

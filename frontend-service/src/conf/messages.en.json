@@ -655,6 +655,14 @@
     "strictModeTooltip": "Associated selected values",
     "addRowConstraint": "Add row constraint",
     "noTablesToSelect": "There are no tables to select",
-    "selectField": "Select field"
+    "selectField": "Select field",
+    "createDatasetValidationBtn": "Create dataset constraint",
+    "createDatasetConstraint": "Create dataset constraint",
+    "editDatasetConstraint": "Edit dataset constraint",
+    "tabMenuTableRelations": "Table relations",
+    "fieldRelationsLabel": "Field relations",
+    "originField": "First table field",
+    "referencedField": "Second table field",
+    "addNewRelation": "Add new relation"
   }
 }

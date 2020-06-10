@@ -2,6 +2,7 @@ import { ApiValidationRepository } from 'core/infrastructure/domain/model/Valida
 
 export const ValidationRepository = {
   create: () => Promise.reject('[ValidationRepository#create] must be implemented'),
+  createDatasetRule: () => Promise.reject('[ValidationRepository#createDatasetRule] must be implemented'),
   createRowRule: () => Promise.reject('[ValidationRepository#createRowRule] must be implemented'),
   deleteById: () => Promise.reject('[ValidationRepository#deleteById] must be implemented'),
   getAll: () => Promise.reject('[ValidationRepository#getAll] must be implemented'),

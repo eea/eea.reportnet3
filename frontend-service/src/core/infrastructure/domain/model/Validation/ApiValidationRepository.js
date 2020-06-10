@@ -24,6 +24,28 @@ const create = async (datasetSchemaId, validationRule) => {
   return await apiValidation.create(datasetSchemaId, validation);
 };
 
+const createDatasetRule = async (datasetSchemaId, validationRule) => {
+  const validation = {
+    automatic: false,
+    description: validationRule.description,
+    enabled: validationRule.active ? validationRule.active : false,
+    referenceId: validationRule.recordSchemaId,
+    ruleName: validationRule.name,
+    shortCode: validationRule.shortCode,
+    integrityVO: {
+      isDoubleReferenced: validationRule.isDoubleReferenced,
+      originDatasetId: validationRule.relations.originDatasetSchema,
+      originFields: validationRule.relations.links.map(link => link.originField.code),
+      referencedDatasetId: validationRule.relations.referencedDatasetSchema.code,
+      referencedFields: validationRule.relations.links.map(link => link.referencedField.code)
+    },
+    thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
+    type: 'DATASET',
+    whenCondition: null
+  };
+  return await apiValidation.create(datasetSchemaId, validation);
+};
+
 const createRowRule = async (datasetSchemaId, validationRule) => {
   const { expressions } = validationRule;
   const validation = {
@@ -100,6 +122,7 @@ const updateRowRule = async (datasetId, validationRule) => {
 
 export const ApiValidationRepository = {
   create,
+  createDatasetRule,
   createRowRule,
   deleteById,
   getAll,
