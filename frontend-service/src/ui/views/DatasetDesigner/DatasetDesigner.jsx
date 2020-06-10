@@ -16,6 +16,7 @@ import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
+import { Integrations } from './_components/Integrations';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
 import { Snapshots } from 'ui/views/_components/Snapshots';
@@ -73,6 +74,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     dataViewerOptions: { activeIndex: 0, isValidationSelected: false, recordPositionId: -1, selectedRecordErrorId: -1 },
     hasWritePermissions: false,
     initialDatasetDescription: '',
+    isIntegrationListDialogVisible: false,
+    isIntegrationManageDialogVisible: false,
     isLoading: true,
     isManageUniqueConstraintDialogVisible: false,
     isPreviewModeOn: DatasetDesignerUtils.getUrlParamValue('design'),
@@ -500,7 +503,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         <div className={styles.ButtonsBar}>
           <InputTextarea
             className={styles.datasetDescription}
-            collapsedHeight={40}
+            collapsedHeight={55}
             expandableOnClick={true}
             key="datasetDescription"
             onBlur={e => onBlurDescription(e.target.value)}
@@ -533,15 +536,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               />
 
               <Button
-                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-                disabled={false}
-                icon={'horizontalSliders'}
-                iconClasses={null}
-                label={resources.messages['qcRules']}
-                onClick={() => manageDialogs('validationListDialogVisible', true)}
-                ownButtonClasses={null}
-              />
-              <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
                   designerState.datasetStatistics.datasetErrors && designerState.isPreviewModeOn
                     ? 'p-button-animated-blink'
@@ -554,11 +548,30 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 ownButtonClasses={null}
                 iconClasses={designerState.datasetStatistics.datasetErrors ? 'warning' : ''}
               />
+
+              <Button
+                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                disabled={false}
+                icon={'horizontalSliders'}
+                iconClasses={null}
+                label={resources.messages['qcRules']}
+                onClick={() => manageDialogs('validationListDialogVisible', true)}
+                ownButtonClasses={null}
+              />
+
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
                 icon={'key'}
                 label={resources.messages['uniqueConstraints']}
                 onClick={() => manageDialogs('isUniqueConstraintsListDialogVisible', true)}
+              />
+
+              <Button
+                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                icon={'export'}
+                iconClasses={styles.integrationsButton}
+                label={resources.messages['externalIntegrations']}
+                onClick={() => manageDialogs('isIntegrationListDialogVisible', true)}
               />
 
               <Button
@@ -577,6 +590,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 label={resources.messages['snapshots']}
                 onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
               />
+
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
                 icon={'refresh'}
@@ -622,6 +636,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         />
         {validationsListDialog()}
         {renderUniqueConstraintsDialog()}
+
+        <Integrations dataflowId={dataflowId} designerState={designerState} manageDialogs={manageDialogs} />
 
         <ManageUniqueConstraint
           designerState={designerState}
