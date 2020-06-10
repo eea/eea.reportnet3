@@ -250,6 +250,7 @@ const ValidationExpression = ({
     }
     return (
       <InputText
+        keyfilter={valueKeyFilter}
         disabled={isDisabled}
         onChange={e => {
           onUpdateExpressionField('expressionValue', e.target.value);
