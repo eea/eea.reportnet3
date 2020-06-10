@@ -25,14 +25,19 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 
 export const FieldsDesigner = ({
+  activeIndex,
   datasetId,
   datasetSchemas,
   isPreviewModeOn,
+  isValidationSelected,
   manageDialogs,
   manageUniqueConstraint,
   onChangeFields,
   onChangeTableProperties,
   onLoadTableData,
+  recordPositionId,
+  selectedRecordErrorId,
+  setIsValidationSelected,
   table
 }) => {
   const validationContext = useContext(ValidationContext);
@@ -267,11 +272,15 @@ export const FieldsDesigner = ({
         <DataViewer
           hasWritePermissions={true}
           isPreviewModeOn={isPreviewModeOn}
+          isValidationSelected={isValidationSelected}
           isWebFormMMR={false}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
           onLoadTableData={onLoadTableData}
           recordPositionId={-1}
+          recordPositionId={recordPositionId}
+          selectedRecordErrorId={selectedRecordErrorId}
+          setIsValidationSelected={setIsValidationSelected}
           tableHasErrors={table.hasErrors}
           tableId={table.tableSchemaId}
           tableName={table.tableSchemaName}
@@ -456,7 +465,7 @@ export const FieldsDesigner = ({
       <div className={styles.switchDivInput}>
         <InputTextarea
           className={styles.tableDescriptionInput}
-          collapsedHeight={40}
+          collapsedHeight={55}
           expandableOnClick={true}
           key="tableDescription"
           onChange={e => setTableDescriptionValue(e.target.value)}
