@@ -328,6 +328,8 @@ public class UniqueValidationUtils {
         notUtilizedRecords = recordRepository.queryExecutionRecord(
             mountIntegrityQuery(integrityVO.getReferencedFields(), integrityVO.getOriginFields()));
         if (notUtilizedRecords.isEmpty()) {
+          validation = createValidation(idRule, schemaId, tableSchema.getNameTableSchema(),
+              EntityTypeEnum.TABLE);
           TableValidation tableValidation = new TableValidation();
           tableValidation.setValidation(validation);
           TableValue tableValue =
@@ -349,9 +351,7 @@ public class UniqueValidationUtils {
 
   private static String mountIntegrityQuery(List<String> originFields,
       List<String> referencedFields) {
-    // TODO Auto-generated method stub
-    // compose query depending on boolean
-    return "query";
+    return "with table_1 as (select rv.id,(select fv.value from field_value fv where fv.id_record=rv.id and fv.id_field_schema = '5ecb97e44e781252a890e71c') AS column_1 from record_value rv), table_2 as (select rv.id,(select fv.value from field_value fv where fv.id_record=rv.id and fv.id_field_schema = '5ecb97e94e781252a890e71d') AS column_1 from record_value rv) select t2.id from table_1 t1 right join table_2 t2 on t1.column_1 = t2.column_1 where t1.column_1 is null and t2.column_1 is not null ;";
   }
 
 }
