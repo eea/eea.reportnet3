@@ -74,10 +74,7 @@ export const IntegrationsList = ({ dataflowId, designerState, getUpdatedData, ma
 
   const onLoadIntegrations = async () => {
     try {
-      const integration = new Integration();
-      const internalParameters = { datasetSchemaId: designerState.datasetSchemaId };
-      integration.internalParameters = internalParameters;
-      const response = await IntegrationService.all(integration);
+      const response = await IntegrationService.all(designerState.datasetSchemaId);
       integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response } });
     } catch (error) {
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
