@@ -109,8 +109,7 @@ public class IntegrationServiceImpl implements IntegrationService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<IntegrationVO> getOnlyExtensionsAndOperations(List<IntegrationVO> integrationVOList)
-      throws EEAException {
+  public List<IntegrationVO> getOnlyExtensionsAndOperations(List<IntegrationVO> integrationVOList) {
     // Remove all data except operation and fileExtension
     List<IntegrationVO> newIntegrationVOList = new ArrayList<>();
     integrationVOList.stream().forEach(integration -> {

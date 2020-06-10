@@ -1,8 +1,11 @@
 package org.eea.dataflow.service.impl;
 
 
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import org.eea.dataflow.integration.crud.factory.CrudManager;
 import org.eea.dataflow.integration.crud.factory.CrudManagerFactory;
 import org.eea.exception.EEAException;
@@ -107,6 +110,22 @@ public class IntegrationServiceImplTest {
     Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
     integrationService.deleteIntegration(integrationVO);
     Mockito.verify(crudManager, times(1)).delete(Mockito.any());
+  }
+
+  /**
+   * Gets the only extensions and operations test.
+   *
+   * @return the only extensions and operations test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getOnlyExtensionsAndOperationsTest() {
+    List<IntegrationVO> integrationVOList = new ArrayList<>();
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setName("name");
+    integrationVOList.add(integrationVO);
+    assertNull(
+        integrationService.getOnlyExtensionsAndOperations(integrationVOList).get(0).getName());
   }
 
 

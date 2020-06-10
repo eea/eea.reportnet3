@@ -2,6 +2,8 @@ package org.eea.dataflow.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
+import java.util.HashMap;
+import java.util.Map;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.integration.IntegrationVO;
@@ -160,4 +162,35 @@ public class IntegrationControllerImplTest {
     }
   }
 
+  /**
+   * Find extensions and operations test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void findExtensionsAndOperationsTest() throws EEAException {
+    IntegrationVO integrationVO = new IntegrationVO();
+    Map<String, String> internalParameters = new HashMap<>();
+    internalParameters.put("datasetSchemaId", "datasetSchemaId");
+    integrationControllerImpl.findExtensionsAndOperations(integrationVO);
+    Mockito.verify(integrationService, times(1)).getOnlyExtensionsAndOperations(Mockito.any());
+  }
+
+
+  /**
+   * Find extensions and operations test exception.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void findExtensionsAndOperationsTestException() throws EEAException {
+    try {
+      Mockito.doThrow(EEAException.class).when(integrationService)
+          .getAllIntegrationsByCriteria(Mockito.any());
+      integrationControllerImpl.findExtensionsAndOperations(new IntegrationVO());
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
 }

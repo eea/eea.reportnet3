@@ -55,8 +55,7 @@ public interface IntegrationService {
    * @return the only extensions and operations
    * @throws EEAException the EEA exception
    */
-  List<IntegrationVO> getOnlyExtensionsAndOperations(List<IntegrationVO> integrationVOList)
-      throws EEAException;
+  List<IntegrationVO> getOnlyExtensionsAndOperations(List<IntegrationVO> integrationVOList);
 
 
 }
