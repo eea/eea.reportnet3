@@ -43,12 +43,7 @@ const parseIntegration = integrationDTO => {
   return integration;
 };
 
-const parseIntegrationId = integrationId => {
-  const integration = new Integration();
-  integration.integrationId = integrationId;
-
-  return integration;
-};
+const parseIntegrationId = integrationId => new Integration({ integrationId });
 
 const parseIntegrationsList = integrationsDTO => {
   if (!isNil(integrationsDTO)) {
