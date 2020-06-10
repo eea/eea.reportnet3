@@ -110,9 +110,12 @@ public class FMEIntegrationManager extends AbstractCrudManager {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.MISSING_PARAMETERS_INTEGRATION);
     }
-
-    integration.getExternalParameters().clear();
-    integration.getInternalParameters().clear();
+    if (integration.getExternalParameters() != null) {
+      integration.getExternalParameters().clear();
+    }
+    if (integration.getInternalParameters() != null) {
+      integration.getInternalParameters().clear();
+    }
     operationParametersRepository.deleteByIntegration(integration);
 
     integration = integrationMapper.classToEntity(integrationVO);

@@ -45,7 +45,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("isAuthenticated()")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @PutMapping(value = "/listIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<IntegrationVO> findAllIntegrationsByCriteria(
       @RequestBody IntegrationVO integrationVO) {
