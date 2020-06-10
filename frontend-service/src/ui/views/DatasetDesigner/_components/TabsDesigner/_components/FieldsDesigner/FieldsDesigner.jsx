@@ -465,7 +465,7 @@ export const FieldsDesigner = ({
       <div className={styles.switchDivInput}>
         <InputTextarea
           className={styles.tableDescriptionInput}
-          collapsedHeight={40}
+          collapsedHeight={55}
           expandableOnClick={true}
           key="tableDescription"
           onChange={e => setTableDescriptionValue(e.target.value)}
