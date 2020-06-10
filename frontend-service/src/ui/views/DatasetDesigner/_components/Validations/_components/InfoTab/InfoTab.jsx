@@ -67,7 +67,6 @@ export const InfoTab = ({
       }
 
       if (!isNil(tableFields) && tableFields.length > 0) {
-        console.log('creationFormState.candidateRule.field', creationFormState.candidateRule.field);
         fieldDropdownOptions.options = tableFields;
         fieldDropdownOptions.disabled = false;
         fieldDropdownOptions.onChange = e => onInfoFieldChange('field', e.value);
@@ -78,7 +77,6 @@ export const InfoTab = ({
         <Dropdown
           id={`${componentName}__field`}
           disabled={fieldDropdownOptions.disabled}
-          // appendTo={document.body}
           filterPlaceholder={fieldDropdownOptions.placeholder}
           placeholder={fieldDropdownOptions.placeholder}
           optionLabel="label"
@@ -94,10 +92,6 @@ export const InfoTab = ({
     creationFormState.tableFields,
     validationContext.isVisible
   ]);
-
-  useEffect(() => {
-    console.log('creationFormState.candidateRule.field,', creationFormState.candidateRule.field);
-  }, [creationFormState.candidateRule.field]);
 
   return (
     <div className={styles.section}>
