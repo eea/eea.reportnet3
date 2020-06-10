@@ -14,16 +14,20 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
 import org.eea.validation.persistence.data.repository.TableRepository;
+import org.eea.validation.persistence.repository.IntegritySchemaRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.RulesSequenceRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.FieldSchema;
+import org.eea.validation.persistence.schemas.IntegritySchema;
 import org.eea.validation.persistence.schemas.RecordSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
@@ -77,6 +81,13 @@ public class RulesServiceImplTest {
   /** The kie base manager. */
   @Mock
   private KieBaseManager kieBaseManager;
+
+  /** The integrity schema repository. */
+  @Mock
+  private IntegritySchemaRepository integritySchemaRepository;
+
+  @Mock
+  private IntegrityMapper integrityMapper;
 
   /**
    * Delete rule by id.
@@ -184,10 +195,34 @@ public class RulesServiceImplTest {
    */
   @Test
   public void getActiveRulesSchemaByDatasetIdSuccessTest() throws EEAException {
+    List<IntegritySchema> integrities = new ArrayList<>();
+    List<Rule> rules = new ArrayList<>();
+    List<RuleVO> rulesVO = new ArrayList<>();
+    List<IntegrityVO> listIntegrityVO = new ArrayList<>();
+    ObjectId id = new ObjectId();
+    RulesSchemaVO rulesSchemaVO = new RulesSchemaVO();
+    Rule rule = new Rule();
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setRuleId(id.toString());
+    rulesVO.add(ruleVO);
+    rule.setRuleId(id);
+    rule.setIntegrityConstraintId(id);
+    rules.add(rule);
+    RulesSchema ruleSchema = new RulesSchema();
+    ruleSchema.setRules(rules);
+    IntegrityVO integrityVO = new IntegrityVO();
+    integrityVO.setId(id.toString());
+    integrities.add(new IntegritySchema());
+    listIntegrityVO.add(integrityVO);
+    RulesSchemaVO ruleSchemaVO = new RulesSchemaVO();
+    ruleSchemaVO.setRules(rulesVO);
     when(rulesRepository.getRulesWithActiveCriteria(Mockito.any(), Mockito.anyBoolean()))
-        .thenReturn(new RulesSchema());
-    when(rulesSchemaMapper.entityToClass(Mockito.any())).thenReturn(new RulesSchemaVO());
-    assertEquals(new RulesSchemaVO(),
+        .thenReturn(ruleSchema);
+    when(rulesSchemaMapper.entityToClass(Mockito.any())).thenReturn(ruleSchemaVO);
+    when(integritySchemaRepository.findByOriginDatasetSchemaId(Mockito.any()))
+        .thenReturn(integrities);
+    when(integrityMapper.entityListToClass(Mockito.any())).thenReturn(listIntegrityVO);
+    assertEquals(ruleSchemaVO,
         rulesServiceImpl.getActiveRulesSchemaByDatasetId("5e44110d6a9e3a270ce13fac"));
   }
 
@@ -1097,5 +1132,10 @@ public class RulesServiceImplTest {
         "5e44110d6a9e3a270ce13fac");
     Mockito.verify(rulesRepository, times(1)).deleteRuleHighLevelLike(
         new ObjectId("5e44110d6a9e3a270ce13fac"), "5e44110d6a9e3a270ce13fac");
+  }
+
+  @Test
+  public void getIntegrityConstraintTest() {
+    assertNull(rulesServiceImpl.getIntegrityConstraint(new ObjectId().toString()));
   }
 }

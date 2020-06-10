@@ -1,7 +1,10 @@
 package org.eea.validation.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
@@ -107,7 +110,10 @@ public class RulesServiceImpl implements RulesService {
   public RulesSchemaVO getRulesSchemaByDatasetId(String datasetSchemaId) {
     RulesSchema rulesSchema =
         rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchemaId), false);
-    return rulesSchema == null ? null : rulesSchemaMapper.entityToClass(rulesSchema);
+    RulesSchemaVO rulesVO =
+        rulesSchema == null ? null : rulesSchemaMapper.entityToClass(rulesSchema);
+    setIntegrityIntoVO(rulesSchema, rulesVO);
+    return rulesVO;
   }
 
   /**
@@ -120,7 +126,10 @@ public class RulesServiceImpl implements RulesService {
   public RulesSchemaVO getActiveRulesSchemaByDatasetId(String datasetSchemaId) {
     RulesSchema rulesSchema =
         rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchemaId), true);
-    return rulesSchema == null ? null : rulesSchemaMapper.entityToClass(rulesSchema);
+    RulesSchemaVO rulesVO =
+        rulesSchema == null ? null : rulesSchemaMapper.entityToClass(rulesSchema);
+    setIntegrityIntoVO(rulesSchema, rulesVO);
+    return rulesVO;
   }
 
   /**
@@ -659,6 +668,40 @@ public class RulesServiceImpl implements RulesService {
     IntegritySchema integritySchema =
         integritySchemaRepository.findById(new ObjectId(integrityId)).orElse(null);
     return integritySchema == null ? null : integrityMapper.entityToClass(integritySchema);
+  }
+
+  /**
+   * Sets the integrity into VO.
+   *
+   * @param ruleSchema the rule schema
+   * @param ruleSchemaVO the rule schema VO
+   */
+  private void setIntegrityIntoVO(RulesSchema ruleSchema, RulesSchemaVO ruleSchemaVO) {
+    // Get integrities
+    if (null != ruleSchema) {
+      Map<String, IntegrityVO> integrityMap = new HashMap<>();
+      List<IntegritySchema> integrities =
+          integritySchemaRepository.findByOriginDatasetSchemaId(ruleSchema.getIdDatasetSchema());
+      if (integrities != null && !integrities.isEmpty()) {
+        List<IntegrityVO> integritiesVO = integrityMapper.entityListToClass(integrities);
+        if (ruleSchema.getRules() != null) {
+          for (Rule rule : ruleSchema.getRules().stream()
+              .filter(rule -> rule.getIntegrityConstraintId() != null)
+              .collect(Collectors.toList())) {
+            for (IntegrityVO integrity : integritiesVO) {
+              if (rule.getIntegrityConstraintId().toString().equals(integrity.getId())) {
+                integrityMap.put(rule.getRuleId().toString(), integrity);
+              }
+            }
+          }
+          // Set integrity into VO
+          if (!integrityMap.isEmpty() && ruleSchemaVO.getRules() != null) {
+            ruleSchemaVO.getRules().stream()
+                .forEach(rule -> rule.setIntegrityVO(integrityMap.get(rule.getRuleId())));
+          }
+        }
+      }
+    }
   }
 
 }
