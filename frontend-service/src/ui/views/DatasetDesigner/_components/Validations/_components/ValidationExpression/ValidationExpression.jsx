@@ -218,7 +218,7 @@ const ValidationExpression = ({
             keyfilter={valueKeyFilter}
             disabled={isDisabled}
             format={false}
-            onBlur={e => checkField('number', e.value)}
+            onBlur={e => checkField('number', e.target.value)}
             onChange={e => onUpdateExpressionField('expressionValue', e.value)}
             placeholder={resourcesContext.messages.value}
             value={expressionValues.expressionValue}
@@ -231,7 +231,7 @@ const ValidationExpression = ({
           disabled={isDisabled}
           format={false}
           mode="decimal"
-          onBlur={e => checkField('number', e.value)}
+          onBlur={e => checkField('number', e.target.value)}
           onChange={e => onUpdateExpressionField('expressionValue', e.value)}
           placeholder={resourcesContext.messages.value}
           steps={0}
@@ -246,7 +246,7 @@ const ValidationExpression = ({
         <InputNumber
           disabled={isDisabled}
           mode="decimal"
-          onBlur={e => checkField('year', e.value)}
+          onBlur={e => checkField('year', e.target.value)}
           onChange={e => onUpdateExpressionField('expressionValue', e.value)}
           placeholder={resourcesContext.messages.value}
           steps={0}
