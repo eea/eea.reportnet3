@@ -301,8 +301,11 @@ public class RuleExpressionVO {
           break loop;
       }
     }
-
+    if (expression.contains("isIntegrityConstraint")) {
+      return length;
+    }
     throw new IllegalStateException("readParams - Invalid expression: " + expression);
+
   }
 
   /**

@@ -204,4 +204,5 @@ public interface RulesController {
   @DeleteMapping("/private/deleteRuleHighLevelLike")
   void deleteRuleHighLevelLike(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("fieldSchemaId") String fieldSchemaId);
+
 }
