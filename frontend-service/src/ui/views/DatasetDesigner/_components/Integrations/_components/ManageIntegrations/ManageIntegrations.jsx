@@ -80,6 +80,12 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
     });
   };
 
+  const onBlurParameter = (id, option, event) => {
+    !isDuplicatedParameter(id, externalParameters, event.target.value)
+      ? onUpdateSingleParameter(id, option, event)
+      : parameterRef.current.element.focus();
+  };
+
   const onChangeParameter = (value, option, id) => {
     manageIntegrationsDispatch({
       type: 'MANAGE_PARAMETERS',
@@ -243,7 +249,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   const renderEditorInput = (option, parameter, id) => {
     return (
       <InputText
-        onBlur={event => onUpdateSingleParameter(id, option, event)}
+        onBlur={event => onBlurParameter(id, option, event)}
         onChange={event => onChangeParameter(event.target.value, option, id)}
         onKeyDown={event => onEditKeyDown(event, id, option)}
         ref={parameterRef}
