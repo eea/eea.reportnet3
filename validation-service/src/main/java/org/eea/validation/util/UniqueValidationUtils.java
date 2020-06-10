@@ -264,7 +264,7 @@ public class UniqueValidationUtils {
       }
     }
     stringQuery.append(
-        " from dataset_" + datasetOriginId + ".record_value rv), with table_2 as(select rv.id, ");
+        " from dataset_" + datasetOriginId + ".record_value rv), table_2 as(select rv.id, ");
     iterator = referencedFields.iterator();
     i = 1;
     while (iterator.hasNext()) {
@@ -284,7 +284,7 @@ public class UniqueValidationUtils {
     iterator.next();
     while (iterator.hasNext()) {
       iterator.next();
-      stringQuery.append("and t1.column_" + i + " = t2.column_ " + i);
+      stringQuery.append(" and t1.column_" + i + " = t2.column_" + i);
       i++;
     }
     stringQuery.append(" where t1.column_1 is null and t2.column_1 is not null ;");
@@ -363,11 +363,11 @@ public class UniqueValidationUtils {
       Validation validation = createValidation(idRule, schemaId, tableSchema.getNameTableSchema(),
           EntityTypeEnum.TABLE);
 
-      List<RecordValue> notUtilizedRecords = recordRepository.queryExecutionRecord(
+      List<String> notUtilizedRecords = recordRepository.queryExecution(
           mountIntegrityQuery(integrityVO.getOriginFields(), integrityVO.getReferencedFields(),
               integrityVO.getOriginDatasetId(), integrityVO.getReferencedDatasetId()));
       List<TableValue> tableValues = new ArrayList<>();
-      if (notUtilizedRecords.isEmpty()) {
+      if (!notUtilizedRecords.isEmpty()) {
         TableValidation tableValidation = new TableValidation();
         tableValidation.setValidation(validation);
         TableValue tableValue =
@@ -387,10 +387,10 @@ public class UniqueValidationUtils {
       if (Boolean.TRUE.equals(integrityVO.getIsDoubleReferenced())) {
         tableSchema = getTableSchemaFromIdFieldSchema(datasetSchema,
             integrityVO.getReferencedFields().get(0));
-        notUtilizedRecords = recordRepository.queryExecutionRecord(
+        notUtilizedRecords = recordRepository.queryExecution(
             mountIntegrityQuery(integrityVO.getReferencedFields(), integrityVO.getOriginFields(),
                 integrityVO.getOriginDatasetId(), integrityVO.getReferencedDatasetId()));
-        if (notUtilizedRecords.isEmpty()) {
+        if (!notUtilizedRecords.isEmpty()) {
           validation = createValidation(idRule, schemaId, tableSchema.getNameTableSchema(),
               EntityTypeEnum.TABLE);
           TableValidation tableValidation = new TableValidation();
