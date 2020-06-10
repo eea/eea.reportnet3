@@ -175,7 +175,7 @@ const ValidationExpression = ({
           baseZIndex={6000}
           dateFormat="yy-mm-dd"
           monthNavigator={true}
-          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
           value={expressionValues.expressionValue}
@@ -191,7 +191,7 @@ const ValidationExpression = ({
           max={32}
           min={0}
           mode="decimal"
-          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
           placeholder={resourcesContext.messages.value}
           steps={0}
           useGrouping={false}
@@ -205,7 +205,7 @@ const ValidationExpression = ({
         return (
           <InputText
             disabled={isDisabled}
-            onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+            onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
             placeholder={resourcesContext.messages.value}
             value={expressionValues.expressionValue}
           />
@@ -219,7 +219,7 @@ const ValidationExpression = ({
             disabled={isDisabled}
             format={false}
             onBlur={e => checkField('number', e.target.value)}
-            onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+            onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
             placeholder={resourcesContext.messages.value}
             value={expressionValues.expressionValue}
           />
@@ -232,7 +232,7 @@ const ValidationExpression = ({
           format={false}
           mode="decimal"
           onBlur={e => checkField('number', e.target.value)}
-          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
           placeholder={resourcesContext.messages.value}
           steps={0}
           useGrouping={false}
@@ -247,7 +247,7 @@ const ValidationExpression = ({
           disabled={isDisabled}
           mode="decimal"
           onBlur={e => checkField('year', e.target.value)}
-          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
           placeholder={resourcesContext.messages.value}
           steps={0}
           useGrouping={false}
@@ -264,7 +264,7 @@ const ValidationExpression = ({
           max={13}
           min={0}
           mode="decimal"
-          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
           placeholder={resourcesContext.messages.value}
           steps={0}
           useGrouping={false}
@@ -300,7 +300,7 @@ const ValidationExpression = ({
         <Dropdown
           // appendTo={document.body}
           disabled={isDisabled || position === 0}
-          onChange={e => onUpdateExpressionField('union', e.value)}
+          onChange={e => onUpdateExpressionField('union', e.target.value)}
           optionLabel="label"
           options={config.validations.logicalOperators}
           placeholder={resourcesContext.messages.union}
@@ -313,7 +313,7 @@ const ValidationExpression = ({
         <Dropdown
           // appendTo={document.body}
           disabled={isDisabled}
-          onChange={e => onUpdateExpressionField('operatorType', e.value)}
+          onChange={e => onUpdateExpressionField('operatorType', e.target.value)}
           optionLabel="label"
           options={operatorTypes}
           placeholder={resourcesContext.messages.operatorType}
@@ -326,7 +326,7 @@ const ValidationExpression = ({
         <Dropdown
           // appendTo={document.body}
           disabled={isDisabled}
-          onChange={e => onUpdateExpressionField('operatorValue', e.value)}
+          onChange={e => onUpdateExpressionField('operatorValue', e.target.value)}
           optionLabel="label"
           options={operatorValues}
           placeholder={resourcesContext.messages.operator}
