@@ -76,6 +76,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
     if (!creationFormState.candidateRule.automatic) {
       setTabContents([
         <TabPanel
+          key="tab_1"
           header={resourcesContext.messages.tabMenuConstraintData}
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}
           headerClassName={showErrorOnInfoTab ? styles.error : ''}>
@@ -89,6 +90,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
           />
         </TabPanel>,
         <TabPanel
+          key="tab_2"
           header={resourcesContext.messages.tabMenuExpression}
           leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}
           headerClassName={showErrorOnExpressionTab ? styles.error : ''}>
@@ -108,6 +110,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
     } else {
       setTabContents([
         <TabPanel
+          key="tab_1"
           header={resourcesContext.messages.tabMenuConstraintData}
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
           <InfoTab
@@ -170,11 +173,12 @@ const FieldValidation = ({ datasetId, tabs }) => {
 
       const fieldType = getFieldType(table, { code: validationContext.referenceId }, tabs);
       creationFormDispatch({
-        type: 'SET_FIELD_AND_FIELD_TYPE',
+        // type: 'SET_FIELD_AND_FIELD_TYPE',
+        type: 'SET_TABLE_ID_FIELD_ID_AND_FIELD_TYPE',
         payload: {
-          key: 'table',
-          value: table,
-          fieldType
+          field: validationContext.referenceId,
+          fieldType,
+          table
         }
       });
     }

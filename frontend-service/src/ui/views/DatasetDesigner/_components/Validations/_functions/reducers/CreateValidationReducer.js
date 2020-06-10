@@ -40,6 +40,7 @@ export const createValidationReducer = (state, { type, payload }) => {
           [payload.key]: payload.value
         }
       };
+
     case 'SET_RULE_TYPE':
       return {
         ...state,
@@ -52,6 +53,18 @@ export const createValidationReducer = (state, { type, payload }) => {
         candidateRule: {
           ...state.candidateRule,
           [payload.key]: payload.value,
+          fieldType: payload.fieldType
+        }
+      };
+
+    case 'SET_TABLE_ID_FIELD_ID_AND_FIELD_TYPE':
+      console.log('SET_TABLE_ID_FIELD_ID_AND_FIELD_TYPE payload', payload);
+      return {
+        ...state,
+        candidateRule: {
+          ...state.candidateRule,
+          table: payload.table,
+          field: payload.field,
           fieldType: payload.fieldType
         }
       };
@@ -280,6 +293,7 @@ export const createValidationReducer = (state, { type, payload }) => {
       };
 
     case 'POPULATE_CREATE_FORM':
+      console.log('POPULATE_CREATE_FORM', payload);
       return {
         ...state,
         candidateRule: {
