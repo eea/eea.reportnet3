@@ -35,7 +35,7 @@ export const getCreationComparisonDTO = expressions => {
       });
 
       return {
-        operator: config.validations.operatorEquivalences.logicalOperators[operator],
+        operator: config.validations.comparisonOperatorEquivalences.logicalOperators[operator],
         params
       };
     }
