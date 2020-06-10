@@ -101,11 +101,9 @@ public class IntegrationServiceImplTest {
    */
   @Test
   public void testDeleteIntegration() throws EEAException {
-    IntegrationVO integrationVO = new IntegrationVO();
-    integrationVO.setId(1L);
-    Mockito.doNothing().when(crudManager).delete(integrationVO);
+    Mockito.doNothing().when(crudManager).delete(Mockito.anyLong());
     Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
-    integrationService.deleteIntegration(integrationVO);
+    integrationService.deleteIntegration(1L);
     Mockito.verify(crudManager, times(1)).delete(Mockito.any());
   }
 

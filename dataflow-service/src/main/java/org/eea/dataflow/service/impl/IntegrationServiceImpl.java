@@ -47,17 +47,18 @@ public class IntegrationServiceImpl implements IntegrationService {
 
   }
 
+
   /**
    * Delete integration.
    *
-   * @param integrationVO the integration VO
+   * @param integrationId the integration id
    * @throws EEAException the EEA exception
    */
   @Transactional
   @Override
-  public void deleteIntegration(IntegrationVO integrationVO) throws EEAException {
+  public void deleteIntegration(Long integrationId) throws EEAException {
     CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
-    crudManager.delete(integrationVO);
+    crudManager.delete(integrationId);
 
   }
 

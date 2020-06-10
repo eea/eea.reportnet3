@@ -35,11 +35,12 @@ public interface CrudManager {
    */
   void create(IntegrationVO integration) throws EEAException;
 
+
   /**
    * Delete.
    *
-   * @param integration the integration
+   * @param integrationId the integration id
    * @throws EEAException the EEA exception
    */
-  void delete(IntegrationVO integration) throws EEAException;
+  void delete(Long integrationId) throws EEAException;
 }

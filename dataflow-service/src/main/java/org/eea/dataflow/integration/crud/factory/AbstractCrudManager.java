@@ -47,12 +47,13 @@ public abstract class AbstractCrudManager implements CrudManager {
   @Override
   public abstract void create(IntegrationVO integration) throws EEAException;
 
+
   /**
    * Delete.
    *
-   * @param integration the integration
+   * @param integrationId the integration id
    * @throws EEAException the EEA exception
    */
   @Override
-  public abstract void delete(IntegrationVO integration) throws EEAException;
+  public abstract void delete(Long integrationId) throws EEAException;
 }
