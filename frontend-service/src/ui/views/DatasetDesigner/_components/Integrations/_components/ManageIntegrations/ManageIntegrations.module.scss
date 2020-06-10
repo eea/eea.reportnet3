@@ -6,12 +6,10 @@
   user-select: none;
 
   .group {
-    --buttonsWidth: 200px;
-
     align-items: center;
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
+    justify-content: space-between;
     margin-bottom: 1.5rem;
 
     &:nth-last-child(2) {
@@ -57,7 +55,7 @@
 
       &.parameterKey,
       &.parameterValue {
-        width: calc((100% - var(--buttonsWidth)) / 2);
+        width: 100%;
       }
     }
 
@@ -125,7 +123,6 @@
     .buttonWrapper {
       display: flex;
       justify-content: space-between;
-      width: var(--buttonsWidth);
     }
   }
 }

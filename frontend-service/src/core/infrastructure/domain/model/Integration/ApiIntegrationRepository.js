@@ -48,9 +48,14 @@ const parseManageIntegration = integration => ({
   description: integration.description,
   externalParameters: parseExternalParameters(integration.externalParameters),
   id: integration.id,
-  internalParameters: { fileExtension: integration.fileExtension, datasetSchemaId: integration.datasetSchemaId },
+  internalParameters: {
+    dataflowId: integration.dataflowId,
+    datasetSchemaId: integration.datasetSchemaId,
+    fileExtension: integration.fileExtension,
+    processName: integration.processName
+  },
   name: integration.name,
-  operation: integration.operation,
+  operation: integration.operation.value,
   tool: integration.tool
 });
 

@@ -14,23 +14,15 @@ export const manageIntegrationsReducer = (state, { type, payload }) => {
         parameterValue: ''
       };
 
-    case 'ON_EDIT_PARAMETER':
-      return {
-        ...state,
-        editorView: { isEditing: true, id: payload.id },
-        parameterKey: payload.keyData,
-        parameterValue: payload.valueData
-      };
-
     case 'ON_FILL':
       return { ...state, [payload.name]: payload.data };
 
-    case 'ON_RESET_PARAMETER':
+    case 'TOGGLE_EDIT_VIEW':
       return {
         ...state,
-        editorView: { isEditing: false, id: null },
-        parameterKey: payload.key,
-        parameterValue: payload.value
+        editorView: { isEditing: payload.isEdit, id: payload.id },
+        parameterKey: payload.keyData,
+        parameterValue: payload.valueData
       };
 
     default:

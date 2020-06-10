@@ -1,31 +1,67 @@
 import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
 
-let id = 0;
-
-const checkEmptyForm = state => {
-  const stateKeys = Object.keys(state).filter(integration => !integration.includes('parameter'));
-  const isEmptyData = [];
-  for (let index = 0; index < stateKeys.length; index++) {
-    const key = stateKeys[index];
-    isEmptyData.push(isEmpty(state[key]));
-  }
-  return isEmptyData;
-};
-
-const getParameterData = (id, option, state) => {
-  const selectedParameter = state.filter(parameter => parameter.id === id);
+const getParameterData = (id, option, parameters) => {
+  const selectedParameter = parameters.filter(parameter => parameter.id === id);
   if (!isEmpty(selectedParameter)) return selectedParameter[0][option];
 };
 
-const onAddParameter = state => ({
-  id: id++,
-  isEditorView: { key: false, value: false },
-  key: state.parameterKey,
-  value: state.parameterValue
-});
+const isDuplicatedIntegration = (integration, incomingIntegration) => {
+  const currentIntegration = {
+    description: integration.description,
+    externalParameters: integration.externalParameters,
+    fileExtension: integration.fileExtension,
+    id: integration.id,
+    isUpdatedVisible: integration.isUpdatedVisible,
+    name: integration.name,
+    operation: integration.operation,
+    processName: integration.processName
+  };
 
-const onUpdateData = (id, option, state, value) => {
-  return state.map(parameter => {
+  return isEqual([currentIntegration].sort(), [incomingIntegration].sort());
+};
+
+const isDuplicatedParameter = (id, parameters, value) => {
+  return parameters
+    .filter(parameter => parameter.id !== id)
+    .map(parameter => parameter.key)
+    .includes(value);
+};
+
+const isFormEmpty = state => {
+  const requiredKeys = ['description', 'externalParameters', 'fileExtension', 'name', 'operation', 'processName'];
+  const isEmptyForm = [];
+  for (let index = 0; index < requiredKeys.length; index++) {
+    const key = requiredKeys[index];
+    isEmptyForm.push(isEmpty(state[key]));
+  }
+
+  return isEmptyForm.includes(true);
+};
+
+const isParameterEditing = parameters => {
+  const isEditorView = parameters
+    .map(parameter => parameter.isEditorView)
+    .map(editor => Object.values(editor))
+    .flat();
+
+  return !isEditorView.includes(true);
+};
+
+const onAddParameter = state => {
+  let id = state.externalParameters.length;
+
+  return {
+    id: id++,
+    isEditorView: { key: false, value: false },
+    key: state.parameterKey,
+    prevValue: { key: '', value: '' },
+    value: state.parameterValue
+  };
+};
+
+const onUpdateData = (id, option, parameters, value) => {
+  return parameters.map(parameter => {
     if (parameter.id === id) {
       Object.assign({}, parameter, (parameter[option] = value));
       return parameter;
@@ -40,6 +76,7 @@ const onUpdateCompleteParameter = (id, state) => {
         id: id,
         isEditorView: { key: false, value: false },
         key: state.parameterKey,
+        prevValue: { key: '', value: '' },
         value: state.parameterValue
       };
     } else return parameter;
@@ -50,14 +87,20 @@ const toggleParameterEditorView = (id, option, parameters) => {
   return parameters.map(parameter => {
     if (parameter.id === id) {
       Object.assign({}, parameter, (parameter.isEditorView[option] = !parameter.isEditorView[option]));
+      if (parameter.isEditorView[option]) {
+        parameter.prevValue = { ...parameter.prevValue, [option]: parameter[option] };
+      }
       return parameter;
     } else return parameter;
   });
 };
 
 export const ManageIntegrationsUtils = {
-  checkEmptyForm,
   getParameterData,
+  isDuplicatedIntegration,
+  isDuplicatedParameter,
+  isFormEmpty,
+  isParameterEditing,
   onAddParameter,
   onUpdateCompleteParameter,
   onUpdateData,

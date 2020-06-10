@@ -18,18 +18,25 @@ import { IntegrationService } from 'core/services/Integration';
 
 import { manageIntegrationsReducer } from './_functions/Reducers/manageIntegrationsReducer';
 
+import { useInputTextFocus } from 'ui/views/_functions/Hooks/useInputTextFocus';
+
 import { ManageIntegrationsUtils } from './_functions/Utils/ManageIntegrationsUtils';
 
-export const ManageIntegrations = ({ designerState, manageDialogs, updatedData }) => {
+export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, updatedData }) => {
   const { datasetSchemaId, isIntegrationManageDialogVisible } = designerState;
   const componentName = 'integration';
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
+  const editParameterRef = useRef(null);
+  const integrationNameRef = useRef(null);
   const parameterRef = useRef(null);
 
+  const inputRefs = { name: integrationNameRef, parameterKey: editParameterRef };
+
   const [manageIntegrationsState, manageIntegrationsDispatch] = useReducer(manageIntegrationsReducer, {
+    dataflowId,
     datasetSchemaId,
     description: '',
     editorView: { isEditing: false, id: null },
@@ -45,7 +52,13 @@ export const ManageIntegrations = ({ designerState, manageDialogs, updatedData }
     tool: 'FME'
   });
 
-  const { editorView, externalParameters } = manageIntegrationsState;
+  const { editorView, externalParameters, parameterKey, parameterValue } = manageIntegrationsState;
+  const { isDuplicatedIntegration, isDuplicatedParameter, isFormEmpty, isParameterEditing } = ManageIntegrationsUtils;
+
+  const isEditingParameter = isParameterEditing(externalParameters);
+  const isEmptyForm = isFormEmpty(manageIntegrationsState);
+  const isKeyDuplicated = isDuplicatedParameter(editorView.id, externalParameters, parameterKey);
+  const isIntegrationDuplicated = isDuplicatedIntegration(manageIntegrationsState, updatedData);
 
   useEffect(() => {
     if (!isEmpty(updatedData)) getUpdatedData();
@@ -54,6 +67,9 @@ export const ManageIntegrations = ({ designerState, manageDialogs, updatedData }
   useEffect(() => {
     if (parameterRef.current) parameterRef.current.element.focus();
   }, [parameterRef.current]);
+
+  useInputTextFocus(editorView.isEditing, editParameterRef);
+  useInputTextFocus(isIntegrationManageDialogVisible, integrationNameRef);
 
   const getUpdatedData = () => manageIntegrationsDispatch({ type: 'GET_UPDATED_DATA', payload: updatedData });
 
@@ -73,7 +89,10 @@ export const ManageIntegrations = ({ designerState, manageDialogs, updatedData }
 
   const onCreateIntegration = async () => {
     try {
-      await IntegrationService.create(manageIntegrationsState);
+      const response = await IntegrationService.create(manageIntegrationsState);
+      if (response.status >= 200 && response.status <= 299) {
+        manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
+      }
     } catch (error) {
       notificationContext.add({ type: 'CREATE_INTEGRATION_ERROR' });
     }
@@ -86,17 +105,40 @@ export const ManageIntegrations = ({ designerState, manageDialogs, updatedData }
     });
   };
 
+  const onEditKeyDown = (event, id, option) => {
+    if (event.key === 'Enter' && !isDuplicatedParameter(id, externalParameters, event.target.value)) {
+      onUpdateSingleParameter(id, option, event);
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      const value = externalParameters.filter(parameter => parameter.id === id).map(value => value.prevValue[option]);
+
+      ManageIntegrationsUtils.onUpdateData(id, option, externalParameters, value);
+      onToggleEditorView(id, [option]);
+    }
+  };
+
   const onEditParameter = id => {
     const keyData = ManageIntegrationsUtils.getParameterData(id, 'key', externalParameters);
     const valueData = ManageIntegrationsUtils.getParameterData(id, 'value', externalParameters);
 
-    manageIntegrationsDispatch({ type: 'ON_EDIT_PARAMETER', payload: { id, keyData, valueData } });
+    manageIntegrationsDispatch({ type: 'TOGGLE_EDIT_VIEW', payload: { id, isEdit: true, keyData, valueData } });
   };
 
   const onFillField = (data, name) => manageIntegrationsDispatch({ type: 'ON_FILL', payload: { data, name } });
 
   const onResetParameterInput = () => {
-    manageIntegrationsDispatch({ type: 'ON_RESET_PARAMETER', payload: { key: '', value: '' } });
+    manageIntegrationsDispatch({
+      type: 'TOGGLE_EDIT_VIEW',
+      payload: { id: null, isEdit: false, keyData: '', valueData: '' }
+    });
+  };
+
+  const onSaveKeyDown = event => {
+    if (event.key === 'Enter' && !isEmpty(parameterKey) && !isEmpty(parameterValue) && !isKeyDuplicated) {
+      onSaveParameter();
+    }
   };
 
   const onSaveParameter = () => (editorView.isEditing ? onUpdateParameter() : onAddParameter());
@@ -110,6 +152,19 @@ export const ManageIntegrations = ({ designerState, manageDialogs, updatedData }
     }
   };
 
+  const onUpdateIntegration = async () => {
+    if (!isIntegrationDuplicated) {
+      try {
+        const response = await IntegrationService.update(manageIntegrationsState);
+        if (response.status >= 200 && response.status <= 299) {
+          manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
+        }
+      } catch (error) {
+        notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' });
+      }
+    } else manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
+  };
+
   const onUpdateParameter = () => {
     onResetParameterInput();
 
@@ -119,12 +174,9 @@ export const ManageIntegrations = ({ designerState, manageDialogs, updatedData }
     });
   };
 
-  const onUpdateIntegration = async () => {
-    try {
-      await IntegrationService.update(manageIntegrationsState);
-    } catch (error) {
-      console.log('error', error);
-    }
+  const onUpdateSingleParameter = (id, option, event) => {
+    ManageIntegrationsUtils.onUpdateData(id, option, externalParameters, event.target.value);
+    onToggleEditorView(id, [option]);
   };
 
   const renderDialogFooter = (
@@ -132,8 +184,8 @@ export const ManageIntegrations = ({ designerState, manageDialogs, updatedData }
       <span data-tip data-for="integrationTooltip">
         <Button
           className="p-button-rounded p-button-animated-blink"
+          disabled={isEmptyForm}
           icon="check"
-          // disabled={ManageIntegrationsUtils.checkEmptyForm(manageIntegrationsState).includes(true)}
           label={!isEmpty(updatedData) ? resources.messages['update'] : resources.messages['create']}
           onClick={() => (!isEmpty(updatedData) ? onUpdateIntegration() : onCreateIntegration())}
         />
@@ -145,14 +197,18 @@ export const ManageIntegrations = ({ designerState, manageDialogs, updatedData }
         onClick={() => manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true)}
       />
 
-      <ReactTooltip className={styles.tooltipClass} effect="solid" id="integrationTooltip" place="top">
-        {resources.messages['fcSubmitButtonDisabled']}
-      </ReactTooltip>
+      {isEmptyForm && (
+        <ReactTooltip effect="solid" id="integrationTooltip" place="top">
+          {resources.messages['fcSubmitButtonDisabled']}
+        </ReactTooltip>
+      )}
     </Fragment>
   );
 
   const renderDialogLayout = children => (
     <Dialog
+      closeOnEscape={false}
+      // closeOnEscape={isEditingParameter}
       footer={renderDialogFooter}
       header={
         !isEmpty(updatedData)
@@ -172,13 +228,13 @@ export const ManageIntegrations = ({ designerState, manageDialogs, updatedData }
       <Dropdown
         appendTo={document.body}
         inputId={`${componentName}__${option}`}
-        placeholder={resources.messages[option]}
-        onChange={event => onFillField(event.value.value, option)}
+        onChange={event => onFillField(event.value, option)}
         optionLabel="label"
         options={[
           { label: 'IMPORT', value: 'IMPORT' },
           { label: 'EXPORT', value: 'EXPORT' }
         ]}
+        placeholder={resources.messages[option]}
         value={manageIntegrationsState[option]}
       />
     </div>
@@ -187,14 +243,9 @@ export const ManageIntegrations = ({ designerState, manageDialogs, updatedData }
   const renderEditorInput = (option, parameter, id) => {
     return (
       <InputText
-        className={styles.editorInput}
-        onBlur={event => {
-          ManageIntegrationsUtils.onUpdateData(id, option, externalParameters, event.target.value);
-          onToggleEditorView(id, [option]);
-        }}
+        onBlur={event => onUpdateSingleParameter(id, option, event)}
         onChange={event => onChangeParameter(event.target.value, option, id)}
-        onFocus={() => {}}
-        onKeyDown={() => {}}
+        onKeyDown={event => onEditKeyDown(event, id, option)}
         ref={parameterRef}
         value={parameter[option]}
       />
@@ -208,7 +259,9 @@ export const ManageIntegrations = ({ designerState, manageDialogs, updatedData }
         <InputText
           id={`${componentName}__${option}`}
           onChange={event => onFillField(event.target.value, option)}
+          onKeyDown={event => onSaveKeyDown(event)}
           placeholder={resources.messages[option]}
+          ref={inputRefs[option]}
           type="search"
           value={manageIntegrationsState[option]}
         />
@@ -264,13 +317,15 @@ export const ManageIntegrations = ({ designerState, manageDialogs, updatedData }
       <div className={styles.group}>
         {renderInputLayout(['parameterKey', 'parameterValue'])}
         <span className={styles.buttonWrapper}>
-          <Button
-            className="p-button-rounded p-button-animated-blink"
-            disabled={isEmpty(manageIntegrationsState.parameterKey) || isEmpty(manageIntegrationsState.parameterValue)}
-            icon="add"
-            label={editorView.isEditing ? resources.messages['update'] : resources.messages['add']}
-            onClick={() => onSaveParameter()}
-          />
+          <span data-tip data-for="addParameterTooltip">
+            <Button
+              className="p-button-rounded p-button-animated-blink"
+              disabled={isEmpty(parameterKey) || isEmpty(parameterValue) || isKeyDuplicated}
+              icon="add"
+              label={editorView.isEditing ? resources.messages['update'] : resources.messages['add']}
+              onClick={() => onSaveParameter()}
+            />
+          </span>
           {editorView.isEditing && (
             <Button
               className="p-button-secondary p-button-rounded p-button-animated-blink"
@@ -278,6 +333,12 @@ export const ManageIntegrations = ({ designerState, manageDialogs, updatedData }
               label={resources.messages['cancel']}
               onClick={() => onResetParameterInput()}
             />
+          )}
+
+          {isKeyDuplicated && (
+            <ReactTooltip effect="solid" id="addParameterTooltip" place="top">
+              {resources.messages['parameterAlreadyExists']}
+            </ReactTooltip>
           )}
         </span>
       </div>

@@ -5,7 +5,7 @@ const parseIntegration = data => ({
   id: data.integrationId,
   isUpdatedVisible: true,
   name: data.integrationName,
-  operation: data.operation,
+  operation: { label: data.operation, value: data.operation },
   processName: ''
 });
 
@@ -16,6 +16,7 @@ const parseIntegrationParameters = parameters => {
     id: index,
     isEditorView: { key: false, value: false },
     key: parameters[item],
+    prevValue: { key: '', value: '' },
     value: parameters[item]
   }));
 };

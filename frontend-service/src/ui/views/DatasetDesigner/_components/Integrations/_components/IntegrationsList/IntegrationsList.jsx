@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -6,7 +6,6 @@ import styles from './IntegrationsList.module.scss';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
-
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Filters } from 'ui/views/_components/Filters';
@@ -18,7 +17,6 @@ import { IntegrationService } from 'core/services/Integration';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { integrationsListReducer } from './_functions/Reducers/integrationsListReducer';
 
@@ -66,7 +64,6 @@ export const IntegrationsList = ({ dataflowId, designerState, getUpdatedData, ma
       const response = await IntegrationService.deleteById(integrationListState.integrationId);
       if (response.status >= 200 && response.status <= 299) onUpdateData();
     } catch (error) {
-      console.log('error', error);
       notificationContext.add({ type: 'DELETE_INTEGRATION_ERROR' });
     } finally {
       isDeleteDialogVisible(false);
@@ -84,7 +81,6 @@ export const IntegrationsList = ({ dataflowId, designerState, getUpdatedData, ma
       integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response } });
     } catch (error) {
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
-      console.log('error', error);
     } finally {
       isLoading(false);
     }

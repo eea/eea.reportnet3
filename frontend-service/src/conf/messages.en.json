@@ -673,6 +673,7 @@
     "noIntegrationsWithSelectedParameters": "There are no integrations with the selected parameters",
     "updateIntegrationError": "Error updating integration",
     "tool": "Tool",
-    "editExternalIntegration": "Edit external integrations"
+    "editExternalIntegration": "Edit external integrations",
+    "parameterAlreadyExists": "The parameter key already exists"
   }
 }

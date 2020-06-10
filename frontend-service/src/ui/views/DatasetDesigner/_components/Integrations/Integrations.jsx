@@ -25,9 +25,10 @@ export const Integrations = ({ dataflowId, designerState, manageDialogs }) => {
           className="p-button-secondary p-button-animated-blink"
           icon={'plus'}
           label={resources.messages['createExternalIntegration']}
-          onClick={() =>
-            manageDialogs('isIntegrationListDialogVisible', false, 'isIntegrationManageDialogVisible', true)
-          }
+          onClick={() => {
+            manageDialogs('isIntegrationListDialogVisible', false, 'isIntegrationManageDialogVisible', true);
+            setUpdatedData({});
+          }}
         />
       </div>
       <Button
@@ -56,7 +57,12 @@ export const Integrations = ({ dataflowId, designerState, manageDialogs }) => {
       </Dialog>
 
       {isIntegrationManageDialogVisible && (
-        <ManageIntegrations designerState={designerState} manageDialogs={manageDialogs} updatedData={updatedData} />
+        <ManageIntegrations
+          dataflowId={dataflowId}
+          designerState={designerState}
+          manageDialogs={manageDialogs}
+          updatedData={updatedData}
+        />
       )}
     </Fragment>
   );
