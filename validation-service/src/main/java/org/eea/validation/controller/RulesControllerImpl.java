@@ -365,6 +365,7 @@ public class RulesControllerImpl implements RulesController {
    * @param fieldSchemaId the field schema id
    */
   @Override
+  @DeleteMapping("/private/deleteDatasetRuleAndIntegrityByIdFieldSchema")
   public void deleteDatasetRuleAndIntegrityByFieldSchemaId(String fieldSchemaId) {
     rulesService.deleteDatasetRuleAndIntegrityByFieldSchemaId(fieldSchemaId);
   }
@@ -375,6 +376,7 @@ public class RulesControllerImpl implements RulesController {
    * @param datasetSchemaId the dataset schema id
    */
   @Override
+  @DeleteMapping("/private/deleteDatasetRuleAndIntegrityByDatasetSchemaId")
   public void deleteDatasetRuleAndIntegrityByDatasetSchemaId(String datasetSchemaId) {
     rulesService.deleteDatasetRuleAndIntegrityByFieldSchemaId(datasetSchemaId);
 
