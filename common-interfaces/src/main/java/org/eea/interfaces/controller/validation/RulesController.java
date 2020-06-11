@@ -206,6 +206,10 @@ public interface RulesController {
       @RequestParam("fieldSchemaId") String fieldSchemaId);
 
   @DeleteMapping("/private/deleteDatasetRuleAndIntegrityByIdFieldSchema")
-  void deleteDatasetRuleAndIntegrityByIdFieldSchema(
+  void deleteDatasetRuleAndIntegrityByFieldSchemaId(
       @RequestParam("fieldSchemaId") String fieldSchemaId);
+
+  @DeleteMapping("/private/deleteDatasetRuleAndIntegrityByDatasetSchemaId")
+  void deleteDatasetRuleAndIntegrityByDatasetSchemaId(
+      @RequestParam("datasetSchemaId") String datasetSchemaId);
 }
