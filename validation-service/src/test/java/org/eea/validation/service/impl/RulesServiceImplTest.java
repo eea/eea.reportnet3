@@ -1183,7 +1183,8 @@ public class RulesServiceImplTest {
    */
   @Test
   public void deleteDatasetRuleAndIntegrityByFieldSchemaIdEmptyTest() {
-    when(integritySchemaRepository.findByOriginOrReferenceFields(Mockito.any())).thenReturn(null);
+    when(integritySchemaRepository.findByOriginOrReferenceDatasetSchemaId(Mockito.any()))
+        .thenReturn(null);
     rulesServiceImpl.deleteDatasetRuleAndIntegrityByDatasetSchemaId("5e44110d6a9e3a270ce13fac");
     Mockito.verify(integritySchemaRepository, times(1))
         .findByOriginOrReferenceDatasetSchemaId(Mockito.any());
