@@ -7,6 +7,9 @@ import { Integration } from 'core/domain/model/Integration/Integration';
 const all = async datasetSchemaId =>
   parseIntegrationsList(await apiIntegration.all(parseDatasetSchemaId(datasetSchemaId)));
 
+const allExtensionsOperations = async datasetSchemaId =>
+  parseIntegrationsOperationsExtensionsList(await apiIntegration.all(parseDatasetSchemaId(datasetSchemaId)));
+
 const create = async integration => apiIntegration.create(parseManageIntegration(integration));
 
 const deleteById = async integrationId => {
@@ -55,6 +58,17 @@ const parseIntegrationsList = integrationsDTO => {
   return;
 };
 
+const parseIntegrationsOperationsExtensionsList = integrationsDTO => {
+  console.log({ integrationsDTO });
+  if (!isNil(integrationsDTO)) {
+    const integrations = [];
+    integrationsDTO.forEach(integrationDTO => integrations.push(parseIntegrationOperationExtension(integrationDTO)));
+
+    return integrations;
+  }
+  return;
+};
+
 const parseManageIntegration = integration => ({
   description: integration.description,
   externalParameters: parseExternalParameters(integration.externalParameters),
@@ -70,6 +84,16 @@ const parseManageIntegration = integration => ({
   tool: integration.tool
 });
 
+const parseIntegrationOperationExtension = integration => ({
+  description: integration.description,
+  internalParameters: {
+    datasetSchemaId: integration.datasetSchemaId,
+    fileExtension: integration.fileExtension
+  },
+  name: integration.name,
+  tool: integration.tool
+});
+
 const update = async integration => apiIntegration.update(parseManageIntegration(integration));
 
-export const ApiIntegrationRepository = { all, create, deleteById, update };
+export const ApiIntegrationRepository = { all, allExtensionsOperations, create, deleteById, update };

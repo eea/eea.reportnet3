@@ -15,6 +15,17 @@ export const apiIntegration = {
 
     return response.data;
   },
+  allOperations: async integration => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.update({
+      url: getUrl(IntegrationConfig.allExtensionsOperations),
+      data: { integration },
+      queryString: {},
+      headers: { Authorization: `Bearer ${tokens.accessToken}` }
+    });
+
+    return response.data;
+  },
 
   create: async integration => {
     const tokens = userStorage.get();
