@@ -11,7 +11,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 /**
  * The Interface SchemasRepository.
  */
-public interface IntegritySchemaRepository extends MongoRepository<IntegritySchema, ObjectId> {
+public interface IntegritySchemaRepository
+    extends MongoRepository<IntegritySchema, ObjectId>, ExtendedIntegritySchemaRepository {
 
   /**
    * Find by id dataset schema.
