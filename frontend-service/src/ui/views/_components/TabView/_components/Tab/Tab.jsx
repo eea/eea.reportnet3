@@ -167,7 +167,7 @@ const Tab = ({
       //currentTarget gets the child's target parent
       const childs = event.currentTarget.childNodes;
       for (let i = 0; i < childs.length; i++) {
-        if (childs[i].nodeName === 'SPAN') {
+        if (childs[i].nodeName === 'SPAN' && childs[i].className === 'p-tabview-title') {
           if (!isUndefined(onTabDragAndDrop)) {
             onTabDragAndDrop(draggedTabHeader, childs[i].textContent);
             setIsDragging(false);

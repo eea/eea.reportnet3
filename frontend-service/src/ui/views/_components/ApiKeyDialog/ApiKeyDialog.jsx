@@ -15,6 +15,7 @@ const ApiKeyDialog = ({
   dataflowId,
   dataProviderId,
   isApiKeyDialogVisible,
+  isCustodian,
   manageDialogs,
   match: {
     params: { representativeId }
@@ -43,7 +44,7 @@ const ApiKeyDialog = ({
   const onGetApiKey = async () => {
     setIsKeyLoading(true);
     try {
-      const responseApiKey = await DataflowService.getApiKey(dataflowId, dataProviderId);
+      const responseApiKey = await DataflowService.getApiKey(dataflowId, dataProviderId, isCustodian);
       setApiKey(responseApiKey);
     } catch (error) {
       console.error('Error on getting Api key:', error);
@@ -56,7 +57,7 @@ const ApiKeyDialog = ({
     setIsKeyLoading(true);
 
     try {
-      const responseApiKey = await DataflowService.generateApiKey(dataflowId, dataProviderId);
+      const responseApiKey = await DataflowService.generateApiKey(dataflowId, dataProviderId, isCustodian);
       setApiKey(responseApiKey);
     } catch (error) {
       console.error('Error on generating Api key:', error);
@@ -129,9 +130,13 @@ const ApiKeyDialog = ({
                   />
                 </div>
                 <p className={styles.ids_info}>
-                  <span className={styles.ids_label}>{resources.messages['dataflow']}: </span> <b>{dataflowId} </b>
-                  <span className={styles.ids_label}>{resources.messages['apiKeyDataProviderIdLabel']}: </span>
-                  <b>{representativeId ? representativeId : dataProviderId} </b>
+                  <span className={styles.ids_label}>
+                    {resources.messages['dataflow']}: <b>{dataflowId} </b>
+                  </span>
+                  <span className={styles.ids_label} style={{ display: isCustodian ? 'none' : '' }}>
+                    {resources.messages['apiKeyDataProviderIdLabel']}:{' '}
+                    <b>{representativeId ? representativeId : dataProviderId} </b>
+                  </span>
                 </p>
               </div>
             </div>
