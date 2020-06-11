@@ -1,5 +1,9 @@
 import React, { useContext, useEffect, useRef, useState, useReducer } from 'react';
-import { isUndefined, isNull, capitalize } from 'lodash';
+
+import capitalize from 'lodash/capitalize';
+import isEmpty from 'lodash/isEmpty';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
 import { config } from 'conf';
 
@@ -63,8 +67,6 @@ const ActionsToolbar = ({
   let filterMenuRef = useRef();
   let dropdownFilterRef = useRef();
 
-  console.log('fileExtensions', fileExtensions);
-
   useEffect(() => {
     const dropdownFilter = colsSchema.map(colSchema => {
       return { label: colSchema.header, key: colSchema.field };
@@ -96,6 +98,14 @@ const ActionsToolbar = ({
       DownloadFile(exportTableData, exportTableDataName);
     }
   }, [exportTableData]);
+
+  const externalExportTypes = [];
+
+  if (!isEmpty(fileExtensions)) {
+    fileExtensions.forEach(element => {
+      element.operation === 'EXPORT' && externalExportTypes.push(element);
+    });
+  }
 
   const onExportTableData = async fileType => {
     setIsLoadingFile(true);

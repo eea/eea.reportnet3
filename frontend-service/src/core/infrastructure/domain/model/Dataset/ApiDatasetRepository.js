@@ -215,8 +215,10 @@ const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
 
 const getMetaData = async datasetId => {
   const datasetTableDataDTO = await apiDataset.getMetaData(datasetId);
+
   const dataset = new Dataset({
-    datasetSchemaName: datasetTableDataDTO.dataSetName
+    datasetSchemaName: datasetTableDataDTO.dataSetName,
+    datasetSchemaId: datasetTableDataDTO.datasetSchema
   });
   return dataset;
 };

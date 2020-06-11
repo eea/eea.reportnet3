@@ -11,7 +11,6 @@ const getDataflowMetadata = async dataflowId => {
 };
 const getDatasetMetadata = async datasetId => {
   try {
-    console.log('DatasetService.getMetaData(datasetId)', await DatasetService.getMetaData(datasetId));
     return await DatasetService.getMetaData(datasetId);
   } catch (error) {
     console.error('DatasetService.getMetaData', error);

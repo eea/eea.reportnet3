@@ -78,6 +78,7 @@ const DataViewer = withRouter(
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
+    const [datasetSchemaId, setDatasetSchemaId] = useState('');
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [editDialogVisible, setEditDialogVisible] = useState(false);
     const [fetchedData, setFetchedData] = useState([]);
@@ -229,10 +230,18 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       getFileExtensions();
+      getMetadata();
     }, []);
 
+    const getMetadata = async () => {
+      const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
+      console.log('metadata', metadata.datasetSchemaId);
+      setDatasetSchemaId(metadata.datasetSchemaId);
+      console.log('datasetSchemaId', datasetSchemaId);
+    };
+
     const getFileExtensions = async () =>
-      setFileExtensions(await IntegrationService.allExtensionsOperations('5ed4ea001bf09e00019f962f'));
+      setFileExtensions(await IntegrationService.allExtensionsOperations(datasetSchemaId));
 
     const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations) => {
       const removeSelectAllFromList = levelErrorValidations => {
