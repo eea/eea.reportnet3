@@ -804,6 +804,15 @@ const DataViewer = withRouter(
       );
     };
 
+    const renderCustomFileUploadFooter = (
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => setImportDialogVisible(false)}
+      />
+    );
+
     const filteredCount = () => {
       return (
         <span>
@@ -974,6 +983,7 @@ const DataViewer = withRouter(
           <Dialog
             className={styles.Dialog}
             dismissableMask={false}
+            footer={renderCustomFileUploadFooter}
             header={`${resources.messages['uploadDataset']}${tableName}`}
             onHide={() => setImportDialogVisible(false)}
             visible={importDialogVisible}>
