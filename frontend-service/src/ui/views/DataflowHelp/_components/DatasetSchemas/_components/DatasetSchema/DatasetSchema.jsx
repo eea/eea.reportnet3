@@ -35,6 +35,7 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
         extensionsOperations: {
           filtered: true,
           groupable: true,
+          narrow: true,
           invisible: ['datasetSchemaId'],
           names: {
             operation: 'Operation',
@@ -44,6 +45,7 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
         uniques: {
           filtered: true,
           groupable: true,
+          narrow: true,
           invisible: ['datasetSchemaId'],
           names: {
             tableName: 'Table',
