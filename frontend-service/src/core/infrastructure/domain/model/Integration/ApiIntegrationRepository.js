@@ -1,4 +1,5 @@
 import isNil from 'lodash/isNil';
+import sortBy from 'lodash/sortBy';
 
 import { apiIntegration } from 'core/infrastructure/api/domain/model/Integration/ApiIntegration';
 
@@ -48,20 +49,16 @@ const parseIntegration = integrationDTO => {
   return integration;
 };
 
-// const parseIntegrationId = integrationId => new Integration({ integrationId });
-
 const parseIntegrationsList = integrationsDTO => {
   if (!isNil(integrationsDTO)) {
     const integrations = [];
     integrationsDTO.forEach(integrationDTO => integrations.push(parseIntegration(integrationDTO)));
-
-    return integrations;
+    return sortBy(integrations, ['integrationId']);
   }
   return;
 };
 
 const parseIntegrationsOperationsExtensionsList = integrationsDTO => {
-  console.log({ integrationsDTO });
   if (!isNil(integrationsDTO)) {
     const integrations = [];
     integrationsDTO.forEach(integrationDTO => integrations.push(parseIntegrationOperationExtension(integrationDTO)));
