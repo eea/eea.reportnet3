@@ -209,21 +209,23 @@ const Dataflow = withRouter(({ history, match }) => {
       title: 'properties'
     };
 
-    if (!isEmpty(dataflowState.data)) {
-      if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']) {
-        leftSideBarContext.addModels([propertiesBtn, editBtn, manageRolesBtn]);
-      } else if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']) {
-        leftSideBarContext.addModels([propertiesBtn, manageRolesBtn]);
+    if (isEmpty(dataflowState.data)) {
+      return;
+    }
+
+    if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']) {
+      leftSideBarContext.addModels([propertiesBtn, editBtn, manageRolesBtn]);
+    } else if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']) {
+      leftSideBarContext.addModels([propertiesBtn, manageRolesBtn, apiKeyBtn]);
+    } else {
+      if (!dataflowState.isCustodian) {
+        dataflowState.data.representatives.length === 1 && isUndefined(representativeId)
+          ? leftSideBarContext.addModels([propertiesBtn, apiKeyBtn])
+          : dataflowState.data.representatives.length > 1 && isUndefined(representativeId)
+          ? leftSideBarContext.addModels([propertiesBtn])
+          : leftSideBarContext.addModels([propertiesBtn, apiKeyBtn]);
       } else {
-        if (!dataflowState.isCustodian) {
-          dataflowState.data.representatives.length === 1 && isUndefined(representativeId)
-            ? leftSideBarContext.addModels([propertiesBtn, apiKeyBtn])
-            : dataflowState.data.representatives.length > 1 && isUndefined(representativeId)
-            ? leftSideBarContext.addModels([propertiesBtn])
-            : leftSideBarContext.addModels([propertiesBtn, apiKeyBtn]);
-        } else {
-          leftSideBarContext.addModels([propertiesBtn]);
-        }
+        leftSideBarContext.addModels([propertiesBtn]);
       }
     }
   }, [dataflowState.isCustodian, dataflowState.status, representativeId]);
@@ -519,6 +521,7 @@ const Dataflow = withRouter(({ history, match }) => {
             dataflowId={dataflowId}
             dataProviderId={dataflowState.dataProviderId}
             isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
+            isCustodian={dataflowState.isCustodian}
             manageDialogs={manageDialogs}
             match={match}
           />

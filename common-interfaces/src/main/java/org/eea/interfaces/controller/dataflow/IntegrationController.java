@@ -4,9 +4,7 @@ import java.util.List;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -28,7 +26,6 @@ public interface IntegrationController {
   }
 
 
-
   /**
    * Find all integrations by criteria.
    *
@@ -38,14 +35,7 @@ public interface IntegrationController {
   @PutMapping(value = "/listIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
   List<IntegrationVO> findAllIntegrationsByCriteria(@RequestBody IntegrationVO integration);
 
-  /**
-   * Find integration by id.
-   *
-   * @param idIntegration the id integration
-   * @return the integration VO
-   */
-  @GetMapping(value = "/{idIntegration}", produces = MediaType.APPLICATION_JSON_VALUE)
-  IntegrationVO findIntegrationById(@PathVariable("idIntegration") Long idIntegration);
+
 
   /**
    * Creates the integration.
@@ -56,13 +46,14 @@ public interface IntegrationController {
   void createIntegration(@RequestBody IntegrationVO integration);
 
 
+
   /**
    * Delete integration.
    *
    * @param integrationId the integration id
    */
-  @DeleteMapping(value = "/{idIntegration}/delete")
-  void deleteIntegration(@PathVariable("idIntegration") Long integrationId);
+  @DeleteMapping(value = "/{integrationId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  void deleteIntegration(@PathVariable("integrationId") Long integrationId);
 
   /**
    * Update integration.
@@ -71,7 +62,7 @@ public interface IntegrationController {
    * @return the response entity
    */
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  ResponseEntity updateIntegration(@RequestBody IntegrationVO integration);
+  void updateIntegration(@RequestBody IntegrationVO integration);
 
 
 
