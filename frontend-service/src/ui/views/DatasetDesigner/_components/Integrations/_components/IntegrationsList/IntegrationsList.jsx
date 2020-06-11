@@ -59,7 +59,7 @@ export const IntegrationsList = ({ dataflowId, designerState, getUpdatedData, ma
 
   const isLoading = value => integrationListDispatch({ type: 'IS_LOADING', payload: value });
 
-  const onDeleteConstraint = async () => {
+  const onDeleteIntegration = async () => {
     try {
       const response = await IntegrationService.deleteById(integrationListState.integrationId);
       if (response.status >= 200 && response.status <= 299) onUpdateData();
@@ -140,7 +140,7 @@ export const IntegrationsList = ({ dataflowId, designerState, getUpdatedData, ma
           header={resources.messages['deleteIntegrationHeader']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          onConfirm={() => onDeleteConstraint(integrationListState.integrationId)}
+          onConfirm={() => onDeleteIntegration(integrationListState.integrationId)}
           onHide={() => isDeleteDialogVisible(false)}
           visible={integrationListState.isDeleteDialogVisible}>
           {resources.messages['deleteIntegrationConfirm']}

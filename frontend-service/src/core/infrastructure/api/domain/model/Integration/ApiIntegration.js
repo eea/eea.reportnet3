@@ -27,12 +27,10 @@ export const apiIntegration = {
     return response;
   },
 
-  deleteById: async integration => {
-    const integrationId = integration.integrationId;
+  deleteById: async integrationId => {
     const tokens = userStorage.get();
-    const response = await HTTPRequester.deleteWithBody({
+    const response = await HTTPRequester.delete({
       url: getUrl(IntegrationConfig.delete, { integrationId }),
-      data: integration,
       queryString: {},
       headers: { Authorization: `Bearer ${tokens.accessToken}` }
     });
