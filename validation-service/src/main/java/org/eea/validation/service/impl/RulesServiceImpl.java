@@ -273,6 +273,7 @@ public class RulesServiceImpl implements RulesService {
       IntegrityVO integrityVO = ruleVO.getIntegrityVO();
       integrityVO.setId(integrityConstraintId.toString());
       IntegritySchema integritySchema = integrityMapper.classToEntity(integrityVO);
+      integritySchema.setRuleId(rule.getRuleId());
       integritySchemaRepository.save(integritySchema);
 
       rule.setIntegrityConstraintId(integrityConstraintId);
