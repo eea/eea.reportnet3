@@ -7,8 +7,8 @@ import { config } from 'conf';
 import styles from './InfoTab.module.scss';
 
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
-// import { Dropdown } from 'ui/views/_components/Dropdown';
-import { Dropdown } from 'primereact/dropdown';
+import { Dropdown } from 'ui/views/_components/Dropdown';
+// import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -102,15 +102,15 @@ export const InfoTab = ({
           className={`${styles.field} ${styles.qcTable} formField ${printError('table')}`}>
           <label htmlFor="table">{resourcesContext.messages.table}</label>
           <Dropdown
-            id={`${componentName}__table`}
-            disabled={tableFieldOptions.disabled}
             // appendTo={document.body}
+            disabled={tableFieldOptions.disabled}
             filterPlaceholder={resourcesContext.messages.table}
-            placeholder={tableFieldOptions.placeholder}
+            id={`${componentName}__table`}
+            onChange={e => onInfoFieldChange('table', e.value)}
             optionLabel="label"
             options={creationFormState.schemaTables}
+            placeholder={tableFieldOptions.placeholder}
             value={creationFormState.candidateRule.table}
-            onChange={e => onInfoFieldChange('table', e.value)}
           />
         </div>
 
@@ -149,15 +149,15 @@ export const InfoTab = ({
 
       <div className={styles.fieldsGroup}>
         <div
-          onBlur={e => onAddToClickedFields('name')}
-          onFocus={e => onDeleteFromClickedFields('name')}
-          className={`${styles.field} ${styles.qcName} formField ${printError('name')}`}>
+          className={`${styles.field} ${styles.qcName} formField ${printError('name')}`}
+          onBlur={() => onAddToClickedFields('name')}
+          onFocus={() => onDeleteFromClickedFields('name')}>
           <label htmlFor="name">{resourcesContext.messages.ruleName}</label>
           <InputText
             id={`${componentName}__name`}
+            onChange={e => onInfoFieldChange('name', e.target.value)}
             placeholder={resourcesContext.messages.ruleName}
             value={creationFormState.candidateRule.name}
-            onChange={e => onInfoFieldChange('name', e.target.value)}
           />
         </div>
 
@@ -165,41 +165,42 @@ export const InfoTab = ({
           <label htmlFor="description">{resourcesContext.messages.description}</label>
           <InputText
             id={`${componentName}__description`}
+            onChange={e => onInfoFieldChange('description', e.target.value)}
             placeholder={resourcesContext.messages.description}
             value={creationFormState.candidateRule.description}
-            onChange={e => onInfoFieldChange('description', e.target.value)}
           />
         </div>
       </div>
 
       <div className={styles.fieldsGroup}>
         <div
-          onBlur={e => onAddToClickedFields('errorLevel')}
-          onFocus={e => onDeleteFromClickedFields('errorLevel')}
+          onBlur={() => onAddToClickedFields('errorLevel')}
+          onFocus={() => onDeleteFromClickedFields('errorLevel')}
           className={`${styles.field} ${styles.qcErrorType} formField ${printError('errorLevel')}`}>
           <label htmlFor="errorType">{resourcesContext.messages.errorType}</label>
           <Dropdown
-            id={`${componentName}__errorType`}
-            filterPlaceholder={resourcesContext.messages.errorTypePlaceholder}
-            placeholder={resourcesContext.messages.errorTypePlaceholder}
             // appendTo={document.body}
+            filterPlaceholder={resourcesContext.messages.errorTypePlaceholder}
+            id={`${componentName}__errorType`}
+            onChange={e => onInfoFieldChange('errorLevel', e.target.value)}
             optionLabel="label"
             options={config.validations.errorLevels}
-            onChange={e => onInfoFieldChange('errorLevel', e.target.value)}
+            optionValue="value"
+            placeholder={resourcesContext.messages.errorTypePlaceholder}
             value={creationFormState.candidateRule.errorLevel}
           />
         </div>
 
         <div
-          onBlur={e => onAddToClickedFields('errorMessage')}
-          onFocus={e => onDeleteFromClickedFields('errorMessage')}
+          onBlur={() => onAddToClickedFields('errorMessage')}
+          onFocus={() => onDeleteFromClickedFields('errorMessage')}
           className={`${styles.field} ${styles.qcErrorMessage} formField ${printError('errorMessage')}`}>
           <label htmlFor="errorMessage">{resourcesContext.messages.ruleErrorMessage}</label>
           <InputText
             id={`${componentName}__errorMessage`}
+            onChange={e => onInfoFieldChange('errorMessage', e.target.value)}
             placeholder={resourcesContext.messages.ruleErrorMessage}
             value={creationFormState.candidateRule.errorMessage}
-            onChange={e => onInfoFieldChange('errorMessage', e.target.value)}
           />
         </div>
       </div>
