@@ -17,7 +17,7 @@ const create = async (datasetSchemaId, validationRule) => {
     referenceId: validationRule.field.code,
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
-    thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
+    thenCondition: [validationRule.errorMessage, validationRule.errorLevel],
     type: 'FIELD',
     whenCondition: getCreationDTO(expressions)
   };
@@ -33,7 +33,7 @@ const createRowRule = async (datasetSchemaId, validationRule) => {
     referenceId: validationRule.recordSchemaId,
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
-    thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
+    thenCondition: [validationRule.errorMessage, validationRule.errorLevel],
     type: 'RECORD',
     whenCondition: getCreationComparisonDTO(expressions)
   };
@@ -71,7 +71,7 @@ const update = async (datasetId, validationRule) => {
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
     type: 'FIELD',
-    thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value]
+    thenCondition: [validationRule.errorMessage, validationRule.errorLevel]
   };
   if (!validationRule.automatic) {
     validation.whenCondition = getCreationDTO(expressions);
@@ -90,7 +90,7 @@ const updateRowRule = async (datasetId, validationRule) => {
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
     type: 'RECORD',
-    thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value]
+    thenCondition: [validationRule.errorMessage, validationRule.errorLevel]
   };
   if (!validationRule.automatic) {
     validation.whenCondition = getCreationComparisonDTO(expressions);
