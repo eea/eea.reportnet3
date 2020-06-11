@@ -640,7 +640,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
               .path(ADD_USER_TO_USER_GROUP_URL).buildAndExpand(uriParams).toString(),
           HttpMethod.PUT, request, Void.class);
     } catch (Exception e) {
-      throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED);
+      LOG_ERROR.error("Error creating permission due to reason {}", e.getMessage(), e);
+      throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED, e);
     }
 
   }
