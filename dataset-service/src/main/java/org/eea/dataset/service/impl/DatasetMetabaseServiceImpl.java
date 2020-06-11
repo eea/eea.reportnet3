@@ -724,9 +724,12 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Override
   public Long getIntegrityDatasetId(Long datasetIdOrigin, String datasetOriginSchemaId,
       String datasetReferencedSchemaId) {
-    return foreignRelationsRepository
-        .findFirstDatasetDestinationByIdDatasetOrigin_idAndIdPkAndidFkOrigin(datasetIdOrigin,
-            datasetOriginSchemaId, datasetReferencedSchemaId);
+    ForeignRelations foreignRelation =
+        foreignRelationsRepository.findFirstByIdDatasetOrigin_idAndIdPkAndIdFkOrigin(
+            datasetIdOrigin, datasetOriginSchemaId, datasetReferencedSchemaId).orElse(null);
+
+    return foreignRelation != null ? foreignRelation.getIdDatasetDestination().getId() : null;
+
   }
 
 

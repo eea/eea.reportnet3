@@ -180,8 +180,8 @@ public class UniqueValidationUtils {
   }
 
   @Transactional
-  private static void saveTableValidations(List<TableValue> tableValues) {
-    tableRepository.saveAll(tableValues);
+  private static void saveTableValidations(TableValue tableValue) {
+    tableRepository.save(tableValue);
   }
 
   /**
@@ -362,11 +362,11 @@ public class UniqueValidationUtils {
    * @param idRule the id rule
    * @return the boolean
    */
-  public static Boolean isIntegrityConstraint(DatasetValue datasetValue, String integrityId,
+  public static Boolean isIntegrityConstraint(DatasetValue datasetId, String integrityId,
       String idRule) {
     // GetValidationData
     IntegrityVO integrityVO = rulesService.getIntegrityConstraint(integrityId);
-    long datasetIdOrigin = datasetValue.getId();
+    long datasetIdOrigin = datasetId.getId();
     long datasetIdReferenced = dataSetMetabaseControllerZuul.getIntegrityDatasetId(datasetIdOrigin,
         integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
     String schemaId = integrityVO.getOriginDatasetSchemaId();
@@ -382,7 +382,6 @@ public class UniqueValidationUtils {
     List<String> notUtilizedRecords =
         recordRepository.queryExecution(mountIntegrityQuery(integrityVO.getOriginFields(),
             integrityVO.getReferencedFields(), datasetIdOrigin, datasetIdReferenced));
-    List<TableValue> tableValues = new ArrayList<>();
     if (!notUtilizedRecords.isEmpty()) {
       TableValidation tableValidation = new TableValidation();
       tableValidation.setValidation(validation);
@@ -393,7 +392,7 @@ public class UniqueValidationUtils {
               : new ArrayList<>();
       tableValidations.add(tableValidation);
       tableValue.setTableValidations(tableValidations);
-      tableValues.add(tableValue);
+      saveTableValidations(tableValue);
     }
     if (datasetIdOrigin != datasetIdReferenced) {
       schemaId = integrityVO.getReferencedDatasetSchemaId();
@@ -417,10 +416,9 @@ public class UniqueValidationUtils {
                 : new ArrayList<>();
         tableValidations.add(tableValidation);
         tableValue.setTableValidations(tableValidations);
-        tableValues.add(tableValue);
+        saveTableValidations(tableValue);
       }
     }
-    saveTableValidations(tableValues);
     return !notUtilizedRecords.isEmpty();
 
   }
