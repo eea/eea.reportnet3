@@ -359,4 +359,15 @@ public class RulesControllerImpl implements RulesController {
     rulesService.deleteRuleHighLevelLike(datasetSchemaId, fieldSchemaId);
   }
 
+  /**
+   * Delete dataset rule and integrity by id field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   */
+  @Override
+  public void deleteDatasetRuleAndIntegrityByIdFieldSchema(String fieldSchemaId) {
+    rulesService.deleteDatasetRuleAndIntegrityByIdFieldSchema(fieldSchemaId);
+  }
+
 }

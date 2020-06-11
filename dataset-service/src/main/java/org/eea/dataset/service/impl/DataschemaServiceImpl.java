@@ -691,10 +691,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     // now we find if we have any record rule related with that fieldSchema to delete it
     rulesControllerZuul.deleteRuleHighLevelLike(datasetSchemaId, fieldSchemaId);
 
+    // we call that method to find if this field have a integrity Rule, and if it has, delete the
+    // integrity and the rule at datasetLevel
+    rulesControllerZuul.deleteDatasetRuleAndIntegrityByIdFieldSchema(fieldSchemaId);
 
     return schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaId)
         .getModifiedCount() == 1;
   }
+
+
 
   /**
    * Order field schema.

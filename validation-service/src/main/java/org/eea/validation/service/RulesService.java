@@ -173,4 +173,13 @@ public interface RulesService {
    */
   IntegrityVO getIntegrityConstraint(String integrityId);
 
+
+  /**
+   * Delete dataset rule and integrity by id field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   */
+  void deleteDatasetRuleAndIntegrityByIdFieldSchema(String fieldSchemaId);
+
 }

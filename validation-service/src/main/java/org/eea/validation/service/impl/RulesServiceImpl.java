@@ -34,6 +34,7 @@ import org.eea.validation.util.KieBaseManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
@@ -70,6 +71,7 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private IntegritySchemaRepository integritySchemaRepository;
 
+  /** The integrity mapper. */
   @Autowired
   private IntegrityMapper integrityMapper;
 
@@ -696,6 +698,25 @@ public class RulesServiceImpl implements RulesService {
             .forEach(rule -> rule.setIntegrityVO(integrityMap.get(rule.getRuleId())));
       }
     }
+  }
+
+  /**
+   * Delete dataset rule and integrity by id field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   */
+  @Override
+  @Async
+  public void deleteDatasetRuleAndIntegrityByIdFieldSchema(String fieldSchemaId) {
+    List<IntegritySchema> integritySchema =
+        integritySchemaRepository.findByidFieldSchemaOrigOrDest(fieldSchemaId);
+
+    integritySchema.stream().forEach(integritySchemaData -> {
+      integritySchemaData.getId();
+      // rulesRepository.deleteRuleById(datasetSchemaId, ruleId);
+      integritySchemaRepository.deleteById(integritySchemaData.getId());
+    });
   }
 
 }
