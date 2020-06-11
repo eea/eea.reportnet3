@@ -1,6 +1,9 @@
 package org.eea.dataflow.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.transaction.Transactional;
 import org.eea.dataflow.integration.crud.factory.CrudManager;
 import org.eea.dataflow.integration.crud.factory.CrudManagerFactory;
@@ -30,6 +33,12 @@ public class IntegrationServiceImpl implements IntegrationService {
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant FILE_EXTENSION: {@value}. */
+  private static final String FILE_EXTENSION = "fileExtension";
+
+  /** The Constant DATASETSCHEMAID: {@value}. */
+  private static final String DATASETSCHEMAID = "datasetSchemaId";
 
   /**
    * Creates the integration.
@@ -91,6 +100,31 @@ public class IntegrationServiceImpl implements IntegrationService {
       throws EEAException {
     CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
     return crudManager.get(integrationVO);
+  }
+
+  /**
+   * Gets only extensions and operations.
+   *
+   * @param integrationVOList the integration VO list
+   * @return the only extensions and operations
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<IntegrationVO> getOnlyExtensionsAndOperations(List<IntegrationVO> integrationVOList) {
+    // Remove all data except operation and fileExtension
+    List<IntegrationVO> newIntegrationVOList = new ArrayList<>();
+    integrationVOList.stream().forEach(integration -> {
+      IntegrationVO integrationVOAux = new IntegrationVO();
+      Map<String, String> internalParameters = new HashMap<>();
+      internalParameters.put(FILE_EXTENSION,
+          integration.getInternalParameters().get(FILE_EXTENSION));
+      internalParameters.put(DATASETSCHEMAID,
+          integration.getInternalParameters().get(DATASETSCHEMAID));
+      integrationVOAux.setOperation(integration.getOperation());
+      integrationVOAux.setInternalParameters(internalParameters);
+      newIntegrationVOList.add(integrationVOAux);
+    });
+    return newIntegrationVOList;
   }
 
 
