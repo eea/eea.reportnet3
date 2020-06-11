@@ -59,7 +59,6 @@ const parseIntegrationsList = integrationsDTO => {
 };
 
 const parseIntegrationsOperationsExtensionsList = integrationsDTO => {
-  console.log({ integrationsDTO });
   if (!isNil(integrationsDTO)) {
     const integrations = [];
     integrationsDTO.forEach(integrationDTO => integrations.push(parseIntegrationOperationExtension(integrationDTO)));
