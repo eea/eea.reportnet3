@@ -35,7 +35,7 @@ export const getComparisonExpression = expression => {
       };
     }
     if (
-      (operatorType === 'day' || operatorType === 'month' || operatorType === 'day') &&
+      (operatorType === 'year' || operatorType === 'month' || operatorType === 'day') &&
       field2Type === 'NUMBER_INTEGER'
     ) {
       return {
