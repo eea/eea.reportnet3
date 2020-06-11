@@ -8,7 +8,9 @@ const all = async datasetSchemaId =>
   parseIntegrationsList(await apiIntegration.all(parseDatasetSchemaId(datasetSchemaId)));
 
 const allExtensionsOperations = async datasetSchemaId =>
-  parseIntegrationsOperationsExtensionsList(await apiIntegration.all(parseDatasetSchemaId(datasetSchemaId)));
+  parseIntegrationsOperationsExtensionsList(
+    await apiIntegration.allExtensionsOperations(parseDatasetSchemaId(datasetSchemaId))
+  );
 
 const create = async integration => apiIntegration.create(parseManageIntegration(integration));
 
@@ -85,13 +87,9 @@ const parseManageIntegration = integration => ({
 });
 
 const parseIntegrationOperationExtension = integration => ({
-  description: integration.description,
-  internalParameters: {
-    datasetSchemaId: integration.datasetSchemaId,
-    fileExtension: integration.fileExtension
-  },
-  name: integration.name,
-  tool: integration.tool
+  datasetSchemaId: integration.internalParameters.datasetSchemaId,
+  fileExtension: integration.internalParameters.fileExtension,
+  operation: integration.operation
 });
 
 const update = async integration => apiIntegration.update(parseManageIntegration(integration));
