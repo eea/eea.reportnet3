@@ -10,7 +10,7 @@ const all = async datasetSchemaId =>
 const create = async integration => apiIntegration.create(parseManageIntegration(integration));
 
 const deleteById = async integrationId => {
-  return await apiIntegration.deleteById(parseIntegrationId(integrationId));
+  return await apiIntegration.deleteById(integrationId);
 };
 
 const parseDatasetSchemaId = datasetSchemaId => {
@@ -43,7 +43,7 @@ const parseIntegration = integrationDTO => {
   return integration;
 };
 
-const parseIntegrationId = integrationId => new Integration({ integrationId });
+// const parseIntegrationId = integrationId => new Integration({ integrationId });
 
 const parseIntegrationsList = integrationsDTO => {
   if (!isNil(integrationsDTO)) {
