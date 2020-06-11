@@ -76,7 +76,7 @@ export const InfoTab = ({
       setFieldsDropdown(
         <Dropdown
           id={`${componentName}__field`}
-          disabled={fieldDropdownOptions.disabled}
+          disabled={creationFormState.candidateRule.automatic ? true : fieldDropdownOptions.disabled}
           filterPlaceholder={fieldDropdownOptions.placeholder}
           placeholder={fieldDropdownOptions.placeholder}
           optionLabel="label"
@@ -102,8 +102,8 @@ export const InfoTab = ({
           className={`${styles.field} ${styles.qcTable} formField ${printError('table')}`}>
           <label htmlFor="table">{resourcesContext.messages.table}</label>
           <Dropdown
-            // appendTo={document.body}
-            disabled={tableFieldOptions.disabled}
+            appendTo={document.body}
+            disabled={creationFormState.candidateRule.automatic ? true : tableFieldOptions.disabled}
             filterPlaceholder={resourcesContext.messages.table}
             id={`${componentName}__table`}
             onChange={e => onInfoFieldChange('table', e.value)}
@@ -179,7 +179,7 @@ export const InfoTab = ({
           className={`${styles.field} ${styles.qcErrorType} formField ${printError('errorLevel')}`}>
           <label htmlFor="errorType">{resourcesContext.messages.errorType}</label>
           <Dropdown
-            // appendTo={document.body}
+            appendTo={document.body}
             filterPlaceholder={resourcesContext.messages.errorTypePlaceholder}
             id={`${componentName}__errorType`}
             onChange={e => onInfoFieldChange('errorLevel', e.target.value)}
