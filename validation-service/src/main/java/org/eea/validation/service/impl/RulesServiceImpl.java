@@ -712,11 +712,12 @@ public class RulesServiceImpl implements RulesService {
     List<IntegritySchema> integritySchema =
         integritySchemaRepository.findByidFieldSchemaOrigOrDest(fieldSchemaId);
 
-    integritySchema.stream().forEach(integritySchemaData -> {
-      integritySchemaData.getId();
-      // rulesRepository.deleteRuleById(datasetSchemaId, ruleId);
-      integritySchemaRepository.deleteById(integritySchemaData.getId());
-    });
+    // integritySchema.stream().forEach(integritySchemaData -> {
+    // integritySchemaData.getId();
+    // rulesRepository.deleteRuleById(integritySchemaData.getOriginDatasetSchemaId(),
+    // integritySchemaData.getRuleId());
+    // integritySchemaRepository.deleteById(integritySchemaData.getId());
+    // });
   }
 
 }
