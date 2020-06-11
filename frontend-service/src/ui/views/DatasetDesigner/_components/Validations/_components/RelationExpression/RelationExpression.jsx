@@ -29,7 +29,6 @@ const RelationExpression = ({
   const [clickedFields, setClickedFields] = useState([]);
 
   useEffect(() => {
-    // console.log({ showRequiredFields, clickedFields });
     if (showRequiredFields) {
       const fieldsToAdd = [];
       ['originField', 'referencedField'].forEach(field => {
