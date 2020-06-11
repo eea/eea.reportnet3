@@ -213,8 +213,6 @@ const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
   return datasetTableData;
 };
 
-const getFileExtensions = async datasetSchemaId => apiDataset.getFileExtensions(datasetSchemaId);
-
 const getMetaData = async datasetId => {
   const datasetTableDataDTO = await apiDataset.getMetaData(datasetId);
   const dataset = new Dataset({
@@ -565,7 +563,6 @@ export const ApiDatasetRepository = {
   errorStatisticsById,
   exportDataById,
   exportTableDataById,
-  getFileExtensions,
   getMetaData,
   getReferencedFieldValues,
   orderFieldSchema,

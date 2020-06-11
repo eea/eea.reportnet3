@@ -50,6 +50,7 @@ import {
   useSetColumns,
   useRecordErrorPosition
 } from './_functions/Hooks/DataViewerHooks';
+import { IntegrationService } from 'core/services/Integration';
 
 const DataViewer = withRouter(
   ({
@@ -230,7 +231,8 @@ const DataViewer = withRouter(
       getFileExtensions();
     }, []);
 
-    const getFileExtensions = async () => setFileExtensions(await DatasetService.getFileExtensions());
+    const getFileExtensions = async () =>
+      setFileExtensions(await IntegrationService.allExtensionsOperations('5ed4ea001bf09e00019f962f'));
 
     const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations) => {
       const removeSelectAllFromList = levelErrorValidations => {
@@ -870,6 +872,7 @@ const DataViewer = withRouter(
           dataflowId={dataflowId}
           datasetId={datasetId}
           hasWritePermissions={hasWritePermissions}
+          fileExtensions={fileExtensions}
           isDataCollection={isDataCollection}
           isFilterValidationsActive={isFilterValidationsActive}
           isTableDeleted={isTableDeleted}

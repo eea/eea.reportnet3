@@ -26,6 +26,7 @@ const ActionsToolbar = ({
   datasetId,
   hasWritePermissions,
   isDataCollection = false,
+  fileExtensions,
   isFilterValidationsActive,
   isLoading,
   isTableDeleted,
@@ -61,6 +62,8 @@ const ActionsToolbar = ({
   let exportMenuRef = useRef();
   let filterMenuRef = useRef();
   let dropdownFilterRef = useRef();
+
+  console.log('fileExtensions', fileExtensions);
 
   useEffect(() => {
     const dropdownFilter = colsSchema.map(colSchema => {

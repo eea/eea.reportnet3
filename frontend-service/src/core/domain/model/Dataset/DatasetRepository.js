@@ -14,7 +14,6 @@ export const DatasetRepository = {
   errorStatisticsById: () => Promise.reject('[DatasetRepository#errorStatisticsById] must be implemented'),
   exportDataById: () => Promise.reject('[DatasetRepository#exportDataById] must be implemented'),
   exportTableDataById: () => Promise.reject('[DatasetRepository#exportTableDataById] must be implemented'),
-  getFileExtensions: () => Promise.reject('[DatasetRepository#getFileExtensions] must be implemented'),
   getMetaData: () => Promise.reject('[DatasetRepository#getMetaData] must be implemented'),
   getReferencedFieldValues: () => Promise.reject('[DatasetRepository#getReferencedFieldValues] must be implemented'),
   orderFieldSchema: () => Promise.reject('[DatasetRepository#orderFieldSchema] must be implemented'),

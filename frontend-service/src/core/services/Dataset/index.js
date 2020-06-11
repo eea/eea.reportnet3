@@ -15,7 +15,6 @@ import { ExportTableData } from './ExportTableData';
 import { GetData } from './GetData';
 import { GetErrorPosition } from './GetErrorPosition';
 import { GetErrors } from './GetErrors';
-import { GetFileExtensions } from './GetFileExtensions';
 import { GetMetaData } from './GetMetaData';
 import { GetReferencedFieldValues } from './GetReferencedFieldValues';
 import { GetSchema } from './GetSchema';
@@ -48,7 +47,6 @@ export const DatasetService = {
   errorStatisticsById: GetStatistics({ datasetRepository }),
   exportDataById: ExportData({ datasetRepository }),
   exportTableDataById: ExportTableData({ datasetRepository }),
-  getFileExtensions: GetFileExtensions({ datasetRepository }),
   getMetaData: GetMetaData({ datasetRepository }),
   getReferencedFieldValues: GetReferencedFieldValues({ datasetRepository }),
   orderRecordFieldDesign: OrderRecordFieldDesign({ datasetRepository }),

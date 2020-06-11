@@ -26,6 +26,7 @@ export const apiIntegration = {
       headers: { Authorization: `Bearer ${tokens.accessToken}` }
     });
 
+    console.log('response.data', response.data);
     return response.data;
   },
 
