@@ -29,7 +29,6 @@ import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepositor
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
@@ -55,7 +54,6 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
@@ -712,6 +710,23 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     }
 
     return type;
+  }
+
+
+  /**
+   * Gets the integrity dataset id.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param datasetOriginSchemaId the dataset origin schema id
+   * @param datasetReferencedSchemaId the dataset referenced schema id
+   * @return the integrity dataset id
+   */
+  @Override
+  public Long getIntegrityDatasetId(Long datasetIdOrigin, String datasetOriginSchemaId,
+      String datasetReferencedSchemaId) {
+    return foreignRelationsRepository
+        .findFirstDatasetDestinationByIdDatasetOrigin_idAndIdPkAndidFkOrigin(datasetIdOrigin,
+            datasetOriginSchemaId, datasetReferencedSchemaId);
   }
 
 

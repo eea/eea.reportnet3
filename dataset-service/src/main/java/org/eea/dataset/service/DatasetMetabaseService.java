@@ -184,4 +184,17 @@ public interface DatasetMetabaseService {
    * @return the dataset type
    */
   DatasetTypeEnum getDatasetType(Long datasetId);
+
+
+
+  /**
+   * Gets the integrity dataset id.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param datasetOriginSchemaId the dataset origin schema id
+   * @param datasetReferencedSchemaId the dataset referenced schema id
+   * @return the integrity dataset id
+   */
+  Long getIntegrityDatasetId(Long datasetIdOrigin, String datasetOriginSchemaId,
+      String datasetReferencedSchemaId);
 }
