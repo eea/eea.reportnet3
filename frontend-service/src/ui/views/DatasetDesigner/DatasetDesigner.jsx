@@ -148,7 +148,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, []);
 
   useEffect(() => {
-    if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener)
+    if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener)
       manageDialogs('validationListDialogVisible', true);
   }, [validationContext]);
 
@@ -284,7 +284,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const onHideValidationsDialog = () => {
-    if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener) {
+    if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener) {
       validationContext.onResetOpener();
     }
     manageDialogs('validationListDialogVisible', false);
