@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 
 /**
- * The Class CrudManagerFactoryImpl.
+ * The Class CrudManagerFactoryImpl. {@inheritDoc}
  */
 @Component
 public class CrudManagerFactoryImpl implements CrudManagerFactory {

@@ -148,17 +148,18 @@ public class FMEIntegrationManager extends AbstractCrudManager {
     LOG.info("New Integration created");
   }
 
+
   /**
    * Delete.
    *
-   * @param integrationVO the integration VO
+   * @param integrationId the integration id
    * @throws EEAException the EEA exception
    */
   @Override
-  public void delete(IntegrationVO integrationVO) throws EEAException {
-    if (integrationVO.getId() != null) {
-      integrationRepository.deleteById(integrationVO.getId());
-      LOG.info("Integration with Id {} deleted", integrationVO.getId());
+  public void delete(Long integrationId) throws EEAException {
+    if (integrationId != null) {
+      integrationRepository.deleteById(integrationId);
+      LOG.info("Integration with Id {} deleted", integrationId);
     } else {
       LOG_ERROR.error("IntegrationId missing");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

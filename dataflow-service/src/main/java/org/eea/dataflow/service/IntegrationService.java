@@ -20,13 +20,14 @@ public interface IntegrationService {
   void createIntegration(final IntegrationVO integrationVO) throws EEAException;
 
 
+
   /**
    * Delete integration.
    *
-   * @param integrationVO the integration VO
+   * @param integrationId the integration id
    * @throws EEAException the EEA exception
    */
-  void deleteIntegration(final IntegrationVO integrationVO) throws EEAException;
+  void deleteIntegration(final Long integrationId) throws EEAException;
 
 
   /**

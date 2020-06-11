@@ -58,12 +58,13 @@ public class IntegrationControllerImplTest {
     Mockito.verify(integrationService, times(1)).getAllIntegrationsByCriteria(Mockito.any());
   }
 
+
   /**
    * Test get integration exception.
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void testGetIntegrationException() throws EEAException {
     try {
       Mockito.doThrow(EEAException.class).when(integrationService)
@@ -71,6 +72,7 @@ public class IntegrationControllerImplTest {
       integrationControllerImpl.findAllIntegrationsByCriteria(new IntegrationVO());
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
     }
   }
 
@@ -88,18 +90,21 @@ public class IntegrationControllerImplTest {
     Mockito.verify(integrationService, times(1)).createIntegration(Mockito.any());
   }
 
+
+
   /**
    * Test create integration exception.
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void testCreateIntegrationException() throws EEAException {
     try {
       Mockito.doThrow(EEAException.class).when(integrationService).createIntegration(Mockito.any());
       integrationControllerImpl.createIntegration(new IntegrationVO());
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
     }
   }
 
@@ -123,13 +128,14 @@ public class IntegrationControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void testUpdateIntegrationException() throws EEAException {
     try {
       Mockito.doThrow(EEAException.class).when(integrationService).updateIntegration(Mockito.any());
       integrationControllerImpl.updateIntegration(new IntegrationVO());
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
     }
   }
 
@@ -140,9 +146,8 @@ public class IntegrationControllerImplTest {
    */
   @Test
   public void testDeleteIntegration() throws EEAException {
-    IntegrationVO integrationVO = new IntegrationVO();
-    integrationVO.setId(1L);
-    integrationControllerImpl.deleteIntegration(integrationVO);
+
+    integrationControllerImpl.deleteIntegration(1L);
     Mockito.verify(integrationService, times(1)).deleteIntegration(Mockito.any());
   }
 
@@ -152,13 +157,14 @@ public class IntegrationControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void testDeleteIntegrationException() throws EEAException {
     try {
       Mockito.doThrow(EEAException.class).when(integrationService).deleteIntegration(Mockito.any());
-      integrationControllerImpl.deleteIntegration(new IntegrationVO());
+      integrationControllerImpl.deleteIntegration(null);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
     }
   }
 

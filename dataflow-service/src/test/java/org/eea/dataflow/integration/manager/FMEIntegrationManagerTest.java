@@ -97,18 +97,20 @@ public class FMEIntegrationManagerTest {
         Mockito.any());
   }
 
+
   /**
    * Test get integration exception.
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void testGetIntegrationException() throws EEAException {
     try {
       IntegrationVO integrationVO = new IntegrationVO();
       integrationManager.get(integrationVO);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
     }
   }
 
@@ -132,13 +134,14 @@ public class FMEIntegrationManagerTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void testCreateException() throws EEAException {
     try {
       IntegrationVO integrationVO = new IntegrationVO();
       integrationManager.create(integrationVO);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
     }
   }
 
@@ -171,7 +174,7 @@ public class FMEIntegrationManagerTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void testUpdateIntegrationException2() throws EEAException {
     try {
       IntegrationVO integrationVO = new IntegrationVO();
@@ -184,6 +187,7 @@ public class FMEIntegrationManagerTest {
     } catch (ResponseStatusException e) {
       assertEquals("Parameters incorrect", e.getReason());
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
     }
   }
 
@@ -192,7 +196,7 @@ public class FMEIntegrationManagerTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = EEAException.class)
   public void testUpdateIntegrationException1() throws EEAException {
     try {
       IntegrationVO integrationVO = new IntegrationVO();
@@ -205,6 +209,7 @@ public class FMEIntegrationManagerTest {
       integrationManager.update(integrationVO);
     } catch (EEAException e) {
       assertEquals("Integration not found", e.getMessage());
+      throw e;
     }
   }
 
@@ -215,9 +220,7 @@ public class FMEIntegrationManagerTest {
    */
   @Test
   public void testDeleteIntegration() throws EEAException {
-    IntegrationVO integrationVO = new IntegrationVO();
-    integrationVO.setId(1L);
-    integrationManager.delete(integrationVO);
+    integrationManager.delete(1L);
     Mockito.verify(integrationRepository, times(1)).deleteById(Mockito.any());
   }
 
@@ -226,13 +229,13 @@ public class FMEIntegrationManagerTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void testDeleteException() throws EEAException {
     try {
-      IntegrationVO integrationVO = new IntegrationVO();
-      integrationManager.delete(integrationVO);
+      integrationManager.delete(null);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
     }
   }
 
