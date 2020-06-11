@@ -5,7 +5,6 @@ import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiIntegration = {
   all: async integration => {
-    console.log('ALL');
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
       url: getUrl(IntegrationConfig.all),
@@ -17,7 +16,6 @@ export const apiIntegration = {
     return response.data;
   },
   allExtensionsOperations: async integration => {
-    console.log('ALL EXTENSIONS');
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
       url: getUrl(IntegrationConfig.allExtensionsOperations),
