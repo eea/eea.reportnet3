@@ -197,4 +197,17 @@ public interface DatasetMetabaseService {
    */
   Long getIntegrityDatasetId(Long datasetIdOrigin, String datasetOriginSchemaId,
       String datasetReferencedSchemaId);
+
+
+  /**
+   * Creates the foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   * @return the object
+   */
+  void createForeignRelationship(long datasetOriginId, long datasetReferencedId,
+      String originDatasetSchemaId, String referencedDatasetSchemaId);
 }

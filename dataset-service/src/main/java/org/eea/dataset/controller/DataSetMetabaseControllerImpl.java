@@ -240,4 +240,16 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
         datasetReferencedSchemaId);
   }
 
+  @Override
+  @PostMapping("/private/createForeignRelationship")
+  public void createDatasetForeignRelationship(
+      @RequestParam("datasetOriginId") final long datasetOriginId,
+      @RequestParam("datasetReferencedId") final long datasetReferencedId,
+      @RequestParam("originDatasetSchemaId") final String originDatasetSchemaId,
+      @RequestParam("referencedDatasetSchemaId") final String referencedDatasetSchemaId) {
+    datasetMetabaseService.createForeignRelationship(datasetOriginId, datasetReferencedId,
+        originDatasetSchemaId, referencedDatasetSchemaId);
+
+  }
+
 }

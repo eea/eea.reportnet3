@@ -730,4 +730,28 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   }
 
 
+  /**
+   * Creates the foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
+  @Override
+  public void createForeignRelationship(long datasetOriginId, long datasetReferencedId,
+      String originDatasetSchemaId, String referencedDatasetSchemaId) {
+    ForeignRelations foreignRelations = new ForeignRelations();
+    DataSetMetabase dataSetReferencedMetabase = new DataSetMetabase();
+    dataSetReferencedMetabase.setId(datasetReferencedId);
+    foreignRelations.setIdDatasetDestination(dataSetReferencedMetabase);
+    DataSetMetabase dataSetOriginMetabase = new DataSetMetabase();
+    dataSetOriginMetabase.setId(datasetOriginId);
+    foreignRelations.setIdDatasetOrigin(dataSetOriginMetabase);
+    foreignRelations.setIdPk(originDatasetSchemaId);
+    foreignRelations.setIdFkOrigin(referencedDatasetSchemaId);
+    foreignRelationsRepository.save(foreignRelations);
+
+  }
+
 }

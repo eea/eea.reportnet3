@@ -79,6 +79,7 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private KieBaseManager kieBaseManager;
 
+
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
 
@@ -279,6 +280,8 @@ public class RulesServiceImpl implements RulesService {
       rule.setIntegrityConstraintId(integrityConstraintId);
       rule.setWhenCondition("isIntegrityConstraint(datasetId,'" + integrityConstraintId.toString()
           + "','" + rule.getRuleId().toString() + "')");
+      dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetId, datasetId,
+          integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
     }
     validateRule(rule);
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
