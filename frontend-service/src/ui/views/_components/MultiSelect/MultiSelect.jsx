@@ -495,7 +495,9 @@ export class MultiSelect extends Component {
     });
 
     return this.props.hasSelectedItemsLabel ? (
-      <div className="p-multiselect-label-container" style={{ position: 'absolute', top: '0', paddingTop: '0.1rem' }}>
+      <div
+        className="p-multiselect-label-container"
+        style={{ position: 'absolute', top: '0', paddingTop: '0.1rem', width: '100%' }}>
         <label className={className}>{content || this.props.placeholder || 'empty'}</label>
       </div>
     ) : null;
