@@ -8,7 +8,7 @@ export const apiIntegration = {
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
       url: getUrl(IntegrationConfig.all),
-      data: { integration },
+      data: integration,
       queryString: {},
       headers: { Authorization: `Bearer ${tokens.accessToken}` }
     });
