@@ -80,6 +80,7 @@ const DataViewer = withRouter(
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [editDialogVisible, setEditDialogVisible] = useState(false);
     const [fetchedData, setFetchedData] = useState([]);
+    const [fileExtensions, setFileExtensions] = useState({});
     const [importDialogVisible, setImportDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
     const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
@@ -224,6 +225,12 @@ const DataViewer = withRouter(
     useEffect(() => {
       dispatchRecords({ type: 'IS_RECORD_DELETED', payload: false });
     }, [confirmDeleteVisible]);
+
+    useEffect(() => {
+      getFileExtensions();
+    }, []);
+
+    const getFileExtensions = async () => setFileExtensions(await DatasetService.getFileExtensions());
 
     const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations) => {
       const removeSelectAllFromList = levelErrorValidations => {

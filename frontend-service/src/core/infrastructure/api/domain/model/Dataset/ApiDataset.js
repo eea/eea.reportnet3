@@ -275,6 +275,16 @@ export const apiDataset = {
     });
     return response.data;
   },
+  getFileExtensions: async datasetSchemaId => {
+    // const tokens = userStorage.get();
+    // const response = await HTTPRequester.get({
+    //   url: getUrl(DatasetConfig.getFileExtensions, { datasetSchemaId }),
+    //   queryString: {},
+    //   headers: { Authorization: `Bearer ${tokens.accessToken}`, 'Content-Type': 'application/octet-stream' }
+    // });
+    const response = { data: { import: ['.json', '.csv', '.txt'], export: ['.json', '.csv', '.txt'] }, status: 200 };
+    return response.data;
+  },
   getMetaData: async datasetId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
