@@ -701,23 +701,61 @@ public class RulesServiceImpl implements RulesService {
   }
 
   /**
-   * Delete dataset rule and integrity by id field schema.
+   * Delete dataset rule and integrity by id field schema. We use that method to delete the
+   * dependences of integrity in others dataset or the same dataset
    *
-   * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaId the field schema id
    */
   @Override
   @Async
-  public void deleteDatasetRuleAndIntegrityByIdFieldSchema(String fieldSchemaId) {
+  public void deleteDatasetRuleAndIntegrityByFieldSchemaId(String fieldSchemaId) {
+    // we find the values salved in database by origin or referenced in integritySchema
     List<IntegritySchema> integritySchema =
-        integritySchemaRepository.findByidFieldSchemaOrigOrDest(fieldSchemaId);
+        integritySchemaRepository.findByOriginOrReferenceFields(new ObjectId(fieldSchemaId));
+    // we delete the integrity object and delete the rules associated to the originDataset
+    if (null != integritySchema && !integritySchema.isEmpty()) {
+      integritySchema.stream().forEach(integritySchemaData -> {
+        // we delete the rule associate with that field
+        rulesRepository.deleteRuleById(integritySchemaData.getOriginDatasetSchemaId(),
+            integritySchemaData.getRuleId());
 
-    // integritySchema.stream().forEach(integritySchemaData -> {
-    // integritySchemaData.getId();
-    // rulesRepository.deleteRuleById(integritySchemaData.getOriginDatasetSchemaId(),
-    // integritySchemaData.getRuleId());
-    // integritySchemaRepository.deleteById(integritySchemaData.getId());
-    // });
+        // we delete the integrity rule in mongodb in integrity collection
+        integritySchemaRepository.deleteById(integritySchemaData.getId());
+        LOG.info(
+            "Rule integrity associated to the fieldschemaId {} and the integrity data with id {} , in the datasetOrigin id {} was deleted!",
+            fieldSchemaId, integritySchemaData.getId(),
+            integritySchemaData.getOriginDatasetSchemaId());
+      });
+
+    }
+  }
+
+  /**
+   * Delete dataset rule and integrity by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   */
+  @Override
+  @Async
+  public void deleteDatasetRuleAndIntegrityByDatasetSchemaId(String datasetSchemaId) {
+    // we find the values salved in database by origin or referenced in integritySchema
+    List<IntegritySchema> integritySchema = integritySchemaRepository
+        .findByOriginOrReferenceDatasetSchemaId(new ObjectId(datasetSchemaId));
+
+    if (null != integritySchema && !integritySchema.isEmpty()) {
+      integritySchema.stream().forEach(integritySchemaData -> {
+        // we delete the rule associate with that field
+        rulesRepository.deleteRuleById(integritySchemaData.getOriginDatasetSchemaId(),
+            integritySchemaData.getRuleId());
+        // we delete the integrity rule in mongodb in integrity collection
+        integritySchemaRepository.deleteById(integritySchemaData.getId());
+        LOG.info(
+            "Rule integrity associated to the datasetId {} and the integrity data with id {} , in the datasetOrigin id {} was deleted!",
+            datasetSchemaId, integritySchemaData.getId(),
+            integritySchemaData.getOriginDatasetSchemaId());
+      });
+
+    }
   }
 
 }
