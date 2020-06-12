@@ -9,7 +9,10 @@ public enum IntegrationToolTypeEnum {
 
 
   /** The fme. */
-  FME("FME");
+  FME("FME"),
+
+  /** The other. */
+  OTHER("OTHER");
 
 
   /** The value. */

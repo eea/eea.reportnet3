@@ -54,6 +54,9 @@ public class RuleVO {
   /** The short code. */
   private String shortCode;
 
+  /** The integrity VO. */
+  private IntegrityVO integrityVO;
+
   /**
    * Hash code.
    *
@@ -62,7 +65,7 @@ public class RuleVO {
   @Override
   public int hashCode() {
     return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, salience,
-        activationGroup, type, whenCondition, thenCondition, description, shortCode);
+        activationGroup, type, whenCondition, thenCondition, description, shortCode, integrityVO);
   }
 
   /**
@@ -87,6 +90,7 @@ public class RuleVO {
         && Objects.equals(type, other.type) && Objects.equals(thenCondition, other.thenCondition)
         && Objects.equals(whenCondition, other.whenCondition)
         && Objects.equals(description, other.description)
-        && Objects.equals(shortCode, other.shortCode);
+        && Objects.equals(shortCode, other.shortCode)
+        && Objects.equals(integrityVO, other.integrityVO);
   }
 }
