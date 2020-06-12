@@ -6,11 +6,13 @@ import java.util.Iterator;
 import java.util.List;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
+import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValidation;
@@ -50,13 +52,14 @@ public class UniqueValidationUtils {
    */
   private static DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
-
   /** The table repository. */
   private static TableRepository tableRepository;
 
-
   /** The rules service. */
   private static RulesService rulesService;
+
+  /** The data set metabase controller zuul. */
+  private static DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /**
    * Sets the rules repository.
@@ -116,6 +119,17 @@ public class UniqueValidationUtils {
   }
 
   /**
+   * Sets the data set metabase controller zuul.
+   *
+   * @param dataSetMetabaseControllerZuul the new data set metabase controller zuul
+   */
+  @Autowired
+  private void setDataSetMetabaseControllerZuul(
+      DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul) {
+    UniqueValidationUtils.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
+  }
+
+  /**
    * Creates the validation.
    *
    * @param idRule the id rule
@@ -166,8 +180,8 @@ public class UniqueValidationUtils {
   }
 
   @Transactional
-  private static void saveTableValidations(List<TableValue> tableValues) {
-    tableRepository.saveAll(tableValues);
+  private static void saveTableValidations(TableValue tableValue) {
+    tableRepository.save(tableValue);
   }
 
   /**
@@ -264,7 +278,7 @@ public class UniqueValidationUtils {
       }
     }
     stringQuery.append(
-        " from dataset_" + datasetOriginId + ".record_value rv), with table_2 as(select rv.id, ");
+        " from dataset_" + datasetOriginId + ".record_value rv), table_2 as(select rv.id, ");
     iterator = referencedFields.iterator();
     i = 1;
     while (iterator.hasNext()) {
@@ -284,7 +298,7 @@ public class UniqueValidationUtils {
     iterator.next();
     while (iterator.hasNext()) {
       iterator.next();
-      stringQuery.append("and t1.column_" + i + " = t2.column_ " + i);
+      stringQuery.append(" and t1.column_" + i + " = t2.column_" + i);
       i++;
     }
     stringQuery.append(" where t1.column_1 is null and t2.column_1 is not null ;");
@@ -348,26 +362,52 @@ public class UniqueValidationUtils {
    * @param idRule the id rule
    * @return the boolean
    */
-  public static Boolean isIntegrityConstraint(String integrityId, String idRule) {
+  public static Boolean isIntegrityConstraint(DatasetValue datasetId, String integrityId,
+      String idRule) {
     // GetValidationData
     IntegrityVO integrityVO = rulesService.getIntegrityConstraint(integrityId);
-    if (integrityVO != null) {
-      String schemaId =
-          dataSetSchemaControllerZuul.getDatasetSchemaId(integrityVO.getOriginDatasetId());
+    long datasetIdOrigin = datasetId.getId();
+    long datasetIdReferenced = dataSetMetabaseControllerZuul.getIntegrityDatasetId(datasetIdOrigin,
+        integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
+    String schemaId = integrityVO.getOriginDatasetSchemaId();
 
-      DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
+    DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
 
-      TableSchema tableSchema =
-          getTableSchemaFromIdFieldSchema(datasetSchema, integrityVO.getOriginFields().get(0));
+    TableSchema tableSchema =
+        getTableSchemaFromIdFieldSchema(datasetSchema, integrityVO.getOriginFields().get(0));
 
-      Validation validation = createValidation(idRule, schemaId, tableSchema.getNameTableSchema(),
-          EntityTypeEnum.TABLE);
+    Validation validation =
+        createValidation(idRule, schemaId, tableSchema.getNameTableSchema(), EntityTypeEnum.TABLE);
 
-      List<RecordValue> notUtilizedRecords = recordRepository.queryExecutionRecord(
-          mountIntegrityQuery(integrityVO.getOriginFields(), integrityVO.getReferencedFields(),
-              integrityVO.getOriginDatasetId(), integrityVO.getReferencedDatasetId()));
-      List<TableValue> tableValues = new ArrayList<>();
-      if (notUtilizedRecords.isEmpty()) {
+    List<String> notUtilizedRecords =
+        recordRepository.queryExecution(mountIntegrityQuery(integrityVO.getOriginFields(),
+            integrityVO.getReferencedFields(), datasetIdOrigin, datasetIdReferenced));
+    if (!notUtilizedRecords.isEmpty()) {
+      TableValidation tableValidation = new TableValidation();
+      tableValidation.setValidation(validation);
+      TableValue tableValue =
+          tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
+      List<TableValidation> tableValidations =
+          tableValue.getTableValidations() != null ? tableValue.getTableValidations()
+              : new ArrayList<>();
+      tableValidation.setTableValue(tableValue);
+      tableValidations.add(tableValidation);
+      tableValue.setTableValidations(tableValidations);
+      saveTableValidations(tableValue);
+    }
+    if (datasetIdOrigin != datasetIdReferenced) {
+      schemaId = integrityVO.getReferencedDatasetSchemaId();
+      datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
+    }
+    if (Boolean.TRUE.equals(integrityVO.getIsDoubleReferenced())) {
+      tableSchema =
+          getTableSchemaFromIdFieldSchema(datasetSchema, integrityVO.getReferencedFields().get(0));
+      notUtilizedRecords =
+          recordRepository.queryExecution(mountIntegrityQuery(integrityVO.getReferencedFields(),
+              integrityVO.getOriginFields(), datasetIdOrigin, datasetIdReferenced));
+      if (!notUtilizedRecords.isEmpty()) {
+        validation = createValidation(idRule, schemaId, tableSchema.getNameTableSchema(),
+            EntityTypeEnum.TABLE);
         TableValidation tableValidation = new TableValidation();
         tableValidation.setValidation(validation);
         TableValue tableValue =
@@ -375,41 +415,14 @@ public class UniqueValidationUtils {
         List<TableValidation> tableValidations =
             tableValue.getTableValidations() != null ? tableValue.getTableValidations()
                 : new ArrayList<>();
+        tableValidation.setTableValue(tableValue);
         tableValidations.add(tableValidation);
         tableValue.setTableValidations(tableValidations);
-        tableValues.add(tableValue);
+        saveTableValidations(tableValue);
       }
-      if (!(integrityVO.getOriginDatasetId().equals(integrityVO.getReferencedDatasetId()))) {
-        schemaId =
-            dataSetSchemaControllerZuul.getDatasetSchemaId(integrityVO.getReferencedDatasetId());
-        datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
-      }
-      if (Boolean.TRUE.equals(integrityVO.getIsDoubleReferenced())) {
-        tableSchema = getTableSchemaFromIdFieldSchema(datasetSchema,
-            integrityVO.getReferencedFields().get(0));
-        notUtilizedRecords = recordRepository.queryExecutionRecord(
-            mountIntegrityQuery(integrityVO.getReferencedFields(), integrityVO.getOriginFields(),
-                integrityVO.getOriginDatasetId(), integrityVO.getReferencedDatasetId()));
-        if (notUtilizedRecords.isEmpty()) {
-          validation = createValidation(idRule, schemaId, tableSchema.getNameTableSchema(),
-              EntityTypeEnum.TABLE);
-          TableValidation tableValidation = new TableValidation();
-          tableValidation.setValidation(validation);
-          TableValue tableValue =
-              tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
-          List<TableValidation> tableValidations =
-              tableValue.getTableValidations() != null ? tableValue.getTableValidations()
-                  : new ArrayList<>();
-          tableValidations.add(tableValidation);
-          tableValue.setTableValidations(tableValidations);
-          tableValues.add(tableValue);
-        }
-      }
-      saveTableValidations(tableValues);
-      return !notUtilizedRecords.isEmpty();
     }
+    return !notUtilizedRecords.isEmpty();
 
-    return false;
   }
 
 }

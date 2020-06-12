@@ -267,6 +267,9 @@ public class RuleExpressionVO {
     rule.params = new ArrayList<>();
     int length = expression.length();
 
+    if (expression.contains("isIntegrityConstraint")) {
+      return length;
+    }
     loop: while (index < length) {
       switch (expression.charAt(index)) {
         case '0':
@@ -300,9 +303,6 @@ public class RuleExpressionVO {
         default:
           break loop;
       }
-    }
-    if (expression.contains("isIntegrityConstraint")) {
-      return length;
     }
     throw new IllegalStateException("readParams - Invalid expression: " + expression);
 
@@ -457,6 +457,11 @@ public class RuleExpressionVO {
 
     if (superInputType.equals(JavaType.DATE)) {
       return string.matches("[0-9]{4}-(?:0[0-9]|1[0-2])-(?:[0-2][0-9]|3[01])");
+    }
+
+    if (superInputType.equalsIgnoreCase("String")
+        && dataTypeMap.get(string).getJavaType().equalsIgnoreCase("Number")) {
+      return true;
     }
 
     return superInputType.equals(JavaType.STRING);

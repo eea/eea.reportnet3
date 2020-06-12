@@ -515,9 +515,26 @@ public class RulesControllerImplTest {
    * Delete rule high level like.
    */
   @Test
-  public void deleteRuleHighLevelLike() {
+  public void deleteRuleHighLevelLikeTest() {
     rulesControllerImpl.deleteRuleHighLevelLike("5e44110d6a9e3a270ce13fac",
         "5e44110d6a9e3a270ce13fac");
     Mockito.verify(rulesService, times(1)).deleteRuleHighLevelLike(Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Delete dataset rule and integrity by field schema id test.
+   */
+  @Test
+  public void deleteDatasetRuleAndIntegrityByFieldSchemaIdTest() {
+    rulesControllerImpl.deleteDatasetRuleAndIntegrityByFieldSchemaId(Mockito.any());
+    Mockito.verify(rulesService, times(1))
+        .deleteDatasetRuleAndIntegrityByFieldSchemaId(Mockito.any());
+  }
+
+  @Test
+  public void deleteDatasetRuleAndIntegrityByDatasetSchemaIdTest() {
+    rulesControllerImpl.deleteDatasetRuleAndIntegrityByDatasetSchemaId(Mockito.any());
+    Mockito.verify(rulesService, times(1))
+        .deleteDatasetRuleAndIntegrityByFieldSchemaId(Mockito.any());
   }
 }
