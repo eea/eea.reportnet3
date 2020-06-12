@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.eea.dataset.controller;
 
 import java.util.Arrays;
@@ -240,6 +243,14 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
         datasetReferencedSchemaId);
   }
 
+  /**
+   * Creates the dataset foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
   @Override
   @PostMapping("/private/createForeignRelationship")
   public void createDatasetForeignRelationship(
@@ -250,6 +261,22 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     datasetMetabaseService.createForeignRelationship(datasetOriginId, datasetReferencedId,
         originDatasetSchemaId, referencedDatasetSchemaId);
 
+  }
+
+  /**
+   * Update dataset foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
+  @Override
+  @PutMapping("/private/updateForeignRelationship")
+  public void updateDatasetForeignRelationship(long datasetOriginId, long datasetReferencedId,
+      String originDatasetSchemaId, String referencedDatasetSchemaId) {
+    datasetMetabaseService.updateForeignRelationship(datasetOriginId, datasetReferencedId,
+        originDatasetSchemaId, referencedDatasetSchemaId);
   }
 
 }

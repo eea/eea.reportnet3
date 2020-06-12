@@ -512,16 +512,18 @@ public class RulesServiceImpl implements RulesService {
       integrityVO.setId(integrityConstraintId.toString());
       IntegritySchema integritySchema = integrityMapper.classToEntity(integrityVO);
       integritySchema.setRuleId(rule.getRuleId());
-      
+      integritySchema.setId(new ObjectId(ruleVO.getIntegrityVO().getId()));
+
       integritySchemaRepository.delete(integritySchema);
       integritySchemaRepository.save(integritySchema);
-      
+
       rule.setVerified(true);
       rule.setEnabled(ruleVO.isEnabled());
       rule.setIntegrityConstraintId(integrityConstraintId);
       rule.setWhenCondition("isIntegrityConstraint(datasetId,'" + integrityConstraintId.toString()
           + "','" + rule.getRuleId().toString() + "')");
-      dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetId, datasetId,
+
+      dataSetMetabaseControllerZuul.updateDatasetForeignRelationship(datasetId, datasetId,
           integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
     }
     validateRule(rule);

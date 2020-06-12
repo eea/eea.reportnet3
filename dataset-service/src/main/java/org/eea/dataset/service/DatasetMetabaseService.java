@@ -210,4 +210,15 @@ public interface DatasetMetabaseService {
    */
   void createForeignRelationship(long datasetOriginId, long datasetReferencedId,
       String originDatasetSchemaId, String referencedDatasetSchemaId);
+
+  /**
+   * Update foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
+  void updateForeignRelationship(long datasetOriginId, long datasetReferencedId,
+      String originDatasetSchemaId, String referencedDatasetSchemaId);
 }

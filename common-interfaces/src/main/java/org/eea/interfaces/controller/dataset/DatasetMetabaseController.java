@@ -132,9 +132,32 @@ public interface DatasetMetabaseController {
       @RequestParam(value = "datasetOriginSchemaId") String datasetOriginSchemaId,
       @RequestParam(value = "datasetReferencedSchemaId") String datasetReferencedSchemaId);
 
+  /**
+   * Creates the dataset foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
   @PostMapping("/private/createForeignRelationship")
   void createDatasetForeignRelationship(@RequestParam("datasetOriginId") final long datasetOriginId,
       @RequestParam("datasetReferencedId") final long datasetReferencedId,
       @RequestParam("originDatasetSchemaId") final String originDatasetSchemaId,
       @RequestParam("referencedDatasetSchemaId") final String referencedDatasetSchemaId);
+
+  /**
+   * Update dataset foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
+  @PutMapping("/private/updateForeignRelationship")
+  void updateDatasetForeignRelationship(@RequestParam("datasetOriginId") final long datasetOriginId,
+      @RequestParam("datasetReferencedId") final long datasetReferencedId,
+      @RequestParam("originDatasetSchemaId") final String originDatasetSchemaId,
+      @RequestParam("referencedDatasetSchemaId") final String referencedDatasetSchemaId);
+
 }
