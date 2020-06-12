@@ -127,3 +127,9 @@
   opacity: 0;
   overflow: hidden;
 }
+
+.invalidExtensionMsg .closeInvalidMessageIcon {
+  cursor: pointer;
+  font-size: 0.7rem;
+  margin: 0 0 0.75rem 0.25rem;
+}

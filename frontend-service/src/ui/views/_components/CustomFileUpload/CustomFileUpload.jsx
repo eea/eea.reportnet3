@@ -24,7 +24,7 @@ export class CustomFileUpload extends Component {
     fileLimit: 1,
     id: null,
     infoTooltip: '',
-    invalidExtensionTooltip: '',
+    invalidExtensionMessage: '',
     invalidFileSizeMessageDetail: 'maximum upload size is {0}.',
     invalidFileSizeMessageSummary: '{0}: Invalid file size, ',
     maxFileSize: null,
@@ -55,7 +55,7 @@ export class CustomFileUpload extends Component {
     fileLimit: PropTypes.number,
     id: PropTypes.string,
     infoTooltip: PropTypes.string,
-    invalidExtensionTooltip: PropTypes.string,
+    invalidExtensionMessage: PropTypes.string,
     invalidFileSizeMessageDetail: PropTypes.string,
     invalidFileSizeMessageSummary: PropTypes.string,
     maxFileSize: PropTypes.number,
@@ -424,7 +424,7 @@ export class CustomFileUpload extends Component {
 
           {this.checkValidExtension() && (
             <ReactTooltip effect="solid" id="inValidExtension" place="top">
-              {this.props.invalidExtensionTooltip}
+              {this.props.invalidExtensionMessage}
             </ReactTooltip>
           )}
         </Fragment>
@@ -469,7 +469,11 @@ export class CustomFileUpload extends Component {
           </div>
         </div>
         <p className={`${styles.invalidExtensionMsg} ${this.state.isValid ? styles.isValid : undefined}`}>
-          {this.props.invalidExtensionTooltip}
+          {this.props.invalidExtensionMessage}
+          <span
+            className={`pi pi-times ${styles.closeInvalidMessageIcon}`}
+            onClick={() => this.setState({ isValid: true })}
+          />
         </p>
       </Fragment>
     );

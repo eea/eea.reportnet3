@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
+
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -234,7 +235,7 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       if (datasetSchemaId) getFileExtensions();
-    }, [datasetSchemaId]);
+    }, [datasetSchemaId, importDialogVisible]);
 
     const getMetadata = async () => {
       try {
@@ -250,8 +251,7 @@ const DataViewer = withRouter(
         const response = await IntegrationService.allExtensionsOperations(datasetSchemaId);
         setExtensionsOperationsList(DataViewerUtils.groupOperations('operation', response));
       } catch (error) {
-        const schemaError = { type: error.message };
-        notificationContext.add(schemaError);
+        notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
       }
     };
 
@@ -1030,7 +1030,7 @@ const DataViewer = withRouter(
               infoTooltip={infoExtensionsTooltip}
               mode="advanced"
               multiple={false}
-              invalidExtensionTooltip={resources.messages['invalidExtensionFile']}
+              invalidExtensionMessage={resources.messages['invalidExtensionFile']}
               name="file"
               onUpload={onUpload}
               url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.loadDataTable, {
