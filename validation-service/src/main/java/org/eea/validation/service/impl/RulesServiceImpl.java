@@ -506,8 +506,25 @@ public class RulesServiceImpl implements RulesService {
     rule.setActivationGroup(null);
     rule.setVerified(null);
 
+    if (EntityTypeEnum.DATASET.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
+      ObjectId integrityConstraintId = new ObjectId();
+      IntegrityVO integrityVO = ruleVO.getIntegrityVO();
+      integrityVO.setId(integrityConstraintId.toString());
+      IntegritySchema integritySchema = integrityMapper.classToEntity(integrityVO);
+      integritySchema.setRuleId(rule.getRuleId());
+      
+      integritySchemaRepository.delete(integritySchema);
+      integritySchemaRepository.save(integritySchema);
+      
+      rule.setVerified(true);
+      rule.setEnabled(ruleVO.isEnabled());
+      rule.setIntegrityConstraintId(integrityConstraintId);
+      rule.setWhenCondition("isIntegrityConstraint(datasetId,'" + integrityConstraintId.toString()
+          + "','" + rule.getRuleId().toString() + "')");
+      dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetId, datasetId,
+          integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
+    }
     validateRule(rule);
-
     if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_UPDATING_RULE);
     }
