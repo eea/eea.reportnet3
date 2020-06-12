@@ -1,6 +1,7 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './ExpressionSelector.module.scss';
 
@@ -34,6 +35,9 @@ export const ExpressionSelector = ({
   tabsChanges
 }) => {
   const resources = useContext(ResourcesContext);
+
+  const [expressionTypeValue, setExpressionTypeValue] = useState('');
+
   const options = [
     { label: resources.messages['fieldComparisonLabel'], value: 'fieldComparison' },
     { label: resources.messages['ifThenLabel'], value: 'ifThenClause' }
@@ -43,8 +47,8 @@ export const ExpressionSelector = ({
   } = creationFormState;
 
   useEffect(() => {
-    onExpressionTypeToggle('fieldComparison');
-  }, []);
+    setExpressionTypeValue(expressionType);
+  }, [expressionType]);
 
   const expressionsTypeView = () => {
     if (!isEmpty(expressionType) && expressionType === 'fieldComparison') {
@@ -92,7 +96,7 @@ export const ExpressionSelector = ({
     <>
       <div className={styles.section}>
         <Dropdown
-          value={expressionType}
+          value={expressionTypeValue}
           options={options}
           onChange={e => onExpressionTypeToggle(e.value)}
           placeholder={resources.messages['expressionTypeDropdownPlaceholder']}
