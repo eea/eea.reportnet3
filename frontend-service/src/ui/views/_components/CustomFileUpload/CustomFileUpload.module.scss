@@ -104,12 +104,12 @@
   height: 0.7em !important;
   margin-left: 0.4rem !important;
   width: 0.7em !important;
-}
 
-.infoButton > span {
-  left: 46% !important;
-  margin-left: -0.48em !important;
-  margin-top: -0.5em !important;
+  > span {
+    left: 46% !important;
+    margin-left: -0.48em !important;
+    margin-top: -0.5em !important;
+  }
 }
 
 .invalidExtensionMsg {
@@ -119,17 +119,17 @@
   margin: 1rem 0 0 0;
   opacity: 1;
   transition: all 0.3s ease 0.15s;
-}
 
-.invalidExtensionMsg.isValid {
-  height: 0;
-  margin: 0;
-  opacity: 0;
-  overflow: hidden;
-}
+  &.isValid {
+    height: 0;
+    margin: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
 
-.invalidExtensionMsg .closeInvalidMessageIcon {
-  cursor: pointer;
-  font-size: 0.7rem;
-  margin: 0 0 0.75rem 0.25rem;
+  .closeInvalidMessageIcon {
+    cursor: pointer;
+    font-size: 0.7rem;
+    margin: 0 0 0.75rem 0.25rem;
+  }
 }

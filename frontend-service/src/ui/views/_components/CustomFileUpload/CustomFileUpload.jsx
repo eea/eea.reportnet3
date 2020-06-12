@@ -3,7 +3,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import styles from './CustomFileUpload.module.css';
+import styles from './CustomFileUpload.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Messages } from 'primereact/messages';
