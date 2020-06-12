@@ -622,8 +622,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Override
   public void addForeignRelationsFromNewReportings(List<FKDataCollection> datasetsRegistry) {
     List<ForeignRelations> foreignRelations = new ArrayList<>();
-    Map<String, List<FKDataCollection>> groupByRepresentative =
-        datasetsRegistry.stream().collect(Collectors.groupingBy(fk -> fk.getRepresentative()));
+    Map<String, List<FKDataCollection>> groupByRepresentative = datasetsRegistry.stream()
+        .collect(Collectors.groupingBy(FKDataCollection::getRepresentative));
 
     groupByRepresentative.forEach((representative, listFkData) -> {
       for (FKDataCollection fkData : listFkData) {
