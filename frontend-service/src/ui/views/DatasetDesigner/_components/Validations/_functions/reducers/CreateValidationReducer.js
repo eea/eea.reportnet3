@@ -292,10 +292,22 @@ export const createValidationReducer = (state, { type, payload }) => {
       };
 
     case 'POPULATE_CREATE_FORM':
+
+      const rowOptions = {};
+      if (payload.expressionsIf && payload.expressionsIf.length > 0) {
+        console.log('payload', payload);
+
+        rowOptions.expressionType = 'ifThenClause';
+        rowOptions.expressionsIf = payload.expressionsIf;
+        rowOptions.allExpressionsIf = payload.allExpressionsIf;
+        rowOptions.expressionsThen = payload.expressionsThen;
+        rowOptions.allExpressionsThen = payload.allExpressionsThen;
+      }
       return {
         ...state,
         candidateRule: {
           ...state.candidateRule,
+          ...rowOptions,
           active: payload.enabled,
           allExpressions: payload.allExpressions,
           automatic: payload.automatic,

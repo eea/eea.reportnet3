@@ -87,7 +87,7 @@ const update = async (datasetId, validationRule) => {
 };
 
 const updateRowRule = async (datasetId, validationRule) => {
-  const { expressions } = validationRule;
+  const { expressions, expressionType, expressionsIf, expressionsThen } = validationRule;
   const validation = {
     ruleId: validationRule.id,
     description: validationRule.description,
@@ -100,7 +100,14 @@ const updateRowRule = async (datasetId, validationRule) => {
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value]
   };
   if (!validationRule.automatic) {
-    validation.whenCondition = getCreationComparisonDTO(expressions);
+    if (expressionType === 'ifThenClause') {
+      validation.whenCondition = {
+        operator: 'RECORD_IF',
+        params: [getCreationComparisonDTO(expressionsIf), getCreationComparisonDTO(expressionsThen)]
+      };
+    } else {
+      validation.whenCondition = getCreationComparisonDTO(expressions);
+    }
   }
   return await apiValidation.update(datasetId, validation);
 };

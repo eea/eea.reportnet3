@@ -291,7 +291,12 @@ export const RowValidation = ({ datasetId, tabs }) => {
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
-      setExpressionsfieldsTypes(candidateRule.expressions, candidateRule.table, tabs);
+      if (candidateRule.expressionType == 'ifThenClause') {
+        setExpressionsfieldsTypes(candidateRule.expressionsIf, candidateRule.table, tabs);
+        setExpressionsfieldsTypes(candidateRule.expressionsThen, candidateRule.table, tabs);
+      } else {
+        setExpressionsfieldsTypes(candidateRule.expressions, candidateRule.table, tabs);
+      }
       await ValidationService.createRowRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
@@ -309,7 +314,12 @@ export const RowValidation = ({ datasetId, tabs }) => {
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
-      setExpressionsfieldsTypes(candidateRule.expressions, candidateRule.table, tabs);
+      if (candidateRule.expressionType == 'ifThenClause') {
+        setExpressionsfieldsTypes(candidateRule.expressionsIf, candidateRule.table, tabs);
+        setExpressionsfieldsTypes(candidateRule.expressionsThen, candidateRule.table, tabs);
+      } else {
+        setExpressionsfieldsTypes(candidateRule.expressions, candidateRule.table, tabs);
+      }
       await ValidationService.updateRowRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
