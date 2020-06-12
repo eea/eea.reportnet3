@@ -4,6 +4,8 @@ import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
+import uniq from 'lodash/uniq';
+import uniqBy from 'lodash/uniqBy';
 
 import { config } from 'conf';
 
@@ -28,9 +30,9 @@ const ActionsToolbar = ({
   colsSchema,
   dataflowId,
   datasetId,
+  exportExtensionsOperationsList,
   hasWritePermissions,
   isDataCollection = false,
-  fileExtensions,
   isFilterValidationsActive,
   isLoading,
   isTableDeleted,
@@ -99,13 +101,36 @@ const ActionsToolbar = ({
     }
   }, [exportTableData]);
 
-  const externalExportTypes = [];
+  const exportExtensions = [];
 
-  if (!isEmpty(fileExtensions)) {
-    fileExtensions.forEach(element => {
-      element.operation === 'EXPORT' && externalExportTypes.push(element);
+  if (!isEmpty(exportExtensionsOperationsList)) {
+    exportExtensionsOperationsList.forEach(element => {
+      exportExtensions.push(element.fileExtension);
     });
+    // console.log('exportExtensions2', exportExtensions);
   }
+
+  const uniqsExportExtensions = uniq(exportExtensions);
+  // console.log('uniqsExportExtensions', uniqsExportExtensions);
+
+  const parsedUniqueExtensions = [];
+  const parseUniqsExportExtensions = uniqsExportExtensions => {
+    uniqsExportExtensions.forEach(uniqExportExtension => {
+      parsedUniqueExtensions.push({
+        text: uniqExportExtension.toUpperCase() + ' (.' + uniqExportExtension.toLowerCase() + ')',
+        code: uniqExportExtension.toLowerCase()
+      });
+      return parsedUniqueExtensions;
+    });
+  };
+
+  parseUniqsExportExtensions(uniqsExportExtensions);
+  // console.log('parsedUniqueExtensions', parsedUniqueExtensions);
+
+  const reportNetandFMEExtensions = parsedUniqueExtensions.concat(config.exportTypes);
+  const uniqsReportNetAndFMEExtensions = uniqBy(reportNetandFMEExtensions, 'text');
+  // console.log('newArray', newArray);
+  // console.log('uniqsArray', uniqsArray);
 
   const onExportTableData = async fileType => {
     setIsLoadingFile(true);
@@ -201,7 +226,7 @@ const ActionsToolbar = ({
           }}
         />
         <Menu
-          model={config.exportTypes.map(type => ({
+          model={uniqsReportNetAndFMEExtensions.map(type => ({
             label: type.text,
             icon: config.icons['archive'],
             command: () => onExportTableData(type.code)
@@ -211,6 +236,18 @@ const ActionsToolbar = ({
           id="exportTableMenu"
           onShow={e => getExportButtonPosition(e)}
         />
+
+        {/* <Menu
+          model={config.exportTypes.map(type => ({
+            label: type.text,
+            icon: config.icons['archive'],
+            command: () => onExportTableData(type.code)
+          }))}
+          popup={true}
+          ref={exportMenuRef}
+          id="exportTableMenu"
+          onShow={e => getExportButtonPosition(e)}
+        /> */}
 
         <Button
           className={`p-button-rounded p-button-secondary-transparent ${

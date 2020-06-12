@@ -894,6 +894,7 @@ const DataViewer = withRouter(
           colsSchema={colsSchema}
           dataflowId={dataflowId}
           datasetId={datasetId}
+          exportExtensionsOperationsList={extensionsOperationsList.export}
           hasWritePermissions={hasWritePermissions}
           fileExtensions={extensionsOperationsList.export}
           isDataCollection={isDataCollection}
