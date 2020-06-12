@@ -339,7 +339,8 @@
         "FIELD_LT",
         "FIELD_LTEQ",
         "FIELD_EQ",
-        "FIELD_DIST"
+        "FIELD_DIST",
+        "FIELD_NUM_MATCH"
       ]
     },
     { "operatorType": "string", "operators": ["FIELD_SEQ", "FIELD_SEQIC", "FIELD_MATCH"] },
@@ -495,7 +496,7 @@
     "FIELD_LTEQ_DATE": "<=",
     "FIELD_EQ_DATE": "=",
     "FIELD_DIST_DATE": "!=",
-    "FIELD_NUMBER_MATCH": "MATCH",
+    "FIELD_NUM_MATCH": "MATCH",
     "FIELD_GT_MONTH": ">",
     "FIELD_LT_MONTH": "<",
     "FIELD_GTEQ_MONTH": ">=",

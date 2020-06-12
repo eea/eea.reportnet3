@@ -19,6 +19,7 @@ export const selectorFromDTO = (expression, expressions, allExpressions, parentO
     } else {
       expressions.push(getExpressionFromDTO(firstParam, allExpressions, parentOperator));
     }
+
     if (logicalOperatorFromDTO.includes(secondParam.operator)) {
       selectorFromDTO(secondParam, expressions, allExpressions, operator);
     } else {

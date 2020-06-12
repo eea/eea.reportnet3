@@ -1,6 +1,5 @@
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import uniq from 'lodash/uniq';
 
 import { config } from 'conf';
 
