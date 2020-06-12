@@ -39,6 +39,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
     dataflowId,
     datasetSchemaId,
     description: '',
+    displayErrors: false,
     editorView: { isEditing: false, id: null },
     externalParameters: [],
     fileExtension: '',
@@ -53,7 +54,13 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   });
 
   const { editorView, externalParameters, parameterKey, parameterValue } = manageIntegrationsState;
-  const { isDuplicatedIntegration, isDuplicatedParameter, isFormEmpty, isParameterEditing } = ManageIntegrationsUtils;
+  const {
+    isDuplicatedIntegration,
+    isDuplicatedParameter,
+    isFormEmpty,
+    isParameterEditing,
+    printError
+  } = ManageIntegrationsUtils;
 
   const isEditingParameter = isParameterEditing(externalParameters);
   const isEmptyForm = isFormEmpty(manageIntegrationsState);
@@ -149,6 +156,8 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
 
   const onSaveParameter = () => (editorView.isEditing ? onUpdateParameter() : onAddParameter());
 
+  const onShowErrors = () => manageIntegrationsDispatch({ type: 'SHOW_ERRORS', payload: { value: true } });
+
   const onToggleEditorView = (id, option) => {
     if (!editorView.isEditing) {
       manageIntegrationsDispatch({
@@ -190,10 +199,12 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
       <span data-tip data-for="integrationTooltip">
         <Button
           className="p-button-rounded p-button-animated-blink"
-          disabled={isEmptyForm}
           icon="check"
           label={!isEmpty(updatedData) ? resources.messages['update'] : resources.messages['create']}
-          onClick={() => (!isEmpty(updatedData) ? onUpdateIntegration() : onCreateIntegration())}
+          onClick={() => {
+            if (isEmptyForm) onShowErrors();
+            else !isEmpty(updatedData) ? onUpdateIntegration() : onCreateIntegration();
+          }}
         />
       </span>
       <Button
@@ -229,7 +240,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   );
 
   const renderDropdownLayout = option => (
-    <div className={`${styles.field} ${styles[option]} formField`}>
+    <div className={`${styles.field} ${styles[option]} formField ${printError(option, manageIntegrationsState)}`}>
       <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
       <Dropdown
         appendTo={document.body}
@@ -240,7 +251,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
           { label: 'IMPORT', value: 'IMPORT' },
           { label: 'EXPORT', value: 'EXPORT' }
         ]}
-        placeholder={resources.messages[option]}
+        placeholder={resources.messages[`${option}PlaceHolder`]}
         value={manageIntegrationsState[option]}
       />
     </div>
@@ -260,7 +271,9 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
 
   const renderInputLayout = (options = []) => {
     return options.map((option, index) => (
-      <div className={`${styles.field} ${styles[option]} formField`} key={index}>
+      <div
+        className={`${styles.field} ${styles[option]} formField ${printError(option, manageIntegrationsState)}`}
+        key={index}>
         <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
         <InputText
           id={`${componentName}__${option}`}

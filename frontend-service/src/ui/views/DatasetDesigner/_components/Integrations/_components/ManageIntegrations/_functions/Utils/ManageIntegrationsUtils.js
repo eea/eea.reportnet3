@@ -29,7 +29,7 @@ const isDuplicatedParameter = (id, parameters, value) => {
 };
 
 const isFormEmpty = state => {
-  const requiredKeys = ['description', 'externalParameters', 'fileExtension', 'name', 'operation', 'processName'];
+  const requiredKeys = ['externalParameters', 'fileExtension', 'name', 'operation', 'processName'];
   const isEmptyForm = [];
   for (let index = 0; index < requiredKeys.length; index++) {
     const key = requiredKeys[index];
@@ -83,6 +83,18 @@ const onUpdateCompleteParameter = (id, state) => {
   });
 };
 
+const printError = (field, state) => {
+  const requiredFields = ['externalParameters', 'fileExtension', 'name', 'operation', 'processName'];
+  const isParameterValid =
+    state.displayErrors &&
+    isEmpty(state['externalParameters']) &&
+    (field === 'parameterKey' || field === 'parameterValue');
+
+  if (isParameterValid) return 'error';
+
+  return state.displayErrors && requiredFields.includes(field) && isEmpty(state[field]) ? 'error' : undefined;
+};
+
 const toggleParameterEditorView = (id, option, parameters) => {
   return parameters.map(parameter => {
     if (parameter.id === id) {
@@ -104,5 +116,6 @@ export const ManageIntegrationsUtils = {
   onAddParameter,
   onUpdateCompleteParameter,
   onUpdateData,
+  printError,
   toggleParameterEditorView
 };
