@@ -1,4 +1,5 @@
 import isNil from 'lodash/isNil';
+import sortBy from 'lodash/sortBy';
 
 import { apiIntegration } from 'core/infrastructure/api/domain/model/Integration/ApiIntegration';
 
@@ -7,10 +8,15 @@ import { Integration } from 'core/domain/model/Integration/Integration';
 const all = async datasetSchemaId =>
   parseIntegrationsList(await apiIntegration.all(parseDatasetSchemaId(datasetSchemaId)));
 
+const allExtensionsOperations = async datasetSchemaId =>
+  parseIntegrationsOperationsExtensionsList(
+    await apiIntegration.allExtensionsOperations(parseDatasetSchemaId(datasetSchemaId))
+  );
+
 const create = async integration => apiIntegration.create(parseManageIntegration(integration));
 
 const deleteById = async integrationId => {
-  return await apiIntegration.deleteById(parseIntegrationId(integrationId));
+  return await apiIntegration.deleteById(integrationId);
 };
 
 const parseDatasetSchemaId = datasetSchemaId => {
@@ -43,12 +49,19 @@ const parseIntegration = integrationDTO => {
   return integration;
 };
 
-const parseIntegrationId = integrationId => new Integration({ integrationId });
-
 const parseIntegrationsList = integrationsDTO => {
   if (!isNil(integrationsDTO)) {
     const integrations = [];
     integrationsDTO.forEach(integrationDTO => integrations.push(parseIntegration(integrationDTO)));
+    return sortBy(integrations, ['integrationId']);
+  }
+  return;
+};
+
+const parseIntegrationsOperationsExtensionsList = integrationsDTO => {
+  if (!isNil(integrationsDTO)) {
+    const integrations = [];
+    integrationsDTO.forEach(integrationDTO => integrations.push(parseIntegrationOperationExtension(integrationDTO)));
 
     return integrations;
   }
@@ -70,6 +83,12 @@ const parseManageIntegration = integration => ({
   tool: integration.tool
 });
 
+const parseIntegrationOperationExtension = integration => ({
+  datasetSchemaId: integration.internalParameters.datasetSchemaId,
+  fileExtension: integration.internalParameters.fileExtension,
+  operation: integration.operation
+});
+
 const update = async integration => apiIntegration.update(parseManageIntegration(integration));
 
-export const ApiIntegrationRepository = { all, create, deleteById, update };
+export const ApiIntegrationRepository = { all, allExtensionsOperations, create, deleteById, update };

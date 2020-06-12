@@ -66,4 +66,14 @@ public interface IntegrationController {
 
 
 
+  /**
+   * Find extensions and operations.
+   *
+   * @param integrationVO the integration VO
+   * @return the list
+   */
+  List<IntegrationVO> findExtensionsAndOperations(IntegrationVO integrationVO);
+
+
+
 }
