@@ -23,18 +23,18 @@ public class IntegrityVO {
   /** The two way. */
   private Boolean isDoubleReferenced;
 
-  /** The origin dataset id. */
-  private Long originDatasetId;
+  /** The dataset schema id. */
+  private String originDatasetSchemaId;
 
 
-  /** The referenced dataset id. */
-  private Long referencedDatasetId;
+  /** The referenced dataset schema id. */
+  private String referencedDatasetSchemaId;
 
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, originFields, referencedFields, isDoubleReferenced, originDatasetId,
-        referencedDatasetId);
+    return Objects.hash(id, originFields, referencedFields, isDoubleReferenced,
+        originDatasetSchemaId, referencedDatasetSchemaId);
   }
 
   /**
@@ -55,8 +55,8 @@ public class IntegrityVO {
     return Objects.equals(id, other.id) && Objects.equals(originFields, other.originFields)
         && Objects.equals(referencedFields, other.referencedFields)
         && Objects.equals(isDoubleReferenced, other.isDoubleReferenced)
-        && Objects.equals(originDatasetId, other.originDatasetId)
-        && Objects.equals(referencedDatasetId, other.referencedDatasetId);
+        && Objects.equals(originDatasetSchemaId, other.originDatasetSchemaId)
+        && Objects.equals(referencedDatasetSchemaId, other.referencedDatasetSchemaId);
   }
 
 }
