@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 
 import PropTypes from 'prop-types';
 
@@ -8,6 +8,7 @@ import { Button } from 'ui/views/_components/Button';
 import { Messages } from 'primereact/messages';
 import { ProgressBar } from 'primereact/progressbar';
 import { userStorage } from 'core/domain/model/User/UserStorage';
+import ReactTooltip from 'react-tooltip';
 
 import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 
@@ -87,6 +88,18 @@ export class CustomFileUpload extends Component {
     this.onFocus = this.onFocus.bind(this);
     this.onBlur = this.onBlur.bind(this);
     this.onSimpleUploaderClick = this.onSimpleUploaderClick.bind(this);
+  }
+
+  checkValidExtension() {
+    if (this.hasFiles()) {
+      const acceptedExtensions = this.props.accept.split(',');
+      const selectedExtension = this.state.files.map(
+        file => file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name
+      );
+
+      return !selectedExtension.some(ext => acceptedExtensions.includes(`.${ext}`));
+    }
+    return false;
   }
 
   clearInputElement() {
@@ -373,12 +386,22 @@ export class CustomFileUpload extends Component {
 
     if (!this.props.auto) {
       uploadButton = (
-        <Button
-          label={this.props.uploadLabel}
-          icon="upload"
-          onClick={this.upload}
-          disabled={this.props.disabled || !this.hasFiles()}
-        />
+        <Fragment>
+          <span data-tip data-for="inValidExtension">
+            <Button
+              label={this.props.uploadLabel}
+              icon="upload"
+              onClick={this.upload}
+              disabled={this.props.disabled || !this.hasFiles() || this.checkValidExtension()}
+            />
+          </span>
+
+          {this.checkValidExtension() && (
+            <ReactTooltip effect="solid" id="inValidExtension" place="top">
+              Invalid
+            </ReactTooltip>
+          )}
+        </Fragment>
       );
       cancelButton = (
         <Button
@@ -399,8 +422,10 @@ export class CustomFileUpload extends Component {
       <div id={this.props.id} className={className} style={this.props.style}>
         <div className="p-fileupload-buttonbar">
           {chooseButton}
-          {uploadButton}
-          {cancelButton}
+          <div className="p-toolbar-group-right">
+            {uploadButton}
+            {cancelButton}
+          </div>
         </div>
         <div
           ref={el => {

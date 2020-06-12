@@ -78,11 +78,11 @@ const DataViewer = withRouter(
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
-    const [datasetSchemaId, setDatasetSchemaId] = useState('');
+    const [datasetSchemaId, setDatasetSchemaId] = useState(null);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [editDialogVisible, setEditDialogVisible] = useState(false);
+    const [extensionsOperationsList, setExtensionsOperationsList] = useState({ export: [], import: [] });
     const [fetchedData, setFetchedData] = useState([]);
-    const [fileExtensions, setFileExtensions] = useState({});
     const [importDialogVisible, setImportDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
     const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
@@ -229,19 +229,31 @@ const DataViewer = withRouter(
     }, [confirmDeleteVisible]);
 
     useEffect(() => {
-      getFileExtensions();
       getMetadata();
     }, []);
 
+    useEffect(() => {
+      if (datasetSchemaId) getFileExtensions();
+    }, [datasetSchemaId]);
+
     const getMetadata = async () => {
-      const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
-      console.log('metadata', metadata.datasetSchemaId);
-      setDatasetSchemaId(metadata.datasetSchemaId);
-      console.log('datasetSchemaId', datasetSchemaId);
+      try {
+        const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
+        setDatasetSchemaId(metadata.datasetSchemaId);
+      } catch (error) {
+        notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
+      }
     };
 
-    const getFileExtensions = async () =>
-      setFileExtensions(await IntegrationService.allExtensionsOperations(datasetSchemaId));
+    const getFileExtensions = async () => {
+      try {
+        const response = await IntegrationService.allExtensionsOperations(datasetSchemaId);
+        setExtensionsOperationsList(DataViewerUtils.groupOperations('operation', response));
+      } catch (error) {
+        const schemaError = { type: error.message };
+        notificationContext.add(schemaError);
+      }
+    };
 
     const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations) => {
       const removeSelectAllFromList = levelErrorValidations => {
@@ -874,6 +886,8 @@ const DataViewer = withRouter(
       }
     };
 
+    const getFileUploadExtensions = extensionsOperationsList.import.map(file => `.${file.fileExtension}`).join(',');
+
     return (
       <SnapshotContext.Provider>
         <ActionsToolbar
@@ -881,7 +895,7 @@ const DataViewer = withRouter(
           dataflowId={dataflowId}
           datasetId={datasetId}
           hasWritePermissions={hasWritePermissions}
-          fileExtensions={fileExtensions}
+          fileExtensions={extensionsOperationsList.export}
           isDataCollection={isDataCollection}
           isFilterValidationsActive={isFilterValidationsActive}
           isTableDeleted={isTableDeleted}
@@ -1007,6 +1021,7 @@ const DataViewer = withRouter(
             onHide={() => setImportDialogVisible(false)}
             visible={importDialogVisible}>
             <CustomFileUpload
+              accept={getFileUploadExtensions}
               chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv|doc)$/"
               className={styles.FileUpload}
               fileLimit={1}
