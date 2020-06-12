@@ -381,6 +381,9 @@
         },
         {
           "key": "UPDATE_INTEGRATION_ERROR"
+        },
+        {
+          "key": "LOADING_FILE_EXTENSIONS_ERROR"
         }
       ]
     },
