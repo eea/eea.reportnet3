@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
+
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -32,6 +33,7 @@ import { InfoTable } from './_components/InfoTable';
 import { Map } from 'ui/views/_components/Map';
 
 import { DatasetService } from 'core/services/Dataset';
+import { IntegrationService } from 'core/services/Integration';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -50,7 +52,6 @@ import {
   useSetColumns,
   useRecordErrorPosition
 } from './_functions/Hooks/DataViewerHooks';
-import { IntegrationService } from 'core/services/Integration';
 
 const DataViewer = withRouter(
   ({
@@ -234,7 +235,7 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       if (datasetSchemaId) getFileExtensions();
-    }, [datasetSchemaId]);
+    }, [datasetSchemaId, importDialogVisible]);
 
     const getMetadata = async () => {
       try {
@@ -250,8 +251,7 @@ const DataViewer = withRouter(
         const response = await IntegrationService.allExtensionsOperations(datasetSchemaId);
         setExtensionsOperationsList(DataViewerUtils.groupOperations('operation', response));
       } catch (error) {
-        const schemaError = { type: error.message };
-        notificationContext.add(schemaError);
+        notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
       }
     };
 
@@ -886,7 +886,9 @@ const DataViewer = withRouter(
       }
     };
 
-    const getFileUploadExtensions = extensionsOperationsList.import.map(file => `.${file.fileExtension}`).join(',');
+    const getFileUploadExtensions = extensionsOperationsList.import.map(file => `.${file.fileExtension}`).join(', ');
+
+    const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${getFileUploadExtensions}`;
 
     return (
       <SnapshotContext.Provider>
@@ -1026,8 +1028,10 @@ const DataViewer = withRouter(
               chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv|doc)$/"
               className={styles.FileUpload}
               fileLimit={1}
+              infoTooltip={infoExtensionsTooltip}
               mode="advanced"
               multiple={false}
+              invalidExtensionMessage={resources.messages['invalidExtensionFile']}
               name="file"
               onUpload={onUpload}
               url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.loadDataTable, {
