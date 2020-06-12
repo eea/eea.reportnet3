@@ -129,7 +129,7 @@ const ComparisonExpression = ({
 
       setSecondFieldOptions(allFields.filter(cField => cField.value !== expressionValues.field1));
     }
-  }, [expressionValues.field1, expressionValues.operatorType, fieldType]);
+  }, [expressionValues.field1, expressionValues.operatorType, fieldType, tableFields]);
 
   useEffect(() => {
     const options = [];
