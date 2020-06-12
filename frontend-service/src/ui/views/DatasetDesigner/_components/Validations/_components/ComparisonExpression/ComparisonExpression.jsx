@@ -120,7 +120,16 @@ const ComparisonExpression = ({
 
   useEffect(() => {
     if (!isEmpty(expressionValues.field1) && !isEmpty(fieldType) && expressionValues.operatorType) {
-      const compatibleFieldTypes = fieldByOperatorType[expressionValues.operatorType];
+      const field1Type = onGetFieldType(expressionValues.field1);
+      let compatibleFieldTypes = fieldByOperatorType[expressionValues.operatorType];
+
+      if (
+        (field1Type === 'NUMBER_INTEGER' || field1Type === 'NUMBER_DECIMAL') &&
+        expressionValues.operatorValue === 'MATCH'
+      ) {
+        compatibleFieldTypes = fieldByOperatorType['numberMatch'];
+      }
+
       const allFields = tableFields.filter(field => {
         const cFieldType = onGetFieldType(field.value);
         const result = compatibleFieldTypes.includes(cFieldType);
@@ -129,7 +138,7 @@ const ComparisonExpression = ({
 
       setSecondFieldOptions(allFields.filter(cField => cField.value !== expressionValues.field1));
     }
-  }, [expressionValues.field1, expressionValues.operatorType, fieldType, tableFields]);
+  }, [expressionValues.field1, expressionValues.operatorType, fieldType, tableFields, expressionValues.operatorValue]);
 
   useEffect(() => {
     const options = [];
