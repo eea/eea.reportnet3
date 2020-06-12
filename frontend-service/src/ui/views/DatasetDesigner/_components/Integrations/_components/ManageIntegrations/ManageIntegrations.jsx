@@ -71,11 +71,8 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
     if (!isEmpty(updatedData)) getUpdatedData();
   }, [updatedData]);
 
-  useEffect(() => {
-    if (parameterRef.current) parameterRef.current.element.focus();
-  }, [parameterRef.current]);
-
   useInputTextFocus(editorView.isEditing, editParameterRef);
+  useInputTextFocus(isEditingParameter, parameterRef);
   useInputTextFocus(isIntegrationManageDialogVisible, integrationNameRef);
 
   const getUpdatedData = () => manageIntegrationsDispatch({ type: 'GET_UPDATED_DATA', payload: updatedData });
@@ -88,6 +85,8 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   };
 
   const onBlurParameter = (id, option, event) => {
+    if (isEmpty(event.target.value)) parameterRef.current.element.focus();
+
     !isDuplicatedParameter(id, externalParameters, event.target.value)
       ? onUpdateSingleParameter(id, option, event)
       : parameterRef.current.element.focus();
@@ -190,8 +189,10 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   };
 
   const onUpdateSingleParameter = (id, option, event) => {
-    ManageIntegrationsUtils.onUpdateData(id, option, externalParameters, event.target.value);
-    onToggleEditorView(id, [option]);
+    if (!isEmpty(event.target.value)) {
+      ManageIntegrationsUtils.onUpdateData(id, option, externalParameters, event.target.value);
+      onToggleEditorView(id, [option]);
+    }
   };
 
   const renderDialogFooter = (

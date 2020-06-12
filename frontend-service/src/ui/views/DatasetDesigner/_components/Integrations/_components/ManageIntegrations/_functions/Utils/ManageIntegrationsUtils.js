@@ -45,7 +45,7 @@ const isParameterEditing = parameters => {
     .map(editor => Object.values(editor))
     .flat();
 
-  return !isEditorView.includes(true);
+  return isEditorView.includes(true);
 };
 
 const onAddParameter = state => {
