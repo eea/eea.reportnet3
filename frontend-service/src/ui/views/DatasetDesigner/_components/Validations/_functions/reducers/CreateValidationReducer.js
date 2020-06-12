@@ -139,6 +139,7 @@ export const createValidationReducer = (state, { type, payload }) => {
         validationRuleString: payload
       };
     case 'INIT_FORM':
+      console.log({ payload });
       return {
         ...state,
         schemaTables: payload.tables,
@@ -162,6 +163,7 @@ export const createValidationReducer = (state, { type, payload }) => {
         }
       };
     case 'POPULATE_CREATE_FORM':
+      console.log({ payload });
       return {
         ...state,
         candidateRule: {
@@ -175,7 +177,9 @@ export const createValidationReducer = (state, { type, payload }) => {
           expressions: payload.expressions,
           id: payload.id,
           name: payload.name,
-          shortCode: payload.shortCode
+          shortCode: payload.shortCode,
+          relations: payload.relations,
+          tableFields: payload.relations.tableFields
         }
       };
     case 'ON_EXPRESSION_TYPE_TOGGLE':

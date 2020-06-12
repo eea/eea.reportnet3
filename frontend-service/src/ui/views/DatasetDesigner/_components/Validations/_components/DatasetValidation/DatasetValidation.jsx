@@ -1,6 +1,7 @@
 import React, { useEffect, useReducer, useContext, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
 
@@ -56,16 +57,11 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(0);
   const [tabsChanges, setTabsChanges] = useState({});
 
-  const ruleAdditionCheckListener = [creationFormState.candidateRule.relations.links, creationFormState.candidateRule];
-  const ruleDisablingCheckListener = [
-    creationFormState.candidateRule.relations.referencedDatasetSchema,
-    creationFormState.candidateRule.relations.referencedTable
-  ];
-
   const componentName = 'createValidation';
 
   useEffect(() => {
     if (!isEmpty(tabs)) {
+      console.log('INIT');
       creationFormDispatch({
         type: 'INIT_FORM',
         payload: initValidationRuleRelationCreation(tabs, datasetSchema.datasetSchemaId, datasetSchemas)
@@ -132,6 +128,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   useEffect(() => {
     const { table } = creationFormState.candidateRule;
     if (!isEmpty(table)) {
+      console.log('FIELDS');
       creationFormDispatch({
         type: 'SET_FIELDS',
         payload: getDatasetSchemaTableFields(table, tabs)
@@ -179,14 +176,16 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
         payload: true
       });
     }
-  }, [...ruleDisablingCheckListener]);
+  }, [creationFormState.candidateRule]);
 
   useEffect(() => {
-    creationFormDispatch({
-      type: 'SET_IS_VALIDATION_ADDING_DISABLED',
-      payload: checkComparisonRelation(creationFormState.candidateRule.relations.links)
-    });
-  }, [...ruleAdditionCheckListener]);
+    if (!isNil(creationFormState.candidateRule.relations)) {
+      creationFormDispatch({
+        type: 'SET_IS_VALIDATION_ADDING_DISABLED',
+        payload: checkComparisonRelation(creationFormState.candidateRule.relations.links)
+      });
+    }
+  }, [creationFormState.candidateRule]);
 
   useEffect(() => {
     creationFormDispatch({
@@ -197,9 +196,10 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
 
   useEffect(() => {
     if (validationContext.ruleEdit && !isEmpty(validationContext.ruleToEdit)) {
+      console.log({ creationFormState }, creationFormState.table);
       creationFormDispatch({
         type: 'POPULATE_CREATE_FORM',
-        payload: validationContext.ruleToEdit
+        payload: parseRuleToEdit(validationContext.ruleToEdit)
       });
     }
   }, [validationContext.ruleEdit]);
@@ -243,6 +243,132 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
     return filteredTable.recordSchemaId;
   };
 
+  const parseRuleToEdit = rule => {
+    console.log({ rule, datasetSchemas });
+    const inmRuleToEdit = { ...rule };
+
+    const filteredReferencedDatasetSchema = datasetSchemas.filter(
+      dataset => dataset.datasetSchemaId === rule.relations.referencedDatasetSchema.code
+    );
+
+    let originTableSchemaId = '';
+    let referencedTableSchemaId = '';
+    // if (rule.originDatasetSchemaId !== rule.relations.referencedDatasetSchema.code) {
+    const filteredOriginDatasetSchema = datasetSchemas.filter(
+      dataset => dataset.datasetSchemaId === rule.relations.originDatasetSchema
+    );
+
+    if (!isNil(filteredOriginDatasetSchema[0])) {
+      filteredOriginDatasetSchema[0].tables.forEach(table => {
+        table.records[0].fields.forEach(field => {
+          if (field.fieldId === rule.relations.links[0].originField.code) {
+            originTableSchemaId = table.tableSchemaId;
+            inmRuleToEdit.relations.table = { label: table.tableSchemaName, code: table.tableSchemaId };
+          }
+        });
+      });
+    }
+
+    console.log({ filteredReferencedDatasetSchema });
+    if (!isNil(filteredReferencedDatasetSchema[0])) {
+      inmRuleToEdit.relations.referencedTables = filteredReferencedDatasetSchema[0].tables.map(table => {
+        return { code: table.tableSchemaId, label: table.tableSchemaName };
+      });
+
+      filteredReferencedDatasetSchema[0].tables.forEach(table => {
+        console.log(table.records[0].fields, rule.relations.links[0].referencedField.code);
+        table.records[0].fields.forEach(field => {
+          if (field.fieldId === rule.relations.links[0].referencedField.code) {
+            referencedTableSchemaId = table.tableSchemaId;
+            inmRuleToEdit.relations.referencedTable = { label: table.tableSchemaName, code: table.tableSchemaId };
+          }
+        });
+      });
+
+      const filteredOriginTable = filteredOriginDatasetSchema[0].tables.filter(
+        table => table.tableSchemaId === originTableSchemaId
+      );
+
+      const filteredOriginFields = filteredOriginTable[0].records[0].fields.map(field => {
+        return { code: field.fieldId, label: field.name };
+      });
+
+      inmRuleToEdit.relations.tableFields = filteredOriginFields;
+
+      const filteredReferencedTable = filteredReferencedDatasetSchema[0].tables.filter(
+        table => table.tableSchemaId === referencedTableSchemaId
+      );
+
+      const filteredReferencedFields = filteredReferencedTable[0].records[0].fields.map(field => {
+        return { code: field.fieldId, label: field.name };
+      });
+
+      inmRuleToEdit.relations.referencedFields = filteredReferencedFields;
+
+      inmRuleToEdit.relations.links.forEach(link => {
+        link.referencedField.label = filteredReferencedFields.filter(
+          filteredField => filteredField.code === link.referencedField.code
+        )[0].label;
+        link.originField.label = filteredOriginFields.filter(
+          originField => originField.code === link.originField.code
+        )[0].label;
+      });
+
+      console.log(inmRuleToEdit.relations.referencedTable);
+    }
+    // }
+    if (!isNil(filteredReferencedDatasetSchema[0])) {
+      inmRuleToEdit.relations.referencedDatasetSchema.label = filteredReferencedDatasetSchema[0].datasetSchemaName;
+    }
+
+    return inmRuleToEdit;
+
+    //   {
+    //     "isDoubleReferenced":false,
+    //     "referencedDatasetSchema":{
+    //        "label":"sdafasdf",
+    //        "code":"5ed5f1e07999710001366b03"
+    //     },
+    //     "referencedFields":[
+    //        {
+    //           "label":"Countries",
+    //           "code":"5ed7b4c1cee26900014c2601"
+    //        },
+    //        {
+    //           "label":"Linked field",
+    //           "code":"5ed89a74cee26900014c261b"
+    //        },
+    //        {
+    //           "label":"poinnnt",
+    //           "code":"5edf991036c5a50001723220"
+    //        }
+    //     ],
+    //     "referencedTable":{
+    //        "label":"5",
+    //        "code":"5ed7a282cee26900014c25ed"
+    //     },
+    //     "referencedTables":[
+    //        {
+    //           "label":"1",
+    //           "code":"5ed7adf3cee26900014c25f7"
+    //        },
+    //        {
+    //           "label":"2",
+    //           "code":"5ed5f1f17999710001366b07"
+    //        },
+    //        null
+    //     ],
+    //     "originDatasetSchema":"5ed5f1e07999710001366b03",
+    //     "links":[
+    //        {
+    //           "linkId":"8dcd07e2-1024-45de-aa91-e9b1f91f58f2",
+    //           "originField":"",
+    //           "referencedField":""
+    //        }
+    //     ]
+    //  }
+  };
+
   const onCreateValidationRule = async () => {
     try {
       setIsSubmitDisabled(true);
@@ -273,7 +399,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
-      await ValidationService.updateRowRule(datasetId, candidateRule);
+      await ValidationService.updateDatasetRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
       notificationContext.add({
@@ -398,6 +524,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   };
 
   const onGetFieldType = field => {
+    console.log(creationFormState.candidateRule.table);
     return getFieldType(creationFormState.candidateRule.table, { code: field }, tabs);
   };
 

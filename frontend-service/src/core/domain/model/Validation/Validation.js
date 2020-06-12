@@ -15,6 +15,7 @@ export class Validation {
     message,
     name,
     referenceId,
+    relations,
     shortCode
   } = {}) {
     this.activationGroup = activationGroup;
@@ -32,6 +33,7 @@ export class Validation {
     this.message = message;
     this.name = name;
     this.referenceId = referenceId;
+    this.relations = relations;
     this.shortCode = shortCode;
   }
 }

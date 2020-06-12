@@ -4,6 +4,7 @@ import { Validation } from 'core/domain/model/Validation/Validation';
 
 import { parseExpressionFromDTO } from './parseExpressionFromDTO';
 import { parseRowExpressionFromDTO } from './parseRowExpressionFromDTO';
+import { parseDatasetRelationFromDTO } from './parseDatasetRelationFromDTO';
 
 export const parseDataValidationRulesDTO = validations => {
   const validationsData = {};
@@ -12,6 +13,7 @@ export const parseDataValidationRulesDTO = validations => {
     validationsData.validations = validations.map(validationDTO => {
       let newExpressions = [];
       let newAllExpressions = [];
+      let newRelations = {};
       entityTypes.push(validationDTO.type);
       if (validationDTO.type === 'FIELD') {
         const { expressions, allExpressions } = parseExpressionFromDTO(validationDTO.whenCondition);
@@ -24,6 +26,14 @@ export const parseDataValidationRulesDTO = validations => {
         newExpressions = expressions;
         newAllExpressions = allExpressions;
       }
+
+      if (validationDTO.type === 'DATASET') {
+        console.log(validationDTO.type);
+        const relations = parseDatasetRelationFromDTO(validationDTO.integrityVO);
+        console.log({ relations });
+        newRelations = relations;
+      }
+
       return new Validation({
         activationGroup: validationDTO.activationGroup,
         automatic: validationDTO.automatic,
@@ -46,7 +56,8 @@ export const parseDataValidationRulesDTO = validations => {
         referenceId: validationDTO.referenceId,
         shortCode: validationDTO.shortCode,
         expressions: newExpressions,
-        allExpressions: newAllExpressions
+        allExpressions: newAllExpressions,
+        relations: newRelations
       });
     });
   } catch (error) {

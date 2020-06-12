@@ -25,6 +25,7 @@ const create = async (datasetSchemaId, validationRule) => {
 };
 
 const createDatasetRule = async (datasetSchemaId, validationRule) => {
+  console.log({ validationRule });
   const validation = {
     automatic: false,
     description: validationRule.description,
@@ -34,9 +35,9 @@ const createDatasetRule = async (datasetSchemaId, validationRule) => {
     shortCode: validationRule.shortCode,
     integrityVO: {
       isDoubleReferenced: validationRule.isDoubleReferenced,
-      originDatasetId: validationRule.relations.originDatasetSchema,
+      originDatasetSchemaId: validationRule.relations.originDatasetSchema,
       originFields: validationRule.relations.links.map(link => link.originField.code),
-      referencedDatasetId: validationRule.relations.referencedDatasetSchema.code,
+      referencedDatasetSchemaId: validationRule.relations.referencedDatasetSchema.code,
       referencedFields: validationRule.relations.links.map(link => link.referencedField.code)
     },
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
@@ -77,6 +78,7 @@ const getAll = async datasetSchemaId => {
   validationsList.rulesSchemaId = validationsListDTO.rulesSchemaId;
 
   const validationsData = parseDataValidationRulesDTO(validationsListDTO.rules);
+  console.log({ validationsData });
   validationsList.entityTypes = validationsData.entityTypes;
   validationsList.validations = validationsData.validations;
   return validationsList;
@@ -120,6 +122,29 @@ const updateRowRule = async (datasetId, validationRule) => {
   return await apiValidation.update(datasetId, validation);
 };
 
+const updateDatasetRule = async (datasetId, validationRule) => {
+  const validation = {
+    ruleId: validationRule.id,
+    description: validationRule.description,
+    automatic: validationRule.automatic,
+    enabled: validationRule.active ? validationRule.active : false,
+    referenceId: validationRule.recordSchemaId,
+    ruleName: validationRule.name,
+    shortCode: validationRule.shortCode,
+    type: 'DATASET',
+    thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
+    integrityVO: {
+      isDoubleReferenced: validationRule.isDoubleReferenced,
+      originDatasetSchemaId: validationRule.relations.originDatasetSchema,
+      originFields: validationRule.relations.links.map(link => link.originField.code),
+      referencedDatasetSchemaId: validationRule.relations.referencedDatasetSchema.code,
+      referencedFields: validationRule.relations.links.map(link => link.referencedField.code)
+    },
+    whenCondition: null
+  };
+  return await apiValidation.update(datasetId, validation);
+};
+
 export const ApiValidationRepository = {
   create,
   createDatasetRule,
@@ -127,5 +152,6 @@ export const ApiValidationRepository = {
   deleteById,
   getAll,
   update,
+  updateDatasetRule,
   updateRowRule
 };

@@ -53,6 +53,7 @@ const validationReducer = (state, { type, payload }) => {
         ruleToEdit: {}
       };
     case 'ON_OPEN_TO_EDIT':
+      console.log({ payload });
       return {
         ...state,
         isVisible: true,
@@ -123,6 +124,7 @@ export const ValidationProvider = ({ children }) => {
           });
         },
         onOpenToEdit: (rule, opener, level) => {
+          console.log({ rule });
           dispatch({
             type: 'ON_OPEN_TO_EDIT',
             payload: {
