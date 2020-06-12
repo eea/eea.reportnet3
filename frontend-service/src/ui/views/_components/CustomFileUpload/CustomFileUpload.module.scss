@@ -91,3 +91,45 @@
 .p-fluid .p-fileupload-content .p-button-icon-only {
   width: 2em;
 }
+
+.chooseButton {
+  display: flex;
+}
+
+.infoButton {
+  background-color: var(--white) !important;
+  border-radius: 50% !important;
+  color: var(--datatable-header-info-button-color) !important;
+  font-size: 12pt !important;
+  height: 0.7em !important;
+  margin-left: 0.4rem !important;
+  width: 0.7em !important;
+
+  > span {
+    left: 46% !important;
+    margin-left: -0.48em !important;
+    margin-top: -0.5em !important;
+  }
+}
+
+.invalidExtensionMsg {
+  align-items: center;
+  display: flex;
+  height: 30px;
+  margin: 1rem 0 0 0;
+  opacity: 1;
+  transition: all 0.3s ease 0.15s;
+
+  &.isValid {
+    height: 0;
+    margin: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
+
+  .closeInvalidMessageIcon {
+    cursor: pointer;
+    font-size: 0.7rem;
+    margin: 0 0 0.75rem 0.25rem;
+  }
+}
