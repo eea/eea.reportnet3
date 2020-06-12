@@ -214,9 +214,9 @@ const Dataflow = withRouter(({ history, match }) => {
     }
 
     if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']) {
-      leftSideBarContext.addModels([propertiesBtn, editBtn, manageRolesBtn]);
+      leftSideBarContext.addModels([propertiesBtn, editBtn, manageRolesBtn, apiKeyBtn]);
     } else if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']) {
-      leftSideBarContext.addModels([propertiesBtn, manageRolesBtn, apiKeyBtn]);
+      leftSideBarContext.addModels([propertiesBtn, manageRolesBtn]);
     } else {
       if (!dataflowState.isCustodian) {
         dataflowState.data.representatives.length === 1 && isUndefined(representativeId)

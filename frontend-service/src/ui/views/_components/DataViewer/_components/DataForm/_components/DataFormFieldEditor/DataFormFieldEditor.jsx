@@ -77,7 +77,7 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
       case 'DATE':
         return 'date';
       case 'TEXT':
-      case 'LONG_TEXT':
+        // case 'RICH_TEXT':
         return 'any';
       case 'EMAIL':
         return 'email';
@@ -159,8 +159,8 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     const longCharacters = 20;
     const decimalCharacters = 40;
     const dateCharacters = 10;
-    const textCharacters = 5000;
-    const longTextCharacters = 10000;
+    const textCharacters = 10000;
+    const richTextCharacters = 10000;
     const emailCharacters = 256;
     const phoneCharacters = 256;
     const urlCharacters = 5000;
@@ -178,8 +178,8 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
         return dateCharacters;
       case 'TEXT':
         return textCharacters;
-      case 'LONG_TEXT':
-        return longTextCharacters;
+      // case 'RICH_TEXT':
+      //   return richTextCharacters;
       case 'EMAIL':
         return emailCharacters;
       case 'PHONE':

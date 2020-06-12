@@ -78,6 +78,14 @@ const getLevelError = validations => {
   return levelError;
 };
 
+const groupOperations = (operation, list) => {
+  return list.reduce((objectsByKeyValue, obj) => {
+    const value = obj[operation].toLowerCase();
+    objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
+    return objectsByKeyValue;
+  }, {});
+};
+
 const groupValidations = (recordData, blockerMessage, errorMessage, warningMessage, infoMessage) => {
   let validations = [];
   if (recordData.recordValidations && !isUndefined(recordData.recordValidations)) {
@@ -196,10 +204,11 @@ const parseData = data =>
 
 export const DataViewerUtils = {
   editLargeStringWithDots,
+  formatValidations,
   getColumnByHeader,
   getFieldValues,
-  formatValidations,
   getLevelError,
+  groupOperations,
   groupValidations,
   orderValidationsByLevelError,
   parseData
