@@ -453,7 +453,7 @@
     "selectContributorRole": "Select Role",
     "selectedLink": "Selected Link",
     "selectedObligation": "Selected obligation",
-    "selectFile": "Select or drag here your dataset (.csv)",
+    "selectFile": "Select or drag here your dataset",
     "selectImage": "Select one",
     "selectLang": "Select language",
     "settings": "Settings",
@@ -674,6 +674,9 @@
     "updateIntegrationError": "Error updating integration",
     "tool": "Tool",
     "editExternalIntegration": "Edit external integrations",
-    "parameterAlreadyExists": "The parameter key already exists"
+    "parameterAlreadyExists": "The parameter key already exists",
+    "supportedFileExtensionsTooltip": "Supported file extensions: ",
+    "invalidExtensionFile": "ERROR: Selected file does not have a valid extension, please check it.",
+    "loadingFileExtensionsError": "Error loading supported file extensions"
   }
 }
