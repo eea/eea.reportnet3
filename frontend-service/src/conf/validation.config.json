@@ -4,7 +4,6 @@
     "DATE": ["date", "day", "month", "year"],
     "EMAIL": ["LEN", "string"],
     "LINK": ["LEN", "string"],
-    "LONG_TEXT": ["LEN", "string"],
     "MULTISELECT_CODELIST": ["LEN", "string"],
     "NUMBER_DECIMAL": ["number"],
     "NUMBER_INTEGER": ["number"],
@@ -15,7 +14,7 @@
   "fieldByOperatorType": {
     "number": ["NUMBER_INTEGER", "NUMBER_DECIMAL"],
     "LEN": ["NUMBER_INTEGER"],
-    "string": ["EMAIL", "TEXT", "PHONE", "LONG_TEXT", "URL", "CODELIST"],
+    "string": ["EMAIL", "TEXT", "PHONE", "URL", "CODELIST"],
     "date": ["DATE"],
     "month": ["DATE", "NUMBER_INTEGER"],
     "year": ["DATE", "NUMBER_INTEGER"],
