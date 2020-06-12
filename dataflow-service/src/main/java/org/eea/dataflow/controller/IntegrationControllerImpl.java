@@ -1,24 +1,24 @@
 package org.eea.dataflow.controller;
 
-import java.util.ArrayList;
 import java.util.List;
+import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController;
-import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
-import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 
@@ -29,9 +29,10 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/integration")
 public class IntegrationControllerImpl implements IntegrationController {
 
-  /*
-   * @Autowired private IntegrationService integrationService;
-   */
+
+  @Autowired
+  private IntegrationService integrationService;
+
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -45,60 +46,22 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @PutMapping(value = "/listIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<IntegrationVO> findAllIntegrationsByCriteria(@RequestBody IntegrationVO integration) {
-    IntegrationVO integration1 = new IntegrationVO();
-    integration1.setId(1L);
-    integration1.setName("Integration dummy 1");
-    integration1.setDescription("This is a description");
-    integration1.setOperation(IntegrationOperationTypeEnum.EXPORT);
-    integration1.setTool(IntegrationToolTypeEnum.FME);
-    integration1.getInternalParameters().put("fileExtension", "csv");
-    integration1.getInternalParameters().put("datasetSchemaId", "5ce524fad31fc52540abae73");
-    integration1.getExternalParameters().put("name1", "value1");
+  public List<IntegrationVO> findAllIntegrationsByCriteria(
+      @RequestBody IntegrationVO integrationVO) {
 
-    IntegrationVO integration2 = new IntegrationVO();
-    integration2.setId(2L);
-    integration2.setName("Integration dummy 2");
-    integration2.setDescription("This is a description");
-    integration2.setOperation(IntegrationOperationTypeEnum.IMPORT);
-    integration2.setTool(IntegrationToolTypeEnum.FME);
-    integration2.getInternalParameters().put("datasetSchemaId", "5ce524fad31fc52540abae73");
-    integration2.getInternalParameters().put("parameter2Name", "paramValue2");
-    integration2.getExternalParameters().put("name1", "value1");
-    integration2.getExternalParameters().put("name2", "value2");
-
-    List<IntegrationVO> integrations = new ArrayList<>();
-    integrations.add(integration1);
-    integrations.add(integration2);
-    return integrations;
+    try {
+      List<IntegrationVO> integrations =
+          integrationService.getAllIntegrationsByCriteria(integrationVO);
+      return integrations;
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error finding integrations: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
 
-  /**
-   * Find integration by id.
-   *
-   * @param idIntegration the id integration
-   * @return the integration VO
-   */
-  @Override
-  @HystrixCommand
-  @GetMapping(value = "/{idIntegration}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public IntegrationVO findIntegrationById(@PathVariable("idIntegration") Long idIntegration) {
-    IntegrationVO integration1 = new IntegrationVO();
 
-    integration1.setId(idIntegration);
-    integration1.setName("Integration dummy 3");
-    integration1.setDescription("This is a description");
-    integration1.setOperation(IntegrationOperationTypeEnum.EXPORT);
-    integration1.setTool(IntegrationToolTypeEnum.FME);
-    integration1.getInternalParameters().put("datasetSchemaId", "5ce524fad31fc52540abae73");
-    integration1.getInternalParameters().put("fileExtension", "json");
-    integration1.getExternalParameters().put("name1", "value1");
-    integration1.getExternalParameters().put("name2", "value2");
-    integration1.getExternalParameters().put("name3", "value3");
-
-    return integration1;
-  }
 
   /**
    * Creates the integration.
@@ -108,26 +71,38 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
   public void createIntegration(@RequestBody IntegrationVO integration) {
 
-    /*
-     * try { integrationService.createIntegration(integration); } catch (EEAException e) {
-     * LOG_ERROR.error("error"); throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-     * e.getMessage(), e); }
-     */
+    try {
+      integrationService.createIntegration(integration);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error creating integration. Message: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+
   }
+
 
 
   /**
    * Delete integration.
    *
-   * @param integrationId the integration id
+   * @param integration the integration
    */
   @Override
   @HystrixCommand
-  @DeleteMapping(value = "/{idIntegration}/delete")
-  public void deleteIntegration(@PathVariable("idIntegration") Long integrationId) {
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @DeleteMapping(value = "/{integrationId}")
+  public void deleteIntegration(@PathVariable("integrationId") Long integrationId) {
+
+    try {
+      integrationService.deleteIntegration(integrationId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting an integration. Message: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
 
   }
 
@@ -139,10 +114,36 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity updateIntegration(@RequestBody IntegrationVO integration) {
-    return null;
+  public void updateIntegration(@RequestBody IntegrationVO integration) {
+
+    try {
+      integrationService.updateIntegration(integration);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error updating an integration. Message: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
 
+  /**
+   * Find extensions and operations.
+   *
+   * @param integrationVO the integration VO
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
+  @PutMapping(value = "/listExtensionsOperations", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<IntegrationVO> findExtensionsAndOperations(@RequestBody IntegrationVO integrationVO) {
+    try {
+      return integrationService.getOnlyExtensionsAndOperations(
+          integrationService.getAllIntegrationsByCriteria(integrationVO));
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error finding integrations: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
 
 }

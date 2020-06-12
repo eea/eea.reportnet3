@@ -778,6 +778,8 @@ body .p-fileupload .p-fileupload-buttonbar {
   -moz-border-radius-topright: 3px;
   -webkit-border-top-right-radius: 3px;
   border-top-right-radius: 3px;
+  display: flex;
+  justify-content: space-between;
 }
 body .p-fileupload .p-fileupload-buttonbar .p-button {
   margin: 3px;

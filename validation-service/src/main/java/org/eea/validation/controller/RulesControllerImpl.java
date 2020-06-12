@@ -171,6 +171,7 @@ public class RulesControllerImpl implements RulesController {
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
 
+
       rulesService.createNewRule(datasetId, ruleVO);
     } catch (EEAException e) {
       LOG_ERROR.error(
@@ -357,4 +358,5 @@ public class RulesControllerImpl implements RulesController {
       @RequestParam("fieldSchemaId") String fieldSchemaId) {
     rulesService.deleteRuleHighLevelLike(datasetSchemaId, fieldSchemaId);
   }
+
 }

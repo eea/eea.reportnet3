@@ -92,6 +92,11 @@ public class Dataflow {
   @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)
   private Set<Representative> representatives;
 
+
+  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)
+  private Set<Integration> integrations;
+
+
   /**
    * Equals.
    *
