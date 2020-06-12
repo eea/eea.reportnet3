@@ -390,6 +390,7 @@ public class UniqueValidationUtils {
       List<TableValidation> tableValidations =
           tableValue.getTableValidations() != null ? tableValue.getTableValidations()
               : new ArrayList<>();
+      tableValidation.setTableValue(tableValue);
       tableValidations.add(tableValidation);
       tableValue.setTableValidations(tableValidations);
       saveTableValidations(tableValue);
@@ -414,6 +415,7 @@ public class UniqueValidationUtils {
         List<TableValidation> tableValidations =
             tableValue.getTableValidations() != null ? tableValue.getTableValidations()
                 : new ArrayList<>();
+        tableValidation.setTableValue(tableValue);
         tableValidations.add(tableValidation);
         tableValue.setTableValidations(tableValidations);
         saveTableValidations(tableValue);
