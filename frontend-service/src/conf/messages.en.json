@@ -453,7 +453,7 @@
     "selectContributorRole": "Select Role",
     "selectedLink": "Selected Link",
     "selectedObligation": "Selected obligation",
-    "selectFile": "Select or drag here your dataset",
+    "selectFile": "Select or drag here your file",
     "selectImage": "Select one",
     "selectLang": "Select language",
     "settings": "Settings",
@@ -656,9 +656,9 @@
     "addRowConstraint": "Add row constraint",
     "noTablesToSelect": "There are no tables to select",
     "externalIntegrations": "External integrations",
-    "createExternalIntegration": "Create external integrations",
+    "createExternalIntegration": "Create external integration",
     "integrationName": "Integration name",
-    "operation": "Operation name",
+    "operation": "Operation",
     "deleteIntegrationHeader": "Delete integration",
     "deleteIntegrationConfirm": "Are you sure you want to delete this integration?",
     "selectField": "Select field",
@@ -673,10 +673,11 @@
     "noIntegrationsWithSelectedParameters": "There are no integrations with the selected parameters",
     "updateIntegrationError": "Error updating integration",
     "tool": "Tool",
-    "editExternalIntegration": "Edit external integrations",
+    "editExternalIntegration": "Edit external integration",
     "parameterAlreadyExists": "The parameter key already exists",
     "supportedFileExtensionsTooltip": "Supported file extensions: ",
-    "invalidExtensionFile": "ERROR: Selected file does not have a valid extension, please check it.",
-    "loadingFileExtensionsError": "Error loading supported file extensions"
+    "invalidExtensionFile": "ERROR: Selected file does not have a valid extension, please check it",
+    "loadingFileExtensionsError": "Error loading supported file extensions",
+    "operationPlaceHolder": "Select an operation"
   }
 }
