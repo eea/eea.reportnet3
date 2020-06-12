@@ -225,8 +225,15 @@ public final class EEAErrorMessage {
   /** The Constant UNREPORTED_FIELDSCHEMAS: {@value}. */
   public static final String UNREPORTED_FIELDSCHEMAS = "Unreported fieldSchemas";
 
+  /** The Constant MISSING_PARAMETERS_INTEGRATION. */
+  public static final String MISSING_PARAMETERS_INTEGRATION = "Parameters incorrect";
+
+  /** The Constant INTEGRATION_NOT_FOUND. */
+  public static final String INTEGRATION_NOT_FOUND = "Integration not found";
+
   /** The Constant DATASET_NOT_REPORTABLE: {@value}. */
   public static final String DATASET_NOT_REPORTABLE = "Dataset %d is not Reportable";
+
 
   /**
    * Instantiates a new EEA error message.
