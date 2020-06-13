@@ -351,6 +351,12 @@ public class ValidationHelperTest {
         validator, EventType.COMMAND_VALIDATED_RECORD_COMPLETED);
     validationHelper.processValidation(eeaEventVO, "1", 2l,
         validator, EventType.COMMAND_VALIDATED_RECORD_COMPLETED);
+    validationHelper.processValidation(eeaEventVO, "1", 2l,
+        validator, EventType.COMMAND_VALIDATED_RECORD_COMPLETED);
+    validationHelper.processValidation(eeaEventVO, "1", 2l,
+        validator, EventType.COMMAND_VALIDATED_RECORD_COMPLETED);
+    validationHelper.processValidation(eeaEventVO, "1", 2l,
+        validator, EventType.COMMAND_VALIDATED_RECORD_COMPLETED);
 
     Thread.sleep(1000);//giving some time to the threads to update the counter
 
