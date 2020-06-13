@@ -298,8 +298,11 @@ public class ValidationHelper implements DisposableBean {
         validator, notificationEventType);
     //first every task is always queued up to ensure the order
 
-    LOG.info(
-        "Queuing up process for event {}. ", eeaEventVO);
+    if (((ThreadPoolExecutor) validationExecutorService).getActiveCount() == maxRunningTasks) {
+      LOG.info(
+          "Event {} will be queued up as there are no validating threads available at the moment",
+          eeaEventVO);
+    }
 
     this.validationExecutorService.submit(new ValidationTasksExecutorThread(validationTask));
 
@@ -584,6 +587,7 @@ public class ValidationHelper implements DisposableBean {
 
       Long currentTime = System.currentTimeMillis();
       int workingThreads = ((ThreadPoolExecutor) validationExecutorService).getActiveCount();
+
       LOG.info(
           "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
           validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads
