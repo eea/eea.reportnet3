@@ -329,6 +329,8 @@ public class ValidationHelperTest {
       throws EEAException, InterruptedException {
     ReflectionTestUtils
         .setField(validationHelper, "validationExecutorService", Executors.newFixedThreadPool(2));
+    ReflectionTestUtils.setField(validationHelper, "maxRunningTasks", 2);
+
     Validator validator = (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase) -> {
       try {
         //Thiss counter will be usefull to verify how many threads has been executed simultaneously before the test ends

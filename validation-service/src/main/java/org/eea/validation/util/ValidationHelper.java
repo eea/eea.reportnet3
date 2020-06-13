@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ThreadPoolExecutor;
 import javax.annotation.PostConstruct;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -33,6 +33,7 @@ import org.eea.validation.util.model.ValidationProcessVO;
 import org.kie.api.KieBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,7 +44,7 @@ import org.springframework.stereotype.Component;
  * The Class ValidationHelper.
  */
 @Component
-public class ValidationHelper {
+public class ValidationHelper implements DisposableBean {
 
   /**
    * The Constant LOG.
@@ -270,6 +271,13 @@ public class ValidationHelper {
     }
   }
 
+  @Override
+  public void destroy() throws Exception {
+    if (null != validationExecutorService) {
+      this.validationExecutorService.shutdown();
+    }
+  }
+
   /**
    * Submits the validation task to the validation executor thread pool. If any thread is available
    * the task will start automatically. Otherwise it will wait in a FIFO queue
@@ -289,9 +297,9 @@ public class ValidationHelper {
     ValidationTask validationTask = this.buildValidationTask(eeaEventVO, processId, datasetId,
         validator, notificationEventType);
     //first every task is always queued up to ensure the order
+
     LOG.info(
-        "Queuing up process for event {}. Event waiting to be processed",
-        eeaEventVO, maxRunningTasks);
+        "Queuing up process for event {}. ", eeaEventVO);
 
     this.validationExecutorService.submit(new ValidationTasksExecutorThread(validationTask));
 
@@ -575,8 +583,10 @@ public class ValidationHelper {
     public void run() {
 
       Long currentTime = System.currentTimeMillis();
-      LOG.info("Executing validation for event {}. ",
-          validationTask.eeaEventVO
+      int workingThreads = ((ThreadPoolExecutor) validationExecutorService).getActiveCount();
+      LOG.info(
+          "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
+          validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads
       );
       try {
         validationTask.validator
