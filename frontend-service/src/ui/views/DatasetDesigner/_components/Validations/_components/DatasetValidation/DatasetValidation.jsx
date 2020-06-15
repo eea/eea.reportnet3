@@ -501,7 +501,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
         referencedFields: getDatasetSchemaTableFieldsBySchema(
           referencedTable,
           datasetSchemas,
-          datasetSchema.datasetSchemaId
+          creationFormState.candidateRule.relations.referencedDatasetSchema.code
         ),
         referencedTable
       }

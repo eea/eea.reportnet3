@@ -5,6 +5,7 @@ export const parseDatasetRelationFromDTO = integrityVO => {
   console.log({ integrityVO });
   if (!isNil(integrityVO)) {
     const relations = {
+      id: integrityVO.id,
       isDoubleReferenced: !isNil(integrityVO.isDoubleReferenced) ? integrityVO.isDoubleReferenced : false,
       originDatasetSchema: integrityVO.originDatasetSchemaId,
       referencedDatasetSchema: { code: integrityVO.referencedDatasetSchemaId, label: '' },

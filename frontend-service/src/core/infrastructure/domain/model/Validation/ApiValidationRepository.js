@@ -148,6 +148,7 @@ const updateDatasetRule = async (datasetId, validationRule) => {
     type: 'DATASET',
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
     integrityVO: {
+      id: validationRule.relations.id,
       isDoubleReferenced: validationRule.isDoubleReferenced,
       originDatasetSchemaId: validationRule.relations.originDatasetSchema,
       originFields: validationRule.relations.links.map(link => link.originField.code),
