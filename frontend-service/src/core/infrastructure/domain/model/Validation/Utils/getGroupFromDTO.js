@@ -23,6 +23,5 @@ export const getGroupFromDTO = (expression, allExpressions, parentOperator) => {
   selectorFromDTO({ operator: expression.operator, params: expression.params }, subExpressions, allExpressions);
   newExpression.expressions = subExpressions;
   allExpressions.push(newExpression);
-
   return newExpression;
 };

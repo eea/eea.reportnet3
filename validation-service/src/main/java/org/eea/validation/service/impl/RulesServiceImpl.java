@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -34,6 +35,7 @@ import org.eea.validation.util.KieBaseManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
@@ -70,12 +72,14 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private IntegritySchemaRepository integritySchemaRepository;
 
+  /** The integrity mapper. */
   @Autowired
   private IntegrityMapper integrityMapper;
 
   /** The kie base manager. */
   @Autowired
   private KieBaseManager kieBaseManager;
+
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
@@ -175,7 +179,19 @@ public class RulesServiceImpl implements RulesService {
     if (datasetSchemaId == null) {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
+    Rule rule = rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
 
+    if (null != rule && EntityTypeEnum.DATASET.equals(rule.getType())
+        && rule.getIntegrityConstraintId() != null) {
+      Optional<IntegritySchema> integritySchema =
+          integritySchemaRepository.findById(rule.getIntegrityConstraintId());
+      if (integritySchema.isPresent()) {
+        dataSetMetabaseControllerZuul.deleteForeignRelationship(datasetId, null,
+            integritySchema.get().getOriginDatasetSchemaId().toString(),
+            integritySchema.get().getReferencedDatasetSchemaId().toString());
+      }
+      integritySchemaRepository.deleteById(rule.getIntegrityConstraintId());
+    }
     rulesRepository.deleteRuleById(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
   }
 
@@ -271,11 +287,17 @@ public class RulesServiceImpl implements RulesService {
       IntegrityVO integrityVO = ruleVO.getIntegrityVO();
       integrityVO.setId(integrityConstraintId.toString());
       IntegritySchema integritySchema = integrityMapper.classToEntity(integrityVO);
+      integritySchema.setRuleId(rule.getRuleId());
       integritySchemaRepository.save(integritySchema);
-
+      rule.setVerified(true);
+      rule.setEnabled(ruleVO.isEnabled());
       rule.setIntegrityConstraintId(integrityConstraintId);
-      rule.setWhenCondition("isIntegrityConstraint('" + integrityConstraintId.toString() + "','"
-          + rule.getRuleId().toString() + "')");
+      rule.setWhenCondition("isIntegrityConstraint(datasetId,'" + integrityConstraintId.toString()
+          + "','" + rule.getRuleId().toString() + "')");
+      Long datasetReferencedId = dataSetMetabaseControllerZuul
+          .getDesignDatasetIdByDatasetSchemaId(integrityVO.getReferencedDatasetSchemaId());
+      dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetId, datasetReferencedId,
+          integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
     }
     validateRule(rule);
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
@@ -499,8 +521,27 @@ public class RulesServiceImpl implements RulesService {
     rule.setActivationGroup(null);
     rule.setVerified(null);
 
-    validateRule(rule);
+    if (EntityTypeEnum.DATASET.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
+      ObjectId integrityConstraintId = new ObjectId();
+      IntegrityVO integrityVO = ruleVO.getIntegrityVO();
+      integrityVO.setId(integrityConstraintId.toString());
+      IntegritySchema integritySchema = integrityMapper.classToEntity(integrityVO);
+      integritySchema.setRuleId(rule.getRuleId());
+      integritySchema.setId(new ObjectId(ruleVO.getIntegrityVO().getId()));
 
+      integritySchemaRepository.delete(integritySchema);
+      integritySchemaRepository.save(integritySchema);
+
+      rule.setVerified(true);
+      rule.setEnabled(ruleVO.isEnabled());
+      rule.setIntegrityConstraintId(integrityConstraintId);
+      rule.setWhenCondition("isIntegrityConstraint(datasetId,'" + integrityConstraintId.toString()
+          + "','" + rule.getRuleId().toString() + "')");
+
+      dataSetMetabaseControllerZuul.updateDatasetForeignRelationship(datasetId, datasetId,
+          integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
+    }
+    validateRule(rule);
     if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_UPDATING_RULE);
     }
@@ -694,6 +735,77 @@ public class RulesServiceImpl implements RulesService {
         ruleSchemaVO.getRules().stream()
             .forEach(rule -> rule.setIntegrityVO(integrityMap.get(rule.getRuleId())));
       }
+    }
+  }
+
+  /**
+   * Delete dataset rule and integrity by id field schema. We use that method to delete the
+   * dependences of integrity in others dataset or the same dataset
+   *
+   * @param fieldSchemaId the field schema id
+   * @param datasetId the dataset id
+   */
+  @Override
+  @Async
+  public void deleteDatasetRuleAndIntegrityByFieldSchemaId(String fieldSchemaId, Long datasetId) {
+    // we find the values salved in database by origin or referenced in integritySchema
+    List<IntegritySchema> integritySchema =
+        integritySchemaRepository.findByOriginOrReferenceFields(new ObjectId(fieldSchemaId));
+    // we delete the integrity object and delete the rules associated to the originDataset
+    if (null != integritySchema && !integritySchema.isEmpty()) {
+      integritySchema.stream().forEach(integritySchemaData -> {
+        // we delete the rule associate with that field
+        rulesRepository.deleteRuleById(integritySchemaData.getOriginDatasetSchemaId(),
+            integritySchemaData.getRuleId());
+
+        // we delete the integrity rule in mongodb in integrity collection
+        integritySchemaRepository.deleteById(integritySchemaData.getId());
+        LOG.info(
+            "Rule integrity associated to the fieldschemaId {} and the integrity data with id {} , in the datasetOrigin id {} was deleted!",
+            fieldSchemaId, integritySchemaData.getId(),
+            integritySchemaData.getOriginDatasetSchemaId());
+
+        // we delete the pk relation in the database
+        dataSetMetabaseControllerZuul.deleteForeignRelationship(datasetId, null,
+            integritySchemaData.getOriginDatasetSchemaId().toString(),
+            integritySchemaData.getReferencedDatasetSchemaId().toString());
+      });
+
+    }
+  }
+
+  /**
+   * Delete dataset rule and integrity by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
+   */
+  @Override
+  @Async
+  public void deleteDatasetRuleAndIntegrityByDatasetSchemaId(String datasetSchemaId,
+      Long datasetId) {
+    // we find the values salved in database by origin or referenced in integritySchema
+    List<IntegritySchema> integritySchema = integritySchemaRepository
+        .findByOriginOrReferenceDatasetSchemaId(new ObjectId(datasetSchemaId));
+
+    if (null != integritySchema && !integritySchema.isEmpty()) {
+      integritySchema.stream().forEach(integritySchemaData -> {
+        // we delete the rule associate with that field
+        rulesRepository.deleteRuleById(integritySchemaData.getOriginDatasetSchemaId(),
+            integritySchemaData.getRuleId());
+        // we delete the integrity rule in mongodb in integrity collection
+        integritySchemaRepository.deleteById(integritySchemaData.getId());
+        LOG.info(
+            "Rule integrity associated to the datasetId {} and the integrity data with id {} , in the datasetOrigin id {} was deleted!",
+            datasetSchemaId, integritySchemaData.getId(),
+            integritySchemaData.getOriginDatasetSchemaId());
+
+        // we delete the pk relation in the database
+        dataSetMetabaseControllerZuul.deleteForeignRelationship(datasetId, null,
+            integritySchemaData.getOriginDatasetSchemaId().toString(),
+            integritySchemaData.getReferencedDatasetSchemaId().toString());
+      });
+
     }
   }
 

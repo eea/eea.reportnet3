@@ -370,7 +370,7 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void deleteDatasetSchemaTest() {
-    dataSchemaServiceImpl.deleteDatasetSchema("idTableSchema");
+    dataSchemaServiceImpl.deleteDatasetSchema("idTableSchema", 1L);
     Mockito.verify(schemasRepository, times(1)).deleteDatasetSchemaById(Mockito.any());
   }
 
@@ -458,7 +458,8 @@ public class DatasetSchemaServiceTest {
     doNothing().when(rulesControllerZuul).deleteRuleHighLevelLike(Mockito.any(), Mockito.any());
     Mockito.when(schemasRepository.deleteFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(updateResult);
-    Assert.assertTrue(dataSchemaServiceImpl.deleteFieldSchema("datasetSchemaId", "fieldSchemaId"));
+    Assert.assertTrue(
+        dataSchemaServiceImpl.deleteFieldSchema("datasetSchemaId", "fieldSchemaId", 1L));
   }
 
   /**
@@ -472,7 +473,8 @@ public class DatasetSchemaServiceTest {
     doNothing().when(rulesControllerZuul).deleteRuleHighLevelLike(Mockito.any(), Mockito.any());
     Mockito.when(schemasRepository.deleteFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(updateResult);
-    Assert.assertFalse(dataSchemaServiceImpl.deleteFieldSchema("datasetSchemaId", "fieldSchemaId"));
+    Assert.assertFalse(
+        dataSchemaServiceImpl.deleteFieldSchema("datasetSchemaId", "fieldSchemaId", 1L));
   }
 
   /**
@@ -645,7 +647,7 @@ public class DatasetSchemaServiceTest {
     Mockito.when(schemasRepository.findRecordSchema(id.toString(), id.toString()))
         .thenReturn(documentRecord);
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
-    dataSchemaServiceImpl.deleteTableSchema(id.toString(), id.toString());
+    dataSchemaServiceImpl.deleteTableSchema(id.toString(), id.toString(), 1l);
     Mockito.verify(schemasRepository, times(1)).deleteTableSchemaById(Mockito.any());
   }
 
@@ -664,7 +666,7 @@ public class DatasetSchemaServiceTest {
     TableSchemaVO tableVO = new TableSchemaVO();
     tableVO.setIdTableSchema(id.toString());
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
-    dataSchemaServiceImpl.deleteTableSchema(id.toString(), id.toString());
+    dataSchemaServiceImpl.deleteTableSchema(id.toString(), id.toString(), 1L);
   }
 
   /**

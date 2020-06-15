@@ -19,24 +19,31 @@ import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.model.FKDataCollection;
+import org.eea.dataset.service.model.IntegrityDataCollection;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
@@ -139,6 +146,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    */
   @Autowired
   private ForeignRelationsRepository foreignRelationsRepository;
+
+
+  /** The rules controller zuul. */
+  @Autowired
+  private RulesControllerZuul rulesControllerZuul;
+
+
+  /** The data set metabase repository. */
+  @Autowired
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
 
   /**
    * The Constant LOG.
@@ -354,8 +371,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
 
         List<FKDataCollection> newReportingDatasetsRegistry = new ArrayList<>();
-
+        List<IntegrityDataCollection> lIntegrityDataCollections = new ArrayList<>();
         for (DesignDatasetVO design : designs) {
+          RulesSchemaVO rulesSchemaVO =
+              rulesControllerZuul.findRuleSchemaByDatasetId(design.getDatasetSchema());
+          List<IntegrityVO> integritieVOs = findIntegrityVO(rulesSchemaVO);
           if (isCreation) {
             // 6. Create DataCollection in metabase
             Long dataCollectionId = persistDC(statement, design, time, dataflowId, dueDate);
@@ -378,6 +398,17 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             newReporting.setFks(
                 datasetSchemaService.getReferencedFieldsBySchema(design.getDatasetSchema()));
             newReportingDatasetsRegistry.add(newReporting);
+            if (!integritieVOs.isEmpty()) {
+              for (IntegrityVO integritieVO : integritieVOs) {
+                IntegrityDataCollection integrityDataCollection = new IntegrityDataCollection();
+                integrityDataCollection.setIdDatasetOrigin(datasetId);
+                integrityDataCollection.setIdDatasetSchemaOrigin(design.getDatasetSchema());
+                integrityDataCollection.setDataProviderId(representative.getDataProviderId());
+                integrityDataCollection
+                    .setIdDatasetSchemaReferenced(integritieVO.getReferencedDatasetSchemaId());
+                lIntegrityDataCollections.add(integrityDataCollection);
+              }
+            }
           }
         }
 
@@ -388,7 +419,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         // Add into the foreign_relations table from metabase the dataset origin-destination
         // relation, if applies
         addForeignRelationsFromNewReportings(newReportingDatasetsRegistry);
-
+        if (lIntegrityDataCollections != null) {
+          addDatasetForeignRelations(lIntegrityDataCollections);
+        }
         LOG.info("Metabase changes completed on DataCollection creation");
 
         // 9. Create schemas for each dataset
@@ -405,6 +438,53 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       }
     } catch (SQLException e) {
       LOG_ERROR.error("Error rolling back: ", e);
+    }
+  }
+
+  /**
+   * Check if dataset has integrity rule.
+   *
+   * @param rulesSchemaVO the rules schema VO
+   * @return true, if successful
+   */
+  List<IntegrityVO> findIntegrityVO(RulesSchemaVO rulesSchemaVO) {
+    List<IntegrityVO> integritiesVO = new ArrayList<>();
+    if (rulesSchemaVO != null && rulesSchemaVO.getRules() != null) {
+      integritiesVO = rulesSchemaVO.getRules().stream().filter(
+          rule -> EntityTypeEnum.DATASET.equals(rule.getType()) && rule.getIntegrityVO() != null)
+          .map(RuleVO::getIntegrityVO).collect(Collectors.toList());
+    }
+    return integritiesVO;
+  }
+
+  /**
+   * Adds the dataset foreign relations.
+   *
+   * @param lIntegrityDataCollections the list of integrity data collections
+   */
+  private void addDatasetForeignRelations(List<IntegrityDataCollection> lIntegrityDataCollections) {
+    List<ForeignRelations> foreignRelationsList = new ArrayList<>();
+    for (IntegrityDataCollection integrityDataCollection : lIntegrityDataCollections) {
+      ForeignRelations foreignRelation = new ForeignRelations();
+      DataSetMetabase datasetOrigin = new DataSetMetabase();
+      datasetOrigin.setId(integrityDataCollection.getIdDatasetOrigin());
+      foreignRelation.setIdDatasetOrigin(datasetOrigin);
+      DataSetMetabase datasetDestination = new DataSetMetabase();
+      Optional<DataSetMetabase> datasetMetabase =
+          dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderId(
+              integrityDataCollection.getIdDatasetSchemaReferenced(),
+              integrityDataCollection.getDataProviderId());
+      if (datasetMetabase.isPresent()) {
+        datasetDestination.setId(datasetMetabase.get().getId());
+      }
+      foreignRelation.setIdDatasetDestination(datasetDestination);
+      foreignRelation.setIdPk(integrityDataCollection.getIdDatasetSchemaOrigin());
+      foreignRelation.setIdFkOrigin(integrityDataCollection.getIdDatasetSchemaReferenced());
+      foreignRelationsList.add(foreignRelation);
+    }
+
+    if (!foreignRelationsList.isEmpty()) {
+      foreignRelationsRepository.saveAll(foreignRelationsList);
     }
   }
 
@@ -622,8 +702,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Override
   public void addForeignRelationsFromNewReportings(List<FKDataCollection> datasetsRegistry) {
     List<ForeignRelations> foreignRelations = new ArrayList<>();
-    Map<String, List<FKDataCollection>> groupByRepresentative =
-        datasetsRegistry.stream().collect(Collectors.groupingBy(fk -> fk.getRepresentative()));
+    Map<String, List<FKDataCollection>> groupByRepresentative = datasetsRegistry.stream()
+        .collect(Collectors.groupingBy(FKDataCollection::getRepresentative));
 
     groupByRepresentative.forEach((representative, listFkData) -> {
       for (FKDataCollection fkData : listFkData) {

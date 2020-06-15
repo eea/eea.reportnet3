@@ -13,8 +13,14 @@ export const parseDataValidationRulesDTO = validations => {
     validationsData.validations = validations.map(validationDTO => {
       let newExpressions = [];
       let newAllExpressions = [];
+      let newExpressionsIf = [];
+      let newAllExpressionsIf = [];
+      let newExpressionsThen = [];
+      let newAllExpressionsThen = [];
       let newRelations = {};
+      
       entityTypes.push(validationDTO.type);
+
       if (validationDTO.type === 'FIELD') {
         const { expressions, allExpressions } = parseExpressionFromDTO(validationDTO.whenCondition);
         newExpressions = expressions;
@@ -22,9 +28,22 @@ export const parseDataValidationRulesDTO = validations => {
       }
 
       if (validationDTO.type === 'RECORD') {
-        const { expressions, allExpressions } = parseRowExpressionFromDTO(validationDTO.whenCondition);
-        newExpressions = expressions;
-        newAllExpressions = allExpressions;
+        if (validationDTO.whenCondition.operator === 'RECORD_IF') {
+          const { expressions: expressionsIf, allExpressions: allExpressionsIf } = parseRowExpressionFromDTO(
+            validationDTO.whenCondition.params[0]
+          );
+          const { expressions: expressionsThen, allExpressions: allExpressionsThen } = parseRowExpressionFromDTO(
+            validationDTO.whenCondition.params[1]
+          );
+          newExpressionsIf = expressionsIf;
+          newAllExpressionsIf = allExpressionsIf;
+          newExpressionsThen = expressionsThen;
+          newAllExpressionsThen = allExpressionsThen;
+        } else {
+          const { expressions, allExpressions } = parseRowExpressionFromDTO(validationDTO.whenCondition);
+          newExpressions = expressions;
+          newAllExpressions = allExpressions;
+        }
       }
 
       if (validationDTO.type === 'DATASET') {
@@ -57,6 +76,10 @@ export const parseDataValidationRulesDTO = validations => {
         shortCode: validationDTO.shortCode,
         expressions: newExpressions,
         allExpressions: newAllExpressions,
+        expressionsIf: newExpressionsIf,
+        allExpressionsIf: newAllExpressionsIf,
+        expressionsThen: newExpressionsThen,
+        allExpressionsThen: newAllExpressionsThen,
         relations: newRelations
       });
     });

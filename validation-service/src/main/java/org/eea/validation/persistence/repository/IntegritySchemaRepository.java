@@ -7,6 +7,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.validation.persistence.schemas.IntegritySchema;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
 /**
  * The Interface SchemasRepository.
@@ -14,20 +15,20 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 public interface IntegritySchemaRepository extends MongoRepository<IntegritySchema, ObjectId> {
 
   /**
-   * Find by id dataset schema.
+   * Find by origin or reference fields.
    *
-   * @param datasetSchemaId the dataset schema id
-   * @return the rules schema
+   * @param idFieldSchema the id field schema
+   * @return the list
    */
-  List<IntegritySchema> findByOriginDatasetId(Long originDatasetId);
+  @Query("{'$or': [{'originFields' : ?0 }, {'referencedFields' : ?0 }]}")
+  List<IntegritySchema> findByOriginOrReferenceFields(ObjectId idFieldSchema);
 
   /**
-   * Find by referenced dataset schema id.
+   * Find by origin or reference dataset schema id.
    *
-   * @param referencedDatasetSchemaId the referenced dataset schema id
-   * @return the integrity schema
+   * @param idFieldSchema the id field schema
+   * @return the list
    */
-  IntegritySchema findByReferencedDatasetId(Long referencedDatasetId);
-
-
+  @Query("{'$or': [{'originDatasetSchemaId' : ?0 }, {'referencedDatasetSchemaId' : ?0 }]}")
+  List<IntegritySchema> findByOriginOrReferenceDatasetSchemaId(ObjectId idFieldSchema);
 }

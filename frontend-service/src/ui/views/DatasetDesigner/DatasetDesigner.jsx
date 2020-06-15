@@ -65,10 +65,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     dataflowName: '',
     datasetDescription: '',
     datasetHasData: false,
+    datasetSchema: {},
     datasetSchemaAllTables: [],
     datasetSchemaId: '',
     datasetSchemaName: '',
-    datasetSchema: {},
     datasetSchemas: [],
     datasetStatistics: [],
     dataViewerOptions: { activeIndex: 0, isValidationSelected: false, recordPositionId: -1, selectedRecordErrorId: -1 },
@@ -148,7 +148,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, []);
 
   useEffect(() => {
-    if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener)
+    if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener)
       manageDialogs('validationListDialogVisible', true);
   }, [validationContext]);
 
@@ -284,7 +284,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const onHideValidationsDialog = () => {
-    if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener) {
+    if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener) {
       validationContext.onResetOpener();
     }
     manageDialogs('validationListDialogVisible', false);
@@ -293,7 +293,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const onKeyChange = event => {
     if (event.key === 'Escape') {
       designerDispatch({ type: 'ON_UPDATE_DESCRIPTION', payload: { value: designerState.initialDatasetDescription } });
-    } else if (event.key == 'Enter') {
+    } else if (event.key === 'Enter') {
       event.preventDefault();
       onBlurDescription(event.target.value);
     }
@@ -316,13 +316,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         designerDispatch({
           type: 'GET_DATASET_DATA',
           payload: {
+            datasetSchema: dataset,
+            datasetStatistics: datasetStatisticsDTO,
             description: dataset.datasetSchemaDescription,
             levelErrorTypes: dataset.levelErrorTypes,
             schemaId: dataset.datasetSchemaId,
             tables: dataset.tables,
-            tableSchemaNames: tableSchemaNamesList,
-            datasetStatistics: datasetStatisticsDTO,
-            datasetSchema: dataset
+            tableSchemaNames: tableSchemaNamesList
           }
         });
       };
@@ -346,10 +346,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     designerDispatch({
       type: 'SET_DATAVIEWER_OPTIONS',
       payload: {
-        recordPositionId: posIdRecord,
-        selectedRecordErrorId: selectedRecordErrorId,
         activeIndex: tableSchemaId,
-        isValidationSelected: true
+        isValidationSelected: true,
+        recordPositionId: posIdRecord,
+        selectedRecordErrorId
       }
     });
   };
@@ -375,7 +375,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const renderActionButtonsValidationDialog = (
     <Fragment>
       <Button
-        className="p-button-primary p-button-animated-blink"
+        className="p-button-secondary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['createDatasetValidationBtn']}
         onClick={() => {
@@ -391,15 +391,17 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           validationContext.onOpenModalFromOpener('row', 'validationsListDialog');
           onHideValidationsDialog();
         }}
+        style={{ float: 'left' }}
       />
       <Button
-        className="p-button-primary p-button-animated-blink"
+        className="p-button-secondary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['createFieldValidationBtn']}
         onClick={() => {
           validationContext.onOpenModalFromOpener('field', 'validationsListDialog');
           onHideValidationsDialog();
         }}
+        style={{ float: 'left' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
@@ -467,12 +469,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     if (designerState.validationListDialogVisible) {
       return (
         <Dialog
-          className={styles.paginatorValidationViewer}
+          className={styles.qcRulesDialog}
           dismissableMask={true}
           footer={renderActionButtonsValidationDialog}
           header={resources.messages['qcRules']}
           onHide={() => onHideValidationsDialog()}
-          style={{ width: '90%' }}
           visible={designerState.validationListDialogVisible}>
           <TabsValidations
             dataset={designerState.metaData.dataset}

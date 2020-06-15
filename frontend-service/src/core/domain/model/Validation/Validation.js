@@ -2,6 +2,8 @@ export class Validation {
   constructor({
     activationGroup,
     allExpressions,
+    allExpressionsIf,
+    allExpressionsThen,
     automatic,
     condition,
     date,
@@ -9,6 +11,8 @@ export class Validation {
     enabled,
     entityType,
     expressions,
+    expressionsIf,
+    expressionsThen,
     id,
     isCorrect,
     levelError,
@@ -20,6 +24,8 @@ export class Validation {
   } = {}) {
     this.activationGroup = activationGroup;
     this.allExpressions = allExpressions;
+    this.allExpressionsIf = allExpressionsIf;
+    this.allExpressionsThen = allExpressionsThen;
     this.automatic = automatic;
     this.condition = condition;
     this.date = date;
@@ -27,6 +33,8 @@ export class Validation {
     this.enabled = enabled;
     this.entityType = entityType;
     this.expressions = expressions;
+    this.expressionsIf = expressionsIf;
+    this.expressionsThen = expressionsThen;
     this.id = id;
     this.isCorrect = isCorrect;
     this.levelError = levelError;
