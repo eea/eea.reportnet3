@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import javax.annotation.PostConstruct;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.ConsumerGroupVO;
@@ -21,6 +25,7 @@ import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
+import org.eea.validation.kafka.command.Validator;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.service.ValidationService;
@@ -28,6 +33,7 @@ import org.eea.validation.util.model.ValidationProcessVO;
 import org.kie.api.KieBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,7 +44,7 @@ import org.springframework.stereotype.Component;
  * The Class ValidationHelper.
  */
 @Component
-public class ValidationHelper {
+public class ValidationHelper implements DisposableBean {
 
   /**
    * The Constant LOG.
@@ -48,8 +54,6 @@ public class ValidationHelper {
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-  private static final String ERROR_ADDING_TASK_TO_PROCESS = "Error trying to add task {} of type {} to process {}";
 
   /**
    * The kafka sender utils.
@@ -88,6 +92,9 @@ public class ValidationHelper {
   @Value("${validation.tasks.initial.tax}")
   private int initialTax;
 
+  @Value("${validation.tasks.parallelism}")
+  private int maxRunningTasks;
+
   /**
    * The table repository.
    */
@@ -106,12 +113,20 @@ public class ValidationHelper {
   private Map<String, ValidationProcessVO> processesMap;
 
 
+  private ExecutorService validationExecutorService;
+
+
   /**
    * Instantiates a new file loader helper.
    */
   public ValidationHelper() {
     super();
     processesMap = new ConcurrentHashMap<>();
+  }
+
+  @PostConstruct
+  private void init() {
+    validationExecutorService = Executors.newFixedThreadPool(maxRunningTasks);
   }
 
   /**
@@ -150,12 +165,13 @@ public class ValidationHelper {
    * @param processId the process id
    *
    * @return the boolean
-   *
-   * @throws EEAException the eea exception
    */
-  public boolean isProcessCoordinator(final String processId) throws EEAException {
-    checkStartedProcess(processId);
-    return processesMap.get(processId).isCoordinatorProcess();
+  public boolean isProcessCoordinator(final String processId) {
+    boolean isProcessCoordinator = false;
+    if (checkStartedProcess(processId)) {
+      isProcessCoordinator = processesMap.get(processId).isCoordinatorProcess();
+    }
+    return isProcessCoordinator;
   }
 
   /**
@@ -207,40 +223,132 @@ public class ValidationHelper {
     releaseRecordsValidation(datasetId, processId);
     LOG.info("Collecting Field Validation tasks");
     releaseFieldsValidation(datasetId, processId);
-    try {
-      startProcess(processId);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error starting validation process for process id {}", processId, e);
-      this.finishProcess(processId);
+    startProcess(processId);
+  }
+
+  /**
+   * Reduce pending tasks for the given processId.
+   *
+   * If as a consequence of the reduction the number of the pending tasks reaches 0 then the process
+   * is finished and notifications are sent via Kafka
+   *
+   * If there are more task after the reduction then more tasks are sent
+   *
+   * @param datasetId the dataset id
+   * @param processId the process id
+   *
+   * @throws EEAException the eea exception
+   */
+  public void reducePendingTasks(final Long datasetId, final String processId) throws EEAException {
+    if (checkStartedProcess(processId)) {
+      synchronized (processesMap) {
+        Integer pendingOk = processesMap.get(processId).getPendingOks();
+        pendingOk--;
+        processesMap.get(processId).setPendingOks(pendingOk);
+        if (!this.checkFinishedValidations(datasetId, processId)) {
+          // process is not over, but still it could happen that there is no task to be sent
+          // remember pendingOks > pendingValidations.size()
+          Integer pendingValidations = processesMap.get(processId).getPendingValidations().size();
+          if (pendingValidations > 0) {
+            // there are more tasks to be sent, just send them out, at least, one more task
+            int tasksToBeSent = this.taskReleasedTax;
+            while (tasksToBeSent > 0) {
+              if (processesMap.get(processId).getPendingValidations().size() >= 1) {
+                this.kafkaSenderUtils
+                    .releaseKafkaEvent(processesMap.get(processId).getPendingValidations().poll());
+              }
+              tasksToBeSent--;
+            }
+            LOG.info(
+                "Sent next tasks for process {}",
+                processId);
+          }
+          LOG.info(
+              "There are still {} tasks to be sent and {} pending Ok's to be received",
+              processesMap.get(processId).getPendingValidations().size(), pendingOk);
+        }
+      }
     }
   }
 
-  private void startProcess(final String processId) throws EEAException {
-    checkStartedProcess(processId);
-    ConsumerGroupVO consumerGroupVO = kafkaAdminUtils.getConsumerGroupInfo();
-    // get the number of validation instances in the system.
-    // at least there should be one, the coordinator node :)
-    Integer initialTasks = consumerGroupVO.getMembers().size() * this.initialTax;
-    synchronized (processesMap) {
+  @Override
+  public void destroy() throws Exception {
+    if (null != validationExecutorService) {
+      this.validationExecutorService.shutdown();
+    }
+  }
 
-      // Sending initial tasks, 1 per validation instance in the system
-      // Due to this initial work load there will be always more pendingOks to be received than
-      // pendingValidation to be sent
-      // This will affect to the reducePendingTasks method since it will need to know whether to
-      // send more tasks or not
-      Deque pendingTasks = processesMap.get(processId).getPendingValidations();
+  /**
+   * Submits the validation task to the validation executor thread pool. If any thread is available
+   * the task will start automatically. Otherwise it will wait in a FIFO queue
+   *
+   * @param eeaEventVO the eea event vo
+   * @param processId the process id
+   * @param datasetId the dataset id
+   * @param validator the validator
+   * @param notificationEventType the notification event type
+   *
+   * @throws EEAException the eea exception
+   */
+  public void processValidation(EEAEventVO eeaEventVO, String processId,
+      Long datasetId,
+      Validator validator, EventType notificationEventType)
+      throws EEAException {
+    ValidationTask validationTask = this.buildValidationTask(eeaEventVO, processId, datasetId,
+        validator, notificationEventType);
+    //first every task is always queued up to ensure the order
+
+    if (((ThreadPoolExecutor) validationExecutorService).getActiveCount() == maxRunningTasks) {
       LOG.info(
-          "started proces {}. Pending Ok's to be received: {}, pending tasks to be sent: {} initial workload: {}",
-          processId, processesMap.get(processId).getPendingOks(),
-          pendingTasks.size() - initialTasks, initialTasks);
-      while (initialTasks > 0) {
-        EEAEventVO event = (EEAEventVO) pendingTasks.poll();
-        if (null != event) {
-          kafkaSenderUtils.releaseKafkaEvent(event);
-        }
-        initialTasks--;
-      }
+          "Event {} will be queued up as there are no validating threads available at the moment",
+          eeaEventVO);
+    }
 
+    this.validationExecutorService.submit(new ValidationTasksExecutorThread(validationTask));
+
+  }
+
+
+  private ValidationTask buildValidationTask(EEAEventVO eeaEventVO, String processId,
+      Long datasetId,
+      Validator validator, EventType notificationEventType) throws EEAException {
+    ValidationTask validationTask = new ValidationTask();
+    validationTask.datasetId = datasetId;
+    validationTask.kieBase = this.getKieBase(processId, datasetId);
+    validationTask.validator = validator;
+    validationTask.processId = processId;
+    validationTask.eeaEventVO = eeaEventVO;
+    validationTask.notificationEventType = notificationEventType;
+    return validationTask;
+  }
+
+  private void startProcess(final String processId) {
+    if (checkStartedProcess(processId)) {
+      ConsumerGroupVO consumerGroupVO = kafkaAdminUtils.getConsumerGroupInfo();
+      // get the number of validation instances in the system.
+      // at least there should be one, the coordinator node :)
+      Integer initialTasks = consumerGroupVO.getMembers().size() * this.initialTax;
+      synchronized (processesMap) {
+
+        // Sending initial tasks, 1 per validation instance in the system
+        // Due to this initial work load there will be always more pendingOks to be received than
+        // pendingValidation to be sent
+        // This will affect to the reducePendingTasks method since it will need to know whether to
+        // send more tasks or not
+        Deque pendingTasks = processesMap.get(processId).getPendingValidations();
+        LOG.info(
+            "started proces {}. Pending Ok's to be received: {}, pending tasks to be sent: {} initial workload: {}",
+            processId, processesMap.get(processId).getPendingOks(),
+            pendingTasks.size() - initialTasks, initialTasks);
+        while (initialTasks > 0) {
+          EEAEventVO event = (EEAEventVO) pendingTasks.poll();
+          if (null != event) {
+            kafkaSenderUtils.releaseKafkaEvent(event);
+          }
+          initialTasks--;
+        }
+
+      }
     }
   }
 
@@ -297,51 +405,6 @@ public class ValidationHelper {
 
 
   /**
-   * Reduce pending tasks for the given processId.
-   *
-   * If as a consequence of the reduction the number of the pending tasks reaches 0 then the process
-   * is finished and notifications are sent via Kafka
-   *
-   * If there are more task after the reduction then more tasks are sent
-   *
-   * @param datasetId the dataset id
-   * @param processId the process id
-   *
-   * @throws EEAException the eea exception
-   */
-  public void reducePendingTasks(final Long datasetId, final String processId) throws EEAException {
-    checkStartedProcess(processId);
-    synchronized (processesMap) {
-      Integer pendingOk = processesMap.get(processId).getPendingOks();
-      pendingOk--;
-      processesMap.get(processId).setPendingOks(pendingOk);
-      if (!this.checkFinishedValidations(datasetId, processId)) {
-        // process is not over, but still it could happen that there is no task to be sent
-        // remember pendingOks > pendingValidations.size()
-        Integer pendingValidations = processesMap.get(processId).getPendingValidations().size();
-        if (pendingValidations > 0) {
-          // there are more tasks to be sent, just send them out, at least, one more task
-          int tasksToBeSent = this.taskReleasedTax;
-          while (tasksToBeSent > 0) {
-            if (processesMap.get(processId).getPendingValidations().size() >= 1) {
-              this.kafkaSenderUtils
-                  .releaseKafkaEvent(processesMap.get(processId).getPendingValidations().poll());
-            }
-            tasksToBeSent--;
-          }
-          LOG.info(
-              "Sent next tasks for process {}",
-              processId);
-        }
-        LOG.info(
-            "There are still {} tasks to be sent and {} pending Ok's to be received",
-            processesMap.get(processId).getPendingValidations().size(), pendingOk);
-      }
-    }
-  }
-
-
-  /**
    * Release dataset validation.
    *
    * @param datasetId the dataset id
@@ -351,14 +414,7 @@ public class ValidationHelper {
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", processId);
-
-    try {
-      addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_DATASET, value);
-    } catch (EEAException e) {
-      LOG_ERROR.error(ERROR_ADDING_TASK_TO_PROCESS, value,
-          EventType.COMMAND_VALIDATE_FIELD.getKey(), processId, e);
-    }
-
+    addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_DATASET, value);
   }
 
   /**
@@ -373,13 +429,7 @@ public class ValidationHelper {
     value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", processId);
     value.put("idTable", Tablenum);
-
-    try {
-      addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_TABLE, value);
-    } catch (EEAException e) {
-      LOG_ERROR.error(ERROR_ADDING_TASK_TO_PROCESS, value,
-          EventType.COMMAND_VALIDATE_FIELD.getKey(), processId, e);
-    }
+    addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_TABLE, value);
 
   }
 
@@ -395,13 +445,7 @@ public class ValidationHelper {
     value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", processId);
     value.put("numPag", numPag);
-
-    try {
-      addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_RECORD, value);
-    } catch (EEAException e) {
-      LOG_ERROR.error(ERROR_ADDING_TASK_TO_PROCESS, value,
-          EventType.COMMAND_VALIDATE_FIELD.getKey(), processId, e);
-    }
+    addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_RECORD, value);
   }
 
 
@@ -417,12 +461,7 @@ public class ValidationHelper {
     value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", processId);
     value.put("numPag", numPag);
-    try {
-      addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_FIELD, value);
-    } catch (EEAException e) {
-      LOG_ERROR.error(ERROR_ADDING_TASK_TO_PROCESS, value,
-          EventType.COMMAND_VALIDATE_FIELD.getKey(), processId, e);
-    }
+    addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_FIELD, value);
 
 
   }
@@ -475,29 +514,114 @@ public class ValidationHelper {
   }
 
   private void addValidationTaskToProcess(final String processId, final EventType eventType,
-      final Map<String, Object> value) throws EEAException {
-    checkStartedProcess(processId);
-    synchronized (processesMap) {
-      Integer pendingOk = processesMap.get(processId).getPendingOks();
-      if (null == pendingOk) {
-        pendingOk = 0;
-      }
+      final Map<String, Object> value) {
+    if (checkStartedProcess(processId)) {
+      synchronized (processesMap) {
+        Integer pendingOk = processesMap.get(processId).getPendingOks();
+        if (null == pendingOk) {
+          pendingOk = 0;
+        }
 
-      pendingOk++;
-      processesMap.get(processId).setPendingOks(pendingOk);
-      EEAEventVO eeaEventVO = new EEAEventVO();
-      eeaEventVO.setEventType(eventType);
-      eeaEventVO.setData(value);
-      processesMap.get(processId).getPendingValidations().add(eeaEventVO);
+        pendingOk++;
+        processesMap.get(processId).setPendingOks(pendingOk);
+        EEAEventVO eeaEventVO = new EEAEventVO();
+        eeaEventVO.setEventType(eventType);
+        eeaEventVO.setData(value);
+        processesMap.get(processId).getPendingValidations().add(eeaEventVO);
+      }
     }
   }
 
-  private void checkStartedProcess(String processId) throws EEAException {
-    if (!processesMap.containsKey(processId)) {
-      LOG_ERROR.error("Error, proces {} has not been initialized or it has been already finished",
+
+  private boolean checkStartedProcess(String processId) {
+    boolean isProcessStarted = processesMap.containsKey(processId);
+    if (!isProcessStarted) {
+      LOG.warn("Error, proces {} has not been initialized or it has been already finished",
           processId);
-      throw new EEAException(String.format(
-          "Error, proces %s has not been initialized or it has been already finished", processId));
     }
+    return isProcessStarted;
+  }
+
+
+  private class ValidationTask {
+
+    /**
+     * The Eea event vo.
+     */
+    EEAEventVO eeaEventVO;
+    /**
+     * The Validator.
+     */
+    Validator validator;
+    /**
+     * The Dataset id.
+     */
+    Long datasetId;
+    /**
+     * The Kie base.
+     */
+    KieBase kieBase;
+
+    /**
+     * The Process id.
+     */
+    String processId;
+
+    /**
+     * The Notification event type.
+     */
+    EventType notificationEventType;
+  }
+
+  private class ValidationTasksExecutorThread implements Runnable {
+
+    private ValidationTask validationTask;
+
+    public ValidationTasksExecutorThread(ValidationTask validationTask) {
+      this.validationTask = validationTask;
+    }
+
+
+    @Override
+    public void run() {
+
+      Long currentTime = System.currentTimeMillis();
+      int workingThreads = ((ThreadPoolExecutor) validationExecutorService).getActiveCount();
+
+      LOG.info(
+          "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
+          validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads
+      );
+      try {
+        validationTask.validator
+            .performValidation(validationTask.eeaEventVO, validationTask.datasetId,
+                validationTask.kieBase);
+      } catch (EEAException e) {
+        LOG_ERROR
+            .error("Error processing validations for dataset {} due to exception {}",
+                validationTask.datasetId,
+                e);
+        validationTask.eeaEventVO.getData().put("error", e);
+      } finally {
+
+        // if this is the coordinator validation instance, then no need to send message, just to update
+        // expected pending ok's and verify if process is finished
+        if (isProcessCoordinator(validationTask.processId)) {
+          // if it's not finished a message with the next task will be sent as part of the reducePendingTasks execution
+          try {
+            reducePendingTasks(validationTask.datasetId, validationTask.processId);
+          } catch (EEAException e) {
+            LOG_ERROR.error("Error trying to reduce pending tasks due to {}", e.getMessage(), e);
+          }
+        } else {// send the message to coordinator validation instance
+          kafkaSenderUtils.releaseKafkaEvent(validationTask.notificationEventType,
+              validationTask.eeaEventVO.getData());
+        }
+        Double totalTime = (System.currentTimeMillis() - currentTime) / 1000.0;
+        LOG.info("Validation task {} took {} seconds", validationTask.eeaEventVO, totalTime);
+      }
+    }
+
+
   }
 }
