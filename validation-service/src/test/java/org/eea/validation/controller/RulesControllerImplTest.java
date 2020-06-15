@@ -536,6 +536,6 @@ public class RulesControllerImplTest {
     rulesControllerImpl.deleteDatasetRuleAndIntegrityByDatasetSchemaId(Mockito.any(),
         Mockito.any());
     Mockito.verify(rulesService, times(1))
-        .deleteDatasetRuleAndIntegrityByFieldSchemaId(Mockito.any(), Mockito.any());
+        .deleteDatasetRuleAndIntegrityByDatasetSchemaId(Mockito.any(), Mockito.any());
   }
 }
