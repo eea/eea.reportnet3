@@ -110,7 +110,7 @@ const FieldEditor = ({
       case 'DATE':
         return 'date';
       case 'TEXT':
-        // case 'RICH_TEXT':
+      case 'LONG_TEXT':
         return 'any';
       case 'EMAIL':
         return 'email';
@@ -127,8 +127,8 @@ const FieldEditor = ({
     const longCharacters = 20;
     const decimalCharacters = 40;
     const dateCharacters = 10;
-    const textCharacters = 10000;
-    const richTextCharacters = 10000;
+    const textCharacters = 5000;
+    const longTextCharacters = 10000;
     const emailCharacters = 256;
     const phoneCharacters = 256;
     const urlCharacters = 5000;
@@ -150,22 +150,22 @@ const FieldEditor = ({
             maxLength={textCharacters}
           />
         );
-      // case 'RICH_TEXT':
-      //   return (
-      //     <InputText
-      //       keyfilter={getFilter(type)}
-      //       onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
-      //       onChange={e => onEditorValueChange(cells, e.target.value)}
-      //       onFocus={e => {
-      //         e.preventDefault();
-      //         onEditorValueFocus(cells, e.target.value);
-      //       }}
-      //       onKeyDown={e => onEditorKeyChange(cells, e, record)}
-      //       type="text"
-      //       value={RecordUtils.getCellValue(cells, cells.field)}
-      //       maxLength={richTextCharacters}
-      //     />
-      //   );
+      case 'LONG_TEXT':
+        return (
+          <InputText
+            keyfilter={getFilter(type)}
+            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+            onChange={e => onEditorValueChange(cells, e.target.value)}
+            onFocus={e => {
+              e.preventDefault();
+              onEditorValueFocus(cells, e.target.value);
+            }}
+            onKeyDown={e => onEditorKeyChange(cells, e, record)}
+            type="text"
+            value={RecordUtils.getCellValue(cells, cells.field)}
+            maxLength={longTextCharacters}
+          />
+        );
       case 'NUMBER_INTEGER':
         return (
           <InputText

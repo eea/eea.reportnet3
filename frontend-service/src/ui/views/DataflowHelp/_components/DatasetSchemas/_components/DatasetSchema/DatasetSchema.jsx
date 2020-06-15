@@ -112,8 +112,8 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
         return resources.messages['dateFieldFormatRestriction'];
       case 'TEXT':
         return resources.messages['textFieldFormatRestriction'];
-      // case 'RICH_TEXT':
-      //   return resources.messages['richTextFieldFormatRestriction'];
+      case 'LONG_TEXT':
+        return resources.messages['longTextFieldFormatRestriction'];
       case 'NUMBER_DECIMAL':
         return resources.messages['dateFieldFormatRestriction'];
       case 'NUMBER_INTEGER':

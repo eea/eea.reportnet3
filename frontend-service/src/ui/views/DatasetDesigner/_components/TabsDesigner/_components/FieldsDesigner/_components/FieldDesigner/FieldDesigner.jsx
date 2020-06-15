@@ -60,7 +60,7 @@ export const FieldDesigner = ({
     // { fieldType: 'Latitude', value: 'Geospatial object (Latitude)', fieldTypeIcon: 'map' },
     // { fieldType: 'Longitude', value: 'Geospatial object (Longitude)', fieldTypeIcon: 'map' },
     { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
-    // { fieldType: 'Rich_Text', value: 'Rich text', fieldTypeIcon: 'align-right' },
+    { fieldType: 'Long_Text', value: 'Long text', fieldTypeIcon: 'align-right' },
     { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
     { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
     { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
@@ -73,7 +73,7 @@ export const FieldDesigner = ({
     { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' }
     // { fieldType: 'Reference', value: 'Reference', fieldTypeIcon: 'link' }
     // { fieldType: 'URL', value: 'Url', fieldTypeIcon: 'url' },
-    // { fieldType: 'RichText', value: 'Rich text', fieldTypeIcon: 'text' },
+    // { fieldType: 'LongText', value: 'Long text', fieldTypeIcon: 'text' },
     // { fieldType: 'LinkData', value: 'Link to a data collection', fieldTypeIcon: 'linkData' },
     // { fieldType: 'Percentage', value: 'Percentage', fieldTypeIcon: 'percentage' },
     // { fieldType: 'Formula', value: 'Formula', fieldTypeIcon: 'formula' },
