@@ -29,7 +29,6 @@ import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepositor
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
@@ -55,7 +54,6 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
@@ -714,5 +712,97 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return type;
   }
 
+
+  /**
+   * Gets the integrity dataset id.
+   *
+   * @param datasetIdOrigin the dataset id origin
+   * @param datasetOriginSchemaId the dataset origin schema id
+   * @param datasetReferencedSchemaId the dataset referenced schema id
+   * @return the integrity dataset id
+   */
+  @Override
+  public Long getIntegrityDatasetId(Long datasetIdOrigin, String datasetOriginSchemaId,
+      String datasetReferencedSchemaId) {
+    ForeignRelations foreignRelation =
+        foreignRelationsRepository.findFirstByIdDatasetOrigin_idAndIdPkAndIdFkOrigin(
+            datasetIdOrigin, datasetOriginSchemaId, datasetReferencedSchemaId).orElse(null);
+
+    return foreignRelation != null ? foreignRelation.getIdDatasetDestination().getId() : null;
+
+  }
+
+
+  /**
+   * Creates the foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
+  @Override
+  public void createForeignRelationship(long datasetOriginId, long datasetReferencedId,
+      String originDatasetSchemaId, String referencedDatasetSchemaId) {
+    ForeignRelations foreignRelations = new ForeignRelations();
+    DataSetMetabase dataSetReferencedMetabase = new DataSetMetabase();
+    dataSetReferencedMetabase.setId(datasetReferencedId);
+    foreignRelations.setIdDatasetDestination(dataSetReferencedMetabase);
+    DataSetMetabase dataSetOriginMetabase = new DataSetMetabase();
+    dataSetOriginMetabase.setId(datasetOriginId);
+    foreignRelations.setIdDatasetOrigin(dataSetOriginMetabase);
+    foreignRelations.setIdPk(originDatasetSchemaId);
+    foreignRelations.setIdFkOrigin(referencedDatasetSchemaId);
+    foreignRelationsRepository.save(foreignRelations);
+    LOG.info(
+        "New create ForeignRelationship created for the combination of : datasetOriginId {} "
+            + ", datasetReferencedId {} , originDatasetSchemaId {} , referencedDatasetSchemaId {}",
+        datasetOriginId, datasetReferencedId, originDatasetSchemaId, referencedDatasetSchemaId);
+
+  }
+
+
+  /**
+   * Update foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
+  @Override
+  public void updateForeignRelationship(long datasetOriginId, long datasetReferencedId,
+      String originDatasetSchemaId, String referencedDatasetSchemaId) {
+    Optional<ForeignRelations> foreignRelations = foreignRelationsRepository
+        .findFirstByIdDatasetOrigin_idAndIdDatasetDestination_idAndIdPkAndIdFkOrigin(
+            datasetOriginId, datasetReferencedId, originDatasetSchemaId, referencedDatasetSchemaId);
+    if (foreignRelations.isPresent()) {
+      foreignRelationsRepository.delete(foreignRelations.get());
+    }
+    createForeignRelationship(datasetOriginId, datasetReferencedId, originDatasetSchemaId,
+        referencedDatasetSchemaId);
+
+    LOG.info(
+        "New update ForeignRelationship created for the combination of : datasetOriginId {} "
+            + ", datasetReferencedId {} , originDatasetSchemaId {} , referencedDatasetSchemaId {}",
+        datasetOriginId, datasetReferencedId, originDatasetSchemaId, referencedDatasetSchemaId);
+  }
+
+
+  /**
+   * Gets the dataset id by dataset schema id and data provider id.
+   *
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   * @param dataProviderId the data provider id
+   * @return the dataset id by dataset schema id and data provider id
+   */
+  @Override
+  public Long getDatasetIdByDatasetSchemaIdAndDataProviderId(String referencedDatasetSchemaId,
+      Long dataProviderId) {
+    DataSetMetabase datasetMetabase = dataSetMetabaseRepository
+        .findFirstByDatasetSchemaAndDataProviderId(referencedDatasetSchemaId, dataProviderId)
+        .orElse(null);
+    return datasetMetabase != null ? datasetMetabase.getId() : null;
+  }
 
 }

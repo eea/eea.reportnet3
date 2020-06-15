@@ -86,6 +86,7 @@ public class RulesServiceImplTest {
   @Mock
   private IntegritySchemaRepository integritySchemaRepository;
 
+  /** The integrity mapper. */
   @Mock
   private IntegrityMapper integrityMapper;
 
@@ -1132,8 +1133,63 @@ public class RulesServiceImplTest {
         new ObjectId("5e44110d6a9e3a270ce13fac"), "5e44110d6a9e3a270ce13fac");
   }
 
+  /**
+   * Delete dataset rule and integrity by field schema id test.
+   */
   @Test
-  public void getIntegrityConstraintTest() {
-    assertNull(rulesServiceImpl.getIntegrityConstraint(new ObjectId().toString()));
+  public void deleteDatasetRuleAndIntegrityByFieldSchemaIdTest() {
+    List<IntegritySchema> integritySchemaList = new ArrayList<>();
+    IntegritySchema integritySchema = new IntegritySchema();
+    integritySchema.setRuleId(new ObjectId());
+    integritySchema.setOriginDatasetSchemaId(new ObjectId());
+    integritySchema.setReferencedDatasetSchemaId(new ObjectId());
+    integritySchemaList.add(integritySchema);
+    when(integritySchemaRepository.findByOriginOrReferenceFields(Mockito.any()))
+        .thenReturn(integritySchemaList);
+    rulesServiceImpl.deleteDatasetRuleAndIntegrityByFieldSchemaId("5e44110d6a9e3a270ce13fac", 1L);
+    Mockito.verify(integritySchemaRepository, times(1))
+        .findByOriginOrReferenceFields(Mockito.any());
+  }
+
+  /**
+   * Delete dataset rule and integrity by dataset schema id.
+   */
+  @Test
+  public void deleteDatasetRuleAndIntegrityByDatasetSchemaIdEmptyTest() {
+    when(integritySchemaRepository.findByOriginOrReferenceFields(Mockito.any())).thenReturn(null);
+    rulesServiceImpl.deleteDatasetRuleAndIntegrityByFieldSchemaId("5e44110d6a9e3a270ce13fac", 1L);
+    Mockito.verify(integritySchemaRepository, times(1))
+        .findByOriginOrReferenceFields(Mockito.any());
+  }
+
+  /**
+   * Delete dataset rule and integrity by dataset schema id test.
+   */
+  @Test
+  public void deleteDatasetRuleAndIntegrityByDatasetSchemaIdTest() {
+    List<IntegritySchema> integritySchemaList = new ArrayList<>();
+    IntegritySchema integritySchema = new IntegritySchema();
+    integritySchema.setRuleId(new ObjectId());
+    integritySchema.setOriginDatasetSchemaId(new ObjectId());
+    integritySchema.setReferencedDatasetSchemaId(new ObjectId());
+    integritySchemaList.add(integritySchema);
+    when(integritySchemaRepository.findByOriginOrReferenceDatasetSchemaId(Mockito.any()))
+        .thenReturn(integritySchemaList);
+    rulesServiceImpl.deleteDatasetRuleAndIntegrityByDatasetSchemaId("5e44110d6a9e3a270ce13fac", 1L);
+    Mockito.verify(integritySchemaRepository, times(1))
+        .findByOriginOrReferenceDatasetSchemaId(Mockito.any());
+  }
+
+  /**
+   * Delete dataset rule and integrity by field schema id empty test.
+   */
+  @Test
+  public void deleteDatasetRuleAndIntegrityByFieldSchemaIdEmptyTest() {
+    when(integritySchemaRepository.findByOriginOrReferenceDatasetSchemaId(Mockito.any()))
+        .thenReturn(null);
+    rulesServiceImpl.deleteDatasetRuleAndIntegrityByDatasetSchemaId("5e44110d6a9e3a270ce13fac", 1L);
+    Mockito.verify(integritySchemaRepository, times(1))
+        .findByOriginOrReferenceDatasetSchemaId(Mockito.any());
+
   }
 }
