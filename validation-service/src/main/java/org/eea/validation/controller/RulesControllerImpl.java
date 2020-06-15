@@ -171,6 +171,7 @@ public class RulesControllerImpl implements RulesController {
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
 
+
       rulesService.createNewRule(datasetId, ruleVO);
     } catch (EEAException e) {
       LOG_ERROR.error(
@@ -356,5 +357,28 @@ public class RulesControllerImpl implements RulesController {
   public void deleteRuleHighLevelLike(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("fieldSchemaId") String fieldSchemaId) {
     rulesService.deleteRuleHighLevelLike(datasetSchemaId, fieldSchemaId);
+  }
+
+  /**
+   * Delete dataset rule and integrity by id field schema.
+   *
+   * @param fieldSchemaId the field schema id
+   */
+  @Override
+  @DeleteMapping("/private/deleteDatasetRuleAndIntegrityByIdFieldSchema")
+  public void deleteDatasetRuleAndIntegrityByFieldSchemaId(String fieldSchemaId) {
+    rulesService.deleteDatasetRuleAndIntegrityByFieldSchemaId(fieldSchemaId);
+  }
+
+  /**
+   * Delete dataset rule and integrity by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   */
+  @Override
+  @DeleteMapping("/private/deleteDatasetRuleAndIntegrityByDatasetSchemaId")
+  public void deleteDatasetRuleAndIntegrityByDatasetSchemaId(String datasetSchemaId) {
+    rulesService.deleteDatasetRuleAndIntegrityByFieldSchemaId(datasetSchemaId);
+
   }
 }

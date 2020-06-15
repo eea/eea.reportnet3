@@ -245,7 +245,8 @@ public interface DatasetController {
    */
   @GetMapping("/{datasetId}/etlExport")
   ETLDatasetVO etlExportDataset(@PathVariable("datasetId") Long datasetId,
-      @RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId);
+      @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
 
   /**
    * Etl import dataset.
@@ -258,5 +259,6 @@ public interface DatasetController {
   @PostMapping("/{datasetId}/etlImport")
   void etlImportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
-      @RequestParam("providerId") Long providerId);
+      @RequestParam(value = "providerId", required = false) Long providerId);
+
 }

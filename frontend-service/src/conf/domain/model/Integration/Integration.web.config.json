@@ -1,0 +1,7 @@
+{
+  "all": "/integration/listIntegrations",
+  "allExtensionsOperations": "/integration/listExtensionsOperations",
+  "create": "/integration/create",
+  "delete": "/integration/{:integrationId}",
+  "update": "/integration/update"
+}
