@@ -886,9 +886,12 @@ const DataViewer = withRouter(
       }
     };
 
-    const getFileUploadExtensions = extensionsOperationsList.import.map(file => `.${file.fileExtension}`).join(', ');
+    const getImportExtensions = [{ datasetSchemaId, fileExtension: 'csv', operation: 'IMPORT' }]
+      .concat(extensionsOperationsList.import)
+      .map(file => `.${file.fileExtension}`)
+      .join(', ');
 
-    const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${getFileUploadExtensions}`;
+    const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${getImportExtensions}`;
 
     return (
       <SnapshotContext.Provider>
@@ -1023,7 +1026,7 @@ const DataViewer = withRouter(
             onHide={() => setImportDialogVisible(false)}
             visible={importDialogVisible}>
             <CustomFileUpload
-              accept={getFileUploadExtensions}
+              accept={getImportExtensions}
               chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv|doc)$/"
               className={styles.FileUpload}
               fileLimit={1}

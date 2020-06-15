@@ -17,6 +17,9 @@ export const manageIntegrationsReducer = (state, { type, payload }) => {
     case 'ON_FILL':
       return { ...state, [payload.name]: payload.data };
 
+    case 'SHOW_ERRORS':
+      return { ...state, displayErrors: payload.value };
+
     case 'TOGGLE_EDIT_VIEW':
       return {
         ...state,
