@@ -250,13 +250,11 @@ const DataViewer = withRouter(
     const getFileExtensions = async () => {
       try {
         const response = await IntegrationService.allExtensionsOperations(datasetSchemaId);
-        console.log('response', response);
         setExtensionsOperationsList(DataViewerUtils.groupOperations('operation', response));
       } catch (error) {
         notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
       }
     };
-    // console.log('extensionsOperationsList', extensionsOperationsList);
 
     const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations) => {
       const removeSelectAllFromList = levelErrorValidations => {

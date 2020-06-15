@@ -78,7 +78,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const [FMEExportExtensions, setFMEExportExtensions] = useState([]);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
-  const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isInputSwitchChecked, setIsInputSwitchChecked] = useState(false);
   const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [isWebFormMMR, setIsWebFormMMR] = useState(false);
@@ -171,22 +170,7 @@ export const Dataset = withRouter(({ match, history }) => {
     onLoadDatasetSchema();
   }, [isDataDeleted]);
 
-  // useEffect(() => {
-  //   let exportOptions = config.exportTypes;
-  //   const exportOptionsFilter = exportOptions.filter(type => type.code !== 'csv');
-
-  //   setExportButtonsList(
-  //     exportOptionsFilter.map(type => ({
-  //       label: type.text,
-  //       icon: config.icons['archive'],
-  //       command: () => onExportData(type.code)
-  //     }))
-  //   );
-  // }, [datasetName]);
-
   useEffect(() => {
-    console.log('FMEExportExtensions', FMEExportExtensions);
-    console.log('FMEExtensionsItems', FMEExtensionsItems);
     if (isEmpty(FMEExportExtensions)) {
       setExportButtonsList(reportNetExtensionsItems);
     } else {
@@ -223,10 +207,6 @@ export const Dataset = withRouter(({ match, history }) => {
   useEffect(() => {
     getDatasetSchemaId();
   }, []);
-
-  // useEffect(() => {
-  //   if (datasetSchemaId) getFileExtensions();
-  // }, [datasetSchemaId, isDataUpdated]);
 
   useEffect(() => {
     getFileExtensions();
@@ -267,23 +247,17 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const getDatasetSchemaId = async () => {
     try {
-      // console.log('datasetId', datasetId);
       const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
-      console.log('metadata.datasetSchemaId', metadata.datasetSchemaId);
       setDatasetSchemaId(metadata.datasetSchemaId);
     } catch (error) {
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     }
   };
 
-  // console.log('datasetSchemaId', datasetSchemaId);
-
   const getFileExtensions = async () => {
     try {
-      console.log('datasetSchemaID', datasetSchemaId);
       const response = await IntegrationService.allExtensionsOperations(datasetSchemaId);
       response.filter(integration => integration.operation === 'EXPORT');
-      console.log('response', response);
       setExportExtensionsOperationsList(response);
     } catch (error) {
       notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
@@ -560,8 +534,6 @@ export const Dataset = withRouter(({ match, history }) => {
     // setActiveIndex(tableSchemaId.index);
   };
 
-  const onUpdateData = () => setIsDataUpdated(!isDataUpdated);
-
   const datasetTitle = () => {
     let datasetReleasedTitle = `${datasetSchemaName} (${resources.messages['released'].toString().toLowerCase()})`;
     return isDatasetReleased ? datasetReleasedTitle : datasetSchemaName;
@@ -650,10 +622,7 @@ export const Dataset = withRouter(({ match, history }) => {
               // disabled={!hasWritePermissions}
               icon={loadingFile ? 'spinnerAnimate' : 'import'}
               label={resources.messages['export']}
-              onClick={event => {
-                onUpdateData();
-                exportMenuRef.current.show(event);
-              }}
+              onClick={event => exportMenuRef.current.show(event)}
             />
             <Menu
               model={exportButtonsList}
