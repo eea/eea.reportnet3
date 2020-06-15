@@ -118,8 +118,6 @@ const ActionsToolbar = ({
     const uniqsExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
     setFMEExportExtensions(parseUniqsExportExtensions(uniqsExportExtensions));
   };
-  console.log('exportExtensionsOperationsList actuonssToolbar', exportExtensionsOperationsList);
-  console.log('FMEExportExtensions parsed', FMEExportExtensions);
 
   const reportNetExtensionsItems = config.exportTypes.map(type => ({
     label: type.text,
@@ -137,6 +135,10 @@ const ActionsToolbar = ({
       }))
     }
   ];
+
+  const totalExtensionsItems = isEmpty(FMEExportExtensions)
+    ? reportNetExtensionsItems
+    : reportNetExtensionsItems.concat(FMEExtensionsItems);
 
   const onExportTableData = async fileType => {
     setIsLoadingFile(true);
@@ -233,7 +235,7 @@ const ActionsToolbar = ({
           }}
         />
         <Menu
-          model={reportNetExtensionsItems.concat(FMEExtensionsItems)}
+          model={totalExtensionsItems}
           popup={true}
           ref={exportMenuRef}
           id="exportTableMenu"
