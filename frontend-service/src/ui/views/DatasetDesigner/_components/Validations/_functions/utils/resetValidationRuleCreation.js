@@ -2,16 +2,22 @@ import { getEmptyExpression } from './getEmptyExpression';
 
 export const resetValidationRuleCreation = () => {
   const newExpression = getEmptyExpression();
+  const newExpressionIf = getEmptyExpression();
+  const newExpressionThen = getEmptyExpression();
   return {
-    table: undefined,
-    field: undefined,
-    shortCode: '',
-    name: '',
-    description: '',
-    errorMessage: '',
-    errorLevel: undefined,
     active: true,
+    allExpressions: [newExpression],
+    allExpressionsIf: [newExpressionIf],
+    allExpressionsThen: [newExpressionThen],
+    description: '',
+    errorLevel: undefined,
+    errorMessage: '',
     expressions: [newExpression],
-    allExpressions: [newExpression]
+    expressionsIf: [newExpressionIf],
+    expressionsThen: [newExpressionThen],
+    field: undefined,
+    name: '',
+    shortCode: '',
+    table: undefined
   };
 };

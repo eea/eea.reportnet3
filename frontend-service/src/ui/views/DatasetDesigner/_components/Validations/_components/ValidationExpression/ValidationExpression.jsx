@@ -63,8 +63,13 @@ const ValidationExpression = ({
   useEffect(() => {
     const { operatorType } = expressionValues;
     const cValueProps = { steps: 0, format: false, useGrouping: false };
+
     if (operatorType === 'number' || operatorType === 'LEN') {
       setValueKeyFilter('num');
+    }
+
+    if (operatorType === 'string') {
+      setValueKeyFilter('');
     }
 
     if (fieldType === 'DATE') {
@@ -72,10 +77,12 @@ const ValidationExpression = ({
         cValueProps.min = 1900;
         cValueProps.max = 2500;
       }
+
       if (operatorType === 'month') {
         cValueProps.min = 1;
         cValueProps.max = 12;
       }
+
       if (operatorType === 'day') {
         cValueProps.min = 1;
         cValueProps.max = 31;
@@ -168,7 +175,7 @@ const ValidationExpression = ({
           baseZIndex={6000}
           dateFormat="yy-mm-dd"
           monthNavigator={true}
-          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
           value={expressionValues.expressionValue}
@@ -184,7 +191,7 @@ const ValidationExpression = ({
           max={32}
           min={0}
           mode="decimal"
-          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
           placeholder={resourcesContext.messages.value}
           steps={0}
           useGrouping={false}
@@ -192,12 +199,27 @@ const ValidationExpression = ({
         />
       );
     }
+
     if (operatorType === 'number') {
       if (operatorValue === 'MATCH') {
         return (
           <InputText
             disabled={isDisabled}
-            onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+            onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
+            placeholder={resourcesContext.messages.value}
+            value={expressionValues.expressionValue}
+          />
+        );
+      }
+
+      if (fieldType === 'NUMBER_DECIMAL') {
+        return (
+          <InputText
+            keyfilter={valueKeyFilter}
+            disabled={isDisabled}
+            format={false}
+            onBlur={e => checkField('number', e.target.value)}
+            onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
             placeholder={resourcesContext.messages.value}
             value={expressionValues.expressionValue}
           />
@@ -209,8 +231,8 @@ const ValidationExpression = ({
           disabled={isDisabled}
           format={false}
           mode="decimal"
-          onBlur={e => checkField('number', e.value)}
-          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+          onBlur={e => checkField('number', e.target.value)}
+          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
           placeholder={resourcesContext.messages.value}
           steps={0}
           useGrouping={false}
@@ -218,13 +240,14 @@ const ValidationExpression = ({
         />
       );
     }
+
     if (operatorType === 'year') {
       return (
         <InputNumber
           disabled={isDisabled}
           mode="decimal"
-          onBlur={e => checkField('year', e.value)}
-          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+          onBlur={e => checkField('year', e.target.value)}
+          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
           placeholder={resourcesContext.messages.value}
           steps={0}
           useGrouping={false}
@@ -232,6 +255,7 @@ const ValidationExpression = ({
         />
       );
     }
+
     if (operatorType === 'month') {
       return (
         <InputNumber
@@ -240,7 +264,7 @@ const ValidationExpression = ({
           max={13}
           min={0}
           mode="decimal"
-          onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
           placeholder={resourcesContext.messages.value}
           steps={0}
           useGrouping={false}
@@ -250,9 +274,11 @@ const ValidationExpression = ({
     }
     return (
       <InputText
-        disabled={isDisabled}
         keyfilter={valueKeyFilter}
-        onChange={e => onUpdateExpressionField('expressionValue', e.value)}
+        disabled={isDisabled}
+        onChange={e => {
+          onUpdateExpressionField('expressionValue', e.target.value);
+        }}
         placeholder={resourcesContext.messages.value}
         value={expressionValues.expressionValue}
       />
@@ -274,7 +300,7 @@ const ValidationExpression = ({
         <Dropdown
           // appendTo={document.body}
           disabled={isDisabled || position === 0}
-          onChange={e => onUpdateExpressionField('union', e.value)}
+          onChange={e => onUpdateExpressionField('union', e.target.value)}
           optionLabel="label"
           options={config.validations.logicalOperators}
           placeholder={resourcesContext.messages.union}
@@ -287,7 +313,7 @@ const ValidationExpression = ({
         <Dropdown
           // appendTo={document.body}
           disabled={isDisabled}
-          onChange={e => onUpdateExpressionField('operatorType', e.value)}
+          onChange={e => onUpdateExpressionField('operatorType', e.target.value)}
           optionLabel="label"
           options={operatorTypes}
           placeholder={resourcesContext.messages.operatorType}
@@ -300,7 +326,7 @@ const ValidationExpression = ({
         <Dropdown
           // appendTo={document.body}
           disabled={isDisabled}
-          onChange={e => onUpdateExpressionField('operatorValue', e.value)}
+          onChange={e => onUpdateExpressionField('operatorValue', e.target.value)}
           optionLabel="label"
           options={operatorValues}
           placeholder={resourcesContext.messages.operator}
