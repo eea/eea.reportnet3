@@ -55,6 +55,7 @@ const ActionsToolbar = ({
   const [exportTableData, setExportTableData] = useState(undefined);
   const [exportTableDataName, setExportTableDataName] = useState('');
   const [isLoadingFile, setIsLoadingFile] = useState(false);
+  const [FMEExportExtensions, setFMEExportExtensions] = useState([]);
 
   const [filter, dispatchFilter] = useReducer(filterReducer, {
     validationDropdown: [],
@@ -101,36 +102,41 @@ const ActionsToolbar = ({
     }
   }, [exportTableData]);
 
-  const exportExtensions = [];
+  useEffect(() => {
+    getReportNetandFMEExportExtensions(exportExtensionsOperationsList);
+  }, [exportExtensionsOperationsList]);
 
-  if (!isEmpty(exportExtensionsOperationsList)) {
-    exportExtensionsOperationsList.forEach(element => {
-      exportExtensions.push(element.fileExtension);
-    });
-    // console.log('exportExtensions2', exportExtensions);
-  }
-
-  const uniqsExportExtensions = uniq(exportExtensions);
-  // console.log('uniqsExportExtensions', uniqsExportExtensions);
-
-  const parsedUniqueExtensions = [];
-  const parseUniqsExportExtensions = uniqsExportExtensions => {
-    uniqsExportExtensions.forEach(uniqExportExtension => {
-      parsedUniqueExtensions.push({
-        text: uniqExportExtension.toUpperCase() + ' (.' + uniqExportExtension.toLowerCase() + ')',
-        code: uniqExportExtension.toLowerCase()
-      });
-      return parsedUniqueExtensions;
-    });
+  const parseUniqsExportExtensions = exportExtensionsOperationsList => {
+    return exportExtensionsOperationsList.map(uniqExportExtension => ({
+      text: `${uniqExportExtension.toUpperCase()} (.${uniqExportExtension.toLowerCase()})`,
+      code: uniqExportExtension.toLowerCase()
+    }));
   };
 
-  parseUniqsExportExtensions(uniqsExportExtensions);
-  // console.log('parsedUniqueExtensions', parsedUniqueExtensions);
+  const getReportNetandFMEExportExtensions = exportExtensionsOperationsList => {
+    const uniqsExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
 
-  const reportNetandFMEExtensions = parsedUniqueExtensions.concat(config.exportTypes);
-  const uniqsReportNetAndFMEExtensions = uniqBy(reportNetandFMEExtensions, 'text');
-  // console.log('newArray', newArray);
-  // console.log('uniqsArray', uniqsArray);
+    setFMEExportExtensions(parseUniqsExportExtensions(uniqsExportExtensions));
+  };
+  console.log('exportExtensionsOperationsList actuonssToolbar', exportExtensionsOperationsList);
+  console.log('FMEExportExtensions parsed', FMEExportExtensions);
+
+  const reportNetExtensionsItems = config.exportTypes.map(type => ({
+    label: type.text,
+    icon: config.icons['archive'],
+    command: () => onExportTableData(type.code)
+  }));
+
+  const FMEExtensionsItems = [
+    {
+      label: 'FME Extensions',
+      items: FMEExportExtensions.map(type => ({
+        label: type.text,
+        icon: config.icons['archive'],
+        command: () => onExportTableData(type.code)
+      }))
+    }
+  ];
 
   const onExportTableData = async fileType => {
     setIsLoadingFile(true);
@@ -226,28 +232,12 @@ const ActionsToolbar = ({
           }}
         />
         <Menu
-          model={uniqsReportNetAndFMEExtensions.map(type => ({
-            label: type.text,
-            icon: config.icons['archive'],
-            command: () => onExportTableData(type.code)
-          }))}
+          model={reportNetExtensionsItems.concat(FMEExtensionsItems)}
           popup={true}
           ref={exportMenuRef}
           id="exportTableMenu"
           onShow={e => getExportButtonPosition(e)}
         />
-
-        {/* <Menu
-          model={config.exportTypes.map(type => ({
-            label: type.text,
-            icon: config.icons['archive'],
-            command: () => onExportTableData(type.code)
-          }))}
-          popup={true}
-          ref={exportMenuRef}
-          id="exportTableMenu"
-          onShow={e => getExportButtonPosition(e)}
-        /> */}
 
         <Button
           className={`p-button-rounded p-button-secondary-transparent ${
