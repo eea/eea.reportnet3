@@ -9,6 +9,8 @@ export const getEmptyExpression = () => {
     operatorType: '',
     operatorValue: '',
     expressionValue: '',
-    expressions: []
+    expressions: [],
+    expressionsIf: [],
+    expressionsThen: []
   };
 };

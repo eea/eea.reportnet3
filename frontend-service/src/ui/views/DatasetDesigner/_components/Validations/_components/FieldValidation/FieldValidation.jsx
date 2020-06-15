@@ -76,6 +76,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
     if (!creationFormState.candidateRule.automatic) {
       setTabContents([
         <TabPanel
+          key="tab_1"
           header={resourcesContext.messages.tabMenuConstraintData}
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}
           headerClassName={showErrorOnInfoTab ? styles.error : ''}>
@@ -89,6 +90,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
           />
         </TabPanel>,
         <TabPanel
+          key="tab_2"
           header={resourcesContext.messages.tabMenuExpression}
           leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}
           headerClassName={showErrorOnExpressionTab ? styles.error : ''}>
@@ -108,6 +110,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
     } else {
       setTabContents([
         <TabPanel
+          key="tab_1"
           header={resourcesContext.messages.tabMenuConstraintData}
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
           <InfoTab
@@ -170,11 +173,12 @@ const FieldValidation = ({ datasetId, tabs }) => {
 
       const fieldType = getFieldType(table, { code: validationContext.referenceId }, tabs);
       creationFormDispatch({
-        type: 'SET_FIELD_AND_FIELD_TYPE',
+        // type: 'SET_FIELD_AND_FIELD_TYPE',
+        type: 'SET_TABLE_ID_FIELD_ID_AND_FIELD_TYPE',
         payload: {
-          key: 'table',
-          value: table,
-          fieldType
+          field: validationContext.referenceId,
+          fieldType,
+          table
         }
       });
     }
@@ -433,9 +437,58 @@ const FieldValidation = ({ datasetId, tabs }) => {
     });
   };
 
+  const renderFieldQCsFooter = (
+    <div className={styles.footer}>
+      <div className={`${styles.section} ${styles.footerToolBar}`}>
+        <div className={styles.subsection}>
+          {validationContext.ruleEdit ? (
+            <span data-tip data-for="createTooltip">
+              <Button
+                id={`${componentName}__update`}
+                disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
+                className="p-button-primary p-button-text-icon-left"
+                type="button"
+                label={resourcesContext.messages.update}
+                icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
+                onClick={e => onUpdateValidationRule()}
+              />
+            </span>
+          ) : (
+            <span data-tip data-for="createTooltip">
+              <Button
+                id={`${componentName}__create`}
+                disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
+                className="p-button-primary p-button-text-icon-left"
+                type="button"
+                label={resourcesContext.messages.create}
+                icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
+                onClick={e => onCreateValidationRule()}
+              />
+            </span>
+          )}
+          {(creationFormState.isValidationCreationDisabled || isSubmitDisabled) && (
+            <ReactTooltip className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
+              <span>{resourcesContext.messages.fcSubmitButtonDisabled}</span>
+            </ReactTooltip>
+          )}
+
+          <Button
+            id={`${componentName}__cancel`}
+            className="p-button-secondary p-button-text-icon-left"
+            type="button"
+            label={resourcesContext.messages.cancel}
+            icon="cancel"
+            onClick={e => onHide()}
+          />
+        </div>
+      </div>
+    </div>
+  );
+
   const dialogLayout = children => (
     <Dialog
       className={styles.dialog}
+      footer={renderFieldQCsFooter}
       header={
         validationContext.ruleEdit
           ? resourcesContext.messages.editFieldConstraint
@@ -460,51 +513,6 @@ const FieldValidation = ({ datasetId, tabs }) => {
               renderActiveOnly={false}>
               {tabContents}
             </TabView>
-          </div>
-          <div className={styles.footer}>
-            <div className={`${styles.section} ${styles.footerToolBar}`}>
-              <div className={styles.subsection}>
-                {validationContext.ruleEdit ? (
-                  <span data-tip data-for="createTooltip">
-                    <Button
-                      id={`${componentName}__update`}
-                      disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
-                      className="p-button-primary p-button-text-icon-left"
-                      type="button"
-                      label={resourcesContext.messages.update}
-                      icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
-                      onClick={e => onUpdateValidationRule()}
-                    />
-                  </span>
-                ) : (
-                  <span data-tip data-for="createTooltip">
-                    <Button
-                      id={`${componentName}__create`}
-                      disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
-                      className="p-button-primary p-button-text-icon-left"
-                      type="button"
-                      label={resourcesContext.messages.create}
-                      icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
-                      onClick={e => onCreateValidationRule()}
-                    />
-                  </span>
-                )}
-                {(creationFormState.isValidationCreationDisabled || isSubmitDisabled) && (
-                  <ReactTooltip className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
-                    <span>{resourcesContext.messages.fcSubmitButtonDisabled}</span>
-                  </ReactTooltip>
-                )}
-
-                <Button
-                  id={`${componentName}__cancel`}
-                  className="p-button-secondary p-button-text-icon-left"
-                  type="button"
-                  label={resourcesContext.messages.cancel}
-                  icon="cancel"
-                  onClick={e => onHide()}
-                />
-              </div>
-            </div>
           </div>
         </div>
       </form>

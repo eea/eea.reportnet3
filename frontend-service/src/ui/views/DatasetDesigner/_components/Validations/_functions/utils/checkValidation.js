@@ -1,5 +1,5 @@
-import isNil from 'lodash/isNil';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import { checkExpressions } from './checkExpressions';
 
@@ -12,7 +12,7 @@ export const checkValidation = candidateRule => {
       if (isNil(candidateRule[ruleKey]) || isEmpty(candidateRule[ruleKey])) {
         isValidated = false;
       }
-    } else if (ruleKey == 'expressions' && !isEmpty(candidateRule.expressions)) {
+    } else if (ruleKey === 'expressions' && !isEmpty(candidateRule.expressions)) {
       if (checkExpressions(candidateRule[ruleKey])) {
         isValidated = false;
       }

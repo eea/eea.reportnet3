@@ -98,7 +98,7 @@ const ValidationExpressionGroup = ({
                 showRequiredFields && position > 0 && isEmpty(expressionValues.union) ? 'error' : ''
               }`}>
               <Dropdown
-                disabled={isDisabled || position == 0}
+                disabled={isDisabled || position === 0}
                 placeholder={resourcesContext.messages.union}
                 optionLabel="label"
                 options={config.validations.logicalOperators}
