@@ -179,12 +179,12 @@
     },
     "LEN": {
       "type": "RECORD_LEN",
-      ">": "RECORD_LEN_GT",
-      "<": "RECORD_LEN_LT",
-      ">=": "RECORD_LEN_GTEQ",
-      "<=": "RECORD_LEN_LTEQ",
-      "=": "RECORD_LEN_EQ",
-      "!=": "RECORD_LEN_DIST"
+      ">": "RECORD_LEN_GT_RECORD",
+      "<": "RECORD_LEN_LT_RECORD",
+      ">=": "RECORD_LEN_GTEQ_RECORD",
+      "<=": "RECORD_LEN_LTEQ_RECORD",
+      "=": "RECORD_LEN_EQ_RECORD",
+      "!=": "RECORD_LEN_DIST_RECORD"
     },
     "string": {
       "=": "RECORD_SEQ_RECORD",
@@ -253,6 +253,7 @@
       "AND": "RECORD_AND",
       "OR": "RECORD_OR"
     },
+
     "number": {
       ">": "RECORD_GT",
       "<": "RECORD_LT",
@@ -408,12 +409,12 @@
       "operatorType": "LEN",
       "operators": [
         "RECORD_LEN",
-        "RECORD_LEN_GT",
-        "RECORD_LEN_LT",
-        "RECORD_LEN_GTEQ",
-        "RECORD_LEN_LTEQ",
-        "RECORD_LEN_EQ",
-        "RECORD_LEN_DIST"
+        "RECORD_LEN_GT_RECORD",
+        "RECORD_LEN_LT_RECORD",
+        "RECORD_LEN_GTEQ_RECORD",
+        "RECORD_LEN_LTEQ_RECORD",
+        "RECORD_LEN_EQ_RECORD",
+        "RECORD_LEN_DIST_RECORD"
       ]
     },
     {
@@ -527,6 +528,12 @@
     "RECORD_LEN_LTEQ": "<=",
     "RECORD_LEN_EQ": "=",
     "RECORD_LEN_DIST": "!=",
+    "RECORD_LEN_GT_RECORD": ">",
+    "RECORD_LEN_LT_RECORD": "<",
+    "RECORD_LEN_GTEQ_RECORD": ">=",
+    "RECORD_LEN_LTEQ_RECORD": "<=",
+    "RECORD_LEN_EQ_RECORD": "=",
+    "RECORD_LEN_DIST_RECORD": "!=",
     "RECORD_SEQ_RECORD": "=",
     "RECORD_SEQIC_RECORD": "=(Ignore case)",
     "RECORD_MATCH_RECORD": "MATCH",
