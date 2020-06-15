@@ -377,14 +377,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'plus'}
-        label={resources.messages['createDatasetValidationBtn']}
+        label={resources.messages['createFieldValidationBtn']}
         onClick={() => {
-          validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog');
+          validationContext.onOpenModalFromOpener('field', 'validationsListDialog');
           onHideValidationsDialog();
         }}
+        style={{ float: 'left' }}
       />
       <Button
-        className="p-button-primary p-button-animated-blink"
+        className="p-button-secondary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['createRowValidationBtn']}
         onClick={() => {
@@ -396,13 +397,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'plus'}
-        label={resources.messages['createFieldValidationBtn']}
+        label={resources.messages['createDatasetValidationBtn']}
         onClick={() => {
-          validationContext.onOpenModalFromOpener('field', 'validationsListDialog');
+          validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog');
           onHideValidationsDialog();
         }}
         style={{ float: 'left' }}
       />
+
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
