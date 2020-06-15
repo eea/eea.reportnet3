@@ -96,7 +96,7 @@ const updateRowRule = async (datasetId, validationRule) => {
     referenceId: validationRule.recordSchemaId,
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
-    type: 'RECORD',
+    type: validationRule.ruleType,
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value]
   };
   if (!validationRule.automatic) {
