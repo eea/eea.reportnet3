@@ -235,11 +235,12 @@ const ActionsToolbar = ({
           }}
         />
         <Menu
+          className={styles.menu}
+          id="exportTableMenu"
           model={totalExtensionsItems}
+          onShow={e => getExportButtonPosition(e)}
           popup={true}
           ref={exportMenuRef}
-          id="exportTableMenu"
-          onShow={e => getExportButtonPosition(e)}
         />
 
         <Button
