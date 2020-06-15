@@ -2,10 +2,10 @@ import React, { useContext, useEffect, useRef, useState, useReducer } from 'reac
 
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 import uniq from 'lodash/uniq';
-import uniqBy from 'lodash/uniqBy';
 
 import { config } from 'conf';
 
@@ -42,6 +42,7 @@ const ActionsToolbar = ({
   onRefresh,
   onSetVisible,
   originalColumns,
+  onUpdateData,
   records,
   setColumns,
   setDeleteDialogVisible,
@@ -115,7 +116,6 @@ const ActionsToolbar = ({
 
   const getReportNetandFMEExportExtensions = exportExtensionsOperationsList => {
     const uniqsExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
-
     setFMEExportExtensions(parseUniqsExportExtensions(uniqsExportExtensions));
   };
   console.log('exportExtensionsOperationsList actuonssToolbar', exportExtensionsOperationsList);
@@ -228,6 +228,7 @@ const ActionsToolbar = ({
           icon={isLoadingFile ? 'spinnerAnimate' : 'import'}
           label={resources.messages['exportTable']}
           onClick={event => {
+            onUpdateData();
             exportMenuRef.current.show(event);
           }}
         />
