@@ -8,6 +8,7 @@ import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -168,5 +169,21 @@ public interface DatasetMetabaseController {
    */
   @GetMapping("/private/getDatasetId/datasetSchema/{datasetSchemaId}")
   Long getDesignDatasetIdByDatasetSchemaId(@PathVariable("datasetSchemaId") String datasetSchemaId);
+  
+  /**
+   * Delete foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
+  @DeleteMapping("/private/deleteForeignRelationship")
+  void deleteForeignRelationship(@RequestParam("datasetOriginId") final Long datasetOriginId,
+      @RequestParam("datasetReferencedId") final Long datasetReferencedId,
+      @RequestParam("originDatasetSchemaId") final String originDatasetSchemaId,
+      @RequestParam("referencedDatasetSchemaId") final String referencedDatasetSchemaId);
+
+
 
 }

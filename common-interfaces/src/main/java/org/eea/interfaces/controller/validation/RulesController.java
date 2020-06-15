@@ -209,17 +209,22 @@ public interface RulesController {
    * Delete dataset rule and integrity by field schema id.
    *
    * @param fieldSchemaId the field schema id
+   * @param datasetId the dataset id
    */
   @DeleteMapping("/private/deleteDatasetRuleAndIntegrityByIdFieldSchema")
   void deleteDatasetRuleAndIntegrityByFieldSchemaId(
-      @RequestParam("fieldSchemaId") String fieldSchemaId);
+      @RequestParam("fieldSchemaId") String fieldSchemaId,
+      @RequestParam("datasetId") Long datasetId);
 
   /**
    * Delete dataset rule and integrity by dataset schema id.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    */
   @DeleteMapping("/private/deleteDatasetRuleAndIntegrityByDatasetSchemaId")
   void deleteDatasetRuleAndIntegrityByDatasetSchemaId(
-      @RequestParam("datasetSchemaId") String datasetSchemaId);
+      @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("datasetId") Long datasetId);
+
 }
