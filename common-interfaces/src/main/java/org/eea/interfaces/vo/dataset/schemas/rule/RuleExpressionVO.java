@@ -267,6 +267,9 @@ public class RuleExpressionVO {
     rule.params = new ArrayList<>();
     int length = expression.length();
 
+    if (expression.contains("isIntegrityConstraint")) {
+      return length;
+    }
     loop: while (index < length) {
       switch (expression.charAt(index)) {
         case '0':
@@ -300,9 +303,6 @@ public class RuleExpressionVO {
         default:
           break loop;
       }
-    }
-    if (expression.contains("isIntegrityConstraint")) {
-      return length;
     }
     throw new IllegalStateException("readParams - Invalid expression: " + expression);
 

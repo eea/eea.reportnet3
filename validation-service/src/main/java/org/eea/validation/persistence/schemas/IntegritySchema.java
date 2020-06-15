@@ -37,13 +37,17 @@ public class IntegritySchema {
   @Field(value = "isDoubleReferenced")
   private Boolean isDoubleReferenced;
 
-  /** The dataset origin id. */
-  @Field(value = "originDatasetId")
-  private Long originDatasetId;
+  /** The dataset schema id. */
+  @Field(value = "originDatasetSchemaId")
+  private ObjectId originDatasetSchemaId;
 
-  /** The referenced dataset id. */
-  @Field(value = "referencedDatasetId")
-  private Long referencedDatasetId;
+  /** The referenced dataset schema id. */
+  @Field(value = "referencedDatasetSchemaId")
+  private ObjectId referencedDatasetSchemaId;
+
+  /** The rule id. */
+  @Field(value = "ruleId")
+  private ObjectId ruleId;
 
 
   /**
@@ -53,8 +57,8 @@ public class IntegritySchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(originFields, referencedFields, isDoubleReferenced, originDatasetId,
-        referencedDatasetId);
+    return Objects.hash(originFields, referencedFields, isDoubleReferenced, originDatasetSchemaId,
+        referencedDatasetSchemaId, ruleId);
   }
 
   /**
@@ -75,8 +79,9 @@ public class IntegritySchema {
     return Objects.equals(originFields, other.originFields)
         && Objects.equals(referencedFields, other.referencedFields)
         && Objects.equals(isDoubleReferenced, other.isDoubleReferenced)
-        && Objects.equals(originDatasetId, other.originDatasetId)
-        && Objects.equals(referencedDatasetId, other.referencedDatasetId);
+        && Objects.equals(originDatasetSchemaId, other.originDatasetSchemaId)
+        && Objects.equals(referencedDatasetSchemaId, other.referencedDatasetSchemaId)
+        && Objects.equals(ruleId, other.ruleId);
   }
 
 }
