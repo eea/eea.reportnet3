@@ -396,11 +396,10 @@ public class UniqueValidationUtils {
       tableValidations.add(tableValidation);
     }
     if (Boolean.TRUE.equals(integrityVO.getIsDoubleReferenced())) {
-      DataSetSchema datasetSchema2 = schemasRepository
+      DataSetSchema datasetSchemaDoubleReference = schemasRepository
           .findByIdDataSetSchema(new ObjectId(integrityVO.getReferencedDatasetSchemaId()));
-      String tableSchemaName =
-          getTableSchemaFromIdFieldSchema(datasetSchema2, integrityVO.getReferencedFields().get(0))
-              .getNameTableSchema();
+      String tableSchemaName = getTableSchemaFromIdFieldSchema(datasetSchemaDoubleReference,
+          integrityVO.getReferencedFields().get(0)).getNameTableSchema();
       notUtilizedRecords =
           recordRepository.queryExecution(mountIntegrityQuery(integrityVO.getReferencedFields(),
               integrityVO.getOriginFields(), datasetIdReferenced, datasetIdOrigin));
