@@ -300,6 +300,9 @@ export const createValidationReducer = (state, { type, payload }) => {
         rowOptions.expressionsThen = payload.expressionsThen;
         rowOptions.allExpressionsThen = payload.allExpressionsThen;
       }
+      if (payload.entityType === 'RECORD' && payload.expressions.length > 0) {
+        rowOptions.expressionType = 'fieldComparison';
+      }
       return {
         ...state,
         candidateRule: {
