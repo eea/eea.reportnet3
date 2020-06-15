@@ -40,7 +40,7 @@ import { getSelectedTableByRecordId } from 'ui/views/DatasetDesigner/_components
 import { groupExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/groupExpressions';
 import { initValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/initValidationRuleCreation';
 import { resetValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/resetValidationRuleCreation';
-import { setExpressionsfieldsTypes } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/setExpressionsfieldsTypes';
+import { setExpressionsFieldsTypes } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/setExpressionsFieldsTypes';
 import { setValidationExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/setValidationExpression';
 
 export const RowValidation = ({ datasetId, tabs }) => {
@@ -74,6 +74,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
     if (!creationFormState.candidateRule.automatic) {
       setTabContents([
         <TabPanel
+          key="tab1"
           header={resourcesContext.messages.tabMenuConstraintData}
           headerClassName={showErrorOnInfoTab ? styles.error : ''}
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
@@ -87,6 +88,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
           />
         </TabPanel>,
         <TabPanel
+          key="tab2"
           header={resourcesContext.messages.tabMenuExpression}
           headerClassName={showErrorOnExpressionTab ? styles.error : ''}
           leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}>
@@ -302,10 +304,10 @@ export const RowValidation = ({ datasetId, tabs }) => {
       const { candidateRule } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
       if (candidateRule.expressionType == 'ifThenClause') {
-        setExpressionsfieldsTypes(candidateRule.expressionsIf, candidateRule.table, tabs);
-        setExpressionsfieldsTypes(candidateRule.expressionsThen, candidateRule.table, tabs);
+        setExpressionsFieldsTypes(candidateRule.expressionsIf, candidateRule.table, tabs);
+        setExpressionsFieldsTypes(candidateRule.expressionsThen, candidateRule.table, tabs);
       } else {
-        setExpressionsfieldsTypes(candidateRule.expressions, candidateRule.table, tabs);
+        setExpressionsFieldsTypes(candidateRule.expressions, candidateRule.table, tabs);
       }
       await ValidationService.createRowRule(datasetId, candidateRule);
       onHide();
@@ -325,10 +327,10 @@ export const RowValidation = ({ datasetId, tabs }) => {
       const { candidateRule } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
       if (candidateRule.expressionType == 'ifThenClause') {
-        setExpressionsfieldsTypes(candidateRule.expressionsIf, candidateRule.table, tabs);
-        setExpressionsfieldsTypes(candidateRule.expressionsThen, candidateRule.table, tabs);
+        setExpressionsFieldsTypes(candidateRule.expressionsIf, candidateRule.table, tabs);
+        setExpressionsFieldsTypes(candidateRule.expressionsThen, candidateRule.table, tabs);
       } else {
-        setExpressionsfieldsTypes(candidateRule.expressions, candidateRule.table, tabs);
+        setExpressionsFieldsTypes(candidateRule.expressions, candidateRule.table, tabs);
       }
       await ValidationService.updateRowRule(datasetId, candidateRule);
       onHide();
@@ -448,7 +450,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
 
   const onExpressionIfMarkToGroup = (expressionId, field) => {
     const {
-      groupCandidate,
+      groupCandidateIf,
       candidateRule: { allExpressionsIf }
     } = creationFormState;
 
@@ -456,23 +458,23 @@ export const RowValidation = ({ datasetId, tabs }) => {
     currentExpression[field.key] = field.value;
 
     if (field.value) {
-      groupCandidate.push(expressionId);
+      groupCandidateIf.push(expressionId);
     } else {
-      pull(groupCandidate, expressionId);
+      pull(groupCandidateIf, expressionId);
     }
     creationFormDispatch({
       type: 'GROUP_IF_RULES_ACTIVATOR',
       payload: {
         allExpressionsIf,
-        groupCandidate,
-        groupExpressionsActive: field.value ? 1 : -1
+        groupCandidateIf,
+        groupExpressionsIfActive: field.value ? 1 : -1
       }
     });
   };
 
   const onExpressionThenMarkToGroup = (expressionId, field) => {
     const {
-      groupCandidate,
+      groupCandidateThen,
       candidateRule: { allExpressionsThen }
     } = creationFormState;
 
@@ -480,16 +482,16 @@ export const RowValidation = ({ datasetId, tabs }) => {
     currentExpression[field.key] = field.value;
 
     if (field.value) {
-      groupCandidate.push(expressionId);
+      groupCandidateThen.push(expressionId);
     } else {
-      pull(groupCandidate, expressionId);
+      pull(groupCandidateThen, expressionId);
     }
     creationFormDispatch({
-      type: 'GROUP_RULES_ACTIVATOR',
+      type: 'GROUP_THEN_RULES_ACTIVATOR',
       payload: {
         allExpressionsThen,
-        groupCandidate,
-        groupExpressionsActive: field.value ? 1 : -1
+        groupCandidateThen,
+        groupExpressionsThenActive: field.value ? 1 : -1
       }
     });
   };
@@ -583,14 +585,14 @@ export const RowValidation = ({ datasetId, tabs }) => {
   const onExpressionIfGroup = () => {
     const groupingResult = groupExpressions(
       creationFormState.candidateRule.expressionsIf,
-      creationFormState.groupExpressionsActive,
-      creationFormState.groupCandidate
+      creationFormState.groupExpressionsIfActive,
+      creationFormState.groupCandidateIf
     );
     if (!isNil(groupingResult.newGroup))
       creationFormDispatch({
-        type: 'GROUP_EXPRESSIONS',
+        type: 'GROUP_EXPRESSIONS_IF',
         payload: {
-          expressionsIf: groupingResult.expressionsIf,
+          expressionsIf: groupingResult.expressions,
           allExpressionsIf: [...creationFormState.candidateRule.allExpressionsIf, groupingResult.newGroup]
         }
       });
@@ -599,14 +601,15 @@ export const RowValidation = ({ datasetId, tabs }) => {
   const onExpressionThenGroup = () => {
     const groupingResult = groupExpressions(
       creationFormState.candidateRule.expressionsThen,
-      creationFormState.groupExpressionsActive,
-      creationFormState.groupCandidate
+      creationFormState.groupExpressionsThenActive,
+      creationFormState.groupCandidateThen
     );
+
     if (!isNil(groupingResult.newGroup))
       creationFormDispatch({
-        type: 'GROUP_EXPRESSIONS',
+        type: 'GROUP_EXPRESSIONS_THEN',
         payload: {
-          expressionsThen: groupingResult.expressionsThen,
+          expressionsThen: groupingResult.expressions,
           allExpressionsThen: [...creationFormState.candidateRule.allExpressionsThen, groupingResult.newGroup]
         }
       });

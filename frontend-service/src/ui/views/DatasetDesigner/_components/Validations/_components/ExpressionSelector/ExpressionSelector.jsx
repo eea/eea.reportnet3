@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 
 import styles from './ExpressionSelector.module.scss';
 
@@ -10,6 +9,7 @@ import { FieldComparison } from 'ui/views/DatasetDesigner/_components/Validation
 import { IfThenClause } from 'ui/views/DatasetDesigner/_components/Validations/_components/IfThenClause';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 export const ExpressionSelector = ({
   componentName,
@@ -35,6 +35,7 @@ export const ExpressionSelector = ({
   tabsChanges
 }) => {
   const resources = useContext(ResourcesContext);
+  const validationContext = useContext(ValidationContext);
 
   const [expressionTypeValue, setExpressionTypeValue] = useState('');
 
@@ -94,13 +95,14 @@ export const ExpressionSelector = ({
   };
   return (
     <>
-      <div className={styles.section}>
+      <div className={styles.section} style={validationContext.ruleEdit ? { display: 'none' } : {}}>
         <Dropdown
           value={expressionTypeValue}
           options={options}
           onChange={e => onExpressionTypeToggle(e.value)}
           placeholder={resources.messages['expressionTypeDropdownPlaceholder']}
           optionLabel="label"
+          style={{ width: '12em' }}
         />
       </div>
 

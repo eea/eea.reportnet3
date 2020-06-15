@@ -330,6 +330,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   @Transactional
   public void deleteDatasetSchema(String schemaId) {
+    // we delete the integrity rules associated with this dataset and delete the integrity in mongo
+    rulesControllerZuul.deleteDatasetRuleAndIntegrityByDatasetSchemaId(schemaId);
     schemasRepository.deleteDatasetSchemaById(schemaId);
   }
 
@@ -474,11 +476,18 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     // if the table havent got any record he hasnt any document too
     if (null != recordSchemadocument) {
       List<?> fieldSchemasList = (ArrayList<?>) recordSchemadocument.get("fieldSchemas");
-      fieldSchemasList.stream().forEach(document -> rulesControllerZuul
-          .deleteRuleByReferenceId(datasetSchemaId, ((Document) document).get("_id").toString()));
+      fieldSchemasList.stream().forEach(document -> {
+        rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId,
+            ((Document) document).get("_id").toString());
+        // we delete the ruleIntegrity for each fields that we have in this table
+        // document.
+        rulesControllerZuul.deleteDatasetRuleAndIntegrityByFieldSchemaId(
+            ((Document) document).get("_id").toString());
+      });
       rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId,
           recordSchemadocument.get("_id").toString());
     }
+
     schemasRepository.deleteTableSchemaById(idTableSchema);
   }
 
@@ -691,10 +700,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     // now we find if we have any record rule related with that fieldSchema to delete it
     rulesControllerZuul.deleteRuleHighLevelLike(datasetSchemaId, fieldSchemaId);
 
+    // we call that method to find if this field have a integrity Rule, and if it has, delete the
+    // integrity and the rule at datasetLevel
+    rulesControllerZuul.deleteDatasetRuleAndIntegrityByFieldSchemaId(fieldSchemaId);
 
     return schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaId)
         .getModifiedCount() == 1;
   }
+
+
 
   /**
    * Order field schema.

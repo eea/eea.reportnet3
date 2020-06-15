@@ -55,16 +55,16 @@ export const IfThenClause = ({
             className="p-button-primary p-button-text-icon-left"
             disabled={creationFormState.isRuleAddingDisabledIf}
             icon="plus"
-            id={`${componentName}__addExpresion`}
+            id={`${componentName}__addExpresionIf`}
             label={resourcesContext.messages.addNewRule}
             onClick={() => onAddNewExpressionIf()}
             type="button"
           />
-          {creationFormState.groupExpressionsActive >= 2 && (
+          {creationFormState.groupExpressionsIfActive >= 2 && (
             <Button
               className="p-button-primary p-button-text"
               icon="plus"
-              id={`${componentName}__groupExpresions`}
+              id={`${componentName}__groupExpresionsIf`}
               label="Group"
               onClick={() => onExpressionIfGroup()}
               type="button"
@@ -100,16 +100,16 @@ export const IfThenClause = ({
             className="p-button-primary p-button-text-icon-left"
             disabled={creationFormState.isRuleAddingDisabledThen}
             icon="plus"
-            id={`${componentName}__addExpresion`}
+            id={`${componentName}__addExpresionThen`}
             label={resourcesContext.messages.addNewRule}
             onClick={() => onAddNewExpressionThen()}
             type="button"
           />
-          {creationFormState.groupExpressionsActive >= 2 && (
+          {creationFormState.groupExpressionsThenActive >= 2 && (
             <Button
               className="p-button-primary p-button-text"
               icon="plus"
-              id={`${componentName}__groupExpresions`}
+              id={`${componentName}__groupExpresionsThen`}
               label="Group"
               onClick={() => onExpressionThenGroup()}
               type="button"

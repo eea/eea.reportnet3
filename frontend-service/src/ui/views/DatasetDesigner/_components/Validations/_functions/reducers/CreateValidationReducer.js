@@ -21,7 +21,11 @@ export const createValidationReducerInitState = {
   areRulesDisabledThen: true,
   datasetSchema: {},
   groupCandidate: [],
+  groupCandidateIf: [],
+  groupCandidateThen: [],
   groupExpressionsActive: 0,
+  groupExpressionsIfActive: 0,
+  groupExpressionsThenActive: 0,
   isRuleAddingDisabled: true,
   isRuleAddingDisabledIf: true,
   isRuleAddingDisabledThen: true,
@@ -229,6 +233,30 @@ export const createValidationReducer = (state, { type, payload }) => {
         }
       };
 
+    case 'GROUP_EXPRESSIONS_IF':
+      return {
+        ...state,
+        groupExpressionsIfActive: 0,
+        groupCandidateIf: [],
+        candidateRule: {
+          ...state.candidateRule,
+          expressionsIf: payload.expressionsIf,
+          allExpressionsIf: payload.allExpressionsIf
+        }
+      };
+
+    case 'GROUP_EXPRESSIONS_THEN':
+      return {
+        ...state,
+        groupExpressionsThenActive: 0,
+        groupCandidateThen: [],
+        candidateRule: {
+          ...state.candidateRule,
+          expressionsThen: payload.expressionsThen,
+          allExpressions: payload.allExpressionsThen
+        }
+      };
+
     case 'GROUP_RULES_ACTIVATOR':
       return {
         ...state,
@@ -243,8 +271,8 @@ export const createValidationReducer = (state, { type, payload }) => {
     case 'GROUP_IF_RULES_ACTIVATOR':
       return {
         ...state,
-        groupExpressionsActive: state.groupExpressionsActive + payload.groupExpressionsActive,
-        groupCandidate: payload.groupCandidate,
+        groupExpressionsIfActive: state.groupExpressionsIfActive + payload.groupExpressionsIfActive,
+        groupCandidateIf: payload.groupCandidateIf,
         candidateRule: {
           ...state.candidateRule,
           allExpressionsIf: payload.allExpressionsIf
@@ -254,8 +282,8 @@ export const createValidationReducer = (state, { type, payload }) => {
     case 'GROUP_THEN_RULES_ACTIVATOR':
       return {
         ...state,
-        groupExpressionsActive: state.groupExpressionsActive + payload.groupExpressionsActive,
-        groupCandidate: payload.groupCandidate,
+        groupExpressionsThenActive: state.groupExpressionsThenActive + payload.groupExpressionsThenActive,
+        groupCandidateThen: payload.groupCandidateThen,
         candidateRule: {
           ...state.candidateRule,
           allExpressionsThen: payload.allExpressionsThen

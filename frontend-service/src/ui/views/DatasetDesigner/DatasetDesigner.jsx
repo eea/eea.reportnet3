@@ -293,7 +293,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const onKeyChange = event => {
     if (event.key === 'Escape') {
       designerDispatch({ type: 'ON_UPDATE_DESCRIPTION', payload: { value: designerState.initialDatasetDescription } });
-    } else if (event.key == 'Enter') {
+    } else if (event.key === 'Enter') {
       event.preventDefault();
       onBlurDescription(event.target.value);
     }

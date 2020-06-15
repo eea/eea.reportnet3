@@ -116,51 +116,11 @@ public class ExecuteRecordValidationCommandTest {
   public void executeTest() throws EEAException {
     ReflectionTestUtils.setField(executeRecordValidationCommand, "recordBatchSize", 20);
 
-    when(validationHelper.getKieBase(Mockito.any(), Mockito.any())).thenReturn(kieBase);
-
     executeRecordValidationCommand.execute(eeaEventVO);
-
-    Mockito.verify(validationService, times(1)).validateRecord(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    Mockito.verify(validationHelper, times(1)).processValidation(Mockito.eq(eeaEventVO),
+        Mockito.eq("uuid"), Mockito.eq(1l), Mockito.any(),
+        Mockito.eq(EventType.COMMAND_VALIDATED_RECORD_COMPLETED));
   }
 
-  /**
-   * Execute exception test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void executeExceptionTest() throws EEAException {
-    Mockito.when(validationHelper.isProcessCoordinator(Mockito.anyString())).thenReturn(false);
-    ReflectionTestUtils.setField(executeRecordValidationCommand, "recordBatchSize", 20);
-    doThrow(new EEAException()).when(validationService).validateRecord(Mockito.any(), Mockito.any(),
-        Mockito.any());
 
-    executeRecordValidationCommand.execute(eeaEventVO);
-
-    Mockito.verify(validationService, times(1)).validateRecord(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    Mockito.verify(kafkaSenderUtils, times(1))
-        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_VALIDATED_RECORD_COMPLETED), Mockito.any());
-  }
-
-  /**
-   * Execute exception send test.
-   *
-   * @throws EEAException the eea exception
-   */
-  @Test
-  public void executeExceptionSendTest() throws EEAException {
-    Mockito.when(validationHelper.isProcessCoordinator(Mockito.anyString())).thenReturn(true);
-    ReflectionTestUtils.setField(executeRecordValidationCommand, "recordBatchSize", 20);
-    doThrow(new EEAException()).when(validationService).validateRecord(Mockito.any(), Mockito.any(),
-        Mockito.any());
-
-    executeRecordValidationCommand.execute(eeaEventVO);
-
-    Mockito.verify(validationService, times(1)).validateRecord(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    Mockito.verify(validationHelper, times(1)).reducePendingTasks(Mockito.any(),
-        Mockito.any());
-  }
 }
