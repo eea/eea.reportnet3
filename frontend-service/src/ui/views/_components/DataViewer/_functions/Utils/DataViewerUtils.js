@@ -79,11 +79,13 @@ const getLevelError = validations => {
 };
 
 const groupOperations = (operation, list) => {
-  return list.reduce((objectsByKeyValue, obj) => {
+  const extensionList = list.reduce((objectsByKeyValue, obj) => {
     const value = obj[operation].toLowerCase();
     objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
     return objectsByKeyValue;
   }, {});
+
+  return { export: extensionList['export'] || [], import: extensionList['import '] || [] };
 };
 
 const groupValidations = (recordData, blockerMessage, errorMessage, warningMessage, infoMessage) => {

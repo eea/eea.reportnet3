@@ -570,6 +570,74 @@ public class RecordValue {
   }
 
   /**
+   * Record string length equals record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordStringLengthEqualsRecord(String fieldSchemaId1, String fieldSchemaId2) {
+    return recordStringLengthEquals(fieldSchemaId1, fieldsMap.get(fieldSchemaId2));
+  }
+
+  /**
+   * Record string length distinct record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordStringLengthDistinctRecord(String fieldSchemaId1, String fieldSchemaId2) {
+    return recordStringLengthDistinct(fieldSchemaId1, fieldsMap.get(fieldSchemaId2));
+  }
+
+  /**
+   * Record string length greater than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordStringLengthGreaterThanRecord(String fieldSchemaId1, String fieldSchemaId2) {
+    return recordStringLengthGreaterThan(fieldSchemaId1, fieldsMap.get(fieldSchemaId2));
+  }
+
+  /**
+   * Record string length less than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordStringLengthLessThanRecord(String fieldSchemaId1, String fieldSchemaId2) {
+    return recordStringLengthLessThan(fieldSchemaId1, fieldsMap.get(fieldSchemaId2));
+  }
+
+  /**
+   * Record string length greater than or equals than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordStringLengthGreaterThanOrEqualsThanRecord(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    return recordStringLengthGreaterThanOrEqualsThan(fieldSchemaId1, fieldsMap.get(fieldSchemaId2));
+  }
+
+  /**
+   * Record string length less than or equals than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public boolean recordStringLengthLessThanOrEqualsThanRecord(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    return recordStringLengthLessThanOrEqualsThan(fieldSchemaId1, fieldsMap.get(fieldSchemaId2));
+  }
+
+  /**
    * Record string equals.
    *
    * @param fieldSchemaId the field schema id
@@ -657,8 +725,7 @@ public class RecordValue {
   public boolean recordStringMatchesRecord(String fieldSchemaId1, String fieldSchemaId2) {
     boolean validateReturn;
     try {
-      validateReturn =
-          -1 == fieldsMap.get(fieldSchemaId2).indexOf(fieldsMap.get(fieldSchemaId1)) ? false : true;
+      return fieldsMap.get(fieldSchemaId1).matches(fieldsMap.get(fieldSchemaId2));
     } catch (Exception e) {
       validateReturn = true;
     }

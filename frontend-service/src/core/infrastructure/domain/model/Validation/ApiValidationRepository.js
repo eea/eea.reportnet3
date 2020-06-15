@@ -25,7 +25,7 @@ const create = async (datasetSchemaId, validationRule) => {
 };
 
 const createRowRule = async (datasetSchemaId, validationRule) => {
-  const { expressions } = validationRule;
+  const { expressions, expressionsIf, expressionsThen, expressionType } = validationRule;
   const validation = {
     automatic: false,
     description: validationRule.description,
@@ -34,9 +34,16 @@ const createRowRule = async (datasetSchemaId, validationRule) => {
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
-    type: 'RECORD',
-    whenCondition: getCreationComparisonDTO(expressions)
+    type: 'RECORD'
   };
+  if (expressionType === 'ifThenClause') {
+    validation.whenCondition = {
+      operator: 'RECORD_IF',
+      params: [getCreationComparisonDTO(expressionsIf), getCreationComparisonDTO(expressionsThen)]
+    };
+  } else {
+    validation.whenCondition = getCreationComparisonDTO(expressions);
+  }
   return await apiValidation.create(datasetSchemaId, validation);
 };
 
@@ -80,7 +87,7 @@ const update = async (datasetId, validationRule) => {
 };
 
 const updateRowRule = async (datasetId, validationRule) => {
-  const { expressions } = validationRule;
+  const { expressions, expressionType, expressionsIf, expressionsThen } = validationRule;
   const validation = {
     ruleId: validationRule.id,
     description: validationRule.description,
@@ -89,11 +96,18 @@ const updateRowRule = async (datasetId, validationRule) => {
     referenceId: validationRule.recordSchemaId,
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
-    type: 'RECORD',
+    type: validationRule.ruleType,
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value]
   };
   if (!validationRule.automatic) {
-    validation.whenCondition = getCreationComparisonDTO(expressions);
+    if (expressionType === 'ifThenClause') {
+      validation.whenCondition = {
+        operator: 'RECORD_IF',
+        params: [getCreationComparisonDTO(expressionsIf), getCreationComparisonDTO(expressionsThen)]
+      };
+    } else {
+      validation.whenCondition = getCreationComparisonDTO(expressions);
+    }
   }
   return await apiValidation.update(datasetId, validation);
 };
