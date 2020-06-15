@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -278,5 +279,28 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     datasetMetabaseService.updateForeignRelationship(datasetOriginId, datasetReferencedId,
         originDatasetSchemaId, referencedDatasetSchemaId);
   }
+
+
+  /**
+   * Delete foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
+  @Override
+  @DeleteMapping("/private/deleteForeignRelationship")
+  public void deleteForeignRelationship(Long datasetOriginId, Long datasetReferencedId,
+      String originDatasetSchemaId, String referencedDatasetSchemaId) {
+
+    if (null == datasetReferencedId || datasetOriginId == datasetReferencedId) {
+      datasetReferencedId =
+          getIntegrityDatasetId(datasetOriginId, originDatasetSchemaId, referencedDatasetSchemaId);
+    }
+    datasetMetabaseService.deleteForeignRelation(datasetOriginId, datasetReferencedId,
+        originDatasetSchemaId, referencedDatasetSchemaId);
+  }
+
 
 }

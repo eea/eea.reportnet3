@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -178,7 +179,19 @@ public class RulesServiceImpl implements RulesService {
     if (datasetSchemaId == null) {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
+    Rule rule = rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
 
+    if (null != rule && EntityTypeEnum.DATASET.equals(rule.getType())
+        && rule.getIntegrityConstraintId() != null) {
+      Optional<IntegritySchema> integritySchema =
+          integritySchemaRepository.findById(rule.getIntegrityConstraintId());
+      if (integritySchema.isPresent()) {
+        dataSetMetabaseControllerZuul.deleteForeignRelationship(datasetId, null,
+            integritySchema.get().getOriginDatasetSchemaId().toString(),
+            integritySchema.get().getReferencedDatasetSchemaId().toString());
+      }
+      integritySchemaRepository.deleteById(rule.getIntegrityConstraintId());
+    }
     rulesRepository.deleteRuleById(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
   }
 
@@ -728,10 +741,11 @@ public class RulesServiceImpl implements RulesService {
    * dependences of integrity in others dataset or the same dataset
    *
    * @param fieldSchemaId the field schema id
+   * @param datasetId the dataset id
    */
   @Override
   @Async
-  public void deleteDatasetRuleAndIntegrityByFieldSchemaId(String fieldSchemaId) {
+  public void deleteDatasetRuleAndIntegrityByFieldSchemaId(String fieldSchemaId, Long datasetId) {
     // we find the values salved in database by origin or referenced in integritySchema
     List<IntegritySchema> integritySchema =
         integritySchemaRepository.findByOriginOrReferenceFields(new ObjectId(fieldSchemaId));
@@ -748,6 +762,11 @@ public class RulesServiceImpl implements RulesService {
             "Rule integrity associated to the fieldschemaId {} and the integrity data with id {} , in the datasetOrigin id {} was deleted!",
             fieldSchemaId, integritySchemaData.getId(),
             integritySchemaData.getOriginDatasetSchemaId());
+
+        // we delete the pk relation in the database
+        dataSetMetabaseControllerZuul.deleteForeignRelationship(datasetId, null,
+            integritySchemaData.getOriginDatasetSchemaId().toString(),
+            integritySchemaData.getReferencedDatasetSchemaId().toString());
       });
 
     }
@@ -757,10 +776,12 @@ public class RulesServiceImpl implements RulesService {
    * Delete dataset rule and integrity by dataset schema id.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    */
   @Override
   @Async
-  public void deleteDatasetRuleAndIntegrityByDatasetSchemaId(String datasetSchemaId) {
+  public void deleteDatasetRuleAndIntegrityByDatasetSchemaId(String datasetSchemaId,
+      Long datasetId) {
     // we find the values salved in database by origin or referenced in integritySchema
     List<IntegritySchema> integritySchema = integritySchemaRepository
         .findByOriginOrReferenceDatasetSchemaId(new ObjectId(datasetSchemaId));
@@ -776,6 +797,11 @@ public class RulesServiceImpl implements RulesService {
             "Rule integrity associated to the datasetId {} and the integrity data with id {} , in the datasetOrigin id {} was deleted!",
             datasetSchemaId, integritySchemaData.getId(),
             integritySchemaData.getOriginDatasetSchemaId());
+
+        // we delete the pk relation in the database
+        dataSetMetabaseControllerZuul.deleteForeignRelationship(datasetId, null,
+            integritySchemaData.getOriginDatasetSchemaId().toString(),
+            integritySchemaData.getReferencedDatasetSchemaId().toString());
       });
 
     }

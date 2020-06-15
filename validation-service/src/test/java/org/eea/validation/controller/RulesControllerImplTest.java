@@ -526,15 +526,16 @@ public class RulesControllerImplTest {
    */
   @Test
   public void deleteDatasetRuleAndIntegrityByFieldSchemaIdTest() {
-    rulesControllerImpl.deleteDatasetRuleAndIntegrityByFieldSchemaId(Mockito.any());
+    rulesControllerImpl.deleteDatasetRuleAndIntegrityByFieldSchemaId(Mockito.any(), Mockito.any());
     Mockito.verify(rulesService, times(1))
-        .deleteDatasetRuleAndIntegrityByFieldSchemaId(Mockito.any());
+        .deleteDatasetRuleAndIntegrityByFieldSchemaId(Mockito.any(), Mockito.any());
   }
 
   @Test
   public void deleteDatasetRuleAndIntegrityByDatasetSchemaIdTest() {
-    rulesControllerImpl.deleteDatasetRuleAndIntegrityByDatasetSchemaId(Mockito.any());
+    rulesControllerImpl.deleteDatasetRuleAndIntegrityByDatasetSchemaId(Mockito.any(),
+        Mockito.any());
     Mockito.verify(rulesService, times(1))
-        .deleteDatasetRuleAndIntegrityByFieldSchemaId(Mockito.any());
+        .deleteDatasetRuleAndIntegrityByFieldSchemaId(Mockito.any(), Mockito.any());
   }
 }

@@ -138,9 +138,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
+  /** The unique constraint repository. */
   @Autowired
   private UniqueConstraintRepository uniqueConstraintRepository;
 
+  /** The unique constraint mapper. */
   @Autowired
   private UniqueConstraintMapper uniqueConstraintMapper;
 
@@ -326,12 +328,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Delete dataset schema.
    *
    * @param schemaId the schema id
+   * @param datasetId the dataset id
    */
   @Override
   @Transactional
-  public void deleteDatasetSchema(String schemaId) {
+  public void deleteDatasetSchema(String schemaId, Long datasetId) {
     // we delete the integrity rules associated with this dataset and delete the integrity in mongo
-    rulesControllerZuul.deleteDatasetRuleAndIntegrityByDatasetSchemaId(schemaId);
+    rulesControllerZuul.deleteDatasetRuleAndIntegrityByDatasetSchemaId(schemaId, datasetId);
     schemasRepository.deleteDatasetSchemaById(schemaId);
   }
 
@@ -456,12 +459,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param idTableSchema the id table schema
-   *
+   * @param datasetId the dataset id
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void deleteTableSchema(String datasetSchemaId, String idTableSchema) throws EEAException {
+  public void deleteTableSchema(String datasetSchemaId, String idTableSchema, Long datasetId)
+      throws EEAException {
     DataSetSchema datasetSchema =
         schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
     TableSchema table = getTableSchema(idTableSchema, datasetSchema);
@@ -482,7 +486,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         // we delete the ruleIntegrity for each fields that we have in this table
         // document.
         rulesControllerZuul.deleteDatasetRuleAndIntegrityByFieldSchemaId(
-            ((Document) document).get("_id").toString());
+            ((Document) document).get("_id").toString(), datasetId);
       });
       rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId,
           recordSchemadocument.get("_id").toString());
@@ -688,13 +692,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaId the field schema id
-   *
+   * @param datasetId the dataset id
    * @return true, if 1 and only 1 fieldSchema has been removed
-   *
    * @throws EEAException the EEA exception
    */
   @Override
-  public boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId)
+  public boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId, Long datasetId)
       throws EEAException {
 
     // now we find if we have any record rule related with that fieldSchema to delete it
@@ -702,7 +705,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     // we call that method to find if this field have a integrity Rule, and if it has, delete the
     // integrity and the rule at datasetLevel
-    rulesControllerZuul.deleteDatasetRuleAndIntegrityByFieldSchemaId(fieldSchemaId);
+    rulesControllerZuul.deleteDatasetRuleAndIntegrityByFieldSchemaId(fieldSchemaId, datasetId);
 
     return schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaId)
         .getModifiedCount() == 1;
@@ -1310,7 +1313,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Delete unique constraint.
    *
    * @param uniqueId the unique id
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public void deleteUniqueConstraint(String uniqueId) throws EEAException {

@@ -12,18 +12,6 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 
 /**
  * The Interface DatasetMetabaseService.
- *
- * @author vicente.cano
- */
-/**
- * @author vicente.cano
- *
- */
-
-/**
- * The interface Dataset metabase service.
- *
- * @author vicente.cano
  */
 public interface DatasetMetabaseService {
 
@@ -221,4 +209,6 @@ public interface DatasetMetabaseService {
    */
   void updateForeignRelationship(long datasetOriginId, long datasetReferencedId,
       String originDatasetSchemaId, String referencedDatasetSchemaId);
+
+
 }
