@@ -253,6 +253,7 @@ const ComparisonExpression = ({
   return (
     <li className={styles.expression}>
       <span className={styles.group}>
+        <label>{resourcesContext.messages['group']} </label>
         <Checkbox
           disabled={disabledFields.union}
           isChecked={expressionValues.group}
