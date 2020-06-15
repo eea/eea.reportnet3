@@ -29,19 +29,18 @@ import {
 
 import { checkComparisonExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonExpressions';
 import { checkComparisonValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonValidation';
+import { checkComparisonValidationIfThen } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonValidationIfThen';
 import { deleteExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpression';
 import { deleteExpressionRecursively } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpressionRecursively';
 import { getDatasetSchemaTableFields } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getDatasetSchemaTableFields';
 import { getEmptyExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getEmptyExpression';
-import { getExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getExpressionString';
+import { getComparisonExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getComparisonExpressionString';
 import { getFieldType } from '../../_functions/utils/getFieldType';
-import { getSelectedFieldById } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedFieldById';
-import { getSelectedTableByFieldId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTablebyFieldId';
-import { getSelectedTableByTableSchemaId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTableByTableSchemaId';
 import { getSelectedTableByRecordId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTableByRecordId';
 import { groupExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/groupExpressions';
 import { initValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/initValidationRuleCreation';
 import { resetValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/resetValidationRuleCreation';
+import { setExpressionsFieldsTypes } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/setExpressionsFieldsTypes';
 import { setValidationExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/setValidationExpression';
 
 export const RowValidation = ({ datasetId, tabs }) => {
@@ -63,9 +62,6 @@ export const RowValidation = ({ datasetId, tabs }) => {
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(0);
   const [tabsChanges, setTabsChanges] = useState({});
 
-  const ruleAdditionCheckListener = [creationFormState.areRulesDisabled, creationFormState.candidateRule];
-  const ruleDisablingCheckListener = [creationFormState.candidateRule.table, creationFormState.candidateRule.field];
-
   const componentName = 'createValidation';
 
   useEffect(() => {
@@ -78,6 +74,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
     if (!creationFormState.candidateRule.automatic) {
       setTabContents([
         <TabPanel
+          key="tab1"
           header={resourcesContext.messages.tabMenuConstraintData}
           headerClassName={showErrorOnInfoTab ? styles.error : ''}
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
@@ -91,6 +88,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
           />
         </TabPanel>,
         <TabPanel
+          key="tab2"
           header={resourcesContext.messages.tabMenuExpression}
           headerClassName={showErrorOnExpressionTab ? styles.error : ''}
           leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}>
@@ -98,11 +96,21 @@ export const RowValidation = ({ datasetId, tabs }) => {
             componentName={componentName}
             creationFormState={creationFormState}
             onAddNewExpression={onAddNewExpression}
+            onAddNewExpressionIf={onAddNewExpressionIf}
+            onAddNewExpressionThen={onAddNewExpressionThen}
             onExpressionDelete={onExpressionDelete}
             onExpressionFieldUpdate={onExpressionFieldUpdate}
             onExpressionGroup={onExpressionGroup}
-            onExpressionMarkToGroup={onExpressionMarkToGroup}
+            onExpressionIfDelete={onExpressionIfDelete}
+            onExpressionIfFieldUpdate={onExpressionIfFieldUpdate}
+            onExpressionIfGroup={onExpressionIfGroup}
+            onExpressionIfMarkToGroup={onExpressionIfMarkToGroup}
             onExpressionsErrors={onExpressionsErrors}
+            onExpressionThenDelete={onExpressionThenDelete}
+            onExpressionThenFieldUpdate={onExpressionThenFieldUpdate}
+            onExpressionThenGroup={onExpressionThenGroup}
+            onExpressionMarkToGroup={onExpressionMarkToGroup}
+            onExpressionThenMarkToGroup={onExpressionThenMarkToGroup}
             onExpressionTypeToggle={onExpressionTypeToggle}
             onGetFieldType={onGetFieldType}
             tabsChanges={tabsChanges}
@@ -181,13 +189,23 @@ export const RowValidation = ({ datasetId, tabs }) => {
   }, [validationContext.referenceId]);
 
   useEffect(() => {
+    let formula = '';
     const {
-      candidateRule: { field, expressions }
+      candidateRule: { table, expressions, expressionType, expressionsIf, expressionsThen }
     } = creationFormState;
+
+    if (expressionType === 'ifThenClause') {
+      formula = `IF ${getComparisonExpressionString(expressionsIf, tabs)} THEN ${getComparisonExpressionString(
+        expressionsThen,
+        tabs
+      )}`;
+    } else {
+      formula = getComparisonExpressionString(expressions, tabs);
+    }
 
     creationFormDispatch({
       type: 'SET_EXPRESSIONS_STRING',
-      payload: getExpressionString(expressions, field)
+      payload: formula
     });
   }, [creationFormState.candidateRule]);
 
@@ -203,24 +221,38 @@ export const RowValidation = ({ datasetId, tabs }) => {
         payload: true
       });
     }
-  }, [...ruleDisablingCheckListener]);
+  }, [creationFormState.candidateRule.table]);
 
   useEffect(() => {
     const {
-      candidateRule: { expressions }
+      candidateRule: { expressions, expressionsIf, expressionsThen }
     } = creationFormState;
+
     creationFormDispatch({
       type: 'SET_IS_VALIDATION_ADDING_DISABLED',
       payload: checkComparisonExpressions(expressions)
     });
-  }, [...ruleAdditionCheckListener]);
+
+    creationFormDispatch({
+      type: 'SET_IS_VALIDATION_ADDING_DISABLED_IF',
+      payload: checkComparisonExpressions(expressionsIf)
+    });
+
+    creationFormDispatch({
+      type: 'SET_IS_VALIDATION_ADDING_DISABLED_THEN',
+      payload: checkComparisonExpressions(expressionsThen)
+    });
+  }, [creationFormState.areRulesDisabled, creationFormState.candidateRule]);
 
   useEffect(() => {
     creationFormDispatch({
       type: 'SET_IS_VALIDATION_CREATION_DISABLED',
-      payload: !checkComparisonValidation(creationFormState.candidateRule)
+      payload:
+        creationFormState.candidateRule.expressionType === 'ifThenClause'
+          ? !checkComparisonValidationIfThen(creationFormState.candidateRule)
+          : !checkComparisonValidation(creationFormState.candidateRule)
     });
-  }, [creationFormState.candidateRule]);
+  }, [creationFormState.candidateRule, creationFormState.candidateRule.expressionType]);
 
   useEffect(() => {
     if (validationContext.ruleEdit && !isEmpty(validationContext.ruleToEdit)) {
@@ -271,6 +303,12 @@ export const RowValidation = ({ datasetId, tabs }) => {
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
+      if (candidateRule.expressionType == 'ifThenClause') {
+        setExpressionsFieldsTypes(candidateRule.expressionsIf, candidateRule.table, tabs);
+        setExpressionsFieldsTypes(candidateRule.expressionsThen, candidateRule.table, tabs);
+      } else {
+        setExpressionsFieldsTypes(candidateRule.expressions, candidateRule.table, tabs);
+      }
       await ValidationService.createRowRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
@@ -288,6 +326,12 @@ export const RowValidation = ({ datasetId, tabs }) => {
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
+      if (candidateRule.expressionType == 'ifThenClause') {
+        setExpressionsFieldsTypes(candidateRule.expressionsIf, candidateRule.table, tabs);
+        setExpressionsFieldsTypes(candidateRule.expressionsThen, candidateRule.table, tabs);
+      } else {
+        setExpressionsFieldsTypes(candidateRule.expressions, candidateRule.table, tabs);
+      }
       await ValidationService.updateRowRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
@@ -316,6 +360,40 @@ export const RowValidation = ({ datasetId, tabs }) => {
     });
   };
 
+  const onExpressionIfDelete = expressionId => {
+    const {
+      candidateRule: { expressionsIf, allExpressionsIf }
+    } = creationFormState;
+    const parsedExpressions = deleteExpressionRecursively(expressionId, expressionsIf);
+    const parsedAllExpressions = deleteExpression(expressionId, allExpressionsIf);
+    creationFormDispatch({
+      type: 'UPDATE_RULES_IF',
+      payload: parsedAllExpressions
+    });
+    creationFormDispatch({
+      type: 'UPDATE_EXPRESSIONS_IF_TREE',
+      payload: parsedExpressions
+    });
+  };
+
+  const onExpressionThenDelete = expressionId => {
+    const {
+      candidateRule: { expressionsThen, allExpressionsThen }
+    } = creationFormState;
+    const parsedExpressions = deleteExpressionRecursively(expressionId, expressionsThen);
+    const parsedAllExpressions = deleteExpression(expressionId, allExpressionsThen);
+
+    creationFormDispatch({
+      type: 'UPDATE_RULES_THEN',
+      payload: parsedAllExpressions
+    });
+
+    creationFormDispatch({
+      type: 'UPDATE_EXPRESSIONS_THEN_TREE',
+      payload: parsedExpressions
+    });
+  };
+
   const onExpressionFieldUpdate = (expressionId, field) => {
     const {
       candidateRule: { allExpressions }
@@ -326,13 +404,33 @@ export const RowValidation = ({ datasetId, tabs }) => {
     });
   };
 
+  const onExpressionIfFieldUpdate = (expressionId, field) => {
+    const {
+      candidateRule: { allExpressionsIf }
+    } = creationFormState;
+    creationFormDispatch({
+      type: 'UPDATE_IF_RULES',
+      payload: setValidationExpression(expressionId, field, allExpressionsIf)
+    });
+  };
+
+  const onExpressionThenFieldUpdate = (expressionId, field) => {
+    const {
+      candidateRule: { allExpressionsThen }
+    } = creationFormState;
+    creationFormDispatch({
+      type: 'UPDATE_THEN_RULES',
+      payload: setValidationExpression(expressionId, field, allExpressionsThen)
+    });
+  };
+
   const onExpressionMarkToGroup = (expressionId, field) => {
     const {
       groupCandidate,
       candidateRule: { allExpressions }
     } = creationFormState;
 
-    const [currentExpression] = allExpressions.filter(expression => expression.expressionId == expressionId);
+    const [currentExpression] = allExpressions.filter(expression => expression.expressionId === expressionId);
     currentExpression[field.key] = field.value;
 
     if (field.value) {
@@ -346,6 +444,54 @@ export const RowValidation = ({ datasetId, tabs }) => {
         allExpressions,
         groupCandidate,
         groupExpressionsActive: field.value ? 1 : -1
+      }
+    });
+  };
+
+  const onExpressionIfMarkToGroup = (expressionId, field) => {
+    const {
+      groupCandidateIf,
+      candidateRule: { allExpressionsIf }
+    } = creationFormState;
+
+    const [currentExpression] = allExpressionsIf.filter(expression => expression.expressionId === expressionId);
+    currentExpression[field.key] = field.value;
+
+    if (field.value) {
+      groupCandidateIf.push(expressionId);
+    } else {
+      pull(groupCandidateIf, expressionId);
+    }
+    creationFormDispatch({
+      type: 'GROUP_IF_RULES_ACTIVATOR',
+      payload: {
+        allExpressionsIf,
+        groupCandidateIf,
+        groupExpressionsIfActive: field.value ? 1 : -1
+      }
+    });
+  };
+
+  const onExpressionThenMarkToGroup = (expressionId, field) => {
+    const {
+      groupCandidateThen,
+      candidateRule: { allExpressionsThen }
+    } = creationFormState;
+
+    const [currentExpression] = allExpressionsThen.filter(expression => expression.expressionId === expressionId);
+    currentExpression[field.key] = field.value;
+
+    if (field.value) {
+      groupCandidateThen.push(expressionId);
+    } else {
+      pull(groupCandidateThen, expressionId);
+    }
+    creationFormDispatch({
+      type: 'GROUP_THEN_RULES_ACTIVATOR',
+      payload: {
+        allExpressionsThen,
+        groupCandidateThen,
+        groupExpressionsThenActive: field.value ? 1 : -1
       }
     });
   };
@@ -386,6 +532,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
       setClickedFields(cClickedFields);
     }
   };
+
   const onDeleteFromClickedFields = field => {
     const cClickedFields = [...clickedFields];
     if (cClickedFields.includes(field)) {
@@ -405,6 +552,20 @@ export const RowValidation = ({ datasetId, tabs }) => {
     });
   };
 
+  const onAddNewExpressionIf = () => {
+    creationFormDispatch({
+      type: 'ADD_EMPTY_IF_RULE',
+      payload: getEmptyExpression()
+    });
+  };
+
+  const onAddNewExpressionThen = () => {
+    creationFormDispatch({
+      type: 'ADD_EMPTY_THEN_RULE',
+      payload: getEmptyExpression()
+    });
+  };
+
   const onExpressionGroup = () => {
     const groupingResult = groupExpressions(
       creationFormState.candidateRule.expressions,
@@ -417,6 +578,39 @@ export const RowValidation = ({ datasetId, tabs }) => {
         payload: {
           expressions: groupingResult.expressions,
           allExpressions: [...creationFormState.candidateRule.allExpressions, groupingResult.newGroup]
+        }
+      });
+  };
+
+  const onExpressionIfGroup = () => {
+    const groupingResult = groupExpressions(
+      creationFormState.candidateRule.expressionsIf,
+      creationFormState.groupExpressionsIfActive,
+      creationFormState.groupCandidateIf
+    );
+    if (!isNil(groupingResult.newGroup))
+      creationFormDispatch({
+        type: 'GROUP_EXPRESSIONS_IF',
+        payload: {
+          expressionsIf: groupingResult.expressions,
+          allExpressionsIf: [...creationFormState.candidateRule.allExpressionsIf, groupingResult.newGroup]
+        }
+      });
+  };
+
+  const onExpressionThenGroup = () => {
+    const groupingResult = groupExpressions(
+      creationFormState.candidateRule.expressionsThen,
+      creationFormState.groupExpressionsThenActive,
+      creationFormState.groupCandidateThen
+    );
+
+    if (!isNil(groupingResult.newGroup))
+      creationFormDispatch({
+        type: 'GROUP_EXPRESSIONS_THEN',
+        payload: {
+          expressionsThen: groupingResult.expressions,
+          allExpressionsThen: [...creationFormState.candidateRule.allExpressionsThen, groupingResult.newGroup]
         }
       });
   };
@@ -439,9 +633,67 @@ export const RowValidation = ({ datasetId, tabs }) => {
     return getFieldType(creationFormState.candidateRule.table, { code: field }, tabs);
   };
 
+  const getRuleCreationBtn = () => {
+    const options = {
+      onClick: () => {},
+      disabled: true,
+      label: '',
+      id: ''
+    };
+
+    if (validationContext.ruleEdit) {
+      options.onClick = () => onUpdateValidationRule();
+      options.label = resourcesContext.messages.update;
+      options.id = `${componentName}__update`;
+    } else {
+      options.onClick = () => onCreateValidationRule();
+      options.label = resourcesContext.messages.create;
+      options.id = `${componentName}__create`;
+    }
+
+    return (
+      <span data-tip data-for="createTooltip">
+        <Button
+          className="p-button-primary p-button-text-icon-left"
+          disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
+          icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
+          id={options.id}
+          label={options.label}
+          onClick={options.onClick}
+          type="button"
+        />
+      </span>
+    );
+  };
+
+  const renderRowQCsFooter = (
+    <div className={styles.footer}>
+      <div className={`${styles.section} ${styles.footerToolBar}`}>
+        <div className={styles.subsection}>
+          {getRuleCreationBtn()}
+          {(creationFormState.isValidationCreationDisabled || isSubmitDisabled) && (
+            <ReactTooltip className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
+              <span>{resourcesContext.messages.fcSubmitButtonDisabled}</span>
+            </ReactTooltip>
+          )}
+
+          <Button
+            className="p-button-secondary p-button-text-icon-left"
+            icon="cancel"
+            id={`${componentName}__cancel`}
+            label={resourcesContext.messages.cancel}
+            onClick={() => onHide()}
+            type="button"
+          />
+        </div>
+      </div>
+    </div>
+  );
+
   const dialogLayout = children => (
     <Dialog
       className={styles.dialog}
+      footer={renderRowQCsFooter}
       header={
         validationContext.ruleEdit
           ? resourcesContext.messages.editRowConstraint
@@ -466,51 +718,6 @@ export const RowValidation = ({ datasetId, tabs }) => {
               renderActiveOnly={false}>
               {tabContents}
             </TabView>
-          </div>
-          <div className={styles.footer}>
-            <div className={`${styles.section} ${styles.footerToolBar}`}>
-              <div className={styles.subsection}>
-                {validationContext.ruleEdit ? (
-                  <span data-tip data-for="createTooltip">
-                    <Button
-                      className="p-button-primary p-button-text-icon-left"
-                      disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
-                      icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
-                      id={`${componentName}__update`}
-                      label={resourcesContext.messages.update}
-                      onClick={() => onUpdateValidationRule()}
-                      type="button"
-                    />
-                  </span>
-                ) : (
-                  <span data-tip data-for="createTooltip">
-                    <Button
-                      className="p-button-primary p-button-text-icon-left"
-                      disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
-                      icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
-                      id={`${componentName}__create`}
-                      label={resourcesContext.messages.create}
-                      onClick={() => onCreateValidationRule()}
-                      type="button"
-                    />
-                  </span>
-                )}
-                {(creationFormState.isValidationCreationDisabled || isSubmitDisabled) && (
-                  <ReactTooltip className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
-                    <span>{resourcesContext.messages.fcSubmitButtonDisabled}</span>
-                  </ReactTooltip>
-                )}
-
-                <Button
-                  className="p-button-secondary p-button-text-icon-left"
-                  icon="cancel"
-                  id={`${componentName}__cancel`}
-                  label={resourcesContext.messages.cancel}
-                  onClick={() => onHide()}
-                  type="button"
-                />
-              </div>
-            </div>
           </div>
         </div>
       </form>

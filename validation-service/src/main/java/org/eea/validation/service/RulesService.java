@@ -178,13 +178,15 @@ public interface RulesService {
    * Delete dataset rule and integrity by id field schema.
    *
    * @param fieldSchemaId the field schema id
+   * @param datasetId the dataset id
    */
-  void deleteDatasetRuleAndIntegrityByFieldSchemaId(String fieldSchemaId);
+  void deleteDatasetRuleAndIntegrityByFieldSchemaId(String fieldSchemaId, Long datasetId);
 
   /**
    * Delete dataset rule and integrity by dataset schema id.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    */
-  void deleteDatasetRuleAndIntegrityByDatasetSchemaId(String datasetSchemaId);
+  void deleteDatasetRuleAndIntegrityByDatasetSchemaId(String datasetSchemaId, Long datasetId);
 }
