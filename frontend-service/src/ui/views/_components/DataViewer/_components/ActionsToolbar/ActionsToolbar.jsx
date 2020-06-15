@@ -2,8 +2,10 @@ import React, { useContext, useEffect, useRef, useState, useReducer } from 'reac
 
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
+import uniq from 'lodash/uniq';
 
 import { config } from 'conf';
 
@@ -28,9 +30,9 @@ const ActionsToolbar = ({
   colsSchema,
   dataflowId,
   datasetId,
+  exportExtensionsOperationsList,
   hasWritePermissions,
   isDataCollection = false,
-  fileExtensions,
   isFilterValidationsActive,
   isLoading,
   isTableDeleted,
@@ -40,6 +42,7 @@ const ActionsToolbar = ({
   onRefresh,
   onSetVisible,
   originalColumns,
+  onUpdateData,
   records,
   setColumns,
   setDeleteDialogVisible,
@@ -53,6 +56,7 @@ const ActionsToolbar = ({
   const [exportTableData, setExportTableData] = useState(undefined);
   const [exportTableDataName, setExportTableDataName] = useState('');
   const [isLoadingFile, setIsLoadingFile] = useState(false);
+  const [FMEExportExtensions, setFMEExportExtensions] = useState([]);
 
   const [filter, dispatchFilter] = useReducer(filterReducer, {
     validationDropdown: [],
@@ -99,13 +103,42 @@ const ActionsToolbar = ({
     }
   }, [exportTableData]);
 
-  const externalExportTypes = [];
+  useEffect(() => {
+    getReportNetandFMEExportExtensions(exportExtensionsOperationsList);
+  }, [exportExtensionsOperationsList]);
 
-  if (!isEmpty(fileExtensions)) {
-    fileExtensions.forEach(element => {
-      element.operation === 'EXPORT' && externalExportTypes.push(element);
-    });
-  }
+  const parseUniqsExportExtensions = exportExtensionsOperationsList => {
+    return exportExtensionsOperationsList.map(uniqExportExtension => ({
+      text: `${uniqExportExtension.toUpperCase()} (.${uniqExportExtension.toLowerCase()})`,
+      code: uniqExportExtension.toLowerCase()
+    }));
+  };
+
+  const getReportNetandFMEExportExtensions = exportExtensionsOperationsList => {
+    const uniqsExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
+    setFMEExportExtensions(parseUniqsExportExtensions(uniqsExportExtensions));
+  };
+
+  const reportNetExtensionsItems = config.exportTypes.map(type => ({
+    label: type.text,
+    icon: config.icons['archive'],
+    command: () => onExportTableData(type.code)
+  }));
+
+  const FMEExtensionsItems = [
+    {
+      label: 'FME Extensions',
+      items: FMEExportExtensions.map(type => ({
+        label: type.text,
+        icon: config.icons['archive'],
+        command: () => onExportTableData(type.code)
+      }))
+    }
+  ];
+
+  const totalExtensionsItems = isEmpty(FMEExportExtensions)
+    ? reportNetExtensionsItems
+    : reportNetExtensionsItems.concat(FMEExtensionsItems);
 
   const onExportTableData = async fileType => {
     setIsLoadingFile(true);
@@ -197,19 +230,17 @@ const ActionsToolbar = ({
           icon={isLoadingFile ? 'spinnerAnimate' : 'import'}
           label={resources.messages['exportTable']}
           onClick={event => {
+            onUpdateData();
             exportMenuRef.current.show(event);
           }}
         />
         <Menu
-          model={config.exportTypes.map(type => ({
-            label: type.text,
-            icon: config.icons['archive'],
-            command: () => onExportTableData(type.code)
-          }))}
+          className={styles.menu}
+          id="exportTableMenu"
+          model={totalExtensionsItems}
+          onShow={e => getExportButtonPosition(e)}
           popup={true}
           ref={exportMenuRef}
-          id="exportTableMenu"
-          onShow={e => getExportButtonPosition(e)}
         />
 
         <Button
