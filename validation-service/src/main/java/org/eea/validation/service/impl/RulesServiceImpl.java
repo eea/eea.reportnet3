@@ -292,7 +292,7 @@ public class RulesServiceImpl implements RulesService {
       rule.setVerified(true);
       rule.setEnabled(ruleVO.isEnabled());
       rule.setIntegrityConstraintId(integrityConstraintId);
-      rule.setWhenCondition("isIntegrityConstraint(datasetId,'" + integrityConstraintId.toString()
+      rule.setWhenCondition("isIntegrityConstraint(this,'" + integrityConstraintId.toString()
           + "','" + rule.getRuleId().toString() + "')");
       Long datasetReferencedId = dataSetMetabaseControllerZuul
           .getDesignDatasetIdByDatasetSchemaId(integrityVO.getReferencedDatasetSchemaId());
@@ -522,24 +522,19 @@ public class RulesServiceImpl implements RulesService {
     rule.setVerified(null);
 
     if (EntityTypeEnum.DATASET.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
-      ObjectId integrityConstraintId = new ObjectId();
-      IntegrityVO integrityVO = ruleVO.getIntegrityVO();
-      integrityVO.setId(integrityConstraintId.toString());
-      IntegritySchema integritySchema = integrityMapper.classToEntity(integrityVO);
-      integritySchema.setRuleId(rule.getRuleId());
-      integritySchema.setId(new ObjectId(ruleVO.getIntegrityVO().getId()));
 
-      integritySchemaRepository.delete(integritySchema);
+      IntegritySchema integritySchema = integrityMapper.classToEntity(ruleVO.getIntegrityVO());
+      integritySchemaRepository.deleteById(new ObjectId(ruleVO.getIntegrityVO().getId()));
+      integritySchema.setRuleId(new ObjectId(ruleVO.getRuleId()));
       integritySchemaRepository.save(integritySchema);
 
       rule.setVerified(true);
       rule.setEnabled(ruleVO.isEnabled());
-      rule.setIntegrityConstraintId(integrityConstraintId);
-      rule.setWhenCondition("isIntegrityConstraint(datasetId,'" + integrityConstraintId.toString()
+      rule.setWhenCondition("isIntegrityConstraint(this,'" + integritySchema.getId().toString()
           + "','" + rule.getRuleId().toString() + "')");
-
       dataSetMetabaseControllerZuul.updateDatasetForeignRelationship(datasetId, datasetId,
-          integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
+          integritySchema.getOriginDatasetSchemaId().toString(),
+          integritySchema.getReferencedDatasetSchemaId().toString());
     }
     validateRule(rule);
     if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {

@@ -382,45 +382,37 @@ public class UniqueValidationUtils {
     List<String> notUtilizedRecords =
         recordRepository.queryExecution(mountIntegrityQuery(integrityVO.getOriginFields(),
             integrityVO.getReferencedFields(), datasetIdOrigin, datasetIdReferenced));
+
+    TableValue tableValue =
+        tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
+    List<TableValidation> tableValidations =
+        tableValue.getTableValidations() != null ? tableValue.getTableValidations()
+            : new ArrayList<>();
+    TableValidation tableValidation = new TableValidation();
+    tableValidation.setValidation(validation);
+
     if (!notUtilizedRecords.isEmpty()) {
-      TableValidation tableValidation = new TableValidation();
-      tableValidation.setValidation(validation);
-      TableValue tableValue =
-          tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
-      List<TableValidation> tableValidations =
-          tableValue.getTableValidations() != null ? tableValue.getTableValidations()
-              : new ArrayList<>();
       tableValidation.setTableValue(tableValue);
       tableValidations.add(tableValidation);
-      tableValue.setTableValidations(tableValidations);
-      saveTableValidations(tableValue);
-    }
-    if (datasetIdOrigin != datasetIdReferenced) {
-      schemaId = integrityVO.getReferencedDatasetSchemaId();
-      datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
     }
     if (Boolean.TRUE.equals(integrityVO.getIsDoubleReferenced())) {
-      tableSchema =
-          getTableSchemaFromIdFieldSchema(datasetSchema, integrityVO.getReferencedFields().get(0));
+      DataSetSchema datasetSchemaDoubleReference = schemasRepository
+          .findByIdDataSetSchema(new ObjectId(integrityVO.getReferencedDatasetSchemaId()));
+      String tableSchemaName = getTableSchemaFromIdFieldSchema(datasetSchemaDoubleReference,
+          integrityVO.getReferencedFields().get(0)).getNameTableSchema();
       notUtilizedRecords =
           recordRepository.queryExecution(mountIntegrityQuery(integrityVO.getReferencedFields(),
-              integrityVO.getOriginFields(), datasetIdOrigin, datasetIdReferenced));
+              integrityVO.getOriginFields(), datasetIdReferenced, datasetIdOrigin));
       if (!notUtilizedRecords.isEmpty()) {
-        validation = createValidation(idRule, schemaId, tableSchema.getNameTableSchema(),
-            EntityTypeEnum.TABLE);
-        TableValidation tableValidation = new TableValidation();
-        tableValidation.setValidation(validation);
-        TableValue tableValue =
-            tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
-        List<TableValidation> tableValidations =
-            tableValue.getTableValidations() != null ? tableValue.getTableValidations()
-                : new ArrayList<>();
-        tableValidation.setTableValue(tableValue);
-        tableValidations.add(tableValidation);
-        tableValue.setTableValidations(tableValidations);
-        saveTableValidations(tableValue);
+        validation = createValidation(idRule, schemaId, tableSchemaName, EntityTypeEnum.TABLE);
+        TableValidation tableValidationReferenced = new TableValidation();
+        tableValidationReferenced.setValidation(validation);
+        tableValidationReferenced.setTableValue(tableValue);
+        tableValidations.add(tableValidationReferenced);
       }
     }
+    tableValue.setTableValidations(tableValidations);
+    saveTableValidations(tableValue);
     return !notUtilizedRecords.isEmpty();
 
   }
