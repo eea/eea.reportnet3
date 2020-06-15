@@ -772,6 +772,10 @@
     "value": "JHtWQUxJREFUSU9OX1RBU0tTX0lOSVRJQUxfVEFYOjF9"
   },
   {
+    "key": "config/validation/validation.tasks.parallelism",
+    "value": "JHtWQUxJREFUSU9OX1RBU0tTX1BBUkFMTEVMSVNNOjR9"
+  },
+  {
     "key": "config/ums/management.endpoints.web.exposure.include",
     "value": "Kg=="
   },
@@ -1222,5 +1226,17 @@
   {
     "key": "config/recordstore/snapshot.bufferSize",
     "value": "NjU1MzY="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.integration.path",
+    "value": "L2ludGVncmF0aW9uLyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.integration.serviceId",
+    "value": "ZGF0YWZsb3c="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.integration.stripPrefix",
+    "value": "ZmFsc2U="
   }
 ]

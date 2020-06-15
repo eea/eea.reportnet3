@@ -12,6 +12,7 @@ import org.drools.template.ObjectDataCompiler;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleExpressionVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -203,7 +204,11 @@ public class KieBaseManager {
   public void textRuleCorrect(String datasetSchemaId, Rule rule) throws EEAException {
 
     Map<String, DataType> dataTypeMap = new HashMap<>();
-    RuleExpressionVO ruleExpressionVO = new RuleExpressionVO(rule.getWhenCondition());
+    RuleExpressionVO ruleExpressionVO = null;
+    if (!EntityTypeEnum.DATASET.equals(rule.getType())
+        && !EntityTypeEnum.TABLE.equals(rule.getType())) {
+      ruleExpressionVO = new RuleExpressionVO(rule.getWhenCondition());
+    }
     TypeValidation typeValidation = TypeValidation.DATASET;
     String schemasDrools = "";
     switch (rule.getType()) {
@@ -237,7 +242,8 @@ public class KieBaseManager {
         break;
     }
 
-    if (!ruleExpressionVO.isDataTypeCompatible(rule.getType(), dataTypeMap)) {
+    if (null != ruleExpressionVO
+        && !ruleExpressionVO.isDataTypeCompatible(rule.getType(), dataTypeMap)) {
       rule.setVerified(false);
       rule.setEnabled(false);
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);

@@ -1,7 +1,10 @@
 package org.eea.validation.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
@@ -9,15 +12,19 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
+import org.eea.validation.persistence.repository.IntegritySchemaRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.RulesSequenceRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.FieldSchema;
+import org.eea.validation.persistence.schemas.IntegritySchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
@@ -27,6 +34,7 @@ import org.eea.validation.util.KieBaseManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
@@ -59,9 +67,18 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private RuleMapper ruleMapper;
 
+  /** The integrity schema repository. */
+  @Autowired
+  private IntegritySchemaRepository integritySchemaRepository;
+
+  /** The integrity mapper. */
+  @Autowired
+  private IntegrityMapper integrityMapper;
+
   /** The kie base manager. */
   @Autowired
   private KieBaseManager kieBaseManager;
+
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
@@ -96,7 +113,10 @@ public class RulesServiceImpl implements RulesService {
   public RulesSchemaVO getRulesSchemaByDatasetId(String datasetSchemaId) {
     RulesSchema rulesSchema =
         rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchemaId), false);
-    return rulesSchema == null ? null : rulesSchemaMapper.entityToClass(rulesSchema);
+    RulesSchemaVO rulesVO =
+        rulesSchema == null ? null : rulesSchemaMapper.entityToClass(rulesSchema);
+    setIntegrityIntoVO(rulesSchema, rulesVO);
+    return rulesVO;
   }
 
   /**
@@ -109,7 +129,10 @@ public class RulesServiceImpl implements RulesService {
   public RulesSchemaVO getActiveRulesSchemaByDatasetId(String datasetSchemaId) {
     RulesSchema rulesSchema =
         rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchemaId), true);
-    return rulesSchema == null ? null : rulesSchemaMapper.entityToClass(rulesSchema);
+    RulesSchemaVO rulesVO =
+        rulesSchema == null ? null : rulesSchemaMapper.entityToClass(rulesSchema);
+    setIntegrityIntoVO(rulesSchema, rulesVO);
+    return rulesVO;
   }
 
   /**
@@ -245,9 +268,22 @@ public class RulesServiceImpl implements RulesService {
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
     rule.setVerified(null);
+    // we create the whencondition Integrity for the rule
+    if (EntityTypeEnum.DATASET.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
+      ObjectId integrityConstraintId = new ObjectId();
+      IntegrityVO integrityVO = ruleVO.getIntegrityVO();
+      integrityVO.setId(integrityConstraintId.toString());
+      IntegritySchema integritySchema = integrityMapper.classToEntity(integrityVO);
+      integritySchema.setRuleId(rule.getRuleId());
+      integritySchemaRepository.save(integritySchema);
 
+      rule.setIntegrityConstraintId(integrityConstraintId);
+      rule.setWhenCondition("isIntegrityConstraint(datasetId,'" + integrityConstraintId.toString()
+          + "','" + rule.getRuleId().toString() + "')");
+      dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetId, datasetId,
+          integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
+    }
     validateRule(rule);
-
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     }
@@ -627,4 +663,102 @@ public class RulesServiceImpl implements RulesService {
           fieldSchemaId, datasetSchemaId);
     }
   }
+
+  /**
+   * Gets the integrity constraint.
+   *
+   * @param integrityId the integrity id
+   * @return the integrity constraint
+   */
+  @Override
+  public IntegrityVO getIntegrityConstraint(String integrityId) {
+    IntegritySchema integritySchema =
+        integritySchemaRepository.findById(new ObjectId(integrityId)).orElse(null);
+    return integritySchema == null ? null : integrityMapper.entityToClass(integritySchema);
+  }
+
+  /**
+   * Sets the integrity into VO.
+   *
+   * @param ruleSchema the rule schema
+   * @param ruleSchemaVO the rule schema VO
+   */
+  private void setIntegrityIntoVO(RulesSchema ruleSchema, RulesSchemaVO ruleSchemaVO) {
+    if (null != ruleSchema) {
+      Map<String, IntegrityVO> integrityMap = new HashMap<>();
+      if (ruleSchema.getRules() != null) {
+        for (Rule rule : ruleSchema.getRules().stream()
+            .filter(rule -> rule.getIntegrityConstraintId() != null).collect(Collectors.toList())) {
+          IntegritySchema integrityschema = integritySchemaRepository
+              .findById(rule.getIntegrityConstraintId()).orElse(new IntegritySchema());
+          integrityMap.put(rule.getRuleId().toString(),
+              integrityMapper.entityToClass(integrityschema));
+        }
+      }
+      // Set integrity into VO
+      if (!integrityMap.isEmpty() && ruleSchemaVO.getRules() != null) {
+        ruleSchemaVO.getRules().stream()
+            .forEach(rule -> rule.setIntegrityVO(integrityMap.get(rule.getRuleId())));
+      }
+    }
+  }
+
+  /**
+   * Delete dataset rule and integrity by id field schema. We use that method to delete the
+   * dependences of integrity in others dataset or the same dataset
+   *
+   * @param fieldSchemaId the field schema id
+   */
+  @Override
+  @Async
+  public void deleteDatasetRuleAndIntegrityByFieldSchemaId(String fieldSchemaId) {
+    // we find the values salved in database by origin or referenced in integritySchema
+    List<IntegritySchema> integritySchema =
+        integritySchemaRepository.findByOriginOrReferenceFields(new ObjectId(fieldSchemaId));
+    // we delete the integrity object and delete the rules associated to the originDataset
+    if (null != integritySchema && !integritySchema.isEmpty()) {
+      integritySchema.stream().forEach(integritySchemaData -> {
+        // we delete the rule associate with that field
+        rulesRepository.deleteRuleById(integritySchemaData.getOriginDatasetSchemaId(),
+            integritySchemaData.getRuleId());
+
+        // we delete the integrity rule in mongodb in integrity collection
+        integritySchemaRepository.deleteById(integritySchemaData.getId());
+        LOG.info(
+            "Rule integrity associated to the fieldschemaId {} and the integrity data with id {} , in the datasetOrigin id {} was deleted!",
+            fieldSchemaId, integritySchemaData.getId(),
+            integritySchemaData.getOriginDatasetSchemaId());
+      });
+
+    }
+  }
+
+  /**
+   * Delete dataset rule and integrity by dataset schema id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   */
+  @Override
+  @Async
+  public void deleteDatasetRuleAndIntegrityByDatasetSchemaId(String datasetSchemaId) {
+    // we find the values salved in database by origin or referenced in integritySchema
+    List<IntegritySchema> integritySchema = integritySchemaRepository
+        .findByOriginOrReferenceDatasetSchemaId(new ObjectId(datasetSchemaId));
+
+    if (null != integritySchema && !integritySchema.isEmpty()) {
+      integritySchema.stream().forEach(integritySchemaData -> {
+        // we delete the rule associate with that field
+        rulesRepository.deleteRuleById(integritySchemaData.getOriginDatasetSchemaId(),
+            integritySchemaData.getRuleId());
+        // we delete the integrity rule in mongodb in integrity collection
+        integritySchemaRepository.deleteById(integritySchemaData.getId());
+        LOG.info(
+            "Rule integrity associated to the datasetId {} and the integrity data with id {} , in the datasetOrigin id {} was deleted!",
+            datasetSchemaId, integritySchemaData.getId(),
+            integritySchemaData.getOriginDatasetSchemaId());
+      });
+
+    }
+  }
+
 }

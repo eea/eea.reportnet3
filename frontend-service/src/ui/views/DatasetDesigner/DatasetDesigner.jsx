@@ -1,6 +1,7 @@
 import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
@@ -15,6 +16,7 @@ import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
+import { Integrations } from './_components/Integrations';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
 import { Snapshots } from 'ui/views/_components/Snapshots';
@@ -24,6 +26,7 @@ import { TabsValidations } from './_components/TabsValidations';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
+import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -65,13 +68,19 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     datasetSchemaAllTables: [],
     datasetSchemaId: '',
     datasetSchemaName: '',
+    datasetSchema: {},
     datasetSchemas: [],
+    datasetStatistics: [],
+    dataViewerOptions: { activeIndex: 0, isValidationSelected: false, recordPositionId: -1, selectedRecordErrorId: -1 },
     hasWritePermissions: false,
     initialDatasetDescription: '',
+    isIntegrationListDialogVisible: false,
+    isIntegrationManageDialogVisible: false,
     isLoading: true,
     isManageUniqueConstraintDialogVisible: false,
     isPreviewModeOn: DatasetDesignerUtils.getUrlParamValue('design'),
     isUniqueConstraintsListDialogVisible: false,
+    isValidationViewerVisible: false,
     levelErrorTypes: [],
     manageUniqueConstraintData: {
       fieldData: [],
@@ -173,6 +182,17 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     );
   };
 
+  const filterActiveIndex = index => {
+    if (!isNil(index) && isNaN(index)) {
+      const filteredTable = designerState.datasetSchema.tables.filter(table => table.tableSchemaId === index);
+      if (!isEmpty(filteredTable) && !isNil(filteredTable[0])) {
+        return filteredTable[0].index;
+      }
+    } else {
+      return index;
+    }
+  };
+
   const getMetadata = async ids => {
     try {
       return await MetadataUtils.getMetadata(ids);
@@ -180,6 +200,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     } finally {
       isLoading(false);
+    }
+  };
+
+  const getStatisticsById = async (datasetId, tableSchemaNames) => {
+    try {
+      const datasetStatistics = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
+      return datasetStatistics;
+    } catch (error) {
+      console.error(error);
+      throw new Error('ERROR_STATISTICS_BY_ID_ERROR');
     }
   };
 
@@ -277,6 +307,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         const tableSchemaNamesList = [];
         dataset.tables.forEach(table => tableSchemaNamesList.push(table.tableSchemaName));
 
+        const datasetStatisticsDTO = await getStatisticsById(
+          datasetId,
+          dataset.tables.map(tableSchema => tableSchema.tableSchemaName)
+        );
+
         isLoading(false);
         designerDispatch({
           type: 'GET_DATASET_DATA',
@@ -285,7 +320,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             levelErrorTypes: dataset.levelErrorTypes,
             schemaId: dataset.datasetSchemaId,
             tables: dataset.tables,
-            tableSchemaNames: tableSchemaNamesList
+            tableSchemaNames: tableSchemaNamesList,
+            datasetStatistics: datasetStatisticsDTO,
+            datasetSchema: dataset
           }
         });
       };
@@ -295,6 +332,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           payload: { schemas: await DataflowService.getAllSchemas(dataflowId) }
         });
       };
+
       getDatasetSchemaId();
       getDatasetSchemas();
     } catch (error) {
@@ -303,6 +341,25 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const onLoadTableData = hasData => designerDispatch({ type: 'SET_DATASET_HAS_DATA', payload: { hasData } });
+
+  const onSelectValidation = (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
+    designerDispatch({
+      type: 'SET_DATAVIEWER_OPTIONS',
+      payload: {
+        recordPositionId: posIdRecord,
+        selectedRecordErrorId: selectedRecordErrorId,
+        activeIndex: tableSchemaId,
+        isValidationSelected: true
+      }
+    });
+  };
+
+  const onTabChange = tableSchemaId => {
+    designerDispatch({
+      type: 'SET_DATAVIEWER_OPTIONS',
+      payload: { ...designerState.dataViewerOptions, activeIndex: tableSchemaId.index }
+    });
+  };
 
   const onUpdateDescription = async description => {
     try {
@@ -446,7 +503,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         <div className={styles.ButtonsBar}>
           <InputTextarea
             className={styles.datasetDescription}
-            collapsedHeight={40}
+            collapsedHeight={55}
             expandableOnClick={true}
             key="datasetDescription"
             onBlur={e => onBlurDescription(e.target.value)}
@@ -468,14 +525,28 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             /> */}
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetHasData ? ' p-button-animated-blink' : null
+                  designerState.datasetHasData && designerState.isPreviewModeOn ? ' p-button-animated-blink' : null
                 }`}
-                disabled={!designerState.datasetHasData}
+                disabled={!designerState.datasetHasData || !designerState.isPreviewModeOn}
                 icon={'validate'}
                 iconClasses={null}
                 label={resources.messages['validate']}
                 onClick={() => manageDialogs('validateDialogVisible', true)}
                 ownButtonClasses={null}
+              />
+
+              <Button
+                className={`p-button-rounded p-button-secondary-transparent ${
+                  designerState.datasetStatistics.datasetErrors && designerState.isPreviewModeOn
+                    ? 'p-button-animated-blink'
+                    : null
+                }`}
+                disabled={!designerState.datasetStatistics.datasetErrors || !designerState.isPreviewModeOn}
+                icon={'warning'}
+                label={resources.messages['showValidations']}
+                onClick={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: true })}
+                ownButtonClasses={null}
+                iconClasses={designerState.datasetStatistics.datasetErrors ? 'warning' : ''}
               />
 
               <Button
@@ -496,6 +567,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               />
 
               <Button
+                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                icon={'export'}
+                iconClasses={styles.integrationsButton}
+                label={resources.messages['externalIntegrations']}
+                onClick={() => manageDialogs('isIntegrationListDialogVisible', true)}
+              />
+
+              <Button
                 className={`p-button-rounded p-button-secondary-transparent`}
                 disabled={!designerState.datasetHasData}
                 icon={'dashboard'}
@@ -511,6 +590,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 label={resources.messages['snapshots']}
                 onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
               />
+
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
                 icon={'refresh'}
@@ -522,15 +602,31 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         </div>
         {renderSwitchView()}
         <TabsDesigner
+          activeIndex={filterActiveIndex(designerState.dataViewerOptions.activeIndex)}
+          datasetSchemaDTO={designerState.datasetSchema}
           datasetSchemas={designerState.datasetSchemas}
+          datasetStatistics={designerState.datasetStatistics}
           editable={true}
           history={history}
           isPreviewModeOn={designerState.isPreviewModeOn}
+          isValidationSelected={designerState.dataViewerOptions.isValidationSelected}
           manageDialogs={manageDialogs}
           manageUniqueConstraint={manageUniqueConstraint}
           onChangeReference={onChangeReference}
           onLoadTableData={onLoadTableData}
+          onTabChange={onTabChange}
           onUpdateTable={onUpdateTable}
+          recordPositionId={designerState.dataViewerOptions.recordPositionId}
+          selectedRecordErrorId={designerState.dataViewerOptions.selectedRecordErrorId}
+          setActiveIndex={index =>
+            designerDispatch({
+              type: 'SET_DATAVIEWER_OPTIONS',
+              payload: { ...designerState.dataViewerOptions, activeIndex: index }
+            })
+          }
+          setIsValidationSelected={isVisible =>
+            designerDispatch({ type: 'SET_IS_VALIDATION_SELECTED', payload: isVisible })
+          }
         />
         <Snapshots
           isLoadingSnapshotListData={isLoadingSnapshotListData}
@@ -540,6 +636,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         />
         {validationsListDialog()}
         {renderUniqueConstraintsDialog()}
+
+        <Integrations dataflowId={dataflowId} designerState={designerState} manageDialogs={manageDialogs} />
 
         <ManageUniqueConstraint
           designerState={designerState}
@@ -567,6 +665,24 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             refresh={designerState.dashDialogVisible}
             levelErrorTypes={designerState.levelErrorTypes}
             tableSchemaNames={designerState.tableSchemaNames}
+          />
+        </Dialog>
+        <Dialog
+          className={styles.paginatorValidationViewer}
+          dismissableMask={true}
+          header={resources.messages['titleValidations']}
+          maximizable
+          onHide={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: false })}
+          style={{ width: '80%' }}
+          visible={designerState.isValidationViewerVisible}>
+          <ValidationViewer
+            datasetId={datasetId}
+            datasetName={designerState.datasetSchemaName}
+            hasWritePermissions={designerState.hasWritePermissions}
+            levelErrorTypes={designerState.datasetSchema.levelErrorTypes}
+            onSelectValidation={onSelectValidation}
+            tableSchemaNames={designerState.tableSchemaNames}
+            visible={designerState.isValidationViewerVisible}
           />
         </Dialog>
       </div>
