@@ -221,4 +221,15 @@ public interface DatasetMetabaseService {
    */
   void updateForeignRelationship(long datasetOriginId, long datasetReferencedId,
       String originDatasetSchemaId, String referencedDatasetSchemaId);
+
+
+  /**
+   * Gets the dataset id by dataset schema id and data provider id.
+   *
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   * @param dataProviderId the data provider id
+   * @return the dataset id by dataset schema id and data provider id
+   */
+  Long getDatasetIdByDatasetSchemaIdAndDataProviderId(String referencedDatasetSchemaId,
+      Long dataProviderId);
 }

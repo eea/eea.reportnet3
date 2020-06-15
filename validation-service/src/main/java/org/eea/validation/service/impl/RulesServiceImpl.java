@@ -281,7 +281,9 @@ public class RulesServiceImpl implements RulesService {
       rule.setIntegrityConstraintId(integrityConstraintId);
       rule.setWhenCondition("isIntegrityConstraint(datasetId,'" + integrityConstraintId.toString()
           + "','" + rule.getRuleId().toString() + "')");
-      dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetId, datasetId,
+      Long datasetReferencedId = dataSetMetabaseControllerZuul
+          .getDesignDatasetIdByDatasetSchemaId(integrityVO.getReferencedDatasetSchemaId());
+      dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetId, datasetReferencedId,
           integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
     }
     validateRule(rule);

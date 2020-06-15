@@ -160,4 +160,13 @@ public interface DatasetMetabaseController {
       @RequestParam("originDatasetSchemaId") final String originDatasetSchemaId,
       @RequestParam("referencedDatasetSchemaId") final String referencedDatasetSchemaId);
 
+  /**
+   * Gets the dataset id by dataset schema id and data provider id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the dataset id by dataset schema id and data provider id
+   */
+  @GetMapping("/private/getDatasetId/datasetSchema/{datasetSchemaId}")
+  Long getDesignDatasetIdByDatasetSchemaId(@PathVariable("datasetSchemaId") String datasetSchemaId);
+
 }

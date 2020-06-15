@@ -215,7 +215,7 @@ public class KieBaseManager {
       case DATASET:
         schemasDrools = SchemasDrools.ID_DATASET_SCHEMA.getValue();
         typeValidation = TypeValidation.DATASET;
-        break;
+        return;
       case TABLE:
         schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
         typeValidation = TypeValidation.TABLE;

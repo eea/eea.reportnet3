@@ -1,5 +1,5 @@
 /*
- * 
+ *
  */
 package org.eea.dataset.controller;
 
@@ -277,6 +277,20 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
       String originDatasetSchemaId, String referencedDatasetSchemaId) {
     datasetMetabaseService.updateForeignRelationship(datasetOriginId, datasetReferencedId,
         originDatasetSchemaId, referencedDatasetSchemaId);
+  }
+
+  /**
+   * Gets the dataset id by dataset schema id and data provider id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the dataset id by dataset schema id and data provider id
+   */
+  @Override
+  @GetMapping("/private/getDatasetId/datasetSchema/{datasetSchemaId}")
+  public Long getDesignDatasetIdByDatasetSchemaId(
+      @PathVariable("datasetSchemaId") String datasetSchemaId) {
+    return datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId(datasetSchemaId,
+        null);
   }
 
 }

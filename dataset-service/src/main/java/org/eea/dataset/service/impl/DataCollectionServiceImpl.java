@@ -448,10 +448,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @return true, if successful
    */
   List<IntegrityVO> findIntegrityVO(RulesSchemaVO rulesSchemaVO) {
-    return rulesSchemaVO.getRules().stream()
-        .filter(
-            rule -> EntityTypeEnum.DATASET.equals(rule.getType()) && rule.getIntegrityVO() != null)
-        .map(RuleVO::getIntegrityVO).collect(Collectors.toList());
+    List<IntegrityVO> integritiesVO = new ArrayList<>();
+    if (rulesSchemaVO != null && rulesSchemaVO.getRules() != null) {
+      integritiesVO = rulesSchemaVO.getRules().stream().filter(
+          rule -> EntityTypeEnum.DATASET.equals(rule.getType()) && rule.getIntegrityVO() != null)
+          .map(RuleVO::getIntegrityVO).collect(Collectors.toList());
+    }
+    return integritiesVO;
   }
 
   /**

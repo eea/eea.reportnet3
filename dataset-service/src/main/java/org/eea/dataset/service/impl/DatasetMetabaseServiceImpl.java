@@ -788,4 +788,21 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         datasetOriginId, datasetReferencedId, originDatasetSchemaId, referencedDatasetSchemaId);
   }
 
+
+  /**
+   * Gets the dataset id by dataset schema id and data provider id.
+   *
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   * @param dataProviderId the data provider id
+   * @return the dataset id by dataset schema id and data provider id
+   */
+  @Override
+  public Long getDatasetIdByDatasetSchemaIdAndDataProviderId(String referencedDatasetSchemaId,
+      Long dataProviderId) {
+    DataSetMetabase datasetMetabase = dataSetMetabaseRepository
+        .findFirstByDatasetSchemaAndDataProviderId(referencedDatasetSchemaId, dataProviderId)
+        .orElse(null);
+    return datasetMetabase != null ? datasetMetabase.getId() : null;
+  }
+
 }
