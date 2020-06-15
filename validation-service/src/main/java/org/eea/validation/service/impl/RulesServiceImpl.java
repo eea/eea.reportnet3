@@ -530,7 +530,7 @@ public class RulesServiceImpl implements RulesService {
 
       rule.setVerified(true);
       rule.setEnabled(ruleVO.isEnabled());
-      rule.setWhenCondition("isIntegrityConstraint(datasetId,'" + integritySchema.getId().toString()
+      rule.setWhenCondition("isIntegrityConstraint(this,'" + integritySchema.getId().toString()
           + "','" + rule.getRuleId().toString() + "')");
       dataSetMetabaseControllerZuul.updateDatasetForeignRelationship(datasetId, datasetId,
           integritySchema.getOriginDatasetSchemaId().toString(),
