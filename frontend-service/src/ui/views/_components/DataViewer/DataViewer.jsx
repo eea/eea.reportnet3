@@ -87,6 +87,7 @@ const DataViewer = withRouter(
     const [importDialogVisible, setImportDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
     const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
+    const [isDataUpdated, setIsDataUpdated] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -235,7 +236,7 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       if (datasetSchemaId) getFileExtensions();
-    }, [datasetSchemaId, importDialogVisible]);
+    }, [datasetSchemaId, isDataUpdated, importDialogVisible]);
 
     const getMetadata = async () => {
       try {
@@ -699,6 +700,8 @@ const DataViewer = withRouter(
       onFetchData(event.sortField, event.sortOrder, 0, records.recordsPerPage, levelErrorTypesWithCorrects);
     };
 
+    const onUpdateData = () => setIsDataUpdated(!isDataUpdated);
+
     const onUpload = async () => {
       setImportDialogVisible(false);
       const {
@@ -899,6 +902,7 @@ const DataViewer = withRouter(
           colsSchema={colsSchema}
           dataflowId={dataflowId}
           datasetId={datasetId}
+          exportExtensionsOperationsList={extensionsOperationsList.export}
           hasWritePermissions={hasWritePermissions}
           fileExtensions={extensionsOperationsList.export}
           isDataCollection={isDataCollection}
@@ -910,6 +914,7 @@ const DataViewer = withRouter(
           levelErrorTypesWithCorrects={levelErrorTypesWithCorrects}
           onRefresh={onRefresh}
           onSetVisible={onSetVisible}
+          onUpdateData={onUpdateData}
           originalColumns={originalColumns}
           records={records}
           setColumns={setColumns}
