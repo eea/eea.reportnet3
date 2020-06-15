@@ -4,13 +4,9 @@ import org.eea.exception.EEAException;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
-import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.ValidationHelper;
-import org.kie.api.KieBase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
@@ -21,28 +17,19 @@ import org.springframework.scheduling.annotation.Async;
  */
 public abstract class ExecuteValidationCommand extends AbstractEEAEventHandlerCommand {
 
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * The validation helper.
    */
   @Autowired
   private ValidationHelper validationHelper;
+
   /**
    * The validation service.
    */
   @Autowired
   @Qualifier("proxyValidationService")
   protected ValidationService validationService;
-
-  /**
-   * The kafka sender utils.
-   */
-  @Autowired
-  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Gets the event type.
@@ -83,24 +70,8 @@ public abstract class ExecuteValidationCommand extends AbstractEEAEventHandlerCo
     final String processId = (String) eeaEventVO.getData().get("uuid");
     TenantResolver.setTenantName("dataset_" + datasetId);
 
-    try {
-      KieBase kieBase = validationHelper.getKieBase(processId, datasetId);
-      getValidationAction().performValidation(eeaEventVO, datasetId, kieBase);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error processing validations for dataset {} due to exception {}", datasetId,
-          e);
-      eeaEventVO.getData().put("error", e);
-    } finally {
-      // if this is the coordinator validation instance, then no need to send message, just to update
-      // expected pending ok's and verify if process is finished
-
-      if (validationHelper.isProcessCoordinator(processId)) {
-        // if it's not finished a message with the next task will be sent as part of the reducePendingTasks execution
-        validationHelper.reducePendingTasks(datasetId, processId);
-      } else {// send the message to coordinator validation instance
-        kafkaSenderUtils.releaseKafkaEvent(getNotificationEventType(),
-            eeaEventVO.getData());
-      }
-    }
+    validationHelper
+        .processValidation(eeaEventVO, processId, datasetId, this.getValidationAction(),
+            this.getNotificationEventType());
   }
 }
