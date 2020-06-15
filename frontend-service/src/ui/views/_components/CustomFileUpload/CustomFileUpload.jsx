@@ -3,7 +3,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import styles from './CustomFileUpload.module.css';
+import styles from './CustomFileUpload.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Messages } from 'primereact/messages';
@@ -17,7 +17,7 @@ export class CustomFileUpload extends Component {
   static defaultProps = {
     accept: null,
     auto: false,
-    cancelLabel: 'Cancel',
+    cancelLabel: 'Reset',
     chooseLabel: 'Choose',
     className: null,
     disabled: false,
@@ -431,8 +431,9 @@ export class CustomFileUpload extends Component {
       );
       cancelButton = (
         <Button
+          className={'p-button-secondary'}
           label={this.props.cancelLabel}
-          icon="cancel"
+          icon="undo"
           onClick={this.clear}
           disabled={this.props.disabled || !this.hasFiles()}
         />
@@ -470,10 +471,6 @@ export class CustomFileUpload extends Component {
         </div>
         <p className={`${styles.invalidExtensionMsg} ${this.state.isValid ? styles.isValid : undefined}`}>
           {this.props.invalidExtensionMessage}
-          <span
-            className={`pi pi-times ${styles.closeInvalidMessageIcon}`}
-            onClick={() => this.setState({ isValid: true })}
-          />
         </p>
       </Fragment>
     );
