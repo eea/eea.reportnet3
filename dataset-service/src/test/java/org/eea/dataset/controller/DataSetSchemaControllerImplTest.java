@@ -494,14 +494,20 @@ public class DataSetSchemaControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void createFieldSchemaTest1() throws EEAException {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any()))
         .thenThrow(EEAException.class);
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setName("test");
-    dataSchemaControllerImpl.createFieldSchema(1L, fieldSchemaVO);
+
+    try {
+      dataSchemaControllerImpl.createFieldSchema(1L, fieldSchemaVO);
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.INVALID_OBJECTID, ex.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+    }
   }
 
 
@@ -536,6 +542,7 @@ public class DataSetSchemaControllerImplTest {
         .thenReturn("FieldId");
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setName("test");
+    fieldSchemaVO.setRequired(Boolean.TRUE);
     assertEquals("FieldId", dataSchemaControllerImpl.createFieldSchema(1L, fieldSchemaVO));
   }
 
