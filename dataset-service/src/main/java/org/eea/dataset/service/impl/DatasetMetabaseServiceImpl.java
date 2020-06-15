@@ -754,7 +754,55 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     foreignRelations.setIdPk(originDatasetSchemaId);
     foreignRelations.setIdFkOrigin(referencedDatasetSchemaId);
     foreignRelationsRepository.save(foreignRelations);
+    LOG.info(
+        "New create ForeignRelationship created for the combination of : datasetOriginId {} "
+            + ", datasetReferencedId {} , originDatasetSchemaId {} , referencedDatasetSchemaId {}",
+        datasetOriginId, datasetReferencedId, originDatasetSchemaId, referencedDatasetSchemaId);
 
+  }
+
+
+  /**
+   * Update foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
+  @Override
+  public void updateForeignRelationship(long datasetOriginId, long datasetReferencedId,
+      String originDatasetSchemaId, String referencedDatasetSchemaId) {
+    Optional<ForeignRelations> foreignRelations = foreignRelationsRepository
+        .findFirstByIdDatasetOrigin_idAndIdDatasetDestination_idAndIdPkAndIdFkOrigin(
+            datasetOriginId, datasetReferencedId, originDatasetSchemaId, referencedDatasetSchemaId);
+    if (foreignRelations.isPresent()) {
+      foreignRelationsRepository.delete(foreignRelations.get());
+    }
+    createForeignRelationship(datasetOriginId, datasetReferencedId, originDatasetSchemaId,
+        referencedDatasetSchemaId);
+
+    LOG.info(
+        "New update ForeignRelationship created for the combination of : datasetOriginId {} "
+            + ", datasetReferencedId {} , originDatasetSchemaId {} , referencedDatasetSchemaId {}",
+        datasetOriginId, datasetReferencedId, originDatasetSchemaId, referencedDatasetSchemaId);
+  }
+
+
+  /**
+   * Gets the dataset id by dataset schema id and data provider id.
+   *
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   * @param dataProviderId the data provider id
+   * @return the dataset id by dataset schema id and data provider id
+   */
+  @Override
+  public Long getDatasetIdByDatasetSchemaIdAndDataProviderId(String referencedDatasetSchemaId,
+      Long dataProviderId) {
+    DataSetMetabase datasetMetabase = dataSetMetabaseRepository
+        .findFirstByDatasetSchemaAndDataProviderId(referencedDatasetSchemaId, dataProviderId)
+        .orElse(null);
+    return datasetMetabase != null ? datasetMetabase.getId() : null;
   }
 
 }

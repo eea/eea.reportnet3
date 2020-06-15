@@ -53,8 +53,9 @@ public interface DatasetSchemaService {
    * Delete dataset schema.
    *
    * @param schemaId the schema id
+   * @param datasetId the dataset id
    */
-  void deleteDatasetSchema(String schemaId);
+  void deleteDatasetSchema(String schemaId, Long datasetId);
 
   /**
    * Creates the group and add user.
@@ -119,10 +120,11 @@ public interface DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param idTableSchema the id table schema
-   *
+   * @param datasetId the dataset id
    * @throws EEAException the EEA exception
    */
-  void deleteTableSchema(String datasetSchemaId, String idTableSchema) throws EEAException;
+  void deleteTableSchema(String datasetSchemaId, String idTableSchema, Long datasetId)
+      throws EEAException;
 
   /**
    * Order table schema.
@@ -168,12 +170,12 @@ public interface DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaId the field schema id
-   *
+   * @param datasetId the dataset id
    * @return true, if 1 and only 1 fieldSchema has been removed
-   *
    * @throws EEAException the EEA exception
    */
-  boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId) throws EEAException;
+  boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId, Long datasetId)
+      throws EEAException;
 
   /**
    * Order field schema.
@@ -365,14 +367,14 @@ public interface DatasetSchemaService {
    * Delete unique constraint.
    *
    * @param uniqueId the unique id
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   void deleteUniqueConstraint(String uniqueId) throws EEAException;
 
   /**
    * Update unique constraint.
    *
-   * @param uniequeConstraint the unique constraint
+   * @param uniqueConstraint the unique constraint
    */
   void updateUniqueConstraint(UniqueConstraintVO uniqueConstraint);
 
@@ -389,7 +391,7 @@ public interface DatasetSchemaService {
    *
    * @param uniqueId the unique id
    * @return the unique constraint
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   UniqueConstraintVO getUniqueConstraint(String uniqueId) throws EEAException;
 
@@ -397,6 +399,7 @@ public interface DatasetSchemaService {
    * Delete uniques constraint from table.
    *
    * @param tableSchemaId the table schema id
+   * @throws EEAException the EEA exception
    */
   void deleteUniquesConstraintFromTable(String tableSchemaId) throws EEAException;
 
@@ -404,7 +407,7 @@ public interface DatasetSchemaService {
    * Delete uniques constraint from dataset.
    *
    * @param datasetSchemaId the dataset schema id
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   void deleteUniquesConstraintFromDataset(String datasetSchemaId) throws EEAException;
 
@@ -413,7 +416,7 @@ public interface DatasetSchemaService {
    *
    * @param schemaId the schema id
    * @param fieldSchemaId the field schema id
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   void deleteUniquesConstraintFromField(String schemaId, String fieldSchemaId) throws EEAException;
 

@@ -326,7 +326,7 @@ public class DataSetSchemaControllerImplTest {
     DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
     dataSetSchemaVO.setIdDataSetSchema("schemaId");
     when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
-    doNothing().when(dataschemaService).deleteDatasetSchema(Mockito.any());
+    doNothing().when(dataschemaService).deleteDatasetSchema(Mockito.any(), Mockito.any());
     doNothing().when(datasetMetabaseService).deleteDesignDataset(Mockito.any());
     doNothing().when(datasetSnapshotService).deleteAllSchemaSnapshots(Mockito.any());
     DataFlowVO df = new DataFlowVO();
@@ -435,7 +435,8 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test
   public void deleteTableSchemaTest1() throws EEAException {
-    Mockito.doNothing().when(dataschemaService).deleteTableSchema(Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(dataschemaService).deleteTableSchema(Mockito.any(), Mockito.any(),
+        Mockito.any());
     Mockito.doNothing().when(datasetService).deleteTableValue(Mockito.any(), Mockito.any());
     dataSchemaControllerImpl.deleteTableSchema(1L, "");
     Mockito.verify(rulesControllerZuul, times(1)).deleteRuleByReferenceId(Mockito.any(),
@@ -447,11 +448,16 @@ public class DataSetSchemaControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void deleteTableSchemaTest2() throws EEAException {
     Mockito.doThrow(EEAException.class).when(dataschemaService).deleteTableSchema(Mockito.any(),
-        Mockito.any());
-    dataSchemaControllerImpl.deleteTableSchema(1L, "");
+        Mockito.any(), Mockito.any());
+    try {
+      dataSchemaControllerImpl.deleteTableSchema(1L, "");
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.EXECUTION_ERROR, ex.getReason());
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatus());
+    }
   }
 
   /**
@@ -488,14 +494,20 @@ public class DataSetSchemaControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void createFieldSchemaTest1() throws EEAException {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any()))
         .thenThrow(EEAException.class);
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setName("test");
-    dataSchemaControllerImpl.createFieldSchema(1L, fieldSchemaVO);
+
+    try {
+      dataSchemaControllerImpl.createFieldSchema(1L, fieldSchemaVO);
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.INVALID_OBJECTID, ex.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+    }
   }
 
 
@@ -530,6 +542,7 @@ public class DataSetSchemaControllerImplTest {
         .thenReturn("FieldId");
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setName("test");
+    fieldSchemaVO.setRequired(Boolean.TRUE);
     assertEquals("FieldId", dataSchemaControllerImpl.createFieldSchema(1L, fieldSchemaVO));
   }
 
@@ -639,7 +652,7 @@ public class DataSetSchemaControllerImplTest {
   @Test
   public void deleteFieldSchemaTest1() throws EEAException {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
-    Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any()))
+    Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(true);
     Mockito.doNothing().when(datasetService).deleteFieldValues(Mockito.any(), Mockito.any());
     dataSchemaControllerImpl.deleteFieldSchema(1L, "");
@@ -654,7 +667,7 @@ public class DataSetSchemaControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void deleteFieldSchemaTest2() throws EEAException {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
-    Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any()))
+    Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(false);
     dataSchemaControllerImpl.deleteFieldSchema(1L, "");
   }
@@ -667,7 +680,7 @@ public class DataSetSchemaControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void deleteFieldSchemaTest3() throws EEAException {
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
-    Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any()))
+    Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenThrow(EEAException.class);
     dataSchemaControllerImpl.deleteFieldSchema(1L, "");
   }
