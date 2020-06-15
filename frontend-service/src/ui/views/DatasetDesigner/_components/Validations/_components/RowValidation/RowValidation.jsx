@@ -187,13 +187,23 @@ export const RowValidation = ({ datasetId, tabs }) => {
   }, [validationContext.referenceId]);
 
   useEffect(() => {
+    let formula = '';
     const {
-      candidateRule: { table, expressions }
+      candidateRule: { table, expressions, expressionType, expressionsIf, expressionsThen }
     } = creationFormState;
+
+    if (expressionType === 'ifThenClause') {
+      formula = `IF ${getComparisonExpressionString(expressionsIf, tabs)} THEN ${getComparisonExpressionString(
+        expressionsThen,
+        tabs
+      )}`;
+    } else {
+      formula = getComparisonExpressionString(expressions, tabs);
+    }
 
     creationFormDispatch({
       type: 'SET_EXPRESSIONS_STRING',
-      payload: getComparisonExpressionString(expressions, tabs)
+      payload: formula
     });
   }, [creationFormState.candidateRule]);
 
