@@ -448,11 +448,16 @@ public class DataSetSchemaControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void deleteTableSchemaTest2() throws EEAException {
     Mockito.doThrow(EEAException.class).when(dataschemaService).deleteTableSchema(Mockito.any(),
         Mockito.any(), Mockito.any());
-    dataSchemaControllerImpl.deleteTableSchema(1L, "");
+    try {
+      dataSchemaControllerImpl.deleteTableSchema(1L, "");
+    } catch (ResponseStatusException ex) {
+      assertEquals(EEAErrorMessage.EXECUTION_ERROR, ex.getReason());
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatus());
+    }
   }
 
   /**
