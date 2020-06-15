@@ -317,7 +317,8 @@ export const createValidationReducer = (state, { type, payload }) => {
           expressions: payload.expressions,
           id: payload.id,
           name: payload.name,
-          shortCode: payload.shortCode
+          shortCode: payload.shortCode,
+          ruleType: payload.entityType
         }
       };
 
