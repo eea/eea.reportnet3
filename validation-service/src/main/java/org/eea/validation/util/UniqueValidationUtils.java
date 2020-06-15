@@ -405,10 +405,10 @@ public class UniqueValidationUtils {
               integrityVO.getOriginFields(), datasetIdReferenced, datasetIdOrigin));
       if (!notUtilizedRecords.isEmpty()) {
         validation = createValidation(idRule, schemaId, tableSchemaName, EntityTypeEnum.TABLE);
-        TableValidation tableValidation2 = new TableValidation();
-        tableValidation2.setValidation(validation);
-        tableValidation2.setTableValue(tableValue);
-        tableValidations.add(tableValidation2);
+        TableValidation tableValidationReferenced = new TableValidation();
+        tableValidationReferenced.setValidation(validation);
+        tableValidationReferenced.setTableValue(tableValue);
+        tableValidations.add(tableValidationReferenced);
       }
     }
     tableValue.setTableValidations(tableValidations);
