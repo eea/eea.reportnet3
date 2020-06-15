@@ -111,51 +111,11 @@ public class ExecuteFieldValidationCommandTest {
    */
   @Test
   public void executeTest() throws EEAException {
-    ReflectionTestUtils.setField(executeFieldValidationCommand, "fieldBatchSize", 20);
-    doNothing().when(validationService).validateFields(Mockito.any(), Mockito.any(), Mockito.any());
-    Mockito.when(validationHelper.isProcessCoordinator(Mockito.anyString())).thenReturn(false);
     executeFieldValidationCommand.execute(eeaEventVO);
 
-    Mockito.verify(validationService, times(1)).validateFields(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    Mockito.verify(kafkaSenderUtils, times(1))
-        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_VALIDATED_FIELD_COMPLETED), Mockito.any());
+    Mockito.verify(validationHelper, times(1)).processValidation(Mockito.eq(eeaEventVO),
+        Mockito.eq("uuid"), Mockito.eq(1l), Mockito.any(),
+        Mockito.eq(EventType.COMMAND_VALIDATED_FIELD_COMPLETED));
   }
 
-  /**
-   * Execute exception test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void executeExceptionTest() throws EEAException {
-    ReflectionTestUtils.setField(executeFieldValidationCommand, "fieldBatchSize", 20);
-    doThrow(new EEAException()).when(validationService).validateFields(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    Mockito.when(validationHelper.isProcessCoordinator(Mockito.anyString())).thenReturn(false);
-    executeFieldValidationCommand.execute(eeaEventVO);
-
-    Mockito.verify(validationService, times(1)).validateFields(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    Mockito.verify(kafkaSenderUtils, times(1))
-        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_VALIDATED_FIELD_COMPLETED), Mockito.any());
-  }
-
-  /**
-   * Execute test contains key.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void executeTestContainsKey() throws EEAException {
-    ReflectionTestUtils.setField(executeFieldValidationCommand, "fieldBatchSize", 20);
-    doNothing().when(validationService).validateFields(Mockito.any(), Mockito.any(), Mockito.any());
-    Mockito.when(validationHelper.isProcessCoordinator(Mockito.anyString())).thenReturn(true);
-    executeFieldValidationCommand.execute(eeaEventVO);
-
-    Mockito.verify(validationService, times(1)).validateFields(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    Mockito.verify(validationHelper, times(1)).reducePendingTasks(Mockito.any(),
-        Mockito.any());
-  }
 }
