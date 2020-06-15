@@ -725,8 +725,7 @@ public class RecordValue {
   public boolean recordStringMatchesRecord(String fieldSchemaId1, String fieldSchemaId2) {
     boolean validateReturn;
     try {
-      validateReturn =
-          -1 == fieldsMap.get(fieldSchemaId2).indexOf(fieldsMap.get(fieldSchemaId1)) ? false : true;
+      return fieldsMap.get(fieldSchemaId1).matches(fieldsMap.get(fieldSchemaId2));
     } catch (Exception e) {
       validateReturn = true;
     }
