@@ -11,19 +11,29 @@ gatling_config:
     #headers:
     #Authorization: Basic Y2FzX3NlcnZpY2U6NTFlYTg2OWFmNjM4NDNjYTkwNjQ0YTY5ZDM0Yjg1Nzk=
     #requestBody: '{"title":"example"}'
-    - requestName: restoreSnapshot
-      endpoint: /recordstore/dataset/${datasetId}/snapshot/restore/poc?idSnapshot=1622&partitionId=${partitionId}&typeDataset=REPORTING&user=jose.luis.provider&isSchemaSnapshot=false&deleteData=true
-      usersNumber: 10
+    #    - requestName: restoreSnapshot
+    #      endpoint: /recordstore/dataset/${datasetId}/snapshot/restore/poc?idSnapshot=1622&partitionId=${partitionId}&typeDataset=REPORTING&user=jose.luis.provider&isSchemaSnapshot=false&deleteData=true
+    #      usersNumber: 10
+    #      numberExecutions: 1
+    #      useFeeder: true
+    #      method: post
+    #      puaseTime: 1
+    #      timeOut: 1000
+    #    - requestName: createSnapshot
+    #      endpoint: /recordstore/dataset/${datasetId}/snapshot/create/poc?idSnapshot=${idSnapshot}&idPartitionDataset=${idPartitionDataset}
+    #      usersNumber: 10
+    #      numberExecutions: 1
+    #      useFeeder: true
+    #      method: post
+    #      puaseTime: 10
+    #      timeOut: 1000
+    - requestName: queryDataset
+      endpoint: /dataset/TableValueDataset/${datasetId}?idTableSchema=${tableschema}&pageNum=0&pageSize=10&levelError=CORRECT,INFO,WARNING,ERROR,BLOCKER
+      usersNumber: 100
       numberExecutions: 1
       useFeeder: true
-      method: post
-      puaseTime: 1
-      timeOut: 1000
-#    - requestName: createSnapshot
-#      endpoint: /recordstore/dataset/${datasetId}/snapshot/create/poc?idSnapshot=${idSnapshot}&idPartitionDataset=${idPartitionDataset}
-#      usersNumber: 10
-#      numberExecutions: 1
-#      useFeeder: true
-#      method: post
-#      puaseTime: 10
-#      timeOut: 1000
+      method: get
+      puaseTime: 5
+      timeOut: 2000
+      headers:
+        Authorization: Bearer 92a26e4f-da46-4dbf-8c49-6e838951f1b6
