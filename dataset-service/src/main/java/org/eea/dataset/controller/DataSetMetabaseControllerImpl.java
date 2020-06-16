@@ -274,8 +274,11 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @PutMapping("/private/updateForeignRelationship")
-  public void updateDatasetForeignRelationship(long datasetOriginId, long datasetReferencedId,
-      String originDatasetSchemaId, String referencedDatasetSchemaId) {
+  public void updateDatasetForeignRelationship(
+      @RequestParam("datasetOriginId") final long datasetOriginId,
+      @RequestParam("datasetReferencedId") final long datasetReferencedId,
+      @RequestParam("originDatasetSchemaId") final String originDatasetSchemaId,
+      @RequestParam("referencedDatasetSchemaId") final String referencedDatasetSchemaId) {
     datasetMetabaseService.updateForeignRelationship(datasetOriginId, datasetReferencedId,
         originDatasetSchemaId, referencedDatasetSchemaId);
   }
@@ -305,8 +308,10 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @DeleteMapping("/private/deleteForeignRelationship")
-  public void deleteForeignRelationship(Long datasetOriginId, Long datasetReferencedId,
-      String originDatasetSchemaId, String referencedDatasetSchemaId) {
+  public void deleteForeignRelationship(@RequestParam("datasetOriginId") Long datasetOriginId,
+      @RequestParam(value = "datasetReferencedId", required = false) Long datasetReferencedId,
+      @RequestParam("originDatasetSchemaId") String originDatasetSchemaId,
+      @RequestParam("referencedDatasetSchemaId") String referencedDatasetSchemaId) {
 
     if (null == datasetReferencedId || datasetOriginId == datasetReferencedId) {
       datasetReferencedId =
