@@ -244,7 +244,8 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   };
 
   const parseRuleToEdit = rule => {
-    console.log({ rule, datasetSchemas });
+    console.log({ rule, datasetSchemas, tabs });
+    console.log(rule.relations.referencedTable);
     const inmRuleToEdit = { ...rule };
 
     const filteredReferencedDatasetSchema = datasetSchemas.filter(
@@ -257,51 +258,88 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
     const filteredOriginDatasetSchema = datasetSchemas.filter(
       dataset => dataset.datasetSchemaId === rule.relations.originDatasetSchema
     );
-
+    console.log({ filteredOriginDatasetSchema });
     if (!isNil(filteredOriginDatasetSchema[0])) {
-      filteredOriginDatasetSchema[0].tables.forEach(table => {
-        table.records[0].fields.forEach(field => {
-          if (field.fieldId === rule.relations.links[0].originField.code) {
-            originTableSchemaId = table.tableSchemaId;
-            inmRuleToEdit.relations.table = { label: table.tableSchemaName, code: table.tableSchemaId };
-          }
-        });
-      });
+      rule.relations.referencedDatasetSchema.code !== rule.relations.originDatasetSchema
+        ? filteredOriginDatasetSchema[0].tables.forEach(table => {
+            if (!isNil(table.records)) {
+              table.records[0].fields.forEach(field => {
+                if (field.fieldId === rule.relations.links[0].originField.code) {
+                  originTableSchemaId = table.tableSchemaId;
+                  inmRuleToEdit.relations.table = { label: table.tableSchemaName, code: table.tableSchemaId };
+                }
+              });
+            }
+          })
+        : tabs.forEach(table => {
+            if (!isNil(table.records)) {
+              table.records[0].fields.forEach(field => {
+                if (field.fieldId === rule.relations.links[0].originField.code) {
+                  originTableSchemaId = table.tableSchemaId;
+                  inmRuleToEdit.relations.table = { label: table.tableSchemaName, code: table.tableSchemaId };
+                }
+              });
+            }
+          });
     }
 
     console.log({ filteredReferencedDatasetSchema });
     if (!isNil(filteredReferencedDatasetSchema[0])) {
-      inmRuleToEdit.relations.referencedTables = filteredReferencedDatasetSchema[0].tables.map(table => {
-        return { code: table.tableSchemaId, label: table.tableSchemaName };
-      });
+      inmRuleToEdit.relations.referencedTables =
+        rule.relations.referencedDatasetSchema.code !== rule.relations.originDatasetSchema
+          ? filteredReferencedDatasetSchema[0].tables.map(table => {
+              return { code: table.tableSchemaId, label: table.tableSchemaName };
+            })
+          : tabs.map(table => {
+              return { code: table.tableSchemaId, label: table.tableSchemaName };
+            });
 
-      filteredReferencedDatasetSchema[0].tables.forEach(table => {
-        console.log(table.records[0].fields, rule.relations.links[0].referencedField.code);
-        table.records[0].fields.forEach(field => {
-          if (field.fieldId === rule.relations.links[0].referencedField.code) {
-            referencedTableSchemaId = table.tableSchemaId;
-            inmRuleToEdit.relations.referencedTable = { label: table.tableSchemaName, code: table.tableSchemaId };
-          }
-        });
-      });
+      rule.relations.referencedDatasetSchema.code !== rule.relations.originDatasetSchema
+        ? filteredReferencedDatasetSchema[0].tables.forEach(table => {
+            if (!isNil(table.records)) {
+              table.records[0].fields.forEach(field => {
+                if (field.fieldId === rule.relations.links[0].referencedField.code) {
+                  referencedTableSchemaId = table.tableSchemaId;
+                  inmRuleToEdit.relations.referencedTable = { label: table.tableSchemaName, code: table.tableSchemaId };
+                }
+              });
+            }
+          })
+        : tabs.forEach(table => {
+            if (!isNil(table.records)) {
+              table.records[0].fields.forEach(field => {
+                if (field.fieldId === rule.relations.links[0].referencedField.code) {
+                  referencedTableSchemaId = table.tableSchemaId;
+                  inmRuleToEdit.relations.referencedTable = { label: table.tableSchemaName, code: table.tableSchemaId };
+                }
+              });
+            }
+          });
 
       const filteredOriginTable = filteredOriginDatasetSchema[0].tables.filter(
         table => table.tableSchemaId === originTableSchemaId
       );
 
-      const filteredOriginFields = filteredOriginTable[0].records[0].fields.map(field => {
-        return { code: field.fieldId, label: field.name };
-      });
+      console.log(rule.relations);
+      const filteredOriginFields =
+        rule.relations.referencedDatasetSchema.code !== rule.relations.originDatasetSchema
+          ? filteredOriginTable[0].records[0].fields.map(field => {
+              return { code: field.fieldId, label: field.name };
+            })
+          : getDatasetSchemaTableFields(rule.relations.table, tabs);
 
       inmRuleToEdit.relations.tableFields = filteredOriginFields;
 
       const filteredReferencedTable = filteredReferencedDatasetSchema[0].tables.filter(
         table => table.tableSchemaId === referencedTableSchemaId
       );
-
-      const filteredReferencedFields = filteredReferencedTable[0].records[0].fields.map(field => {
-        return { code: field.fieldId, label: field.name };
-      });
+      console.log(rule.relations.referencedDatasetSchema.code, rule.relations.originDatasetSchema);
+      const filteredReferencedFields =
+        rule.relations.referencedDatasetSchema.code !== rule.relations.originDatasetSchema
+          ? filteredReferencedTable[0].records[0].fields.map(field => {
+              return { code: field.fieldId, label: field.name };
+            })
+          : getDatasetSchemaTableFields(rule.relations.referencedTable, tabs);
 
       inmRuleToEdit.relations.referencedFields = filteredReferencedFields;
 
@@ -322,51 +360,6 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
     }
 
     return inmRuleToEdit;
-
-    //   {
-    //     "isDoubleReferenced":false,
-    //     "referencedDatasetSchema":{
-    //        "label":"sdafasdf",
-    //        "code":"5ed5f1e07999710001366b03"
-    //     },
-    //     "referencedFields":[
-    //        {
-    //           "label":"Countries",
-    //           "code":"5ed7b4c1cee26900014c2601"
-    //        },
-    //        {
-    //           "label":"Linked field",
-    //           "code":"5ed89a74cee26900014c261b"
-    //        },
-    //        {
-    //           "label":"poinnnt",
-    //           "code":"5edf991036c5a50001723220"
-    //        }
-    //     ],
-    //     "referencedTable":{
-    //        "label":"5",
-    //        "code":"5ed7a282cee26900014c25ed"
-    //     },
-    //     "referencedTables":[
-    //        {
-    //           "label":"1",
-    //           "code":"5ed7adf3cee26900014c25f7"
-    //        },
-    //        {
-    //           "label":"2",
-    //           "code":"5ed5f1f17999710001366b07"
-    //        },
-    //        null
-    //     ],
-    //     "originDatasetSchema":"5ed5f1e07999710001366b03",
-    //     "links":[
-    //        {
-    //           "linkId":"8dcd07e2-1024-45de-aa91-e9b1f91f58f2",
-    //           "originField":"",
-    //           "referencedField":""
-    //        }
-    //     ]
-    //  }
   };
 
   const onCreateValidationRule = async () => {
@@ -495,14 +488,19 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   };
 
   const onReferencedTableChange = referencedTable => {
+    console.log('SET_REFERENCED_FIELDS', referencedTable);
     creationFormDispatch({
       type: 'SET_REFERENCED_FIELDS',
       payload: {
-        referencedFields: getDatasetSchemaTableFieldsBySchema(
-          referencedTable,
-          datasetSchemas,
-          creationFormState.candidateRule.relations.referencedDatasetSchema.code
-        ),
+        referencedFields:
+          creationFormState.candidateRule.relations.referencedDatasetSchema.code !==
+          creationFormState.candidateRule.relations.originDatasetSchema
+            ? getDatasetSchemaTableFieldsBySchema(
+                referencedTable,
+                datasetSchemas,
+                creationFormState.candidateRule.relations.referencedDatasetSchema.code
+              )
+            : getDatasetSchemaTableFields(referencedTable, tabs),
         referencedTable
       }
     });

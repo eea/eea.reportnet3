@@ -18,7 +18,7 @@ export const parseDataValidationRulesDTO = validations => {
       let newExpressionsThen = [];
       let newAllExpressionsThen = [];
       let newRelations = {};
-      
+
       entityTypes.push(validationDTO.type);
 
       if (validationDTO.type === 'FIELD') {
@@ -47,7 +47,7 @@ export const parseDataValidationRulesDTO = validations => {
       }
 
       if (validationDTO.type === 'DATASET') {
-        console.log(validationDTO.type);
+        console.log(validationDTO);
         const relations = parseDatasetRelationFromDTO(validationDTO.integrityVO);
         console.log({ relations });
         newRelations = relations;

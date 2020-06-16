@@ -98,7 +98,12 @@ export const TableRelationsSelector = ({
               filterPlaceholder={resources.messages.tableSchemaName}
               placeholder={resources.messages.tableSchemaName}
               optionLabel="label"
-              options={relations.referencedTables}
+              options={
+                creationFormState.candidateRule.relations.referencedDatasetSchema.code ===
+                creationFormState.candidateRule.relations.originDatasetSchema
+                  ? creationFormState.schemaTables
+                  : relations.referencedTables
+              }
               onChange={e => onReferencedTableChange(e.target.value)}
               value={relations.referencedTable}
             />

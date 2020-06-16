@@ -34,7 +34,7 @@ const createDatasetRule = async (datasetSchemaId, validationRule) => {
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
     integrityVO: {
-      isDoubleReferenced: validationRule.isDoubleReferenced,
+      isDoubleReferenced: validationRule.relations.isDoubleReferenced,
       originDatasetSchemaId: validationRule.relations.originDatasetSchema,
       originFields: validationRule.relations.links.map(link => link.originField.code),
       referencedDatasetSchemaId: validationRule.relations.referencedDatasetSchema.code,
