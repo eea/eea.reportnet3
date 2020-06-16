@@ -45,14 +45,11 @@ export const DataflowManagement = ({
   const dataflowManagementInitialState = {
     description: isEditForm ? state.description : '',
     isSubmitting: false,
-
     name: isEditForm ? state.name : '',
-
     obligation:
       isEditForm && state.obligations
         ? { id: state.obligations.obligationId, title: state.obligations.title }
         : { id: null, title: '' },
-
     obligationPrevState:
       isEditForm && state.obligations
         ? { id: state.obligations.obligationId, title: state.obligations.title }
