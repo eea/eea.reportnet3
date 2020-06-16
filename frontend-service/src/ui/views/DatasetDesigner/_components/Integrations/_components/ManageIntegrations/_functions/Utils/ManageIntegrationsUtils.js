@@ -21,6 +21,11 @@ const isDuplicatedIntegration = (integration, incomingIntegration) => {
   return isEqual([currentIntegration].sort(), [incomingIntegration].sort());
 };
 
+const isDuplicatedIntegrationName = (integrationName, integrationsList) => {
+  const integrationsWithSameName = integrationsList.map(integration => integration.integrationName === integrationName);
+  return integrationsWithSameName.includes(true) ? true : false;
+};
+
 const isDuplicatedParameter = (id, parameters, value) => {
   return parameters
     .filter(parameter => parameter.id !== id)
@@ -110,6 +115,7 @@ const toggleParameterEditorView = (id, option, parameters) => {
 export const ManageIntegrationsUtils = {
   getParameterData,
   isDuplicatedIntegration,
+  isDuplicatedIntegrationName,
   isDuplicatedParameter,
   isFormEmpty,
   isParameterEditing,

@@ -22,7 +22,7 @@ import { useInputTextFocus } from 'ui/views/_functions/Hooks/useInputTextFocus';
 
 import { ManageIntegrationsUtils } from './_functions/Utils/ManageIntegrationsUtils';
 
-export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, updatedData }) => {
+export const ManageIntegrations = ({ dataflowId, designerState, integrationsList, manageDialogs, updatedData }) => {
   const { datasetSchemaId, isIntegrationManageDialogVisible } = designerState;
   const componentName = 'integration';
 
@@ -56,6 +56,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   const { editorView, externalParameters, parameterKey, parameterValue } = manageIntegrationsState;
   const {
     isDuplicatedIntegration,
+    isDuplicatedIntegrationName,
     isDuplicatedParameter,
     isFormEmpty,
     isParameterEditing,
@@ -66,6 +67,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   const isEmptyForm = isFormEmpty(manageIntegrationsState);
   const isKeyDuplicated = isDuplicatedParameter(editorView.id, externalParameters, parameterKey);
   const isIntegrationDuplicated = isDuplicatedIntegration(manageIntegrationsState, updatedData);
+  const isIntegrationNameDuplicated = isDuplicatedIntegrationName(manageIntegrationsState.name, integrationsList);
 
   useEffect(() => {
     if (!isEmpty(updatedData)) getUpdatedData();
@@ -200,6 +202,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
       <span data-tip data-for="integrationTooltip">
         <Button
           className="p-button-rounded p-button-animated-blink"
+          disabled={isIntegrationNameDuplicated}
           icon="check"
           label={!isEmpty(updatedData) ? resources.messages['update'] : resources.messages['create']}
           onClick={() => {
@@ -215,9 +218,21 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
         onClick={() => manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true)}
       />
 
-      {isEmptyForm && (
+      {isIntegrationNameDuplicated && !isEmptyForm && (
+        <ReactTooltip effect="solid" id="integrationTooltip" place="top">
+          {resources.messages['duplicatedIntegrationName']}
+        </ReactTooltip>
+      )}
+
+      {isEmptyForm && !isIntegrationNameDuplicated && (
         <ReactTooltip effect="solid" id="integrationTooltip" place="top">
           {resources.messages['fcSubmitButtonDisabled']}
+        </ReactTooltip>
+      )}
+
+      {isEmptyForm && isIntegrationNameDuplicated && (
+        <ReactTooltip effect="solid" id="integrationTooltip" place="top">
+          {resources.messages['duplicatedNameMissingFields']}
         </ReactTooltip>
       )}
     </Fragment>

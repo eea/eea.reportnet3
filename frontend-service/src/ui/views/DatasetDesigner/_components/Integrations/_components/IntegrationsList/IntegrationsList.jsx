@@ -20,7 +20,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { integrationsListReducer } from './_functions/Reducers/integrationsListReducer';
 
-export const IntegrationsList = ({ dataflowId, designerState, getUpdatedData, manageDialogs }) => {
+export const IntegrationsList = ({ dataflowId, designerState, getUpdatedData, integrationsList, manageDialogs }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -76,6 +76,7 @@ export const IntegrationsList = ({ dataflowId, designerState, getUpdatedData, ma
     try {
       const response = await IntegrationService.all(designerState.datasetSchemaId);
       integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response } });
+      integrationsList(response);
     } catch (error) {
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
     } finally {
