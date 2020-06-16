@@ -685,6 +685,8 @@
     "duplicatedParameterKeyErrorContent": "ERROR: This parameter key already exist, please check it",
     "emptyParameterErrorHeader": "Empty parameter error",
     "emptyParameterErrorContent": "ERROR: Parameter {:option} can not be empty",
-    "newSchema": "New schema"
+    "newSchema": "New schema",
+    "searchObligations": "Search obligations",
+    "PKTooltip": "The primary key (PK) is a unique identifier for the records"
   }
 }

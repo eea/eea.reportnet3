@@ -119,12 +119,7 @@ const DataflowManagementForm = forwardRef(
               </div>
 
               <div className={`${styles.search}`}>
-                <Button
-                  className={`p-button-secondary`}
-                  icon="search"
-                  label={resources.messages['search']}
-                  onMouseDown={onSearch}
-                />
+                <Button icon="search" label={resources.messages['searchObligations']} onMouseDown={onSearch} />
                 <Field
                   className={`${styles.searchInput} ${
                     (!isEmpty(errors.obligation) && !isEmpty(touched.obligation) && touched.obligation.title) ||

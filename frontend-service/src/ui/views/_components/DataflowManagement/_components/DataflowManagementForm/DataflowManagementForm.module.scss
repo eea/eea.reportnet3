@@ -1,8 +1,9 @@
 .search {
+  --searchButtonWidth: 170px;
+
   cursor: pointer !important;
   display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
+  justify-content: space-between;
 
   .searchInput {
     background-color: var(--form-field-bg);
@@ -12,6 +13,8 @@
     cursor: default !important;
     outline: none;
     padding: 10px;
+    text-overflow: ellipsis;
+    width: calc(100% - var(--searchButtonWidth));
 
     &:focus {
       border: none;

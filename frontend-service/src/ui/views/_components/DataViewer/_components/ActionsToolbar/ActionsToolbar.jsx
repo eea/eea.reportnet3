@@ -212,7 +212,7 @@ const ActionsToolbar = ({
     <Toolbar className={styles.actionsToolbar}>
       <div className="p-toolbar-group-left">
         <Button
-          className={`p-button-rounded p-button-secondary-transparent ${
+          className={`p-button-rounded p-button-secondary ${
             !hasWritePermissions || tableReadOnly || isWebFormMMR ? null : 'p-button-animated-blink'
           }`}
           disabled={!hasWritePermissions || tableReadOnly || isWebFormMMR}
