@@ -90,7 +90,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   };
 
   const onBlurParameter = (id, option, event) => {
-    if (isEmpty(event.target.value)) onToggleDialogError('empty', option, true);
+    if (isEmpty(event.target.value.trim())) onToggleDialogError('empty', option, true);
 
     !isDuplicatedParameter(id, externalParameters, event.target.value)
       ? onUpdateSingleParameter(id, option, event)
@@ -125,7 +125,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   const onEditKeyDown = (event, id, option) => {
     const duplicated = isDuplicatedParameter(id, externalParameters, event.target.value);
 
-    if (event.key === 'Enter' && isEmpty(event.target.value)) onToggleDialogError('empty', option, true);
+    if (event.key === 'Enter' && isEmpty(event.target.value.trim())) onToggleDialogError('empty', option, true);
 
     if (event.key === 'Enter' && duplicated) onToggleDialogError('duplicated', option, true);
 
@@ -157,7 +157,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   };
 
   const onSaveKeyDown = event => {
-    if (event.key === 'Enter' && !isEmpty(parameterKey) && !isEmpty(parameterValue) && !isKeyDuplicated) {
+    if (event.key === 'Enter' && !isEmpty(parameterKey.trim()) && !isEmpty(parameterValue.trim()) && !isKeyDuplicated) {
       onSaveParameter();
     }
   };
@@ -195,16 +195,14 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   };
 
   const onUpdateIntegration = async () => {
-    if (!isIntegrationDuplicated) {
-      try {
-        const response = await IntegrationService.update(manageIntegrationsState);
-        if (response.status >= 200 && response.status <= 299) {
-          manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
-        }
-      } catch (error) {
-        notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' });
+    try {
+      const response = await IntegrationService.update(manageIntegrationsState);
+      if (response.status >= 200 && response.status <= 299) {
+        manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
       }
-    } else manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
+    } catch (error) {
+      notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' });
+    }
   };
 
   const onUpdateParameter = () => {
@@ -217,7 +215,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   };
 
   const onUpdateSingleParameter = (id, option, event) => {
-    if (!isEmpty(event.target.value)) {
+    if (!isEmpty(event.target.value.trim())) {
       ManageIntegrationsUtils.onUpdateData(id, option, externalParameters, event.target.value);
       onToggleEditorView(id, [option]);
     }
@@ -373,7 +371,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
             <span data-tip data-for="addParameterTooltip">
               <Button
                 className="p-button-rounded p-button-animated-blink"
-                disabled={isEmpty(parameterKey) || isEmpty(parameterValue) || isKeyDuplicated}
+                disabled={isEmpty(parameterKey.trim()) || isEmpty(parameterValue.trim()) || isKeyDuplicated}
                 icon="add"
                 label={editorView.isEditing ? resources.messages['update'] : resources.messages['add']}
                 onClick={() => onSaveParameter()}
@@ -407,9 +405,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
         visible={parametersErrors.isDialogVisible}>
         <span
           dangerouslySetInnerHTML={{
-            __html: TextUtils.parseText(parametersErrors.content, {
-              option: parametersErrors.option
-            })
+            __html: TextUtils.parseText(parametersErrors.content, { option: parametersErrors.option })
           }}
         />
       </Dialog>
