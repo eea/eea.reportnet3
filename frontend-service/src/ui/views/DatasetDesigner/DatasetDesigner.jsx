@@ -42,6 +42,7 @@ import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContex
 
 import { designerReducer } from './_functions/Reducers/designerReducer';
 
+import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
 
 import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
@@ -79,6 +80,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     isLoading: true,
     isManageUniqueConstraintDialogVisible: false,
     isPreviewModeOn: DatasetDesignerUtils.getUrlParamValue('design'),
+    isRefreshHighlighted: false,
     isUniqueConstraintsListDialogVisible: false,
     isValidationViewerVisible: false,
     levelErrorTypes: [],
@@ -283,6 +285,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
+  const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
+
+  useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
+
   const onHideValidationsDialog = () => {
     if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener) {
       validationContext.onResetOpener();
@@ -300,6 +306,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const onLoadSchema = () => {
+    onHighlightRefresh(false);
+
     try {
       isLoading(true);
       const getDatasetSchemaId = async () => {
@@ -593,7 +601,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               />
 
               <Button
-                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                className={`p-button-rounded p-button-${
+                  designerState.isRefreshHighlighted ? 'primary' : 'secondary-transparent'
+                }  p-button-animated-blink`}
                 icon={'refresh'}
                 label={resources.messages['refresh']}
                 onClick={() => onLoadSchema()}
