@@ -19,9 +19,7 @@ export const Integrations = ({ dataflowId, designerState, manageDialogs }) => {
 
   const getUpdatedData = data => setUpdatedData(IntegrationsUtils.parseIntegrationsList(data));
 
-  const getIntegrationsList = data => {
-    setIntegrationsList(data);
-  };
+  const getIntegrationsList = data => setIntegrationsList(data);
 
   const renderIntegrationFooter = (
     <Fragment>
@@ -54,7 +52,6 @@ export const Integrations = ({ dataflowId, designerState, manageDialogs }) => {
         style={{ width: '70%' }}
         visible={isIntegrationListDialogVisible}>
         <IntegrationsList
-          dataflowId={dataflowId}
           designerState={designerState}
           getUpdatedData={getUpdatedData}
           integrationsList={getIntegrationsList}

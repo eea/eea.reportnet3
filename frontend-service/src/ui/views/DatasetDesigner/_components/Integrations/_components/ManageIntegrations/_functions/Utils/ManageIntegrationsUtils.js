@@ -21,9 +21,11 @@ const isDuplicatedIntegration = (integration, incomingIntegration) => {
   return isEqual([currentIntegration].sort(), [incomingIntegration].sort());
 };
 
-const isDuplicatedIntegrationName = (integrationName, integrationsList) => {
-  const integrationsWithSameName = integrationsList.map(integration => integration.integrationName === integrationName);
-  return integrationsWithSameName.includes(true) ? true : false;
+const isDuplicatedIntegrationName = (currentName, integrationsList, id) => {
+  const names = integrationsList
+    .filter(integration => integration.integrationId !== id)
+    .map(integration => integration.integrationName.toLowerCase());
+  return names.includes(currentName.toLowerCase());
 };
 
 const isDuplicatedParameter = (id, parameters, value) => {

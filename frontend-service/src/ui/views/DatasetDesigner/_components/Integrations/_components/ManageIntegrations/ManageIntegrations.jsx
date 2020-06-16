@@ -68,9 +68,13 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
 
   const isEditingParameter = isParameterEditing(externalParameters);
   const isEmptyForm = isFormEmpty(manageIntegrationsState);
-  const isKeyDuplicated = isDuplicatedParameter(editorView.id, externalParameters, parameterKey);
   const isIntegrationDuplicated = isDuplicatedIntegration(manageIntegrationsState, updatedData);
-  const isIntegrationNameDuplicated = isDuplicatedIntegrationName(manageIntegrationsState.name, integrationsList);
+  const isIntegrationNameDuplicated = isDuplicatedIntegrationName(
+    manageIntegrationsState.name,
+    integrationsList,
+    manageIntegrationsState.id
+  );
+  const isKeyDuplicated = isDuplicatedParameter(editorView.id, externalParameters, parameterKey);
 
   useEffect(() => {
     if (!isEmpty(updatedData)) getUpdatedData();
@@ -244,21 +248,11 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
         onClick={() => manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true)}
       />
 
-      {isIntegrationNameDuplicated && !isEmptyForm && (
+      {(isEmptyForm || isIntegrationNameDuplicated) && (
         <ReactTooltip effect="solid" id="integrationTooltip" place="top">
-          {resources.messages['duplicatedIntegrationName']}
-        </ReactTooltip>
-      )}
-
-      {isEmptyForm && !isIntegrationNameDuplicated && (
-        <ReactTooltip effect="solid" id="integrationTooltip" place="top">
-          {resources.messages['fcSubmitButtonDisabled']}
-        </ReactTooltip>
-      )}
-
-      {isEmptyForm && isIntegrationNameDuplicated && (
-        <ReactTooltip effect="solid" id="integrationTooltip" place="top">
-          {resources.messages['duplicatedNameMissingFields']}
+          {isIntegrationNameDuplicated
+            ? resources.messages['duplicatedIntegrationName']
+            : resources.messages['fcSubmitButtonDisabled']}
         </ReactTooltip>
       )}
     </Fragment>

@@ -11,8 +11,6 @@ import { DataTable } from 'ui/views/_components/DataTable';
 import { Filters } from 'ui/views/_components/Filters';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { Integration } from 'core/domain/model/Integration/Integration';
-
 import { IntegrationService } from 'core/services/Integration';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -20,7 +18,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { integrationsListReducer } from './_functions/Reducers/integrationsListReducer';
 
-export const IntegrationsList = ({ dataflowId, designerState, getUpdatedData, integrationsList, manageDialogs }) => {
+export const IntegrationsList = ({ designerState, getUpdatedData, integrationsList, manageDialogs }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
