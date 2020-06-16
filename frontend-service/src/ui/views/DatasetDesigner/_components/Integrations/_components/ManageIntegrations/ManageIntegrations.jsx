@@ -19,8 +19,10 @@ import { IntegrationService } from 'core/services/Integration';
 import { manageIntegrationsReducer } from './_functions/Reducers/manageIntegrationsReducer';
 
 import { useInputTextFocus } from 'ui/views/_functions/Hooks/useInputTextFocus';
+import { useLockBodyScroll } from 'ui/views/_functions/Hooks/useLockBodyScroll';
 
 import { ManageIntegrationsUtils } from './_functions/Utils/ManageIntegrationsUtils';
+import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const ManageIntegrations = ({ dataflowId, designerState, integrationsList, manageDialogs, updatedData }) => {
   const { datasetSchemaId, isIntegrationManageDialogVisible } = designerState;
@@ -48,12 +50,13 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
     name: '',
     operation: '',
     parameterKey: '',
+    parametersErrors: { content: '', header: '', isDialogVisible: false, option: '' },
     parameterValue: '',
     processName: '',
     tool: 'FME'
   });
 
-  const { editorView, externalParameters, parameterKey, parameterValue } = manageIntegrationsState;
+  const { editorView, externalParameters, parameterKey, parameterValue, parametersErrors } = manageIntegrationsState;
   const {
     isDuplicatedIntegration,
     isDuplicatedIntegrationName,
@@ -77,6 +80,8 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
   useInputTextFocus(isEditingParameter, parameterRef);
   useInputTextFocus(isIntegrationManageDialogVisible, integrationNameRef);
 
+  useLockBodyScroll(parametersErrors.isDialogVisible);
+
   const getUpdatedData = () => manageIntegrationsDispatch({ type: 'GET_UPDATED_DATA', payload: updatedData });
 
   const onAddParameter = () => {
@@ -87,11 +92,11 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
   };
 
   const onBlurParameter = (id, option, event) => {
-    if (isEmpty(event.target.value)) parameterRef.current.element.focus();
+    if (isEmpty(event.target.value.trim())) onToggleDialogError('empty', option, true);
 
     !isDuplicatedParameter(id, externalParameters, event.target.value)
       ? onUpdateSingleParameter(id, option, event)
-      : parameterRef.current.element.focus();
+      : onToggleDialogError('duplicated', option, true);
   };
 
   const onChangeParameter = (value, option, id) => {
@@ -120,9 +125,13 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
   };
 
   const onEditKeyDown = (event, id, option) => {
-    if (event.key === 'Enter' && !isDuplicatedParameter(id, externalParameters, event.target.value)) {
-      onUpdateSingleParameter(id, option, event);
-    }
+    const duplicated = isDuplicatedParameter(id, externalParameters, event.target.value);
+
+    if (event.key === 'Enter' && isEmpty(event.target.value.trim())) onToggleDialogError('empty', option, true);
+
+    if (event.key === 'Enter' && duplicated) onToggleDialogError('duplicated', option, true);
+
+    if (event.key === 'Enter' && !duplicated) onUpdateSingleParameter(id, option, event);
 
     if (event.key === 'Escape') {
       event.preventDefault();
@@ -150,7 +159,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
   };
 
   const onSaveKeyDown = event => {
-    if (event.key === 'Enter' && !isEmpty(parameterKey) && !isEmpty(parameterValue) && !isKeyDuplicated) {
+    if (event.key === 'Enter' && !isEmpty(parameterKey.trim()) && !isEmpty(parameterValue.trim()) && !isKeyDuplicated) {
       onSaveParameter();
     }
   };
@@ -158,6 +167,25 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
   const onSaveParameter = () => (editorView.isEditing ? onUpdateParameter() : onAddParameter());
 
   const onShowErrors = () => manageIntegrationsDispatch({ type: 'SHOW_ERRORS', payload: { value: true } });
+
+  const onToggleDialogError = (errorType, option, value) => {
+    const dialogContent = {
+      duplicated: resources.messages['duplicatedParameterKeyErrorContent'],
+      empty: resources.messages['emptyParameterErrorContent']
+    };
+
+    const dialogHeader = {
+      duplicated: resources.messages['duplicatedParameterKeyErrorHeader'],
+      empty: resources.messages['emptyParameterErrorHeader']
+    };
+
+    if (parameterRef.current) parameterRef.current.element.focus();
+
+    manageIntegrationsDispatch({
+      type: 'TOGGLE_ERROR_DIALOG',
+      payload: { content: dialogContent[errorType], header: dialogHeader[errorType], option, value }
+    });
+  };
 
   const onToggleEditorView = (id, option) => {
     if (!editorView.isEditing) {
@@ -169,16 +197,14 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
   };
 
   const onUpdateIntegration = async () => {
-    if (!isIntegrationDuplicated) {
-      try {
-        const response = await IntegrationService.update(manageIntegrationsState);
-        if (response.status >= 200 && response.status <= 299) {
-          manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
-        }
-      } catch (error) {
-        notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' });
+    try {
+      const response = await IntegrationService.update(manageIntegrationsState);
+      if (response.status >= 200 && response.status <= 299) {
+        manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
       }
-    } else manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
+    } catch (error) {
+      notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' });
+    }
   };
 
   const onUpdateParameter = () => {
@@ -191,7 +217,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
   };
 
   const onUpdateSingleParameter = (id, option, event) => {
-    if (!isEmpty(event.target.value)) {
+    if (!isEmpty(event.target.value.trim())) {
       ManageIntegrationsUtils.onUpdateData(id, option, externalParameters, event.target.value);
       onToggleEditorView(id, [option]);
     }
@@ -285,6 +311,10 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
     );
   };
 
+  const renderErrorDialogFooter = (
+    <Button icon="check" label={resources.messages['ok']} onClick={() => onToggleDialogError('', '', false)} />
+  );
+
   const renderInputLayout = (options = []) => {
     return options.map((option, index) => (
       <div
@@ -342,44 +372,58 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
   };
 
   return renderDialogLayout(
-    <div className={styles.content}>
-      <div className={styles.group}>{renderInputLayout(['name', 'description'])}</div>
-      <div className={styles.group}>
-        {renderInputLayout(['processName'])}
-        {renderDropdownLayout('operation')}
-        {renderInputLayout(['fileExtension'])}
-      </div>
-      <div className={styles.group}>
-        {renderInputLayout(['parameterKey', 'parameterValue'])}
-        <span className={styles.buttonWrapper}>
-          <span data-tip data-for="addParameterTooltip">
-            <Button
-              className="p-button-rounded p-button-animated-blink"
-              disabled={isEmpty(parameterKey) || isEmpty(parameterValue) || isKeyDuplicated}
-              icon="add"
-              label={editorView.isEditing ? resources.messages['update'] : resources.messages['add']}
-              onClick={() => onSaveParameter()}
-            />
-          </span>
-          {editorView.isEditing && (
-            <Button
-              className="p-button-secondary p-button-rounded p-button-animated-blink"
-              icon={'cancel'}
-              label={resources.messages['cancel']}
-              onClick={() => onResetParameterInput()}
-            />
-          )}
+    <Fragment>
+      <div className={styles.content}>
+        <div className={styles.group}>{renderInputLayout(['name', 'description'])}</div>
+        <div className={styles.group}>
+          {renderInputLayout(['processName'])}
+          {renderDropdownLayout('operation')}
+          {renderInputLayout(['fileExtension'])}
+        </div>
+        <div className={styles.group}>
+          {renderInputLayout(['parameterKey', 'parameterValue'])}
+          <span className={styles.buttonWrapper}>
+            <span data-tip data-for="addParameterTooltip">
+              <Button
+                className="p-button-rounded p-button-animated-blink"
+                disabled={isEmpty(parameterKey.trim()) || isEmpty(parameterValue.trim()) || isKeyDuplicated}
+                icon="add"
+                label={editorView.isEditing ? resources.messages['update'] : resources.messages['add']}
+                onClick={() => onSaveParameter()}
+              />
+            </span>
+            {editorView.isEditing && (
+              <Button
+                className="p-button-secondary p-button-rounded p-button-animated-blink"
+                icon={'cancel'}
+                label={resources.messages['cancel']}
+                onClick={() => onResetParameterInput()}
+              />
+            )}
 
-          {isKeyDuplicated && (
-            <ReactTooltip effect="solid" id="addParameterTooltip" place="top">
-              {resources.messages['parameterAlreadyExists']}
-            </ReactTooltip>
-          )}
-        </span>
+            {isKeyDuplicated && (
+              <ReactTooltip effect="solid" id="addParameterTooltip" place="top">
+                {resources.messages['parameterAlreadyExists']}
+              </ReactTooltip>
+            )}
+          </span>
+        </div>
+        <div className={styles.group}>
+          <span className={styles.parameters}>{renderParametersLayout()}</span>
+        </div>
       </div>
-      <div className={styles.group}>
-        <span className={styles.parameters}>{renderParametersLayout()}</span>
-      </div>
-    </div>
+
+      <Dialog
+        footer={renderErrorDialogFooter}
+        header={parametersErrors.header}
+        onHide={() => onToggleDialogError('', '', false)}
+        visible={parametersErrors.isDialogVisible}>
+        <span
+          dangerouslySetInnerHTML={{
+            __html: TextUtils.parseText(parametersErrors.content, { option: parametersErrors.option })
+          }}
+        />
+      </Dialog>
+    </Fragment>
   );
 };
