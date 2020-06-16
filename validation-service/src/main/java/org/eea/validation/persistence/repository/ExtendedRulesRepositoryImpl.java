@@ -110,7 +110,7 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
         new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId))
             .addCriteria(new Criteria("rules._id").is(rule.getRuleId())),
         new Update().set("rules.$", rule), RulesSchema.class);
-    return result.getMatchedCount() > 0 || result.getModifiedCount() > 0 ? true : false;
+    return result.getMatchedCount() > 0 || result.getModifiedCount() > 0;
   }
 
   /**
