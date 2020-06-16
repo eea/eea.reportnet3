@@ -413,7 +413,7 @@ public class RecordValue {
    */
   public boolean recordStringLengthEquals(String fieldSchemaId, String number) {
     try {
-      return fieldsMap.get(fieldSchemaId).length() != Integer.valueOf(number);
+      return fieldsMap.get(fieldSchemaId).length() == Integer.valueOf(number);
     } catch (Exception e) {
       return true;
     }

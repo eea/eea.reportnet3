@@ -580,8 +580,8 @@
     "nextReportDue": "Next report due",
     "isCorrect": "Validity",
     "automatic": "Creation Mode",
-    "table": "Tables",
-    "field": "Fields",
+    "table": "Table",
+    "field": "Field",
     "tabMenuExpression": "Expression",
     "fcSubmitButtonDisabled": "One or more required field(s) are missing",
     "longFieldFormatRestriction": "Maximum of 20 characters",
@@ -678,6 +678,13 @@
     "supportedFileExtensionsTooltip": "Supported file extensions: ",
     "invalidExtensionFile": "ERROR: Selected file does not have a valid extension, please check it",
     "loadingFileExtensionsError": "Error loading supported file extensions",
-    "operationPlaceHolder": "Select an operation"
+    "operationPlaceHolder": "Select an operation",
+    "duplicatedIntegrationName": "The integration name already exists",
+    "duplicatedNameMissingFields": "One or more required field(s) are missing and the name already exists",
+    "duplicatedParameterKeyErrorHeader": "Duplicated parameter key error",
+    "duplicatedParameterKeyErrorContent": "ERROR: This parameter key already exist, please check it",
+    "emptyParameterErrorHeader": "Empty parameter error",
+    "emptyParameterErrorContent": "ERROR: Parameter {:option} can not be empty",
+    "newSchema": "New schema"
   }
 }

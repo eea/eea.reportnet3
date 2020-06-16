@@ -618,7 +618,8 @@ public class ValidationHelper implements DisposableBean {
               validationTask.eeaEventVO.getData());
         }
         Double totalTime = (System.currentTimeMillis() - currentTime) / 1000.0;
-        LOG.info("Validation task {} took {} seconds", validationTask.eeaEventVO, totalTime);
+        LOG.info("Validation task {} finished, it has taken taken {} seconds",
+            validationTask.eeaEventVO, totalTime);
       }
     }
 
