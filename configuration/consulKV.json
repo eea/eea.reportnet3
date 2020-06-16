@@ -60,6 +60,10 @@
     "value": "JHtEQl9DSEVDS19GUkVRVUVOQ1k6NTAwMH0="
   },
   {
+    "key": "config/application/spring.health.redis.check.frequency",
+    "value": "JHtSRURJU19DSEVDS19GUkVRVUVOQ1k6NTAwMH0="
+  },
+  {
     "key": "config/dataset/dataset.loadDataDelimiter",
     "value": "fA=="
   },
