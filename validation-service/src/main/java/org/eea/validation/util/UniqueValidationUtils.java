@@ -395,15 +395,16 @@ public class UniqueValidationUtils {
       tableValidation.setTableValue(tableValue);
       tableValidations.add(tableValidation);
     }
+    List<String> notUtilizedRecords2 = new ArrayList<>();
     if (Boolean.TRUE.equals(integrityVO.getIsDoubleReferenced())) {
       DataSetSchema datasetSchemaDoubleReference = schemasRepository
           .findByIdDataSetSchema(new ObjectId(integrityVO.getReferencedDatasetSchemaId()));
       String tableSchemaName = getTableSchemaFromIdFieldSchema(datasetSchemaDoubleReference,
           integrityVO.getReferencedFields().get(0)).getNameTableSchema();
-      notUtilizedRecords =
+      notUtilizedRecords2 =
           recordRepository.queryExecution(mountIntegrityQuery(integrityVO.getReferencedFields(),
               integrityVO.getOriginFields(), datasetIdReferenced, datasetIdOrigin));
-      if (!notUtilizedRecords.isEmpty()) {
+      if (!notUtilizedRecords2.isEmpty()) {
         validation = createValidation(idRule, schemaId, tableSchemaName, EntityTypeEnum.TABLE);
         TableValidation tableValidationReferenced = new TableValidation();
         tableValidationReferenced.setValidation(validation);
@@ -413,7 +414,7 @@ public class UniqueValidationUtils {
     }
     tableValue.setTableValidations(tableValidations);
     saveTableValidations(tableValue);
-    return !notUtilizedRecords.isEmpty();
+    return notUtilizedRecords.isEmpty() || notUtilizedRecords2.isEmpty();
 
   }
 
