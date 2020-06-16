@@ -678,6 +678,7 @@
     "supportedFileExtensionsTooltip": "Supported file extensions: ",
     "invalidExtensionFile": "ERROR: Selected file does not have a valid extension, please check it",
     "loadingFileExtensionsError": "Error loading supported file extensions",
-    "operationPlaceHolder": "Select an operation"
+    "operationPlaceHolder": "Select an operation",
+    "newSchema": "New schema"
   }
 }

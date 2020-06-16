@@ -35,7 +35,7 @@ const useBigButtonList = ({
       buttonIcon: 'plus',
       buttonIconClass: 'newItemCross',
       // caption: resources.messages['newItem'],
-      caption: 'New schema',
+      caption: resources.messages['newSchema'],
       helpClassName: 'dataflow-new-item-help-step',
       // layout: 'menuBigButton',
       layout: 'defaultBigButton',
