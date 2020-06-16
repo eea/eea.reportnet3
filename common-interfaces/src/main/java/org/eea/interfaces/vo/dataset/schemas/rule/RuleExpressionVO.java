@@ -146,7 +146,7 @@ public class RuleExpressionVO {
       boolean firstParam = true;
       StringBuilder sb = new StringBuilder();
 
-      sb.append("this.");
+      sb.append("RuleOperators.");
       sb.append(operator.getFunctionName());
       sb.append("(");
 
@@ -247,7 +247,7 @@ public class RuleExpressionVO {
    * @return the int
    */
   private int readOperator(String expression, int index, RuleExpressionVO rule) {
-    int beginIndex = index + "this.".length();
+    int beginIndex = index + "RuleOperators.".length();
     int endIndex = expression.indexOf('(', beginIndex);
     rule.operator =
         RuleOperatorEnum.valueOfFunctionName(expression.substring(beginIndex, endIndex));
