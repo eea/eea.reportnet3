@@ -23,6 +23,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'GET_UNIQUES':
       return { ...state, uniqueConstraintsList: payload.data };
 
+    case 'HIGHLIGHT_REFRESH':
+      return { ...state, isRefreshHighlighted: payload.value };
+
     case 'INITIAL_DATASET_DESCRIPTION':
       return { ...state, initialDatasetDescription: payload.value };
 

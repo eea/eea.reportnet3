@@ -290,7 +290,7 @@ export const DataCollection = withRouter(({ match, history }) => {
         <Toolbar>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
+              className={`p-button-rounded p-button-secondary`}
               disabled={true}
               icon={'import'}
               label={resources.messages['export']}

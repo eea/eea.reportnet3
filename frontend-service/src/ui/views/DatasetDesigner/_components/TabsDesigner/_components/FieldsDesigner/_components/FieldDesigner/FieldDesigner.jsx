@@ -609,6 +609,7 @@ export const FieldDesigner = ({
       />
       <Checkbox
         checked={fieldDesignerState.fieldPKValue}
+        className={styles.checkPK}
         disabled={hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)}
         inputId={`${fieldId}_check_pk`}
         label="Default"
@@ -785,6 +786,7 @@ export const FieldDesigner = ({
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton}`}
             icon="horizontalSliders"
+            label={resources.messages['qcRules']}
             onClick={() => validationContext.onOpenModalFromField(fieldId, tableSchemaId)}
             style={{ marginLeft: '0.4rem', alignSelf: !fieldDesignerState.isEditing ? 'center' : 'baseline' }}
             tooltip={resources.messages['createFieldQC']}
