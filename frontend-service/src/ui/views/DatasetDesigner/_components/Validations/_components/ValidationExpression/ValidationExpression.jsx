@@ -138,11 +138,13 @@ const ValidationExpression = ({
   };
 
   const onAddToClickedFields = field => {
-    const cClickedFields = [...clickedFields];
-    if (!cClickedFields.includes(field)) {
-      cClickedFields.push(field);
-      setClickedFields(cClickedFields);
-    }
+    setTimeout(() => {
+      const cClickedFields = [...clickedFields];
+      if (!cClickedFields.includes(field)) {
+        cClickedFields.push(field);
+        setClickedFields(cClickedFields);
+      }
+    }, 250);
   };
   const onDeleteFromClickedFields = field => {
     const cClickedFields = [...clickedFields];
