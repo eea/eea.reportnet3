@@ -156,7 +156,7 @@ public class ExtendedRulesRepositoryImplTest {
   @Test
   public void updateRuleFalseTest() {
     Mockito.when(mongoTemplate.updateFirst(Mockito.any(), Mockito.any(), Mockito.any(Class.class)))
-        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
+        .thenReturn(UpdateResult.acknowledged(0L, 0L, null));
     Assert.assertFalse(extendedRulesRepositoryImpl.updateRule(new ObjectId(), new Rule()));
   }
 

@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import com.mongodb.client.result.UpdateResult;
 
 /**
  * The Class ExtendedRulesRepositoryImpl.
@@ -105,10 +106,11 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
    */
   @Override
   public boolean updateRule(ObjectId datasetSchemaId, Rule rule) {
-    return mongoTemplate.updateFirst(
+    UpdateResult result = mongoTemplate.updateFirst(
         new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId))
             .addCriteria(new Criteria("rules._id").is(rule.getRuleId())),
-        new Update().set("rules.$", rule), RulesSchema.class).getModifiedCount() == 1;
+        new Update().set("rules.$", rule), RulesSchema.class);
+    return result.getMatchedCount() > 0 || result.getModifiedCount() > 0;
   }
 
   /**

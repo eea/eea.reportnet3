@@ -86,6 +86,7 @@ public class KieBaseManagerTest {
     rule.setReferenceId(new ObjectId());
     rule.setRuleId(new ObjectId());
     rule.setThenCondition(thenCondition);
+    rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     rules.add(rule);
     schemaRules.setRules(rules);
     Mockito.when(rulesRepository.getActiveAndVerifiedRules(Mockito.any())).thenReturn(schemaRules);
@@ -106,6 +107,7 @@ public class KieBaseManagerTest {
     rule.setReferenceId(id);
     rule.setRuleId(id);
     rule.setThenCondition(thenCondition);
+    rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     rules.add(rule);
     schemaRules.setRules(rules);
     Mockito.when(rulesRepository.getActiveAndVerifiedRules(Mockito.any())).thenReturn(schemaRules);
@@ -125,6 +127,7 @@ public class KieBaseManagerTest {
     rule.setReferenceId(id);
     rule.setRuleId(id);
     rule.setThenCondition(thenCondition);
+    rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     rules.add(rule);
     schemaRules.setRules(rules);
     Mockito.when(rulesRepository.getActiveAndVerifiedRules(Mockito.any())).thenReturn(schemaRules);
@@ -145,7 +148,7 @@ public class KieBaseManagerTest {
     rule.setRuleId(id);
     rule.setThenCondition(thenCondition);
     rules.add(rule);
-    rule.setWhenCondition("this.fieldNumberEquals(\"5\", 5)");
+    rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     schemaRules.setRules(rules);
     fieldSchema.setType(DataType.NUMBER_INTEGER);
     Document fieldDocument = new Document();
@@ -170,7 +173,7 @@ public class KieBaseManagerTest {
     rule.setRuleId(id);
     rule.setThenCondition(thenCondition);
     rules.add(rule);
-    rule.setWhenCondition("this.fieldNumberEquals(\"5\", 5)");
+    rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     schemaRules.setRules(rules);
     fieldSchema.setType(DataType.NUMBER_DECIMAL);
     Document fieldDocument = new Document();
@@ -195,7 +198,7 @@ public class KieBaseManagerTest {
     rule.setRuleId(id);
     rule.setThenCondition(thenCondition);
     rules.add(rule);
-    rule.setWhenCondition("this.fieldNumberEquals(\"5\", 5)");
+    rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     schemaRules.setRules(rules);
     fieldSchema.setType(DataType.DATE);
     Document fieldDocument = new Document();
@@ -220,7 +223,7 @@ public class KieBaseManagerTest {
     rule.setRuleId(id);
     rule.setThenCondition(thenCondition);
     rules.add(rule);
-    rule.setWhenCondition("this.fieldNumberEquals(\"5\", 5)");
+    rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     schemaRules.setRules(rules);
     fieldSchema.setType(DataType.BOOLEAN);
     Document fieldDocument = new Document();
@@ -245,7 +248,7 @@ public class KieBaseManagerTest {
     rule.setRuleId(id);
     rule.setThenCondition(thenCondition);
     rules.add(rule);
-    rule.setWhenCondition("this.fieldNumberEquals(\"5\", 5)");
+    rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     schemaRules.setRules(rules);
     fieldSchema.setType(DataType.COORDINATE_LAT);
     Document fieldDocument = new Document();
@@ -270,7 +273,7 @@ public class KieBaseManagerTest {
     rule.setRuleId(id);
     rule.setThenCondition(thenCondition);
     rules.add(rule);
-    rule.setWhenCondition("this.fieldNumberEquals(\"5\", 5)");
+    rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     schemaRules.setRules(rules);
     fieldSchema.setType(DataType.COORDINATE_LONG);
     Document fieldDocument = new Document();
@@ -313,7 +316,7 @@ public class KieBaseManagerTest {
     thenCondition.add("");
     thenCondition.add("");
     rule.setType(EntityTypeEnum.RECORD);
-    rule.setWhenCondition("this.fieldNumberEquals(\"5\", 5)");
+    rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     rule.setReferenceId(id);
     rule.setRuleId(id);
     rule.setThenCondition(thenCondition);
@@ -335,7 +338,7 @@ public class KieBaseManagerTest {
     rule.setType(EntityTypeEnum.FIELD);
     rule.setReferenceId(id);
     rule.setRuleId(id);
-    rule.setWhenCondition("this.fieldNumberEquals(\"5\", 5)");
+    rule.setWhenCondition("RuleOperators.fieldNumberEquals(\"5\", 5)");
     rule.setThenCondition(thenCondition);
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(document);
