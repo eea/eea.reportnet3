@@ -6,10 +6,13 @@ import isNil from 'lodash/isNil';
 import styles from './ComparisonExpression.module.scss';
 
 import { config } from 'conf/';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dropdown } from 'primereact/dropdown';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -216,12 +219,14 @@ const ComparisonExpression = ({
   };
 
   const onAddToClickedFields = field => {
-    const cClickedFields = [...clickedFields];
+    setTimeout(() => {
+      const cClickedFields = [...clickedFields];
 
-    if (!cClickedFields.includes(field)) {
-      cClickedFields.push(field);
-      setClickedFields(cClickedFields);
-    }
+      if (!cClickedFields.includes(field)) {
+        cClickedFields.push(field);
+        setClickedFields(cClickedFields);
+      }
+    }, 300);
   };
 
   const onDeleteFromClickedFields = field => {
@@ -253,6 +258,7 @@ const ComparisonExpression = ({
   return (
     <li className={styles.expression}>
       <span className={styles.group}>
+        <FontAwesomeIcon icon={AwesomeIcons('link')} />
         <Checkbox
           disabled={disabledFields.union}
           isChecked={expressionValues.group}

@@ -28,6 +28,18 @@ export const manageIntegrationsReducer = (state, { type, payload }) => {
         parameterValue: payload.valueData
       };
 
+    case 'TOGGLE_ERROR_DIALOG':
+      return {
+        ...state,
+        parametersErrors: {
+          ...state.parametersErrors,
+          content: payload.content,
+          header: payload.header,
+          isDialogVisible: payload.value,
+          option: payload.option
+        }
+      };
+
     default:
       return state;
   }

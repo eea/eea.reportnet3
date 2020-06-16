@@ -126,7 +126,7 @@ const groupValidations = (recordData, blockerMessage, errorMessage, warningMessa
   const getMessages = validationsType => {
     let messageType = '';
     validationsType.forEach(validation =>
-      validation.message ? (messageType += '- ' + capitalize(validation.message) + '\n') : ''
+      validation.message ? (messageType += '- ' + validation.message + '\n') : ''
     );
     return messageType;
   };
