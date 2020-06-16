@@ -21,6 +21,13 @@ const isDuplicatedIntegration = (integration, incomingIntegration) => {
   return isEqual([currentIntegration].sort(), [incomingIntegration].sort());
 };
 
+const isDuplicatedIntegrationName = (currentName, integrationsList, id) => {
+  const names = integrationsList
+    .filter(integration => integration.integrationId !== id)
+    .map(integration => integration.integrationName.toLowerCase());
+  return names.includes(currentName.toLowerCase());
+};
+
 const isDuplicatedParameter = (id, parameters, value) => {
   return parameters
     .filter(parameter => parameter.id !== id)
@@ -29,7 +36,7 @@ const isDuplicatedParameter = (id, parameters, value) => {
 };
 
 const isFormEmpty = state => {
-  const requiredKeys = ['externalParameters', 'fileExtension', 'name', 'operation', 'processName'];
+  const requiredKeys = ['fileExtension', 'name', 'operation', 'processName'];
   const isEmptyForm = [];
   for (let index = 0; index < requiredKeys.length; index++) {
     const key = requiredKeys[index];
@@ -84,13 +91,7 @@ const onUpdateCompleteParameter = (id, state) => {
 };
 
 const printError = (field, state) => {
-  const requiredFields = ['externalParameters', 'fileExtension', 'name', 'operation', 'processName'];
-  const isParameterValid =
-    state.displayErrors &&
-    isEmpty(state['externalParameters']) &&
-    (field === 'parameterKey' || field === 'parameterValue');
-
-  if (isParameterValid) return 'error';
+  const requiredFields = ['fileExtension', 'name', 'operation', 'processName'];
 
   return state.displayErrors && requiredFields.includes(field) && isEmpty(state[field]) ? 'error' : undefined;
 };
@@ -110,6 +111,7 @@ const toggleParameterEditorView = (id, option, parameters) => {
 export const ManageIntegrationsUtils = {
   getParameterData,
   isDuplicatedIntegration,
+  isDuplicatedIntegrationName,
   isDuplicatedParameter,
   isFormEmpty,
   isParameterEditing,
