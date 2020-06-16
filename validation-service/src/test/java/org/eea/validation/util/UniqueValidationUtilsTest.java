@@ -134,7 +134,12 @@ public class UniqueValidationUtilsTest {
   public void uniqueConstraintTest() {
     Assert.assertFalse(uniqueValidationUtils.uniqueConstraint("5ece3de73fd71093b81eb4e6",
         "5ece3de73fd71093b81eb4e6"));
+  }
 
+  @Test
+  public void uniqueConstraintErrorTest() {
+    Assert.assertFalse(uniqueValidationUtils.uniqueConstraint("5ece3de73fd71093b81eb4e6",
+        "5ece3de73fd71093b81eb4e6"));
   }
 
   @Test
