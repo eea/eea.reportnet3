@@ -567,8 +567,8 @@ public class DatasetMetabaseServiceTest {
   public void getDatasetIdByDatasetSchemaIdAndDataProviderIdNullTest() {
     Mockito.when(dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderId(Mockito.any(),
         Mockito.anyLong())).thenReturn(Optional.empty());
-    Assert.assertEquals((Long) 1L,
-        datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId("1", 1L));
+    Assert
+        .assertNull(datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId("1", 1L));
   }
 
   @Test
