@@ -414,7 +414,7 @@ public class UniqueValidationUtils {
     }
     tableValue.setTableValidations(tableValidations);
     saveTableValidations(tableValue);
-    return notUtilizedRecords.isEmpty() || notUtilizedRecords2.isEmpty();
+    return notUtilizedRecords.isEmpty() && notUtilizedRecords2.isEmpty();
 
   }
 
