@@ -609,6 +609,7 @@ export const FieldDesigner = ({
       />
       <Checkbox
         checked={fieldDesignerState.fieldPKValue}
+        className={styles.checkPK}
         disabled={hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)}
         inputId={`${fieldId}_check_pk`}
         label="Default"
