@@ -40,11 +40,11 @@ import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarCont
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
+import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useReporterDataset';
 
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
-import { isEmptyChildren } from 'formik';
 
 export const Dataset = withRouter(({ match, history }) => {
   const {
@@ -79,6 +79,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isInputSwitchChecked, setIsInputSwitchChecked] = useState(false);
+  const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
   const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [isWebFormMMR, setIsWebFormMMR] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
@@ -372,6 +373,10 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
+  const onHighlightRefresh = value => setIsRefreshHighlighted(value);
+
+  useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
+
   const onLoadTableData = hasData => {
     setDatasetHasData(hasData);
   };
@@ -448,6 +453,8 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const onLoadDatasetSchema = async () => {
+    onHighlightRefresh(false);
+
     try {
       setLoading(true);
       const datasetSchema = await getDataSchema();
@@ -692,7 +699,9 @@ export const Dataset = withRouter(({ match, history }) => {
               onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
             />
             <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+              className={`p-button-rounded p-button-${
+                isRefreshHighlighted ? 'primary' : 'secondary-transparent'
+              } p-button-animated-blink`}
               icon={'refresh'}
               label={resources.messages['refresh']}
               onClick={() => onLoadDatasetSchema()}
