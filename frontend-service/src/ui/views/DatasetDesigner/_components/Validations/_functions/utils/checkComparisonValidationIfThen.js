@@ -3,7 +3,7 @@ import isNil from 'lodash/isNil';
 
 import { checkComparisonExpressions } from './checkComparisonExpressions';
 
-export const checkComparisonValidation = candidateRule => {
+export const checkComparisonValidationIfThen = candidateRule => {
   let isValidated = true;
 
   const ruleKeys = Object.keys(candidateRule);
@@ -15,7 +15,11 @@ export const checkComparisonValidation = candidateRule => {
       if (isNil(candidateRule[ruleKey]) || isEmpty(candidateRule[ruleKey])) {
         isValidated = false;
       }
-    } else if (ruleKey === 'expressions' && !isEmpty(candidateRule.expressions)) {
+    } else if (ruleKey === 'expressionsIf' && !isEmpty(candidateRule.expressionsIf)) {
+      if (checkComparisonExpressions(candidateRule[ruleKey])) {
+        isValidated = false;
+      }
+    } else if (ruleKey === 'expressionsThen' && !isEmpty(candidateRule.expressionsThen)) {
       if (checkComparisonExpressions(candidateRule[ruleKey])) {
         isValidated = false;
       }

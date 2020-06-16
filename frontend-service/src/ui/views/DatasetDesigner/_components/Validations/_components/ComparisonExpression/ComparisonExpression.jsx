@@ -1,17 +1,20 @@
 import React, { useState, useEffect, useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './ComparisonExpression.module.scss';
 
 import { config } from 'conf/';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dropdown } from 'primereact/dropdown';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import isNil from 'lodash/isNil';
 
 const ComparisonExpression = ({
   expressionValues,
@@ -20,20 +23,20 @@ const ComparisonExpression = ({
   onExpressionFieldUpdate,
   onExpressionGroup,
   onExpressionsErrors,
+  onGetFieldType,
   position,
-  showRequiredFields,
   rawTableFields,
-  onGetFieldType
+  showRequiredFields
 }) => {
   const componentName = 'fieldComparison';
   const resourcesContext = useContext(ResourcesContext);
   const { expressionId } = expressionValues;
-  const [operatorValues, setOperatorValues] = useState([]);
-  const [operatorTypes, setOperatorTypes] = useState([]);
   const [clickedFields, setClickedFields] = useState([]);
-  const [tableFields, setTableFields] = useState([]);
   const [fieldType, setFieldType] = useState(null);
+  const [operatorTypes, setOperatorTypes] = useState([]);
+  const [operatorValues, setOperatorValues] = useState([]);
   const [secondFieldOptions, setSecondFieldOptions] = useState();
+  const [tableFields, setTableFields] = useState([]);
   const {
     validations: { operatorTypes: operatorTypesConf, operatorByType, fieldByOperatorType }
   } = config;
@@ -71,17 +74,17 @@ const ComparisonExpression = ({
       ...newDisabledFields
     });
   }, [
-    isDisabled,
     expressionValues.field1,
     expressionValues.field2,
     expressionValues.operatorType,
-    expressionValues.operatorValue
+    expressionValues.operatorValue,
+    isDisabled
   ]);
 
   useEffect(() => {
     if (rawTableFields) {
       const parsedTableFields = rawTableFields.map(field => {
-        return { label: field.label, value: field.code };
+        return { label: field.label, value: field.code, type: field.type };
       });
       setTableFields(parsedTableFields);
       setSecondFieldOptions(parsedTableFields);
@@ -120,7 +123,16 @@ const ComparisonExpression = ({
 
   useEffect(() => {
     if (!isEmpty(expressionValues.field1) && !isEmpty(fieldType) && expressionValues.operatorType) {
-      const compatibleFieldTypes = fieldByOperatorType[expressionValues.operatorType];
+      const field1Type = onGetFieldType(expressionValues.field1);
+      let compatibleFieldTypes = fieldByOperatorType[expressionValues.operatorType];
+
+      if (
+        (field1Type === 'NUMBER_INTEGER' || field1Type === 'NUMBER_DECIMAL') &&
+        expressionValues.operatorValue === 'MATCH'
+      ) {
+        compatibleFieldTypes = fieldByOperatorType['numberMatch'];
+      }
+
       const allFields = tableFields.filter(field => {
         const cFieldType = onGetFieldType(field.value);
         const result = compatibleFieldTypes.includes(cFieldType);
@@ -129,11 +141,10 @@ const ComparisonExpression = ({
 
       setSecondFieldOptions(allFields.filter(cField => cField.value !== expressionValues.field1));
     }
-  }, [expressionValues.field1, expressionValues.operatorType, fieldType]);
+  }, [expressionValues.field1, expressionValues.operatorType, fieldType, tableFields, expressionValues.operatorValue]);
 
   useEffect(() => {
     const options = [];
-    let operatorOfType = null;
     if (!isNil(fieldType)) {
       operatorByType[fieldType].forEach(key => {
         options.push(operatorTypesConf[key].option);
@@ -149,20 +160,24 @@ const ComparisonExpression = ({
   useEffect(() => {
     if (showRequiredFields) {
       const fieldsToAdd = [];
+
       ['union', 'field1', 'operatorType', 'operatorValue', 'field2'].forEach(field => {
         if (!clickedFields.includes(field)) fieldsToAdd.push(field);
       });
+
       setClickedFields([...clickedFields, ...fieldsToAdd]);
     }
   }, [showRequiredFields]);
 
   useEffect(() => {
     let errors = false;
+
     clickedFields.forEach(clickedField => {
       if (printRequiredFieldError(clickedField) === 'error') {
         errors = true;
       }
     });
+
     if (errors) {
       onExpressionsErrors(expressionId, true);
     } else {
@@ -172,6 +187,7 @@ const ComparisonExpression = ({
 
   const printRequiredFieldError = field => {
     let conditions = false;
+
     if (field === 'union') {
       conditions = clickedFields.includes(field) && position !== 0 && isEmpty(expressionValues[field]);
     } else if (field === 'expressionValue') {
@@ -184,7 +200,9 @@ const ComparisonExpression = ({
 
   const onUpdateExpressionField = (key, value) => {
     checkField(key, value.value);
+
     onDeleteFromClickedFields(key);
+
     if (key === 'field1' && value !== expressionValues.field1) {
       ['operatorType', 'operatorValue', 'field2'].forEach(field => {
         onExpressionFieldUpdate(expressionId, {
@@ -193,6 +211,7 @@ const ComparisonExpression = ({
         });
       });
     }
+
     onExpressionFieldUpdate(expressionId, {
       key,
       value
@@ -201,27 +220,33 @@ const ComparisonExpression = ({
 
   const onAddToClickedFields = field => {
     const cClickedFields = [...clickedFields];
+
     if (!cClickedFields.includes(field)) {
       cClickedFields.push(field);
       setClickedFields(cClickedFields);
     }
   };
+
   const onDeleteFromClickedFields = field => {
     const cClickedFields = [...clickedFields];
+
     if (cClickedFields.includes(field)) {
       cClickedFields.splice(cClickedFields.indexOf(field), 1);
       setClickedFields(cClickedFields);
     }
   };
+
   const checkField = (field, fieldValue) => {
     if (field === 'year') {
       const yearInt = parseInt(fieldValue);
+
       if (yearInt < 1000 || yearInt > 9999) {
         onUpdateExpressionField('expressionValue', 0);
       }
     }
     if (expressionValues.operatorType === 'number' && field === 'operatorValue' && fieldValue !== 'MATCH') {
       const number = Number(fieldValue);
+
       if (!number) {
         onUpdateExpressionField('expressionValue', '');
       }
@@ -231,15 +256,17 @@ const ComparisonExpression = ({
   return (
     <li className={styles.expression}>
       <span className={styles.group}>
+        <FontAwesomeIcon icon={AwesomeIcons('link')} />
         <Checkbox
           disabled={disabledFields.union}
           isChecked={expressionValues.group}
           onChange={e => onExpressionGroup(expressionId, { key: 'group', value: e.checked })}
         />
       </span>
+
       <span
-        onBlur={() => onAddToClickedFields('union')}
-        className={`${styles.union} formField ${printRequiredFieldError('union')}`}>
+        className={`${styles.union} formField ${printRequiredFieldError('union')}`}
+        onBlur={() => onAddToClickedFields('union')}>
         <Dropdown
           disabled={position === 0}
           onChange={e => onUpdateExpressionField('union', e.value)}
@@ -249,13 +276,16 @@ const ComparisonExpression = ({
           value={expressionValues.union}
         />
       </span>
+
       <span
         onBlur={() => onAddToClickedFields('field1')}
         className={`${styles.operatorType} formField ${printRequiredFieldError('field1')}`}>
         <Dropdown
           disabled={disabledFields.field1}
           id={`${componentName}__field1`}
-          onChange={e => onUpdateExpressionField('field1', e.value)}
+          onChange={e => {
+            onUpdateExpressionField('field1', e.value);
+          }}
           optionLabel={'label'}
           options={tableFields}
           placeholder={resourcesContext.messages.selectField}
@@ -289,7 +319,6 @@ const ComparisonExpression = ({
           value={expressionValues.operatorValue}
         />
       </span>
-
       <span
         onBlur={() => onAddToClickedFields('field2')}
         className={`${styles.operatorType} formField ${printRequiredFieldError('field2')}`}>
@@ -304,6 +333,7 @@ const ComparisonExpression = ({
           value={expressionValues.field2}
         />
       </span>
+
       <div className={styles.deleteBtnWrap}>
         <Button
           className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton} p-button-animated-blink`}

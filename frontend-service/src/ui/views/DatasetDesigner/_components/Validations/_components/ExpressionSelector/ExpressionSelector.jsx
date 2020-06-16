@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -9,21 +9,36 @@ import { FieldComparison } from 'ui/views/DatasetDesigner/_components/Validation
 import { IfThenClause } from 'ui/views/DatasetDesigner/_components/Validations/_components/IfThenClause';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 export const ExpressionSelector = ({
-  onExpressionTypeToggle,
   componentName,
   creationFormState,
+  onAddNewExpression,
+  onAddNewExpressionIf,
+  onAddNewExpressionThen,
   onExpressionDelete,
   onExpressionFieldUpdate,
-  onExpressionMarkToGroup,
-  tabsChanges,
-  onAddNewExpression,
   onExpressionGroup,
+  onExpressionIfDelete,
+  onExpressionIfFieldUpdate,
+  onExpressionIfGroup,
+  onExpressionIfMarkToGroup,
+  onExpressionMarkToGroup,
   onExpressionsErrors,
-  onGetFieldType
+  onExpressionThenDelete,
+  onExpressionThenFieldUpdate,
+  onExpressionThenGroup,
+  onExpressionThenMarkToGroup,
+  onExpressionTypeToggle,
+  onGetFieldType,
+  tabsChanges
 }) => {
   const resources = useContext(ResourcesContext);
+  const validationContext = useContext(ValidationContext);
+
+  const [expressionTypeValue, setExpressionTypeValue] = useState('');
+
   const options = [
     { label: resources.messages['fieldComparisonLabel'], value: 'fieldComparison' },
     { label: resources.messages['ifThenLabel'], value: 'ifThenClause' }
@@ -33,8 +48,8 @@ export const ExpressionSelector = ({
   } = creationFormState;
 
   useEffect(() => {
-    onExpressionTypeToggle('fieldComparison');
-  }, []);
+    setExpressionTypeValue(expressionType);
+  }, [expressionType]);
 
   const expressionsTypeView = () => {
     if (!isEmpty(expressionType) && expressionType === 'fieldComparison') {
@@ -56,27 +71,41 @@ export const ExpressionSelector = ({
       );
     }
     if (!isEmpty(expressionType) && expressionType === 'ifThenClause') {
-      return <IfThenClause />;
+      return (
+        <IfThenClause
+          componentName={componentName}
+          creationFormState={creationFormState}
+          onAddNewExpressionIf={onAddNewExpressionIf}
+          onAddNewExpressionThen={onAddNewExpressionThen}
+          onExpressionIfDelete={onExpressionIfDelete}
+          onExpressionThenDelete={onExpressionThenDelete}
+          onExpressionIfFieldUpdate={onExpressionIfFieldUpdate}
+          onExpressionThenFieldUpdate={onExpressionThenFieldUpdate}
+          onExpressionIfGroup={onExpressionIfGroup}
+          onExpressionThenGroup={onExpressionThenGroup}
+          onExpressionIfMarkToGroup={onExpressionIfMarkToGroup}
+          onExpressionThenMarkToGroup={onExpressionThenMarkToGroup}
+          onExpressionsErrors={onExpressionsErrors}
+          tabsChanges={tabsChanges}
+          onGetFieldType={onGetFieldType}
+        />
+      );
     }
     return <></>;
   };
-  // return (
-  //   <>
-  //     <div className={styles.section}>
-  //       <Dropdown
-  //         value={expressionType}
-  //         options={options}
-  //         onChange={e => onExpressionTypeToggle(e.value)}
-  //         placeholder={resources.messages['expressionTypeDropdownPlaceholder']}
-  //         optionLabel="label"
-  //       />
-  //     </div>
-
-  //     <div className={styles.section}>{expressionsTypeView()} </div>
-  //   </>
-  // );
   return (
     <>
+      <div className={styles.section} style={validationContext.ruleEdit ? { display: 'none' } : {}}>
+        <Dropdown
+          value={expressionTypeValue}
+          options={options}
+          onChange={e => onExpressionTypeToggle(e.value)}
+          placeholder={resources.messages['expressionTypeDropdownPlaceholder']}
+          optionLabel="label"
+          style={{ width: '12em' }}
+        />
+      </div>
+
       <div className={styles.section}>{expressionsTypeView()} </div>
     </>
   );

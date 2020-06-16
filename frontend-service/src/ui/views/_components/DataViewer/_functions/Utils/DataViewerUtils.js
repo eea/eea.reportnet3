@@ -79,11 +79,13 @@ const getLevelError = validations => {
 };
 
 const groupOperations = (operation, list) => {
-  return list.reduce((objectsByKeyValue, obj) => {
+  const extensionList = list.reduce((objectsByKeyValue, obj) => {
     const value = obj[operation].toLowerCase();
     objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
     return objectsByKeyValue;
   }, {});
+
+  return { export: extensionList['export'] || [], import: extensionList['import '] || [] };
 };
 
 const groupValidations = (recordData, blockerMessage, errorMessage, warningMessage, infoMessage) => {
@@ -124,7 +126,7 @@ const groupValidations = (recordData, blockerMessage, errorMessage, warningMessa
   const getMessages = validationsType => {
     let messageType = '';
     validationsType.forEach(validation =>
-      validation.message ? (messageType += '- ' + capitalize(validation.message) + '\n') : ''
+      validation.message ? (messageType += '- ' + validation.message + '\n') : ''
     );
     return messageType;
   };

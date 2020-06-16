@@ -3,6 +3,8 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 
 import { withRouter } from 'react-router-dom';
 import { capitalize, isUndefined } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import uniq from 'lodash/uniq';
 
 import styles from './Dataset.module.css';
 
@@ -30,6 +32,7 @@ import { WebFormData } from './_components/WebFormData/WebFormData';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
+import { IntegrationService } from 'core/services/Integration';
 import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
@@ -41,6 +44,7 @@ import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useRep
 
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { isEmptyChildren } from 'formik';
 
 export const Dataset = withRouter(({ match, history }) => {
   const {
@@ -55,6 +59,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataflowName, setDataflowName] = useState('');
+  const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [datasetSchemaName, setDatasetSchemaName] = useState();
   // const [datasetSchemas, setDatasetSchemas] = useState([]);
   const [datasetName, setDatasetName] = useState('');
@@ -68,7 +73,9 @@ export const Dataset = withRouter(({ match, history }) => {
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
+  const [exportExtensionsOperationsList, setExportExtensionsOperationsList] = useState([]);
   const [datasetHasData, setDatasetHasData] = useState(false);
+  const [FMEExportExtensions, setFMEExportExtensions] = useState([]);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isInputSwitchChecked, setIsInputSwitchChecked] = useState(false);
@@ -77,6 +84,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingFile, setLoadingFile] = useState(false);
+  const [metaData, setMetaData] = useState({});
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
   const [tableSchemaNames, setTableSchemaNames] = useState([]);
@@ -84,7 +92,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [tableSchemaId, setTableSchemaId] = useState();
-  const [metaData, setMetaData] = useState({});
 
   let exportMenuRef = useRef();
 
@@ -164,17 +171,12 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [isDataDeleted]);
 
   useEffect(() => {
-    let exportOptions = config.exportTypes;
-    const exportOptionsFilter = exportOptions.filter(type => type.code !== 'csv');
-
-    setExportButtonsList(
-      exportOptionsFilter.map(type => ({
-        label: type.text,
-        icon: config.icons['archive'],
-        command: () => onExportData(type.code)
-      }))
-    );
-  }, [datasetName]);
+    if (isEmpty(FMEExportExtensions)) {
+      setExportButtonsList(reportNetExtensionsItems);
+    } else {
+      setExportButtonsList(reportNetExtensionsItems.concat(FMEExtensionsItems));
+    }
+  }, [datasetName, FMEExportExtensions]);
 
   useEffect(() => {
     if (!isUndefined(exportDatasetData)) {
@@ -201,6 +203,66 @@ export const Dataset = withRouter(({ match, history }) => {
       console.error(error.response);
     }
   }, []);
+
+  useEffect(() => {
+    getDatasetSchemaId();
+  }, []);
+
+  useEffect(() => {
+    getFileExtensions();
+  }, []);
+
+  useEffect(() => {
+    getReportNetandFMEExportExtensions(exportExtensionsOperationsList);
+  }, [exportExtensionsOperationsList]);
+
+  const parseUniqsExportExtensions = exportExtensionsOperationsList => {
+    return exportExtensionsOperationsList.map(uniqExportExtension => ({
+      text: `${uniqExportExtension.toUpperCase()} (.${uniqExportExtension.toLowerCase()})`,
+      code: uniqExportExtension.toLowerCase()
+    }));
+  };
+
+  const getReportNetandFMEExportExtensions = exportExtensionsOperationsList => {
+    const uniqsExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
+    setFMEExportExtensions(parseUniqsExportExtensions(uniqsExportExtensions));
+  };
+
+  const reportNetExtensionsItems = config.exportTypes.map(type => ({
+    label: type.text,
+    icon: config.icons['archive'],
+    command: () => onExportData(type.code)
+  }));
+
+  const FMEExtensionsItems = [
+    {
+      label: 'FME Extensions',
+      items: FMEExportExtensions.map(type => ({
+        label: type.text,
+        icon: config.icons['archive'],
+        command: () => onExportData(type.code)
+      }))
+    }
+  ];
+
+  const getDatasetSchemaId = async () => {
+    try {
+      const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
+      setDatasetSchemaId(metadata.datasetSchemaId);
+    } catch (error) {
+      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
+    }
+  };
+
+  const getFileExtensions = async () => {
+    try {
+      const response = await IntegrationService.allExtensionsOperations(datasetSchemaId);
+      response.filter(integration => integration.operation === 'EXPORT');
+      setExportExtensionsOperationsList(response);
+    } catch (error) {
+      notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
+    }
+  };
 
   const getMetadata = async ids => {
     try {

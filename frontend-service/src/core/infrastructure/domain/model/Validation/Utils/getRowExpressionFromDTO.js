@@ -17,8 +17,8 @@ export const getRowExpressionFromDTO = (expression, allExpressions, parentUnion)
   newExpression.field2 = expression.params[1];
   newExpression.expressions = [];
   newExpression.operatorType = getExpressionOperatorType(expression.operator, 'row');
-  if (isObject(expression.params[0])) {
-    newExpression.operatorType = getExpressionOperatorType(expression.params[0].operator, 'row');
+  if (isObject(expression.params[1])) {
+    newExpression.operatorType = getExpressionOperatorType(expression.params[1].operator, 'row');
     newExpression.field1 = expression.params[0];
     newExpression.field2 = expression.params[1].params[0];
   }

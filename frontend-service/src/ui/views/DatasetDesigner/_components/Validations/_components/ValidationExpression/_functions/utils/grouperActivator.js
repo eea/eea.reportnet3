@@ -1,5 +1,5 @@
 export const grouperActivator = () => {
-  if (ruleProperty.key == 'group') {
+  if (ruleProperty.key === 'group') {
     if (ruleProperty.value.value) {
       groupCandidate.push(ruleId);
     } else {
