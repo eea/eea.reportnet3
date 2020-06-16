@@ -219,12 +219,14 @@ const ComparisonExpression = ({
   };
 
   const onAddToClickedFields = field => {
-    const cClickedFields = [...clickedFields];
+    setTimeout(() => {
+      const cClickedFields = [...clickedFields];
 
-    if (!cClickedFields.includes(field)) {
-      cClickedFields.push(field);
-      setClickedFields(cClickedFields);
-    }
+      if (!cClickedFields.includes(field)) {
+        cClickedFields.push(field);
+        setClickedFields(cClickedFields);
+      }
+    }, 300);
   };
 
   const onDeleteFromClickedFields = field => {
