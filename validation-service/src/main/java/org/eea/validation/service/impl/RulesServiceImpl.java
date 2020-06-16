@@ -536,6 +536,7 @@ public class RulesServiceImpl implements RulesService {
       dataSetMetabaseControllerZuul.updateDatasetForeignRelationship(datasetId, datasetId,
           integritySchema.getOriginDatasetSchemaId().toString(),
           integritySchema.getReferencedDatasetSchemaId().toString());
+      rule.setIntegrityConstraintId(integritySchema.getId());
     }
     validateRule(rule);
     if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
