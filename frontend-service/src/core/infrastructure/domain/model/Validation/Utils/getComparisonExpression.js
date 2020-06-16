@@ -22,18 +22,6 @@ export const getComparisonExpression = expression => {
   if (expression.expressions.length > 1) {
     return getCreationComparisonDTO(expression.expressions);
   } else {
-    if (operatorType === 'LEN') {
-      return {
-        operator: getOperatorEquivalence(operatorType, operatorValue),
-        params: [
-          field1,
-          {
-            operator: getOperatorEquivalence(operatorType),
-            params: [field2]
-          }
-        ]
-      };
-    }
     if (
       (operatorType === 'year' || operatorType === 'month' || operatorType === 'day') &&
       field2Type === 'NUMBER_INTEGER'
