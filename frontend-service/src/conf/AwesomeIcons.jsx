@@ -316,7 +316,7 @@ export const AwesomeIcons = icon => {
       return faCog;
     case 'edit':
       return faPen;
-    case 'manageRoles':
+    case 'manageReporters':
       return faUsersCog;
     case 'userConfig':
       return faUserCog;

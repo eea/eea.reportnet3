@@ -363,22 +363,28 @@ public class RulesControllerImpl implements RulesController {
    * Delete dataset rule and integrity by id field schema.
    *
    * @param fieldSchemaId the field schema id
+   * @param datasetId the dataset id
    */
   @Override
   @DeleteMapping("/private/deleteDatasetRuleAndIntegrityByIdFieldSchema")
-  public void deleteDatasetRuleAndIntegrityByFieldSchemaId(String fieldSchemaId) {
-    rulesService.deleteDatasetRuleAndIntegrityByFieldSchemaId(fieldSchemaId);
+  public void deleteDatasetRuleAndIntegrityByFieldSchemaId(
+      @RequestParam("fieldSchemaId") String fieldSchemaId,
+      @RequestParam("datasetId") Long datasetId) {
+    rulesService.deleteDatasetRuleAndIntegrityByFieldSchemaId(fieldSchemaId, datasetId);
   }
 
   /**
    * Delete dataset rule and integrity by dataset schema id.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
    */
   @Override
   @DeleteMapping("/private/deleteDatasetRuleAndIntegrityByDatasetSchemaId")
-  public void deleteDatasetRuleAndIntegrityByDatasetSchemaId(String datasetSchemaId) {
-    rulesService.deleteDatasetRuleAndIntegrityByFieldSchemaId(datasetSchemaId);
+  public void deleteDatasetRuleAndIntegrityByDatasetSchemaId(
+      @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("datasetId") Long datasetId) {
+    rulesService.deleteDatasetRuleAndIntegrityByDatasetSchemaId(datasetSchemaId, datasetId);
 
   }
 }

@@ -180,7 +180,8 @@ public class KieBaseManager {
             }
         }
         ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
-            rule.getRuleId().toString(), typeValidation, schemasDrools, rule.getWhenCondition(),
+            rule.getRuleId().toString(), typeValidation, schemasDrools,
+            "RuleOperators.setEntity(this) && " + rule.getWhenCondition(),
             rule.getThenCondition().get(0), rule.getThenCondition().get(1), originName));
       });
     }
@@ -215,7 +216,7 @@ public class KieBaseManager {
       case DATASET:
         schemasDrools = SchemasDrools.ID_DATASET_SCHEMA.getValue();
         typeValidation = TypeValidation.DATASET;
-        break;
+        return;
       case TABLE:
         schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
         typeValidation = TypeValidation.TABLE;

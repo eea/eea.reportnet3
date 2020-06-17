@@ -410,4 +410,13 @@ public interface DatasetService {
    * @return the boolean
    */
   Boolean isDatasetReportable(Long idDataset);
+
+  /**
+   * Gets the mimetype.
+   *
+   * @param file the file
+   * @return the mimetype
+   * @throws EEAException the EEA exception
+   */
+  String getMimetype(String file) throws EEAException;
 }

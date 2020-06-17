@@ -65,7 +65,7 @@ export const FieldDesigner = ({
     { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
     { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
     // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
-    { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
+    // { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
     // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
     // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
@@ -609,6 +609,7 @@ export const FieldDesigner = ({
       />
       <Checkbox
         checked={fieldDesignerState.fieldPKValue}
+        className={styles.checkPK}
         disabled={hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)}
         inputId={`${fieldId}_check_pk`}
         label="Default"
@@ -785,10 +786,9 @@ export const FieldDesigner = ({
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton}`}
             icon="horizontalSliders"
+            label={resources.messages['createFieldQC']}
             onClick={() => validationContext.onOpenModalFromField(fieldId, tableSchemaId)}
             style={{ marginLeft: '0.4rem', alignSelf: !fieldDesignerState.isEditing ? 'center' : 'baseline' }}
-            tooltip={resources.messages['createFieldQC']}
-            tooltipOptions={{ position: 'bottom' }}
           />
         ) : null}
         {renderDeleteButton()}

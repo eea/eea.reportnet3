@@ -54,4 +54,11 @@ public interface ForeignRelationsRepository extends CrudRepository<ForeignRelati
   Optional<ForeignRelations> findFirstByIdDatasetOrigin_idAndIdPkAndIdFkOrigin(
       @Param("idDatasetOrigin") Long idDatasetOrigin, @Param("idPk") String idPk,
       @Param("idFkOrigin") String idFkOrigin);
+
+  Optional<ForeignRelations> findFirstByIdDatasetOrigin_idAndIdDatasetDestination_idAndIdPkAndIdFkOrigin(
+      @Param("idDatasetOrigin") Long datasetOriginId,
+      @Param("idDatasetDestination") Long datasetReferencedId,
+      @Param("idPk") String originDatasetSchemaId,
+      @Param("idFkOrigin") String referencedDatasetSchemaId);
+
 }

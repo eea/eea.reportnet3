@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
+
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -32,6 +33,7 @@ import { InfoTable } from './_components/InfoTable';
 import { Map } from 'ui/views/_components/Map';
 
 import { DatasetService } from 'core/services/Dataset';
+import { IntegrationService } from 'core/services/Integration';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -77,12 +79,15 @@ const DataViewer = withRouter(
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
+    const [datasetSchemaId, setDatasetSchemaId] = useState(null);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [editDialogVisible, setEditDialogVisible] = useState(false);
+    const [extensionsOperationsList, setExtensionsOperationsList] = useState({ export: [], import: [] });
     const [fetchedData, setFetchedData] = useState([]);
     const [importDialogVisible, setImportDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
     const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
+    const [isDataUpdated, setIsDataUpdated] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -224,6 +229,32 @@ const DataViewer = withRouter(
     useEffect(() => {
       dispatchRecords({ type: 'IS_RECORD_DELETED', payload: false });
     }, [confirmDeleteVisible]);
+
+    useEffect(() => {
+      getMetadata();
+    }, []);
+
+    useEffect(() => {
+      if (datasetSchemaId) getFileExtensions();
+    }, [datasetSchemaId, isDataUpdated, importDialogVisible]);
+
+    const getMetadata = async () => {
+      try {
+        const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
+        setDatasetSchemaId(metadata.datasetSchemaId);
+      } catch (error) {
+        notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
+      }
+    };
+
+    const getFileExtensions = async () => {
+      try {
+        const response = await IntegrationService.allExtensionsOperations(datasetSchemaId);
+        setExtensionsOperationsList(DataViewerUtils.groupOperations('operation', response));
+      } catch (error) {
+        notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
+      }
+    };
 
     const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations) => {
       const removeSelectAllFromList = levelErrorValidations => {
@@ -468,6 +499,7 @@ const DataViewer = withRouter(
     };
 
     const onEditorSubmitValue = async (cell, value, record) => {
+      console.log('onEditorSubmitValue');
       if (!isEmpty(record)) {
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
         if (
@@ -669,6 +701,8 @@ const DataViewer = withRouter(
       onFetchData(event.sortField, event.sortOrder, 0, records.recordsPerPage, levelErrorTypesWithCorrects);
     };
 
+    const onUpdateData = () => setIsDataUpdated(!isDataUpdated);
+
     const onUpload = async () => {
       setImportDialogVisible(false);
       const {
@@ -804,6 +838,15 @@ const DataViewer = withRouter(
       );
     };
 
+    const renderCustomFileUploadFooter = (
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => setImportDialogVisible(false)}
+      />
+    );
+
     const filteredCount = () => {
       return (
         <span>
@@ -847,13 +890,22 @@ const DataViewer = withRouter(
       }
     };
 
+    const getImportExtensions = [{ datasetSchemaId, fileExtension: 'csv', operation: 'IMPORT' }]
+      .concat(extensionsOperationsList.import)
+      .map(file => `.${file.fileExtension}`)
+      .join(', ');
+
+    const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${getImportExtensions}`;
+
     return (
       <SnapshotContext.Provider>
         <ActionsToolbar
           colsSchema={colsSchema}
           dataflowId={dataflowId}
           datasetId={datasetId}
+          exportExtensionsOperationsList={extensionsOperationsList.export}
           hasWritePermissions={hasWritePermissions}
+          fileExtensions={extensionsOperationsList.export}
           isDataCollection={isDataCollection}
           isFilterValidationsActive={isFilterValidationsActive}
           isTableDeleted={isTableDeleted}
@@ -863,6 +915,7 @@ const DataViewer = withRouter(
           levelErrorTypesWithCorrects={levelErrorTypesWithCorrects}
           onRefresh={onRefresh}
           onSetVisible={onSetVisible}
+          onUpdateData={onUpdateData}
           originalColumns={originalColumns}
           records={records}
           setColumns={setColumns}
@@ -974,15 +1027,19 @@ const DataViewer = withRouter(
           <Dialog
             className={styles.Dialog}
             dismissableMask={false}
+            footer={renderCustomFileUploadFooter}
             header={`${resources.messages['uploadDataset']}${tableName}`}
             onHide={() => setImportDialogVisible(false)}
             visible={importDialogVisible}>
             <CustomFileUpload
+              accept={getImportExtensions}
               chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv|doc)$/"
               className={styles.FileUpload}
               fileLimit={1}
+              infoTooltip={infoExtensionsTooltip}
               mode="advanced"
               multiple={false}
+              invalidExtensionMessage={resources.messages['invalidExtensionFile']}
               name="file"
               onUpload={onUpload}
               url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.loadDataTable, {

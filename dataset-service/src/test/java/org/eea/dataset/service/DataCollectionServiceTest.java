@@ -23,11 +23,13 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController.Represent
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.junit.Assert;
@@ -111,6 +113,10 @@ public class DataCollectionServiceTest {
   /** The foreign relations repository. */
   @Mock
   private ForeignRelationsRepository foreignRelationsRepository;
+
+  /** The rules controller zuul. */
+  @Mock
+  private RulesControllerZuul rulesControllerZuul;
 
   /**
    * Inits the mocks.
@@ -299,6 +305,8 @@ public class DataCollectionServiceTest {
     Mockito.doNothing().when(resourceManagementControllerZuul).createResources(Mockito.any());
     Mockito.doNothing().when(userManagementControllerZuul)
         .addContributorsToResources(Mockito.any());
+    Mockito.when(rulesControllerZuul.findRuleSchemaByDatasetId(Mockito.any()))
+        .thenReturn(new RulesSchemaVO());
     Mockito.doNothing().when(recordStoreControllerZull).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean());
     Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(Mockito.any()))

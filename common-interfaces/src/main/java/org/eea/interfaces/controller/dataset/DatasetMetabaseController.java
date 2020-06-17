@@ -8,6 +8,7 @@ import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -132,9 +133,57 @@ public interface DatasetMetabaseController {
       @RequestParam(value = "datasetOriginSchemaId") String datasetOriginSchemaId,
       @RequestParam(value = "datasetReferencedSchemaId") String datasetReferencedSchemaId);
 
+  /**
+   * Creates the dataset foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
   @PostMapping("/private/createForeignRelationship")
   void createDatasetForeignRelationship(@RequestParam("datasetOriginId") final long datasetOriginId,
       @RequestParam("datasetReferencedId") final long datasetReferencedId,
       @RequestParam("originDatasetSchemaId") final String originDatasetSchemaId,
       @RequestParam("referencedDatasetSchemaId") final String referencedDatasetSchemaId);
+
+  /**
+   * Update dataset foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
+  @PutMapping("/private/updateForeignRelationship")
+  void updateDatasetForeignRelationship(@RequestParam("datasetOriginId") final long datasetOriginId,
+      @RequestParam("datasetReferencedId") final long datasetReferencedId,
+      @RequestParam("originDatasetSchemaId") final String originDatasetSchemaId,
+      @RequestParam("referencedDatasetSchemaId") final String referencedDatasetSchemaId);
+
+  /**
+   * Gets the dataset id by dataset schema id and data provider id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the dataset id by dataset schema id and data provider id
+   */
+  @GetMapping("/private/getDatasetId/datasetSchema/{datasetSchemaId}")
+  Long getDesignDatasetIdByDatasetSchemaId(@PathVariable("datasetSchemaId") String datasetSchemaId);
+
+  /**
+   * Delete foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
+  @DeleteMapping("/private/deleteForeignRelationship")
+  void deleteForeignRelationship(@RequestParam("datasetOriginId") Long datasetOriginId,
+      @RequestParam(value = "datasetReferencedId", required = false) Long datasetReferencedId,
+      @RequestParam("originDatasetSchemaId") String originDatasetSchemaId,
+      @RequestParam("referencedDatasetSchemaId") String referencedDatasetSchemaId);
+
+
+
 }

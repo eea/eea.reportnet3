@@ -19,10 +19,12 @@ import { IntegrationService } from 'core/services/Integration';
 import { manageIntegrationsReducer } from './_functions/Reducers/manageIntegrationsReducer';
 
 import { useInputTextFocus } from 'ui/views/_functions/Hooks/useInputTextFocus';
+import { useLockBodyScroll } from 'ui/views/_functions/Hooks/useLockBodyScroll';
 
 import { ManageIntegrationsUtils } from './_functions/Utils/ManageIntegrationsUtils';
+import { TextUtils } from 'ui/views/_functions/Utils';
 
-export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, updatedData }) => {
+export const ManageIntegrations = ({ dataflowId, designerState, integrationsList, manageDialogs, updatedData }) => {
   const { datasetSchemaId, isIntegrationManageDialogVisible } = designerState;
   const componentName = 'integration';
 
@@ -39,6 +41,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
     dataflowId,
     datasetSchemaId,
     description: '',
+    displayErrors: false,
     editorView: { isEditing: false, id: null },
     externalParameters: [],
     fileExtension: '',
@@ -47,29 +50,41 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
     name: '',
     operation: '',
     parameterKey: '',
+    parametersErrors: { content: '', header: '', isDialogVisible: false, option: '' },
     parameterValue: '',
     processName: '',
     tool: 'FME'
   });
 
-  const { editorView, externalParameters, parameterKey, parameterValue } = manageIntegrationsState;
-  const { isDuplicatedIntegration, isDuplicatedParameter, isFormEmpty, isParameterEditing } = ManageIntegrationsUtils;
+  const { editorView, externalParameters, parameterKey, parameterValue, parametersErrors } = manageIntegrationsState;
+  const {
+    isDuplicatedIntegration,
+    isDuplicatedIntegrationName,
+    isDuplicatedParameter,
+    isFormEmpty,
+    isParameterEditing,
+    printError
+  } = ManageIntegrationsUtils;
 
   const isEditingParameter = isParameterEditing(externalParameters);
   const isEmptyForm = isFormEmpty(manageIntegrationsState);
-  const isKeyDuplicated = isDuplicatedParameter(editorView.id, externalParameters, parameterKey);
   const isIntegrationDuplicated = isDuplicatedIntegration(manageIntegrationsState, updatedData);
+  const isIntegrationNameDuplicated = isDuplicatedIntegrationName(
+    manageIntegrationsState.name,
+    integrationsList,
+    manageIntegrationsState.id
+  );
+  const isKeyDuplicated = isDuplicatedParameter(editorView.id, externalParameters, parameterKey);
 
   useEffect(() => {
     if (!isEmpty(updatedData)) getUpdatedData();
   }, [updatedData]);
 
-  useEffect(() => {
-    if (parameterRef.current) parameterRef.current.element.focus();
-  }, [parameterRef.current]);
-
   useInputTextFocus(editorView.isEditing, editParameterRef);
+  useInputTextFocus(isEditingParameter, parameterRef);
   useInputTextFocus(isIntegrationManageDialogVisible, integrationNameRef);
+
+  useLockBodyScroll(parametersErrors.isDialogVisible);
 
   const getUpdatedData = () => manageIntegrationsDispatch({ type: 'GET_UPDATED_DATA', payload: updatedData });
 
@@ -81,9 +96,11 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   };
 
   const onBlurParameter = (id, option, event) => {
+    if (isEmpty(event.target.value.trim())) onToggleDialogError('empty', option, true);
+
     !isDuplicatedParameter(id, externalParameters, event.target.value)
       ? onUpdateSingleParameter(id, option, event)
-      : parameterRef.current.element.focus();
+      : onToggleDialogError('duplicated', option, true);
   };
 
   const onChangeParameter = (value, option, id) => {
@@ -112,9 +129,13 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   };
 
   const onEditKeyDown = (event, id, option) => {
-    if (event.key === 'Enter' && !isDuplicatedParameter(id, externalParameters, event.target.value)) {
-      onUpdateSingleParameter(id, option, event);
-    }
+    const duplicated = isDuplicatedParameter(id, externalParameters, event.target.value);
+
+    if (event.key === 'Enter' && isEmpty(event.target.value.trim())) onToggleDialogError('empty', option, true);
+
+    if (event.key === 'Enter' && duplicated) onToggleDialogError('duplicated', option, true);
+
+    if (event.key === 'Enter' && !duplicated) onUpdateSingleParameter(id, option, event);
 
     if (event.key === 'Escape') {
       event.preventDefault();
@@ -142,12 +163,33 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   };
 
   const onSaveKeyDown = event => {
-    if (event.key === 'Enter' && !isEmpty(parameterKey) && !isEmpty(parameterValue) && !isKeyDuplicated) {
+    if (event.key === 'Enter' && !isEmpty(parameterKey.trim()) && !isEmpty(parameterValue.trim()) && !isKeyDuplicated) {
       onSaveParameter();
     }
   };
 
   const onSaveParameter = () => (editorView.isEditing ? onUpdateParameter() : onAddParameter());
+
+  const onShowErrors = () => manageIntegrationsDispatch({ type: 'SHOW_ERRORS', payload: { value: true } });
+
+  const onToggleDialogError = (errorType, option, value) => {
+    const dialogContent = {
+      duplicated: resources.messages['duplicatedParameterKeyErrorContent'],
+      empty: resources.messages['emptyParameterErrorContent']
+    };
+
+    const dialogHeader = {
+      duplicated: resources.messages['duplicatedParameterKeyErrorHeader'],
+      empty: resources.messages['emptyParameterErrorHeader']
+    };
+
+    if (parameterRef.current) parameterRef.current.element.focus();
+
+    manageIntegrationsDispatch({
+      type: 'TOGGLE_ERROR_DIALOG',
+      payload: { content: dialogContent[errorType], header: dialogHeader[errorType], option, value }
+    });
+  };
 
   const onToggleEditorView = (id, option) => {
     if (!editorView.isEditing) {
@@ -159,16 +201,14 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   };
 
   const onUpdateIntegration = async () => {
-    if (!isIntegrationDuplicated) {
-      try {
-        const response = await IntegrationService.update(manageIntegrationsState);
-        if (response.status >= 200 && response.status <= 299) {
-          manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
-        }
-      } catch (error) {
-        notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' });
+    try {
+      const response = await IntegrationService.update(manageIntegrationsState);
+      if (response.status >= 200 && response.status <= 299) {
+        manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
       }
-    } else manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
+    } catch (error) {
+      notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' });
+    }
   };
 
   const onUpdateParameter = () => {
@@ -181,8 +221,10 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   };
 
   const onUpdateSingleParameter = (id, option, event) => {
-    ManageIntegrationsUtils.onUpdateData(id, option, externalParameters, event.target.value);
-    onToggleEditorView(id, [option]);
+    if (!isEmpty(event.target.value.trim())) {
+      ManageIntegrationsUtils.onUpdateData(id, option, externalParameters, event.target.value);
+      onToggleEditorView(id, [option]);
+    }
   };
 
   const renderDialogFooter = (
@@ -190,10 +232,13 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
       <span data-tip data-for="integrationTooltip">
         <Button
           className="p-button-rounded p-button-animated-blink"
-          disabled={isEmptyForm}
+          disabled={isIntegrationNameDuplicated}
           icon="check"
           label={!isEmpty(updatedData) ? resources.messages['update'] : resources.messages['create']}
-          onClick={() => (!isEmpty(updatedData) ? onUpdateIntegration() : onCreateIntegration())}
+          onClick={() => {
+            if (isEmptyForm) onShowErrors();
+            else !isEmpty(updatedData) ? onUpdateIntegration() : onCreateIntegration();
+          }}
         />
       </span>
       <Button
@@ -203,9 +248,11 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
         onClick={() => manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true)}
       />
 
-      {isEmptyForm && (
+      {(isEmptyForm || isIntegrationNameDuplicated) && (
         <ReactTooltip effect="solid" id="integrationTooltip" place="top">
-          {resources.messages['fcSubmitButtonDisabled']}
+          {isIntegrationNameDuplicated
+            ? resources.messages['duplicatedIntegrationName']
+            : resources.messages['fcSubmitButtonDisabled']}
         </ReactTooltip>
       )}
     </Fragment>
@@ -229,7 +276,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   );
 
   const renderDropdownLayout = option => (
-    <div className={`${styles.field} ${styles[option]} formField`}>
+    <div className={`${styles.field} ${styles[option]} formField ${printError(option, manageIntegrationsState)}`}>
       <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
       <Dropdown
         appendTo={document.body}
@@ -240,7 +287,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
           { label: 'IMPORT', value: 'IMPORT' },
           { label: 'EXPORT', value: 'EXPORT' }
         ]}
-        placeholder={resources.messages[option]}
+        placeholder={resources.messages[`${option}PlaceHolder`]}
         value={manageIntegrationsState[option]}
       />
     </div>
@@ -258,9 +305,15 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
     );
   };
 
+  const renderErrorDialogFooter = (
+    <Button icon="check" label={resources.messages['ok']} onClick={() => onToggleDialogError('', '', false)} />
+  );
+
   const renderInputLayout = (options = []) => {
     return options.map((option, index) => (
-      <div className={`${styles.field} ${styles[option]} formField`} key={index}>
+      <div
+        className={`${styles.field} ${styles[option]} formField ${printError(option, manageIntegrationsState)}`}
+        key={index}>
         <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
         <InputText
           id={`${componentName}__${option}`}
@@ -313,44 +366,58 @@ export const ManageIntegrations = ({ dataflowId, designerState, manageDialogs, u
   };
 
   return renderDialogLayout(
-    <div className={styles.content}>
-      <div className={styles.group}>{renderInputLayout(['name', 'description'])}</div>
-      <div className={styles.group}>
-        {renderInputLayout(['processName'])}
-        {renderDropdownLayout('operation')}
-        {renderInputLayout(['fileExtension'])}
-      </div>
-      <div className={styles.group}>
-        {renderInputLayout(['parameterKey', 'parameterValue'])}
-        <span className={styles.buttonWrapper}>
-          <span data-tip data-for="addParameterTooltip">
-            <Button
-              className="p-button-rounded p-button-animated-blink"
-              disabled={isEmpty(parameterKey) || isEmpty(parameterValue) || isKeyDuplicated}
-              icon="add"
-              label={editorView.isEditing ? resources.messages['update'] : resources.messages['add']}
-              onClick={() => onSaveParameter()}
-            />
-          </span>
-          {editorView.isEditing && (
-            <Button
-              className="p-button-secondary p-button-rounded p-button-animated-blink"
-              icon={'cancel'}
-              label={resources.messages['cancel']}
-              onClick={() => onResetParameterInput()}
-            />
-          )}
+    <Fragment>
+      <div className={styles.content}>
+        <div className={styles.group}>{renderInputLayout(['name', 'description'])}</div>
+        <div className={styles.group}>
+          {renderInputLayout(['processName'])}
+          {renderDropdownLayout('operation')}
+          {renderInputLayout(['fileExtension'])}
+        </div>
+        <div className={styles.group}>
+          {renderInputLayout(['parameterKey', 'parameterValue'])}
+          <span className={styles.buttonWrapper}>
+            <span data-tip data-for="addParameterTooltip">
+              <Button
+                className="p-button-rounded p-button-animated-blink"
+                disabled={isEmpty(parameterKey.trim()) || isEmpty(parameterValue.trim()) || isKeyDuplicated}
+                icon="add"
+                label={editorView.isEditing ? resources.messages['update'] : resources.messages['add']}
+                onClick={() => onSaveParameter()}
+              />
+            </span>
+            {editorView.isEditing && (
+              <Button
+                className="p-button-secondary p-button-rounded p-button-animated-blink"
+                icon={'cancel'}
+                label={resources.messages['cancel']}
+                onClick={() => onResetParameterInput()}
+              />
+            )}
 
-          {isKeyDuplicated && (
-            <ReactTooltip effect="solid" id="addParameterTooltip" place="top">
-              {resources.messages['parameterAlreadyExists']}
-            </ReactTooltip>
-          )}
-        </span>
+            {isKeyDuplicated && (
+              <ReactTooltip effect="solid" id="addParameterTooltip" place="top">
+                {resources.messages['parameterAlreadyExists']}
+              </ReactTooltip>
+            )}
+          </span>
+        </div>
+        <div className={styles.group}>
+          <span className={styles.parameters}>{renderParametersLayout()}</span>
+        </div>
       </div>
-      <div className={styles.group}>
-        <span className={styles.parameters}>{renderParametersLayout()}</span>
-      </div>
-    </div>
+
+      <Dialog
+        footer={renderErrorDialogFooter}
+        header={parametersErrors.header}
+        onHide={() => onToggleDialogError('', '', false)}
+        visible={parametersErrors.isDialogVisible}>
+        <span
+          dangerouslySetInnerHTML={{
+            __html: TextUtils.parseText(parametersErrors.content, { option: parametersErrors.option })
+          }}
+        />
+      </Dialog>
+    </Fragment>
   );
 };

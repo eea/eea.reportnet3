@@ -19,5 +19,6 @@ public class ValidationProcessVO {
   private Deque<EEAEventVO> pendingValidations;
   private KieBase kieBase;
   private boolean coordinatorProcess;
+  private String requestingUser;
 
 }
