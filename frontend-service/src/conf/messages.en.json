@@ -549,7 +549,7 @@
     "validateDatasetConfirm": "This action will take some minutes and it will run in background. Do you want to continue with the validation?",
     "validationDashboards": "Validation dashboards",
     "validationFilter": "Validation filter",
-    "validationFinishedEvent": "Validation finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "validationFinishedEvent": "Validation finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Click <strong>Refresh</strong> to view the data.",
     "validations": "Validations",
     "validationServiceGetAllError": "Error loading QC's",
     "value": "Value",
