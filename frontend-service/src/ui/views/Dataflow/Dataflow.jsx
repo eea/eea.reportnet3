@@ -193,14 +193,6 @@ const Dataflow = withRouter(({ history, match }) => {
       title: 'edit'
     };
 
-    const manageRolesBtn = {
-      className: 'dataflow-manage-roles-help-step',
-      icon: 'manageRoles',
-      label: 'manageRoles',
-      onClick: () => manageDialogs('isManageRolesDialogVisible', true),
-      title: 'manageRoles'
-    };
-
     const propertiesBtn = {
       className: 'dataflow-properties-provider-help-step',
       icon: 'infoCircle',
@@ -214,9 +206,9 @@ const Dataflow = withRouter(({ history, match }) => {
     }
 
     if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']) {
-      leftSideBarContext.addModels([propertiesBtn, editBtn, manageRolesBtn, apiKeyBtn]);
+      leftSideBarContext.addModels([propertiesBtn, editBtn, apiKeyBtn]);
     } else if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']) {
-      leftSideBarContext.addModels([propertiesBtn, manageRolesBtn]);
+      leftSideBarContext.addModels([propertiesBtn]);
     } else {
       if (!dataflowState.isCustodian) {
         dataflowState.data.representatives.length === 1 && isUndefined(representativeId)
@@ -431,6 +423,8 @@ const Dataflow = withRouter(({ history, match }) => {
     setUpdatedDatasetSchema(updatedTitles);
   };
 
+  const onShowManageReportersDialog = () => manageDialogs('isManageRolesDialogVisible', true);
+
   const onShowSnapshotDialog = async datasetId => {
     dataflowDispatch({ type: 'SET_DATASET_ID_TO_SNAPSHOT_PROPS', payload: { id: datasetId } });
     manageDialogs('isSnapshotDialogVisible', true);
@@ -462,6 +456,7 @@ const Dataflow = withRouter(({ history, match }) => {
             handleRedirect={handleRedirect}
             onCleanUpReceipt={onCleanUpReceipt}
             onSaveName={onSaveName}
+            onShowManageReportersDialog={onShowManageReportersDialog}
             onShowSnapshotDialog={onShowSnapshotDialog}
             onUpdateData={setIsDataUpdated}
             setIsReceiptLoading={setIsReceiptLoading}
