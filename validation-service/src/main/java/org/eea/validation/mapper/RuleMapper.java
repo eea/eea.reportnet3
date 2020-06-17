@@ -1,6 +1,7 @@
 package org.eea.validation.mapper;
 
 import org.bson.types.ObjectId;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleExpressionVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.mapper.IMapper;
@@ -48,11 +49,8 @@ public interface RuleMapper extends IMapper<Rule, RuleVO> {
   default void afterMapping(Rule rule, @MappingTarget RuleVO ruleVO) {
     ruleVO.setRuleId(rule.getRuleId().toString());
     ruleVO.setReferenceId(rule.getReferenceId().toString());
-    if (!rule.isAutomatic()) {
+    if (!rule.isAutomatic() && !EntityTypeEnum.DATASET.equals(rule.getType())) {
       ruleVO.setWhenCondition(new RuleExpressionVO(rule.getWhenCondition()));
-    }
-    if ((rule.getIntegrityConstraintId() != null)) {
-
     }
   }
 }

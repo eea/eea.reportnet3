@@ -68,7 +68,7 @@ public class RuleOperators {
     if (argIf) {
       return argThen;
     } else {
-      return false;
+      return true;
     }
   }
 
