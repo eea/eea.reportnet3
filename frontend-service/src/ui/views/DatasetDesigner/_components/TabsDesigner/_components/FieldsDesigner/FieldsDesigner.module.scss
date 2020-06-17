@@ -61,6 +61,10 @@
       margin-right: 0.9rem !important;
       margin-top: -1rem !important;
       padding: 0rem !important;
+
+      &:focus {
+        box-shadow: none !important;
+      }
     }
   }
 }

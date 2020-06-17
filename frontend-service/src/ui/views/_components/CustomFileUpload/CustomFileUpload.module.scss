@@ -110,6 +110,10 @@
     margin-left: -0.48em !important;
     margin-top: -0.5em !important;
   }
+
+  &:focus {
+    box-shadow: none !important;
+  }
 }
 
 .invalidExtensionMsg {
