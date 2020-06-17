@@ -377,7 +377,10 @@ export const BigButtonList = ({
               })
             }}></p>
         ) : (
-          <p>{`${resources.messages['chooseExpirationDate']}: `}</p>
+          <p>
+            <div>{`${resources.messages['chooseExpirationDate']} `}</div>
+            <div>{`${resources.messages['chooseExpirationDateSecond']} `}</div>
+          </p>
         )}
         <Calendar
           className={styles.calendar}
@@ -395,7 +398,6 @@ export const BigButtonList = ({
 
       {isConfirmCollectionDialog && (
         <ConfirmDialog
-          classNameConfirm={'p-button-danger'}
           header={resources.messages['createDataCollection']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
