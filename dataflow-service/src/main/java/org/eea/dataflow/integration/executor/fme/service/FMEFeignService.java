@@ -1,4 +1,4 @@
-package org.eea.dataflow.integration.executor.fme.repository;
+package org.eea.dataflow.integration.executor.fme.service;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,15 +12,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-
-
-// @FeignClient(name = "FMEInterface", url = "${integration.fme.url}")
-@Component
-public class FMEFeignRepository {
+@Service
+public class FMEFeignService {
 
   // fme.discomap.eea.europa.eu
   @Value("${integration.fme.host}")

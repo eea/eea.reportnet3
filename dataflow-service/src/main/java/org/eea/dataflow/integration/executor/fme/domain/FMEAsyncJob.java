@@ -5,18 +5,24 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The Class FMEAsyncJob.
+ */
 @Getter
 @Setter
 @ToString
 public class FMEAsyncJob {
 
-  // Notification Manager directives
+  /** The nm directives. */
   private NMDirectives nmDirectives;
-  // Transformation Manager directives
+
+  /** The tm directives. */
   private TMDirectives tmDirectives;
-  // Workspace published parameters defined for this job
+
+  /** The published parameters. */
   private List<PublishedParameter> publishedParameters;
 
+  /** The workspace path. */
   private String workspacePath;
 
 }

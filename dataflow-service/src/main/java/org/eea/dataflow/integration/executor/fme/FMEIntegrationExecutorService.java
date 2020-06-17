@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.PublishedParameter;
-import org.eea.dataflow.integration.executor.fme.repository.FMEFeignRepository;
+import org.eea.dataflow.integration.executor.fme.service.FMEFeignService;
 import org.eea.dataflow.integration.executor.service.AbstractIntegrationExecutorService;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -22,34 +22,55 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Class FMEIntegrationExecutorService.
+ */
 @Component
 public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorService {
 
+  /** The fme feign service. */
   @Autowired
-  private FMEFeignRepository fmeFeignRepository;
+  private FMEFeignService fmeFeignService;
 
+  /** The data set metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
+  /** The data set controller zuul. */
   @Autowired
   private DataSetControllerZuul dataSetControllerZuul;
 
+  /** The user management controller. */
   @Autowired
   private UserManagementController userManagementController;
 
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(FMEIntegrationExecutorService.class);
 
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR =
       LoggerFactory.getLogger(FMEIntegrationExecutorService.class);
 
 
 
+  /**
+   * Gets the executor type.
+   *
+   * @return the executor type
+   */
   @Override
   public IntegrationToolTypeEnum getExecutorType() {
     return IntegrationToolTypeEnum.FME;
   }
 
+  /**
+   * Execute.
+   *
+   * @param integrationOperationTypeEnum the integration operation type enum
+   * @param executionParams the execution params
+   * @return the execution result VO
+   */
   @Override
   @Async
   public ExecutionResultVO execute(IntegrationOperationTypeEnum integrationOperationTypeEnum,
@@ -134,6 +155,13 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     }
   }
 
+  /**
+   * Save parameter.
+   *
+   * @param name the name
+   * @param value the value
+   * @return the published parameter
+   */
   private PublishedParameter saveParameter(String name, Object value) {
     PublishedParameter parameter = new PublishedParameter();
     parameter.setName(name);
@@ -143,19 +171,27 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
 
 
+  /**
+   * Execute submit.
+   *
+   * @param repository the repository
+   * @param workspace the workspace
+   * @param fmeAsyncJob the fme async job
+   * @return the execution result VO
+   */
   private ExecutionResultVO executeSubmit(String repository, String workspace,
       FMEAsyncJob fmeAsyncJob) {
     Map<String, Object> executionResultParams = new HashMap<>();
     ExecutionResultVO executionResultVO = new ExecutionResultVO();
 
-    Integer a = null;
+    Integer executionResult = null;
     try {
-      a = fmeFeignRepository.submitAsyncJob(repository, workspace, fmeAsyncJob);
+      executionResult = fmeFeignService.submitAsyncJob(repository, workspace, fmeAsyncJob);
     } catch (Exception e) {
       e.getMessage();
       e.printStackTrace();
     }
-    executionResultParams.put("id", a);
+    executionResultParams.put("id", executionResult);
     executionResultVO.setExecutionResultParams(executionResultParams);
 
     return executionResultVO;
