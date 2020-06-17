@@ -78,12 +78,12 @@ export const TableRelationsSelector = ({
       <div className={styles.section}>
         <div className={styles.fieldsGroup}>
           <div className={styles.field}>
-            <label htmlFor="dataset">{resources.messages.datasetSchema}</label>
+            <label htmlFor="dataset">{resources.messages.targetDatasetSchema}</label>
             <Dropdown
               id={`${componentName}__dataset`}
               disabled={relations.links.length > 1}
-              filterPlaceholder={resources.messages.datasetSchema}
-              placeholder={resources.messages.datasetSchema}
+              filterPlaceholder={resources.messages.targetDatasetSchema}
+              placeholder={resources.messages.targetDatasetSchema}
               optionLabel="label"
               options={creationFormState.datasetSchemas}
               onChange={e => onDatasetSchemaChange(e.target.value)}
@@ -91,12 +91,12 @@ export const TableRelationsSelector = ({
             />
           </div>
           <div className={styles.field}>
-            <label htmlFor="table">{resources.messages.tableSchemaName}</label>
+            <label htmlFor="table">{resources.messages.targetTable}</label>
             <Dropdown
               id={`${componentName}__table`}
               disabled={relations.links.length > 1}
-              filterPlaceholder={resources.messages.tableSchemaName}
-              placeholder={resources.messages.tableSchemaName}
+              filterPlaceholder={resources.messages.targetTable}
+              placeholder={resources.messages.targetTable}
               optionLabel="label"
               options={
                 creationFormState.candidateRule.relations.referencedDatasetSchema.code ===
