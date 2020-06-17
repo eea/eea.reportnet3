@@ -193,7 +193,8 @@ public class ValidationHelper implements DisposableBean {
    */
   public void initializeProcess(String processId, boolean isCoordinator) {
     ValidationProcessVO process =
-        new ValidationProcessVO(0, new ConcurrentLinkedDeque<>(), null, isCoordinator);
+        new ValidationProcessVO(0, new ConcurrentLinkedDeque<>(), null, isCoordinator,
+            (String) ThreadPropertiesManager.getVariable("user"));
     synchronized (processesMap) {
       processesMap.put(processId, process);
     }
@@ -480,9 +481,12 @@ public class ValidationHelper implements DisposableBean {
       lockService.removeLockByCriteria(criteria2);
 
       // after last dataset validations have been saved, an event is sent to notify it
+      String notificationUser = processesMap.get(processId).getRequestingUser();
       Map<String, Object> value = new HashMap<>();
       value.put(LiteralConstants.DATASET_ID, datasetId);
       value.put("uuid", processId);
+      //Setting as user the requesting one as it is being taken from ThreadPropertiesManager and validation threads inheritances from it. This is a side effect.
+      value.put("user", notificationUser);
       Integer pendingValidations = processesMap.get(processId).getPendingValidations().size();
       if (pendingValidations > 0) {
         // this is just a warning messages to show an abnormal situation finishing validation
@@ -495,7 +499,7 @@ public class ValidationHelper implements DisposableBean {
 
       kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+          NotificationVO.builder().user(notificationUser)
               .datasetId(datasetId).build());
       isFinished = true;
     }
