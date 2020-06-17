@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import javax.annotation.PostConstruct;
+import lombok.AllArgsConstructor;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.ConsumerGroupVO;
@@ -294,8 +295,9 @@ public class ValidationHelper implements DisposableBean {
       Long datasetId,
       Validator validator, EventType notificationEventType)
       throws EEAException {
-    ValidationTask validationTask = this.buildValidationTask(eeaEventVO, processId, datasetId,
-        validator, notificationEventType);
+    ValidationTask validationTask = new ValidationTask(eeaEventVO, validator, datasetId,
+        this.getKieBase(processId, datasetId), processId, notificationEventType);
+
     //first every task is always queued up to ensure the order
 
     if (((ThreadPoolExecutor) validationExecutorService).getActiveCount() == maxRunningTasks) {
@@ -308,19 +310,6 @@ public class ValidationHelper implements DisposableBean {
 
   }
 
-
-  private ValidationTask buildValidationTask(EEAEventVO eeaEventVO, String processId,
-      Long datasetId,
-      Validator validator, EventType notificationEventType) throws EEAException {
-    ValidationTask validationTask = new ValidationTask();
-    validationTask.datasetId = datasetId;
-    validationTask.kieBase = this.getKieBase(processId, datasetId);
-    validationTask.validator = validator;
-    validationTask.processId = processId;
-    validationTask.eeaEventVO = eeaEventVO;
-    validationTask.notificationEventType = notificationEventType;
-    return validationTask;
-  }
 
   private void startProcess(final String processId) {
     if (checkStartedProcess(processId)) {
@@ -543,6 +532,7 @@ public class ValidationHelper implements DisposableBean {
   }
 
 
+  @AllArgsConstructor
   private class ValidationTask {
 
     /**
