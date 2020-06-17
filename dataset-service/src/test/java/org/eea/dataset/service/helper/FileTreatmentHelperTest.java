@@ -12,12 +12,15 @@ import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.notification.event.NotificableEventHandler;
@@ -80,6 +83,15 @@ public class FileTreatmentHelperTest {
   @Mock
   private RepresentativeControllerZuul representativeControllerZuul;
 
+  @Mock
+  private DatasetSchemaService datasetSchemaService;
+
+  @Mock
+  private IntegrationControllerZuul integrationController;
+
+  List<IntegrationVO> integrations;
+
+  IntegrationVO integrationVO;
 
   /**
    * Inits the mocks.
@@ -87,6 +99,9 @@ public class FileTreatmentHelperTest {
   @Before
   public void initMocks() {
     ThreadPropertiesManager.setVariable("name", "user");
+    integrationVO = new IntegrationVO();
+    integrations = new ArrayList<>();
+    integrations.add(integrationVO);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -120,6 +135,10 @@ public class FileTreatmentHelperTest {
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
+    Mockito.when(datasetService.getMimetype(Mockito.any())).thenReturn("xls");
+    Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("123456");
+    Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
+        .thenReturn(integrations);
     fileTreatmentHelper.executeFileProcess(1L, "fileName", new ByteArrayInputStream(new byte[0]),
         "5d4abe555b1c1e0001477410");
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
@@ -154,6 +173,10 @@ public class FileTreatmentHelperTest {
     when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(new DataProviderVO());
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
+    Mockito.when(datasetService.getMimetype(Mockito.any())).thenReturn("xls");
+    Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("123456");
+    Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
+        .thenReturn(integrations);
     fileTreatmentHelper.executeFileProcess(1L, "fileName", new ByteArrayInputStream(new byte[0]),
         "5d4abe555b1c1e0001477410");
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
@@ -171,6 +194,10 @@ public class FileTreatmentHelperTest {
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
+    Mockito.when(datasetService.getMimetype(Mockito.any())).thenReturn("xls");
+    Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("123456");
+    Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
+        .thenReturn(integrations);
     fileTreatmentHelper.executeFileProcess(1L, "fileName", new ByteArrayInputStream(new byte[0]),
         "5d4abe555b1c1e0001477410");
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),

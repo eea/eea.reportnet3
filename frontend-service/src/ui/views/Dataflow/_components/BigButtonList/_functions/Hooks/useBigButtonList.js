@@ -222,7 +222,8 @@ const useBigButtonList = ({
       helpClassName: 'dataflow-datacollection-help-step',
       handleRedirect: isActiveButton ? () => onShowUpdateDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
-      visibility: dataflowState.status === 'DRAFT' && dataflowState.hasRepresentativesWithoutDatasets
+      visibility:
+        dataflowState.isCustodian && dataflowState.status === 'DRAFT' && dataflowState.hasRepresentativesWithoutDatasets
     }
   ];
 

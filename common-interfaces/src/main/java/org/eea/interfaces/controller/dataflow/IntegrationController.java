@@ -1,6 +1,9 @@
 package org.eea.interfaces.controller.dataflow;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
+import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -9,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 /**
@@ -72,8 +76,25 @@ public interface IntegrationController {
    * @param integrationVO the integration VO
    * @return the list
    */
+  @PutMapping(value = "/listExtensionsOperations", produces = MediaType.APPLICATION_JSON_VALUE)
   List<IntegrationVO> findExtensionsAndOperations(IntegrationVO integrationVO);
 
 
+
+  /**
+   * Execute integration process.
+   *
+   * @param integrationOperationTypeEnum the integration operation type enum
+   * @param file the file
+   * @param datasetId
+   * @param integration the integration
+   * @return the execution result VO
+   */
+  @PostMapping(value = "/executeIntegration")
+  ExecutionResultVO executeIntegrationProcess(
+      @RequestParam("integrationTool") IntegrationToolTypeEnum integrationToolTypeEnum,
+      @RequestParam("operation") IntegrationOperationTypeEnum integrationOperationTypeEnum,
+      @RequestParam("file") final String file, @RequestParam("datasetId") Long datasetId,
+      @RequestBody IntegrationVO integration);
 
 }

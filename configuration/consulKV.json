@@ -60,6 +60,10 @@
     "value": "JHtEQl9DSEVDS19GUkVRVUVOQ1k6NTAwMH0="
   },
   {
+    "key": "config/application/spring.health.redis.check.frequency",
+    "value": "JHtSRURJU19DSEVDS19GUkVRVUVOQ1k6NTAwMH0="
+  },
+  {
     "key": "config/dataset/dataset.loadDataDelimiter",
     "value": "fA=="
   },
@@ -218,6 +222,18 @@
   {
     "key": "config/dataflow/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
     "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6MjB9"
+  },
+  {
+    "key": "config/dataflow/integration.fme.user",
+    "value": "JHtGTUVfVVNFUjogUmVwb3J0bmV0M30="
+  },
+  {
+    "key": "config/dataflow/integration.fme.password",
+    "value": "JHtGTUVfUEFTU1dPUkQ6UmVwb3J0bmV0M18yMDIwIX0="
+  },
+  {
+    "key": "config/dataflow/integration.fme.url",
+    "value": "JHtGTUVfVVJMOmh0dHBzOi8vZm1lLmRpc2NvbWFwLmVlYS5ldXJvcGEuZXUvZm1lcmVzdC92M30="
   },
   {
     "key": "config/dataflow/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",

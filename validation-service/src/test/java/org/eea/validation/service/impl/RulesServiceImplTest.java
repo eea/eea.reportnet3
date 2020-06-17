@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
@@ -119,6 +120,27 @@ public class RulesServiceImplTest {
       Assert.assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, e.getMessage());
       throw e;
     }
+  }
+
+  @Test
+  public void deleteRuleByIdDatasetTest() throws EEAException {
+    IntegritySchema integritySchema = new IntegritySchema();
+    integritySchema.setRuleId(new ObjectId());
+    integritySchema.setOriginDatasetSchemaId(new ObjectId());
+    integritySchema.setReferencedDatasetSchemaId(new ObjectId());
+    Rule rule = new Rule();
+    rule.setShortCode("ft01");
+    rule.setType(EntityTypeEnum.DATASET);
+    rule.setIntegrityConstraintId(new ObjectId());
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
+    Mockito.when(integritySchemaRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(integritySchema));
+
+    Mockito.when(rulesRepository.deleteRuleById(Mockito.any(), Mockito.any())).thenReturn(true);
+    rulesServiceImpl.deleteRuleById(1L, "5e44110d6a9e3a270ce13fac");
+    Mockito.verify(rulesRepository, times(1)).deleteRuleById(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -555,6 +577,43 @@ public class RulesServiceImplTest {
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }
 
+  @Test
+  public void createNewRuleDatasetTest() throws EEAException {
+
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setType(EntityTypeEnum.DATASET);
+    ruleVO.setRuleId("5e44110d6a9e3a270ce13fac");
+    ruleVO.setEnabled(true);
+    IntegrityVO integrityVO = new IntegrityVO();
+    integrityVO.setId("5e44110d6a9e3a270ce13fac");
+    ruleVO.setIntegrityVO(integrityVO);
+    IntegritySchema integritySchema = new IntegritySchema();
+    integritySchema.setId(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    integritySchema.setRuleId(new ObjectId());
+    integritySchema.setOriginDatasetSchemaId(new ObjectId());
+    integritySchema.setReferencedDatasetSchemaId(new ObjectId());
+    Rule rule = new Rule();
+    rule.setType(EntityTypeEnum.DATASET);
+    rule.setShortCode("shortCode");
+    rule.setDescription("description");
+    rule.setRuleName("ruleName");
+    rule.setWhenCondition("whenCondition");
+    rule.setThenCondition(Arrays.asList("success", "error"));
+    rule.setIntegrityConstraintId(new ObjectId());
+    rule.setRuleId(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    rule.setReferenceId(new ObjectId());
+    rule.setDescription("");
+    rule.setRuleName("");
+    rule.setThenCondition(Arrays.asList("success", "error"));
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    Mockito.when(integrityMapper.classToEntity(Mockito.any())).thenReturn(integritySchema);
+    Mockito.when(rulesRepository.createNewRule(Mockito.any(), Mockito.any())).thenReturn(true);
+    rulesServiceImpl.createNewRule(1L, ruleVO);
+    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+  }
+
   /**
    * Creates the new rule dataset id exception test.
    *
@@ -834,6 +893,39 @@ public class RulesServiceImplTest {
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
     Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
     rulesServiceImpl.updateRule(1L, new RuleVO());
+    Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void updateRuleDatasetTest() throws EEAException {
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setType(EntityTypeEnum.DATASET);
+    ruleVO.setRuleId("5e44110d6a9e3a270ce13fac");
+    ruleVO.setEnabled(true);
+    IntegrityVO integrityVO = new IntegrityVO();
+    integrityVO.setId("5e44110d6a9e3a270ce13fac");
+    ruleVO.setIntegrityVO(integrityVO);
+    IntegritySchema integritySchema = new IntegritySchema();
+    integritySchema.setId(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    integritySchema.setRuleId(new ObjectId());
+    integritySchema.setOriginDatasetSchemaId(new ObjectId());
+    integritySchema.setReferencedDatasetSchemaId(new ObjectId());
+    Rule rule = new Rule();
+    rule.setShortCode("ft01");
+    rule.setType(EntityTypeEnum.DATASET);
+    rule.setIntegrityConstraintId(new ObjectId());
+    rule.setRuleId(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    rule.setReferenceId(new ObjectId());
+    rule.setDescription("");
+    rule.setRuleName("");
+    rule.setThenCondition(Arrays.asList("success", "error"));
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    Mockito.when(integrityMapper.classToEntity(Mockito.any())).thenReturn(integritySchema);
+
+    Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
+    rulesServiceImpl.updateRule(1L, ruleVO);
     Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
   }
 
@@ -1192,4 +1284,20 @@ public class RulesServiceImplTest {
         .findByOriginOrReferenceDatasetSchemaId(Mockito.any());
 
   }
+
+  @Test
+  public void getIntegrityConstraintNullTest() throws EEAException {
+    when(integritySchemaRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    assertNull(rulesServiceImpl.getIntegrityConstraint("5e44110d6a9e3a270ce13fac"));
+  }
+
+  @Test
+  public void getIntegrityConstraintTest() throws EEAException {
+    when(integritySchemaRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new IntegritySchema()));
+    when(integrityMapper.entityToClass(Mockito.any())).thenReturn(new IntegrityVO());
+    assertEquals(new IntegrityVO(),
+        rulesServiceImpl.getIntegrityConstraint("5e44110d6a9e3a270ce13fac"));
+  }
+
 }

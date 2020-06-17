@@ -309,6 +309,9 @@ public class DatasetServiceImpl implements DatasetService {
     final String mimeType = getMimetype(fileName);
     // validates file types for the data load
     validateFileType(mimeType);
+
+
+
     try {
       // Get the partition for the partiton id
       final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
@@ -412,7 +415,8 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  private String getMimetype(final String file) throws EEAException {
+  @Override
+  public String getMimetype(final String file) throws EEAException {
     String mimeType = null;
     final int location = file.lastIndexOf('.');
     if (location == -1) {
