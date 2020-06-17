@@ -19,7 +19,6 @@ import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -38,14 +37,6 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
   @Autowired
   private UserManagementController userManagementController;
 
-  @Value("${integration.fme.user}")
-  private String fmeUser;
-
-  @Value("${integration.fme.password}")
-  private String fmePassword;
-
-  @Value("${integration.fme.url}")
-  private String fmeUrl;
 
   private static final Logger LOG = LoggerFactory.getLogger(FMEIntegrationExecutorService.class);
 
@@ -88,27 +79,46 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     }
 
     DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-    Long dataflowId = dataSetControllerZuul.getDataFlowIdById(datasetId);
+    Long dataflowId = 0L;
+    if (null != integration.getInternalParameters().get("repository")) {
+      dataflowId = dataset.getDataflowId();
+    } else {
+      dataflowId = dataSetControllerZuul.getDataFlowIdById(datasetId);
+    }
+
     Long dataproviderId = dataset.getDataProviderId();
+
     String apiKey = userManagementController.getApiKey(dataflowId, dataproviderId);
 
     FMEAsyncJob fmeAsyncJob = new FMEAsyncJob();
     String workspace = integration.getInternalParameters().get("processName");
-    String repository = "ReportNetTesting";
+    String repository = null;
+    if (null != integration.getInternalParameters().get("repository")) {
+      repository = integration.getInternalParameters().get("repository");
+    } else {
+      repository = "ReportNetTesting";
+    }
+    String folder = null;
+    if (null != integration.getInternalParameters().get("folder")) {
+      folder = integration.getInternalParameters().get("folder");
+    } else {
+      folder = "MMR";
+    }
+
 
     List<PublishedParameter> parameters = new ArrayList<>();
     // dataflowId
-    parameters.add(saveParameter("dataflowId", 88));
+    parameters.add(saveParameter("dataflowId", dataflowId));
     // providerId
-    parameters.add(saveParameter("providerId", 86));
+    parameters.add(saveParameter("providerId", dataproviderId));
     // datasetDataId
-    parameters.add(saveParameter("datasetDataId", 413));
+    parameters.add(saveParameter("datasetDataId", datasetId));
     // inputfile
     parameters.add(saveParameter("inputfile", file));
     // folder
-    parameters.add(saveParameter("folder", "MMR"));
+    parameters.add(saveParameter("folder", folder));
     // apikey
-    parameters.add(saveParameter("apiKey", "ApiKey 6b9844c3-1194-401f-b5e5-509bfe4a7ea4"));
+    parameters.add(saveParameter("apiKey", apiKey));
 
     fmeAsyncJob.setPublishedParameters(parameters);
 
@@ -116,10 +126,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     switch (integrationOperationTypeEnum) {
       case EXPORT:
         return executeSubmit(repository, workspace, fmeAsyncJob);
-
       case IMPORT:
         return executeSubmit(repository, workspace, fmeAsyncJob);
-
       default:
         return null;
 
@@ -145,6 +153,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
       a = fmeFeignRepository.submitAsyncJob(repository, workspace, fmeAsyncJob);
     } catch (Exception e) {
       e.getMessage();
+      e.printStackTrace();
     }
     executionResultParams.put("id", a);
     executionResultVO.setExecutionResultParams(executionResultParams);

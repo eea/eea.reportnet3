@@ -1,11 +1,12 @@
 package org.eea.dataflow.controller;
 
 import java.util.List;
-import org.eea.dataflow.integration.executor.fme.FMEIntegrationExecutorService;
+import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.slf4j.Logger;
@@ -40,7 +41,7 @@ public class IntegrationControllerImpl implements IntegrationController {
 
   /** The FME integration executor service. */
   @Autowired
-  private FMEIntegrationExecutorService integrationExecutorService;
+  private IntegrationExecutorFactory integrationExecutorFactory;
 
 
   /** The Constant LOG_ERROR. */
@@ -168,11 +169,12 @@ public class IntegrationControllerImpl implements IntegrationController {
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
   @PostMapping(value = "/executeIntegration")
   public ExecutionResultVO executeIntegrationProcess(
+      @RequestParam("integrationTool") IntegrationToolTypeEnum integrationToolTypeEnum,
       @RequestParam("operation") IntegrationOperationTypeEnum integrationOperationTypeEnum,
       @RequestParam("file") final String file, @RequestParam("datasetId") Long datasetId,
       @RequestBody IntegrationVO integration) {
-    return integrationExecutorService.execute(integrationOperationTypeEnum, file, datasetId,
-        integration);
+    return integrationExecutorFactory.getExecutor(integrationToolTypeEnum)
+        .execute(integrationOperationTypeEnum, file, datasetId, integration);
   }
 
 }
