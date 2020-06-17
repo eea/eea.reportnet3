@@ -32,7 +32,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     filteredData: [],
     isLoading: false,
     issues: [],
-    isTableView: false,
+    isTableView: true,
     oblChoosed: {},
     organizations: [],
     pagination: { first: 0, rows: 10, page: 0 },
