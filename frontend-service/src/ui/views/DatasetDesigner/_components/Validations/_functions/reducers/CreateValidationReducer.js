@@ -307,7 +307,6 @@ export const createValidationReducer = (state, { type, payload }) => {
       };
 
     case 'INIT_FORM':
-      console.log({ payload });
       return {
         ...state,
         candidateRule: payload.candidateRule,

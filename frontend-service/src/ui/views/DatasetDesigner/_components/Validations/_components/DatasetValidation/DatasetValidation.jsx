@@ -33,7 +33,7 @@ import { getDatasetSchemaTableFieldsBySchema } from 'ui/views/DatasetDesigner/_c
 import { getEmptyLink } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getEmptyLink';
 import { getFieldType } from '../../_functions/utils/getFieldType';
 import { getReferencedTables } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getReferencedTables';
-import { getSelectedTableByRecordId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTableByRecordId';
+import { getSelectedTableByFieldId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTablebyFieldId';
 import { initValidationRuleRelationCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/initValidationRuleRelationCreation';
 import { resetValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/resetValidationRuleCreation';
 import { setValidationRelation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/setValidationRelation';
@@ -61,7 +61,6 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
 
   useEffect(() => {
     if (!isEmpty(tabs)) {
-      console.log('INIT');
       creationFormDispatch({
         type: 'INIT_FORM',
         payload: initValidationRuleRelationCreation(tabs, datasetSchema.datasetSchemaId, datasetSchemas)
@@ -75,6 +74,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
         <TabPanel
           header={resourcesContext.messages.tabMenuConstraintData}
           headerClassName={showErrorOnInfoTab ? styles.error : ''}
+          key="datasetValidationInfo"
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
           <InfoTab
             componentName={componentName}
@@ -88,6 +88,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
         <TabPanel
           header={resourcesContext.messages.tabMenuTableRelations}
           headerClassName={showErrorOnRelationsTab ? styles.error : ''}
+          key="datasetValidationRelations"
           leftIcon={showErrorOnRelationsTab ? 'pi pi-exclamation-circle' : ''}>
           <TableRelationsSelector
             componentName={componentName}
@@ -128,7 +129,6 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   useEffect(() => {
     const { table } = creationFormState.candidateRule;
     if (!isEmpty(table)) {
-      console.log('FIELDS');
       creationFormDispatch({
         type: 'SET_FIELDS',
         payload: getDatasetSchemaTableFields(table, tabs)
@@ -153,7 +153,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
 
   useEffect(() => {
     if (validationContext.referenceId) {
-      const table = getSelectedTableByRecordId(validationContext.referenceId, tabs);
+      const table = getSelectedTableByFieldId(validationContext.ruleToEdit.relations.links[0].originField.code, tabs);
       creationFormDispatch({
         type: 'SET_FORM_FIELD',
         payload: {
@@ -196,7 +196,6 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
 
   useEffect(() => {
     if (validationContext.ruleEdit && !isEmpty(validationContext.ruleToEdit)) {
-      console.log({ creationFormState }, creationFormState.table);
       creationFormDispatch({
         type: 'POPULATE_CREATE_FORM',
         payload: parseRuleToEdit(validationContext.ruleToEdit)
@@ -244,8 +243,6 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   };
 
   const parseRuleToEdit = rule => {
-    console.log({ rule, datasetSchemas, tabs });
-    console.log(rule.relations.referencedTable);
     const inmRuleToEdit = { ...rule };
 
     const filteredReferencedDatasetSchema = datasetSchemas.filter(
@@ -254,11 +251,11 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
 
     let originTableSchemaId = '';
     let referencedTableSchemaId = '';
-    // if (rule.originDatasetSchemaId !== rule.relations.referencedDatasetSchema.code) {
+
     const filteredOriginDatasetSchema = datasetSchemas.filter(
       dataset => dataset.datasetSchemaId === rule.relations.originDatasetSchema
     );
-    console.log({ filteredOriginDatasetSchema });
+
     if (!isNil(filteredOriginDatasetSchema[0])) {
       rule.relations.referencedDatasetSchema.code !== rule.relations.originDatasetSchema
         ? filteredOriginDatasetSchema[0].tables.forEach(table => {
@@ -283,7 +280,6 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
           });
     }
 
-    console.log({ filteredReferencedDatasetSchema });
     if (!isNil(filteredReferencedDatasetSchema[0])) {
       inmRuleToEdit.relations.referencedTables =
         rule.relations.referencedDatasetSchema.code !== rule.relations.originDatasetSchema
@@ -320,7 +316,6 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
         table => table.tableSchemaId === originTableSchemaId
       );
 
-      console.log(rule.relations);
       const filteredOriginFields =
         rule.relations.referencedDatasetSchema.code !== rule.relations.originDatasetSchema
           ? filteredOriginTable[0].records[0].fields.map(field => {
@@ -333,7 +328,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
       const filteredReferencedTable = filteredReferencedDatasetSchema[0].tables.filter(
         table => table.tableSchemaId === referencedTableSchemaId
       );
-      console.log(rule.relations.referencedDatasetSchema.code, rule.relations.originDatasetSchema);
+
       const filteredReferencedFields =
         rule.relations.referencedDatasetSchema.code !== rule.relations.originDatasetSchema
           ? filteredReferencedTable[0].records[0].fields.map(field => {
@@ -351,10 +346,8 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
           originField => originField.code === link.originField.code
         )[0].label;
       });
-
-      console.log(inmRuleToEdit.relations.referencedTable);
     }
-    // }
+
     if (!isNil(filteredReferencedDatasetSchema[0])) {
       inmRuleToEdit.relations.referencedDatasetSchema.label = filteredReferencedDatasetSchema[0].datasetSchemaName;
     }
@@ -488,7 +481,6 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   };
 
   const onReferencedTableChange = referencedTable => {
-    console.log('SET_REFERENCED_FIELDS', referencedTable);
     creationFormDispatch({
       type: 'SET_REFERENCED_FIELDS',
       payload: {
@@ -522,7 +514,6 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   };
 
   const onGetFieldType = field => {
-    console.log(creationFormState.candidateRule.table);
     return getFieldType(creationFormState.candidateRule.table, { code: field }, tabs);
   };
 

@@ -81,7 +81,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
   const onLoadValidationsList = async datasetSchemaId => {
     try {
       const validationsServiceList = await ValidationService.getAll(datasetSchemaId);
-      console.log({ validationsServiceList });
+
       if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
         validationsServiceList.validations.forEach(validation => {
           const additionalInfo = getAdditionalValidationInfo(validation.referenceId);
@@ -202,7 +202,7 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
     } else if (row.entityType === 'DATASET') {
       rowType = 'dataset';
     }
-    
+
     return (
       <ActionsColumn
         onDeleteClick={() => onShowDeleteDialog()}

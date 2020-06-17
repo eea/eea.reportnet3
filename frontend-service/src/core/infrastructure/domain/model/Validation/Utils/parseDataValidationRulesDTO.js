@@ -47,9 +47,7 @@ export const parseDataValidationRulesDTO = validations => {
       }
 
       if (validationDTO.type === 'DATASET') {
-        console.log(validationDTO);
         const relations = parseDatasetRelationFromDTO(validationDTO.integrityVO);
-        console.log({ relations });
         newRelations = relations;
       }
 

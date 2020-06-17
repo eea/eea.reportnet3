@@ -53,7 +53,6 @@ const validationReducer = (state, { type, payload }) => {
         ruleToEdit: {}
       };
     case 'ON_OPEN_TO_EDIT':
-      console.log({ payload });
       return {
         ...state,
         isVisible: true,

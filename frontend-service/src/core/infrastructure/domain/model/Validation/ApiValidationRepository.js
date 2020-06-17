@@ -25,12 +25,12 @@ const create = async (datasetSchemaId, validationRule) => {
 };
 
 const createDatasetRule = async (datasetSchemaId, validationRule) => {
-  console.log({ validationRule });
+  console.log(validationRule);
   const validation = {
     automatic: false,
     description: validationRule.description,
     enabled: validationRule.active ? validationRule.active : false,
-    referenceId: validationRule.recordSchemaId,
+    referenceId: validationRule.relations.originDatasetSchema,
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
     integrityVO: {
@@ -85,7 +85,6 @@ const getAll = async datasetSchemaId => {
   validationsList.rulesSchemaId = validationsListDTO.rulesSchemaId;
 
   const validationsData = parseDataValidationRulesDTO(validationsListDTO.rules);
-  console.log({ validationsData });
   validationsList.entityTypes = validationsData.entityTypes;
   validationsList.validations = validationsData.validations;
   return validationsList;
@@ -137,12 +136,13 @@ const updateRowRule = async (datasetId, validationRule) => {
 };
 
 const updateDatasetRule = async (datasetId, validationRule) => {
+  console.log({ validationRule });
   const validation = {
     ruleId: validationRule.id,
     description: validationRule.description,
     automatic: validationRule.automatic,
     enabled: validationRule.active ? validationRule.active : false,
-    referenceId: validationRule.recordSchemaId,
+    referenceId: validationRule.relations.originDatasetSchema,
     ruleName: validationRule.name,
     shortCode: validationRule.shortCode,
     type: 'DATASET',

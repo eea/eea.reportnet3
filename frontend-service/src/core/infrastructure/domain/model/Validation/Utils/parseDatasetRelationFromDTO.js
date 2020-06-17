@@ -2,7 +2,6 @@ import isNil from 'lodash/isNil';
 import uuid from 'uuid';
 
 export const parseDatasetRelationFromDTO = integrityVO => {
-  console.log({ integrityVO });
   if (!isNil(integrityVO)) {
     const relations = {
       id: integrityVO.id,
