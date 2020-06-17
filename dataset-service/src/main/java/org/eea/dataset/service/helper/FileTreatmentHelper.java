@@ -18,6 +18,7 @@ import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationC
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
@@ -129,8 +130,8 @@ public class FileTreatmentHelper {
     });
     if (auxExtensionList.contains(fileExtension)) {
       try {
-        integrationController.executeIntegrationProcess(IntegrationOperationTypeEnum.IMPORT,
-            fileName, datasetId, integrationAux.get(0));
+        integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
+            IntegrationOperationTypeEnum.IMPORT, fileName, datasetId, integrationAux.get(0));
       } finally {
         removeLock(datasetId, tableSchemaId);
       }

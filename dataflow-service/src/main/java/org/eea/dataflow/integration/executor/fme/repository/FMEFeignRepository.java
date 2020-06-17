@@ -34,6 +34,14 @@ public class FMEFeignRepository {
   @Value("${integration.fme.token}")
   private String fmeToken;
 
+  /**
+   * Submit async job.
+   *
+   * @param repository the repository
+   * @param workspace the workspace
+   * @param fmeAsyncJob the fme async job
+   * @return the integer
+   */
   public Integer submitAsyncJob(String repository, String workspace, FMEAsyncJob fmeAsyncJob) {
 
     Map<String, String> uriParams = new HashMap<>();
@@ -59,6 +67,14 @@ public class FMEFeignRepository {
     return result;
   }
 
+  /**
+   * Creates the http request.
+   *
+   * @param <T> the generic type
+   * @param body the body
+   * @param uriParams the uri params
+   * @return the http entity
+   */
   private <T> HttpEntity<T> createHttpRequest(T body, Map<String, String> uriParams) {
     Map<String, String> headerInfo = new HashMap<>();
     headerInfo.put(LiteralConstants.AUTHORIZATION_HEADER, fmeToken);
@@ -69,6 +85,12 @@ public class FMEFeignRepository {
     return request;
   }
 
+  /**
+   * Creates the basic headers.
+   *
+   * @param headersInfo the headers info
+   * @return the http headers
+   */
   private HttpHeaders createBasicHeaders(Map<String, String> headersInfo) {
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
