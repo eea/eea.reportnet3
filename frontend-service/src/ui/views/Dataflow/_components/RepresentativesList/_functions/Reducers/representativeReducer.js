@@ -117,15 +117,9 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'ON_ACCOUNT_CHANGE':
-      updatedList = state.representatives.map(representative => {
-        if (representative.dataProviderId === payload.dataProviderId) {
-          representative.providerAccount = payload.providerAccount;
-        }
-        return representative;
-      });
       return {
         ...state,
-        representatives: updatedList
+        representatives: payload.updatedList
       };
 
     case 'ON_PROVIDER_CHANGE':
@@ -135,17 +129,17 @@ export const reducer = (state, { type, payload }) => {
         }
         return representative;
       });
+
       if (!isNil(payload.representativeId)) {
         return {
           ...state,
           refresher: !state.refresher
         };
-      } else {
-        return {
-          ...state,
-          representatives: updatedList
-        };
       }
+      return {
+        ...state,
+        representatives: updatedList
+      };
 
     case 'SELECT_PROVIDERS_TYPE':
       return {

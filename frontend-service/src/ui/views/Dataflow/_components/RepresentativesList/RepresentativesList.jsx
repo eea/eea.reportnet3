@@ -107,6 +107,22 @@ const RepresentativesList = ({
 
     let hasError = formState.representativeHasError.includes(representative.representativeId);
 
+    const onAccountChange = event => {
+      const updatedList = formState.representatives.map(thisRepresentative => {
+        if (thisRepresentative.dataProviderId === representative.dataProviderId) {
+          thisRepresentative.providerAccount = event.target.value;
+        }
+        return thisRepresentative;
+      });
+
+      formDispatcher({
+        type: 'ON_ACCOUNT_CHANGE',
+        payload: {
+          updatedList
+        }
+      });
+    };
+
     return (
       <>
         <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
@@ -119,15 +135,7 @@ const RepresentativesList = ({
               representative.providerAccount = representative.providerAccount.toLowerCase();
               onAddProvider(formDispatcher, formState, representative, dataflowId);
             }}
-            onChange={event => {
-              formDispatcher({
-                type: 'ON_ACCOUNT_CHANGE',
-                payload: {
-                  providerAccount: event.target.value,
-                  dataProviderId: representative.dataProviderId
-                }
-              });
-            }}
+            onChange={event => onAccountChange(event)}
             onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
             placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
             value={inputData}
