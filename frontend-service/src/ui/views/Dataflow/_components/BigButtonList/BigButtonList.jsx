@@ -35,6 +35,7 @@ export const BigButtonList = ({
   handleRedirect,
   onCleanUpReceipt,
   onSaveName,
+  onShowManageReportersDialog,
   onShowSnapshotDialog,
   onUpdateData,
   setIsReceiptLoading,
@@ -54,7 +55,7 @@ export const BigButtonList = ({
   const [isActiveButton, setIsActiveButton] = useState(true);
   const [isConfirmCollectionDialog, setIsConfirmCollectionDialog] = useState(false);
   const [isDuplicated, setIsDuplicated] = useState(false);
-  const [isUpdateDatacollectionDialogVisible, setIsUpdateDatacollectionDialogVisible] = useState(false);
+  const [isUpdateDataCollectionDialogVisible, setIsUpdateDataCollectionDialogVisible] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
 
   const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
@@ -197,7 +198,7 @@ export const BigButtonList = ({
   };
 
   const onUpdateDataCollection = async () => {
-    setIsUpdateDatacollectionDialogVisible(false);
+    setIsUpdateDataCollectionDialogVisible(false);
 
     setIsActiveButton(false);
 
@@ -270,7 +271,7 @@ export const BigButtonList = ({
   };
 
   const onShowUpdateDataCollectionModal = () => {
-    setIsUpdateDatacollectionDialogVisible(true);
+    setIsUpdateDataCollectionDialogVisible(true);
   };
 
   const bigButtonList = uniqBy(
@@ -286,6 +287,7 @@ export const BigButtonList = ({
       onLoadReceiptData,
       onSaveName,
       onShowDataCollectionModal,
+      onShowManageReportersDialog,
       onShowNewSchemaDialog,
       onShowSnapshotDialog,
       onShowUpdateDataCollectionModal,
@@ -353,8 +355,8 @@ export const BigButtonList = ({
         labelCancel={resources.messages['close']}
         labelConfirm={resources.messages['create']}
         onConfirm={() => onUpdateDataCollection()}
-        onHide={() => setIsUpdateDatacollectionDialogVisible(false)}
-        visible={isUpdateDatacollectionDialogVisible}>
+        onHide={() => setIsUpdateDataCollectionDialogVisible(false)}
+        visible={isUpdateDataCollectionDialogVisible}>
         <p>{resources.messages['updateDataCollectionMessage']}</p>
       </ConfirmDialog>
 
