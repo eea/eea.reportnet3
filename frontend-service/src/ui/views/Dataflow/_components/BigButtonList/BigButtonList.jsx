@@ -52,6 +52,7 @@ export const BigButtonList = ({
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [isActiveButton, setIsActiveButton] = useState(true);
+  const [isConfirmCollectionDialog, setIsConfirmCollectionDialog] = useState(false);
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isUpdateDatacollectionDialogVisible, setIsUpdateDatacollectionDialogVisible] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
@@ -165,6 +166,7 @@ export const BigButtonList = ({
   };
 
   const onCreateDataCollection = async date => {
+    setIsConfirmCollectionDialog(false);
     setDataCollectionDialog(false);
 
     notificationContext.add({
@@ -357,13 +359,12 @@ export const BigButtonList = ({
       </ConfirmDialog>
 
       <ConfirmDialog
+        className={styles.calendarConfirm}
         disabledConfirm={isNil(dataCollectionDueDate)}
         header={resources.messages['createDataCollection']}
         labelCancel={resources.messages['close']}
         labelConfirm={resources.messages['create']}
-        onConfirm={() =>
-          onCreateDataCollection(new Date(moment(dataCollectionDueDate).endOf('day').format()).getTime() / 1000)
-        }
+        onConfirm={() => setIsConfirmCollectionDialog(true)}
         onHide={() => setDataCollectionDialog(false)}
         visible={dataCollectionDialog}>
         {hasExpirationDate ? (
@@ -389,6 +390,21 @@ export const BigButtonList = ({
           yearRange="2020:2030"
         />
       </ConfirmDialog>
+
+      {isConfirmCollectionDialog && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={resources.messages['createDataCollection']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={() =>
+            onCreateDataCollection(new Date(moment(dataCollectionDueDate).endOf('day').format()).getTime() / 1000)
+          }
+          onHide={() => setIsConfirmCollectionDialog(false)}
+          visible={isConfirmCollectionDialog}>
+          {resources.messages['createDataCollectionConfirm']}
+        </ConfirmDialog>
+      )}
 
       <button ref={receiptBtnRef} style={{ display: 'none' }} />
     </>

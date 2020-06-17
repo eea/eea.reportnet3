@@ -44,6 +44,13 @@
   margin-bottom: 4rem;
 }
 
+.calendarConfirm {
+  min-width: 20rem !important;
+  min-height: 20rem !important;
+  width: 40rem !important;
+  max-height: 40rem !important;
+}
+
 .calendar {
   display: flex !important;
 }

@@ -85,7 +85,7 @@
     "dark": "Dark",
     "dashboards": "Dashboards",
     "dataCollection": "Data Collection",
-    "dataCollectionExpirationDate": "Current expiration date is <strong>{:expirationData}</strong>",
+    "dataCollectionExpirationDate": "Associated obligation's next report due: <strong>{:expirationData}</strong>",
     "dataflow": "Dataflow",
     "dataflowAcceptedPendingTab": "Pending & Accepted",
     "dataflowCompletedTab": "Completed",
@@ -687,6 +687,7 @@
     "emptyParameterErrorContent": "ERROR: Parameter {:option} can not be empty",
     "newSchema": "New schema",
     "searchObligations": "Search obligations",
-    "PKTooltip": "The primary key (PK) is a unique identifier for the records"
+    "PKTooltip": "The primary key (PK) is a unique identifier for the records",
+    "createDataCollectionConfirm": "Are you sure you want to create a data collection? You won't be able to make any changes after that."
   }
 }
