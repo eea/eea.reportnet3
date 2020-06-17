@@ -9,6 +9,7 @@ const getOperatorEquivalence = (operatorType, operatorValue = null) => {
   const {
     validations: { operatorEquivalences }
   } = config;
+
   if (isNil(operatorValue)) {
     return operatorEquivalences[operatorType].type;
   } else {
@@ -23,6 +24,7 @@ export const getExpression = expression => {
   const {
     validations: { nonNumericOperators }
   } = config;
+
   if (expression.expressions.length > 1) {
     return getCreationDTO(expression.expressions);
   } else {
@@ -38,12 +40,21 @@ export const getExpression = expression => {
         ]
       };
     }
+
     if (operatorType === 'date') {
       return {
         operator: getOperatorEquivalence(operatorType, operatorValue),
         params: ['VALUE', moment(expressionValue).format('YYYY-MM-DD')]
       };
     }
+
+    if (getOperatorEquivalence(operatorType, operatorValue) === 'FIELD_NUM_MATCH') {
+      return {
+        operator: getOperatorEquivalence(operatorType, operatorValue),
+        params: ['VALUE', expressionValue]
+      };
+    }
+
     return {
       operator: getOperatorEquivalence(operatorType, operatorValue),
       params: ['VALUE', !nonNumericOperators.includes(operatorType) ? Number(expressionValue) : expressionValue]

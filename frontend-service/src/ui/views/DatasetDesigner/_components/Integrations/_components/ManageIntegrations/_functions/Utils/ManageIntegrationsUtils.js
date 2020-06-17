@@ -21,6 +21,13 @@ const isDuplicatedIntegration = (integration, incomingIntegration) => {
   return isEqual([currentIntegration].sort(), [incomingIntegration].sort());
 };
 
+const isDuplicatedIntegrationName = (currentName, integrationsList, id) => {
+  const names = integrationsList
+    .filter(integration => integration.integrationId !== id)
+    .map(integration => integration.integrationName.toLowerCase());
+  return names.includes(currentName.toLowerCase());
+};
+
 const isDuplicatedParameter = (id, parameters, value) => {
   return parameters
     .filter(parameter => parameter.id !== id)
@@ -29,7 +36,7 @@ const isDuplicatedParameter = (id, parameters, value) => {
 };
 
 const isFormEmpty = state => {
-  const requiredKeys = ['description', 'externalParameters', 'fileExtension', 'name', 'operation', 'processName'];
+  const requiredKeys = ['fileExtension', 'name', 'operation', 'processName'];
   const isEmptyForm = [];
   for (let index = 0; index < requiredKeys.length; index++) {
     const key = requiredKeys[index];
@@ -45,7 +52,7 @@ const isParameterEditing = parameters => {
     .map(editor => Object.values(editor))
     .flat();
 
-  return !isEditorView.includes(true);
+  return isEditorView.includes(true);
 };
 
 const onAddParameter = state => {
@@ -83,6 +90,12 @@ const onUpdateCompleteParameter = (id, state) => {
   });
 };
 
+const printError = (field, state) => {
+  const requiredFields = ['fileExtension', 'name', 'operation', 'processName'];
+
+  return state.displayErrors && requiredFields.includes(field) && isEmpty(state[field]) ? 'error' : undefined;
+};
+
 const toggleParameterEditorView = (id, option, parameters) => {
   return parameters.map(parameter => {
     if (parameter.id === id) {
@@ -98,11 +111,13 @@ const toggleParameterEditorView = (id, option, parameters) => {
 export const ManageIntegrationsUtils = {
   getParameterData,
   isDuplicatedIntegration,
+  isDuplicatedIntegrationName,
   isDuplicatedParameter,
   isFormEmpty,
   isParameterEditing,
   onAddParameter,
   onUpdateCompleteParameter,
   onUpdateData,
+  printError,
   toggleParameterEditorView
 };

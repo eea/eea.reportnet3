@@ -1,3 +1,6 @@
+/*
+ *
+ */
 package org.eea.dataset.controller;
 
 import java.util.Arrays;
@@ -22,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -240,6 +244,14 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
         datasetReferencedSchemaId);
   }
 
+  /**
+   * Creates the dataset foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
   @Override
   @PostMapping("/private/createForeignRelationship")
   public void createDatasetForeignRelationship(
@@ -251,5 +263,63 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
         originDatasetSchemaId, referencedDatasetSchemaId);
 
   }
+
+  /**
+   * Update dataset foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
+  @Override
+  @PutMapping("/private/updateForeignRelationship")
+  public void updateDatasetForeignRelationship(
+      @RequestParam("datasetOriginId") final long datasetOriginId,
+      @RequestParam("datasetReferencedId") final long datasetReferencedId,
+      @RequestParam("originDatasetSchemaId") final String originDatasetSchemaId,
+      @RequestParam("referencedDatasetSchemaId") final String referencedDatasetSchemaId) {
+    datasetMetabaseService.updateForeignRelationship(datasetOriginId, datasetReferencedId,
+        originDatasetSchemaId, referencedDatasetSchemaId);
+  }
+
+  /**
+   * Gets the dataset id by dataset schema id and data provider id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the dataset id by dataset schema id and data provider id
+   */
+  @Override
+  @GetMapping("/private/getDatasetId/datasetSchema/{datasetSchemaId}")
+  public Long getDesignDatasetIdByDatasetSchemaId(
+      @PathVariable("datasetSchemaId") String datasetSchemaId) {
+    return datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId(datasetSchemaId,
+        null);
+  }
+
+
+  /**
+   * Delete foreign relationship.
+   *
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param referencedDatasetSchemaId the referenced dataset schema id
+   */
+  @Override
+  @DeleteMapping("/private/deleteForeignRelationship")
+  public void deleteForeignRelationship(@RequestParam("datasetOriginId") Long datasetOriginId,
+      @RequestParam(value = "datasetReferencedId", required = false) Long datasetReferencedId,
+      @RequestParam("originDatasetSchemaId") String originDatasetSchemaId,
+      @RequestParam("referencedDatasetSchemaId") String referencedDatasetSchemaId) {
+
+    if (null == datasetReferencedId || datasetOriginId == datasetReferencedId) {
+      datasetReferencedId =
+          getIntegrityDatasetId(datasetOriginId, originDatasetSchemaId, referencedDatasetSchemaId);
+    }
+    datasetMetabaseService.deleteForeignRelation(datasetOriginId, datasetReferencedId,
+        originDatasetSchemaId, referencedDatasetSchemaId);
+  }
+
 
 }

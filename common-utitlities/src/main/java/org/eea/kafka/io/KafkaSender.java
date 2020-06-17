@@ -14,6 +14,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
@@ -49,7 +50,9 @@ public class KafkaSender {
   public void sendMessage(final EEAEventVO event) {
 
     kafkaTemplate.executeInTransaction(operations -> {
-      event.getData().put("user", String.valueOf(ThreadPropertiesManager.getVariable("user")));
+      if (StringUtils.isEmpty(event.getData().get("user"))) {
+        event.getData().put("user", String.valueOf(ThreadPropertiesManager.getVariable("user")));
+      }
       event.getData().put("token",
           String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));
 

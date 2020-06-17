@@ -1,5 +1,11 @@
 import React, { useContext, useEffect, useRef, useState, useReducer } from 'react';
-import { isUndefined, isNull, capitalize } from 'lodash';
+
+import capitalize from 'lodash/capitalize';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
+import uniq from 'lodash/uniq';
 
 import { config } from 'conf';
 
@@ -24,6 +30,7 @@ const ActionsToolbar = ({
   colsSchema,
   dataflowId,
   datasetId,
+  exportExtensionsOperationsList,
   hasWritePermissions,
   isDataCollection = false,
   isFilterValidationsActive,
@@ -35,6 +42,7 @@ const ActionsToolbar = ({
   onRefresh,
   onSetVisible,
   originalColumns,
+  onUpdateData,
   records,
   setColumns,
   setDeleteDialogVisible,
@@ -48,6 +56,7 @@ const ActionsToolbar = ({
   const [exportTableData, setExportTableData] = useState(undefined);
   const [exportTableDataName, setExportTableDataName] = useState('');
   const [isLoadingFile, setIsLoadingFile] = useState(false);
+  const [FMEExportExtensions, setFMEExportExtensions] = useState([]);
 
   const [filter, dispatchFilter] = useReducer(filterReducer, {
     validationDropdown: [],
@@ -93,6 +102,43 @@ const ActionsToolbar = ({
       DownloadFile(exportTableData, exportTableDataName);
     }
   }, [exportTableData]);
+
+  useEffect(() => {
+    getReportNetandFMEExportExtensions(exportExtensionsOperationsList);
+  }, [exportExtensionsOperationsList]);
+
+  const parseUniqsExportExtensions = exportExtensionsOperationsList => {
+    return exportExtensionsOperationsList.map(uniqExportExtension => ({
+      text: `${uniqExportExtension.toUpperCase()} (.${uniqExportExtension.toLowerCase()})`,
+      code: uniqExportExtension.toLowerCase()
+    }));
+  };
+
+  const getReportNetandFMEExportExtensions = exportExtensionsOperationsList => {
+    const uniqsExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
+    setFMEExportExtensions(parseUniqsExportExtensions(uniqsExportExtensions));
+  };
+
+  const reportNetExtensionsItems = config.exportTypes.map(type => ({
+    label: type.text,
+    icon: config.icons['archive'],
+    command: () => onExportTableData(type.code)
+  }));
+
+  const FMEExtensionsItems = [
+    {
+      label: 'FME Extensions',
+      items: FMEExportExtensions.map(type => ({
+        label: type.text,
+        icon: config.icons['archive'],
+        command: () => onExportTableData(type.code)
+      }))
+    }
+  ];
+
+  const totalExtensionsItems = isEmpty(FMEExportExtensions)
+    ? reportNetExtensionsItems
+    : reportNetExtensionsItems.concat(FMEExtensionsItems);
 
   const onExportTableData = async fileType => {
     setIsLoadingFile(true);
@@ -166,7 +212,7 @@ const ActionsToolbar = ({
     <Toolbar className={styles.actionsToolbar}>
       <div className="p-toolbar-group-left">
         <Button
-          className={`p-button-rounded p-button-secondary-transparent ${
+          className={`p-button-rounded p-button-secondary ${
             !hasWritePermissions || tableReadOnly || isWebFormMMR ? null : 'p-button-animated-blink'
           }`}
           disabled={!hasWritePermissions || tableReadOnly || isWebFormMMR}
@@ -184,19 +230,17 @@ const ActionsToolbar = ({
           icon={isLoadingFile ? 'spinnerAnimate' : 'import'}
           label={resources.messages['exportTable']}
           onClick={event => {
+            onUpdateData();
             exportMenuRef.current.show(event);
           }}
         />
         <Menu
-          model={config.exportTypes.map(type => ({
-            label: type.text,
-            icon: config.icons['archive'],
-            command: () => onExportTableData(type.code)
-          }))}
+          className={styles.menu}
+          id="exportTableMenu"
+          model={totalExtensionsItems}
+          onShow={e => getExportButtonPosition(e)}
           popup={true}
           ref={exportMenuRef}
-          id="exportTableMenu"
-          onShow={e => getExportButtonPosition(e)}
         />
 
         <Button

@@ -492,11 +492,12 @@ export const FieldsDesigner = ({
               });
             }}
           />
+
           <Button
             className="p-button-secondary p-button-animated-blink"
             icon={'horizontalSliders'}
             label={resources.messages['addRowConstraint']}
-            onClick={() => validationContext.onOpenModalFromRow(table.records[0].recordSchemaId)}
+            onClick={() => validationContext.onOpenModalFromRow(table.recordSchemaId)}
           />
         </div>
         <div className={styles.switchDiv}>
@@ -529,7 +530,16 @@ export const FieldsDesigner = ({
         <div className={styles.fieldsHeader}>
           <label></label>
           <label>{resources.messages['required']}</label>
-          <label>{resources.messages['pk']}</label>
+          <span className={styles.PKWrap}>
+            <label>{resources.messages['pk']}</label>
+            <Button
+              className={`${styles.PKInfoButton} p-button-rounded p-button-secondary-transparent`}
+              icon="infoCircle"
+              tooltip={resources.messages['PKTooltip']}
+              tooltipOptions={{ position: 'top' }}
+            />
+          </span>
+
           <label>{resources.messages['newFieldPlaceHolder']}</label>
           <label>{resources.messages['newFieldDescriptionPlaceHolder']}</label>
           <label>{resources.messages['newFieldTypePlaceHolder']}</label>

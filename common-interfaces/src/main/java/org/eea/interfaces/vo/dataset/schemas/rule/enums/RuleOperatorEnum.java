@@ -111,6 +111,30 @@ public enum RuleOperatorEnum {
   RECORD_LEN_LTEQ(EntityTypeEnum.RECORD, "recordStringLengthLessThanOrEqualsThan", JavaType.BOOLEAN,
       JavaType.STRING, JavaType.NUMBER),
 
+  /** The record len eq record. */
+  RECORD_LEN_EQ_RECORD(EntityTypeEnum.RECORD, "recordStringLengthEqualsRecord", JavaType.BOOLEAN,
+      JavaType.STRING, JavaType.NUMBER),
+
+  /** The record len dist record. */
+  RECORD_LEN_DIST_RECORD(EntityTypeEnum.RECORD, "recordStringLengthDistinctRecord",
+      JavaType.BOOLEAN, JavaType.STRING, JavaType.NUMBER),
+
+  /** The record len gt record. */
+  RECORD_LEN_GT_RECORD(EntityTypeEnum.RECORD, "recordStringLengthGreaterThanRecord",
+      JavaType.BOOLEAN, JavaType.STRING, JavaType.NUMBER),
+
+  /** The record len lt record. */
+  RECORD_LEN_LT_RECORD(EntityTypeEnum.RECORD, "recordStringLengthLessThanRecord", JavaType.BOOLEAN,
+      JavaType.STRING, JavaType.NUMBER),
+
+  /** The record len gteq record. */
+  RECORD_LEN_GTEQ_RECORD(EntityTypeEnum.RECORD, "recordStringLengthGreaterThanOrEqualsThanRecord",
+      JavaType.BOOLEAN, JavaType.STRING, JavaType.NUMBER),
+
+  /** The record len lteq record. */
+  RECORD_LEN_LTEQ_RECORD(EntityTypeEnum.RECORD, "recordStringLengthLessThanOrEqualsThanRecord",
+      JavaType.BOOLEAN, JavaType.STRING, JavaType.NUMBER),
+
   /** The record seq. */
   RECORD_SEQ(EntityTypeEnum.RECORD, "recordStringEquals", JavaType.BOOLEAN, JavaType.STRING,
       JavaType.STRING),

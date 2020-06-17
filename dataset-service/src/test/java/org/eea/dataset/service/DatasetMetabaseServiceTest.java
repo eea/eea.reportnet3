@@ -7,7 +7,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -137,10 +136,14 @@ public class DatasetMetabaseServiceTest {
   private KafkaSenderUtils kafkaSenderUtils;
 
   @Mock
-  private ForeignRelationsRepository foreingRelationsRepository;
+  private ForeignRelationsRepository foreignRelationsRepository;
 
   @Mock
   private DatasetService datasetService;
+
+  ForeignRelations foreignRelations;
+
+  DataSetMetabase dataSetMetabase;
 
   /**
    * Inits the mocks.
@@ -148,6 +151,11 @@ public class DatasetMetabaseServiceTest {
   @Before
   public void initMocks() {
     ThreadPropertiesManager.setVariable("user", "user");
+    dataSetMetabase = new DataSetMetabase();
+    dataSetMetabase.setId(1L);
+    foreignRelations = new ForeignRelations();
+    foreignRelations.setId(1L);
+    foreignRelations.setIdDatasetDestination(dataSetMetabase);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -440,20 +448,20 @@ public class DatasetMetabaseServiceTest {
 
   @Test
   public void testAddForeignRelation() {
-    Mockito.when(foreingRelationsRepository.save(Mockito.any())).thenReturn(new ForeignRelations());
+    Mockito.when(foreignRelationsRepository.save(Mockito.any())).thenReturn(new ForeignRelations());
     datasetMetabaseService.addForeignRelation(1L, 1L, "5ce524fad31fc52540abae73",
         "5ce524fad31fc52540abae73");
-    Mockito.verify(foreingRelationsRepository, times(1)).save(Mockito.any());
+    Mockito.verify(foreignRelationsRepository, times(1)).save(Mockito.any());
   }
 
   @Test
   public void testDeleteForeignRelation() {
-    Mockito.doNothing().when(foreingRelationsRepository)
+    Mockito.doNothing().when(foreignRelationsRepository)
         .deleteFKByOriginDestinationAndPkAndIdFkOrigin(Mockito.any(), Mockito.any(), Mockito.any(),
             Mockito.any());
     datasetMetabaseService.deleteForeignRelation(1L, 1L, "5ce524fad31fc52540abae73",
         "5ce524fad31fc52540abae73");
-    Mockito.verify(foreingRelationsRepository, times(1))
+    Mockito.verify(foreignRelationsRepository, times(1))
         .deleteFKByOriginDestinationAndPkAndIdFkOrigin(Mockito.any(), Mockito.any(), Mockito.any(),
             Mockito.any());
   }
@@ -461,7 +469,7 @@ public class DatasetMetabaseServiceTest {
   @Test
   public void testGetDatasetDestinationForeignRelation() {
     datasetMetabaseService.getDatasetDestinationForeignRelation(1L, "5ce524fad31fc52540abae73");
-    Mockito.verify(foreingRelationsRepository, times(1))
+    Mockito.verify(foreignRelationsRepository, times(1))
         .findDatasetDestinationByOriginAndPk(Mockito.any(), Mockito.any());
   }
 
@@ -512,5 +520,62 @@ public class DatasetMetabaseServiceTest {
     Mockito.when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
     Mockito.when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(false);
     Assert.assertNull(datasetMetabaseService.getDatasetType(1L));
+  }
+
+  @Test
+  public void getIntegrityDatasetIdNullTest() {
+    Mockito.when(foreignRelationsRepository.findFirstByIdDatasetOrigin_idAndIdPkAndIdFkOrigin(
+        Mockito.anyLong(), Mockito.any(), Mockito.any())).thenReturn(Optional.empty());
+    Assert.assertNull(datasetMetabaseService.getIntegrityDatasetId(1L, "1", "1"));
+  }
+
+  @Test
+  public void getIntegrityDatasetIdTest() {
+
+    Mockito.when(foreignRelationsRepository.findFirstByIdDatasetOrigin_idAndIdPkAndIdFkOrigin(
+        Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Optional.of(foreignRelations));
+    Assert.assertEquals((Long) 1L, datasetMetabaseService.getIntegrityDatasetId(1L, "1", "1"));
+  }
+
+  @Test
+  public void createForeignRelationshipTest() {
+    datasetMetabaseService.createForeignRelationship(1L, 1L, "5ce524fad31fc52540abae73",
+        "5ce524fad31fc52540abae73");
+    Mockito.verify(foreignRelationsRepository, times(1)).save(Mockito.any());
+  }
+
+  @Test
+  public void updateForeignRelationshipFoundOlderTest() {
+    Mockito
+        .when(foreignRelationsRepository
+            .findFirstByIdDatasetOrigin_idAndIdDatasetDestination_idAndIdPkAndIdFkOrigin(
+                Mockito.anyLong(), Mockito.anyLong(), Mockito.any(), Mockito.any()))
+        .thenReturn(Optional.of(foreignRelations));
+    datasetMetabaseService.updateForeignRelationship(1L, 1L, "5ce524fad31fc52540abae73",
+        "5ce524fad31fc52540abae73");
+    Mockito.verify(foreignRelationsRepository, times(1)).save(Mockito.any());
+  }
+
+  @Test
+  public void updateForeignRelationshipTest() {
+    datasetMetabaseService.updateForeignRelationship(1L, 1L, "5ce524fad31fc52540abae73",
+        "5ce524fad31fc52540abae73");
+    Mockito.verify(foreignRelationsRepository, times(1)).save(Mockito.any());
+  }
+
+  @Test
+  public void getDatasetIdByDatasetSchemaIdAndDataProviderIdNullTest() {
+    Mockito.when(dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderId(Mockito.any(),
+        Mockito.anyLong())).thenReturn(Optional.empty());
+    Assert
+        .assertNull(datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId("1", 1L));
+  }
+
+  @Test
+  public void getDatasetIdByDatasetSchemaIdAndDataProviderIdTest() {
+    Mockito.when(dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderId(Mockito.any(),
+        Mockito.anyLong())).thenReturn(Optional.of(dataSetMetabase));
+    Assert.assertEquals((Long) 1L,
+        datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId("1", 1L));
   }
 }

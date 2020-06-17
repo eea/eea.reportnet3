@@ -34,17 +34,20 @@ const useBigButtonList = ({
       buttonClass: 'newItem',
       buttonIcon: 'plus',
       buttonIconClass: 'newItemCross',
-      caption: resources.messages['newItem'],
+      // caption: resources.messages['newItem'],
+      caption: resources.messages['newSchema'],
       helpClassName: 'dataflow-new-item-help-step',
-      layout: 'menuBigButton',
-      model: [
+      // layout: 'menuBigButton',
+      layout: 'defaultBigButton',
+      handleRedirect: () => onShowNewSchemaDialog(),
+      /* model: [
         {
           label: resources.messages['createNewEmptyDatasetSchema'],
           icon: 'add',
           command: () => onShowNewSchemaDialog()
         },
         { label: resources.messages['createNewDatasetFromTemplate'], icon: 'add', disabled: true }
-      ],
+      ], */
       visibility: dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']
     },
     {
