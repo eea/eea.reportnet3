@@ -144,7 +144,7 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
         table.tableSchemaName = tableDTO.tableSchemaName;
         table.tableSchemaDescription = tableDTO.tableSchemaDescription;
         table.tableSchemaReadOnly = tableDTO.tableSchemaReadOnly;
-        table.tableSchemaToPrefill = !isNil(tableDTO.tableSchemaToPrefill);
+        table.tableSchemaToPrefill = !isNil(tableDTO.tableSchemaToPrefill) ? tableDTO.tableSchemaToPrefill : false;
         if (!isNull(tableDTO.records) && !isNil(tableDTO.records[0].fields) && tableDTO.records[0].fields.length > 0) {
           const containsCodelists = !isEmpty(
             tableDTO.records[0].fields.filter(
