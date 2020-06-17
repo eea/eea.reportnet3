@@ -196,7 +196,13 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
 
   const editAndDeleteTemplate = row => {
     let rowType = 'field';
-    if (row.entityType === 'RECORD' || row.entityType === 'TABLE') rowType = 'row';
+
+    if (row.entityType === 'RECORD' || row.entityType === 'TABLE') {
+      rowType = 'row';
+    } else if (row.entityType === 'DATASET') {
+      rowType = 'dataset';
+    }
+
     return (
       <ActionsColumn
         onDeleteClick={() => onShowDeleteDialog()}

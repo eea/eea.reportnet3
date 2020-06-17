@@ -106,7 +106,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    leftSideBarContext.addHelpSteps(DataflowHelpHelpConfig, 'dataflowHelpHelp', []);
+    leftSideBarContext.addHelpSteps(DataflowHelpHelpConfig, 'dataflowHelpHelp');
   }, [documents, webLinks, datasetsSchemas, selectedIndex]);
 
   // useEffect(() => {
