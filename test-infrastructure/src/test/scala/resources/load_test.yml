@@ -29,11 +29,11 @@ gatling_config:
     #      timeOut: 1000
     - requestName: queryDataset
       endpoint: /dataset/TableValueDataset/${datasetId}?idTableSchema=${tableschema}&pageNum=0&pageSize=10&levelError=CORRECT,INFO,WARNING,ERROR,BLOCKER
-      usersNumber: 100
-      numberExecutions: 1
+      usersNumber: 200
+      numberExecutions: 10
       useFeeder: true
       method: get
       puaseTime: 5
-      timeOut: 2000
+      timeOut: 15000
       headers:
-        Authorization: Bearer 92a26e4f-da46-4dbf-8c49-6e838951f1b6
+        Authorization: Bearer 1ce7b658-c4b7-47ca-a460-8e472564d7c5
