@@ -146,7 +146,7 @@ public class RuleExpressionVO {
       boolean firstParam = true;
       StringBuilder sb = new StringBuilder();
 
-      sb.append("this.");
+      sb.append("RuleOperators.");
       sb.append(operator.getFunctionName());
       sb.append("(");
 
@@ -247,7 +247,7 @@ public class RuleExpressionVO {
    * @return the int
    */
   private int readOperator(String expression, int index, RuleExpressionVO rule) {
-    int beginIndex = index + "this.".length();
+    int beginIndex = index + "RuleOperators.".length();
     int endIndex = expression.indexOf('(', beginIndex);
     rule.operator =
         RuleOperatorEnum.valueOfFunctionName(expression.substring(beginIndex, endIndex));
@@ -267,9 +267,6 @@ public class RuleExpressionVO {
     rule.params = new ArrayList<>();
     int length = expression.length();
 
-    if (expression.contains("isIntegrityConstraint")) {
-      return length;
-    }
     loop: while (index < length) {
       switch (expression.charAt(index)) {
         case '0':
@@ -284,7 +281,7 @@ public class RuleExpressionVO {
         case '9':
           index = readNumber(expression, index, rule);
           break;
-        case 't':
+        case 'R':
           index = readFunction(expression, index, rule);
           break;
         case 'v':
