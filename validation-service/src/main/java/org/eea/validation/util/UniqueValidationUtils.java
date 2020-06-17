@@ -410,8 +410,10 @@ public class UniqueValidationUtils {
         tableValidationReferenced.setValidation(validation);
         if (integrityVO.getOriginDatasetSchemaId()
             .equals(integrityVO.getReferencedDatasetSchemaId())) {
+          TableSchema tableSchema2 = getTableSchemaFromIdFieldSchema(datasetSchema,
+              integrityVO.getReferencedFields().get(0));
           TableValue tableValue2 =
-              tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
+              tableRepository.findByIdTableSchema(tableSchema2.getIdTableSchema().toString());
           tableValidationReferenced.setTableValue(tableValue2);
         } else {
           tableValidationReferenced.setTableValue(tableValue);
