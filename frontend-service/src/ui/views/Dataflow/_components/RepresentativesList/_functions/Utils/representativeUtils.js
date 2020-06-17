@@ -136,9 +136,13 @@ export const onDeleteConfirm = async (formDispatcher, formState) => {
   try {
     await RepresentativeService.deleteById(formState.representativeIdToDelete);
 
+    const updatedList = formState.representatives.filter(
+      representative => representative.representativeId !== formState.representativeIdToDelete
+    );
+
     formDispatcher({
       type: 'DELETE_REPRESENTATIVE',
-      payload: { representativeIdToDelete: formState.representativeIdToDelete }
+      payload: { updatedList }
     });
   } catch (error) {
     console.error('error on RepresentativeService.deleteById: ', error);

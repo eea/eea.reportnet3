@@ -28,12 +28,9 @@ export const reducer = (state, { type, payload }) => {
       return { ...state, unusedDataProvidersOptions };
 
     case 'DELETE_REPRESENTATIVE':
-      updatedList = state.representatives.filter(
-        representative => representative.representativeId !== payload.representativeIdToDelete
-      );
       return {
         ...state,
-        representatives: updatedList,
+        representatives: payload.updatedList,
         refresher: !state.refresher,
         isVisibleConfirmDeleteDialog: false
       };
