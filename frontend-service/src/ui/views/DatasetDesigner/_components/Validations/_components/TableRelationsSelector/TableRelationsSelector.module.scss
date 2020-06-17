@@ -1,0 +1,26 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin-top: 1rem;
+  .fieldsGroup {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    .field {
+      --qcFieldGap: 1rem;
+      --tableFieldWidth: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      padding-left: 0.1rem;
+      margin-right: var(--qcFieldGap);
+      width: var(--tableFieldWidth);
+    }
+    .checkbox {
+      --tableCheckboxLabelWidth: 225px;
+      width: var(--tableCheckboxLabelWidth);
+    }
+  }
+}

@@ -21,6 +21,7 @@ export const ExpressionsTab = ({
   onExpressionsErrors
 }) => {
   const resourcesContext = useContext(ResourcesContext);
+
   return (
     <React.Fragment>
       <div className={styles.section}>

@@ -2,6 +2,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { checkComparisonExpressions } from './checkComparisonExpressions';
+import { checkComparisonRelation } from './checkComparisonRelation';
 
 export const checkComparisonValidation = candidateRule => {
   let isValidated = true;
@@ -17,6 +18,10 @@ export const checkComparisonValidation = candidateRule => {
       }
     } else if (ruleKey === 'expressions' && !isEmpty(candidateRule.expressions)) {
       if (checkComparisonExpressions(candidateRule[ruleKey])) {
+        isValidated = false;
+      }
+    } else if (ruleKey == 'relations' && !isEmpty(candidateRule.relations.links)) {
+      if (checkComparisonRelation(candidateRule[ruleKey].links)) {
         isValidated = false;
       }
     }
