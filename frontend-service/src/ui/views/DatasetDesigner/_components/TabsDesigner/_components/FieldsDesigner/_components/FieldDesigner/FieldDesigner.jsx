@@ -786,11 +786,9 @@ export const FieldDesigner = ({
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton}`}
             icon="horizontalSliders"
-            label={resources.messages['qcRules']}
+            label={resources.messages['createFieldQC']}
             onClick={() => validationContext.onOpenModalFromField(fieldId, tableSchemaId)}
             style={{ marginLeft: '0.4rem', alignSelf: !fieldDesignerState.isEditing ? 'center' : 'baseline' }}
-            tooltip={resources.messages['createFieldQC']}
-            tooltipOptions={{ position: 'bottom' }}
           />
         ) : null}
         {renderDeleteButton()}

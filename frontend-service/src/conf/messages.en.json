@@ -28,7 +28,8 @@
     "categoryShortCode": "Short code",
     "checkAllFilter": "Select all",
     "chooseChartColor": "Choose your dashboard color",
-    "chooseExpirationDate": "The expiration date is not defined or has expired. Please choose data collection expiration date",
+    "chooseExpirationDate": "Please choose the delivery date for this dataflow.",
+    "chooseExpirationDateSecondLine": "There is no due date for this associated obligation.",
     "cleanFilters": "Clean filters",
     "clearFilters": "Clear filters",
     "close": "Close",
@@ -85,7 +86,7 @@
     "dark": "Dark",
     "dashboards": "Dashboards",
     "dataCollection": "Data Collection",
-    "dataCollectionExpirationDate": "Current expiration date is <strong>{:expirationData}</strong>",
+    "dataCollectionExpirationDate": "Please choose the <strong>delivery date</strong> for this dataflow. <br>Due date for the associated obligation selected is <strong>{:expirationData}</strong>. <br>Associated obligation's due date will not be changed.",
     "dataflow": "Dataflow",
     "dataflowAcceptedPendingTab": "Pending & Accepted",
     "dataflowCompletedTab": "Completed",
@@ -698,6 +699,8 @@
     "fieldRelationsLabel": "Field relations",
     "originField": "First table field",
     "referencedField": "Second table field",
-    "addNewRelation": "Add new relation"
+    "addNewRelation": "Add new relation",
+    "createDataCollectionConfirmQuestion": "Are you sure you want to create a data collection?",
+    "createDataCollectionConfirm": "You can no longer edit anything related to design datasets (tables, fields, QC's, snapshots, etc). You will be able to manage new reporters."
   }
 }
