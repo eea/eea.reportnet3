@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { isEmpty, isUndefined } from 'lodash';
@@ -37,11 +37,15 @@ export const BigButton = ({
 }) => {
   const resources = useContext(ResourcesContext);
 
-  const [buttonsTitle, setButtonsTitle] = useState(!isUndefined(caption) ? caption : '');
+  const [buttonsTitle, setButtonsTitle] = useState('');
   const [initialValue, setInitialValue] = useState();
   const [isEditEnabled, setIsEditEnabled] = useState(false);
 
   const menuBigButtonRef = useRef();
+
+  useEffect(() => {
+    setButtonsTitle(caption);
+  }, [caption]);
 
   if (isEditEnabled && document.getElementsByClassName('p-inputtext p-component').length > 0) {
     document.getElementsByClassName('p-inputtext p-component')[0].focus();
