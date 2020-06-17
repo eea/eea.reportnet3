@@ -12,6 +12,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
+import { IntegrationService } from 'core/services/Integration';
 import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
 import { ValidationService } from 'core/services/Validation';
 
@@ -20,6 +21,7 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
   const notificationContext = useContext(NotificationContext);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [extensionsOperationsList, setExtensionsOperationsList] = useState();
   const [uniqueList, setUniqueList] = useState();
   const [validationList, setValidationList] = useState();
 
@@ -27,6 +29,7 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
     if (!isEmpty(datasetsSchemas)) {
       getValidationList(datasetsSchemas);
       getUniqueList(datasetsSchemas);
+      getExtensionsOperations(datasetsSchemas);
     }
   }, [datasetsSchemas]);
 
@@ -34,11 +37,11 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
     renderDatasetSchemas();
   }, [uniqueList, validationList]);
 
-  const filterUniques = designDataset => {
-    if (!isUndefined(uniqueList)) {
-      const filteredUniques = uniqueList.filter(list => list.datasetSchemaId === designDataset.datasetSchemaId);
-      if (!isUndefined(filteredUniques[0])) {
-        return filteredUniques;
+  const filterData = (designDataset, data) => {
+    if (!isUndefined(data)) {
+      const filteredData = data.filter(list => list.datasetSchemaId === designDataset.datasetSchemaId);
+      if (!isUndefined(filteredData[0])) {
+        return filteredData;
       } else {
         return [];
       }
@@ -47,16 +50,31 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
     }
   };
 
-  const filterValidations = designDataset => {
-    if (!isUndefined(validationList)) {
-      const filteredValidations = validationList.filter(list => list.datasetSchemaId === designDataset.datasetSchemaId);
-      if (!isUndefined(filteredValidations[0])) {
-        return filteredValidations;
-      } else {
-        return [];
-      }
-    } else {
-      return [];
+  const getExtensionsOperations = async datasetsSchemas => {
+    try {
+      const datasetExtensionsOperations = datasetsSchemas.map(async datasetSchema => {
+        return await IntegrationService.allExtensionsOperations(datasetSchema.datasetSchemaId);
+      });
+
+      Promise.all(datasetExtensionsOperations).then(allExtensionsOperations => {
+        const parseExtensionsOperations = extensionsOperations => {
+          const parsedExtensionsOperations = [];
+          extensionsOperations.forEach(extensionOperation => {
+            parsedExtensionsOperations.push(pick(extensionOperation, 'datasetSchemaId', 'operation', 'fileExtension'));
+          });
+          return parsedExtensionsOperations;
+        };
+
+        const parsedExtensionsOperations = parseExtensionsOperations(allExtensionsOperations.flat());
+        setExtensionsOperationsList(!isUndefined(parsedExtensionsOperations) ? parsedExtensionsOperations : []);
+      });
+    } catch (error) {
+      const schemaError = {
+        type: error.message
+      };
+      notificationContext.add(schemaError);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -210,8 +228,9 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
               key={i}
               index={i}
               isCustodian={isCustodian}
-              uniqueList={filterUniques(designDataset)}
-              validationList={filterValidations(designDataset)}
+              extensionsOperationsList={filterData(designDataset, extensionsOperationsList)}
+              uniqueList={filterData(designDataset, uniqueList)}
+              validationList={filterData(designDataset, validationList)}
             />
           );
         })}

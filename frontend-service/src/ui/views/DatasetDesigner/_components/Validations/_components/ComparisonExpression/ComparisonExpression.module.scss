@@ -7,6 +7,9 @@
   --fieldsGap: 1rem;
   list-style: none !important;
   .group {
+    display: flex;
+    align-self: baseline;
+    align-items: center;
     margin-right: 1rem;
     // margin-left: 0.5rem;
     :global .p-checkbox {

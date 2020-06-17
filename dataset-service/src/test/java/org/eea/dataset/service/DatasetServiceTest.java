@@ -1,11 +1,12 @@
 package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,6 +37,7 @@ import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.data.repository.TableValidationRepository;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
@@ -57,8 +59,11 @@ import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
@@ -72,7 +77,6 @@ import org.eea.interfaces.vo.dataset.RecordValidationVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -323,6 +327,10 @@ public class DatasetServiceTest {
    */
   @Mock
   private LockService lockService;
+
+  /** The dataflow controller zull. */
+  @Mock
+  private DataFlowControllerZuul dataflowControllerZull;
 
   /**
    * The field value.
@@ -648,7 +656,7 @@ public class DatasetServiceTest {
     when(recordRepository.findByTableValueNoOrder(Mockito.any(), Mockito.any()))
         .thenReturn(recordValues);
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING,
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING,
         ErrorTypeEnum.CORRECT, ErrorTypeEnum.BLOCKER, ErrorTypeEnum.INFO};
     datasetService.getTableValuesById(1L, "mongoId", pageable, null, errorfilter);
     Mockito.verify(recordNoValidationMapper, times(1)).entityListToClass(Mockito.any());
@@ -683,7 +691,7 @@ public class DatasetServiceTest {
     recV.add(recValidation);
     pageable = PageRequest.of(0, 1);
     String listFields = "field_1:1,fields_2:2,fields_3:3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
     when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
     when(fieldValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
@@ -723,7 +731,7 @@ public class DatasetServiceTest {
     recV.add(recValidation);
     pageable = PageRequest.of(0, 1);
     String listFields = "field_1:1,fields_2:2,fields_3:3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
     when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
     when(fieldValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
@@ -763,7 +771,7 @@ public class DatasetServiceTest {
     recV.add(recValidation);
     pageable = null;
     String listFields = "field_1:1,fields_2:2,fields_3:3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
     when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
     when(fieldValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
@@ -803,7 +811,7 @@ public class DatasetServiceTest {
     recV.add(recValidation);
     pageable = null;
     String listFields = "field_1:1,fields_2:2,fields_3:3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
     when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
     when(fieldValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
@@ -842,7 +850,7 @@ public class DatasetServiceTest {
     recV.add(recValidation);
     pageable = null;
     String listFields = "field_1:1,fields_2:2,fields_3:3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     List<FieldValidationVO> valFieldVO = new ArrayList<>();
     FieldValidationVO fieldVO = new FieldValidationVO();
     ValidationVO validation = new ValidationVO();
@@ -886,7 +894,7 @@ public class DatasetServiceTest {
     recV.add(recValidation);
     pageable = null;
     String listFields = "field_1:1,fields_2:2,fields_3:3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
     when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
     when(fieldValidationMapper.entityListToClass(Mockito.any())).thenReturn(null);
@@ -925,7 +933,7 @@ public class DatasetServiceTest {
     recV.add(recValidation);
     pageable = null;
     String listFields = "field_1:1,fields_2:2,fields_3:3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
     when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
     when(fieldValidationMapper.entityListToClass(Mockito.any())).thenReturn(null);
@@ -964,7 +972,7 @@ public class DatasetServiceTest {
     recV.add(recValidation);
     pageable = null;
     String listFields = "field_1:1,fields_2:2,fields_3:3";
-    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[]{ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
+    ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     List<FieldValidationVO> valFieldVO = new ArrayList<>();
     FieldValidationVO fieldVO = new FieldValidationVO();
     ValidationVO validation = new ValidationVO();
@@ -2044,4 +2052,52 @@ public class DatasetServiceTest {
     Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
   }
 
+  @Test
+  public void isReportableDesignTest() {
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(designDatasetRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new DesignDataset()));
+    Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
+    Mockito.when(dataflowControllerZull.findById(Mockito.any())).thenReturn(dataflow);
+    assertTrue(datasetService.isDatasetReportable(1L));
+  }
+
+  @Test
+  public void isNotReportableDesignTest() {
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(designDatasetRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new DesignDataset()));
+    Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
+    Mockito.when(dataflowControllerZull.findById(Mockito.any())).thenReturn(dataflow);
+    assertFalse(datasetService.isDatasetReportable(1L));
+  }
+
+  @Test
+  public void isReportableTest() {
+    assertFalse(datasetService.isDatasetReportable(1L));
+  }
+
+  @Test
+  public void isReportableReportingTest() {
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(reportingDatasetRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new ReportingDataset()));
+    Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
+    Mockito.when(dataflowControllerZull.findById(Mockito.any())).thenReturn(dataflow);
+    assertTrue(datasetService.isDatasetReportable(1L));
+  }
+
+  @Test
+  public void isNotReportableReportingTest() {
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(reportingDatasetRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new ReportingDataset()));
+    Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
+    Mockito.when(dataflowControllerZull.findById(Mockito.any())).thenReturn(dataflow);
+    assertFalse(datasetService.isDatasetReportable(1L));
+  }
 }

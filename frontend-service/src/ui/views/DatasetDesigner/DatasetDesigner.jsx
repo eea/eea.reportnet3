@@ -16,6 +16,7 @@ import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
+import { Integrations } from './_components/Integrations';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
 import { Snapshots } from 'ui/views/_components/Snapshots';
@@ -41,6 +42,7 @@ import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContex
 
 import { designerReducer } from './_functions/Reducers/designerReducer';
 
+import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
 
 import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
@@ -64,18 +66,21 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     dataflowName: '',
     datasetDescription: '',
     datasetHasData: false,
+    datasetSchema: {},
     datasetSchemaAllTables: [],
     datasetSchemaId: '',
     datasetSchemaName: '',
-    datasetSchema: {},
     datasetSchemas: [],
     datasetStatistics: [],
     dataViewerOptions: { activeIndex: 0, isValidationSelected: false, recordPositionId: -1, selectedRecordErrorId: -1 },
     hasWritePermissions: false,
     initialDatasetDescription: '',
+    isIntegrationListDialogVisible: false,
+    isIntegrationManageDialogVisible: false,
     isLoading: true,
     isManageUniqueConstraintDialogVisible: false,
     isPreviewModeOn: DatasetDesignerUtils.getUrlParamValue('design'),
+    isRefreshHighlighted: false,
     isUniqueConstraintsListDialogVisible: false,
     isValidationViewerVisible: false,
     levelErrorTypes: [],
@@ -145,7 +150,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, []);
 
   useEffect(() => {
-    if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener)
+    if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener)
       manageDialogs('validationListDialogVisible', true);
   }, [validationContext]);
 
@@ -280,8 +285,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
+  const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
+
+  useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
+
   const onHideValidationsDialog = () => {
-    if (validationContext.opener == 'validationsListDialog' && validationContext.reOpenOpener) {
+    if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener) {
       validationContext.onResetOpener();
     }
     manageDialogs('validationListDialogVisible', false);
@@ -290,13 +299,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const onKeyChange = event => {
     if (event.key === 'Escape') {
       designerDispatch({ type: 'ON_UPDATE_DESCRIPTION', payload: { value: designerState.initialDatasetDescription } });
-    } else if (event.key == 'Enter') {
+    } else if (event.key === 'Enter') {
       event.preventDefault();
       onBlurDescription(event.target.value);
     }
   };
 
   const onLoadSchema = () => {
+    onHighlightRefresh(false);
+
     try {
       isLoading(true);
       const getDatasetSchemaId = async () => {
@@ -313,13 +324,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         designerDispatch({
           type: 'GET_DATASET_DATA',
           payload: {
+            datasetSchema: dataset,
+            datasetStatistics: datasetStatisticsDTO,
             description: dataset.datasetSchemaDescription,
             levelErrorTypes: dataset.levelErrorTypes,
             schemaId: dataset.datasetSchemaId,
             tables: dataset.tables,
-            tableSchemaNames: tableSchemaNamesList,
-            datasetStatistics: datasetStatisticsDTO,
-            datasetSchema: dataset
+            tableSchemaNames: tableSchemaNamesList
           }
         });
       };
@@ -343,10 +354,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     designerDispatch({
       type: 'SET_DATAVIEWER_OPTIONS',
       payload: {
-        recordPositionId: posIdRecord,
-        selectedRecordErrorId: selectedRecordErrorId,
         activeIndex: tableSchemaId,
-        isValidationSelected: true
+        isValidationSelected: true,
+        recordPositionId: posIdRecord,
+        selectedRecordErrorId
       }
     });
   };
@@ -372,22 +383,24 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const renderActionButtonsValidationDialog = (
     <Fragment>
       <Button
-        className="p-button-primary p-button-animated-blink"
+        className="p-button-secondary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['createRowValidationBtn']}
         onClick={() => {
           validationContext.onOpenModalFromOpener('row', 'validationsListDialog');
           onHideValidationsDialog();
         }}
+        style={{ float: 'left' }}
       />
       <Button
-        className="p-button-primary p-button-animated-blink"
+        className="p-button-secondary p-button-animated-blink"
         icon={'plus'}
         label={resources.messages['createFieldValidationBtn']}
         onClick={() => {
           validationContext.onOpenModalFromOpener('field', 'validationsListDialog');
           onHideValidationsDialog();
         }}
+        style={{ float: 'left' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
@@ -455,12 +468,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     if (designerState.validationListDialogVisible) {
       return (
         <Dialog
-          className={styles.paginatorValidationViewer}
+          className={styles.qcRulesDialog}
           dismissableMask={true}
           footer={renderActionButtonsValidationDialog}
           header={resources.messages['qcRules']}
           onHide={() => onHideValidationsDialog()}
-          style={{ width: '90%' }}
           visible={designerState.validationListDialogVisible}>
           <TabsValidations
             dataset={designerState.metaData.dataset}
@@ -500,7 +512,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         <div className={styles.ButtonsBar}>
           <InputTextarea
             className={styles.datasetDescription}
-            collapsedHeight={40}
+            collapsedHeight={55}
             expandableOnClick={true}
             key="datasetDescription"
             onBlur={e => onBlurDescription(e.target.value)}
@@ -533,15 +545,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               />
 
               <Button
-                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-                disabled={false}
-                icon={'horizontalSliders'}
-                iconClasses={null}
-                label={resources.messages['qcRules']}
-                onClick={() => manageDialogs('validationListDialogVisible', true)}
-                ownButtonClasses={null}
-              />
-              <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
                   designerState.datasetStatistics.datasetErrors && designerState.isPreviewModeOn
                     ? 'p-button-animated-blink'
@@ -554,11 +557,30 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 ownButtonClasses={null}
                 iconClasses={designerState.datasetStatistics.datasetErrors ? 'warning' : ''}
               />
+
+              <Button
+                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                disabled={false}
+                icon={'horizontalSliders'}
+                iconClasses={null}
+                label={resources.messages['qcRules']}
+                onClick={() => manageDialogs('validationListDialogVisible', true)}
+                ownButtonClasses={null}
+              />
+
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
                 icon={'key'}
                 label={resources.messages['uniqueConstraints']}
                 onClick={() => manageDialogs('isUniqueConstraintsListDialogVisible', true)}
+              />
+
+              <Button
+                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                icon={'export'}
+                iconClasses={styles.integrationsButton}
+                label={resources.messages['externalIntegrations']}
+                onClick={() => manageDialogs('isIntegrationListDialogVisible', true)}
               />
 
               <Button
@@ -577,8 +599,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 label={resources.messages['snapshots']}
                 onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
               />
+
               <Button
-                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                className={`p-button-rounded p-button-${
+                  designerState.isRefreshHighlighted ? 'primary' : 'secondary-transparent'
+                }  p-button-animated-blink`}
                 icon={'refresh'}
                 label={resources.messages['refresh']}
                 onClick={() => onLoadSchema()}
@@ -622,6 +647,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         />
         {validationsListDialog()}
         {renderUniqueConstraintsDialog()}
+
+        <Integrations dataflowId={dataflowId} designerState={designerState} manageDialogs={manageDialogs} />
 
         <ManageUniqueConstraint
           designerState={designerState}

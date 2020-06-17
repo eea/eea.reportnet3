@@ -369,6 +369,21 @@
         },
         {
           "key": "UPDATE_UNIQUE_CONSTRAINT_ERROR"
+        },
+        {
+          "key": "CREATE_INTEGRATION_ERROR"
+        },
+        {
+          "key": "LOAD_INTEGRATIONS_ERROR"
+        },
+        {
+          "key": "DELETE_INTEGRATION_ERROR"
+        },
+        {
+          "key": "UPDATE_INTEGRATION_ERROR"
+        },
+        {
+          "key": "LOADING_FILE_EXTENSIONS_ERROR"
         }
       ]
     },

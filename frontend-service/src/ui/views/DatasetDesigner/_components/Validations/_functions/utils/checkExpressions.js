@@ -1,5 +1,5 @@
-import isNil from 'lodash/isNil';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import last from 'lodash/last';
 
 const checkLastExpressionWithUnion = expression => {

@@ -6,19 +6,27 @@ import java.util.Iterator;
 import java.util.List;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
+import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.RecordValue;
+import org.eea.validation.persistence.data.domain.TableValidation;
+import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.RecordRepository;
+import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
+import org.eea.validation.persistence.schemas.FieldSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
+import org.eea.validation.service.RulesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,6 +52,14 @@ public class UniqueValidationUtils {
    */
   private static DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
+  /** The table repository. */
+  private static TableRepository tableRepository;
+
+  /** The rules service. */
+  private static RulesService rulesService;
+
+  /** The data set metabase controller zuul. */
+  private static DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /**
    * Sets the rules repository.
@@ -86,6 +102,33 @@ public class UniqueValidationUtils {
     UniqueValidationUtils.dataSetSchemaControllerZuul = dataSetSchemaControllerZuul;
   }
 
+
+  /**
+   * Sets the table repository.
+   *
+   * @param tableRepository the new table repository
+   */
+  @Autowired
+  private void setTableRepository(TableRepository tableRepository) {
+    UniqueValidationUtils.tableRepository = tableRepository;
+  }
+
+  @Autowired
+  private void setRulesService(RulesService rulesService) {
+    UniqueValidationUtils.rulesService = rulesService;
+  }
+
+  /**
+   * Sets the data set metabase controller zuul.
+   *
+   * @param dataSetMetabaseControllerZuul the new data set metabase controller zuul
+   */
+  @Autowired
+  private void setDataSetMetabaseControllerZuul(
+      DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul) {
+    UniqueValidationUtils.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
+  }
+
   /**
    * Creates the validation.
    *
@@ -94,8 +137,8 @@ public class UniqueValidationUtils {
    *
    * @return the validation
    */
-  private static Validation createValidation(String idRule, String idDatasetSchema,
-      String origname) {
+  private static Validation createValidation(String idRule, String idDatasetSchema, String origname,
+      EntityTypeEnum typeEnum) {
 
     Rule rule = rulesRepository.findRule(new ObjectId(idDatasetSchema), new ObjectId(idRule));
 
@@ -112,16 +155,13 @@ public class UniqueValidationUtils {
       case "INFO":
         validation.setLevelError(ErrorTypeEnum.INFO);
         break;
-      case "BLOCKER":
-        validation.setLevelError(ErrorTypeEnum.BLOCKER);
-        break;
       default:
         validation.setLevelError(ErrorTypeEnum.BLOCKER);
         break;
     }
 
     validation.setMessage(rule.getThenCondition().get(0));
-    validation.setTypeEntity(EntityTypeEnum.RECORD);
+    validation.setTypeEntity(typeEnum);
     validation.setValidationDate(new Date().toString());
     validation.setOriginName(origname);
 
@@ -137,6 +177,11 @@ public class UniqueValidationUtils {
   @Transactional
   private static void saveRecordValidations(List<RecordValue> recordValues) {
     recordRepository.saveAll(recordValues);
+  }
+
+  @Transactional
+  private static void saveTableValidations(TableValue tableValue) {
+    tableRepository.save(tableValue);
   }
 
   /**
@@ -160,13 +205,25 @@ public class UniqueValidationUtils {
     return tableSchemaName;
   }
 
+  private static TableSchema getTableSchemaFromIdFieldSchema(DataSetSchema datasetSchema,
+      String idFieldSchema) {
+    for (TableSchema table : datasetSchema.getTableSchemas()) {
+      for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+        if (field.getIdFieldSchema().toString().equals(idFieldSchema)) {
+          return table;
+        }
+      }
+    }
+    return new TableSchema();
+  }
+
   /**
    * Mount query.
    *
    * @param fieldSchemaIds the field schema ids
    * @return the string
    */
-  private static String mountQuery(List<String> fieldSchemaIds) {
+  private static String mountDuplicatedQuery(List<String> fieldSchemaIds) {
     StringBuilder stringQuery = new StringBuilder("with table_1 as(select rv.id, ");
     Iterator<String> iterator = fieldSchemaIds.iterator();
     int i = 1;
@@ -196,6 +253,61 @@ public class UniqueValidationUtils {
   }
 
   /**
+   * Mount integrity query.
+   *
+   * @param originFields the origin fields
+   * @param referencedFields the referenced fields
+   * @param datasetOriginId the dataset origin id
+   * @param datasetReferencedId the dataset referenced id
+   * @return the string
+   */
+  private static String mountIntegrityQuery(List<String> originFields,
+      List<String> referencedFields, Long datasetOriginId, Long datasetReferencedId) {
+
+    StringBuilder stringQuery = new StringBuilder("with table_1 as(select rv.id, ");
+    Iterator<String> iterator = originFields.iterator();
+    int i = 1;
+    while (iterator.hasNext()) {
+      String schemaId = iterator.next();
+      stringQuery
+          .append("(select fv.value from dataset_" + datasetOriginId
+              + ".field_value fv where fv.id_record=rv.id and fv.id_field_schema = '")
+          .append(schemaId).append("') AS ").append("column_" + (i++));
+      if (iterator.hasNext()) {
+        stringQuery.append(",");
+      }
+    }
+    stringQuery.append(
+        " from dataset_" + datasetOriginId + ".record_value rv), table_2 as(select rv.id, ");
+    iterator = referencedFields.iterator();
+    i = 1;
+    while (iterator.hasNext()) {
+      String schemaId = iterator.next();
+      stringQuery
+          .append("(select fv.value from dataset_" + datasetReferencedId
+              + ".field_value fv where fv.id_record=rv.id and fv.id_field_schema = '")
+          .append(schemaId).append("') AS ").append("column_" + (i++));
+      if (iterator.hasNext()) {
+        stringQuery.append(",");
+      }
+    }
+    stringQuery.append(" from dataset_" + datasetReferencedId
+        + ".record_value rv) select t2.id from table_1 t1 right join table_2 t2 on t1.column_1 = t2.column_1");
+    iterator = originFields.iterator();
+    i = 2;
+    iterator.next();
+    while (iterator.hasNext()) {
+      iterator.next();
+      stringQuery.append(" and t1.column_" + i + " = t2.column_" + i);
+      i++;
+    }
+    stringQuery.append(" where t1.column_1 is null and t2.column_1 is not null ;");
+    return stringQuery.toString();
+
+  }
+
+
+  /**
    * Checks if is unique field.
    *
    * @param datasetId the dataset id
@@ -219,11 +331,11 @@ public class UniqueValidationUtils {
         getTableSchemaFromIdTableSchema(datasetSchema, uniqueConstraint.getTableSchemaId());
 
     // GetValidationData
-    Validation validation = createValidation(idRule, schemaId, origname);
+    Validation validation = createValidation(idRule, schemaId, origname, EntityTypeEnum.RECORD);
 
     // get duplicated records
-    List<RecordValue> duplicatedRecords =
-        recordRepository.queryExecutionRecord(mountQuery(uniqueConstraint.getFieldSchemaIds()));
+    List<RecordValue> duplicatedRecords = recordRepository
+        .queryExecutionRecord(mountDuplicatedQuery(uniqueConstraint.getFieldSchemaIds()));
 
     List<RecordValue> recordValues = new ArrayList<>();
     for (RecordValue record : duplicatedRecords) {
@@ -241,6 +353,76 @@ public class UniqueValidationUtils {
     saveRecordValidations(recordValues);
 
     return duplicatedRecords.isEmpty();
+  }
+
+  /**
+   * Checks if is integrity constraint.
+   *
+   * @param integrityId the integrity id
+   * @param idRule the id rule
+   * @return the boolean
+   */
+  public static Boolean isIntegrityConstraint(DatasetValue datasetId, String integrityId,
+      String idRule) {
+    // GetValidationData
+    IntegrityVO integrityVO = rulesService.getIntegrityConstraint(integrityId);
+    long datasetIdOrigin = datasetId.getId();
+    long datasetIdReferenced = dataSetMetabaseControllerZuul.getIntegrityDatasetId(datasetIdOrigin,
+        integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
+    String schemaId = integrityVO.getOriginDatasetSchemaId();
+
+    DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
+
+    TableSchema tableSchema =
+        getTableSchemaFromIdFieldSchema(datasetSchema, integrityVO.getOriginFields().get(0));
+
+    Validation validation =
+        createValidation(idRule, schemaId, tableSchema.getNameTableSchema(), EntityTypeEnum.TABLE);
+
+    List<String> notUtilizedRecords =
+        recordRepository.queryExecution(mountIntegrityQuery(integrityVO.getOriginFields(),
+            integrityVO.getReferencedFields(), datasetIdOrigin, datasetIdReferenced));
+    if (!notUtilizedRecords.isEmpty()) {
+      TableValidation tableValidation = new TableValidation();
+      tableValidation.setValidation(validation);
+      TableValue tableValue =
+          tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
+      List<TableValidation> tableValidations =
+          tableValue.getTableValidations() != null ? tableValue.getTableValidations()
+              : new ArrayList<>();
+      tableValidation.setTableValue(tableValue);
+      tableValidations.add(tableValidation);
+      tableValue.setTableValidations(tableValidations);
+      saveTableValidations(tableValue);
+    }
+    if (datasetIdOrigin != datasetIdReferenced) {
+      schemaId = integrityVO.getReferencedDatasetSchemaId();
+      datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
+    }
+    if (Boolean.TRUE.equals(integrityVO.getIsDoubleReferenced())) {
+      tableSchema =
+          getTableSchemaFromIdFieldSchema(datasetSchema, integrityVO.getReferencedFields().get(0));
+      notUtilizedRecords =
+          recordRepository.queryExecution(mountIntegrityQuery(integrityVO.getReferencedFields(),
+              integrityVO.getOriginFields(), datasetIdOrigin, datasetIdReferenced));
+      if (!notUtilizedRecords.isEmpty()) {
+        validation = createValidation(idRule, schemaId, tableSchema.getNameTableSchema(),
+            EntityTypeEnum.TABLE);
+        TableValidation tableValidation = new TableValidation();
+        tableValidation.setValidation(validation);
+        TableValue tableValue =
+            tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
+        List<TableValidation> tableValidations =
+            tableValue.getTableValidations() != null ? tableValue.getTableValidations()
+                : new ArrayList<>();
+        tableValidation.setTableValue(tableValue);
+        tableValidations.add(tableValidation);
+        tableValue.setTableValidations(tableValidations);
+        saveTableValidations(tableValue);
+      }
+    }
+    return !notUtilizedRecords.isEmpty();
+
   }
 
 }

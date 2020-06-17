@@ -62,7 +62,14 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
     parseData(fields);
     if (!isUndefined(fields) && !isNull(fields) && fields.length > 0) {
       return (
-        <DataTable ref={dataTableRef} style={{ width: '100%', marginTop: '1rem', marginBottom: '1rem' }} value={fields}>
+        <DataTable
+          ref={dataTableRef}
+          style={{
+            width: columnOptions[propertyName]['narrow'] ? '25%' : '100%',
+            marginTop: '1rem',
+            marginBottom: '1rem'
+          }}
+          value={fields}>
           {renderColumns(fields)}
         </DataTable>
       );

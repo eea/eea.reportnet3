@@ -117,49 +117,10 @@ public class ExecuteTableValidationCommandTest {
    */
   @Test
   public void executeTest() throws EEAException {
-    doNothing().when(validationService).validateTable(Mockito.any(), Mockito.any(), Mockito.any());
-    Mockito.when(validationHelper.isProcessCoordinator(Mockito.anyString())).thenReturn(false);
     executeTableValidationCommand.execute(eeaEventVO);
-
-    Mockito.verify(validationService, times(1)).validateTable(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    Mockito.verify(kafkaSenderUtils, times(1))
-        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_VALIDATED_TABLE_COMPLETED), Mockito.any());
+    Mockito.verify(validationHelper, times(1)).processValidation(Mockito.eq(eeaEventVO),
+        Mockito.eq("uuid"), Mockito.eq(1l), Mockito.any(),
+        Mockito.eq(EventType.COMMAND_VALIDATED_TABLE_COMPLETED));
   }
 
-  /**
-   * Execute exception test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void executeExceptionTest() throws EEAException {
-    doThrow(new EEAException()).when(validationService).validateTable(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    Mockito.when(validationHelper.isProcessCoordinator(Mockito.anyString())).thenReturn(false);
-    executeTableValidationCommand.execute(eeaEventVO);
-
-    Mockito.verify(validationService, times(1)).validateTable(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    Mockito.verify(kafkaSenderUtils, times(1))
-        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_VALIDATED_TABLE_COMPLETED), Mockito.any());
-  }
-
-  /**
-   * Execute test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void executeTestContainsKey() throws EEAException {
-    doNothing().when(validationService).validateTable(Mockito.any(), Mockito.any(), Mockito.any());
-
-    Mockito.when(validationHelper.isProcessCoordinator(Mockito.anyString())).thenReturn(true);
-    executeTableValidationCommand.execute(eeaEventVO);
-
-    Mockito.verify(validationService, times(1)).validateTable(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    Mockito.verify(validationHelper, times(1)).reducePendingTasks(Mockito.any(),
-        Mockito.any());
-  }
 }

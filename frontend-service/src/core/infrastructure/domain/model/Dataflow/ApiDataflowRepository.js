@@ -307,10 +307,11 @@ const getAllSchemas = async dataflowId => {
   return datasetSchemas;
 };
 
-const getApiKey = async (dataflowId, dataProviderId) => await apiDataflow.getApiKey(dataflowId, dataProviderId);
+const getApiKey = async (dataflowId, dataProviderId, isCustodian) =>
+  await apiDataflow.getApiKey(dataflowId, dataProviderId, isCustodian);
 
-const generateApiKey = async (dataflowId, dataProviderId) =>
-  await apiDataflow.generateApiKey(dataflowId, dataProviderId);
+const generateApiKey = async (dataflowId, dataProviderId, isCustodian) =>
+  await apiDataflow.generateApiKey(dataflowId, dataProviderId, isCustodian);
 
 const getPercentageOfValue = (val, total) => {
   return total === 0 ? '0.00' : ((val / total) * 100).toFixed(2);

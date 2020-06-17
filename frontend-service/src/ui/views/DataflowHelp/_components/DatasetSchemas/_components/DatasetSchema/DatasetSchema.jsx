@@ -10,11 +10,16 @@ import styles from './DatasetSchema.module.scss';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { TreeView } from 'ui/views/_components/TreeView';
 
-const DatasetSchema = ({ designDataset, index, uniqueList = [], validationList }) => {
+const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], uniqueList = [], validationList }) => {
   const resources = useContext(ResourcesContext);
   const renderDatasetSchema = () => {
     if (!isUndefined(designDataset) && !isNull(designDataset)) {
-      const parsedDesignDataset = parseDesignDataset(designDataset, uniqueList, validationList);
+      const parsedDesignDataset = parseDesignDataset(
+        designDataset,
+        extensionsOperationsList,
+        uniqueList,
+        validationList
+      );
 
       const columnOptions = {
         levelErrorTypes: {
@@ -27,9 +32,20 @@ const DatasetSchema = ({ designDataset, index, uniqueList = [], validationList }
           groupable: true,
           names: { shortCode: 'Shortcode', codelistItems: 'Single select items', pk: 'Primary key' }
         },
+        extensionsOperations: {
+          filtered: true,
+          groupable: true,
+          narrow: true,
+          invisible: ['datasetSchemaId'],
+          names: {
+            operation: 'Operation',
+            fileExtension: 'Extension'
+          }
+        },
         uniques: {
           filtered: true,
           groupable: true,
+          narrow: true,
           invisible: ['datasetSchemaId'],
           names: {
             tableName: 'Table',
@@ -115,10 +131,11 @@ const DatasetSchema = ({ designDataset, index, uniqueList = [], validationList }
     }
   };
 
-  const parseDesignDataset = (design, uniqueList, validationList) => {
+  const parseDesignDataset = (design, extensionsOperationsList, uniqueList, validationList) => {
     const parsedDataset = {};
     parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
     parsedDataset.levelErrorTypes = design.levelErrorTypes;
+    parsedDataset.extensionsOperations = extensionsOperationsList;
     parsedDataset.uniques = uniqueList;
     parsedDataset.validations = validationList;
     if (!isUndefined(design.tables) && !isNull(design.tables) && design.tables.length > 0) {

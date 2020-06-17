@@ -256,7 +256,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         dataschemaService.updatePkCatalogueDeletingSchema(schemaId);
 
         // delete the schema in Mongo
-        dataschemaService.deleteDatasetSchema(schemaId);
+        dataschemaService.deleteDatasetSchema(schemaId, datasetId);
 
         // delete from the UniqueConstraint catalog
         dataschemaService.deleteUniquesConstraintFromDataset(schemaId);
@@ -351,7 +351,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       // Delete the Uniques constraints in table
       dataschemaService.deleteUniquesConstraintFromTable(tableSchemaId);
 
-      dataschemaService.deleteTableSchema(datasetSchemaId, tableSchemaId);
+      dataschemaService.deleteTableSchema(datasetSchemaId, tableSchemaId, datasetId);
 
       // we delete the rules associate to the table
       rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, tableSchemaId);
@@ -505,7 +505,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       // Validate if the field we want to delete is a PK and it's being referenced by another field
       if (!dataschemaService.checkExistingPkReferenced(fieldVO)) {
         // Delete the fieldSchema from the datasetSchema
-        if (!dataschemaService.deleteFieldSchema(datasetSchemaId, fieldSchemaId)) {
+        if (!dataschemaService.deleteFieldSchema(datasetSchemaId, fieldSchemaId, datasetId)) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
               EEAErrorMessage.INVALID_OBJECTID);
         }

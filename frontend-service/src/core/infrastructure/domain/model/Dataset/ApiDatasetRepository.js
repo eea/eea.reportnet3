@@ -216,8 +216,10 @@ const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
 
 const getMetaData = async datasetId => {
   const datasetTableDataDTO = await apiDataset.getMetaData(datasetId);
+
   const dataset = new Dataset({
-    datasetSchemaName: datasetTableDataDTO.dataSetName
+    datasetSchemaName: datasetTableDataDTO.dataSetName,
+    datasetSchemaId: datasetTableDataDTO.datasetSchema
   });
   return dataset;
 };
@@ -563,8 +565,8 @@ export const ApiDatasetRepository = {
   deleteSchemaById,
   deleteTableDataById,
   deleteTableDesign,
-  errorsById,
   errorPositionByObjectId,
+  errorsById,
   errorStatisticsById,
   exportDataById,
   exportTableDataById,
@@ -574,10 +576,10 @@ export const ApiDatasetRepository = {
   orderTableSchema,
   schemaById,
   tableDataById,
+  updateDatasetDescriptionDesign,
   updateFieldById,
   updateRecordFieldDesign,
   updateRecordsById,
-  updateDatasetDescriptionDesign,
   updateSchemaNameById,
   updateTableDescriptionDesign,
   updateTableNameDesign,
