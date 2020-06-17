@@ -29,7 +29,7 @@
     "checkAllFilter": "Select all",
     "chooseChartColor": "Choose your dashboard color",
     "chooseExpirationDate": "Please choose the delivery date for this dataflow.",
-    "chooseExpirationDateSecond": "There is no due date for this associated obligation.",
+    "chooseExpirationDateSecondLine": "There is no due date for this associated obligation.",
     "cleanFilters": "Clean filters",
     "clearFilters": "Clear filters",
     "close": "Close",
@@ -86,8 +86,7 @@
     "dark": "Dark",
     "dashboards": "Dashboards",
     "dataCollection": "Data Collection",
-    "dataCollectionExpirationDate": "Please choose the delivery date for this dataflow.",
-    "dataCollectionExpirationDateSecond": "Due date for the associated obligation selected is <strong>{:expirationData}</strong>. Associated obligation's due date will not be changed.",
+    "dataCollectionExpirationDate": "Please choose the <strong>delivery date</strong> for this dataflow. <br>Due date for the associated obligation selected is <strong>{:expirationData}</strong>. <br>Associated obligation's due date will not be changed.",
     "dataflow": "Dataflow",
     "dataflowAcceptedPendingTab": "Pending & Accepted",
     "dataflowCompletedTab": "Completed",
@@ -690,6 +689,7 @@
     "newSchema": "New schema",
     "searchObligations": "Search obligations",
     "PKTooltip": "The primary key (PK) is a unique identifier for the records",
-    "createDataCollectionConfirm": "Are you sure you want to create a data collection? You can no longer edit anything related to design datasets (tables, fields, QC's, snapshots, etc). You will be able to manage new reporters."
+    "createDataCollectionConfirmQuestion": "Are you sure you want to create a data collection?",
+    "createDataCollectionConfirm": "You can no longer edit anything related to design datasets (tables, fields, QC's, snapshots, etc). You will be able to manage new reporters."
   }
 }

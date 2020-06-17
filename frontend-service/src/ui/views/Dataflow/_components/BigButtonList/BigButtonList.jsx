@@ -379,7 +379,7 @@ export const BigButtonList = ({
         ) : (
           <p>
             <div>{`${resources.messages['chooseExpirationDate']} `}</div>
-            <div>{`${resources.messages['chooseExpirationDateSecond']} `}</div>
+            <div>{`${resources.messages['chooseExpirationDateSecondLine']} `}</div>
           </p>
         )}
         <Calendar
@@ -406,6 +406,7 @@ export const BigButtonList = ({
           }
           onHide={() => setIsConfirmCollectionDialog(false)}
           visible={isConfirmCollectionDialog}>
+          <div>{resources.messages['createDataCollectionConfirmQuestion']}</div>
           {resources.messages['createDataCollectionConfirm']}
         </ConfirmDialog>
       )}
