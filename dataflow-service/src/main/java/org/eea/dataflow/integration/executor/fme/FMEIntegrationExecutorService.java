@@ -139,7 +139,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     // folder
     parameters.add(saveParameter("folder", folder));
     // apikey
-    parameters.add(saveParameter("apiKey", apiKey));
+    parameters.add(saveParameter("apiKey", "ApiKey " + apiKey));
 
     fmeAsyncJob.setPublishedParameters(parameters);
 
