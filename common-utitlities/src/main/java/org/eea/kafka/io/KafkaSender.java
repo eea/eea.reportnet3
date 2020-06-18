@@ -50,7 +50,8 @@ public class KafkaSender {
   public void sendMessage(final EEAEventVO event) {
 
     kafkaTemplate.executeInTransaction(operations -> {
-      if (StringUtils.isEmpty(event.getData().get("user"))) {
+      if (!event.getData().containsKey("user") || StringUtils
+          .isEmpty(event.getData().get("user"))) {
         event.getData().put("user", String.valueOf(ThreadPropertiesManager.getVariable("user")));
       }
       event.getData().put("token",
