@@ -114,7 +114,8 @@ export const IntegrationsList = ({ designerState, getUpdatedData, integrationsLi
       <Filters
         data={integrationListState.data}
         getFilteredData={onLoadFilteredData}
-        selectOptions={['integrationName', 'operation']}
+        inputOptions={['integrationName']}
+        selectOptions={['operation']}
       />
 
       {!isEmpty(integrationListState.filteredData) ? (

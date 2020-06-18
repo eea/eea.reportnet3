@@ -85,6 +85,14 @@
 .newItem span:hover {
   background-color: var(--c-blue-200);
 }
+
+.manageReporters {
+  background-color: var(--c-blue-green);
+}
+.manageReporters span:hover {
+  background-color: var(--c-aquamarine);
+}
+
 /* .newItem a:hover .newItemCross {
   -webkit-transition-duration: 0.5s;
   -moz-transition-duration: 0.5s;

@@ -408,13 +408,22 @@ public class UniqueValidationUtils {
         validation = createValidation(idRule, schemaId, tableSchemaName, EntityTypeEnum.TABLE);
         TableValidation tableValidationReferenced = new TableValidation();
         tableValidationReferenced.setValidation(validation);
-        tableValidationReferenced.setTableValue(tableValue);
+        if (integrityVO.getOriginDatasetSchemaId()
+            .equals(integrityVO.getReferencedDatasetSchemaId())) {
+          TableSchema tableSchema2 = getTableSchemaFromIdFieldSchema(datasetSchema,
+              integrityVO.getReferencedFields().get(0));
+          TableValue tableValue2 =
+              tableRepository.findByIdTableSchema(tableSchema2.getIdTableSchema().toString());
+          tableValidationReferenced.setTableValue(tableValue2);
+        } else {
+          tableValidationReferenced.setTableValue(tableValue);
+        }
         tableValidations.add(tableValidationReferenced);
       }
     }
     tableValue.setTableValidations(tableValidations);
     saveTableValidations(tableValue);
-    return notUtilizedRecords.isEmpty() || notUtilizedRecords2.isEmpty();
+    return notUtilizedRecords.isEmpty() && notUtilizedRecords2.isEmpty();
 
   }
 
