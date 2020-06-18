@@ -9,7 +9,7 @@ import lombok.Setter;
 /**
  * The Class SubmitResult.
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({"id"})
 @Getter
 @Setter

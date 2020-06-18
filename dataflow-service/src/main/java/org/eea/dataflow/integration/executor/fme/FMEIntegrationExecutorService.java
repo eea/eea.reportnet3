@@ -85,7 +85,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
     try {
       for (Object param : executionParams) {
-        if (param.getClass().getTypeName() != null) {
+        if (null != param && null != param.getClass().getTypeName()) {
           if (param instanceof Long) {
             datasetId = ((Long) param);
           } else if (param instanceof String) {
@@ -111,6 +111,11 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
     String apiKey = userManagementController.getApiKey(dataflowId, dataproviderId);
 
+    if (null == apiKey) {
+      apiKey = userManagementController.createApiKey(dataflowId, dataproviderId);
+    }
+
+
     FMEAsyncJob fmeAsyncJob = new FMEAsyncJob();
     String workspace = integration.getInternalParameters().get("processName");
     String repository = null;
@@ -126,28 +131,40 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
       folder = "MMR";
     }
 
-
     List<PublishedParameter> parameters = new ArrayList<>();
-    // dataflowId
-    parameters.add(saveParameter("dataflowId", dataflowId));
-    // providerId
-    parameters.add(saveParameter("providerId", dataproviderId));
-    // datasetDataId
-    parameters.add(saveParameter("datasetDataId", datasetId));
-    // inputfile
-    parameters.add(saveParameter("inputfile", file));
-    // folder
-    parameters.add(saveParameter("folder", folder));
-    // apikey
-    parameters.add(saveParameter("apiKey", "ApiKey " + apiKey));
-
-    fmeAsyncJob.setPublishedParameters(parameters);
-
 
     switch (integrationOperationTypeEnum) {
       case EXPORT:
+        // dataflowId
+        parameters.add(saveParameter("dataflowId", dataflowId));
+        // providerId
+        parameters.add(saveParameter("providerId", dataproviderId));
+        // datasetDataId
+        parameters.add(saveParameter("datasetDataId", datasetId));
+        // folder
+        parameters.add(saveParameter("folder", folder));
+        // apikey
+        parameters.add(saveParameter("apiKey", "ApiKey " + apiKey));
+
+        fmeAsyncJob.setPublishedParameters(parameters);
         return executeSubmit(repository, workspace, fmeAsyncJob);
+
       case IMPORT:
+
+        // dataflowId
+        parameters.add(saveParameter("dataflowId", dataflowId));
+        // providerId
+        parameters.add(saveParameter("providerId", dataproviderId));
+        // datasetDataId
+        parameters.add(saveParameter("datasetDataId", datasetId));
+        // inputfile
+        parameters.add(saveParameter("inputfile", file));
+        // folder
+        parameters.add(saveParameter("folder", folder));
+        // apikey
+        parameters.add(saveParameter("apiKey", "ApiKey " + apiKey));
+
+        fmeAsyncJob.setPublishedParameters(parameters);
         return executeSubmit(repository, workspace, fmeAsyncJob);
       default:
         return null;

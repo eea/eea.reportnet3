@@ -171,8 +171,8 @@ public class IntegrationControllerImpl implements IntegrationController {
   public ExecutionResultVO executeIntegrationProcess(
       @RequestParam("integrationTool") IntegrationToolTypeEnum integrationToolTypeEnum,
       @RequestParam("operation") IntegrationOperationTypeEnum integrationOperationTypeEnum,
-      @RequestParam("file") final String file, @RequestParam("datasetId") Long datasetId,
-      @RequestBody IntegrationVO integration) {
+      @RequestParam(name = "file", required = false) final String file,
+      @RequestParam("datasetId") Long datasetId, @RequestBody IntegrationVO integration) {
     return integrationExecutorFactory.getExecutor(integrationToolTypeEnum)
         .execute(integrationOperationTypeEnum, file, datasetId, integration);
   }
