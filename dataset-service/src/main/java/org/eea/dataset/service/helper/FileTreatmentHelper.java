@@ -1,7 +1,9 @@
 package org.eea.dataset.service.helper;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -125,6 +127,20 @@ public class FileTreatmentHelper {
     integrations.stream().forEach(integration -> {
       if (IntegrationOperationTypeEnum.IMPORT.equals(integration.getOperation())) {
         auxExtensionList.add(integration.getInternalParameters().get("fileExtension"));
+        Map<String, String> externalParameters = new HashMap<>();
+        InputStreamReader isReader = new InputStreamReader(is);
+        BufferedReader reader = new BufferedReader(isReader);
+        StringBuffer sb = new StringBuffer();
+        String str = null;
+        try {
+          while ((str = reader.readLine()) != null) {
+            sb.append(str);
+          }
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+        externalParameters.put("fileIS", str);
+        integration.setExternalParameters(externalParameters);
         integrationAux.add(integration);
       }
     });
