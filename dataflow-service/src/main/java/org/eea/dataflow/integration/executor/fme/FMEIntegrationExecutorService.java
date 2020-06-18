@@ -1,11 +1,10 @@
 package org.eea.dataflow.integration.executor.fme;
 
-import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.io.IOUtils;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.PublishedParameter;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
@@ -129,12 +128,6 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     } else {
       repository = "ReportNetTesting";
     }
-    String folder = null;
-    if (null != integration.getInternalParameters().get("folder")) {
-      folder = integration.getInternalParameters().get("folder");
-    } else {
-      folder = "MMR";
-    }
 
     List<PublishedParameter> parameters = new ArrayList<>();
 
@@ -148,7 +141,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         // datasetDataId
         parameters.add(saveParameter("datasetDataId", datasetId));
         // folder
-        parameters.add(saveParameter("folder", folder));
+        parameters.add(saveParameter("folder", datasetId + "/" + dataproviderId));
         // apikey
         parameters.add(saveParameter("apiKey", "ApiKey " + apiKey));
 
@@ -167,16 +160,17 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         // inputfile
         parameters.add(saveParameter("inputfile", fileName));
         // folder
-        parameters.add(saveParameter("folder", folder));
+        parameters.add(saveParameter("folder", datasetId + "/" + dataproviderId));
         // apikey
         parameters.add(saveParameter("apiKey", "ApiKey " + apiKey));
 
         fmeAsyncJob.setPublishedParameters(parameters);
 
-        // try to send file to FME Repository
-        InputStream file = IOUtils.toInputStream(integration.getExternalParameters().get("fileIS"));
+        byte[] decodedBytes =
+            Base64.getDecoder().decode(integration.getExternalParameters().get("fileIS"));
+
         LOG.info("Upload file to FME");
-        fmeCommunicationService.sendFile(file, datasetId, dataproviderId, fileName);
+        fmeCommunicationService.sendFile(decodedBytes, datasetId, dataproviderId, fileName);
         LOG.info("File uploaded");
         LOG.info("Executing FME Import");
         return executeSubmit(repository, workspace, fmeAsyncJob);

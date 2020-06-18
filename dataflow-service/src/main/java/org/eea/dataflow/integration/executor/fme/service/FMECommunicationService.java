@@ -1,25 +1,20 @@
 package org.eea.dataflow.integration.executor.fme.service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.io.IOUtils;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
 import org.eea.dataflow.integration.executor.fme.domain.SubmitResult;
 import org.eea.utils.LiteralConstants;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -58,8 +53,10 @@ public class FMECommunicationService {
 
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
-    HttpEntity<FMEAsyncJob> request =
-        createHttpRequest(fmeAsyncJob, uriParams, new HashMap<String, String>());
+    Map<String, String> headerInfo = new HashMap<>();
+    headerInfo.put("Content-Type", "application/json");
+
+    HttpEntity<FMEAsyncJob> request = createHttpRequest(fmeAsyncJob, uriParams, headerInfo);
     RestTemplate restTemplate = new RestTemplate();
     ResponseEntity<SubmitResult> checkResult =
         restTemplate.exchange(
@@ -75,29 +72,33 @@ public class FMECommunicationService {
     return result;
   }
 
-  public FileSubmitResult sendFile(InputStream file, Long idDataset, Long idProvider,
-      String fileName) {
+  public FileSubmitResult sendFile(byte[] file, Long idDataset, Long idProvider, String fileName) {
     MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-    try {
-      body.add("file", getFile(file));
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+
+    body.add("file", file);
+
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("datasetId", String.valueOf(idDataset));
     uriParams.put("providerId", String.valueOf(idProvider));
-    uriParams.put("fileName", fileName);
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Content-Disposition", "attachment; filename=" + fileName);
+    headerInfo.put("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+    headerInfo.put("Content-Type", "application/octet-stream");
+    headerInfo.put("Accept", "application/json");
+
+    MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter =
+        new MappingJackson2HttpMessageConverter();
+    mappingJackson2HttpMessageConverter.setSupportedMediaTypes(
+        Arrays.asList(MediaType.APPLICATION_JSON, MediaType.APPLICATION_OCTET_STREAM));
 
     HttpEntity<MultiValueMap<String, Object>> request =
         createHttpRequest(body, uriParams, headerInfo);
     RestTemplate restTemplate = new RestTemplate();
+    restTemplate.getMessageConverters().add(mappingJackson2HttpMessageConverter);
     ResponseEntity<FileSubmitResult> checkResult = restTemplate.exchange(uriComponentsBuilder
         .scheme(fmeScheme).host(fmeHost)
         .path(
-            "fmerest/v3/resources/connections/Reportnet3/{datasetId}/{providerId}/{fileName}?createDirectories=true&overwrite=true")
+            "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}?createDirectories=true&overwrite=true")
         .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, FileSubmitResult.class);
 
     FileSubmitResult result = new FileSubmitResult();
@@ -108,12 +109,45 @@ public class FMECommunicationService {
 
   }
 
-  private Resource getFile(InputStream is) throws IOException {
-    Path file = Files.createTempFile("test-file", ".txt");
-    System.out.println("Creating and Uploading Test File: " + file);
-    Files.write(file, IOUtils.toByteArray(is));
-    return new FileSystemResource(file.toFile());
+
+  public FileSubmitResult reciveFile(byte[] file, Long idDataset, Long idProvider,
+      String fileName) {
+    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+    body.add("file", file);
+
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put("datasetId", String.valueOf(idDataset));
+    uriParams.put("providerId", String.valueOf(idProvider));
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    Map<String, String> headerInfo = new HashMap<>();
+    headerInfo.put("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+    headerInfo.put("Content-Type", "application/octet-stream");
+    headerInfo.put("Accept", "application/octet-stream");
+
+    MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter =
+        new MappingJackson2HttpMessageConverter();
+    mappingJackson2HttpMessageConverter.setSupportedMediaTypes(
+        Arrays.asList(MediaType.APPLICATION_JSON, MediaType.APPLICATION_OCTET_STREAM));
+
+    HttpEntity<MultiValueMap<String, Object>> request =
+        createHttpRequest(body, uriParams, headerInfo);
+    RestTemplate restTemplate = new RestTemplate();
+    restTemplate.getMessageConverters().add(mappingJackson2HttpMessageConverter);
+    ResponseEntity<FileSubmitResult> checkResult = restTemplate.exchange(uriComponentsBuilder
+        .scheme(fmeScheme).host(fmeHost)
+        .path(
+            "fmerest/v3/resources/connections/Reportnet3/download/{datasetId}/{providerId}/{fileName}")
+        .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, FileSubmitResult.class);
+
+    FileSubmitResult result = new FileSubmitResult();
+    if (null != checkResult && null != checkResult.getBody()) {
+      result = checkResult.getBody();
+    }
+    return result;
+
   }
+
 
   /**
    * Creates the http request.
@@ -127,7 +161,7 @@ public class FMECommunicationService {
   private <T> HttpEntity<T> createHttpRequest(T body, Map<String, String> uriParams,
       Map<String, String> headerInfo) {
     headerInfo.put(LiteralConstants.AUTHORIZATION_HEADER, fmeToken);
-    headerInfo.put("Content-Type", "application/json");
+
     HttpHeaders headers = createBasicHeaders(headerInfo);
 
     HttpEntity<T> request = new HttpEntity<>(body, headers);
