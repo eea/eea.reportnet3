@@ -73,7 +73,7 @@ const RepresentativesList = ({
   }, [formState.selectedDataProviderGroup]);
 
   useEffect(() => {
-    createUnusedOptionsList(formDispatcher, formState);
+    createUnusedOptionsList(formDispatcher);
   }, [formState.allPossibleDataProviders]);
 
   useEffect(() => {
