@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
+import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
 import org.eea.dataflow.integration.executor.fme.domain.SubmitResult;
 import org.eea.utils.LiteralConstants;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,9 +74,9 @@ public class FMEFeignService {
     return result;
   }
 
-  public void sendFile(InputStream file, Long idDataset, Long idProvider, String fileName) {
-    MultiValueMap<String, Object> body
-        = new LinkedMultiValueMap<>();
+  public FileSubmitResult sendFile(InputStream file, Long idDataset, Long idProvider,
+      String fileName) {
+    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
     try {
       body.add("file", getFile(file));
     } catch (IOException e) {
@@ -88,13 +89,17 @@ public class FMEFeignService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     HttpEntity<MultiValueMap<String, Object>> request = createHttpRequest(body, uriParams);
     RestTemplate restTemplate = new RestTemplate();
-    ResponseEntity<SubmitResult> checkResult =
-        restTemplate.exchange(
-            uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
-                .path(
-                    "fmerest/v3/transformations/connections/reportnet3/{datasetId}/{providerId}/{fileName}?createDirectories=true&overwrite=true")
-                .buildAndExpand(uriParams).toString(),
-            HttpMethod.POST, request, SubmitResult.class);
+    ResponseEntity<FileSubmitResult> checkResult = restTemplate.exchange(uriComponentsBuilder
+        .scheme(fmeScheme).host(fmeHost)
+        .path(
+            "fmerest/v3/resources/connections/CARPETA_R3/{datasetId}/{providerId}/{fileName}?createDirectories=true&overwrite=true")
+        .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, FileSubmitResult.class);
+
+    FileSubmitResult result = new FileSubmitResult();
+    if (null != checkResult && null != checkResult.getBody()) {
+      result = checkResult.getBody();
+    }
+    return result;
 
   }
 
@@ -140,5 +145,16 @@ public class FMEFeignService {
     }
     return headers;
   }
+
+  private HttpHeaders createFileHeaders(Map<String, String> headersInfo) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+    if (null != headersInfo && headersInfo.size() > 0) {
+      headersInfo.entrySet().forEach(entry -> headers.set(entry.getKey(), entry.getValue()));
+    }
+    return headers;
+  }
+
 
 }

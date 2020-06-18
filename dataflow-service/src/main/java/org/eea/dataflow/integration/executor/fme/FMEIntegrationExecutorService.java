@@ -1,9 +1,11 @@
 package org.eea.dataflow.integration.executor.fme;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.io.IOUtils;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.PublishedParameter;
 import org.eea.dataflow.integration.executor.fme.service.FMEFeignService;
@@ -79,7 +81,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     // 1- Long datasetId
     Long datasetId = null;
     // 2- MultipartFile
-    String file = null;
+    String fileName = null;
     // 3- IntegrationVO
     IntegrationVO integration = new IntegrationVO();
 
@@ -89,7 +91,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
           if (param instanceof Long) {
             datasetId = ((Long) param);
           } else if (param instanceof String) {
-            file = ((String) param);
+            fileName = ((String) param);
           } else if (param instanceof IntegrationVO) {
             integration = ((IntegrationVO) param);
           }
@@ -158,13 +160,18 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         // datasetDataId
         parameters.add(saveParameter("datasetDataId", datasetId));
         // inputfile
-        parameters.add(saveParameter("inputfile", file));
+        parameters.add(saveParameter("inputfile", fileName));
         // folder
         parameters.add(saveParameter("folder", folder));
         // apikey
         parameters.add(saveParameter("apiKey", "ApiKey " + apiKey));
 
         fmeAsyncJob.setPublishedParameters(parameters);
+
+        // try to send file to FME Repository
+        InputStream file = IOUtils.toInputStream(integration.getExternalParameters().get("fileIS"));
+        fmeFeignService.sendFile(file, datasetId, dataproviderId, fileName);
+
         return executeSubmit(repository, workspace, fmeAsyncJob);
       default:
         return null;
