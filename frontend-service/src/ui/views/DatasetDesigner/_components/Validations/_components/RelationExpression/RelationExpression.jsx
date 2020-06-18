@@ -7,7 +7,7 @@ import styles from './RelationExpression.module.scss';
 import { config } from 'conf/';
 
 import { Button } from 'ui/views/_components/Button';
-import { Dropdown } from 'primereact/dropdown';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import isNil from 'lodash/isNil';
@@ -94,6 +94,7 @@ const RelationExpression = ({
         onBlur={() => onAddToClickedFields('originField')}
         className={`${styles.tableField} formField ${printRequiredFieldError('originField')}`}>
         <Dropdown
+          appendTo={document.body}
           disabled={isDisabled}
           onChange={e => onUpdateRelationExpressionField('originField', e.value)}
           optionLabel="label"
@@ -106,6 +107,7 @@ const RelationExpression = ({
         onBlur={() => onAddToClickedFields('referencedField')}
         className={`${styles.tableField} formField ${printRequiredFieldError('referencedField')}`}>
         <Dropdown
+          appendTo={document.body}
           disabled={isDisabled}
           onChange={e => onUpdateRelationExpressionField('referencedField', e.value)}
           optionLabel="label"
