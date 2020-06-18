@@ -46,9 +46,19 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId) =>
   }
 };
 
-export const createUnusedOptionsList = formDispatcher => {
+export const createUnusedOptionsList = (formDispatcher, fromState) => {
+  const unusedDataProvidersOptions = fromState.allPossibleDataProviders.filter(dataProviderOption => {
+    let result = true;
+    for (let index = 0; index < fromState.representatives.length; index++) {
+      if (fromState.representatives[index].dataProviderId === dataProviderOption.dataProviderId) {
+        result = false;
+      }
+    }
+    return result;
+  });
   formDispatcher({
-    type: 'CREATE_UNUSED_OPTIONS_LIST'
+    type: 'CREATE_UNUSED_OPTIONS_LIST',
+    payload: unusedDataProvidersOptions
   });
 };
 
@@ -111,7 +121,7 @@ export const getInitialData = async (formDispatcher, dataflowId, formState) => {
   await getAllRepresentatives(dataflowId, formDispatcher, formState);
   if (!isEmpty(formState.representatives)) {
     await getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
-    createUnusedOptionsList(formDispatcher);
+    createUnusedOptionsList(formDispatcher, formState);
   }
 };
 
