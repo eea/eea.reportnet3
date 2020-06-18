@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.PublishedParameter;
-import org.eea.dataflow.integration.executor.fme.service.FMEFeignService;
+import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.integration.executor.service.AbstractIntegrationExecutorService;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -32,7 +32,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
   /** The fme feign service. */
   @Autowired
-  private FMEFeignService fmeFeignService;
+  private FMECommunicationService fmeCommunicationService;
 
   /** The data set metabase controller zuul. */
   @Autowired
@@ -85,6 +85,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     // 3- IntegrationVO
     IntegrationVO integration = new IntegrationVO();
 
+    LOG.info("trying to extract params for Execution");
     try {
       for (Object param : executionParams) {
         if (null != param && null != param.getClass().getTypeName()) {
@@ -114,7 +115,9 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     String apiKey = userManagementController.getApiKey(dataflowId, dataproviderId);
 
     if (null == apiKey) {
+      LOG.info("ApiKey not exits");
       apiKey = userManagementController.createApiKey(dataflowId, dataproviderId);
+      LOG.info("ApiKey created");
     }
 
 
@@ -137,6 +140,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
     switch (integrationOperationTypeEnum) {
       case EXPORT:
+        LOG.info("");
         // dataflowId
         parameters.add(saveParameter("dataflowId", dataflowId));
         // providerId
@@ -149,6 +153,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         parameters.add(saveParameter("apiKey", "ApiKey " + apiKey));
 
         fmeAsyncJob.setPublishedParameters(parameters);
+        LOG.info("Executing FME Export");
         return executeSubmit(repository, workspace, fmeAsyncJob);
 
       case IMPORT:
@@ -170,8 +175,10 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
         // try to send file to FME Repository
         InputStream file = IOUtils.toInputStream(integration.getExternalParameters().get("fileIS"));
-        fmeFeignService.sendFile(file, datasetId, dataproviderId, fileName);
-
+        LOG.info("Upload file to FME");
+        fmeCommunicationService.sendFile(file, datasetId, dataproviderId, fileName);
+        LOG.info("File uploaded");
+        LOG.info("Executing FME Import");
         return executeSubmit(repository, workspace, fmeAsyncJob);
       default:
         return null;
@@ -210,7 +217,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
     Integer executionResult = null;
     try {
-      executionResult = fmeFeignService.submitAsyncJob(repository, workspace, fmeAsyncJob);
+      executionResult = fmeCommunicationService.submitAsyncJob(repository, workspace, fmeAsyncJob);
     } catch (Exception e) {
       e.getMessage();
       e.printStackTrace();

@@ -27,7 +27,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
-public class FMEFeignService {
+public class FMECommunicationService {
 
   // fme.discomap.eea.europa.eu
   @Value("${integration.fme.host}")
@@ -58,7 +58,8 @@ public class FMEFeignService {
 
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
-    HttpEntity<FMEAsyncJob> request = createHttpRequest(fmeAsyncJob, uriParams);
+    HttpEntity<FMEAsyncJob> request =
+        createHttpRequest(fmeAsyncJob, uriParams, new HashMap<String, String>());
     RestTemplate restTemplate = new RestTemplate();
     ResponseEntity<SubmitResult> checkResult =
         restTemplate.exchange(
@@ -87,12 +88,16 @@ public class FMEFeignService {
     uriParams.put("providerId", String.valueOf(idProvider));
     uriParams.put("fileName", fileName);
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
-    HttpEntity<MultiValueMap<String, Object>> request = createHttpRequest(body, uriParams);
+    Map<String, String> headerInfo = new HashMap<>();
+    headerInfo.put("Content-Disposition", "attachment; filename=" + fileName);
+
+    HttpEntity<MultiValueMap<String, Object>> request =
+        createHttpRequest(body, uriParams, headerInfo);
     RestTemplate restTemplate = new RestTemplate();
     ResponseEntity<FileSubmitResult> checkResult = restTemplate.exchange(uriComponentsBuilder
         .scheme(fmeScheme).host(fmeHost)
         .path(
-            "fmerest/v3/resources/connections/CARPETA_R3/{datasetId}/{providerId}/{fileName}?createDirectories=true&overwrite=true")
+            "fmerest/v3/resources/connections/Reportnet3/{datasetId}/{providerId}/{fileName}?createDirectories=true&overwrite=true")
         .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, FileSubmitResult.class);
 
     FileSubmitResult result = new FileSubmitResult();
@@ -119,8 +124,8 @@ public class FMEFeignService {
    *
    * @return the http entity
    */
-  private <T> HttpEntity<T> createHttpRequest(T body, Map<String, String> uriParams) {
-    Map<String, String> headerInfo = new HashMap<>();
+  private <T> HttpEntity<T> createHttpRequest(T body, Map<String, String> uriParams,
+      Map<String, String> headerInfo) {
     headerInfo.put(LiteralConstants.AUTHORIZATION_HEADER, fmeToken);
     headerInfo.put("Content-Type", "application/json");
     HttpHeaders headers = createBasicHeaders(headerInfo);
@@ -137,16 +142,6 @@ public class FMEFeignService {
    * @return the http headers
    */
   private HttpHeaders createBasicHeaders(Map<String, String> headersInfo) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-
-    if (null != headersInfo && headersInfo.size() > 0) {
-      headersInfo.entrySet().forEach(entry -> headers.set(entry.getKey(), entry.getValue()));
-    }
-    return headers;
-  }
-
-  private HttpHeaders createFileHeaders(Map<String, String> headersInfo) {
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
