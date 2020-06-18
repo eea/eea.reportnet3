@@ -60,7 +60,7 @@ export const FieldDesigner = ({
     // { fieldType: 'Latitude', value: 'Geospatial object (Latitude)', fieldTypeIcon: 'map' },
     // { fieldType: 'Longitude', value: 'Geospatial object (Longitude)', fieldTypeIcon: 'map' },
     { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
-    { fieldType: 'Long_Text', value: 'Long text', fieldTypeIcon: 'align-right' },
+    // { fieldType: 'Long_Text', value: 'Long text', fieldTypeIcon: 'align-right' },
     { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
     { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
     { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
