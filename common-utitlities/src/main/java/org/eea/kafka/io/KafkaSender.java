@@ -52,6 +52,7 @@ public class KafkaSender {
     kafkaTemplate.executeInTransaction(operations -> {
       if (!event.getData().containsKey("user") || StringUtils
           .isEmpty(event.getData().get("user"))) {
+        LOG.info("user not found on event {}, getting it from context", event);
         event.getData().put("user", String.valueOf(ThreadPropertiesManager.getVariable("user")));
       }
       event.getData().put("token",
