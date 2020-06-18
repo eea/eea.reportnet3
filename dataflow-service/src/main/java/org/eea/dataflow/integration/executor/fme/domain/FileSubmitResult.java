@@ -6,16 +6,21 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * The Class SubmitResult.
- */
+@JsonPropertyOrder({"name"})
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({"id"})
 @Getter
 @Setter
-public class SubmitResult {
+public class FileSubmitResult {
 
-  /** The id. */
-  @JsonProperty("id")
-  private Integer id;
+  @JsonProperty("date")
+  private String date;
+  @JsonProperty("name")
+  private String name;
+  @JsonProperty("path")
+  private String path;
+  @JsonProperty("size")
+  private Integer size;
+  @JsonProperty("type")
+  private String type;
+
 }

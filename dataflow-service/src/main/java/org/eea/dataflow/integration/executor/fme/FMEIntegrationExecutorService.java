@@ -1,12 +1,13 @@
 package org.eea.dataflow.integration.executor.fme;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.PublishedParameter;
-import org.eea.dataflow.integration.executor.fme.service.FMEFeignService;
+import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.integration.executor.service.AbstractIntegrationExecutorService;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -30,7 +31,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
   /** The fme feign service. */
   @Autowired
-  private FMEFeignService fmeFeignService;
+  private FMECommunicationService fmeCommunicationService;
 
   /** The data set metabase controller zuul. */
   @Autowired
@@ -79,17 +80,18 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     // 1- Long datasetId
     Long datasetId = null;
     // 2- MultipartFile
-    String file = null;
+    String fileName = null;
     // 3- IntegrationVO
     IntegrationVO integration = new IntegrationVO();
 
+    LOG.info("trying to extract params for Execution");
     try {
       for (Object param : executionParams) {
-        if (param.getClass().getTypeName() != null) {
+        if (null != param && null != param.getClass().getTypeName()) {
           if (param instanceof Long) {
             datasetId = ((Long) param);
           } else if (param instanceof String) {
-            file = ((String) param);
+            fileName = ((String) param);
           } else if (param instanceof IntegrationVO) {
             integration = ((IntegrationVO) param);
           }
@@ -111,6 +113,13 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
     String apiKey = userManagementController.getApiKey(dataflowId, dataproviderId);
 
+    if (null == apiKey) {
+      LOG.info("ApiKey not exits");
+      apiKey = userManagementController.createApiKey(dataflowId, dataproviderId);
+      LOG.info("ApiKey created");
+    }
+
+
     FMEAsyncJob fmeAsyncJob = new FMEAsyncJob();
     String workspace = integration.getInternalParameters().get("processName");
     String repository = null;
@@ -119,35 +128,51 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     } else {
       repository = "ReportNetTesting";
     }
-    String folder = null;
-    if (null != integration.getInternalParameters().get("folder")) {
-      folder = integration.getInternalParameters().get("folder");
-    } else {
-      folder = "MMR";
-    }
-
 
     List<PublishedParameter> parameters = new ArrayList<>();
-    // dataflowId
-    parameters.add(saveParameter("dataflowId", dataflowId));
-    // providerId
-    parameters.add(saveParameter("providerId", dataproviderId));
-    // datasetDataId
-    parameters.add(saveParameter("datasetDataId", datasetId));
-    // inputfile
-    parameters.add(saveParameter("inputfile", file));
-    // folder
-    parameters.add(saveParameter("folder", folder));
-    // apikey
-    parameters.add(saveParameter("apiKey", "ApiKey " + apiKey));
-
-    fmeAsyncJob.setPublishedParameters(parameters);
-
 
     switch (integrationOperationTypeEnum) {
       case EXPORT:
+        LOG.info("");
+        // dataflowId
+        parameters.add(saveParameter("dataflowId", dataflowId));
+        // providerId
+        parameters.add(saveParameter("providerId", dataproviderId));
+        // datasetDataId
+        parameters.add(saveParameter("datasetDataId", datasetId));
+        // folder
+        parameters.add(saveParameter("folder", datasetId + "/" + dataproviderId));
+        // apikey
+        parameters.add(saveParameter("apiKey", "ApiKey " + apiKey));
+
+        fmeAsyncJob.setPublishedParameters(parameters);
+        LOG.info("Executing FME Export");
         return executeSubmit(repository, workspace, fmeAsyncJob);
+
       case IMPORT:
+
+        // dataflowId
+        parameters.add(saveParameter("dataflowId", dataflowId));
+        // providerId
+        parameters.add(saveParameter("providerId", dataproviderId));
+        // datasetDataId
+        parameters.add(saveParameter("datasetDataId", datasetId));
+        // inputfile
+        parameters.add(saveParameter("inputfile", fileName));
+        // folder
+        parameters.add(saveParameter("folder", datasetId + "/" + dataproviderId));
+        // apikey
+        parameters.add(saveParameter("apiKey", "ApiKey " + apiKey));
+
+        fmeAsyncJob.setPublishedParameters(parameters);
+
+        byte[] decodedBytes =
+            Base64.getDecoder().decode(integration.getExternalParameters().get("fileIS"));
+
+        LOG.info("Upload file to FME");
+        fmeCommunicationService.sendFile(decodedBytes, datasetId, dataproviderId, fileName);
+        LOG.info("File uploaded");
+        LOG.info("Executing FME Import");
         return executeSubmit(repository, workspace, fmeAsyncJob);
       default:
         return null;
@@ -186,7 +211,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
     Integer executionResult = null;
     try {
-      executionResult = fmeFeignService.submitAsyncJob(repository, workspace, fmeAsyncJob);
+      executionResult = fmeCommunicationService.submitAsyncJob(repository, workspace, fmeAsyncJob);
     } catch (Exception e) {
       e.getMessage();
       e.printStackTrace();

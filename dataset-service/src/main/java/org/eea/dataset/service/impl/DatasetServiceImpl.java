@@ -53,6 +53,7 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
@@ -62,9 +63,12 @@ import org.eea.dataset.service.file.interfaces.IFileParserFactory;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -85,6 +89,7 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -94,11 +99,14 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The type Dataset service.
@@ -285,6 +293,19 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private LockService lockService;
+
+  /** The integration controller. */
+  @Autowired
+  private IntegrationControllerZuul integrationController;
+
+  /** The dataset schema service. */
+  @Autowired
+  private DatasetSchemaService datasetSchemaService;
+
+  /** The dataset service. */
+  @Autowired
+  @Qualifier("proxyDatasetService")
+  private DatasetService datasetService;
 
   /**
    * Process file.
@@ -1233,15 +1254,46 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public byte[] exportFile(Long datasetId, String mimeType, final String idTableSchema)
       throws EEAException, IOException {
-    // Get the partition
-    // final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
 
-    // Get the dataFlowId from the metabase
-    Long idDataflow = getDataFlowIdById(datasetId);
+    // Integration process
+    String fileExtension = null;
+    String datasetSchemaId = null;
+    try {
+      fileExtension = mimeType;
+      datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
 
-    final IFileExportContext context = fileExportFactory.createContext(mimeType);
-    LOG.info("End of exportFile");
-    return context.fileWriter(idDataflow, datasetId, idTableSchema);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+    IntegrationVO integrationVO = new IntegrationVO();
+    Map<String, String> internalParameters = new HashMap<>();
+    internalParameters.put("datasetSchemaId", datasetSchemaId);
+    integrationVO.setInternalParameters(internalParameters);
+    List<IntegrationVO> integrationAux = new ArrayList<>();
+    List<IntegrationVO> integrations =
+        integrationController.findAllIntegrationsByCriteria(integrationVO);
+    List<String> auxExtensionList = new ArrayList<>();
+    integrations.stream().forEach(integration -> {
+      if (IntegrationOperationTypeEnum.EXPORT.equals(integration.getOperation())) {
+        auxExtensionList.add(integration.getInternalParameters().get("fileExtension"));
+        integrationAux.add(integration);
+      }
+    });
+    if (auxExtensionList.contains(fileExtension)) {
+      integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
+          IntegrationOperationTypeEnum.EXPORT, null, datasetId, integrationAux.get(0));
+      return null;
+    } else {
+      // Get the partition
+      // final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
+
+      // Get the dataFlowId from the metabase
+      Long idDataflow = getDataFlowIdById(datasetId);
+
+      final IFileExportContext context = fileExportFactory.createContext(mimeType);
+      LOG.info("End of exportFile");
+      return context.fileWriter(idDataflow, datasetId, idTableSchema);
+    }
 
   }
 
