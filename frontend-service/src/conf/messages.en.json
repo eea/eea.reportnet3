@@ -662,7 +662,6 @@
     "operation": "Operation",
     "deleteIntegrationHeader": "Delete integration",
     "deleteIntegrationConfirm": "Are you sure you want to delete this integration?",
-    "selectField": "Select field",
     "processName": "Process Name",
     "fileExtension": "File extension",
     "parameterKey": "Parameter key",
@@ -677,8 +676,6 @@
     "editExternalIntegration": "Edit external integration",
     "parameterAlreadyExists": "The parameter key already exists",
     "supportedFileExtensionsTooltip": "Supported file extensions: ",
-    "invalidExtensionFile": "ERROR: Selected file does not have a valid extension, please check it",
-    "loadingFileExtensionsError": "Error loading supported file extensions",
     "operationPlaceHolder": "Select an operation",
     "duplicatedIntegrationName": "The integration name already exists",
     "duplicatedNameMissingFields": "One or more required field(s) are missing and the name already exists",
@@ -697,10 +694,12 @@
     "editDatasetConstraint": "Edit dataset constraint",
     "tabMenuTableRelations": "Table relations",
     "fieldRelationsLabel": "Field relations",
-    "originField": "First table field",
-    "referencedField": "Second table field",
+    "originField": "Source field",
+    "referencedField": "Target field",
     "addNewRelation": "Add new relation",
     "createDataCollectionConfirmQuestion": "Are you sure you want to create a data collection?",
-    "createDataCollectionConfirm": "You can no longer edit anything related to design datasets (tables, fields, QC's, snapshots, etc). You will be able to manage new reporters."
+    "createDataCollectionConfirm": "You can no longer edit anything related to design datasets (tables, fields, QC's, snapshots, etc). You will be able to manage new reporters.",
+    "targetDatasetSchema": "Target dataset schema",
+    "targetTable": "Target table"
   }
 }
