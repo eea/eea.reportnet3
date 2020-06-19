@@ -294,18 +294,18 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private LockService lockService;
 
-  /** The integration controller. */
+  /**
+   * The integration controller.
+   */
   @Autowired
   private IntegrationControllerZuul integrationController;
 
-  /** The dataset schema service. */
+  /**
+   * The dataset schema service.
+   */
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
-  /** The dataset service. */
-  @Autowired
-  @Qualifier("proxyDatasetService")
-  private DatasetService datasetService;
 
   /**
    * Process file.
@@ -330,8 +330,6 @@ public class DatasetServiceImpl implements DatasetService {
     final String mimeType = getMimetype(fileName);
     // validates file types for the data load
     validateFileType(mimeType);
-
-
 
     try {
       // Get the partition for the partiton id
@@ -1935,8 +1933,9 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Checks if is dataset reportable. Dataset is reportable when is designDataset in dataflow with
    * status design or reportingDataset in state Draft.
-   * 
+   *
    * @param idDataset the id dataset
+   *
    * @return the boolean
    */
   @Override
@@ -1973,6 +1972,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the dataflow by IdDataset.
    *
    * @param idDataset the id dataset
+   *
    * @return the dataflow
    */
   private DataFlowVO getDataflow(Long idDataset) {
