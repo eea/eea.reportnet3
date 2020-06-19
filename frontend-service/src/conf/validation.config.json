@@ -248,6 +248,91 @@
       "!=": "RECORD_DIST_YEAR_RECORD_NUMBER"
     }
   },
+  "comparisonValuesOperatorEquivalences": {
+    "logicalOperators": {
+      "AND": "RECORD_AND",
+      "OR": "RECORD_OR"
+    },
+    "number": {
+      ">": "RECORD_GT",
+      "<": "RECORD_LT",
+      ">=": "RECORD_GTEQ",
+      "<=": "RECORD_LTEQ",
+      "=": "RECORD_EQ",
+      "!=": "RECORD_DIST",
+      "MATCH": "RECORD_NUM_MATCH"
+    },
+    "LEN": {
+      "type": "RECORD_LEN",
+      ">": "RECORD_LEN_GT",
+      "<": "RECORD_LEN_LT",
+      ">=": "RECORD_LEN_GTEQ",
+      "<=": "RECORD_LEN_LTEQ",
+      "=": "RECORD_LEN_EQ",
+      "!=": "RECORD_LEN_DIST"
+    },
+    "string": {
+      "=": "RECORD_SEQ",
+      "=(Ignore case)": "RECORD_SEQIC",
+      "MATCH": "RECORD_MATCH"
+    },
+    "date": {
+      ">": "RECORD_GT_DATE",
+      "<": "RECORD_LT_DATE",
+      ">=": "RECORD_GTEQ_DATE",
+      "<=": "RECORD_LTEQ_DATE",
+      "=": "RECORD_EQ_DATE",
+      "!=": "RECORD_DIST_DATE"
+    },
+    "day": {
+      ">": "RECORD_GT_DAY",
+      "<": "RECORD_LT_DAY",
+      ">=": "RECORD_GTEQ_DAY",
+      "<=": "RECORD_LTEQ_DAY",
+      "=": "RECORD_EQ_DAY",
+      "!=": "RECORD_DIST_DAY"
+    },
+    "month": {
+      ">": "RECORD_GT_MONTH",
+      "<": "RECORD_LT_MONTH",
+      ">=": "RECORD_GTEQ_MONTH",
+      "<=": "RECORD_LTEQ_MONTH",
+      "=": "RECORD_EQ_MONTH",
+      "!=": "RECORD_DIST_MONTH"
+    },
+    "year": {
+      ">": "RECORD_GT_YEAR",
+      "<": "RECORD_LT_YEAR",
+      ">=": "RECORD_GTEQ_YEAR",
+      "<=": "RECORD_LTEQ_YEAR",
+      "=": "RECORD_EQ_YEAR",
+      "!=": "RECORD_DIST_YEAR"
+    },
+    "dayNumber": {
+      ">": "RECORD_GT_DAY_NUMBER",
+      "<": "RECORD_LT_DAY_NUMBER",
+      ">=": "RECORD_GTEQ_DAY_NUMBER",
+      "<=": "RECORD_LTEQ_DAY_NUMBER",
+      "=": "RECORD_EQ_DAY_NUMBER",
+      "!=": "RECORD_DIST_DAY_NUMBER"
+    },
+    "monthNumber": {
+      ">": "RECORD_GT_MONTH_NUMBER",
+      "<": "RECORD_LT_MONTH_NUMBER",
+      ">=": "RECORD_GTEQ_MONTH_NUMBER",
+      "<=": "RECORD_LTEQ_MONTH_NUMBER",
+      "=": "RECORD_EQ_MONTH_NUMBER",
+      "!=": "RECORD_DIST_MONTH_NUMBER"
+    },
+    "yearNumber": {
+      ">": "RECORD_GT_YEAR_NUMBER",
+      "<": "RECORD_LT_YEAR_NUMBER",
+      ">=": "RECORD_GTEQ_YEAR_NUMBER",
+      "<=": "RECORD_LTEQ_YEAR_NUMBER",
+      "=": "RECORD_EQ_YEAR_NUMBER",
+      "!=": "RECORD_DIST_YEAR_NUMBER"
+    }
+  },
   "ifThenOperatorEquivalences": {
     "logicalOperators": {
       "AND": "RECORD_AND",
