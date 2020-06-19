@@ -13,6 +13,15 @@ export const createValidationReducerInitState = {
     expressionsThen: [],
     expressionType: '',
     field: undefined,
+    relations: {
+      isDoubleReferenced: false,
+      originDatasetSchema: {},
+      referencedDatasetSchema: {},
+      referencedFields: [],
+      referencedTable: {},
+      referencedTables: [],
+      links: [{ originField: '', referencedField: '' }]
+    },
     shortCode: '',
     table: undefined
   },
@@ -20,6 +29,7 @@ export const createValidationReducerInitState = {
   areRulesDisabledIf: true,
   areRulesDisabledThen: true,
   datasetSchema: {},
+  datasetSchemas: [],
   groupCandidate: [],
   groupCandidateIf: [],
   groupCandidateThen: [],
@@ -300,6 +310,7 @@ export const createValidationReducer = (state, { type, payload }) => {
       return {
         ...state,
         candidateRule: payload.candidateRule,
+        datasetSchemas: payload.datasetSchemas,
         schemaTables: payload.tables
       };
 
@@ -346,7 +357,9 @@ export const createValidationReducer = (state, { type, payload }) => {
           id: payload.id,
           name: payload.name,
           shortCode: payload.shortCode,
-          ruleType: payload.entityType
+          ruleType: payload.entityType,
+          relations: payload.relations,
+          tableFields: payload.relations.tableFields
         }
       };
 
@@ -356,6 +369,81 @@ export const createValidationReducer = (state, { type, payload }) => {
         candidateRule: {
           ...state.candidateRule,
           expressionType: payload
+        }
+      };
+
+    case 'SET_REFERENCED_TABLES':
+      return {
+        ...state,
+        candidateRule: {
+          ...state.candidateRule,
+          relations: {
+            ...state.candidateRule.relations,
+            referencedDatasetSchema: payload.candidateRule.relations.referencedDatasetSchema,
+            referencedTables: payload.candidateRule.relations.referencedTables,
+            links: state.candidateRule.relations.links.map(link => {
+              return { linkId: link.linkId, originField: link.originField, referencedField: '' };
+            })
+          }
+        }
+      };
+    case 'SET_REFERENCED_FIELDS':
+      return {
+        ...state,
+        candidateRule: {
+          ...state.candidateRule,
+          relations: {
+            ...state.candidateRule.relations,
+            referencedFields: payload.referencedFields,
+            referencedTable: payload.referencedTable
+          }
+        }
+      };
+    case 'UPDATE_LINKS':
+      return {
+        ...state,
+        candidateRule: {
+          ...state.candidateRule,
+          relations: {
+            ...state.candidateRule.relations,
+            links: payload
+          }
+        }
+      };
+    case 'ADD_EMPTY_RELATION':
+      return {
+        ...state,
+        candidateRule: {
+          ...state.candidateRule,
+          relations: {
+            ...state.candidateRule.relations,
+            links: [...state.candidateRule.relations.links, payload]
+          }
+        }
+      };
+    case 'UPDATE_IS_DOUBLE_REFERENCED':
+      return {
+        ...state,
+        candidateRule: {
+          ...state.candidateRule,
+          relations: {
+            ...state.candidateRule.relations,
+            isDoubleReferenced: payload
+          }
+        }
+      };
+    case 'SET_FORM_FIELD_RELATION':
+      return {
+        ...state,
+        candidateRule: {
+          ...state.candidateRule,
+          [payload.key]: payload.value,
+          relations: {
+            ...state.candidateRule.relations,
+            links: state.candidateRule.relations.links.map(link => {
+              return { linkId: link.linkId, originField: '', referencedField: link.referencedField };
+            })
+          }
         }
       };
     default:

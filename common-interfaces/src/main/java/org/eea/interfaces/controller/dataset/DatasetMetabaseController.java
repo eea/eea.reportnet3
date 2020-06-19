@@ -169,7 +169,7 @@ public interface DatasetMetabaseController {
    */
   @GetMapping("/private/getDatasetId/datasetSchema/{datasetSchemaId}")
   Long getDesignDatasetIdByDatasetSchemaId(@PathVariable("datasetSchemaId") String datasetSchemaId);
-  
+
   /**
    * Delete foreign relationship.
    *
@@ -179,10 +179,10 @@ public interface DatasetMetabaseController {
    * @param referencedDatasetSchemaId the referenced dataset schema id
    */
   @DeleteMapping("/private/deleteForeignRelationship")
-  void deleteForeignRelationship(@RequestParam("datasetOriginId") final Long datasetOriginId,
-      @RequestParam("datasetReferencedId") final Long datasetReferencedId,
-      @RequestParam("originDatasetSchemaId") final String originDatasetSchemaId,
-      @RequestParam("referencedDatasetSchemaId") final String referencedDatasetSchemaId);
+  void deleteForeignRelationship(@RequestParam("datasetOriginId") Long datasetOriginId,
+      @RequestParam(value = "datasetReferencedId", required = false) Long datasetReferencedId,
+      @RequestParam("originDatasetSchemaId") String originDatasetSchemaId,
+      @RequestParam("referencedDatasetSchemaId") String referencedDatasetSchemaId);
 
 
 

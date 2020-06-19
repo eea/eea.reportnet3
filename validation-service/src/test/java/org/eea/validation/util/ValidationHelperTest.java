@@ -158,7 +158,7 @@ public class ValidationHelperTest {
    */
   @Test
   public void isProcessCoordinator() throws EEAException {
-    processesMap.put("1", new ValidationProcessVO(0, null, null, true));
+    processesMap.put("1", new ValidationProcessVO(0, null, null, true, "user1"));
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
 
     Assert.assertTrue(validationHelper.isProcessCoordinator("1"));
@@ -238,7 +238,7 @@ public class ValidationHelperTest {
   public void reducePendingTasksFinishingProcess() throws EEAException {
 
     Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
-    processesMap.put("1", new ValidationProcessVO(1, pendingValidations, null, true));
+    processesMap.put("1", new ValidationProcessVO(1, pendingValidations, null, true, "user1"));
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
 
     validationHelper.reducePendingTasks(1l, "1");
@@ -262,7 +262,7 @@ public class ValidationHelperTest {
 
     Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
     pendingValidations.add(eeaEventVO);
-    processesMap.put("1", new ValidationProcessVO(1, pendingValidations, null, true));
+    processesMap.put("1", new ValidationProcessVO(1, pendingValidations, null, true, "user1"));
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
 
     validationHelper.reducePendingTasks(1l, "1");
@@ -286,7 +286,7 @@ public class ValidationHelperTest {
     Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
     pendingValidations.add(eeaEventVO);
 
-    processesMap.put("1", new ValidationProcessVO(2, pendingValidations, null, true));
+    processesMap.put("1", new ValidationProcessVO(2, pendingValidations, null, true, "user1"));
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
     ReflectionTestUtils.setField(validationHelper, "taskReleasedTax", 2);
 
@@ -310,7 +310,7 @@ public class ValidationHelperTest {
     Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
     pendingValidations.add(eeaEventVO);
     pendingValidations.add(eeaEventVO);
-    processesMap.put("1", new ValidationProcessVO(2, pendingValidations, null, true));
+    processesMap.put("1", new ValidationProcessVO(2, pendingValidations, null, true, "user1"));
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
     ReflectionTestUtils.setField(validationHelper, "taskReleasedTax", 2);
 
@@ -371,7 +371,7 @@ public class ValidationHelperTest {
     Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
     pendingValidations.add(eeaEventVO);
     pendingValidations.add(eeaEventVO);
-    processesMap.put("1", new ValidationProcessVO(2, pendingValidations, null, false));
+    processesMap.put("1", new ValidationProcessVO(2, pendingValidations, null, false, "user1"));
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
     ReflectionTestUtils.setField(validationHelper, "taskReleasedTax", 2);
 
@@ -399,7 +399,7 @@ public class ValidationHelperTest {
     Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
     pendingValidations.add(eeaEventVO);
     pendingValidations.add(eeaEventVO);
-    processesMap.put("1", new ValidationProcessVO(2, pendingValidations, null, true));
+    processesMap.put("1", new ValidationProcessVO(2, pendingValidations, null, true, "user1"));
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
     ReflectionTestUtils.setField(validationHelper, "taskReleasedTax", 1);
 
