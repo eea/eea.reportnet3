@@ -85,9 +85,6 @@ public class FMECommunicationService {
   }
 
   public FileSubmitResult sendFile(byte[] file, Long idDataset, Long idProvider, String fileName) {
-    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-    body.add("fileA", "aba".getBytes());
-//      body.add("file", file);
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("datasetId", String.valueOf(idDataset));
