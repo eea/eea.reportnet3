@@ -40,7 +40,9 @@ const getOptionTypes = (data, option, list, order) => {
     }));
   } else {
     const optionItems = uniq(data.map(item => item[option]));
-    const filteredOptionItems = optionItems.filter(option => !isNil(option));
+    const filteredOptionItems = optionItems.filter(option =>
+      typeof option === 'boolean' ? option : !isNil(option) && !isEmpty(option)
+    );
     const orderedOptions = filteredOptionItems.includes('INFO' || 'WARNING' || 'ERROR' || 'BLOCKER')
       ? order(filteredOptionItems)
       : filteredOptionItems;
