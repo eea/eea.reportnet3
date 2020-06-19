@@ -1602,5 +1602,7 @@ public class DatasetSchemaServiceTest {
     field.setPk(true);
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     dataSchemaServiceImpl.createUniqueConstraintPK(new ObjectId().toString(), field);
+    Mockito.verify(rulesControllerZuul, times(1)).createUniqueConstraintRule(Mockito.any(),
+        Mockito.any(), Mockito.any());
   }
 }
