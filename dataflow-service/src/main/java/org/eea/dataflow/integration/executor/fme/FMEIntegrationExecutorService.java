@@ -29,30 +29,39 @@ import org.springframework.stereotype.Component;
 @Component
 public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorService {
 
-  /** The fme feign service. */
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+  /**
+   * The fme feign service.
+   */
   @Autowired
   private FMECommunicationService fmeCommunicationService;
 
-  /** The data set metabase controller zuul. */
+  /**
+   * The data set metabase controller zuul.
+   */
   @Autowired
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
-  /** The data set controller zuul. */
+  /**
+   * The data set controller zuul.
+   */
   @Autowired
   private DataSetControllerZuul dataSetControllerZuul;
 
-  /** The user management controller. */
+  /**
+   * The user management controller.
+   */
   @Autowired
   private UserManagementController userManagementController;
 
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(FMEIntegrationExecutorService.class);
-
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR =
-      LoggerFactory.getLogger(FMEIntegrationExecutorService.class);
-
 
 
   /**
@@ -70,6 +79,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
    *
    * @param integrationOperationTypeEnum the integration operation type enum
    * @param executionParams the execution params
+   *
    * @return the execution result VO
    */
   @Override
@@ -118,7 +128,6 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
       apiKey = userManagementController.createApiKey(dataflowId, dataproviderId);
       LOG.info("ApiKey created");
     }
-
 
     FMEAsyncJob fmeAsyncJob = new FMEAsyncJob();
     String workspace = integration.getInternalParameters().get("processName");
@@ -185,6 +194,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
    *
    * @param name the name
    * @param value the value
+   *
    * @return the published parameter
    */
   private PublishedParameter saveParameter(String name, Object value) {
@@ -195,13 +205,13 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
   }
 
 
-
   /**
    * Execute submit.
    *
    * @param repository the repository
    * @param workspace the workspace
    * @param fmeAsyncJob the fme async job
+   *
    * @return the execution result VO
    */
   private ExecutionResultVO executeSubmit(String repository, String workspace,
@@ -213,15 +223,13 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     try {
       executionResult = fmeCommunicationService.submitAsyncJob(repository, workspace, fmeAsyncJob);
     } catch (Exception e) {
-      e.getMessage();
-      e.printStackTrace();
+      LOG_ERROR.error("Error invoking FME due to reason {}", e, e.getMessage());
     }
     executionResultParams.put("id", executionResult);
     executionResultVO.setExecutionResultParams(executionResultParams);
 
     return executionResultVO;
   }
-
 
 
 }
