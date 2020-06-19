@@ -107,18 +107,18 @@ const RepresentativesList = ({
 
     let hasError = formState.representativeHasError.includes(representative.representativeId);
 
-    const onAccountChange = event => {
-      const updatedList = formState.representatives.map(thisRepresentative => {
-        if (thisRepresentative.dataProviderId === representative.dataProviderId) {
-          thisRepresentative.providerAccount = event.target.value;
-        }
-        return thisRepresentative;
-      });
+    const onAccountChange = (value, dataProviderId) => {
+      const { representatives } = formState;
+
+      const [thisRepresentative] = representatives.filter(
+        thisRepresentative => thisRepresentative.dataProviderId === dataProviderId
+      );
+      thisRepresentative.providerAccount = value;
 
       formDispatcher({
         type: 'ON_ACCOUNT_CHANGE',
         payload: {
-          updatedList
+          representatives
         }
       });
     };
@@ -127,15 +127,15 @@ const RepresentativesList = ({
       <>
         <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
           <input
+            autoFocus={isNil(representative.representativeId)}
             className={representative.hasDatasets ? styles.disabled : undefined}
             disabled={representative.hasDatasets}
-            autoFocus={isNil(representative.representativeId)}
             id={isEmpty(inputData) ? 'emptyInput' : undefined}
             onBlur={() => {
               representative.providerAccount = representative.providerAccount.toLowerCase();
               onAddProvider(formDispatcher, formState, representative, dataflowId);
             }}
-            onChange={event => onAccountChange(event)}
+            onChange={event => onAccountChange(event.target.value, representative.dataProviderId)}
             onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
             placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
             value={inputData}

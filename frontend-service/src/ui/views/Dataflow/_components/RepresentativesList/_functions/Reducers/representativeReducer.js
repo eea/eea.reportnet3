@@ -116,7 +116,7 @@ export const reducer = (state, { type, payload }) => {
     case 'ON_ACCOUNT_CHANGE':
       return {
         ...state,
-        representatives: payload.updatedList
+        representatives: payload.representatives
       };
 
     case 'ON_PROVIDER_CHANGE':
