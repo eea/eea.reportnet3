@@ -1,7 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import sortBy from 'lodash/sortBy';
 
 import { RepresentativeService } from 'core/services/Representative';
 
@@ -31,8 +30,9 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId) =>
         newRepresentative[0].providerAccount,
         parseInt(newRepresentative[0].dataProviderId)
       );
+
       formDispatcher({
-        type: 'ADD_REPRESENTATIVE'
+        type: 'REFRESH'
       });
     } catch (error) {
       console.error('error on RepresentativeService.add', error);
@@ -121,13 +121,30 @@ export const onAddProvider = (formDispatcher, formState, representative, dataflo
     : updateRepresentative(formDispatcher, formState, representative);
 };
 
-export const onDataProviderIdChange = (formDispatcher, newDataProviderId, representative) => {
+export const onDataProviderIdChange = async (formDispatcher, newDataProviderId, representative, formState) => {
   if (!isNil(representative.representativeId)) {
-    updateProviderId(formDispatcher, representative.representativeId, newDataProviderId);
+    try {
+      await RepresentativeService.updateDataProviderId(
+        parseInt(representative.representativeId),
+        parseInt(newDataProviderId)
+      );
+      formDispatcher({
+        type: 'REFRESH'
+      });
+    } catch (error) {
+      console.error('error on RepresentativeService.updateDataProviderId', error);
+    }
   } else {
+    const { representatives } = formState;
+
+    const [thisRepresentative] = representatives.filter(
+      thisRepresentative => thisRepresentative.representativeId === representative.representativeId
+    );
+    thisRepresentative.dataProviderId = newDataProviderId;
+
     formDispatcher({
       type: 'ON_PROVIDER_CHANGE',
-      payload: { dataProviderId: newDataProviderId, representativeId: representative.representativeId }
+      payload: { representatives }
     });
   }
 };
@@ -159,18 +176,6 @@ export const onCloseManageRolesDialog = async formDispatcher => {
   formDispatcher({
     type: 'REFRESH_ON_HIDE_MANAGE_ROLES_DIALOG'
   });
-};
-
-const updateProviderId = async (formDispatcher, representativeId, newDataProviderId) => {
-  try {
-    await RepresentativeService.updateDataProviderId(parseInt(representativeId), parseInt(newDataProviderId));
-    formDispatcher({
-      type: 'ON_PROVIDER_CHANGE',
-      payload: { dataProviderId: newDataProviderId, representativeId }
-    });
-  } catch (error) {
-    console.error('error on RepresentativeService.updateDataProviderId', error);
-  }
 };
 
 const updateRepresentative = async (formDispatcher, formState, updatedRepresentative) => {

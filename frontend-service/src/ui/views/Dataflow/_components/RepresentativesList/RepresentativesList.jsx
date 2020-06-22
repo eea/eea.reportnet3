@@ -150,8 +150,6 @@ const RepresentativesList = ({
       option => option.dataProviderId === representative.dataProviderId
     );
 
-    let hasError = formState.representativeHasError.includes(representative.representativeId);
-
     const remainingOptionsAndSelectedOption = selectedOptionForThisSelect.concat(formState.unusedDataProvidersOptions);
 
     return (
@@ -163,7 +161,7 @@ const RepresentativesList = ({
           }
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={event => {
-            onDataProviderIdChange(formDispatcher, event.target.value, representative);
+            onDataProviderIdChange(formDispatcher, event.target.value, representative, formState);
           }}
           onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
           value={representative.dataProviderId}>

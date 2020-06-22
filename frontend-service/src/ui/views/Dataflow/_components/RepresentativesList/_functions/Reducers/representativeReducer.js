@@ -8,7 +8,7 @@ export const reducer = (state, { type, payload }) => {
   let updatedList = [];
 
   switch (type) {
-    case 'ADD_REPRESENTATIVE':
+    case 'REFRESH':
       return {
         ...state,
         refresher: !state.refresher
@@ -120,22 +120,9 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'ON_PROVIDER_CHANGE':
-      updatedList = state.representatives.map(representative => {
-        if (representative.representativeId === payload.representativeId) {
-          representative.dataProviderId = payload.dataProviderId;
-        }
-        return representative;
-      });
-
-      if (!isNil(payload.representativeId)) {
-        return {
-          ...state,
-          refresher: !state.refresher
-        };
-      }
       return {
         ...state,
-        representatives: updatedList
+        representatives: payload.representatives
       };
 
     case 'SELECT_PROVIDERS_TYPE':
