@@ -589,7 +589,7 @@
     "decimalFieldFormatRestriction": "Maximum of 40 characters",
     "dateFieldFormatRestriction": "YYYY-MM-DD",
     "textFieldFormatRestriction": "Maximum of 5000 characters",
-    "longTextFieldFormatRestriction": "Maximum of 10000 characters",
+    "richTextFieldFormatRestriction": "Maximum of 10000 characters",
     "emailFieldFormatRestriction": "Maximum of 256 characters",
     "urlFieldFormatRestriction": "Maximum of 5000 characters",
     "phoneNumberFieldFormatRestriction": "Maximum of 256 characters",
