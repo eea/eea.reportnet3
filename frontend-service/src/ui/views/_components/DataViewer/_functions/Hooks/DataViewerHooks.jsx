@@ -9,10 +9,12 @@ import styles from '../../DataViewer.module.css';
 
 import { config } from 'conf';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { DataViewerUtils } from '../Utils/DataViewerUtils';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -111,7 +113,8 @@ export const useSetColumns = (
       { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
       { fieldType: 'Codelist', value: 'Single select' },
       { fieldType: 'Multiselect_Codelist', value: 'Multiple select' },
-      { fieldType: 'Link', value: 'Link' }
+      { fieldType: 'Link', value: 'Link' },
+      { fieldType: 'Attachement', value: 'Attachement' }
     ];
 
     if (!isUndefined(fieldType)) {
@@ -121,6 +124,32 @@ export const useSetColumns = (
       return '';
     }
   };
+
+  const renderAttachement = () => (
+    <>
+      <Button
+        className={`p-button-secondary-transparent`}
+        icon="clipboard"
+        onClick={() => {
+          console.log('Download');
+        }}
+      />
+      <Button
+        className={`p-button-secondary-transparent`}
+        icon="export"
+        onClick={() => {
+          console.log('Download');
+        }}
+      />
+      <Button
+        className={`p-button-secondary-transparent`}
+        icon="trash"
+        onClick={() => {
+          console.log('Delete');
+        }}
+      />
+    </>
+  );
 
   const getTooltipMessage = column => {
     return !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
@@ -168,6 +197,8 @@ export const useSetColumns = (
                 field.fieldData[column.field] !== '' &&
                 field.fieldData.type === 'MULTISELECT_CODELIST'
               ? field.fieldData[column.field].split(',').join(', ')
+              : field.fieldData.type === 'PHONE'
+              ? renderAttachement()
               : field.fieldData[column.field]
             : null}
           <IconTooltip levelError={levelError} message={message} />
@@ -183,6 +214,8 @@ export const useSetColumns = (
                 field.fieldData[column.field] !== '' &&
                 field.fieldData.type === 'MULTISELECT_CODELIST'
               ? field.fieldData[column.field].split(',').join(', ')
+              : field.fieldData.type === 'PHONE'
+              ? renderAttachement()
               : field.fieldData[column.field]
             : null}
         </div>
@@ -219,7 +252,11 @@ export const useSetColumns = (
         <Column
           body={dataTemplate}
           className={invisibleColumn}
-          editor={hasWritePermissions && !isWebFormMMR ? row => cellDataEditor(row, records.selectedRecord) : null}
+          editor={
+            hasWritePermissions && !isWebFormMMR && column.type !== 'PHONE'
+              ? row => cellDataEditor(row, records.selectedRecord)
+              : null
+          }
           field={column.field}
           header={
             <React.Fragment>

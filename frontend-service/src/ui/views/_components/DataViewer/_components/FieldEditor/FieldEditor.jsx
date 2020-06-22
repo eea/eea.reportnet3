@@ -302,20 +302,22 @@ const FieldEditor = ({
           />
         );
       case 'PHONE':
-        return (
-          <InputText
-            keyfilter={getFilter(type)}
-            maxLength={phoneCharacters}
-            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
-            onChange={e => onEditorValueChange(cells, e.target.value)}
-            onFocus={e => {
-              e.preventDefault();
-              onEditorValueFocus(cells, e.target.value);
-            }}
-            onKeyDown={e => onEditorKeyChange(cells, e, record)}
-            value={RecordUtils.getCellValue(cells, cells.field)}
-          />
-        );
+        return false;
+      // (
+      //   <InputText
+      //     keyfilter={getFilter(type)}
+      //     maxLength={phoneCharacters}
+      //     onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+      //     onChange={e => onEditorValueChange(cells, e.target.value)}
+      //     onFocus={e => {
+      //       e.preventDefault();
+      //       onEditorValueFocus(cells, e.target.value);
+      //     }}
+      //     onKeyDown={e => onEditorKeyChange(cells, e, record)}
+      //     value={RecordUtils.getCellValue(cells, cells.field)}
+      //   />
+      // );
+
       case 'LINK':
         return (
           <Dropdown

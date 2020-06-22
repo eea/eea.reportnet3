@@ -70,7 +70,7 @@ export const FieldDesigner = ({
     // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
     { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
-    { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' }
+    { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' },
     // { fieldType: 'Reference', value: 'Reference', fieldTypeIcon: 'link' }
     // { fieldType: 'URL', value: 'Url', fieldTypeIcon: 'url' },
     // { fieldType: 'LongText', value: 'Long text', fieldTypeIcon: 'text' },
@@ -79,7 +79,7 @@ export const FieldDesigner = ({
     // { fieldType: 'Formula', value: 'Formula', fieldTypeIcon: 'formula' },
     // { fieldType: 'Fixed', value: 'Fixed select list', fieldTypeIcon: 'list' },
     // { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
-    // { fieldType: 'Attachement', value: 'Attachement', fieldTypeIcon: 'clip' }
+    { fieldType: 'Attachement', value: 'Attachement', fieldTypeIcon: 'clip' }
   ];
 
   const getFieldTypeValue = value => {
