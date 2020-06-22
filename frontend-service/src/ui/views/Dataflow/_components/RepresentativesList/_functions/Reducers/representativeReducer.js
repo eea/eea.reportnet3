@@ -5,7 +5,6 @@ import { Representative } from 'core/domain/model/Representative/Representative'
 
 export const reducer = (state, { type, payload }) => {
   const emptyRepresentative = new Representative({ dataProviderId: '', providerAccount: '' });
-  let updatedList = [];
 
   switch (type) {
     case 'REFRESH':
@@ -69,12 +68,6 @@ export const reducer = (state, { type, payload }) => {
         representativeIdToDelete: ''
       };
 
-    case 'REFRESH_ON_HIDE_MANAGE_ROLES_DIALOG':
-      return {
-        ...state,
-        refresher: !state.refresher
-      };
-
     case 'INITIAL_LOAD':
       const group = state.dataProvidersTypesList.filter(
         dataProviderType => dataProviderType.dataProviderGroupId === payload.response.group.dataProviderGroupId
@@ -99,18 +92,6 @@ export const reducer = (state, { type, payload }) => {
         initialRepresentatives: payload.representativesByCopy,
         selectedDataProviderGroup: getSelectedProviderGroup(),
         representativeHasError: []
-      };
-
-    case 'UPDATE_ACCOUNT':
-      return {
-        ...state,
-        refresher: !state.refresher
-      };
-
-    case 'UPDATE_DATA_PROVIDER':
-      return {
-        ...state,
-        refresher: !state.refresher
       };
 
     case 'ON_ACCOUNT_CHANGE':

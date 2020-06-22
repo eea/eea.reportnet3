@@ -65,20 +65,7 @@ export const getAllDataProviders = async (selectedDataProviderGroup, formDispatc
   }
 };
 
-const getAllRepresentatives = async (dataflowId, formDispatcher, formState) => {
-  /*  if (isEmpty(formState.representatives) && !isEmpty(formState.dataflowRepresentatives)) {
-    const mimicResponse = {
-      group: { dataProviderGroupId: formState.dataflowRepresentatives[0].dataProviderGroupId },
-      representatives: sortBy(formState.dataflowRepresentatives, ['representativeId'])
-    };
-
-    const representativesByCopy = cloneDeep(mimicResponse.representatives);
-
-    formDispatcher({
-      type: 'INITIAL_LOAD',
-      payload: { response: mimicResponse, representativesByCopy }
-    });
-  } else { */
+const getAllRepresentatives = async (dataflowId, formDispatcher) => {
   try {
     const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
 
@@ -92,7 +79,6 @@ const getAllRepresentatives = async (dataflowId, formDispatcher, formState) => {
     console.error('error on RepresentativeService.allRepresentatives', error);
   }
 };
-/* }; */
 
 const getProviderTypes = async formDispatcher => {
   try {
@@ -172,12 +158,6 @@ export const onKeyDown = (event, formDispatcher, formState, representative, data
   }
 };
 
-export const onCloseManageRolesDialog = async formDispatcher => {
-  formDispatcher({
-    type: 'REFRESH_ON_HIDE_MANAGE_ROLES_DIALOG'
-  });
-};
-
 const updateRepresentative = async (formDispatcher, formState, updatedRepresentative) => {
   let isChangedAccount = false;
 
@@ -205,7 +185,7 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
         updatedRepresentative.providerAccount
       );
       formDispatcher({
-        type: 'UPDATE_ACCOUNT'
+        type: 'REFRESH'
       });
     } catch (error) {
       console.error('error on RepresentativeService.updateProviderAccount', error);

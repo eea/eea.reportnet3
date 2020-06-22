@@ -15,7 +15,6 @@ import {
   getAllDataProviders,
   getInitialData,
   onAddProvider,
-  onCloseManageRolesDialog,
   onDataProviderIdChange,
   onDeleteConfirm,
   onKeyDown
@@ -62,7 +61,9 @@ const RepresentativesList = ({
 
   useEffect(() => {
     if (isActiveManageRolesDialog === false && !isEmpty(formState.representativeHasError)) {
-      onCloseManageRolesDialog(formDispatcher);
+      formDispatcher({
+        type: 'REFRESH'
+      });
     }
   }, [isActiveManageRolesDialog]);
 
