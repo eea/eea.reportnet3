@@ -60,6 +60,7 @@ import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -331,6 +332,15 @@ public class DatasetServiceTest {
   /** The dataflow controller zull. */
   @Mock
   private DataFlowControllerZuul dataflowControllerZull;
+
+
+  /** The dataset schema service. */
+  @Mock
+  private DatasetSchemaService datasetSchemaService;
+
+  /** The integration controller. */
+  @Mock
+  private IntegrationControllerZuul integrationController;
 
   /**
    * The field value.

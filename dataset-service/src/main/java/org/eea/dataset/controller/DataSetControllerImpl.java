@@ -100,6 +100,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   private DesignDatasetService designDatasetService;
 
+  /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
@@ -217,6 +218,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
     // extract the filename
     String fileName = file.getOriginalFilename();
+
     // extract the file content
     try {
       InputStream is = file.getInputStream();
@@ -510,6 +512,7 @@ public class DataSetControllerImpl implements DatasetController {
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
 
       return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
+
     } catch (EEAException | IOException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }

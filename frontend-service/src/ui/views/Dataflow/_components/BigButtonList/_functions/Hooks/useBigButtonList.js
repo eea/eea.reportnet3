@@ -23,13 +23,38 @@ const useBigButtonList = ({
   onLoadReceiptData,
   onSaveName,
   onShowDataCollectionModal,
+  onShowManageReportersDialog,
   onShowNewSchemaDialog,
   onShowSnapshotDialog,
   onShowUpdateDataCollectionModal
 }) => {
   const resources = useContext(ResourcesContext);
 
-  const buttonList = [
+  const manageReportersBigButton = [
+    {
+      buttonClass: 'manageReporters',
+      buttonIcon: 'manageReporters',
+      caption: resources.messages['manageReporters'],
+      layout: 'defaultBigButton',
+      handleRedirect: () => onShowManageReportersDialog(),
+      visibility: dataflowState.isCustodian
+    }
+  ];
+
+  const helpBigButton = [
+    {
+      buttonClass: 'dataflowHelp',
+      buttonIcon: 'info',
+      caption: resources.messages['dataflowHelp'],
+      layout: 'defaultBigButton',
+      handleRedirect: () => handleRedirect(getUrl(routes.DOCUMENTS, { dataflowId }, true)),
+      helpClassName: 'dataflow-documents-weblinks-help-step',
+      onWheel: getUrl(routes.DOCUMENTS, { dataflowId }, true),
+      visibility: true
+    }
+  ];
+
+  const newSchemaBigButton = [
     {
       buttonClass: 'newItem',
       buttonIcon: 'plus',
@@ -49,16 +74,6 @@ const useBigButtonList = ({
         { label: resources.messages['createNewDatasetFromTemplate'], icon: 'add', disabled: true }
       ], */
       visibility: dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']
-    },
-    {
-      buttonClass: 'dataflowHelp',
-      buttonIcon: 'info',
-      caption: resources.messages['dataflowHelp'],
-      layout: 'defaultBigButton',
-      handleRedirect: () => handleRedirect(getUrl(routes.DOCUMENTS, { dataflowId }, true)),
-      helpClassName: 'dataflow-documents-weblinks-help-step',
-      onWheel: getUrl(routes.DOCUMENTS, { dataflowId }, true),
-      visibility: true
     }
   ];
 
@@ -169,7 +184,7 @@ const useBigButtonList = ({
 
   const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState.data);
 
-  const dashboardModels = [
+  const dashboardBigButton = [
     {
       buttonClass: 'dashboard',
       buttonIcon: 'barChart',
@@ -207,7 +222,8 @@ const useBigButtonList = ({
       helpClassName: 'dataflow-datacollection-help-step',
       handleRedirect: isActiveButton ? () => onShowUpdateDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
-      visibility: dataflowState.status === 'DRAFT' && dataflowState.hasRepresentativesWithoutDatasets
+      visibility:
+        dataflowState.isCustodian && dataflowState.status === 'DRAFT' && dataflowState.hasRepresentativesWithoutDatasets
     }
   ];
 
@@ -249,6 +265,7 @@ const useBigButtonList = ({
     const { datasets } = dataflowState.data;
     const representativeNames = datasets.map(dataset => dataset.datasetSchemaName);
     const releasedStates = datasets.map(dataset => dataset.isReleased);
+
     return [
       {
         buttonClass: 'schemaDataset',
@@ -270,14 +287,16 @@ const useBigButtonList = ({
   const receiptBigButton = onBuildReceiptButton();
 
   return [
-    ...buttonList,
-    ...designDatasetModels,
-    ...groupByRepresentativeModels,
-    ...receiptBigButton,
-    ...createDataCollection,
+    ...manageReportersBigButton,
+    ...helpBigButton,
+    ...dashboardBigButton,
     ...dataCollectionModels,
-    ...dashboardModels,
-    ...updateDatasetsNewRepresentatives
+    ...designDatasetModels,
+    ...newSchemaBigButton,
+    ...createDataCollection,
+    ...updateDatasetsNewRepresentatives,
+    ...groupByRepresentativeModels,
+    ...receiptBigButton
   ];
 };
 

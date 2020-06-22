@@ -4,6 +4,7 @@ import { Validation } from 'core/domain/model/Validation/Validation';
 
 import { parseExpressionFromDTO } from './parseExpressionFromDTO';
 import { parseRowExpressionFromDTO } from './parseRowExpressionFromDTO';
+import { parseDatasetRelationFromDTO } from './parseDatasetRelationFromDTO';
 
 export const parseDataValidationRulesDTO = validations => {
   const validationsData = {};
@@ -16,6 +17,7 @@ export const parseDataValidationRulesDTO = validations => {
       let newAllExpressionsIf = [];
       let newExpressionsThen = [];
       let newAllExpressionsThen = [];
+      let newRelations = {};
 
       entityTypes.push(validationDTO.type);
 
@@ -43,6 +45,12 @@ export const parseDataValidationRulesDTO = validations => {
           newAllExpressions = allExpressions;
         }
       }
+
+      if (validationDTO.type === 'DATASET') {
+        const relations = parseDatasetRelationFromDTO(validationDTO.integrityVO);
+        newRelations = relations;
+      }
+
       return new Validation({
         activationGroup: validationDTO.activationGroup,
         automatic: validationDTO.automatic,
@@ -69,7 +77,8 @@ export const parseDataValidationRulesDTO = validations => {
         expressionsIf: newExpressionsIf,
         allExpressionsIf: newAllExpressionsIf,
         expressionsThen: newExpressionsThen,
-        allExpressionsThen: newAllExpressionsThen
+        allExpressionsThen: newAllExpressionsThen,
+        relations: newRelations
       });
     });
   } catch (error) {

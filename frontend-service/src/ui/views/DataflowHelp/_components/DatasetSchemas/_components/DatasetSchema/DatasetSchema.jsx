@@ -112,8 +112,8 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
         return resources.messages['dateFieldFormatRestriction'];
       case 'TEXT':
         return resources.messages['textFieldFormatRestriction'];
-      case 'LONG_TEXT':
-        return resources.messages['longTextFieldFormatRestriction'];
+      case 'RICH_TEXT':
+        return resources.messages['richTextFieldFormatRestriction'];
       case 'NUMBER_DECIMAL':
         return resources.messages['dateFieldFormatRestriction'];
       case 'NUMBER_INTEGER':
@@ -144,7 +144,7 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
         table.tableSchemaName = tableDTO.tableSchemaName;
         table.tableSchemaDescription = tableDTO.tableSchemaDescription;
         table.tableSchemaReadOnly = tableDTO.tableSchemaReadOnly;
-        table.tableSchemaToPrefill = !isNil(tableDTO.tableSchemaToPrefill);
+        table.tableSchemaToPrefill = !isNil(tableDTO.tableSchemaToPrefill) ? tableDTO.tableSchemaToPrefill : false;
         if (!isNull(tableDTO.records) && !isNil(tableDTO.records[0].fields) && tableDTO.records[0].fields.length > 0) {
           const containsCodelists = !isEmpty(
             tableDTO.records[0].fields.filter(

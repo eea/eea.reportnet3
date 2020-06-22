@@ -3,20 +3,27 @@ package org.eea.dataset.service.helper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.io.IOUtils;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -28,8 +35,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class FileTreatmentHelper.
@@ -69,6 +78,14 @@ public class FileTreatmentHelper {
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
+  /** The dataset schema service. */
+  @Autowired
+  private DatasetSchemaService datasetSchemaService;
+
+  /** The integration controller. */
+  @Autowired
+  private IntegrationControllerZuul integrationController;
+
   /**
    * Instantiates a new file loader helper.
    */
@@ -87,53 +104,100 @@ public class FileTreatmentHelper {
   @Async
   public void executeFileProcess(final Long datasetId, final String fileName, final InputStream is,
       String tableSchemaId) {
+
+
+    // Integration process
+    String fileExtension = null;
+    String datasetSchemaId = null;
     try {
-      LOG.info("Processing file");
-      DataSetVO datasetVO = datasetService.processFile(datasetId, fileName, is, tableSchemaId);
+      fileExtension = datasetService.getMimetype(fileName);
+      datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
 
-      // map the VO to the entity
-      datasetVO.setId(datasetId);
-      final DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
-      if (dataset == null) {
-        throw new IOException("Error mapping file");
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+    IntegrationVO integrationVO = new IntegrationVO();
+    Map<String, String> internalParameters = new HashMap<>();
+    internalParameters.put("datasetSchemaId", datasetSchemaId);
+    integrationVO.setInternalParameters(internalParameters);
+    List<IntegrationVO> integrationAux = new ArrayList<>();
+    List<IntegrationVO> integrations =
+        integrationController.findAllIntegrationsByCriteria(integrationVO);
+    List<String> auxExtensionList = new ArrayList<>();
+    integrations.stream().forEach(integration -> {
+      if (IntegrationOperationTypeEnum.IMPORT.equals(integration.getOperation())) {
+        auxExtensionList.add(integration.getInternalParameters().get("fileExtension"));
+        Map<String, String> externalParameters = new HashMap<>();
+        byte[] imageBytes;
+        try {
+          imageBytes = IOUtils.toByteArray(is);
+          String encodedString = Base64.getEncoder().encodeToString(imageBytes);
+          is.close();
+          externalParameters.put("fileIS", encodedString);
+          integration.setExternalParameters(externalParameters);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+        integrationAux.add(integration);
       }
-
-      // Save empty table
-      List<RecordValue> allRecords = dataset.getTableValues().get(0).getRecords();
-      dataset.getTableValues().get(0).setRecords(new ArrayList<>());
-
-      // Check if the table with idTableSchema has been populated already
-      Long oldTableId = datasetService.findTableIdByTableSchema(datasetId, tableSchemaId);
-      fillTableId(tableSchemaId, dataset.getTableValues(), oldTableId);
-
-      if (null == oldTableId) {
-        datasetService.saveTable(datasetId, dataset.getTableValues().get(0));
+    });
+    if (auxExtensionList.contains(fileExtension)) {
+      try {
+        integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
+            IntegrationOperationTypeEnum.IMPORT, fileName, datasetId, integrationAux.get(0));
+      } finally {
+        removeLock(datasetId, tableSchemaId);
       }
+    } else {
+      // REP-3 file process
+      try {
+        LOG.info("Processing file");
+        DataSetVO datasetVO = datasetService.processFile(datasetId, fileName, is, tableSchemaId);
 
-      List<List<RecordValue>> listaGeneral = getListOfRecords(allRecords);
+        // map the VO to the entity
+        datasetVO.setId(datasetId);
+        final DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
+        if (dataset == null) {
+          throw new IOException("Error mapping file");
+        }
 
-      // Obtain the data provider code to insert into the record
-      Long providerId = 0L;
-      DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(datasetId);
-      if (metabase.getDataProviderId() != null) {
-        providerId = metabase.getDataProviderId();
+        // Save empty table
+        List<RecordValue> allRecords = dataset.getTableValues().get(0).getRecords();
+        dataset.getTableValues().get(0).setRecords(new ArrayList<>());
+
+        // Check if the table with idTableSchema has been populated already
+        Long oldTableId = datasetService.findTableIdByTableSchema(datasetId, tableSchemaId);
+        fillTableId(tableSchemaId, dataset.getTableValues(), oldTableId);
+
+        if (null == oldTableId) {
+          datasetService.saveTable(datasetId, dataset.getTableValues().get(0));
+        }
+
+        List<List<RecordValue>> listaGeneral = getListOfRecords(allRecords);
+
+        // Obtain the data provider code to insert into the record
+        Long providerId = 0L;
+        DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(datasetId);
+        if (metabase.getDataProviderId() != null) {
+          providerId = metabase.getDataProviderId();
+        }
+        DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
+
+        listaGeneral.parallelStream().forEach(value -> {
+          value.stream().forEach(r -> r.setDataProviderCode(provider.getCode()));
+          datasetService.saveAllRecords(datasetId, value);
+        });
+
+        LOG.info("File processed and saved into DB");
+        releaseSuccessEvents((String) ThreadPropertiesManager.getVariable("user"), datasetId,
+            tableSchemaId, fileName);
+      } catch (Exception e) {
+        LOG.error("Error loading file: " + fileName, e);
+        releaseFailEvents((String) ThreadPropertiesManager.getVariable("user"), datasetId,
+            tableSchemaId, fileName, "Fail importing file " + fileName);
+      } finally {
+        removeLock(datasetId, tableSchemaId);
       }
-      DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
-
-      listaGeneral.parallelStream().forEach(value -> {
-        value.stream().forEach(r -> r.setDataProviderCode(provider.getCode()));
-        datasetService.saveAllRecords(datasetId, value);
-      });
-
-      LOG.info("File processed and saved into DB");
-      releaseSuccessEvents((String) ThreadPropertiesManager.getVariable("user"), datasetId,
-          tableSchemaId, fileName);
-    } catch (Exception e) {
-      LOG.error("Error loading file: " + fileName, e);
-      releaseFailEvents((String) ThreadPropertiesManager.getVariable("user"), datasetId,
-          tableSchemaId, fileName, "Fail importing file " + fileName);
-    } finally {
-      removeLock(datasetId, tableSchemaId);
     }
   }
 

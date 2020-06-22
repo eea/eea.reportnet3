@@ -104,7 +104,7 @@ export const useSetColumns = (
       { fieldType: 'Number_Decimal', value: 'Number - Decimal' },
       { fieldType: 'Date', value: 'Date' },
       { fieldType: 'Text', value: 'Text' },
-      { fieldType: 'Long_Text', value: 'Long text' },
+      { fieldType: 'Rich_Text', value: 'Rich text' },
       { fieldType: 'Email', value: 'Email' },
       { fieldType: 'URL', value: 'URL' },
       { fieldType: 'Phone', value: 'Phone number' },

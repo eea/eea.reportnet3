@@ -61,12 +61,12 @@ export const FieldDesigner = ({
     // { fieldType: 'Latitude', value: 'Geospatial object (Latitude)', fieldTypeIcon: 'map' },
     // { fieldType: 'Longitude', value: 'Geospatial object (Longitude)', fieldTypeIcon: 'map' },
     { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
-    { fieldType: 'Long_Text', value: 'Long text', fieldTypeIcon: 'align-right' },
+    // { fieldType: 'Rich_Text', value: 'Rich text', fieldTypeIcon: 'align-right' },
     { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
     { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
     { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
     // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
-    { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
+    // { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
     // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
     // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
@@ -74,7 +74,7 @@ export const FieldDesigner = ({
     { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' }
     // { fieldType: 'Reference', value: 'Reference', fieldTypeIcon: 'link' }
     // { fieldType: 'URL', value: 'Url', fieldTypeIcon: 'url' },
-    // { fieldType: 'LongText', value: 'Long text', fieldTypeIcon: 'text' },
+    // { fieldType: 'RichText', value: 'Rich text', fieldTypeIcon: 'text' },
     // { fieldType: 'LinkData', value: 'Link to a data collection', fieldTypeIcon: 'linkData' },
     // { fieldType: 'Percentage', value: 'Percentage', fieldTypeIcon: 'percentage' },
     // { fieldType: 'Formula', value: 'Formula', fieldTypeIcon: 'formula' },
@@ -797,11 +797,9 @@ export const FieldDesigner = ({
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton}`}
             icon="horizontalSliders"
-            label={resources.messages['qcRules']}
+            label={resources.messages['createFieldQC']}
             onClick={() => validationContext.onOpenModalFromField(fieldId, tableSchemaId)}
             style={{ marginLeft: '0.4rem', alignSelf: !fieldDesignerState.isEditing ? 'center' : 'baseline' }}
-            tooltip={resources.messages['createFieldQC']}
-            tooltipOptions={{ position: 'bottom' }}
           />
         ) : null}
         {renderDeleteButton()}

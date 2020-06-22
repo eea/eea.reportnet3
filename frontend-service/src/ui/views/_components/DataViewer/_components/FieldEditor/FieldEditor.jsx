@@ -111,7 +111,7 @@ const FieldEditor = ({
       case 'DATE':
         return 'date';
       case 'TEXT':
-      case 'LONG_TEXT':
+      case 'RICH_TEXT':
         return 'any';
       case 'EMAIL':
         return 'email';
@@ -128,8 +128,8 @@ const FieldEditor = ({
     const longCharacters = 20;
     const decimalCharacters = 40;
     const dateCharacters = 10;
-    const textCharacters = 5000;
-    const longTextCharacters = 10000;
+    const textCharacters = 10000;
+    const richTextCharacters = 10000;
     const emailCharacters = 256;
     const phoneCharacters = 256;
     const urlCharacters = 5000;
@@ -151,7 +151,7 @@ const FieldEditor = ({
             maxLength={textCharacters}
           />
         );
-      case 'LONG_TEXT':
+      case 'RICH_TEXT':
         return (
           <InputText
             keyfilter={getFilter(type)}
@@ -164,7 +164,7 @@ const FieldEditor = ({
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
             type="text"
             value={RecordUtils.getCellValue(cells, cells.field)}
-            maxLength={longTextCharacters}
+            maxLength={richTextCharacters}
           />
         );
       case 'NUMBER_INTEGER':
