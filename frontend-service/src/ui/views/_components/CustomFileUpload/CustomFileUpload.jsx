@@ -15,7 +15,7 @@ import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 
 export class CustomFileUpload extends Component {
   static defaultProps = {
-    accept: null,
+    accept: undefined,
     auto: false,
     cancelLabel: 'Reset',
     chooseLabel: 'Choose',
@@ -98,17 +98,17 @@ export class CustomFileUpload extends Component {
 
   checkValidExtension(file) {
     const acceptedExtensions = this.props.accept.split(', ');
-
+    console.log({ acceptedExtensions });
     if (file) {
       const extension = file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name;
       return acceptedExtensions.includes(`.${extension}`);
     }
-
+    console.log(this.hasFiles());
     if (this.hasFiles()) {
       const selectedExtension = this.state.files.map(
         file => file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name
       );
-
+      console.log({ selectedExtension });
       return !selectedExtension.some(ext => acceptedExtensions.includes(`.${ext}`));
     }
     return false;
@@ -215,10 +215,12 @@ export class CustomFileUpload extends Component {
 
       return false;
     }
-
-    if (!this.checkValidExtension(file)) {
-      this.setState({ isValid: false });
-      return false;
+    if (this.props.accept) {
+      console.log(this.props.accept);
+      if (!this.checkValidExtension(file)) {
+        this.setState({ isValid: false });
+        return false;
+      }
     }
 
     this.setState({ isValid: true });
@@ -409,7 +411,7 @@ export class CustomFileUpload extends Component {
     let className = classNames('p-fileupload p-component', this.props.className);
     let uploadButton, cancelButton, filesList, progressBar;
     let chooseButton = this.renderChooseButton();
-
+    console.log('ADVANCED');
     if (!this.props.auto) {
       uploadButton = (
         <Fragment>
@@ -418,11 +420,11 @@ export class CustomFileUpload extends Component {
               label={this.props.uploadLabel}
               icon="upload"
               onClick={this.upload}
-              disabled={this.props.disabled || !this.hasFiles() || this.checkValidExtension()}
+              disabled={this.props.disabled || !this.hasFiles() || (this.props.accept && this.checkValidExtension())}
             />
           </span>
 
-          {this.checkValidExtension() && (
+          {this.props.accept && this.checkValidExtension() && (
             <ReactTooltip effect="solid" id="inValidExtension" place="top">
               {this.props.invalidExtensionMessage}
             </ReactTooltip>

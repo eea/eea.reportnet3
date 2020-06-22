@@ -216,7 +216,7 @@ const ActionsToolbar = ({
             !hasWritePermissions || tableReadOnly || isWebFormMMR ? null : 'p-button-animated-blink'
           }`}
           disabled={!hasWritePermissions || tableReadOnly || isWebFormMMR}
-          icon={'export'}
+          icon={'import'}
           label={resources.messages['import']}
           onClick={() => setImportDialogVisible(true)}
         />
@@ -227,7 +227,7 @@ const ActionsToolbar = ({
           }`}
           // disabled={!hasWritePermissions}
           disabled={isDataCollection}
-          icon={isLoadingFile ? 'spinnerAnimate' : 'import'}
+          icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
           label={resources.messages['exportTable']}
           onClick={event => {
             onUpdateData();

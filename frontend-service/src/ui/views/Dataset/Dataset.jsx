@@ -627,7 +627,7 @@ export const Dataset = withRouter(({ match, history }) => {
             <Button
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
               // disabled={!hasWritePermissions}
-              icon={loadingFile ? 'spinnerAnimate' : 'import'}
+              icon={loadingFile ? 'spinnerAnimate' : 'export'}
               label={resources.messages['export']}
               onClick={event => exportMenuRef.current.show(event)}
             />

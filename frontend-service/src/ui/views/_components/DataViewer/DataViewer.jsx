@@ -77,6 +77,8 @@ const DataViewer = withRouter(
     const userContext = useContext(UserContext);
 
     const [addDialogVisible, setAddDialogVisible] = useState(false);
+    const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
+    const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
     const [datasetSchemaId, setDatasetSchemaId] = useState(null);
@@ -186,7 +188,9 @@ const DataViewer = withRouter(
       isWebFormMMR,
       records,
       resources,
+      setIsAttachFileVisible,
       setIsColumnInfoVisible,
+      setIsDeleteAttachmentVisible,
       validationsTemplate
     );
 
@@ -397,6 +401,25 @@ const DataViewer = withRouter(
       }
     };
 
+    const onAttach = async () => {
+      setIsAttachFileVisible(false);
+      console.log('ON ATTACH');
+      // const {
+      //   dataflow: { name: dataflowName },
+      //   dataset: { name: datasetName }
+      // } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+      // notificationContext.add({
+      //   type: 'DATASET_DATA_LOADING_INIT',
+      //   content: {
+      //     datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
+      //     title: TextUtils.ellipsis(tableName, config.notifications.STRING_LENGTH_MAX),
+      //     datasetLoading: resources.messages['datasetLoading'],
+      //     dataflowName,
+      //     datasetName
+      //   }
+      // });
+    };
+
     const onCancelRowEdit = () => {
       let updatedValue = RecordUtils.changeRecordInTable(
         fetchedData,
@@ -442,6 +465,11 @@ const DataViewer = withRouter(
       } finally {
         setDeleteDialogVisible(false);
       }
+    };
+
+    const onConfirmDeleteAttachment = () => {
+      console.log('DELETE ATTACHMENT');
+      setIsDeleteAttachmentVisible(false);
     };
 
     const onConfirmDeleteRow = async () => {
@@ -831,6 +859,15 @@ const DataViewer = withRouter(
       );
     };
 
+    const renderCustomFileAttachFooter = (
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => setIsAttachFileVisible(false)}
+      />
+    );
+
     const renderCustomFileUploadFooter = (
       <Button
         className="p-button-secondary p-button-animated-blink"
@@ -882,11 +919,16 @@ const DataViewer = withRouter(
         onSaveRecord(records.newRecord);
       }
     };
+    const getAttachExtensions = [{ datasetSchemaId, fileExtension: '.*' }]
+      .map(file => `.${file.fileExtension}`)
+      .join(', ');
 
     const getImportExtensions = [{ datasetSchemaId, fileExtension: 'csv', operation: 'IMPORT' }]
       .concat(extensionsOperationsList.import)
       .map(file => `.${file.fileExtension}`)
       .join(', ');
+
+    const infoAttachTooltip = `${resources.messages['supportedFileAttachementsTooltip']} ${getAttachExtensions}`;
 
     const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${getImportExtensions}`;
 
@@ -1043,6 +1085,33 @@ const DataViewer = withRouter(
           </Dialog>
         )}
 
+        {isAttachFileVisible && (
+          <Dialog
+            className={styles.Dialog}
+            dismissableMask={false}
+            footer={renderCustomFileAttachFooter}
+            header={`${resources.messages['uploadAttachement']}`}
+            onHide={() => setIsAttachFileVisible(false)}
+            visible={isAttachFileVisible}>
+            <CustomFileUpload
+              // accept={getAttachExtensions}
+              chooseLabel={resources.messages['selectFile']}
+              className={styles.FileUpload}
+              fileLimit={1}
+              infoTooltip={infoAttachTooltip}
+              mode="advanced"
+              multiple={false}
+              invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+              name="file"
+              onUpload={onAttach}
+              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.loadDataTable, {
+                datasetId: datasetId,
+                tableId: tableId
+              })}`}
+            />
+          </Dialog>
+        )}
+
         {addDialogVisible && (
           <div onKeyPress={onKeyPress}>
             <Dialog
@@ -1108,6 +1177,19 @@ const DataViewer = withRouter(
             onHide={() => onSetVisible(setDeleteDialogVisible, false)}
             visible={deleteDialogVisible}>
             {resources.messages['deleteDatasetTableConfirm']}
+          </ConfirmDialog>
+        )}
+
+        {isDeleteAttachmentVisible && (
+          <ConfirmDialog
+            classNameConfirm={'p-button-danger'}
+            header={`${resources.messages['deleteAttachmentHeader']}`}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            onConfirm={onConfirmDeleteAttachment}
+            onHide={() => setIsDeleteAttachmentVisible(false)}
+            visible={isDeleteAttachmentVisible}>
+            {resources.messages['deleteAttachmentConfirm']}
           </ConfirmDialog>
         )}
 

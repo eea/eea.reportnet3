@@ -84,7 +84,9 @@ export const useSetColumns = (
   isWebFormMMR,
   records,
   resources,
+  setIsAttachFileVisible,
   setIsColumnInfoVisible,
+  setIsDeleteAttachmentVisible,
   validationsTemplate
 ) => {
   const [columns, setColumns] = useState([]);
@@ -125,30 +127,34 @@ export const useSetColumns = (
     }
   };
 
-  const renderAttachement = () => (
-    <>
+  const renderAttachement = (value = '') => (
+    <div style={{ display: 'flex', justifyContent: 'center' }}>
+      {value !== '' && (
+        <Button
+          className={`p-button-secondary-transparent`}
+          icon="export"
+          iconPos="right"
+          label={value}
+          onClick={() => {
+            console.log('Download');
+          }}
+        />
+      )}
       <Button
         className={`p-button-secondary-transparent`}
-        icon="clipboard"
+        icon="import"
         onClick={() => {
-          console.log('Download');
+          setIsAttachFileVisible(true);
         }}
       />
-      <Button
-        className={`p-button-secondary-transparent`}
-        icon="export"
-        onClick={() => {
-          console.log('Download');
-        }}
-      />
-      <Button
-        className={`p-button-secondary-transparent`}
-        icon="trash"
-        onClick={() => {
-          console.log('Delete');
-        }}
-      />
-    </>
+      {value !== '' && (
+        <Button
+          className={`p-button-secondary-transparent`}
+          icon="trash"
+          onClick={() => setIsDeleteAttachmentVisible(true)}
+        />
+      )}
+    </div>
   );
 
   const getTooltipMessage = column => {
@@ -188,7 +194,7 @@ export const useSetColumns = (
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between'
+            justifyContent: field.fieldData.type === 'PHONE' ? 'flex-end' : 'space-between'
           }}>
           {field
             ? Array.isArray(field.fieldData[column.field])
@@ -198,7 +204,7 @@ export const useSetColumns = (
                 field.fieldData.type === 'MULTISELECT_CODELIST'
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData.type === 'PHONE'
-              ? renderAttachement()
+              ? renderAttachement(field.fieldData[column.field])
               : field.fieldData[column.field]
             : null}
           <IconTooltip levelError={levelError} message={message} />
@@ -206,7 +212,12 @@ export const useSetColumns = (
       );
     } else {
       return (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: field.fieldData.type === 'PHONE' ? 'flex-end' : 'space-between'
+          }}>
           {field
             ? Array.isArray(field.fieldData[column.field])
               ? field.fieldData[column.field].sort().join(', ')
@@ -215,7 +226,7 @@ export const useSetColumns = (
                 field.fieldData.type === 'MULTISELECT_CODELIST'
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData.type === 'PHONE'
-              ? renderAttachement()
+              ? renderAttachement(field.fieldData[column.field])
               : field.fieldData[column.field]
             : null}
         </div>

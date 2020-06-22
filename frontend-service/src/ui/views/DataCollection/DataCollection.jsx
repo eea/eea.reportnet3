@@ -292,7 +292,7 @@ export const DataCollection = withRouter(({ match, history }) => {
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={true}
-              icon={'import'}
+              icon={'export'}
               label={resources.messages['export']}
             />
             <Button
