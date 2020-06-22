@@ -35,14 +35,10 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID':
-      const providersNoSelect = [...payload.responseAllDataProviders];
-      if (state.representatives.length <= payload.responseAllDataProviders.length) {
-        payload.responseAllDataProviders.unshift({ dataProviderId: '', label: 'Select...' });
-      }
       return {
         ...state,
         allPossibleDataProviders: payload.responseAllDataProviders,
-        allPossibleDataProvidersNoSelect: providersNoSelect
+        allPossibleDataProvidersNoSelect: payload.providersNoSelect
       };
 
     case 'GET_PROVIDERS_TYPES_LIST':

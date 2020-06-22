@@ -69,7 +69,7 @@ const RepresentativesList = ({
 
   useEffect(() => {
     if (!isNull(formState.selectedDataProviderGroup)) {
-      getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
+      getAllDataProviders(formState.selectedDataProviderGroup, formState.representatives, formDispatcher);
     }
   }, [formState.selectedDataProviderGroup]);
 

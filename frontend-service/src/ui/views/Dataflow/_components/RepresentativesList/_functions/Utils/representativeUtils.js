@@ -52,13 +52,18 @@ export const createUnusedOptionsList = formDispatcher => {
   });
 };
 
-export const getAllDataProviders = async (selectedDataProviderGroup, formDispatcher) => {
+export const getAllDataProviders = async (selectedDataProviderGroup, representatives, formDispatcher) => {
   try {
     const responseAllDataProviders = await RepresentativeService.allDataProviders(selectedDataProviderGroup);
 
+    const providersNoSelect = [...responseAllDataProviders];
+    if (representatives.length <= responseAllDataProviders.length) {
+      responseAllDataProviders.unshift({ dataProviderId: '', label: 'Select...' });
+    }
+
     formDispatcher({
       type: 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID',
-      payload: { responseAllDataProviders }
+      payload: { responseAllDataProviders, providersNoSelect }
     });
   } catch (error) {
     console.error('error on RepresentativeService.allDataProviders', error);
