@@ -44,7 +44,7 @@ export const reducer = (state, { type, payload }) => {
     case 'GET_PROVIDERS_TYPES_LIST':
       return { ...state, dataProvidersTypesList: payload.providerTypes };
 
-    case 'REPRESENTATIVE_HAS_ERROR':
+    case 'MANAGE_ERRORS':
       return { ...state, representativeHasError: payload.representativeHasError };
 
     case 'HIDE_CONFIRM_DIALOG':

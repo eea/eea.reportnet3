@@ -41,7 +41,7 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId, fo
         let { representativeHasError } = formState;
         representativeHasError.unshift(representatives[representatives.length - 1].representativeId);
         formDispatcher({
-          type: 'REPRESENTATIVE_HAS_ERROR',
+          type: 'MANAGE_ERRORS',
           payload: { representativeHasError: uniq(representativeHasError) }
         });
       }
@@ -184,7 +184,7 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
         representativeId => representativeId !== updatedRepresentative.representativeId
       );
       formDispatcher({
-        type: 'REPRESENTATIVE_HAS_ERROR',
+        type: 'MANAGE_ERRORS',
         payload: { representativeHasError: filteredInputsWithErrors }
       });
     }
@@ -206,7 +206,7 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
         let { representativeHasError } = formState;
         representativeHasError.unshift(updatedRepresentative.representativeId);
         formDispatcher({
-          type: 'REPRESENTATIVE_HAS_ERROR',
+          type: 'MANAGE_ERRORS',
           payload: { representativeHasError: uniq(representativeHasError) }
         });
       }
