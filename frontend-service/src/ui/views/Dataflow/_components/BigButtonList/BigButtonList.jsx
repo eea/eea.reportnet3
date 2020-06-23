@@ -282,16 +282,14 @@ export const BigButtonList = ({
 
   const renderDialogFooter = (
     <Fragment>
-      <div className="p-toolbar-group-left">
-        <Button
-          className="p-button-secondary p-button-animated-blink"
-          icon={'plus'}
-          label={resources.messages['cloneSelectedDataflow']}
-          onClick={() => {
-            console.log('clone from dataflowID ', dataflowId);
-          }}
-        />
-      </div>
+      <Button
+        className="p-button-primary p-button-animated-blink"
+        icon={'plus'}
+        label={resources.messages['cloneSelectedDataflow']}
+        onClick={() => {
+          console.log('clone from dataflowID ', dataflowId);
+        }}
+      />
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
