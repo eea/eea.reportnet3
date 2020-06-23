@@ -703,6 +703,7 @@
     "targetTable": "Target table",
     "cloneSchemasFromDataflow": "Clone all schemas from dataflow",
     "DataflowsList": "Dataflow's List",
-    "cloneSelectedDataflow": "Clone selected dataflow"
+    "cloneSelectedDataflow": "Clone selected dataflow",
+    "selectedDataflow": "Selected dataflow"
   }
 }
