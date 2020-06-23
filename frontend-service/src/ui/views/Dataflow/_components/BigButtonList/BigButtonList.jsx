@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import isNil from 'lodash/isNil';
 import remove from 'lodash/remove';
@@ -10,6 +10,7 @@ import styles from './BigButtonList.module.css';
 import { BigButton } from '../BigButton';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar/Calendar';
+import { CloneSchemas } from 'ui/views/Dataflow/_components/CloneSchemas';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
@@ -47,6 +48,7 @@ export const BigButtonList = ({
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
+  const [cloneDialogVisible, setCloneDialogVisible] = useState(false);
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
   const [dataCollectionDueDate, setDataCollectionDueDate] = useState(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -162,6 +164,10 @@ export const BigButtonList = ({
     }
   };
 
+  const onCloneDataflow = () => {
+    setCloneDialogVisible(true);
+  };
+
   const onCreateDatasetSchema = () => {
     setNewDatasetDialog(false);
   };
@@ -274,6 +280,27 @@ export const BigButtonList = ({
     setIsUpdateDataCollectionDialogVisible(true);
   };
 
+  const renderDialogFooter = (
+    <Fragment>
+      <div className="p-toolbar-group-left">
+        <Button
+          className="p-button-secondary p-button-animated-blink"
+          icon={'plus'}
+          label={resources.messages['cloneSelectedDataflow']}
+          onClick={() => {
+            console.log('clone from dataflowID ', dataflowId);
+          }}
+        />
+      </div>
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => setCloneDialogVisible(false)}
+      />
+    </Fragment>
+  );
+
   const bigButtonList = uniqBy(
     useBigButtonList({
       dataflowId,
@@ -282,6 +309,7 @@ export const BigButtonList = ({
       getDeleteSchemaIndex,
       handleRedirect,
       isActiveButton,
+      onCloneDataflow,
       onDatasetSchemaNameError,
       onDuplicateName,
       onLoadReceiptData,
@@ -320,6 +348,18 @@ export const BigButtonList = ({
             onUpdateData={onUpdateData}
             setNewDatasetDialog={setNewDatasetDialog}
           />
+        </Dialog>
+      )}
+
+      {cloneDialogVisible && (
+        <Dialog
+          className={styles.dialog}
+          dismissableMask={false}
+          footer={renderDialogFooter}
+          header={resources.messages['DataflowsList']}
+          onHide={() => setCloneDialogVisible(false)}
+          visible={cloneDialogVisible}>
+          <CloneSchemas dataflowId={dataflowId} />
         </Dialog>
       )}
 
