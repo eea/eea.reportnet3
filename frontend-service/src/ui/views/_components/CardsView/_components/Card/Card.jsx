@@ -33,9 +33,13 @@ export const Card = ({ card, checked, date, handleRedirect, icon, id, onCheck, s
 };
 
 Card.propTypes = {
-  checked: PropTypes.object
+  checked: PropTypes.object,
+  handleRedirect: PropTypes.func,
+  onCheck: PropTypes.func
 };
 
 Card.defaultProps = {
-  checked: { id: null, title: '' }
+  checked: { id: null, title: '' },
+  handleRedirect: () => {},
+  onCheck: () => {}
 };
