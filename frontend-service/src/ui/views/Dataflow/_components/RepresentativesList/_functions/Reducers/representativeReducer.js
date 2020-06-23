@@ -45,10 +45,7 @@ export const reducer = (state, { type, payload }) => {
       return { ...state, dataProvidersTypesList: payload.providerTypes };
 
     case 'REPRESENTATIVE_HAS_ERROR':
-      let inputsWithErrors = state.representativeHasError;
-      inputsWithErrors.unshift(payload.representativeIdThatHasError);
-
-      return { ...state, representativeHasError: inputsWithErrors };
+      return { ...state, representativeHasError: payload.representativeHasError };
 
     case 'REPRESENTATIVE_HAS_NO_ERROR':
       const filteredInputsWithErrors = state.representativeHasError.filter(

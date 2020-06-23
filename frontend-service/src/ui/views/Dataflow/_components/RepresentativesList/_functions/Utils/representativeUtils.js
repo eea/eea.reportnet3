@@ -1,6 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import uniq from 'lodash/uniq';
 
 import { RepresentativeService } from 'core/services/Representative';
 
@@ -21,7 +22,7 @@ export const autofocusOnEmptyInput = formState => {
   }
 };
 
-const addRepresentative = async (formDispatcher, representatives, dataflowId) => {
+const addRepresentative = async (formDispatcher, representatives, dataflowId, formState) => {
   const newRepresentative = representatives.filter(representative => isNil(representative.representativeId));
   if (!isEmpty(newRepresentative[0].providerAccount) && !isEmpty(newRepresentative[0].dataProviderId)) {
     try {
@@ -37,9 +38,11 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId) =>
     } catch (error) {
       console.error('error on RepresentativeService.add', error);
       if (error.response.status === 400 || error.response.status === 404) {
+        let { representativeHasError } = formState;
+        representativeHasError.unshift(representatives[representatives.length - 1].representativeId);
         formDispatcher({
           type: 'REPRESENTATIVE_HAS_ERROR',
-          payload: { representativeIdThatHasError: representatives[representatives.length - 1].representativeId }
+          payload: { representativeHasError: uniq(representativeHasError) }
         });
       }
     }
@@ -108,7 +111,7 @@ export const getInitialData = async (formDispatcher, dataflowId, formState) => {
 
 export const onAddProvider = (formDispatcher, formState, representative, dataflowId) => {
   isNil(representative.representativeId)
-    ? addRepresentative(formDispatcher, formState.representatives, dataflowId)
+    ? addRepresentative(formDispatcher, formState.representatives, dataflowId, formState)
     : updateRepresentative(formDispatcher, formState, representative);
 };
 
@@ -196,9 +199,11 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
       console.error('error on RepresentativeService.updateProviderAccount', error);
 
       if (error.response.status === 400 || error.response.status === 404) {
+        let { representativeHasError } = formState;
+        representativeHasError.unshift(updatedRepresentative.representativeId);
         formDispatcher({
           type: 'REPRESENTATIVE_HAS_ERROR',
-          payload: { representativeIdThatHasError: updatedRepresentative.representativeId }
+          payload: { representativeHasError: uniq(representativeHasError) }
         });
       }
     }
