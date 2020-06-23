@@ -84,14 +84,12 @@ public class FMECommunicationService {
     return result;
   }
 
-  public FileSubmitResult sendFile(byte[] file, Long idDataset, Long idProvider, String fileName) {
-    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-    body.add("fileA", "aba".getBytes());
-//      body.add("file", file);
+  public FileSubmitResult sendFile(byte[] file, Long idDataset, String idProvider,
+      String fileName) {
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("datasetId", String.valueOf(idDataset));
-    uriParams.put("providerId", String.valueOf(idProvider));
+    uriParams.put("providerId", idProvider);
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
     headerInfo.put("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
@@ -115,7 +113,7 @@ public class FMECommunicationService {
   }
 
 
-  public FileSubmitResult receiveFile(byte[] file, Long idDataset, Long idProvider,
+  public FileSubmitResult receiveFile(byte[] file, Long idDataset, String idProvider,
       String fileName) {
     MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 
@@ -123,7 +121,7 @@ public class FMECommunicationService {
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("datasetId", String.valueOf(idDataset));
-    uriParams.put("providerId", String.valueOf(idProvider));
+    uriParams.put("providerId", idProvider);
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
     headerInfo.put("Content-Disposition", "attachment; filename=\"" + fileName + "\"");

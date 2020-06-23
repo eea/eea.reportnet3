@@ -104,7 +104,6 @@ const DataViewer = withRouter(
     ]);
     const [levelErrorValidations, setLevelErrorValidations] = useState([]);
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
-    const [selectedCellId, setSelectedCellId] = useState();
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
       editedRecord: {},
@@ -499,14 +498,9 @@ const DataViewer = withRouter(
     };
 
     const onEditorSubmitValue = async (cell, value, record) => {
-      console.log('onEditorSubmitValue');
       if (!isEmpty(record)) {
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
-        if (
-          value !== initialCellValue &&
-          selectedCellId === RecordUtils.getCellId(cell, cell.field) &&
-          record.recordId === records.selectedRecord.recordId
-        ) {
+        if (value !== initialCellValue && record.recordId === records.selectedRecord.recordId) {
           try {
             //without await. We don't have to wait for the response.
             const fieldUpdated = DatasetService.updateFieldById(
@@ -550,7 +544,6 @@ const DataViewer = withRouter(
     };
 
     const onEditorValueFocus = (props, value) => {
-      setSelectedCellId(RecordUtils.getCellId(props, props.field));
       setInitialCellValue(value);
       if (!isEditing) {
         setIsEditing(true);

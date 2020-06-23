@@ -25,7 +25,6 @@ const create = async (datasetSchemaId, validationRule) => {
 };
 
 const createDatasetRule = async (datasetSchemaId, validationRule) => {
-  console.log(validationRule);
   const validation = {
     automatic: false,
     description: validationRule.description,
@@ -136,7 +135,6 @@ const updateRowRule = async (datasetId, validationRule) => {
 };
 
 const updateDatasetRule = async (datasetId, validationRule) => {
-  console.log({ validationRule });
   const validation = {
     ruleId: validationRule.id,
     description: validationRule.description,
