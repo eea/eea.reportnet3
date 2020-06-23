@@ -179,9 +179,12 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
       initialRepresentative.representativeId === updatedRepresentative.representativeId &&
       initialRepresentative.providerAccount === updatedRepresentative.providerAccount
     ) {
+      const filteredInputsWithErrors = formState.representativeHasError.filter(
+        representativeId => representativeId !== updatedRepresentative.representativeId
+      );
       formDispatcher({
-        type: 'REPRESENTATIVE_HAS_NO_ERROR',
-        payload: { representativeId: updatedRepresentative.representativeId }
+        type: 'REPRESENTATIVE_HAS_ERROR',
+        payload: { representativeHasError: filteredInputsWithErrors }
       });
     }
   });

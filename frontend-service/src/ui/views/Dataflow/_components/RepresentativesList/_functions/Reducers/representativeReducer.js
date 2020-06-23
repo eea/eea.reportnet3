@@ -47,13 +47,6 @@ export const reducer = (state, { type, payload }) => {
     case 'REPRESENTATIVE_HAS_ERROR':
       return { ...state, representativeHasError: payload.representativeHasError };
 
-    case 'REPRESENTATIVE_HAS_NO_ERROR':
-      const filteredInputsWithErrors = state.representativeHasError.filter(
-        representativeId => representativeId !== payload.representativeId
-      );
-
-      return { ...state, representativeHasError: filteredInputsWithErrors };
-
     case 'HIDE_CONFIRM_DIALOG':
       return {
         ...state,
