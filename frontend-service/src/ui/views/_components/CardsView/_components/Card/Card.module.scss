@@ -70,11 +70,11 @@
     }
   }
 
-  .footer {
+  .date {
     display: flex;
     align-items: center;
 
-    span {
+    .dueDate {
       font-weight: bold;
       padding: 0.3rem;
     }

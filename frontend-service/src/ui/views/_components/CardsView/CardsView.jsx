@@ -10,7 +10,7 @@ import { Paginator } from 'ui/views/_components/DataTable/_components/Paginator'
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const CardsView = ({ checkedCard, data, onChangePagination, onSelectCard, pagination }) => {
+export const CardsView = ({ checkedCard, data, handleRedirect, onChangePagination, onSelectCard, pagination }) => {
   const resources = useContext(ResourcesContext);
 
   const [cards, setCards] = useState(data);
@@ -45,21 +45,20 @@ export const CardsView = ({ checkedCard, data, onChangePagination, onSelectCard,
       <div
         className={styles.cardWrap}
         style={{ justifyContent: currentPosts.length === cardsPerPage ? 'space-between' : 'flex-start' }}>
-        {currentPosts.map(card => {
-          return (
-            <Card
-              card={card}
-              checked={checkedCard}
-              footer={card.dueDate}
-              icon="externalLink"
-              id={card.id}
-              key={card.id}
-              onCheck={onSelectCard}
-              subtitle={card.legalInstrument}
-              title={card.title}
-            />
-          );
-        })}
+        {currentPosts.map(card => (
+          <Card
+            card={card}
+            checked={checkedCard}
+            date={card.dueDate}
+            handleRedirect={handleRedirect}
+            icon="externalLink"
+            id={card.id}
+            key={card.id}
+            onCheck={onSelectCard}
+            subtitle={card.legalInstrument || card.subtitle}
+            title={card.title}
+          />
+        ))}
       </div>
 
       <Paginator

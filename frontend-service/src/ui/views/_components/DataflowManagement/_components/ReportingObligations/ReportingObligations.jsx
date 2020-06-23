@@ -54,6 +54,10 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
 
   const isLoading = value => reportingObligationDispatch({ type: 'IS_LOADING', payload: { value } });
 
+  const onChangePagination = pagination => {
+    reportingObligationDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
+  };
+
   const onLoadCountries = async () => {
     try {
       const countries = await ObligationService.getCountries();
@@ -107,8 +111,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
 
   const onLoadSearchedData = data => reportingObligationDispatch({ type: 'SEARCHED_DATA', payload: { data } });
 
-  const onChangePagination = pagination =>
-    reportingObligationDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
+  const onOpenObligation = id => window.open(`http://rod3.devel1dub.eionet.europa.eu/obligations/${id}`);
 
   const onSelectObl = rowData => {
     const oblChoosed = { id: rowData.id, title: rowData.title };
@@ -137,6 +140,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
       <CardsView
         checkedCard={reportingObligationState.oblChoosed}
         data={reportingObligationState.searchedData}
+        handleRedirect={onOpenObligation}
         onChangePagination={onChangePagination}
         onSelectCard={onSelectObl}
         pagination={reportingObligationState.pagination}

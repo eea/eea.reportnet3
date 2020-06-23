@@ -8,7 +8,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const Card = ({ card, checked, footer, icon, id, onCheck, subtitle, title }) => {
+export const Card = ({ card, checked, date, handleRedirect, icon, id, onCheck, subtitle, title }) => {
   const resources = useContext(ResourcesContext);
 
   return (
@@ -19,15 +19,11 @@ export const Card = ({ card, checked, footer, icon, id, onCheck, subtitle, title
       </div>
 
       <div className={`${styles.link}`}>
-        <FontAwesomeIcon
-          className={styles.linkIcon}
-          icon={AwesomeIcons(icon)}
-          onMouseDown={() => window.open(`http://rod3.devel1dub.eionet.europa.eu/obligations/${id}`)}
-        />
+        <FontAwesomeIcon className={styles.linkIcon} icon={AwesomeIcons(icon)} onMouseDown={() => handleRedirect(id)} />
       </div>
 
-      <div className={`${styles.footer}`}>
-        {resources.messages['nextReportDue']}: <span>{footer}</span>
+      <div className={`${styles.date}`}>
+        {resources.messages['nextReportDue']}: <span className={styles.dueDate}>{date}</span>
       </div>
     </div>
   );
