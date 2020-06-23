@@ -9,8 +9,11 @@ import { config } from 'conf/';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { Button } from 'ui/views/_components/Button';
+import { Calendar } from 'ui/views/_components/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dropdown } from 'primereact/dropdown';
+import { InputNumber } from 'primereact/inputnumber';
+import { InputText } from 'ui/views/_components/InputText';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -41,6 +44,7 @@ const ComparisonExpression = ({
     validations: { operatorTypes: operatorTypesConf, operatorByType, fieldByOperatorType }
   } = config;
   const [disabledFields, setDisabledFields] = useState({});
+  const [valueKeyFilter, setValueKeyFilter] = useState();
   const [valueTypeSelectorOptions, setValueTypeSelectorOptions] = useState([]);
 
   useEffect(() => {
@@ -181,7 +185,7 @@ const ComparisonExpression = ({
 
     if (field === 'union') {
       conditions = clickedFields.includes(field) && position !== 0 && isEmpty(expressionValues[field]);
-    } else if (field === 'expressionValue') {
+    } else if (field === 'field2' && expressionValues.valueTypeSelector === 'value') {
       conditions = clickedFields.includes(field) && isEmpty(expressionValues[field].toString());
     } else {
       conditions = clickedFields.includes(field) && isEmpty(expressionValues[field]);
@@ -190,7 +194,7 @@ const ComparisonExpression = ({
   };
 
   const onUpdateExpressionField = (key, value) => {
-    checkField(key, value.value);
+    checkField(key, value);
 
     onDeleteFromClickedFields(key);
 
@@ -230,39 +234,44 @@ const ComparisonExpression = ({
   };
 
   const checkField = (field, fieldValue) => {
-    if (field === 'year') {
-      const yearInt = parseInt(fieldValue);
+    if (expressionValues.valueTypeSelector === 'value') {
+      if (field === 'year') {
+        const yearInt = parseInt(fieldValue);
 
-      if (yearInt < 1000 || yearInt > 9999) {
-        onUpdateExpressionField('expressionValue', 0);
+        if (yearInt < 1000 || yearInt > 9999) {
+          onUpdateExpressionField('field2', 0);
+        }
       }
-    }
-    if (expressionValues.operatorType === 'number' && field === 'operatorValue' && fieldValue !== 'MATCH') {
-      const number = Number(fieldValue);
-
-      if (!number) {
-        onUpdateExpressionField('expressionValue', '');
+      if (expressionValues.operatorType === 'number' && field === 'operatorValue' && fieldValue !== 'MATCH') {
+        const number = Number(fieldValue);
+        if (!number) {
+          onUpdateExpressionField('field2', '');
+        }
       }
     }
   };
 
   const getValueField = () => {
-    return (
-      <Dropdown
-        disabled={disabledFields.field2}
-        filterPlaceholder={resourcesContext.messages.selectField}
-        id={`${componentName}__field2`}
-        onChange={e => onUpdateExpressionField('field2', e.value)}
-        optionLabel="label"
-        options={secondFieldOptions}
-        placeholder={resourcesContext.messages.selectField}
-        value={expressionValues.field2}
-      />
-    );
+    if (expressionValues.valueTypeSelector === 'value') {
+      return buildValueInput();
+    } else {
+      return (
+        <Dropdown
+          disabled={disabledFields.field2}
+          filterPlaceholder={resourcesContext.messages.selectField}
+          id={`${componentName}__field2`}
+          onChange={e => onUpdateExpressionField('field2', e.value)}
+          optionLabel="label"
+          options={secondFieldOptions}
+          placeholder={resourcesContext.messages.selectField}
+          value={expressionValues.field2}
+        />
+      );
+    }
   };
 
   const buildValueInput = () => {
-    const { operatorType, operatorValue } = expressionValues;
+    const { operatorType, operatorValue, field2 } = expressionValues;
     if (operatorType === 'date') {
       return (
         <Calendar
@@ -270,10 +279,10 @@ const ComparisonExpression = ({
           baseZIndex={6000}
           dateFormat="yy-mm-dd"
           monthNavigator={true}
-          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
+          onChange={e => onUpdateExpressionField('field2', e.target.value)}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
-          value={expressionValues.expressionValue}
+          value={field2}
           yearNavigator={true}
           yearRange="1900:2500"></Calendar>
       );
@@ -286,11 +295,11 @@ const ComparisonExpression = ({
           max={32}
           min={0}
           mode="decimal"
-          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
+          onChange={e => onUpdateExpressionField('field2', e.target.value)}
           placeholder={resourcesContext.messages.value}
           steps={0}
           useGrouping={false}
-          value={expressionValues.expressionValue}
+          value={field2}
         />
       );
     }
@@ -300,9 +309,9 @@ const ComparisonExpression = ({
         return (
           <InputText
             disabled={isDisabled}
-            onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
+            onChange={e => onUpdateExpressionField('field2', e.target.value)}
             placeholder={resourcesContext.messages.value}
-            value={expressionValues.expressionValue}
+            value={field2}
           />
         );
       }
@@ -314,9 +323,9 @@ const ComparisonExpression = ({
             disabled={isDisabled}
             format={false}
             onBlur={e => checkField('number', e.target.value)}
-            onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
+            onChange={e => onUpdateExpressionField('field2', e.target.value)}
             placeholder={resourcesContext.messages.value}
-            value={expressionValues.expressionValue}
+            value={field2}
           />
         );
       }
@@ -327,11 +336,11 @@ const ComparisonExpression = ({
           format={false}
           mode="decimal"
           onBlur={e => checkField('number', e.target.value)}
-          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
+          onChange={e => onUpdateExpressionField('field2', e.target.value)}
           placeholder={resourcesContext.messages.value}
           steps={0}
           useGrouping={false}
-          value={expressionValues.expressionValue}
+          value={field2}
         />
       );
     }
@@ -342,11 +351,11 @@ const ComparisonExpression = ({
           disabled={isDisabled}
           mode="decimal"
           onBlur={e => checkField('year', e.target.value)}
-          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
+          onChange={e => onUpdateExpressionField('field2', e.target.value)}
           placeholder={resourcesContext.messages.value}
           steps={0}
           useGrouping={false}
-          value={expressionValues.expressionValue}
+          value={field2}
         />
       );
     }
@@ -359,11 +368,11 @@ const ComparisonExpression = ({
           max={13}
           min={0}
           mode="decimal"
-          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
+          onChange={e => onUpdateExpressionField('field2', e.target.value)}
           placeholder={resourcesContext.messages.value}
           steps={0}
           useGrouping={false}
-          value={expressionValues.expressionValue}
+          value={field2}
         />
       );
     }
@@ -372,10 +381,10 @@ const ComparisonExpression = ({
         keyfilter={valueKeyFilter}
         disabled={isDisabled}
         onChange={e => {
-          onUpdateExpressionField('expressionValue', e.target.value);
+          onUpdateExpressionField('field2', e.target.value);
         }}
         placeholder={resourcesContext.messages.value}
-        value={expressionValues.expressionValue}
+        value={field2}
       />
     );
   };
