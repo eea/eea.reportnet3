@@ -22,7 +22,7 @@ import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
-import { TabsValidations } from './_components/TabsValidations';
+import { TabsValidations } from 'ui/views/_components/TabsValidations';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';

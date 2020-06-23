@@ -25,6 +25,7 @@ import { Snapshots } from 'ui/views/_components/Snapshots';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
+import { TabsValidations } from 'ui/views/_components/TabsValidations';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
@@ -59,6 +60,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataflowName, setDataflowName] = useState('');
+  const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [datasetSchemaName, setDatasetSchemaName] = useState();
   // const [datasetSchemas, setDatasetSchemas] = useState([]);
@@ -91,6 +93,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [tableSchemaNames, setTableSchemaNames] = useState([]);
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
+  const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [tableSchemaId, setTableSchemaId] = useState();
 
@@ -435,6 +438,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const getDataSchema = async () => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
+      setDatasetSchemaAllTables(datasetSchema.tables);
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       return datasetSchema;
@@ -560,6 +564,15 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
+  const validationListFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => onSetVisible(setValidationListDialogVisible, false)}
+    />
+  );
+
   const isWebForm = () => {
     if (isInputSwitchChecked) {
       return <WebFormData datasetId={datasetId} tableSchemaId={tableSchemaId} />;
@@ -682,6 +695,16 @@ export const Dataset = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
+                isWebFormMMR ? null : 'p-button-animated-blink'
+              }`}
+              disabled={isWebFormMMR}
+              icon={'horizontalSliders'}
+              label={resources.messages['qcRules']}
+              onClick={() => onSetVisible(setValidationListDialogVisible, true)}
+              ownButtonClasses={null}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary-transparent ${
                 isWebFormMMR || !datasetHasData ? null : 'p-button-animated-blink'
               }`}
               disabled={isWebFormMMR || !datasetHasData}
@@ -737,6 +760,24 @@ export const Dataset = withRouter(({ match, history }) => {
           visible={validationsVisible}
         />
       </Dialog>
+      {console.log(tableSchema, tableSchemaColumns)}
+      {validationListDialogVisible && (
+        <Dialog
+          className={styles.qcRulesDialog}
+          dismissableMask={true}
+          footer={validationListFooter}
+          header={resources.messages['qcRules']}
+          onHide={() => onSetVisible(setValidationListDialogVisible, false)}
+          visible={validationListDialogVisible}>
+          <TabsValidations
+            dataset={{ datasetId: datasetId, name: datasetSchemaName }}
+            datasetSchemaAllTables={datasetSchemaAllTables}
+            datasetSchemaId={datasetSchemaId}
+            onHideValidationsDialog={() => onSetVisible(setValidationListDialogVisible, false)}
+            reporting={true}
+          />
+        </Dialog>
+      )}
       <ConfirmDialog
         classNameConfirm={'p-button-danger'}
         header={resources.messages['deleteDatasetHeader']}
