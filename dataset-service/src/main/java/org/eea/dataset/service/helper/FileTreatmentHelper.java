@@ -3,9 +3,11 @@ package org.eea.dataset.service.helper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.io.IOUtils;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
@@ -125,6 +127,17 @@ public class FileTreatmentHelper {
     integrations.stream().forEach(integration -> {
       if (IntegrationOperationTypeEnum.IMPORT.equals(integration.getOperation())) {
         auxExtensionList.add(integration.getInternalParameters().get("fileExtension"));
+        Map<String, String> externalParameters = new HashMap<>();
+        byte[] imageBytes;
+        try {
+          imageBytes = IOUtils.toByteArray(is);
+          String encodedString = Base64.getEncoder().encodeToString(imageBytes);
+          is.close();
+          externalParameters.put("fileIS", encodedString);
+          integration.setExternalParameters(externalParameters);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
         integrationAux.add(integration);
       }
     });

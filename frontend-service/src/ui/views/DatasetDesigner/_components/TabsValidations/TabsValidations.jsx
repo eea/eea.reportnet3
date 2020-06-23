@@ -85,8 +85,8 @@ const TabsValidations = withRouter(({ dataset, datasetSchemaAllTables, datasetSc
       if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
         validationsServiceList.validations.forEach(validation => {
           const additionalInfo = getAdditionalValidationInfo(validation.referenceId);
-          validation.table = additionalInfo.tableName;
-          validation.field = additionalInfo.fieldName;
+          validation.table = additionalInfo.tableName || '';
+          validation.field = additionalInfo.fieldName || '';
         });
       }
 

@@ -224,16 +224,16 @@
     "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6MjB9"
   },
   {
-    "key": "config/dataflow/integration.fme.user",
-    "value": "JHtGTUVfVVNFUjogUmVwb3J0bmV0M30="
+    "key": "config/dataflow/integration.fme.scheme",
+    "value": "JHtGTUVfU0NIRU1FOmh0dHBzfQ=="
   },
   {
-    "key": "config/dataflow/integration.fme.password",
-    "value": "JHtGTUVfUEFTU1dPUkQ6UmVwb3J0bmV0M18yMDIwIX0="
+    "key": "config/dataflow/integration.fme.token",
+    "value": "JHtGTUVfVE9LRU46QmFzaWMgVW1Wd2IzSjBibVYwTXpwU1pYQnZjblJ1WlhRelh6SXdNakFofQ=="
   },
   {
-    "key": "config/dataflow/integration.fme.url",
-    "value": "JHtGTUVfVVJMOmh0dHBzOi8vZm1lLmRpc2NvbWFwLmVlYS5ldXJvcGEuZXUvZm1lcmVzdC92M30="
+    "key": "config/dataflow/integration.fme.host",
+    "value": "JHtGTUVfSE9TVDpmbWUuZGlzY29tYXAuZWVhLmV1cm9wYS5ldX0="
   },
   {
     "key": "config/dataflow/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
