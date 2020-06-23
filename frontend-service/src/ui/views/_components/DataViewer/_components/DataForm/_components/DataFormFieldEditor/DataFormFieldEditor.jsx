@@ -240,6 +240,7 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
           appendTo={document.body}
           maxSelectedLabels={10}
           onChange={e => onChangeForm(field, e.value)}
+          // onFilterInputChangeBackend={onFilter}
           options={columnWithLinks.linkItems}
           optionLabel="itemType"
           style={{ height: '34px' }}

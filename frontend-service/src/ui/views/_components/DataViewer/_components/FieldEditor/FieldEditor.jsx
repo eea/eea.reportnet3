@@ -54,6 +54,7 @@ const FieldEditor = ({
     if (isNil(colSchema) || isNil(colSchema.referencedField)) {
       return;
     }
+
     const referencedFieldValues = await DatasetService.getReferencedFieldValues(
       datasetId,
       isUndefined(colSchema.referencedField.name)
@@ -61,6 +62,7 @@ const FieldEditor = ({
         : colSchema.referencedField.referencedField.fieldSchemaId,
       filter
     );
+
     const linkItems = referencedFieldValues
       .map(referencedField => {
         return {
@@ -69,6 +71,7 @@ const FieldEditor = ({
         };
       })
       .sort((a, b) => a.value - b.value);
+
     linkItems.unshift({
       itemType: resources.messages['noneCodelist'],
       value: ''
@@ -334,6 +337,7 @@ const FieldEditor = ({
                   console.error(error);
                 }
               }}
+              // onFilterInputChangeBackend={onFilter}
               onFocus={e => {
                 e.preventDefault();
                 if (!isUndefined(codelistItemValue)) {

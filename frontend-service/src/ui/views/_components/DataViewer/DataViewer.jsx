@@ -508,7 +508,9 @@ const DataViewer = withRouter(
               cell.field,
               field.id,
               field.type,
-              field.type === 'MULTISELECT_CODELIST' ? value.join(',') : value
+              field.type === 'MULTISELECT_CODELIST' || (field.type === 'LINK' && Array.isArray(value))
+                ? value.join(',')
+                : value
             );
             if (!fieldUpdated) {
               throw new Error('UPDATE_FIELD_BY_ID_ERROR');
