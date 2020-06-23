@@ -1,4 +1,5 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -45,20 +46,24 @@ export const CardsView = ({ checkedCard, data, handleRedirect, onChangePaginatio
       <div
         className={styles.cardWrap}
         style={{ justifyContent: currentPosts.length === cardsPerPage ? 'space-between' : 'flex-start' }}>
-        {currentPosts.map(card => (
-          <Card
-            card={card}
-            checked={checkedCard}
-            date={card.dueDate}
-            handleRedirect={handleRedirect}
-            icon="externalLink"
-            id={card.id}
-            key={card.id}
-            onCheck={onSelectCard}
-            subtitle={card.legalInstrument || card.subtitle}
-            title={card.title}
-          />
-        ))}
+        {currentPosts.map(card => {
+          console.log('card', card);
+          return (
+            <Card
+              card={card}
+              checked={checkedCard}
+              date={card.dueDate}
+              handleRedirect={handleRedirect}
+              icon="externalLink"
+              id={card.id}
+              key={card.id}
+              onCheck={onSelectCard}
+              status={card.status}
+              subtitle={card.legalInstrument || card.subtitle}
+              title={card.title}
+            />
+          );
+        })}
       </div>
 
       <Paginator
@@ -72,4 +77,12 @@ export const CardsView = ({ checkedCard, data, handleRedirect, onChangePaginatio
       />
     </Fragment>
   );
+};
+
+CardsView.propTypes = {
+  pagination: PropTypes.object
+};
+
+CardsView.defaultProps = {
+  pagination: { first: 0, rows: 10, page: 0 }
 };
