@@ -168,8 +168,9 @@ export const onKeyDown = (event, formDispatcher, formState, representative, data
 
 const updateRepresentative = async (formDispatcher, formState, updatedRepresentative) => {
   let isChangedAccount = false;
+  const { initialRepresentatives } = formState;
 
-  formState.initialRepresentatives.forEach(initialRepresentative => {
+  for (let initialRepresentative of initialRepresentatives) {
     if (
       initialRepresentative.representativeId === updatedRepresentative.representativeId &&
       initialRepresentative.providerAccount !== updatedRepresentative.providerAccount
@@ -187,7 +188,7 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
         payload: { representativeHasError: filteredInputsWithErrors }
       });
     }
-  });
+  }
 
   if (isChangedAccount) {
     try {
