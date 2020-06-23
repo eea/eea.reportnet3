@@ -4,7 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 
 import styles from './ReportingObligations.module.scss';
 
-import { CardsView } from './_components/CardsView';
+import { CardsView } from 'ui/views/_components/CardsView';
 import { Filters } from 'ui/views/_components/Filters';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -135,10 +135,10 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
       />
     ) : (
       <CardsView
-        checkedObligation={reportingObligationState.oblChoosed}
+        checkedCard={reportingObligationState.oblChoosed}
         data={reportingObligationState.searchedData}
         onChangePagination={onChangePagination}
-        onSelectObl={onSelectObl}
+        onSelectCard={onSelectObl}
         pagination={reportingObligationState.pagination}
       />
     );

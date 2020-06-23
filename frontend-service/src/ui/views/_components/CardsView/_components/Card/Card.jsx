@@ -8,13 +8,11 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const Card = ({ checked, date, icon, id, obligation, onCheck, subtitle, title }) => {
+export const Card = ({ card, checked, footer, icon, id, onCheck, subtitle, title }) => {
   const resources = useContext(ResourcesContext);
 
   return (
-    <div
-      className={`${styles.card} ${checked.id === id ? styles.checked : undefined}`}
-      onClick={() => onCheck(obligation)}>
+    <div className={`${styles.card} ${checked.id === id ? styles.checked : undefined}`} onClick={() => onCheck(card)}>
       <div className={styles.text}>
         <h3 className={styles.title}>{title}</h3>
         <p className={styles.subtitle}>{subtitle}</p>
@@ -28,8 +26,8 @@ export const Card = ({ checked, date, icon, id, obligation, onCheck, subtitle, t
         />
       </div>
 
-      <div className={`${styles.date}`}>
-        {resources.messages['nextReportDue']}: <span className={styles.dueDate}>{date}</span>
+      <div className={`${styles.footer}`}>
+        {resources.messages['nextReportDue']}: <span>{footer}</span>
       </div>
     </div>
   );

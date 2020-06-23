@@ -10,7 +10,7 @@ import { Paginator } from 'ui/views/_components/DataTable/_components/Paginator'
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const CardsView = ({ checkedObligation, data, onChangePagination, onSelectObl, pagination }) => {
+export const CardsView = ({ checkedCard, data, onChangePagination, onSelectCard, pagination }) => {
   const resources = useContext(ResourcesContext);
 
   const [cards, setCards] = useState(data);
@@ -45,22 +45,23 @@ export const CardsView = ({ checkedObligation, data, onChangePagination, onSelec
       <div
         className={styles.cardWrap}
         style={{ justifyContent: currentPosts.length === cardsPerPage ? 'space-between' : 'flex-start' }}>
-        {currentPosts.map(obligation => {
+        {currentPosts.map(card => {
           return (
             <Card
-              key={obligation.id}
-              checked={checkedObligation}
-              date={obligation.dueDate}
+              card={card}
+              checked={checkedCard}
+              footer={card.dueDate}
               icon="externalLink"
-              id={obligation.id}
-              obligation={obligation}
-              onCheck={onSelectObl}
-              subtitle={obligation.legalInstrument}
-              title={obligation.title}
+              id={card.id}
+              key={card.id}
+              onCheck={onSelectCard}
+              subtitle={card.legalInstrument}
+              title={card.title}
             />
           );
         })}
       </div>
+
       <Paginator
         className={'p-paginator-bottom'}
         first={first}
