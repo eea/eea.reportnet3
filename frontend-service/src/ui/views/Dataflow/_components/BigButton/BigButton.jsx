@@ -211,7 +211,7 @@ export const BigButton = ({
 
   return (
     <>
-      <div className={`${styles.datasetItem} ${!enabled && styles.datasetItemEnabled}`}>{buttons[layout]}</div>
+      <div className={`${styles.datasetItem} ${!enabled && styles.datasetItemDisabled}`}>{buttons[layout]}</div>
       {tooltip && (
         <ReactTooltip effect="solid" id={caption} place="top">
           {tooltip}
