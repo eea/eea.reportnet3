@@ -49,30 +49,6 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId, fo
   }
 };
 
-export const createUnusedOptionsList = formDispatcher => {
-  formDispatcher({
-    type: 'CREATE_UNUSED_OPTIONS_LIST'
-  });
-};
-
-export const getAllDataProviders = async (selectedDataProviderGroup, representatives, formDispatcher) => {
-  try {
-    const responseAllDataProviders = await RepresentativeService.allDataProviders(selectedDataProviderGroup);
-
-    const providersNoSelect = [...responseAllDataProviders];
-    if (representatives.length <= responseAllDataProviders.length) {
-      responseAllDataProviders.unshift({ dataProviderId: '', label: 'Select...' });
-    }
-
-    formDispatcher({
-      type: 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID',
-      payload: { responseAllDataProviders, providersNoSelect }
-    });
-  } catch (error) {
-    console.error('error on RepresentativeService.allDataProviders', error);
-  }
-};
-
 const getAllRepresentatives = async (dataflowId, formDispatcher) => {
   try {
     const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
@@ -88,25 +64,8 @@ const getAllRepresentatives = async (dataflowId, formDispatcher) => {
   }
 };
 
-const getProviderTypes = async formDispatcher => {
-  try {
-    const providerTypes = await RepresentativeService.getProviderTypes();
-    formDispatcher({
-      type: 'GET_PROVIDERS_TYPES_LIST',
-      payload: { providerTypes }
-    });
-  } catch (error) {
-    console.error('error on  RepresentativeService.getProviderTypes', error);
-  }
-};
-
 export const getInitialData = async (formDispatcher, dataflowId, formState) => {
-  await getProviderTypes(formDispatcher);
   await getAllRepresentatives(dataflowId, formDispatcher, formState);
-  if (!isEmpty(formState.representatives)) {
-    await getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
-    createUnusedOptionsList(formDispatcher);
-  }
 };
 
 export const onAddProvider = (formDispatcher, formState, representative, dataflowId) => {

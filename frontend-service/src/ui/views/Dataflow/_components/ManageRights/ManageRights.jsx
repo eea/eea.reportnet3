@@ -11,8 +11,6 @@ import styles from './ManageRights.module.scss';
 import { reducer } from './_functions/Reducers/representativeReducer.js';
 import {
   autofocusOnEmptyInput,
-  createUnusedOptionsList,
-  getAllDataProviders,
   getInitialData,
   onAddProvider,
   onDataProviderIdChange,
@@ -34,7 +32,7 @@ const ManageRights = ({
   dataflowRepresentatives,
   dataflowId,
   isActiveManageRightsDialog,
-  setFormHasRepresentatives,
+
   setHasRepresentativesWithoutDatasets
 }) => {
   const resources = useContext(ResourcesContext);
@@ -69,24 +67,8 @@ const ManageRights = ({
   }, [isActiveManageRightsDialog]);
 
   useEffect(() => {
-    if (!isNull(formState.selectedDataProviderGroup)) {
-      getAllDataProviders(formState.selectedDataProviderGroup, formState.representatives, formDispatcher);
-    }
-  }, [formState.selectedDataProviderGroup]);
-
-  useEffect(() => {
-    createUnusedOptionsList(formDispatcher);
-  }, [formState.allPossibleDataProviders]);
-
-  useEffect(() => {
     autofocusOnEmptyInput(formState);
   }, [formState.representativeHasError]);
-
-  useEffect(() => {
-    if (!isEmpty(formState.representatives)) {
-      setFormHasRepresentatives(formState.representatives.length > 1);
-    }
-  }, [formState.representatives]);
 
   useEffect(() => {
     if (!isEmpty(formState.representatives) && formState.representatives.length > 1) {
@@ -148,29 +130,25 @@ const ManageRights = ({
   };
 
   const dropdownColumnTemplate = representative => {
-    const selectedOptionForThisSelect = formState.allPossibleDataProviders.filter(
-      option => option.dataProviderId === representative.dataProviderId
-    );
-
-    const remainingOptionsAndSelectedOption = selectedOptionForThisSelect.concat(formState.unusedDataProvidersOptions);
+    const permissionsOptions = [
+      { label: 'Read', type: 'read' },
+      { label: 'Read/Write', type: 'read' }
+    ];
 
     return (
       <>
         <select
           disabled={representative.hasDatasets}
-          className={
-            representative.hasDatasets ? `${styles.disabled} ${styles.selectDataProvider}` : styles.selectDataProvider
-          }
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={event => {
             onDataProviderIdChange(formDispatcher, event.target.value, representative, formState);
           }}
           onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
-          value={representative.dataProviderId}>
-          {remainingOptionsAndSelectedOption.map(provider => {
+          value={representative.permissionType}>
+          {permissionsOptions.map(permission => {
             return (
-              <option key={uuid.v4()} className="p-dropdown-item" value={provider.dataProviderId}>
-                {provider.label}
+              <option key={uuid.v4()} className="p-dropdown-item" value={permission.type}>
+                {permission.label}
               </option>
             );
           })}
@@ -198,42 +176,14 @@ const ManageRights = ({
 
   return (
     <div className={styles.container}>
-      <div className={styles.selectWrapper}>
-        <div className={styles.title}>{resources.messages['manageRolesDialogHeader']}</div>
-
-        <div>
-          <label htmlFor="dataProvidersDropdown">{resources.messages['manageRolesDialogDropdownLabel']} </label>
-          <Dropdown
-            disabled={formState.representatives.length > 1}
-            name="dataProvidersDropdown"
-            optionLabel="label"
-            placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
-            value={formState.selectedDataProviderGroup}
-            options={formState.dataProvidersTypesList}
-            onChange={e => {
-              return formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: e.target.value });
-            }}
-          />
-        </div>
-      </div>
-
-      {!isNil(formState.selectedDataProviderGroup) && !isEmpty(formState.allPossibleDataProviders) ? (
-        <DataTable
-          value={
-            formState.representatives.length > formState.allPossibleDataProvidersNoSelect.length
-              ? formState.representatives.filter(representative => !isNil(representative.representativeId))
-              : formState.representatives
-          }>
-          <Column
-            body={providerAccountInputColumnTemplate}
-            header={resources.messages['manageRolesDialogAccountColumn']}
-          />
-          <Column body={dropdownColumnTemplate} header={resources.messages['manageRolesDialogDataProviderColumn']} />
-          <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
-        </DataTable>
-      ) : (
-        <p className={styles.chooseRepresentative}>{resources.messages['manageRolesDialogNoRepresentativesMessage']}</p>
-      )}
+      <DataTable value={formState.representatives}>
+        <Column
+          body={providerAccountInputColumnTemplate}
+          header={resources.messages['manageRolesDialogAccountColumn']}
+        />
+        <Column body={dropdownColumnTemplate} header={'Permissions'} />
+        <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
+      </DataTable>
 
       {formState.isVisibleConfirmDeleteDialog && (
         <ConfirmDialog
