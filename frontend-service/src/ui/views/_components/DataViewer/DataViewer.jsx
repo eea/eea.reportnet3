@@ -6,6 +6,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
+import uniq from 'lodash/uniq';
 
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { config } from 'conf';
@@ -853,9 +854,12 @@ const DataViewer = withRouter(
     const getImportExtensions = [{ datasetSchemaId, fileExtension: 'csv', operation: 'IMPORT' }]
       .concat(extensionsOperationsList.import)
       .map(file => `.${file.fileExtension}`)
-      .join(', ');
+      .join(', ')
+      .toLowerCase();
 
-    const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${getImportExtensions}`;
+    const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
+      getImportExtensions.split(', ')
+    ).join(', ')}`;
 
     return (
       <SnapshotContext.Provider>
