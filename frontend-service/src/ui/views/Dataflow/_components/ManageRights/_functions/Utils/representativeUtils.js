@@ -3,7 +3,10 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
 
+import { Representative } from 'core/domain/model/Representative/Representative';
 import { RepresentativeService } from 'core/services/Representative';
+
+const emptyRepresentative = new Representative({ dataProviderId: '', providerAccount: '' });
 
 export const autofocusOnEmptyInput = formState => {
   if (!isEmpty(formState.representatives)) {
@@ -51,13 +54,16 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId, fo
 
 const getAllRepresentatives = async (dataflowId, formDispatcher) => {
   try {
-    const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
+    // const response = await RepresentativeService.allRepresentatives(dataflowId);
+    const response = await RepresentativeService.allRepresentatives(dataflowId);
 
-    const representativesByCopy = cloneDeep(responseAllRepresentatives.representatives);
+    response.representatives.push(emptyRepresentative);
+
+    const representativesByCopy = cloneDeep(response.representatives);
 
     formDispatcher({
       type: 'INITIAL_LOAD',
-      payload: { response: responseAllRepresentatives, representativesByCopy }
+      payload: { representatives: response.representatives, representativesByCopy }
     });
   } catch (error) {
     console.error('error on RepresentativeService.allRepresentatives', error);
@@ -96,7 +102,7 @@ export const onDataProviderIdChange = async (formDispatcher, newDataProviderId, 
     thisRepresentative.dataProviderId = newDataProviderId;
 
     formDispatcher({
-      type: 'ON_PROVIDER_CHANGE',
+      type: 'ON_PERMISSIONS_CHANGE',
       payload: { representatives }
     });
   }

@@ -702,6 +702,9 @@
     "targetDatasetSchema": "Target dataset schema",
     "targetTable": "Target table",
     "manageReportersRights": "Manage reporters",
-    "manageEditorsRights": "Manage editors"
+    "manageEditorsRights": "Manage editors",
+    "selectPermission": "Select",
+    "readPermission": "Read",
+    "readAndWritePermission": "Read/Write"
   }
 }

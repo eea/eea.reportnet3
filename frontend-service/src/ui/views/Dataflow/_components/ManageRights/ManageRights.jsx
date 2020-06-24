@@ -27,29 +27,17 @@ import { Spinner } from 'ui/views/_components/Spinner';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const ManageRights = ({
-  dataflowState,
-  dataflowRepresentatives,
-  dataflowId,
-  isActiveManageRightsDialog,
-
-  setHasRepresentativesWithoutDatasets
-}) => {
+const ManageRights = ({ dataflowState, dataflowRepresentatives, dataflowId, isActiveManageRightsDialog }) => {
   const resources = useContext(ResourcesContext);
 
   const initialState = {
-    allPossibleDataProviders: [],
-    allPossibleDataProvidersNoSelect: [],
     dataflowRepresentatives: dataflowRepresentatives,
-    dataProvidersTypesList: [],
     initialRepresentatives: [],
     isVisibleConfirmDeleteDialog: false,
     refresher: false,
     representativeHasError: [],
     representativeIdToDelete: '',
-    representatives: [],
-    selectedDataProviderGroup: null,
-    unusedDataProvidersOptions: []
+    representatives: []
   };
 
   const [formState, formDispatcher] = useReducer(reducer, initialState);
@@ -69,22 +57,6 @@ const ManageRights = ({
   useEffect(() => {
     autofocusOnEmptyInput(formState);
   }, [formState.representativeHasError]);
-
-  useEffect(() => {
-    if (!isEmpty(formState.representatives) && formState.representatives.length > 1) {
-      const representativesNoDatasets = formState.representatives.filter(
-        representative => !representative.hasDatasets && !isUndefined(representative.representativeId)
-      );
-
-      const representativesHaveDatasets = formState.representatives.filter(
-        representative => representative.hasDatasets && !isUndefined(representative.representativeId)
-      );
-
-      setHasRepresentativesWithoutDatasets(
-        !isEmpty(representativesNoDatasets) && !isEmpty(representativesHaveDatasets)
-      );
-    }
-  }, [formState.representatives]);
 
   const providerAccountInputColumnTemplate = representative => {
     let inputData = representative.providerAccount;
@@ -131,8 +103,9 @@ const ManageRights = ({
 
   const dropdownColumnTemplate = representative => {
     const permissionsOptions = [
-      { label: 'Read', type: 'read' },
-      { label: 'Read/Write', type: 'read' }
+      { label: resources.messages['selectPermission'], type: '' },
+      { label: resources.messages['readPermission'], type: 'read' },
+      { label: resources.messages['readAndWritePermission'], type: 'read_write' }
     ];
 
     return (
@@ -158,7 +131,7 @@ const ManageRights = ({
   };
 
   const deleteBtnColumnTemplate = representative => {
-    return isNil(representative.representativeId) || representative.hasDatasets ? (
+    return isNil(representative.representativeId) /*||  representative.permissionsType */ ? (
       <></>
     ) : (
       <ActionsColumn

@@ -1,11 +1,4 @@
-import includes from 'lodash/includes';
-import isNil from 'lodash/isNil';
-
-import { Representative } from 'core/domain/model/Representative/Representative';
-
 export const reducer = (state, { type, payload }) => {
-  const emptyRepresentative = new Representative({ dataProviderId: '', providerAccount: '' });
-
   switch (type) {
     case 'REFRESH':
       return {
@@ -55,28 +48,10 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'INITIAL_LOAD':
-      const group = state.dataProvidersTypesList.filter(
-        dataProviderType => dataProviderType.dataProviderGroupId === payload.response.group.dataProviderGroupId
-      );
-
-      if (!includes(state.representatives, emptyRepresentative)) {
-        payload.response.representatives.push(emptyRepresentative);
-      }
-
-      const getSelectedProviderGroup = () => {
-        let selectedGroup = null;
-        if (isNil(state.selectedDataProviderGroup)) {
-          selectedGroup = isNil(group[0]) ? null : group[0];
-        } else {
-          selectedGroup = state.selectedDataProviderGroup;
-        }
-        return selectedGroup;
-      };
       return {
         ...state,
-        representatives: payload.response.representatives,
+        representatives: payload.representatives,
         initialRepresentatives: payload.representativesByCopy,
-        selectedDataProviderGroup: getSelectedProviderGroup(),
         representativeHasError: []
       };
 
@@ -86,16 +61,10 @@ export const reducer = (state, { type, payload }) => {
         representatives: payload.representatives
       };
 
-    case 'ON_PROVIDER_CHANGE':
+    case 'ON_PERMISSIONS_CHANGE':
       return {
         ...state,
         representatives: payload.representatives
-      };
-
-    case 'SELECT_PROVIDERS_TYPE':
-      return {
-        ...state,
-        selectedDataProviderGroup: payload
       };
 
     case 'SHOW_CONFIRM_DIALOG':
