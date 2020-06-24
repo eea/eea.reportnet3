@@ -97,19 +97,19 @@ export class CustomFileUpload extends Component {
   }
 
   checkValidExtension(file) {
-    const acceptedExtensions = this.props.accept.split(', ');
-    console.log({ acceptedExtensions });
+    const acceptedExtensions = this.props.accept.toLowerCase().split(', ');
+
     if (file) {
       const extension = file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name;
-      return acceptedExtensions.includes(`.${extension}`);
+      return acceptedExtensions.includes(`.${extension.toLowerCase()}`);
     }
     console.log(this.hasFiles());
     if (this.hasFiles()) {
       const selectedExtension = this.state.files.map(
         file => file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name
       );
-      console.log({ selectedExtension });
-      return !selectedExtension.some(ext => acceptedExtensions.includes(`.${ext}`));
+
+      return !selectedExtension.some(ext => acceptedExtensions.includes(`.${ext.toLowerCase()}`));
     }
     return false;
   }

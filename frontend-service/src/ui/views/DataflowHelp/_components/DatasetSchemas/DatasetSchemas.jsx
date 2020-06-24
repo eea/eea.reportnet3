@@ -10,6 +10,8 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
+import { getExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getExpressionString';
+
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 import { IntegrationService } from 'core/services/Integration';
@@ -149,7 +151,7 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
   const getValidationList = async datasetsSchemas => {
     try {
       const datasetValidations = datasetsSchemas.map(async datasetSchema => {
-        return await ValidationService.getAll(datasetSchema.datasetSchemaId);
+        return await ValidationService.getAll(datasetSchema.datasetSchemaId, !isCustodian);
       });
       Promise.all(datasetValidations).then(allValidations => {
         allValidations = allValidations.filter(allValidation => !isUndefined(allValidation));
@@ -172,6 +174,10 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
                     );
                     validation.tableName = validationTableAndField.tableName;
                     validation.fieldName = validationTableAndField.fieldName;
+                    validation.expression = getExpressionString(validation.expressions, {
+                      label: validation.fieldName,
+                      code: validation.id
+                    });
                     validation.datasetSchemaId = allValidation.datasetSchemaId;
                     if (!isCustodian) {
                       return pick(
@@ -181,6 +187,7 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
                         'shortCode',
                         'name',
                         'description',
+                        'expression',
                         'entityType',
                         'levelError',
                         'message',
@@ -194,6 +201,7 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
                         'shortCode',
                         'name',
                         'description',
+                        'expression',
                         'entityType',
                         'levelError',
                         'message',
