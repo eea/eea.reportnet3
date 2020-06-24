@@ -47,20 +47,19 @@ export const CardsView = ({ checkedCard, data, handleRedirect, onChangePaginatio
         className={styles.cardWrap}
         style={{ justifyContent: currentPosts.length === cardsPerPage ? 'space-between' : 'flex-start' }}>
         {currentPosts.map(card => {
-          console.log('card', card);
           return (
             <Card
               card={card}
               checked={checkedCard}
-              date={card.dueDate}
+              date={card.dueDate || card.expirationDate}
               handleRedirect={handleRedirect}
               icon="externalLink"
               id={card.id}
               key={card.id}
               onCheck={onSelectCard}
               status={card.status}
-              subtitle={card.legalInstrument || card.subtitle}
-              title={card.title}
+              subtitle={card.legalInstrument || card.description}
+              title={card.title || card.name}
             />
           );
         })}

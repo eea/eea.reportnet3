@@ -45,7 +45,7 @@ export const CloneSchemas = dataflowId => {
       cloneSchemasDispatch({
         type: 'INITIAL_LOAD',
         payload: {
-          accepted: CloneSchemasUtils.parseDataflowsList(allDataflows.accepted),
+          accepted: allDataflows.accepted,
           allDataflows,
           completed: allDataflows.completed,
           pending: allDataflows.pending
@@ -76,7 +76,7 @@ export const CloneSchemas = dataflowId => {
   );
 
   return (
-    <Fragment>
+    <div className={styles.cloneSchemas}>
       <div className={styles.switchDiv}>
         <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
         <InputSwitch checked={cloneSchemasState.isTableView} onChange={() => onToggleView()} />
@@ -86,8 +86,11 @@ export const CloneSchemas = dataflowId => {
       <div className={styles.filters}>
         <Filters
           data={cloneSchemasState.accepted}
+          dateOptions={['expirationDate']}
           getFilteredData={onLoadFilteredData}
-          inputOptions={['name', 'description']}
+          inputOptions={['name', 'description', 'legalInstrument', 'obligationTitle']}
+          selectOptions={['status', 'userRole']}
+          sortable={true}
         />
       </div>
 
@@ -106,6 +109,6 @@ export const CloneSchemas = dataflowId => {
           }`}
         </span>
       )}
-    </Fragment>
+    </div>
   );
 };
