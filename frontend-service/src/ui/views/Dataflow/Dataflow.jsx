@@ -20,6 +20,7 @@ import { Button } from 'ui/views/_components/Button';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
+import { ManageRights } from './_components/ManageRights';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { SnapshotsDialog } from './_components/SnapshotsDialog';
@@ -72,6 +73,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isDataUpdated: false,
     isDeleteDialogVisible: false,
     isEditDialogVisible: false,
+    isManageRightsDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPageLoading: true,
     isPropertiesDialogVisible: false,
@@ -201,21 +203,40 @@ const Dataflow = withRouter(({ history, match }) => {
       title: 'properties'
     };
 
+    const manageRightsBtn = {
+      className: 'dataflow-properties-provider-help-step',
+      icon: 'userConfig',
+      label: dataflowState.isCustodian ? 'manageReportersRights' : 'manageEditorsRights',
+      onClick: () => manageDialogs('isManageRightsDialogVisible', true),
+      title: dataflowState.isCustodian ? 'manageReportersRights' : 'manageEditorsRights'
+    };
+
     if (isEmpty(dataflowState.data)) {
       return;
     }
 
     if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']) {
-      leftSideBarContext.addModels([propertiesBtn, editBtn, apiKeyBtn]);
+      leftSideBarContext.addModels([propertiesBtn, editBtn, apiKeyBtn, manageRightsBtn]);
     } else if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']) {
-      leftSideBarContext.addModels([propertiesBtn]);
+      leftSideBarContext.addModels([propertiesBtn, manageRightsBtn]);
     } else {
       if (!dataflowState.isCustodian) {
+        /*       dataflowState.data.representatives.length === 1 && isUndefined(representativeId)
+          ? leftSideBarContext.addModels([propertiesBtn, apiKeyBtn])
+          : dataflowState.data.representatives.length > 1 && isUndefined(representativeId)
+          ? leftSideBarContext.addModels([propertiesBtn])
+          : leftSideBarContext.addModels([propertiesBtn, apiKeyBtn]); */
+
         dataflowState.data.representatives.length === 1 && isUndefined(representativeId)
           ? leftSideBarContext.addModels([propertiesBtn, apiKeyBtn])
           : dataflowState.data.representatives.length > 1 && isUndefined(representativeId)
           ? leftSideBarContext.addModels([propertiesBtn])
           : leftSideBarContext.addModels([propertiesBtn, apiKeyBtn]);
+
+        const isLeadReporter = true;
+        if (isLeadReporter) {
+          leftSideBarContext.addModels([propertiesBtn, apiKeyBtn, manageRightsBtn]);
+        }
       } else {
         leftSideBarContext.addModels([propertiesBtn]);
       }
@@ -247,6 +268,14 @@ const Dataflow = withRouter(({ history, match }) => {
       icon={'cancel'}
       label={resources.messages['close']}
       onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
+    />
+  );
+  const manageRightsDialogFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => manageDialogs('isManageRightsDialogVisible', false)}
     />
   );
 
@@ -498,6 +527,28 @@ const Dataflow = withRouter(({ history, match }) => {
             </div>
           </Dialog>
         )}
+
+        <Dialog
+          contentStyle={{ maxHeight: '60vh' }}
+          footer={manageRightsDialogFooter}
+          header={
+            dataflowState.isCustodian
+              ? resources.messages['manageEditorsRights']
+              : resources.messages['manageReportersRights']
+          }
+          onHide={() => manageDialogs('isManageRightsDialogVisible', false)}
+          visible={dataflowState.isManageRightsDialogVisible}>
+          <div className={styles.dialog}>
+            <ManageRights
+              dataflowId={dataflowId}
+              dataflowRepresentatives={dataflowState.data.representatives}
+              dataflowState={dataflowState}
+              isActiveManageRightsDialog={dataflowState.isManageRightsDialogVisible}
+              setFormHasRepresentatives={setFormHasRepresentatives}
+              setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
+            />
+          </div>
+        </Dialog>
 
         <PropertiesDialog dataflowState={dataflowState} manageDialogs={manageDialogs} />
 

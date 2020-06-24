@@ -700,6 +700,8 @@
     "createDataCollectionConfirmQuestion": "Are you sure you want to create a data collection?",
     "createDataCollectionConfirm": "You can no longer edit anything related to design datasets (tables, fields, QC's, snapshots, etc). You will be able to manage new reporters.",
     "targetDatasetSchema": "Target dataset schema",
-    "targetTable": "Target table"
+    "targetTable": "Target table",
+    "manageReportersRights": "Manage reporters",
+    "manageEditorsRights": "Manage editors"
   }
 }
