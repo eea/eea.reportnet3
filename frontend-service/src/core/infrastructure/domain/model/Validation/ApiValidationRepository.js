@@ -83,11 +83,9 @@ const getAll = async (datasetSchemaId, reporting = false) => {
   validationsList.datasetSchemaId = validationsListDTO.idDatasetSchema;
   validationsList.rulesSchemaId = validationsListDTO.rulesSchemaId;
 
-  console.log(validationsListDTO.rules, reporting);
   if (reporting) {
     validationsListDTO.rules = validationsListDTO.rules.filter(rule => rule.enabled === true);
   }
-  console.log(validationsListDTO.rules);
   const validationsData = parseDataValidationRulesDTO(validationsListDTO.rules);
   validationsList.entityTypes = validationsData.entityTypes;
   validationsList.validations = validationsData.validations;

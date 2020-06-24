@@ -246,11 +246,9 @@ const TabsValidations = withRouter(
     const columnStyles = field => {
       const style = {};
       const invisibleFields = ['id', 'referenceId', 'activationGroup', 'condition', 'date', 'entityType'];
-      console.log({ reporting });
       if (reporting) {
         invisibleFields.push('enabled', 'automatic', 'isCorrect');
       }
-      console.log(invisibleFields);
       if (field.toUpperCase() === 'DESCRIPTION') {
         style.width = '23%';
       }

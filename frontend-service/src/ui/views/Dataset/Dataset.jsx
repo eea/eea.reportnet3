@@ -760,7 +760,6 @@ export const Dataset = withRouter(({ match, history }) => {
           visible={validationsVisible}
         />
       </Dialog>
-      {console.log(tableSchema, tableSchemaColumns)}
       {validationListDialogVisible && (
         <Dialog
           className={styles.qcRulesDialog}
