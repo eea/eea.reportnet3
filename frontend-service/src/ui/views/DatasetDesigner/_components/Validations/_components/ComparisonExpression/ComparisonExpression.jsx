@@ -391,7 +391,6 @@ const ComparisonExpression = ({
 
   return (
     <li className={styles.expression}>
-      {console.log('expressionValues', expressionValues)}
       <span className={styles.group}>
         <FontAwesomeIcon icon={AwesomeIcons('link')} />
         <Checkbox
