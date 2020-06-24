@@ -4,7 +4,6 @@ import isUndefined from 'lodash/isUndefined';
 import { UserConfig } from 'conf/domain/model/User';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
-import { userStorage } from 'core/domain/model/User/UserStorage';
 
 const parseUserConfiguration = userConfiguration => {
   userConfiguration.userImage = userConfiguration.userImage.map((token, i) => `${('000' + i).substr(-3)}~${token}`);
@@ -34,8 +33,7 @@ export const apiUser = {
     const tokens = await HTTPRequester.post({
       url: getUrl(UserConfig.login, {
         code
-      }),
-      queryString: {}
+      })
     });
     return tokens.data;
   },
@@ -45,56 +43,32 @@ export const apiUser = {
       url: getUrl(UserConfig.uploadImg, {
         userId
       }),
-      queryString: {},
       data: imgData
     });
     return response;
   },
-  //implementar token
-
-  // await HTTPRequester.postWithFiles({
-  //   url: getUrl(UserConfig.uploadImg, {
-  //     userId:
-  //   }),
-  //   queryString: {},
-  //   data: formData,
-  //   headers: {
-  //     Authorization: `Bearer ${tokens.accessToken}`,
-  //     'Content-Type': undefined
-  //   }
-  // });
-
   oldLogin: async (userName, password) => {
     const tokens = await HTTPRequester.post({
       url: getUrl(UserConfig.oldLogin, {
         userName,
         password
-      }),
-      queryString: {}
+      })
     });
     return tokens.data;
   },
 
   configuration: async () => {
-    const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(UserConfig.configuration),
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      },
-      queryString: {}
+      url: getUrl(UserConfig.configuration)
     });
     return parseUserImage(response.data);
   },
 
   updateAttributes: async userConfiguration => {
-    const tokens = userStorage.get();
     const response = await HTTPRequester.update({
       url: getUrl(UserConfig.updateConfiguration),
-      queryString: {},
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${tokens.accessToken}`
+        'Content-Type': 'application/json'
       },
       data: parseUserConfiguration(userConfiguration)
     });
@@ -104,8 +78,7 @@ export const apiUser = {
     const response = await HTTPRequester.post({
       url: getUrl(UserConfig.logout, {
         refreshToken
-      }),
-      queryString: {}
+      })
     });
     return response;
   },
@@ -114,8 +87,7 @@ export const apiUser = {
     const tokens = await HTTPRequester.post({
       url: getUrl(UserConfig.refreshToken, {
         refreshToken
-      }),
-      queryString: {}
+      })
     });
     return tokens.data;
   }
