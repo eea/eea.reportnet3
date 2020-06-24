@@ -156,7 +156,7 @@ const ComparisonExpression = ({
     if (showRequiredFields) {
       const fieldsToAdd = [];
 
-      ['union', 'field1', 'operatorType', 'operatorValue', 'field2'].forEach(field => {
+      ['union', 'field1', 'operatorType', 'operatorValue', 'valueTypeSelector', 'field2'].forEach(field => {
         if (!clickedFields.includes(field)) fieldsToAdd.push(field);
       });
 
