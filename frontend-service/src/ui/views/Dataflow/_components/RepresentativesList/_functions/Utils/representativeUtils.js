@@ -1,7 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import sortBy from 'lodash/sortBy';
+import uniq from 'lodash/uniq';
 
 import { RepresentativeService } from 'core/services/Representative';
 
@@ -22,7 +22,7 @@ export const autofocusOnEmptyInput = formState => {
   }
 };
 
-const addRepresentative = async (formDispatcher, representatives, dataflowId) => {
+const addRepresentative = async (formDispatcher, representatives, dataflowId, formState) => {
   const newRepresentative = representatives.filter(representative => isNil(representative.representativeId));
   if (!isEmpty(newRepresentative[0].providerAccount) && !isEmpty(newRepresentative[0].dataProviderId)) {
     try {
@@ -31,15 +31,18 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId) =>
         newRepresentative[0].providerAccount,
         parseInt(newRepresentative[0].dataProviderId)
       );
+
       formDispatcher({
-        type: 'ADD_REPRESENTATIVE'
+        type: 'REFRESH'
       });
     } catch (error) {
       console.error('error on RepresentativeService.add', error);
       if (error.response.status === 400 || error.response.status === 404) {
+        let { representativeHasError } = formState;
+        representativeHasError.unshift(representatives[representatives.length - 1].representativeId);
         formDispatcher({
-          type: 'REPRESENTATIVE_HAS_ERROR',
-          payload: { representativeIdThatHasError: representatives[representatives.length - 1].representativeId }
+          type: 'MANAGE_ERRORS',
+          payload: { representativeHasError: uniq(representativeHasError) }
         });
       }
     }
@@ -52,33 +55,25 @@ export const createUnusedOptionsList = formDispatcher => {
   });
 };
 
-export const getAllDataProviders = async (selectedDataProviderGroup, formDispatcher) => {
+export const getAllDataProviders = async (selectedDataProviderGroup, representatives, formDispatcher) => {
   try {
     const responseAllDataProviders = await RepresentativeService.allDataProviders(selectedDataProviderGroup);
 
+    const providersNoSelect = [...responseAllDataProviders];
+    if (representatives.length <= responseAllDataProviders.length) {
+      responseAllDataProviders.unshift({ dataProviderId: '', label: 'Select...' });
+    }
+
     formDispatcher({
       type: 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID',
-      payload: { responseAllDataProviders }
+      payload: { responseAllDataProviders, providersNoSelect }
     });
   } catch (error) {
     console.error('error on RepresentativeService.allDataProviders', error);
   }
 };
 
-const getAllRepresentatives = async (dataflowId, formDispatcher, formState) => {
-  /*  if (isEmpty(formState.representatives) && !isEmpty(formState.dataflowRepresentatives)) {
-    const mimicResponse = {
-      group: { dataProviderGroupId: formState.dataflowRepresentatives[0].dataProviderGroupId },
-      representatives: sortBy(formState.dataflowRepresentatives, ['representativeId'])
-    };
-
-    const representativesByCopy = cloneDeep(mimicResponse.representatives);
-
-    formDispatcher({
-      type: 'INITIAL_LOAD',
-      payload: { response: mimicResponse, representativesByCopy }
-    });
-  } else { */
+const getAllRepresentatives = async (dataflowId, formDispatcher) => {
   try {
     const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
 
@@ -92,7 +87,6 @@ const getAllRepresentatives = async (dataflowId, formDispatcher, formState) => {
     console.error('error on RepresentativeService.allRepresentatives', error);
   }
 };
-/* }; */
 
 const getProviderTypes = async formDispatcher => {
   try {
@@ -117,17 +111,34 @@ export const getInitialData = async (formDispatcher, dataflowId, formState) => {
 
 export const onAddProvider = (formDispatcher, formState, representative, dataflowId) => {
   isNil(representative.representativeId)
-    ? addRepresentative(formDispatcher, formState.representatives, dataflowId)
+    ? addRepresentative(formDispatcher, formState.representatives, dataflowId, formState)
     : updateRepresentative(formDispatcher, formState, representative);
 };
 
-export const onDataProviderIdChange = (formDispatcher, newDataProviderId, representative) => {
+export const onDataProviderIdChange = async (formDispatcher, newDataProviderId, representative, formState) => {
   if (!isNil(representative.representativeId)) {
-    updateProviderId(formDispatcher, representative.representativeId, newDataProviderId);
+    try {
+      await RepresentativeService.updateDataProviderId(
+        parseInt(representative.representativeId),
+        parseInt(newDataProviderId)
+      );
+      formDispatcher({
+        type: 'REFRESH'
+      });
+    } catch (error) {
+      console.error('error on RepresentativeService.updateDataProviderId', error);
+    }
   } else {
+    const { representatives } = formState;
+
+    const [thisRepresentative] = representatives.filter(
+      thisRepresentative => thisRepresentative.representativeId === representative.representativeId
+    );
+    thisRepresentative.dataProviderId = newDataProviderId;
+
     formDispatcher({
       type: 'ON_PROVIDER_CHANGE',
-      payload: { dataProviderId: newDataProviderId, representativeId: representative.representativeId }
+      payload: { representatives }
     });
   }
 };
@@ -136,9 +147,13 @@ export const onDeleteConfirm = async (formDispatcher, formState) => {
   try {
     await RepresentativeService.deleteById(formState.representativeIdToDelete);
 
+    const updatedList = formState.representatives.filter(
+      representative => representative.representativeId !== formState.representativeIdToDelete
+    );
+
     formDispatcher({
       type: 'DELETE_REPRESENTATIVE',
-      payload: { representativeIdToDelete: formState.representativeIdToDelete }
+      payload: { updatedList }
     });
   } catch (error) {
     console.error('error on RepresentativeService.deleteById: ', error);
@@ -151,28 +166,11 @@ export const onKeyDown = (event, formDispatcher, formState, representative, data
   }
 };
 
-export const onCloseManageRolesDialog = async formDispatcher => {
-  formDispatcher({
-    type: 'REFRESH_ON_HIDE_MANAGE_ROLES_DIALOG'
-  });
-};
-
-const updateProviderId = async (formDispatcher, representativeId, newDataProviderId) => {
-  try {
-    await RepresentativeService.updateDataProviderId(parseInt(representativeId), parseInt(newDataProviderId));
-    formDispatcher({
-      type: 'ON_PROVIDER_CHANGE',
-      payload: { dataProviderId: newDataProviderId, representativeId }
-    });
-  } catch (error) {
-    console.error('error on RepresentativeService.updateDataProviderId', error);
-  }
-};
-
 const updateRepresentative = async (formDispatcher, formState, updatedRepresentative) => {
   let isChangedAccount = false;
+  const { initialRepresentatives } = formState;
 
-  formState.initialRepresentatives.forEach(initialRepresentative => {
+  for (let initialRepresentative of initialRepresentatives) {
     if (
       initialRepresentative.representativeId === updatedRepresentative.representativeId &&
       initialRepresentative.providerAccount !== updatedRepresentative.providerAccount
@@ -182,12 +180,15 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
       initialRepresentative.representativeId === updatedRepresentative.representativeId &&
       initialRepresentative.providerAccount === updatedRepresentative.providerAccount
     ) {
+      const filteredInputsWithErrors = formState.representativeHasError.filter(
+        representativeId => representativeId !== updatedRepresentative.representativeId
+      );
       formDispatcher({
-        type: 'REPRESENTATIVE_HAS_NO_ERROR',
-        payload: { representativeId: updatedRepresentative.representativeId }
+        type: 'MANAGE_ERRORS',
+        payload: { representativeHasError: filteredInputsWithErrors }
       });
     }
-  });
+  }
 
   if (isChangedAccount) {
     try {
@@ -196,15 +197,17 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
         updatedRepresentative.providerAccount
       );
       formDispatcher({
-        type: 'UPDATE_ACCOUNT'
+        type: 'REFRESH'
       });
     } catch (error) {
       console.error('error on RepresentativeService.updateProviderAccount', error);
 
       if (error.response.status === 400 || error.response.status === 404) {
+        let { representativeHasError } = formState;
+        representativeHasError.unshift(updatedRepresentative.representativeId);
         formDispatcher({
-          type: 'REPRESENTATIVE_HAS_ERROR',
-          payload: { representativeIdThatHasError: updatedRepresentative.representativeId }
+          type: 'MANAGE_ERRORS',
+          payload: { representativeHasError: uniq(representativeHasError) }
         });
       }
     }
