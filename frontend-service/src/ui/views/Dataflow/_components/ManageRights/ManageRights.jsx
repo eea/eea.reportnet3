@@ -146,15 +146,18 @@ const ManageRights = ({ dataflowState, dataflowRepresentatives, dataflowId, isAc
   };
 
   if (isEmpty(formState.representatives)) return <Spinner style={{ top: 0 }} />;
-
   return (
     <div className={styles.container}>
       <DataTable value={formState.representatives}>
         <Column
           body={providerAccountInputColumnTemplate}
-          header={resources.messages['manageRolesDialogAccountColumn']}
+          header={
+            dataflowState.isCustodian
+              ? resources.messages['editorsAccountColumn']
+              : resources.messages['reportersAccountColumn']
+          }
         />
-        <Column body={dropdownColumnTemplate} header={'Permissions'} />
+        <Column body={dropdownColumnTemplate} header={resources.messages['permissionsColumn']} />
         <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
       </DataTable>
 

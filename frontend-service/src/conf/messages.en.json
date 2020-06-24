@@ -706,6 +706,9 @@
     "manageEditorsRights": "Manage editors",
     "selectPermission": "Select",
     "readPermission": "Read",
-    "readAndWritePermission": "Read/Write"
+    "readAndWritePermission": "Read/Write",
+    "editorsAccountColumn": "Editor account",
+    "reportersAccountColumn": "Reporter account",
+    "permissionsColumn": "Permissions"
   }
 }

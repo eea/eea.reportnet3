@@ -206,9 +206,9 @@ const Dataflow = withRouter(({ history, match }) => {
     const manageRightsBtn = {
       className: 'dataflow-properties-provider-help-step',
       icon: 'userConfig',
-      label: dataflowState.isCustodian ? 'manageReportersRights' : 'manageEditorsRights',
+      label: dataflowState.isCustodian ? 'manageEditorsRights' : 'manageReportersRights',
       onClick: () => manageDialogs('isManageRightsDialogVisible', true),
-      title: dataflowState.isCustodian ? 'manageReportersRights' : 'manageEditorsRights'
+      title: dataflowState.isCustodian ? 'manageEditorsRights' : 'manageReportersRights'
     };
 
     if (isEmpty(dataflowState.data)) {
@@ -221,12 +221,6 @@ const Dataflow = withRouter(({ history, match }) => {
       leftSideBarContext.addModels([propertiesBtn, manageRightsBtn]);
     } else {
       if (!dataflowState.isCustodian) {
-        /*       dataflowState.data.representatives.length === 1 && isUndefined(representativeId)
-          ? leftSideBarContext.addModels([propertiesBtn, apiKeyBtn])
-          : dataflowState.data.representatives.length > 1 && isUndefined(representativeId)
-          ? leftSideBarContext.addModels([propertiesBtn])
-          : leftSideBarContext.addModels([propertiesBtn, apiKeyBtn]); */
-
         dataflowState.data.representatives.length === 1 && isUndefined(representativeId)
           ? leftSideBarContext.addModels([propertiesBtn, apiKeyBtn])
           : dataflowState.data.representatives.length > 1 && isUndefined(representativeId)
