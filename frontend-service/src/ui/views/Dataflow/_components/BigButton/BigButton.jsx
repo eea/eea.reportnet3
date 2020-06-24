@@ -12,6 +12,7 @@ import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { DropDownMenu } from 'ui/views/_components/DropdownButton/_components/DropDownMenu';
 import { Icon } from 'ui/views/_components/Icon';
 import { InputText } from 'ui/views/_components/InputText';
+import ReactTooltip from 'react-tooltip';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -22,6 +23,7 @@ export const BigButton = ({
   caption,
   dataflowStatus,
   datasetSchemaInfo,
+  enabled = true,
   handleRedirect = () => {},
   helpClassName,
   index,
@@ -33,7 +35,8 @@ export const BigButton = ({
   onSaveError,
   onSaveName,
   onWheel,
-  placeholder
+  placeholder,
+  tooltip
 }) => {
   const resources = useContext(ResourcesContext);
 
@@ -134,7 +137,7 @@ export const BigButton = ({
   const defaultBigButton = (
     <>
       <div className={`${styles.bigButton} ${styles.defaultBigButton} ${styles[buttonClass]} ${helpClassName}`}>
-        <span onClick={() => handleRedirect()} onMouseDown={event => onWheelClick(event)}>
+        <span onClick={() => handleRedirect()} onMouseDown={event => onWheelClick(event)} data-tip data-for={caption}>
           <FontAwesomeIcon icon={AwesomeIcons(buttonIcon)} className={styles[buttonIconClass]} />
         </span>
         {model && (
@@ -206,5 +209,14 @@ export const BigButton = ({
     menuBigButton
   };
 
-  return <div className={`${styles.datasetItem}`}>{buttons[layout]}</div>;
+  return (
+    <>
+      <div className={`${styles.datasetItem} ${!enabled && styles.datasetItemEnabled}`}>{buttons[layout]}</div>
+      {tooltip && (
+        <ReactTooltip effect="solid" id={caption} place="top">
+          {tooltip}
+        </ReactTooltip>
+      )}
+    </>
+  );
 };
