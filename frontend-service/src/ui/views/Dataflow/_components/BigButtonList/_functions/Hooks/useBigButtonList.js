@@ -223,7 +223,7 @@ const useBigButtonList = ({
         : !dataflowState.formHasRepresentatives
         ? resources.messages['disabledCreateDataCollectionNoProviders']
         : undefined,
-      visibility: isEmpty(dataflowState.data.dataCollections)
+      visibility: isEmpty(dataflowState.data.dataCollections) && dataflowState.status === 'DESIGN'
     }
   ];
 
