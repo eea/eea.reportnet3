@@ -186,7 +186,9 @@ const ComparisonExpression = ({
     if (field === 'union') {
       conditions = clickedFields.includes(field) && position !== 0 && isEmpty(expressionValues[field]);
     } else if (field === 'field2' && expressionValues.valueTypeSelector === 'value') {
-      conditions = clickedFields.includes(field) && isEmpty(expressionValues[field].toString());
+      conditions =
+        clickedFields.includes(field) &&
+        (isNil(expressionValues[field]) || isEmpty(expressionValues[field].toString()));
     } else {
       conditions = clickedFields.includes(field) && isEmpty(expressionValues[field]);
     }
@@ -204,6 +206,13 @@ const ComparisonExpression = ({
           key: field,
           value: ''
         });
+      });
+    }
+
+    if (key === 'valueTypeSelector' && value !== expressionValues.valueTypeSelector) {
+      onExpressionFieldUpdate(expressionId, {
+        key: 'field2',
+        value: ''
       });
     }
 
