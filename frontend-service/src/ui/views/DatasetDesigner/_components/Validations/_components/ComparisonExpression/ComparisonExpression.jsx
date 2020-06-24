@@ -9,8 +9,11 @@ import { config } from 'conf/';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { Button } from 'ui/views/_components/Button';
+import { Calendar } from 'ui/views/_components/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
 import { Dropdown } from 'primereact/dropdown';
+import { InputNumber } from 'primereact/inputnumber';
+import { InputText } from 'ui/views/_components/InputText';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -41,33 +44,24 @@ const ComparisonExpression = ({
     validations: { operatorTypes: operatorTypesConf, operatorByType, fieldByOperatorType }
   } = config;
   const [disabledFields, setDisabledFields] = useState({});
+  const [valueKeyFilter, setValueKeyFilter] = useState();
+  const [valueTypeSelectorOptions, setValueTypeSelectorOptions] = useState([]);
+
+  useEffect(() => {
+    setValueTypeSelectorOptions([
+      { label: 'field', value: 'field' },
+      { label: 'value', value: 'value' }
+    ]);
+  }, []);
 
   useEffect(() => {
     const newDisabledFields = {};
 
-    if (isDisabled) {
-      newDisabledFields.field1 = true;
-    } else {
-      newDisabledFields.field1 = false;
-    }
-
-    if (isEmpty(expressionValues.field1)) {
-      newDisabledFields.operatorType = true;
-    } else {
-      newDisabledFields.operatorType = false;
-    }
-
-    if (isEmpty(expressionValues.operatorType)) {
-      newDisabledFields.operatorValue = true;
-    } else {
-      newDisabledFields.operatorValue = false;
-    }
-
-    if (isEmpty(expressionValues.operatorValue)) {
-      newDisabledFields.field2 = true;
-    } else {
-      newDisabledFields.field2 = false;
-    }
+    newDisabledFields.field1 = isDisabled;
+    newDisabledFields.operatorType = isEmpty(expressionValues.field1);
+    newDisabledFields.operatorValue = isEmpty(expressionValues.operatorType);
+    newDisabledFields.valueTypeSelector = isEmpty(expressionValues.operatorValue);
+    newDisabledFields.field2 = isEmpty(expressionValues.valueTypeSelector);
 
     setDisabledFields({
       ...disabledFields,
@@ -78,6 +72,7 @@ const ComparisonExpression = ({
     expressionValues.field2,
     expressionValues.operatorType,
     expressionValues.operatorValue,
+    expressionValues.valueTypeSelector,
     isDisabled
   ]);
 
@@ -190,7 +185,7 @@ const ComparisonExpression = ({
 
     if (field === 'union') {
       conditions = clickedFields.includes(field) && position !== 0 && isEmpty(expressionValues[field]);
-    } else if (field === 'expressionValue') {
+    } else if (field === 'field2' && expressionValues.valueTypeSelector === 'value') {
       conditions = clickedFields.includes(field) && isEmpty(expressionValues[field].toString());
     } else {
       conditions = clickedFields.includes(field) && isEmpty(expressionValues[field]);
@@ -199,7 +194,7 @@ const ComparisonExpression = ({
   };
 
   const onUpdateExpressionField = (key, value) => {
-    checkField(key, value.value);
+    checkField(key, value);
 
     onDeleteFromClickedFields(key);
 
@@ -239,20 +234,159 @@ const ComparisonExpression = ({
   };
 
   const checkField = (field, fieldValue) => {
-    if (field === 'year') {
-      const yearInt = parseInt(fieldValue);
+    if (expressionValues.valueTypeSelector === 'value') {
+      if (field === 'year') {
+        const yearInt = parseInt(fieldValue);
 
-      if (yearInt < 1000 || yearInt > 9999) {
-        onUpdateExpressionField('expressionValue', 0);
+        if (yearInt < 1000 || yearInt > 9999) {
+          onUpdateExpressionField('field2', 0);
+        }
+      }
+      if (expressionValues.operatorType === 'number' && field === 'operatorValue' && fieldValue !== 'MATCH') {
+        const number = Number(fieldValue);
+        if (!number) {
+          onUpdateExpressionField('field2', '');
+        }
       }
     }
-    if (expressionValues.operatorType === 'number' && field === 'operatorValue' && fieldValue !== 'MATCH') {
-      const number = Number(fieldValue);
+  };
 
-      if (!number) {
-        onUpdateExpressionField('expressionValue', '');
-      }
+  const getValueField = () => {
+    if (expressionValues.valueTypeSelector === 'value') {
+      return buildValueInput();
+    } else {
+      return (
+        <Dropdown
+          disabled={disabledFields.field2}
+          filterPlaceholder={resourcesContext.messages.selectField}
+          id={`${componentName}__field2`}
+          onChange={e => onUpdateExpressionField('field2', e.value)}
+          optionLabel="label"
+          options={secondFieldOptions}
+          placeholder={resourcesContext.messages.selectField}
+          value={expressionValues.field2}
+        />
+      );
     }
+  };
+
+  const buildValueInput = () => {
+    const { operatorType, operatorValue, field2 } = expressionValues;
+    if (operatorType === 'date') {
+      return (
+        <Calendar
+          appendTo={document.body}
+          baseZIndex={6000}
+          dateFormat="yy-mm-dd"
+          monthNavigator={true}
+          onChange={e => onUpdateExpressionField('field2', e.target.value)}
+          placeholder="YYYY-MM-DD"
+          readOnlyInput={false}
+          value={field2}
+          yearNavigator={true}
+          yearRange="1900:2500"></Calendar>
+      );
+    }
+    if (operatorType === 'day') {
+      return (
+        <InputNumber
+          disabled={isDisabled}
+          format={false}
+          max={32}
+          min={0}
+          mode="decimal"
+          onChange={e => onUpdateExpressionField('field2', e.target.value)}
+          placeholder={resourcesContext.messages.value}
+          steps={0}
+          useGrouping={false}
+          value={field2}
+        />
+      );
+    }
+
+    if (operatorType === 'number') {
+      if (operatorValue === 'MATCH') {
+        return (
+          <InputText
+            disabled={isDisabled}
+            onChange={e => onUpdateExpressionField('field2', e.target.value)}
+            placeholder={resourcesContext.messages.value}
+            value={field2}
+          />
+        );
+      }
+
+      if (fieldType === 'NUMBER_DECIMAL') {
+        return (
+          <InputText
+            keyfilter={valueKeyFilter}
+            disabled={isDisabled}
+            format={false}
+            onBlur={e => checkField('number', e.target.value)}
+            onChange={e => onUpdateExpressionField('field2', e.target.value)}
+            placeholder={resourcesContext.messages.value}
+            value={field2}
+          />
+        );
+      }
+
+      return (
+        <InputNumber
+          disabled={isDisabled}
+          format={false}
+          mode="decimal"
+          onBlur={e => checkField('number', e.target.value)}
+          onChange={e => onUpdateExpressionField('field2', e.target.value)}
+          placeholder={resourcesContext.messages.value}
+          steps={0}
+          useGrouping={false}
+          value={field2}
+        />
+      );
+    }
+
+    if (operatorType === 'year') {
+      return (
+        <InputNumber
+          disabled={isDisabled}
+          mode="decimal"
+          onBlur={e => checkField('year', e.target.value)}
+          onChange={e => onUpdateExpressionField('field2', e.target.value)}
+          placeholder={resourcesContext.messages.value}
+          steps={0}
+          useGrouping={false}
+          value={field2}
+        />
+      );
+    }
+
+    if (operatorType === 'month') {
+      return (
+        <InputNumber
+          disabled={isDisabled}
+          format={false}
+          max={13}
+          min={0}
+          mode="decimal"
+          onChange={e => onUpdateExpressionField('field2', e.target.value)}
+          placeholder={resourcesContext.messages.value}
+          steps={0}
+          useGrouping={false}
+          value={field2}
+        />
+      );
+    }
+    return (
+      <InputText
+        keyfilter={valueKeyFilter}
+        disabled={isDisabled}
+        onChange={e => {
+          onUpdateExpressionField('field2', e.target.value);
+        }}
+        placeholder={resourcesContext.messages.value}
+        value={field2}
+      />
+    );
   };
 
   return (
@@ -307,7 +441,6 @@ const ComparisonExpression = ({
           value={expressionValues.operatorType}
         />
       </span>
-
       <span
         onBlur={() => onAddToClickedFields('operatorValue')}
         className={`${styles.operatorValue} formField ${printRequiredFieldError('operatorValue')}`}>
@@ -322,18 +455,22 @@ const ComparisonExpression = ({
         />
       </span>
       <span
+        onBlur={() => onAddToClickedFields('valueTypeSelector')}
+        className={`${styles.operatorValue} formField ${printRequiredFieldError('valueTypeSelector')}`}>
+        <Dropdown
+          disabled={disabledFields.valueTypeSelector}
+          onChange={e => onUpdateExpressionField('valueTypeSelector', e.value)}
+          optionLabel="label"
+          options={valueTypeSelectorOptions}
+          optionValue="value"
+          placeholder={resourcesContext.messages.comparisonValueFieldSelector}
+          value={expressionValues.valueTypeSelector}
+        />
+      </span>
+      <span
         onBlur={() => onAddToClickedFields('field2')}
         className={`${styles.operatorType} formField ${printRequiredFieldError('field2')}`}>
-        <Dropdown
-          disabled={disabledFields.field2}
-          filterPlaceholder={resourcesContext.messages.selectField}
-          id={`${componentName}__field2`}
-          onChange={e => onUpdateExpressionField('field2', e.value)}
-          optionLabel="label"
-          options={secondFieldOptions}
-          placeholder={resourcesContext.messages.selectField}
-          value={expressionValues.field2}
-        />
+        {getValueField()}
       </span>
 
       <div className={styles.deleteBtnWrap}>
