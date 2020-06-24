@@ -27,7 +27,7 @@ export const checkComparisonExpressions = expressions => {
     }
     const { valueTypeSelector, field2 } = lastExpression;
     let cField2 = field2;
-    if (valueTypeSelector === 'value') cField2 = field2.toString();
+    if (valueTypeSelector === 'value') cField2 = !isNil(field2) ? field2.toString() : '';
     return (
       isEmpty(lastExpression.field1) ||
       isEmpty(lastExpression.operatorType) ||
