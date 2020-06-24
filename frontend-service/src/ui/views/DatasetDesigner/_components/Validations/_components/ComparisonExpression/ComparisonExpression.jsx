@@ -199,7 +199,7 @@ const ComparisonExpression = ({
     onDeleteFromClickedFields(key);
 
     if (key === 'field1' && value !== expressionValues.field1) {
-      ['operatorType', 'operatorValue', 'field2'].forEach(field => {
+      ['operatorType', 'operatorValue', 'valueTypeSelector', 'field2'].forEach(field => {
         onExpressionFieldUpdate(expressionId, {
           key: field,
           value: ''
