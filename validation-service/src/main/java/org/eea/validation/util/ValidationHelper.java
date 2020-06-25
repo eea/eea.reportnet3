@@ -254,16 +254,20 @@ public class ValidationHelper implements DisposableBean {
           if (pendingValidations > 0) {
             // there are more tasks to be sent, just send them out, at least, one more task
             int tasksToBeSent = this.taskReleasedTax;
+            int sentTasks = 0;
             while (tasksToBeSent > 0) {
               if (processesMap.get(processId).getPendingValidations().size() >= 1) {
                 this.kafkaSenderUtils
                     .releaseKafkaEvent(processesMap.get(processId).getPendingValidations().poll());
+                sentTasks++;
+              } else {
+                break;
               }
               tasksToBeSent--;
             }
             LOG.info(
-                "Sent next tasks for process {}",
-                processId);
+                "Sent next {} tasks for process {}",
+                sentTasks, processId);
           }
           LOG.info(
               "There are still {} tasks to be sent and {} pending Ok's to be received",

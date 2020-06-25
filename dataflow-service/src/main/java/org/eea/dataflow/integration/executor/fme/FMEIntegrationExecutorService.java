@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * The Class FMEIntegrationExecutorService.
@@ -139,18 +140,19 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     }
 
     List<PublishedParameter> parameters = new ArrayList<>();
-
+    String paramDataProvider =
+        StringUtils.isEmpty(dataproviderId) ? "design" : String.valueOf(dataproviderId);
     switch (integrationOperationTypeEnum) {
       case EXPORT:
         LOG.info("");
         // dataflowId
         parameters.add(saveParameter("dataflowId", dataflowId));
         // providerId
-        parameters.add(saveParameter("providerId", dataproviderId));
+        parameters.add(saveParameter("providerId", paramDataProvider));
         // datasetDataId
         parameters.add(saveParameter("datasetDataId", datasetId));
         // folder
-        parameters.add(saveParameter("folder", datasetId + "/" + dataproviderId));
+        parameters.add(saveParameter("folder", datasetId + "/" + paramDataProvider));
         // apikey
         parameters.add(saveParameter("apiKey", "ApiKey " + apiKey));
 
@@ -163,13 +165,13 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         // dataflowId
         parameters.add(saveParameter("dataflowId", dataflowId));
         // providerId
-        parameters.add(saveParameter("providerId", dataproviderId));
+        parameters.add(saveParameter("providerId", paramDataProvider));
         // datasetDataId
         parameters.add(saveParameter("datasetDataId", datasetId));
         // inputfile
         parameters.add(saveParameter("inputfile", fileName));
         // folder
-        parameters.add(saveParameter("folder", datasetId + "/" + dataproviderId));
+        parameters.add(saveParameter("folder", datasetId + "/" + paramDataProvider));
         // apikey
         parameters.add(saveParameter("apiKey", "ApiKey " + apiKey));
 
@@ -179,7 +181,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
             Base64.getDecoder().decode(integration.getExternalParameters().get("fileIS"));
 
         LOG.info("Upload file to FME");
-        fmeCommunicationService.sendFile(decodedBytes, datasetId, dataproviderId, fileName);
+        fmeCommunicationService.sendFile(decodedBytes, datasetId, paramDataProvider, fileName);
         LOG.info("File uploaded");
         LOG.info("Executing FME Import");
         return executeSubmit(repository, workspace, fmeAsyncJob);

@@ -1,6 +1,7 @@
 package org.eea.dataset.persistence.schemas.repository;
 
 import org.bson.Document;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.exception.EEAException;
@@ -132,4 +133,12 @@ public interface ExtendedSchemaRepository {
    * @return the document
    */
   Document findRecordSchema(String datasetSchemaId, String tableSchemaId);
+
+
+  /**
+   * Update schema document.
+   *
+   * @param schema the schema
+   */
+  void updateSchemaDocument(DataSetSchema schema);
 }
