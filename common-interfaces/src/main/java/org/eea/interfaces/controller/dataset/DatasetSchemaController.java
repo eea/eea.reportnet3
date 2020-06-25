@@ -259,4 +259,16 @@ public interface DatasetSchemaController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   UniqueConstraintVO getUniqueConstraint(@PathVariable("uniqueId") String uniqueId);
 
+
+  /**
+   * Copy designs from dataflow.
+   *
+   * @param dataflowIdOrigin the dataflow id origin
+   * @param dataflowIdDestination the dataflow id destination
+   */
+  @PostMapping(value = "/dataflow/{dataflowIdOrigin}/copyTo/{dataflowIdDestination}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void copyDesignsFromDataflow(@PathVariable("dataflowIdOrigin") Long dataflowIdOrigin,
+      @PathVariable("dataflowIdDestination") Long dataflowIdDestination);
+
 }
