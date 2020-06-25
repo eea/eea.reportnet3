@@ -20,7 +20,7 @@ import { Button } from 'ui/views/_components/Button';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ManageRights } from './_components/ManageRights';
+import { ManageRightsHOC } from './_components/ManageRightsHOC';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { SnapshotsDialog } from './_components/SnapshotsDialog';
@@ -533,13 +533,10 @@ const Dataflow = withRouter(({ history, match }) => {
           onHide={() => manageDialogs('isManageRightsDialogVisible', false)}
           visible={dataflowState.isManageRightsDialogVisible}>
           <div className={styles.dialog}>
-            <ManageRights
+            <ManageRightsHOC
               dataflowId={dataflowId}
-              dataflowRepresentatives={dataflowState.data.representatives}
               dataflowState={dataflowState}
               isActiveManageRightsDialog={dataflowState.isManageRightsDialogVisible}
-              setFormHasRepresentatives={setFormHasRepresentatives}
-              setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
             />
           </div>
         </Dialog>

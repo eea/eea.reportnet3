@@ -709,6 +709,10 @@
     "readAndWritePermission": "Read/Write",
     "editorsAccountColumn": "Editor account",
     "reportersAccountColumn": "Reporter account",
-    "permissionsColumn": "Permissions"
+    "permissionsColumn": "Permissions",
+    "editorsRightsDialogConfirmDeleteHeader": "Delete editor",
+    "editorsRightsDialogConfirmDeleteQuestion": "Do you really want to delete this editor?",
+    "reportersRightsDialogConfirmDeleteHeader": "Delete reporter",
+    "reportersRightsDialogConfirmDeleteQuestion": "Do you really want to delete this reporter?"
   }
 }

@@ -54,7 +54,6 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId, fo
 
 const getAllRepresentatives = async (dataflowId, formDispatcher) => {
   try {
-    // const response = await RepresentativeService.allRepresentatives(dataflowId);
     const response = await RepresentativeService.allRepresentatives(dataflowId);
 
     response.representatives.push(emptyRepresentative);

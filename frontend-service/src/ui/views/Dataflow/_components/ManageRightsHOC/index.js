@@ -1,0 +1,1 @@
+export { ManageRightsHOC } from './ManageRightsHOC';

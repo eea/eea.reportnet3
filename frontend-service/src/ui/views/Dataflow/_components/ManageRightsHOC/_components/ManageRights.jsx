@@ -1,64 +1,34 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { useContext, useEffect } from 'react';
 
-import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isNull from 'lodash/isNull';
-import isUndefined from 'lodash/isUndefined';
 
 import uuid from 'uuid';
 import styles from './ManageRights.module.scss';
-
-import { reducer } from './_functions/Reducers/representativeReducer.js';
-import {
-  autofocusOnEmptyInput,
-  getInitialData,
-  onAddProvider,
-  onDataProviderIdChange,
-  onDeleteConfirm,
-  onKeyDown
-} from './_functions/Utils/representativeUtils';
+import isEmpty from 'lodash/isEmpty';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
-import { Dropdown } from 'ui/views/_components/Dropdown';
 import { Spinner } from 'ui/views/_components/Spinner';
 
+import {
+  autofocusOnEmptyInput,
+  onAddProvider,
+  onDataProviderIdChange,
+  onDeleteConfirm,
+  onKeyDown
+} from '../_functions/Utils/rightsUtils';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const ManageRights = ({ dataflowState, dataflowRepresentatives, dataflowId, isActiveManageRightsDialog }) => {
+export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
   const resources = useContext(ResourcesContext);
-
-  const initialState = {
-    dataflowRepresentatives: dataflowRepresentatives,
-    initialRepresentatives: [],
-    isVisibleConfirmDeleteDialog: false,
-    refresher: false,
-    representativeHasError: [],
-    representativeIdToDelete: '',
-    representatives: []
-  };
-
-  const [formState, formDispatcher] = useReducer(reducer, initialState);
-
-  useEffect(() => {
-    getInitialData(formDispatcher, dataflowId, formState);
-  }, [formState.refresher]);
-
-  useEffect(() => {
-    if (isActiveManageRightsDialog === false && !isEmpty(formState.representativeHasError)) {
-      formDispatcher({
-        type: 'REFRESH'
-      });
-    }
-  }, [isActiveManageRightsDialog]);
 
   useEffect(() => {
     autofocusOnEmptyInput(formState);
   }, [formState.representativeHasError]);
 
-  const providerAccountInputColumnTemplate = representative => {
+  const accountInputColumnTemplate = representative => {
     let inputData = representative.providerAccount;
 
     let hasError = formState.representativeHasError.includes(representative.representativeId);
@@ -84,8 +54,6 @@ const ManageRights = ({ dataflowState, dataflowRepresentatives, dataflowId, isAc
         <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
           <input
             autoFocus={isNil(representative.representativeId)}
-            className={representative.hasDatasets ? styles.disabled : undefined}
-            disabled={representative.hasDatasets}
             id={isEmpty(inputData) ? 'emptyInput' : undefined}
             onBlur={() => {
               representative.providerAccount = representative.providerAccount.toLowerCase();
@@ -149,14 +117,7 @@ const ManageRights = ({ dataflowState, dataflowRepresentatives, dataflowId, isAc
   return (
     <div className={styles.container}>
       <DataTable value={formState.representatives}>
-        <Column
-          body={providerAccountInputColumnTemplate}
-          header={
-            dataflowState.isCustodian
-              ? resources.messages['editorsAccountColumn']
-              : resources.messages['reportersAccountColumn']
-          }
-        />
+        <Column body={accountInputColumnTemplate} header={formState.accountInputHeader} />
         <Column body={dropdownColumnTemplate} header={resources.messages['permissionsColumn']} />
         <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
       </DataTable>
@@ -169,14 +130,12 @@ const ManageRights = ({ dataflowState, dataflowRepresentatives, dataflowId, isAc
           }}
           onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
           visible={formState.isVisibleConfirmDeleteDialog}
-          header={resources.messages['manageRolesDialogConfirmDeleteHeader']}
+          header={formState.deleteConfirmHeader}
           labelConfirm={resources.messages['yes']}
           labelCancel={resources.messages['no']}>
-          {resources.messages['manageRolesDialogConfirmDeleteQuestion']}
+          {formState.deleteConfirmMessage}
         </ConfirmDialog>
       )}
     </div>
   );
 };
-
-export { ManageRights };
