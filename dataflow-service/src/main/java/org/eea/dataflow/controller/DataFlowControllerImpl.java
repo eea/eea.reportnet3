@@ -52,7 +52,7 @@ public class DataFlowControllerImpl implements DataFlowController {
 
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER')")
   @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   public DataFlowVO findById(@PathVariable("dataflowId") Long dataflowId) {
 
@@ -269,7 +269,7 @@ public class DataFlowControllerImpl implements DataFlowController {
 
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER')")
   @GetMapping(value = "/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
   public DataFlowVO getMetabaseById(@PathVariable("dataflowId") Long dataflowId) {
     if (dataflowId == null) {
@@ -305,7 +305,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
   @Override
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
   @PutMapping("/{dataflowId}/updateStatus")
   public void updateDataFlowStatus(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("status") TypeStatusEnum status,

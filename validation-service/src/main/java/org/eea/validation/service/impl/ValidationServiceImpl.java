@@ -413,7 +413,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   private void initVariablesToValidate(Long datasetId) {
     ResourceInfoVO resourceInfoVO = resourceManagementController.getResourceDetail(datasetId,
-        ResourceGroupEnum.DATASET_PROVIDER);
+        ResourceGroupEnum.DATASET_LEAD_REPORTER);
     String countryCode = "''";
     String dataCallYear = "" + new LocalDate().getYear();
     if (null != resourceInfoVO.getAttributes() && resourceInfoVO.getAttributes().size() > 0) {

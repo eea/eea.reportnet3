@@ -13,7 +13,6 @@ import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.Weblink;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.WebLinkRepository;
-import org.eea.dataflow.service.impl.DataflowServiceWebLinkImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.ums.UserManagementController;
@@ -95,14 +94,14 @@ public class DataFlowWebLinkServiceImplTest {
     resource.setId(1L);
     resource.setResource(ResourceTypeEnum.DATAFLOW);
     resource.setRole(SecurityRoleEnum.DATA_CUSTODIAN);
-    resources = new ArrayList<ResourceAccessVO>();
+    resources = new ArrayList<>();
     resources.add(resource);
 
     badResource = new ResourceAccessVO();
     badResource.setId(1L);
     badResource.setResource(ResourceTypeEnum.DATAFLOW);
-    badResource.setRole(SecurityRoleEnum.DATA_PROVIDER);
-    badResources = new ArrayList<ResourceAccessVO>();
+    badResource.setRole(SecurityRoleEnum.LEAD_REPORTER);
+    badResources = new ArrayList<>();
     badResources.add(badResource);
 
 

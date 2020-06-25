@@ -6,9 +6,9 @@ package org.eea.interfaces.vo.ums.enums;
  */
 public enum ResourceGroupEnum {
   /**
-   * Dataflow provider resource group enum.
+   * The dataflow lead reporter.
    */
-  DATAFLOW_PROVIDER("Dataflow-%s-DATA_PROVIDER"),
+  DATAFLOW_LEAD_REPORTER("Dataflow-%s-LEAD_REPORTER"),
   /**
    * Dataflow requester resource group enum.
    */
@@ -22,9 +22,9 @@ public enum ResourceGroupEnum {
    */
   DATAFLOW_CUSTODIAN("Dataflow-%s-DATA_CUSTODIAN"),
   /**
-   * Dataset provider resource group enum.
+   * The dataset lead reporter.
    */
-  DATASET_PROVIDER("Dataset-%s-DATA_PROVIDER"),
+  DATASET_LEAD_REPORTER("Dataset-%s-LEAD_REPORTER"),
   /**
    * Dataset requester resource group enum.
    */

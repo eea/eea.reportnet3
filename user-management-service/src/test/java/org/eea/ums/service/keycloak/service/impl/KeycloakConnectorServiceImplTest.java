@@ -1,7 +1,6 @@
 package org.eea.ums.service.keycloak.service.impl;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -139,7 +138,7 @@ public class KeycloakConnectorServiceImplTest {
   public void getReportnetClientInfo() {
     ClientInfo info = new ClientInfo();
     info.setClientId("reportnet");
-    ClientInfo[] body = new ClientInfo[]{info};
+    ClientInfo[] body = new ClientInfo[] {info};
 
     ResponseEntity<ClientInfo[]> clientInfoResult = new ResponseEntity<>(body, HttpStatus.OK);
     Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
@@ -153,7 +152,7 @@ public class KeycloakConnectorServiceImplTest {
   @Test
   public void getResourceInfo() {
 
-    String[] bodyResourceSet = new String[]{"resource1"};
+    String[] bodyResourceSet = new String[] {"resource1"};
 
     ResponseEntity<String[]> resourceSetInfo = new ResponseEntity<>(bodyResourceSet, HttpStatus.OK);
 
@@ -191,9 +190,9 @@ public class KeycloakConnectorServiceImplTest {
 
     GroupInfo groupInfo = new GroupInfo();
     groupInfo.setId("1");
-    groupInfo.setName("Dataflow-1-DATA_PROVIDER");
+    groupInfo.setName("Dataflow-1-LEAD_REPORTER");
     groupInfo.setPath("/path");
-    GroupInfo[] groupInfos = new GroupInfo[]{groupInfo};
+    GroupInfo[] groupInfos = new GroupInfo[] {groupInfo};
 
     ResponseEntity<GroupInfo[]> responseGroupInfos =
         new ResponseEntity<>(groupInfos, HttpStatus.OK);
@@ -206,7 +205,7 @@ public class KeycloakConnectorServiceImplTest {
     GroupInfo[] result = keycloakConnectorService.getGroupsByUser("user1");
     Assert.assertNotNull(result);
     Assert.assertTrue(result.length > 0);
-    Assert.assertEquals(result[0].getName(), "Dataflow-1-DATA_PROVIDER");
+    Assert.assertEquals(result[0].getName(), "Dataflow-1-LEAD_REPORTER");
 
   }
 

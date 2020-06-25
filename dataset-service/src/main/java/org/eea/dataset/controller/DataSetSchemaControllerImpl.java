@@ -170,7 +170,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @RequestMapping(value = "/datasetId/{datasetId}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_PROVIDER', 'DATACOLLECTION_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_PROVIDER', 'DATACOLLECTION_CUSTODIAN')")
   public DataSetSchemaVO findDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId) {
     try {
       return dataschemaService.getDataSchemaByDatasetId(true, datasetId);
@@ -206,7 +206,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @GetMapping(value = "{datasetId}/noRules", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN','DATASCHEMA_PROVIDER')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_PROVIDER')")
   public DataSetSchemaVO findDataSchemaWithNoRulesByDatasetId(
       @PathVariable("datasetId") Long datasetId) {
     try {

@@ -394,7 +394,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     List<ResourceInfoVO> groups = new ArrayList<>();
     Set<Long> datasetIds = datasetIdsEmail.keySet();
     for (Long datasetId : datasetIds) {
-      groups.add(createGroup(datasetId, ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_PROVIDER));
+      groups.add(createGroup(datasetId, ResourceTypeEnum.DATASET, SecurityRoleEnum.LEAD_REPORTER));
       groups.add(createGroup(datasetId, ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_CUSTODIAN));
     }
     resourceManagementControllerZuul.createResources(groups);
@@ -404,7 +404,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     datasetIdsEmail.forEach((Long id, String email) -> {
 
       ResourceAssignationVO resourceDP =
-          fillResourceAssignation(id, email, ResourceGroupEnum.DATASET_PROVIDER);
+          fillResourceAssignation(id, email, ResourceGroupEnum.DATASET_LEAD_REPORTER);
       resourcesProviders.add(resourceDP);
 
       ResourceAssignationVO resourceDC =
@@ -466,9 +466,9 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     resourceManagementControllerZuul.createResource(
         createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_CUSTODIAN));
 
-    // Create group Dataschema-X-DATA_PROVIDER
+    // Create group Dataschema-X-LEAD_REPORTER
     resourceManagementControllerZuul.createResource(
-        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_PROVIDER));
+        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.LEAD_REPORTER));
 
     // Add user to new group Dataschema-X-DATA_CUSTODIAN
     userManagementControllerZuul.addUserToResource(datasetId,

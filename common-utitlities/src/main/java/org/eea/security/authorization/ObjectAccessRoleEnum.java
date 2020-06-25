@@ -5,9 +5,9 @@ package org.eea.security.authorization;
  */
 public enum ObjectAccessRoleEnum {
   /**
-   * Dataflow provider object access role enum.
+   * The dataflow lead reporter.
    */
-  DATAFLOW_PROVIDER("ROLE_DATAFLOW-%s-DATA_PROVIDER"),
+  DATAFLOW_LEAD_REPORTER("ROLE_DATAFLOW-%s-LEAD_REPORTER"),
   /**
    * Dataflow requestor object access role enum.
    */
@@ -21,9 +21,9 @@ public enum ObjectAccessRoleEnum {
    */
   DATAFLOW_CUSTODIAN("ROLE_DATAFLOW-%s-DATA_CUSTODIAN"),
   /**
-   * Dataset provider object access role enum.
+   * The dataset lead reporter.
    */
-  DATASET_PROVIDER("ROLE_DATASET-%s-DATA_PROVIDER"),
+  DATASET_LEAD_REPORTER("ROLE_DATASET-%s-LEAD_REPORTER"),
   /**
    * Dataset requester object access role enum.
    */

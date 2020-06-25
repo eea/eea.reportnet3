@@ -299,7 +299,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   /**
    * Delete resource instances containing the ID in the name.
    * <p>
-   * Example: Dataflow-1-DATA_CUSTODIAN and Dataflow-1-DATA_PROVIDER would be deleted if the list
+   * Example: Dataflow-1-DATA_CUSTODIAN and Dataflow-1-LEAD_REPORTER would be deleted if the list
    * contains the ID 1.
    * </p>
    *
@@ -511,9 +511,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       try {
         keycloakConnectorService.createGroupDetail(groupInfo);
       } catch (EEAException e) {
-        LOG_ERROR
-            .error("Error creating group {} due to reason {}", groupInfo.getName(), e.getMessage(),
-                e);
+        LOG_ERROR.error("Error creating group {} due to reason {}", groupInfo.getName(),
+            e.getMessage(), e);
         deleteResourceInstances(resourceInfoVOs.subList(0, i));
         throw e;
       }
@@ -535,14 +534,14 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     Long dataflowId = 0l;
     for (UserRepresentation userRepresentation : keycloakConnectorService.getUsers()) {
       if (null != userRepresentation.getAttributes()
-          && 1 <= userRepresentation.getAttributes().size() && userRepresentation.getAttributes()
-          .containsKey("ApiKeys")) {
+          && 1 <= userRepresentation.getAttributes().size()
+          && userRepresentation.getAttributes().containsKey("ApiKeys")) {
         List<String> apiKeys = userRepresentation.getAttributes().get("ApiKeys");
         // an api key in attributes is represented as a string where positions are:
         // ApiKeyValue,dataflowId,dataproviderId
 
-        String userApiKey = apiKeys.stream()
-            .filter(value -> value.startsWith(apiKey)).findFirst().orElse("");
+        String userApiKey =
+            apiKeys.stream().filter(value -> value.startsWith(apiKey)).findFirst().orElse("");
         if (StringUtils.isNotEmpty(userApiKey)) {
 
           String[] apiKeyValues = userApiKey.split(",");
@@ -554,14 +553,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     TokenVO tokenVO = null;
     if (1 == userRepresentations.size()) {
       UserRepresentation user = userRepresentations.get(0);
-      LOG.info("Found user {} with api key {}",
-          user.getUsername(), apiKey);
+      LOG.info("Found user {} with api key {}", user.getUsername(), apiKey);
       tokenVO = new TokenVO();
       tokenVO.setUserId(user.getId());
       Set<String> userGroups = new HashSet<>();
       for (GroupInfo groupInfo : keycloakConnectorService.getGroupsByUser(user.getId())) {
         if (groupInfo.getName()
-            .equals(ResourceGroupEnum.DATAFLOW_PROVIDER.getGroupName(dataflowId))) {
+            .equals(ResourceGroupEnum.DATAFLOW_LEAD_REPORTER.getGroupName(dataflowId))) {
           userGroups.add(groupInfo.getName());
         }
       }
@@ -679,13 +677,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       Optional.ofNullable(token.getOtherClaims())
           .map(claims -> (List<String>) claims.get("user_groups"))
           .filter(groups -> groups.size() > 0).ifPresent(groups -> {
-        groups.stream().map(group -> {
-          if (group.startsWith("/")) {
-            group = group.substring(1);
-          }
-          return group.toUpperCase();
-        }).forEach(eeaGroups::add);
-      });
+            groups.stream().map(group -> {
+              if (group.startsWith("/")) {
+                group = group.substring(1);
+              }
+              return group.toUpperCase();
+            }).forEach(eeaGroups::add);
+          });
 
       tokenVO.setRoles(token.getRoles());
       tokenVO.setRefreshToken(tokenInfo.getRefreshToken());

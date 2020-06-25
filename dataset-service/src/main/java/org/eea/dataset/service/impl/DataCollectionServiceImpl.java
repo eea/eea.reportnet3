@@ -581,15 +581,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           createAssignments(dataCollectionId, null, ResourceGroupEnum.DATACOLLECTION_CUSTODIAN));
     }
 
-    // Create DATASET_PROVIDER and DATA_CUSTODIAN groups
-    // Assign DATAFLOW_PROVIDER and DATA_PROVIDER to representatives and DATA_CUSTODIAN to self user
+    // Create DATASET_LEAD_REPORTER and DATA_CUSTODIAN groups
+    // Assign DATAFLOW_LEAD_REPORTER and DATA_PROVIDER to representatives and DATA_CUSTODIAN to self
+    // user
     for (Map.Entry<Long, String> entry : datasetIdsEmails.entrySet()) {
       groups.add(
-          createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_PROVIDER));
-      providerAssignments.add(
-          createAssignments(entry.getKey(), entry.getValue(), ResourceGroupEnum.DATASET_PROVIDER));
-      providerAssignments.add(
-          createAssignments(dataflowId, entry.getValue(), ResourceGroupEnum.DATAFLOW_PROVIDER));
+          createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.LEAD_REPORTER));
+      providerAssignments.add(createAssignments(entry.getKey(), entry.getValue(),
+          ResourceGroupEnum.DATASET_LEAD_REPORTER));
+      providerAssignments.add(createAssignments(dataflowId, entry.getValue(),
+          ResourceGroupEnum.DATAFLOW_LEAD_REPORTER));
       groups.add(
           createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_CUSTODIAN));
       custodianAssignments

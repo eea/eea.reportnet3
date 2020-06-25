@@ -172,7 +172,7 @@ public class UserManagementControllerImplTest {
     Mockito.when(securityProviderInterfaceService.getResourcesByUser(Mockito.any()))
         .thenReturn(resourceList);
     assertEquals("assertion error", resourceList,
-        userManagementController.getResourcesByUser(SecurityRoleEnum.DATA_PROVIDER));
+        userManagementController.getResourcesByUser(SecurityRoleEnum.LEAD_REPORTER));
   }
 
   @Test
@@ -187,7 +187,7 @@ public class UserManagementControllerImplTest {
     Mockito.when(securityProviderInterfaceService.getResourcesByUser(Mockito.any()))
         .thenReturn(resourceList);
     assertEquals("assertion error", resourceList, userManagementController
-        .getResourcesByUser(ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_PROVIDER));
+        .getResourcesByUser(ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.LEAD_REPORTER));
 
   }
 

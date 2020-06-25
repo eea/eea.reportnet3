@@ -184,7 +184,7 @@ public interface SecurityProviderInterfaceService {
   /**
    * Delete resource instances containing the ID in the name.
    * <p>
-   * Example: Dataflow-1-DATA_CUSTODIAN and Dataflow-1-DATA_PROVIDER would be deleted if the list
+   * Example: Dataflow-1-DATA_CUSTODIAN and Dataflow-1-LEAD_REPORTER would be deleted if the list
    * contains the ID 1.
    * </p>
    *
@@ -241,5 +241,6 @@ public interface SecurityProviderInterfaceService {
    * @param attributes the attributes
    * @return the user representation
    */
-  UserRepresentation setAttributesWithApiKey(UserRepresentation user, Map<String, List<String>> attributes);
+  UserRepresentation setAttributesWithApiKey(UserRepresentation user,
+      Map<String, List<String>> attributes);
 }

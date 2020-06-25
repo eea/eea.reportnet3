@@ -1,8 +1,8 @@
 package org.eea.interfaces.vo.ums.enums;
 
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 
 /**
  * The enum Security role enum.
@@ -13,9 +13,9 @@ public enum SecurityRoleEnum {
    */
   DATA_CUSTODIAN("DATA_CUSTODIAN"),
   /**
-   * Data provider security role enum.
+   * The lead reporter.
    */
-  DATA_PROVIDER("DATA_PROVIDER"),
+  LEAD_REPORTER("LEAD_REPORTER"),
   /**
    * Data requester security role enum.
    */
