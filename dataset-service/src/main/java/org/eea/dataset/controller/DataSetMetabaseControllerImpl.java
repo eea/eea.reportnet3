@@ -313,7 +313,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
       @RequestParam("originDatasetSchemaId") String originDatasetSchemaId,
       @RequestParam("referencedDatasetSchemaId") String referencedDatasetSchemaId) {
 
-    if (null == datasetReferencedId || datasetOriginId == datasetReferencedId) {
+    if (null == datasetReferencedId || datasetReferencedId.equals(datasetOriginId)) {
       datasetReferencedId =
           getIntegrityDatasetId(datasetOriginId, originDatasetSchemaId, referencedDatasetSchemaId);
     }
