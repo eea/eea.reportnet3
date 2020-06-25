@@ -1215,8 +1215,8 @@ public class DatasetServiceImpl implements DatasetService {
         }
         // if the type is multiselect codelist or Link multiple we sort the values in lexicographic
         // order
-        if (DataType.MULTISELECT_CODELIST.equals(field.getType())
-            || isLinkMultiselect && null != field.getValue()) {
+        if ((DataType.MULTISELECT_CODELIST.equals(field.getType()) || isLinkMultiselect)
+            && null != field.getValue()) {
           List<String> values = new ArrayList<>();
           Arrays.asList(field.getValue().split(",")).stream()
               .forEach(value -> values.add(value.trim()));
@@ -1387,8 +1387,8 @@ public class DatasetServiceImpl implements DatasetService {
     }
     // if the type is multiselect codelist or Link multiselect we sort the values in lexicographic
     // order
-    if (DataType.MULTISELECT_CODELIST.equals(field.getType())
-        || isLinkMultiselect && null != field.getValue()) {
+    if ((DataType.MULTISELECT_CODELIST.equals(field.getType()) || isLinkMultiselect)
+        && null != field.getValue()) {
       List<String> values = new ArrayList<>();
       Arrays.asList(field.getValue().split(",")).stream()
           .forEach(value -> values.add(value.trim()));
