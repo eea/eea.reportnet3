@@ -456,11 +456,6 @@ public class RuleExpressionVO {
       return string.matches("[0-9]{4}-(?:0[0-9]|1[0-2])-(?:[0-2][0-9]|3[01])");
     }
 
-    if (superInputType.equalsIgnoreCase("String")
-        && dataTypeMap.get(string).getJavaType().equalsIgnoreCase("Number")) {
-      return true;
-    }
-
     return superInputType.equals(JavaType.STRING);
   }
 
