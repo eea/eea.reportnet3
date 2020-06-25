@@ -41,6 +41,6 @@ public class RepresentativeVO implements Serializable {
   /** The role. */
   private SecurityRoleEnum role;
 
-  /** The has write permission. */
-  private Boolean hasWritePermission;
+  /** The write permission. */
+  private Boolean permission;
 }

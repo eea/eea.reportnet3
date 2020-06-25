@@ -13,6 +13,10 @@ public enum SecurityRoleEnum {
    */
   DATA_CUSTODIAN("DATA_CUSTODIAN"),
   /**
+   * The editor.
+   */
+  EDITOR("EDITOR"),
+  /**
    * The lead reporter.
    */
   LEAD_REPORTER("LEAD_REPORTER"),
