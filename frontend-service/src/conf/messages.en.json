@@ -704,6 +704,7 @@
     "cloneSchemasFromDataflow": "Clone all schemas from dataflow",
     "DataflowsList": "Dataflow's List",
     "cloneSelectedDataflow": "Clone selected dataflow",
-    "selectedDataflow": "Selected dataflow"
+    "selectedDataflow": "Selected dataflow",
+    "totalDataflows": "Total dataflows"
   }
 }

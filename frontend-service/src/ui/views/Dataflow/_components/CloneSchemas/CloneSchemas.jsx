@@ -7,6 +7,7 @@ import styles from './CloneSchemas.module.scss';
 import { CardsView } from 'ui/views/_components/CardsView';
 import { Filters } from 'ui/views/_components/Filters';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
+import { TableViewSchemas } from './_components/TableViewSchemas';
 
 import { DataflowService } from 'core/services/Dataflow';
 
@@ -18,7 +19,7 @@ import { cloneSchemasReducer } from './_functions/Reducers/cloneSchemasReducer';
 
 import { CloneSchemasUtils } from './_functions/Utils/CloneSchemasUtils';
 
-export const CloneSchemas = dataflowId => {
+export const CloneSchemas = () => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
@@ -26,17 +27,27 @@ export const CloneSchemas = dataflowId => {
   const [cloneSchemasState, cloneSchemasDispatch] = useReducer(cloneSchemasReducer, {
     accepted: [],
     allDataflows: {},
+    chosenDataflow: {},
+    chosenDataflowId: null,
     completed: [],
     filteredData: [],
     isLoading: true,
+    isTableView: true,
+    pagination: { first: 0, rows: 10, page: 0 },
     pending: []
   });
+
+  console.log('cloneSchemasState.chosenDataflowId', cloneSchemasState.chosenDataflowId);
 
   useEffect(() => {
     onLoadDataflows();
   }, []);
 
   const isLoading = value => cloneSchemasDispatch({ type: 'IS_LOADING', payload: { value } });
+
+  const onChangePagination = pagination => {
+    cloneSchemasDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
+  };
 
   const onLoadDataflows = async () => {
     isLoading(true);
@@ -60,20 +71,35 @@ export const CloneSchemas = dataflowId => {
 
   const onLoadFilteredData = data => cloneSchemasDispatch({ type: 'FILTERED_DATA', payload: { data } });
 
+  const onSelectDataflow = rowData => {
+    cloneSchemasDispatch({ type: 'ON_SELECT_DATAFLOW', payload: { rowData } });
+  };
+
   const onToggleView = () => {
     cloneSchemasDispatch({ type: 'ON_TOGGLE_VIEW', payload: { view: !cloneSchemasState.isTableView } });
   };
 
-  const renderCardView = () => (
-    <CardsView
-      // checkedCard={reportingObligationState.oblChoosed}
-      data={cloneSchemasState.filteredData}
-      // handleRedirect={onOpenObligation}
-      // onChangePagination={onChangePagination}
-      // onSelectCard={onSelectObl}
-      // pagination={reportingObligationState.pagination}
-    />
-  );
+  const renderData = () =>
+    cloneSchemasState.isTableView ? (
+      <TableViewSchemas
+        checkedDataflow={cloneSchemasState.chosenDataflow}
+        data={cloneSchemasState.filteredData}
+        onChangePagination={onChangePagination}
+        onSelectDataflow={onSelectDataflow}
+        pagination={cloneSchemasState.pagination}
+        selectedDataflowId={cloneSchemasState.chosenDataflowId}
+      />
+    ) : (
+      <CardsView
+        // checkedCard={reportingObligationState.oblChoosed}
+        data={cloneSchemasState.filteredData}
+        // handleRedirect={onOpenObligation}
+        // onChangePagination={onChangePagination}
+        // onSelectCard={onSelectObl}
+
+        // pagination={reportingObligationState.pagination}
+      />
+    );
 
   return (
     <div className={styles.cloneSchemas}>
@@ -94,7 +120,7 @@ export const CloneSchemas = dataflowId => {
         />
       </div>
 
-      {renderCardView()}
+      {renderData()}
 
       {!cloneSchemasState.isLoading && (
         <span
@@ -102,11 +128,7 @@ export const CloneSchemas = dataflowId => {
             isEmpty(cloneSchemasState.data) || isEmpty(cloneSchemasState.searchedData) ? styles.filteredSelected : ''
           }`}>
           <span>{`${resources.messages['selectedDataflow']}: `}</span>
-          {`${
-            !isEmpty(cloneSchemasState.dataflowChosen) && !isEmpty(cloneSchemasState.dataflowChosen)
-              ? cloneSchemasState.dataflowChosen.name
-              : '-'
-          }`}
+          {`${!isEmpty(cloneSchemasState.chosenDataflow) ? cloneSchemasState.chosenDataflow.name : '-'}`}
         </span>
       )}
     </div>
