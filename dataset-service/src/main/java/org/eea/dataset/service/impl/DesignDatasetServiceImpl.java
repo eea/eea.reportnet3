@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DesignDatasetMapper;
+import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
@@ -59,25 +60,37 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
   @Autowired
   private FileCommonUtils fileCommon;
 
+  /** The dataschema service. */
   @Autowired
   private DatasetSchemaService dataschemaService;
 
+  /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
+  /** The dataset service. */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
+  /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
 
+  /** The table schema mapper. */
   @Autowired
   private TableSchemaMapper tableSchemaMapper;
 
+  /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The field schema no rules mapper. */
+  @Autowired
+  FieldSchemaNoRulesMapper fieldSchemaNoRulesMapper;
+
+
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant LOG. */
@@ -130,6 +143,10 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
    * @param designs the designs
    * @param idDataflowDestination the id dataflow destination
    * @throws EEAException the EEA exception
+   * 
+   *         We've got the list of design datasets from the dataflow to copy and the dataflow
+   *         destination. The idea is create a new design dataset copied from the original and
+   *         change the schema's objectId (dataset, table, record and field level)
    */
   @Async
   @Override
@@ -154,7 +171,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
             nameToClone(schemaVO.getNameDatasetSchema(), designs), newIdDatasetSchema,
             idDataflowDestination, null, null, 0);
         // Fill the new schema dataset with the data of the original schema dataset
-        LOG.info("El dataset creado es {}", datasetId.get());
+        LOG.info("Design dataset created in the copy process with id {}", datasetId.get());
         Thread.sleep(2000);
         fillDesignDatasetCopied(schemaVO, newIdDatasetSchema, mapOldNewObjectId, datasetId.get());
 
@@ -170,6 +187,17 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
   }
 
 
+  /**
+   * Fill design dataset copied.
+   *
+   * @param schemaOrigin the schema origin
+   * @param newIdDatasetSchema the new id dataset schema
+   * @param mapOldNewObjectId the map old new object id
+   * @param datasetId the dataset id
+   * @return the map
+   * @throws EEAException the EEA exception
+   * @throws InterruptedException the interrupted exception
+   */
   private Map<String, String> fillDesignDatasetCopied(DataSetSchemaVO schemaOrigin,
       String newIdDatasetSchema, Map<String, String> mapOldNewObjectId, Long datasetId)
       throws EEAException, InterruptedException {
@@ -181,14 +209,10 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
     // table level
     for (TableSchemaVO tableVO : schemaOrigin.getTableSchemas()) {
       TableSchema table = new TableSchema();
-      table.setDescription(tableVO.getDescription());
       ObjectId newTableId = new ObjectId();
-      table.setIdTableSchema(newTableId);
       mapOldNewObjectId.put(tableVO.getIdTableSchema(), newTableId.toString());
-      table.setDescription(table.getDescription());
-      table.setNameTableSchema(tableVO.getNameTableSchema());
-      table.setToPrefill(tableVO.getToPrefill());
-      table.setReadOnly(tableVO.getReadOnly());
+      table = tableSchemaMapper.classToEntity(tableVO);
+      table.setIdTableSchema(newTableId);
       // record level
       RecordSchema record = new RecordSchema();
       ObjectId newRecordId = new ObjectId();
@@ -202,16 +226,9 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         for (FieldSchemaVO fieldVO : tableVO.getRecordSchema().getFieldSchema()) {
           FieldSchema field = new FieldSchema();
           ObjectId newFieldId = new ObjectId();
-          field.setIdFieldSchema(newFieldId);
           mapOldNewObjectId.put(fieldVO.getId(), newFieldId.toString());
-          field.setDescription(fieldVO.getDescription());
-          field.setPk(fieldVO.getPk());
-          field.setType(fieldVO.getType());
-          field.setRequired(fieldVO.getRequired());
-          field.setPkMustBeUsed(fieldVO.getPkMustBeUsed());
-          field.setHeaderName(fieldVO.getName());
-          field.setCodelistItems(fieldVO.getCodelistItems());
-          field.setIdRecord(newRecordId);
+          field = fieldSchemaNoRulesMapper.classToEntity(fieldVO);
+          field.setIdFieldSchema(newFieldId);
 
           record.getFieldSchema().add(field);
         }
@@ -230,6 +247,13 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
   }
 
 
+  /**
+   * Name to clone.
+   *
+   * @param nameDesign the name design
+   * @param designs the designs
+   * @return the string
+   */
   private String nameToClone(String nameDesign, List<DesignDatasetVO> designs) {
 
     String result = "CLONE_" + nameDesign;

@@ -775,19 +775,22 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   }
 
 
+
   /**
    * Copy designs from dataflow.
    *
    * @param dataflowIdOrigin the dataflow id origin
    * @param dataflowIdDestination the dataflow id destination
+   * 
+   *        Copy the design datasets of a dataflow (origin) into the current dataflow (target) It's
+   *        an async call. It sends a notification when all the process it's done
    */
   @Override
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  @PostMapping(value = "/dataflow/{dataflowIdOrigin}/copyTo/{dataflowIdDestination}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public void copyDesignsFromDataflow(@PathVariable("dataflowIdOrigin") Long dataflowIdOrigin,
-      @PathVariable("dataflowIdDestination") Long dataflowIdDestination) {
+  @PostMapping(value = "/copy", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void copyDesignsFromDataflow(@RequestParam("sourceDataflow") final Long dataflowIdOrigin,
+      @RequestParam("targetDataflow") final Long dataflowIdDestination) {
 
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",

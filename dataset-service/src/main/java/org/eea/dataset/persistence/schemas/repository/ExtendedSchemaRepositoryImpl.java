@@ -46,6 +46,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The mongo converter. */
   @Autowired
   private MongoConverter mongoConverter;
 
