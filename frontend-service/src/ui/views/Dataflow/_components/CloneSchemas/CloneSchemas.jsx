@@ -20,7 +20,6 @@ import { cloneSchemasReducer } from './_functions/Reducers/cloneSchemasReducer';
 import { CloneSchemasUtils } from './_functions/Utils/CloneSchemasUtils';
 
 export const CloneSchemas = ({ dataflowId }) => {
-  console.log('dataflowId', dataflowId);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
@@ -37,8 +36,6 @@ export const CloneSchemas = ({ dataflowId }) => {
     pagination: { first: 0, rows: 10, page: 0 },
     pending: []
   });
-
-  console.log('cloneSchemasState.chosenDataflowId', cloneSchemasState.chosenDataflowId);
 
   useEffect(() => {
     onLoadDataflows();

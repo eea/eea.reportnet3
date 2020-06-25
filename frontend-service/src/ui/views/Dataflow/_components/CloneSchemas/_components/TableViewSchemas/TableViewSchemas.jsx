@@ -21,10 +21,11 @@ export const TableViewSchemas = withRouter(
   ({ data, history, onChangePagination, onSelectDataflow, pagination, selectedDataflowId }) => {
     const resources = useContext(ResourcesContext);
 
-    const headerTableTemplate = dataflow => {
-      if (dataflow === 'expirationDate') return resources.messages['nextReportDue'];
-      else if (dataflow === 'obligation') return resources.messages['obligationTitle'];
-      else return resources.messages[dataflow];
+    const headerTableTemplate = field => {
+      if (field === 'expirationDate') return resources.messages['nextReportDue'];
+      else if (field === 'obligation') return resources.messages['obligationTitle'];
+      else if (field === 'legalInstruments') return resources.messages['legalInstrument'];
+      else return resources.messages[field];
     };
 
     const onLoadCheckButton = row => {
@@ -40,14 +41,11 @@ export const TableViewSchemas = withRouter(
       );
     };
 
-    // const onLoadLegalInstrumentTemplate = row => (
-    //   <div className={styles.titleColum}>{row.obligation.legalInstruments.title}</div>
-    // );
+    const onLoadLegalInstrumentTemplate = row => (
+      <div className={styles.titleColum}>{row.obligation.legalInstruments.alias}</div>
+    );
 
-    const onLoadObligationTemplate = row => {
-      console.log('row', row);
-      return <div className={styles.titleColum}>{row.obligation.title}</div>;
-    };
+    const onLoadObligationTemplate = row => <div className={styles.titleColum}>{row.obligation.title}</div>;
 
     const onLoadPagination = event => onChangePagination({ first: event.first, rows: event.rows, page: event.page });
 
@@ -68,8 +66,6 @@ export const TableViewSchemas = withRouter(
     const renderCheckColum = <Column key="checkId" body={row => onLoadCheckButton(row)} />;
 
     const renderColumns = dataflows => {
-      console.log('dataflows', dataflows);
-      console.log('Object.keys(dataflows[0]', Object.keys(dataflows[0]));
       const fieldColumns = Object.keys(dataflows[0])
         .filter(
           key =>
@@ -84,16 +80,28 @@ export const TableViewSchemas = withRouter(
           let template = null;
           if (field === 'name') template = onLoadTitleTemplate;
           if (field === 'obligation') template = onLoadObligationTemplate;
-          // if (field.obligation === 'legalInstruments') template = onLoadLegalInstrumentTemplate;
 
           return (
             <Column body={template} field={field} header={headerTableTemplate(field)} key={field} sortable={true} />
           );
         });
 
+      const legalFieldColumn = Object.values(dataflows[0]).filter(key => typeof key === 'object');
+
+      const legalInstrument = Object.keys(legalFieldColumn[0])
+        .filter(key => key.includes('legalInstruments'))
+        .map(field => {
+          let template = null;
+          if (field === 'legalInstruments') template = onLoadLegalInstrumentTemplate;
+
+          return (
+            <Column body={template} field={field} header={headerTableTemplate(field)} key={field} sortable={true} />
+          );
+        });
+
+      fieldColumns.push(legalInstrument);
       fieldColumns.unshift(renderCheckColum);
 
-      console.log('fieldColumns', fieldColumns);
       return fieldColumns;
     };
 
