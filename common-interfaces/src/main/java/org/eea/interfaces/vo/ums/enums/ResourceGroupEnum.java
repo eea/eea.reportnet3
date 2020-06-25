@@ -55,7 +55,13 @@ public enum ResourceGroupEnum {
   DATACOLLECTION_CUSTODIAN("DataCollection-%s-DATA_CUSTODIAN"),
 
   /** The datacollection provider. */
-  DATACOLLECTION_PROVIDER("DataCollection-%s-DATA_PROVIDER");
+  DATACOLLECTION_PROVIDER("DataCollection-%s-DATA_PROVIDER"),
+
+  /** The dataflow editor write. */
+  DATAFLOW_EDITOR_WRITE("Dataflow-%s-EDITOR_WRITE"),
+
+  /** The dataflow editor read. */
+  DATAFLOW_EDITOR_READ("Dataflow-%s-EDITOR_READ");
 
 
   /** The expression. */

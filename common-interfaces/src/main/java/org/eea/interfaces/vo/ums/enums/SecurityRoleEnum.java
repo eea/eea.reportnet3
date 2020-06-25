@@ -13,9 +13,13 @@ public enum SecurityRoleEnum {
    */
   DATA_CUSTODIAN("DATA_CUSTODIAN"),
   /**
-   * The editor.
+   * The editor with edit access.
    */
-  EDITOR("EDITOR"),
+  EDITOR_WRITE("EDITOR_WRITE"),
+  /**
+   * The editor read-only access.
+   */
+  EDITOR_READ("EDITOR_READ"),
   /**
    * The lead reporter.
    */
