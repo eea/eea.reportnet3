@@ -50,14 +50,14 @@ export const TableViewSchemas = withRouter(
     const onLoadPagination = event => onChangePagination({ first: event.first, rows: event.rows, page: event.page });
 
     const onLoadTitleTemplate = row => {
+      let dataflowId = row.id;
       return (
         <div className={styles.titleColum}>
           {row.name}
           <FontAwesomeIcon
             className={styles.linkIcon}
             icon={AwesomeIcons('externalLink')}
-            onMouseDown={() => window.open(getUrl(`/dataflow/${row.id}`))}
-            // onMouseDown={() => window.history.push(getUrl(routes.DATAFLOW, { selectedRowId }))}
+            onMouseDown={() => window.open(getUrl(routes.DATAFLOW, { dataflowId }))}
           />
         </div>
       );
