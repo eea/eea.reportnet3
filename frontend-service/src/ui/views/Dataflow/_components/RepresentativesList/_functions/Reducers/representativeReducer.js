@@ -5,10 +5,9 @@ import { Representative } from 'core/domain/model/Representative/Representative'
 
 export const reducer = (state, { type, payload }) => {
   const emptyRepresentative = new Representative({ dataProviderId: '', providerAccount: '' });
-  let updatedList = [];
 
   switch (type) {
-    case 'ADD_REPRESENTATIVE':
+    case 'REFRESH':
       return {
         ...state,
         refresher: !state.refresher
@@ -28,54 +27,31 @@ export const reducer = (state, { type, payload }) => {
       return { ...state, unusedDataProvidersOptions };
 
     case 'DELETE_REPRESENTATIVE':
-      updatedList = state.representatives.filter(
-        representative => representative.representativeId !== payload.representativeIdToDelete
-      );
       return {
         ...state,
-        representatives: updatedList,
+        representatives: payload.updatedList,
         refresher: !state.refresher,
         isVisibleConfirmDeleteDialog: false
       };
 
     case 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID':
-      const providersNoSelect = [...payload.responseAllDataProviders];
-      if (state.representatives.length <= payload.responseAllDataProviders.length) {
-        payload.responseAllDataProviders.unshift({ dataProviderId: '', label: 'Select...' });
-      }
       return {
         ...state,
         allPossibleDataProviders: payload.responseAllDataProviders,
-        allPossibleDataProvidersNoSelect: providersNoSelect
+        allPossibleDataProvidersNoSelect: payload.providersNoSelect
       };
 
     case 'GET_PROVIDERS_TYPES_LIST':
       return { ...state, dataProvidersTypesList: payload.providerTypes };
 
-    case 'REPRESENTATIVE_HAS_ERROR':
-      let inputsWithErrors = state.representativeHasError;
-      inputsWithErrors.unshift(payload.representativeIdThatHasError);
-
-      return { ...state, representativeHasError: inputsWithErrors };
-
-    case 'REPRESENTATIVE_HAS_NO_ERROR':
-      const filteredInputsWithErrors = state.representativeHasError.filter(
-        representativeId => representativeId !== payload.representativeId
-      );
-
-      return { ...state, representativeHasError: filteredInputsWithErrors };
+    case 'MANAGE_ERRORS':
+      return { ...state, representativeHasError: payload.representativeHasError };
 
     case 'HIDE_CONFIRM_DIALOG':
       return {
         ...state,
         isVisibleConfirmDeleteDialog: false,
         representativeIdToDelete: ''
-      };
-
-    case 'REFRESH_ON_HIDE_MANAGE_ROLES_DIALOG':
-      return {
-        ...state,
-        refresher: !state.refresher
       };
 
     case 'INITIAL_LOAD':
@@ -104,48 +80,17 @@ export const reducer = (state, { type, payload }) => {
         representativeHasError: []
       };
 
-    case 'UPDATE_ACCOUNT':
-      return {
-        ...state,
-        refresher: !state.refresher
-      };
-
-    case 'UPDATE_DATA_PROVIDER':
-      return {
-        ...state,
-        refresher: !state.refresher
-      };
-
     case 'ON_ACCOUNT_CHANGE':
-      updatedList = state.representatives.map(representative => {
-        if (representative.dataProviderId === payload.dataProviderId) {
-          representative.providerAccount = payload.providerAccount;
-        }
-        return representative;
-      });
       return {
         ...state,
-        representatives: updatedList
+        representatives: payload.representatives
       };
 
     case 'ON_PROVIDER_CHANGE':
-      updatedList = state.representatives.map(representative => {
-        if (representative.representativeId === payload.representativeId) {
-          representative.dataProviderId = payload.dataProviderId;
-        }
-        return representative;
-      });
-      if (!isNil(payload.representativeId)) {
-        return {
-          ...state,
-          refresher: !state.refresher
-        };
-      } else {
-        return {
-          ...state,
-          representatives: updatedList
-        };
-      }
+      return {
+        ...state,
+        representatives: payload.representatives
+      };
 
     case 'SELECT_PROVIDERS_TYPE':
       return {

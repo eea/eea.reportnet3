@@ -208,13 +208,27 @@ const useBigButtonList = ({
       buttonIcon: isActiveButton ? 'siteMap' : 'spinner',
       buttonIconClass: isActiveButton ? 'siteMap' : 'spinner',
       caption: resources.messages['createDataCollection'],
+      enabled:
+        isEmpty(dataflowState.data.dataCollections) &&
+        dataflowState.isDataSchemaCorrect &&
+        dataflowState.formHasRepresentatives,
       helpClassName: 'dataflow-datacollection-help-step',
-      handleRedirect: isActiveButton ? () => onShowDataCollectionModal() : () => {},
-      layout: 'defaultBigButton',
-      visibility:
+      handleRedirect:
+        isActiveButton &&
         isEmpty(dataflowState.data.dataCollections) &&
         dataflowState.isDataSchemaCorrect &&
         dataflowState.formHasRepresentatives
+          ? () => onShowDataCollectionModal()
+          : () => {},
+      layout: 'defaultBigButton',
+      tooltip: !isEmpty(dataflowState.data.dataCollections)
+        ? resources.messages['disabledCreateDataCollectionSchemas']
+        : !dataflowState.isDataSchemaCorrect
+        ? resources.messages['disabledCreateDataCollectionSchemasWithError']
+        : !dataflowState.formHasRepresentatives
+        ? resources.messages['disabledCreateDataCollectionNoProviders']
+        : undefined,
+      visibility: isEmpty(dataflowState.data.dataCollections) && dataflowState.status === 'DESIGN'
     }
   ];
 
