@@ -686,6 +686,7 @@
     "newSchema": "New schema",
     "searchObligations": "Search obligations",
     "PKTooltip": "The primary key (PK) is a unique identifier for the records",
+    "comparisonValueFieldSelector": "Value type",
     "invalidExtensionFile": "ERROR: Selected file does not have a valid extension, please check it.",
     "loadingFileExtensionsError": "Error loading supported file extensions",
     "selectField": "Select field",
@@ -705,6 +706,9 @@
     "DataflowsList": "Dataflow's List",
     "cloneSelectedDataflow": "Clone selected dataflow",
     "selectedDataflow": "Selected dataflow",
-    "totalDataflows": "Total dataflows"
+    "totalDataflows": "Total dataflows",
+    "disabledCreateDataCollectionSchemas": "There is already a data collection created",
+    "disabledCreateDataCollectionSchemasWithError": "Incomplete schemas. Check that all your schemas have tables and (at least) one field per table",
+    "disabledCreateDataCollectionNoProviders": "You haven't assigned yet reporter/s to your dataflow"
   }
 }
