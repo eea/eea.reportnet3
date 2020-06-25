@@ -35,6 +35,7 @@ import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.eea.ums.service.vo.UserVO;
 import org.keycloak.common.VerificationException;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -565,7 +566,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       }
       tokenVO.setGroups(userGroups);
       tokenVO.setRoles(Arrays.asList(keycloakConnectorService.getUserRoles(user.getId())).stream()
-          .map(roleRepresentation -> roleRepresentation.getName()).collect(Collectors.toSet()));
+          .map(RoleRepresentation::getName).collect(Collectors.toSet()));
 
       tokenVO.setPreferredUsername(user.getUsername());
       LOG.info("User {} logged in and cached succesfully via api key {}",

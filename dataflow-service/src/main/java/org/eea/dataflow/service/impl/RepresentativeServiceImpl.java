@@ -72,7 +72,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   public Long createRepresentative(Long dataflowId, RepresentativeVO representativeVO)
       throws EEAException {
 
-    String email = representativeVO.getProviderAccount();
+    String email = representativeVO.getAccount();
     Long dataProviderId = representativeVO.getDataProviderId();
     Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
 
@@ -139,7 +139,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (existsUserMail(
         representativeVO.getDataProviderId() != null ? representativeVO.getDataProviderId()
             : representative.getDataProvider().getId(),
-        representativeVO.getProviderAccount() != null ? representativeVO.getProviderAccount()
+        representativeVO.getAccount() != null ? representativeVO.getAccount()
             : representative.getUserMail(),
         representative.getDataflow().getId())
         && !changesInReceiptStatus(representative, representativeVO)) {
@@ -147,8 +147,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       throw new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED);
     } else {
       // update changes on first level
-      if (representativeVO.getProviderAccount() != null) {
-        representative.setUserMail(representativeVO.getProviderAccount());
+      if (representativeVO.getAccount() != null) {
+        representative.setUserMail(representativeVO.getAccount());
       }
       if (representativeVO.getDataProviderId() != null) {
         DataProvider dataProvider = new DataProvider();

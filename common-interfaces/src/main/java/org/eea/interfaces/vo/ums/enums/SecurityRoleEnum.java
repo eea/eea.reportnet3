@@ -25,9 +25,17 @@ public enum SecurityRoleEnum {
    */
   DATA_STEWARD("DATA_STEWARD"),
   /**
-   * Delegate data provider security role enum.
+   * The reporter.
    */
-  DELEGATE_DATA_PROVIDER("DELEGATE_DATA_PROVIDER");
+  REPORTER("REPORTER"),
+  /**
+   * The reporter partitioned.
+   */
+  REPORTER_PARTITIONED("REPORTER_PARTITIONED"),
+  /**
+   * The national coordinator.
+   */
+  NATIONAL_COORDINATOR("NATIONAL_COORDINATOR");
 
   private final String role;
 

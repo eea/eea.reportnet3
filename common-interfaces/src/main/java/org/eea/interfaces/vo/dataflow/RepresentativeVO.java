@@ -1,6 +1,7 @@
 package org.eea.interfaces.vo.dataflow;
 
 import java.io.Serializable;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -22,8 +23,8 @@ public class RepresentativeVO implements Serializable {
   /** The data provider id. */
   private Long dataProviderId;
 
-  /** The provider account. */
-  private String providerAccount;
+  /** The account. */
+  private String account;
 
   /** The data provider group id. */
   private Long dataProviderGroupId;
@@ -36,4 +37,10 @@ public class RepresentativeVO implements Serializable {
 
   /** The has datasets. */
   private Boolean hasDatasets;
+
+  /** The role. */
+  private SecurityRoleEnum role;
+
+  /** The has write permission. */
+  private Boolean hasWritePermission;
 }
