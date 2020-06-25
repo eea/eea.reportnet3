@@ -205,13 +205,12 @@ const RepresentativesList = ({
           <Dropdown
             disabled={formState.representatives.length > 1}
             name="dataProvidersDropdown"
+            onChange={event => formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value })}
             optionLabel="label"
-            placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
-            value={formState.selectedDataProviderGroup}
             options={formState.dataProvidersTypesList}
-            onChange={e => {
-              return formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: e.target.value });
-            }}
+            placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
+            style={{ maxWidth: '16rem' }}
+            value={formState.selectedDataProviderGroup}
           />
         </div>
       </div>
