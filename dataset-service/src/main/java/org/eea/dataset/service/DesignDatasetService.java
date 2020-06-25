@@ -31,4 +31,16 @@ public interface DesignDatasetService {
   String getFileNameDesign(String mimeType, String idTableSchema, Long datasetId)
       throws EEAException;
 
+
+
+  /**
+   * Copy design datasets.
+   *
+   * @param designs the designs
+   * @param idDataflowDestination the id dataflow destination
+   * @throws EEAException the EEA exception
+   */
+  void copyDesignDatasets(List<DesignDatasetVO> designs, Long idDataflowDestination)
+      throws EEAException;
+
 }
