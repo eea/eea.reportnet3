@@ -49,19 +49,16 @@ export const TableViewSchemas = withRouter(
 
     const onLoadPagination = event => onChangePagination({ first: event.first, rows: event.rows, page: event.page });
 
-    const onLoadTitleTemplate = row => {
-      let dataflowId = row.id;
-      return (
-        <div className={styles.titleColum}>
-          {row.name}
-          <FontAwesomeIcon
-            className={styles.linkIcon}
-            icon={AwesomeIcons('externalLink')}
-            onMouseDown={() => window.open(getUrl(routes.DATAFLOW, { dataflowId }))}
-          />
-        </div>
-      );
-    };
+    const onLoadTitleTemplate = row => (
+      <div className={styles.titleColum}>
+        {row.name}
+        <FontAwesomeIcon
+          className={styles.linkIcon}
+          icon={AwesomeIcons('externalLink')}
+          onMouseDown={() => window.open(getUrl(routes.DATAFLOW, { dataflowId: row.id }, true))}
+        />
+      </div>
+    );
 
     const renderCheckColum = <Column key="checkId" body={row => onLoadCheckButton(row)} />;
 
