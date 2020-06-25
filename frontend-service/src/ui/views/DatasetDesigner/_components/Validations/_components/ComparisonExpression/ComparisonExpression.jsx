@@ -156,7 +156,7 @@ const ComparisonExpression = ({
     if (showRequiredFields) {
       const fieldsToAdd = [];
 
-      ['union', 'field1', 'operatorType', 'operatorValue', 'field2'].forEach(field => {
+      ['union', 'field1', 'operatorType', 'operatorValue', 'valueTypeSelector', 'field2'].forEach(field => {
         if (!clickedFields.includes(field)) fieldsToAdd.push(field);
       });
 
@@ -186,7 +186,9 @@ const ComparisonExpression = ({
     if (field === 'union') {
       conditions = clickedFields.includes(field) && position !== 0 && isEmpty(expressionValues[field]);
     } else if (field === 'field2' && expressionValues.valueTypeSelector === 'value') {
-      conditions = clickedFields.includes(field) && isEmpty(expressionValues[field].toString());
+      conditions =
+        clickedFields.includes(field) &&
+        (isNil(expressionValues[field]) || isEmpty(expressionValues[field].toString()));
     } else {
       conditions = clickedFields.includes(field) && isEmpty(expressionValues[field]);
     }
@@ -199,11 +201,18 @@ const ComparisonExpression = ({
     onDeleteFromClickedFields(key);
 
     if (key === 'field1' && value !== expressionValues.field1) {
-      ['operatorType', 'operatorValue', 'field2'].forEach(field => {
+      ['operatorType', 'operatorValue', 'valueTypeSelector', 'field2'].forEach(field => {
         onExpressionFieldUpdate(expressionId, {
           key: field,
           value: ''
         });
+      });
+    }
+
+    if (key === 'valueTypeSelector' && value !== expressionValues.valueTypeSelector) {
+      onExpressionFieldUpdate(expressionId, {
+        key: 'field2',
+        value: ''
       });
     }
 
