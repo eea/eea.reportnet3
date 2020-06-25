@@ -4,22 +4,32 @@
   justify-content: space-between;
   min-height: 70vh !important;
 
-  .switchDiv {
+  .viewsFilters {
     align-items: center;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     margin-left: auto;
-    width: 30%;
+    width: 100%;
 
-    .switchTextInput {
-      color: var(--main-font-color);
-      font-size: 0.9em;
-      font-weight: bold;
-      margin-block-end: 0.5em;
-      margin-block-start: 0.5em;
-      margin-inline-end: 0px;
-      margin-inline-start: 0px;
-      padding: 10px !important;
+    .filters {
+      width: calc(100% - 400px);
+    }
+
+    .switchDiv {
+      align-items: center;
+      display: flex;
+      width: 250px;
+
+      .switchTextInput {
+        color: var(--main-font-color);
+        font-size: 0.9em;
+        font-weight: bold;
+        margin-block-end: 0.5em;
+        margin-block-start: 0.5em;
+        margin-inline-end: 0px;
+        margin-inline-start: 0px;
+        padding: 10px !important;
+      }
     }
   }
 

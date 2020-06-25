@@ -18,7 +18,8 @@ import { cloneSchemasReducer } from './_functions/Reducers/cloneSchemasReducer';
 
 import { CloneSchemasUtils } from './_functions/Utils/CloneSchemasUtils';
 
-export const CloneSchemas = dataflowId => {
+export const CloneSchemas = ({ dataflowId }) => {
+  console.log('dataflowId', dataflowId);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
@@ -45,7 +46,7 @@ export const CloneSchemas = dataflowId => {
       cloneSchemasDispatch({
         type: 'INITIAL_LOAD',
         payload: {
-          accepted: allDataflows.accepted,
+          accepted: allDataflows.accepted.filter(dataflow => dataflow.id !== parseInt(dataflowId)),
           allDataflows,
           completed: allDataflows.completed,
           pending: allDataflows.pending
@@ -77,21 +78,21 @@ export const CloneSchemas = dataflowId => {
 
   return (
     <div className={styles.cloneSchemas}>
-      <div className={styles.switchDiv}>
-        <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
-        <InputSwitch checked={cloneSchemasState.isTableView} onChange={() => onToggleView()} />
-        <label className={styles.switchTextInput}>{resources.messages['listView']}</label>
-      </div>
-
-      <div className={styles.filters}>
-        <Filters
-          data={cloneSchemasState.accepted}
-          dateOptions={['expirationDate']}
-          getFilteredData={onLoadFilteredData}
-          inputOptions={['name', 'description', 'legalInstrument', 'obligationTitle']}
-          selectOptions={['status', 'userRole']}
-          sortable={true}
-        />
+      <div className={styles.viewsFilters}>
+        <span className={styles.filters}>
+          <Filters
+            data={cloneSchemasState.accepted}
+            dateOptions={['expirationDate']}
+            getFilteredData={onLoadFilteredData}
+            inputOptions={['name', 'description']}
+            selectOptions={['status']}
+          />
+        </span>
+        <span className={styles.switchDiv}>
+          <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
+          <InputSwitch checked={cloneSchemasState.isTableView} onChange={() => onToggleView()} />
+          <label className={styles.switchTextInput}>{resources.messages['listView']}</label>
+        </span>
       </div>
 
       {renderCardView()}
