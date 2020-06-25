@@ -275,7 +275,7 @@ public class FKValidationUtils {
       final List<String> arrayValue = Arrays.asList(value.getValue().split(","));
 
       for (String valueArray : arrayValue) {
-        if (!pkValues.contains(valueArray)) {
+        if (!pkValues.contains(valueArray.trim())) {
           returnChecked = Boolean.FALSE;
           break;
         }
