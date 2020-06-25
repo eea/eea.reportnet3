@@ -19,6 +19,10 @@
   height: 0px !important;
 }
 
+.datasetItemDisabled {
+  opacity: 0.5;
+}
+
 .defaultBigButton {
   color: var(--white);
   display: flex;
