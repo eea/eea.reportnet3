@@ -209,7 +209,7 @@ const RepresentativesList = ({
             optionLabel="label"
             options={formState.dataProvidersTypesList}
             placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
-            style={{ maxWidth: '16rem' }}
+            className={styles.dataProvidersDropdown}
             value={formState.selectedDataProviderGroup}
           />
         </div>
