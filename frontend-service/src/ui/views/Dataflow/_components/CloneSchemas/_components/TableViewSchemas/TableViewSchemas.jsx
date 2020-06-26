@@ -14,12 +14,12 @@ import { DataTable } from 'ui/views/_components/DataTable';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const TableViewSchemas = ({
+  checkedDataflow,
   data,
   handleRedirect,
   onChangePagination,
   onSelectDataflow,
-  pagination,
-  selectedDataflowId
+  pagination
 }) => {
   const resources = useContext(ResourcesContext);
 
@@ -35,7 +35,7 @@ export const TableViewSchemas = ({
       <div className={styles.checkColum}>
         <Checkbox
           id={`${row.id}_checkbox`}
-          isChecked={selectedDataflowId === row.id}
+          isChecked={checkedDataflow.id === row.id}
           onChange={() => onSelectDataflow(row)}
           role="checkbox"
         />

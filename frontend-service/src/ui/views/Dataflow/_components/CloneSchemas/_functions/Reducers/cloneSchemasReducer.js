@@ -13,7 +13,7 @@ export const cloneSchemasReducer = (state, { type, payload }) => {
       return { ...state, pagination: payload.pagination };
 
     case 'ON_SELECT_DATAFLOW':
-      return { ...state, chosenDataflow: payload.rowData, chosenDataflowId: payload.rowData.id };
+      return { ...state, chosenDataflow: { ...state.chosenDataflow, id: payload.id, name: payload.name } };
 
     case 'ON_TOGGLE_VIEW':
       return { ...state, isTableView: payload.view };
