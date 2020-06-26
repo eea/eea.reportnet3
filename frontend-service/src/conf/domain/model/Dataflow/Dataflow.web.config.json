@@ -1,6 +1,7 @@
 {
   "acceptDataflow": "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}",
   "allSchemas": "/dataschema/getSchemas/dataflow/{:dataflowId}",
+  "cloneDatasetSchemas": "/dataschema/copy?sourceDataflow={:sourceDataflowId}&targetDataflow={:targetDataflowId}",
   "createDataflow": "/dataflow",
   "dataflowDetails": "/dataflow/{:dataflowId}/getmetabase",
   "dataSchemasValidation": "/dataschema/validate/dataflow/{:dataflowId}",

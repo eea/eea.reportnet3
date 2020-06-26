@@ -30,6 +30,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
+import { DataflowService } from 'core/services/Dataflow';
 
 export const BigButtonList = ({
   dataflowState,
@@ -48,6 +49,7 @@ export const BigButtonList = ({
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
+  const [cloneDataflowId, setCloneDataflowId] = useState(null);
   const [cloneDialogVisible, setCloneDialogVisible] = useState(false);
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
   const [dataCollectionDueDate, setDataCollectionDueDate] = useState(null);
@@ -80,6 +82,17 @@ export const BigButtonList = ({
   useEffect(() => {
     getExpirationDate();
   }, [dataflowState.obligations.expirationDate]);
+
+  const cloneDatasetSchemas = async () => {
+    try {
+      const response = await DataflowService.cloneDatasetSchemas(5230, 5232);
+      if (response.status >= 200 && response.status <= 299) {
+        console.log('response', response);
+      }
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
 
   const downloadPdf = response => {
     if (!isNil(response)) {
@@ -137,6 +150,10 @@ export const BigButtonList = ({
   // }
   // };
 
+  const getCloneDataflowId = value => {
+    setCloneDataflowId(value);
+  };
+
   const getDeleteSchemaIndex = index => {
     setDeleteSchemaIndex(index);
     setDeleteDialogVisible(true);
@@ -164,7 +181,7 @@ export const BigButtonList = ({
     }
   };
 
-  const onCloneDataflow = () => {
+  const onCloneDataflow = async () => {
     setCloneDialogVisible(true);
   };
 
@@ -287,7 +304,7 @@ export const BigButtonList = ({
         icon={'plus'}
         label={resources.messages['cloneSelectedDataflow']}
         onClick={() => {
-          console.log('clone from dataflowID ', dataflowId);
+          cloneDatasetSchemas();
         }}
       />
       <Button
@@ -357,7 +374,7 @@ export const BigButtonList = ({
           onHide={() => setCloneDialogVisible(false)}
           style={{ width: '95%' }}
           visible={cloneDialogVisible}>
-          <CloneSchemas dataflowId={dataflowId} />
+          <CloneSchemas dataflowId={dataflowId} getCloneDataflowId={getCloneDataflowId} />
         </Dialog>
       )}
 

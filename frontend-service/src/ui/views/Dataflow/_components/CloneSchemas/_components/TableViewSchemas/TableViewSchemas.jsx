@@ -23,12 +23,13 @@ export const TableViewSchemas = ({
 }) => {
   const resources = useContext(ResourcesContext);
 
-  const headerTableTemplate = field => {
-    if (field === 'expirationDate') return resources.messages['nextReportDue'];
-    else if (field === 'obligation') return resources.messages['obligationTitle'];
-    else if (field === 'legalInstruments') return resources.messages['legalInstrument'];
-    else return resources.messages[field];
+  const fieldTables = {
+    expirationDate: resources.messages['nextReportDue'],
+    obligation: resources.messages['obligationTitle'],
+    legalInstruments: resources.messages['legalInstrument']
   };
+
+  const headerTableTemplate = field => fieldTables[field] || resources.messages[field];
 
   const onLoadCheckButton = row => {
     return (
@@ -51,18 +52,16 @@ export const TableViewSchemas = ({
 
   const onLoadPagination = event => onChangePagination({ first: event.first, rows: event.rows, page: event.page });
 
-  const onLoadTitleTemplate = row => {
-    return (
-      <div className={styles.titleColum}>
-        {row.name}
-        <FontAwesomeIcon
-          className={styles.linkIcon}
-          icon={AwesomeIcons('externalLink')}
-          onMouseDown={() => handleRedirect(row.id)}
-        />
-      </div>
-    );
-  };
+  const onLoadTitleTemplate = row => (
+    <div className={styles.titleColum}>
+      {row.name}
+      <FontAwesomeIcon
+        className={styles.linkIcon}
+        icon={AwesomeIcons('externalLink')}
+        onMouseDown={() => handleRedirect(row.id)}
+      />
+    </div>
+  );
 
   const renderCheckColum = <Column key="checkId" body={row => onLoadCheckButton(row)} />;
 

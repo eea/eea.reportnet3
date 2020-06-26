@@ -29,6 +29,15 @@ export const apiDataflow = {
     });
     return response.data;
   },
+  cloneDatasetSchemas: async (sourceDataflowId, targetDataflowId) => {
+    const response = await HTTPRequester.post({
+      url: getUrl(DataflowConfig.cloneDatasetSchemas, {
+        sourceDataflowId,
+        targetDataflowId
+      })
+    });
+    return response;
+  },
   completed: async () => {
     const response = await HTTPRequester.get({
       url: getUrl(DataflowConfig.loadDataflowTaskPendingAccepted)

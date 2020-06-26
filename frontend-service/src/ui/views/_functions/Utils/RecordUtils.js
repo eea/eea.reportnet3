@@ -44,6 +44,11 @@ const getCellId = (tableData, field) => {
   return !isUndefined(completeField) ? completeField.fieldData.id : undefined;
 };
 
+const getCellInfo = (colSchemaData, field) => {
+  const completeField = colSchemaData.filter(data => data.field === field)[0];
+  return !isUndefined(completeField) ? completeField : undefined;
+};
+
 const getCellItems = (colSchemaData, field) => {
   const completeField = colSchemaData.filter(data => data.field === field)[0];
   return !isUndefined(completeField) ? completeField.codelistItems : undefined;
@@ -130,7 +135,8 @@ const getLinkValue = (linkOptions, value) => {
 };
 
 const getMultiselectValues = (multiselectItemsOptions, value) => {
-  if (!isUndefined(value) && !isUndefined(value[0])) {
+  console.log({ multiselectItemsOptions, value });
+  if (!isUndefined(value) && !isUndefined(value[0]) && !isUndefined(multiselectItemsOptions)) {
     const splittedValue = !Array.isArray(value) ? value.split(',').map(item => item.trim()) : value;
     return intersection(
       splittedValue,
@@ -197,6 +203,7 @@ export const RecordUtils = {
   createEmptyObject,
   getCellFieldSchemaId,
   getCellId,
+  getCellInfo,
   getCellItems,
   getCellValue,
   getClipboardData,
