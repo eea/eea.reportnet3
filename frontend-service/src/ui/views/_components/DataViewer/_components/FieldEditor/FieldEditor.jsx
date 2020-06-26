@@ -8,7 +8,8 @@ import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
-import { MultiSelect } from 'primereact/multiselect';
+import { MultiSelect } from 'ui/views/_components/MultiSelect';
+//'primereact/multiselect';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -45,7 +46,6 @@ const FieldEditor = ({
 
   let fieldType = {};
   if (!isEmpty(record)) {
-    console.log(record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cells.field)[0], colsSchema);
     fieldType = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cells.field)[0].fieldData.type;
   }
 
@@ -55,12 +55,14 @@ const FieldEditor = ({
       return;
     }
 
+    const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
+
     const referencedFieldValues = await DatasetService.getReferencedFieldValues(
       datasetId,
       isUndefined(colSchema.referencedField.name)
         ? colSchema.referencedField.idPk
         : colSchema.referencedField.referencedField.fieldSchemaId,
-      filter
+      hasMultipleValues ? '' : filter
     );
 
     const linkItems = referencedFieldValues
@@ -72,10 +74,12 @@ const FieldEditor = ({
       })
       .sort((a, b) => a.value - b.value);
 
-    linkItems.unshift({
-      itemType: resources.messages['noneCodelist'],
-      value: ''
-    });
+    if (!hasMultipleValues) {
+      linkItems.unshift({
+        itemType: resources.messages['noneCodelist'],
+        value: ''
+      });
+    }
     setLinkItemsOptions(linkItems);
   };
 
@@ -327,17 +331,20 @@ const FieldEditor = ({
             <MultiSelect
               // onChange={e => onChangeForm(field, e.value)}
               appendTo={document.body}
+              clearButton={false}
+              filter={true}
+              filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               maxSelectedLabels={10}
               onChange={e => {
                 try {
-                  setCodelistItemValue(e.value);
+                  setLinkItemsValue(e.value);
                   onEditorValueChange(cells, e.value);
                   onEditorSubmitValue(cells, e.value, record);
                 } catch (error) {
                   console.error(error);
                 }
               }}
-              // onFilterInputChangeBackend={onFilter}
+              onFilterInputChangeBackend={onFilter}
               onFocus={e => {
                 e.preventDefault();
                 if (!isUndefined(codelistItemValue)) {
@@ -392,10 +399,8 @@ const FieldEditor = ({
           />
         );
       case 'MULTISELECT_CODELIST':
-        console.log(RecordUtils.getMultiselectValues(codelistItemsOptions, codelistItemValue));
         return (
           <MultiSelect
-            // onChange={e => onChangeForm(field, e.value)}
             appendTo={document.body}
             maxSelectedLabels={10}
             onChange={e => {
