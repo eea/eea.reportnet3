@@ -492,4 +492,29 @@ public class KeycloakConnectorServiceImplTest {
 
     Assert.assertNotNull(result);
   }
+
+  @Test
+  public void getGroupsWithSearchTest() {
+    GroupInfo[] groupInfo = new GroupInfo[0];
+    ResponseEntity<GroupInfo[]> responseGroupInfo = new ResponseEntity<>(groupInfo, HttpStatus.OK);
+
+    Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
+        Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(responseGroupInfo);
+
+    Assert.assertNotNull(keycloakConnectorService.getGroupsWithSearch("value"));
+  }
+
+  @Test
+  public void getUsersByGroupIdTest() {
+    UserRepresentation[] userRepresentation = new UserRepresentation[0];
+    ResponseEntity<UserRepresentation[]> responseUserRepresentation =
+        new ResponseEntity<>(userRepresentation, HttpStatus.OK);
+
+    Mockito
+        .when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
+            Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
+        .thenReturn(responseUserRepresentation);
+
+    Assert.assertNotNull(keycloakConnectorService.getUsersByGroupId("value"));
+  }
 }
