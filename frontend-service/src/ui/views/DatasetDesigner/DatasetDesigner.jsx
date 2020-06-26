@@ -132,6 +132,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   useEffect(() => {
     breadCrumbContext.add([
       {
+        label: resources.messages['homeBreadcrumb'],
+        href: getUrl(routes.DATAFLOWS),
+        command: () => history.push(getUrl(routes.DATAFLOWS))
+      },
+      {
         command: () => history.push(getUrl(routes.DATAFLOWS)),
         href: getUrl(routes.DATAFLOWS),
         icon: 'home',

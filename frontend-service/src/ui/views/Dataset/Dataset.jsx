@@ -111,6 +111,11 @@ export const Dataset = withRouter(({ match, history }) => {
     if (!isUndefined(metaData.dataset)) {
       const breadCrumbs = [
         {
+          label: resources.messages['homeBreadcrumb'],
+          href: getUrl(routes.DATAFLOWS),
+          command: () => history.push(getUrl(routes.DATAFLOWS))
+        },
+        {
           label: resources.messages['dataflows'],
           icon: 'home',
           href: getUrl(routes.DATAFLOWS),

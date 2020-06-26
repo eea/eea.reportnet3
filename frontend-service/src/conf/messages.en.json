@@ -704,6 +704,7 @@
     "targetTable": "Target table",
     "disabledCreateDataCollectionSchemas": "There is already a data collection created",
     "disabledCreateDataCollectionSchemasWithError": "Incomplete schemas. Check that all your schemas have tables and (at least) one field per table",
-    "disabledCreateDataCollectionNoProviders": "You haven't assigned yet reporter/s to your dataflow"
+    "disabledCreateDataCollectionNoProviders": "You haven't assigned yet reporter/s to your dataflow",
+    "homeBreadcrumb": "Reportnet 3.0"
   }
 }

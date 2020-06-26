@@ -69,7 +69,14 @@ const Dataflows = withRouter(({ match, history }) => {
 
   //Bread Crumbs settings
   useEffect(() => {
-    breadCrumbContext.add([{ label: resources.messages['dataflows'], icon: 'home' }]);
+    breadCrumbContext.add([
+      {
+        label: resources.messages['homeBreadcrumb'],
+        href: getUrl(routes.DATAFLOWS),
+        command: () => history.push(getUrl(routes.DATAFLOWS))
+      },
+      { label: resources.messages['dataflows'], icon: 'home' }
+    ]);
   }, []);
 
   useEffect(() => {
