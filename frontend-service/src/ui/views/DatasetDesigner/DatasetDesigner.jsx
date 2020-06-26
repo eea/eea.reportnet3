@@ -140,7 +140,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       {
         command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true)),
         href: getUrl(routes.DATAFLOW, { dataflowId }, true),
-        icon: 'archive',
+        icon: 'clone',
         label: resources.messages['dataflow']
       },
       { label: resources.messages['datasetDesigner'], icon: 'pencilRuler' }
