@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
-import { reducer } from './_functions/Reducers/representativeReducer.js';
-import { getInitialData } from './_functions/Utils/rightsUtils';
+import { reducer } from './_functions/Reducers/rightsReducer.js';
+import { getEditors, getReporters } from './_functions/Utils/rightsUtils';
 
 import { ManageRights } from './_components/ManageRights.jsx';
 
@@ -33,7 +33,12 @@ const ManageRightsHOC = ({ dataflowState, dataflowId, isActiveManageRightsDialog
   const [formState, formDispatcher] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    getInitialData(formDispatcher, dataflowId, formState);
+    if (dataflowState.isCustodian) {
+      getEditors(formDispatcher, dataflowId, formState);
+    } else if (!dataflowState.isCustodian) {
+      // change to isLeadReporter
+      getReporters(formDispatcher, dataflowId, formState);
+    }
   }, [formState.refresher]);
 
   useEffect(() => {

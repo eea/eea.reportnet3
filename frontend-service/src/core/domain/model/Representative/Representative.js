@@ -5,7 +5,7 @@ export class Representative {
     id,
     isReceiptDownloaded,
     isReceiptOutdated,
-    permission = true,
+    permission = false,
     providerAccount,
     hasDatasets
   } = {}) {
@@ -13,7 +13,7 @@ export class Representative {
     this.dataProviderId = dataProviderId;
     this.isReceiptDownloaded = isReceiptDownloaded;
     this.isReceiptOutdated = isReceiptOutdated;
-    this.providerAccount = providerAccount;
+    this.account = providerAccount;
     this.permission = permission;
     this.representativeId = id;
     this.hasDatasets = hasDatasets;

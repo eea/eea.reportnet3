@@ -38,16 +38,16 @@ const getProviderTypes = async () => {
   return dataProviderTypesDTO.data;
 };
 
-const add = async (dataflowId, providerAccount, dataProviderId) => {
-  return await apiRepresentative.add(dataflowId, providerAccount, dataProviderId);
+const add = async (dataflowId, account, dataProviderId) => {
+  return await apiRepresentative.add(dataflowId, account, dataProviderId);
 };
 
 const deleteById = async representativeId => {
   return await apiRepresentative.deleteById(representativeId);
 };
 
-const updateProviderAccount = async (representativeId, providerAccount) => {
-  return await apiRepresentative.updateProviderAccount(representativeId, providerAccount);
+const updateAccount = async (representativeId, account) => {
+  return await apiRepresentative.updateAccount(representativeId, account);
 };
 
 const updateDataProviderId = async (representativeId, dataProviderId) => {
@@ -59,12 +59,12 @@ const updatePermission = async (representativeId, permission) => {
 };
 
 export const ApiRepresentativeRepository = {
-  allRepresentatives,
-  allDataProviders,
   add,
+  allDataProviders,
+  allRepresentatives,
   deleteById,
   getProviderTypes,
-  updateProviderAccount,
+  updateAccount,
   updateDataProviderId,
   updatePermission
 };

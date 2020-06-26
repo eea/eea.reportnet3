@@ -23,13 +23,14 @@ export const autofocusOnEmptyInput = formState => {
 };
 
 const addRepresentative = async (formDispatcher, representatives, dataflowId, formState) => {
-  const newRepresentative = representatives.filter(representative => isNil(representative.representativeId));
-  if (!isEmpty(newRepresentative[0].providerAccount) && !isEmpty(newRepresentative[0].dataProviderId)) {
+  const [newRepresentative] = representatives.filter(representative => isNil(representative.representativeId));
+
+  if (!isEmpty(newRepresentative.account) && !isEmpty(newRepresentative.dataProviderId)) {
     try {
       await RepresentativeService.add(
         dataflowId,
-        newRepresentative[0].providerAccount,
-        parseInt(newRepresentative[0].dataProviderId)
+        newRepresentative.account,
+        parseInt(newRepresentative.dataProviderId)
       );
 
       formDispatcher({
@@ -173,12 +174,12 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
   for (let initialRepresentative of initialRepresentatives) {
     if (
       initialRepresentative.representativeId === updatedRepresentative.representativeId &&
-      initialRepresentative.providerAccount !== updatedRepresentative.providerAccount
+      initialRepresentative.account !== updatedRepresentative.account
     ) {
       isChangedAccount = true;
     } else if (
       initialRepresentative.representativeId === updatedRepresentative.representativeId &&
-      initialRepresentative.providerAccount === updatedRepresentative.providerAccount
+      initialRepresentative.account === updatedRepresentative.account
     ) {
       const filteredInputsWithErrors = formState.representativeHasError.filter(
         representativeId => representativeId !== updatedRepresentative.representativeId
@@ -192,15 +193,15 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
 
   if (isChangedAccount) {
     try {
-      await RepresentativeService.updateProviderAccount(
+      await RepresentativeService.updateAccount(
         parseInt(updatedRepresentative.representativeId),
-        updatedRepresentative.providerAccount
+        updatedRepresentative.account
       );
       formDispatcher({
         type: 'REFRESH'
       });
     } catch (error) {
-      console.error('error on RepresentativeService.updateProviderAccount', error);
+      console.error('error on RepresentativeService.updateAccount', error);
 
       if (error.response.status === 400 || error.response.status === 404) {
         let { representativeHasError } = formState;
