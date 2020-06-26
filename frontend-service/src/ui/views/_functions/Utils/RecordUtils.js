@@ -135,7 +135,6 @@ const getLinkValue = (linkOptions, value) => {
 };
 
 const getMultiselectValues = (multiselectItemsOptions, value) => {
-  console.log({ multiselectItemsOptions, value });
   if (!isUndefined(value) && !isUndefined(value[0]) && !isUndefined(multiselectItemsOptions)) {
     const splittedValue = !Array.isArray(value) ? value.split(',').map(item => item.trim()) : value;
     return intersection(

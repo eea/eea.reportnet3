@@ -104,7 +104,6 @@ const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, on
 
   const onBuildReleaseButton = () => {
     const { datasets } = dataflowState.data;
-    console.log({ datasets }, dataflowState);
 
     const filteredDatasets = datasets.filter(
       dataset => dataset.dataProviderId === parseInt(match.params.representativeId)

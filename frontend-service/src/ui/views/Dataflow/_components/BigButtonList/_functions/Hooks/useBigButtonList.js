@@ -291,7 +291,6 @@ const useBigButtonList = ({
 
   const onBuildReleaseButton = () => {
     const { datasets } = dataflowState.data;
-    console.log({ datasets }, dataflowState);
 
     const allDatasets = datasets.map(dataset => {
       return { name: dataset.datasetSchemaName, id: dataset.dataProviderId };
@@ -325,8 +324,6 @@ const useBigButtonList = ({
         };
       });
     }
-
-    console.log({ properties });
 
     return properties;
   };

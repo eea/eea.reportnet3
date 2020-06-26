@@ -271,8 +271,20 @@ export const FieldDesigner = ({
     }
   };
 
-  const onCancelSaveLink = () => {
+  const onCancelSaveLink = (link, pkMustBeUsed, pkHasMultipleValues) => {
+    console.log({ link });
     // onCodelistAndLinkShow(fieldId, { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' });
+    if (!isUndefined(fieldId)) {
+      if (fieldId.toString() === '-1') {
+        onFieldAdd({
+          codelistItems,
+          type: 'LINK',
+          referencedField: link,
+          pkMustBeUsed,
+          pkHasMultipleValues
+        });
+      }
+    }
     dispatchFieldDesigner({ type: 'CANCEL_SELECT_LINK' });
   };
 
