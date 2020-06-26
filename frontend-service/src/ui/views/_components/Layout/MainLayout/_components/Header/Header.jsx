@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import isEmpty from 'lodash/isEmpty';
 
@@ -12,6 +12,7 @@ import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { EuHeader } from 'ui/views/_components/Layout/MainLayout/_components/EuHeader';
 
 import { UserService } from 'core/services/User';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
@@ -49,7 +50,7 @@ const Header = withRouter(({ history }) => {
         history.push(getUrl(routes.DATAFLOWS));
       }}>
       <img height="50px" src={logo} alt="Reportnet" className={styles.appLogo} />
-      <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>
+      {/* <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1> */}
     </a>
   );
 
@@ -152,24 +153,32 @@ const Header = withRouter(({ history }) => {
   };
 
   return (
-    <div id="header" className={styles.header}>
-      {loadTitle()}
-      <BreadCrumb />
-      {loadUser()}
-      {userContext.userProps.showLogoutConfirmation && (
-        <ConfirmDialog
-          onConfirm={() => {
-            userLogout();
-          }}
-          onHide={() => setConfirmVisible(false)}
-          visible={confirmvisible}
-          header={resources.messages['logout']}
-          labelConfirm={resources.messages['yes']}
-          labelCancel={resources.messages['no']}>
-          {resources.messages['userLogout']}
-        </ConfirmDialog>
-      )}
-    </div>
+    <Fragment>
+      <div className="euHeader">
+        <div></div>
+      </div>
+      <div id="header" className={styles.header}>
+        <EuHeader />
+        <div className={styles.customHeader}>
+          {loadTitle()}
+          <BreadCrumb />
+          {loadUser()}
+          {userContext.userProps.showLogoutConfirmation && (
+            <ConfirmDialog
+              onConfirm={() => {
+                userLogout();
+              }}
+              onHide={() => setConfirmVisible(false)}
+              visible={confirmvisible}
+              header={resources.messages['logout']}
+              labelConfirm={resources.messages['yes']}
+              labelCancel={resources.messages['no']}>
+              {resources.messages['userLogout']}
+            </ConfirmDialog>
+          )}
+        </div>
+      </div>
+    </Fragment>
   );
 });
 export { Header };
