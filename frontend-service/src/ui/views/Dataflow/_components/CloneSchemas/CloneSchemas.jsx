@@ -19,7 +19,7 @@ import { cloneSchemasReducer } from './_functions/Reducers/cloneSchemasReducer';
 
 import { CloneSchemasUtils } from './_functions/Utils/CloneSchemasUtils';
 
-export const CloneSchemas = ({ dataflowId }) => {
+export const CloneSchemas = ({ dataflowId, getCloneDataflowId }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
@@ -40,6 +40,10 @@ export const CloneSchemas = ({ dataflowId }) => {
   useEffect(() => {
     onLoadDataflows();
   }, []);
+
+  useEffect(() => {
+    getCloneDataflowId(cloneSchemasState.chosenDataflowId);
+  }, [cloneSchemasState.chosenDataflowId]);
 
   const isLoading = value => cloneSchemasDispatch({ type: 'IS_LOADING', payload: { value } });
 

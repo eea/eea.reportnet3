@@ -74,6 +74,9 @@ const all = async userData => {
 
 const create = async (name, description, obligationId) => await apiDataflow.create(name, description, obligationId);
 
+const cloneDatasetSchemas = async (sourceDataflowId, targetDataflowId) =>
+  await apiDataflow.cloneDatasetSchemas(sourceDataflowId, targetDataflowId);
+
 const completed = async () => {
   const completedDataflowsDTO = await apiDataflow.completed();
   return parseDataflowDTOs(completedDataflowsDTO);
@@ -514,6 +517,7 @@ export const ApiDataflowRepository = {
   accept,
   accepted,
   all,
+  cloneDatasetSchemas,
   completed,
   create,
   dataflowDetails,
