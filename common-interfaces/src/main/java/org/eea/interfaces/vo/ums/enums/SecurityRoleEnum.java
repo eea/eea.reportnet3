@@ -33,9 +33,13 @@ public enum SecurityRoleEnum {
    */
   DATA_STEWARD("DATA_STEWARD"),
   /**
-   * The reporter.
+   * The reporter with edit access.
    */
-  REPORTER("REPORTER"),
+  REPORTER_WRITE("REPORTER_WRITE"),
+  /**
+   * The reporter read-only access.
+   */
+  REPORTER_READ("REPORTER_READ"),
   /**
    * The reporter partitioned.
    */

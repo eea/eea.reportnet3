@@ -61,7 +61,13 @@ public enum ResourceGroupEnum {
   DATAFLOW_EDITOR_WRITE("Dataflow-%s-EDITOR_WRITE"),
 
   /** The dataflow editor read. */
-  DATAFLOW_EDITOR_READ("Dataflow-%s-EDITOR_READ");
+  DATAFLOW_EDITOR_READ("Dataflow-%s-EDITOR_READ"),
+  
+  /** The dataschema editor write. */
+  DATASCHEMA_EDITOR_WRITE("Dataschema-%s-EDITOR_WRITE"),
+  
+  /** The dataschema editor read. */
+  DATASCHEMA_EDITOR_READ("Dataschema-%s-EDITOR_READ");
 
 
   /** The expression. */
