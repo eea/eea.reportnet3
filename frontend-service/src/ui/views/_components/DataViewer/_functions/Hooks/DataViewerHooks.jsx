@@ -153,7 +153,6 @@ export const useSetColumns = (
       const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
       const message = DataViewerUtils.formatValidations(validations);
       const levelError = DataViewerUtils.getLevelError(validations);
-
       return (
         <div
           style={{
@@ -164,9 +163,10 @@ export const useSetColumns = (
           {field
             ? Array.isArray(field.fieldData[column.field])
               ? field.fieldData[column.field].sort().join(', ')
-              : !isNil(field.fieldData[column.field]) &&
-                field.fieldData[column.field] !== '' &&
-                field.fieldData.type === 'MULTISELECT_CODELIST'
+              : (!isNil(field.fieldData[column.field]) &&
+                  field.fieldData[column.field] !== '' &&
+                  field.fieldData.type === 'MULTISELECT_CODELIST') ||
+                (field.fieldData.type === 'LINK' && !Array.isArray(field.fieldData[column.field]))
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData[column.field]
             : null}
@@ -179,9 +179,10 @@ export const useSetColumns = (
           {field
             ? Array.isArray(field.fieldData[column.field])
               ? field.fieldData[column.field].sort().join(', ')
-              : !isNil(field.fieldData[column.field]) &&
-                field.fieldData[column.field] !== '' &&
-                field.fieldData.type === 'MULTISELECT_CODELIST'
+              : (!isNil(field.fieldData[column.field]) &&
+                  field.fieldData[column.field] !== '' &&
+                  field.fieldData.type === 'MULTISELECT_CODELIST') ||
+                (field.fieldData.type === 'LINK' && !Array.isArray(field.fieldData[column.field]))
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData[column.field]
             : null}

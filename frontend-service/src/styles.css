@@ -356,7 +356,7 @@ body .p-multiselect-panel .p-multiselect-header {
 }
 body .p-multiselect-panel .p-multiselect-header .p-multiselect-filter-container {
   float: none;
-  width: 70%;
+  width: 80%;
   display: inline-block;
   vertical-align: middle;
   margin-left: 0;

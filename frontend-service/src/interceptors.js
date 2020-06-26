@@ -33,7 +33,6 @@ axios.interceptors.response.use(
       return HTTPRequester.post({
         url: getUrl(UserConfig.refreshToken, { refreshToken })
       }).then(res => {
-        console.log({ res });
         const { accessToken, refreshToken } = res.data;
         if (res.status >= 200 && res.status <= 299) {
           userStorage.set({ accessToken, refreshToken });

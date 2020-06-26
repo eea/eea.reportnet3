@@ -102,6 +102,7 @@ export const FieldsDesigner = ({
     description,
     fieldId,
     pk,
+    pkHasMultipleValues,
     pkMustBeUsed,
     name,
     recordId,
@@ -115,6 +116,7 @@ export const FieldsDesigner = ({
       description,
       fieldId,
       pk,
+      pkHasMultipleValues,
       pkMustBeUsed,
       name,
       recordId,
@@ -139,6 +141,7 @@ export const FieldsDesigner = ({
     id,
     isLinkChange,
     pk,
+    pkHasMultipleValues,
     pkMustBeUsed,
     name,
     referencedField,
@@ -156,6 +159,7 @@ export const FieldsDesigner = ({
       inmFields[fieldIndex].referencedField = referencedField;
       inmFields[fieldIndex].required = required;
       inmFields[fieldIndex].pk = pk;
+      inmFields[fieldIndex].pkHasMultipleValues = pkHasMultipleValues;
       inmFields[fieldIndex].pkMustBeUsed = pkMustBeUsed;
       onChangeFields(inmFields, isLinkChange, table.tableSchemaId);
       setFields(inmFields);
@@ -258,6 +262,7 @@ export const FieldsDesigner = ({
             description: field.description,
             field: field['fieldId'],
             header: field['name'],
+            pkHasMultipleValues: field['pkHasMultipleValues'],
             recordId: field['recordId'],
             referencedField: field['referencedField'],
             required: field.required,
@@ -344,6 +349,7 @@ export const FieldsDesigner = ({
           fieldId="-1"
           fieldName=""
           fieldLink={null}
+          fieldHasMultipleValues={false}
           fieldMustBeUsed={false}
           fieldRequired={false}
           fieldType=""
@@ -379,9 +385,9 @@ export const FieldsDesigner = ({
                 fieldId={field.fieldId}
                 fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
                 fieldName={field.name}
+                fieldHasMultipleValues={field.pkHasMultipleValues}
                 fieldMustBeUsed={field.pkMustBeUsed}
                 fieldPK={field.pk}
-                fieldPkMustBeUsed={field.pkMustBeUsed}
                 fieldPKReferenced={field.pkReferenced}
                 fieldRequired={Boolean(field.required)}
                 fieldType={field.type}
