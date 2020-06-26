@@ -23,7 +23,7 @@ public class RepresentativeVO implements Serializable {
   /** The data provider id. */
   private Long dataProviderId;
 
-  /** The account. */
+  /** The account email. */
   private String account;
 
   /** The data provider group id. */
