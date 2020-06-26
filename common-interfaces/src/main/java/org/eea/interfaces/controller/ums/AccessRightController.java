@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * The Class AccessRightController.
@@ -32,7 +33,8 @@ public interface AccessRightController {
    * @param resourceInfoVO the resource info vo
    */
   @DeleteMapping(value = "/delete")
-  void deleteRoleUser(@RequestBody RepresentativeVO representativeVO);
+  void deleteRoleUser(@RequestBody RepresentativeVO representativeVO,
+      @RequestParam Long dataflowId);
 
   /**
    * Find role users by group.

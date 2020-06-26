@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eea.interfaces.controller.ums.AccessRightController;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.ums.service.AccessRightService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +38,9 @@ public class AccessRightControllerImpl implements AccessRightController {
   private static final Logger LOG = LoggerFactory.getLogger(AccessRightControllerImpl.class);
 
 
+  @Autowired
+  private AccessRightService accessRightService;
+
   /**
    * Delete resource.
    *
@@ -43,8 +48,20 @@ public class AccessRightControllerImpl implements AccessRightController {
    */
   @DeleteMapping(value = "/delete")
   @Override
-  public void deleteRoleUser(@RequestBody RepresentativeVO representativeVO) {
+  public void deleteRoleUser(@RequestBody RepresentativeVO representativeVO,
+      @RequestBody Long dataflowId) {
     // we can only remove role of editor, reporter or reporter partition type
+    switch (representativeVO.getRole()) {
+      case "EDITOR":
+      case "REPORTER_PARTITIONED":
+      case "REPORTER":
+        accessRightService.deleteRoleUser(representativeVO, dataflowId);
+        break;
+      default:
+        LOG.info("Didn't remove role of the representative with id {} because its role is {}",
+            representativeVO.getId(), representativeVO.getRole());
+        break;
+    }
   }
 
   /**
