@@ -81,6 +81,12 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   private static final String LIST_GROUPS_URL = "/auth/admin/realms/{realm}/groups";
 
   /**
+   * The Constant LIST_GROUPS_URL.
+   */
+  private static final String LIST_GROUPS_URL_WITH_SEARCH =
+      "/auth/admin/realms/{realm}/groups?search={searchParam}";
+
+  /**
    * The Constant GROUP_DETAIL_URL.
    */
   private static final String GROUP_DETAIL_URL = "/auth/admin/realms/{realm}/groups/{groupId}";
@@ -170,6 +176,10 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * The Constant USER_URL.
    */
   private static final String USER_URL = "/auth/admin/realms/{realm}/users/{userId}";
+
+  /** The Constant USERS_BY_GROUPS: {@value}. */
+  private static final String USERS_BY_GROUPS =
+      "/auth/admin/realms/{realm}/groups/{groupId}/members";
 
   /**
    * The Constant USER_ROLES_URL.
@@ -483,6 +493,28 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   }
 
   /**
+   * Gets the groups with search.
+   *
+   * @return the groups
+   */
+  @Override
+  public GroupInfo[] getGroupsWithSearch(String value) {
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
+    uriParams.put("searchParam", value);
+
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    HttpEntity<Void> request = createHttpRequest(null, uriParams);
+    ResponseEntity<GroupInfo[]> responseEntity = this.restTemplate.exchange(
+        uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
+            .path(LIST_GROUPS_URL_WITH_SEARCH).buildAndExpand(uriParams).toString(),
+        HttpMethod.GET, request, GroupInfo[].class);
+
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
+        .orElse(null);
+  }
+
+  /**
    * Gets the group detail.
    *
    * @param groupId the group id
@@ -550,6 +582,31 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
         uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(USER_URL)
             .buildAndExpand(uriParams).toString(),
         HttpMethod.GET, request, UserRepresentation.class);
+
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
+        .orElse(null);
+  }
+
+  /**
+   * Gets the users.
+   *
+   * @param userId the user id
+   *
+   * @return the user
+   */
+  @Override
+  public UserRepresentation[] getUsersByGroupId(String groupId) {
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
+    uriParams.put(URI_PARAM_GROUP_ID, groupId);
+
+    HttpEntity<UserRepresentation> request = createHttpRequest(null, uriParams);
+
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    ResponseEntity<UserRepresentation[]> responseEntity = this.restTemplate.exchange(
+        uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(USERS_BY_GROUPS)
+            .buildAndExpand(uriParams).toString(),
+        HttpMethod.GET, request, UserRepresentation[].class);
 
     return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
         .orElse(null);
@@ -659,7 +716,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-            .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+        .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 
@@ -720,7 +777,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-            .path(ADD_ROLE_TO_USER).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+        .path(ADD_ROLE_TO_USER).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 

@@ -21,6 +21,7 @@ import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.ums.mapper.UserRepresentationMapper;
 import org.eea.ums.service.BackupManagmentService;
 import org.eea.ums.service.SecurityProviderInterfaceService;
+import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
@@ -232,7 +233,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @return the string
    */
   @HystrixCommand
-  @PreAuthorize("checkApiKey(#dataflowId,#provider) AND secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTER','DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("checkApiKey(#dataflowId,#provider) AND secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTER','DATAFLOW_PROVIDER')")
   @GetMapping("/test-security")
   public String testSecuredService(@RequestParam("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long provider) {
@@ -427,7 +428,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER','DATAFLOW_CUSTODIAN')")
   @PostMapping("/createApiKey")
   public String createApiKey(@RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "dataProvider", required = false) Long dataProvider) {
@@ -454,7 +455,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER','DATAFLOW_CUSTODIAN')")
   @GetMapping("/getApiKey")
   public String getApiKey(@RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "dataProvider", required = false) Long dataProvider) {
@@ -492,6 +493,28 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PostMapping("/authenticateByApiKey/{apiKey}")
   public TokenVO authenticateUserByApiKey(@PathVariable("apiKey") String apiKey) {
     return securityProviderInterfaceService.authenticateApiKey(apiKey);
+  }
+
+
+  /**
+   * Gets the users by group.
+   *
+   * @param group the group
+   * @return the users by group
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/getUsersByGroup/{group}")
+  public List<UserRepresentationVO> getUsersByGroup(@PathVariable("group") String group) {
+    GroupInfo[] groupInfo = keycloakConnectorService.getGroupsWithSearch(group);
+    UserRepresentation[] users = null;
+    if (groupInfo != null && groupInfo.length != 0) {
+      users = keycloakConnectorService.getUsersByGroupId(groupInfo[0].getId());
+    }
+    return users != null
+        ? userRepresentationMapper.entityListToClass(new ArrayList<>(Arrays.asList(users)))
+        : null;
   }
 
   /**

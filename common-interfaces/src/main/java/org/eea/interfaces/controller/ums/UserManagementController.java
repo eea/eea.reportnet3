@@ -250,4 +250,13 @@ public interface UserManagementController {
    */
   @PostMapping("/authenticateByApiKey/{apiKey}")
   TokenVO authenticateUserByApiKey(@PathVariable("apiKey") String apiKey);
+
+  /**
+   * Gets the users by group.
+   *
+   * @param group the group
+   * @return the user by group
+   */
+  @GetMapping("/getUsersByGroup/{group}")
+  List<UserRepresentationVO> getUsersByGroup(@PathVariable("group") String group);
 }
