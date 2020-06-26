@@ -492,6 +492,7 @@ export const Dataset = withRouter(({ match, history }) => {
               description: field['description'],
               field: field['fieldId'],
               header: field['name'],
+              pkHasMultipleValues: field['pkHasMultipleValues'],
               recordId: field['recordId'],
               referencedField: field['referencedField'],
               table: table['tableSchemaName'],
