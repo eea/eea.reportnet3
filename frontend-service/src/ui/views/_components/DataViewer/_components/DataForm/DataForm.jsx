@@ -45,7 +45,10 @@ const DataForm = ({
                 style={{
                   padding: '.5em',
                   width:
-                    column.type === 'DATE' || column.type === 'CODELIST' || column.type === 'MULTISELECT_CODELIST'
+                    column.type === 'DATE' ||
+                    column.type === 'CODELIST' ||
+                    column.type === 'MULTISELECT_CODELIST' ||
+                    column.type === 'LINK'
                       ? '30%'
                       : ''
                 }}>

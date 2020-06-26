@@ -6,6 +6,7 @@ import { InputText } from 'ui/views/_components/InputText';
 export const MultiSelectHeader = ({
   allChecked,
   checkAllHeader,
+  clearButton = true,
   filter,
   filterPlaceholder,
   filterValue,
@@ -63,9 +64,11 @@ export const MultiSelectHeader = ({
         {allChecked ? notCheckAllHeader : checkAllHeader}
       </span>
       {renderFilterElement()}
-      <button type="button" className="p-multiselect-close p-link" onClick={event => onClose(event)}>
-        <span className="p-multiselect-close-icon pi pi-times" />
-      </button>
+      {clearButton && (
+        <button type="button" className="p-multiselect-close p-link" onClick={event => onClose(event)}>
+          <span className="p-multiselect-close-icon pi pi-times" />
+        </button>
+      )}
     </div>
   );
 };
