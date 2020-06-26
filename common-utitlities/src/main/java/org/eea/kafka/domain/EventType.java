@@ -194,7 +194,11 @@ public enum EventType {
       true),
 
   /** The validated qc rule event. */
-  VALIDATED_QC_RULE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validated_qc_rule_event", true);
+  VALIDATED_QC_RULE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validated_qc_rule_event", true),
+
+  /** The copy dataset schema completed event. */
+  COPY_DATASET_SCHEMA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "copy_dataset_schema_completed_event", true);
 
 
 

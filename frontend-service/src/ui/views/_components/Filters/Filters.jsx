@@ -301,6 +301,7 @@ export const Filters = ({
         id={property}
         inputClassName={`p-float-label ${styles.label}`}
         inputId={property}
+        isFilter={true}
         itemTemplate={selectTemplate}
         label={resources.messages[property]}
         notCheckAllHeader={resources.messages['uncheckAllFilter']}
