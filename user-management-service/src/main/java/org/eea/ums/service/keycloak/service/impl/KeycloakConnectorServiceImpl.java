@@ -105,7 +105,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * The Constant ADD_USER_TO_USER_GROUP_URL.
    */
   private static final String ADD_USER_TO_USER_GROUP_URL =
-      "/auth/admin/realms/Reportnet/users/{userId}/groups/{groupId}";
+      "/auth/admin/realms/{realm}/users/{userId}/groups/{groupId}";
 
   /**
    * The Constant CHECK_USER_PERMISSION.

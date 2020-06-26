@@ -1,6 +1,8 @@
 package org.eea.ums.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -24,6 +26,7 @@ import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.ums.mapper.UserRepresentationMapper;
 import org.eea.ums.service.BackupManagmentService;
 import org.eea.ums.service.SecurityProviderInterfaceService;
+import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.junit.Assert;
 import org.junit.Before;
@@ -555,5 +558,22 @@ public class UserManagementControllerImplTest {
   public void authenticateUserByApiKeyWrongApiKey() {
     TokenVO result = this.userManagementController.authenticateUserByApiKey("apiKey1");
     Assert.assertNull(result);
+  }
+
+  @Test
+  public void getUsersByGroupTest() {
+    GroupInfo[] groupInfo = new GroupInfo[1];
+    UserRepresentation[] userRepresentation = new UserRepresentation[1];
+    groupInfo[0] = new GroupInfo();
+    userRepresentation[0] = new UserRepresentation();
+    Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groupInfo);
+    Mockito.when(keycloakConnectorService.getUsersByGroupId(Mockito.any()))
+        .thenReturn(userRepresentation);
+    assertNotNull(userManagementController.getUsersByGroup(""));
+  }
+
+  @Test
+  public void getUsersByGroupTestNull() {
+    assertNull(userManagementController.getUsersByGroup(""));
   }
 }
