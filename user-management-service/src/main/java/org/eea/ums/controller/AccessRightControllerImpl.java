@@ -1,10 +1,12 @@
 package org.eea.ums.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.eea.interfaces.controller.ums.AccessRightController;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -56,7 +58,16 @@ public class AccessRightControllerImpl implements AccessRightController {
   @Override
   public List<RepresentativeVO> findRoleUsersByGroup(@PathVariable("dataflowId") Long dataflowId) {
     // we can find editors, reporters or reporter partition roles based on the dataflow state
-    return null;
+    // mock
+    RepresentativeVO representativeVO = new RepresentativeVO();
+    representativeVO.setAccount("email@emali.com");
+    representativeVO.setDataProviderId(1L);
+    representativeVO.setPermission(true);
+    representativeVO.setRole("EDITOR");
+    List<RepresentativeVO> representativeVOs = new ArrayList<>();
+    representativeVOs.add(representativeVO);
+    representativeVOs.add(representativeVO);
+    return representativeVOs;
   }
 
   /**
@@ -71,7 +82,8 @@ public class AccessRightControllerImpl implements AccessRightController {
   public ResponseEntity updateRoleUser(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody RepresentativeVO representativeVO) {
     // we can only update an editor, reporter or reporter partition role
-    return null;
+    // mock
+    return new ResponseEntity(HttpStatus.OK);
   }
 
   /**
@@ -88,6 +100,7 @@ public class AccessRightControllerImpl implements AccessRightController {
   public Long createRoleUser(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody RepresentativeVO representativeVO) {
     // we can only assign an editor, reporter or reporter partition role
-    return null;
+    // mock
+    return 1L;
   }
 }
