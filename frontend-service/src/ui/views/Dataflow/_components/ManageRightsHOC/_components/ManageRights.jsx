@@ -14,8 +14,8 @@ import { Spinner } from 'ui/views/_components/Spinner';
 
 import {
   autofocusOnEmptyInput,
-  onAddProvider,
-  onDataProviderIdChange,
+  onAddRepresentative,
+  onPermissionsChange,
   onDeleteConfirm,
   onKeyDown
 } from '../_functions/Utils/rightsUtils';
@@ -33,11 +33,11 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
 
     let hasError = formState.representativeHasError.includes(representative.representativeId);
 
-    const onAccountChange = (value, dataProviderId) => {
+    const onAccountChange = (value, representativeId) => {
       const { representatives } = formState;
 
       const [thisRepresentative] = representatives.filter(
-        thisRepresentative => thisRepresentative.dataProviderId === dataProviderId
+        thisRepresentative => thisRepresentative.representativeId === representativeId
       );
       thisRepresentative.providerAccount = value;
 
@@ -57,9 +57,9 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
             id={isEmpty(inputData) ? 'emptyInput' : undefined}
             onBlur={() => {
               representative.providerAccount = representative.providerAccount.toLowerCase();
-              onAddProvider(formDispatcher, formState, representative, dataflowId);
+              onAddRepresentative(formDispatcher, formState, representative, dataflowId);
             }}
-            onChange={event => onAccountChange(event.target.value, representative.dataProviderId)}
+            onChange={event => onAccountChange(event.target.value, representative.representativeId)}
             onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
             placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
             value={inputData}
@@ -71,25 +71,24 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
 
   const dropdownColumnTemplate = representative => {
     const permissionsOptions = [
-      { label: resources.messages['selectPermission'], type: '' },
-      { label: resources.messages['readPermission'], type: 'read' },
-      { label: resources.messages['readAndWritePermission'], type: 'read_write' }
+      { label: resources.messages['selectPermission'], permission: '' },
+      { label: resources.messages['readPermission'], permission: 'false' },
+      { label: resources.messages['readAndWritePermission'], permission: 'true' }
     ];
 
     return (
       <>
         <select
-          disabled={representative.hasDatasets}
-          onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
+          onBlur={() => onAddRepresentative(formDispatcher, formState, representative, dataflowId)}
           onChange={event => {
-            onDataProviderIdChange(formDispatcher, event.target.value, representative, formState);
+            onPermissionsChange(formDispatcher, event.target.value, representative, formState);
           }}
           onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
-          value={representative.permissionType}>
-          {permissionsOptions.map(permission => {
+          value={representative.permission}>
+          {permissionsOptions.map(option => {
             return (
-              <option key={uuid.v4()} className="p-dropdown-item" value={permission.type}>
-                {permission.label}
+              <option key={uuid.v4()} className="p-dropdown-item" value={option.permission}>
+                {option.label}
               </option>
             );
           })}
@@ -99,7 +98,7 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
   };
 
   const deleteBtnColumnTemplate = representative => {
-    return isNil(representative.representativeId) /*||  representative.permissionsType */ ? (
+    return isNil(representative.representativeId) /*||  representative.permission*/ ? (
       <></>
     ) : (
       <ActionsColumn

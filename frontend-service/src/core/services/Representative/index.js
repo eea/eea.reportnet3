@@ -5,6 +5,7 @@ import { Delete } from './Delete';
 import { GetProviderTypes } from './GetProviderTypes';
 import { Update } from './Update';
 import { UpdateDataProviderId } from './UpdateDataProviderId';
+import { UpdatePermission } from './UpdatePermission';
 import { UpdateProviderAccount } from './UpdateProviderAccount';
 
 import { representativeRepository } from 'core/domain/model/Representative/RepresentativeRepository';
@@ -17,5 +18,6 @@ export const RepresentativeService = {
   getProviderTypes: GetProviderTypes({ representativeRepository }),
   update: Update({ representativeRepository }),
   updateDataProviderId: UpdateDataProviderId({ representativeRepository }),
+  updatePermission: UpdatePermission({ representativeRepository }),
   updateProviderAccount: UpdateProviderAccount({ representativeRepository })
 };

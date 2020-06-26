@@ -71,6 +71,17 @@ const apiRepresentative = {
       }
     });
     return response;
+  },
+
+  updatePermission: async (representativeId, permission) => {
+    const response = await HTTPRequester.update({
+      url: getUrl(RepresentativeConfig.permission, {}),
+      data: {
+        id: representativeId,
+        permission: permission
+      }
+    });
+    return response;
   }
 };
 
