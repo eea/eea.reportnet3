@@ -4,9 +4,13 @@ import isEmpty from 'lodash/isEmpty';
 
 import styles from './CloneSchemas.module.scss';
 
+import { routes } from 'ui/routes';
+import { getUrl } from 'core/infrastructure/CoreUtils';
+
 import { CardsView } from 'ui/views/_components/CardsView';
 import { Filters } from 'ui/views/_components/Filters';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { TableViewSchemas } from './_components/TableViewSchemas';
 
 import { DataflowService } from 'core/services/Dataflow';
@@ -43,9 +47,7 @@ export const CloneSchemas = ({ dataflowId }) => {
 
   const isLoading = value => cloneSchemasDispatch({ type: 'IS_LOADING', payload: { value } });
 
-  const onChangePagination = pagination => {
-    cloneSchemasDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
-  };
+  const onChangePagination = pagination => cloneSchemasDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
 
   const onLoadDataflows = async () => {
     isLoading(true);
@@ -69,9 +71,9 @@ export const CloneSchemas = ({ dataflowId }) => {
 
   const onLoadFilteredData = data => cloneSchemasDispatch({ type: 'FILTERED_DATA', payload: { data } });
 
-  const onSelectDataflow = rowData => {
-    cloneSchemasDispatch({ type: 'ON_SELECT_DATAFLOW', payload: { rowData } });
-  };
+  const onOpenDataflow = id => window.open(getUrl(`/dataflow/${id}`));
+
+  const onSelectDataflow = rowData => cloneSchemasDispatch({ type: 'ON_SELECT_DATAFLOW', payload: { rowData } });
 
   const onToggleView = () => {
     cloneSchemasDispatch({ type: 'ON_TOGGLE_VIEW', payload: { view: !cloneSchemasState.isTableView } });
@@ -82,6 +84,7 @@ export const CloneSchemas = ({ dataflowId }) => {
       <TableViewSchemas
         checkedDataflow={cloneSchemasState.chosenDataflow}
         data={cloneSchemasState.filteredData}
+        handleRedirect={onOpenDataflow}
         onChangePagination={onChangePagination}
         onSelectDataflow={onSelectDataflow}
         pagination={cloneSchemasState.pagination}
@@ -89,15 +92,16 @@ export const CloneSchemas = ({ dataflowId }) => {
       />
     ) : (
       <CardsView
-        // checkedCard={reportingObligationState.oblChoosed}
+        checkedCard={cloneSchemasReducer.chosenDataflow}
         data={cloneSchemasState.filteredData}
-        // handleRedirect={onOpenObligation}
-        // onChangePagination={onChangePagination}
-        // onSelectCard={onSelectObl}
-
-        // pagination={reportingObligationState.pagination}
+        handleRedirect={onOpenDataflow}
+        onChangePagination={onChangePagination}
+        onSelectCard={onSelectDataflow}
+        pagination={cloneSchemasState.pagination}
       />
     );
+
+  if (cloneSchemasState.isLoading) return <Spinner style={{ top: 0 }} />;
 
   return (
     <div className={styles.cloneSchemas}>

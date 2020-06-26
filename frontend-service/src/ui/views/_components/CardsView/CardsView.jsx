@@ -12,6 +12,7 @@ import { Paginator } from 'ui/views/_components/DataTable/_components/Paginator'
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const CardsView = ({ checkedCard, data, handleRedirect, onChangePagination, onSelectCard, pagination }) => {
+  console.log('checkedCard', checkedCard);
   const resources = useContext(ResourcesContext);
 
   const [cards, setCards] = useState(data);
