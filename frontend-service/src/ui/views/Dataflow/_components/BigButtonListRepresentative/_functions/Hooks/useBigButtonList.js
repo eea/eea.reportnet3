@@ -118,7 +118,7 @@ const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, on
         caption: resources.messages['releaseDataCollection'],
         handleRedirect:
           filteredDatasets.length > 1 ? () => {} : () => onShowSnapshotDialog(filteredDatasets[0].datasetId),
-        layout: 'defaultBigButton',
+        layout: filteredDatasets.length > 1 ? 'menuBigButton' : 'defaultBigButton',
         visibility:
           !dataflowState.isCustodian && dataflowState.status !== 'DESIGN' && !isEmpty(dataflowState.data.datasets)
       }

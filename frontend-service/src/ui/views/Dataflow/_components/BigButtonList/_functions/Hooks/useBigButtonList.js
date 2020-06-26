@@ -302,11 +302,11 @@ const useBigButtonList = ({
     const properties = [
       {
         buttonClass: 'schemaDataset',
-        buttonIcon: dataflowState.isReceiptLoading ? 'spinner' : 'released',
-        buttonIconClass: dataflowState.isReceiptLoading ? 'spinner' : 'released',
+        buttonIcon: 'released',
+        buttonIconClass: 'released',
         caption: resources.messages['releaseDataCollection'],
-        handleRedirect: datasets.length > 1 ? () => {} : () => onShowSnapshotDialog(datasets.datasetId),
-        layout: 'defaultBigButton',
+        handleRedirect: datasets.length > 1 ? () => {} : () => onShowSnapshotDialog(datasets[0].datasetId),
+        layout: datasets.length > 1 ? 'menuBigButton' : 'defaultBigButton',
         visibility:
           !dataflowState.isCustodian &&
           dataflowState.status !== 'DESIGN' &&
