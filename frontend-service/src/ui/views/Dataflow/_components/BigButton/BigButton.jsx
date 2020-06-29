@@ -136,7 +136,10 @@ export const BigButton = ({
 
   const defaultBigButton = (
     <>
-      <div className={`${styles.bigButton} ${styles.defaultBigButton} ${styles[buttonClass]} ${helpClassName}`}>
+      <div
+        className={`${styles.bigButton} ${styles.defaultBigButton} ${styles[buttonClass]} ${helpClassName} ${
+          !enabled && styles.bigButtonDisabled
+        }`}>
         <span onClick={() => handleRedirect()} onMouseDown={event => onWheelClick(event)} data-tip data-for={caption}>
           <FontAwesomeIcon icon={AwesomeIcons(buttonIcon)} className={styles[buttonIconClass]} />
         </span>

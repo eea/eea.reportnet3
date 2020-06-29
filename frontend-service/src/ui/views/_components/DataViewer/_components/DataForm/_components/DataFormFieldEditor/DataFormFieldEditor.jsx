@@ -35,7 +35,12 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
 
   const onLoadColsSchema = async filter => {
     const inmColumn = { ...column };
-    const linkItems = await getLinkItemsWithEmptyOption(filter, type, column.referencedField);
+    const linkItems = await getLinkItemsWithEmptyOption(
+      filter,
+      type,
+      column.referencedField,
+      inmColumn.pkHasMultipleValues
+    );
     inmColumn.linkItems = linkItems;
     setColumnWithLinks(inmColumn);
   };
@@ -77,8 +82,8 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
       case 'DATE':
         return 'date';
       case 'TEXT':
-      // case 'RICH_TEXT':
-      //   return 'any';
+      case 'RICH_TEXT':
+        return 'any';
       case 'EMAIL':
         return 'email';
       case 'PHONE':
@@ -90,14 +95,14 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     }
   };
 
-  const getLinkItemsWithEmptyOption = async (filter, type, referencedField) => {
+  const getLinkItemsWithEmptyOption = async (filter, type, referencedField, hasMultipleValues) => {
     if (isNil(type) || type.toUpperCase() !== 'LINK' || isNil(referencedField)) {
       return [];
     }
     const referencedFieldValues = await DatasetService.getReferencedFieldValues(
       datasetId,
       isUndefined(referencedField.name) ? referencedField.idPk : referencedField.referencedField.fieldSchemaId,
-      filter
+      hasMultipleValues ? '' : filter
     );
     const linkItems = referencedFieldValues
       .map(referencedField => {
@@ -107,10 +112,14 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
         };
       })
       .sort((a, b) => a.value - b.value);
-    linkItems.unshift({
-      itemType: resources.messages['noneCodelist'],
-      value: ''
-    });
+
+    // const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
+    if (!hasMultipleValues) {
+      linkItems.unshift({
+        itemType: resources.messages['noneCodelist'],
+        value: ''
+      });
+    }
     return linkItems;
   };
 
@@ -232,23 +241,45 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     );
   };
 
-  const renderLinkDropdown = (field, fieldValue) => (
-    <Dropdown
-      appendTo={document.body}
-      currentValue={fieldValue}
-      filter={true}
-      filterPlaceholder={resources.messages['linkFilterPlaceholder']}
-      filterBy="itemType,value"
-      onChange={e => {
-        onChangeForm(field, e.target.value.value);
-      }}
-      onFilterInputChangeBackend={onFilter}
-      optionLabel="itemType"
-      options={columnWithLinks.linkItems}
-      showFilterClear={true}
-      value={RecordUtils.getLinkValue(columnWithLinks.linkItems, fieldValue)}
-    />
-  );
+  const renderLinkDropdown = (field, fieldValue) => {
+    if (column.pkHasMultipleValues) {
+      return (
+        <MultiSelect
+          appendTo={document.body}
+          clearButton={false}
+          filter={true}
+          filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+          maxSelectedLabels={10}
+          onChange={e => onChangeForm(field, e.value)}
+          onFilterInputChangeBackend={onFilter}
+          options={columnWithLinks.linkItems}
+          optionLabel="itemType"
+          value={RecordUtils.getMultiselectValues(
+            columnWithLinks.linkItems,
+            !Array.isArray(fieldValue) ? fieldValue.split(', ').join(',') : fieldValue
+          )}
+        />
+      );
+    } else {
+      return (
+        <Dropdown
+          appendTo={document.body}
+          currentValue={fieldValue}
+          filter={true}
+          filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+          filterBy="itemType,value"
+          onChange={e => {
+            onChangeForm(field, e.target.value.value);
+          }}
+          onFilterInputChangeBackend={onFilter}
+          optionLabel="itemType"
+          options={columnWithLinks.linkItems}
+          showFilterClear={true}
+          value={RecordUtils.getLinkValue(columnWithLinks.linkItems, fieldValue)}
+        />
+      );
+    }
+  };
 
   const renderMap = () => <Map coordinates={mapCoordinates} onSelectPoint={onSelectPoint} selectButton={true}></Map>;
 
