@@ -13,6 +13,7 @@ import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
@@ -49,6 +50,45 @@ public class AccessRightServiceImpl implements AccessRightService {
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
+
+
+  /**
+   * Find role users by id dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Override
+  public List<RoleUserVO> findRoleUsersByIdDataflow(Long dataflowId) {
+    DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
+    List<RoleUserVO> listRoleUserVO = new ArrayList();
+
+    if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
+      StringBuilder stringBuilder =
+          new StringBuilder("Dataflow-").append(dataflowId).append("-EDITOR_WRITE");
+      List<UserRepresentationVO> listUserWrite =
+          userManagementControllerZull.getUsersByGroup(stringBuilder.toString());
+      listUserWrite.stream().forEach(userWrite -> {
+        RoleUserVO roleUserVO = new RoleUserVO();
+        roleUserVO.setAccount(userWrite.getEmail());
+        roleUserVO.setPermission(true);
+        listRoleUserVO.add(roleUserVO);
+      });
+      stringBuilder = new StringBuilder("Dataflow-").append(dataflowId).append("-EDITOR_READ");
+      List<UserRepresentationVO> listUserRead =
+          userManagementControllerZull.getUsersByGroup(stringBuilder.toString());
+      listUserRead.stream().forEach(userRead -> {
+        RoleUserVO roleUserVO = new RoleUserVO();
+        roleUserVO.setAccount(userRead.getEmail());
+        roleUserVO.setPermission(false);
+        roleUserVO.setRole("EDITOR");
+        listRoleUserVO.add(roleUserVO);
+      });
+    }
+
+    return listRoleUserVO;
+  }
+
   /**
    * Delete role user.
    *
@@ -60,12 +100,17 @@ public class AccessRightServiceImpl implements AccessRightService {
     DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
 
     ResourceGroupEnum resourceGroupEnum = null;
+    ResourceGroupEnum resourceGroupEnumDataflow = null;
 
     switch (roleUserVO.getRole()) {
       case "EDITOR":
         resourceGroupEnum = Boolean.TRUE.equals(roleUserVO.getPermission())
-            ? resourceGroupEnum.DATASCHEMA_EDITOR_WRITE
-            : resourceGroupEnum.DATASCHEMA_EDITOR_READ;
+            ? ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE
+            : ResourceGroupEnum.DATASCHEMA_EDITOR_READ;
+        resourceGroupEnumDataflow = Boolean.TRUE.equals(roleUserVO.getPermission())
+            ? ResourceGroupEnum.DATAFLOW_EDITOR_WRITE
+            : ResourceGroupEnum.DATAFLOW_EDITOR_READ;
+
         break;
       case "REPORTER_PARTITIONED":
         break;
@@ -79,13 +124,15 @@ public class AccessRightServiceImpl implements AccessRightService {
 
     if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
       List<ResourceAssignationVO> resourcesProviders = new ArrayList<>();
+      resourcesProviders.add(
+          fillResourceAssignation(dataflowId, roleUserVO.getAccount(), resourceGroupEnumDataflow));
       for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
-        // quitar resource
-        ResourceAssignationVO resourceDP = fillResourceAssignation(designDatasetVO.getId(),
-            roleUserVO.getAccount(), resourceGroupEnum);
-        resourcesProviders.add(resourceDP);
+        // quitar resources
+
+        resourcesProviders.add(fillResourceAssignation(designDatasetVO.getId(),
+            roleUserVO.getAccount(), resourceGroupEnum));
       }
-      // enviar a bea resourcesProviders;
+      userManagementControllerZull.removeContributorsFromResources(resourcesProviders);
     }
   }
 
@@ -94,7 +141,7 @@ public class AccessRightServiceImpl implements AccessRightService {
   /**
    * Creates the role user.
    *
-   * @param representativeVO the representative VO
+   * @param roleUserVO the role user VO
    * @param dataflowId the dataflow id
    */
   @Override
@@ -141,7 +188,6 @@ public class AccessRightServiceImpl implements AccessRightService {
         resourceAssignationVOList.add(fillResourceAssignation(designDatasetVO.getId(),
             roleUserVO.getAccount(), resourceGroupEnum));
       }
-      // enviar a bea resourcesProviders;
 
 
       resourceManagementControllerZull.createResource(
@@ -152,6 +198,14 @@ public class AccessRightServiceImpl implements AccessRightService {
   }
 
 
+  /**
+   * Fill resource assignation.
+   *
+   * @param id the id
+   * @param email the email
+   * @param group the group
+   * @return the resource assignation VO
+   */
   private ResourceAssignationVO fillResourceAssignation(Long id, String email,
       ResourceGroupEnum group) {
 
@@ -178,4 +232,20 @@ public class AccessRightServiceImpl implements AccessRightService {
     resourceInfoVO.setSecurityRoleEnum(role);
     return resourceInfoVO;
   }
+
+
+  /**
+   * Update role user.
+   *
+   * @param roleUserVO the role user VO
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  public void updateRoleUser(RoleUserVO roleUserVO, Long dataflowId) {
+    // TODO Auto-generated method stub
+
+  }
+
+
+
 }

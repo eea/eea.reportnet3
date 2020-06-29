@@ -1,6 +1,5 @@
 package org.eea.dataflow.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataflow.service.AccessRightService;
 import org.eea.interfaces.controller.dataflow.AccessRightController;
@@ -77,15 +76,7 @@ public class AccessRightControllerImpl implements AccessRightController {
   public List<RoleUserVO> findRoleUsersByGroup(@PathVariable("dataflowId") Long dataflowId) {
     // we can find editors, reporters or reporter partition roles based on the dataflow state
     // mock
-    RoleUserVO roleUserVO = new RoleUserVO();
-    roleUserVO.setAccount("email@emali.com");
-    roleUserVO.setDataProviderId(1L);
-    roleUserVO.setPermission(true);
-    roleUserVO.setRole("EDITOR");
-    List<RoleUserVO> roleUserVOs = new ArrayList<>();
-    roleUserVOs.add(roleUserVO);
-    roleUserVOs.add(roleUserVO);
-    return roleUserVOs;
+    return accessRightService.findRoleUsersByIdDataflow(dataflowId);
   }
 
   /**
@@ -102,6 +93,7 @@ public class AccessRightControllerImpl implements AccessRightController {
       @RequestBody RoleUserVO roleUserVO) {
     // we can only update an editor, reporter or reporter partition role
     // mock
+    accessRightService.updateRoleUser(roleUserVO, dataflowId);
     return new ResponseEntity(HttpStatus.OK);
   }
 
