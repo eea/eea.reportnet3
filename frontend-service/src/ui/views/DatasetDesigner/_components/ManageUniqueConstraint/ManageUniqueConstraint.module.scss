@@ -17,13 +17,14 @@
 
 .pkField {
   color: var(--main-font-color);
-  font-size: 10pt;
+  font-size: 8pt;
   font-weight: 800;
   background-color: var(--listbox-item-pk-indicator-bg);
   color: var(--listbox-item-pk-indicator-color);
-  margin-left: 0.5rem;
+  margin: 0.1rem 0 0.1rem 0.5rem;
   padding: 0 0.2rem;
   border-radius: 3px;
+  position: absolute;
 }
 
 .selected {
