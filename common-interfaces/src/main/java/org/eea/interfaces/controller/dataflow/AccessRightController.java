@@ -1,4 +1,4 @@
-package org.eea.interfaces.controller.ums;
+package org.eea.interfaces.controller.dataflow;
 
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;

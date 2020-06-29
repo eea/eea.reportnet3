@@ -1,10 +1,10 @@
-package org.eea.ums.controller;
+package org.eea.dataflow.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.eea.interfaces.controller.ums.AccessRightController;
+import org.eea.dataflow.service.AccessRightService;
+import org.eea.interfaces.controller.dataflow.AccessRightController;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
-import org.eea.ums.service.AccessRightService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

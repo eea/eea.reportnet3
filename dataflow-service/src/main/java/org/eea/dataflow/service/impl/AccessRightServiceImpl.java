@@ -1,8 +1,9 @@
-package org.eea.ums.service.impl;
+package org.eea.dataflow.service.impl;
 
 
 import java.util.ArrayList;
 import java.util.List;
+import org.eea.dataflow.service.AccessRightService;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -15,8 +16,6 @@ import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
-import org.eea.ums.service.AccessRightService;
-import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,12 +40,12 @@ public class AccessRightServiceImpl implements AccessRightService {
   @Autowired
   private DataFlowControllerZuul dataflowControlleZuul;
 
-  @Autowired
-  private SecurityProviderInterfaceService securityProviderInterfaceService;
 
+  /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
+  /** The resource management controller zull. */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
@@ -159,6 +158,14 @@ public class AccessRightServiceImpl implements AccessRightService {
   }
 
 
+  /**
+   * Creates the group.
+   *
+   * @param datasetId the dataset id
+   * @param type the type
+   * @param role the role
+   * @return the resource info VO
+   */
   private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
     resourceInfoVO.setResourceId(datasetId);

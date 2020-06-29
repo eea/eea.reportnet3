@@ -1,4 +1,4 @@
-package org.eea.ums.service;
+package org.eea.dataflow.service;
 
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 
