@@ -69,22 +69,13 @@ const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, on
           },
           true
         ),
-        model: dataflowState.hasWritePermissions
-          ? [
-              {
-                label: resources.messages['releaseDataCollection'],
-                icon: 'cloudUpload',
-                command: () => onShowSnapshotDialog(dataset.datasetId),
-                disabled: false
-              }
-            ]
-          : [
-              {
-                label: resources.messages['properties'],
-                icon: 'info',
-                disabled: true
-              }
-            ],
+        // model: !dataflowState.hasWritePermissions && [
+        //   {
+        //     label: resources.messages['properties'],
+        //     icon: 'info',
+        //     disabled: true
+        //   }
+        // ],
         visibility: !isEmpty(dataflowState.data.datasets)
       };
     });
@@ -111,9 +102,46 @@ const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, on
     ];
   };
 
+  const onBuildReleaseButton = () => {
+    const { datasets } = dataflowState.data;
+
+    const filteredDatasets = datasets.filter(
+      dataset => dataset.dataProviderId === parseInt(match.params.representativeId)
+    );
+
+    const properties = [
+      {
+        buttonClass: 'schemaDataset',
+        buttonIcon: 'released',
+        buttonIconClass: 'released',
+        caption: resources.messages['releaseDataCollection'],
+        handleRedirect:
+          filteredDatasets.length > 1 ? () => {} : () => onShowSnapshotDialog(filteredDatasets[0].datasetId),
+        layout: filteredDatasets.length > 1 ? 'menuBigButton' : 'defaultBigButton',
+        visibility:
+          !dataflowState.isCustodian && dataflowState.status !== 'DESIGN' && !isEmpty(dataflowState.data.datasets)
+      }
+    ];
+
+    if (filteredDatasets.length > 1) {
+      properties[0].model = filteredDatasets.map(dataset => {
+        return {
+          label: dataset.name,
+          icon: 'cloudUpload',
+          command: () => onShowSnapshotDialog(dataset.datasetId),
+          disabled: false
+        };
+      });
+    }
+
+    return properties;
+  };
+
   const receiptBigButton = onBuildReceiptButton();
 
-  return [helpButton, ...groupByRepresentativeModels, ...receiptBigButton];
+  const releaseBigButton = onBuildReleaseButton();
+
+  return [helpButton, ...groupByRepresentativeModels, ...receiptBigButton, ...releaseBigButton];
 };
 
 export { useBigButtonList };

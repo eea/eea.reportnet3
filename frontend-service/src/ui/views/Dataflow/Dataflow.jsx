@@ -122,7 +122,7 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'archive'
+            icon: 'clone'
           }
         ]);
       } else if (representatives.length > 1 && isUndefined(representativeId)) {
@@ -135,7 +135,7 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'archive'
+            icon: 'clone'
           }
         ]);
       } else if (representativeId) {
@@ -152,13 +152,13 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'archive',
+            icon: 'clone',
             href: getUrl(routes.DATAFLOW),
             command: () => history.goBack()
           },
           {
             label: currentRepresentative[0],
-            icon: 'archive'
+            icon: 'clone'
           }
         ]);
       } else if (dataflowState.status === 'DESIGN') {
@@ -171,7 +171,7 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'archive'
+            icon: 'clone'
           }
         ]);
       }
