@@ -45,7 +45,7 @@ export const reducer = (state, { type, payload }) => {
       return { ...state, dataProvidersTypesList: payload.providerTypes };
 
     case 'MANAGE_ERRORS':
-      return { ...state, representativeHasError: payload.representativeHasError };
+      return { ...state, representativesHaveError: payload.representativesHaveError };
 
     case 'HIDE_CONFIRM_DIALOG':
       return {
@@ -77,7 +77,7 @@ export const reducer = (state, { type, payload }) => {
         representatives: payload.response.representatives,
         initialRepresentatives: payload.representativesByCopy,
         selectedDataProviderGroup: getSelectedProviderGroup(),
-        representativeHasError: []
+        representativesHaveError: []
       };
 
     case 'ON_ACCOUNT_CHANGE':

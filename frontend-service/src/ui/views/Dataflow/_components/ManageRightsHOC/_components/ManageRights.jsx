@@ -26,12 +26,13 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
 
   useEffect(() => {
     autofocusOnEmptyInput(formState);
-  }, [formState.representativeHasError]);
+    console.log('formState.representativesHaveError', formState.representativesHaveError);
+  }, [formState.representativesHaveError]);
 
   const accountInputColumnTemplate = representative => {
     let inputData = representative.account;
 
-    let hasError = formState.representativeHasError.includes(representative.representativeId);
+    let hasError = formState.representativesHaveError.includes(representative.representativeId);
 
     const onAccountChange = (value, representativeId) => {
       const { representatives } = formState;
@@ -51,7 +52,6 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
 
     return (
       <>
-        {console.log('representative', representative)}
         <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
           <input
             autoFocus={isNil(representative.representativeId)}

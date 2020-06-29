@@ -16,7 +16,7 @@ const ManageRightsHOC = ({ dataflowState, dataflowId, isActiveManageRightsDialog
     initialRepresentatives: [],
     isVisibleConfirmDeleteDialog: false,
     refresher: false,
-    representativeHasError: [],
+    representativesHaveError: [],
     representativeIdToDelete: '',
     representatives: [],
     accountInputHeader: dataflowState.isCustodian
@@ -42,7 +42,7 @@ const ManageRightsHOC = ({ dataflowState, dataflowId, isActiveManageRightsDialog
   }, [formState.refresher]);
 
   useEffect(() => {
-    if (isActiveManageRightsDialog === false && !isEmpty(formState.representativeHasError)) {
+    if (isActiveManageRightsDialog === false && !isEmpty(formState.representativesHaveError)) {
       formDispatcher({
         type: 'REFRESH'
       });

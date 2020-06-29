@@ -39,11 +39,11 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId, fo
     } catch (error) {
       console.error('error on RepresentativeService.add', error);
       if (error.response.status === 400 || error.response.status === 404) {
-        let { representativeHasError } = formState;
-        representativeHasError.unshift(representatives[representatives.length - 1].representativeId);
+        let { representativesHaveError } = formState;
+        representativesHaveError.unshift(representatives[representatives.length - 1].representativeId);
         formDispatcher({
           type: 'MANAGE_ERRORS',
-          payload: { representativeHasError: uniq(representativeHasError) }
+          payload: { representativesHaveError: uniq(representativesHaveError) }
         });
       }
     }
@@ -181,12 +181,12 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
       initialRepresentative.representativeId === updatedRepresentative.representativeId &&
       initialRepresentative.account === updatedRepresentative.account
     ) {
-      const filteredInputsWithErrors = formState.representativeHasError.filter(
+      const filteredInputsWithErrors = formState.representativesHaveError.filter(
         representativeId => representativeId !== updatedRepresentative.representativeId
       );
       formDispatcher({
         type: 'MANAGE_ERRORS',
-        payload: { representativeHasError: filteredInputsWithErrors }
+        payload: { representativesHaveError: filteredInputsWithErrors }
       });
     }
   }
@@ -204,11 +204,11 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
       console.error('error on RepresentativeService.updateAccount', error);
 
       if (error.response.status === 400 || error.response.status === 404) {
-        let { representativeHasError } = formState;
-        representativeHasError.unshift(updatedRepresentative.representativeId);
+        let { representativesHaveError } = formState;
+        representativesHaveError.unshift(updatedRepresentative.representativeId);
         formDispatcher({
           type: 'MANAGE_ERRORS',
-          payload: { representativeHasError: uniq(representativeHasError) }
+          payload: { representativesHaveError: uniq(representativesHaveError) }
         });
       }
     }

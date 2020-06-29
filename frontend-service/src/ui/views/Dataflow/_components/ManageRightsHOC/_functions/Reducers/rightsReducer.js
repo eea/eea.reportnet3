@@ -15,7 +15,7 @@ export const reducer = (state, { type, payload }) => {
       };
 
     case 'MANAGE_ERRORS':
-      return { ...state, representativeHasError: payload.representativeHasError };
+      return { ...state, representativesHaveError: payload.representativesHaveError };
 
     case 'HIDE_CONFIRM_DIALOG':
       return {
@@ -29,7 +29,7 @@ export const reducer = (state, { type, payload }) => {
         ...state,
         representatives: payload.representatives,
         initialRepresentatives: payload.representativesByCopy,
-        representativeHasError: []
+        representativesHaveError: []
       };
 
     case 'ON_ACCOUNT_CHANGE':
