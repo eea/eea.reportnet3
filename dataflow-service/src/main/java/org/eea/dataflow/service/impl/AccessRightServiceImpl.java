@@ -1,16 +1,11 @@
 package org.eea.dataflow.service.impl;
 
 
-import java.util.ArrayList;
-import java.util.List;
 import org.eea.dataflow.service.AccessRightService;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
-import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.RoleUserVO;
-import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -57,36 +52,34 @@ public class AccessRightServiceImpl implements AccessRightService {
    */
   @Override
   public void deleteRoleUser(RoleUserVO roleUserVO, Long dataflowId) {
-    DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
+    // dataflowControlleZuul.findById(dataflowId);
 
-    ResourceGroupEnum resourceGroupEnum = null;
-
-    switch (roleUserVO.getRole()) {
-      case "EDITOR":
-        resourceGroupEnum = Boolean.TRUE.equals(roleUserVO.getPermission())
-            ? resourceGroupEnum.DATASCHEMA_EDITOR_WRITE
-            : resourceGroupEnum.DATASCHEMA_EDITOR_READ;
-        break;
-      case "REPORTER_PARTITIONED":
-        break;
-      case "REPORTER":
-        /*
-         * resourceGroupEnum = Boolean.TRUE.equals(representativeVO.getPermission()) ?
-         * resourceGroupEnum.datas : resourceGroupEnum.DATASCHEMA_EDITOR_READ;
-         */
-        break;
-    }
-
-    if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
-      List<ResourceAssignationVO> resourcesProviders = new ArrayList<>();
-      for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
-        // quitar resource
-        ResourceAssignationVO resourceDP = fillResourceAssignation(designDatasetVO.getId(),
-            roleUserVO.getAccount(), resourceGroupEnum);
-        resourcesProviders.add(resourceDP);
-      }
-      // enviar a bea resourcesProviders;
-    }
+    // switch (roleUserVO.getRole()) {
+    // case "EDITOR":
+    // resourceGroupEnum = Boolean.TRUE.equals(roleUserVO.getPermission())
+    // ? resourceGroupEnum.DATASCHEMA_EDITOR_WRITE
+    // : resourceGroupEnum.DATASCHEMA_EDITOR_READ;
+    // break;
+    // case "REPORTER_PARTITIONED":
+    // break;
+    // case "REPORTER":
+    // /*
+    // * resourceGroupEnum = Boolean.TRUE.equals(representativeVO.getPermission()) ?
+    // * resourceGroupEnum.datas : resourceGroupEnum.DATASCHEMA_EDITOR_READ;
+    // */
+    // break;
+    // }
+    //
+    // if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
+    // List<ResourceAssignationVO> resourcesProviders = new ArrayList<>();
+    // for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
+    // // quitar resource
+    // ResourceAssignationVO resourceDP = fillResourceAssignation(designDatasetVO.getId(),
+    // roleUserVO.getAccount(), resourceGroupEnum);
+    // resourcesProviders.add(resourceDP);
+    // }
+    // // enviar a bea resourcesProviders;
+    // }
   }
 
 
@@ -99,56 +92,54 @@ public class AccessRightServiceImpl implements AccessRightService {
    */
   @Override
   public void createRoleUser(RoleUserVO roleUserVO, Long dataflowId) {
-    DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
-    SecurityRoleEnum securityRoleEnum = null;
-    ResourceGroupEnum resourceGroupEnum = null;
-    ResourceGroupEnum resourceGroupEnumDataflow = null;
+    dataflowControlleZuul.findById(dataflowId);
 
-    switch (roleUserVO.getRole()) {
-      case "EDITOR":
-        securityRoleEnum =
-            Boolean.TRUE.equals(roleUserVO.getPermission()) ? SecurityRoleEnum.EDITOR_WRITE
-                : SecurityRoleEnum.EDITOR_READ;
-        resourceGroupEnum = Boolean.TRUE.equals(roleUserVO.getPermission())
-            ? ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE
-            : ResourceGroupEnum.DATASCHEMA_EDITOR_READ;
-        resourceGroupEnumDataflow = Boolean.TRUE.equals(roleUserVO.getPermission())
-            ? ResourceGroupEnum.DATAFLOW_EDITOR_WRITE
-            : ResourceGroupEnum.DATAFLOW_EDITOR_READ;
-        break;
-      case "REPORTER_PARTITIONED":
-        break;
-      case "REPORTER":
-        /*
-         * resourceGroupEnum = Boolean.TRUE.equals(representativeVO.getPermission()) ?
-         * resourceGroupEnum.datas : resourceGroupEnum.DATASCHEMA_EDITOR_READ;
-         */
-        break;
-    }
-    if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
-      final List<ResourceAssignationVO> resourceAssignationVOList = new ArrayList();
-      resourceAssignationVOList.add(
-          fillResourceAssignation(dataflowId, roleUserVO.getAccount(), resourceGroupEnumDataflow));
-
-      resourceManagementControllerZull
-          .createResource(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, securityRoleEnum));
-
-      for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
-
-        resourceManagementControllerZull.createResource(
-            createGroup(designDatasetVO.getId(), ResourceTypeEnum.DATA_SCHEMA, securityRoleEnum));
-
-        resourceAssignationVOList.add(fillResourceAssignation(designDatasetVO.getId(),
-            roleUserVO.getAccount(), resourceGroupEnum));
-      }
-      // enviar a bea resourcesProviders;
+    // switch (roleUserVO.getRole()) {
+    // case "EDITOR":
+    // securityRoleEnum =
+    // Boolean.TRUE.equals(roleUserVO.getPermission()) ? SecurityRoleEnum.EDITOR_WRITE
+    // : SecurityRoleEnum.EDITOR_READ;
+    // resourceGroupEnum = Boolean.TRUE.equals(roleUserVO.getPermission())
+    // ? ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE
+    // : ResourceGroupEnum.DATASCHEMA_EDITOR_READ;
+    // resourceGroupEnumDataflow = Boolean.TRUE.equals(roleUserVO.getPermission())
+    // ? ResourceGroupEnum.DATAFLOW_EDITOR_WRITE
+    // : ResourceGroupEnum.DATAFLOW_EDITOR_READ;
+    // break;
+    // case "REPORTER_PARTITIONED":
+    // break;
+    // case "REPORTER":
+    // /*
+    // * resourceGroupEnum = Boolean.TRUE.equals(representativeVO.getPermission()) ?
+    // * resourceGroupEnum.datas : resourceGroupEnum.DATASCHEMA_EDITOR_READ;
+    // */
+    // break;
+    // }
+    // if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
+    // final List<ResourceAssignationVO> resourceAssignationVOList = new ArrayList();
+    // resourceAssignationVOList.add(
+    // fillResourceAssignation(dataflowId, roleUserVO.getAccount(), resourceGroupEnumDataflow));
+    //
+    // resourceManagementControllerZull
+    // .createResource(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, securityRoleEnum));
+    //
+    // for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
+    //
+    // resourceManagementControllerZull.createResource(
+    // createGroup(designDatasetVO.getId(), ResourceTypeEnum.DATA_SCHEMA, securityRoleEnum));
+    //
+    // resourceAssignationVOList.add(fillResourceAssignation(designDatasetVO.getId(),
+    // roleUserVO.getAccount(), resourceGroupEnum));
+    // }
+    // enviar a bea resourcesProviders;
 
 
-      resourceManagementControllerZull.createResource(
-          createGroup(dataflow.getId(), ResourceTypeEnum.DATAFLOW, securityRoleEnum));
-      // we add all datas to contributor
-      userManagementControllerZull.addContributorsToResources(resourceAssignationVOList);
-    }
+    // resourceManagementControllerZull
+    // .createResource(createGroup(dataflow.getId(), ResourceTypeEnum.DATAFLOW, securityRoleEnum));
+    // // we add all datas to contributor
+    // userManagementControllerZull.addContributorsToResources(resourceAssignationVOList);
+    // }
+
   }
 
 
