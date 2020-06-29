@@ -5,7 +5,7 @@ import org.eea.dataflow.service.ContributorService;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
-import org.eea.interfaces.vo.dataflow.RoleUserVO;
+import org.eea.interfaces.vo.contributor.ContributorVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -51,7 +51,7 @@ public class ContributorServiceImpl implements ContributorService {
    * @param dataflowId the dataflow id
    */
   @Override
-  public void deleteRoleUser(RoleUserVO roleUserVO, Long dataflowId) {
+  public void deleteContributor(ContributorVO contributorVO, Long dataflowId) {
     // dataflowControlleZuul.findById(dataflowId);
 
     // switch (roleUserVO.getRole()) {
@@ -91,7 +91,7 @@ public class ContributorServiceImpl implements ContributorService {
    * @param dataflowId the dataflow id
    */
   @Override
-  public void createRoleUser(RoleUserVO roleUserVO, Long dataflowId) {
+  public void createContributor(ContributorVO contributorVO, Long dataflowId) {
     dataflowControlleZuul.findById(dataflowId);
 
     // switch (roleUserVO.getRole()) {

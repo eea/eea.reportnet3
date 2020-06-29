@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataflow.service.ContributorService;
 import org.eea.interfaces.controller.dataflow.ContributorController;
-import org.eea.interfaces.vo.dataflow.RoleUserVO;
+import org.eea.interfaces.vo.contributor.ContributorVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,22 +46,22 @@ public class ContributorControllerImpl implements ContributorController {
   /**
    * Delete resource.
    *
-   * @param roleUserVO the role user VO
+   * @param contributorVO the role user VO
    * @param dataflowId the dataflow id
    */
   @DeleteMapping(value = "/delete")
   @Override
-  public void delete(@RequestBody RoleUserVO roleUserVO, @RequestParam Long dataflowId) {
+  public void delete(@RequestBody ContributorVO contributorVO, @RequestParam Long dataflowId) {
     // we can only remove role of editor, reporter or reporter partition type
-    switch (roleUserVO.getRole()) {
+    switch (contributorVO.getRole()) {
       case "EDITOR":
       case "REPORTER_PARTITIONED":
       case "REPORTER":
-        contributorService.deleteRoleUser(roleUserVO, dataflowId);
+        contributorService.deleteContributor(contributorVO, dataflowId);
         break;
       default:
         LOG.info("Didn't remove role of the user with account {} because its role is {}",
-            roleUserVO.getAccount(), roleUserVO.getRole());
+            contributorVO.getAccount(), contributorVO.getRole());
         break;
     }
   }
@@ -74,32 +74,32 @@ public class ContributorControllerImpl implements ContributorController {
    */
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @Override
-  public List<RoleUserVO> findContributorsByGroup(@PathVariable("dataflowId") Long dataflowId) {
+  public List<ContributorVO> findContributorsByGroup(@PathVariable("dataflowId") Long dataflowId) {
     // we can find editors, reporters or reporter partition roles based on the dataflow state
     // mock
-    RoleUserVO roleUserVO = new RoleUserVO();
-    roleUserVO.setAccount("email@emali.com");
-    roleUserVO.setDataProviderId(1L);
-    roleUserVO.setPermission(true);
-    roleUserVO.setRole("EDITOR");
-    List<RoleUserVO> roleUserVOs = new ArrayList<>();
-    roleUserVOs.add(roleUserVO);
-    roleUserVOs.add(roleUserVO);
-    return roleUserVOs;
+    ContributorVO contributorVO = new ContributorVO();
+    contributorVO.setAccount("email@emali.com");
+    contributorVO.setDataProviderId(1L);
+    contributorVO.setWritePermission(true);
+    contributorVO.setRole("EDITOR");
+    List<ContributorVO> contributorVOs = new ArrayList<>();
+    contributorVOs.add(contributorVO);
+    contributorVOs.add(contributorVO);
+    return contributorVOs;
   }
 
   /**
    * Update role user.
    *
    * @param dataflowId the dataflow id
-   * @param roleUserVO the role user VO
+   * @param contributorVO the role user VO
    * @return the response entity
    */
   @Override
   @HystrixCommand
   @PutMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity update(@PathVariable("dataflowId") Long dataflowId,
-      @RequestBody RoleUserVO roleUserVO) {
+      @RequestBody ContributorVO contributorVO) {
     // we can only update an editor, reporter or reporter partition role
     // mock
     return new ResponseEntity(HttpStatus.OK);
@@ -109,7 +109,7 @@ public class ContributorControllerImpl implements ContributorController {
    * Creates the representative.
    *
    * @param dataflowId the dataflow id
-   * @param roleUserVO the role user VO
+   * @param contributorVO the role user VO
    * @return the long
    */
   @Override
@@ -117,17 +117,17 @@ public class ContributorControllerImpl implements ContributorController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   @PostMapping("/dataflow/{dataflowId}")
   public Long createContributor(@PathVariable("dataflowId") Long dataflowId,
-      @RequestBody RoleUserVO roleUserVO) {
+      @RequestBody ContributorVO contributorVO) {
 
-    switch (roleUserVO.getRole()) {
+    switch (contributorVO.getRole()) {
       case "EDITOR":
       case "REPORTER_PARTITIONED":
       case "REPORTER":
-        contributorService.createRoleUser(roleUserVO, dataflowId);
+        contributorService.createContributor(contributorVO, dataflowId);
         break;
       default:
         LOG.info("Didn't remove role of the user with account {} because its role is {}",
-            roleUserVO.getAccount(), roleUserVO.getRole());
+            contributorVO.getAccount(), contributorVO.getRole());
         break;
     }
     return 1L;

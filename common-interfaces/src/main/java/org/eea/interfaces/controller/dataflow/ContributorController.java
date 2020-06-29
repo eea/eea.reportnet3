@@ -1,7 +1,7 @@
 package org.eea.interfaces.controller.dataflow;
 
 import java.util.List;
-import org.eea.interfaces.vo.dataflow.RoleUserVO;
+import org.eea.interfaces.vo.contributor.ContributorVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,11 +30,11 @@ public interface ContributorController {
   /**
    * Delete resource.
    *
-   * @param roleUserVO the role user VO
+   * @param contributorVO the role user VO
    * @param dataflowId the dataflow id
    */
   @DeleteMapping(value = "/delete")
-  void delete(@RequestBody RoleUserVO roleUserVO, @RequestParam Long dataflowId);
+  void delete(@RequestBody ContributorVO contributorVO, @RequestParam Long dataflowId);
 
   /**
    * Find role users by group.
@@ -43,27 +43,27 @@ public interface ContributorController {
    * @return the list
    */
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<RoleUserVO> findContributorsByGroup(@PathVariable("dataflowId") Long dataflowId);
+  List<ContributorVO> findContributorsByGroup(@PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Update role user.
    *
    * @param dataflowId the dataflow id
-   * @param roleUserVO the role user VO
+   * @param contributorVO the role user VO
    * @return the response entity
    */
   @PutMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   ResponseEntity update(@PathVariable("dataflowId") Long dataflowId,
-      @RequestBody RoleUserVO roleUserVO);
+      @RequestBody ContributorVO contributorVO);
 
   /**
    * Creates the role user.
    *
    * @param dataflowId the dataflow id
-   * @param roleUserVO the role user VO
+   * @param contributorVO the role user VO
    * @return the long
    */
   @PostMapping("/dataflow/{dataflowId}")
   Long createContributor(@PathVariable("dataflowId") Long dataflowId,
-      @RequestBody RoleUserVO roleUserVO);
+      @RequestBody ContributorVO contributorVO);
 }

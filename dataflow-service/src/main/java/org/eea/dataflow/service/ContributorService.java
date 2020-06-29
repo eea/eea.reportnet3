@@ -1,6 +1,6 @@
 package org.eea.dataflow.service;
 
-import org.eea.interfaces.vo.dataflow.RoleUserVO;
+import org.eea.interfaces.vo.contributor.ContributorVO;
 
 
 /**
@@ -15,7 +15,7 @@ public interface ContributorService {
    * @param roleUserVO the role user VO
    * @param dataflowId the dataflow id
    */
-  void deleteRoleUser(RoleUserVO roleUserVO, Long dataflowId);
+  void deleteContributor(ContributorVO contributorVO, Long dataflowId);
 
   /**
    * Creates the role user.
@@ -23,5 +23,5 @@ public interface ContributorService {
    * @param roleUserVO the role user VO
    * @param dataflowId the dataflow id
    */
-  void createRoleUser(RoleUserVO roleUserVO, Long dataflowId);
+  void createContributor(ContributorVO contributorVO, Long dataflowId);
 }
