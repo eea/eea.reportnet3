@@ -121,7 +121,7 @@ public class AccessRightControllerImpl implements AccessRightController {
       case "EDITOR":
       case "REPORTER_PARTITIONED":
       case "REPORTER":
-        accessRightService.deleteRoleUser(representativeVO, dataflowId);
+        accessRightService.createRoleUser(representativeVO, dataflowId);
         break;
       default:
         LOG.info("Didn't remove role of the representative with id {} because its role is {}",

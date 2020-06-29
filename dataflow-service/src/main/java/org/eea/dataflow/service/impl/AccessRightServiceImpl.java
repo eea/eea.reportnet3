@@ -89,24 +89,6 @@ public class AccessRightServiceImpl implements AccessRightService {
     }
   }
 
-  /**
-   * Fill resource assignation.
-   *
-   * @param id the id
-   * @param email the email
-   * @param group the group
-   * @return the resource assignation VO
-   */
-  private ResourceAssignationVO fillResourceAssignation(Long id, String email,
-      ResourceGroupEnum group) {
-
-    ResourceAssignationVO resource = new ResourceAssignationVO();
-    resource.setResourceId(id);
-    resource.setEmail(email);
-    resource.setResourceGroup(group);
-
-    return resource;
-  }
 
 
   /**
@@ -138,12 +120,12 @@ public class AccessRightServiceImpl implements AccessRightService {
          */
         break;
     }
-
-    resourceManagementControllerZull
-        .createResource(createGroup(dataflow.getId(), ResourceTypeEnum.DATAFLOW, securityRoleEnum));
-    userManagementControllerZull.addUserToResource(dataflowId, resourceGroupEnum);
-
     if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
+
+      // ResourceAssignationVO resourceAssignationVO = fillResourceAssignation(,,);
+
+
+
       List<ResourceAssignationVO> resourcesProviders = new ArrayList<>();
       for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
 
@@ -155,8 +137,27 @@ public class AccessRightServiceImpl implements AccessRightService {
       }
       // enviar a bea resourcesProviders;
     }
+
+    resourceManagementControllerZull
+        .createResource(createGroup(dataflow.getId(), ResourceTypeEnum.DATAFLOW, securityRoleEnum));
+
+
+
+    // userManagementControllerZull.addContributorsToResources(new
+    // ArrayList(resourceAssignationVO));
   }
 
+
+  private ResourceAssignationVO fillResourceAssignation(Long id, String email,
+      ResourceGroupEnum group) {
+
+    ResourceAssignationVO resource = new ResourceAssignationVO();
+    resource.setResourceId(id);
+    resource.setEmail(email);
+    resource.setResourceGroup(group);
+
+    return resource;
+  }
 
   /**
    * Creates the group.
