@@ -29,12 +29,11 @@ public interface ContributorController {
   /**
    * Delete resource.
    *
-   * @param contributorVO the role user VO
    * @param dataflowId the dataflow id
+   * @param account the account
    */
-  @DeleteMapping(value = "/dataflow/{dataflowId}")
-  void delete(@RequestBody ContributorVO contributorVO,
-      @PathVariable("dataflowId") Long dataflowId);
+  @DeleteMapping(value = "/dataflow/{dataflowId}/user/{account}")
+  void delete(@PathVariable("dataflowId") Long dataflowId, @PathVariable String account);
 
   /**
    * Find role users by group.
