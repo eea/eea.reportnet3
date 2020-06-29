@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.FieldNoValidationMapper;
@@ -86,6 +87,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
+import org.eea.utils.LiteralConstants;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -1205,20 +1207,28 @@ public class DatasetServiceTest {
 
     List<FieldValue> fields = new ArrayList<>();
     FieldValue field = new FieldValue();
+    field.setType(DataType.LINK);
+    field.setValue("");
 
     fields.add(field);
     field.setValue(null);
     fields.add(field);
     record.setFields(fields);
     recordsList.add(record);
+    Document fieldSchema = new Document();
+    fieldSchema.put(LiteralConstants.PK_HAS_MULTIPLE_VALUES, Boolean.TRUE);
     when(recordMapper.classListToEntity(records)).thenReturn(recordsList);
     when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
     when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(new DataProviderVO());
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(fieldSchema);
     datasetService.createRecords(1L, records, "");
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
+
+
 
   /**
    * The thrown.
@@ -1340,6 +1350,24 @@ public class DatasetServiceTest {
     FieldVO multiselectField = new FieldVO();
     multiselectField.setType(DataType.MULTISELECT_CODELIST);
     multiselectField.setValue("");
+    datasetService.updateField(1L, multiselectField);
+    Mockito.verify(fieldRepository, times(1)).saveValue(Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Update field test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateFieldLinkMulti() throws EEAException {
+    FieldVO multiselectField = new FieldVO();
+    multiselectField.setType(DataType.LINK);
+    multiselectField.setValue("a,a");
+    Document fieldSchema = new Document();
+    fieldSchema.put(LiteralConstants.PK_HAS_MULTIPLE_VALUES, Boolean.TRUE);
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(fieldSchema);
     datasetService.updateField(1L, multiselectField);
     Mockito.verify(fieldRepository, times(1)).saveValue(Mockito.any(), Mockito.any());
   }
