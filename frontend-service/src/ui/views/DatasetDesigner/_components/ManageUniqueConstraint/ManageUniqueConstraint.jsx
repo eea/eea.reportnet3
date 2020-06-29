@@ -7,8 +7,10 @@ import isNil from 'lodash/isNil';
 
 import styles from './ManageUniqueConstraint.module.scss';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ListBox } from 'ui/views/DatasetDesigner/_components/ListBox';
 
 import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
@@ -82,11 +84,22 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
     if (selectedTable.value) {
       const table = datasetSchemaAllTables.filter(table => table.tableSchemaId === selectedTable.value)[0];
       if (table && table.records) {
+        console.log(table.records[0].fields);
         return !isEmpty(table.records[0].fields)
-          ? table.records[0].fields.map(field => ({ name: field.name, value: field.fieldId }))
+          ? table.records[0].fields.map(field => ({ name: field.name, value: field.fieldId, isPk: field.pk }))
           : [{ name: resources.messages['noFieldsToSelect'], disabled: true }];
       }
     } else return [{ name: resources.messages['noTableSelected'], disabled: true }];
+  };
+
+  const pkTemplate = option => {
+    console.log({ option });
+    return (
+      <span>
+        {`${option.name}`}
+        {option.isPk ? <span className={styles.pkField}>{'PK'}</span> : ''}
+      </span>
+    );
   };
 
   const onCreateConstraint = async () => {
@@ -211,6 +224,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
   const renderListBoxField = () => (
     <ListBox
       disabled={isNil(selectedTable)}
+      itemTemplate={pkTemplate}
       listStyle={{ height: '200px' }}
       multiple={true}
       onChange={event => !isNil(event.value) && setSelectedFields(event.value)}
