@@ -54,10 +54,6 @@ const updateDataProviderId = async (representativeId, dataProviderId) => {
   return await apiRepresentative.updateDataProviderId(representativeId, dataProviderId);
 };
 
-const updatePermission = async (representativeId, permission) => {
-  return await apiRepresentative.updatePermission(representativeId, permission);
-};
-
 export const ApiRepresentativeRepository = {
   allRepresentatives,
   allDataProviders,
@@ -65,6 +61,5 @@ export const ApiRepresentativeRepository = {
   deleteById,
   getProviderTypes,
   updateProviderAccount,
-  updateDataProviderId,
-  updatePermission
+  updateDataProviderId
 };

@@ -6,7 +6,7 @@ import uniq from 'lodash/uniq';
 import { Representative } from 'core/domain/model/Representative/Representative';
 import { RepresentativeService } from 'core/services/Representative';
 
-const emptyRepresentative = new Representative({ dataProviderId: '', permission: '', providerAccount: '' });
+const emptyRepresentative = new Representative({ dataProviderId: '', providerAccount: '' });
 
 export const autofocusOnEmptyInput = formState => {
   if (!isEmpty(formState.representatives)) {
@@ -25,13 +25,15 @@ export const autofocusOnEmptyInput = formState => {
   }
 };
 
-const addRepresentative = async (formDispatcher, formState, dataflowId) => {
-  const { representatives } = formState;
-  const [newRepresentative] = representatives.filter(representative => isNil(representative.representativeId));
-
-  if (!isEmpty(newRepresentative.providerAccount) && !isEmpty(newRepresentative.permission)) {
+const addRepresentative = async (formDispatcher, representatives, dataflowId, formState) => {
+  const newRepresentative = representatives.filter(representative => isNil(representative.representativeId));
+  if (!isEmpty(newRepresentative[0].providerAccount) && !isEmpty(newRepresentative[0].dataProviderId)) {
     try {
-      await RepresentativeService.add(dataflowId, newRepresentative.providerAccount, newRepresentative.permission);
+      await RepresentativeService.add(
+        dataflowId,
+        newRepresentative[0].providerAccount,
+        parseInt(newRepresentative[0].dataProviderId)
+      );
 
       formDispatcher({
         type: 'REFRESH'
@@ -50,7 +52,7 @@ const addRepresentative = async (formDispatcher, formState, dataflowId) => {
   }
 };
 
-export const getInitialData = async (formDispatcher, dataflowId, formState) => {
+const getAllRepresentatives = async (dataflowId, formDispatcher) => {
   try {
     const response = await RepresentativeService.allRepresentatives(dataflowId);
 
@@ -67,21 +69,28 @@ export const getInitialData = async (formDispatcher, dataflowId, formState) => {
   }
 };
 
-export const onAddRepresentative = (formDispatcher, formState, representative, dataflowId) => {
+export const getInitialData = async (formDispatcher, dataflowId, formState) => {
+  await getAllRepresentatives(dataflowId, formDispatcher, formState);
+};
+
+export const onAddProvider = (formDispatcher, formState, representative, dataflowId) => {
   isNil(representative.representativeId)
-    ? addRepresentative(formDispatcher, formState, dataflowId)
+    ? addRepresentative(formDispatcher, formState.representatives, dataflowId, formState)
     : updateRepresentative(formDispatcher, formState, representative);
 };
 
-export const onPermissionsChange = async (formDispatcher, newPermission, representative, formState) => {
+export const onDataProviderIdChange = async (formDispatcher, newDataProviderId, representative, formState) => {
   if (!isNil(representative.representativeId)) {
     try {
-      await RepresentativeService.updatePermission(parseInt(representative.representativeId), newPermission);
+      await RepresentativeService.updateDataProviderId(
+        parseInt(representative.representativeId),
+        parseInt(newDataProviderId)
+      );
       formDispatcher({
         type: 'REFRESH'
       });
     } catch (error) {
-      console.error('error on RepresentativeService.updatePermission', error);
+      console.error('error on RepresentativeService.updateDataProviderId', error);
     }
   } else {
     const { representatives } = formState;
@@ -89,7 +98,7 @@ export const onPermissionsChange = async (formDispatcher, newPermission, represe
     const [thisRepresentative] = representatives.filter(
       thisRepresentative => thisRepresentative.representativeId === representative.representativeId
     );
-    thisRepresentative.permission = newPermission;
+    thisRepresentative.dataProviderId = newDataProviderId;
 
     formDispatcher({
       type: 'ON_PERMISSIONS_CHANGE',
@@ -117,7 +126,7 @@ export const onDeleteConfirm = async (formDispatcher, formState) => {
 
 export const onKeyDown = (event, formDispatcher, formState, representative, dataflowId) => {
   if (event.key === 'Enter') {
-    onAddRepresentative(formDispatcher, formState, representative, dataflowId);
+    onAddProvider(formDispatcher, formState, representative, dataflowId);
   }
 };
 
