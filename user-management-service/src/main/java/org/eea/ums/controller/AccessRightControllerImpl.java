@@ -116,8 +116,18 @@ public class AccessRightControllerImpl implements AccessRightController {
   @PostMapping("/{dataflowId}")
   public Long createRoleUser(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody RepresentativeVO representativeVO) {
-    // we can only assign an editor, reporter or reporter partition role
-    // mock
+
+    switch (representativeVO.getRole()) {
+      case "EDITOR":
+      case "REPORTER_PARTITIONED":
+      case "REPORTER":
+        accessRightService.deleteRoleUser(representativeVO, dataflowId);
+        break;
+      default:
+        LOG.info("Didn't remove role of the representative with id {} because its role is {}",
+            representativeVO.getId(), representativeVO.getRole());
+        break;
+    }
     return 1L;
   }
 }

@@ -15,4 +15,12 @@ public interface AccessRightService {
    * @param dataflowId the dataflow id
    */
   void deleteRoleUser(RepresentativeVO representativeVO, Long dataflowId);
+
+  /**
+   * Creates the role user.
+   *
+   * @param representativeVO the representative VO
+   * @param dataflowId the dataflow id
+   */
+  void createRoleUser(RepresentativeVO representativeVO, Long dataflowId);
 }
