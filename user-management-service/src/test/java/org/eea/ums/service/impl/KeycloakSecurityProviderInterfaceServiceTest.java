@@ -256,13 +256,13 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   }
 
 
-  /**
-   * Removes the user from user group.
-   */
-  @Test(expected = UnsupportedOperationException.class)
-  public void removeUserFromUserGroup() {
-    keycloakSecurityProviderInterfaceService.removeUserFromUserGroup("", "");
-  }
+  // /**
+  // * Removes the user from user group.
+  // */
+  // @Test(expected = UnsupportedOperationException.class)
+  // public void removeUserFromUserGroup() {
+  // keycloakSecurityProviderInterfaceService.removeUserFromUserGroup("", "");
+  // }
 
   /**
    * Gets the resources by user.

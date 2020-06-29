@@ -99,8 +99,9 @@ public interface SecurityProviderInterfaceService {
    *
    * @param userId the user id
    * @param groupId the group id
+   * @throws EEAException
    */
-  void removeUserFromUserGroup(String userId, String groupId);
+  void removeUserFromUserGroup(String userId, String groupId) throws EEAException;
 
   /**
    * Gets resources by user.
@@ -243,4 +244,23 @@ public interface SecurityProviderInterfaceService {
    */
   UserRepresentation setAttributesWithApiKey(UserRepresentation user,
       Map<String, List<String>> attributes);
+
+  /**
+   * Removes the contributor from user group.
+   *
+   * @param contributor the contributor
+   * @param userMail the user mail
+   * @param groupName the group name
+   * @throws EEAException the EEA exception
+   */
+  void removeContributorFromUserGroup(Optional<UserRepresentation> contributor, String userMail,
+      String groupName) throws EEAException;
+
+  /**
+   * Removes the contributors from user group.
+   *
+   * @param resources the resources
+   * @throws EEAException the EEA exception
+   */
+  void removeContributorsFromUserGroup(List<ResourceAssignationVO> resources) throws EEAException;
 }

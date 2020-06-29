@@ -199,4 +199,13 @@ public interface KeycloakConnectorService {
    * @return the user by group id
    */
   UserRepresentation[] getUsersByGroupId(String groupId);
+
+  /**
+   * Removes the user from group.
+   *
+   * @param userId the user id
+   * @param groupId the group id
+   * @throws EEAException the EEA exception
+   */
+  void removeUserFromGroup(String userId, String groupId) throws EEAException;
 }

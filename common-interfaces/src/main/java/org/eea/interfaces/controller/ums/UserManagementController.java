@@ -11,6 +11,7 @@ import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -259,4 +260,32 @@ public interface UserManagementController {
    */
   @GetMapping("/getUsersByGroup/{group}")
   List<UserRepresentationVO> getUsersByGroup(@PathVariable("group") String group);
+
+  /**
+   * Removes the contributor from resource.
+   *
+   * @param idResource the id resource
+   * @param resourceGroupEnum the resource group enum
+   * @param userMail the user mail
+   */
+  @DeleteMapping("/remove_contributor_from_resource")
+  void removeContributorFromResource(@RequestParam("idResource") Long idResource,
+      @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum,
+      @RequestParam("userMail") String userMail);
+
+  /**
+   * Removes the contributors from resources.
+   *
+   * @param resources the resources
+   */
+  @DeleteMapping("/remove_contributors_from_resources")
+  void removeContributorsFromResources(@RequestBody List<ResourceAssignationVO> resources);
+
+  /**
+   * Removes the user from resources.
+   *
+   * @param resources the resources
+   */
+  @DeleteMapping("/remove_user_from_resources")
+  public void removeUserFromResources(@RequestBody List<ResourceAssignationVO> resources);
 }

@@ -101,10 +101,9 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    */
   private static final String DELETE_USER_GROUP_URL = "/auth/admin/realms/{realm}/groups/{groupId}";
 
-  /**
-   * The Constant ADD_USER_TO_USER_GROUP_URL.
-   */
-  private static final String ADD_USER_TO_USER_GROUP_URL =
+
+  /** The Constant ALTER_USER_TO_USER_GROUP_URL: {@value}. */
+  private static final String ALTER_USER_TO_USER_GROUP_URL =
       "/auth/admin/realms/{realm}/users/{userId}/groups/{groupId}";
 
   /**
@@ -253,9 +252,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   @Autowired
   private RestTemplate restTemplate;
 
-  /**
-   * the token monitor
-   */
+  /** the token monitor. */
   @Autowired
   private TokenMonitor tokenMonitor;
 
@@ -495,6 +492,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   /**
    * Gets the groups with search.
    *
+   * @param value the value
    * @return the groups
    */
   @Override
@@ -590,8 +588,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   /**
    * Gets the users.
    *
-   * @param userId the user id
-   *
+   * @param groupId the group id
    * @return the user
    */
   @Override
@@ -612,6 +609,12 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
         .orElse(null);
   }
 
+  /**
+   * Gets the user roles.
+   *
+   * @param userId the user id
+   * @return the user roles
+   */
   @Override
   public RoleRepresentation[] getUserRoles(String userId) {
     Map<String, String> uriParams = new HashMap<>();
@@ -694,11 +697,39 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     try {
       this.restTemplate.exchange(
           uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-              .path(ADD_USER_TO_USER_GROUP_URL).buildAndExpand(uriParams).toString(),
+              .path(ALTER_USER_TO_USER_GROUP_URL).buildAndExpand(uriParams).toString(),
           HttpMethod.PUT, request, Void.class);
     } catch (Exception e) {
       LOG_ERROR.error("Error creating permission due to reason {}", e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED, e);
+    }
+
+  }
+
+
+  /**
+   * Removes the user from group.
+   *
+   * @param userId the user id
+   * @param groupId the group id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void removeUserFromGroup(String userId, String groupId) throws EEAException {
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
+    uriParams.put(URI_PARAM_GROUP_ID, groupId);
+    uriParams.put(URI_PARAM_USER_ID, userId);
+    HttpEntity<Void> request = createHttpRequest(null, uriParams);
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    try {
+      this.restTemplate.exchange(
+          uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
+              .path(ALTER_USER_TO_USER_GROUP_URL).buildAndExpand(uriParams).toString(),
+          HttpMethod.DELETE, request, Void.class);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error removing permission due to reason {}", e.getMessage(), e);
+      throw new EEAException(EEAErrorMessage.PERMISSION_NOT_REMOVED, e);
     }
 
   }
