@@ -79,7 +79,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       },
       {
         label: resources.messages['dataflow'],
-        icon: 'archive',
+        icon: 'clone',
         href: getUrl(
           routes.DATAFLOW,
           {
