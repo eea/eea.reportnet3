@@ -7,10 +7,8 @@ import isNil from 'lodash/isNil';
 
 import styles from './ManageUniqueConstraint.module.scss';
 
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ListBox } from 'ui/views/DatasetDesigner/_components/ListBox';
 
 import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
@@ -84,20 +82,29 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
     if (selectedTable.value) {
       const table = datasetSchemaAllTables.filter(table => table.tableSchemaId === selectedTable.value)[0];
       if (table && table.records) {
-        console.log(table.records[0].fields);
         return !isEmpty(table.records[0].fields)
-          ? table.records[0].fields.map(field => ({ name: field.name, value: field.fieldId, isPk: field.pk }))
+          ? table.records[0].fields.map(field => ({ name: field.name, value: field.fieldId }))
           : [{ name: resources.messages['noFieldsToSelect'], disabled: true }];
       }
     } else return [{ name: resources.messages['noTableSelected'], disabled: true }];
   };
 
   const pkTemplate = option => {
-    console.log({ option });
+    let isPk = false;
+    const table = datasetSchemaAllTables.filter(table => table.tableSchemaId === selectedTable.value)[0];
+    if (table && table.records) {
+      const filteredField = table.records[0].fields.filter(field => field.fieldId === option.value);
+      if (filteredField[0]) {
+        if (filteredField[0].pk) {
+          isPk = true;
+        }
+      }
+    }
+
     return (
       <span>
         {`${option.name}`}
-        {option.isPk ? <span className={styles.pkField}>{'PK'}</span> : ''}
+        {isPk ? <span className={styles.pkField}>{'PK'}</span> : ''}
       </span>
     );
   };
