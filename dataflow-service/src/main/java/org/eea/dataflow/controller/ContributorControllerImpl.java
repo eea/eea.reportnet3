@@ -45,25 +45,24 @@ public class ContributorControllerImpl implements ContributorController {
   /**
    * Delete resource.
    *
-   * @param contributorVO the role user VO
    * @param dataflowId the dataflow id
+   * @param account the account
    */
-  @DeleteMapping(value = "/dataflow/{dataflowId}")
+  @DeleteMapping(value = "/dataflow/{dataflowId}/user/{account}")
   @Override
-  public void delete(@RequestBody ContributorVO contributorVO,
-      @PathVariable("dataflowId") Long dataflowId) {
-    // we can only remove role of editor, reporter or reporter partition type
-    switch (contributorVO.getRole()) {
-      case "EDITOR":
-      case "REPORTER_PARTITIONED":
-      case "REPORTER":
-        contributorService.deleteContributor(contributorVO, dataflowId);
-        break;
-      default:
-        LOG.info("Didn't remove role of the user with account {} because its role is {}",
-            contributorVO.getAccount(), contributorVO.getRole());
-        break;
-    }
+  public void delete(@PathVariable("dataflowId") Long dataflowId, @PathVariable String account) {
+    // we can only remove role of editor, reporter type
+    // switch (contributorVO.getRole()) {
+    // case "EDITOR":
+    // case "REPORTER_PARTITIONED":
+    // case "REPORTER":
+    // contributorService.deleteContributor(contributorVO, dataflowId);
+    // break;
+    // default:
+    // LOG.info("Didn't remove role of the user with account {} because its role is {}",
+    // contributorVO.getAccount(), contributorVO.getRole());
+    // break;
+    // }
   }
 
   /**
