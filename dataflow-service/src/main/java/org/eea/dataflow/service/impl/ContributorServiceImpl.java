@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 /**
  * The Class ContributorServiceImpl.
  */
-@Service("ContributorService")
+@Service
 public class ContributorServiceImpl implements ContributorService {
 
   /**
