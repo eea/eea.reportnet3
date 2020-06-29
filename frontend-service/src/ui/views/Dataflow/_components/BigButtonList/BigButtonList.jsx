@@ -379,7 +379,7 @@ export const BigButtonList = ({
         <Dialog
           className={styles.dialog}
           footer={renderDialogFooter}
-          header={resources.messages['DataflowsList']}
+          header={resources.messages['dataflowsList']}
           onHide={() => setCloneDialogVisible(false)}
           style={{ width: '95%' }}
           visible={cloneDialogVisible}>

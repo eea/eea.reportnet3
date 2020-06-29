@@ -703,7 +703,7 @@
     "targetDatasetSchema": "Target dataset schema",
     "targetTable": "Target table",
     "cloneSchemasFromDataflow": "Clone all schemas from dataflow",
-    "DataflowsList": "Dataflow's List",
+    "dataflowsList": "Dataflows",
     "cloneSelectedDataflow": "Clone selected dataflow",
     "selectedDataflow": "Selected dataflow",
     "totalDataflows": "Total dataflows",

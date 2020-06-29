@@ -29,6 +29,22 @@ export const TableViewSchemas = ({
     legalInstruments: resources.messages['legalInstrument']
   };
 
+  const getOrderedFields = dataflows => {
+    const dataflowsWithPriority = [
+      { id: 'name', index: 0 },
+      { id: 'description', index: 1 },
+      { id: 'obligation', index: 2 },
+      { id: 'status', index: 3 },
+      { id: 'expirationDate', index: 4 }
+    ];
+
+    return dataflows
+      .map(field => dataflowsWithPriority.filter(e => field === e.id))
+      .flat()
+      .sort((a, b) => a.index - b.index)
+      .map(orderedField => orderedField.id);
+  };
+
   const headerTableTemplate = field => fieldTables[field] || resources.messages[field];
 
   const onLoadCheckButton = row => {
@@ -66,22 +82,13 @@ export const TableViewSchemas = ({
   const renderCheckColum = <Column key="checkId" body={row => onLoadCheckButton(row)} />;
 
   const renderColumns = dataflows => {
-    const fieldColumns = Object.keys(dataflows[0])
-      .filter(
-        key =>
-          key.includes('name') ||
-          key.includes('expirationDate') ||
-          key.includes('description') ||
-          key.includes('status') ||
-          key.includes('obligation')
-      )
-      .map(field => {
-        let template = null;
-        if (field === 'name') template = onLoadTitleTemplate;
-        if (field === 'obligation') template = onLoadObligationTemplate;
+    const fieldColumns = getOrderedFields(Object.keys(dataflows[0])).map(field => {
+      let template = null;
+      if (field === 'name') template = onLoadTitleTemplate;
+      if (field === 'obligation') template = onLoadObligationTemplate;
 
-        return <Column body={template} field={field} header={headerTableTemplate(field)} key={field} sortable={true} />;
-      });
+      return <Column body={template} field={field} header={headerTableTemplate(field)} key={field} sortable={true} />;
+    });
 
     const legalFieldColumn = Object.values(dataflows[0]).filter(key => typeof key === 'object');
 
@@ -94,7 +101,7 @@ export const TableViewSchemas = ({
         return <Column body={template} field={field} header={headerTableTemplate(field)} key={field} sortable={true} />;
       });
 
-    fieldColumns.push(legalInstrument);
+    fieldColumns.splice(3, 0, legalInstrument);
     fieldColumns.unshift(renderCheckColum);
 
     return fieldColumns;
