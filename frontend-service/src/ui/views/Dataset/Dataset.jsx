@@ -123,7 +123,7 @@ export const Dataset = withRouter(({ match, history }) => {
         },
         {
           label: resources.messages['dataflow'],
-          icon: 'archive',
+          icon: 'clone',
           href: getUrl(
             routes.DATAFLOW,
             {
