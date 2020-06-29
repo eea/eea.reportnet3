@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 /**
@@ -33,8 +32,9 @@ public interface ContributorController {
    * @param contributorVO the role user VO
    * @param dataflowId the dataflow id
    */
-  @DeleteMapping(value = "/delete")
-  void delete(@RequestBody ContributorVO contributorVO, @RequestParam Long dataflowId);
+  @DeleteMapping(value = "/dataflow/{dataflowId}")
+  void delete(@RequestBody ContributorVO contributorVO,
+      @PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Find role users by group.
