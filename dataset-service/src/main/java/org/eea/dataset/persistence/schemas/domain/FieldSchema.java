@@ -72,6 +72,10 @@ public class FieldSchema {
   @Field(value = "pkMustBeUsed")
   private Boolean pkMustBeUsed;
 
+  /** The pk has multiple values. */
+  @Field(value = "pkHasMultipleValues")
+  private Boolean pkHasMultipleValues;
+
   /**
    * Hash code.
    *
