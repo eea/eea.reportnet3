@@ -1,7 +1,7 @@
 package org.eea.interfaces.controller.dataflow;
 
 import java.util.List;
-import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.RoleUserVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +22,7 @@ public interface AccessRightController {
   /**
    * The interface Resource management controller zull.
    */
-  @FeignClient(value = "ums", contextId = "accessRight", path = "/accessRight")
+  @FeignClient(value = "dataflow", contextId = "accessRight", path = "/accessRight")
   interface AccessRightControllerZuul extends AccessRightController {
 
   }
@@ -33,8 +33,7 @@ public interface AccessRightController {
    * @param resourceInfoVO the resource info vo
    */
   @DeleteMapping(value = "/delete")
-  void deleteRoleUser(@RequestBody RepresentativeVO representativeVO,
-      @RequestParam Long dataflowId);
+  void deleteRoleUser(@RequestBody RoleUserVO roleUserVO, @RequestParam Long dataflowId);
 
   /**
    * Find role users by group.
@@ -44,7 +43,7 @@ public interface AccessRightController {
    * @return the list
    */
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<RepresentativeVO> findRoleUsersByGroup(@PathVariable("dataflowId") Long dataflowId);
+  List<RoleUserVO> findRoleUsersByGroup(@PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Update role user.
@@ -54,7 +53,7 @@ public interface AccessRightController {
    */
   @PutMapping(value = "/update/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   ResponseEntity updateRoleUser(@PathVariable("dataflowId") Long dataflowId,
-      @RequestBody RepresentativeVO representativeVO);
+      @RequestBody RoleUserVO roleUserVO);
 
   /**
    * Creates the role user.
@@ -65,5 +64,5 @@ public interface AccessRightController {
    */
   @PostMapping("/{dataflowId}")
   Long createRoleUser(@PathVariable("dataflowId") Long dataflowId,
-      @RequestBody RepresentativeVO representativeVO);
+      @RequestBody RoleUserVO roleUserVO);
 }

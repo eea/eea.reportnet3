@@ -1,6 +1,6 @@
 package org.eea.dataflow.service;
 
-import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.RoleUserVO;
 
 /**
  * The Interface AccessRightService.
@@ -11,16 +11,16 @@ public interface AccessRightService {
   /**
    * Delete role user.
    *
-   * @param representativeVO the representative VO
+   * @param roleUserVO the role user VO
    * @param dataflowId the dataflow id
    */
-  void deleteRoleUser(RepresentativeVO representativeVO, Long dataflowId);
+  void deleteRoleUser(RoleUserVO roleUserVO, Long dataflowId);
 
   /**
    * Creates the role user.
    *
-   * @param representativeVO the representative VO
+   * @param roleUserVO the role user VO
    * @param dataflowId the dataflow id
    */
-  void createRoleUser(RepresentativeVO representativeVO, Long dataflowId);
+  void createRoleUser(RoleUserVO roleUserVO, Long dataflowId);
 }
