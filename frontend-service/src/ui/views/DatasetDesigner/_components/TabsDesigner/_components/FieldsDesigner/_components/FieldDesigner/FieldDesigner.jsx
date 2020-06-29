@@ -290,6 +290,12 @@ export const FieldDesigner = ({
 
   const onCancelSaveCodelist = () => {
     // onCodelistAndLinkShow(fieldId, { fieldType: 'Codelist', value: 'Codelist', fieldTypeIcon: 'list' });
+
+    if (!isUndefined(fieldId)) {
+      if (fieldId.toString() === '-1') {
+        onFieldAdd({ codelistItems });
+      }
+    }
     dispatchFieldDesigner({ type: 'CANCEL_SELECT_CODELIST' });
   };
 
