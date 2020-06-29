@@ -193,7 +193,7 @@ public class DatasetMetabaseServiceTest {
     Mockito.when(reportingDatasetRepository.save(Mockito.any())).thenReturn(reporting);
     RepresentativeVO representative = new RepresentativeVO();
     representative.setDataProviderId(1L);
-    representative.setAccount("test@reportnet.net");
+    representative.setProviderAccount("test@reportnet.net");
     datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.REPORTING, "",
         "5d0c822ae1ccd34cfcd97e20", 1L, null, Arrays.asList(representative), 0);
 
@@ -214,7 +214,7 @@ public class DatasetMetabaseServiceTest {
             .user((String) ThreadPropertiesManager.getVariable("user")).dataflowId(1L).build());
     RepresentativeVO representative = new RepresentativeVO();
     representative.setDataProviderId(1L);
-    representative.setAccount("test@reportnet.net");
+    representative.setProviderAccount("test@reportnet.net");
     try {
       datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.REPORTING, "datasetName",
           (new ObjectId()).toString(), 1L, null, new ArrayList<>(), 0);
@@ -399,7 +399,7 @@ public class DatasetMetabaseServiceTest {
   public void createGroupAndAddUserTest() {
 
     RepresentativeVO representative = new RepresentativeVO();
-    representative.setAccount("test@reportnet.net");
+    representative.setProviderAccount("test@reportnet.net");
     representative.setDataProviderId(1L);
     Map<Long, String> mapTest = new HashMap<>();
     mapTest.put(1L, "test@reportnet.net");

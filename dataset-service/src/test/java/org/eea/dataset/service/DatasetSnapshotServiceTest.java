@@ -610,7 +610,7 @@ public class DatasetSnapshotServiceTest {
     dataset.setDataProviderId(1L);
     dataset.setDataSetName("datsetName");
     representative.setDataProviderId(1L);
-    representative.setAccount("providerAccount");
+    representative.setProviderAccount("providerAccount");
     representative.setReceiptDownloaded(true);
     representative.setReceiptOutdated(true);
     datasets.add(dataset);

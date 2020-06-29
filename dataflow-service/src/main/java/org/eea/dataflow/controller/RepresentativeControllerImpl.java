@@ -139,10 +139,10 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   public ResponseEntity updateRepresentative(@RequestBody RepresentativeVO representativeVO) {
     String message = null;
     HttpStatus status = HttpStatus.OK;
-    if (representativeVO.getAccount() != null) {
+    if (representativeVO.getProviderAccount() != null) {
       List<UserRepresentationVO> users = userManagementControllerZull.getUsers();
       UserRepresentationVO userRepresentationVO = users.stream()
-          .filter(user -> representativeVO.getAccount().equalsIgnoreCase(user.getEmail()))
+          .filter(user -> representativeVO.getProviderAccount().equalsIgnoreCase(user.getEmail()))
           .findFirst().orElse(null);
       if (userRepresentationVO == null) {
         message = EEAErrorMessage.USER_REQUEST_NOTFOUND;

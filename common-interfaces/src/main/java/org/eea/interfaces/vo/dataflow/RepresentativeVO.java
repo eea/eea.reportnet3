@@ -22,8 +22,8 @@ public class RepresentativeVO implements Serializable {
   /** The data provider id. */
   private Long dataProviderId;
 
-  /** The account email. */
-  private String account;
+  /** The provider account. */
+  private String providerAccount;
 
   /** The data provider group id. */
   private Long dataProviderGroupId;
@@ -36,10 +36,4 @@ public class RepresentativeVO implements Serializable {
 
   /** The has datasets. */
   private Boolean hasDatasets;
-
-  /** The role. */
-  private String role;
-
-  /** The write permission. */
-  private Boolean permission;
 }
