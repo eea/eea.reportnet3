@@ -384,6 +384,9 @@
         },
         {
           "key": "LOADING_FILE_EXTENSIONS_ERROR"
+        },
+        {
+          "key": "COPY_DATASET_SCHEMA_FAILED_EVENT"
         }
       ]
     },
@@ -533,6 +536,9 @@
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
           }
+        },
+        {
+          "key": "COPY_DATASET_SCHEMA_COMPLETED_EVENT"
         }
       ]
     },
@@ -559,6 +565,9 @@
         },
         {
           "key": "CREATE_DATA_COLLECTION_INIT"
+        },
+        {
+          "key": "CLONE_DATASET_SCHEMAS_INIT"
         }
       ]
     }

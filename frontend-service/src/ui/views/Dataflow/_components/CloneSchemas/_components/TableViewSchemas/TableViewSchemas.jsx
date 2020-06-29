@@ -73,7 +73,6 @@ export const TableViewSchemas = ({
           key.includes('expirationDate') ||
           key.includes('description') ||
           key.includes('status') ||
-          key.includes('userRole') ||
           key.includes('obligation')
       )
       .map(field => {
