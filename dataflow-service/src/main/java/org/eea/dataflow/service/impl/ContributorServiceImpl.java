@@ -1,7 +1,7 @@
 package org.eea.dataflow.service.impl;
 
 
-import org.eea.dataflow.service.AccessRightService;
+import org.eea.dataflow.service.ContributorService;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -17,15 +17,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * The Class AccessRightServiceImpl.
+ * The Class ContributorServiceImpl.
  */
-@Service("AccessRightService")
-public class AccessRightServiceImpl implements AccessRightService {
+@Service("ContributorService")
+public class ContributorServiceImpl implements ContributorService {
 
   /**
    * The Constant LOG.
    */
-  private static final Logger LOG = LoggerFactory.getLogger(AccessRightServiceImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ContributorServiceImpl.class);
   /**
    * The Constant LOG_ERROR.
    */

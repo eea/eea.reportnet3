@@ -13,56 +13,57 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * The Class AccessRightController.
- */
-public interface AccessRightController {
 
+/**
+ * The Interface ContributorController.
+ */
+public interface ContributorController {
 
   /**
    * The interface Resource management controller zull.
    */
-  @FeignClient(value = "dataflow", contextId = "accessRight", path = "/accessRight")
-  interface AccessRightControllerZuul extends AccessRightController {
+  @FeignClient(value = "dataflow", contextId = "contributor", path = "/contributor")
+  interface ContributorControllerZuul extends ContributorController {
 
   }
 
   /**
    * Delete resource.
    *
-   * @param resourceInfoVO the resource info vo
+   * @param roleUserVO the role user VO
+   * @param dataflowId the dataflow id
    */
   @DeleteMapping(value = "/delete")
-  void deleteRoleUser(@RequestBody RoleUserVO roleUserVO, @RequestParam Long dataflowId);
+  void delete(@RequestBody RoleUserVO roleUserVO, @RequestParam Long dataflowId);
 
   /**
    * Find role users by group.
    *
    * @param dataflowId the dataflow id
-   * @param role the role
    * @return the list
    */
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<RoleUserVO> findRoleUsersByGroup(@PathVariable("dataflowId") Long dataflowId);
+  List<RoleUserVO> findContributorsByGroup(@PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Update role user.
    *
-   * @param representativeVO the representative VO
+   * @param dataflowId the dataflow id
+   * @param roleUserVO the role user VO
    * @return the response entity
    */
-  @PutMapping(value = "/update/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  ResponseEntity updateRoleUser(@PathVariable("dataflowId") Long dataflowId,
+  @PutMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  ResponseEntity update(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody RoleUserVO roleUserVO);
 
   /**
    * Creates the role user.
    *
    * @param dataflowId the dataflow id
-   * @param representativeVO the representative VO
+   * @param roleUserVO the role user VO
    * @return the long
    */
-  @PostMapping("/{dataflowId}")
-  Long createRoleUser(@PathVariable("dataflowId") Long dataflowId,
+  @PostMapping("/dataflow/{dataflowId}")
+  Long createContributor(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody RoleUserVO roleUserVO);
 }

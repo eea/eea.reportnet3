@@ -2,10 +2,11 @@ package org.eea.dataflow.service;
 
 import org.eea.interfaces.vo.dataflow.RoleUserVO;
 
+
 /**
- * The Interface AccessRightService.
+ * The Interface ContributorService.
  */
-public interface AccessRightService {
+public interface ContributorService {
 
 
   /**
