@@ -605,7 +605,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     fillDataset(dataset, provider.getLabel(), dataflowId, datasetSchemaId);
     dataset.setDataProviderId(representative.getDataProviderId());
     Long idDataset = reportingDatasetRepository.save(dataset).getId();
-    datasetIdsEmail.put(idDataset, representative.getAccount());
+    datasetIdsEmail.put(idDataset, representative.getProviderAccount());
     recordStoreControllerZull.createEmptyDataset(LiteralConstants.DATASET_PREFIX + idDataset,
         datasetSchemaId);
     LOG.info("New Reporting Dataset into the dataflow {}. DatasetId {} with name {}", dataflowId,

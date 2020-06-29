@@ -64,7 +64,7 @@ public class RepresentativeControllerImplTest {
     users = new ArrayList<>();
     users.add(user);
     representativeVO = new RepresentativeVO();
-    representativeVO.setAccount("email@host.com");
+    representativeVO.setProviderAccount("email@host.com");
     representativeVOs = new ArrayList<>();
     representativeVOs.add(representativeVO);
     MockitoAnnotations.initMocks(this);
@@ -167,7 +167,7 @@ public class RepresentativeControllerImplTest {
    */
   @Test
   public void updateRepresentativeSuccessNoAccountTest() throws EEAException {
-    representativeVO.setAccount(null);
+    representativeVO.setProviderAccount(null);
     representativeControllerImpl.updateRepresentative(representativeVO);
     Mockito.verify(representativeService, times(1)).updateDataflowRepresentative(Mockito.any());
   }
@@ -177,7 +177,7 @@ public class RepresentativeControllerImplTest {
    */
   @Test
   public void updateRepresentativeException1Test() {
-    representativeVO.setAccount("otro@host.com");
+    representativeVO.setProviderAccount("otro@host.com");
     when(userManagementControllerZull.getUsers()).thenReturn(users);
     try {
       representativeControllerImpl.updateRepresentative(representativeVO);

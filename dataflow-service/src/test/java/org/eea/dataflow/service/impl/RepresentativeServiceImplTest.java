@@ -79,7 +79,7 @@ public class RepresentativeServiceImplTest {
     representative.setDataflow(dataflow);
     representativeVO = new RepresentativeVO();
     representativeVO.setId(1L);
-    representativeVO.setAccount("email");
+    representativeVO.setProviderAccount("email");
     arrayId = new ArrayList<>();
     arrayId.add(new Representative());
     MockitoAnnotations.initMocks(this);
@@ -148,7 +148,7 @@ public class RepresentativeServiceImplTest {
    */
   @Test
   public void updateDataflowRepresentativeSuccessTest() throws EEAException {
-    representativeVO.setAccount("user");
+    representativeVO.setProviderAccount("user");
     representativeVO.setDataProviderId(1L);
     when(representativeRepository.findById(Mockito.any())).thenReturn(Optional.of(representative));
     when(representativeRepository.save(Mockito.any())).thenReturn(representative);
@@ -287,7 +287,7 @@ public class RepresentativeServiceImplTest {
     Representative representative = new Representative();
     representative.setId(1L);
     RepresentativeVO representativeVO = new RepresentativeVO();
-    representativeVO.setAccount("sample@email.net");
+    representativeVO.setProviderAccount("sample@email.net");
     representativeVO.setDataProviderId(1L);
 
     Mockito.when(dataflowRepository.findById(Mockito.any()))
@@ -315,7 +315,7 @@ public class RepresentativeServiceImplTest {
     Representative representative = new Representative();
     representative.setId(1L);
     RepresentativeVO representativeVO = new RepresentativeVO();
-    representativeVO.setAccount("sample@email.net");
+    representativeVO.setProviderAccount("sample@email.net");
     representativeVO.setDataProviderId(null);
 
     Mockito.when(dataflowRepository.findById(Mockito.any()))
@@ -338,7 +338,7 @@ public class RepresentativeServiceImplTest {
   @Test(expected = EEAException.class)
   public void createRepresentativeDataflowNotFoundExceptionTest() throws EEAException {
     RepresentativeVO representativeVO = new RepresentativeVO();
-    representativeVO.setAccount("sample@email.net");
+    representativeVO.setProviderAccount("sample@email.net");
     representativeVO.setDataProviderId(1L);
 
     Mockito.when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.empty());
@@ -358,7 +358,7 @@ public class RepresentativeServiceImplTest {
   @Test(expected = EEAException.class)
   public void createRepresentativeUserRequestotFoundExceptionTest() throws EEAException {
     RepresentativeVO representativeVO = new RepresentativeVO();
-    representativeVO.setAccount("sample@email.net");
+    representativeVO.setProviderAccount("sample@email.net");
     representativeVO.setDataProviderId(1L);
 
     Mockito.when(dataflowRepository.findById(Mockito.any()))
@@ -382,7 +382,7 @@ public class RepresentativeServiceImplTest {
     Representative representative = new Representative();
     representative.setId(1L);
     RepresentativeVO representativeVO = new RepresentativeVO();
-    representativeVO.setAccount("sample@email.net");
+    representativeVO.setProviderAccount("sample@email.net");
     representativeVO.setDataProviderId(1L);
 
     Mockito.when(dataflowRepository.findById(Mockito.any()))
