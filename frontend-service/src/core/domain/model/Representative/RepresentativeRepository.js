@@ -7,7 +7,7 @@ export const RepresentativeRepository = {
   deleteById: () => Promise.reject('[RepresentativeRepository#deleteById] must be implemented'),
   getProviderTypes: () => Promise.reject('[RepresentativeRepository#getProviderTypes] must be implemented'),
   update: () => Promise.reject('[RepresentativeRepository#updateById] must be implemented'),
-  updateAccount: () => Promise.reject('[RepresentativeRepository#updateAccount] must be implemented'),
+  updateProviderAccount: () => Promise.reject('[RepresentativeRepository#updateProviderAccount] must be implemented'),
   updatePermission: () => Promise.reject('[RepresentativeRepository#updatePermission] must be implemented'),
   updateDataProviderId: () => Promise.reject('[RepresentativeRepository#updateDataProviderId] must be implemented')
 };

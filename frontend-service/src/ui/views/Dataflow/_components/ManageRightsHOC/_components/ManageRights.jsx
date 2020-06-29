@@ -30,7 +30,7 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
   }, [formState.representativesHaveError]);
 
   const accountInputColumnTemplate = representative => {
-    let inputData = representative.account;
+    let inputData = representative.providerAccount;
 
     let hasError = formState.representativesHaveError.includes(representative.representativeId);
 
@@ -40,7 +40,7 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
       const [thisRepresentative] = representatives.filter(
         thisRepresentative => thisRepresentative.representativeId === representativeId
       );
-      thisRepresentative.account = value;
+      thisRepresentative.providerAccount = value;
 
       formDispatcher({
         type: 'ON_ACCOUNT_CHANGE',
@@ -57,7 +57,7 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
             autoFocus={isNil(representative.representativeId)}
             id={isEmpty(inputData) ? 'emptyInput' : undefined}
             onBlur={() => {
-              representative.account = representative.account.toLowerCase();
+              representative.providerAccount = representative.providerAccount.toLowerCase();
               onAddRepresentative(formDispatcher, formState, representative, dataflowId);
             }}
             onChange={event => onAccountChange(event.target.value, representative.representativeId)}

@@ -6,7 +6,7 @@ import { GetProviderTypes } from './GetProviderTypes';
 import { Update } from './Update';
 import { UpdateDataProviderId } from './UpdateDataProviderId';
 import { UpdatePermission } from './UpdatePermission';
-import { UpdateAccount } from './UpdateAccount';
+import { UpdateProviderAccount } from './UpdateProviderAccount';
 
 import { representativeRepository } from 'core/domain/model/Representative/RepresentativeRepository';
 
@@ -19,5 +19,5 @@ export const RepresentativeService = {
   update: Update({ representativeRepository }),
   updateDataProviderId: UpdateDataProviderId({ representativeRepository }),
   updatePermission: UpdatePermission({ representativeRepository }),
-  updateAccount: UpdateAccount({ representativeRepository })
+  updateProviderAccount: UpdateProviderAccount({ representativeRepository })
 };

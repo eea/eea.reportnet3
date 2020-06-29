@@ -29,9 +29,9 @@ const addRepresentative = async (formDispatcher, formState, dataflowId) => {
   const { representatives } = formState;
   const [newRepresentative] = representatives.filter(representative => isNil(representative.representativeId));
 
-  if (!isEmpty(newRepresentative.account) && !isEmpty(newRepresentative.permission)) {
+  if (!isEmpty(newRepresentative.providerAccount) && !isEmpty(newRepresentative.permission)) {
     try {
-      await RepresentativeService.add(dataflowId, newRepresentative.account, newRepresentative.permission);
+      await RepresentativeService.add(dataflowId, newRepresentative.providerAccount, newRepresentative.permission);
 
       formDispatcher({
         type: 'REFRESH'
@@ -50,26 +50,9 @@ const addRepresentative = async (formDispatcher, formState, dataflowId) => {
   }
 };
 
-export const getEditors = async (formDispatcher, dataflowId) => {
+export const getInitialData = async (formDispatcher, dataflowId, formState) => {
   try {
-    const response = await RepresentativeService.allRepresentatives(dataflowId); // Editor endpoint
-
-    response.representatives.push(emptyRepresentative);
-
-    const representativesByCopy = cloneDeep(response.representatives);
-
-    formDispatcher({
-      type: 'INITIAL_LOAD',
-      payload: { representatives: response.representatives, representativesByCopy }
-    });
-  } catch (error) {
-    console.error('error on RepresentativeService.allRepresentatives', error);
-  }
-};
-
-export const getReporters = async (formDispatcher, dataflowId) => {
-  try {
-    const response = await RepresentativeService.allRepresentatives(dataflowId); // Reporter endpoint
+    const response = await RepresentativeService.allRepresentatives(dataflowId);
 
     response.representatives.push(emptyRepresentative);
 
@@ -145,12 +128,12 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
   for (let initialRepresentative of initialRepresentatives) {
     if (
       initialRepresentative.representativeId === updatedRepresentative.representativeId &&
-      initialRepresentative.account !== updatedRepresentative.account
+      initialRepresentative.providerAccount !== updatedRepresentative.providerAccount
     ) {
       isChangedAccount = true;
     } else if (
       initialRepresentative.representativeId === updatedRepresentative.representativeId &&
-      initialRepresentative.account === updatedRepresentative.account
+      initialRepresentative.providerAccount === updatedRepresentative.providerAccount
     ) {
       const filteredInputsWithErrors = formState.representativesHaveError.filter(
         representativeId => representativeId !== updatedRepresentative.representativeId
@@ -164,15 +147,15 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
 
   if (isChangedAccount) {
     try {
-      await RepresentativeService.updateAccount(
+      await RepresentativeService.updateProviderAccount(
         parseInt(updatedRepresentative.representativeId),
-        updatedRepresentative.account
+        updatedRepresentative.providerAccount
       );
       formDispatcher({
         type: 'REFRESH'
       });
     } catch (error) {
-      console.error('error on RepresentativeService.updateAccount', error);
+      console.error('error on RepresentativeService.updateProviderAccount', error);
 
       if (error.response.status === 400 || error.response.status === 404) {
         let { representativesHaveError } = formState;

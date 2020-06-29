@@ -6,6 +6,19 @@ export const reducer = (state, { type, payload }) => {
         refresher: !state.refresher
       };
 
+    case 'CREATE_UNUSED_OPTIONS_LIST':
+      const unusedDataProvidersOptions = state.allPossibleDataProviders.filter(dataProviderOption => {
+        let result = true;
+        for (let index = 0; index < state.representatives.length; index++) {
+          if (state.representatives[index].dataProviderId === dataProviderOption.dataProviderId) {
+            result = false;
+          }
+        }
+        return result;
+      });
+
+      return { ...state, unusedDataProvidersOptions };
+
     case 'DELETE_REPRESENTATIVE':
       return {
         ...state,
@@ -13,6 +26,16 @@ export const reducer = (state, { type, payload }) => {
         refresher: !state.refresher,
         isVisibleConfirmDeleteDialog: false
       };
+
+    case 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID':
+      return {
+        ...state,
+        allPossibleDataProviders: payload.responseAllDataProviders,
+        allPossibleDataProvidersNoSelect: payload.providersNoSelect
+      };
+
+    case 'GET_PROVIDERS_TYPES_LIST':
+      return { ...state, dataProvidersTypesList: payload.providerTypes };
 
     case 'MANAGE_ERRORS':
       return { ...state, representativesHaveError: payload.representativesHaveError };

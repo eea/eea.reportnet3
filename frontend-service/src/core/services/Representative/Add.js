@@ -1,2 +1,2 @@
-export const Add = ({ representativeRepository }) => async (dataflowId, account, dataProviderId) =>
-  representativeRepository.add(dataflowId, account, dataProviderId);
+export const Add = ({ representativeRepository }) => async (dataflowId, providerAccount, dataProviderId) =>
+  representativeRepository.add(dataflowId, providerAccount, dataProviderId);

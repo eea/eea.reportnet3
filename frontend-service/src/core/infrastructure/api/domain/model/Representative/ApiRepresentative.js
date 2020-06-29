@@ -3,14 +3,14 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 const apiRepresentative = {
-  add: async (dataflowId, account, dataProviderId) => {
+  add: async (dataflowId, providerAccount, dataProviderId) => {
     const response = await HTTPRequester.post({
       url: getUrl(RepresentativeConfig.add, {
         dataflowId
       }),
       data: {
         dataProviderId,
-        providerAccount: account
+        providerAccount
       }
     });
     return response;
@@ -51,12 +51,12 @@ const apiRepresentative = {
     return response;
   },
 
-  updateAccount: async (representativeId, account) => {
+  updateProviderAccount: async (representativeId, providerAccount) => {
     const response = await HTTPRequester.update({
-      url: getUrl(RepresentativeConfig.updateAccount, {}),
+      url: getUrl(RepresentativeConfig.updateProviderAccount, {}),
       data: {
         id: representativeId,
-        providerAccount: account
+        providerAccount: providerAccount
       }
     });
     return response;

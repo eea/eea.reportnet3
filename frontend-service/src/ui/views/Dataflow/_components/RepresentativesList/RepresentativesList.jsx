@@ -103,8 +103,8 @@ const RepresentativesList = ({
     }
   }, [formState.representatives]);
 
-  const accountInputColumnTemplate = representative => {
-    let inputData = representative.account;
+  const providerAccountInputColumnTemplate = representative => {
+    let inputData = representative.providerAccount;
 
     let hasError = formState.representativesHaveError.includes(representative.representativeId);
 
@@ -114,7 +114,7 @@ const RepresentativesList = ({
       const [thisRepresentative] = representatives.filter(
         thisRepresentative => thisRepresentative.dataProviderId === dataProviderId
       );
-      thisRepresentative.account = value;
+      thisRepresentative.providerAccount = value;
 
       formDispatcher({
         type: 'ON_ACCOUNT_CHANGE',
@@ -133,7 +133,7 @@ const RepresentativesList = ({
             disabled={representative.hasDatasets}
             id={isEmpty(inputData) ? 'emptyInput' : undefined}
             onBlur={() => {
-              representative.account = representative.account.toLowerCase();
+              representative.providerAccount = representative.providerAccount.toLowerCase();
               onAddProvider(formDispatcher, formState, representative, dataflowId);
             }}
             onChange={event => onAccountChange(event.target.value, representative.dataProviderId)}
@@ -222,7 +222,10 @@ const RepresentativesList = ({
               ? formState.representatives.filter(representative => !isNil(representative.representativeId))
               : formState.representatives
           }>
-          <Column body={accountInputColumnTemplate} header={resources.messages['manageRolesDialogAccountColumn']} />
+          <Column
+            body={providerAccountInputColumnTemplate}
+            header={resources.messages['manageRolesDialogAccountColumn']}
+          />
           <Column body={dropdownColumnTemplate} header={resources.messages['manageRolesDialogDataProviderColumn']} />
           <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
         </DataTable>
