@@ -662,6 +662,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           if (fieldSchemaVO.getPkMustBeUsed() != null) {
             fieldSchema.put("pkMustBeUsed", fieldSchemaVO.getPkMustBeUsed());
           }
+          if (fieldSchemaVO.getPkHasMultipleValues() != null) {
+            fieldSchema.put("pkHasMultipleValues", fieldSchemaVO.getPkHasMultipleValues());
+          }
           if (fieldSchemaVO.getReferencedField() != null) {
             Document referenced = new Document();
             referenced.put(LiteralConstants.ID_DATASET_SCHEMA,
