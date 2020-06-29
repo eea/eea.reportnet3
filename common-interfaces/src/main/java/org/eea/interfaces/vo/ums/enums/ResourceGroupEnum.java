@@ -47,15 +47,15 @@ public enum ResourceGroupEnum {
    */
   DATASCHEMA_REQUESTER("Dataschema-%s-DATA_REQUESTER"),
   /**
-   * Dataschema provider resource group enum.
+   * Dataschema reporter resource group enum.
    */
-  DATASCHEMA_PROVIDER("Dataschema-%s-DATA_PROVIDER"),
+  DATASCHEMA_REPORTER("Dataschema-%s-REPORTER"),
 
   /** The datacollection custodian. */
   DATACOLLECTION_CUSTODIAN("DataCollection-%s-DATA_CUSTODIAN"),
 
-  /** The datacollection provider. */
-  DATACOLLECTION_PROVIDER("DataCollection-%s-DATA_PROVIDER"),
+  /** The datacollection lead_reporter. */
+  DATACOLLECTION_LEAD_REPORTER("DataCollection-%s-DATA_LEAD_REPORTER"),
 
   /** The dataflow editor write. */
   DATAFLOW_EDITOR_WRITE("Dataflow-%s-EDITOR_WRITE"),
