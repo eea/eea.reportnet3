@@ -1,0 +1,9 @@
+{
+  "add": "/contributor/dataflow/{dataflowid}",
+
+  "all": "/contributor/dataflow/{dataflowid}",
+
+  "delete": "/contributor/dataflow/{dataflowid}",
+
+  "updateWritePermission": "/contributor/dataflow/{dataflowid}"
+}
