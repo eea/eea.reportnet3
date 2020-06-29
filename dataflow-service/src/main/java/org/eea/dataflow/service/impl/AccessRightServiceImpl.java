@@ -138,9 +138,6 @@ public class AccessRightServiceImpl implements AccessRightService {
         resourceManagementControllerZull.createResource(
             createGroup(designDatasetVO.getId(), ResourceTypeEnum.DATA_SCHEMA, securityRoleEnum));
 
-        // Add user to new group Dataschema-X-DATA_CUSTODIAN
-        userManagementControllerZull.addUserToResource(designDatasetVO.getId(), resourceGroupEnum);
-
         resourceAssignationVOList.add(fillResourceAssignation(designDatasetVO.getId(),
             roleUserVO.getAccount(), resourceGroupEnum));
       }
