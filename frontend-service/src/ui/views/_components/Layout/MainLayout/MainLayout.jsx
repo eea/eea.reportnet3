@@ -6,6 +6,7 @@ import styles from './MainLayout.module.css';
 
 import { Footer } from './_components';
 import { Header } from './_components/Header';
+import { EuFooter } from './_components/EuFooter';
 import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
@@ -92,7 +93,8 @@ const MainLayout = ({ children }) => {
         <LeftSideBar onToggleSideBar={onToggleSideBar} />
         {children}
       </div>
-      <Footer />
+      <Footer leftMargin={margin} />
+      <EuFooter leftMargin={margin} />
     </div>
   );
 };

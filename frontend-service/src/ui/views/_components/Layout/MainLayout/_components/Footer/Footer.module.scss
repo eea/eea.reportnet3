@@ -1,0 +1,23 @@
+.Footer {
+  color: var(--c-black-300);
+  background-color: var(--bg);
+  .footerContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .reportnetLogo {
+      a {
+        display: flex;
+        align-items: center;
+        h1 {
+          margin-left: 0.5rem;
+        }
+      }
+    }
+    .helpDesk {
+      a {
+        font-weight: bold;
+      }
+    }
+  }
+}
