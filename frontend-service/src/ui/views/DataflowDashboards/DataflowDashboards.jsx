@@ -47,7 +47,7 @@ export const DataflowDashboards = withRouter(
         },
         {
           label: resources.messages['dataflow'],
-          icon: 'archive',
+          icon: 'clone',
           href: getUrl(
             routes.DATAFLOW,
             {

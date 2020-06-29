@@ -67,7 +67,7 @@ const LinkSelector = withRouter(
           icon="cancel"
           label={resources.messages['cancel']}
           onClick={() => {
-            onCancelSaveLink();
+            onCancelSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
             setIsVisible(false);
           }}
         />
@@ -159,7 +159,7 @@ const LinkSelector = withRouter(
         header={resources.messages['linkSelector']}
         modal={true}
         onHide={() => {
-          onCancelSaveLink();
+          onCancelSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
           setIsVisible(false);
         }}
         style={{ minWidth: '55%' }}

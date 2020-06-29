@@ -82,8 +82,8 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
       case 'DATE':
         return 'date';
       case 'TEXT':
-      // case 'RICH_TEXT':
-      //   return 'any';
+      case 'RICH_TEXT':
+        return 'any';
       case 'EMAIL':
         return 'email';
       case 'PHONE':

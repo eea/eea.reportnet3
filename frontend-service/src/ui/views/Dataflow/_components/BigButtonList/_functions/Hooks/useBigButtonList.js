@@ -154,16 +154,7 @@ const useBigButtonList = ({
           infoStatus: dataset.isReleased,
           infoStatusIcon: true,
           layout: 'defaultBigButton',
-          model: dataflowState.hasWritePermissions
-            ? [
-                {
-                  label: resources.messages['releaseDataCollection'],
-                  icon: 'cloudUpload',
-                  command: () => onShowSnapshotDialog(dataset.datasetId),
-                  disabled: false
-                }
-              ]
-            : [{ label: resources.messages['properties'], icon: 'info', disabled: true }],
+          // model: [{ label: resources.messages['properties'], icon: 'info', disabled: true }],
           onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
           visibility: !isEmpty(dataflowState.data.datasets)
         };
@@ -189,6 +180,11 @@ const useBigButtonList = ({
 
   const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState.data);
 
+  const checkDisabledDataCollectionButton = () =>
+    isEmpty(dataflowState.data.dataCollections) &&
+    dataflowState.isDataSchemaCorrect &&
+    dataflowState.formHasRepresentatives;
+
   const dashboardBigButton = [
     {
       buttonClass: 'dashboard',
@@ -206,20 +202,16 @@ const useBigButtonList = ({
     {
       buttonClass: 'newItem',
       buttonIcon: isActiveButton ? 'siteMap' : 'spinner',
-      buttonIconClass: isActiveButton ? 'siteMap' : 'spinner',
+      buttonIconClass: isActiveButton
+        ? !checkDisabledDataCollectionButton()
+          ? 'siteMapDisabled'
+          : 'siteMap'
+        : 'spinner',
       caption: resources.messages['createDataCollection'],
-      enabled:
-        isEmpty(dataflowState.data.dataCollections) &&
-        dataflowState.isDataSchemaCorrect &&
-        dataflowState.formHasRepresentatives,
+      enabled: checkDisabledDataCollectionButton(),
       helpClassName: 'dataflow-datacollection-help-step',
       handleRedirect:
-        isActiveButton &&
-        isEmpty(dataflowState.data.dataCollections) &&
-        dataflowState.isDataSchemaCorrect &&
-        dataflowState.formHasRepresentatives
-          ? () => onShowDataCollectionModal()
-          : () => {},
+        isActiveButton && checkDisabledDataCollectionButton() ? () => onShowDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
       tooltip: !isEmpty(dataflowState.data.dataCollections)
         ? resources.messages['disabledCreateDataCollectionSchemas']
@@ -303,7 +295,48 @@ const useBigButtonList = ({
     ];
   };
 
+  const onBuildReleaseButton = () => {
+    const { datasets } = dataflowState.data;
+
+    const allDatasets = datasets.map(dataset => {
+      return { name: dataset.datasetSchemaName, id: dataset.dataProviderId };
+    });
+
+    const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.id)).length === 1;
+
+    const properties = [
+      {
+        buttonClass: 'schemaDataset',
+        buttonIcon: 'released',
+        buttonIconClass: 'released',
+        caption: resources.messages['releaseDataCollection'],
+        handleRedirect: datasets.length > 1 ? () => {} : () => onShowSnapshotDialog(datasets[0].datasetId),
+        layout: datasets.length > 1 ? 'menuBigButton' : 'defaultBigButton',
+        visibility:
+          !dataflowState.isCustodian &&
+          dataflowState.status !== 'DESIGN' &&
+          !isEmpty(dataflowState.data.datasets) &&
+          isUniqRepresentative
+      }
+    ];
+
+    if (datasets.length > 1) {
+      properties[0].model = datasets.map(dataset => {
+        return {
+          label: dataset.name,
+          icon: 'cloudUpload',
+          command: () => onShowSnapshotDialog(dataset.datasetId),
+          disabled: false
+        };
+      });
+    }
+
+    return properties;
+  };
+
   const receiptBigButton = onBuildReceiptButton();
+
+  const releaseBigButton = onBuildReleaseButton();
 
   return [
     ...manageReportersBigButton,
@@ -315,7 +348,8 @@ const useBigButtonList = ({
     ...createDataCollection,
     ...updateDatasetsNewRepresentatives,
     ...groupByRepresentativeModels,
-    ...receiptBigButton
+    ...receiptBigButton,
+    ...releaseBigButton
   ];
 };
 
