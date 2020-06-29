@@ -14,11 +14,11 @@ import { Spinner } from 'ui/views/_components/Spinner';
 
 import {
   autofocusOnEmptyInput,
-  onAddProvider,
-  onDataProviderIdChange,
+  onAddContributor,
+  onWritePermissionChange,
   onDeleteConfirm,
   onKeyDown
-} from '../_functions/Utils/rightsUtils';
+} from '../_functions/Utils/contributorUtils';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
@@ -26,26 +26,23 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
 
   useEffect(() => {
     autofocusOnEmptyInput(formState);
-    console.log('formState.representativesHaveError', formState.representativesHaveError);
-  }, [formState.representativesHaveError]);
+  }, [formState.contributorsHaveError]);
 
-  const accountInputColumnTemplate = representative => {
-    let inputData = representative.providerAccount;
+  const accountInputColumnTemplate = contributor => {
+    let inputData = contributor.account;
 
-    let hasError = formState.representativesHaveError.includes(representative.representativeId);
+    let hasError = formState.contributorsHaveError.includes(contributor.account);
 
-    const onAccountChange = (value, dataProviderId) => {
-      const { representatives } = formState;
+    const onAccountChange = (value, account) => {
+      const { contributors } = formState;
 
-      const [thisRepresentative] = representatives.filter(
-        thisRepresentative => thisRepresentative.dataProviderId === dataProviderId
-      );
-      thisRepresentative.providerAccount = value;
+      const [thisContributor] = contributors.filter(thisContributor => thisContributor.account === account);
+      thisContributor.account = value;
 
       formDispatcher({
         type: 'ON_ACCOUNT_CHANGE',
         payload: {
-          representatives
+          contributors
         }
       });
     };
@@ -54,14 +51,14 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
       <>
         <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
           <input
-            autoFocus={isNil(representative.representativeId)}
+            autoFocus={isNil(contributor.account)}
             id={isEmpty(inputData) ? 'emptyInput' : undefined}
             onBlur={() => {
-              representative.providerAccount = representative.providerAccount.toLowerCase();
-              onAddProvider(formDispatcher, formState, representative, dataflowId);
+              contributor.account = contributor.account.toLowerCase();
+              onAddContributor(formDispatcher, formState, contributor, dataflowId);
             }}
-            onChange={event => onAccountChange(event.target.value, representative.dataProviderId)}
-            onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
+            onChange={event => onAccountChange(event.target.value, contributor.account)}
+            onKeyDown={event => onKeyDown(event, formDispatcher, formState, contributor, dataflowId)}
             placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
             value={inputData}
           />
@@ -70,27 +67,26 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
     );
   };
 
-  const dropdownColumnTemplate = representative => {
-    const permissionsOptions = [
-      { label: resources.messages['selectPermission'], type: '' },
-      { label: resources.messages['readPermission'], type: 'read' },
-      { label: resources.messages['readAndWritePermission'], type: 'read_write' }
+  const writePermissinosColumnTemplate = contributor => {
+    const writePermissionsOptions = [
+      { label: resources.messages['selectPermission'], writePermission: '' },
+      { label: resources.messages['readPermission'], writePermission: 'false' },
+      { label: resources.messages['readAndWritePermission'], writePermission: 'true' }
     ];
 
     return (
       <>
         <select
-          disabled={representative.hasDatasets}
-          onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
+          onBlur={() => onAddContributor(formDispatcher, formState, contributor, dataflowId)}
           onChange={event => {
-            onDataProviderIdChange(formDispatcher, event.target.value, representative, formState);
+            onWritePermissionChange(formDispatcher, event.target.value, contributor, formState);
           }}
-          onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
-          value={representative.permissionType}>
-          {permissionsOptions.map(permission => {
+          onKeyDown={event => onKeyDown(event, formDispatcher, formState, contributor, dataflowId)}
+          value={contributor.writePermission}>
+          {writePermissionsOptions.map(option => {
             return (
-              <option key={uuid.v4()} className="p-dropdown-item" value={permission.type}>
-                {permission.label}
+              <option key={uuid.v4()} className="p-dropdown-item" value={option.writePermission}>
+                {option.label}
               </option>
             );
           })}
@@ -99,27 +95,27 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
     );
   };
 
-  const deleteBtnColumnTemplate = representative => {
-    return isNil(representative.representativeId) /*||  representative.permissionsType */ ? (
+  const deleteBtnColumnTemplate = contributor => {
+    return isNil(contributor.account) /*||  contributor.writePermission*/ ? (
       <></>
     ) : (
       <ActionsColumn
         onDeleteClick={() => {
           formDispatcher({
             type: 'SHOW_CONFIRM_DIALOG',
-            payload: { representativeId: representative.representativeId }
+            payload: { account: contributor.account }
           });
         }}
       />
     );
   };
 
-  if (isEmpty(formState.representatives)) return <Spinner style={{ top: 0 }} />;
+  if (isEmpty(formState.contributors)) return <Spinner style={{ top: 0 }} />;
   return (
     <div className={styles.container}>
-      <DataTable value={formState.representatives}>
+      <DataTable value={formState.contributors}>
         <Column body={accountInputColumnTemplate} header={formState.accountInputHeader} />
-        <Column body={dropdownColumnTemplate} header={resources.messages['permissionsColumn']} />
+        <Column body={writePermissinosColumnTemplate} header={resources.messages['writePermissionsColumn']} />
         <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
       </DataTable>
 

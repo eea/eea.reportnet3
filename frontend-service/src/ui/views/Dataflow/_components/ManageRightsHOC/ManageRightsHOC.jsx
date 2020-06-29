@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
-import { reducer } from './_functions/Reducers/representativeReducer.js';
-import { getInitialData } from './_functions/Utils/rightsUtils';
+import { reducer } from './_functions/Reducers/contributorReducer.js';
+import { getInitialData } from './_functions/Utils/contributorUtils';
 
 import { ManageRights } from './_components/ManageRights.jsx';
 
@@ -13,12 +13,12 @@ const ManageRightsHOC = ({ dataflowState, dataflowId, isActiveManageRightsDialog
   const resources = useContext(ResourcesContext);
 
   const initialState = {
-    initialRepresentatives: [],
+    initialContributors: [],
     isVisibleConfirmDeleteDialog: false,
     refresher: false,
-    representativesHaveError: [],
-    representativeIdToDelete: '',
-    representatives: [],
+    contributorsHaveError: [],
+    contributorIdToDelete: '',
+    contributors: [],
     accountInputHeader: dataflowState.isCustodian
       ? resources.messages['editorsAccountColumn']
       : resources.messages['reportersAccountColumn'],
@@ -37,7 +37,7 @@ const ManageRightsHOC = ({ dataflowState, dataflowId, isActiveManageRightsDialog
   }, [formState.refresher]);
 
   useEffect(() => {
-    if (isActiveManageRightsDialog === false && !isEmpty(formState.representativesHaveError)) {
+    if (isActiveManageRightsDialog === false && !isEmpty(formState.contributorsHaveError)) {
       formDispatcher({
         type: 'REFRESH'
       });
