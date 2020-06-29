@@ -175,6 +175,11 @@ const useBigButtonList = ({
 
   const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState.data);
 
+  const checkDisabledDataCollectionButton = () =>
+    isEmpty(dataflowState.data.dataCollections) &&
+    dataflowState.isDataSchemaCorrect &&
+    dataflowState.formHasRepresentatives;
+
   const dashboardBigButton = [
     {
       buttonClass: 'dashboard',
@@ -192,20 +197,16 @@ const useBigButtonList = ({
     {
       buttonClass: 'newItem',
       buttonIcon: isActiveButton ? 'siteMap' : 'spinner',
-      buttonIconClass: isActiveButton ? 'siteMap' : 'spinner',
+      buttonIconClass: isActiveButton
+        ? !checkDisabledDataCollectionButton()
+          ? 'siteMapDisabled'
+          : 'siteMap'
+        : 'spinner',
       caption: resources.messages['createDataCollection'],
-      enabled:
-        isEmpty(dataflowState.data.dataCollections) &&
-        dataflowState.isDataSchemaCorrect &&
-        dataflowState.formHasRepresentatives,
+      enabled: checkDisabledDataCollectionButton(),
       helpClassName: 'dataflow-datacollection-help-step',
       handleRedirect:
-        isActiveButton &&
-        isEmpty(dataflowState.data.dataCollections) &&
-        dataflowState.isDataSchemaCorrect &&
-        dataflowState.formHasRepresentatives
-          ? () => onShowDataCollectionModal()
-          : () => {},
+        isActiveButton && checkDisabledDataCollectionButton() ? () => onShowDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
       tooltip: !isEmpty(dataflowState.data.dataCollections)
         ? resources.messages['disabledCreateDataCollectionSchemas']
