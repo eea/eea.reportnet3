@@ -1,9 +1,9 @@
 package org.eea.dataflow.controller;
 
 import java.util.List;
-import org.eea.dataflow.service.AccessRightService;
-import org.eea.interfaces.controller.dataflow.AccessRightController;
-import org.eea.interfaces.vo.dataflow.RoleUserVO;
+import org.eea.dataflow.service.ContributorService;
+import org.eea.interfaces.controller.dataflow.ContributorController;
+import org.eea.interfaces.vo.contributor.ContributorVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +18,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
- * The Class UserManagementControllerImpl.
+ * The Class ContributorControllerImpl.
  */
 @RestController
-@RequestMapping("/accessRight")
-public class AccessRightControllerImpl implements AccessRightController {
+@RequestMapping("/contributor")
+public class ContributorControllerImpl implements ContributorController {
 
 
   /** The Constant LOG_ERROR. */
@@ -35,48 +34,39 @@ public class AccessRightControllerImpl implements AccessRightController {
 
 
   /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(AccessRightControllerImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ContributorControllerImpl.class);
 
 
-  /** The access right service. */
+  /** The contributor service. */
   @Autowired
-  private AccessRightService accessRightService;
+  private ContributorService contributorService;
 
   /**
-   * Delete resource.
+   * Delete.
    *
-   * @param roleUserVO the role user VO
    * @param dataflowId the dataflow id
+   * @param account the account
    */
-  @DeleteMapping(value = "/delete")
+  @DeleteMapping(value = "/dataflow/{dataflowId}/user/{account}")
   @Override
-  public void deleteRoleUser(@RequestBody RoleUserVO roleUserVO, @RequestParam Long dataflowId) {
+  public void delete(@PathVariable("dataflowId") Long dataflowId, @PathVariable String account) {
     // we can only remove role of editor, reporter or reporter partition type
-    switch (roleUserVO.getRole()) {
-      case "EDITOR":
-      case "REPORTER_PARTITIONED":
-      case "REPORTER":
-        accessRightService.deleteRoleUser(roleUserVO, dataflowId);
-        break;
-      default:
-        LOG.info("Didn't remove role of the user with account {} because its role is {}",
-            roleUserVO.getAccount(), roleUserVO.getRole());
-        break;
-    }
+    contributorService.deleteContributor(dataflowId, account);
   }
 
+
   /**
-   * Find role users by group.
+   * Find contributors by group.
    *
    * @param dataflowId the dataflow id
    * @return the list
    */
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @Override
-  public List<RoleUserVO> findRoleUsersByGroup(@PathVariable("dataflowId") Long dataflowId) {
+  public List<ContributorVO> findContributorsByGroup(@PathVariable("dataflowId") Long dataflowId) {
     // we can find editors, reporters or reporter partition roles based on the dataflow state
     // mock
-    return accessRightService.findRoleUsersByIdDataflow(dataflowId);
+    return contributorService.findContributorsByIdDataflow(dataflowId);
   }
 
   /**
@@ -88,38 +78,38 @@ public class AccessRightControllerImpl implements AccessRightController {
    */
   @Override
   @HystrixCommand
-  @PutMapping(value = "/update/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity updateRoleUser(@PathVariable("dataflowId") Long dataflowId,
-      @RequestBody RoleUserVO roleUserVO) {
+  @PutMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity update(@PathVariable("dataflowId") Long dataflowId,
+      @RequestBody ContributorVO contributorVO) {
     // we can only update an editor, reporter or reporter partition role
     // mock
-    accessRightService.updateRoleUser(roleUserVO, dataflowId);
+    contributorService.updateContributor(contributorVO, dataflowId);
     return new ResponseEntity(HttpStatus.OK);
   }
 
+
   /**
-   * Creates the representative.
+   * Creates the contributor.
    *
    * @param dataflowId the dataflow id
-   * @param roleUserVO the role user VO
+   * @param contributorVO the contributor VO
    * @return the long
    */
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
-  @PostMapping("/{dataflowId}")
-  public Long createRoleUser(@PathVariable("dataflowId") Long dataflowId,
-      @RequestBody RoleUserVO roleUserVO) {
-
-    switch (roleUserVO.getRole()) {
+  @PostMapping("/dataflow/{dataflowId}")
+  public Long createContributor(@PathVariable("dataflowId") Long dataflowId,
+      @RequestBody ContributorVO contributorVO) {
+    switch (contributorVO.getRole()) {
       case "EDITOR":
       case "REPORTER_PARTITIONED":
       case "REPORTER":
-        accessRightService.createRoleUser(roleUserVO, dataflowId);
+        contributorService.createContributor(contributorVO, dataflowId);
         break;
       default:
         LOG.info("Didn't remove role of the user with account {} because its role is {}",
-            roleUserVO.getAccount(), roleUserVO.getRole());
+            contributorVO.getAccount(), contributorVO.getRole());
         break;
     }
     return 1L;

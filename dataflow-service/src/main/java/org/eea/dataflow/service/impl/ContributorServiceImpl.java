@@ -3,12 +3,12 @@ package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.eea.dataflow.service.AccessRightService;
+import org.eea.dataflow.service.ContributorService;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.contributor.ContributorVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataflow.RoleUserVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
@@ -23,15 +23,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * The Class AccessRightServiceImpl.
+ * The Class ContributorServiceImpl.
  */
-@Service("AccessRightService")
-public class AccessRightServiceImpl implements AccessRightService {
+@Service
+public class ContributorServiceImpl implements ContributorService {
 
   /**
    * The Constant LOG.
    */
-  private static final Logger LOG = LoggerFactory.getLogger(AccessRightServiceImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ContributorServiceImpl.class);
   /**
    * The Constant LOG_ERROR.
    */
@@ -50,18 +50,16 @@ public class AccessRightServiceImpl implements AccessRightService {
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
-
-
   /**
-   * Find role users by id dataflow.
+   * Find contributors by id dataflow.
    *
    * @param dataflowId the dataflow id
    * @return the list
    */
   @Override
-  public List<RoleUserVO> findRoleUsersByIdDataflow(Long dataflowId) {
+  public List<ContributorVO> findContributorsByIdDataflow(Long dataflowId) {
     DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
-    List<RoleUserVO> listRoleUserVO = new ArrayList();
+    List<ContributorVO> listRoleUserVO = new ArrayList();
 
     if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
       StringBuilder stringBuilder =
@@ -69,20 +67,20 @@ public class AccessRightServiceImpl implements AccessRightService {
       List<UserRepresentationVO> listUserWrite =
           userManagementControllerZull.getUsersByGroup(stringBuilder.toString());
       listUserWrite.stream().forEach(userWrite -> {
-        RoleUserVO roleUserVO = new RoleUserVO();
-        roleUserVO.setAccount(userWrite.getEmail());
-        roleUserVO.setPermission(true);
-        listRoleUserVO.add(roleUserVO);
+        ContributorVO contributorVO = new ContributorVO();
+        contributorVO.setAccount(userWrite.getEmail());
+        contributorVO.setWritePermission(true);
+        listRoleUserVO.add(contributorVO);
       });
       stringBuilder = new StringBuilder("Dataflow-").append(dataflowId).append("-EDITOR_READ");
       List<UserRepresentationVO> listUserRead =
           userManagementControllerZull.getUsersByGroup(stringBuilder.toString());
       listUserRead.stream().forEach(userRead -> {
-        RoleUserVO roleUserVO = new RoleUserVO();
-        roleUserVO.setAccount(userRead.getEmail());
-        roleUserVO.setPermission(false);
-        roleUserVO.setRole("EDITOR");
-        listRoleUserVO.add(roleUserVO);
+        ContributorVO contributorVO = new ContributorVO();
+        contributorVO.setAccount(userRead.getEmail());
+        contributorVO.setWritePermission(false);
+        contributorVO.setRole("EDITOR");
+        listRoleUserVO.add(contributorVO);
       });
     }
 
@@ -90,76 +88,79 @@ public class AccessRightServiceImpl implements AccessRightService {
   }
 
   /**
-   * Delete role user.
+   * Delete contributor.
    *
-   * @param roleUserVO the role user VO
    * @param dataflowId the dataflow id
+   * @param account the account
    */
   @Override
-  public void deleteRoleUser(RoleUserVO roleUserVO, Long dataflowId) {
+  public void deleteContributor(Long dataflowId, String account) {
     DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
 
-    ResourceGroupEnum resourceGroupEnum = null;
-    ResourceGroupEnum resourceGroupEnumDataflow = null;
+    ResourceGroupEnum resourceGroupEnumWrite = null;
+    ResourceGroupEnum resourceGroupEnumRead = null;
+    ResourceGroupEnum resourceGroupEnumDataflowWrite = null;
+    ResourceGroupEnum resourceGroupEnumDataflowRead = null;
 
-    switch (roleUserVO.getRole()) {
-      case "EDITOR":
-        resourceGroupEnum = Boolean.TRUE.equals(roleUserVO.getPermission())
-            ? ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE
-            : ResourceGroupEnum.DATASCHEMA_EDITOR_READ;
-        resourceGroupEnumDataflow = Boolean.TRUE.equals(roleUserVO.getPermission())
-            ? ResourceGroupEnum.DATAFLOW_EDITOR_WRITE
-            : ResourceGroupEnum.DATAFLOW_EDITOR_READ;
+    switch (dataflow.getStatus().toString()) {
+      case "DESIGN":
+        resourceGroupEnumWrite = ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE;
+        resourceGroupEnumRead = ResourceGroupEnum.DATASCHEMA_EDITOR_READ;
+        resourceGroupEnumDataflowWrite = ResourceGroupEnum.DATAFLOW_EDITOR_WRITE;
+        resourceGroupEnumDataflowRead = ResourceGroupEnum.DATAFLOW_EDITOR_READ;
 
         break;
-      case "REPORTER_PARTITIONED":
+      case "DRAFT":
         break;
-      case "REPORTER":
-        /*
-         * resourceGroupEnum = Boolean.TRUE.equals(representativeVO.getPermission()) ?
-         * resourceGroupEnum.datas : resourceGroupEnum.DATASCHEMA_EDITOR_READ;
-         */
+      /*
+       * resourceGroupEnum = Boolean.TRUE.equals(representativeVO.getPermission()) ?
+       * resourceGroupEnum.datas : resourceGroupEnum.DATASCHEMA_EDITOR_READ;
+       */
+      default:
         break;
     }
 
     if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
       List<ResourceAssignationVO> resourcesProviders = new ArrayList<>();
-      resourcesProviders.add(
-          fillResourceAssignation(dataflowId, roleUserVO.getAccount(), resourceGroupEnumDataflow));
+      resourcesProviders
+          .add(fillResourceAssignation(dataflowId, account, resourceGroupEnumDataflowWrite));
+      resourcesProviders
+          .add(fillResourceAssignation(dataflowId, account, resourceGroupEnumDataflowRead));
       for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
         // quitar resources
 
-        resourcesProviders.add(fillResourceAssignation(designDatasetVO.getId(),
-            roleUserVO.getAccount(), resourceGroupEnum));
+        resourcesProviders
+            .add(fillResourceAssignation(designDatasetVO.getId(), account, resourceGroupEnumWrite));
+        resourcesProviders
+            .add(fillResourceAssignation(designDatasetVO.getId(), account, resourceGroupEnumRead));
       }
       userManagementControllerZull.removeContributorsFromResources(resourcesProviders);
     }
   }
 
 
-
   /**
-   * Creates the role user.
+   * Creates the contributor.
    *
-   * @param roleUserVO the role user VO
+   * @param contributorVO the contributor VO
    * @param dataflowId the dataflow id
    */
   @Override
-  public void createRoleUser(RoleUserVO roleUserVO, Long dataflowId) {
+  public void createContributor(ContributorVO contributorVO, Long dataflowId) {
     DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
     SecurityRoleEnum securityRoleEnum = null;
     ResourceGroupEnum resourceGroupEnum = null;
     ResourceGroupEnum resourceGroupEnumDataflow = null;
 
-    switch (roleUserVO.getRole()) {
+    switch (contributorVO.getRole()) {
       case "EDITOR":
         securityRoleEnum =
-            Boolean.TRUE.equals(roleUserVO.getPermission()) ? SecurityRoleEnum.EDITOR_WRITE
+            Boolean.TRUE.equals(contributorVO.getWritePermission()) ? SecurityRoleEnum.EDITOR_WRITE
                 : SecurityRoleEnum.EDITOR_READ;
-        resourceGroupEnum = Boolean.TRUE.equals(roleUserVO.getPermission())
+        resourceGroupEnum = Boolean.TRUE.equals(contributorVO.getWritePermission())
             ? ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE
             : ResourceGroupEnum.DATASCHEMA_EDITOR_READ;
-        resourceGroupEnumDataflow = Boolean.TRUE.equals(roleUserVO.getPermission())
+        resourceGroupEnumDataflow = Boolean.TRUE.equals(contributorVO.getWritePermission())
             ? ResourceGroupEnum.DATAFLOW_EDITOR_WRITE
             : ResourceGroupEnum.DATAFLOW_EDITOR_READ;
         break;
@@ -174,8 +175,8 @@ public class AccessRightServiceImpl implements AccessRightService {
     }
     if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
       final List<ResourceAssignationVO> resourceAssignationVOList = new ArrayList();
-      resourceAssignationVOList.add(
-          fillResourceAssignation(dataflowId, roleUserVO.getAccount(), resourceGroupEnumDataflow));
+      resourceAssignationVOList.add(fillResourceAssignation(dataflowId, contributorVO.getAccount(),
+          resourceGroupEnumDataflow));
 
       resourceManagementControllerZull
           .createResource(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, securityRoleEnum));
@@ -186,7 +187,7 @@ public class AccessRightServiceImpl implements AccessRightService {
             createGroup(designDatasetVO.getId(), ResourceTypeEnum.DATA_SCHEMA, securityRoleEnum));
 
         resourceAssignationVOList.add(fillResourceAssignation(designDatasetVO.getId(),
-            roleUserVO.getAccount(), resourceGroupEnum));
+            contributorVO.getAccount(), resourceGroupEnum));
       }
 
 
@@ -233,15 +234,14 @@ public class AccessRightServiceImpl implements AccessRightService {
     return resourceInfoVO;
   }
 
-
   /**
-   * Update role user.
+   * Update contributor.
    *
-   * @param roleUserVO the role user VO
+   * @param contributorVO the contributor VO
    * @param dataflowId the dataflow id
    */
   @Override
-  public void updateRoleUser(RoleUserVO roleUserVO, Long dataflowId) {
+  public void updateContributor(ContributorVO contributorVO, Long dataflowId) {
     // TODO Auto-generated method stub
 
   }
