@@ -8,7 +8,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.RoleUserVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
@@ -52,18 +52,18 @@ public class AccessRightServiceImpl implements AccessRightService {
   /**
    * Delete role user.
    *
-   * @param representativeVO the representative VO
+   * @param roleUserVO the role user VO
    * @param dataflowId the dataflow id
    */
   @Override
-  public void deleteRoleUser(RepresentativeVO representativeVO, Long dataflowId) {
+  public void deleteRoleUser(RoleUserVO roleUserVO, Long dataflowId) {
     DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
 
     ResourceGroupEnum resourceGroupEnum = null;
 
-    switch (representativeVO.getRole()) {
+    switch (roleUserVO.getRole()) {
       case "EDITOR":
-        resourceGroupEnum = Boolean.TRUE.equals(representativeVO.getPermission())
+        resourceGroupEnum = Boolean.TRUE.equals(roleUserVO.getPermission())
             ? resourceGroupEnum.DATASCHEMA_EDITOR_WRITE
             : resourceGroupEnum.DATASCHEMA_EDITOR_READ;
         break;
@@ -82,7 +82,7 @@ public class AccessRightServiceImpl implements AccessRightService {
       for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
         // quitar resource
         ResourceAssignationVO resourceDP = fillResourceAssignation(designDatasetVO.getId(),
-            representativeVO.getAccount(), resourceGroupEnum);
+            roleUserVO.getAccount(), resourceGroupEnum);
         resourcesProviders.add(resourceDP);
       }
       // enviar a bea resourcesProviders;
@@ -116,16 +116,16 @@ public class AccessRightServiceImpl implements AccessRightService {
    * @param dataflowId the dataflow id
    */
   @Override
-  public void createRoleUser(RepresentativeVO representativeVO, Long dataflowId) {
+  public void createRoleUser(RoleUserVO roleUserVO, Long dataflowId) {
     DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
     SecurityRoleEnum securityRoleEnum = null;
     ResourceGroupEnum resourceGroupEnum = null;
-    switch (representativeVO.getRole()) {
+    switch (roleUserVO.getRole()) {
       case "EDITOR":
         securityRoleEnum =
-            Boolean.TRUE.equals(representativeVO.getPermission()) ? securityRoleEnum.EDITOR_WRITE
+            Boolean.TRUE.equals(roleUserVO.getPermission()) ? securityRoleEnum.EDITOR_WRITE
                 : securityRoleEnum.EDITOR_READ;
-        resourceGroupEnum = Boolean.TRUE.equals(representativeVO.getPermission())
+        resourceGroupEnum = Boolean.TRUE.equals(roleUserVO.getPermission())
             ? resourceGroupEnum.DATASCHEMA_EDITOR_WRITE
             : resourceGroupEnum.DATASCHEMA_EDITOR_READ;
         break;
@@ -144,7 +144,7 @@ public class AccessRightServiceImpl implements AccessRightService {
     userManagementControllerZull.addUserToResource(dataflowId, resourceGroupEnum);
 
     if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
-      List<ResourceAssignationVO> resourcesProviders = new ArrayList<>();
+      new ArrayList<>();
       for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
 
         resourceManagementControllerZull.createResource(
