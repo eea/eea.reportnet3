@@ -13,7 +13,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
-import org.eea.interfaces.vo.dataset.schemas.rule.RuleExpressionVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -39,37 +38,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-/**
- * The Class KieBaseManager.
- */
+/** The Class KieBaseManager. */
 @Component
 public class KieBaseManager {
 
-  /**
-   * The Constant REGULATION_TEMPLATE_FILE.
-   */
+  /** The Constant REGULATION_TEMPLATE_FILE. */
   private static final String REGULATION_TEMPLATE_FILE = "/templateRules.drl";
 
-  /**
-   * The rules repository.
-   */
+  /** The rules repository. */
   @Autowired
   private RulesRepository rulesRepository;
-  /**
-   * The dataset metabase controller.
-   */
+
+  /** The dataset metabase controller. */
   @Autowired
   private DatasetMetabaseController datasetMetabaseController;
 
-  /**
-   * The schemas repository.
-   */
+  /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
 
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The rule expression service. */
+  @Autowired
+  private RuleExpressionService ruleExpressionService;
 
   /**
    * Reload rules.
@@ -192,30 +186,27 @@ public class KieBaseManager {
   }
 
   /**
-   * Text rule and put disable if is the rule have not correct format
+   * Text rule and put disable if is the rule have not correct format.
    *
    * @param datasetSchemaId the dataset schema id
    * @param rule the rule
-   *
    * @return true, if successful
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Async
   @SuppressWarnings("unchecked")
   public void textRuleCorrect(String datasetSchemaId, Rule rule) throws EEAException {
 
     Map<String, DataType> dataTypeMap = new HashMap<>();
-    RuleExpressionVO ruleExpressionVO = null;
+    String ruleExpressionString = null;
     if (!EntityTypeEnum.DATASET.equals(rule.getType())
         && !EntityTypeEnum.TABLE.equals(rule.getType())) {
-      ruleExpressionVO = new RuleExpressionVO(rule.getWhenCondition());
+      ruleExpressionString = rule.getWhenCondition();
     }
     TypeValidation typeValidation = TypeValidation.DATASET;
     String schemasDrools = "";
     switch (rule.getType()) {
       case DATASET:
-        schemasDrools = SchemasDrools.ID_DATASET_SCHEMA.getValue();
-        typeValidation = TypeValidation.DATASET;
         return;
       case TABLE:
         schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
@@ -243,8 +234,8 @@ public class KieBaseManager {
         break;
     }
 
-    if (null != ruleExpressionVO
-        && !ruleExpressionVO.isDataTypeCompatible(rule.getType(), dataTypeMap)) {
+    if (null != ruleExpressionString && !ruleExpressionService
+        .isDataTypeCompatible(ruleExpressionString, rule.getType(), dataTypeMap)) {
       rule.setVerified(false);
       rule.setEnabled(false);
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);

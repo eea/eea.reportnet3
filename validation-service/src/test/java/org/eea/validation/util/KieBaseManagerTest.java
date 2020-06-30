@@ -46,6 +46,9 @@ public class KieBaseManagerTest {
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
+  @Mock
+  private RuleExpressionService ruleExpressionService;
+
   private DataSetSchema datasetSchema;
   private ObjectId id;
   private FieldSchema fieldSchema;
@@ -322,6 +325,8 @@ public class KieBaseManagerTest {
     rule.setThenCondition(thenCondition);
     Mockito.when(schemasRepository.findRecordSchema(Mockito.any(), Mockito.any()))
         .thenReturn(document);
+    Mockito.when(ruleExpressionService.isDataTypeCompatible(Mockito.anyString(), Mockito.any(),
+        Mockito.any())).thenReturn(true);
     kieBaseManager.textRuleCorrect(id.toString(), rule);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -346,6 +351,4 @@ public class KieBaseManagerTest {
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
-
-
 }
