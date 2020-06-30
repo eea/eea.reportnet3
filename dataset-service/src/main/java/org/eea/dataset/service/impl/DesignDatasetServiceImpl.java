@@ -23,8 +23,13 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController;
+import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -88,6 +93,20 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
   /** The field schema no rules mapper. */
   @Autowired
   FieldSchemaNoRulesMapper fieldSchemaNoRulesMapper;
+
+  /** The dataschema controller. */
+  @Autowired
+  private DatasetSchemaController dataschemaController;
+
+  /** The rules controller zuul. */
+  @Autowired
+  private RulesControllerZuul rulesControllerZuul;
+
+
+  /** The integration controller zuul. */
+  @Autowired
+  private IntegrationControllerZuul integrationControllerZuul;
+
 
 
   /** The Constant LOG_ERROR. */
@@ -155,30 +174,69 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
 
     // Map to store the objectsId of the schemas (dataset, tables, records and fields, to keep the
     // track).
-    // The key is the older to copy, the value is the new one created
-    Map<String, String> mapOldNewObjectId = new HashMap<>();
+    // The key is the origin to copy, the value is the new one created, the target
+    Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
+
+    // map to temporally store the datasetId and the field schema if it's a Link type. Later we'll
+    // use this map to modify
+    // the field schemas to correct the fk relations
+    Map<Long, List<FieldSchemaVO>> mapDatasetIdFKRelations = new HashMap<>();
+
+    // List to store the origin datasetSchemaIds
+    List<String> originDatasetSchemaIds = new ArrayList<>();
+
+    // Map to store the old datasetsId and the new ones equivalent
+    Map<Long, Long> dictionaryOriginTargetDatasetsId = new HashMap<>();
+
     for (DesignDatasetVO design : designs) {
 
       DataSetSchemaVO schemaVO = dataschemaService.getDataSchemaById(design.getDatasetSchema());
+      originDatasetSchemaIds.add(design.getDatasetSchema());
       String newIdDatasetSchema;
       try {
         // Create the schema
         newIdDatasetSchema =
             dataschemaService.createEmptyDataSetSchema(idDataflowDestination).toString();
-        mapOldNewObjectId.put(schemaVO.getIdDataSetSchema(), newIdDatasetSchema);
+        dictionaryOriginTargetObjectId.put(schemaVO.getIdDataSetSchema(), newIdDatasetSchema);
         // Create the schema into the metabase
         Future<Long> datasetId = datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN,
-            nameToClone(schemaVO.getNameDatasetSchema(), designs), newIdDatasetSchema,
+            nameToClone(schemaVO.getNameDatasetSchema(), idDataflowDestination), newIdDatasetSchema,
             idDataflowDestination, null, null, 0);
         // Fill the new schema dataset with the data of the original schema dataset
         LOG.info("Design dataset created in the copy process with id {}", datasetId.get());
-        Thread.sleep(2000);
-        fillDesignDatasetCopied(schemaVO, newIdDatasetSchema, mapOldNewObjectId, datasetId.get());
+        dictionaryOriginTargetDatasetsId.put(design.getId(), datasetId.get());
+        Thread.sleep(3000);
+        fillAndUpdateDesignDatasetCopied(schemaVO, newIdDatasetSchema,
+            dictionaryOriginTargetObjectId, datasetId.get(), mapDatasetIdFKRelations);
 
       } catch (EEAException | InterruptedException | ExecutionException e) {
         LOG_ERROR.error("Error during the copy", e);
       }
     }
+
+    // Modify the FK
+    processToModifyTheFK(dictionaryOriginTargetObjectId, mapDatasetIdFKRelations);
+
+
+    // Copy the rules
+    CopySchemaVO copy = new CopySchemaVO();
+    copy.setDictionaryOriginTargetObjectId(dictionaryOriginTargetObjectId);
+    copy.setOriginDatasetSchemaIds(originDatasetSchemaIds);
+    copy.setDataflowIdDestination(idDataflowDestination);
+    copy.setDictionaryOriginTargetDatasetsId(dictionaryOriginTargetDatasetsId);
+
+    dictionaryOriginTargetObjectId = rulesControllerZuul.copyRulesSchema(copy);
+
+    // Copy the unique catalogue
+    dataschemaService.copyUniqueConstraintsCatalogue(originDatasetSchemaIds,
+        dictionaryOriginTargetObjectId);
+
+    // Copy the integrations
+    integrationControllerZuul.copyIntegrations(copy);
+
+    // Copy the data inside the design datasets, but only the tables that are prefilled
+    datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
+
     // Release the notification
     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_COMPLETED_EVENT,
         null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
@@ -187,30 +245,32 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
   }
 
 
+
   /**
-   * Fill design dataset copied.
+   * Fill and update design dataset copied.
    *
    * @param schemaOrigin the schema origin
    * @param newIdDatasetSchema the new id dataset schema
-   * @param mapOldNewObjectId the map old new object id
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
    * @param datasetId the dataset id
+   * @param mapDatasetIdFKRelations the map dataset id FK relations
    * @return the map
    * @throws EEAException the EEA exception
    * @throws InterruptedException the interrupted exception
    */
-  private Map<String, String> fillDesignDatasetCopied(DataSetSchemaVO schemaOrigin,
-      String newIdDatasetSchema, Map<String, String> mapOldNewObjectId, Long datasetId)
+  private Map<String, String> fillAndUpdateDesignDatasetCopied(DataSetSchemaVO schemaOrigin,
+      String newIdDatasetSchema, Map<String, String> dictionaryOriginTargetObjectId, Long datasetId,
+      Map<Long, List<FieldSchemaVO>> mapDatasetIdFKRelations)
       throws EEAException, InterruptedException {
 
     DataSetSchema schema =
         schemasRepository.findByIdDataSetSchema(new ObjectId(newIdDatasetSchema));
-
     schema.setDescription(schemaOrigin.getDescription());
     // table level
     for (TableSchemaVO tableVO : schemaOrigin.getTableSchemas()) {
       TableSchema table = new TableSchema();
       ObjectId newTableId = new ObjectId();
-      mapOldNewObjectId.put(tableVO.getIdTableSchema(), newTableId.toString());
+      dictionaryOriginTargetObjectId.put(tableVO.getIdTableSchema(), newTableId.toString());
       table = tableSchemaMapper.classToEntity(tableVO);
       table.setIdTableSchema(newTableId);
       // record level
@@ -218,7 +278,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       ObjectId newRecordId = new ObjectId();
       record.setIdRecordSchema(newRecordId);
       if (tableVO.getRecordSchema() != null && tableVO.getRecordSchema().getFieldSchema() != null) {
-        mapOldNewObjectId.put(tableVO.getRecordSchema().getIdRecordSchema(),
+        dictionaryOriginTargetObjectId.put(tableVO.getRecordSchema().getIdRecordSchema(),
             newRecordId.toString());
         record.setFieldSchema(new ArrayList<>());
         record.setIdTableSchema(newTableId);
@@ -226,14 +286,24 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         for (FieldSchemaVO fieldVO : tableVO.getRecordSchema().getFieldSchema()) {
           FieldSchema field = new FieldSchema();
           ObjectId newFieldId = new ObjectId();
-          mapOldNewObjectId.put(fieldVO.getId(), newFieldId.toString());
+          dictionaryOriginTargetObjectId.put(fieldVO.getId(), newFieldId.toString());
           field = fieldSchemaNoRulesMapper.classToEntity(fieldVO);
           field.setIdFieldSchema(newFieldId);
-
+          field.setIdRecord(newRecordId);
           record.getFieldSchema().add(field);
+
+          // if the type is Link we store to later modify the schema id's with the proper fk
+          // relations after all the process it's done
+          if (DataType.LINK.equals(field.getType())) {
+            List<FieldSchemaVO> listFK = new ArrayList<>();
+            if (mapDatasetIdFKRelations.containsKey(datasetId)) {
+              listFK = mapDatasetIdFKRelations.get(datasetId);
+            }
+            listFK.add(fieldVO);
+            mapDatasetIdFKRelations.put(datasetId, listFK);
+          }
         }
         table.setRecordSchema(record);
-
       }
       schema.getTableSchemas().add(table);
 
@@ -243,21 +313,69 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
     // save
     schemasRepository.updateSchemaDocument(schema);
 
-    return mapOldNewObjectId;
+    return dictionaryOriginTargetObjectId;
   }
+
+
+
+  /**
+   * Process to modify the FK.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param mapDatasetIdFKRelations the map dataset id FK relations
+   */
+  private void processToModifyTheFK(Map<String, String> dictionaryOriginTargetObjectId,
+      Map<Long, List<FieldSchemaVO>> mapDatasetIdFKRelations) {
+
+    mapDatasetIdFKRelations.forEach((datasetId, listFields) -> {
+      for (FieldSchemaVO field : listFields) {
+        if (dictionaryOriginTargetObjectId.containsKey(field.getId())) {
+          field.setId(dictionaryOriginTargetObjectId.get(field.getId()));
+        }
+        if (dictionaryOriginTargetObjectId.containsKey(field.getIdRecord())) {
+          field.setIdRecord(dictionaryOriginTargetObjectId.get(field.getIdRecord()));
+        }
+        if (field.getReferencedField() != null) {
+          if (dictionaryOriginTargetObjectId
+              .containsKey(field.getReferencedField().getIdDatasetSchema())) {
+            field.getReferencedField().setIdDatasetSchema(dictionaryOriginTargetObjectId
+                .get(field.getReferencedField().getIdDatasetSchema()));
+          }
+          if (dictionaryOriginTargetObjectId.containsKey(field.getReferencedField().getIdPk())) {
+            field.getReferencedField()
+                .setIdPk(dictionaryOriginTargetObjectId.get(field.getReferencedField().getIdPk()));
+          }
+        }
+        // with the fieldVO updated with the objectIds of the cloned dataset, we modify the field to
+        // update all the things
+        // related to the PK/FK
+        dataschemaController.updateFieldSchema(datasetId, field);
+      }
+    });
+  }
+
 
 
   /**
    * Name to clone.
    *
    * @param nameDesign the name design
-   * @param designs the designs
+   * @param dataflowIdDestination the dataflow id destination
    * @return the string
    */
-  private String nameToClone(String nameDesign, List<DesignDatasetVO> designs) {
+  private String nameToClone(String nameDesign, Long dataflowIdDestination) {
 
+    List<DesignDatasetVO> designs = getDesignDataSetIdByDataflowId(dataflowIdDestination);
     String result = "CLONE_" + nameDesign;
-
+    int index = 1;
+    for (int i = 0; i < designs.size(); i++) {
+      if (designs.get(i).getDataSetName().equals(result)) {
+        result = result + " (" + index + ")";
+        i = 0;
+        index++;
+        break;
+      }
+    }
     return result;
   }
 

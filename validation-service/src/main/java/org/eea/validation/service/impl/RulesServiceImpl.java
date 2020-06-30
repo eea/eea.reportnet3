@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
@@ -13,6 +14,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
@@ -803,6 +805,121 @@ public class RulesServiceImpl implements RulesService {
       });
 
     }
+  }
+
+
+  /**
+   * Copy rules schema.
+   *
+   * @param rules the rules
+   * @return the map
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public Map<String, String> copyRulesSchema(CopySchemaVO rules) throws EEAException {
+
+    List<String> listDatasetSchemaIdToCopy = rules.getOriginDatasetSchemaIds();
+    Map<String, String> dictionaryOriginTargetObjectId = rules.getDictionaryOriginTargetObjectId();
+    for (String originDatasetSchemaId : listDatasetSchemaIdToCopy) {
+      String newDatasetSchemaId = dictionaryOriginTargetObjectId.get(originDatasetSchemaId);
+      RulesSchema oldRules =
+          rulesRepository.getRulesWithActiveCriteria(new ObjectId(originDatasetSchemaId), false);
+
+      for (Rule rule : oldRules.getRules()) {
+        if (!rule.getRuleName().contains("LINK")) {
+          String newRuleId = new ObjectId().toString();
+          dictionaryOriginTargetObjectId.put(rule.getRuleId().toString(), newRuleId);
+          rule.setRuleId(new ObjectId(newRuleId));
+          if (dictionaryOriginTargetObjectId.containsKey(rule.getReferenceId().toString())) {
+            rule.setReferenceId(
+                new ObjectId(dictionaryOriginTargetObjectId.get(rule.getReferenceId().toString())));
+          }
+          if (rule.getReferenceFieldSchemaPKId() != null && dictionaryOriginTargetObjectId
+              .containsKey(rule.getReferenceFieldSchemaPKId().toString())) {
+            rule.setReferenceFieldSchemaPKId(new ObjectId(
+                dictionaryOriginTargetObjectId.get(rule.getReferenceFieldSchemaPKId().toString())));
+          }
+          if (rule.getUniqueConstraintId() != null) {
+            String newUniqueConstraintId = new ObjectId().toString();
+            dictionaryOriginTargetObjectId.put(rule.getUniqueConstraintId().toString(),
+                newUniqueConstraintId);
+            rule.setUniqueConstraintId(new ObjectId(
+                dictionaryOriginTargetObjectId.get(rule.getUniqueConstraintId().toString())));
+          }
+
+          if (rule.getIntegrityConstraintId() != null) {
+            String newIntegrityConstraintId = new ObjectId().toString();
+            dictionaryOriginTargetObjectId.put(rule.getIntegrityConstraintId().toString(),
+                newIntegrityConstraintId);
+            rule.setIntegrityConstraintId(new ObjectId(
+                dictionaryOriginTargetObjectId.get(rule.getIntegrityConstraintId().toString())));
+
+          }
+          if (EntityTypeEnum.DATASET.equals(rule.getType())) {
+            List<IntegritySchema> integritySchemas = integritySchemaRepository
+                .findByOriginOrReferenceDatasetSchemaId(new ObjectId(originDatasetSchemaId));
+            for (IntegritySchema integrity : integritySchemas) {
+              integrity.setId(rule.getIntegrityConstraintId());
+              integrity.setOriginDatasetSchemaId(new ObjectId(dictionaryOriginTargetObjectId
+                  .get(integrity.getOriginDatasetSchemaId().toString())));
+              integrity.setReferencedDatasetSchemaId(new ObjectId(dictionaryOriginTargetObjectId
+                  .get(integrity.getReferencedDatasetSchemaId().toString())));
+              integrity.setRuleId(rule.getRuleId());
+              for (int i = 0; i < integrity.getOriginFields().size(); i++) {
+                integrity.getOriginFields().set(i, new ObjectId(dictionaryOriginTargetObjectId
+                    .get(integrity.getOriginFields().get(i).toString())));
+              }
+              for (int i = 0; i < integrity.getReferencedFields().size(); i++) {
+                integrity.getReferencedFields().set(i, new ObjectId(dictionaryOriginTargetObjectId
+                    .get(integrity.getReferencedFields().get(i).toString())));
+              }
+
+              integritySchemaRepository.save(integrity);
+
+              Long datasetReferencedId =
+                  dataSetMetabaseControllerZuul.getDesignDatasetIdByDatasetSchemaId(
+                      integrity.getReferencedDatasetSchemaId().toString());
+              Long datasetOriginId =
+                  dataSetMetabaseControllerZuul.getDesignDatasetIdByDatasetSchemaId(
+                      integrity.getOriginDatasetSchemaId().toString());
+              dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetOriginId,
+                  datasetReferencedId, integrity.getOriginDatasetSchemaId().toString(),
+                  integrity.getReferencedDatasetSchemaId().toString());
+            }
+          }
+
+          // modify the when condition
+          if (StringUtils.isNotBlank(rule.getWhenCondition())) {
+            LOG.info("El when condition original es:" + rule.getWhenCondition());
+            dictionaryOriginTargetObjectId.forEach((String oldObjectId, String newObjectId) -> {
+              if (rule.getWhenCondition().contains(oldObjectId)) {
+                LOG.info("Se ha encontrado en el when condition el viejo objeto " + oldObjectId);
+                LOG.info("Lo reemplazamos por " + newObjectId);
+                String newWhenCondition = rule.getWhenCondition().replace(oldObjectId, newObjectId);
+                rule.setWhenCondition(newWhenCondition);
+              }
+            });
+          }
+          LOG.info("Despues de haberse modificado el when condition:" + rule.getWhenCondition());
+
+          if (!rule.isAutomatic()) {
+            validateRule(rule);
+          }
+          if (!rulesRepository.createNewRule(new ObjectId(newDatasetSchemaId), rule)) {
+            throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
+          }
+
+          // Check if rule is valid
+          if (!rule.isAutomatic()) {
+            kieBaseManager.textRuleCorrect(newDatasetSchemaId, rule);
+          }
+
+          // add the rules sequence
+          rulesSequenceRepository.updateSequence(new ObjectId(newDatasetSchemaId));
+        }
+      }
+    }
+    return dictionaryOriginTargetObjectId;
   }
 
 }

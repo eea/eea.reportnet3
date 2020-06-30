@@ -128,4 +128,33 @@ public class IntegrationServiceImpl implements IntegrationService {
   }
 
 
+  /**
+   * Copy integrations.
+   *
+   * @param dataflowIdDestination the dataflow id destination
+   * @param originDatasetSchemaIds the origin dataset schema ids
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @throws EEAException the EEA exception
+   */
+  @Transactional
+  @Override
+  public void copyIntegrations(Long dataflowIdDestination, List<String> originDatasetSchemaIds,
+      Map<String, String> dictionaryOriginTargetObjectId) throws EEAException {
+    for (String originDatasetSchemaId : originDatasetSchemaIds) {
+      IntegrationVO integrationCriteria = new IntegrationVO();
+      integrationCriteria.getInternalParameters().put("datasetSchemaId", originDatasetSchemaId);
+      List<IntegrationVO> integrations = getAllIntegrationsByCriteria(integrationCriteria);
+      for (IntegrationVO integration : integrations) {
+        // we've got the origin integrations. We intend to change the dataflow and the
+        // datasetSchemaId
+        // parameters and save all as new integrations of the copied design datasets
+        integration.getInternalParameters().put("datasetSchemaId",
+            dictionaryOriginTargetObjectId.get(originDatasetSchemaId));
+        integration.getInternalParameters().put("dataflowId", dataflowIdDestination.toString());
+        createIntegration(integration);
+      }
+    }
+  }
+
+
 }

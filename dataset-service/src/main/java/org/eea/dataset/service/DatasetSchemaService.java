@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import java.util.List;
+import java.util.Map;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
@@ -437,5 +438,15 @@ public interface DatasetSchemaService {
    */
   void deleteOnlyUniqueConstraintFromField(String schemaId, String fieldSchemaId)
       throws EEAException;
+
+
+  /**
+   * Copy unique constraints catalogue.
+   *
+   * @param originDatasetSchemaIds the origin dataset schema ids
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   */
+  void copyUniqueConstraintsCatalogue(List<String> originDatasetSchemaIds,
+      Map<String, String> dictionaryOriginTargetObjectId);
 
 }

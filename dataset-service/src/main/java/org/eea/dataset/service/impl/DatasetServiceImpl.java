@@ -42,7 +42,6 @@ import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
-import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
@@ -99,7 +98,6 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -165,12 +163,8 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
 
-  /**
-   * The data collection repository.
-   */
-  @Autowired
-  private DataCollectionRepository dataCollectionRepository;
 
+  /** The dataflow controller zull. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZull;
 
@@ -361,7 +355,7 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void saveAllRecords(@DatasetId Long datasetId, List<RecordValue> listaGeneral) {
+  public void saveAllRecords(Long datasetId, List<RecordValue> listaGeneral) {
     recordRepository.saveAll(listaGeneral);
   }
 
@@ -1966,6 +1960,103 @@ public class DatasetServiceImpl implements DatasetService {
       }
     }
     return result;
+  }
+
+
+
+  /**
+   * Copy data.
+   *
+   * @param dictionaryOriginTargetDatasetsId the dictionary origin target datasets id
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   */
+  @Override
+  public void copyData(Map<Long, Long> dictionaryOriginTargetDatasetsId,
+      Map<String, String> dictionaryOriginTargetObjectId) {
+    dictionaryOriginTargetDatasetsId.forEach((Long originDataset, Long targetDataset) -> {
+
+      LOG.info("Copiando datos del dataset {} al dataset {}", originDataset, targetDataset);
+      DesignDataset originDesign =
+          designDatasetRepository.findById(originDataset).orElse(new DesignDataset());
+      if (StringUtils.isNoneBlank(originDesign.getDatasetSchema())) {
+
+        // get tables from schema
+        DataSetSchema schema =
+            schemasRepository.findByIdDataSetSchema(new ObjectId(originDesign.getDatasetSchema()));
+        List<TableSchema> listOfTables = schema.getTableSchemas();
+        List<TableSchema> listOfTablesFiltered = new ArrayList<>();
+        for (TableSchema desingTableToPrefill : listOfTables) {
+          if (Boolean.TRUE.equals(desingTableToPrefill.getToPrefill())) {
+            listOfTablesFiltered.add(desingTableToPrefill);
+          }
+        }
+        // get the data from designs datasets
+        if (!listOfTablesFiltered.isEmpty()) {
+          LOG.info("Hay para copiar");
+          TenantResolver.setTenantName(
+              String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
+          List<RecordValue> recordDesignValues = new ArrayList<>();
+
+          for (TableSchema desingTable : listOfTablesFiltered) {
+            LOG.info("idTableschema a copiar: {}", desingTable.getIdTableSchema().toString());
+            recordDesignValues.addAll(recordRepository
+                .findByTableValueAllRecords(desingTable.getIdTableSchema().toString()));
+            LOG.info("Registros a copiar : " + recordDesignValues.size());
+
+          }
+          List<RecordValue> recordDesignValuesList = new ArrayList<>();
+
+          // fill the data
+          DatasetValue ds = new DatasetValue();
+          ds.setId(targetDataset);
+
+          Optional<PartitionDataSetMetabase> datasetPartition =
+              partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(targetDataset);
+          Long datasetPartitionId = null;
+          if (null != datasetPartition.orElse(null)) {
+            datasetPartitionId = datasetPartition.get().getId();
+          }
+
+          for (RecordValue record : recordDesignValues) {
+            RecordValue recordAux = new RecordValue();
+            TableValue tableAux = record.getTableValue();
+            TenantResolver
+                .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset));
+            tableAux.setId(tableRepository.findIdByIdTableSchema(
+                dictionaryOriginTargetObjectId.get(record.getTableValue().getIdTableSchema())));
+
+            recordAux.setTableValue(tableAux);
+            recordAux
+                .setIdRecordSchema(dictionaryOriginTargetObjectId.get(record.getIdRecordSchema()));
+            recordAux.setDatasetPartitionId(datasetPartitionId);
+
+
+            TenantResolver.setTenantName(
+                String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
+            List<FieldValue> fieldValues = fieldRepository.findByRecord(record);
+            List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
+            for (FieldValue field : fieldValues) {
+              FieldValue auxField = new FieldValue();
+              auxField.setValue(field.getValue());
+              auxField
+                  .setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
+              auxField.setType(field.getType());
+              auxField.setRecord(recordAux);
+              fieldValuesOnlyValues.add(auxField);
+            }
+            recordAux.setFields(fieldValuesOnlyValues);
+            recordDesignValuesList.add(recordAux);
+          }
+          if (!recordDesignValuesList.isEmpty()) {
+            // save values
+            TenantResolver
+                .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset));
+            saveAllRecords(targetDataset, recordDesignValuesList);
+          }
+        }
+      }
+    });
+
   }
 
   /**
