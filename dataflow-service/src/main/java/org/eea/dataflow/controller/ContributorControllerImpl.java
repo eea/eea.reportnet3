@@ -97,7 +97,7 @@ public class ContributorControllerImpl implements ContributorController {
     String message = "";
     HttpStatus status = HttpStatus.OK;
     try {
-      contributorService.updateContributor(contributorVO, dataflowId);
+      contributorService.updateContributor(dataflowId, contributorVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Error update the contributor {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
@@ -126,7 +126,7 @@ public class ContributorControllerImpl implements ContributorController {
       case "EDITOR":
       case "REPORTER":
         try {
-          contributorService.createContributor(contributorVO, dataflowId);
+          contributorService.createContributor(dataflowId, contributorVO);
         } catch (EEAException e) {
           LOG_ERROR.error("Error creating  the contributor {}.in the dataflow: {} ",
               contributorVO.getAccount(), dataflowId);
