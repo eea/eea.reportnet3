@@ -186,7 +186,7 @@ const TabsValidations = withRouter(
         { id: 'actionButtons', index: 14 },
         { id: 'isCorrect', index: 15 }
       ];
-      console.log(validations.map(error => validationsWithPriority.filter(e => error === e.id)));
+
       return validations
         .map(error => validationsWithPriority.filter(e => error === e.id))
         .flat()

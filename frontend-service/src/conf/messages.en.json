@@ -701,6 +701,11 @@
     "createDataCollectionConfirmQuestion": "Are you sure you want to create a data collection?",
     "createDataCollectionConfirm": "You can no longer edit anything related to design datasets (tables, fields, QC's, snapshots, etc). You will be able to manage new reporters.",
     "targetDatasetSchema": "Target dataset schema",
-    "targetTable": "Target table"
+    "targetTable": "Target table",
+    "disabledCreateDataCollectionSchemas": "There is already a data collection created",
+    "disabledCreateDataCollectionSchemasWithError": "Incomplete schemas. Check that all your schemas have tables and (at least) one field per table",
+    "disabledCreateDataCollectionNoProviders": "You haven't assigned yet reporter/s to your dataflow",
+    "selectField": "Select field",
+    "pkHasMultipleValues": "Multiple values"
   }
 }

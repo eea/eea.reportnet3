@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
@@ -1198,8 +1199,19 @@ public class DatasetServiceImpl implements DatasetService {
             field.setValue(field.getValue().substring(0, fieldMaxLength));
           }
         }
-        // if the type is multiselect codelist we sort the values in lexicographic order
-        if (DataType.MULTISELECT_CODELIST.equals(field.getType()) && null != field.getValue()) {
+        // if the type is link multiselect we check if is multiple
+        Boolean isLinkMultiselect = false;
+        if (DataType.LINK.equals(field.getType())) {
+          Document fieldSchema = schemasRepository.findFieldSchema(metabase.getDatasetSchema(),
+              field.getIdFieldSchema());
+          isLinkMultiselect = fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES) != null
+              ? (Boolean) fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES)
+              : Boolean.FALSE;
+        }
+        // if the type is multiselect codelist or Link multiple we sort the values in lexicographic
+        // order
+        if ((DataType.MULTISELECT_CODELIST.equals(field.getType()) || isLinkMultiselect)
+            && null != field.getValue()) {
           List<String> values = new ArrayList<>();
           Arrays.asList(field.getValue().split(",")).stream()
               .forEach(value -> values.add(value.trim()));
@@ -1359,8 +1371,19 @@ public class DatasetServiceImpl implements DatasetService {
       throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
 
     }
-    // if the type is multiselect codelist we sort the values in lexicographic order
-    if (DataType.MULTISELECT_CODELIST.equals(field.getType()) && null != field.getValue()) {
+    Boolean isLinkMultiselect = Boolean.FALSE;
+    if (DataType.LINK.equals(field.getType())) {
+      String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
+      Document fieldSchema =
+          schemasRepository.findFieldSchema(datasetSchemaId, field.getIdFieldSchema());
+      isLinkMultiselect = fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES) != null
+          ? (Boolean) fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES)
+          : Boolean.FALSE;
+    }
+    // if the type is multiselect codelist or Link multiselect we sort the values in lexicographic
+    // order
+    if ((DataType.MULTISELECT_CODELIST.equals(field.getType()) || isLinkMultiselect)
+        && null != field.getValue()) {
       List<String> values = new ArrayList<>();
       Arrays.asList(field.getValue().split(",")).stream()
           .forEach(value -> values.add(value.trim()));

@@ -2,6 +2,7 @@ package org.eea.interfaces.vo.dataset.schemas.rule;
 
 import java.util.List;
 import java.util.Objects;
+import org.eea.interfaces.dto.dataset.schemas.rule.RuleExpressionDTO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
@@ -43,7 +44,7 @@ public class RuleVO {
   private EntityTypeEnum type;
 
   /** The when condition. */
-  private RuleExpressionVO whenCondition;
+  private RuleExpressionDTO whenCondition;
 
   /** The then condition. */
   private List<String> thenCondition;
