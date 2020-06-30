@@ -53,10 +53,8 @@ const addContributor = async (formDispatcher, contributors, dataflowId, formStat
   }
 };
 
-const getAllContributors = async (dataflowId, dataProviderId, formDispatcher) => {
+const getAllContributors = async (dataflowId, formDispatcher) => {
   try {
-    console.log('dataflowId', dataflowId);
-    // console.log('dataProviderId', dataProviderId);
     const response = await ContributorService.all(dataflowId);
     response.contributors.push(emptyContributor);
 
