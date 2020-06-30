@@ -18,6 +18,7 @@ const useBigButtonList = ({
   getDeleteSchemaIndex,
   handleRedirect,
   isActiveButton,
+  onCloneDataflow,
   onDatasetSchemaNameError,
   onDuplicateName,
   onLoadReceiptData,
@@ -62,17 +63,21 @@ const useBigButtonList = ({
       // caption: resources.messages['newItem'],
       caption: resources.messages['newSchema'],
       helpClassName: 'dataflow-new-item-help-step',
-      // layout: 'menuBigButton',
-      layout: 'defaultBigButton',
+      layout: 'menuBigButton',
+      // layout: 'defaultBigButton',
       handleRedirect: () => onShowNewSchemaDialog(),
-      /* model: [
+      model: [
         {
           label: resources.messages['createNewEmptyDatasetSchema'],
           icon: 'add',
           command: () => onShowNewSchemaDialog()
         },
-        { label: resources.messages['createNewDatasetFromTemplate'], icon: 'add', disabled: true }
-      ], */
+        {
+          label: resources.messages['cloneSchemasFromDataflow'],
+          icon: 'add',
+          command: () => onCloneDataflow()
+        }
+      ],
       visibility: dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']
     }
   ];
