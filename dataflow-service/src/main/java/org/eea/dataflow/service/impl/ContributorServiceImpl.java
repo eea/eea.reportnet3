@@ -167,8 +167,6 @@ public class ContributorServiceImpl implements ContributorService {
             ? ResourceGroupEnum.DATAFLOW_EDITOR_WRITE
             : ResourceGroupEnum.DATAFLOW_EDITOR_READ;
         break;
-      case "REPORTER_PARTITIONED":
-        break;
       case "REPORTER":
         /*
          * resourceGroupEnum = Boolean.TRUE.equals(representativeVO.getPermission()) ?
@@ -181,21 +179,22 @@ public class ContributorServiceImpl implements ContributorService {
       resourceAssignationVOList.add(fillResourceAssignation(dataflowId, contributorVO.getAccount(),
           resourceGroupEnumDataflow));
 
-      resourceManagementControllerZull
-          .createResource(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, securityRoleEnum));
-
+      ResourceInfoVO resourceDataflow =
+          resourceManagementControllerZull.getResourceDetail(dataflowId, resourceGroupEnumDataflow);
+      if (null == resourceDataflow.getName()) {
+        resourceManagementControllerZull
+            .createResource(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, securityRoleEnum));
+      }
       for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
-
-        resourceManagementControllerZull.createResource(
-            createGroup(designDatasetVO.getId(), ResourceTypeEnum.DATA_SCHEMA, securityRoleEnum));
-
+        ResourceInfoVO resourceDataSchema = resourceManagementControllerZull
+            .getResourceDetail(designDatasetVO.getId(), resourceGroupEnum);
+        if (null == resourceDataSchema.getName()) {
+          resourceManagementControllerZull.createResource(
+              createGroup(designDatasetVO.getId(), ResourceTypeEnum.DATA_SCHEMA, securityRoleEnum));
+        }
         resourceAssignationVOList.add(fillResourceAssignation(designDatasetVO.getId(),
             contributorVO.getAccount(), resourceGroupEnum));
       }
-
-
-      resourceManagementControllerZull.createResource(
-          createGroup(dataflow.getId(), ResourceTypeEnum.DATAFLOW, securityRoleEnum));
       // we add all datas to contributor
       userManagementControllerZull.addContributorsToResources(resourceAssignationVOList);
     }

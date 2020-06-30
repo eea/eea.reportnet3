@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
@@ -49,9 +50,9 @@ public class ContributorControllerImpl implements ContributorController {
    * @param dataflowId the dataflow id
    * @param account the account
    */
-  @DeleteMapping(value = "/dataflow/{dataflowId}/user/{account}")
+  @DeleteMapping(value = "/dataflow/{dataflowId}/user")
   @Override
-  public void delete(@PathVariable("dataflowId") Long dataflowId, @PathVariable String account) {
+  public void delete(@PathVariable("dataflowId") Long dataflowId, @RequestParam String account) {
     // we can only remove role of editor, reporter or reporter partition type
     try {
       contributorService.deleteContributor(dataflowId, account);
@@ -120,7 +121,6 @@ public class ContributorControllerImpl implements ContributorController {
       @RequestBody ContributorVO contributorVO) {
     switch (contributorVO.getRole()) {
       case "EDITOR":
-      case "REPORTER_PARTITIONED":
       case "REPORTER":
         try {
           contributorService.createContributor(contributorVO, dataflowId);

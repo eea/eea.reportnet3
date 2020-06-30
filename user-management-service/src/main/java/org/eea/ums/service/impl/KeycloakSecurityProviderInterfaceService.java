@@ -357,7 +357,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   public void removeUserFromUserGroup(String userId, String groupName) throws EEAException {
     GroupInfo[] groups = keycloakConnectorService.getGroupsWithSearch(groupName);
     if (null != groups && groups.length > 0) {
-      keycloakConnectorService.removeUserFromGroup(userId, groups[1].getId());
+      keycloakConnectorService.removeUserFromGroup(userId, groups[0].getId());
       LOG.info("User {} remove to group {} succesfully", userId, groupName);
     }
   }
