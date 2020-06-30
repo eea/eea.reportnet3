@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 
 import styles from './EuHeader.module.scss';
 
@@ -7,10 +7,10 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { InputText } from 'primereact/inputtext';
 
-export const EuHeader = () => {
+export const EuHeader = ({ globanElementStyle, euHeaderElementStyle }) => {
   return (
     <Fragment>
-      <div id="globan" className={styles.globan}>
+      <div id="globan" style={globanElementStyle} className={styles.globan}>
         <div className={styles.globanContent}>
           An official website of the European Union
           <a href="#globan-dropdown-186d0fazrpn" aria-controls="globan-dropdown-186d0fazrpn" aria-expanded="false">
@@ -19,7 +19,7 @@ export const EuHeader = () => {
           </a>
         </div>
       </div>
-      <div className={styles.euHeader}>
+      <div id="euHeader" style={euHeaderElementStyle} className={styles.euHeader}>
         <div className={styles.europeanUnionLogo}>
           <a href="https://europa.eu/european-union/index_en" title="Home - European Union">
             <span>Home - European Commission</span>

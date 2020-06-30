@@ -24,7 +24,7 @@ import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-const Header = withRouter(({ history }) => {
+const Header = withRouter(({ history, onLeftSideBarStyleChange }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -33,6 +33,58 @@ const Header = withRouter(({ history }) => {
   const avatarImage = useRef();
 
   const [confirmvisible, setConfirmVisible] = useState(false);
+
+  const [globanElementStyle, setGlobanElementStyle] = useState({
+    marginTop: 0,
+    transition: '0.5s'
+  });
+  const [euHeaderElementStyle, setEuHeaderElementStyle] = useState({
+    marginTop: 0,
+    transition: '0.5s'
+  });
+  const [headerElementStyle, setHeaderElementStyle] = useState({});
+  useEffect(() => {
+    var prevScrollpos = window.pageYOffset;
+    window.onscroll = function () {
+      var currentScrollPos = window.pageYOffset;
+      if (prevScrollpos > currentScrollPos) {
+        setGlobanElementStyle({
+          marginTop: '0',
+          transition: '0.5s'
+        });
+        setEuHeaderElementStyle({
+          marginTop: '0',
+          transition: '0.5s'
+        });
+        setHeaderElementStyle({
+          height: '196px',
+          transition: '0.5s'
+        });
+        onLeftSideBarStyleChange({
+          top: '196px',
+          transition: '0.5s'
+        });
+      } else {
+        setGlobanElementStyle({
+          marginTop: '-100px',
+          transition: '0.5s'
+        });
+        setEuHeaderElementStyle({
+          marginTop: '-20px',
+          transition: '0.5s'
+        });
+        setHeaderElementStyle({
+          height: '70px',
+          transition: '0.5s'
+        });
+        onLeftSideBarStyleChange({
+          top: '70px',
+          transition: '0.5s'
+        });
+      }
+      prevScrollpos = currentScrollPos;
+    };
+  }, []);
 
   useEffect(() => {
     if (!isEmpty(userContext.userProps.userImage) && userContext.userProps.userImage.join('') !== '') {
@@ -157,11 +209,8 @@ const Header = withRouter(({ history }) => {
 
   return (
     <Fragment>
-      <div className="euHeader">
-        <div></div>
-      </div>
-      <div id="header" className={styles.header}>
-        <EuHeader />
+      <div id="header" style={headerElementStyle} className={styles.header}>
+        <EuHeader globanElementStyle={globanElementStyle} euHeaderElementStyle={euHeaderElementStyle} />
         <div className={styles.customHeader}>
           {loadTitle()}
           <BreadCrumb />

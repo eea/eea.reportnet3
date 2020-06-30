@@ -25,6 +25,7 @@ const MainLayout = ({ children }) => {
   const userContext = useContext(UserContext);
 
   const [margin, setMargin] = useState('50px');
+  const [leftSideBarStyle, setLeftSideBarStyle] = useState({});
 
   const getUserConfiguration = async () => {
     try {
@@ -85,12 +86,16 @@ const MainLayout = ({ children }) => {
 
   const onToggleSideBar = hover => {};
 
+  const onLeftSideBarStyleChange = sideBarStyle => {
+    setLeftSideBarStyle(sideBarStyle);
+  };
+
   useSocket();
   return (
     <div id={styles.mainLayoutContainer}>
-      <Header />
+      <Header onLeftSideBarStyleChange={onLeftSideBarStyleChange} />
       <div className={styles.mainContent} style={{ marginLeft: margin, transition: '0.5s' }}>
-        <LeftSideBar onToggleSideBar={onToggleSideBar} />
+        <LeftSideBar onToggleSideBar={onToggleSideBar} style={leftSideBarStyle} style={leftSideBarStyle} />
         {children}
       </div>
       <Footer leftMargin={margin} />

@@ -18,7 +18,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-const LeftSideBar = withRouter(({ history }) => {
+const LeftSideBar = withRouter(({ history, style }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -157,7 +157,9 @@ const LeftSideBar = withRouter(({ history }) => {
           }
         }}
       />
-      <div className={`${styles.leftSideBar}${leftSideBarContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}>
+      <div
+        className={`${styles.leftSideBar}${leftSideBarContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}
+        style={style}>
         {
           <>
             <div className={styles.barSection}>
