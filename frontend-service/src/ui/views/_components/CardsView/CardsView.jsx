@@ -11,7 +11,15 @@ import { Paginator } from 'ui/views/_components/DataTable/_components/Paginator'
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const CardsView = ({ checkedCard, data, handleRedirect, onChangePagination, onSelectCard, pagination }) => {
+export const CardsView = ({
+  checkedCard,
+  contentType,
+  data,
+  handleRedirect,
+  onChangePagination,
+  onSelectCard,
+  pagination
+}) => {
   const resources = useContext(ResourcesContext);
 
   const [cards, setCards] = useState(data);
@@ -37,15 +45,15 @@ export const CardsView = ({ checkedCard, data, handleRedirect, onChangePaginatio
   const end = begin + cardsPerPage;
   const currentPosts = cards.slice(begin, end);
 
-  const paginatorRightText = `${resources.messages['totalObligations']}: ${data.length}`;
+  const paginatorRightText = `${resources.messages[`total${contentType}`]}: ${data.length}`;
+
+  const stylesCardWrap = { justifyContent: currentPosts.length % 5 === 0 ? 'space-between' : 'flex-start' };
 
   return isEmpty(data) ? (
-    <h3 className={styles.noObligations}>{resources.messages['noObligationsWithSelectedParameters']}</h3>
+    <h3 className={styles.noObligations}>{resources.messages[`no${contentType}WithSelectedParameters`]}</h3>
   ) : (
     <Fragment>
-      <div
-        className={styles.cardWrap}
-        style={{ justifyContent: currentPosts.length === cardsPerPage ? 'space-between' : 'flex-start' }}>
+      <div className={styles.cardWrap} style={stylesCardWrap}>
         {currentPosts.map(card => {
           return (
             <Card

@@ -110,7 +110,7 @@ export const TableViewSchemas = ({
   const paginatorRightText = `${resources.messages['totalDataflows']}: ${data.length}`;
 
   return isEmpty(data) ? (
-    <h3 className={styles.noObligations}>{resources.messages['noObligationsWithSelectedParameters']}</h3>
+    <h3 className={styles.noDataflows}>{resources.messages['noDataflowsWithSelectedParameters']}</h3>
   ) : (
     <DataTable
       autoLayout={true}

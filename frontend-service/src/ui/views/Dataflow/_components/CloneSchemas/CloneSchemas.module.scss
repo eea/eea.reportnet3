@@ -31,9 +31,10 @@
     > span {
       font-weight: bold;
     }
-  }
 
-  .filteredSelected {
-    margin-bottom: 0.5rem;
+    &.filteredSelected {
+      position: absolute;
+      bottom: 0;
+    }
   }
 }
