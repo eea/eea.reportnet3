@@ -21,7 +21,6 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { cloneSchemasReducer } from './_functions/Reducers/cloneSchemasReducer';
 
-import { CloneSchemasUtils } from './_functions/Utils/CloneSchemasUtils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
@@ -67,6 +66,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
       });
     } catch (error) {
       console.error('onLoadDataflows error: ', error);
+      notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
     } finally {
       isLoading(false);
     }

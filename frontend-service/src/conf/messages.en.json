@@ -713,6 +713,7 @@
     "pkHasMultipleValues": "Multiple values",
     "cloneDatasetSchemasInit": "Cloning dataset schemas from <strong> {:sourceDataflowName} </strong> to <strong>{:targetDataflowName}</strong>.",
     "copyDatasetSchemaFailedEvent": "Error cloning in the dataflow <strong> {:dataflowName} </strong>.",
-    "copyDatasetSchemaCompletedEvent": "Dataflow cloned successfully in dataflow <strong>{:dataflowName}</strong>."
+    "copyDatasetSchemaCompletedEvent": "Dataflow cloned successfully in dataflow <strong>{:dataflowName}</strong>.",
+    "loadDataflowsError": "Error loading dataflows"
   }
 }

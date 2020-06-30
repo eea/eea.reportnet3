@@ -405,8 +405,8 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
-  useCheckNotifications(['RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT'], onLoadReportingDataflow);
   useCheckNotifications(['COPY_DATASET_SCHEMA_COMPLETED_EVENT'], setIsDataUpdated);
+  useCheckNotifications(['RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT'], onLoadReportingDataflow);
 
   const onLoadSchemasValidations = async () => {
     const validationResult = await DataflowService.schemasValidation(dataflowId);

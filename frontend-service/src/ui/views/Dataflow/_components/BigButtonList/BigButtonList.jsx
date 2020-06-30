@@ -1,9 +1,9 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import isNil from 'lodash/isNil';
+import moment from 'moment';
 import remove from 'lodash/remove';
 import uniqBy from 'lodash/uniqBy';
-import moment from 'moment';
 
 import styles from './BigButtonList.module.css';
 
@@ -17,8 +17,9 @@ import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 
 import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
-import { DatasetService } from 'core/services/Dataset';
 import { DataCollectionService } from 'core/services/DataCollection';
+import { DataflowService } from 'core/services/Dataflow';
+import { DatasetService } from 'core/services/Dataset';
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -30,7 +31,6 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
-import { DataflowService } from 'core/services/Dataflow';
 
 export const BigButtonList = ({
   dataflowState,
