@@ -22,6 +22,7 @@ export const Card = ({ checked, date, icon, id, obligation, onCheck, subtitle, t
 
       <div className={`${styles.link}`}>
         <FontAwesomeIcon
+          aria-hidden={false}
           className={styles.linkIcon}
           icon={AwesomeIcons(icon)}
           onMouseDown={() => window.open(`http://rod3.devel1dub.eionet.europa.eu/obligations/${id}`)}

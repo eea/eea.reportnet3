@@ -27,7 +27,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, title,
 
   return (
     <div className={`${styles.wrap} ${className}`}>
-      <h2>{title}</h2>
+      {title && <h2>{title}</h2>}
       <p>{description}</p>
       <div className="dataflowList-filters-help-step">
         <Filters

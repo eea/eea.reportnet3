@@ -286,6 +286,7 @@ export const Filters = ({
         style={{ fontSize: '12pt' }}
         tooltip={resources.messages['sort']}
         tooltipOptions={{ position: 'bottom' }}
+        value={`${property}_sortOrder`}
       />
     ) : (
       <Fragment />

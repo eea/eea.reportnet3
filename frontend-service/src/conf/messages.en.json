@@ -705,7 +705,7 @@
     "disabledCreateDataCollectionSchemas": "There is already a data collection created",
     "disabledCreateDataCollectionSchemasWithError": "Incomplete schemas. Check that all your schemas have tables and (at least) one field per table",
     "disabledCreateDataCollectionNoProviders": "You haven't assigned yet reporter/s to your dataflow",
-    "selectField": "Select field",
-    "pkHasMultipleValues": "Multiple values"
+    "pkHasMultipleValues": "Multiple values",
+    "clearFilter": "Clear filter"
   }
 }
