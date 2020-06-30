@@ -6,7 +6,7 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.mapper.IMapper;
 import org.eea.validation.persistence.schemas.rule.Rule;
-import org.eea.validation.util.RuleExpressionService;
+import org.eea.validation.service.RuleExpressionService;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

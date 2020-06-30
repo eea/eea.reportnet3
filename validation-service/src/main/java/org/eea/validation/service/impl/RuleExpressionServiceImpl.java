@@ -1,4 +1,4 @@
-package org.eea.validation.util;
+package org.eea.validation.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,11 +9,12 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.enums.JavaType;
 import org.eea.interfaces.vo.dataset.schemas.rule.enums.RuleOperatorEnum;
+import org.eea.validation.service.RuleExpressionService;
 import org.springframework.stereotype.Service;
 
 /** The Class RuleExpressionService. */
 @Service
-public class RuleExpressionService {
+public class RuleExpressionServiceImpl implements RuleExpressionService {
 
   /**
    * Converts a String containing a rule expression (Java code) into a RuleExpressionDTO data
@@ -123,7 +124,7 @@ public class RuleExpressionService {
   /**
    * Instantiates a new rule expression service.
    */
-  private RuleExpressionService() {}
+  private RuleExpressionServiceImpl() {}
 
   /**
    * Constructor.

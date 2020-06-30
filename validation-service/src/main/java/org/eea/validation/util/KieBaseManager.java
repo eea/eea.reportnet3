@@ -24,6 +24,7 @@ import org.eea.validation.persistence.schemas.FieldSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
+import org.eea.validation.service.RuleExpressionService;
 import org.eea.validation.util.drools.compose.ConditionsDrools;
 import org.eea.validation.util.drools.compose.SchemasDrools;
 import org.eea.validation.util.drools.compose.TypeValidation;

@@ -22,6 +22,7 @@ import org.eea.validation.persistence.schemas.ReferencedFieldSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
+import org.eea.validation.service.RuleExpressionService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
