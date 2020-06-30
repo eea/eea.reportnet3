@@ -51,7 +51,7 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
       <>
         <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
           <input
-            autoFocus={isNil(contributor.account)}
+            autoFocus={contributor.isNew}
             id={isEmpty(inputData) ? 'emptyInput' : undefined}
             onBlur={() => {
               contributor.account = contributor.account.toLowerCase();
@@ -61,13 +61,14 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
             onKeyDown={event => onKeyDown(event, formDispatcher, formState, contributor, dataflowId)}
             placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
             value={inputData}
+            disabled={!contributor.isNew}
           />
         </div>
       </>
     );
   };
 
-  const writePermissinosColumnTemplate = contributor => {
+  const writePermissionsColumnTemplate = contributor => {
     const writePermissionsOptions = [
       { label: resources.messages['selectPermission'], writePermission: '' },
       { label: resources.messages['readPermission'], writePermission: 'false' },
@@ -96,7 +97,7 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
   };
 
   const deleteBtnColumnTemplate = contributor => {
-    return isNil(contributor.account) /*||  contributor.writePermission*/ ? (
+    return contributor.isNew ? (
       <></>
     ) : (
       <ActionsColumn
@@ -115,7 +116,7 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
     <div className={styles.container}>
       <DataTable value={formState.contributors}>
         <Column body={accountInputColumnTemplate} header={formState.accountInputHeader} />
-        <Column body={writePermissinosColumnTemplate} header={resources.messages['writePermissionsColumn']} />
+        <Column body={writePermissionsColumnTemplate} header={resources.messages['writePermissionsColumn']} />
         <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
       </DataTable>
 

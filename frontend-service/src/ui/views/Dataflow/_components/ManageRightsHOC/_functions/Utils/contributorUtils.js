@@ -6,7 +6,7 @@ import uniq from 'lodash/uniq';
 import { Contributor } from 'core/domain/model/Contributor/Contributor';
 import { ContributorService } from 'core/services/Contributor';
 
-const emptyContributor = new Contributor({ account: '', dataProviderId: '', writePermission: '' });
+const emptyContributor = new Contributor({ account: '', dataProviderId: '', writePermission: '', isNew: true });
 
 export const autofocusOnEmptyInput = formState => {
   if (!isEmpty(formState.contributors)) {
@@ -25,30 +25,34 @@ export const autofocusOnEmptyInput = formState => {
   }
 };
 
-const addContributor = async (formDispatcher, contributors, dataflowId, formState) => {
-  const newContributor = contributors.filter(contributor => isNil(contributor.account));
-
-  if (!isEmpty(newContributor[0].providerAccount) && !isEmpty(newContributor[0].dataProviderId)) {
+const addContributor = async (formDispatcher, contributor, dataflowId, formState) => {
+  if (!isEmpty(contributor.account) && !isEmpty(contributor.writePermission)) {
     try {
-      await ContributorService.add(
-        dataflowId,
-        newContributor[0].providerAccount,
-        parseInt(newContributor[0].dataProviderId)
-      );
+      await ContributorService.add(contributor, dataflowId);
 
       formDispatcher({
         type: 'REFRESH'
       });
     } catch (error) {
       console.error('error on ContributorService.add', error);
+
+      let { contributorsHaveError } = formState;
+      contributorsHaveError.unshift(formState.contributors[formState.contributors.length - 1].account);
+      formDispatcher({
+        type: 'MANAGE_ERRORS',
+        payload: { contributorsHaveError: uniq(contributorsHaveError) }
+      });
+
+      /* 
+      // error.response.status OF UNDEFINED - CHECK WHY
       if (error.response.status === 400 || error.response.status === 404) {
         let { contributorsHaveError } = formState;
-        contributorsHaveError.unshift(contributors[contributors.length - 1].account);
+        contributorsHaveError.unshift(formState.contributors[formState.contributors.length - 1].account);
         formDispatcher({
           type: 'MANAGE_ERRORS',
           payload: { contributorsHaveError: uniq(contributorsHaveError) }
         });
-      }
+      } */
     }
   }
 };
@@ -56,8 +60,6 @@ const addContributor = async (formDispatcher, contributors, dataflowId, formStat
 export const getInitialData = async (formDispatcher, dataflowId) => {
   try {
     const contributors = await ContributorService.all(dataflowId);
-
-    console.log('contributors', contributors);
 
     contributors.push(emptyContributor);
 
@@ -73,9 +75,7 @@ export const getInitialData = async (formDispatcher, dataflowId) => {
 };
 
 export const onAddContributor = (formDispatcher, formState, contributor, dataflowId) => {
-  isNil(contributor.account)
-    ? addContributor(formDispatcher, formState.contributors, dataflowId, formState)
-    : updateContributor(formDispatcher, formState, contributor);
+  addContributor(formDispatcher, contributor, dataflowId, formState);
 };
 
 export const onWritePermissionChange = async (contributor, dataflowId, formDispatcher, formState, writePermission) => {
@@ -120,53 +120,5 @@ export const onDeleteConfirm = async (formDispatcher, formState) => {
 export const onKeyDown = (event, formDispatcher, formState, contributor, dataflowId) => {
   if (event.key === 'Enter') {
     onAddContributor(formDispatcher, formState, contributor, dataflowId);
-  }
-};
-
-const updateContributor = async (formDispatcher, formState, updatedContributor) => {
-  let isChangedAccount = false;
-  const { initialContributors } = formState;
-
-  for (let initialContributor of initialContributors) {
-    if (
-      initialContributor.account === updatedContributor.account &&
-      initialContributor.providerAccount !== updatedContributor.providerAccount
-    ) {
-      isChangedAccount = true;
-    } else if (
-      initialContributor.account === updatedContributor.account &&
-      initialContributor.providerAccount === updatedContributor.providerAccount
-    ) {
-      const filteredInputsWithErrors = formState.contributorsHaveError.filter(
-        account => account !== updatedContributor.account
-      );
-      formDispatcher({
-        type: 'MANAGE_ERRORS',
-        payload: { contributorsHaveError: filteredInputsWithErrors }
-      });
-    }
-  }
-
-  if (isChangedAccount) {
-    try {
-      await ContributorService.updateProviderAccount(
-        parseInt(updatedContributor.account),
-        updatedContributor.providerAccount
-      );
-      formDispatcher({
-        type: 'REFRESH'
-      });
-    } catch (error) {
-      console.error('error on ContributorService.updateProviderAccount', error);
-
-      if (error.response.status === 400 || error.response.status === 404) {
-        let { contributorsHaveError } = formState;
-        contributorsHaveError.unshift(updatedContributor.account);
-        formDispatcher({
-          type: 'MANAGE_ERRORS',
-          payload: { contributorsHaveError: uniq(contributorsHaveError) }
-        });
-      }
-    }
   }
 };

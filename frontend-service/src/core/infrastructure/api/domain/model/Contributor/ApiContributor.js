@@ -40,7 +40,6 @@ const apiContributor = {
     return response;
   },
   updateWritePermission: async (contributor, dataflowId) => {
-    console.log('contributor, dataflowId', contributor, dataflowId);
     const response = await HTTPRequester.update({
       url: getUrl(ContributorConfig.updateWritePermission, { dataflowId }),
       data: {
