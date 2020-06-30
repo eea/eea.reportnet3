@@ -1,11 +1,11 @@
-import React, { Fragment, useContext, useEffect, useReducer } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
 import styles from './CloneSchemas.module.scss';
 
+import { dataflowRoles } from 'conf/dataflow.config.json';
 import { routes } from 'ui/routes';
-import { getUrl } from 'core/infrastructure/CoreUtils';
 
 import { CardsView } from 'ui/views/_components/CardsView';
 import { Filters } from 'ui/views/_components/Filters';
@@ -21,7 +21,7 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { cloneSchemasReducer } from './_functions/Reducers/cloneSchemasReducer';
 
-import { CloneSchemasUtils } from './_functions/Utils/CloneSchemasUtils';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
   const notificationContext = useContext(NotificationContext);
@@ -52,13 +52,12 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
   const onChangePagination = pagination => cloneSchemasDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
 
   const onLoadDataflows = async () => {
-    isLoading(true);
     try {
       const allDataflows = await DataflowService.all(user.contextRoles);
       cloneSchemasDispatch({
         type: 'INITIAL_LOAD',
         payload: {
-          accepted: allDataflows.accepted.filter(dataflow => dataflow.id !== parseInt(dataflowId)),
+          accepted: parseDataflowList(allDataflows.accepted),
           allDataflows,
           completed: allDataflows.completed,
           pending: allDataflows.pending
@@ -66,6 +65,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
       });
     } catch (error) {
       console.error('onLoadDataflows error: ', error);
+      notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
     } finally {
       isLoading(false);
     }
@@ -73,7 +73,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
 
   const onLoadFilteredData = data => cloneSchemasDispatch({ type: 'FILTERED_DATA', payload: { data } });
 
-  const onOpenDataflow = id => window.open(getUrl(`/dataflow/${id}`));
+  const onOpenDataflow = dataflowId => window.open(getUrl(routes.DATAFLOW, { dataflowId }, true));
 
   const onSelectDataflow = dataflowData => {
     cloneSchemasDispatch({ type: 'ON_SELECT_DATAFLOW', payload: { id: dataflowData.id, name: dataflowData.name } });
@@ -91,7 +91,8 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
       />
     ) : (
       <CardsView
-        checkedCard={cloneSchemasReducer.chosenDataflow}
+        checkedCard={cloneSchemasState.chosenDataflow}
+        contentType={'Dataflows'}
         data={cloneSchemasState.filteredData}
         handleRedirect={onOpenDataflow}
         onChangePagination={onChangePagination}
@@ -100,10 +101,23 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
       />
     );
 
+  const parseDataflowList = dataflows => {
+    return dataflows.filter(
+      dataflow => dataflow.id !== parseInt(dataflowId) && dataflow.userRole === dataflowRoles.DATA_CUSTODIAN
+    );
+  };
+
+  const cloneSchemaStyles = {
+    justifyContent:
+      cloneSchemasState.isLoading || isEmpty(cloneSchemasState.data || cloneSchemasState.filteredData)
+        ? 'flex-start'
+        : 'space-between'
+  };
+
   if (cloneSchemasState.isLoading) return <Spinner style={{ top: 0 }} />;
 
   return (
-    <div className={styles.cloneSchemas}>
+    <div className={styles.cloneSchemas} style={cloneSchemaStyles}>
       <div className={styles.switchDiv}>
         <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
         <InputSwitch checked={user.userProps.listView} onChange={e => user.onToggleTypeView(e.value)} />
@@ -122,15 +136,13 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
 
       {renderData()}
 
-      {!cloneSchemasState.isLoading && (
-        <span
-          className={`${styles.selectedDataflow} ${
-            isEmpty(cloneSchemasState.data) || isEmpty(cloneSchemasState.searchedData) ? styles.filteredSelected : ''
-          }`}>
-          <span>{`${resources.messages['selectedDataflow']}: `}</span>
-          {`${!isEmpty(cloneSchemasState.chosenDataflow) ? cloneSchemasState.chosenDataflow.name : '-'}`}
-        </span>
-      )}
+      <span
+        className={`${styles.selectedDataflow} ${
+          isEmpty(cloneSchemasState.data || cloneSchemasState.filteredData) ? styles.filteredSelected : ''
+        }`}>
+        <span>{`${resources.messages['selectedDataflow']}: `}</span>
+        {!isEmpty(cloneSchemasState.chosenDataflow) ? cloneSchemasState.chosenDataflow.name : '-'}
+      </span>
     </div>
   );
 };

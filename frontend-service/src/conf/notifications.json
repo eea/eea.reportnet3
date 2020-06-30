@@ -387,6 +387,9 @@
         },
         {
           "key": "COPY_DATASET_SCHEMA_FAILED_EVENT"
+        },
+        {
+          "key": "LOAD_DATAFLOWS_ERROR"
         }
       ]
     },

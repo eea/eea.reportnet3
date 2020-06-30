@@ -135,6 +135,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     ) : (
       <CardsView
         checkedCard={reportingObligationState.oblChoosed}
+        contentType={'Obligations'}
         data={reportingObligationState.searchedData}
         handleRedirect={onOpenObligation}
         onChangePagination={onChangePagination}

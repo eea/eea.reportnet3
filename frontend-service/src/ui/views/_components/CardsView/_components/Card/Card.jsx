@@ -22,7 +22,7 @@ export const Card = ({ card, checked, date, handleRedirect, icon, id, onCheck, s
       </div>
 
       <div className={`${styles.link}`}>
-        <FontAwesomeIcon className={styles.linkIcon} icon={AwesomeIcons(icon)} onMouseDown={() => handleRedirect(id)} />
+        <FontAwesomeIcon aria-hidden={false} className={styles.linkIcon} icon={AwesomeIcons(icon)} onMouseDown={() => handleRedirect(id)} />
       </div>
 
       <div className={`${styles.date}`}>

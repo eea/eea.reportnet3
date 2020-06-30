@@ -717,6 +717,8 @@
     "userTypeOfView": "Type of view",
     "userTypeOfViewSubtitle": "Choose the tope of view to visualize.",
     "toggleListView": "Switch to list view",
-    "toggleMagazineView": "Switch to magazine view"
+    "toggleMagazineView": "Switch to magazine view",
+    "loadDataflowsError": "Error loading dataflows",
+    "clearFilter": "Clear filter"
   }
 }
