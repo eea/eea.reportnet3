@@ -1500,7 +1500,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public void copyUniqueConstraintsCatalogue(List<String> originDatasetSchemaIds,
       Map<String, String> dictionaryOriginTargetObjectId) {
-
+    // We obtain the UniqueConstraints of the origin dataset schemas, and with the help of the
+    // dictionary we replace the objectIds with the correct ones to finally save them. The result it
+    // will be new constraints in the catalogue with correct data according to the new copied
+    // schemas
     for (String datasetSchemaId : originDatasetSchemaIds) {
       List<UniqueConstraintVO> uniques = getUniqueConstraints(datasetSchemaId);
       for (UniqueConstraintVO uniqueConstraintVO : uniques) {
@@ -1513,6 +1516,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           uniqueConstraintVO.getFieldSchemaIds().set(i,
               dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getFieldSchemaIds().get(i)));
         }
+        LOG.info("A unique constraint is going to be created during the copy process");
         uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
       }
     }

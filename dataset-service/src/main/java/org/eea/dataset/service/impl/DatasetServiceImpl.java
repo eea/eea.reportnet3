@@ -1996,9 +1996,12 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   public void copyData(Map<Long, Long> dictionaryOriginTargetDatasetsId,
       Map<String, String> dictionaryOriginTargetObjectId) {
+    // We've got the dictionary of origin datasetsId and it's new equivalent datasetId from the
+    // copied ones
+    // We'll load the data from the origin datasetId, modify it using the dictionary to accurate to
+    // the target datasetId (like the tableschema) and finally save it
     dictionaryOriginTargetDatasetsId.forEach((Long originDataset, Long targetDataset) -> {
 
-      LOG.info("Copiando datos del dataset {} al dataset {}", originDataset, targetDataset);
       DesignDataset originDesign =
           designDatasetRepository.findById(originDataset).orElse(new DesignDataset());
       if (StringUtils.isNoneBlank(originDesign.getDatasetSchema())) {
@@ -2013,63 +2016,15 @@ public class DatasetServiceImpl implements DatasetService {
             listOfTablesFiltered.add(desingTableToPrefill);
           }
         }
-        // get the data from designs datasets
+        // if there are tables of the origin dataset with tables ToPrefill, then we'll copy the data
         if (!listOfTablesFiltered.isEmpty()) {
-          LOG.info("Hay para copiar");
-          TenantResolver.setTenantName(
-              String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
-          List<RecordValue> recordDesignValues = new ArrayList<>();
-
-          for (TableSchema desingTable : listOfTablesFiltered) {
-            LOG.info("idTableschema a copiar: {}", desingTable.getIdTableSchema().toString());
-            recordDesignValues.addAll(recordRepository
-                .findByTableValueAllRecords(desingTable.getIdTableSchema().toString()));
-            LOG.info("Registros a copiar : " + recordDesignValues.size());
-
-          }
+          LOG.info("There is data to copy. Copy data from datasetId {} to datasetId {}",
+              originDataset, targetDataset);
           List<RecordValue> recordDesignValuesList = new ArrayList<>();
 
-          // fill the data
-          DatasetValue ds = new DatasetValue();
-          ds.setId(targetDataset);
+          recordDesignValuesList = replaceData(originDataset, targetDataset, listOfTablesFiltered,
+              dictionaryOriginTargetObjectId);
 
-          Optional<PartitionDataSetMetabase> datasetPartition =
-              partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(targetDataset);
-          Long datasetPartitionId = null;
-          if (null != datasetPartition.orElse(null)) {
-            datasetPartitionId = datasetPartition.get().getId();
-          }
-
-          for (RecordValue record : recordDesignValues) {
-            RecordValue recordAux = new RecordValue();
-            TableValue tableAux = record.getTableValue();
-            TenantResolver
-                .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset));
-            tableAux.setId(tableRepository.findIdByIdTableSchema(
-                dictionaryOriginTargetObjectId.get(record.getTableValue().getIdTableSchema())));
-
-            recordAux.setTableValue(tableAux);
-            recordAux
-                .setIdRecordSchema(dictionaryOriginTargetObjectId.get(record.getIdRecordSchema()));
-            recordAux.setDatasetPartitionId(datasetPartitionId);
-
-
-            TenantResolver.setTenantName(
-                String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
-            List<FieldValue> fieldValues = fieldRepository.findByRecord(record);
-            List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
-            for (FieldValue field : fieldValues) {
-              FieldValue auxField = new FieldValue();
-              auxField.setValue(field.getValue());
-              auxField
-                  .setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
-              auxField.setType(field.getType());
-              auxField.setRecord(recordAux);
-              fieldValuesOnlyValues.add(auxField);
-            }
-            recordAux.setFields(fieldValuesOnlyValues);
-            recordDesignValuesList.add(recordAux);
-          }
           if (!recordDesignValuesList.isEmpty()) {
             // save values
             TenantResolver
@@ -2080,6 +2035,72 @@ public class DatasetServiceImpl implements DatasetService {
       }
     });
 
+  }
+
+
+  /**
+   * Replace data.
+   *
+   * @param originDataset the origin dataset
+   * @param targetDataset the target dataset
+   * @param listOfTablesFiltered the list of tables filtered
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @return the list
+   */
+  private List<RecordValue> replaceData(Long originDataset, Long targetDataset,
+      List<TableSchema> listOfTablesFiltered, Map<String, String> dictionaryOriginTargetObjectId) {
+
+    TenantResolver.setTenantName(
+        String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
+    List<RecordValue> recordDesignValues = new ArrayList<>();
+
+    for (TableSchema desingTable : listOfTablesFiltered) {
+      recordDesignValues.addAll(
+          recordRepository.findByTableValueAllRecords(desingTable.getIdTableSchema().toString()));
+    }
+    List<RecordValue> recordDesignValuesList = new ArrayList<>();
+
+    // fill the data
+    DatasetValue ds = new DatasetValue();
+    ds.setId(targetDataset);
+
+    Optional<PartitionDataSetMetabase> datasetPartition =
+        partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(targetDataset);
+    Long datasetPartitionId = null;
+    if (null != datasetPartition.orElse(null)) {
+      datasetPartitionId = datasetPartition.get().getId();
+    }
+
+    for (RecordValue record : recordDesignValues) {
+      RecordValue recordAux = new RecordValue();
+      TableValue tableAux = record.getTableValue();
+      TenantResolver
+          .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset));
+      tableAux.setId(tableRepository.findIdByIdTableSchema(
+          dictionaryOriginTargetObjectId.get(record.getTableValue().getIdTableSchema())));
+
+      recordAux.setTableValue(tableAux);
+      recordAux.setIdRecordSchema(dictionaryOriginTargetObjectId.get(record.getIdRecordSchema()));
+      recordAux.setDatasetPartitionId(datasetPartitionId);
+
+
+      TenantResolver.setTenantName(
+          String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
+      List<FieldValue> fieldValues = fieldRepository.findByRecord(record);
+      List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
+      for (FieldValue field : fieldValues) {
+        FieldValue auxField = new FieldValue();
+        auxField.setValue(field.getValue());
+        auxField.setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
+        auxField.setType(field.getType());
+        auxField.setRecord(recordAux);
+        fieldValuesOnlyValues.add(auxField);
+      }
+      recordAux.setFields(fieldValuesOnlyValues);
+      recordDesignValuesList.add(recordAux);
+    }
+
+    return recordDesignValuesList;
   }
 
   /**

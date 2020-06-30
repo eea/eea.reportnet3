@@ -148,6 +148,9 @@ public class IntegrationServiceImpl implements IntegrationService {
         // we've got the origin integrations. We intend to change the dataflow and the
         // datasetSchemaId
         // parameters and save all as new integrations of the copied design datasets
+        LOG.info(
+            "There are integrations to be copied into the datasetSchemaId {} in the dataflowId {}",
+            dictionaryOriginTargetObjectId.get(originDatasetSchemaId), dataflowIdDestination);
         integration.getInternalParameters().put("datasetSchemaId",
             dictionaryOriginTargetObjectId.get(originDatasetSchemaId));
         integration.getInternalParameters().put("dataflowId", dataflowIdDestination.toString());

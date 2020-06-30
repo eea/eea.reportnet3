@@ -401,7 +401,6 @@ public class RulesControllerImpl implements RulesController {
   @PostMapping("/private/copyRulesSchema")
   public Map<String, String> copyRulesSchema(@RequestBody CopySchemaVO copy) {
     try {
-
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
