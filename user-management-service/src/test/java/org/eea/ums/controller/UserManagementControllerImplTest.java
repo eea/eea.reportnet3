@@ -576,4 +576,89 @@ public class UserManagementControllerImplTest {
   public void getUsersByGroupTestNull() {
     assertNull(userManagementController.getUsersByGroup(""));
   }
+
+  @Test
+  public void removeContributorFromResource() throws EEAException {
+    userManagementController.removeContributorFromResource(1L,
+        ResourceGroupEnum.DATAFLOW_EDITOR_READ, "");
+    Mockito.verify(securityProviderInterfaceService, Mockito.times(1))
+        .removeContributorFromUserGroup(Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void removeContributorFromResourceException() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
+        .removeContributorFromUserGroup(Mockito.any(), Mockito.any(), Mockito.any());
+    try {
+      userManagementController.removeContributorFromResource(1L,
+          ResourceGroupEnum.DATAFLOW_EDITOR_READ, "");
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals(EEAErrorMessage.PERMISSION_NOT_CREATED, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test
+  public void removeContributorsFromResources() throws EEAException {
+    userManagementController.removeContributorsFromResources(new ArrayList<>());
+    Mockito.verify(securityProviderInterfaceService, Mockito.times(1))
+        .removeContributorsFromUserGroup(Mockito.any());
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void removeContributorsFromResourcesException() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
+        .removeContributorsFromUserGroup(Mockito.any());
+    try {
+      userManagementController.removeContributorsFromResources(new ArrayList<>());
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals(EEAErrorMessage.PERMISSION_NOT_CREATED, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test
+  public void removeUserFromResources() throws EEAException {
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken("user1", null, null);
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
+    authenticationToken.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    List<ResourceAssignationVO> resources = new ArrayList<>();
+    ResourceAssignationVO resource = new ResourceAssignationVO();
+    resource.setResourceGroup(ResourceGroupEnum.DATAFLOW_EDITOR_READ);
+    resource.setResourceId(1L);
+    resources.add(resource);
+    userManagementController.removeUserFromResources(resources);
+    Mockito.verify(securityProviderInterfaceService, Mockito.times(1))
+        .removeUserFromUserGroup(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void removeUserFromResourcesException() throws EEAException {
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken("user1", null, null);
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
+    authenticationToken.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    List<ResourceAssignationVO> resources = new ArrayList<>();
+    ResourceAssignationVO resource = new ResourceAssignationVO();
+    resource.setResourceGroup(ResourceGroupEnum.DATAFLOW_EDITOR_READ);
+    resource.setResourceId(1L);
+    resources.add(resource);
+    Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
+        .removeUserFromUserGroup(Mockito.any(), Mockito.any());
+    try {
+      userManagementController.removeUserFromResources(resources);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals(EEAErrorMessage.PERMISSION_NOT_CREATED, e.getReason());
+      throw e;
+    }
+  }
 }

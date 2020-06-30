@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.security.jwt.utils.AuthenticationDetails;
@@ -516,5 +517,32 @@ public class KeycloakConnectorServiceImplTest {
         .thenReturn(responseUserRepresentation);
 
     Assert.assertNotNull(keycloakConnectorService.getUsersByGroupId("value"));
+  }
+
+
+  @Test
+  public void removeUserFromGroup() throws EEAException {
+    ResponseEntity<Void> responseRemoveUserFromGroup = new ResponseEntity<>(null, HttpStatus.OK);
+    Mockito
+        .when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
+            Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
+        .thenReturn(responseRemoveUserFromGroup);
+    keycloakConnectorService.removeUserFromGroup("", "");
+    Mockito.verify(restTemplate, Mockito.times(1)).exchange(Mockito.anyString(),
+        Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class), Mockito.any(Class.class));
+
+  }
+
+  @Test(expected = EEAException.class)
+  public void removeUserFromGroupError() throws EEAException {
+    Mockito.doThrow(new RestClientException("error test")).when(restTemplate).exchange(
+        Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+        Mockito.any(Class.class));
+    try {
+      keycloakConnectorService.removeUserFromGroup("user1", "");
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.PERMISSION_NOT_REMOVED, e.getMessage());
+      throw e;
+    }
   }
 }
