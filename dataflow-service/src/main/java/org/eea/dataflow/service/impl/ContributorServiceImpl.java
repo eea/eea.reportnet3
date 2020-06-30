@@ -146,7 +146,7 @@ public class ContributorServiceImpl implements ContributorService {
    * @param dataflowId the dataflow id
    */
   @Override
-  public void createContributor(ContributorVO contributorVO, Long dataflowId) throws EEAException {
+  public void createContributor(Long dataflowId, ContributorVO contributorVO) throws EEAException {
     DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
     SecurityRoleEnum securityRoleEnum = null;
     ResourceGroupEnum resourceGroupEnum = null;
@@ -240,8 +240,9 @@ public class ContributorServiceImpl implements ContributorService {
    * @param dataflowId the dataflow id
    */
   @Override
-  public void updateContributor(ContributorVO contributorVO, Long dataflowId) throws EEAException {
+  public void updateContributor(Long dataflowId, ContributorVO contributorVO) throws EEAException {
     DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
+    // we delete the contributor and after we create to update it
     if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
       try {
         deleteContributor(dataflowId, contributorVO.getAccount());
@@ -251,7 +252,7 @@ public class ContributorServiceImpl implements ContributorService {
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
       }
       try {
-        createContributor(contributorVO, dataflowId);
+        createContributor(dataflowId, contributorVO);
       } catch (EEAException e) {
         LOG_ERROR.error("Error creating contributor with the account: {} in the dataflow {} ",
             contributorVO.getAccount(), dataflowId);
