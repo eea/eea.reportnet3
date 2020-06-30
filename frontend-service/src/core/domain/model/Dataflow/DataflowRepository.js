@@ -4,6 +4,7 @@ export const DataflowRepository = {
   accept: () => Promise.reject('[DataflowRepository#accept] must be implemented'),
   accepted: () => Promise.reject('[DataflowRepository#accepted] must be implemented'),
   all: () => Promise.reject('[DataflowRepository#all] must be implemented'),
+  cloneDatasetSchemas: () => Promise.reject('[DataflowRepository#cloneDatasetSchemas] must be implemented'),
   completed: () => Promise.reject('[DataflowRepository#completed] must be implemented'),
   create: () => Promise.reject('[DataflowRepository#create] must be implemented'),
   datasetsReleasedStatus: () => Promise.reject('[DataflowRepository#datasetsReleasedStatus] must be implemented'),

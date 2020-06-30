@@ -38,6 +38,7 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
     <div className={styles.titleColum}>
       {row.title}
       <FontAwesomeIcon
+        aria-hidden={false}
         className={styles.linkIcon}
         icon={AwesomeIcons('externalLink')}
         onMouseDown={() => window.open(`http://rod3.devel1dub.eionet.europa.eu/obligations/${row.id}`)}

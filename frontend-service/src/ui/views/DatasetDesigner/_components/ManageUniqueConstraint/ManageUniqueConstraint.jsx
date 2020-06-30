@@ -89,6 +89,26 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
     } else return [{ name: resources.messages['noTableSelected'], disabled: true }];
   };
 
+  const pkTemplate = option => {
+    let isPk = false;
+    const table = datasetSchemaAllTables.filter(table => table.tableSchemaId === selectedTable.value)[0];
+    if (table && table.records) {
+      const filteredField = table.records[0].fields.filter(field => field.fieldId === option.value);
+      if (filteredField[0]) {
+        if (filteredField[0].pk) {
+          isPk = true;
+        }
+      }
+    }
+
+    return (
+      <span>
+        {`${option.name}`}
+        {isPk ? <span className={styles.pkField}>{'PK'}</span> : ''}
+      </span>
+    );
+  };
+
   const onCreateConstraint = async () => {
     try {
       const response = await UniqueConstraintsService.create(
@@ -211,6 +231,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
   const renderListBoxField = () => (
     <ListBox
       disabled={isNil(selectedTable)}
+      itemTemplate={pkTemplate}
       listStyle={{ height: '200px' }}
       multiple={true}
       onChange={event => !isNil(event.value) && setSelectedFields(event.value)}
