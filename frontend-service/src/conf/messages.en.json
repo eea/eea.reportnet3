@@ -702,11 +702,22 @@
     "createDataCollectionConfirm": "You can no longer edit anything related to design datasets (tables, fields, QC's, snapshots, etc). You will be able to manage new reporters.",
     "targetDatasetSchema": "Target dataset schema",
     "targetTable": "Target table",
+    "cloneSchemasFromDataflow": "Clone all schemas from dataflow",
+    "dataflowsList": "Dataflows",
+    "cloneSelectedDataflow": "Clone selected dataflow",
+    "selectedDataflow": "Selected dataflow",
+    "totalDataflows": "Total dataflows",
     "disabledCreateDataCollectionSchemas": "There is already a data collection created",
     "disabledCreateDataCollectionSchemasWithError": "Incomplete schemas. Check that all your schemas have tables and (at least) one field per table",
     "disabledCreateDataCollectionNoProviders": "You haven't assigned yet reporter/s to your dataflow",
     "homeBreadcrumb": "Reportnet 3.0",
     "selectField": "Select field",
-    "pkHasMultipleValues": "Multiple values"
+    "pkHasMultipleValues": "Multiple values",
+    "pkHasMultipleValues": "Multiple values",
+    "cloneDatasetSchemasInit": "Cloning dataset schemas from <strong> {:sourceDataflowName} </strong> to <strong>{:targetDataflowName}</strong>.",
+    "copyDatasetSchemaFailedEvent": "Error cloning in the dataflow <strong> {:dataflowName} </strong>.",
+    "copyDatasetSchemaCompletedEvent": "Dataflow cloned successfully in dataflow <strong>{:dataflowName}</strong>.",
+    "loadDataflowsError": "Error loading dataflows",
+    "clearFilter": "Clear filter"
   }
 }
