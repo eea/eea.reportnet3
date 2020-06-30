@@ -4,6 +4,7 @@ package org.eea.dataflow.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataflow.service.ContributorService;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -20,7 +21,9 @@ import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class ContributorServiceImpl.
@@ -94,7 +97,7 @@ public class ContributorServiceImpl implements ContributorService {
    * @param account the account
    */
   @Override
-  public void deleteContributor(Long dataflowId, String account) {
+  public void deleteContributor(Long dataflowId, String account) throws EEAException {
     DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
 
     ResourceGroupEnum resourceGroupEnumWrite = null;
@@ -146,7 +149,7 @@ public class ContributorServiceImpl implements ContributorService {
    * @param dataflowId the dataflow id
    */
   @Override
-  public void createContributor(ContributorVO contributorVO, Long dataflowId) {
+  public void createContributor(ContributorVO contributorVO, Long dataflowId) throws EEAException {
     DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
     SecurityRoleEnum securityRoleEnum = null;
     ResourceGroupEnum resourceGroupEnum = null;
@@ -241,8 +244,24 @@ public class ContributorServiceImpl implements ContributorService {
    * @param dataflowId the dataflow id
    */
   @Override
-  public void updateContributor(ContributorVO contributorVO, Long dataflowId) {
-    // TODO Auto-generated method stub
+  public void updateContributor(ContributorVO contributorVO, Long dataflowId) throws EEAException {
+    DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
+    if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
+      try {
+        deleteContributor(dataflowId, contributorVO.getAccount());
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error deleting contributor with the account: {} in the dataflow {} ",
+            contributorVO.getAccount(), dataflowId);
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      }
+      try {
+        createContributor(contributorVO, dataflowId);
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error creating contributor with the account: {} in the dataflow {} ",
+            contributorVO.getAccount(), dataflowId);
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      }
+    }
 
   }
 

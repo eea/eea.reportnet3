@@ -2,6 +2,7 @@ package org.eea.dataflow.controller;
 
 import java.util.List;
 import org.eea.dataflow.service.ContributorService;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController;
 import org.eea.interfaces.vo.contributor.ContributorVO;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
@@ -51,7 +53,12 @@ public class ContributorControllerImpl implements ContributorController {
   @Override
   public void delete(@PathVariable("dataflowId") Long dataflowId, @PathVariable String account) {
     // we can only remove role of editor, reporter or reporter partition type
-    contributorService.deleteContributor(dataflowId, account);
+    try {
+      contributorService.deleteContributor(dataflowId, account);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting the contributor {}.in the dataflow: {}", account, dataflowId);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
 
 
@@ -83,8 +90,18 @@ public class ContributorControllerImpl implements ContributorController {
       @RequestBody ContributorVO contributorVO) {
     // we can only update an editor, reporter or reporter partition role
     // mock
-    contributorService.updateContributor(contributorVO, dataflowId);
-    return new ResponseEntity(HttpStatus.OK);
+    String message = "";
+    HttpStatus status = HttpStatus.OK;
+    try {
+      contributorService.updateContributor(contributorVO, dataflowId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error update the contributor {}.in the dataflow: {}",
+          contributorVO.getAccount(), dataflowId);
+      message = e.getMessage();
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
+    }
+
+    return new ResponseEntity<>(message, status);
   }
 
 
@@ -99,19 +116,24 @@ public class ContributorControllerImpl implements ContributorController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   @PostMapping("/dataflow/{dataflowId}")
-  public Long createContributor(@PathVariable("dataflowId") Long dataflowId,
+  public void createContributor(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody ContributorVO contributorVO) {
     switch (contributorVO.getRole()) {
       case "EDITOR":
       case "REPORTER_PARTITIONED":
       case "REPORTER":
-        contributorService.createContributor(contributorVO, dataflowId);
+        try {
+          contributorService.createContributor(contributorVO, dataflowId);
+        } catch (EEAException e) {
+          LOG_ERROR.error("Error creating  the contributor {}.in the dataflow: {} ",
+              contributorVO.getAccount(), dataflowId);
+          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+        }
         break;
       default:
         LOG.info("Didn't remove role of the user with account {} because its role is {}",
             contributorVO.getAccount(), contributorVO.getRole());
         break;
     }
-    return 1L;
   }
 }

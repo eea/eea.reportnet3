@@ -64,6 +64,6 @@ public interface ContributorController {
    * @return the long
    */
   @PostMapping("/dataflow/{dataflowId}")
-  Long createContributor(@PathVariable("dataflowId") Long dataflowId,
+  void createContributor(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody ContributorVO contributorVO);
 }

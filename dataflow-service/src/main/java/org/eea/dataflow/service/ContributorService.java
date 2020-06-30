@@ -1,6 +1,7 @@
 package org.eea.dataflow.service;
 
 import java.util.List;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.contributor.ContributorVO;
 
 /**
@@ -15,7 +16,7 @@ public interface ContributorService {
    * @param account the account
    * @param dataflowId the dataflow id
    */
-  void deleteContributor(Long dataflowId, String account);
+  void deleteContributor(Long dataflowId, String account) throws EEAException;
 
   /**
    * Creates the role user.
@@ -23,7 +24,7 @@ public interface ContributorService {
    * @param contributorVO the contributor VO
    * @param dataflowId the dataflow id
    */
-  void createContributor(ContributorVO contributorVO, Long dataflowId);
+  void createContributor(ContributorVO contributorVO, Long dataflowId) throws EEAException;
 
   /**
    * Find role users by id dataflow.
@@ -39,5 +40,5 @@ public interface ContributorService {
    * @param contributorVO the contributor VO
    * @param dataflowId the dataflow id
    */
-  void updateContributor(ContributorVO contributorVO, Long dataflowId);
+  void updateContributor(ContributorVO contributorVO, Long dataflowId) throws EEAException;
 }
