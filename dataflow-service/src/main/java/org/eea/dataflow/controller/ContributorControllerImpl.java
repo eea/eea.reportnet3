@@ -50,8 +50,9 @@ public class ContributorControllerImpl implements ContributorController {
    * @param dataflowId the dataflow id
    * @param account the account
    */
-  @DeleteMapping(value = "/dataflow/{dataflowId}/user")
   @Override
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
+  @DeleteMapping(value = "/dataflow/{dataflowId}/user")
   public void delete(@PathVariable("dataflowId") Long dataflowId, @RequestParam String account) {
     // we can only remove role of editor, reporter or reporter partition type
     try {
@@ -69,8 +70,9 @@ public class ContributorControllerImpl implements ContributorController {
    * @param dataflowId the dataflow id
    * @return the list
    */
-  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @Override
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
+  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<ContributorVO> findContributorsByGroup(@PathVariable("dataflowId") Long dataflowId) {
     // we can find editors, reporters or reporter partition roles based on the dataflow state
     // mock
@@ -86,6 +88,7 @@ public class ContributorControllerImpl implements ContributorController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
   @PutMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity update(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody ContributorVO contributorVO) {
@@ -115,7 +118,7 @@ public class ContributorControllerImpl implements ContributorController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
   @PostMapping("/dataflow/{dataflowId}")
   public void createContributor(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody ContributorVO contributorVO) {

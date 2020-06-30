@@ -69,11 +69,8 @@ public enum ResourceGroupEnum {
   /** The dataschema editor read. */
   DATASCHEMA_EDITOR_READ("Dataschema-%s-EDITOR_READ"),
 
-  /** The dataflow reporter write. */
-  DATAFLOW_REPORTER_WRITE("Dataflow-%s-REPORTER_WRITE"),
-
   /** The dataflow reporter read. */
-  DATAFLOW_REPORTER_READ("Dataflow-%s-REPORTER_READ"),
+  DATAFLOW_REPORTER("Dataflow-%s-REPORTER"),
 
   /** The dataset reporter write. */
   DATASET_REPORTER_WRITE("Dataset-%s-REPORTER_WRITE"),
