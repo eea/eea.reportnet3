@@ -73,6 +73,7 @@ public class ContributorServiceImpl implements ContributorService {
         ContributorVO contributorVO = new ContributorVO();
         contributorVO.setAccount(userWrite.getEmail());
         contributorVO.setWritePermission(true);
+        contributorVO.setRole("EDITOR");
         listRoleUserVO.add(contributorVO);
       });
       stringBuilder = new StringBuilder("Dataflow-").append(dataflowId).append("-EDITOR_READ");
@@ -115,10 +116,6 @@ public class ContributorServiceImpl implements ContributorService {
         break;
       case "DRAFT":
         break;
-      /*
-       * resourceGroupEnum = Boolean.TRUE.equals(representativeVO.getPermission()) ?
-       * resourceGroupEnum.datas : resourceGroupEnum.DATASCHEMA_EDITOR_READ;
-       */
       default:
         break;
     }
