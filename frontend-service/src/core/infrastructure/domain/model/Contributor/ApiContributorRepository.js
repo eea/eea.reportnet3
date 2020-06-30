@@ -1,21 +1,16 @@
 import { apiContributor } from 'core/infrastructure/api/domain/model/Contributor';
 import { Contributor } from 'core/domain/model/Contributor/Contributor';
 import isEmpty from 'lodash/isEmpty';
-import sortBy from 'lodash/sortBy';
 
 const all = async dataflowId => {
-  console.log('TEST');
-  console.log('dataflowId', dataflowId);
-
   const contributorsDTO = await apiContributor.all(dataflowId);
 
-  console.log('contributorsDTO', contributorsDTO);
-
-  const contributorsList = !isEmpty(contributorsDTO)
+  const contributors = !isEmpty(contributorsDTO)
     ? contributorsDTO.map(contributorDTO => new Contributor(contributorDTO))
     : [];
-  console.log('contributorsList', sortBy(contributorsList, ['account']));
-  return sortBy(contributorsList, ['account']);
+
+  console.log('contributors', contributors);
+  return contributors;
 };
 
 const add = async (Contributor, dataflowId) => {

@@ -33,7 +33,7 @@ const ManageRightsHOC = ({ dataflowState, dataflowId, dataProviderId, isActiveMa
   const [formState, formDispatcher] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    getInitialData(formDispatcher, dataflowId, dataProviderId, formState);
+    getInitialData(formDispatcher, dataflowId);
   }, [formState.refresher]);
 
   useEffect(() => {
