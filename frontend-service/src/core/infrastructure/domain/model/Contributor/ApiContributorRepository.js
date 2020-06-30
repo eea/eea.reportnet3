@@ -11,10 +11,10 @@ const all = async dataflowId => {
 
   console.log('contributorsDTO', contributorsDTO);
 
-  const contributorsList = !isEmpty(contributorsDTO.data)
-    ? contributorsDTO.data.map(contributorDTO => new Contributor(contributorDTO))
+  const contributorsList = !isEmpty(contributorsDTO)
+    ? contributorsDTO.map(contributorDTO => new Contributor(contributorDTO))
     : [];
-
+  console.log('contributorsList', sortBy(contributorsList, ['account']));
   return sortBy(contributorsList, ['account']);
 };
 

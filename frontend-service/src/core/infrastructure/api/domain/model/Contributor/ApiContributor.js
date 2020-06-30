@@ -31,7 +31,7 @@ const apiContributor = {
       })
     });
     console.log('response', response);
-    return response;
+    return response.data;
   },
 
   deleteContributor: async (Contributor, dataflowId) => {
