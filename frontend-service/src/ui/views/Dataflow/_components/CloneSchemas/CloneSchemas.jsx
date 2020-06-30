@@ -35,7 +35,6 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
     completed: [],
     filteredData: [],
     isLoading: true,
-    isTableView: true,
     pagination: { first: 0, rows: 10, page: 0 },
     pending: []
   });
@@ -80,12 +79,8 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
     cloneSchemasDispatch({ type: 'ON_SELECT_DATAFLOW', payload: { id: dataflowData.id, name: dataflowData.name } });
   };
 
-  const onToggleView = () => {
-    cloneSchemasDispatch({ type: 'ON_TOGGLE_VIEW', payload: { view: !cloneSchemasState.isTableView } });
-  };
-
   const renderData = () =>
-    cloneSchemasState.isTableView ? (
+    user.userProps.listView ? (
       <TableViewSchemas
         checkedDataflow={cloneSchemasState.chosenDataflow}
         data={cloneSchemasState.filteredData}
@@ -111,7 +106,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
     <div className={styles.cloneSchemas}>
       <div className={styles.switchDiv}>
         <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
-        <InputSwitch checked={cloneSchemasState.isTableView} onChange={() => onToggleView()} />
+        <InputSwitch checked={user.userProps.listView} onChange={e => user.onToggleTypeView(e.value)} />
         <label className={styles.switchTextInput}>{resources.messages['listView']}</label>
       </div>
 

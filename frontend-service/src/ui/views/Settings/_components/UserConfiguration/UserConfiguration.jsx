@@ -103,6 +103,30 @@ const UserConfiguration = () => {
     </React.Fragment>
   );
 
+  const chooseTypeViewSwitch = (
+    <React.Fragment>
+      <span className={styles.switchTextInput}>{`${resources.messages['magazineView']}`}</span>
+      <InputSwitch
+        checked={userContext.userProps.listView}
+        onChange={async e => {
+          userContext.onToggleTypeView(e.value);
+          const inmUserProperties = { ...userContext.userProps };
+          inmUserProperties.listView = e.value;
+          const response = await changeUserProperties(inmUserProperties);
+          if (response.status < 200 || response.status > 299) {
+            userContext.onToggleTypeView(!e.value);
+          }
+        }}
+        tooltip={
+          userContext.userProps.listView === true
+            ? resources.messages['toggleMagazineView']
+            : resources.messages['toggleListView']
+        }
+      />
+      <span className={styles.switchTextInput}>{`${resources.messages['listView']}`}</span>
+    </React.Fragment>
+  );
+
   const rowsInPaginationDropdown = (
     <React.Fragment>
       <Dropdown
@@ -171,6 +195,16 @@ const UserConfiguration = () => {
     />
   );
 
+  const viewConfiguration = (
+    <TitleWithItem
+      title={resources.messages['userTypeOfView']}
+      icon="eye"
+      iconSize="2rem"
+      subtitle={resources.messages['userTypeOfViewSubtitle']}
+      items={[chooseTypeViewSwitch]}
+    />
+  );
+
   const dateFormatSubtitle = (
     <React.Fragment>
       <div>{resources.messages['dateFormatSubtitle']}</div>
@@ -195,6 +229,7 @@ const UserConfiguration = () => {
         {dateFormatConfiguration}
         {themeConfiguration}
         {logoutConfiguration}
+        {viewConfiguration}
       </div>
     </React.Fragment>
   );

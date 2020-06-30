@@ -713,6 +713,10 @@
     "pkHasMultipleValues": "Multiple values",
     "cloneDatasetSchemasInit": "Cloning dataset schemas from <strong> {:sourceDataflowName} </strong> to <strong>{:targetDataflowName}</strong>.",
     "copyDatasetSchemaFailedEvent": "Error cloning in the dataflow <strong> {:dataflowName} </strong>.",
-    "copyDatasetSchemaCompletedEvent": "Dataflow cloned successfully in dataflow <strong>{:dataflowName}</strong>."
+    "copyDatasetSchemaCompletedEvent": "Dataflow cloned successfully in dataflow <strong>{:dataflowName}</strong>.",
+    "userTypeOfView": "Type of view",
+    "userTypeOfViewSubtitle": "Choose the tope of view to visualize.",
+    "toggleListView": "Switch to list view",
+    "toggleMagazineView": "Switch to magazine view"
   }
 }
