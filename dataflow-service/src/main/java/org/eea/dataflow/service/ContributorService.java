@@ -24,7 +24,7 @@ public interface ContributorService {
    * @param contributorVO the contributor VO
    * @param dataflowId the dataflow id
    */
-  void createContributor(ContributorVO contributorVO, Long dataflowId) throws EEAException;
+  void createContributor(Long dataflowId, ContributorVO contributorVO) throws EEAException;
 
   /**
    * Find role users by id dataflow.
@@ -40,5 +40,5 @@ public interface ContributorService {
    * @param contributorVO the contributor VO
    * @param dataflowId the dataflow id
    */
-  void updateContributor(ContributorVO contributorVO, Long dataflowId) throws EEAException;
+  void updateContributor(Long dataflowId, ContributorVO contributorVO) throws EEAException;
 }

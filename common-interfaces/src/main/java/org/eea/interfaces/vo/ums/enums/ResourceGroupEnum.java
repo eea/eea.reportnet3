@@ -2,7 +2,7 @@ package org.eea.interfaces.vo.ums.enums;
 
 
 /**
- * The enum Resource group enum.
+ * The enum Resource group enum. Allows to create groups
  */
 public enum ResourceGroupEnum {
   /**
@@ -63,17 +63,23 @@ public enum ResourceGroupEnum {
   /** The dataflow editor read. */
   DATAFLOW_EDITOR_READ("Dataflow-%s-EDITOR_READ"),
 
-  /** The dataset editor write. */
-  DATASET_EDITOR_WRITE("Dataset-%s-EDITOR_WRITE"),
-
-  /** The dataset editor read. */
-  DATASET_EDITOR_READ("Dataset-%s-EDITOR_READ"),
-
   /** The dataschema editor write. */
   DATASCHEMA_EDITOR_WRITE("Dataschema-%s-EDITOR_WRITE"),
 
   /** The dataschema editor read. */
-  DATASCHEMA_EDITOR_READ("Dataschema-%s-EDITOR_READ");
+  DATASCHEMA_EDITOR_READ("Dataschema-%s-EDITOR_READ"),
+
+  /** The dataflow reporter write. */
+  DATAFLOW_REPORTER_WRITE("Dataflow-%s-REPORTER_WRITE"),
+
+  /** The dataflow reporter read. */
+  DATAFLOW_REPORTER_READ("Dataflow-%s-REPORTER_READ"),
+
+  /** The dataset reporter write. */
+  DATASET_REPORTER_WRITE("Dataset-%s-REPORTER_WRITE"),
+
+  /** The dataset reporter read. */
+  DATASET_REPORTER_READ("Dataset-%s-REPORTER_READ");
 
 
   /** The expression. */

@@ -1,7 +1,7 @@
 package org.eea.security.authorization;
 
 /**
- * The enum Object access role enum.
+ * The enum Object access role enum. Allows to know if the user has access to the right entity
  */
 public enum ObjectAccessRoleEnum {
   /**
@@ -47,7 +47,31 @@ public enum ObjectAccessRoleEnum {
   DATACOLLECTION_CUSTODIAN("ROLE_DATACOLLECTION-%s-DATA_CUSTODIAN"),
 
   /** The datacollection provider. */
-  DATACOLLECTION_PROVIDER("ROLE_DATACOLLECTION-%s-DATA_PROVIDER");
+  DATACOLLECTION_PROVIDER("ROLE_DATACOLLECTION-%s-DATA_PROVIDER"),
+
+  /** The dataflow editor write. */
+  DATAFLOW_EDITOR_WRITE("ROLE_DATAFLOW-%s-EDITOR_WRITE"),
+
+  /** The dataflow editor read. */
+  DATAFLOW_EDITOR_READ("ROLE_DATAFLOW-%s-EDITOR_READ"),
+
+  /** The dataschema editor write. */
+  DATASCHEMA_EDITOR_WRITE("ROLE_DATASCHEMA-%s-EDITOR_WRITE"),
+
+  /** The dataschema editor read. */
+  DATASCHEMA_EDITOR_READ("ROLE_DATASCHEMA-%s-EDITOR_READ"),
+
+  /** The dataflow reporter write. */
+  DATAFLOW_REPORTER_WRITE("ROLE_DATAFLOW-%s-REPORTER_WRITE"),
+
+  /** The dataflow reporter read. */
+  DATAFLOW_REPORTER_READ("ROLE_DATAFLOW-%s-REPORTER_READ"),
+
+  /** The dataset reporter write. */
+  DATASET_REPORTER_WRITE("ROLE_DATASET-%s-REPORTER_WRITE"),
+
+  /** The dataset reporter read. */
+  DATASET_REPORTER_READ("ROLE_DATASET-%s-REPORTER_READ");
 
 
   /** The expression. */
