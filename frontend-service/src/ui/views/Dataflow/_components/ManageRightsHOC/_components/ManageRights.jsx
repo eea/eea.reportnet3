@@ -79,7 +79,7 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
         <select
           onBlur={() => onAddContributor(formDispatcher, formState, contributor, dataflowId)}
           onChange={event => {
-            onWritePermissionChange(formDispatcher, event.target.value, contributor, formState);
+            onWritePermissionChange(contributor, dataflowId, formDispatcher, formState, event.target.value);
           }}
           onKeyDown={event => onKeyDown(event, formDispatcher, formState, contributor, dataflowId)}
           value={contributor.writePermission}>

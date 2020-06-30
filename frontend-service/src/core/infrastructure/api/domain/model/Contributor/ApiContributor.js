@@ -39,13 +39,15 @@ const apiContributor = {
 
     return response;
   },
-  updateWritePermission: async (Contributor, dataflowId) => {
+  updateWritePermission: async (contributor, dataflowId) => {
+    console.log('contributor, dataflowId', contributor, dataflowId);
     const response = await HTTPRequester.update({
       url: getUrl(ContributorConfig.updateWritePermission, { dataflowId }),
       data: {
-        account: Contributor.account,
-        dataProviderId: Contributor.dataProviderId,
-        writePermission: Contributor.writePermission
+        account: contributor.account,
+        dataProviderId: contributor.dataProviderId,
+        role: contributor.role,
+        writePermission: Boolean(contributor.writePermission)
       }
     });
     return response;

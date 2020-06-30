@@ -21,8 +21,9 @@ const deleteContributor = async (Contributor, dataflowId) => {
   return await apiContributor.deleteContributor(Contributor, dataflowId);
 };
 
-const updateWritePermission = async (Contributor, dataflowId) => {
-  return await apiContributor.updateWritePermission(Contributor, dataflowId);
+const updateWritePermission = async (contributor, dataflowId) => {
+  console.log('contributor, dataflowId', contributor, dataflowId);
+  return await apiContributor.updateWritePermission(contributor, dataflowId);
 };
 
 export const ApiContributorRepository = {

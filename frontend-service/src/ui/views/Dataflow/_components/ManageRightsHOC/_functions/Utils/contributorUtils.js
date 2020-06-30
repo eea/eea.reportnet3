@@ -78,10 +78,11 @@ export const onAddContributor = (formDispatcher, formState, contributor, dataflo
     : updateContributor(formDispatcher, formState, contributor);
 };
 
-export const onWritePermissionChange = async (formDispatcher, newDataProviderId, contributor, formState) => {
+export const onWritePermissionChange = async (contributor, dataflowId, formDispatcher, formState, writePermission) => {
   if (!isNil(contributor.account)) {
     try {
-      await ContributorService.updateWritePermission(parseInt(contributor.account), parseInt(newDataProviderId));
+      contributor.writePermission = writePermission;
+      await ContributorService.updateWritePermission(contributor, dataflowId);
       formDispatcher({
         type: 'REFRESH'
       });
@@ -92,7 +93,7 @@ export const onWritePermissionChange = async (formDispatcher, newDataProviderId,
     const { contributors } = formState;
 
     const [thisContributor] = contributors.filter(thisContributor => thisContributor.account === contributor.account);
-    thisContributor.dataProviderId = newDataProviderId;
+    thisContributor.writePermission = writePermission;
 
     formDispatcher({
       type: 'ON_PERMISSIONS_CHANGE',

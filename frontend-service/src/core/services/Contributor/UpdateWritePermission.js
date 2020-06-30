@@ -1,2 +1,2 @@
-export const UpdateWritePermission = ({ contributorRepository }) => async (Contributor, dataflowId) =>
-  contributorRepository.updateWritePermission(Contributor, dataflowId);
+export const UpdateWritePermission = ({ contributorRepository }) => async (contributor, dataflowId) =>
+  contributorRepository.updateWritePermission(contributor, dataflowId);
