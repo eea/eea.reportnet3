@@ -536,6 +536,7 @@ const Dataflow = withRouter(({ history, match }) => {
             <ManageRightsHOC
               dataflowId={dataflowId}
               dataflowState={dataflowState}
+              dataProviderId={dataflowState.dataProviderId}
               isActiveManageRightsDialog={dataflowState.isManageRightsDialogVisible}
             />
           </div>

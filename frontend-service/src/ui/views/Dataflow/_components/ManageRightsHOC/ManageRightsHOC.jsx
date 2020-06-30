@@ -9,7 +9,7 @@ import { ManageRights } from './_components/ManageRights.jsx';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const ManageRightsHOC = ({ dataflowState, dataflowId, isActiveManageRightsDialog }) => {
+const ManageRightsHOC = ({ dataflowState, dataflowId, dataProviderId, isActiveManageRightsDialog }) => {
   const resources = useContext(ResourcesContext);
 
   const initialState = {
@@ -33,7 +33,7 @@ const ManageRightsHOC = ({ dataflowState, dataflowId, isActiveManageRightsDialog
   const [formState, formDispatcher] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    getInitialData(formDispatcher, dataflowId, formState);
+    getInitialData(formDispatcher, dataflowId, dataProviderId, formState);
   }, [formState.refresher]);
 
   useEffect(() => {

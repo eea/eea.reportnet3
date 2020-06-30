@@ -17,16 +17,20 @@ const apiContributor = {
     return response;
   },
 
-  all: async (dataflowId, dataProviderId, userId) => {
+  all: async dataflowId => {
+    console.log('dataflowId', dataflowId);
+    console.log(
+      'url',
+      getUrl(ContributorConfig.all, {
+        dataflowId
+      })
+    );
     const response = await HTTPRequester.get({
       url: getUrl(ContributorConfig.all, {
         dataflowId
-      }),
-      data: {
-        userId,
-        dataProviderId
-      }
+      })
     });
+    console.log('response', response);
     return response;
   },
 

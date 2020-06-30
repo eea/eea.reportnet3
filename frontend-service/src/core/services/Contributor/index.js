@@ -7,10 +7,7 @@ import { contributorRepository } from 'core/domain/model/Contributor/Contributor
 
 export const ContributorService = {
   all: All({ contributorRepository }),
-
   add: Add({ contributorRepository }),
-
   deleteContributor: Delete({ contributorRepository }),
-
   updateWritePermission: UpdateWritePermission({ contributorRepository })
 };

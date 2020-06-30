@@ -53,10 +53,11 @@ const addContributor = async (formDispatcher, contributors, dataflowId, formStat
   }
 };
 
-const getAllContributors = async (dataflowId, formDispatcher) => {
+const getAllContributors = async (dataflowId, dataProviderId, formDispatcher) => {
   try {
-    const response = await ContributorService.allContributors(dataflowId);
-
+    console.log('dataflowId', dataflowId);
+    // console.log('dataProviderId', dataProviderId);
+    const response = await ContributorService.all(dataflowId);
     response.contributors.push(emptyContributor);
 
     const contributorsByCopy = cloneDeep(response.contributors);
@@ -66,12 +67,12 @@ const getAllContributors = async (dataflowId, formDispatcher) => {
       payload: { contributors: response.contributors, contributorsByCopy }
     });
   } catch (error) {
-    console.error('error on ContributorService.allContributors', error);
+    console.error('error on ContributorService.all', error);
   }
 };
 
-export const getInitialData = async (formDispatcher, dataflowId, formState) => {
-  await getAllContributors(dataflowId, formDispatcher, formState);
+export const getInitialData = async (formDispatcher, dataflowId, dataProviderId, formState) => {
+  await getAllContributors(dataflowId, dataProviderId, formDispatcher, formState);
 };
 
 export const onAddContributor = (formDispatcher, formState, contributor, dataflowId) => {
