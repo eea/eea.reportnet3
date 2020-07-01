@@ -22,6 +22,7 @@ import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
@@ -115,6 +116,9 @@ public class DataSetSchemaControllerImplTest {
   /** The design dataset service. */
   @Mock
   private DesignDatasetService designDatasetService;
+
+  @Mock
+  private ContributorControllerZuul contributorControllerZuul;
 
   /**
    * Inits the mocks.

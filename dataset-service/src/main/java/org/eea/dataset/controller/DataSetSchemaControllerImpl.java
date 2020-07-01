@@ -118,6 +118,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private DesignDatasetService designDatasetService;
 
+  /** The contributor controller zuul. */
   @Autowired
   private ContributorControllerZuul contributorControllerZuul;
 
