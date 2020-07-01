@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { Fragment, useContext } from 'react';
 import PropTypes from 'prop-types';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -9,10 +9,21 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const Card = ({ card, checked, date, handleRedirect, icon, id, onCheck, status, subtitle, title }) => {
+export const Card = ({ card, checked, date, handleRedirect, icon, id, onCheck, status, subtitle, title, type }) => {
   const resources = useContext(ResourcesContext);
 
+  const isCloneSchemasView = type === 'cloneSchemas';
   const isSelected = checked.id === id ? styles.checked : undefined;
+
+  const renderCardFooter = () => {
+    if (isCloneSchemasView) {
+      return (
+        <span>
+          {resources.messages['status']}: <span className={styles.dueDate}>{status}</span>
+        </span>
+      );
+    } else return <Fragment />;
+  };
 
   return (
     <div className={`${styles.card} ${isSelected} ${styles[status]}`} onClick={() => onCheck(card)}>
@@ -25,8 +36,12 @@ export const Card = ({ card, checked, date, handleRedirect, icon, id, onCheck, s
         <FontAwesomeIcon aria-hidden={false} className={styles.linkIcon} icon={AwesomeIcons(icon)} onMouseDown={() => handleRedirect(id)} />
       </div>
 
-      <div className={`${styles.date}`}>
-        {resources.messages['nextReportDue']}: <span className={styles.dueDate}>{date}</span>
+      <div className={`${styles.date} ${styles[type]}`}>
+        <span>
+          {resources.messages[isCloneSchemasView ? 'date' : 'nextReportDue']}:
+          <span className={styles.dueDate}>{date}</span>
+        </span>
+        {renderCardFooter()}
       </div>
     </div>
   );

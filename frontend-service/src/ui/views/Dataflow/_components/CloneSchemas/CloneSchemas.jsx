@@ -120,6 +120,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
         onChangePagination={onChangePagination}
         onSelectCard={onSelectDataflow}
         pagination={cloneSchemasState.pagination}
+        type={'cloneSchemas'}
       />
     );
 
