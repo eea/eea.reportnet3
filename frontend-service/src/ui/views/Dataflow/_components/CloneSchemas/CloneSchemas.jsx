@@ -139,26 +139,15 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
         <InputSwitch checked={user.userProps.listView} onChange={e => user.onToggleTypeView(e.value)} />
         <label className={styles.switchTextInput}>{resources.messages['listView']}</label>
       </div>
-      {user.userProps.listView ? (
-        <div className={styles.filters}>
-          <Filters
-            data={cloneSchemasState.accepted}
-            dateOptions={['expirationDate']}
-            getFilteredData={onLoadFilteredData}
-            inputOptions={['name', 'description', 'obligationTitle', 'legalInstruments']}
-            selectOptions={['status']}
-          />
-        </div>
-      ) : (
-        <div className={styles.filters}>
-          <Filters
-            data={cloneSchemasState.accepted}
-            dateOptions={['expirationDate']}
-            getFilteredData={onLoadFilteredData}
-            inputOptions={['name', 'description']}
-          />
-        </div>
-      )}
+      <div className={styles.filters}>
+        <Filters
+          data={cloneSchemasState.accepted}
+          dateOptions={['expirationDate']}
+          getFilteredData={onLoadFilteredData}
+          inputOptions={['name', 'description', 'obligationTitle', 'legalInstruments']}
+          selectOptions={['status']}
+        />
+      </div>
       {renderData()}
       <span
         className={`${styles.selectedDataflow} ${

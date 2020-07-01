@@ -228,8 +228,8 @@ const UserConfiguration = () => {
         {rowsInPaginationConfiguration}
         {dateFormatConfiguration}
         {themeConfiguration}
-        {logoutConfiguration}
         {viewConfiguration}
+        {logoutConfiguration}
       </div>
     </React.Fragment>
   );

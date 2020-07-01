@@ -715,7 +715,7 @@
     "copyDatasetSchemaFailedEvent": "Error cloning in the dataflow <strong> {:dataflowName} </strong>.",
     "copyDatasetSchemaCompletedEvent": "Dataflow cloned successfully in dataflow <strong>{:dataflowName}</strong>.",
     "userTypeOfView": "Type of view",
-    "userTypeOfViewSubtitle": "Choose the tope of view to visualize.",
+    "userTypeOfViewSubtitle": "Choose default layout to search obligations and dataflows.",
     "toggleListView": "Switch to list view",
     "toggleMagazineView": "Switch to magazine view",
     "loadDataflowsError": "Error loading dataflows",
