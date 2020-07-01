@@ -17,9 +17,11 @@ import javax.sql.DataSource;
 import org.eea.dataset.mapper.DataCollectionMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.service.DataCollectionService;
@@ -156,6 +158,15 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  /** The user management controller zull. */
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZull;
+
+  /** The design dataset repository. */
+  @Autowired
+  private DesignDatasetRepository designDatasetRepository;
+
 
   /**
    * The Constant LOG.
@@ -415,6 +426,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         statement.executeBatch();
         // 8. Create permissions
         createPermissions(datasetIdsEmails, dataCollectionIds, dataflowId);
+        // 9. Delete editors
+        removePermissionEditors(dataflowId);
+
         connection.commit();
         // Add into the foreign_relations table from metabase the dataset origin-destination
         // relation, if applies
@@ -424,7 +438,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
         LOG.info("Metabase changes completed on DataCollection creation");
 
-        // 9. Create schemas for each dataset
+        // 10. Create schemas for each dataset
         // This method will release the lock
         recordStoreControllerZull.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation);
       } catch (SQLException e) {
@@ -439,6 +453,26 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     } catch (SQLException e) {
       LOG_ERROR.error("Error rolling back: ", e);
     }
+  }
+
+  /**
+   * Removes the permission editors.
+   *
+   * @param dataflowId the dataflow id
+   */
+  private void removePermissionEditors(Long dataflowId) {
+
+    List<DesignDataset> designDatasetIds = designDatasetRepository.findByDataflowId(dataflowId);
+    List<String> resources = new ArrayList<>();
+    resources.add(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(dataflowId));
+    resources.add(ResourceGroupEnum.DATAFLOW_EDITOR_READ.getGroupName(dataflowId));
+    for (DesignDataset designDataset : designDatasetIds) {
+      resources.add(ResourceGroupEnum.DATASET_REPORTER_READ.getGroupName(designDataset.getId()));
+      resources.add(ResourceGroupEnum.DATASET_REPORTER_WRITE.getGroupName(designDataset.getId()));
+    }
+
+    resourceManagementControllerZuul.deleteResourceByName(resources);
+
   }
 
   /**
