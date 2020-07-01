@@ -96,6 +96,7 @@ public class ContributorServiceImpl implements ContributorService {
    *
    * @param dataflowId the dataflow id
    * @param account the account
+   * @throws EEAException the EEA exception
    */
   @Override
   public void deleteContributor(Long dataflowId, String account) throws EEAException {
@@ -142,8 +143,9 @@ public class ContributorServiceImpl implements ContributorService {
   /**
    * Creates the contributor.
    *
-   * @param contributorVO the contributor VO
    * @param dataflowId the dataflow id
+   * @param contributorVO the contributor VO
+   * @throws EEAException the EEA exception
    */
   @Override
   public void createContributor(Long dataflowId, ContributorVO contributorVO) throws EEAException {
@@ -236,8 +238,9 @@ public class ContributorServiceImpl implements ContributorService {
   /**
    * Update contributor.
    *
-   * @param contributorVO the contributor VO
    * @param dataflowId the dataflow id
+   * @param contributorVO the contributor VO
+   * @throws EEAException the EEA exception
    */
   @Override
   public void updateContributor(Long dataflowId, ContributorVO contributorVO) throws EEAException {
@@ -259,6 +262,18 @@ public class ContributorServiceImpl implements ContributorService {
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
       }
     }
+
+  }
+
+  /**
+   * Creates the associated permissions.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void createAssociatedPermissions(Long dataflowId, Long datasetId) throws EEAException {
 
   }
 

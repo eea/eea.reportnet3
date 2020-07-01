@@ -67,4 +67,14 @@ public interface ContributorController {
   @PostMapping("/dataflow/{dataflowId}")
   void createContributor(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody ContributorVO contributorVO);
+
+  /**
+   * Creates the associated permissions.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetId the dataset id
+   */
+  @PostMapping("/private/dataflow/{dataflowId}/createAssociatedPermissions/{datasetId}")
+  void createAssociatedPermissions(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("datasetId") Long datasetId);
 }

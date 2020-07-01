@@ -13,6 +13,7 @@ import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
@@ -117,6 +118,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private DesignDatasetService designDatasetService;
 
+  @Autowired
+  private ContributorControllerZuul contributorControllerZuul;
+
   /**
    * Creates the empty dataset schema.
    *
@@ -135,6 +139,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
           datasetSchemaName, dataschemaService.createEmptyDataSetSchema(dataflowId).toString(),
           dataflowId, null, null, 0);
       datasetId.get();
+      // we find if the dataflow has any permission to give the permission to this new datasetschema
+      contributorControllerZuul.createAssociatedPermissions(dataflowId, datasetId.get());
     } catch (InterruptedException | ExecutionException | EEAException e) {
       LOG.error("Aborted DataSetSchema creation: {}", e.getMessage());
       if (e instanceof InterruptedException) {
@@ -270,7 +276,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
         // delete the group in keycloak
         dataschemaService.deleteGroup(datasetId, ResourceGroupEnum.DATASCHEMA_CUSTODIAN,
-            ResourceGroupEnum.DATASCHEMA_REPORTER);
+            ResourceGroupEnum.DATASCHEMA_REPORTER, ResourceGroupEnum.DATASCHEMA_EDITOR_READ,
+            ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE);
         LOG.info("The Design Dataset {} has been deleted", datasetId);
       } else {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,

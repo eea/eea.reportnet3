@@ -136,4 +136,19 @@ public class ContributorControllerImpl implements ContributorController {
         break;
     }
   }
+
+
+  @PostMapping("/private/dataflow/{dataflowId}/createAssociatedPermissions/{datasetId}")
+  public void createAssociatedPermissions(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("datasetId") Long datasetId) {
+
+    try {
+      contributorService.createAssociatedPermissions(dataflowId, datasetId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(
+          "Error creating  the associated permissions for editor role in datasetschema {}.in the dataflow: {} ",
+          datasetId, dataflowId);
+    }
+  }
+
 }
