@@ -151,6 +151,7 @@ public class ContributorControllerImpl implements ContributorController {
       LOG_ERROR.error(
           "Error creating  the associated permissions for editor role in datasetschema {}.in the dataflow: {} ",
           datasetId, dataflowId);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 
