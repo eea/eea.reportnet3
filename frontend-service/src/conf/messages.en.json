@@ -288,7 +288,7 @@
     "invalidCharacter": "Invalid character",
     "issues": "Issue",
     "language": "Language",
-    "legalInstrument": "Legal instrument",
+    "legalInstruments": "Legal instrument",
     "legalInstrumentDataflowItem": "Legal instrument",
     "levelError": "Level error",
     "light": "Light",
@@ -714,6 +714,10 @@
     "cloneDatasetSchemasInit": "Cloning dataset schemas from <strong> {:sourceDataflowName} </strong> to <strong>{:targetDataflowName}</strong>.",
     "copyDatasetSchemaFailedEvent": "Error cloning in the dataflow <strong> {:dataflowName} </strong>.",
     "copyDatasetSchemaCompletedEvent": "Dataflow cloned successfully in dataflow <strong>{:dataflowName}</strong>.",
+    "userTypeOfView": "Type of view",
+    "userTypeOfViewSubtitle": "Choose default layout to search obligations and dataflows.",
+    "toggleListView": "Switch to list view",
+    "toggleMagazineView": "Switch to magazine view",
     "loadDataflowsError": "Error loading dataflows",
     "clearFilter": "Clear filter"
   }

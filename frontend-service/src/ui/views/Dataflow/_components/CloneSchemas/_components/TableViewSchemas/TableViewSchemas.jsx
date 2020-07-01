@@ -26,16 +26,17 @@ export const TableViewSchemas = ({
   const fieldTables = {
     expirationDate: resources.messages['nextReportDue'],
     obligation: resources.messages['obligationTitle'],
-    legalInstruments: resources.messages['legalInstrument']
+    legalInstruments: resources.messages['legalInstruments']
   };
 
   const getOrderedFields = dataflows => {
     const dataflowsWithPriority = [
       { id: 'name', index: 0 },
       { id: 'description', index: 1 },
-      { id: 'obligation', index: 2 },
-      { id: 'status', index: 3 },
-      { id: 'expirationDate', index: 4 }
+      { id: 'obligationTitle', index: 2 },
+      { id: 'legalInstruments', index: 3 },
+      { id: 'status', index: 4 },
+      { id: 'expirationDate', index: 5 }
     ];
 
     return dataflows
@@ -60,12 +61,6 @@ export const TableViewSchemas = ({
     );
   };
 
-  const onLoadLegalInstrumentTemplate = row => (
-    <div className={styles.titleColum}>{row.obligation.legalInstruments.alias}</div>
-  );
-
-  const onLoadObligationTemplate = row => <div className={styles.titleColum}>{row.obligation.title}</div>;
-
   const onLoadPagination = event => onChangePagination({ first: event.first, rows: event.rows, page: event.page });
 
   const onLoadTitleTemplate = row => (
@@ -85,23 +80,10 @@ export const TableViewSchemas = ({
     const fieldColumns = getOrderedFields(Object.keys(dataflows[0])).map(field => {
       let template = null;
       if (field === 'name') template = onLoadTitleTemplate;
-      if (field === 'obligation') template = onLoadObligationTemplate;
 
       return <Column body={template} field={field} header={headerTableTemplate(field)} key={field} sortable={true} />;
     });
 
-    const legalFieldColumn = Object.values(dataflows[0]).filter(key => typeof key === 'object');
-
-    const legalInstrument = Object.keys(legalFieldColumn[0])
-      .filter(key => key.includes('legalInstruments'))
-      .map(field => {
-        let template = null;
-        if (field === 'legalInstruments') template = onLoadLegalInstrumentTemplate;
-
-        return <Column body={template} field={field} header={headerTableTemplate(field)} key={field} sortable={true} />;
-      });
-
-    fieldColumns.splice(3, 0, legalInstrument);
     fieldColumns.unshift(renderCheckColum);
 
     return fieldColumns;
@@ -116,6 +98,7 @@ export const TableViewSchemas = ({
       autoLayout={true}
       first={pagination.first}
       getPageChange={onLoadPagination}
+      onRowClick={event => onSelectDataflow(event.data)}
       paginator={true}
       paginatorRight={paginatorRightText}
       rows={pagination.rows}
