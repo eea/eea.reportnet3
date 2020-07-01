@@ -355,7 +355,7 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       if (recordErrorPositionId === -1) {
-        if (isValidationShown && levelErrorValidations.length > 0) {
+        if (!isValidationShown && levelErrorValidations.length > 0) {
           onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
         } else {
           if (isValidationShown) {
