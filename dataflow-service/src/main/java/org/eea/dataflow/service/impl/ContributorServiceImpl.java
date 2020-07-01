@@ -10,7 +10,6 @@ import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceMa
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.contributor.ContributorVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
@@ -58,14 +57,15 @@ public class ContributorServiceImpl implements ContributorService {
    * Find contributors by id dataflow.
    *
    * @param dataflowId the dataflow id
+   * @param role the role
    * @return the list
    */
   @Override
-  public List<ContributorVO> findContributorsByIdDataflow(Long dataflowId) {
-    DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
-    List<ContributorVO> listRoleUserVO = new ArrayList();
+  public List<ContributorVO> findContributorsByIdDataflow(Long dataflowId, String role) {
+    dataflowControlleZuul.findById(dataflowId);
+    List<ContributorVO> listRoleUserVO = new ArrayList<>();
 
-    if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
+    if ("EDITOR".equals(role)) {
       StringBuilder stringBuilder =
           new StringBuilder("Dataflow-").append(dataflowId).append("-EDITOR_WRITE");
       List<UserRepresentationVO> listUserWrite =
@@ -97,10 +97,11 @@ public class ContributorServiceImpl implements ContributorService {
    *
    * @param dataflowId the dataflow id
    * @param account the account
+   * @param role the role
    * @throws EEAException the EEA exception
    */
   @Override
-  public void deleteContributor(Long dataflowId, String account) throws EEAException {
+  public void deleteContributor(Long dataflowId, String account, String role) throws EEAException {
     DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
 
     ResourceGroupEnum resourceGroupEnumWrite = null;
@@ -108,21 +109,21 @@ public class ContributorServiceImpl implements ContributorService {
     ResourceGroupEnum resourceGroupEnumDataflowWrite = null;
     ResourceGroupEnum resourceGroupEnumDataflowRead = null;
 
-    switch (dataflow.getStatus().toString()) {
-      case "DESIGN":
+    switch (role) {
+      case "EDITOR":
         resourceGroupEnumWrite = ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE;
         resourceGroupEnumRead = ResourceGroupEnum.DATASCHEMA_EDITOR_READ;
         resourceGroupEnumDataflowWrite = ResourceGroupEnum.DATAFLOW_EDITOR_WRITE;
         resourceGroupEnumDataflowRead = ResourceGroupEnum.DATAFLOW_EDITOR_READ;
 
         break;
-      case "DRAFT":
+      case "REPORTER":
         break;
       default:
         break;
     }
 
-    if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
+    if ("EDITOR".equals(role)) {
       List<ResourceAssignationVO> resourcesProviders = new ArrayList<>();
       resourcesProviders
           .add(fillResourceAssignation(dataflowId, account, resourceGroupEnumDataflowWrite));
@@ -146,17 +147,19 @@ public class ContributorServiceImpl implements ContributorService {
    *
    * @param dataflowId the dataflow id
    * @param contributorVO the contributor VO
+   * @param role the role
    * @throws EEAException the EEA exception
    */
   @Override
-  public void createContributor(Long dataflowId, ContributorVO contributorVO) throws EEAException {
+  public void createContributor(Long dataflowId, ContributorVO contributorVO, String role)
+      throws EEAException {
     DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
     SecurityRoleEnum securityRoleEnum = null;
     ResourceGroupEnum resourceGroupEnum = null;
     ResourceGroupEnum resourceGroupEnumDataflow = null;
     ResourceGroupEnum resourceGroupEnumDataset = null;
 
-    switch (contributorVO.getRole()) {
+    switch (role) {
       case "EDITOR":
         securityRoleEnum =
             Boolean.TRUE.equals(contributorVO.getWritePermission()) ? SecurityRoleEnum.EDITOR_WRITE
@@ -182,7 +185,7 @@ public class ContributorServiceImpl implements ContributorService {
         break;
     }
     final List<ResourceAssignationVO> resourceAssignationVOList = new ArrayList<>();
-    if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
+    if ("EDITOR".equals(role)) {
 
       ResourceInfoVO resourceDataflow =
           resourceManagementControllerZull.getResourceDetail(dataflowId, resourceGroupEnumDataflow);
@@ -202,7 +205,7 @@ public class ContributorServiceImpl implements ContributorService {
         resourceAssignationVOList.add(fillResourceAssignation(designDatasetVO.getId(),
             contributorVO.getAccount(), resourceGroupEnum));
       }
-    } else if (TypeStatusEnum.DRAFT.equals(dataflow.getStatus())) {
+    } else if ("REPORTER".equals(role)) {
       ResourceInfoVO resourceDataflow =
           resourceManagementControllerZull.getResourceDetail(dataflowId, resourceGroupEnumDataflow);
       if (null == resourceDataflow.getName()) {
@@ -273,22 +276,24 @@ public class ContributorServiceImpl implements ContributorService {
    *
    * @param dataflowId the dataflow id
    * @param contributorVO the contributor VO
+   * @param role the role
    * @throws EEAException the EEA exception
    */
   @Override
-  public void updateContributor(Long dataflowId, ContributorVO contributorVO) throws EEAException {
-    DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
+  public void updateContributor(Long dataflowId, ContributorVO contributorVO, String role)
+      throws EEAException {
+    dataflowControlleZuul.findById(dataflowId);
     // we delete the contributor and after we create to update it
-    if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
+    if ("EDITOR".equals(role) || "REPORTER".equals(role)) {
       try {
-        deleteContributor(dataflowId, contributorVO.getAccount());
+        deleteContributor(dataflowId, contributorVO.getAccount(), role);
       } catch (EEAException e) {
         LOG_ERROR.error("Error deleting contributor with the account: {} in the dataflow {} ",
             contributorVO.getAccount(), dataflowId);
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
       }
       try {
-        createContributor(dataflowId, contributorVO);
+        createContributor(dataflowId, contributorVO, role);
       } catch (EEAException e) {
         LOG_ERROR.error("Error creating contributor with the account: {} in the dataflow {} ",
             contributorVO.getAccount(), dataflowId);

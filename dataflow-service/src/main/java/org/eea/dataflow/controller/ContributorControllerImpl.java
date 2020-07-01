@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
@@ -45,59 +44,101 @@ public class ContributorControllerImpl implements ContributorController {
   private ContributorService contributorService;
 
   /**
-   * Delete.
+   * Delete editor.
    *
    * @param dataflowId the dataflow id
-   * @param account the account
+   * @param contributorVO the contributor VO
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
-  @DeleteMapping(value = "/dataflow/{dataflowId}/user")
-  public void delete(@PathVariable("dataflowId") Long dataflowId, @RequestParam String account) {
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
+  @DeleteMapping(value = "/editor/dataflow/{dataflowId}")
+  public void deleteEditor(@PathVariable("dataflowId") Long dataflowId,
+      @RequestBody ContributorVO contributorVO) {
     // we can only remove role of editor, reporter or reporter partition type
     try {
-      contributorService.deleteContributor(dataflowId, account);
+      contributorService.deleteContributor(dataflowId, contributorVO.getAccount(), "EDITOR");
     } catch (EEAException e) {
-      LOG_ERROR.error("Error deleting the contributor {}.in the dataflow: {}", account, dataflowId);
+      LOG_ERROR.error("Error deleting the contributor {}.in the dataflow: {}",
+          contributorVO.getAccount(), dataflowId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 
+  /**
+   * Delete reporter.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param contributorVO the contributor VO
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
+  @DeleteMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}")
+  public void deleteReporter(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("dataProviderId") Long dataProviderId,
+      @RequestBody ContributorVO contributorVO) {
+    // we can only remove role of editor, reporter or reporter partition type
+    try {
+      contributorService.deleteContributor(dataflowId, contributorVO.getAccount(), "REPORTER");
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting the contributor {}.in the dataflow: {}",
+          contributorVO.getAccount(), dataflowId);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
 
   /**
-   * Find contributors by group.
+   * Find editors by group.
    *
    * @param dataflowId the dataflow id
    * @return the list
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
-  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<ContributorVO> findContributorsByGroup(@PathVariable("dataflowId") Long dataflowId) {
-    // we can find editors, reporters or reporter partition roles based on the dataflow state
-    // mock
-    return contributorService.findContributorsByIdDataflow(dataflowId);
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
+  @GetMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<ContributorVO> findEditorsByGroup(@PathVariable("dataflowId") Long dataflowId) {
+    // we can find editors,
+    return contributorService.findContributorsByIdDataflow(dataflowId, "EDITOR");
   }
 
+
   /**
-   * Update role user.
+   * Find reporters by group.
    *
    * @param dataflowId the dataflow id
-   * @param roleUserVO the role user VO
+   * @param dataproviderId the dataprovider id
+   * @return the list
+   */
+  @Override
+  @GetMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataproviderId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
+  public List<ContributorVO> findReportersByGroup(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("providerId") Long dataproviderId) {
+    // find reporters or reporter partition roles based on the dataflow state
+    return contributorService.findContributorsByIdDataflow(dataflowId, "REPORTER");
+  }
+
+
+  /**
+   * Update editor.
+   *
+   * @param dataflowId the dataflow id
+   * @param contributorVO the contributor VO
    * @return the response entity
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
-  @PutMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity update(@PathVariable("dataflowId") Long dataflowId,
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
+  @PutMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<?> updateEditor(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody ContributorVO contributorVO) {
     // we can only update an editor, reporter or reporter partition role
     // mock
     String message = "";
     HttpStatus status = HttpStatus.OK;
     try {
-      contributorService.updateContributor(dataflowId, contributorVO);
+      contributorService.updateContributor(dataflowId, contributorVO, "EDITOR");
     } catch (EEAException e) {
       LOG_ERROR.error("Error update the contributor {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
@@ -108,39 +149,44 @@ public class ContributorControllerImpl implements ContributorController {
     return new ResponseEntity<>(message, status);
   }
 
-
   /**
-   * Creates the contributor.
+   * Update reporter.
    *
    * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
    * @param contributorVO the contributor VO
-   * @return the long
+   * @return the response entity
    */
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
-  @PostMapping("/dataflow/{dataflowId}")
-  public void createContributor(@PathVariable("dataflowId") Long dataflowId,
+  @PutMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<?> updateReporter(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("dataProviderId") Long dataProviderId,
       @RequestBody ContributorVO contributorVO) {
-    switch (contributorVO.getRole()) {
-      case "EDITOR":
-      case "REPORTER":
-        try {
-          contributorService.createContributor(dataflowId, contributorVO);
-        } catch (EEAException e) {
-          LOG_ERROR.error("Error creating  the contributor {}.in the dataflow: {} ",
-              contributorVO.getAccount(), dataflowId);
-          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-        }
-        break;
-      default:
-        LOG.info("Didn't remove role of the user with account {} because its role is {}",
-            contributorVO.getAccount(), contributorVO.getRole());
-        break;
+    // we can only update an editor, reporter or reporter partition role
+    String message = "";
+    HttpStatus status = HttpStatus.OK;
+    try {
+      contributorService.updateContributor(dataflowId, contributorVO, "REPORTER");
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error update the contributor {}.in the dataflow: {}",
+          contributorVO.getAccount(), dataflowId);
+      message = e.getMessage();
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
     }
+
+    return new ResponseEntity<>(message, status);
   }
 
-
+  /**
+   * Creates the associated permissions.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetId the dataset id
+   */
+  @Override
   @PostMapping("/private/dataflow/{dataflowId}/createAssociatedPermissions/{datasetId}")
   public void createAssociatedPermissions(@PathVariable("dataflowId") Long dataflowId,
       @PathVariable("datasetId") Long datasetId) {

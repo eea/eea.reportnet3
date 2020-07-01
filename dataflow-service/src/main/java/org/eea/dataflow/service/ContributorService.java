@@ -15,9 +15,10 @@ public interface ContributorService {
    *
    * @param dataflowId the dataflow id
    * @param account the account
+   * @param role the role
    * @throws EEAException the EEA exception
    */
-  void deleteContributor(Long dataflowId, String account) throws EEAException;
+  void deleteContributor(Long dataflowId, String account, String role) throws EEAException;
 
   /**
    * Creates the role user.
@@ -26,24 +27,28 @@ public interface ContributorService {
    * @param contributorVO the contributor VO
    * @throws EEAException the EEA exception
    */
-  void createContributor(Long dataflowId, ContributorVO contributorVO) throws EEAException;
+  void createContributor(Long dataflowId, ContributorVO contributorVO, String role)
+      throws EEAException;
 
   /**
    * Find role users by id dataflow.
    *
    * @param dataflowId the dataflow id
+   * @param role
    * @return the list
    */
-  List<ContributorVO> findContributorsByIdDataflow(Long dataflowId);
+  List<ContributorVO> findContributorsByIdDataflow(Long dataflowId, String role);
 
   /**
    * Update role user.
    *
    * @param dataflowId the dataflow id
    * @param contributorVO the contributor VO
+   * @param role the role
    * @throws EEAException the EEA exception
    */
-  void updateContributor(Long dataflowId, ContributorVO contributorVO) throws EEAException;
+  void updateContributor(Long dataflowId, ContributorVO contributorVO, String role)
+      throws EEAException;
 
 
   /**
