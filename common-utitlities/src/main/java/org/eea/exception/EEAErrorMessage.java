@@ -235,7 +235,7 @@ public final class EEAErrorMessage {
   public static final String DATASET_NOT_REPORTABLE = "Dataset %d is not Reportable";
 
   /** The Constant NOT_EMAIL: {@value}. */
-  public static final String NOT_EMAIL = "This is not an email";
+  public static final String NOT_EMAIL = "%s is not an email";
 
 
   /**

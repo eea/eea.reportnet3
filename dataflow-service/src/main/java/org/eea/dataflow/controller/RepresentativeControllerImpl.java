@@ -72,7 +72,8 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     Matcher m = p.matcher(representativeVO.getProviderAccount());
     boolean result = m.matches();
     if (Boolean.FALSE.equals(result)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NOT_EMAIL);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          String.format(EEAErrorMessage.NOT_EMAIL, representativeVO.getProviderAccount()));
     }
 
     try {
@@ -164,7 +165,8 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     Matcher m = p.matcher(representativeVO.getProviderAccount());
     boolean result = m.matches();
     if (Boolean.FALSE.equals(result)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NOT_EMAIL);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          String.format(EEAErrorMessage.NOT_EMAIL, representativeVO.getProviderAccount()));
     }
 
     if (representativeVO.getProviderAccount() != null) {
