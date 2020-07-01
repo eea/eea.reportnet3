@@ -2,10 +2,12 @@ package org.eea.dataflow.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -199,4 +201,36 @@ public class IntegrationControllerImplTest {
       throw e;
     }
   }
+
+  @Test
+  public void testCopyIntegrations() throws EEAException {
+    Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
+    dictionaryOriginTargetObjectId.put("5ce524fad31fc52540abae73", "5ce524fad31fc52540abae73");
+    CopySchemaVO copy = new CopySchemaVO();
+    copy.setDataflowIdDestination(1L);
+    copy.setDictionaryOriginTargetObjectId(dictionaryOriginTargetObjectId);
+    copy.setOriginDatasetSchemaIds(Arrays.asList("5ce524fad31fc52540abae73"));
+    integrationControllerImpl.copyIntegrations(copy);
+    Mockito.verify(integrationService, times(1)).copyIntegrations(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testCopyIntegrationsException() throws EEAException {
+    try {
+      Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
+      dictionaryOriginTargetObjectId.put("5ce524fad31fc52540abae73", "5ce524fad31fc52540abae73");
+      CopySchemaVO copy = new CopySchemaVO();
+      copy.setDataflowIdDestination(1L);
+      copy.setDictionaryOriginTargetObjectId(dictionaryOriginTargetObjectId);
+      copy.setOriginDatasetSchemaIds(Arrays.asList("5ce524fad31fc52540abae73"));
+      Mockito.doThrow(EEAException.class).when(integrationService).copyIntegrations(Mockito.any(),
+          Mockito.any(), Mockito.any());
+      integrationControllerImpl.copyIntegrations(copy);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
 }
