@@ -2,7 +2,6 @@ package org.eea.dataset.mapper;
 
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.rule.Rule;
-import org.eea.interfaces.vo.dataset.schemas.rule.RuleExpressionVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.mapper.IMapper;
 import org.mapstruct.AfterMapping;
@@ -32,15 +31,11 @@ public interface RuleMapper extends IMapper<Rule, RuleVO> {
   default void afterMapping(RuleVO ruleVO, @MappingTarget Rule rule) {
     String ruleId = ruleVO.getRuleId();
     String referenceId = ruleVO.getReferenceId();
-    RuleExpressionVO ruleExpressionVO = ruleVO.getWhenCondition();
     if (ruleId != null && !ruleId.isEmpty()) {
       rule.setRuleId(new ObjectId(ruleId));
     }
     if (referenceId != null && !referenceId.isEmpty()) {
       rule.setReferenceId(new ObjectId(referenceId));
-    }
-    if (ruleExpressionVO != null) {
-      rule.setWhenCondition(ruleExpressionVO.toString());
     }
   }
 
@@ -48,8 +43,5 @@ public interface RuleMapper extends IMapper<Rule, RuleVO> {
   default void afterMapping(Rule rule, @MappingTarget RuleVO ruleVO) {
     ruleVO.setRuleId(rule.getRuleId().toString());
     ruleVO.setReferenceId(rule.getReferenceId().toString());
-    if (!rule.isAutomatic()) {
-      ruleVO.setWhenCondition(new RuleExpressionVO(rule.getWhenCondition()));
-    }
   }
 }

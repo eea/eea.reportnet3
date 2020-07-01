@@ -408,6 +408,7 @@ public class ValidationHelper implements DisposableBean {
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", processId);
+    value.put("user", processesMap.get(processId).getRequestingUser());
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_DATASET, value);
   }
 
@@ -423,6 +424,7 @@ public class ValidationHelper implements DisposableBean {
     value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", processId);
     value.put("idTable", Tablenum);
+    value.put("user", processesMap.get(processId).getRequestingUser());
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_TABLE, value);
 
   }
@@ -439,6 +441,7 @@ public class ValidationHelper implements DisposableBean {
     value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", processId);
     value.put("numPag", numPag);
+    value.put("user", processesMap.get(processId).getRequestingUser());
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_RECORD, value);
   }
 
@@ -455,6 +458,7 @@ public class ValidationHelper implements DisposableBean {
     value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", processId);
     value.put("numPag", numPag);
+    value.put("user", processesMap.get(processId).getRequestingUser());
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_FIELD, value);
 
 
@@ -524,6 +528,7 @@ public class ValidationHelper implements DisposableBean {
         EEAEventVO eeaEventVO = new EEAEventVO();
         eeaEventVO.setEventType(eventType);
         eeaEventVO.setData(value);
+
         processesMap.get(processId).getPendingValidations().add(eeaEventVO);
       }
     }
