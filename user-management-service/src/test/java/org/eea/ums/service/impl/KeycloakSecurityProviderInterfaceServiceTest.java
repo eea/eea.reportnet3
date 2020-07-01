@@ -7,12 +7,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.security.jwt.data.CacheTokenVO;
@@ -610,4 +613,67 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     assertEquals(user,
         keycloakSecurityProviderInterfaceService.setAttributesWithApiKey(user, attributes));
   }
+
+  @Test
+  public void removeContributorFromUserGroup() throws EEAException {
+    GroupInfo[] groups = {new GroupInfo()};
+    Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groups);
+    keycloakSecurityProviderInterfaceService
+        .removeContributorFromUserGroup(Optional.of(new UserRepresentation()), "", "");
+    Mockito.verify(keycloakConnectorService, Mockito.times(1)).removeUserFromGroup(Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test(expected = EEAException.class)
+  public void removeContributorFromUserGroupNoUser() throws EEAException {
+    GroupInfo[] groups = {new GroupInfo()};
+    UserRepresentation[] users = {new UserRepresentation()};
+    Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
+    Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groups);
+    try {
+      keycloakSecurityProviderInterfaceService.removeContributorFromUserGroup(Optional.empty(), "",
+          "");
+    } catch (EEAException e) {
+      assertEquals("Error, user not found", e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test
+  public void removeContributorsFromUserGroup() throws EEAException {
+    List<ResourceAssignationVO> resources = new ArrayList<>();
+    GroupInfo[] groups = {new GroupInfo()};
+    ResourceAssignationVO resource = new ResourceAssignationVO();
+    resource.setEmail("a");
+    resource.setResourceGroup(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE);
+    resources.add(resource);
+    UserRepresentation user = new UserRepresentation();
+    user.setEmail("a");
+    UserRepresentation[] users = {user};
+    Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
+    Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groups);
+    keycloakSecurityProviderInterfaceService.removeContributorsFromUserGroup(resources);
+    Mockito.verify(keycloakConnectorService, Mockito.times(1)).removeUserFromGroup(Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test(expected = EEAException.class)
+  public void removeContributorsFromUserGroupException() throws EEAException {
+    List<ResourceAssignationVO> resources = new ArrayList<>();
+    GroupInfo[] groups = {new GroupInfo()};
+    ResourceAssignationVO resource = new ResourceAssignationVO();
+    resource.setEmail("a");
+    resource.setResourceGroup(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE);
+    resources.add(resource);
+    UserRepresentation[] users = {new UserRepresentation()};
+    Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
+    Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groups);
+    try {
+      keycloakSecurityProviderInterfaceService.removeContributorsFromUserGroup(resources);
+    } catch (EEAException e) {
+      assertEquals("Error, user not found", e.getMessage());
+      throw e;
+    }
+  }
+
 }

@@ -552,7 +552,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
             .get(cont).getResourceGroup().getGroupName(resources.get(cont).getResourceId()));
       } catch (EEAException e) {
         for (int j = 0; j < resources.subList(0, cont).size(); j++) {
-          removeUserFromUserGroup(contributors.get(j).getId(),
+          addUserToUserGroup(contributors.get(j).getId(),
               resources.get(j).getResourceGroup().getGroupName(resources.get(j).getResourceId()));
         }
         throw e;

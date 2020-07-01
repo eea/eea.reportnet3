@@ -12,6 +12,7 @@ import org.eea.interfaces.vo.contributor.ContributorVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
@@ -153,6 +154,7 @@ public class ContributorServiceImpl implements ContributorService {
     SecurityRoleEnum securityRoleEnum = null;
     ResourceGroupEnum resourceGroupEnum = null;
     ResourceGroupEnum resourceGroupEnumDataflow = null;
+    ResourceGroupEnum resourceGroupEnumDataset = null;
 
     switch (contributorVO.getRole()) {
       case "EDITOR":
@@ -167,16 +169,20 @@ public class ContributorServiceImpl implements ContributorService {
             : ResourceGroupEnum.DATAFLOW_EDITOR_READ;
         break;
       case "REPORTER":
-        /*
-         * resourceGroupEnum = Boolean.TRUE.equals(representativeVO.getPermission()) ?
-         * resourceGroupEnum.datas : resourceGroupEnum.DATASCHEMA_EDITOR_READ;
-         */
+        securityRoleEnum = Boolean.TRUE.equals(contributorVO.getWritePermission())
+            ? SecurityRoleEnum.REPORTER_WRITE
+            : SecurityRoleEnum.REPORTER_READ;
+        resourceGroupEnum = ResourceGroupEnum.DATASCHEMA_REPORTER;
+        resourceGroupEnumDataflow = ResourceGroupEnum.DATAFLOW_REPORTER;
+        resourceGroupEnumDataset = Boolean.TRUE.equals(contributorVO.getWritePermission())
+            ? ResourceGroupEnum.DATASET_REPORTER_WRITE
+            : ResourceGroupEnum.DATASET_REPORTER_READ;
+        break;
+      default:
         break;
     }
+    final List<ResourceAssignationVO> resourceAssignationVOList = new ArrayList<>();
     if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
-      final List<ResourceAssignationVO> resourceAssignationVOList = new ArrayList();
-      resourceAssignationVOList.add(fillResourceAssignation(dataflowId, contributorVO.getAccount(),
-          resourceGroupEnumDataflow));
 
       ResourceInfoVO resourceDataflow =
           resourceManagementControllerZull.getResourceDetail(dataflowId, resourceGroupEnumDataflow);
@@ -184,6 +190,8 @@ public class ContributorServiceImpl implements ContributorService {
         resourceManagementControllerZull
             .createResource(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, securityRoleEnum));
       }
+      resourceAssignationVOList.add(fillResourceAssignation(dataflowId, contributorVO.getAccount(),
+          resourceGroupEnumDataflow));
       for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
         ResourceInfoVO resourceDataSchema = resourceManagementControllerZull
             .getResourceDetail(designDatasetVO.getId(), resourceGroupEnum);
@@ -194,9 +202,34 @@ public class ContributorServiceImpl implements ContributorService {
         resourceAssignationVOList.add(fillResourceAssignation(designDatasetVO.getId(),
             contributorVO.getAccount(), resourceGroupEnum));
       }
-      // we add all datas to contributor
-      userManagementControllerZull.addContributorsToResources(resourceAssignationVOList);
+    } else if (TypeStatusEnum.DRAFT.equals(dataflow.getStatus())) {
+      ResourceInfoVO resourceDataflow =
+          resourceManagementControllerZull.getResourceDetail(dataflowId, resourceGroupEnumDataflow);
+      if (null == resourceDataflow.getName()) {
+        resourceManagementControllerZull.createResource(
+            createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.REPORTER_READ));
+      }
+      resourceAssignationVOList.add(fillResourceAssignation(dataflowId, contributorVO.getAccount(),
+          resourceGroupEnumDataflow));
+
+      for (ReportingDatasetVO reportingDatasetVO : dataflow.getReportingDatasets()) {
+        ResourceInfoVO resourceDataSchema = resourceManagementControllerZull
+            .getResourceDetail(reportingDatasetVO.getId(), resourceGroupEnum);
+        if (null == resourceDataSchema.getName()) {
+          resourceManagementControllerZull.createResource(
+              createGroup(reportingDatasetVO.getId(), ResourceTypeEnum.DATASET, securityRoleEnum));
+          resourceManagementControllerZull.createResource(createGroup(dataflowId,
+              ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.REPORTER_READ));
+        }
+        resourceAssignationVOList.add(fillResourceAssignation(reportingDatasetVO.getId(),
+            contributorVO.getAccount(), resourceGroupEnum));
+        resourceAssignationVOList.add(fillResourceAssignation(reportingDatasetVO.getId(),
+            contributorVO.getAccount(), resourceGroupEnumDataset));
+      }
+
     }
+    // we add all data to contributor
+    userManagementControllerZull.addContributorsToResources(resourceAssignationVOList);
   }
 
 
