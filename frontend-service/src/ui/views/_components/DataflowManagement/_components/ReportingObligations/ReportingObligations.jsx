@@ -32,7 +32,6 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     filteredData: [],
     isLoading: false,
     issues: [],
-    isTableView: true,
     oblChoosed: {},
     organizations: [],
     pagination: { first: 0, rows: 10, page: 0 },
@@ -118,9 +117,6 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     reportingObligationDispatch({ type: 'ON_SELECT_OBL', payload: { oblChoosed } });
   };
 
-  const onToggleView = () =>
-    reportingObligationDispatch({ type: 'ON_TOGGLE_VIEW', payload: { view: !reportingObligationState.isTableView } });
-
   const parsedFilterList = {
     countries: reportingObligationState.countries,
     issues: reportingObligationState.issues,
@@ -128,7 +124,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
   };
 
   const renderData = () =>
-    reportingObligationState.isTableView ? (
+    userContext.userProps.listView ? (
       <TableView
         checkedObligation={reportingObligationState.oblChoosed}
         data={reportingObligationState.searchedData}
@@ -163,7 +159,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
         <Filters data={reportingObligationState.filteredData} getFilteredData={onLoadSearchedData} searchAll />
         <div className={styles.switchDiv}>
           <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
-          <InputSwitch checked={reportingObligationState.isTableView} onChange={() => onToggleView()} />
+          <InputSwitch checked={userContext.userProps.listView} onChange={e => userContext.onToggleTypeView(e.value)} />
           <label className={styles.switchTextInput}>{resources.messages['listView']}</label>
         </div>
       </div>

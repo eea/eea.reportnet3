@@ -15,8 +15,6 @@ export const cloneSchemasReducer = (state, { type, payload }) => {
     case 'ON_SELECT_DATAFLOW':
       return { ...state, chosenDataflow: { ...state.chosenDataflow, id: payload.id, name: payload.name } };
 
-    case 'ON_TOGGLE_VIEW':
-      return { ...state, isTableView: payload.view };
     default:
       return state;
   }
