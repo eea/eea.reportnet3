@@ -1,13 +1,17 @@
-import { Add } from './Add';
-import { All } from './All';
-import { Delete } from './Delete';
-import { UpdateWritePermission } from './UpdateWritePermission';
+import { AllEditors } from './AllEditors';
+import { AllReporters } from './AllReporters';
+import { DeleteEditor } from './DeleteEditor';
+import { DeleteReporter } from './DeleteReporter';
+import { UpdateEditor } from './UpdateEditor';
+import { UpdateReporter } from './UpdateReporter';
 
 import { contributorRepository } from 'core/domain/model/Contributor/ContributorRepository';
 
 export const ContributorService = {
-  all: All({ contributorRepository }),
-  add: Add({ contributorRepository }),
-  deleteContributor: Delete({ contributorRepository }),
-  updateWritePermission: UpdateWritePermission({ contributorRepository })
+  allEditors: AllEditors({ contributorRepository }),
+  allReporters: AllReporters({ contributorRepository }),
+  deleteEditor: DeleteEditor({ contributorRepository }),
+  deleteReporter: DeleteReporter({ contributorRepository }),
+  updateEditor: UpdateEditor({ contributorRepository }),
+  updateReporter: UpdateReporter({ contributorRepository })
 };
