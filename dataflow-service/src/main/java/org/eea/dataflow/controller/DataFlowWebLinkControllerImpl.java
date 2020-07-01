@@ -81,7 +81,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Override
   @HystrixCommand
   @PostMapping
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE')")
   public void saveLink(@RequestParam(value = "dataflowId") Long dataflowId, WeblinkVO weblinkVO) {
 
     try {

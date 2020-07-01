@@ -109,7 +109,7 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @DeleteMapping("/deleteRule")
   public void deleteRuleById(@RequestParam("datasetId") long datasetId,
       @RequestParam("ruleId") String ruleId) {
@@ -163,7 +163,7 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PutMapping("/createNewRule")
   public void createNewRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO) {
     try {
@@ -232,7 +232,7 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PutMapping("/updateRule")
   public void updateRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO) {
     try {
@@ -259,7 +259,7 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PutMapping("/updateAutomaticRule/{datasetId}")
   public void updateAutomaticRule(@PathVariable("datasetId") long datasetId,
       @RequestBody RuleVO ruleVO) {
