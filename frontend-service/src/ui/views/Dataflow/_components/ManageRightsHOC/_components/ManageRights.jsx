@@ -21,7 +21,7 @@ import {
 } from '../_functions/Utils/contributorUtils';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
+export const ManageRights = ({ formState, formDispatcher, dataflowId, dataProviderId }) => {
   const resources = useContext(ResourcesContext);
 
   useEffect(() => {
@@ -80,7 +80,14 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
         <select
           onBlur={() => onAddContributor(formDispatcher, formState, contributor, dataflowId)}
           onChange={event => {
-            onWritePermissionChange(contributor, dataflowId, formDispatcher, formState, event.target.value);
+            onWritePermissionChange(
+              contributor,
+              dataflowId,
+              dataProviderId,
+              formDispatcher,
+              formState,
+              event.target.value
+            );
           }}
           onKeyDown={event => onKeyDown(event, formDispatcher, formState, contributor, dataflowId)}
           value={contributor.writePermission}>
@@ -124,7 +131,7 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           onConfirm={() => {
-            onDeleteConfirm(formDispatcher, formState, dataflowId);
+            onDeleteConfirm(formDispatcher, formState, dataflowId, dataProviderId);
           }}
           onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
           visible={formState.isVisibleConfirmDeleteDialog}

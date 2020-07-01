@@ -33,7 +33,7 @@ const ManageRightsHOC = ({ dataflowState, dataflowId, dataProviderId, isActiveMa
   const [formState, formDispatcher] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    getInitialData(formDispatcher, dataflowId);
+    getInitialData(formDispatcher, dataflowId, dataProviderId);
   }, [formState.refresher]);
 
   useEffect(() => {
@@ -44,7 +44,14 @@ const ManageRightsHOC = ({ dataflowState, dataflowId, dataProviderId, isActiveMa
     }
   }, [isActiveManageRightsDialog]);
 
-  return <ManageRights formState={formState} formDispatcher={formDispatcher} dataflowId={dataflowId} />;
+  return (
+    <ManageRights
+      formState={formState}
+      formDispatcher={formDispatcher}
+      dataflowId={dataflowId}
+      dataProviderId={dataProviderId}
+    />
+  );
 };
 
 export { ManageRightsHOC };

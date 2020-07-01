@@ -28,7 +28,7 @@ export const autofocusOnEmptyInput = formState => {
 const addContributor = async (formDispatcher, contributor, dataflowId, formState) => {
   if (!isEmpty(contributor.account) && !isEmpty(contributor.writePermission)) {
     try {
-      await ContributorService.add(contributor, dataflowId);
+      await ContributorService.update(contributor, dataflowId);
 
       formDispatcher({
         type: 'REFRESH'
@@ -57,9 +57,9 @@ const addContributor = async (formDispatcher, contributor, dataflowId, formState
   }
 };
 
-export const getInitialData = async (formDispatcher, dataflowId) => {
+export const getInitialData = async (formDispatcher, dataflowId, dataProviderId) => {
   try {
-    const contributors = await ContributorService.all(dataflowId);
+    let contributors = await ContributorService.all(dataflowId, dataProviderId);
 
     contributors.push(emptyContributor);
 
@@ -78,11 +78,18 @@ export const onAddContributor = (formDispatcher, formState, contributor, dataflo
   addContributor(formDispatcher, contributor, dataflowId, formState);
 };
 
-export const onWritePermissionChange = async (contributor, dataflowId, formDispatcher, formState, writePermission) => {
+export const onWritePermissionChange = async (
+  contributor,
+  dataflowId,
+  dataProviderId,
+  formDispatcher,
+  formState,
+  writePermission
+) => {
   if (!isNil(contributor.account)) {
     try {
       contributor.writePermission = writePermission;
-      await ContributorService.updateWritePermission(contributor, dataflowId);
+      await ContributorService.update(contributor, dataflowId, dataProviderId);
       formDispatcher({
         type: 'REFRESH'
       });
@@ -102,10 +109,9 @@ export const onWritePermissionChange = async (contributor, dataflowId, formDispa
   }
 };
 
-export const onDeleteConfirm = async (formDispatcher, formState, dataflowId) => {
+export const onDeleteConfirm = async (formDispatcher, formState, dataflowId, dataProviderId) => {
   try {
-    console.log('formDispatcher, formState, dataflowId', formDispatcher, formState, dataflowId);
-    await ContributorService.deleteContributor(formState.contributorToDelete, dataflowId);
+    await ContributorService.delete(formState.contributorToDelete, dataflowId, dataProviderId);
 
     const updatedList = formState.contributors.filter(
       contributor => contributor.account !== formState.contributorToDelete

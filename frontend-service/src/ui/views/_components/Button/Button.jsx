@@ -46,7 +46,6 @@ export const Button = ({
     );
   }
   if (isNull(layout)) {
-    console.log({ value });
     return visible ? (
       <>
         <PrimeButton
