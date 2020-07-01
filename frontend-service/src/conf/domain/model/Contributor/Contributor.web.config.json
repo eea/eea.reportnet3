@@ -1,6 +1,10 @@
 {
-  "add": "/contributor/dataflow/{:dataflowId}",
-  "all": "/contributor/dataflow/{:dataflowId}",
-  "delete": "/contributor/dataflow/{:dataflowId}",
-  "updateWritePermission": "/contributor/dataflow/{:dataflowId}"
+  "allEditors": "/contributor/editor/dataflow/{:dataflowId}",
+  "allReporters": "/contributor/reporter/dataflow/{:dataflowId}/provider/{:dataProviderId}",
+
+  "deleteEditor": "/contributor/editor/dataflow/{:dataflowId}",
+  "deleteReporter": "/contributor/reporter/dataflow/{:dataflowId}/provider/{:dataProviderId}",
+
+  "updateEditor": "/contributor/editor/dataflow/{:dataflowId}",
+  "updateReporter": "/contributor/reporter/dataflow/{:dataflowId}/provider/{:dataProviderId}"
 }

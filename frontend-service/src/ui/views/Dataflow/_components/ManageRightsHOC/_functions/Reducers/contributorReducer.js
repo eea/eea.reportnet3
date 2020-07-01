@@ -48,7 +48,7 @@ export const reducer = (state, { type, payload }) => {
       return {
         ...state,
         isVisibleConfirmDeleteDialog: true,
-        accountToDelete: payload.account
+        contributorToDelete: payload
       };
 
     default:

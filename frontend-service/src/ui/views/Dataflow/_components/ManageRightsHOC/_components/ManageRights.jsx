@@ -104,7 +104,7 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
         onDeleteClick={() => {
           formDispatcher({
             type: 'SHOW_CONFIRM_DIALOG',
-            payload: { account: contributor.account }
+            payload: { contributor }
           });
         }}
       />
@@ -124,7 +124,7 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId }) => {
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           onConfirm={() => {
-            onDeleteConfirm(formDispatcher, formState);
+            onDeleteConfirm(formDispatcher, formState, dataflowId);
           }}
           onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
           visible={formState.isVisibleConfirmDeleteDialog}
