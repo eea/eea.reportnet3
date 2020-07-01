@@ -79,6 +79,28 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
     cloneSchemasDispatch({ type: 'ON_SELECT_DATAFLOW', payload: { id: dataflowData.id, name: dataflowData.name } });
   };
 
+  const parseDataflowList = dataflows => {
+    let parsedDataflows = dataflows.filter(
+      dataflow => dataflow.id !== parseInt(dataflowId) && dataflow.userRole === dataflowRoles.DATA_CUSTODIAN
+    );
+
+    let dataflowsToFilter = [];
+
+    parsedDataflows.forEach(dataflow => {
+      let dataflowToFilter = {};
+      dataflowToFilter.id = dataflow.id;
+      dataflowToFilter.name = dataflow.name;
+      dataflowToFilter.description = dataflow.description;
+      dataflowToFilter.obligationTitle = dataflow.obligation.title;
+      dataflowToFilter.legalInstruments = dataflow.obligation.legalInstruments.alias;
+      dataflowToFilter.status = dataflow.status;
+      dataflowToFilter.expirationDate = dataflow.expirationDate;
+      dataflowsToFilter.push(dataflowToFilter);
+    });
+
+    return dataflowsToFilter;
+  };
+
   const renderData = () =>
     user.userProps.listView ? (
       <TableViewSchemas
@@ -101,12 +123,6 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
       />
     );
 
-  const parseDataflowList = dataflows => {
-    return dataflows.filter(
-      dataflow => dataflow.id !== parseInt(dataflowId) && dataflow.userRole === dataflowRoles.DATA_CUSTODIAN
-    );
-  };
-
   const cloneSchemaStyles = {
     justifyContent:
       cloneSchemasState.isLoading || isEmpty(cloneSchemasState.data || cloneSchemasState.filteredData)
@@ -123,19 +139,27 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
         <InputSwitch checked={user.userProps.listView} onChange={e => user.onToggleTypeView(e.value)} />
         <label className={styles.switchTextInput}>{resources.messages['listView']}</label>
       </div>
-
-      <div className={styles.filters}>
-        <Filters
-          data={cloneSchemasState.accepted}
-          dateOptions={['expirationDate']}
-          getFilteredData={onLoadFilteredData}
-          inputOptions={['name', 'description', 'legalInstrument', 'obligationTitle']}
-          selectOptions={['status']}
-        />
-      </div>
-
+      {user.userProps.listView ? (
+        <div className={styles.filters}>
+          <Filters
+            data={cloneSchemasState.accepted}
+            dateOptions={['expirationDate']}
+            getFilteredData={onLoadFilteredData}
+            inputOptions={['name', 'description', 'obligationTitle', 'legalInstruments']}
+            selectOptions={['status']}
+          />
+        </div>
+      ) : (
+        <div className={styles.filters}>
+          <Filters
+            data={cloneSchemasState.accepted}
+            dateOptions={['expirationDate']}
+            getFilteredData={onLoadFilteredData}
+            inputOptions={['name', 'description']}
+          />
+        </div>
+      )}
       {renderData()}
-
       <span
         className={`${styles.selectedDataflow} ${
           isEmpty(cloneSchemasState.data || cloneSchemasState.filteredData) ? styles.filteredSelected : ''

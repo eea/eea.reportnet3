@@ -26,16 +26,23 @@ export const TableViewSchemas = ({
   const fieldTables = {
     expirationDate: resources.messages['nextReportDue'],
     obligation: resources.messages['obligationTitle'],
-    legalInstruments: resources.messages['legalInstrument']
+    legalInstruments: resources.messages['legalInstruments']
   };
 
   const getOrderedFields = dataflows => {
     const dataflowsWithPriority = [
+      // { id: 'name', index: 0 },
+      // { id: 'description', index: 1 },
+      // { id: 'obligation', index: 2 },
+      // { id: 'status', index: 3 },
+      // { id: 'expirationDate', index: 4 }
+
       { id: 'name', index: 0 },
       { id: 'description', index: 1 },
-      { id: 'obligation', index: 2 },
-      { id: 'status', index: 3 },
-      { id: 'expirationDate', index: 4 }
+      { id: 'obligationTitle', index: 2 },
+      { id: 'legalInstruments', index: 3 },
+      { id: 'status', index: 4 },
+      { id: 'expirationDate', index: 5 }
     ];
 
     return dataflows
@@ -90,18 +97,18 @@ export const TableViewSchemas = ({
       return <Column body={template} field={field} header={headerTableTemplate(field)} key={field} sortable={true} />;
     });
 
-    const legalFieldColumn = Object.values(dataflows[0]).filter(key => typeof key === 'object');
+    // const legalFieldColumn = Object.values(dataflows[0]).filter(key => typeof key === 'object');
 
-    const legalInstrument = Object.keys(legalFieldColumn[0])
-      .filter(key => key.includes('legalInstruments'))
-      .map(field => {
-        let template = null;
-        if (field === 'legalInstruments') template = onLoadLegalInstrumentTemplate;
+    // const legalInstrument = Object.keys(legalFieldColumn[0])
+    //   .filter(key => key.includes('legalInstruments'))
+    //   .map(field => {
+    //     let template = null;
+    //     if (field === 'legalInstruments') template = onLoadLegalInstrumentTemplate;
 
-        return <Column body={template} field={field} header={headerTableTemplate(field)} key={field} sortable={true} />;
-      });
+    //     return <Column body={template} field={field} header={headerTableTemplate(field)} key={field} sortable={true} />;
+    //   });
 
-    fieldColumns.splice(3, 0, legalInstrument);
+    // fieldColumns.splice(3, 0, legalInstrument);
     fieldColumns.unshift(renderCheckColum);
 
     return fieldColumns;
