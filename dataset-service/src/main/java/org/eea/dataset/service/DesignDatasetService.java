@@ -36,12 +36,10 @@ public interface DesignDatasetService {
   /**
    * Copy design datasets.
    *
-   * @param designs the designs
    * @param idDataflowOrigin the id dataflow origin
    * @param idDataflowDestination the id dataflow destination
    * @throws EEAException the EEA exception
    */
-  void copyDesignDatasets(List<DesignDatasetVO> designs, Long idDataflowOrigin,
-      Long idDataflowDestination) throws EEAException;
+  void copyDesignDatasets(Long idDataflowOrigin, Long idDataflowDestination) throws EEAException;
 
 }

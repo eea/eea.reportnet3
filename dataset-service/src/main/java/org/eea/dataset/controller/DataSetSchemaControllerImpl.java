@@ -28,7 +28,6 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
-import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -798,19 +797,16 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
           name = "dataflowIdOrigin") final Long dataflowIdOrigin,
       @RequestParam("targetDataflow") @LockCriteria(
           name = "dataflowIdDestination") final Long dataflowIdDestination) {
-
-    // Set the user name on the thread
-    ThreadPropertiesManager.setVariable("user",
-        SecurityContextHolder.getContext().getAuthentication().getName());
-
     try {
-      List<DesignDatasetVO> designs =
-          designDatasetService.getDesignDataSetIdByDataflowId(dataflowIdOrigin);
-      // Pass the list of the design datasets to copy
-      designDatasetService.copyDesignDatasets(designs, dataflowIdOrigin, dataflowIdDestination);
+      // Set the user name on the thread
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
+      designDatasetService.copyDesignDatasets(dataflowIdOrigin, dataflowIdDestination);
     } catch (EEAException e) {
-      datasetService.releaseLock(LockSignature.COPY_DATASET_SCHEMA.getValue(), dataflowIdOrigin,
-          dataflowIdDestination);
+      /*
+       * datasetService.releaseLock(LockSignature.COPY_DATASET_SCHEMA.getValue(), dataflowIdOrigin,
+       * dataflowIdDestination);
+       */
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }

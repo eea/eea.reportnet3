@@ -234,6 +234,12 @@ public final class EEAErrorMessage {
   /** The Constant DATASET_NOT_REPORTABLE: {@value}. */
   public static final String DATASET_NOT_REPORTABLE = "Dataset %d is not Reportable";
 
+  /** The Constant NO_DESIGNS_TO_COPY. */
+  public static final String NO_DESIGNS_TO_COPY = "No designs datasets found to copy";
+
+  /** The Constant ERROR COPYING SCHEMAS. */
+  public static final String ERROR_COPYING_SCHEMAS = "Error copying schemas";
+
 
   /**
    * Instantiates a new EEA error message.
