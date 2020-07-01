@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -27,13 +26,26 @@ public interface ContributorController {
   }
 
   /**
-   * Delete resource.
+   * Delete editor.
    *
    * @param dataflowId the dataflow id
-   * @param account the account
+   * @param contributorVO the contributor VO
    */
-  @DeleteMapping(value = "/dataflow/{dataflowId}/user/{account}")
-  void delete(@PathVariable("dataflowId") Long dataflowId, @PathVariable String account);
+  @DeleteMapping(value = "/editor/dataflow/{dataflowId}")
+  void deleteEditor(@PathVariable("dataflowId") Long dataflowId,
+      @RequestBody ContributorVO contributorVO);
+
+  /**
+   * Delete reporter.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param contributorVO the contributor VO
+   */
+  @DeleteMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}")
+  void deleteReporter(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("dataProviderId") Long dataProviderId,
+      @RequestBody ContributorVO contributorVO);
 
   /**
    * Find role users by group.
@@ -41,28 +53,44 @@ public interface ContributorController {
    * @param dataflowId the dataflow id
    * @return the list
    */
-  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<ContributorVO> findContributorsByGroup(@PathVariable("dataflowId") Long dataflowId);
+  @GetMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<ContributorVO> findEditorsByGroup(@PathVariable("dataflowId") Long dataflowId);
 
   /**
-   * Update role user.
+   * Find reporters by group.
    *
    * @param dataflowId the dataflow id
-   * @param contributorVO the role user VO
+   * @param dataproviderId the dataprovider id
+   * @return the list
+   */
+  @GetMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataproviderId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<ContributorVO> findReportersByGroup(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("providerId") Long dataproviderId);
+
+
+  /**
+   * Update editor.
+   *
+   * @param dataflowId the dataflow id
+   * @param contributorVO the contributor VO
    * @return the response entity
    */
-  @PutMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  ResponseEntity update(@PathVariable("dataflowId") Long dataflowId,
+  @PutMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  ResponseEntity updateEditor(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody ContributorVO contributorVO);
 
   /**
-   * Creates the role user.
+   * Update reporter.
    *
    * @param dataflowId the dataflow id
-   * @param contributorVO the role user VO
-   * @return the long
+   * @param dataProviderId the data provider id
+   * @param contributorVO the contributor VO
+   * @return the response entity
    */
-  @PostMapping("/dataflow/{dataflowId}")
-  Long createContributor(@PathVariable("dataflowId") Long dataflowId,
+  @PutMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  ResponseEntity updateReporter(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("dataProviderId") Long dataProviderId,
       @RequestBody ContributorVO contributorVO);
 }

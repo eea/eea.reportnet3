@@ -204,7 +204,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       // Error. There aren't designs to copy in the dataflow
       datasetService.releaseLock(LockSignature.COPY_DATASET_SCHEMA.getValue(), idDataflowOrigin,
           idDataflowDestination);
-      throw new EEAException(EEAErrorMessage.NO_DESIGNS_TO_COPY);
+      throw new EEAException(String.format(EEAErrorMessage.NO_DESIGNS_TO_COPY, idDataflowOrigin));
     } else {
       try {
         for (DesignDatasetVO design : designs) {
@@ -277,7 +277,8 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
                 .dataflowId(idDataflowDestination).error("Error copying the schemas").build());
         datasetService.releaseLock(LockSignature.COPY_DATASET_SCHEMA.getValue(), idDataflowOrigin,
             idDataflowDestination);
-        throw new EEAException(EEAErrorMessage.ERROR_COPYING_SCHEMAS, e);
+        throw new EEAException(String.format(EEAErrorMessage.ERROR_COPYING_SCHEMAS,
+            idDataflowOrigin, idDataflowDestination), e);
       }
 
     }
