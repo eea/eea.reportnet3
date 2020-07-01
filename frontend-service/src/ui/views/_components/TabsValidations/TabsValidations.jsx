@@ -85,7 +85,7 @@ const TabsValidations = withRouter(
 
         if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
           validationsServiceList.validations.forEach(validation => {
-            const additionalInfo = getAdditionalValidationInfo(validation.referenceId);
+            const additionalInfo = getAdditionalValidationInfo(validation.referenceId, validation.entityType);
             validation.table = additionalInfo.tableName || '';
             validation.field = additionalInfo.fieldName || '';
           });
@@ -130,20 +130,26 @@ const TabsValidations = withRouter(
       </div>
     );
 
-    const getAdditionalValidationInfo = referenceId => {
+    const getAdditionalValidationInfo = (referenceId, entityType) => {
       const additionalInfo = {};
       datasetSchemaAllTables.forEach(table => {
         if (!isUndefined(table.records)) {
-          table.records.forEach(record =>
-            record.fields.forEach(field => {
-              if (!isNil(field)) {
-                if (field.fieldId === referenceId) {
-                  additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
-                  additionalInfo.fieldName = field.name;
+          if (entityType.toUpperCase() === 'TABLE' || entityType.toUpperCase() === 'RECORD') {
+            additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
+          } else if (entityType.toUpperCase() === 'FIELD') {
+            table.records.forEach(record =>
+              record.fields.forEach(field => {
+                if (!isNil(field)) {
+                  if (field.fieldId === referenceId) {
+                    additionalInfo.tableName = !isUndefined(table.tableSchemaName)
+                      ? table.tableSchemaName
+                      : table.header;
+                    additionalInfo.fieldName = field.name;
+                  }
                 }
-              }
-            })
-          );
+              })
+            );
+          }
         }
       });
       return additionalInfo;
