@@ -308,8 +308,39 @@ public class ContributorServiceImpl implements ContributorService {
   @Override
   public void createAssociatedPermissions(Long dataflowId, Long datasetId) throws EEAException {
 
+    // It find all users that have dataflow-xx-editor-read
+    List<UserRepresentationVO> usersEditorRead = userManagementControllerZull
+        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_EDITOR_READ.getGroupName(dataflowId));
+
+    // It find all users that have dataflow-xx-editor-write
+    List<UserRepresentationVO> usersEditorWrite = userManagementControllerZull
+        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(dataflowId));
 
 
+    List<ResourceAssignationVO> resources = new ArrayList();
+
+    // we create resources for any of users to add the new resource associated with the new
+    // datasetSchema
+    if (!usersEditorRead.isEmpty() || !usersEditorWrite.isEmpty()) {
+      for (UserRepresentationVO userEditorRead : usersEditorRead) {
+        resources.add(fillResourceAssignation(datasetId, userEditorRead.getEmail(),
+            ResourceGroupEnum.DATASCHEMA_EDITOR_READ));
+      }
+      for (UserRepresentationVO userEditorWrite : usersEditorWrite) {
+        resources.add(fillResourceAssignation(datasetId, userEditorWrite.getEmail(),
+            ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE));
+      }
+      userManagementControllerZull.addContributorsToResources(resources);
+
+      LOG.info(
+          "Create role editor for dataflow {} with the dataset id {},"
+              + " number write permissions added = {} and number read permissions added = {}",
+          dataflowId, datasetId, usersEditorWrite.size(), usersEditorRead.size());
+    } else {
+      LOG.info(
+          "Didn't create role editor for dataflow {} with the dataset id {}, because it hasn't editors associated",
+          dataflowId, datasetId);
+    }
   }
 
 
