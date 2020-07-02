@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UniqueValidationUtils {
+
   /**
    * The rules repository.
    */
@@ -52,13 +53,19 @@ public class UniqueValidationUtils {
    */
   private static DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
-  /** The table repository. */
+  /**
+   * The table repository.
+   */
   private static TableRepository tableRepository;
 
-  /** The rules service. */
+  /**
+   * The rules service.
+   */
   private static RulesService rulesService;
 
-  /** The data set metabase controller zuul. */
+  /**
+   * The data set metabase controller zuul.
+   */
   private static DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /**
@@ -222,6 +229,7 @@ public class UniqueValidationUtils {
    * Mount query.
    *
    * @param fieldSchemaIds the field schema ids
+   *
    * @return the string
    */
   private static String mountDuplicatedQuery(List<String> fieldSchemaIds) {
@@ -260,6 +268,7 @@ public class UniqueValidationUtils {
    * @param referencedFields the referenced fields
    * @param datasetOriginId the dataset origin id
    * @param datasetReferencedId the dataset referenced id
+   *
    * @return the string
    */
   private static String mountIntegrityQuery(List<String> originFields,
@@ -314,13 +323,13 @@ public class UniqueValidationUtils {
    * @param datasetId the dataset id
    * @param idFieldSchema the id field schema
    * @param idRule the id rule
+   *
    * @return the boolean
    */
   public static Boolean uniqueConstraint(String uniqueIdConstraint, String idRule) {
 
     UniqueConstraintVO uniqueConstraint =
         dataSetSchemaControllerZuul.getUniqueConstraint(uniqueIdConstraint);
-
 
     // Get Schema
     String schemaId = uniqueConstraint.getDatasetSchemaId();
@@ -357,16 +366,25 @@ public class UniqueValidationUtils {
   }
 
   /**
-   * Checks if is integrity constraint.
+   * Retrieves data from Referenced column in Master Dataset and from Referencer Column on Dependant
+   * Dataset and checks if ALL data on Referenced Column are in Referencer Column. Additionaly, if
+   * integrity rule determined by param <code>integrityId</code> has Double Reference check active,
+   * it will be checked that all the data on Referencer Column are in Referenced column
+   *
+   * Summarizing: Referencer column data must be contained by Referenced column data
+   *
+   * Additionally if double reference check is active: Referenced column data must be contained by
+   * Referencer column data
    *
    * @param datasetId the dataset id
    * @param integrityId the integrity id
    * @param idRule the id rule
+   *
    * @return the boolean
    */
   public static Boolean isIntegrityConstraint(DatasetValue datasetId, String integrityId,
       String idRule) {
-    // GetValidationData
+    // Retrieving basic data for validation process
     IntegrityVO integrityVO = rulesService.getIntegrityConstraint(integrityId);
     long datasetIdOrigin = datasetId.getId();
     long datasetIdReferenced = dataSetMetabaseControllerZuul.getIntegrityDatasetId(datasetIdOrigin,
@@ -378,22 +396,26 @@ public class UniqueValidationUtils {
     TableSchema tableSchema =
         getTableSchemaFromIdFieldSchema(datasetSchema, integrityVO.getOriginFields().get(0));
 
+    //pre-creates the validation error that will be saved on database in case there is any error
     Validation validation =
         createValidation(idRule, schemaId, tableSchema.getNameTableSchema(), EntityTypeEnum.TABLE);
 
+    //retrieving data from Referenced column that has not been used on Referencer column
     List<String> notUtilizedRecords =
         recordRepository.queryExecution(mountIntegrityQuery(integrityVO.getOriginFields(),
             integrityVO.getReferencedFields(), datasetIdOrigin, datasetIdReferenced));
 
+    //Retrieving tableValue to store validation data if there are any error
     TableValue tableValue =
         tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
     List<TableValidation> tableValidations =
         tableValue.getTableValidations() != null ? tableValue.getTableValidations()
             : new ArrayList<>();
 
-    // Validation origin table
     String auxValidationMessage = validation.getMessage();
+
     if (!notUtilizedRecords.isEmpty()) {
+      //Error: there are records on Referenced Column that are not in Referencer column
       TableValidation tableValidation = new TableValidation();
       validation.setMessage(auxValidationMessage + " (OMISSION)");
       tableValidation.setValidation(validation);
@@ -401,14 +423,15 @@ public class UniqueValidationUtils {
       tableValidations.add(tableValidation);
     }
     List<String> notUtilizedRecords2 = new ArrayList<>();
-    // Create validation on referenced DS/Table
+
     if (Boolean.TRUE.equals(integrityVO.getIsDoubleReferenced())) {
+      // Create validation on referenced DS/Table, checking if all data on Referencer Column are in Referenced column
       notUtilizedRecords2 =
           recordRepository.queryExecution(mountIntegrityQuery(integrityVO.getReferencedFields(),
               integrityVO.getOriginFields(), datasetIdReferenced, datasetIdOrigin));
 
-      // Validation referenced table
       if (!notUtilizedRecords2.isEmpty()) {
+        //Error: there are data on Referencer column that are not in Referenced column.
         validation = createValidation(idRule, schemaId, tableSchema.getNameTableSchema(),
             EntityTypeEnum.TABLE);
         TableValidation tableValidationReferenced = new TableValidation();
