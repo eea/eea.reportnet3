@@ -8,7 +8,7 @@ import isNil from 'lodash/isNil';
 const apiContributor = {
   all: async (dataflowId, dataProviderId) => {
     const isReporter = !isNil(dataProviderId) && !isEmpty(dataProviderId);
-    console.log('isReporter', isReporter);
+    console.log(isReporter ? 'miguel.provider' : 'miguel.custodian');
 
     const response = await HTTPRequester.get({
       url: isReporter
@@ -26,8 +26,10 @@ const apiContributor = {
 
   delete: async (account, dataflowId, dataProviderId) => {
     const isReporter = !isNil(dataProviderId) && !isEmpty(dataProviderId);
-    console.log('isReporter', isReporter);
-
+    console.log(isReporter ? 'miguel.provider' : 'miguel.custodian');
+    console.log('dataProviderId', dataProviderId);
+    let a = getUrl(ContributorConfig.deleteEditor, { dataflowId });
+    console.log('a', a, 'body:', account);
     const response = await HTTPRequester.delete({
       url: isReporter
         ? getUrl(ContributorConfig.deleteReporter, { dataflowId, dataProviderId })
@@ -42,7 +44,7 @@ const apiContributor = {
 
   update: async (contributor, dataflowId, dataProviderId) => {
     const isReporter = !isNil(dataProviderId) && !isEmpty(dataProviderId);
-    console.log('isReporter', isReporter);
+    console.log(isReporter ? 'miguel.provider' : 'custodian');
 
     const response = await HTTPRequester.update({
       url: isReporter

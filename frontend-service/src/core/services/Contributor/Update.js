@@ -1,2 +1,2 @@
-export const Update = ({ contributorRepository }) => async (reporter, dataflowId, dataProviderId) =>
-  contributorRepository.updateReporter(reporter, dataflowId, dataProviderId);
+export const Update = ({ contributorRepository }) => async (contributor, dataflowId, dataProviderId) =>
+  contributorRepository.update(contributor, dataflowId, dataProviderId);

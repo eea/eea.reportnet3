@@ -18,7 +18,6 @@ const deleteContributor = async (editorAccount, dataflowId, dataProviderId) => {
 };
 
 const update = async (contributor, dataflowId, dataProviderId) => {
-  console.log('editor', contributor);
   return await apiContributor.update(contributor, dataflowId, dataProviderId);
 };
 

@@ -89,6 +89,8 @@ export const onWritePermissionChange = async (
   if (!isNil(contributor.account)) {
     try {
       contributor.writePermission = writePermission;
+      console.log('c', contributor);
+      console.log('dataProviderId', dataProviderId);
       await ContributorService.update(contributor, dataflowId, dataProviderId);
       formDispatcher({
         type: 'REFRESH'
@@ -111,7 +113,12 @@ export const onWritePermissionChange = async (
 
 export const onDeleteConfirm = async (formDispatcher, formState, dataflowId, dataProviderId) => {
   try {
-    await ContributorService.delete(formState.contributorToDelete, dataflowId, dataProviderId);
+    console.log('account', formState.contributorToDelete.contributor.account, dataProviderId);
+    await ContributorService.deleteContributor(
+      formState.contributorToDelete.contributor.account,
+      dataflowId,
+      dataProviderId
+    );
 
     const updatedList = formState.contributors.filter(
       contributor => contributor.account !== formState.contributorToDelete
