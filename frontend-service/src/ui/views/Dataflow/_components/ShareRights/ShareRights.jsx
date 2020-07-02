@@ -1,9 +1,7 @@
 import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
-import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import uniq from 'lodash/uniq';
 import uuid from 'uuid';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
@@ -33,6 +31,7 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
 
   const [shareRightsState, shareRightsDispatch] = useReducer(shareRightsReducer, {
     account: '',
+    accountHasError: false,
     contributors: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
@@ -65,13 +64,20 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
   };
 
   const isValidEmail = email => {
+    if (isNil(email)) {
+      return true;
+    }
+
     const expression = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
     return email.match(expression);
   };
 
-  const onAccountChange = contributor => {
-    if (contributor.writePermission !== '' && isValidEmail(contributor.account)) {
+  const updateContributor = contributor => {
+    if (!isValidEmail(contributor.account)) {
+      return;
+    }
+    if (contributor.writePermission !== '') {
       onUpdateContributor(contributor);
     }
   };
@@ -86,7 +92,8 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
     }
   };
 
-  const onUpdateData = () => shareRightsDispatch({ type: 'ON_UPDATE_DATA', payload: !shareRightsState.isDataUpdated });
+  const onUpdateData = () =>
+    shareRightsDispatch({ type: 'ON_UPDATE_DATA', payload: { isDataUpdated: !shareRightsState.isDataUpdated } });
 
   const onUpdateContributor = async contributor => {
     try {
@@ -96,20 +103,33 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
       }
     } catch (error) {
       notificationContext.add({ type: 'UPDATE_CONTRIBUTOR_ERROR' });
+      if (error.status >= 400 && error.status <= 404) {
+        shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError: true } });
+      }
     }
   };
 
   const onWritePermissionChange = async (contributor, newWritePermission) => {
-    if (!isNil(contributor.account)) {
+    if (isValidEmail(contributor.account)) {
       onUpdateContributor(contributor);
     } else {
       const { contributors } = shareRightsState;
-
       const [thisContributor] = contributors.filter(thisContributor => thisContributor.account === contributor.account);
       thisContributor.writePermission = newWritePermission;
 
       shareRightsDispatch({ type: 'ON_WRITE_PERMISSION_CHANGE', payload: { contributors } });
     }
+  };
+
+  const onSetAccount = inputValue => {
+    const { contributors } = shareRightsState;
+    const [newContributor] = contributors.filter(contributor => contributor.isNew);
+    newContributor.account = inputValue;
+
+    shareRightsDispatch({
+      type: 'ON_SET_ACCOUNT',
+      payload: { contributors, accountHasError: !isValidEmail(inputValue) }
+    });
   };
 
   const renderDeleteColumnTemplate = contributor =>
@@ -119,8 +139,8 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
       <ActionsColumn
         onDeleteClick={() =>
           shareRightsDispatch({
-            type: 'TOGGLE_DELETE_CONFIRM_DIALOG',
-            payload: { isVisible: true, contributorAccountToDelete: contributor.account }
+            type: 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG',
+            payload: { isDeleteDialogVisible: true, contributorAccountToDelete: contributor.account }
           })
         }
       />
@@ -139,9 +159,8 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
         ];
 
     return (
-      <>
-        <select
-          /*  onBlur={() => onAddContributor(formDispatcher, formState, contributor, dataflowId)}
+      <select
+        /*  onBlur={() => onAddContributor(formDispatcher, formState, contributor, dataflowId)}
           onChange={event => {
             onWritePermissionChange(
               contributor,
@@ -153,39 +172,31 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
             );
           }}
           onKeyDown={event => onKeyDown(event, formDispatcher, formState, contributor, dataflowId)} */
-          onChange={event => onWritePermissionChange(contributor, event.target.value)}
-          value={contributor.writePermission}>
-          {writePermissionsOptions.map(option => {
-            return (
-              <option key={uuid.v4()} className="p-dropdown-item" value={option.writePermission}>
-                {option.label}
-              </option>
-            );
-          })}
-        </select>
-      </>
+
+        onChange={event => onWritePermissionChange(contributor, event.target.value)}
+        value={contributor.writePermission}>
+        {writePermissionsOptions.map(option => {
+          return (
+            <option key={uuid.v4()} className="p-dropdown-item" value={option.writePermission}>
+              {option.label}
+            </option>
+          );
+        })}
+      </select>
     );
   };
 
   const renderAccountTemplate = contributor => {
-    const hasError = false;
-
-    console.log('contributor', contributor);
-
     return (
-      <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
-        {/* <input
-          autoFocus={contributor.isNew}
-          disabled={!contributor.isNew}
-          id={isEmpty(contributor.account) ? 'emptyInput' : undefined}
-          placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
-          value={contributor.account}
-        /> */}
+      <div
+        className={`formField ${contributor.isNew && shareRightsState.accountHasError && 'error'}`}
+        style={{ marginBottom: '0rem' }}>
         <InputText
           autoFocus={contributor.isNew}
           disabled={!contributor.isNew}
           id={isEmpty(contributor.account) ? 'emptyInput' : undefined}
-          onChange={event => {}}
+          onBlur={() => updateContributor(contributor)}
+          onChange={event => onSetAccount(event.target.value)}
           placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
           ref={inputRef}
           value={contributor.account}
@@ -215,7 +226,12 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteContributor()}
-          onHide={() => shareRightsDispatch({ type: 'TOGGLE_DELETE_CONFIRM_DIALOG', payload: { isVisible: false } })}
+          onHide={() =>
+            shareRightsDispatch({
+              type: 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG',
+              payload: { isDeleteDialogVisible: false }
+            })
+          }
           visible={shareRightsState.isDeleteDialogVisible}>
           {deleteConfirmMessage}
         </ConfirmDialog>
