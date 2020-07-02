@@ -62,10 +62,10 @@ public class ContributorControllerImpl implements ContributorController {
    * @param dataProviderId the data provider id
    * @param contributorVO the contributor VO
    */
-  @DeleteMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}")
+  @DeleteMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataproviderId}")
   @Override
   public void deleteReporter(@PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("dataProviderId") Long dataProviderId,
+      @PathVariable("dataproviderId") Long dataproviderId,
       @RequestBody ContributorVO contributorVO) {
     // LOG.info("Didn't remove role of the user with account {} because its role is {}",
     // contributorVO.getAccount(), contributorVO.getRole());
@@ -101,7 +101,7 @@ public class ContributorControllerImpl implements ContributorController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @Override
   public List<ContributorVO> findReportersByGroup(@PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("providerId") Long dataproviderId) {
+      @PathVariable("dataproviderId") Long dataproviderId) {
     ContributorVO contributorVO = new ContributorVO();
     contributorVO.setAccount("email@emali.com");
     contributorVO.setDataProviderId(1L);
@@ -143,10 +143,10 @@ public class ContributorControllerImpl implements ContributorController {
    */
   @Override
   @HystrixCommand
-  @PutMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}",
+  @PutMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataproviderId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity updateReporter(@PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("dataProviderId") Long dataProviderId,
+      @PathVariable("dataproviderId") Long dataproviderId,
       @RequestBody ContributorVO contributorVO) {
     return new ResponseEntity(HttpStatus.OK);
   }
