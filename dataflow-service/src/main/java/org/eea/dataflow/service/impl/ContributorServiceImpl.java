@@ -86,24 +86,28 @@ public class ContributorServiceImpl implements ContributorService {
           new StringBuilder(resource).append(referenceId).append("-").append(role).append("_WRITE");
       List<UserRepresentationVO> listUserWrite =
           userManagementControllerZull.getUsersByGroup(stringBuilder.toString());
-      listUserWrite.stream().forEach(userWrite -> {
-        ContributorVO contributorVO = new ContributorVO();
-        contributorVO.setAccount(userWrite.getEmail());
-        contributorVO.setWritePermission(true);
-        contributorVO.setRole(role);
-        contributorVOList.add(contributorVO);
-      });
+      if (!CollectionUtils.isEmpty(listUserWrite)) {
+        listUserWrite.stream().forEach(userWrite -> {
+          ContributorVO contributorVO = new ContributorVO();
+          contributorVO.setAccount(userWrite.getEmail());
+          contributorVO.setWritePermission(true);
+          contributorVO.setRole(role);
+          contributorVOList.add(contributorVO);
+        });
+      }
       stringBuilder =
           new StringBuilder(resource).append(referenceId).append("-").append(role).append("_READ");
       List<UserRepresentationVO> listUserRead =
           userManagementControllerZull.getUsersByGroup(stringBuilder.toString());
-      listUserRead.stream().forEach(userRead -> {
-        ContributorVO contributorVO = new ContributorVO();
-        contributorVO.setAccount(userRead.getEmail());
-        contributorVO.setWritePermission(false);
-        contributorVO.setRole(role);
-        contributorVOList.add(contributorVO);
-      });
+      if (!CollectionUtils.isEmpty(listUserRead)) {
+        listUserRead.stream().forEach(userRead -> {
+          ContributorVO contributorVO = new ContributorVO();
+          contributorVO.setAccount(userRead.getEmail());
+          contributorVO.setWritePermission(false);
+          contributorVO.setRole(role);
+          contributorVOList.add(contributorVO);
+        });
+      }
     }
 
     return contributorVOList;
@@ -139,8 +143,8 @@ public class ContributorServiceImpl implements ContributorService {
       case REPORTER:
         resourceGroupEnumWrite = ResourceGroupEnum.DATASET_REPORTER_WRITE;
         resourceGroupEnumRead = ResourceGroupEnum.DATASET_REPORTER_READ;
-        resourceGroupEnumDataflowWrite = ResourceGroupEnum.DATASCHEMA_REPORTER;
-        resourceGroupEnumDataflowRead = ResourceGroupEnum.DATAFLOW_REPORTER;
+        resourceGroupEnumDataflowWrite = ResourceGroupEnum.DATASCHEMA_REPORTER_READ;
+        resourceGroupEnumDataflowRead = ResourceGroupEnum.DATAFLOW_REPORTER_READ;
         break;
       default:
         break;
@@ -201,8 +205,8 @@ public class ContributorServiceImpl implements ContributorService {
         securityRoleEnum = Boolean.TRUE.equals(contributorVO.getWritePermission())
             ? SecurityRoleEnum.REPORTER_WRITE
             : SecurityRoleEnum.REPORTER_READ;
-        resourceGroupEnum = ResourceGroupEnum.DATASCHEMA_REPORTER;
-        resourceGroupEnumDataflow = ResourceGroupEnum.DATAFLOW_REPORTER;
+        resourceGroupEnum = ResourceGroupEnum.DATASCHEMA_REPORTER_READ;
+        resourceGroupEnumDataflow = ResourceGroupEnum.DATAFLOW_REPORTER_READ;
         resourceGroupEnumDataset = Boolean.TRUE.equals(contributorVO.getWritePermission())
             ? ResourceGroupEnum.DATASET_REPORTER_WRITE
             : ResourceGroupEnum.DATASET_REPORTER_READ;
