@@ -83,7 +83,7 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
           names: {
             tableName: 'Table',
             fieldName: 'Field',
-            entityType: 'Entity type',
+            entityType: 'Type of qc',
             levelError: 'Level error',
             ruleName: 'Rule name'
           }

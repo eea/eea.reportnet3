@@ -85,7 +85,11 @@ const TabsValidations = withRouter(
 
         if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
           validationsServiceList.validations.forEach(validation => {
-            const additionalInfo = getAdditionalValidationInfo(validation.referenceId, validation.entityType);
+            const additionalInfo = getAdditionalValidationInfo(
+              validation.referenceId,
+              validation.entityType,
+              validation.relations
+            );
             validation.table = additionalInfo.tableName || '';
             validation.field = additionalInfo.fieldName || '';
           });
@@ -130,21 +134,32 @@ const TabsValidations = withRouter(
       </div>
     );
 
-    const getAdditionalValidationInfo = (referenceId, entityType) => {
+    const getAdditionalValidationInfo = (referenceId, entityType, relations) => {
       const additionalInfo = {};
       datasetSchemaAllTables.forEach(table => {
         if (!isUndefined(table.records)) {
           if (entityType.toUpperCase() === 'TABLE' || entityType.toUpperCase() === 'RECORD') {
             additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
-          } else if (entityType.toUpperCase() === 'FIELD') {
+          } else if (entityType.toUpperCase() === 'FIELD' || entityType.toUpperCase() === 'DATASET') {
             table.records.forEach(record =>
               record.fields.forEach(field => {
                 if (!isNil(field)) {
-                  if (field.fieldId === referenceId) {
-                    additionalInfo.tableName = !isUndefined(table.tableSchemaName)
-                      ? table.tableSchemaName
-                      : table.header;
-                    additionalInfo.fieldName = field.name;
+                  if (entityType.toUpperCase() === 'FIELD') {
+                    if (field.fieldId === referenceId) {
+                      additionalInfo.tableName = !isUndefined(table.tableSchemaName)
+                        ? table.tableSchemaName
+                        : table.header;
+                      additionalInfo.fieldName = field.name;
+                    }
+                  } else {
+                    if (!isEmpty(relations)) {
+                      if (field.fieldId === relations.links[0].originField.code) {
+                        additionalInfo.tableName = !isUndefined(table.tableSchemaName)
+                          ? table.tableSchemaName
+                          : table.header;
+                        additionalInfo.fieldName = field.name;
+                      }
+                    }
                   }
                 }
               })
@@ -157,19 +172,24 @@ const TabsValidations = withRouter(
 
     const getHeader = fieldHeader => {
       let header;
-      if (fieldHeader === 'levelError') {
-        header = resources.messages['ruleLevelError'];
-        return header;
+      switch (fieldHeader) {
+        case 'levelError':
+          header = resources.messages['ruleLevelError'];
+          break;
+        case 'shortCode':
+          header = resources.messages['ruleCode'];
+          break;
+        case 'isCorrect':
+          header = resources.messages['valid'];
+          break;
+        case 'entityType':
+          header = resources.messages['entityType'];
+          break;
+        default:
+          header = fieldHeader;
+          break;
       }
-      if (fieldHeader === 'shortCode') {
-        header = resources.messages['ruleCode'];
-        return header;
-      }
-      if (fieldHeader === 'isCorrect') {
-        header = resources.messages['valid'];
-        return header;
-      }
-      header = fieldHeader;
+
       return capitalize(header);
     };
 
@@ -182,13 +202,13 @@ const TabsValidations = withRouter(
         { id: 'name', index: 4 },
         { id: 'description', index: 5 },
         { id: 'message', index: 6 },
-        { id: 'levelError', index: 7 },
-        { id: 'automatic', index: 8 },
-        { id: 'enabled', index: 9 },
-        { id: 'referenceId', index: 10 },
-        { id: 'activationGroup', index: 11 },
-        { id: 'date', index: 12 },
-        { id: 'entityType', index: 13 },
+        { id: 'entityType', index: 7 },
+        { id: 'levelError', index: 8 },
+        { id: 'automatic', index: 9 },
+        { id: 'enabled', index: 10 },
+        { id: 'referenceId', index: 11 },
+        { id: 'activationGroup', index: 12 },
+        { id: 'date', index: 13 },
         { id: 'actionButtons', index: 14 },
         { id: 'isCorrect', index: 15 }
       ];
@@ -251,7 +271,7 @@ const TabsValidations = withRouter(
 
     const columnStyles = field => {
       const style = {};
-      const invisibleFields = ['id', 'referenceId', 'activationGroup', 'condition', 'date', 'entityType'];
+      const invisibleFields = ['id', 'referenceId', 'activationGroup', 'condition', 'date'];
       if (reporting) {
         invisibleFields.push('enabled', 'automatic', 'isCorrect');
       }
