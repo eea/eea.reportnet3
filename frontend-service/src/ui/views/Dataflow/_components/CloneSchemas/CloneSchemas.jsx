@@ -35,7 +35,6 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
     completed: [],
     filteredData: [],
     isLoading: true,
-    isTableView: true,
     pagination: { first: 0, rows: 10, page: 0 },
     pending: []
   });
@@ -80,12 +79,30 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
     cloneSchemasDispatch({ type: 'ON_SELECT_DATAFLOW', payload: { id: dataflowData.id, name: dataflowData.name } });
   };
 
-  const onToggleView = () => {
-    cloneSchemasDispatch({ type: 'ON_TOGGLE_VIEW', payload: { view: !cloneSchemasState.isTableView } });
+  const parseDataflowList = dataflows => {
+    let parsedDataflows = dataflows.filter(
+      dataflow => dataflow.id !== parseInt(dataflowId) && dataflow.userRole === dataflowRoles.DATA_CUSTODIAN
+    );
+
+    let dataflowsToFilter = [];
+
+    parsedDataflows.forEach(dataflow => {
+      let dataflowToFilter = {};
+      dataflowToFilter.id = dataflow.id;
+      dataflowToFilter.name = dataflow.name;
+      dataflowToFilter.description = dataflow.description;
+      dataflowToFilter.obligationTitle = dataflow.obligation.title;
+      dataflowToFilter.legalInstruments = dataflow.obligation.legalInstruments.alias;
+      dataflowToFilter.status = dataflow.status;
+      dataflowToFilter.expirationDate = dataflow.expirationDate;
+      dataflowsToFilter.push(dataflowToFilter);
+    });
+
+    return dataflowsToFilter;
   };
 
   const renderData = () =>
-    cloneSchemasState.isTableView ? (
+    user.userProps.listView ? (
       <TableViewSchemas
         checkedDataflow={cloneSchemasState.chosenDataflow}
         data={cloneSchemasState.filteredData}
@@ -103,14 +120,9 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
         onChangePagination={onChangePagination}
         onSelectCard={onSelectDataflow}
         pagination={cloneSchemasState.pagination}
+        type={'cloneSchemas'}
       />
     );
-
-  const parseDataflowList = dataflows => {
-    return dataflows.filter(
-      dataflow => dataflow.id !== parseInt(dataflowId) && dataflow.userRole === dataflowRoles.DATA_CUSTODIAN
-    );
-  };
 
   const cloneSchemaStyles = {
     justifyContent:
@@ -125,22 +137,19 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
     <div className={styles.cloneSchemas} style={cloneSchemaStyles}>
       <div className={styles.switchDiv}>
         <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
-        <InputSwitch checked={cloneSchemasState.isTableView} onChange={() => onToggleView()} />
+        <InputSwitch checked={user.userProps.listView} onChange={e => user.onToggleTypeView(e.value)} />
         <label className={styles.switchTextInput}>{resources.messages['listView']}</label>
       </div>
-
       <div className={styles.filters}>
         <Filters
           data={cloneSchemasState.accepted}
           dateOptions={['expirationDate']}
           getFilteredData={onLoadFilteredData}
-          inputOptions={['name', 'description', 'legalInstrument', 'obligationTitle']}
+          inputOptions={['name', 'description', 'obligationTitle', 'legalInstruments']}
           selectOptions={['status']}
         />
       </div>
-
       {renderData()}
-
       <span
         className={`${styles.selectedDataflow} ${
           isEmpty(cloneSchemasState.data || cloneSchemasState.filteredData) ? styles.filteredSelected : ''

@@ -61,7 +61,8 @@ const parseConfigurationDTO = userConfigurationDTO => {
     rowsPerPage: 10,
     visualTheme: 'light',
     userImage: [],
-    amPm24h: true
+    amPm24h: true,
+    listView: true
   };
 
   if (isNil(userConfigurationDTO) || isEmpty(userConfigurationDTO)) {
@@ -71,6 +72,7 @@ const parseConfigurationDTO = userConfigurationDTO => {
     userConfiguration.visualTheme = userDefaultConfiguration.visualTheme;
     userConfiguration.userImage = userDefaultConfiguration.userImage;
     userConfiguration.amPm24h = userDefaultConfiguration.amPm24h;
+    userConfiguration.listView = userDefaultConfiguration.listView;
   } else {
     userConfiguration.dateFormat = !isNil(userConfigurationDTO.dateFormat[0])
       ? userConfigurationDTO.dateFormat[0]
@@ -99,6 +101,12 @@ const parseConfigurationDTO = userConfigurationDTO => {
       : userConfigurationDTO.amPm24h[0] === 'false'
       ? (userConfiguration.amPm24h = false)
       : (userConfiguration.amPm24h = true);
+
+    userConfiguration.listView = isNil(userConfigurationDTO.listView)
+      ? userDefaultConfiguration.listView
+      : userConfigurationDTO.listView[0] === 'false'
+      ? (userConfiguration.listView = false)
+      : (userConfiguration.listView = true);
   }
   return userConfiguration;
 };

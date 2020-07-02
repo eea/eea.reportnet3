@@ -270,8 +270,8 @@ public class ValidationHelper implements DisposableBean {
                 sentTasks, processId);
           }
           LOG.info(
-              "There are still {} tasks to be sent and {} pending Ok's to be received",
-              processesMap.get(processId).getPendingValidations().size(), pendingOk);
+              "There are still {} tasks to be sent and {} pending Ok's to be received for process {}",
+              processesMap.get(processId).getPendingValidations().size(), pendingOk, processId);
         }
       }
     }
