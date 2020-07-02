@@ -86,7 +86,7 @@ public class ContributorServiceImpl implements ContributorService {
           new StringBuilder(resource).append(referenceId).append("-").append(role).append("_WRITE");
       List<UserRepresentationVO> listUserWrite =
           userManagementControllerZull.getUsersByGroup(stringBuilder.toString());
-      if (listUserWrite != null) {
+      if (!CollectionUtils.isEmpty(listUserWrite)) {
         listUserWrite.stream().forEach(userWrite -> {
           ContributorVO contributorVO = new ContributorVO();
           contributorVO.setAccount(userWrite.getEmail());
@@ -99,7 +99,7 @@ public class ContributorServiceImpl implements ContributorService {
           new StringBuilder(resource).append(referenceId).append("-").append(role).append("_READ");
       List<UserRepresentationVO> listUserRead =
           userManagementControllerZull.getUsersByGroup(stringBuilder.toString());
-      if (listUserRead != null) {
+      if (!CollectionUtils.isEmpty(listUserRead)) {
         listUserRead.stream().forEach(userRead -> {
           ContributorVO contributorVO = new ContributorVO();
           contributorVO.setAccount(userRead.getEmail());
