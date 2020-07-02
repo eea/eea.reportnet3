@@ -65,7 +65,9 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
   };
 
   const isValidEmail = email => {
-    return true; // REGULAR EXPRESSION
+    const expression = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+
+    return email.match(expression);
   };
 
   const onAccountChange = contributor => {
