@@ -309,6 +309,18 @@ public class ContributorServiceImpl implements ContributorService {
   @Override
   public void updateContributor(Long dataflowId, ContributorVO contributorVO, String role,
       Long dataProviderId) throws EEAException {
+
+    // check if the email is correct
+    UserRepresentationVO emailUser =
+        userManagementControllerZull.getUserByEmail(contributorVO.getAccount());
+    if (null == emailUser) {
+      LOG_ERROR.error(
+          "Error creating contributor with the account: {} in the dataflow {} because the email doesn't exist in the system",
+          contributorVO.getAccount(), dataflowId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, new StringBuilder("The email ")
+          .append(contributorVO.getAccount()).append(" doesn't exist in repornet").toString());
+    }
+
     // we delete the contributor and after that we create it to update
     if (EDITOR.equals(role) || REPORTER.equals(role)) {
       try {
@@ -325,6 +337,12 @@ public class ContributorServiceImpl implements ContributorService {
             contributorVO.getAccount(), dataflowId);
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
       }
+    } else {
+      LOG_ERROR.error(
+          "Error creating contributor with the account: {} in the dataflow {}  because the role not avaliable {}",
+          contributorVO.getAccount(), dataflowId, role);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          new StringBuilder("ROLE").append(role).append(" doesn't exist").toString());
     }
 
   }
@@ -356,12 +374,17 @@ public class ContributorServiceImpl implements ContributorService {
 
       if (!CollectionUtils.isEmpty(usersEditorRead)) {
         for (UserRepresentationVO userEditorRead : usersEditorRead) {
+          resourceManagementControllerZull.createResource(
+              createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.EDITOR_READ));
           resources.add(fillResourceAssignation(datasetId, userEditorRead.getEmail(),
               ResourceGroupEnum.DATASCHEMA_EDITOR_READ));
+
         }
       }
       if (!CollectionUtils.isEmpty(usersEditorWrite)) {
         for (UserRepresentationVO userEditorWrite : usersEditorWrite) {
+          resourceManagementControllerZull.createResource(
+              createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.EDITOR_WRITE));
           resources.add(fillResourceAssignation(datasetId, userEditorWrite.getEmail(),
               ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE));
         }
