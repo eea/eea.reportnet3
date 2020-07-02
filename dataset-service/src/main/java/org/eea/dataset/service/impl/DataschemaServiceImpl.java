@@ -1016,7 +1016,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       }
     }
     // For fieldSchemas that are FK
-    if (DataType.LINK.equals(fieldSchemaVO.getType())) {
+    if (DataType.LINK.equals(fieldSchemaVO.getType())
+        && fieldSchemaVO.getReferencedField() != null) {
       PkCatalogueSchema catalogue = pkCatalogueRepository
           .findByIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
       if (catalogue != null) {

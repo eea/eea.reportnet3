@@ -202,6 +202,9 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
     List<DesignDatasetVO> designs = getDesignDataSetIdByDataflowId(idDataflowOrigin);
     if (designs == null || designs.isEmpty()) {
       // Error. There aren't designs to copy in the dataflow
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_FAILED_EVENT,
+          null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .dataflowId(idDataflowDestination).error("No design datasets found to copy").build());
       datasetService.releaseLock(LockSignature.COPY_DATASET_SCHEMA.getValue(), idDataflowOrigin,
           idDataflowDestination);
       throw new EEAException(String.format(EEAErrorMessage.NO_DESIGNS_TO_COPY, idDataflowOrigin));
@@ -416,10 +419,13 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
     int index = 1;
     for (int i = 0; i < designs.size(); i++) {
       if (designs.get(i).getDataSetName().equals(result)) {
-        result = result + " (" + index + ")";
+        if (result.contains("(" + (index - 1) + ")")) {
+          result = result.replace("(" + (index - 1) + ")", "(" + index + ")");
+        } else {
+          result = result + " (" + index + ")";
+        }
         i = 0;
         index++;
-        break;
       }
     }
     return result;
