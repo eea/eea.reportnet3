@@ -29,7 +29,7 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
-import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -276,9 +276,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
 
         // delete the group in keycloak
-        dataschemaService.deleteGroup(datasetId, ResourceGroupEnum.DATASCHEMA_CUSTODIAN,
-            ResourceGroupEnum.DATASCHEMA_REPORTER, ResourceGroupEnum.DATASCHEMA_EDITOR_READ,
-            ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE);
+
+        dataschemaService.deleteGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA);
         LOG.info("The Design Dataset {} has been deleted", datasetId);
       } else {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,

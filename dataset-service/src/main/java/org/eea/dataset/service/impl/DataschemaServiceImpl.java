@@ -200,14 +200,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Delete group and remove user.
    *
    * @param datasetId the dataset id
-   * @param roles the roles
+   * @param resourceTypeEnum the resource type enum
    */
   @Override
-  public void deleteGroup(Long datasetId, ResourceGroupEnum... roles) {
-    List<String> resources = new ArrayList<>();
-    // Remove groups from list
-    Arrays.asList(roles).stream().forEach(role -> resources.add(role.getGroupName(datasetId)));
-    resourceManagementControllerZull.deleteResourceByName(resources);
+  public void deleteGroup(Long datasetId, ResourceTypeEnum resourceTypeEnum) {
+    // We find all types of data of this schema and delete it
+    List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
+        .getGroupsByIdResourceType(datasetId, ResourceTypeEnum.DATA_SCHEMA);
+    resourceManagementControllerZull.deleteResource(resourceCustodian);
   }
 
 

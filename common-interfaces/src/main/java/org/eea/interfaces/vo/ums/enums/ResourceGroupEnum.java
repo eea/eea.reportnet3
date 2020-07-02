@@ -51,6 +51,9 @@ public enum ResourceGroupEnum {
    */
   DATASCHEMA_REPORTER("Dataschema-%s-REPORTER"),
 
+  /** The dataschema lead reporter. */
+  DATASCHEMA_LEAD_REPORTER("Dataschema-%s-LEAD_REPORTER"),
+
   /** The datacollection custodian. */
   DATACOLLECTION_CUSTODIAN("DataCollection-%s-DATA_CUSTODIAN"),
 

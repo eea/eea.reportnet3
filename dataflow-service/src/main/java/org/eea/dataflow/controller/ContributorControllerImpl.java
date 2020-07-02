@@ -4,7 +4,9 @@ import java.util.List;
 import org.eea.dataflow.service.ContributorService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.contributor.ContributorVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,18 +32,24 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/contributor")
 public class ContributorControllerImpl implements ContributorController {
 
-
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ContributorControllerImpl.class);
 
+  /** The Constant EDITOR: {@value}. */
+  private static final String EDITOR = "EDITOR";
+
+  /** The Constant REPORTER: {@value}. */
+  private static final String REPORTER = "REPORTER";
 
   /** The contributor service. */
   @Autowired
   private ContributorService contributorService;
+
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZull;
 
   /**
    * Delete editor.
@@ -56,7 +64,8 @@ public class ContributorControllerImpl implements ContributorController {
       @RequestBody ContributorVO contributorVO) {
     // we can only remove role of editor, reporter or reporter partition type
     try {
-      contributorService.deleteContributor(dataflowId, contributorVO.getAccount(), "EDITOR");
+      checkAccount(dataflowId, contributorVO.getAccount());
+      contributorService.deleteContributor(dataflowId, contributorVO.getAccount(), EDITOR, null);
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting the contributor {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
@@ -79,7 +88,9 @@ public class ContributorControllerImpl implements ContributorController {
       @RequestBody ContributorVO contributorVO) {
     // we can only remove role of editor, reporter or reporter partition type
     try {
-      contributorService.deleteContributor(dataflowId, contributorVO.getAccount(), "REPORTER");
+      checkAccount(dataflowId, contributorVO.getAccount());
+      contributorService.deleteContributor(dataflowId, contributorVO.getAccount(), REPORTER,
+          dataProviderId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting the contributor {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
@@ -98,9 +109,8 @@ public class ContributorControllerImpl implements ContributorController {
   @GetMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<ContributorVO> findEditorsByGroup(@PathVariable("dataflowId") Long dataflowId) {
     // we can find editors,
-    return contributorService.findContributorsByIdDataflow(dataflowId, "EDITOR");
+    return contributorService.findContributorsByResourceId(dataflowId, null, EDITOR);
   }
-
 
   /**
    * Find reporters by group.
@@ -114,11 +124,10 @@ public class ContributorControllerImpl implements ContributorController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
   public List<ContributorVO> findReportersByGroup(@PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("providerId") Long dataproviderId) {
+      @PathVariable("dataproviderId") Long dataproviderId) {
     // find reporters or reporter partition roles based on the dataflow state
-    return contributorService.findContributorsByIdDataflow(dataflowId, "REPORTER");
+    return contributorService.findContributorsByResourceId(dataflowId, dataproviderId, REPORTER);
   }
-
 
   /**
    * Update editor.
@@ -138,7 +147,8 @@ public class ContributorControllerImpl implements ContributorController {
     String message = "";
     HttpStatus status = HttpStatus.OK;
     try {
-      contributorService.updateContributor(dataflowId, contributorVO, "EDITOR");
+      checkAccount(dataflowId, contributorVO.getAccount());
+      contributorService.updateContributor(dataflowId, contributorVO, EDITOR, null);
     } catch (EEAException e) {
       LOG_ERROR.error("Error update the contributor {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
@@ -169,7 +179,8 @@ public class ContributorControllerImpl implements ContributorController {
     String message = "";
     HttpStatus status = HttpStatus.OK;
     try {
-      contributorService.updateContributor(dataflowId, contributorVO, "REPORTER");
+      checkAccount(dataflowId, contributorVO.getAccount());
+      contributorService.updateContributor(dataflowId, contributorVO, REPORTER, dataProviderId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error update the contributor {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
@@ -198,6 +209,24 @@ public class ContributorControllerImpl implements ContributorController {
           "Error creating  the associated permissions for editor role in datasetschema {}.in the dataflow: {} ",
           datasetId, dataflowId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Check account.
+   *
+   * @param dataflowId the dataflow id
+   * @param account the account
+   */
+  private void checkAccount(Long dataflowId, String account) {
+    // check if the email is correct
+    UserRepresentationVO emailUser = userManagementControllerZull.getUserByEmail(account);
+    if (null == emailUser) {
+      LOG_ERROR.error(
+          "Error creating contributor with the account: {} in the dataflow {} because the email doesn't exist in the system",
+          account, dataflowId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, new StringBuilder("The email ")
+          .append(account).append(" doesn't exist in repornet").toString());
     }
   }
 

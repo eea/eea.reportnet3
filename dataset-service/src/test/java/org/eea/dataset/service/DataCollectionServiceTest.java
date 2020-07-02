@@ -13,6 +13,7 @@ import javax.sql.DataSource;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataCollectionMapper;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
+import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.service.impl.DataCollectionServiceImpl;
@@ -117,6 +118,10 @@ public class DataCollectionServiceTest {
   /** The rules controller zuul. */
   @Mock
   private RulesControllerZuul rulesControllerZuul;
+
+  /** The design dataset repository. */
+  @Mock
+  private DesignDatasetRepository designDatasetRepository;
 
   /**
    * Inits the mocks.
@@ -305,6 +310,8 @@ public class DataCollectionServiceTest {
     Mockito.doNothing().when(resourceManagementControllerZuul).createResources(Mockito.any());
     Mockito.doNothing().when(userManagementControllerZuul)
         .addContributorsToResources(Mockito.any());
+    Mockito.when(designDatasetRepository.findByDataflowId(Mockito.any()))
+        .thenReturn(new ArrayList<>());
     Mockito.when(rulesControllerZuul.findRuleSchemaByDatasetId(Mockito.any()))
         .thenReturn(new RulesSchemaVO());
     Mockito.doNothing().when(recordStoreControllerZull).createSchemas(Mockito.any(), Mockito.any(),

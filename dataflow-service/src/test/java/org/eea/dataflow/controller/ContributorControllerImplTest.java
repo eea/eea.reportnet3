@@ -64,8 +64,8 @@ public class ContributorControllerImplTest {
   @Test
   public void updateContributor() throws EEAException {
     contributorControllerImpl.updateEditor(1L, contributorVOWrite);
-    Mockito.verify(contributorService, times(1)).updateContributor(1L, contributorVOWrite,
-        "EDITOR");
+    Mockito.verify(contributorService, times(1)).updateContributor(1L, contributorVOWrite, "EDITOR",
+        null);
   }
 
   /**
@@ -76,7 +76,7 @@ public class ContributorControllerImplTest {
   @Test
   public void updateContributoThrow() throws EEAException {
     Mockito.doThrow(EEAException.class).when(contributorService).updateContributor(1L,
-        contributorVOWrite, "EDITOR");
+        contributorVOWrite, "EDITOR", null);
     ResponseEntity<?> value = contributorControllerImpl.updateEditor(1L, contributorVOWrite);
     assertEquals(null, value.getBody());
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, value.getStatusCode());
@@ -88,7 +88,7 @@ public class ContributorControllerImplTest {
   @Test
   public void findContributorsByGroup() {
     contributorControllerImpl.findEditorsByGroup(1L);
-    Mockito.verify(contributorService, times(1)).findContributorsByIdDataflow(1L, "EDITOR");
+    Mockito.verify(contributorService, times(1)).findContributorsByResourceId(1L, null, "EDITOR");
   }
 
   /**
@@ -109,7 +109,7 @@ public class ContributorControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void deleteThrow() throws EEAException {
     Mockito.doThrow(EEAException.class).when(contributorService)
-        .deleteContributor(Mockito.anyLong(), Mockito.any(), Mockito.any());
+        .deleteContributor(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any());
     try {
       contributorControllerImpl.deleteEditor(1L, contributorVOWrite);
     } catch (ResponseStatusException ex) {
