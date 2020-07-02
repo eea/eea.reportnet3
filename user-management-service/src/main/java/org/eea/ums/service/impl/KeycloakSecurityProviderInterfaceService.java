@@ -241,6 +241,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Override
   public void createResourceInstance(ResourceInfoVO resourceInfoVO) throws EEAException {
     GroupInfo groupInfo = new GroupInfo();
+    LOG.error(resourceInfoVO.getResourceTypeEnum().toString() + resourceInfoVO.getResourceId()
+        + resourceInfoVO.getSecurityRoleEnum());
     String groupName =
         ResourceGroupEnum.fromResourceTypeAndSecurityRole(resourceInfoVO.getResourceTypeEnum(),
             resourceInfoVO.getSecurityRoleEnum()).getGroupName(resourceInfoVO.getResourceId());
