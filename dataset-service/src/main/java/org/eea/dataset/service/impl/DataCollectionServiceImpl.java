@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
@@ -463,16 +464,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private void removePermissionEditors(Long dataflowId) {
 
     List<DesignDataset> designDatasetIds = designDatasetRepository.findByDataflowId(dataflowId);
-    List<String> resources = new ArrayList<>();
-    resources.add(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(dataflowId));
-    resources.add(ResourceGroupEnum.DATAFLOW_EDITOR_READ.getGroupName(dataflowId));
+    List<ResourceInfoVO> resources = new ArrayList<>();
+    resources.add(resourceManagementControllerZuul.getResourceDetail(dataflowId,
+        ResourceGroupEnum.DATAFLOW_EDITOR_WRITE));
+    resources.add(resourceManagementControllerZuul.getResourceDetail(dataflowId,
+        ResourceGroupEnum.DATAFLOW_EDITOR_READ));
     for (DesignDataset designDataset : designDatasetIds) {
-      resources.add(ResourceGroupEnum.DATASET_REPORTER_READ.getGroupName(designDataset.getId()));
-      resources.add(ResourceGroupEnum.DATASET_REPORTER_WRITE.getGroupName(designDataset.getId()));
+      resources.add(resourceManagementControllerZuul.getResourceDetail(designDataset.getId(),
+          ResourceGroupEnum.DATASCHEMA_EDITOR_READ));
+      resources.add(resourceManagementControllerZuul.getResourceDetail(designDataset.getId(),
+          ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE));
     }
-
-    resourceManagementControllerZuul.deleteResourceByName(resources);
-
+    resources.removeIf(Objects::isNull);
+    resourceManagementControllerZuul.deleteResource(resources);
   }
 
   /**
