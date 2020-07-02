@@ -72,6 +72,12 @@ const MainLayout = ({ children }) => {
   }, [children]);
 
   useEffect(() => {
+    if (mainContentStyle.height === 'auto') {
+      window.scrollTo(0, 0);
+    }
+  }, [mainContentStyle]);
+
+  useEffect(() => {
     async function fetchData() {
       if (isUndefined(userContext.id)) {
         try {
