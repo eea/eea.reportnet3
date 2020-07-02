@@ -391,9 +391,8 @@ public class UniqueValidationUtils {
         tableValue.getTableValidations() != null ? tableValue.getTableValidations()
             : new ArrayList<>();
 
-
+    // Validation origin table
     String auxValidationMessage = validation.getMessage();
-    // Cuando hay de menos
     if (!notUtilizedRecords.isEmpty()) {
       TableValidation tableValidation = new TableValidation();
       validation.setMessage(auxValidationMessage + " (OMISSION)");
@@ -402,15 +401,13 @@ public class UniqueValidationUtils {
       tableValidations.add(tableValidation);
     }
     List<String> notUtilizedRecords2 = new ArrayList<>();
-
-
     // Create validation on referenced DS/Table
     if (Boolean.TRUE.equals(integrityVO.getIsDoubleReferenced())) {
       notUtilizedRecords2 =
           recordRepository.queryExecution(mountIntegrityQuery(integrityVO.getReferencedFields(),
               integrityVO.getOriginFields(), datasetIdReferenced, datasetIdOrigin));
 
-      // Cuando hay de mas
+      // Validation referenced table
       if (!notUtilizedRecords2.isEmpty()) {
         validation = createValidation(idRule, schemaId, tableSchema.getNameTableSchema(),
             EntityTypeEnum.TABLE);
@@ -418,7 +415,6 @@ public class UniqueValidationUtils {
         validation.setMessage(auxValidationMessage + " (COMMISSION)");
         tableValidationReferenced.setValidation(validation);
         tableValidationReferenced.setTableValue(tableValue);
-
 
         tableValidations.add(tableValidationReferenced);
       }
