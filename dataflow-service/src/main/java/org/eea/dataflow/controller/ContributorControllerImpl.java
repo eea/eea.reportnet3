@@ -4,7 +4,9 @@ import java.util.List;
 import org.eea.dataflow.service.ContributorService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.contributor.ContributorVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,9 @@ public class ContributorControllerImpl implements ContributorController {
   @Autowired
   private ContributorService contributorService;
 
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZull;
+
   /**
    * Delete editor.
    *
@@ -59,6 +64,7 @@ public class ContributorControllerImpl implements ContributorController {
       @RequestBody ContributorVO contributorVO) {
     // we can only remove role of editor, reporter or reporter partition type
     try {
+      checkAccount(dataflowId, contributorVO.getAccount());
       contributorService.deleteContributor(dataflowId, contributorVO.getAccount(), EDITOR, null);
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting the contributor {}.in the dataflow: {}",
@@ -82,6 +88,7 @@ public class ContributorControllerImpl implements ContributorController {
       @RequestBody ContributorVO contributorVO) {
     // we can only remove role of editor, reporter or reporter partition type
     try {
+      checkAccount(dataflowId, contributorVO.getAccount());
       contributorService.deleteContributor(dataflowId, contributorVO.getAccount(), REPORTER,
           dataProviderId);
     } catch (EEAException e) {
@@ -140,6 +147,7 @@ public class ContributorControllerImpl implements ContributorController {
     String message = "";
     HttpStatus status = HttpStatus.OK;
     try {
+      checkAccount(dataflowId, contributorVO.getAccount());
       contributorService.updateContributor(dataflowId, contributorVO, EDITOR, null);
     } catch (EEAException e) {
       LOG_ERROR.error("Error update the contributor {}.in the dataflow: {}",
@@ -171,6 +179,7 @@ public class ContributorControllerImpl implements ContributorController {
     String message = "";
     HttpStatus status = HttpStatus.OK;
     try {
+      checkAccount(dataflowId, contributorVO.getAccount());
       contributorService.updateContributor(dataflowId, contributorVO, REPORTER, dataProviderId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error update the contributor {}.in the dataflow: {}",
@@ -200,6 +209,24 @@ public class ContributorControllerImpl implements ContributorController {
           "Error creating  the associated permissions for editor role in datasetschema {}.in the dataflow: {} ",
           datasetId, dataflowId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Check account.
+   *
+   * @param dataflowId the dataflow id
+   * @param account the account
+   */
+  private void checkAccount(Long dataflowId, String account) {
+    // check if the email is correct
+    UserRepresentationVO emailUser = userManagementControllerZull.getUserByEmail(account);
+    if (null == emailUser) {
+      LOG_ERROR.error(
+          "Error creating contributor with the account: {} in the dataflow {} because the email doesn't exist in the system",
+          account, dataflowId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, new StringBuilder("The email ")
+          .append(account).append(" doesn't exist in repornet").toString());
     }
   }
 

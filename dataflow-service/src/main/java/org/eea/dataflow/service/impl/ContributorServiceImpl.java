@@ -310,17 +310,6 @@ public class ContributorServiceImpl implements ContributorService {
   public void updateContributor(Long dataflowId, ContributorVO contributorVO, String role,
       Long dataProviderId) throws EEAException {
 
-    // check if the email is correct
-    UserRepresentationVO emailUser =
-        userManagementControllerZull.getUserByEmail(contributorVO.getAccount());
-    if (null == emailUser) {
-      LOG_ERROR.error(
-          "Error creating contributor with the account: {} in the dataflow {} because the email doesn't exist in the system",
-          contributorVO.getAccount(), dataflowId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, new StringBuilder("The email ")
-          .append(contributorVO.getAccount()).append(" doesn't exist in repornet").toString());
-    }
-
     // we delete the contributor and after that we create it to update
     if (EDITOR.equals(role) || REPORTER.equals(role)) {
       try {
