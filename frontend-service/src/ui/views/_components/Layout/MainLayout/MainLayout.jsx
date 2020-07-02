@@ -28,7 +28,9 @@ const MainLayout = ({ children }) => {
 
   const [margin, setMargin] = useState('50px');
   const [leftSideBarStyle, setLeftSideBarStyle] = useState({});
-  const [mainContentStyle, setMainContentStyle] = useState({});
+  const [mainContentStyle, setMainContentStyle] = useState({
+    height: `${window.innerHeight - 196}px`
+  });
 
   const getUserConfiguration = async () => {
     try {
@@ -60,17 +62,9 @@ const MainLayout = ({ children }) => {
 
   useEffect(() => {
     const header = document.getElementById('header');
-    const mainContent = document.getElementById('mainContent');
     const pageContent = document.getElementById('pageContent');
 
-    if (isEmpty(mainContentStyle) && header.clientHeight + mainContent.clientHeight < window.innerHeight) {
-      setMainContentStyle({
-        height: `${window.innerHeight - header.clientHeight}px`
-      });
-    } else if (
-      !isEmpty(mainContentStyle) &&
-      header.clientHeight + pageContent.children[0].clientHeight > window.innerHeight
-    ) {
+    if (!isEmpty(mainContentStyle) && header.clientHeight + pageContent.children[0].clientHeight > window.innerHeight) {
       setMainContentStyle({
         height: 'auto'
       });
@@ -123,6 +117,7 @@ const MainLayout = ({ children }) => {
           {children}
         </div>
       </div>
+
       <Footer leftMargin={margin} />
       <EuFooter leftMargin={margin} />
     </div>
