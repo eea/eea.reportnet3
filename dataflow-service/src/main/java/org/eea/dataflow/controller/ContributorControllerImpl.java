@@ -11,11 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,92 +41,114 @@ public class ContributorControllerImpl implements ContributorController {
   private ContributorService contributorService;
 
   /**
-   * Delete resource.
+   * Delete editor.
    *
    * @param dataflowId the dataflow id
-   * @param account the account
+   * @param contributorVO the contributor VO
    */
-  @DeleteMapping(value = "/dataflow/{dataflowId}/user/{account}")
+  @DeleteMapping(value = "/editor/dataflow/{dataflowId}")
   @Override
-  public void delete(@PathVariable("dataflowId") Long dataflowId, @PathVariable String account) {
-    // we can only remove role of editor, reporter type
-    // switch (contributorVO.getRole()) {
-    // case "EDITOR":
-    // case "REPORTER_PARTITIONED":
-    // case "REPORTER":
-    // contributorService.deleteContributor(contributorVO, dataflowId);
-    // break;
-    // default:
+  public void deleteEditor(@PathVariable("dataflowId") Long dataflowId,
+      @RequestBody ContributorVO contributorVO) {
     // LOG.info("Didn't remove role of the user with account {} because its role is {}",
     // contributorVO.getAccount(), contributorVO.getRole());
-    // break;
-    // }
   }
 
+
   /**
-   * Find role users by group.
+   * Delete reporter.
    *
    * @param dataflowId the dataflow id
-   * @return the list
+   * @param dataProviderId the data provider id
+   * @param contributorVO the contributor VO
    */
-  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @DeleteMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}")
   @Override
-  public List<ContributorVO> findContributorsByGroup(@PathVariable("dataflowId") Long dataflowId) {
-    // we can find editors, reporters or reporter partition roles based on the dataflow state
-    // mock
+  public void deleteReporter(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("dataProviderId") Long dataProviderId,
+      @RequestBody ContributorVO contributorVO) {
+    // LOG.info("Didn't remove role of the user with account {} because its role is {}",
+    // contributorVO.getAccount(), contributorVO.getRole());
+  }
+
+  @GetMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Override
+  public List<ContributorVO> findEditorsByGroup(@PathVariable("dataflowId") Long dataflowId) {
     ContributorVO contributorVO = new ContributorVO();
     contributorVO.setAccount("email@emali.com");
-    contributorVO.setDataProviderId(1L);
+    contributorVO.setDataProviderId(null);
     contributorVO.setWritePermission(true);
     contributorVO.setRole("EDITOR");
+    ContributorVO contributorVO2 = new ContributorVO();
+    contributorVO2.setAccount("email2@emali.com");
+    contributorVO2.setDataProviderId(null);
+    contributorVO2.setWritePermission(true);
+    contributorVO2.setRole("EDITOR");
     List<ContributorVO> contributorVOs = new ArrayList<>();
     contributorVOs.add(contributorVO);
-    contributorVOs.add(contributorVO);
+    contributorVOs.add(contributorVO2);
     return contributorVOs;
   }
 
   /**
-   * Update role user.
+   * Find reporters by group.
    *
    * @param dataflowId the dataflow id
-   * @param contributorVO the role user VO
+   * @param dataproviderId the dataprovider id
+   * @return the list
+   */
+  @GetMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataproviderId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @Override
+  public List<ContributorVO> findReportersByGroup(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("providerId") Long dataproviderId) {
+    ContributorVO contributorVO = new ContributorVO();
+    contributorVO.setAccount("email@emali.com");
+    contributorVO.setDataProviderId(1L);
+    contributorVO.setWritePermission(true);
+    contributorVO.setRole("REPORTER");
+    ContributorVO contributorVO2 = new ContributorVO();
+    contributorVO2.setAccount("email2@emali.com");
+    contributorVO2.setDataProviderId(2L);
+    contributorVO2.setWritePermission(true);
+    contributorVO2.setRole("REPORTER");
+    List<ContributorVO> contributorVOs = new ArrayList<>();
+    contributorVOs.add(contributorVO);
+    contributorVOs.add(contributorVO2);
+    return contributorVOs;
+  }
+
+  /**
+   * Update editor.
+   *
+   * @param dataflowId the dataflow id
+   * @param contributorVO the contributor VO
    * @return the response entity
    */
   @Override
   @HystrixCommand
-  @PutMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity update(@PathVariable("dataflowId") Long dataflowId,
+  @PutMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity updateEditor(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody ContributorVO contributorVO) {
-    // we can only update an editor, reporter or reporter partition role
-    // mock
     return new ResponseEntity(HttpStatus.OK);
   }
 
   /**
-   * Creates the representative.
+   * Update reporter.
    *
    * @param dataflowId the dataflow id
-   * @param contributorVO the role user VO
-   * @return the long
+   * @param dataProviderId the data provider id
+   * @param contributorVO the contributor VO
+   * @return the response entity
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
-  @PostMapping("/dataflow/{dataflowId}")
-  public Long createContributor(@PathVariable("dataflowId") Long dataflowId,
+  @PutMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity updateReporter(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("dataProviderId") Long dataProviderId,
       @RequestBody ContributorVO contributorVO) {
-
-    switch (contributorVO.getRole()) {
-      case "EDITOR":
-      case "REPORTER_PARTITIONED":
-      case "REPORTER":
-        contributorService.createContributor(contributorVO, dataflowId);
-        break;
-      default:
-        LOG.info("Didn't remove role of the user with account {} because its role is {}",
-            contributorVO.getAccount(), contributorVO.getRole());
-        break;
-    }
-    return 1L;
+    return new ResponseEntity(HttpStatus.OK);
   }
+
 }

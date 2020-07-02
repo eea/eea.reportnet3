@@ -40,7 +40,10 @@ public enum LockSignature {
   DELETE_DATASET_VALUES("DataSetControllerImpl.deleteImportData(..)"),
 
   /** DataCollectionControllerImpl.updateDataCollection(..) */
-  UPDATE_DATA_COLLECTION("DataCollectionControllerImpl.updateDataCollection(..)");
+  UPDATE_DATA_COLLECTION("DataCollectionControllerImpl.updateDataCollection(..)"),
+
+  /** The copy dataset schema. */
+  COPY_DATASET_SCHEMA("DataSetSchemaControllerImpl.copyDesignsFromDataflow(..)");
 
   /** The value. */
   private final String value;
