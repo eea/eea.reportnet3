@@ -50,7 +50,7 @@ const apiContributor = {
         : getUrl(ContributorConfig.updateEditor, { dataflowId }),
       data: {
         account: contributor.account,
-        writePermission: Boolean(contributor.writePermission)
+        writePermission: contributor.writePermission
       }
     });
     return response;
