@@ -396,16 +396,16 @@ public class UniqueValidationUtils {
     TableSchema tableSchema =
         getTableSchemaFromIdFieldSchema(datasetSchema, integrityVO.getOriginFields().get(0));
 
-    //pre-creates the validation error that will be saved on database in case there is any error
+    // pre-creates the validation error that will be saved on database in case there is any error
     Validation validation =
         createValidation(idRule, schemaId, tableSchema.getNameTableSchema(), EntityTypeEnum.TABLE);
 
-    //retrieving data from Referenced column that has not been used on Referencer column
+    // retrieving data from Referenced column that has not been used on Referencer column
     List<String> notUtilizedRecords =
         recordRepository.queryExecution(mountIntegrityQuery(integrityVO.getOriginFields(),
             integrityVO.getReferencedFields(), datasetIdOrigin, datasetIdReferenced));
 
-    //Retrieving tableValue to store validation data if there are any error
+    // Retrieving tableValue to store validation data if there are any error
     TableValue tableValue =
         tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
     List<TableValidation> tableValidations =
@@ -415,7 +415,7 @@ public class UniqueValidationUtils {
     String auxValidationMessage = validation.getMessage();
 
     if (!notUtilizedRecords.isEmpty()) {
-      //Error: there are records on Referenced Column that are not in Referencer column
+      // Error: there are records on Referenced Column that are not in Referencer column
       TableValidation tableValidation = new TableValidation();
       validation.setMessage(auxValidationMessage + " (OMISSION)");
       tableValidation.setValidation(validation);
@@ -425,15 +425,14 @@ public class UniqueValidationUtils {
     List<String> notUtilizedRecords2 = new ArrayList<>();
 
     if (Boolean.TRUE.equals(integrityVO.getIsDoubleReferenced())) {
-      // Create validation on referenced DS/Table, checking if all data on Referencer Column are in Referenced column
+      // Create validation on referenced DS/Table, checking if all data on Referencer Column are in
+      // Referenced column
       notUtilizedRecords2 =
           recordRepository.queryExecution(mountIntegrityQuery(integrityVO.getReferencedFields(),
               integrityVO.getOriginFields(), datasetIdReferenced, datasetIdOrigin));
 
       if (!notUtilizedRecords2.isEmpty()) {
-        //Error: there are data on Referencer column that are not in Referenced column.
-        validation = createValidation(idRule, schemaId, tableSchema.getNameTableSchema(),
-            EntityTypeEnum.TABLE);
+        // Error: there are data on Referencer column that are not in Referenced column.
         TableValidation tableValidationReferenced = new TableValidation();
         validation.setMessage(auxValidationMessage + " (COMMISSION)");
         tableValidationReferenced.setValidation(validation);
