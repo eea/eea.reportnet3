@@ -16,15 +16,18 @@ public interface ContributorService {
    * @param dataflowId the dataflow id
    * @param account the account
    * @param role the role
+   * @param dataProviderId the data provider id
    * @throws EEAException the EEA exception
    */
-  void deleteContributor(Long dataflowId, String account, String role) throws EEAException;
+  void deleteContributor(Long dataflowId, String account, String role, Long dataProviderId)
+      throws EEAException;
 
   /**
    * Creates the role user.
    *
    * @param dataflowId the dataflow id
    * @param contributorVO the contributor VO
+   * @param role the role
    * @throws EEAException the EEA exception
    */
   void createContributor(Long dataflowId, ContributorVO contributorVO, String role)
@@ -34,10 +37,12 @@ public interface ContributorService {
    * Find role users by id dataflow.
    *
    * @param dataflowId the dataflow id
-   * @param role
+   * @param dataproviderId the dataprovider id
+   * @param role the role
    * @return the list
    */
-  List<ContributorVO> findContributorsByIdDataflow(Long dataflowId, String role);
+  List<ContributorVO> findContributorsByResourceId(Long dataflowId, Long dataproviderId,
+      String role);
 
   /**
    * Update role user.
@@ -45,18 +50,19 @@ public interface ContributorService {
    * @param dataflowId the dataflow id
    * @param contributorVO the contributor VO
    * @param role the role
+   * @param dataProviderId the data provider id
    * @throws EEAException the EEA exception
    */
-  void updateContributor(Long dataflowId, ContributorVO contributorVO, String role)
-      throws EEAException;
-
+  void updateContributor(Long dataflowId, ContributorVO contributorVO, String role,
+      Long dataProviderId) throws EEAException;
 
   /**
    * Creates the associated permissions.
    *
    * @param dataflowId the dataflow id
-   * @param dataflowId the dataflow id
+   * @param datasetId the dataset id
    * @throws EEAException the EEA exception
    */
   void createAssociatedPermissions(Long dataflowId, Long datasetId) throws EEAException;
+
 }
