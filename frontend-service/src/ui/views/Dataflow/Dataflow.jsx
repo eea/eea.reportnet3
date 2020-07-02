@@ -20,9 +20,10 @@ import { Button } from 'ui/views/_components/Button';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ManageRightsHOC } from './_components/ManageRightsHOC';
+import { ManageRights } from './_components/ManageRights';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { RepresentativesList } from './_components/RepresentativesList';
+import { ShareRights } from './_components/ShareRights';
 import { SnapshotsDialog } from './_components/SnapshotsDialog';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from '../_components/Title/Title';
@@ -84,7 +85,8 @@ const Dataflow = withRouter(({ history, match }) => {
     name: '',
     obligations: {},
     status: '',
-    updatedDatasetSchema: undefined
+    updatedDatasetSchema: undefined,
+    isShareRightsDialogVisible: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -207,7 +209,7 @@ const Dataflow = withRouter(({ history, match }) => {
       className: 'dataflow-properties-provider-help-step',
       icon: 'userConfig',
       label: dataflowState.isCustodian ? 'manageEditorsRights' : 'manageReportersRights',
-      onClick: () => manageDialogs('isManageRightsDialogVisible', true),
+      onClick: () => manageDialogs('isShareRightsDialogVisible', true),
       title: dataflowState.isCustodian ? 'manageEditorsRights' : 'manageReportersRights'
     };
 
@@ -269,7 +271,7 @@ const Dataflow = withRouter(({ history, match }) => {
       className="p-button-secondary p-button-animated-blink"
       icon={'cancel'}
       label={resources.messages['close']}
-      onClick={() => manageDialogs('isManageRightsDialogVisible', false)}
+      onClick={() => manageDialogs('isShareRightsDialogVisible', false)}
     />
   );
 
@@ -534,13 +536,25 @@ const Dataflow = withRouter(({ history, match }) => {
           onHide={() => manageDialogs('isManageRightsDialogVisible', false)}
           visible={dataflowState.isManageRightsDialogVisible}>
           <div className={styles.dialog}>
-            <ManageRightsHOC
+            <ManageRights
               dataflowId={dataflowId}
               dataflowState={dataflowState}
               dataProviderId={dataflowState.dataProviderId}
               isActiveManageRightsDialog={dataflowState.isManageRightsDialogVisible}
             />
           </div>
+        </Dialog>
+
+        <Dialog
+          header={
+            dataflowState.isCustodian
+              ? resources.messages['manageEditorsRights']
+              : resources.messages['manageReportersRights']
+          }
+          footer={manageRightsDialogFooter}
+          onHide={() => manageDialogs('isShareRightsDialogVisible', false)}
+          visible={dataflowState.isShareRightsDialogVisible}>
+          <ShareRights dataflowId={dataflowId} dataflowState={dataflowState} />
         </Dialog>
 
         <PropertiesDialog dataflowState={dataflowState} manageDialogs={manageDialogs} />

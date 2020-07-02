@@ -5,8 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 const all = async (dataflowId, dataProviderId) => {
   const contributorsDTO = await apiContributor.all(dataflowId, dataProviderId);
 
-  const contributors = contributorsDTO.map(contributorDTO => new Contributor(contributorDTO));
-  return contributors;
+  return contributorsDTO.map(contributorDTO => new Contributor(contributorDTO));
 };
 
 const deleteContributor = async (editorAccount, dataflowId, dataProviderId) => {

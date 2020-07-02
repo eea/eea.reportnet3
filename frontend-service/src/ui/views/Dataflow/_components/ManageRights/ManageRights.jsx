@@ -1,10 +1,8 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 
-import isNil from 'lodash/isNil';
-
+import isEmpty from 'lodash/isEmpty';
 import uuid from 'uuid';
 import styles from './ManageRights.module.scss';
-import isEmpty from 'lodash/isEmpty';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
@@ -12,17 +10,52 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Spinner } from 'ui/views/_components/Spinner';
 
+import { reducer } from './_functions/Reducers/contributorReducer.js';
 import {
+  getInitialData,
   autofocusOnEmptyInput,
   onAddContributor,
   onWritePermissionChange,
   onDeleteConfirm,
   onKeyDown
-} from '../_functions/Utils/contributorUtils';
+} from './_functions/Utils/contributorUtils';
+
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const ManageRights = ({ formState, formDispatcher, dataflowId, dataProviderId }) => {
+const ManageRights = ({ dataflowState, dataflowId, dataProviderId, isActiveManageRightsDialog }) => {
   const resources = useContext(ResourcesContext);
+
+  const initialState = {
+    initialContributors: [],
+    isVisibleConfirmDeleteDialog: false,
+    refresher: false,
+    contributorsHaveError: [],
+    contributorIdToDelete: '',
+    contributors: [],
+    accountInputHeader: dataflowState.isCustodian
+      ? resources.messages['editorsAccountColumn']
+      : resources.messages['reportersAccountColumn'],
+    deleteConfirmHeader: dataflowState.isCustodian
+      ? resources.messages['editorsRightsDialogConfirmDeleteHeader']
+      : resources.messages['reportersRightsDialogConfirmDeleteHeader'],
+    deleteConfirmMessage: dataflowState.isCustodian
+      ? resources.messages['editorsRightsDialogConfirmDeleteQuestion']
+      : resources.messages['reportersRightsDialogConfirmDeleteQuestion']
+  };
+
+  const [formState, formDispatcher] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    getInitialData(formDispatcher, dataflowId, dataProviderId);
+  }, [formState.refresher]);
+
+  useEffect(() => {
+    if (isActiveManageRightsDialog === false && !isEmpty(formState.contributorsHaveError)) {
+      formDispatcher({
+        type: 'REFRESH'
+      });
+    }
+  }, [isActiveManageRightsDialog]);
 
   useEffect(() => {
     autofocusOnEmptyInput(formState);
@@ -144,3 +177,5 @@ export const ManageRights = ({ formState, formDispatcher, dataflowId, dataProvid
     </div>
   );
 };
+
+export { ManageRights };
