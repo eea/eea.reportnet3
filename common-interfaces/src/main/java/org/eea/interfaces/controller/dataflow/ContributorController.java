@@ -67,7 +67,7 @@ public interface ContributorController {
   @GetMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataproviderId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<ContributorVO> findReportersByGroup(@PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("providerId") Long dataproviderId);
+      @PathVariable("dataproviderId") Long dataproviderId);
 
   /**
    * Update editor.

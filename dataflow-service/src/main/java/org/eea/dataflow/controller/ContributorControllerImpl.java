@@ -117,7 +117,7 @@ public class ContributorControllerImpl implements ContributorController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
   public List<ContributorVO> findReportersByGroup(@PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("providerId") Long dataproviderId) {
+      @PathVariable("dataproviderId") Long dataproviderId) {
     // find reporters or reporter partition roles based on the dataflow state
     return contributorService.findContributorsByResourceId(dataflowId, dataproviderId, REPORTER);
   }
