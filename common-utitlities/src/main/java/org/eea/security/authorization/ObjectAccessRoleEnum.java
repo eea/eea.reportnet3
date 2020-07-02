@@ -49,8 +49,8 @@ public enum ObjectAccessRoleEnum {
   /** The datacollection custodian. */
   DATACOLLECTION_CUSTODIAN("ROLE_DATACOLLECTION-%s-DATA_CUSTODIAN"),
 
-  /** The datacollection provider. */
-  DATACOLLECTION_PROVIDER("ROLE_DATACOLLECTION-%s-DATA_PROVIDER"),
+  /** The datacollection lead reporter. */
+  DATACOLLECTION_LEAD_REPORTER("ROLE_DATACOLLECTION-%s-LEAD_REPORTER"),
 
   /** The dataflow editor write. */
   DATAFLOW_EDITOR_WRITE("ROLE_DATAFLOW-%s-EDITOR_WRITE"),

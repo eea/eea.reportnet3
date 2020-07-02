@@ -1254,5 +1254,17 @@
   {
     "key": "config/apiGateway/zuul.routes.integration.stripPrefix",
     "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.contributor.path",
+    "value": "L2NvbnRyaWJ1dG9yLyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.contributor.serviceId",
+    "value": "ZGF0YWZsb3c="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.contributor.stripPrefix",
+    "value": "ZmFsc2U="
   }
 ]

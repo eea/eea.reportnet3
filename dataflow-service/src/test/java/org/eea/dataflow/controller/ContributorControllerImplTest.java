@@ -4,7 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import org.eea.dataflow.service.ContributorService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.contributor.ContributorVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,11 +35,15 @@ public class ContributorControllerImplTest {
   @Mock
   private ContributorService contributorService;
 
+  @Mock
+  private UserManagementControllerZull userManagementControllerZull;
+
   /** The contributor VO write. */
   private ContributorVO contributorVOWrite;
 
   /** The contributor VO read. */
   private ContributorVO contributorVORead;
+
 
   /**
    * Inits the mocks.
@@ -63,6 +69,8 @@ public class ContributorControllerImplTest {
    */
   @Test
   public void updateContributor() throws EEAException {
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
+        .thenReturn(new UserRepresentationVO());
     contributorControllerImpl.updateEditor(1L, contributorVOWrite);
     Mockito.verify(contributorService, times(1)).updateContributor(1L, contributorVOWrite, "EDITOR",
         null);
@@ -75,6 +83,8 @@ public class ContributorControllerImplTest {
    */
   @Test
   public void updateContributoThrow() throws EEAException {
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
+        .thenReturn(new UserRepresentationVO());
     Mockito.doThrow(EEAException.class).when(contributorService).updateContributor(1L,
         contributorVOWrite, "EDITOR", null);
     ResponseEntity<?> value = contributorControllerImpl.updateEditor(1L, contributorVOWrite);
@@ -98,6 +108,8 @@ public class ContributorControllerImplTest {
    */
   @Test
   public void delete() throws EEAException {
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
+        .thenReturn(new UserRepresentationVO());
     contributorControllerImpl.deleteEditor(1L, contributorVOWrite);
   }
 
@@ -108,6 +120,8 @@ public class ContributorControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteThrow() throws EEAException {
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
+        .thenReturn(new UserRepresentationVO());
     Mockito.doThrow(EEAException.class).when(contributorService)
         .deleteContributor(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any());
     try {
