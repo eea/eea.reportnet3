@@ -203,6 +203,7 @@ const RepresentativesList = ({
         <div>
           <label htmlFor="dataProvidersDropdown">{resources.messages['manageRolesDialogDropdownLabel']} </label>
           <Dropdown
+            ariaLabel={'dataProviders'}
             disabled={formState.representatives.length > 1}
             name="dataProvidersDropdown"
             onChange={event => formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value })}

@@ -82,6 +82,7 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
       autoLayout={true}
       first={pagination.first}
       getPageChange={onLoadPagination}
+      onRowClick={event => onSelectObl(event.data)}
       paginator={true}
       paginatorRight={paginatorRightText}
       rows={pagination.rows}
