@@ -89,8 +89,6 @@ export const onWritePermissionChange = async (
   if (!isNil(contributor.account)) {
     try {
       contributor.writePermission = writePermission;
-      console.log('c', contributor);
-      console.log('dataProviderId', dataProviderId);
       await ContributorService.update(contributor, dataflowId, dataProviderId);
       formDispatcher({
         type: 'REFRESH'

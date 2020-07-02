@@ -5,11 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 const all = async (dataflowId, dataProviderId) => {
   const contributorsDTO = await apiContributor.all(dataflowId, dataProviderId);
 
-  const contributors = !isEmpty(contributorsDTO)
-    ? contributorsDTO.map(contributorDTO => new Contributor(contributorDTO))
-    : [];
-
-  console.log('contributors', contributors);
+  const contributors = contributorsDTO.map(contributorDTO => new Contributor(contributorDTO));
   return contributors;
 };
 
