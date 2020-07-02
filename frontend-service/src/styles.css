@@ -3388,3 +3388,14 @@ body .p-fluid .p-inplace.p-inplace-closable .p-inplace-content > :first-child {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--gray-50);
 }
+
+/* Accessibility */
+
+body .srOnly {
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  position: absolute;
+  white-space: nowrap;
+}

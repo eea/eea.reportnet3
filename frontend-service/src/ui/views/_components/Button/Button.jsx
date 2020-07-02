@@ -23,6 +23,8 @@ export const Button = ({
   tooltipOptions = null,
   style = null,
   layout = null,
+  title = undefined,
+  value = '',
   visible = true
 }) => {
   const iconClassName = `${icon ? config.icons[icon] : ''} ${iconClasses ? iconClasses : ''}`;
@@ -36,28 +38,39 @@ export const Button = ({
         onClick={onClick}
         onMouseDown={onMouseDown}
         style={style}
-        type={type}>
+        type={type}
+        value={value}>
         {icon ? <Icon icon={icon} /> : ''}
+        <span className="srOnly">{value}</span>
         {label}
       </button>
     );
   }
   if (isNull(layout)) {
     return visible ? (
-      <PrimeButton
-        id={id}
-        className={className}
-        disabled={disabled}
-        icon={iconClassName}
-        iconPos={icon ? iconPos : null}
-        label={label}
-        onClick={onClick}
-        onMouseDown={onMouseDown}
-        style={style}
-        tooltip={tooltip}
-        type={type}
-        tooltipOptions={tooltipOptions}
-      />
+      <>
+        <PrimeButton
+          id={id}
+          className={className}
+          disabled={disabled}
+          icon={iconClassName}
+          iconPos={icon ? iconPos : null}
+          label={label}
+          onClick={onClick}
+          onMouseDown={onMouseDown}
+          style={style}
+          title={title}
+          tooltip={tooltip}
+          type={type}
+          tooltipOptions={tooltipOptions}
+          value={value}
+        />
+        {/* {!title && (
+          <label for={id} className="srOnly">
+            {tooltip}
+          </label>
+        )} */}
+      </>
     ) : null;
   }
 };

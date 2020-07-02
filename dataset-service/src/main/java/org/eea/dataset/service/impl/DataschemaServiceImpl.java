@@ -3,6 +3,7 @@ package org.eea.dataset.service.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import org.bson.Document;
@@ -1015,7 +1016,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       }
     }
     // For fieldSchemas that are FK
-    if (DataType.LINK.equals(fieldSchemaVO.getType())) {
+    if (DataType.LINK.equals(fieldSchemaVO.getType())
+        && fieldSchemaVO.getReferencedField() != null) {
       PkCatalogueSchema catalogue = pkCatalogueRepository
           .findByIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
       if (catalogue != null) {
@@ -1487,5 +1489,38 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         createUniqueConstraint(unique);
       }
     }
+  }
+
+
+  /**
+   * Copy unique constraints catalogue.
+   *
+   * @param originDatasetSchemaIds the origin dataset schema ids
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   */
+  @Override
+  public void copyUniqueConstraintsCatalogue(List<String> originDatasetSchemaIds,
+      Map<String, String> dictionaryOriginTargetObjectId) {
+    // We obtain the UniqueConstraints of the origin dataset schemas, and with the help of the
+    // dictionary we replace the objectIds with the correct ones to finally save them. The result it
+    // will be new constraints in the catalogue with correct data according to the new copied
+    // schemas
+    for (String datasetSchemaId : originDatasetSchemaIds) {
+      List<UniqueConstraintVO> uniques = getUniqueConstraints(datasetSchemaId);
+      for (UniqueConstraintVO uniqueConstraintVO : uniques) {
+        uniqueConstraintVO
+            .setUniqueId(dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getUniqueId()));
+        uniqueConstraintVO.setDatasetSchemaId(dictionaryOriginTargetObjectId.get(datasetSchemaId));
+        uniqueConstraintVO.setTableSchemaId(
+            dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getTableSchemaId()));
+        for (int i = 0; i < uniqueConstraintVO.getFieldSchemaIds().size(); i++) {
+          uniqueConstraintVO.getFieldSchemaIds().set(i,
+              dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getFieldSchemaIds().get(i)));
+        }
+        LOG.info("A unique constraint is going to be created during the copy process");
+        uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
+      }
+    }
+
   }
 }

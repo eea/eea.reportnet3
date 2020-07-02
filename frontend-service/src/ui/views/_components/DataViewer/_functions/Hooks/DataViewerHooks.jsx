@@ -166,7 +166,9 @@ export const useSetColumns = (
               : (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
-                (field.fieldData.type === 'LINK' && !Array.isArray(field.fieldData[column.field]))
+                (!isNil(field.fieldData[column.field]) &&
+                  field.fieldData.type === 'LINK' &&
+                  !Array.isArray(field.fieldData[column.field]))
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData[column.field]
             : null}
@@ -182,7 +184,9 @@ export const useSetColumns = (
               : (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
-                (field.fieldData.type === 'LINK' && !Array.isArray(field.fieldData[column.field]))
+                (!isNil(field.fieldData[column.field]) &&
+                  field.fieldData.type === 'LINK' &&
+                  !Array.isArray(field.fieldData[column.field]))
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData[column.field]
             : null}

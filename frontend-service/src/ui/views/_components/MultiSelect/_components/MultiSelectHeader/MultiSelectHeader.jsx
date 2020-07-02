@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
 import { Checkbox } from 'primereact/checkbox';
 import { InputText } from 'ui/views/_components/InputText';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const MultiSelectHeader = ({
   allChecked,
@@ -16,6 +18,8 @@ export const MultiSelectHeader = ({
   onFilter,
   onToggleAll
 }) => {
+  const resources = useContext(ResourcesContext);
+
   const onFilterEvent = event => {
     if (onFilter) {
       onFilter({
@@ -56,17 +60,19 @@ export const MultiSelectHeader = ({
     <div className="p-multiselect-header" style={{ padding: '0.5rem' }}>
       <Checkbox
         aria-checked={allChecked}
+        ariaLabelledBy="selectAll"
         checked={allChecked}
         onChange={event => onToggleAllEvent(event)}
         role="checkbox"
       />
-      <span className={headerClassName} onClick={event => onToggleAll(event)}>
+      <span id="selectAll" className={headerClassName} onClick={event => onToggleAll(event)}>
         {allChecked ? notCheckAllHeader : checkAllHeader}
       </span>
       {renderFilterElement()}
       {clearButton && (
         <button type="button" className="p-multiselect-close p-link" onClick={event => onClose(event)}>
           <span className="p-multiselect-close-icon pi pi-times" />
+          <span className="srOnly">{resources.messages['clearFilter']}</span>
         </button>
       )}
     </div>
