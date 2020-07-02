@@ -11,7 +11,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
@@ -475,8 +474,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       resources.add(resourceManagementControllerZuul.getResourceDetail(designDataset.getId(),
           ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE));
     }
-    resources.removeIf(Objects::isNull);
-    resourceManagementControllerZuul.deleteResource(resources);
+    resourceManagementControllerZuul.deleteResource(
+        resources.parallelStream().filter(resourceinfoVO -> resourceinfoVO.getResourceId() != null)
+            .collect(Collectors.toList()));
   }
 
   /**
