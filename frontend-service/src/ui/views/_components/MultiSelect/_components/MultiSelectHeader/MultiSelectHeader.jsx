@@ -60,11 +60,12 @@ export const MultiSelectHeader = ({
     <div className="p-multiselect-header" style={{ padding: '0.5rem' }}>
       <Checkbox
         aria-checked={allChecked}
+        ariaLabelledBy="selectAll"
         checked={allChecked}
         onChange={event => onToggleAllEvent(event)}
         role="checkbox"
       />
-      <span className={headerClassName} onClick={event => onToggleAll(event)}>
+      <span id="selectAll" className={headerClassName} onClick={event => onToggleAll(event)}>
         {allChecked ? notCheckAllHeader : checkAllHeader}
       </span>
       {renderFilterElement()}

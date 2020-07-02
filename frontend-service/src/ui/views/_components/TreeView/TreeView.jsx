@@ -42,18 +42,24 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
       !isUndefined(columnOptions[propertyName]['filterType']['multiselect'][field])
     ) {
       return (
-        <MultiSelect
-          itemTemplate={
-            !isUndefined(columnOptions[propertyName]['filterType']['multiselect'][field][0]['class']) &&
-            !isUndefined(columnOptions[propertyName]['filterType']['multiselect'][field][0]['subclass'])
-              ? multiselectItemTemplate
-              : null
-          }
-          onChange={e => onFilterChange(e, field)}
-          options={columnOptions[propertyName]['filterType']['multiselect'][field]}
-          style={{ width: '100%' }}
-          value={treeViewState.filters[field]}
-        />
+        <>
+          <MultiSelect
+            ariaLabelledBy={propertyName}
+            itemTemplate={
+              !isUndefined(columnOptions[propertyName]['filterType']['multiselect'][field][0]['class']) &&
+              !isUndefined(columnOptions[propertyName]['filterType']['multiselect'][field][0]['subclass'])
+                ? multiselectItemTemplate
+                : null
+            }
+            onChange={e => onFilterChange(e, field)}
+            options={columnOptions[propertyName]['filterType']['multiselect'][field]}
+            style={{ width: '100%' }}
+            value={treeViewState.filters[field]}
+          />
+          <label id={propertyName} className="srOnly">
+            {propertyName}
+          </label>
+        </>
       );
     }
   };

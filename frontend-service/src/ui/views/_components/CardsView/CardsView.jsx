@@ -18,7 +18,8 @@ export const CardsView = ({
   handleRedirect,
   onChangePagination,
   onSelectCard,
-  pagination
+  pagination,
+  type
 }) => {
   const resources = useContext(ResourcesContext);
 
@@ -68,6 +69,7 @@ export const CardsView = ({
               status={card.status}
               subtitle={card.legalInstrument || card.description}
               title={card.title || card.name}
+              type={type}
             />
           );
         })}

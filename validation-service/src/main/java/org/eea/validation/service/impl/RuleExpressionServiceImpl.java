@@ -12,7 +12,7 @@ import org.eea.interfaces.vo.dataset.schemas.rule.enums.RuleOperatorEnum;
 import org.eea.validation.service.RuleExpressionService;
 import org.springframework.stereotype.Service;
 
-/** The Class RuleExpressionService. */
+/** The Class RuleExpressionServiceImpl. */
 @Service
 public class RuleExpressionServiceImpl implements RuleExpressionService {
 
@@ -23,6 +23,7 @@ public class RuleExpressionServiceImpl implements RuleExpressionService {
    * @param ruleExpressionString the rule expression string
    * @return the rule expression DTO
    */
+  @Override
   public RuleExpressionDTO convertToDTO(String ruleExpressionString) {
     RuleExpressionDTO ruleExpressionDTO = new RuleExpressionDTO();
     constructor(ruleExpressionString, 0, ruleExpressionDTO);
@@ -35,6 +36,7 @@ public class RuleExpressionServiceImpl implements RuleExpressionService {
    * @param ruleExpressionDTO the rule expression DTO
    * @return the string
    */
+  @Override
   public String convertToString(RuleExpressionDTO ruleExpressionDTO) {
     if (null != ruleExpressionDTO.getOperator() && null != ruleExpressionDTO.getParams()
         && !ruleExpressionDTO.getParams().isEmpty()) {
@@ -70,6 +72,7 @@ public class RuleExpressionServiceImpl implements RuleExpressionService {
    * @param dataTypeMap the data type map
    * @return true, if is data type compatible
    */
+  @Override
   public boolean isDataTypeCompatible(String ruleExpressionString, EntityTypeEnum entityType,
       Map<String, DataType> dataTypeMap) {
     if (ruleExpressionString == null || ruleExpressionString.isEmpty()) {
@@ -87,6 +90,7 @@ public class RuleExpressionServiceImpl implements RuleExpressionService {
    * @param dataTypeMap the data type map
    * @return true, if is data type compatible
    */
+  @Override
   public boolean isDataTypeCompatible(RuleExpressionDTO ruleExpressionDTO,
       EntityTypeEnum entityType, Map<String, DataType> dataTypeMap) {
 
@@ -342,6 +346,10 @@ public class RuleExpressionServiceImpl implements RuleExpressionService {
       branchRule.setOperator(RuleOperatorEnum.valueOf((String) branchMap.get("operator")));
       branchRule.setParams((ArrayList<Object>) branchMap.get("params"));
       return convertToString(branchRule);
+    }
+
+    if (branch instanceof RuleExpressionDTO) {
+      return convertToString((RuleExpressionDTO) branch);
     }
 
     return branch.toString();

@@ -525,6 +525,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             className={styles.datasetDescription}
             collapsedHeight={55}
             expandableOnClick={true}
+            id="datasetDescription"
             key="datasetDescription"
             onBlur={e => onBlurDescription(e.target.value)}
             onChange={e => designerDispatch({ type: 'ON_UPDATE_DESCRIPTION', payload: { value: e.target.value } })}
@@ -533,7 +534,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
             value={designerState.datasetDescription || ''}
           />
-
           <Toolbar>
             <div className="p-toolbar-group-right">
               {/* <Button

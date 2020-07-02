@@ -71,8 +71,13 @@
   }
 
   .date {
-    display: flex;
     align-items: center;
+    display: flex;
+    grid-column-start: span 2;
+
+    &.cloneSchemas {
+      justify-content: space-between;
+    }
 
     .dueDate {
       font-weight: bold;

@@ -233,6 +233,7 @@ export const Filters = ({
     <span key={i} className={`${styles.dataflowInput}`}>
       {renderOrderFilter(property)}
       <Dropdown
+        ariaLabel={property}
         className={styles.dropdownFilter}
         filter={FiltersUtils.getOptionTypes(data, property, dropDownList).length > 10}
         filterPlaceholder={resources.messages[property]}
@@ -297,6 +298,7 @@ export const Filters = ({
     <span key={i} className={`${styles.dataflowInput}`}>
       {renderOrderFilter(property)}
       <MultiSelect
+        ariaLabelledBy={property}
         checkAllHeader={resources.messages['checkAllFilter']}
         className={styles.multiselectFilter}
         headerClassName={styles.selectHeader}

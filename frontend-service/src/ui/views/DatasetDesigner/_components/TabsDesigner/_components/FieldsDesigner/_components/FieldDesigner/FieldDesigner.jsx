@@ -272,7 +272,6 @@ export const FieldDesigner = ({
   };
 
   const onCancelSaveLink = (link, pkMustBeUsed, pkHasMultipleValues) => {
-    console.log({ link });
     // onCodelistAndLinkShow(fieldId, { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' });
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
@@ -629,17 +628,22 @@ export const FieldDesigner = ({
         checked={fieldDesignerState.fieldRequiredValue}
         className={styles.checkRequired}
         disabled={Boolean(fieldDesignerState.fieldPKValue)}
-        inputId={`${fieldId}_check`}
+        id={`${fieldId}_check_required`}
+        inputId={`${fieldId}_check_required`}
         label="Default"
         onChange={e => {
           onRequiredChange(e.checked);
         }}
         style={{ width: '70px' }}
       />
+      <label for={`${fieldId}_check_required`} className="srOnly">
+        {resources.messages['required']}
+      </label>
       <Checkbox
         checked={fieldDesignerState.fieldPKValue}
         className={styles.checkPK}
         disabled={hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)}
+        id={`${fieldId}_check_pk`}
         inputId={`${fieldId}_check_pk`}
         label="Default"
         onChange={e => {
@@ -649,6 +653,9 @@ export const FieldDesigner = ({
         }}
         style={{ width: '35px' }}
       />
+      <label for={`${fieldId}_check_pk`} className="srOnly">
+        {resources.messages['pk']}
+      </label>
     </div>
   );
 
@@ -702,9 +709,7 @@ export const FieldDesigner = ({
     !addField ? (
       <a
         draggable={true}
-        className={`${styles.button} ${styles.deleteButton} ${
-          fieldDesignerState.fieldPKValue || fieldPKReferenced ? styles.disabledDeleteButton : ''
-        }`}
+        className={`${styles.button} ${styles.deleteButton} ${fieldPKReferenced ? styles.disabledDeleteButton : ''}`}
         href="#"
         onClick={e => {
           e.preventDefault();
@@ -723,8 +728,8 @@ export const FieldDesigner = ({
       <InputText
         autoFocus={false}
         className={styles.inputField}
+        id={fieldName}
         // key={`${fieldId}_${index}`} --> Problem with DOM modification
-        ref={inputRef}
         onBlur={e => {
           dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: false });
           onBlurFieldName(e.target.value);
@@ -736,14 +741,19 @@ export const FieldDesigner = ({
         }}
         onKeyDown={e => onKeyChange(e, 'NAME')}
         placeholder={resources.messages['newFieldPlaceHolder']}
+        ref={inputRef}
         required={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue === '' : fieldName === ''}
         value={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue : fieldName}
       />
+      <label for={fieldName} className="srOnly">
+        {resources.messages['newFieldPlaceHolder']}
+      </label>
       <InputTextarea
         autoFocus={false}
         collapsedHeight={33}
         expandableOnClick={true}
         className={styles.inputFieldDescription}
+        id={`${fieldName}_description`}
         key={fieldId}
         onBlur={e => {
           dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: false });
@@ -764,8 +774,11 @@ export const FieldDesigner = ({
       />
       <Dropdown
         appendTo={document.body}
+        ariaLabel={'fieldType'}
         className={styles.dropdownFieldType}
+        inputId={`${fieldName}_fieldType`}
         itemTemplate={fieldTypeTemplate}
+        name={resources.messages['newFieldTypePlaceHolder']}
         onChange={e => onChangeFieldType(e.target.value)}
         onMouseDown={event => {
           event.preventDefault();
