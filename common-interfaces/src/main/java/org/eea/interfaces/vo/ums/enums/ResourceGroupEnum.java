@@ -49,7 +49,7 @@ public enum ResourceGroupEnum {
   /**
    * Dataschema reporter resource group enum.
    */
-  DATASCHEMA_REPORTER("Dataschema-%s-REPORTER"),
+  DATASCHEMA_REPORTER_READ("Dataschema-%s-REPORTER_READ"),
 
   /** The dataschema lead reporter. */
   DATASCHEMA_LEAD_REPORTER("Dataschema-%s-LEAD_REPORTER"),
@@ -72,14 +72,14 @@ public enum ResourceGroupEnum {
   /** The dataschema editor read. */
   DATASCHEMA_EDITOR_READ("Dataschema-%s-EDITOR_READ"),
 
-  /** The dataflow reporter read. */
-  DATAFLOW_REPORTER("Dataflow-%s-REPORTER"),
-
   /** The dataset reporter write. */
   DATASET_REPORTER_WRITE("Dataset-%s-REPORTER_WRITE"),
 
   /** The dataset reporter read. */
-  DATASET_REPORTER_READ("Dataset-%s-REPORTER_READ");
+  DATASET_REPORTER_READ("Dataset-%s-REPORTER_READ"),
+
+  /** The dataflow reporter read. */
+  DATAFLOW_REPORTER_READ("Dataflow-%s-REPORTER_READ");
 
 
   /** The expression. */

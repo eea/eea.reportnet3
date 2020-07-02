@@ -139,8 +139,8 @@ public class ContributorServiceImpl implements ContributorService {
       case REPORTER:
         resourceGroupEnumWrite = ResourceGroupEnum.DATASET_REPORTER_WRITE;
         resourceGroupEnumRead = ResourceGroupEnum.DATASET_REPORTER_READ;
-        resourceGroupEnumDataflowWrite = ResourceGroupEnum.DATASCHEMA_REPORTER;
-        resourceGroupEnumDataflowRead = ResourceGroupEnum.DATAFLOW_REPORTER;
+        resourceGroupEnumDataflowWrite = ResourceGroupEnum.DATASCHEMA_REPORTER_READ;
+        resourceGroupEnumDataflowRead = ResourceGroupEnum.DATAFLOW_REPORTER_READ;
         break;
       default:
         break;
@@ -201,8 +201,8 @@ public class ContributorServiceImpl implements ContributorService {
         securityRoleEnum = Boolean.TRUE.equals(contributorVO.getWritePermission())
             ? SecurityRoleEnum.REPORTER_WRITE
             : SecurityRoleEnum.REPORTER_READ;
-        resourceGroupEnum = ResourceGroupEnum.DATASCHEMA_REPORTER;
-        resourceGroupEnumDataflow = ResourceGroupEnum.DATAFLOW_REPORTER;
+        resourceGroupEnum = ResourceGroupEnum.DATASCHEMA_REPORTER_READ;
+        resourceGroupEnumDataflow = ResourceGroupEnum.DATAFLOW_REPORTER_READ;
         resourceGroupEnumDataset = Boolean.TRUE.equals(contributorVO.getWritePermission())
             ? ResourceGroupEnum.DATASET_REPORTER_WRITE
             : ResourceGroupEnum.DATASET_REPORTER_READ;

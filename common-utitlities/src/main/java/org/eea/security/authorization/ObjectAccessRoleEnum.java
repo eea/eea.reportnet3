@@ -40,8 +40,11 @@ public enum ObjectAccessRoleEnum {
   /** The dataschema custodian. */
   DATASCHEMA_CUSTODIAN("ROLE_DATASCHEMA-%s-DATA_CUSTODIAN"),
 
-  /** The dataschema reporter. */
-  DATASCHEMA_REPORTER("ROLE_DATASCHEMA-%s-REPORTER"),
+  /** The dataschema reporter read. */
+  DATASCHEMA_REPORTER_READ("ROLE_DATASCHEMA-%s-REPORTER_READ"),
+
+  /** The dataschema lead reporter. */
+  DATASCHEMA_LEAD_REPORTER("ROLE_DATASCHEMA-%s-LEAD_REPORTER"),
 
   /** The datacollection custodian. */
   DATACOLLECTION_CUSTODIAN("ROLE_DATACOLLECTION-%s-DATA_CUSTODIAN"),
