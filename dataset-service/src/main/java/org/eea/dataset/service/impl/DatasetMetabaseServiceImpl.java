@@ -467,8 +467,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_CUSTODIAN));
 
     // Create group Dataschema-X-LEAD_REPORTER
-    resourceManagementControllerZuul.createResource(
-        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.LEAD_REPORTER));
+     resourceManagementControllerZuul.createResource(
+     createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.REPORTER));
 
     // Add user to new group Dataschema-X-DATA_CUSTODIAN
     userManagementControllerZuul.addUserToResource(datasetId,
