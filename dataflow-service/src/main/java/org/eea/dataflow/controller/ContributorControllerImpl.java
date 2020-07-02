@@ -30,14 +30,17 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/contributor")
 public class ContributorControllerImpl implements ContributorController {
 
-
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ContributorControllerImpl.class);
 
+  /** The Constant EDITOR: {@value}. */
+  private static final String EDITOR = "EDITOR";
+
+  /** The Constant REPORTER: {@value}. */
+  private static final String REPORTER = "REPORTER";
 
   /** The contributor service. */
   @Autowired
@@ -56,7 +59,7 @@ public class ContributorControllerImpl implements ContributorController {
       @RequestBody ContributorVO contributorVO) {
     // we can only remove role of editor, reporter or reporter partition type
     try {
-      contributorService.deleteContributor(dataflowId, contributorVO.getAccount(), "EDITOR");
+      contributorService.deleteContributor(dataflowId, contributorVO.getAccount(), EDITOR, null);
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting the contributor {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
@@ -79,7 +82,8 @@ public class ContributorControllerImpl implements ContributorController {
       @RequestBody ContributorVO contributorVO) {
     // we can only remove role of editor, reporter or reporter partition type
     try {
-      contributorService.deleteContributor(dataflowId, contributorVO.getAccount(), "REPORTER");
+      contributorService.deleteContributor(dataflowId, contributorVO.getAccount(), REPORTER,
+          dataProviderId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting the contributor {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
@@ -98,9 +102,8 @@ public class ContributorControllerImpl implements ContributorController {
   @GetMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<ContributorVO> findEditorsByGroup(@PathVariable("dataflowId") Long dataflowId) {
     // we can find editors,
-    return contributorService.findContributorsByIdDataflow(dataflowId, "EDITOR");
+    return contributorService.findContributorsByResourceId(dataflowId, null, EDITOR);
   }
-
 
   /**
    * Find reporters by group.
@@ -116,9 +119,8 @@ public class ContributorControllerImpl implements ContributorController {
   public List<ContributorVO> findReportersByGroup(@PathVariable("dataflowId") Long dataflowId,
       @PathVariable("providerId") Long dataproviderId) {
     // find reporters or reporter partition roles based on the dataflow state
-    return contributorService.findContributorsByIdDataflow(dataflowId, "REPORTER");
+    return contributorService.findContributorsByResourceId(dataflowId, dataproviderId, REPORTER);
   }
-
 
   /**
    * Update editor.
@@ -138,7 +140,7 @@ public class ContributorControllerImpl implements ContributorController {
     String message = "";
     HttpStatus status = HttpStatus.OK;
     try {
-      contributorService.updateContributor(dataflowId, contributorVO, "EDITOR");
+      contributorService.updateContributor(dataflowId, contributorVO, EDITOR, null);
     } catch (EEAException e) {
       LOG_ERROR.error("Error update the contributor {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
@@ -169,7 +171,7 @@ public class ContributorControllerImpl implements ContributorController {
     String message = "";
     HttpStatus status = HttpStatus.OK;
     try {
-      contributorService.updateContributor(dataflowId, contributorVO, "REPORTER");
+      contributorService.updateContributor(dataflowId, contributorVO, REPORTER, dataProviderId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error update the contributor {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);

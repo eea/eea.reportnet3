@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
  */
 public interface ContributorController {
 
-
   /**
    * The Interface ContributorControllerZuul.
    */
@@ -58,7 +57,6 @@ public interface ContributorController {
   @GetMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<ContributorVO> findEditorsByGroup(@PathVariable("dataflowId") Long dataflowId);
 
-
   /**
    * Find reporters by group.
    *
@@ -70,7 +68,6 @@ public interface ContributorController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<ContributorVO> findReportersByGroup(@PathVariable("dataflowId") Long dataflowId,
       @PathVariable("providerId") Long dataproviderId);
-
 
   /**
    * Update editor.
