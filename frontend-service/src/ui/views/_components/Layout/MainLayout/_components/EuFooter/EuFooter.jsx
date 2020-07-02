@@ -144,7 +144,7 @@ export const EuFooter = ({ leftMargin }) => {
   ];
   return (
     <Fragment>
-      <div className={styles.footer} style={{ marginLeft: leftMargin, transition: '0.5s' }}>
+      <div className={styles.footer}>
         <div className="rep-container">
           <div className={styles.footerTop}>
             {topContent.map(block => {

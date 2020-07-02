@@ -157,9 +157,7 @@ const LeftSideBar = withRouter(({ history, style }) => {
           }
         }}
       />
-      <div
-        className={`${styles.leftSideBar}${leftSideBarContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}
-        style={style}>
+      <div className={`${styles.leftSideBar}${leftSideBarContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}>
         {
           <>
             <div className={styles.barSection}>

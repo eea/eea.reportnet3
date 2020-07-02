@@ -5,6 +5,10 @@
 }
 .mainContent {
   background-color: var(--bg);
+  display: flex;
+}
+.pageContent {
+  width: 100%;
 }
 .disclaimer {
   padding: 0.5em;

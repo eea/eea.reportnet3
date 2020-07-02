@@ -14,18 +14,13 @@
 }
 
 .leftSideBar {
-  position: fixed;
-  height: calc(100% - var(--header-height));
   width: 50px;
-  z-index: 3002;
-  left: 0;
-  top: var(--header-height);
+  z-index: 1000;
   background-color: var(--leftSideBar-bg);
   transition: 0.5s;
   overflow-x: hidden;
   white-space: nowrap;
   overflow: hidden;
-  box-shadow: var(--leftSideBar-box-shadow);
 
   .barSection {
     --top-height: 160px;

@@ -14,7 +14,7 @@ export const Footer = withRouter(({ history, leftMargin }) => {
   const resources = useContext(ResourcesContext);
   return (
     <Fragment>
-      <div className={styles.Footer} style={{ marginLeft: leftMargin, transition: '0.5s' }}>
+      <div className={styles.Footer}>
         <div className="rep-container">
           <div className={styles.footerContent}>
             <div className={styles.reportnetLogo}>

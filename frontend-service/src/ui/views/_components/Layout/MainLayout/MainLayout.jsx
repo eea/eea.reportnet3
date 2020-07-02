@@ -4,6 +4,8 @@ import { isUndefined } from 'lodash';
 
 import styles from './MainLayout.module.css';
 
+import isEmpty from 'lodash/isEmpty';
+
 import { Footer } from './_components';
 import { Header } from './_components/Header';
 import { EuFooter } from './_components/EuFooter';
@@ -26,6 +28,7 @@ const MainLayout = ({ children }) => {
 
   const [margin, setMargin] = useState('50px');
   const [leftSideBarStyle, setLeftSideBarStyle] = useState({});
+  const [mainContentStyle, setMainContentStyle] = useState({});
 
   const getUserConfiguration = async () => {
     try {
@@ -53,6 +56,25 @@ const MainLayout = ({ children }) => {
       getUserConfiguration();
     }
   }, []);
+
+  useEffect(() => {
+    const header = document.getElementById('header');
+    const mainContent = document.getElementById('mainContent');
+    const pageContent = document.getElementById('pageContent');
+
+    if (isEmpty(mainContentStyle) && header.clientHeight + mainContent.clientHeight < window.innerHeight) {
+      setMainContentStyle({
+        height: `${window.innerHeight - header.clientHeight}px`
+      });
+    } else if (
+      !isEmpty(mainContentStyle) &&
+      header.clientHeight + pageContent.children[0].clientHeight > window.innerHeight
+    ) {
+      setMainContentStyle({
+        height: 'auto'
+      });
+    }
+  }, [children]);
 
   useEffect(() => {
     async function fetchData() {
@@ -94,9 +116,11 @@ const MainLayout = ({ children }) => {
   return (
     <div id={styles.mainLayoutContainer}>
       <Header onLeftSideBarStyleChange={onLeftSideBarStyleChange} />
-      <div className={styles.mainContent} style={{ marginLeft: margin, transition: '0.5s' }}>
+      <div id="mainContent" className={styles.mainContent} style={mainContentStyle}>
         <LeftSideBar onToggleSideBar={onToggleSideBar} style={leftSideBarStyle} style={leftSideBarStyle} />
-        {children}
+        <div id="pageContent" className={styles.pageContent}>
+          {children}
+        </div>
       </div>
       <Footer leftMargin={margin} />
       <EuFooter leftMargin={margin} />
