@@ -86,24 +86,28 @@ public class ContributorServiceImpl implements ContributorService {
           new StringBuilder(resource).append(referenceId).append("-").append(role).append("_WRITE");
       List<UserRepresentationVO> listUserWrite =
           userManagementControllerZull.getUsersByGroup(stringBuilder.toString());
-      listUserWrite.stream().forEach(userWrite -> {
-        ContributorVO contributorVO = new ContributorVO();
-        contributorVO.setAccount(userWrite.getEmail());
-        contributorVO.setWritePermission(true);
-        contributorVO.setRole(role);
-        contributorVOList.add(contributorVO);
-      });
+      if (!CollectionUtils.isEmpty(listUserWrite)) {
+        listUserWrite.stream().forEach(userWrite -> {
+          ContributorVO contributorVO = new ContributorVO();
+          contributorVO.setAccount(userWrite.getEmail());
+          contributorVO.setWritePermission(true);
+          contributorVO.setRole(role);
+          contributorVOList.add(contributorVO);
+        });
+      }
       stringBuilder =
           new StringBuilder(resource).append(referenceId).append("-").append(role).append("_READ");
       List<UserRepresentationVO> listUserRead =
           userManagementControllerZull.getUsersByGroup(stringBuilder.toString());
-      listUserRead.stream().forEach(userRead -> {
-        ContributorVO contributorVO = new ContributorVO();
-        contributorVO.setAccount(userRead.getEmail());
-        contributorVO.setWritePermission(false);
-        contributorVO.setRole(role);
-        contributorVOList.add(contributorVO);
-      });
+      if (!CollectionUtils.isEmpty(listUserRead)) {
+        listUserRead.stream().forEach(userRead -> {
+          ContributorVO contributorVO = new ContributorVO();
+          contributorVO.setAccount(userRead.getEmail());
+          contributorVO.setWritePermission(false);
+          contributorVO.setRole(role);
+          contributorVOList.add(contributorVO);
+        });
+      }
     }
 
     return contributorVOList;
