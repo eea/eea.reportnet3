@@ -1027,7 +1027,7 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test
   public void deleteUniqueConstraintTest() throws EEAException {
-    dataSchemaControllerImpl.deleteUniqueConstraint(new ObjectId().toString());
+    dataSchemaControllerImpl.deleteUniqueConstraint(new ObjectId().toString(), 1L);
     Mockito.verify(dataschemaService, times(1)).deleteUniqueConstraint(Mockito.any());
   }
 
@@ -1037,7 +1037,7 @@ public class DataSetSchemaControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void deleteUniqueConstraintIdErrorTest() {
     try {
-      dataSchemaControllerImpl.deleteUniqueConstraint(null);
+      dataSchemaControllerImpl.deleteUniqueConstraint(null, null);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT, e.getReason());
@@ -1054,7 +1054,7 @@ public class DataSetSchemaControllerImplTest {
   public void deleteUniqueConstraintErrorTest() throws EEAException {
     doThrow(EEAException.class).when(dataschemaService).deleteUniqueConstraint(Mockito.any());
     try {
-      dataSchemaControllerImpl.deleteUniqueConstraint(new ObjectId().toString());
+      dataSchemaControllerImpl.deleteUniqueConstraint(new ObjectId().toString(), 1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;
@@ -1170,7 +1170,8 @@ public class DataSetSchemaControllerImplTest {
   public void getUniqueConstraintsTests() {
     List<UniqueConstraintVO> uniques = new ArrayList<>();
     Mockito.when(dataschemaService.getUniqueConstraints(Mockito.any())).thenReturn(uniques);
-    assertEquals(uniques, dataSchemaControllerImpl.getUniqueConstraints(new ObjectId().toString()));
+    assertEquals(uniques,
+        dataSchemaControllerImpl.getUniqueConstraints(new ObjectId().toString(), null));
   }
 
   /**
@@ -1181,7 +1182,7 @@ public class DataSetSchemaControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void getUniqueConstraintsErrorTest() {
     try {
-      dataSchemaControllerImpl.getUniqueConstraints(null);
+      dataSchemaControllerImpl.getUniqueConstraints(null, null);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
