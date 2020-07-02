@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -308,6 +309,18 @@ public class ContributorServiceImpl implements ContributorService {
   @Override
   public void updateContributor(Long dataflowId, ContributorVO contributorVO, String role,
       Long dataProviderId) throws EEAException {
+
+    // check if the email is correct
+    UserRepresentationVO emailUser =
+        userManagementControllerZull.getUserByEmail(contributorVO.getAccount());
+    if (null == emailUser) {
+      LOG_ERROR.error(
+          "Error creating contributor with the account: {} in the dataflow {} because the email doesn't exist in the system",
+          contributorVO.getAccount(), dataflowId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, new StringBuilder("The email ")
+          .append(contributorVO.getAccount()).append(" doesn't exist in repornet").toString());
+    }
+
     // we delete the contributor and after that we create it to update
     if (EDITOR.equals(role) || REPORTER.equals(role)) {
       try {
@@ -324,6 +337,12 @@ public class ContributorServiceImpl implements ContributorService {
             contributorVO.getAccount(), dataflowId);
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
       }
+    } else {
+      LOG_ERROR.error(
+          "Error creating contributor with the account: {} in the dataflow {}  because the role not avaliable {}",
+          contributorVO.getAccount(), dataflowId, role);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          new StringBuilder("ROLE").append(role).append(" doesn't exist").toString());
     }
 
   }
@@ -351,21 +370,28 @@ public class ContributorServiceImpl implements ContributorService {
 
     // we create resources for any users to add the new resource associated with the new
     // datasetSchema
-    if (!usersEditorRead.isEmpty() || !usersEditorWrite.isEmpty()) {
-      for (UserRepresentationVO userEditorRead : usersEditorRead) {
-        resources.add(fillResourceAssignation(datasetId, userEditorRead.getEmail(),
-            ResourceGroupEnum.DATASCHEMA_EDITOR_READ));
+    if (!CollectionUtils.isEmpty(usersEditorRead) || !CollectionUtils.isEmpty(usersEditorWrite)) {
+
+      if (!CollectionUtils.isEmpty(usersEditorRead)) {
+        for (UserRepresentationVO userEditorRead : usersEditorRead) {
+          resourceManagementControllerZull.createResource(
+              createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.EDITOR_READ));
+          resources.add(fillResourceAssignation(datasetId, userEditorRead.getEmail(),
+              ResourceGroupEnum.DATASCHEMA_EDITOR_READ));
+
+        }
       }
-      for (UserRepresentationVO userEditorWrite : usersEditorWrite) {
-        resources.add(fillResourceAssignation(datasetId, userEditorWrite.getEmail(),
-            ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE));
+      if (!CollectionUtils.isEmpty(usersEditorWrite)) {
+        for (UserRepresentationVO userEditorWrite : usersEditorWrite) {
+          resourceManagementControllerZull.createResource(
+              createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.EDITOR_WRITE));
+          resources.add(fillResourceAssignation(datasetId, userEditorWrite.getEmail(),
+              ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE));
+        }
       }
       userManagementControllerZull.addContributorsToResources(resources);
 
-      LOG.info(
-          "Create role editor for dataflow {} with the dataset id {},"
-              + " number write permissions added = {} and number read permissions added = {}",
-          dataflowId, datasetId, usersEditorWrite.size(), usersEditorRead.size());
+      LOG.info("Create role editor for dataflow {} with the dataset id {}", dataflowId, datasetId);
     } else {
       LOG.info(
           "Didn't create role editor for dataflow {} with the dataset id {}, because it hasn't editors associated",
