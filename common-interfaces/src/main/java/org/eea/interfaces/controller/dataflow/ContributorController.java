@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface ContributorController {
 
   /**
-   * The interface Resource management controller zull.
+   * The Interface ContributorControllerZuul.
    */
   @FeignClient(value = "dataflow", contextId = "contributor", path = "/contributor")
   interface ContributorControllerZuul extends ContributorController {
@@ -42,13 +42,13 @@ public interface ContributorController {
    * @param dataProviderId the data provider id
    * @param contributorVO the contributor VO
    */
-  @DeleteMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}")
+  @DeleteMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataproviderId}")
   void deleteReporter(@PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("dataProviderId") Long dataProviderId,
+      @PathVariable("dataproviderId") Long dataproviderId,
       @RequestBody ContributorVO contributorVO);
 
   /**
-   * Find role users by group.
+   * Find editors by group.
    *
    * @param dataflowId the dataflow id
    * @return the list
@@ -66,8 +66,7 @@ public interface ContributorController {
   @GetMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataproviderId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<ContributorVO> findReportersByGroup(@PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("providerId") Long dataproviderId);
-
+      @PathVariable("dataproviderId") Long dataproviderId);
 
   /**
    * Update editor.
@@ -77,7 +76,7 @@ public interface ContributorController {
    * @return the response entity
    */
   @PutMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  ResponseEntity updateEditor(@PathVariable("dataflowId") Long dataflowId,
+  ResponseEntity<?> updateEditor(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody ContributorVO contributorVO);
 
   /**
@@ -90,7 +89,8 @@ public interface ContributorController {
    */
   @PutMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  ResponseEntity updateReporter(@PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("dataProviderId") Long dataProviderId,
+  ResponseEntity<?> updateReporter(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("dataProviderId") Long dataproviderId,
       @RequestBody ContributorVO contributorVO);
+
 }
