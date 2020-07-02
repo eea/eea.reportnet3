@@ -24,9 +24,6 @@ export const reportingObligationReducer = (state, { type, payload }) => {
     case 'ON_SELECT_OBL':
       return { ...state, oblChoosed: payload.oblChoosed };
 
-    case 'ON_TOGGLE_VIEW':
-      return { ...state, isTableView: payload.view };
-
     case 'SEARCHED_DATA':
       return { ...state, searchedData: payload.data };
 

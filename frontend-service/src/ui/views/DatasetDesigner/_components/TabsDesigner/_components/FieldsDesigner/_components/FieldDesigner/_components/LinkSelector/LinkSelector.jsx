@@ -128,19 +128,27 @@ const LinkSelector = withRouter(
             <span className={styles.switchTextInput}>{resources.messages['pkValuesMustBeUsed']}</span>
             <Checkbox
               checked={pkMustBeUsed}
+              id={'pkMustBeUsed_check'}
               inputId={'pkMustBeUsed_check'}
               label="Default"
               onChange={e => setPkMustBeUsed(e.checked)}
               style={{ width: '70px', marginLeft: '0.5rem' }}
             />
+            <label for={'pkMustBeUsed_check'} className="srOnly">
+              {resources.messages['pkValuesMustBeUsed']}
+            </label>
             <span className={styles.switchTextInput}>{resources.messages['pkHasMultipleValues']}</span>
             <Checkbox
               checked={pkHasMultipleValues}
+              id={'pkHasMultipleValues_check'}
               inputId={'pkHasMultipleValues_check'}
               label="Default"
               onChange={e => setPkHasMultipleValues(e.checked)}
               style={{ width: '70px', marginLeft: '0.5rem' }}
             />
+            <label for={'pkHasMultipleValues_check'} className="srOnly">
+              {resources.messages['pkHasMultipleValues']}
+            </label>
           </div>
           <div className={styles.selectedLinkWrapper}>
             <span>{`${resources.messages['selectedLink']}: `}</span>

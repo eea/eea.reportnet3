@@ -289,6 +289,7 @@ export const Map = ({
 
       <div className={styles.mapButtonsBar}>
         <Dropdown
+          ariaLabel={'themes'}
           className={styles.themeSwitcherSplitButton}
           options={themes}
           optionLabel="id"

@@ -23,6 +23,7 @@ export const Button = ({
   tooltipOptions = null,
   style = null,
   layout = null,
+  title = undefined,
   value = '',
   visible = true
 }) => {
@@ -58,12 +59,17 @@ export const Button = ({
           onClick={onClick}
           onMouseDown={onMouseDown}
           style={style}
+          title={title}
           tooltip={tooltip}
           type={type}
           tooltipOptions={tooltipOptions}
           value={value}
         />
-        <span className="srOnly">Email</span>
+        {/* {!title && (
+          <label for={id} className="srOnly">
+            {tooltip}
+          </label>
+        )} */}
       </>
     ) : null;
   }
