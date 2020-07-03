@@ -4,14 +4,30 @@ import isNil from 'lodash/isNil';
 import { getSelectedFieldById } from './getSelectedFieldById';
 
 const printExpression = (expression, tabs) => {
-  if (!isNil(expression.operatorValue) && !isEmpty(expression.operatorValue) && !isEmpty(expression.field2)) {
+
+  if (
+    !isNil(expression.operatorValue) &&
+    !isEmpty(expression.operatorValue) &&
+    !isNil(expression.field2) &&
+    expression.field2 !== ''
+  ) {
     if (expression.operatorType === 'LEN') {
+      if (expression.valueTypeSelector !== 'value') {
+        return `( LEN( ${getSelectedFieldById(expression.field1, tabs).label} ) ${expression.operatorValue} ${
+          getSelectedFieldById(expression.field2, tabs).label
+        } )`;
+      }
       return `( LEN( ${getSelectedFieldById(expression.field1, tabs).label} ) ${expression.operatorValue} ${
+        expression.field2
+      } )`;
+    }
+    if (expression.valueTypeSelector !== 'value') {
+      return `( ${getSelectedFieldById(expression.field1, tabs).label} ${expression.operatorValue} ${
         getSelectedFieldById(expression.field2, tabs).label
       } )`;
     }
     return `( ${getSelectedFieldById(expression.field1, tabs).label} ${expression.operatorValue} ${
-      getSelectedFieldById(expression.field2, tabs).label
+      expression.field2
     } )`;
   }
   return '';
@@ -41,9 +57,8 @@ const printSelector = (expression, index, expressions, tabs) => {
 };
 
 export const getComparisonExpressionString = (expressions, tabs) => {
-  let expressionString = '';
   if (expressions.length > 0) {
-    expressionString = printSelector(expressions[0], 0, expressions, tabs);
+    return printSelector(expressions[0], 0, expressions, tabs);
   }
-  return expressionString;
+  return '';
 };

@@ -3,8 +3,10 @@
  */
 package org.eea.interfaces.controller.validation;
 
+import java.util.Map;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -226,5 +228,16 @@ public interface RulesController {
   void deleteDatasetRuleAndIntegrityByDatasetSchemaId(
       @RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("datasetId") Long datasetId);
+
+
+
+  /**
+   * Copy rules schema.
+   *
+   * @param copy the copy
+   * @return the map
+   */
+  @PostMapping("/private/copyRulesSchema")
+  Map<String, String> copyRulesSchema(@RequestBody CopySchemaVO copy);
 
 }

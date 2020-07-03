@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -17,7 +17,8 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
-const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChangeForm, type }) => {
+const DataFormFieldEditor = ({ autoFocus, column, datasetId, field, fieldValue = '', onChangeForm, type }) => {
+  const inputRef = useRef(null);
   const resources = useContext(ResourcesContext);
   const [columnWithLinks, setColumnWithLinks] = useState([]);
   const [isMapOpen, setIsMapOpen] = useState(false);
@@ -29,13 +30,24 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     }
   }, []);
 
+  useEffect(() => {
+    if (autoFocus) {
+      inputRef.current.element.focus();
+    }
+  }, []);
+
   const onFilter = async filter => {
     onLoadColsSchema(filter);
   };
 
   const onLoadColsSchema = async filter => {
     const inmColumn = { ...column };
-    const linkItems = await getLinkItemsWithEmptyOption(filter, type, column.referencedField);
+    const linkItems = await getLinkItemsWithEmptyOption(
+      filter,
+      type,
+      column.referencedField,
+      inmColumn.pkHasMultipleValues
+    );
     inmColumn.linkItems = linkItems;
     setColumnWithLinks(inmColumn);
   };
@@ -77,7 +89,7 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
       case 'DATE':
         return 'date';
       case 'TEXT':
-      case 'LONG_TEXT':
+      case 'RICH_TEXT':
         return 'any';
       case 'EMAIL':
         return 'email';
@@ -90,14 +102,14 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     }
   };
 
-  const getLinkItemsWithEmptyOption = async (filter, type, referencedField) => {
+  const getLinkItemsWithEmptyOption = async (filter, type, referencedField, hasMultipleValues) => {
     if (isNil(type) || type.toUpperCase() !== 'LINK' || isNil(referencedField)) {
       return [];
     }
     const referencedFieldValues = await DatasetService.getReferencedFieldValues(
       datasetId,
       isUndefined(referencedField.name) ? referencedField.idPk : referencedField.referencedField.fieldSchemaId,
-      filter
+      hasMultipleValues ? '' : filter
     );
     const linkItems = referencedFieldValues
       .map(referencedField => {
@@ -107,10 +119,14 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
         };
       })
       .sort((a, b) => a.value - b.value);
-    linkItems.unshift({
-      itemType: resources.messages['noneCodelist'],
-      value: ''
-    });
+
+    // const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
+    if (!hasMultipleValues) {
+      linkItems.unshift({
+        itemType: resources.messages['noneCodelist'],
+        value: ''
+      });
+    }
     return linkItems;
   };
 
@@ -159,8 +175,8 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     const longCharacters = 20;
     const decimalCharacters = 40;
     const dateCharacters = 10;
-    const textCharacters = 5000;
-    const longTextCharacters = 10000;
+    const textCharacters = 10000;
+    const richTextCharacters = 10000;
     const emailCharacters = 256;
     const phoneCharacters = 256;
     const urlCharacters = 5000;
@@ -178,8 +194,8 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
         return dateCharacters;
       case 'TEXT':
         return textCharacters;
-      case 'LONG_TEXT':
-        return longTextCharacters;
+      case 'RICH_TEXT':
+        return richTextCharacters;
       case 'EMAIL':
         return emailCharacters;
       case 'PHONE':
@@ -210,6 +226,7 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
         onChange={e => onChangeForm(field, e.target.value)}
         // type={type === 'DATE' ? 'date' : 'text'}
         placeholder={type === 'DATE' ? 'YYYY-MM-DD' : ''}
+        ref={inputRef}
         style={{ width: '35%' }}
         type="text"
         value={fieldValue}
@@ -232,23 +249,45 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
     );
   };
 
-  const renderLinkDropdown = (field, fieldValue) => (
-    <Dropdown
-      appendTo={document.body}
-      currentValue={fieldValue}
-      filter={true}
-      filterPlaceholder={resources.messages['linkFilterPlaceholder']}
-      filterBy="itemType,value"
-      onChange={e => {
-        onChangeForm(field, e.target.value.value);
-      }}
-      onFilterInputChangeBackend={onFilter}
-      optionLabel="itemType"
-      options={columnWithLinks.linkItems}
-      showFilterClear={true}
-      value={RecordUtils.getLinkValue(columnWithLinks.linkItems, fieldValue)}
-    />
-  );
+  const renderLinkDropdown = (field, fieldValue) => {
+    if (column.pkHasMultipleValues) {
+      return (
+        <MultiSelect
+          appendTo={document.body}
+          clearButton={false}
+          filter={true}
+          filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+          maxSelectedLabels={10}
+          onChange={e => onChangeForm(field, e.value)}
+          onFilterInputChangeBackend={onFilter}
+          options={columnWithLinks.linkItems}
+          optionLabel="itemType"
+          value={RecordUtils.getMultiselectValues(
+            columnWithLinks.linkItems,
+            !Array.isArray(fieldValue) ? fieldValue.split(', ').join(',') : fieldValue
+          )}
+        />
+      );
+    } else {
+      return (
+        <Dropdown
+          appendTo={document.body}
+          currentValue={fieldValue}
+          filter={true}
+          filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+          filterBy="itemType,value"
+          onChange={e => {
+            onChangeForm(field, e.target.value.value);
+          }}
+          onFilterInputChangeBackend={onFilter}
+          optionLabel="itemType"
+          options={columnWithLinks.linkItems}
+          showFilterClear={true}
+          value={RecordUtils.getLinkValue(columnWithLinks.linkItems, fieldValue)}
+        />
+      );
+    }
+  };
 
   const renderMap = () => <Map coordinates={mapCoordinates} onSelectPoint={onSelectPoint} selectButton={true}></Map>;
 

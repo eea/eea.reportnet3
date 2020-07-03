@@ -37,6 +37,7 @@ const MainLayout = ({ children }) => {
       userContext.onToggleAmPm24hFormat(userConfiguration.amPm24h);
       themeContext.onToggleTheme(userConfiguration.visualTheme);
       userContext.onToggleSettingsLoaded(true);
+      userContext.onToggleTypeView(userConfiguration.listView);
     } catch (error) {
       console.error(error);
       userContext.onToggleSettingsLoaded(false);

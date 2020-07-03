@@ -48,7 +48,7 @@ const Header = withRouter(({ history }) => {
         e.preventDefault();
         history.push(getUrl(routes.DATAFLOWS));
       }}>
-      <img height="50px" src={logo} alt="Reportnet" className={styles.appLogo} />
+      <img height="50px" src={logo} alt="Reportnet 3.0" className={styles.appLogo} />
       <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>
     </a>
   );
@@ -108,10 +108,13 @@ const Header = withRouter(({ history }) => {
         history.push(getUrl(routes.SETTINGS));
       }}>
       <img
-        ref={avatarImage}
-        icon={<FontAwesomeIcon icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />}
-        src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
+        alt="User avatar"
         className={styles.userAvatar}
+        icon={
+          <FontAwesomeIcon aria-hidden={false} icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />
+        }
+        ref={avatarImage}
+        src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
       />
       {/* <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />{' '} */}
       <span>{userContext.preferredUsername}</span>
@@ -125,7 +128,7 @@ const Header = withRouter(({ history }) => {
         e.preventDefault();
         userContext.userProps.showLogoutConfirmation ? setConfirmVisible(true) : userLogout();
       }}>
-      <FontAwesomeIcon className={styles.logoutButton} icon={AwesomeIcons('logout')} />
+      <FontAwesomeIcon aria-hidden={false} className={styles.logoutButton} icon={AwesomeIcons('logout')} />
     </div>
   );
 

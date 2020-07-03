@@ -1,6 +1,8 @@
 package org.eea.dataflow.controller;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -45,6 +47,10 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant EMAIL_REGEX: {@value}. */
+  private static final String EMAIL_REGEX =
+      "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$";
+
   /**
    * Creates the representative.
    *
@@ -58,6 +64,18 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   public Long createRepresentative(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody RepresentativeVO representativeVO) {
+
+    if (null == representativeVO.getProviderAccount()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.USER_NOTFOUND);
+    }
+    Pattern p = Pattern.compile(EMAIL_REGEX);
+    Matcher m = p.matcher(representativeVO.getProviderAccount());
+    boolean result = m.matches();
+    if (Boolean.FALSE.equals(result)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          String.format(EEAErrorMessage.NOT_EMAIL, representativeVO.getProviderAccount()));
+    }
+
     try {
       return representativeService.createRepresentative(dataflowId, representativeVO);
     } catch (EEAException e) {
@@ -139,6 +157,18 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   public ResponseEntity updateRepresentative(@RequestBody RepresentativeVO representativeVO) {
     String message = null;
     HttpStatus status = HttpStatus.OK;
+
+    if (null == representativeVO.getProviderAccount()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.USER_NOTFOUND);
+    }
+    Pattern p = Pattern.compile(EMAIL_REGEX);
+    Matcher m = p.matcher(representativeVO.getProviderAccount());
+    boolean result = m.matches();
+    if (Boolean.FALSE.equals(result)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          String.format(EEAErrorMessage.NOT_EMAIL, representativeVO.getProviderAccount()));
+    }
+
     if (representativeVO.getProviderAccount() != null) {
       List<UserRepresentationVO> users = userManagementControllerZull.getUsers();
       UserRepresentationVO userRepresentationVO = users.stream()

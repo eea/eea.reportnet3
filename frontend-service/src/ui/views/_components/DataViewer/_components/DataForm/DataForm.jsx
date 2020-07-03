@@ -36,6 +36,7 @@ const DataForm = ({
                   onClick={() => {
                     onShowFieldInfo(column.header, true);
                   }}
+                  tabIndex="-1"
                   tooltip={getTooltipMessage(column)}
                   tooltipOptions={{ position: 'top' }}
                 />
@@ -45,11 +46,15 @@ const DataForm = ({
                 style={{
                   padding: '.5em',
                   width:
-                    column.type === 'DATE' || column.type === 'CODELIST' || column.type === 'MULTISELECT_CODELIST'
+                    column.type === 'DATE' ||
+                    column.type === 'CODELIST' ||
+                    column.type === 'MULTISELECT_CODELIST' ||
+                    column.type === 'LINK'
                       ? '30%'
                       : ''
                 }}>
                 <DataFormFieldEditor
+                  autoFocus={i === 0}
                   column={column}
                   datasetId={datasetId}
                   field={column.field}
@@ -85,6 +90,7 @@ const DataForm = ({
                   onClick={() => {
                     onShowFieldInfo(column.header, true);
                   }}
+                  tabIndex="-1"
                   tooltip={getTooltipMessage(column)}
                   tooltipOptions={{ position: 'top' }}
                 />
@@ -99,6 +105,7 @@ const DataForm = ({
                       : ''
                 }}>
                 <DataFormFieldEditor
+                  autoFocus={i === 0}
                   column={column}
                   datasetId={datasetId}
                   field={column.field}
