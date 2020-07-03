@@ -729,7 +729,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
           HttpMethod.DELETE, request, Void.class);
     } catch (Exception e) {
       LOG_ERROR.error("Error removing permission due to reason {}", e.getMessage(), e);
-      throw new EEAException(EEAErrorMessage.PERMISSION_NOT_REMOVED, e);
+      throw new EEAException(String.format(EEAErrorMessage.PERMISSION_NOT_REMOVED, groupId), e);
     }
 
   }
