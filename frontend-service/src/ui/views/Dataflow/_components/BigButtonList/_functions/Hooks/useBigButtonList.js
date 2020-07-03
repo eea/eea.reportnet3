@@ -1,13 +1,16 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniq from 'lodash/uniq';
 
+import { config } from 'conf';
 import { routes } from 'ui/routes';
 import DataflowConf from 'conf/dataflow.config.json';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
@@ -30,6 +33,19 @@ const useBigButtonList = ({
   onShowUpdateDataCollectionModal
 }) => {
   const resources = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
+
+  const [buttonsVisibility, setButtonsVisibility] = useState({});
+
+  useEffect(() => {
+    if (!isNil(userContext.contextRoles)) {
+      const userRole = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
+
+      setButtonsVisibility(getButtonsVisibility(config.permissions[userRole]));
+    }
+  }, [userContext]);
+
+  const getButtonsVisibility = role => ({ manageReporters: role === config.permissions['DATA_CUSTODIAN'] });
 
   const manageReportersBigButton = [
     {
@@ -38,7 +54,7 @@ const useBigButtonList = ({
       caption: resources.messages['manageReporters'],
       layout: 'defaultBigButton',
       handleRedirect: () => onShowManageReportersDialog(),
-      visibility: dataflowState.isCustodian
+      visibility: buttonsVisibility.manageReporters
     }
   ];
 
