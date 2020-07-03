@@ -230,7 +230,7 @@ pipeline {
                             def app
                             app = docker.build("k8s-swi001:5000/inspire-harvester:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/inspire-harvester-3.0-SNAPSHOT.jar --build-arg MS_PORT=8050 -f ./Dockerfile ./inspire-harvester ")
                             app.push()
-                            sh 'docker rmi k8s-swi001:5000/inspire-harvester-service:3.0${TAG_SUFIX}'
+                            sh 'docker rmi k8s-swi001:5000/inspire-harvester:3.0${TAG_SUFIX}'
                         }
                          script {
                             echo 'Communication Service'
