@@ -188,6 +188,7 @@ export const Filters = ({
           value={filterState.filterBy[property]}
           yearNavigator={true}
           yearRange="2015:2030"
+          style={{ zoom: '0.95' }}
         />
         {!isEmpty(filterState.filterBy[property]) && (
           <Button
@@ -232,6 +233,7 @@ export const Filters = ({
     <span key={i} className={`${styles.dataflowInput}`}>
       {renderOrderFilter(property)}
       <Dropdown
+        ariaLabel={property}
         className={styles.dropdownFilter}
         filter={FiltersUtils.getOptionTypes(data, property, dropDownList).length > 10}
         filterPlaceholder={resources.messages[property]}
@@ -286,6 +288,7 @@ export const Filters = ({
         style={{ fontSize: '12pt' }}
         tooltip={resources.messages['sort']}
         tooltipOptions={{ position: 'bottom' }}
+        value={`${property}_sortOrder`}
       />
     ) : (
       <Fragment />
@@ -295,12 +298,14 @@ export const Filters = ({
     <span key={i} className={`${styles.dataflowInput}`}>
       {renderOrderFilter(property)}
       <MultiSelect
+        ariaLabelledBy={property}
         checkAllHeader={resources.messages['checkAllFilter']}
         className={styles.multiselectFilter}
         headerClassName={styles.selectHeader}
         id={property}
         inputClassName={`p-float-label ${styles.label}`}
         inputId={property}
+        isFilter={true}
         itemTemplate={selectTemplate}
         label={resources.messages[property]}
         notCheckAllHeader={resources.messages['uncheckAllFilter']}

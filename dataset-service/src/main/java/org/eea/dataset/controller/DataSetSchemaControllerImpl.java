@@ -30,6 +30,9 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.eea.lock.annotation.LockCriteria;
+import org.eea.lock.annotation.LockMethod;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +40,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -780,6 +784,41 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     }
 
     dataschemaService.updateUniqueConstraint(uniqueConstraint);
+  }
+
+
+
+  /**
+   * Copy designs from dataflow.
+   *
+   * @param dataflowIdOrigin the dataflow id origin
+   * @param dataflowIdDestination the dataflow id destination
+   * 
+   *        Copy the design datasets of a dataflow (origin) into the current dataflow (target) It's
+   *        an async call. It sends a notification when all the process it's done
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @LockMethod(removeWhenFinish = false)
+  @PostMapping(value = "/copy", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void copyDesignsFromDataflow(
+      @RequestParam("sourceDataflow") @LockCriteria(
+          name = "dataflowIdOrigin") final Long dataflowIdOrigin,
+      @RequestParam("targetDataflow") @LockCriteria(
+          name = "dataflowIdDestination") final Long dataflowIdDestination) {
+    try {
+      // Set the user name on the thread
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
+      designDatasetService.copyDesignDatasets(dataflowIdOrigin, dataflowIdDestination);
+    } catch (EEAException e) {
+      /*
+       * datasetService.releaseLock(LockSignature.COPY_DATASET_SCHEMA.getValue(), dataflowIdOrigin,
+       * dataflowIdDestination);
+       */
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
   }
 
 }

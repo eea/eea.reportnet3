@@ -7,7 +7,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -1606,5 +1608,25 @@ public class DatasetSchemaServiceTest {
     dataSchemaServiceImpl.createUniqueConstraintPK(new ObjectId().toString(), field);
     Mockito.verify(rulesControllerZuul, times(1)).createUniqueConstraintRule(Mockito.any(),
         Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void testCopyUniqueConstraintsCatalogue() {
+    String datasetSchemaId = "5ce524fad31fc52540abae73";
+    Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
+    UniqueConstraintSchema unique = new UniqueConstraintSchema();
+    unique.setDatasetSchemaId(new ObjectId());
+    unique.setUniqueId(new ObjectId());
+    dictionaryOriginTargetObjectId.put("5ce524fad31fc52540abae73", "5ce524fad31fc52540abae73");
+    Mockito.when(uniqueConstraintRepository.findByDatasetSchemaId(Mockito.any()))
+        .thenReturn(Arrays.asList(unique));
+    List<UniqueConstraintVO> uniques = new ArrayList<>();
+    UniqueConstraintVO uniqueVO = new UniqueConstraintVO();
+    uniqueVO.setFieldSchemaIds(Arrays.asList("5ce524fad31fc52540abae73"));
+    uniques.add(uniqueVO);
+    Mockito.when(uniqueConstraintMapper.entityListToClass(Mockito.any())).thenReturn(uniques);
+    dataSchemaServiceImpl.copyUniqueConstraintsCatalogue(Arrays.asList(datasetSchemaId),
+        dictionaryOriginTargetObjectId);
+    Mockito.verify(uniqueConstraintRepository, times(1)).save(Mockito.any());
   }
 }

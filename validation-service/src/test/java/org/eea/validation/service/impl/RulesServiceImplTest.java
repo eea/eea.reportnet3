@@ -6,7 +6,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -15,6 +17,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
@@ -1298,6 +1301,66 @@ public class RulesServiceImplTest {
     when(integrityMapper.entityToClass(Mockito.any())).thenReturn(new IntegrityVO());
     assertEquals(new IntegrityVO(),
         rulesServiceImpl.getIntegrityConstraint("5e44110d6a9e3a270ce13fac"));
+  }
+
+  @Test
+  public void copyRuleTest() throws EEAException {
+    CopySchemaVO copy = new CopySchemaVO();
+    List<String> listDatasetSchemaIdToCopy = new ArrayList<>();
+    Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
+    listDatasetSchemaIdToCopy.add("5e44110d6a9e3a270ce13fac");
+    dictionaryOriginTargetObjectId.put("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");
+    copy.setDictionaryOriginTargetObjectId(dictionaryOriginTargetObjectId);
+    copy.setOriginDatasetSchemaIds(listDatasetSchemaIdToCopy);
+
+    List<IntegritySchema> integrities = new ArrayList<>();
+    List<Rule> rules = new ArrayList<>();
+    List<RuleVO> rulesVO = new ArrayList<>();
+    List<IntegrityVO> listIntegrityVO = new ArrayList<>();
+    ObjectId id = new ObjectId();
+    new RulesSchemaVO();
+    Rule rule = new Rule();
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setRuleId(id.toString());
+    rulesVO.add(ruleVO);
+    rule.setRuleId(id);
+    rule.setIntegrityConstraintId(id);
+    rule.setType(EntityTypeEnum.DATASET);
+    rule.setShortCode("shortCode");
+    rule.setDescription("description");
+    rule.setRuleName("ruleName");
+    rule.setWhenCondition("whenCondition 5e44110d6a9e3a270ce13fac");
+    rule.setThenCondition(Arrays.asList("success", "error"));
+    rule.setReferenceId(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    rule.setReferenceFieldSchemaPKId(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    rule.setUniqueConstraintId(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    rules.add(rule);
+    RulesSchema ruleSchema = new RulesSchema();
+    ruleSchema.setRules(rules);
+    IntegrityVO integrityVO = new IntegrityVO();
+    integrityVO.setId(id.toString());
+    integrities.add(new IntegritySchema());
+    listIntegrityVO.add(integrityVO);
+    RulesSchemaVO ruleSchemaVO = new RulesSchemaVO();
+    ruleSchemaVO.setRules(rulesVO);
+    when(rulesRepository.getRulesWithActiveCriteria(Mockito.any(), Mockito.anyBoolean()))
+        .thenReturn(ruleSchema);
+    Mockito.when(rulesRepository.createNewRule(Mockito.any(), Mockito.any())).thenReturn(true);
+
+    List<IntegritySchema> integritySchemaList = new ArrayList<>();
+    IntegritySchema integritySchema = new IntegritySchema();
+    integritySchema.setRuleId(new ObjectId());
+    integritySchema.setOriginDatasetSchemaId(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    integritySchema.setReferencedDatasetSchemaId(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    integritySchema.setOriginFields(Arrays.asList(new ObjectId("5e44110d6a9e3a270ce13fac")));
+    integritySchema.setReferencedFields(Arrays.asList(new ObjectId("5e44110d6a9e3a270ce13fac")));
+    integritySchemaList.add(integritySchema);
+    when(integritySchemaRepository.findByOriginOrReferenceDatasetSchemaId(Mockito.any()))
+        .thenReturn(integritySchemaList);
+
+    rulesServiceImpl.copyRulesSchema(copy);
+    Mockito.verify(rulesRepository, times(1)).getRulesWithActiveCriteria(Mockito.any(),
+        Mockito.anyBoolean());
   }
 
 }

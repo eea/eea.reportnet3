@@ -254,20 +254,24 @@ public class ValidationHelper implements DisposableBean {
           if (pendingValidations > 0) {
             // there are more tasks to be sent, just send them out, at least, one more task
             int tasksToBeSent = this.taskReleasedTax;
+            int sentTasks = 0;
             while (tasksToBeSent > 0) {
               if (processesMap.get(processId).getPendingValidations().size() >= 1) {
                 this.kafkaSenderUtils
                     .releaseKafkaEvent(processesMap.get(processId).getPendingValidations().poll());
+                sentTasks++;
+              } else {
+                break;
               }
               tasksToBeSent--;
             }
             LOG.info(
-                "Sent next tasks for process {}",
-                processId);
+                "Sent next {} tasks for process {}",
+                sentTasks, processId);
           }
           LOG.info(
-              "There are still {} tasks to be sent and {} pending Ok's to be received",
-              processesMap.get(processId).getPendingValidations().size(), pendingOk);
+              "There are still {} tasks to be sent and {} pending Ok's to be received for process {}",
+              processesMap.get(processId).getPendingValidations().size(), pendingOk, processId);
         }
       }
     }
@@ -404,6 +408,7 @@ public class ValidationHelper implements DisposableBean {
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", processId);
+    value.put("user", processesMap.get(processId).getRequestingUser());
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_DATASET, value);
   }
 
@@ -419,6 +424,7 @@ public class ValidationHelper implements DisposableBean {
     value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", processId);
     value.put("idTable", Tablenum);
+    value.put("user", processesMap.get(processId).getRequestingUser());
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_TABLE, value);
 
   }
@@ -435,6 +441,7 @@ public class ValidationHelper implements DisposableBean {
     value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", processId);
     value.put("numPag", numPag);
+    value.put("user", processesMap.get(processId).getRequestingUser());
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_RECORD, value);
   }
 
@@ -451,6 +458,7 @@ public class ValidationHelper implements DisposableBean {
     value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", processId);
     value.put("numPag", numPag);
+    value.put("user", processesMap.get(processId).getRequestingUser());
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_FIELD, value);
 
 
@@ -520,6 +528,7 @@ public class ValidationHelper implements DisposableBean {
         EEAEventVO eeaEventVO = new EEAEventVO();
         eeaEventVO.setEventType(eventType);
         eeaEventVO.setData(value);
+
         processesMap.get(processId).getPendingValidations().add(eeaEventVO);
       }
     }

@@ -1,10 +1,12 @@
 package org.eea.validation.controller;
 
+import java.util.Map;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.validation.RulesController;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.thread.ThreadPropertiesManager;
@@ -386,5 +388,27 @@ public class RulesControllerImpl implements RulesController {
       @RequestParam("datasetId") Long datasetId) {
     rulesService.deleteDatasetRuleAndIntegrityByDatasetSchemaId(datasetSchemaId, datasetId);
 
+  }
+
+
+  /**
+   * Copy rules schema.
+   *
+   * @param copy the copy
+   * @return the map
+   */
+  @Override
+  @PostMapping("/private/copyRulesSchema")
+  public Map<String, String> copyRulesSchema(@RequestBody CopySchemaVO copy) {
+    try {
+      // Set the user name on the thread
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
+
+      return rulesService.copyRulesSchema(copy);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error copying rule: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
   }
 }

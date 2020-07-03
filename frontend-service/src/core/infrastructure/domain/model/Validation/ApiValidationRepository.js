@@ -73,7 +73,7 @@ const deleteById = async (datasetSchemaId, ruleId) => {
   return await apiValidation.deleteById(datasetSchemaId, ruleId);
 };
 
-const getAll = async datasetSchemaId => {
+const getAll = async (datasetSchemaId, reporting = false) => {
   const validationsListDTO = await apiValidation.getAll(datasetSchemaId);
   if (isUndefined(validationsListDTO) || isEmpty(validationsListDTO.rules)) {
     return;
@@ -83,6 +83,9 @@ const getAll = async datasetSchemaId => {
   validationsList.datasetSchemaId = validationsListDTO.idDatasetSchema;
   validationsList.rulesSchemaId = validationsListDTO.rulesSchemaId;
 
+  if (reporting) {
+    validationsListDTO.rules = validationsListDTO.rules.filter(rule => rule.enabled === true);
+  }
   const validationsData = parseDataValidationRulesDTO(validationsListDTO.rules);
   validationsList.entityTypes = validationsData.entityTypes;
   validationsList.validations = validationsData.validations;

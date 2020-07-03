@@ -47,6 +47,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -121,12 +124,26 @@ public class DataSetSchemaControllerImplTest {
   private ContributorControllerZuul contributorControllerZuul;
 
   /**
+   * The security context.
+   */
+  SecurityContext securityContext;
+
+  /**
+   * The authentication.
+   */
+  Authentication authentication;
+
+  /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
     datasetSchemaVO = new DataSetSchemaVO();
     datasetSchemaVO.setDescription("description");
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -1219,6 +1236,31 @@ public class DataSetSchemaControllerImplTest {
       throw e;
     }
   }
+
+  @Test
+  public void testCopyDesignsFromDataflow() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    dataSchemaControllerImpl.copyDesignsFromDataflow(1L, 1L);
+    Mockito.verify(designDatasetService, times(1)).copyDesignDatasets(Mockito.any(), Mockito.any());
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testCopyDesignsFromDataflowException() throws EEAException {
+    try {
+      doThrow(EEAException.class).when(designDatasetService).copyDesignDatasets(Mockito.anyLong(),
+          Mockito.anyLong());
+      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+      Mockito.when(authentication.getName()).thenReturn("user");
+      dataSchemaControllerImpl.copyDesignsFromDataflow(1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+
 }
 
 

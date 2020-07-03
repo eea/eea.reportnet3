@@ -47,6 +47,9 @@ public final class LiteralConstants {
   /** The Constant DATASET_ID: {@value}. */
   public static final String DATASET_ID = "dataset_id";
 
+  /** The Constant PK_HAS_MULTIPLE_VALUES: {@value}. */
+  public static final String PK_HAS_MULTIPLE_VALUES = "pkHasMultipleValues";
+
   /** The Constant RULES: {@value}. */
   public static final String RULES = "rules";
 
