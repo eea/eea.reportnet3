@@ -24,7 +24,7 @@
 
   .barSection {
     --top-height: 160px;
-    --bottom-height: 100px;
+    // --bottom-height: 100px;
     --middle-height: calc(100% - var(--top-height) - var(--bottom-height) - (1rem * 3));
     padding: 1rem 0;
     height: var(--middle-height);
