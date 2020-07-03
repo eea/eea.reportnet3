@@ -6,9 +6,8 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 const apiContributor = {
-  all: async (dataflowId, dataProviderId = null) => {
+  all: async (dataflowId, dataProviderId = '') => {
     const isReporter = !isEmpty(dataProviderId.toString());
-    console.log(isReporter ? 'miguel.provider' : 'miguel.custodian');
 
     const response = await HTTPRequester.get({
       url: isReporter
@@ -24,9 +23,10 @@ const apiContributor = {
     return response.data;
   },
 
-  delete: async (account, dataflowId, dataProviderId = null) => {
+  delete: async (account, dataflowId, dataProviderId = '') => {
     const isReporter = !isEmpty(dataProviderId.toString());
-    console.log('dataProviderId', dataProviderId);
+
+    console.log('account', account);
 
     const response = await HTTPRequester.delete({
       url: isReporter
@@ -40,9 +40,8 @@ const apiContributor = {
     return response;
   },
 
-  update: async (contributor, dataflowId, dataProviderId = null) => {
+  update: async (contributor, dataflowId, dataProviderId = '') => {
     const isReporter = !isEmpty(dataProviderId.toString());
-    console.log(isReporter ? 'miguel.provider' : 'custodian');
 
     const response = await HTTPRequester.update({
       url: isReporter

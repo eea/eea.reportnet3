@@ -32,6 +32,7 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
   const [shareRightsState, shareRightsDispatch] = useReducer(shareRightsReducer, {
     account: '',
     accountHasError: false,
+    contributorAccountToDelete: '',
     contributors: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
@@ -82,9 +83,13 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
     }
   };
 
-  const onDeleteContributor = async account => {
+  const onDeleteContributor = async () => {
     try {
-      await ContributorService.deleteContributor(account, dataflowId, dataProviderId);
+      await ContributorService.deleteContributor(
+        shareRightsState.contributorAccountToDelete,
+        dataflowId,
+        dataProviderId
+      );
 
       shareRightsDispatch({ type: 'DELETE_CONTRIBUTOR', payload: {} });
     } catch (error) {

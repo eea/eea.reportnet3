@@ -8,8 +8,8 @@ const all = async (dataflowId, dataProviderId) => {
   return contributorsDTO.map(contributorDTO => new Contributor(contributorDTO));
 };
 
-const deleteContributor = async (editorAccount, dataflowId, dataProviderId) => {
-  return await apiContributor.delete(editorAccount, dataflowId, dataProviderId);
+const deleteContributor = async (account, dataflowId, dataProviderId) => {
+  return await apiContributor.delete(account, dataflowId, dataProviderId);
 };
 
 const update = async (contributor, dataflowId, dataProviderId) => {
