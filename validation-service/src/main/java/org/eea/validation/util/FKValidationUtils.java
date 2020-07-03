@@ -125,7 +125,7 @@ public class FKValidationUtils {
    * @param datasetValue the dataset value
    * @param idFieldSchema the id field schema
    * @param idRule the id rule
-   *
+   * @param pkMustBeUsed the pk must be used
    * @return the boolean
    */
   public static Boolean isfieldFK(DatasetValue datasetValue, String idFieldSchema, String idRule,
@@ -195,8 +195,13 @@ public class FKValidationUtils {
         // Values must be
         Set<String> pkSet = new HashSet<>();
         pkSet.addAll(pkList);
-        // Values must check
-        fkFields.stream().forEach(field -> pkSet.remove(field.getValue()));
+        if (Boolean.TRUE.equals(fkFieldSchema.getPkHasMultipleValues())) {
+          // we look one by one to know if all values are avaliable
+          checkAllValuesMulti(pkSet, fkFields);
+        } else {
+          // Values must check
+          fkFields.stream().forEach(field -> pkSet.remove(field.getValue()));
+        }
         return pkSet.isEmpty();
       }
 
@@ -206,11 +211,30 @@ public class FKValidationUtils {
 
 
   /**
+   * Check all values multi.
+   *
+   * @param pkSet the pk set
+   * @param fkFields the fk fields
+   */
+  private static void checkAllValuesMulti(Set<String> pkSet, List<FieldValue> fkFields) {
+
+    for (FieldValue fieldValue : fkFields) {
+      final List<String> arrayValue = Arrays.asList(fieldValue.getValue().split(","));
+
+      for (String valueArray : arrayValue) {
+        pkSet.remove(valueArray.trim());
+      }
+    }
+  }
+
+
+
+  /**
    * Creates the validation.
    *
    * @param idRule the id rule
    * @param idDatasetSchema the id dataset schema
-   *
+   * @param origname the origname
    * @return the validation
    */
   private static Validation createValidation(String idRule, String idDatasetSchema,
@@ -265,7 +289,7 @@ public class FKValidationUtils {
    *
    * @param pkValues the pk values
    * @param value the FieldValue
-   *
+   * @param pkHasMultipleValues the pk has multiple values
    * @return the boolean
    */
   private static Boolean checkPK(List<String> pkValues, FieldValue value,
@@ -293,9 +317,8 @@ public class FKValidationUtils {
    * Mount query.
    *
    * @param datasetSchema the dataset schema
-   * @param IdFieldScehma the id field scehma
+   * @param idFieldSchema the id field schema
    * @param datasetId the dataset id
-   *
    * @return the list
    */
   private static List<String> mountQuery(DataSetSchema datasetSchema, String idFieldSchema,
@@ -432,6 +455,13 @@ public class FKValidationUtils {
   }
 
 
+  /**
+   * Gets the PK field schema from schema.
+   *
+   * @param schema the schema
+   * @param idFieldSchema the id field schema
+   * @return the PK field schema from schema
+   */
   private static FieldSchema getPKFieldSchemaFromSchema(DataSetSchema schema,
       String idFieldSchema) {
 

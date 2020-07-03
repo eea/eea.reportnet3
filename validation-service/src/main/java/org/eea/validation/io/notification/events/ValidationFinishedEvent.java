@@ -20,11 +20,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ValidationFinishedEvent implements NotificableEventHandler {
 
-  /**
-   * The dataset controller zuul.
-   */
-  @Autowired
-  private DataSetControllerZuul dataSetControllerZuul;
 
   /**
    * The dataset metabase controller zuul.

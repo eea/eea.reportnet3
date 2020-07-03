@@ -10,7 +10,9 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -2137,5 +2139,44 @@ public class DatasetServiceTest {
     Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(dataflowControllerZull.findById(Mockito.any())).thenReturn(dataflow);
     assertFalse(datasetService.isDatasetReportable(1L));
+  }
+
+  @Test
+  public void testCopyData() {
+    Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
+    dictionaryOriginTargetObjectId.put("5ce524fad31fc52540abae73", "5ce524fad31fc52540abae73");
+    Map<Long, Long> dictionaryOriginTargetDatasetsId = new HashMap<>();
+    dictionaryOriginTargetDatasetsId.put(1L, 2L);
+
+    DesignDataset designDataset = new DesignDataset();
+    designDataset.setId(2L);
+    designDataset.setDatasetSchema("5ce524fad31fc52540abae73");
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema desingTableSchema = new TableSchema();
+
+    desingTableSchema.setToPrefill(Boolean.TRUE);
+    desingTableSchema.setIdTableSchema(new ObjectId());
+    List<TableSchema> desingTableSchemas = new ArrayList<>();
+    desingTableSchemas.add(desingTableSchema);
+    schema.setTableSchemas(desingTableSchemas);
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    when(designDatasetRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(designDataset));
+    List<RecordValue> recordDesignValues = new ArrayList<>();
+    RecordValue record = new RecordValue();
+    TableValue table = new TableValue();
+    table.setId(1L);
+    record.setTableValue(table);
+    recordDesignValues.add(record);
+    when(recordRepository.findByTableValueAllRecords(Mockito.any())).thenReturn(recordDesignValues);
+    List<FieldValue> fieldValues = new ArrayList<>();
+    FieldValue field = new FieldValue();
+    fieldValues.add(field);
+    when(fieldRepository.findByRecord(Mockito.any())).thenReturn(fieldValues);
+    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(Mockito.any()))
+        .thenReturn(Optional.of(new PartitionDataSetMetabase()));
+
+    datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
+    Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
 }
