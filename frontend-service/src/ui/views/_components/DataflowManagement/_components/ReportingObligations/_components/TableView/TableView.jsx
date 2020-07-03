@@ -38,6 +38,7 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
     <div className={styles.titleColum}>
       {row.title}
       <FontAwesomeIcon
+        aria-hidden={false}
         className={styles.linkIcon}
         icon={AwesomeIcons('externalLink')}
         onMouseDown={() => window.open(`http://rod3.devel1dub.eionet.europa.eu/obligations/${row.id}`)}
@@ -81,6 +82,7 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
       autoLayout={true}
       first={pagination.first}
       getPageChange={onLoadPagination}
+      onRowClick={event => onSelectObl(event.data)}
       paginator={true}
       paginatorRight={paginatorRightText}
       rows={pagination.rows}

@@ -1,4 +1,5 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -10,7 +11,16 @@ import { Paginator } from 'ui/views/_components/DataTable/_components/Paginator'
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const CardsView = ({ checkedObligation, data, onChangePagination, onSelectObl, pagination }) => {
+export const CardsView = ({
+  checkedCard,
+  contentType,
+  data,
+  handleRedirect,
+  onChangePagination,
+  onSelectCard,
+  pagination,
+  type
+}) => {
   const resources = useContext(ResourcesContext);
 
   const [cards, setCards] = useState(data);
@@ -36,31 +46,35 @@ export const CardsView = ({ checkedObligation, data, onChangePagination, onSelec
   const end = begin + cardsPerPage;
   const currentPosts = cards.slice(begin, end);
 
-  const paginatorRightText = `${resources.messages['totalObligations']}: ${data.length}`;
+  const paginatorRightText = `${resources.messages[`total${contentType}`]}: ${data.length}`;
+
+  const stylesCardWrap = { justifyContent: currentPosts.length % 5 === 0 ? 'space-between' : 'flex-start' };
 
   return isEmpty(data) ? (
-    <h3 className={styles.noObligations}>{resources.messages['noObligationsWithSelectedParameters']}</h3>
+    <h3 className={styles.noObligations}>{resources.messages[`no${contentType}WithSelectedParameters`]}</h3>
   ) : (
     <Fragment>
-      <div
-        className={styles.cardWrap}
-        style={{ justifyContent: currentPosts.length === cardsPerPage ? 'space-between' : 'flex-start' }}>
-        {currentPosts.map(obligation => {
+      <div className={styles.cardWrap} style={stylesCardWrap}>
+        {currentPosts.map(card => {
           return (
             <Card
-              key={obligation.id}
-              checked={checkedObligation}
-              date={obligation.dueDate}
+              card={card}
+              checked={checkedCard}
+              date={card.dueDate || card.expirationDate}
+              handleRedirect={handleRedirect}
               icon="externalLink"
-              id={obligation.id}
-              obligation={obligation}
-              onCheck={onSelectObl}
-              subtitle={obligation.legalInstrument}
-              title={obligation.title}
+              id={card.id}
+              key={card.id}
+              onCheck={onSelectCard}
+              status={card.status}
+              subtitle={card.legalInstrument || card.description}
+              title={card.title || card.name}
+              type={type}
             />
           );
         })}
       </div>
+
       <Paginator
         className={'p-paginator-bottom'}
         first={first}
@@ -72,4 +86,12 @@ export const CardsView = ({ checkedObligation, data, onChangePagination, onSelec
       />
     </Fragment>
   );
+};
+
+CardsView.propTypes = {
+  pagination: PropTypes.object
+};
+
+CardsView.defaultProps = {
+  pagination: { first: 0, rows: 10, page: 0 }
 };

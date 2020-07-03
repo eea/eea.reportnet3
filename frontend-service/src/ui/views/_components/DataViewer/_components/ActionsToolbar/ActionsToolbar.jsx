@@ -32,6 +32,7 @@ const ActionsToolbar = ({
   datasetId,
   exportExtensionsOperationsList,
   hasWritePermissions,
+  hideValidationFilter,
   isDataCollection = false,
   isFilterValidationsActive,
   isLoading,
@@ -297,6 +298,7 @@ const ActionsToolbar = ({
           filters={filter.validationDropdown}
           popup={true}
           ref={filterMenuRef}
+          hide={hideValidationFilter}
           id="filterValidationDropdown"
           showFilters={showValidationFilter}
           onShow={e => {

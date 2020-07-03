@@ -17,6 +17,7 @@ import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { ActionsToolbar } from './_components/ActionsToolbar';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Chips } from 'ui/views/_components/Chips';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -77,6 +78,7 @@ const DataViewer = withRouter(
   }) => {
     const userContext = useContext(UserContext);
 
+    const [addAnotherOne, setAddAnotherOne] = useState(false);
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
     const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
@@ -98,6 +100,7 @@ const DataViewer = withRouter(
     const [isPasting, setIsPasting] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isTableDeleted, setIsTableDeleted] = useState(false);
+    const [isValidationShown, setIsValidationShown] = useState(false);
     const [levelErrorTypesWithCorrects, setLevelErrorTypesWithCorrects] = useState([
       'CORRECT',
       'INFO',
@@ -200,6 +203,10 @@ const DataViewer = withRouter(
     //   inmLevelErrorTypesWithCorrects = inmLevelErrorTypesWithCorrects.concat(levelErrorTypes);
     //   setLevelErrorTypesWithCorrects(inmLevelErrorTypesWithCorrects);
     // }, [levelErrorTypes]);
+
+    useEffect(() => {
+      if (!addDialogVisible) setAddAnotherOne(false);
+    }, [addDialogVisible]);
 
     useEffect(() => {
       setLevelErrorValidations(levelErrorTypesWithCorrects);
@@ -358,7 +365,13 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       if (recordErrorPositionId === -1) {
-        onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
+        if (!isValidationShown && levelErrorValidations.length > 0) {
+          onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
+        } else {
+          if (isValidationShown) {
+            onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
+          }
+        }
       }
     }, [levelErrorValidations]);
 
@@ -370,7 +383,10 @@ const DataViewer = withRouter(
 
     const parseMultiselect = record => {
       record.dataRow.forEach(field => {
-        if (field.fieldData.type === 'MULTISELECT_CODELIST') {
+        if (
+          field.fieldData.type === 'MULTISELECT_CODELIST' ||
+          (field.fieldData.type === 'LINK' && Array.isArray(field.fieldData[field.fieldData.fieldSchemaId]))
+        ) {
           if (
             !isNil(field.fieldData[field.fieldData.fieldSchemaId]) &&
             field.fieldData[field.fieldData.fieldSchemaId] !== ''
@@ -389,6 +405,10 @@ const DataViewer = withRouter(
       return record;
     };
 
+    const hideValidationFilter = () => {
+      setIsValidationShown(false);
+    };
+
     const showValidationFilter = filteredKeys => {
       // length of errors in data schema rules of validation
       const filteredKeysWithoutSelectAll = filteredKeys.filter(key => key !== 'selectAll');
@@ -400,6 +420,7 @@ const DataViewer = withRouter(
       if (recordErrorPositionId !== -1) {
         setRecordErrorPositionId(-1);
       }
+      setIsValidationShown(true);
     };
 
     const onAttach = async () => {
@@ -537,7 +558,9 @@ const DataViewer = withRouter(
               cell.field,
               field.id,
               field.type,
-              field.type === 'MULTISELECT_CODELIST' ? value.join(',') : value
+              field.type === 'MULTISELECT_CODELIST' || (field.type === 'LINK' && Array.isArray(value))
+                ? value.join(',')
+                : value
             );
             if (!fieldUpdated) {
               throw new Error('UPDATE_FIELD_BY_ID_ERROR');
@@ -675,7 +698,9 @@ const DataViewer = withRouter(
             }
           });
         } finally {
-          setAddDialogVisible(false);
+          if (!addAnotherOne) {
+            setAddDialogVisible(false);
+          }
           setIsLoading(false);
           setIsSaving(false);
         }
@@ -720,7 +745,7 @@ const DataViewer = withRouter(
     const onSort = event => {
       dispatchSort({ type: 'SORT_TABLE', payload: { order: event.sortOrder, field: event.sortField } });
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
-      onFetchData(event.sortField, event.sortOrder, 0, records.recordsPerPage, levelErrorTypesWithCorrects);
+      onFetchData(event.sortField, event.sortOrder, 0, records.recordsPerPage, levelErrorValidations);
     };
 
     const onUpdateData = () => setIsDataUpdated(!isDataUpdated);
@@ -746,6 +771,17 @@ const DataViewer = withRouter(
 
     const addRowDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
+        {isNewRecord && (
+          <div className={styles.addAnotherOneWrapper}>
+            <Checkbox
+              id={`addAnother`}
+              isChecked={addAnotherOne}
+              onChange={() => setAddAnotherOne(!addAnotherOne)}
+              role="checkbox"
+            />
+            <span className={styles.addAnotherOne}>{resources.messages['addAnotherOne']}</span>
+          </div>
+        )}
         <Button
           disabled={isSaving}
           label={resources.messages['save']}
@@ -911,6 +947,7 @@ const DataViewer = withRouter(
           datasetId={datasetId}
           exportExtensionsOperationsList={extensionsOperationsList.export}
           hasWritePermissions={hasWritePermissions}
+          hideValidationFilter={hideValidationFilter}
           fileExtensions={extensionsOperationsList.export}
           isDataCollection={isDataCollection}
           isFilterValidationsActive={isFilterValidationsActive}

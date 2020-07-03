@@ -1,23 +1,25 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import isNil from 'lodash/isNil';
+import moment from 'moment';
 import remove from 'lodash/remove';
 import uniqBy from 'lodash/uniqBy';
-import moment from 'moment';
 
 import styles from './BigButtonList.module.css';
 
 import { BigButton } from '../BigButton';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar/Calendar';
+import { CloneSchemas } from 'ui/views/Dataflow/_components/CloneSchemas';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 
 import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
-import { DatasetService } from 'core/services/Dataset';
 import { DataCollectionService } from 'core/services/DataCollection';
+import { DataflowService } from 'core/services/Dataflow';
+import { DatasetService } from 'core/services/Dataset';
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -47,6 +49,8 @@ export const BigButtonList = ({
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
+  const [cloneDataflow, setCloneDataflow] = useState({});
+  const [cloneDialogVisible, setCloneDialogVisible] = useState(false);
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
   const [dataCollectionDueDate, setDataCollectionDueDate] = useState(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -62,6 +66,7 @@ export const BigButtonList = ({
   const receiptBtnRef = useRef(null);
 
   const dataflowId = dataflowState.id;
+  const dataflowName = dataflowState.name;
 
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
@@ -78,6 +83,21 @@ export const BigButtonList = ({
   useEffect(() => {
     getExpirationDate();
   }, [dataflowState.obligations.expirationDate]);
+
+  const cloneDatasetSchemas = async () => {
+    setCloneDialogVisible(false);
+
+    notificationContext.add({
+      type: 'CLONE_DATASET_SCHEMAS_INIT',
+      content: { sourceDataflowName: cloneDataflow.name, targetDataflowName: dataflowName }
+    });
+
+    try {
+      await DataflowService.cloneDatasetSchemas(cloneDataflow.id, dataflowId);
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
 
   const downloadPdf = response => {
     if (!isNil(response)) {
@@ -135,6 +155,10 @@ export const BigButtonList = ({
   // }
   // };
 
+  const getCloneDataflow = value => {
+    setCloneDataflow(value);
+  };
+
   const getDeleteSchemaIndex = index => {
     setDeleteSchemaIndex(index);
     setDeleteDialogVisible(true);
@@ -160,6 +184,10 @@ export const BigButtonList = ({
         }
       });
     }
+  };
+
+  const onCloneDataflow = async () => {
+    setCloneDialogVisible(true);
   };
 
   const onCreateDatasetSchema = () => {
@@ -274,6 +302,26 @@ export const BigButtonList = ({
     setIsUpdateDataCollectionDialogVisible(true);
   };
 
+  const renderDialogFooter = (
+    <Fragment>
+      <Button
+        className="p-button-primary p-button-animated-blink"
+        icon={'plus'}
+        disabled={isNil(cloneDataflow.id)}
+        label={resources.messages['cloneSelectedDataflow']}
+        onClick={() => {
+          cloneDatasetSchemas();
+        }}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => setCloneDialogVisible(false)}
+      />
+    </Fragment>
+  );
+
   const bigButtonList = uniqBy(
     useBigButtonList({
       dataflowId,
@@ -282,6 +330,7 @@ export const BigButtonList = ({
       getDeleteSchemaIndex,
       handleRedirect,
       isActiveButton,
+      onCloneDataflow,
       onDatasetSchemaNameError,
       onDuplicateName,
       onLoadReceiptData,
@@ -320,6 +369,18 @@ export const BigButtonList = ({
             onUpdateData={onUpdateData}
             setNewDatasetDialog={setNewDatasetDialog}
           />
+        </Dialog>
+      )}
+
+      {cloneDialogVisible && (
+        <Dialog
+          className={styles.dialog}
+          footer={renderDialogFooter}
+          header={resources.messages['dataflowsList']}
+          onHide={() => setCloneDialogVisible(false)}
+          style={{ width: '95%' }}
+          visible={cloneDialogVisible}>
+          <CloneSchemas dataflowId={dataflowId} getCloneDataflow={getCloneDataflow} />
         </Dialog>
       )}
 
@@ -411,7 +472,9 @@ export const BigButtonList = ({
         </ConfirmDialog>
       )}
 
-      <button ref={receiptBtnRef} style={{ display: 'none' }} />
+      <button ref={receiptBtnRef} style={{ display: 'none' }}>
+        <span className="srOnly">{resources.messages['confirmationReceipt']}</span>
+      </button>
     </>
   );
 };

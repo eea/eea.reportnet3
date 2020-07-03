@@ -1,4 +1,5 @@
 import { Accept } from './Accept';
+import { CloneDatasetSchemas } from './CloneDatasetSchemas';
 import { Create } from './Create';
 import { CreateDatasetSchema } from './CreateDatasetSchema';
 import { dataflowRepository } from 'core/domain/model/Dataflow/DataflowRepository';
@@ -22,6 +23,7 @@ export const DataflowService = {
   accept: Accept({ dataflowRepository }),
   accepted: GetAccepted({ dataflowRepository }),
   all: GetAll({ dataflowRepository }),
+  cloneDatasetSchemas: CloneDatasetSchemas({ dataflowRepository }),
   completed: GetCompleted({ dataflowRepository }),
   create: Create({ dataflowRepository }),
   dataflowDetails: GetDetails({ dataflowRepository }),
