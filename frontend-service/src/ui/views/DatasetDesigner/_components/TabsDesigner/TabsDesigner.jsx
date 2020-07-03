@@ -27,6 +27,7 @@ import isEmpty from 'lodash/isEmpty';
 export const TabsDesigner = withRouter(
   ({
     activeIndex = 0,
+    changeMode,
     datasetSchemaDTO,
     datasetSchemas,
     datasetStatistics,
@@ -196,6 +197,7 @@ export const TabsDesigner = withRouter(
         } else {
           if (tabs[tabIndex].newTab) {
             addTable(header, tabIndex);
+            changeMode(false);
           } else {
             updateTableName(tabs[tabIndex].tableSchemaId, header);
           }

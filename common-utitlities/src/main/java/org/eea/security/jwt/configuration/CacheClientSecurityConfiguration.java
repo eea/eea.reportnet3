@@ -99,7 +99,6 @@ public class CacheClientSecurityConfiguration {
     RedisTemplate<String, CacheTokenVO> redisTemplate = new RedisTemplate<>();
 
     redisTemplate.setConnectionFactory(jedisConnectionFactory);
-    redisTemplate.setEnableTransactionSupport(true);
     redisTemplate.setKeySerializer(new StringRedisSerializer());
     redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer(CacheTokenVO.class));
     return redisTemplate;
@@ -113,6 +112,9 @@ public class CacheClientSecurityConfiguration {
     poolConfig.setBlockWhenExhausted(true);
     poolConfig.setMinEvictableIdleTimeMillis(minEvitableIdleTimeMillis);
     poolConfig.setMaxWaitMillis(maxWaitMillis);
+    poolConfig.setTestOnBorrow(true);
+    poolConfig.setTestOnReturn(true);
+    poolConfig.setTestWhileIdle(true);
     return poolConfig;
   }
 
