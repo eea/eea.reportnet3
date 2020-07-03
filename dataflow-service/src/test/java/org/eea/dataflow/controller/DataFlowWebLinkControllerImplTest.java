@@ -112,14 +112,14 @@ public class DataFlowWebLinkControllerImplTest {
     resource.setId(1L);
     resource.setResource(ResourceTypeEnum.DATAFLOW);
     resource.setRole(SecurityRoleEnum.DATA_CUSTODIAN);
-    resources = new ArrayList<ResourceAccessVO>();
+    resources = new ArrayList<>();
     resources.add(resource);
 
     badResource = new ResourceAccessVO();
     badResource.setId(1L);
     badResource.setResource(ResourceTypeEnum.DATAFLOW);
-    badResource.setRole(SecurityRoleEnum.DATA_PROVIDER);
-    badResources = new ArrayList<ResourceAccessVO>();
+    badResource.setRole(SecurityRoleEnum.LEAD_REPORTER);
+    badResources = new ArrayList<>();
     badResources.add(badResource);
 
 

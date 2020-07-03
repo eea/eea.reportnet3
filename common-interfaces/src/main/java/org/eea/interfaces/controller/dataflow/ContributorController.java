@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -42,9 +43,9 @@ public interface ContributorController {
    * @param dataProviderId the data provider id
    * @param contributorVO the contributor VO
    */
-  @DeleteMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataproviderId}")
+  @DeleteMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}")
   void deleteReporter(@PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("dataproviderId") Long dataproviderId,
+      @PathVariable("dataProviderId") Long dataProviderId,
       @RequestBody ContributorVO contributorVO);
 
   /**
@@ -90,7 +91,16 @@ public interface ContributorController {
   @PutMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   ResponseEntity<?> updateReporter(@PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("dataProviderId") Long dataproviderId,
+      @PathVariable("dataProviderId") Long dataProviderId,
       @RequestBody ContributorVO contributorVO);
 
+  /**
+   * Creates the associated permissions.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetId the dataset id
+   */
+  @PostMapping("/private/dataflow/{dataflowId}/createAssociatedPermissions/{datasetId}")
+  void createAssociatedPermissions(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("datasetId") Long datasetId);
 }

@@ -1,13 +1,13 @@
 package org.eea.security.authorization;
 
 /**
- * The enum Object access role enum.
+ * The enum Object access role enum. Allows to know if the user has access to the right entity
  */
 public enum ObjectAccessRoleEnum {
   /**
-   * Dataflow provider object access role enum.
+   * The dataflow lead reporter.
    */
-  DATAFLOW_PROVIDER("ROLE_DATAFLOW-%s-DATA_PROVIDER"),
+  DATAFLOW_LEAD_REPORTER("ROLE_DATAFLOW-%s-LEAD_REPORTER"),
   /**
    * Dataflow requestor object access role enum.
    */
@@ -21,9 +21,9 @@ public enum ObjectAccessRoleEnum {
    */
   DATAFLOW_CUSTODIAN("ROLE_DATAFLOW-%s-DATA_CUSTODIAN"),
   /**
-   * Dataset provider object access role enum.
+   * The dataset lead reporter.
    */
-  DATASET_PROVIDER("ROLE_DATASET-%s-DATA_PROVIDER"),
+  DATASET_LEAD_REPORTER("ROLE_DATASET-%s-LEAD_REPORTER"),
   /**
    * Dataset requester object access role enum.
    */
@@ -40,14 +40,41 @@ public enum ObjectAccessRoleEnum {
   /** The dataschema custodian. */
   DATASCHEMA_CUSTODIAN("ROLE_DATASCHEMA-%s-DATA_CUSTODIAN"),
 
-  /** The dataschema provider. */
-  DATASCHEMA_PROVIDER("ROLE_DATASCHEMA-%s-DATA_PROVIDER"),
+  /** The dataschema reporter read. */
+  DATASCHEMA_REPORTER_READ("ROLE_DATASCHEMA-%s-REPORTER_READ"),
+
+  /** The dataschema lead reporter. */
+  DATASCHEMA_LEAD_REPORTER("ROLE_DATASCHEMA-%s-LEAD_REPORTER"),
 
   /** The datacollection custodian. */
   DATACOLLECTION_CUSTODIAN("ROLE_DATACOLLECTION-%s-DATA_CUSTODIAN"),
 
-  /** The datacollection provider. */
-  DATACOLLECTION_PROVIDER("ROLE_DATACOLLECTION-%s-DATA_PROVIDER");
+  /** The datacollection lead reporter. */
+  DATACOLLECTION_LEAD_REPORTER("ROLE_DATACOLLECTION-%s-LEAD_REPORTER"),
+
+  /** The dataflow editor write. */
+  DATAFLOW_EDITOR_WRITE("ROLE_DATAFLOW-%s-EDITOR_WRITE"),
+
+  /** The dataflow editor read. */
+  DATAFLOW_EDITOR_READ("ROLE_DATAFLOW-%s-EDITOR_READ"),
+
+  /** The dataschema editor write. */
+  DATASCHEMA_EDITOR_WRITE("ROLE_DATASCHEMA-%s-EDITOR_WRITE"),
+
+  /** The dataschema editor read. */
+  DATASCHEMA_EDITOR_READ("ROLE_DATASCHEMA-%s-EDITOR_READ"),
+
+  /** The dataflow reporter write. */
+  DATAFLOW_REPORTER_WRITE("ROLE_DATAFLOW-%s-REPORTER_WRITE"),
+
+  /** The dataflow reporter read. */
+  DATAFLOW_REPORTER_READ("ROLE_DATAFLOW-%s-REPORTER_READ"),
+
+  /** The dataset reporter write. */
+  DATASET_REPORTER_WRITE("ROLE_DATASET-%s-REPORTER_WRITE"),
+
+  /** The dataset reporter read. */
+  DATASET_REPORTER_READ("ROLE_DATASET-%s-REPORTER_READ");
 
 
   /** The expression. */

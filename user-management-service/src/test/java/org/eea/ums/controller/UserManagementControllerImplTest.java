@@ -1,6 +1,8 @@
 package org.eea.ums.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -24,6 +26,7 @@ import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.ums.mapper.UserRepresentationMapper;
 import org.eea.ums.service.BackupManagmentService;
 import org.eea.ums.service.SecurityProviderInterfaceService;
+import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.junit.Assert;
 import org.junit.Before;
@@ -172,7 +175,7 @@ public class UserManagementControllerImplTest {
     Mockito.when(securityProviderInterfaceService.getResourcesByUser(Mockito.any()))
         .thenReturn(resourceList);
     assertEquals("assertion error", resourceList,
-        userManagementController.getResourcesByUser(SecurityRoleEnum.DATA_PROVIDER));
+        userManagementController.getResourcesByUser(SecurityRoleEnum.LEAD_REPORTER));
   }
 
   @Test
@@ -187,7 +190,7 @@ public class UserManagementControllerImplTest {
     Mockito.when(securityProviderInterfaceService.getResourcesByUser(Mockito.any()))
         .thenReturn(resourceList);
     assertEquals("assertion error", resourceList, userManagementController
-        .getResourcesByUser(ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_PROVIDER));
+        .getResourcesByUser(ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.LEAD_REPORTER));
 
   }
 
@@ -555,5 +558,107 @@ public class UserManagementControllerImplTest {
   public void authenticateUserByApiKeyWrongApiKey() {
     TokenVO result = this.userManagementController.authenticateUserByApiKey("apiKey1");
     Assert.assertNull(result);
+  }
+
+  @Test
+  public void getUsersByGroupTest() {
+    GroupInfo[] groupInfo = new GroupInfo[1];
+    UserRepresentation[] userRepresentation = new UserRepresentation[1];
+    groupInfo[0] = new GroupInfo();
+    userRepresentation[0] = new UserRepresentation();
+    Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groupInfo);
+    Mockito.when(keycloakConnectorService.getUsersByGroupId(Mockito.any()))
+        .thenReturn(userRepresentation);
+    assertNotNull(userManagementController.getUsersByGroup(""));
+  }
+
+  @Test
+  public void getUsersByGroupTestNull() {
+    assertNull(userManagementController.getUsersByGroup(""));
+  }
+
+  @Test
+  public void removeContributorFromResource() throws EEAException {
+    userManagementController.removeContributorFromResource(1L,
+        ResourceGroupEnum.DATAFLOW_EDITOR_READ, "");
+    Mockito.verify(securityProviderInterfaceService, Mockito.times(1))
+        .removeContributorFromUserGroup(Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void removeContributorFromResourceException() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
+        .removeContributorFromUserGroup(Mockito.any(), Mockito.any(), Mockito.any());
+    try {
+      userManagementController.removeContributorFromResource(1L,
+          ResourceGroupEnum.DATAFLOW_EDITOR_READ, "");
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals(EEAErrorMessage.PERMISSION_NOT_CREATED, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test
+  public void removeContributorsFromResources() throws EEAException {
+    userManagementController.removeContributorsFromResources(new ArrayList<>());
+    Mockito.verify(securityProviderInterfaceService, Mockito.times(1))
+        .removeContributorsFromUserGroup(Mockito.any());
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void removeContributorsFromResourcesException() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
+        .removeContributorsFromUserGroup(Mockito.any());
+    try {
+      userManagementController.removeContributorsFromResources(new ArrayList<>());
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals(EEAErrorMessage.PERMISSION_NOT_CREATED, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test
+  public void removeUserFromResources() throws EEAException {
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken("user1", null, null);
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
+    authenticationToken.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    List<ResourceAssignationVO> resources = new ArrayList<>();
+    ResourceAssignationVO resource = new ResourceAssignationVO();
+    resource.setResourceGroup(ResourceGroupEnum.DATAFLOW_EDITOR_READ);
+    resource.setResourceId(1L);
+    resources.add(resource);
+    userManagementController.removeUserFromResources(resources);
+    Mockito.verify(securityProviderInterfaceService, Mockito.times(1))
+        .removeUserFromUserGroup(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void removeUserFromResourcesException() throws EEAException {
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken("user1", null, null);
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "userId_123");
+    authenticationToken.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    List<ResourceAssignationVO> resources = new ArrayList<>();
+    ResourceAssignationVO resource = new ResourceAssignationVO();
+    resource.setResourceGroup(ResourceGroupEnum.DATAFLOW_EDITOR_READ);
+    resource.setResourceId(1L);
+    resources.add(resource);
+    Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
+        .removeUserFromUserGroup(Mockito.any(), Mockito.any());
+    try {
+      userManagementController.removeUserFromResources(resources);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals(EEAErrorMessage.PERMISSION_NOT_CREATED, e.getReason());
+      throw e;
+    }
   }
 }

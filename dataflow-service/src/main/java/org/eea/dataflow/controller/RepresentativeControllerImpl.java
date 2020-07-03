@@ -127,7 +127,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
   public List<RepresentativeVO> findRepresentativesByIdDataFlow(
       @PathVariable("dataflowId") Long dataflowId) {
     if (dataflowId == null) {
@@ -153,7 +153,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
   public ResponseEntity updateRepresentative(@RequestBody RepresentativeVO representativeVO) {
     String message = null;
     HttpStatus status = HttpStatus.OK;
@@ -226,7 +226,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataProvider/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
   public DataProviderVO findDataProviderById(@PathVariable("id") Long dataProviderId) {
     if (null == dataProviderId) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,

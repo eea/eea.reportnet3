@@ -4,7 +4,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.model.TokenInfo;
-
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
@@ -184,4 +183,29 @@ public interface KeycloakConnectorService {
    * @return the user roles
    */
   RoleRepresentation[] getUserRoles(String userId);
+
+  /**
+   * Gets the groups with search.
+   *
+   * @param value the value
+   * @return the group with search
+   */
+  GroupInfo[] getGroupsWithSearch(String value);
+
+  /**
+   * Gets the users by group id.
+   *
+   * @param groupId the group id
+   * @return the user by group id
+   */
+  UserRepresentation[] getUsersByGroupId(String groupId);
+
+  /**
+   * Removes the user from group.
+   *
+   * @param userId the user id
+   * @param groupId the group id
+   * @throws EEAException the EEA exception
+   */
+  void removeUserFromGroup(String userId, String groupId) throws EEAException;
 }
