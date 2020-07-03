@@ -285,7 +285,7 @@ pipeline {
     }post {
              always {
                  echo 'Removing unstaged images'
-                 sh "docker rmi $(docker images | awk '/^<none>/{print $3}')"
+                 sh "docker rmi \$(docker images | awk '/^<none>/{print \$3}')"
 
              }
          }
