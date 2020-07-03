@@ -2,13 +2,18 @@ package org.eea.dataflow.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.contributor.ContributorVO;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.junit.Before;
@@ -32,17 +37,30 @@ public class ContributorServiceImplTest {
   @InjectMocks
   private ContributorServiceImpl contributorServiceImpl;
 
+  /** The user management controller zull. */
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
 
+  /** The resource management controller zull. */
   @Mock
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
+  /** The dataflow controlle zuul. */
+  @Mock
+  private DataFlowControllerZuul dataflowControlleZuul;
   /** The contributor VO write. */
   private ContributorVO contributorVOWrite;
 
   /** The contributor VO read. */
   private ContributorVO contributorVORead;
+
+  /** The dataflow VO. */
+  private DataFlowVO dataflowVO;
+
+  /** The design datasets. */
+  private List<DesignDatasetVO> designDatasets;
+
+  private List<ReportingDatasetVO> reportingDatasets;
 
   /**
    * Inits the mocks.
@@ -58,6 +76,21 @@ public class ContributorServiceImplTest {
     contributorVORead.setAccount("read@reportnet.net");
     contributorVORead.setRole("EDITOR");
     contributorVORead.setWritePermission(false);
+
+    dataflowVO = new DataFlowVO();
+    dataflowVO.setId(1L);
+    designDatasets = new ArrayList();
+    reportingDatasets = new ArrayList();
+
+    DesignDatasetVO designDatasetVO = new DesignDatasetVO();
+    designDatasetVO.setId(1L);
+    designDatasets.add(designDatasetVO);
+
+    ReportingDatasetVO reportingDatasetVO = new ReportingDatasetVO();
+    reportingDatasetVO.setDataProviderId(1L);
+    reportingDatasets.add(reportingDatasetVO);
+    dataflowVO.setReportingDatasets(reportingDatasets);
+    dataflowVO.setDesignDatasets(designDatasets);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -79,6 +112,11 @@ public class ContributorServiceImplTest {
     contributorServiceImpl.createAssociatedPermissions(1L, 1L);
   }
 
+  /**
+   * Creates the associated permissions filled.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createAssociatedPermissionsFilled() throws EEAException {
     List<UserRepresentationVO> usersEditorRead = new ArrayList();
@@ -100,6 +138,11 @@ public class ContributorServiceImplTest {
   }
 
 
+  /**
+   * Update contributor non type.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void updateContributorNonType() throws EEAException {
     try {
@@ -109,5 +152,52 @@ public class ContributorServiceImplTest {
       assertEquals("Role REPO doesn't exist", ex.getReason());
       throw ex;
     }
+  }
+
+
+  /**
+   * Delete contributor editor.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test()
+  public void deleteContributorEditor() throws EEAException {
+    when(dataflowControlleZuul.findById(1L)).thenReturn(dataflowVO);
+    contributorServiceImpl.deleteContributor(1L, "reportnet@reportnet.net", "EDITOR", 1L);
+    Mockito.verify(userManagementControllerZull, times(1))
+        .removeContributorsFromResources(Mockito.any());
+
+  }
+
+  /**
+   * Delete contributor report.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test()
+  public void deleteContributorReport() throws EEAException {
+    when(dataflowControlleZuul.findById(1L)).thenReturn(dataflowVO);
+    contributorServiceImpl.deleteContributor(1L, "reportnet@reportnet.net", "REPORTER", 1L);
+    Mockito.verify(userManagementControllerZull, times(1))
+        .removeContributorsFromResources(Mockito.any());
+  }
+
+
+  // @Test()
+  public void createContributorEditor() throws EEAException {
+    when(dataflowControlleZuul.findById(1L)).thenReturn(dataflowVO);
+    contributorServiceImpl.deleteContributor(1L, "reportnet@reportnet.net", "REPORTER", 1L);
+    // Mockito.verify(contributorService, times(1)).updateContributor(1L, contributorVOWrite,
+    // "EDITOR",
+    // null);
+  }
+
+  // @Test()
+  public void createContributorReport() throws EEAException {
+    when(dataflowControlleZuul.findById(1L)).thenReturn(dataflowVO);
+    contributorServiceImpl.deleteContributor(1L, "reportnet@reportnet.net", "REPORTER", 1L);
+    // Mockito.verify(contributorService, times(1)).updateContributor(1L, contributorVOWrite,
+    // "EDITOR",
+    // null);
   }
 }
