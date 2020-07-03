@@ -27,78 +27,6 @@ export const UserProvider = ({ children }) => {
     <UserContext.Provider
       value={{
         ...userState,
-        onLogin: user => {
-          userDispatcher({
-            type: 'LOGIN',
-            payload: { user }
-          });
-        },
-        onAddSocket: socket => {
-          userDispatcher({
-            type: 'ADD_SOCKET',
-            payload: socket
-          });
-        },
-        onLogout: () => {
-          notificationContext.deleteAll();
-          userDispatcher({
-            type: 'LOGOUT',
-            payload: userSettingsDefaultState
-          });
-        },
-        onChangeRowsPerPage: rowNumber => {
-          userDispatcher({
-            type: 'DEFAULT_ROW_SELECTED',
-            payload: rowNumber
-          });
-        },
-        onChangeDateFormat: dateFormat => {
-          userDispatcher({ type: 'DATE_FORMAT', payload: dateFormat });
-        },
-        onTokenRefresh: user => {
-          userDispatcher({
-            type: 'REFRESH_TOKEN',
-            payload: {
-              user
-            }
-          });
-        },
-        onToggleAmPm24hFormat: hoursFormat => {
-          userDispatcher({
-            type: 'TOGGLE_DATE_FORMAT_AM_PM_24H',
-            payload: hoursFormat
-          });
-        },
-        onToggleLogoutConfirm: logoutConf => {
-          userDispatcher({
-            type: 'TOGGLE_LOGOUT_CONFIRM',
-            payload: logoutConf
-          });
-        },
-        onToggleVisualTheme: currentTheme => {
-          userDispatcher({
-            type: 'DEFAULT_VISUAL_THEME',
-            payload: currentTheme
-          });
-        },
-        onToggleTypeView: currentView => {
-          userDispatcher({
-            type: 'DEFAULT_VISUAL_TYPE',
-            payload: currentView
-          });
-        },
-        onToggleSettingsLoaded: settingsLoaded => {
-          userDispatcher({
-            type: 'SETTINGS_LOADED',
-            payload: settingsLoaded
-          });
-        },
-        onUserFileUpload: base64Image => {
-          userDispatcher({
-            type: 'USER_AVATAR_IMAGE',
-            payload: base64Image
-          });
-        },
         hasPermission: (permissions, entity) => {
           let allow = false;
           if (isUndefined(entity)) {
@@ -110,7 +38,43 @@ export const UserProvider = ({ children }) => {
             });
           }
           return allow;
-        }
+        },
+
+        getUserRole: entity => {
+          const userRole = userState.contextRoles.filter(role => role.includes(entity));
+          return userRole.map(role => role.replace(`${entity}-`, ''));
+        },
+
+        onAddSocket: socket => userDispatcher({ type: 'ADD_SOCKET', payload: socket }),
+
+        onChangeDateFormat: dateFormat => userDispatcher({ type: 'DATE_FORMAT', payload: dateFormat }),
+
+        onChangeRowsPerPage: rowNumber => userDispatcher({ type: 'DEFAULT_ROW_SELECTED', payload: rowNumber }),
+
+        onLogin: user => userDispatcher({ type: 'LOGIN', payload: { user } }),
+
+        onLogout: () => {
+          notificationContext.deleteAll();
+          userDispatcher({ type: 'LOGOUT', payload: userSettingsDefaultState });
+        },
+
+        onToggleAmPm24hFormat: hoursFormat => {
+          userDispatcher({ type: 'TOGGLE_DATE_FORMAT_AM_PM_24H', payload: hoursFormat });
+        },
+
+        onToggleLogoutConfirm: logoutConfirmation => {
+          userDispatcher({ type: 'TOGGLE_LOGOUT_CONFIRM', payload: logoutConfirmation });
+        },
+
+        onToggleSettingsLoaded: settingsLoaded => userDispatcher({ type: 'SETTINGS_LOADED', payload: settingsLoaded }),
+
+        onToggleTypeView: currentView => userDispatcher({ type: 'DEFAULT_VISUAL_TYPE', payload: currentView }),
+
+        onToggleVisualTheme: currentTheme => userDispatcher({ type: 'DEFAULT_VISUAL_THEME', payload: currentTheme }),
+
+        onTokenRefresh: user => userDispatcher({ type: 'REFRESH_TOKEN', payload: { user } }),
+
+        onUserFileUpload: base64Image => userDispatcher({ type: 'USER_AVATAR_IMAGE', payload: base64Image })
       }}>
       {children}
     </UserContext.Provider>

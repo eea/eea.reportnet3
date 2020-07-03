@@ -545,7 +545,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               label={resources.messages['events']}
               onClick={null}
             /> */}
-              {console.log(designerState.datasetHasData)}
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
                   designerState.datasetHasData && designerState.isPreviewModeOn ? ' p-button-animated-blink' : null

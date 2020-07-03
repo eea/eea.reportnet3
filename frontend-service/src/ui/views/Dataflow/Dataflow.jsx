@@ -323,11 +323,12 @@ const Dataflow = withRouter(({ history, match }) => {
       `${config.permissions.DATAFLOW}${dataflowId}`
     );
 
-    console.log('userContext', userContext);
     const isCustodian = userContext.hasPermission(
       [config.permissions.CUSTODIAN],
       `${config.permissions.DATAFLOW}${dataflowId}`
     );
+
+    const userRole = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
 
     dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian } });
   };
