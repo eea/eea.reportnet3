@@ -158,15 +158,14 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     String message = null;
     HttpStatus status = HttpStatus.OK;
 
-    if (null == representativeVO.getProviderAccount()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.USER_NOTFOUND);
-    }
-    Pattern p = Pattern.compile(EMAIL_REGEX);
-    Matcher m = p.matcher(representativeVO.getProviderAccount());
-    boolean result = m.matches();
-    if (Boolean.FALSE.equals(result)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          String.format(EEAErrorMessage.NOT_EMAIL, representativeVO.getProviderAccount()));
+    if (null != representativeVO.getProviderAccount()) {
+      Pattern p = Pattern.compile(EMAIL_REGEX);
+      Matcher m = p.matcher(representativeVO.getProviderAccount());
+      boolean result = m.matches();
+      if (Boolean.FALSE.equals(result)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            String.format(EEAErrorMessage.NOT_EMAIL, representativeVO.getProviderAccount()));
+      }
     }
 
     if (representativeVO.getProviderAccount() != null) {
