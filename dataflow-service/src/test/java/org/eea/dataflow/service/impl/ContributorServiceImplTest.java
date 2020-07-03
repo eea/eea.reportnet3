@@ -239,7 +239,12 @@ public class ContributorServiceImplTest {
   }
 
 
-  // @Test()
+  /**
+   * Update contributor.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test()
   public void updateContributor() throws EEAException {
     when(dataflowControlleZuul.findById(1L)).thenReturn(dataflowVO);
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
@@ -248,18 +253,8 @@ public class ContributorServiceImplTest {
     when(resourceManagementControllerZull.getResourceDetail(1L,
         ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE)).thenReturn(resourceInfoVO);
     contributorServiceImpl.updateContributor(1L, contributorVOWrite, "EDITOR", 1l);
-    Mockito.verify(dataflowControlleZuul, times(1)).findById(1L);
+    Mockito.verify(dataflowControlleZuul, times(2)).findById(1L);
   }
 
-  // @Test(expected = ResponseStatusException.class)
-  public void updateContributorAddThrow() throws EEAException {
-    // doThrow(EEAException.class).when(userManagementControllerZull)
-    // .removeContributorsFromResources(Mockito.any());
-    try {
-      contributorServiceImpl.updateContributor(1L, contributorVOWrite, "EDITOR", 1l);
-    } catch (ResponseStatusException ex) {
 
-      throw ex;
-    }
-  }
 }
