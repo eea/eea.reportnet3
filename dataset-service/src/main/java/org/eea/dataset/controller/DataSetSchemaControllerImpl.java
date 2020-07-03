@@ -759,7 +759,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @param uniqueConstraint the unique constraint
    */
   @Override
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')  OR secondLevelAuthorize(#uniqueConstraint.dataflowId,'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN)")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')  OR secondLevelAuthorize(#uniqueConstraint.dataflowId,'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
   @PutMapping(value = "/updateUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
   public void updateUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
     if (uniqueConstraint == null) {
