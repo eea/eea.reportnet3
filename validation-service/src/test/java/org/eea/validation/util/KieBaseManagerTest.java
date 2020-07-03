@@ -301,7 +301,7 @@ public class KieBaseManagerTest {
     rule.setReferenceId(id);
     rule.setRuleId(id);
     rule.setThenCondition(thenCondition);
-    kieBaseManager.textRuleCorrect(id.toString(), rule);
+    kieBaseManager.validateRule(id.toString(), rule);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -328,7 +328,7 @@ public class KieBaseManagerTest {
         .thenReturn(document);
     Mockito.when(ruleExpressionService.isDataTypeCompatible(Mockito.anyString(), Mockito.any(),
         Mockito.any())).thenReturn(true);
-    kieBaseManager.textRuleCorrect(id.toString(), rule);
+    kieBaseManager.validateRule(id.toString(), rule);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -348,7 +348,7 @@ public class KieBaseManagerTest {
     rule.setThenCondition(thenCondition);
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(document);
-    kieBaseManager.textRuleCorrect(id.toString(), rule);
+    kieBaseManager.validateRule(id.toString(), rule);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
