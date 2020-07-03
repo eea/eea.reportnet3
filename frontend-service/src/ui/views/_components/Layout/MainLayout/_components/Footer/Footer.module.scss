@@ -1,5 +1,4 @@
 .Footer {
-  color: var(--c-black-300);
   background-color: var(--bg);
   border-top: 4px solid var(--c-corporate-blue);
   .footerContent {
@@ -12,6 +11,7 @@
         align-items: center;
         h1 {
           margin-left: 0.5rem;
+          color: var(--main-font-color);
         }
       }
     }

@@ -1,7 +1,7 @@
 .footer {
   position: relative;
   bottom: 0;
-  background-color: #ebebeb;
+  background-color: var(--header-footer-bg);
   padding-top: 3rem;
   border-top: 8px solid var(--c-corporate-blue);
   .footerTop {
@@ -10,7 +10,8 @@
     margin-bottom: 2rem;
     .contentBlock {
       h3 {
-        border-bottom: 2px solid #c0c0c0;
+        border-bottom: 2px solid var(--gray-50);
+        color: var(--eu-footer-title);
       }
       .linksWrapper {
         display: flex;
@@ -54,7 +55,7 @@
   }
   .footerBottom {
     padding: 2rem 0;
-    background-color: #d9d9d9;
+    background-color: var(--eu-footer-bottom);
     a {
       margin-right: 3rem;
     }

@@ -479,6 +479,9 @@
 
   /* Map */
   --map-marker-color: var(--c-corporate-blue-lighter);
+
+  /*Eu header footer*/
+  --eu-footer-bottom-bg: #d9d9d9;
 }
 body {
   margin: 0px;

@@ -8,7 +8,7 @@
   height: var(--header-height);
   overflow: hidden;
   background-color: var(--bg);
-  background-color: #ebebeb;
+  background-color: var(--header-footer-bg);
   transition: 0.5s;
   box-shadow: var(--header-box-shadow);
   z-index: 3002;
