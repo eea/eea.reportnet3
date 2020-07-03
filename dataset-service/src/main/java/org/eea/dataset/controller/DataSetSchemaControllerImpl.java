@@ -29,6 +29,8 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.lock.annotation.LockCriteria;
+import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -788,19 +790,23 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @LockMethod(removeWhenFinish = false)
   @PostMapping(value = "/copy", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void copyDesignsFromDataflow(@RequestParam("sourceDataflow") final Long dataflowIdOrigin,
-      @RequestParam("targetDataflow") final Long dataflowIdDestination) {
-
-    // Set the user name on the thread
-    ThreadPropertiesManager.setVariable("user",
-        SecurityContextHolder.getContext().getAuthentication().getName());
-
+  public void copyDesignsFromDataflow(
+      @RequestParam("sourceDataflow") @LockCriteria(
+          name = "dataflowIdOrigin") final Long dataflowIdOrigin,
+      @RequestParam("targetDataflow") @LockCriteria(
+          name = "dataflowIdDestination") final Long dataflowIdDestination) {
     try {
-      List<DesignDatasetVO> designs =
-          designDatasetService.getDesignDataSetIdByDataflowId(dataflowIdOrigin);
-      designDatasetService.copyDesignDatasets(designs, dataflowIdDestination);
+      // Set the user name on the thread
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
+      designDatasetService.copyDesignDatasets(dataflowIdOrigin, dataflowIdDestination);
     } catch (EEAException e) {
+      /*
+       * datasetService.releaseLock(LockSignature.COPY_DATASET_SCHEMA.getValue(), dataflowIdOrigin,
+       * dataflowIdDestination);
+       */
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }

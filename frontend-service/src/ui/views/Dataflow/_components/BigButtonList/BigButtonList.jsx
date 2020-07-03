@@ -93,10 +93,7 @@ export const BigButtonList = ({
     });
 
     try {
-      const response = await DataflowService.cloneDatasetSchemas(cloneDataflow.id, dataflowId);
-      if (response.status >= 200 && response.status <= 299) {
-        console.log('response', response);
-      }
+      await DataflowService.cloneDatasetSchemas(cloneDataflow.id, dataflowId);
     } catch (error) {
       console.log('error', error);
     }
@@ -475,7 +472,9 @@ export const BigButtonList = ({
         </ConfirmDialog>
       )}
 
-      <button ref={receiptBtnRef} style={{ display: 'none' }} />
+      <button ref={receiptBtnRef} style={{ display: 'none' }}>
+        <span className="srOnly">{resources.messages['confirmationReceipt']}</span>
+      </button>
     </>
   );
 };

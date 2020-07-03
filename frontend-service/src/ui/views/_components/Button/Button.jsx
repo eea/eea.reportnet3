@@ -9,20 +9,22 @@ import { Button as PrimeButton } from 'primereact/button';
 import { Icon } from 'ui/views/_components/Icon';
 
 export const Button = ({
-  id = null,
+  className = null,
   disabled = false,
   icon = null,
   iconClasses = null,
   iconPos = 'left',
+  id = null,
   label = null,
+  layout = null,
   onClick = () => {},
   onMouseDown = () => {},
-  className = null,
-  type = 'button',
+  style = null,
+  tabIndex = null,
+  title = undefined,
   tooltip = null,
   tooltipOptions = null,
-  style = null,
-  layout = null,
+  type = 'button',
   value = '',
   visible = true
 }) => {
@@ -37,6 +39,7 @@ export const Button = ({
         onClick={onClick}
         onMouseDown={onMouseDown}
         style={style}
+        tabIndex={tabIndex}
         type={type}
         value={value}>
         {icon ? <Icon icon={icon} /> : ''}
@@ -58,12 +61,18 @@ export const Button = ({
           onClick={onClick}
           onMouseDown={onMouseDown}
           style={style}
+          tabIndex={tabIndex}
+          title={title}
           tooltip={tooltip}
           type={type}
           tooltipOptions={tooltipOptions}
           value={value}
         />
-        <span className="srOnly">Email</span>
+        {/* {!title && (
+          <label for={id} className="srOnly">
+            {tooltip}
+          </label>
+        )} */}
       </>
     ) : null;
   }

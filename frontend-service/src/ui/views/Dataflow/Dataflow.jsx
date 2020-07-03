@@ -124,7 +124,7 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'clone'
+            icon: 'archive'
           }
         ]);
       } else if (representatives.length > 1 && isUndefined(representativeId)) {
@@ -137,7 +137,7 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'clone'
+            icon: 'archive'
           }
         ]);
       } else if (representativeId) {
@@ -154,13 +154,13 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'clone',
+            icon: 'archive',
             href: getUrl(routes.DATAFLOW),
             command: () => history.goBack()
           },
           {
             label: currentRepresentative[0],
-            icon: 'clone'
+            icon: 'archive'
           }
         ]);
       } else if (dataflowState.status === 'DESIGN') {
@@ -173,7 +173,7 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'clone'
+            icon: 'archive'
           }
         ]);
       }
@@ -430,7 +430,6 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
-  useCheckNotifications(['COPY_DATASET_SCHEMA_COMPLETED_EVENT'], setIsDataUpdated);
   useCheckNotifications(['RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT'], onLoadReportingDataflow);
 
   const onLoadSchemasValidations = async () => {

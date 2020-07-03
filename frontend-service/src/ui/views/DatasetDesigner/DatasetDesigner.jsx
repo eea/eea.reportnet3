@@ -174,6 +174,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     });
   };
 
+  const changeMode = previewMode => {
+    designerDispatch({ type: 'IS_PREVIEW_MODE_ON', payload: { value: previewMode } });
+  };
+
   const changeUrl = () => {
     window.history.replaceState(
       null,
@@ -525,6 +529,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             className={styles.datasetDescription}
             collapsedHeight={55}
             expandableOnClick={true}
+            id="datasetDescription"
             key="datasetDescription"
             onBlur={e => onBlurDescription(e.target.value)}
             onChange={e => designerDispatch({ type: 'ON_UPDATE_DESCRIPTION', payload: { value: e.target.value } })}
@@ -533,7 +538,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
             value={designerState.datasetDescription || ''}
           />
-
           <Toolbar>
             <div className="p-toolbar-group-right">
               {/* <Button
@@ -543,11 +547,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               label={resources.messages['events']}
               onClick={null}
             /> */}
+              {console.log(designerState.datasetHasData)}
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
                   designerState.datasetHasData && designerState.isPreviewModeOn ? ' p-button-animated-blink' : null
                 }`}
-                disabled={!designerState.datasetHasData || !designerState.isPreviewModeOn}
+                disabled={!designerState.datasetHasData}
                 icon={'validate'}
                 iconClasses={null}
                 label={resources.messages['validate']}
@@ -561,7 +566,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                     ? 'p-button-animated-blink'
                     : null
                 }`}
-                disabled={!designerState.datasetStatistics.datasetErrors || !designerState.isPreviewModeOn}
+                disabled={!designerState.datasetStatistics.datasetErrors}
                 icon={'warning'}
                 label={resources.messages['showValidations']}
                 onClick={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: true })}
@@ -625,6 +630,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         {renderSwitchView()}
         <TabsDesigner
           activeIndex={filterActiveIndex(designerState.dataViewerOptions.activeIndex)}
+          changeMode={changeMode}
           datasetSchemaDTO={designerState.datasetSchema}
           datasetSchemas={designerState.datasetSchemas}
           datasetStatistics={designerState.datasetStatistics}
