@@ -166,6 +166,16 @@ export const onKeyDown = (event, formDispatcher, formState, representative, data
   }
 };
 
+export const isValidEmail = email => {
+  if (isNil(email)) {
+    return true;
+  }
+
+  const expression = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+  return email.match(expression);
+};
+
 const updateRepresentative = async (formDispatcher, formState, updatedRepresentative) => {
   let isChangedAccount = false;
   const { initialRepresentatives } = formState;
@@ -190,7 +200,7 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
     }
   }
 
-  if (isChangedAccount) {
+  if (isChangedAccount && isValidEmail(updatedRepresentative.providerAccount)) {
     try {
       await RepresentativeService.updateProviderAccount(
         parseInt(updatedRepresentative.representativeId),
