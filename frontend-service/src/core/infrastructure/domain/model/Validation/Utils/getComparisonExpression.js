@@ -33,6 +33,14 @@ export const getComparisonExpression = expression => {
         params: [field1, field2]
       };
     }
+
+    if (operatorType === 'LEN' && valueTypeSelector === 'value') {
+      return {
+        operator: getOperatorEquivalence(valueTypeSelector, operatorType, operatorValue),
+        params: [field1, Number(field2)]
+      };
+    }
+
     return {
       operator: getOperatorEquivalence(valueTypeSelector, operatorType, operatorValue),
       params: [field1, field2]

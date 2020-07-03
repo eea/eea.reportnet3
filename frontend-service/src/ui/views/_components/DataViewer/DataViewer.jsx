@@ -17,6 +17,7 @@ import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { ActionsToolbar } from './_components/ActionsToolbar';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Chips } from 'ui/views/_components/Chips';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -77,6 +78,7 @@ const DataViewer = withRouter(
   }) => {
     const userContext = useContext(UserContext);
 
+    const [addAnotherOne, setAddAnotherOne] = useState(false);
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
@@ -197,6 +199,10 @@ const DataViewer = withRouter(
     //   inmLevelErrorTypesWithCorrects = inmLevelErrorTypesWithCorrects.concat(levelErrorTypes);
     //   setLevelErrorTypesWithCorrects(inmLevelErrorTypesWithCorrects);
     // }, [levelErrorTypes]);
+
+    useEffect(() => {
+      if (!addDialogVisible) setAddAnotherOne(false);
+    }, [addDialogVisible]);
 
     useEffect(() => {
       setLevelErrorValidations(levelErrorTypesWithCorrects);
@@ -664,7 +670,9 @@ const DataViewer = withRouter(
             }
           });
         } finally {
-          setAddDialogVisible(false);
+          if (!addAnotherOne) {
+            setAddDialogVisible(false);
+          }
           setIsLoading(false);
           setIsSaving(false);
         }
@@ -735,6 +743,17 @@ const DataViewer = withRouter(
 
     const addRowDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
+        {isNewRecord && (
+          <div className={styles.addAnotherOneWrapper}>
+            <Checkbox
+              id={`addAnother`}
+              isChecked={addAnotherOne}
+              onChange={() => setAddAnotherOne(!addAnotherOne)}
+              role="checkbox"
+            />
+            <span className={styles.addAnotherOne}>{resources.messages['addAnotherOne']}</span>
+          </div>
+        )}
         <Button
           disabled={isSaving}
           label={resources.messages['save']}

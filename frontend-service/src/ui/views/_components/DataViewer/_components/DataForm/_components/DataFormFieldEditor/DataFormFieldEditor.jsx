@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -17,7 +17,8 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
-const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChangeForm, type }) => {
+const DataFormFieldEditor = ({ autoFocus, column, datasetId, field, fieldValue = '', onChangeForm, type }) => {
+  const inputRef = useRef(null);
   const resources = useContext(ResourcesContext);
   const [columnWithLinks, setColumnWithLinks] = useState([]);
   const [isMapOpen, setIsMapOpen] = useState(false);
@@ -26,6 +27,12 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
   useEffect(() => {
     if (!isUndefined(fieldValue)) {
       if (type === 'LINK') onLoadColsSchema(fieldValue);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (autoFocus) {
+      inputRef.current.element.focus();
     }
   }, []);
 
@@ -219,6 +226,7 @@ const DataFormFieldEditor = ({ column, datasetId, field, fieldValue = '', onChan
         onChange={e => onChangeForm(field, e.target.value)}
         // type={type === 'DATE' ? 'date' : 'text'}
         placeholder={type === 'DATE' ? 'YYYY-MM-DD' : ''}
+        ref={inputRef}
         style={{ width: '35%' }}
         type="text"
         value={fieldValue}
