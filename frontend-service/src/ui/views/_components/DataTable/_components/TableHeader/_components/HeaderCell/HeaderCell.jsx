@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
-import { InputText } from 'primereact/inputtext';
+import uuid from 'uuid';
+
+import { InputText } from 'ui/views/_components/InputText';
+//'primereact/inputtext';
 import classNames from 'classnames';
 import { RowCheckbox } from 'ui/views/_components/DataTable/_components/RowCheckbox';
 import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
@@ -127,21 +130,27 @@ export class HeaderCell extends Component {
     );
 
     let sortIconElement = this.renderSortIcon(sorted, sortOrder);
-
     if (this.props.filter) {
+      const id = uuid.v4();
       filterElement = this.props.filterElement || (
-        <InputText
-          onInput={this.onFilterInput}
-          type={this.props.filterType}
-          defaultValue={
-            this.props.filters && this.props.filters[this.props.field]
-              ? this.props.filters[this.props.field].value
-              : null
-          }
-          className="p-column-filter"
-          placeholder={this.props.filterPlaceholder}
-          maxLength={this.props.filterMaxLength}
-        />
+        <>
+          <InputText
+            id={`${this.props.field}_${id}_filter`}
+            onInput={this.onFilterInput}
+            type={this.props.filterType}
+            defaultValue={
+              this.props.filters && this.props.filters[this.props.field]
+                ? this.props.filters[this.props.field].value
+                : null
+            }
+            className="p-column-filter"
+            placeholder={this.props.filterPlaceholder}
+            maxLength={this.props.filterMaxLength}
+          />
+          <label for={`${this.props.field}_${id}_filter`} className="srOnly">
+            {`${this.props.field}_filter`}
+          </label>
+        </>
       );
     }
 

@@ -4,7 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 
 import styles from './ReportingObligations.module.scss';
 
-import { CardsView } from './_components/CardsView';
+import { CardsView } from 'ui/views/_components/CardsView';
 import { Filters } from 'ui/views/_components/Filters';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -32,7 +32,6 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     filteredData: [],
     isLoading: false,
     issues: [],
-    isTableView: true,
     oblChoosed: {},
     organizations: [],
     pagination: { first: 0, rows: 10, page: 0 },
@@ -53,6 +52,10 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
   const isFiltered = ReportingObligationUtils.isFiltered(reportingObligationState.filterBy);
 
   const isLoading = value => reportingObligationDispatch({ type: 'IS_LOADING', payload: { value } });
+
+  const onChangePagination = pagination => {
+    reportingObligationDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
+  };
 
   const onLoadCountries = async () => {
     try {
@@ -107,16 +110,12 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
 
   const onLoadSearchedData = data => reportingObligationDispatch({ type: 'SEARCHED_DATA', payload: { data } });
 
-  const onChangePagination = pagination =>
-    reportingObligationDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
+  const onOpenObligation = id => window.open(`http://rod3.devel1dub.eionet.europa.eu/obligations/${id}`);
 
   const onSelectObl = rowData => {
     const oblChoosed = { id: rowData.id, title: rowData.title };
     reportingObligationDispatch({ type: 'ON_SELECT_OBL', payload: { oblChoosed } });
   };
-
-  const onToggleView = () =>
-    reportingObligationDispatch({ type: 'ON_TOGGLE_VIEW', payload: { view: !reportingObligationState.isTableView } });
 
   const parsedFilterList = {
     countries: reportingObligationState.countries,
@@ -125,7 +124,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
   };
 
   const renderData = () =>
-    reportingObligationState.isTableView ? (
+    userContext.userProps.listView ? (
       <TableView
         checkedObligation={reportingObligationState.oblChoosed}
         data={reportingObligationState.searchedData}
@@ -135,10 +134,12 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
       />
     ) : (
       <CardsView
-        checkedObligation={reportingObligationState.oblChoosed}
+        checkedCard={reportingObligationState.oblChoosed}
+        contentType={'Obligations'}
         data={reportingObligationState.searchedData}
+        handleRedirect={onOpenObligation}
         onChangePagination={onChangePagination}
-        onSelectObl={onSelectObl}
+        onSelectCard={onSelectObl}
         pagination={reportingObligationState.pagination}
       />
     );
@@ -158,7 +159,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
         <Filters data={reportingObligationState.filteredData} getFilteredData={onLoadSearchedData} searchAll />
         <div className={styles.switchDiv}>
           <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
-          <InputSwitch checked={reportingObligationState.isTableView} onChange={() => onToggleView()} />
+          <InputSwitch checked={userContext.userProps.listView} onChange={e => userContext.onToggleTypeView(e.value)} />
           <label className={styles.switchTextInput}>{resources.messages['listView']}</label>
         </div>
       </div>

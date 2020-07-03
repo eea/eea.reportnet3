@@ -195,10 +195,10 @@ export const RowValidation = ({ datasetId, tabs }) => {
     } = creationFormState;
 
     if (expressionType === 'ifThenClause') {
-      formula = `IF ${getComparisonExpressionString(expressionsIf, tabs)} THEN ${getComparisonExpressionString(
+      formula = `IF ( ${getComparisonExpressionString(expressionsIf, tabs)} ) THEN ( ${getComparisonExpressionString(
         expressionsThen,
         tabs
-      )}`;
+      )} )`;
     } else {
       formula = getComparisonExpressionString(expressions, tabs);
     }

@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
@@ -42,7 +43,6 @@ import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
-import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
@@ -99,7 +99,6 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -165,12 +164,8 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
 
-  /**
-   * The data collection repository.
-   */
-  @Autowired
-  private DataCollectionRepository dataCollectionRepository;
 
+  /** The dataflow controller zull. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZull;
 
@@ -361,7 +356,7 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void saveAllRecords(@DatasetId Long datasetId, List<RecordValue> listaGeneral) {
+  public void saveAllRecords(Long datasetId, List<RecordValue> listaGeneral) {
     recordRepository.saveAll(listaGeneral);
   }
 
@@ -1204,8 +1199,19 @@ public class DatasetServiceImpl implements DatasetService {
             field.setValue(field.getValue().substring(0, fieldMaxLength));
           }
         }
-        // if the type is multiselect codelist we sort the values in lexicographic order
-        if (DataType.MULTISELECT_CODELIST.equals(field.getType()) && null != field.getValue()) {
+        // if the type is link multiselect we check if is multiple
+        Boolean isLinkMultiselect = false;
+        if (DataType.LINK.equals(field.getType())) {
+          Document fieldSchema = schemasRepository.findFieldSchema(metabase.getDatasetSchema(),
+              field.getIdFieldSchema());
+          isLinkMultiselect = fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES) != null
+              ? (Boolean) fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES)
+              : Boolean.FALSE;
+        }
+        // if the type is multiselect codelist or Link multiple we sort the values in lexicographic
+        // order
+        if ((DataType.MULTISELECT_CODELIST.equals(field.getType()) || isLinkMultiselect)
+            && null != field.getValue()) {
           List<String> values = new ArrayList<>();
           Arrays.asList(field.getValue().split(",")).stream()
               .forEach(value -> values.add(value.trim()));
@@ -1365,8 +1371,19 @@ public class DatasetServiceImpl implements DatasetService {
       throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
 
     }
-    // if the type is multiselect codelist we sort the values in lexicographic order
-    if (DataType.MULTISELECT_CODELIST.equals(field.getType()) && null != field.getValue()) {
+    Boolean isLinkMultiselect = Boolean.FALSE;
+    if (DataType.LINK.equals(field.getType())) {
+      String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
+      Document fieldSchema =
+          schemasRepository.findFieldSchema(datasetSchemaId, field.getIdFieldSchema());
+      isLinkMultiselect = fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES) != null
+          ? (Boolean) fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES)
+          : Boolean.FALSE;
+    }
+    // if the type is multiselect codelist or Link multiselect we sort the values in lexicographic
+    // order
+    if ((DataType.MULTISELECT_CODELIST.equals(field.getType()) || isLinkMultiselect)
+        && null != field.getValue()) {
       List<String> values = new ArrayList<>();
       Arrays.asList(field.getValue().split(",")).stream()
           .forEach(value -> values.add(value.trim()));
@@ -1966,6 +1983,124 @@ public class DatasetServiceImpl implements DatasetService {
       }
     }
     return result;
+  }
+
+
+
+  /**
+   * Copy data.
+   *
+   * @param dictionaryOriginTargetDatasetsId the dictionary origin target datasets id
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   */
+  @Override
+  public void copyData(Map<Long, Long> dictionaryOriginTargetDatasetsId,
+      Map<String, String> dictionaryOriginTargetObjectId) {
+    // We've got the dictionary of origin datasetsId and it's new equivalent datasetId from the
+    // copied ones
+    // We'll load the data from the origin datasetId, modify it using the dictionary to accurate to
+    // the target datasetId (like the tableschema) and finally save it
+    dictionaryOriginTargetDatasetsId.forEach((Long originDataset, Long targetDataset) -> {
+
+      DesignDataset originDesign =
+          designDatasetRepository.findById(originDataset).orElse(new DesignDataset());
+      if (StringUtils.isNoneBlank(originDesign.getDatasetSchema())) {
+
+        // get tables from schema
+        DataSetSchema schema =
+            schemasRepository.findByIdDataSetSchema(new ObjectId(originDesign.getDatasetSchema()));
+        List<TableSchema> listOfTables = schema.getTableSchemas();
+        List<TableSchema> listOfTablesFiltered = new ArrayList<>();
+        for (TableSchema desingTableToPrefill : listOfTables) {
+          if (Boolean.TRUE.equals(desingTableToPrefill.getToPrefill())) {
+            listOfTablesFiltered.add(desingTableToPrefill);
+          }
+        }
+        // if there are tables of the origin dataset with tables ToPrefill, then we'll copy the data
+        if (!listOfTablesFiltered.isEmpty()) {
+          LOG.info("There is data to copy. Copy data from datasetId {} to datasetId {}",
+              originDataset, targetDataset);
+          List<RecordValue> recordDesignValuesList = new ArrayList<>();
+
+          recordDesignValuesList = replaceData(originDataset, targetDataset, listOfTablesFiltered,
+              dictionaryOriginTargetObjectId);
+
+          if (!recordDesignValuesList.isEmpty()) {
+            // save values
+            TenantResolver
+                .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset));
+            saveAllRecords(targetDataset, recordDesignValuesList);
+          }
+        }
+      }
+    });
+
+  }
+
+
+  /**
+   * Replace data.
+   *
+   * @param originDataset the origin dataset
+   * @param targetDataset the target dataset
+   * @param listOfTablesFiltered the list of tables filtered
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @return the list
+   */
+  private List<RecordValue> replaceData(Long originDataset, Long targetDataset,
+      List<TableSchema> listOfTablesFiltered, Map<String, String> dictionaryOriginTargetObjectId) {
+
+    TenantResolver.setTenantName(
+        String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
+    List<RecordValue> recordDesignValues = new ArrayList<>();
+
+    for (TableSchema desingTable : listOfTablesFiltered) {
+      recordDesignValues.addAll(
+          recordRepository.findByTableValueAllRecords(desingTable.getIdTableSchema().toString()));
+    }
+    List<RecordValue> recordDesignValuesList = new ArrayList<>();
+
+    // fill the data
+    DatasetValue ds = new DatasetValue();
+    ds.setId(targetDataset);
+
+    Optional<PartitionDataSetMetabase> datasetPartition =
+        partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(targetDataset);
+    Long datasetPartitionId = null;
+    if (null != datasetPartition.orElse(null)) {
+      datasetPartitionId = datasetPartition.get().getId();
+    }
+
+    for (RecordValue record : recordDesignValues) {
+      RecordValue recordAux = new RecordValue();
+      TableValue tableAux = record.getTableValue();
+      TenantResolver
+          .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset));
+      tableAux.setId(tableRepository.findIdByIdTableSchema(
+          dictionaryOriginTargetObjectId.get(record.getTableValue().getIdTableSchema())));
+
+      recordAux.setTableValue(tableAux);
+      recordAux.setIdRecordSchema(dictionaryOriginTargetObjectId.get(record.getIdRecordSchema()));
+      recordAux.setDatasetPartitionId(datasetPartitionId);
+
+
+      TenantResolver.setTenantName(
+          String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
+      List<FieldValue> fieldValues = fieldRepository.findByRecord(record);
+      List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
+      for (FieldValue field : fieldValues) {
+        FieldValue auxField = new FieldValue();
+        auxField.setValue(field.getValue());
+        auxField.setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
+        auxField.setType(field.getType());
+        auxField.setRecord(recordAux);
+        fieldValuesOnlyValues.add(auxField);
+      }
+      recordAux.setFields(fieldValuesOnlyValues);
+      recordDesignValuesList.add(recordAux);
+    }
+
+    return recordDesignValuesList;
   }
 
   /**

@@ -8,6 +8,7 @@ import org.eea.interfaces.controller.dataflow.IntegrationController;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
+import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -175,6 +176,26 @@ public class IntegrationControllerImpl implements IntegrationController {
       @RequestParam("datasetId") Long datasetId, @RequestBody IntegrationVO integration) {
     return integrationExecutorFactory.getExecutor(integrationToolTypeEnum)
         .execute(integrationOperationTypeEnum, file, datasetId, integration);
+  }
+
+
+  /**
+   * Copy integrations.
+   *
+   * @param copyVO the copy VO
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PostMapping(value = "/private/copyIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void copyIntegrations(@RequestBody CopySchemaVO copyVO) {
+    try {
+      integrationService.copyIntegrations(copyVO.getDataflowIdDestination(),
+          copyVO.getOriginDatasetSchemaIds(), copyVO.getDictionaryOriginTargetObjectId());
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error copying integrations: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
 
 }
