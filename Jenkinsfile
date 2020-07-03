@@ -223,7 +223,7 @@ pipeline {
                             def app
                             app = docker.build("k8s-swi001:5000/api-gateway:1.0$TAG_SUFIX", "--build-arg JAR_FILE=target/api-gateway-1.0-SNAPSHOT.jar --build-arg MS_PORT=8010 -f ./Dockerfile ./api-gateway ")
                             app.push()
-                            sh 'docker rmi k8s-swi001:5000/api-gateway-service:1.0${TAG_SUFIX}'
+                            sh 'docker rmi k8s-swi001:5000/api-gateway:1.0${TAG_SUFIX}'
                         }
                         script {
                             echo 'Inspire Harvester'
@@ -282,5 +282,11 @@ pipeline {
         }
 
 
-    }
+    }post {
+             always {
+                 echo 'Removing unstaged images'
+                 sh "docker rmi $(docker images | awk '/^<none>/{print $3}')"
+
+             }
+         }
 }
