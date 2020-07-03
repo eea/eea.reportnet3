@@ -28,7 +28,6 @@ import { Title } from '../_components/Title/Title';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
-import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
@@ -52,7 +51,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
   const dataflowInitialState = {
     currentUrl: '',
@@ -88,8 +87,8 @@ const Dataflow = withRouter(({ history, match }) => {
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
   useEffect(() => {
-    if (!isNil(user.contextRoles)) onLoadPermission();
-  }, [user]);
+    if (!isNil(userContext.contextRoles)) onLoadPermission();
+  }, [userContext]);
 
   useEffect(() => {
     leftSideBarContext.addHelpSteps(DataflowHelpConfig, 'dataflowHelp');
@@ -319,14 +318,13 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   const onLoadPermission = () => {
-    const hasWritePermissions = UserService.hasPermission(
-      user,
+    const hasWritePermissions = userContext.hasPermission(
       [config.permissions.PROVIDER],
       `${config.permissions.DATAFLOW}${dataflowId}`
     );
 
-    const isCustodian = UserService.hasPermission(
-      user,
+    console.log('userContext', userContext);
+    const isCustodian = userContext.hasPermission(
       [config.permissions.CUSTODIAN],
       `${config.permissions.DATAFLOW}${dataflowId}`
     );

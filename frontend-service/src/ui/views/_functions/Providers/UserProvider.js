@@ -1,126 +1,36 @@
 import React, { useContext, useReducer } from 'react';
 
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+import isUndefined from 'lodash/isUndefined';
+
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+
+import { userReducer } from 'ui/views/_functions/Reducers/userReducer';
 
 const userSettingsDefaultState = {
   userProps: {
+    amPm24h: true,
+    dateFormat: 'YYYY-MM-DD',
+    listView: true,
     rowsPerPage: 10,
-    visualTheme: 'light',
     showLogoutConfirmation: true,
     userImage: [],
-    dateFormat: 'YYYY-MM-DD',
-    amPm24h: true,
-    listView: true
-  }
-};
-
-const userReducer = (state, { type, payload }) => {
-  switch (type) {
-    case 'LOGIN':
-      return {
-        ...state,
-        ...payload.user
-      };
-    case 'LOGOUT':
-      return userSettingsDefaultState;
-    case 'ADD_SOCKET':
-      return {
-        ...state,
-        socket: payload
-      };
-    case 'REFRESH_TOKEN':
-      return {
-        ...state,
-        ...payload.user
-      };
-    case 'TOGGLE_LOGOUT_CONFIRM':
-      return {
-        ...state,
-        userProps: {
-          ...state.userProps,
-          showLogoutConfirmation: payload
-        }
-      };
-    case 'DEFAULT_ROW_SELECTED':
-      return {
-        ...state,
-        userProps: {
-          ...state.userProps,
-          rowsPerPage: payload
-        }
-      };
-    case 'DATE_FORMAT':
-      return {
-        ...state,
-        userProps: {
-          ...state.userProps,
-          dateFormat: payload
-        }
-      };
-    case 'TOGGLE_DATE_FORMAT_AM_PM_24H':
-      return {
-        ...state,
-        userProps: {
-          ...state.userProps,
-          amPm24h: payload
-        }
-      };
-    case 'DEFAULT_VISUAL_THEME':
-      return {
-        ...state,
-        userProps: {
-          ...state.userProps,
-          visualTheme: payload
-        }
-      };
-    case 'DEFAULT_VISUAL_TYPE':
-      return {
-        ...state,
-        userProps: {
-          ...state.userProps,
-          listView: payload
-        }
-      };
-
-    case 'SETTINGS_LOADED':
-      return {
-        ...state,
-        userProps: {
-          ...state.userProps,
-          settingsLoaded: payload
-        }
-      };
-    case 'USER_AVATAR_IMAGE':
-      return {
-        ...state,
-        userProps: {
-          ...state.userProps,
-          userImage: payload
-        }
-      };
-
-    default:
-      return state;
+    visualTheme: 'light'
   }
 };
 
 export const UserProvider = ({ children }) => {
   const notificationContext = useContext(NotificationContext);
-  //const [state, userDispatcher] = useReducer(userReducer, {});
-  const [state, userDispatcher] = useReducer(userReducer, userSettingsDefaultState);
-  // const notificationContext = useContext(NotificationContext);
+  const [userState, userDispatcher] = useReducer(userReducer, userSettingsDefaultState);
 
   return (
     <UserContext.Provider
       value={{
-        ...state,
+        ...userState,
         onLogin: user => {
           userDispatcher({
             type: 'LOGIN',
-            payload: {
-              user
-            }
+            payload: { user }
           });
         },
         onAddSocket: socket => {
@@ -133,9 +43,7 @@ export const UserProvider = ({ children }) => {
           notificationContext.deleteAll();
           userDispatcher({
             type: 'LOGOUT',
-            payload: {
-              user: {}
-            }
+            payload: userSettingsDefaultState
           });
         },
         onChangeRowsPerPage: rowNumber => {
@@ -190,6 +98,18 @@ export const UserProvider = ({ children }) => {
             type: 'USER_AVATAR_IMAGE',
             payload: base64Image
           });
+        },
+        hasPermission: (permissions, entity) => {
+          let allow = false;
+          if (isUndefined(entity)) {
+            if (permissions.filter(permission => userState.accessRole.includes(permission)).length > 0) allow = true;
+          } else {
+            permissions.forEach(permission => {
+              const role = `${entity}-${permission}`;
+              if (userState.contextRoles.includes(role)) allow = true;
+            });
+          }
+          return allow;
         }
       }}>
       {children}

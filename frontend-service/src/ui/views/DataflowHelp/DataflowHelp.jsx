@@ -23,7 +23,6 @@ import { WebLinks } from './_components/WebLinks';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { DocumentService } from 'core/services/Document';
-import { UserService } from 'core/services/User';
 import { WebLinkService } from 'core/services/WebLink';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
@@ -45,7 +44,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
   const [dataflowName, setDataflowName] = useState();
   const [datasetsSchemas, setDatasetsSchemas] = useState([]);
@@ -62,12 +61,12 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const [webLinks, setWebLinks] = useState([]);
 
   useEffect(() => {
-    if (!isUndefined(user.contextRoles)) {
+    if (!isUndefined(userContext.contextRoles)) {
       setIsCustodian(
-        UserService.hasPermission(user, [config.permissions.CUSTODIAN], `${config.permissions.DATAFLOW}${dataflowId}`)
+        userContext.hasPermission([config.permissions.CUSTODIAN], `${config.permissions.DATAFLOW}${dataflowId}`)
       );
     }
-  }, [user]);
+  }, [userContext]);
 
   //Bread Crumbs settings
   useEffect(() => {

@@ -31,7 +31,6 @@ import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
-import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
@@ -58,7 +57,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
@@ -115,19 +114,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, []);
 
   useEffect(() => {
-    if (!isUndefined(user.contextRoles)) {
+    if (!isUndefined(userContext.contextRoles)) {
       designerDispatch({
         type: 'LOAD_PERMISSIONS',
         payload: {
-          permissions: UserService.hasPermission(
-            user,
+          permissions: userContext.hasPermission(
             [config.permissions.PROVIDER],
             `${config.permissions.DATASET}${datasetId}`
           )
         }
       });
     }
-  }, [user]);
+  }, [userContext]);
 
   useEffect(() => {
     breadCrumbContext.add([

@@ -19,7 +19,7 @@ import { routes } from 'ui/routes';
 
 const ReportnetLogin = ({ history }) => {
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
   const notificationContext = useContext(NotificationContext);
   const [loginError, setLoginError] = useState();
   const initialValues = {
@@ -47,7 +47,7 @@ const ReportnetLogin = ({ history }) => {
               setSubmitting(true);
               try {
                 const userObject = await UserService.oldLogin(values.userName, values.password);
-                user.onLogin(userObject);
+                userContext.onLogin(userObject);
                 history.push(getUrl(routes.DATAFLOWS));
               } catch (error) {
                 console.error(error);
@@ -55,7 +55,7 @@ const ReportnetLogin = ({ history }) => {
                   type: 'USER_SERVICE_OLD_LOGIN_ERROR',
                   content: {}
                 });
-                user.onLogout();
+                userContext.onLogout();
                 const errorResponse = error.response;
                 if (!isUndefined(errorResponse) && errorResponse.status === 500) {
                   setLoginError('Incorrect username or password');
