@@ -1,7 +1,9 @@
 package org.eea.dataflow.service.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -48,7 +50,7 @@ public class ContributorServiceImplTest {
 
   /** The dataflow controlle zuul. */
   @Mock
-  private DataFlowControllerZuul dataflowControlleZuul;
+  private DataFlowControllerZuul dataflowControllerZuul;
   /** The contributor VO write. */
   private ContributorVO contributorVOWrite;
 
@@ -63,6 +65,11 @@ public class ContributorServiceImplTest {
 
   /** The reporting datasets. */
   private List<ReportingDatasetVO> reportingDatasets;
+
+  /**
+   * Inits the mocks.
+   */
+  private List<UserRepresentationVO> listUserWrite;
 
   /**
    * Inits the mocks.
@@ -83,6 +90,7 @@ public class ContributorServiceImplTest {
     dataflowVO.setId(1L);
     designDatasets = new ArrayList();
     reportingDatasets = new ArrayList();
+    listUserWrite = new ArrayList<>();
 
     DesignDatasetVO designDatasetVO = new DesignDatasetVO();
     designDatasetVO.setId(1L);
@@ -94,6 +102,7 @@ public class ContributorServiceImplTest {
     reportingDatasets.add(reportingDatasetVO);
     dataflowVO.setReportingDatasets(reportingDatasets);
     dataflowVO.setDesignDatasets(designDatasets);
+    listUserWrite.add(new UserRepresentationVO());
     MockitoAnnotations.initMocks(this);
   }
 
@@ -113,6 +122,7 @@ public class ContributorServiceImplTest {
         .getUsersByGroup(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(1L)))
             .thenReturn(usersEditorWrite);
     contributorServiceImpl.createAssociatedPermissions(1L, 1L);
+    Mockito.verify(userManagementControllerZull, times(2)).getUsersByGroup((Mockito.any()));
   }
 
   /**
@@ -138,6 +148,8 @@ public class ContributorServiceImplTest {
             .thenReturn(usersEditorWrite);
     doNothing().when(resourceManagementControllerZull).createResource(Mockito.any());
     contributorServiceImpl.createAssociatedPermissions(1L, 1L);
+    Mockito.verify(userManagementControllerZull, times(1))
+        .addContributorsToResources(Mockito.any());
   }
 
 
@@ -165,7 +177,7 @@ public class ContributorServiceImplTest {
    */
   @Test()
   public void deleteContributorEditor() throws EEAException {
-    when(dataflowControlleZuul.findById(1L)).thenReturn(dataflowVO);
+    when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
     contributorServiceImpl.deleteContributor(1L, "reportnet@reportnet.net", "EDITOR", 1L);
     Mockito.verify(userManagementControllerZull, times(1))
         .removeContributorsFromResources(Mockito.any());
@@ -179,7 +191,7 @@ public class ContributorServiceImplTest {
    */
   @Test()
   public void deleteContributorReport() throws EEAException {
-    when(dataflowControlleZuul.findById(1L)).thenReturn(dataflowVO);
+    when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
     contributorServiceImpl.deleteContributor(1L, "reportnet@reportnet.net", "REPORTER", 1L);
     Mockito.verify(userManagementControllerZull, times(1))
         .removeContributorsFromResources(Mockito.any());
@@ -193,14 +205,14 @@ public class ContributorServiceImplTest {
    */
   @Test()
   public void createContributorEditorRead() throws EEAException {
-    when(dataflowControlleZuul.findById(1L)).thenReturn(dataflowVO);
+    when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
     when(resourceManagementControllerZull.getResourceDetail(1L,
         ResourceGroupEnum.DATAFLOW_EDITOR_READ)).thenReturn(resourceInfoVO);
     when(resourceManagementControllerZull.getResourceDetail(1L,
         ResourceGroupEnum.DATASCHEMA_EDITOR_READ)).thenReturn(resourceInfoVO);
     contributorServiceImpl.createContributor(1L, contributorVORead, "EDITOR");
-    Mockito.verify(dataflowControlleZuul, times(1)).findById(1L);
+    Mockito.verify(dataflowControllerZuul, times(1)).findById(1L);
   }
 
   /**
@@ -210,7 +222,7 @@ public class ContributorServiceImplTest {
    */
   @Test()
   public void createContributorEditorWrite() throws EEAException {
-    when(dataflowControlleZuul.findById(1L)).thenReturn(dataflowVO);
+    when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
     when(resourceManagementControllerZull.getResourceDetail(1L,
         ResourceGroupEnum.DATAFLOW_EDITOR_WRITE)).thenReturn(resourceInfoVO);
@@ -218,7 +230,7 @@ public class ContributorServiceImplTest {
         ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE)).thenReturn(resourceInfoVO);
     contributorServiceImpl.createContributor(1L, contributorVOWrite, "EDITOR");
 
-    Mockito.verify(dataflowControlleZuul, times(1)).findById(1L);
+    Mockito.verify(dataflowControllerZuul, times(1)).findById(1L);
   }
 
   /**
@@ -228,14 +240,14 @@ public class ContributorServiceImplTest {
    */
   @Test()
   public void createContributorReportRead() throws EEAException {
-    when(dataflowControlleZuul.findById(1L)).thenReturn(dataflowVO);
+    when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
     when(resourceManagementControllerZull.getResourceDetail(1L,
         ResourceGroupEnum.DATAFLOW_REPORTER_READ)).thenReturn(resourceInfoVO);
     when(resourceManagementControllerZull.getResourceDetail(1L,
         ResourceGroupEnum.DATASCHEMA_REPORTER_READ)).thenReturn(resourceInfoVO);
     contributorServiceImpl.createContributor(1L, contributorVORead, "REPORTER");
-    Mockito.verify(dataflowControlleZuul, times(1)).findById(1L);
+    Mockito.verify(dataflowControllerZuul, times(1)).findById(1L);
   }
 
 
@@ -246,15 +258,51 @@ public class ContributorServiceImplTest {
    */
   @Test()
   public void updateContributor() throws EEAException {
-    when(dataflowControlleZuul.findById(1L)).thenReturn(dataflowVO);
+    when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
     when(resourceManagementControllerZull.getResourceDetail(1L,
         ResourceGroupEnum.DATAFLOW_EDITOR_WRITE)).thenReturn(resourceInfoVO);
     when(resourceManagementControllerZull.getResourceDetail(1L,
         ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE)).thenReturn(resourceInfoVO);
     contributorServiceImpl.updateContributor(1L, contributorVOWrite, "EDITOR", 1l);
-    Mockito.verify(dataflowControlleZuul, times(2)).findById(1L);
+    Mockito.verify(dataflowControllerZuul, times(2)).findById(1L);
   }
 
+  /**
+   * Update contributor add throw.
+   *
+   * @throws EEAException the EEA exception
+   */
+  // @Test(expected = ResponseStatusException.class)
+  public void updateContributorAddThrow() throws EEAException {
+    doThrow(ResponseStatusException.class).when(dataflowControllerZuul).findById(Mockito.any());
+    try {
+      contributorServiceImpl.updateContributor(1L, contributorVOWrite, "EDITOR", 1l);
+    } catch (EEAException ex) {
+      // assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      // assertEquals("Role REPO doesn't exist", ex.getReason());
+      throw ex;
+    }
+  }
+
+  /**
+   * Find contributors by resource id editor test.
+   */
+  @Test
+  public void findContributorsByResourceIdEditorTest() {
+    when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
+    assertNotNull(contributorServiceImpl.findContributorsByResourceId(1L, 1L, "EDITOR"));
+  }
+
+  /**
+   * Find contributors by resource id reporter test.
+   */
+  @Test
+  public void findContributorsByResourceIdReporterTest() {
+    reportingDatasets.get(0).setDataProviderId(2L);
+    when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
+    when(userManagementControllerZull.getUsersByGroup(Mockito.any())).thenReturn(listUserWrite);
+    assertNotNull(contributorServiceImpl.findContributorsByResourceId(1L, 1L, "REPORTER"));
+  }
 
 }
