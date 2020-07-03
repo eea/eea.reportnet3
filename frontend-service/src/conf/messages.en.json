@@ -719,6 +719,7 @@
     "toggleListView": "Switch to list view",
     "toggleMagazineView": "Switch to magazine view",
     "loadDataflowsError": "Error loading dataflows",
-    "clearFilter": "Clear filter"
+    "clearFilter": "Clear filter",
+    "addAnotherOne": "Add another record"
   }
 }
