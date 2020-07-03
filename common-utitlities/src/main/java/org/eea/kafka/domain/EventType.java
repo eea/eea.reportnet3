@@ -202,7 +202,11 @@ public enum EventType {
 
   /** The copy dataset schema failed event. */
   COPY_DATASET_SCHEMA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "copy_dataset_schema_completed_event", true);
+      "copy_dataset_schema_completed_event", true),
+
+  /** The copy dataset schema not found event. */
+  COPY_DATASET_SCHEMA_NOT_FOUND_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "copy_dataset_schema_not_found_event", true);
 
 
 
