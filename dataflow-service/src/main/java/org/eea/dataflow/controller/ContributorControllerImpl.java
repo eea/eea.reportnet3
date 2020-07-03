@@ -221,7 +221,7 @@ public class ContributorControllerImpl implements ContributorController {
   private void checkAccount(Long dataflowId, String account) {
     // check if the email is correct
     UserRepresentationVO emailUser = userManagementControllerZull.getUserByEmail(account);
-    if (null == emailUser) {
+    if (null == emailUser || null == emailUser.getEmail()) {
       LOG_ERROR.error(
           "Error creating contributor with the account: {} in the dataflow {} because the email doesn't exist in the system",
           account, dataflowId);

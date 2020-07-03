@@ -335,7 +335,7 @@ public class ContributorServiceImpl implements ContributorService {
           "Error creating contributor with the account: {} in the dataflow {}  because the role not avaliable {}",
           contributorVO.getAccount(), dataflowId, role);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          new StringBuilder("ROLE").append(role).append(" doesn't exist").toString());
+          new StringBuilder("Role ").append(role).append(" doesn't exist").toString());
     }
 
   }

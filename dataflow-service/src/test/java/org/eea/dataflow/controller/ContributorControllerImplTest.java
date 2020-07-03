@@ -35,6 +35,7 @@ public class ContributorControllerImplTest {
   @Mock
   private ContributorService contributorService;
 
+  /** The user management controller zull. */
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
 
@@ -44,6 +45,8 @@ public class ContributorControllerImplTest {
   /** The contributor VO read. */
   private ContributorVO contributorVORead;
 
+  /** The user representation VO. */
+  private UserRepresentationVO userRepresentationVO;
 
   /**
    * Inits the mocks.
@@ -59,6 +62,9 @@ public class ContributorControllerImplTest {
     contributorVORead.setAccount("read@reportnet.net");
     contributorVORead.setRole("EDITOR");
     contributorVORead.setWritePermission(false);
+
+    userRepresentationVO = new UserRepresentationVO();
+    userRepresentationVO.setEmail("write@reportnet.net");
     MockitoAnnotations.initMocks(this);
   }
 
@@ -71,6 +77,8 @@ public class ContributorControllerImplTest {
   public void updateContributor() throws EEAException {
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(new UserRepresentationVO());
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
+        .thenReturn(userRepresentationVO);
     contributorControllerImpl.updateEditor(1L, contributorVOWrite);
     Mockito.verify(contributorService, times(1)).updateContributor(1L, contributorVOWrite, "EDITOR",
         null);
@@ -87,6 +95,8 @@ public class ContributorControllerImplTest {
         .thenReturn(new UserRepresentationVO());
     Mockito.doThrow(EEAException.class).when(contributorService).updateContributor(1L,
         contributorVOWrite, "EDITOR", null);
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
+        .thenReturn(userRepresentationVO);
     ResponseEntity<?> value = contributorControllerImpl.updateEditor(1L, contributorVOWrite);
     assertEquals(null, value.getBody());
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, value.getStatusCode());
@@ -108,9 +118,14 @@ public class ContributorControllerImplTest {
    */
   @Test
   public void delete() throws EEAException {
+    UserRepresentationVO user = new UserRepresentationVO();
+    user.setEmail("write@reportnet.net");
+
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
-        .thenReturn(new UserRepresentationVO());
+        .thenReturn(userRepresentationVO);
     contributorControllerImpl.deleteEditor(1L, contributorVOWrite);
+    Mockito.verify(contributorService, times(1)).deleteContributor(1L, "write@reportnet.net",
+        "EDITOR", null);
   }
 
   /**
@@ -124,13 +139,64 @@ public class ContributorControllerImplTest {
         .thenReturn(new UserRepresentationVO());
     Mockito.doThrow(EEAException.class).when(contributorService)
         .deleteContributor(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
+        .thenReturn(userRepresentationVO);
     try {
       contributorControllerImpl.deleteEditor(1L, contributorVOWrite);
     } catch (ResponseStatusException ex) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatus());
       throw ex;
     }
+
   }
 
+  /**
+   * Email null test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void emailNullTest() throws EEAException {
+
+    userRepresentationVO.setEmail("write@reportnet.net");
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any())).thenReturn(null);
+    try {
+      contributorControllerImpl.deleteEditor(1L, contributorVOWrite);
+    } catch (ResponseStatusException ex) {
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      assertEquals("The email write@reportnet.net doesn't exist in repornet", ex.getReason());
+      throw ex;
+    }
+  }
+
+
+  /**
+   * Creates the associated permissions.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test()
+  public void createAssociatedPermissions() throws EEAException {
+    contributorControllerImpl.createAssociatedPermissions(1L, 1L);
+    Mockito.verify(contributorService, times(1)).createAssociatedPermissions(1L, 1L);
+  }
+
+
+  /**
+   * Creates the associated permissions throw.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createAssociatedPermissionsThrow() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(contributorService).createAssociatedPermissions(1L,
+        1L);
+    try {
+      contributorControllerImpl.createAssociatedPermissions(1L, 1L);
+    } catch (ResponseStatusException ex) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatus());
+      throw ex;
+    }
+  }
 
 }
