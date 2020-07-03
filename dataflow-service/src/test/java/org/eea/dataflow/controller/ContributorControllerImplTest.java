@@ -199,4 +199,81 @@ public class ContributorControllerImplTest {
     }
   }
 
+
+
+  /**
+   * Delete reporter.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test()
+  public void deleteReporter() throws EEAException {
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
+        .thenReturn(userRepresentationVO);
+    contributorControllerImpl.deleteReporter(1L, 1L, contributorVORead);
+  }
+
+  /**
+   * Delete reporter throw.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void deleteReporterThrow() throws EEAException {
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
+        .thenReturn(userRepresentationVO);
+    Mockito.doThrow(EEAException.class).when(contributorService).deleteContributor(1L,
+        "read@reportnet.net", "REPORTER", 1L);
+    try {
+      contributorControllerImpl.deleteReporter(1L, 1L, contributorVORead);
+    } catch (ResponseStatusException ex) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatus());
+      throw ex;
+    }
+  }
+
+
+  /**
+   * Find reporters by group.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test()
+  public void findReportersByGroup() throws EEAException {
+    contributorControllerImpl.findReportersByGroup(1L, 1L);
+    Mockito.verify(contributorService, times(1)).findContributorsByResourceId(1L, 1L, "REPORTER");
+  }
+
+
+  /**
+   * Update reporter.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test()
+  public void updateReporter() throws EEAException {
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
+        .thenReturn(userRepresentationVO);
+    contributorControllerImpl.updateReporter(1L, 1L, contributorVORead);
+    Mockito.verify(contributorService, times(1)).updateContributor(1L, contributorVORead,
+        "REPORTER", 1L);
+  }
+
+
+  /**
+   * Update reporter throw.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test()
+  public void updateReporterThrow() throws EEAException {
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
+        .thenReturn(userRepresentationVO);
+    Mockito.doThrow(EEAException.class).when(contributorService).updateContributor(1L,
+        contributorVORead, "REPORTER", 1L);
+    ResponseEntity<?> value = contributorControllerImpl.updateReporter(1L, 1L, contributorVORead);
+    assertEquals(null, value.getBody());
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, value.getStatusCode());
+
+  }
 }
