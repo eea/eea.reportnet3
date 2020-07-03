@@ -541,7 +541,8 @@ public class KeycloakConnectorServiceImplTest {
     try {
       keycloakConnectorService.removeUserFromGroup("user1", "");
     } catch (EEAException e) {
-      Assert.assertEquals(EEAErrorMessage.PERMISSION_NOT_REMOVED, e.getMessage());
+      Assert.assertEquals(String.format(EEAErrorMessage.PERMISSION_NOT_REMOVED, ""),
+          e.getMessage());
       throw e;
     }
   }
