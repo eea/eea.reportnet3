@@ -68,7 +68,7 @@ public class ValidationControllerImpl implements ValidationController {
    */
   @Override
   @PutMapping(value = "/dataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @LockMethod(removeWhenFinish = false)
   public void validateDataSetData(
       @LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId) {
