@@ -734,6 +734,7 @@
     "loadDataflowsError": "Error loading dataflows",
     "clearFilter": "Clear filter",
     "addAnotherOne": "Add another record",
-    "noData": "No data to display"
+    "noData": "No data to display",
+    "updateContributorError": "Error updating contributor"
   }
 }

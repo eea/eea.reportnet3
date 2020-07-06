@@ -390,6 +390,9 @@
         },
         {
           "key": "LOAD_DATAFLOWS_ERROR"
+        },
+        {
+          "key": "UPDATE_CONTRIBUTOR_ERROR"
         }
       ]
     },
