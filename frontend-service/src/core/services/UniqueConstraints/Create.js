@@ -1,2 +1,6 @@
-export const Create = ({ uniqueConstraintsRepository }) => async (datasetSchemaId, fieldSchemaIds, tableSchemaId) =>
-  uniqueConstraintsRepository.create(datasetSchemaId, fieldSchemaIds, tableSchemaId);
+export const Create = ({ uniqueConstraintsRepository }) => async (
+  dataflowId,
+  datasetSchemaId,
+  fieldSchemaIds,
+  tableSchemaId
+) => uniqueConstraintsRepository.create(dataflowId, datasetSchemaId, fieldSchemaIds, tableSchemaId);

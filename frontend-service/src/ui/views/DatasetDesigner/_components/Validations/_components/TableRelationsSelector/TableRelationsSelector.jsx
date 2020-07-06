@@ -117,6 +117,9 @@ export const TableRelationsSelector = ({
               onChange={e => onDoubleReferencedChange(e.checked)}
               style={{ width: '70px', marginLeft: '0.5rem', marginTop: '5px' }}
             />
+            <label for={'isDoubleReferenced_check'} className="srOnly">
+              {resources.messages['pkValuesMustBeUsed']}
+            </label>
           </div>
         </div>
       </div>
