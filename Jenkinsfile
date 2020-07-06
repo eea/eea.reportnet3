@@ -182,7 +182,7 @@ pipeline {
                             def app
                             app = docker.build("k8s-swi001:5000/dataset-service:1.0$TAG_SUFIX", "--build-arg JAR_FILE=target/dataset-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8030 -f ./Dockerfile ./dataset-service")
                             app.push()
-                            //sh 'docker rmi k8s-swi001:5000/dataset-service:1.0${TAG_SUFIX}'
+                            sh 'docker rmi k8s-swi001:5000/dataset-service:1.0${TAG_SUFIX}'
                         }
                         script {
                             echo 'Recordstore Service'
