@@ -57,34 +57,30 @@ const useBigButtonList = ({
       dashboard:
         roles.includes(config.permissions['DATA_CUSTODIAN']) ||
         roles.includes(config.permissions['DATA_STEWARD']) ||
-        roles.includes(config.permissions['EDITOR_WRITE']),
+        roles.includes(config.permissions['EDITOR_WRITE']) ||
+        roles.includes(config.permissions['EDITOR_READ']),
       designDatasets:
         roles.includes(config.permissions['DATA_CUSTODIAN']) ||
         roles.includes(config.permissions['DATA_STEWARD']) ||
-        roles.includes(config.permissions['EDITOR_WRITE']),
+        roles.includes(config.permissions['EDITOR_WRITE']) ||
+        roles.includes(config.permissions['EDITOR_READ']),
       groupByRepresentative:
         !roles.includes(config.permissions['DATA_CUSTODIAN']) &&
         !roles.includes(config.permissions['DATA_STEWARD']) &&
-        !roles.includes(config.permissions['EDITOR_WRITE']),
+        !roles.includes(config.permissions['EDITOR_WRITE']) &&
+        !roles.includes(config.permissions['EDITOR_READ']),
       manageReporters:
-        (roles.includes(config.permissions['DATA_CUSTODIAN']) && !roles.includes(config.permissions['EDITOR_WRITE'])) ||
-        (roles.includes(config.permissions['DATA_STEWARD']) && !roles.includes(config.permissions['EDITOR_WRITE'])),
+        (roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD'])) &&
+        (!roles.includes(config.permissions['EDITOR_WRITE']) || !roles.includes(config.permissions['EDITOR_READ'])),
       newSchema:
         roles.includes(config.permissions['DATA_CUSTODIAN']) ||
         roles.includes(config.permissions['DATA_STEWARD']) ||
         roles.includes(config.permissions['EDITOR_WRITE']),
       updateReporters:
-        roles.includes(config.permissions['DATA_CUSTODIAN']) ||
-        roles.includes(config.permissions['DATA_STEWARD']) ||
-        roles.includes(config.permissions['EDITOR_WRITE']),
-      receipt:
-        !roles.includes(config.permissions['DATA_CUSTODIAN']) &&
-        !roles.includes(config.permissions['DATA_STEWARD']) &&
-        !roles.includes(config.permissions['EDITOR_WRITE']),
-      release:
-        !roles.includes(config.permissions['DATA_CUSTODIAN']) &&
-        !roles.includes(config.permissions['DATA_STEWARD']) &&
-        !roles.includes(config.permissions['EDITOR_WRITE'])
+        (roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD'])) &&
+        (!roles.includes(config.permissions['EDITOR_WRITE']) || !roles.includes(config.permissions['EDITOR_READ'])),
+      receipt: roles.includes(config.permissions['LEAD_REPORTER']) || roles.includes(config.permissions['REPORTER']),
+      release: roles.includes(config.permissions['LEAD_REPORTER']) || roles.includes(config.permissions['REPORTER'])
     };
   };
 
