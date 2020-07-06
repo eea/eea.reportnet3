@@ -1,6 +1,6 @@
 {
-  "all": "/{:datasetSchemaId}/getUniqueConstraints/dataflow/{:dataflowId}",
+  "all": "/dataschema/{:datasetSchemaId}/getUniqueConstraints/dataflow/{:dataflowId}",
   "create": "/dataschema/createUniqueConstraint",
-  "delete": "/deleteUniqueConstraint/{:uniqueConstraintId}/dataflow/{:dataflowId}",
+  "delete": "/dataschema/deleteUniqueConstraint/{:uniqueConstraintId}/dataflow/{:dataflowId}",
   "update": "/dataschema/updateUniqueConstraint"
 }

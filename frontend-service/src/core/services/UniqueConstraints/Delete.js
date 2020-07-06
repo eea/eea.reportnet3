@@ -1,2 +1,2 @@
-export const Delete = ({ uniqueConstraintsRepository }) => async (uniqueConstraintId, dataflowId) =>
-  uniqueConstraintsRepository.deleteById(uniqueConstraintId, dataflowId);
+export const Delete = ({ uniqueConstraintsRepository }) => async (dataflowId, uniqueConstraintId) =>
+  uniqueConstraintsRepository.deleteById(dataflowId, uniqueConstraintId);
