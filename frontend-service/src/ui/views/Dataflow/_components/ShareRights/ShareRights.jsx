@@ -214,10 +214,17 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
     <Fragment>
       <div>
         {isEmpty(shareRightsState.contributors) ? (
-          <div>No data</div>
+          <div>{resources.messages['noData']}</div>
         ) : (
           <DataTable value={shareRightsState.contributors}>
-            <Column body={renderAccountTemplate} header={shareRightsState.accountInputHeader} />
+            <Column
+              body={renderAccountTemplate}
+              header={
+                dataflowState.isCustodian
+                  ? resources.messages['editorsAccountColumn']
+                  : resources.messages['reportersAccountColumn']
+              }
+            />
             <Column body={renderWritePermissionsColumnTemplate} header={resources.messages['writePermissionsColumn']} />
             <Column body={renderDeleteColumnTemplate} style={{ width: '60px' }} />
           </DataTable>

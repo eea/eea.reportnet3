@@ -715,7 +715,7 @@
     "readAndWritePermission": "Read/Write",
     "editorsAccountColumn": "Editor account",
     "reportersAccountColumn": "Reporter account",
-    "permissionsColumn": "Permissions",
+    "writePermissionsColumn": "Permissions",
     "editorsRightsDialogConfirmDeleteHeader": "Delete editor",
     "editorsRightsDialogConfirmDeleteQuestion": "Do you really want to delete this editor?",
     "reportersRightsDialogConfirmDeleteHeader": "Delete reporter",
@@ -733,6 +733,7 @@
     "toggleMagazineView": "Switch to magazine view",
     "loadDataflowsError": "Error loading dataflows",
     "clearFilter": "Clear filter",
-    "addAnotherOne": "Add another record"
+    "addAnotherOne": "Add another record",
+    "noData": "No data to display"
   }
 }
