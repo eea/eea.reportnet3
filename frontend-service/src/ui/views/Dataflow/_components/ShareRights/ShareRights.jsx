@@ -104,21 +104,24 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
     shareRightsDispatch({ type: 'ON_DATA_CHANGE', payload: { isDataUpdated: !shareRightsState.isDataUpdated } });
 
   const onUpdateContributor = async contributor => {
-    try {
-      const response = await ContributorService.update(contributor, dataflowId, dataProviderId);
-      if (response.status >= 200 && response.status <= 299) {
-        onDataChange();
-      }
-    } catch (error) {
-      notificationContext.add({ type: 'UPDATE_CONTRIBUTOR_ERROR' });
-      if (error.status >= 400 && error.status <= 404) {
-        shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError: true } });
+    if (contributor.writePermission !== '') {
+      try {
+        const response = await ContributorService.update(contributor, dataflowId, dataProviderId);
+        if (response.status >= 200 && response.status <= 299) {
+          onDataChange();
+        }
+      } catch (error) {
+        notificationContext.add({ type: 'UPDATE_CONTRIBUTOR_ERROR' });
+        if (error.status >= 400 && error.status <= 404) {
+          shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError: true } });
+        }
       }
     }
   };
 
   const onWritePermissionChange = async (contributor, newWritePermission) => {
     if (isValidEmail(contributor.account)) {
+
       onUpdateContributor(contributor);
     } else {
       const { contributors } = shareRightsState;
@@ -168,19 +171,8 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
 
     return (
       <select
-        /*  onBlur={() => onAddContributor(formDispatcher, formState, contributor, dataflowId)}
-          onChange={event => {
-            onWritePermissionChange(
-              contributor,
-              dataflowId,
-              dataProviderId,
-              formDispatcher,
-              formState,
-              event.target.value
-            );
-          }}
-          onKeyDown={event => onKeyDown(event, formDispatcher, formState, contributor, dataflowId)} */
-
+        // onKeyDown={event => onKeyDown(event, formDispatcher, formState, contributor, dataflowId)}
+        onBlur={() => updateContributor(contributor)}
         onChange={event => onWritePermissionChange(contributor, event.target.value)}
         value={contributor.writePermission}>
         {writePermissionsOptions.map(option => {
@@ -202,7 +194,7 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
         <InputText
           autoFocus={contributor.isNew}
           disabled={!contributor.isNew}
-          id={isEmpty(contributor.account) ? 'emptyInput' : undefined}
+          id={isEmpty(contributor.account) ? 'emptyInput' : contributor.account}
           onBlur={() => updateContributor(contributor)}
           onChange={event => onSetAccount(event.target.value)}
           placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
