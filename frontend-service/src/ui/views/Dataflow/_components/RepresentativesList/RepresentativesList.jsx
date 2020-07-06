@@ -155,6 +155,9 @@ const RepresentativesList = ({
             placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
             value={inputData}
           />
+          <label for="emptyInput" className="srOnly">
+            {resources.messages['manageRolesDialogInputPlaceholder']}
+          </label>
         </div>
       </>
     );
@@ -170,10 +173,11 @@ const RepresentativesList = ({
     return (
       <>
         <select
-          disabled={representative.hasDatasets}
           className={
             representative.hasDatasets ? `${styles.disabled} ${styles.selectDataProvider}` : styles.selectDataProvider
           }
+          disabled={representative.hasDatasets}
+          id="dataProvider"
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={event => {
             onDataProviderIdChange(formDispatcher, event.target.value, representative, formState);
@@ -188,6 +192,9 @@ const RepresentativesList = ({
             );
           })}
         </select>
+        <label for="dataProvider" className="srOnly">
+          {resources.messages['manageRolesDialogInputPlaceholder']}
+        </label>
       </>
     );
   };
@@ -215,7 +222,7 @@ const RepresentativesList = ({
         <div className={styles.title}>{resources.messages['manageRolesDialogHeader']}</div>
 
         <div>
-          <label htmlFor="dataProvidersDropdown">{resources.messages['manageRolesDialogDropdownLabel']} </label>
+          <label>{resources.messages['manageRolesDialogDropdownLabel']} </label>
           <Dropdown
             ariaLabel={'dataProviders'}
             disabled={formState.representatives.length > 1}
