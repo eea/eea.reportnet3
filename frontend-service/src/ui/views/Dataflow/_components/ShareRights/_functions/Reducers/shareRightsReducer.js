@@ -6,8 +6,15 @@ export const shareRightsReducer = (state, { type, payload }) => {
     case 'GET_ALL_CONTRIBUTORS':
       return { ...state, contributors: payload.contributors };
 
-    case 'ON_UPDATE_DATA':
+    case 'ON_DATA_CHANGE':
       return { ...state, isDataUpdated: payload.isDataUpdated };
+
+    case 'ON_DELETE_CONTRIBUTOR':
+      return {
+        ...state,
+        isDeleteDialogVisible: payload.isDeleteDialogVisible,
+        contributorAccountToDelete: payload.contributorAccountToDelete
+      };
 
     case 'ON_SET_ACCOUNT':
       return { ...state, contributors: payload.contributors, accountHasError: payload.accountHasError };
@@ -19,11 +26,7 @@ export const shareRightsReducer = (state, { type, payload }) => {
       return { ...state, accountHasError: payload.accountHasError };
 
     case 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG':
-      return {
-        ...state,
-        isDeleteDialogVisible: payload.isDeleteDialogVisible,
-        contributorAccountToDelete: payload.contributorAccountToDelete
-      };
+      return { ...state, isDeleteDialogVisible: payload.isDeleteDialogVisible };
 
     default:
       return state;

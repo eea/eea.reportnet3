@@ -69,7 +69,7 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
       return true;
     }
 
-    const expression = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    const expression = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
     return email.match(expression);
   };
@@ -85,26 +85,29 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
 
   const onDeleteContributor = async () => {
     try {
-      await ContributorService.deleteContributor(
+      const response = await ContributorService.deleteContributor(
         shareRightsState.contributorAccountToDelete,
         dataflowId,
         dataProviderId
       );
-
-      shareRightsDispatch({ type: 'DELETE_CONTRIBUTOR', payload: {} });
+      if (response.status >= 200 && response.status <= 299) {
+        onDataChange();
+      }
     } catch (error) {
       console.error('error on ContributorService.deleteContributor: ', error);
+    } finally {
+      shareRightsDispatch({ type: 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG', payload: { isDeleteDialogVisible: false } });
     }
   };
 
-  const onUpdateData = () =>
-    shareRightsDispatch({ type: 'ON_UPDATE_DATA', payload: { isDataUpdated: !shareRightsState.isDataUpdated } });
+  const onDataChange = () =>
+    shareRightsDispatch({ type: 'ON_DATA_CHANGE', payload: { isDataUpdated: !shareRightsState.isDataUpdated } });
 
   const onUpdateContributor = async contributor => {
     try {
       const response = await ContributorService.update(contributor, dataflowId, dataProviderId);
       if (response.status >= 200 && response.status <= 299) {
-        onUpdateData();
+        onDataChange();
       }
     } catch (error) {
       notificationContext.add({ type: 'UPDATE_CONTRIBUTOR_ERROR' });
@@ -144,7 +147,7 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
       <ActionsColumn
         onDeleteClick={() =>
           shareRightsDispatch({
-            type: 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG',
+            type: 'ON_DELETE_CONTRIBUTOR',
             payload: { isDeleteDialogVisible: true, contributorAccountToDelete: contributor.account }
           })
         }
