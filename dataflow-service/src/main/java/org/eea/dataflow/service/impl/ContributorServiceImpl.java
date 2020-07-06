@@ -22,10 +22,8 @@ import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class ContributorServiceImpl.
@@ -330,14 +328,7 @@ public class ContributorServiceImpl implements ContributorService {
             contributorVO.getAccount(), dataflowId);
         throw new EEAException(e);
       }
-    } else {
-      LOG_ERROR.error(
-          "Error creating contributor with the account: {} in the dataflow {}  because the role not avaliable {}",
-          contributorVO.getAccount(), dataflowId, role);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          new StringBuilder("Role ").append(role).append(" doesn't exist").toString());
     }
-
   }
 
   /**

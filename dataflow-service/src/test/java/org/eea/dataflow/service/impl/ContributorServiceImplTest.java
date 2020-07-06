@@ -1,6 +1,5 @@
 package org.eea.dataflow.service.impl;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -27,7 +26,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -40,6 +38,8 @@ public class ContributorServiceImplTest {
   @InjectMocks
   private ContributorServiceImpl contributorServiceImpl;
 
+  @Mock
+  private ContributorServiceImpl contributorServiceImplTest;
   /** The user management controller zull. */
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
@@ -153,22 +153,6 @@ public class ContributorServiceImplTest {
   }
 
 
-  /**
-   * Update contributor non type.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void updateContributorNonType() throws EEAException {
-    try {
-      contributorServiceImpl.updateContributor(1L, contributorVOWrite, "REPO", null);
-    } catch (ResponseStatusException ex) {
-      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-      assertEquals("Role REPO doesn't exist", ex.getReason());
-      throw ex;
-    }
-  }
-
 
   /**
    * Delete contributor editor.
@@ -250,6 +234,23 @@ public class ContributorServiceImplTest {
     Mockito.verify(dataflowControllerZuul, times(1)).findById(1L);
   }
 
+  /**
+   * Update contributor add throw.
+   *
+   * @throws EEAException the EEA exception
+   */
+  // @Test(expected = ResponseStatusException.class)
+  public void updateContributorAddThrow() throws EEAException {
+    doThrow(ResponseStatusException.class).when(contributorServiceImplTest).deleteContributor(1L,
+        contributorVOWrite.getAccount(), "EDITOR", 1l);
+    try {
+      contributorServiceImpl.updateContributor(1L, contributorVOWrite, "EDITOR", 1l);
+    } catch (EEAException ex) {
+      // assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      // assertEquals("Role REPO doesn't exist", ex.getReason());
+      throw ex;
+    }
+  }
 
   /**
    * Update contributor.
@@ -268,22 +269,6 @@ public class ContributorServiceImplTest {
     Mockito.verify(dataflowControllerZuul, times(2)).findById(1L);
   }
 
-  /**
-   * Update contributor add throw.
-   *
-   * @throws EEAException the EEA exception
-   */
-  // @Test(expected = ResponseStatusException.class)
-  public void updateContributorAddThrow() throws EEAException {
-    doThrow(ResponseStatusException.class).when(dataflowControllerZuul).findById(Mockito.any());
-    try {
-      contributorServiceImpl.updateContributor(1L, contributorVOWrite, "EDITOR", 1l);
-    } catch (EEAException ex) {
-      // assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-      // assertEquals("Role REPO doesn't exist", ex.getReason());
-      throw ex;
-    }
-  }
 
   /**
    * Find contributors by resource id editor test.

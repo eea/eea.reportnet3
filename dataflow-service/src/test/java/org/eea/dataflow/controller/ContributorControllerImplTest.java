@@ -102,6 +102,14 @@ public class ContributorControllerImplTest {
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, value.getStatusCode());
   }
 
+  @Test
+  public void updateContributorNonEditor() throws EEAException {
+    contributorVOWrite.setRole("REPO");
+    ResponseEntity<?> value = contributorControllerImpl.updateEditor(1L, contributorVOWrite);
+    assertEquals("Role REPO doesn't exist", value.getBody());
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
+  }
+
   /**
    * Find contributors by group.
    */
@@ -254,6 +262,7 @@ public class ContributorControllerImplTest {
   public void updateReporter() throws EEAException {
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(userRepresentationVO);
+    contributorVORead.setRole("REPORTER");
     contributorControllerImpl.updateReporter(1L, 1L, contributorVORead);
     Mockito.verify(contributorService, times(1)).updateContributor(1L, contributorVORead,
         "REPORTER", 1L);
@@ -271,9 +280,23 @@ public class ContributorControllerImplTest {
         .thenReturn(userRepresentationVO);
     Mockito.doThrow(EEAException.class).when(contributorService).updateContributor(1L,
         contributorVORead, "REPORTER", 1L);
+    contributorVORead.setRole("REPORTER");
     ResponseEntity<?> value = contributorControllerImpl.updateReporter(1L, 1L, contributorVORead);
     assertEquals(null, value.getBody());
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, value.getStatusCode());
+
+  }
+
+  /**
+   * Update reporter non valid rol throw.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test()
+  public void updateReporterNonValidRolThrow() throws EEAException {
+    ResponseEntity<?> value = contributorControllerImpl.updateReporter(1L, 1L, contributorVORead);
+    assertEquals("Role EDITOR doesn't exist", value.getBody());
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
 
   }
 }

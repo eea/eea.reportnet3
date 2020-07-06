@@ -146,16 +146,25 @@ public class ContributorControllerImpl implements ContributorController {
     // mock
     String message = "";
     HttpStatus status = HttpStatus.OK;
-    try {
-      checkAccount(dataflowId, contributorVO.getAccount());
-      contributorService.updateContributor(dataflowId, contributorVO, EDITOR, null);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error update the contributor {}.in the dataflow: {}",
-          contributorVO.getAccount(), dataflowId);
-      message = e.getMessage();
-      status = HttpStatus.INTERNAL_SERVER_ERROR;
-    }
+    if (!EDITOR.equals(contributorVO.getRole())) {
+      LOG_ERROR.error(
+          "Error creating contributor with the account: {} in the dataflow {}  because the role not avaliable {}",
+          contributorVO.getAccount(), dataflowId, contributorVO.getRole());
+      message = new StringBuilder("Role ").append(contributorVO.getRole()).append(" doesn't exist")
+          .toString();
+      status = HttpStatus.BAD_REQUEST;
 
+    } else {
+      try {
+        checkAccount(dataflowId, contributorVO.getAccount());
+        contributorService.updateContributor(dataflowId, contributorVO, EDITOR, null);
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error update the contributor {}.in the dataflow: {}",
+            contributorVO.getAccount(), dataflowId);
+        message = e.getMessage();
+        status = HttpStatus.INTERNAL_SERVER_ERROR;
+      }
+    }
     return new ResponseEntity<>(message, status);
   }
 
@@ -178,16 +187,25 @@ public class ContributorControllerImpl implements ContributorController {
     // we can only update an editor, reporter or reporter partition role
     String message = "";
     HttpStatus status = HttpStatus.OK;
-    try {
-      checkAccount(dataflowId, contributorVO.getAccount());
-      contributorService.updateContributor(dataflowId, contributorVO, REPORTER, dataProviderId);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error update the contributor {}.in the dataflow: {}",
-          contributorVO.getAccount(), dataflowId);
-      message = e.getMessage();
-      status = HttpStatus.INTERNAL_SERVER_ERROR;
-    }
+    if (!REPORTER.equals(contributorVO.getRole())) {
+      LOG_ERROR.error(
+          "Error creating contributor with the account: {} in the dataflow {}  because the role not avaliable {}",
+          contributorVO.getAccount(), dataflowId, contributorVO.getRole());
+      message = new StringBuilder("Role ").append(contributorVO.getRole()).append(" doesn't exist")
+          .toString();
+      status = HttpStatus.BAD_REQUEST;
 
+    } else {
+      try {
+        checkAccount(dataflowId, contributorVO.getAccount());
+        contributorService.updateContributor(dataflowId, contributorVO, REPORTER, dataProviderId);
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error update the contributor {}.in the dataflow: {}",
+            contributorVO.getAccount(), dataflowId);
+        message = e.getMessage();
+        status = HttpStatus.INTERNAL_SERVER_ERROR;
+      }
+    }
     return new ResponseEntity<>(message, status);
   }
 
