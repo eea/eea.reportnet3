@@ -92,7 +92,9 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
         onDataChange();
       }
     } catch (error) {
-      console.error('error on ContributorService.deleteContributor: ', error);
+      const notificationKey = isCustodian ? 'DELETE_EDITOR_ERROR' : 'DELETE_REPORTER_ERROR';
+
+      notificationContext.add({ type: notificationKey });
     } finally {
       shareRightsDispatch({ type: 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG', payload: { isDeleteDialogVisible: false } });
     }

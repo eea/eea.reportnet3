@@ -736,6 +736,8 @@
     "addAnotherOne": "Add another record",
     "noData": "No data to display",
     "updateContributorError": "Error updating contributor",
-    "copyDatasetSchemaNotFoundEvent": "No design datasets found to copy"
+    "copyDatasetSchemaNotFoundEvent": "No design datasets found to copy",
+    "deleteEditorError": "Error deleting editor",
+    "deleteReporterError": "Error deleting reporter"
   }
 }

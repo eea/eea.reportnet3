@@ -396,6 +396,12 @@
         },
         {
           "key": "COPY_DATASET_SCHEMA_NOT_FOUND_EVENT"
+        },
+        {
+          "key": "DELETE_EDITOR_ERROR"
+        },
+        {
+          "key": "DELETE_REPORTER_ERROR"
         }
       ]
     },
