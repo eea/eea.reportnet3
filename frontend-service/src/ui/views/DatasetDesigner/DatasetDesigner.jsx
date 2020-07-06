@@ -448,6 +448,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       style={{ width: '70%' }}
       visible={designerState.isUniqueConstraintsListDialogVisible}>
       <UniqueConstraints
+        dataflowId={dataflowId}
         designerState={designerState}
         getManageUniqueConstraint={manageUniqueConstraint}
         getUniques={getUniqueConstraintsList}
@@ -665,6 +666,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         <Integrations dataflowId={dataflowId} designerState={designerState} manageDialogs={manageDialogs} />
 
         <ManageUniqueConstraint
+          dataflowId={dataflowId}
           designerState={designerState}
           manageDialogs={manageDialogs}
           resetUniques={manageUniqueConstraint}

@@ -16,7 +16,7 @@ import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniques }) => {
+export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialogs, resetUniques }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -112,6 +112,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
   const onCreateConstraint = async () => {
     try {
       const response = await UniqueConstraintsService.create(
+        dataflowId,
         datasetSchemaId,
         selectedFields.map(field => field.value),
         selectedTable.value
@@ -127,7 +128,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
 
   const onLoadUniquesList = async () => {
     try {
-      setDuplicatedList(await UniqueConstraintsService.all(datasetSchemaId));
+      setDuplicatedList(await UniqueConstraintsService.all(dataflowId, datasetSchemaId));
     } catch (error) {
       console.error('error', error);
     }
@@ -145,6 +146,7 @@ export const ManageUniqueConstraint = ({ designerState, manageDialogs, resetUniq
     } else {
       try {
         const response = await UniqueConstraintsService.update(
+          dataflowId,
           datasetSchemaId,
           selectedFields.map(field => field.value),
           selectedTable.value,
