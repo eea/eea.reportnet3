@@ -27,6 +27,8 @@ import org.eea.validation.persistence.schemas.FieldSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.service.RulesService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -135,6 +137,9 @@ public class UniqueValidationUtils {
       DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul) {
     UniqueValidationUtils.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
   }
+
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(UniqueValidationUtils.class);
 
   /**
    * Creates the validation.
@@ -257,6 +262,7 @@ public class UniqueValidationUtils {
       }
     }
     stringQuery.append(") as N from table_1 where column_1 is not null) as t where n>1);");
+    LOG.debug("Drools, Duplicated records query: " + stringQuery.toString());
     return stringQuery.toString();
 
   }
@@ -422,8 +428,8 @@ public class UniqueValidationUtils {
       tableValidation.setTableValue(tableValue);
       tableValidations.add(tableValidation);
     }
-    List<String> notUtilizedRecords2 = new ArrayList<>();
 
+    List<String> notUtilizedRecords2 = new ArrayList<>();
     if (Boolean.TRUE.equals(integrityVO.getIsDoubleReferenced())) {
       // Create validation on referenced DS/Table, checking if all data on Referencer Column are in
       // Referenced column
@@ -434,8 +440,10 @@ public class UniqueValidationUtils {
       if (!notUtilizedRecords2.isEmpty()) {
         // Error: there are data on Referencer column that are not in Referenced column.
         TableValidation tableValidationReferenced = new TableValidation();
-        validation.setMessage(auxValidationMessage + " (COMMISSION)");
-        tableValidationReferenced.setValidation(validation);
+        Validation validationReference = createValidation(idRule, schemaId,
+            tableSchema.getNameTableSchema(), EntityTypeEnum.TABLE);
+        validationReference.setMessage(auxValidationMessage + " (COMMISSION)");
+        tableValidationReferenced.setValidation(validationReference);
         tableValidationReferenced.setTableValue(tableValue);
 
         tableValidations.add(tableValidationReferenced);

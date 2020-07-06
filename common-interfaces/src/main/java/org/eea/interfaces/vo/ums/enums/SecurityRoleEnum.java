@@ -1,8 +1,8 @@
 package org.eea.interfaces.vo.ums.enums;
 
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 
 /**
  * The enum Security role enum.
@@ -13,9 +13,17 @@ public enum SecurityRoleEnum {
    */
   DATA_CUSTODIAN("DATA_CUSTODIAN"),
   /**
-   * Data provider security role enum.
+   * The editor with edit access.
    */
-  DATA_PROVIDER("DATA_PROVIDER"),
+  EDITOR_WRITE("EDITOR_WRITE"),
+  /**
+   * The editor read-only access.
+   */
+  EDITOR_READ("EDITOR_READ"),
+  /**
+   * The lead reporter.
+   */
+  LEAD_REPORTER("LEAD_REPORTER"),
   /**
    * Data requester security role enum.
    */
@@ -25,9 +33,22 @@ public enum SecurityRoleEnum {
    */
   DATA_STEWARD("DATA_STEWARD"),
   /**
-   * Delegate data provider security role enum.
+   * The reporter with edit access.
    */
-  DELEGATE_DATA_PROVIDER("DELEGATE_DATA_PROVIDER");
+  REPORTER_WRITE("REPORTER_WRITE"),
+
+  /**
+   * The reporter read-only access.
+   */
+  REPORTER_READ("REPORTER_READ"),
+  /**
+   * The reporter partitioned.
+   */
+  REPORTER_PARTITIONED("REPORTER_PARTITIONED"),
+  /**
+   * The national coordinator.
+   */
+  NATIONAL_COORDINATOR("NATIONAL_COORDINATOR");
 
   private final String role;
 
