@@ -30,13 +30,11 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
   const inputRef = useRef(null);
 
   const [shareRightsState, shareRightsDispatch] = useReducer(shareRightsReducer, {
-    account: '',
     accountHasError: false,
     contributorAccountToDelete: '',
     contributors: [],
     isDataUpdated: false,
-    isDeleteDialogVisible: false,
-    writePermission: false
+    isDeleteDialogVisible: false
   });
 
   const deleteConfirmMessage =
@@ -100,8 +98,9 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
     }
   };
 
-  const onDataChange = () =>
+  const onDataChange = () => {
     shareRightsDispatch({ type: 'ON_DATA_CHANGE', payload: { isDataUpdated: !shareRightsState.isDataUpdated } });
+  };
 
   const onUpdateContributor = async contributor => {
     if (contributor.writePermission !== '') {
@@ -120,15 +119,14 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
   };
 
   const onWritePermissionChange = async (contributor, newWritePermission) => {
+    const { contributors } = shareRightsState;
+    const [thisContributor] = contributors.filter(thisContributor => thisContributor.account === contributor.account);
+    thisContributor.writePermission = newWritePermission;
+
+    shareRightsDispatch({ type: 'ON_WRITE_PERMISSION_CHANGE', payload: { contributors } });
+
     if (isValidEmail(contributor.account)) {
-
-      onUpdateContributor(contributor);
-    } else {
-      const { contributors } = shareRightsState;
-      const [thisContributor] = contributors.filter(thisContributor => thisContributor.account === contributor.account);
-      thisContributor.writePermission = newWritePermission;
-
-      shareRightsDispatch({ type: 'ON_WRITE_PERMISSION_CHANGE', payload: { contributors } });
+      onUpdateContributor(thisContributor);
     }
   };
 
