@@ -32,12 +32,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -649,8 +651,14 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     try {
       this.restTemplate.postForEntity(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
           .path(CREATE_USER_GROUP_URL).buildAndExpand(uriParams).toString(), request, Void.class);
+    } catch (HttpClientErrorException e) {
+      if (!HttpStatus.CONFLICT.equals(e.getStatusCode())) {
+        throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED, e);
+      } else {
+        LOG_ERROR.error("Group already exists, will not be created again");
+      }
     } catch (Exception e) {
-      throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED);
+      throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED, e);
     }
   }
 

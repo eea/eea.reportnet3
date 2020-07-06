@@ -213,45 +213,29 @@ public class ContributorServiceImpl implements ContributorService {
         break;
     }
     final List<ResourceAssignationVO> resourceAssignationVOList = new ArrayList<>();
+    List<ResourceInfoVO> resourceInfoVOs = new ArrayList<>();
     if (EDITOR.equals(role)) {
 
-      ResourceInfoVO resourceDataflow =
-          resourceManagementControllerZull.getResourceDetail(dataflowId, resourceGroupEnumDataflow);
-      if (null == resourceDataflow.getName()) {
-        resourceManagementControllerZull
-            .createResource(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, securityRoleEnum));
-      }
+      resourceInfoVOs.add(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, securityRoleEnum));
       resourceAssignationVOList.add(fillResourceAssignation(dataflowId, contributorVO.getAccount(),
           resourceGroupEnumDataflow));
       for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
-        ResourceInfoVO resourceDataSchema = resourceManagementControllerZull
-            .getResourceDetail(designDatasetVO.getId(), resourceGroupEnum);
-        if (null == resourceDataSchema.getName()) {
-          resourceManagementControllerZull.createResource(
-              createGroup(designDatasetVO.getId(), ResourceTypeEnum.DATA_SCHEMA, securityRoleEnum));
-        }
+        resourceInfoVOs.add(
+            createGroup(designDatasetVO.getId(), ResourceTypeEnum.DATA_SCHEMA, securityRoleEnum));
         resourceAssignationVOList.add(fillResourceAssignation(designDatasetVO.getId(),
             contributorVO.getAccount(), resourceGroupEnum));
       }
     } else if (REPORTER.equals(role)) {
-      ResourceInfoVO resourceDataflow =
-          resourceManagementControllerZull.getResourceDetail(dataflowId, resourceGroupEnumDataflow);
-      if (null == resourceDataflow.getName()) {
-        resourceManagementControllerZull.createResource(
-            createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.REPORTER_READ));
-      }
+      resourceInfoVOs
+          .add(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.REPORTER_READ));
       resourceAssignationVOList.add(fillResourceAssignation(dataflowId, contributorVO.getAccount(),
           resourceGroupEnumDataflow));
 
       for (ReportingDatasetVO reportingDatasetVO : dataflow.getReportingDatasets()) {
-        ResourceInfoVO resourceDataSchema = resourceManagementControllerZull
-            .getResourceDetail(reportingDatasetVO.getId(), resourceGroupEnum);
-        if (null == resourceDataSchema.getName()) {
-          resourceManagementControllerZull.createResource(
-              createGroup(reportingDatasetVO.getId(), ResourceTypeEnum.DATASET, securityRoleEnum));
-          resourceManagementControllerZull.createResource(createGroup(dataflowId,
-              ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.REPORTER_READ));
-        }
+        resourceInfoVOs.add(
+            createGroup(reportingDatasetVO.getId(), ResourceTypeEnum.DATASET, securityRoleEnum));
+        resourceInfoVOs.add(
+            createGroup(dataflowId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.REPORTER_READ));
         resourceAssignationVOList.add(fillResourceAssignation(reportingDatasetVO.getId(),
             contributorVO.getAccount(), resourceGroupEnum));
         resourceAssignationVOList.add(fillResourceAssignation(reportingDatasetVO.getId(),
@@ -259,6 +243,7 @@ public class ContributorServiceImpl implements ContributorService {
       }
 
     }
+    resourceManagementControllerZull.createResources(resourceInfoVOs);
     // we add data to contributor
     userManagementControllerZull.addContributorsToResources(resourceAssignationVOList);
   }
