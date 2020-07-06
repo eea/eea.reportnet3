@@ -721,6 +721,7 @@
     "toggleMagazineView": "Switch to magazine view",
     "loadDataflowsError": "Error loading dataflows",
     "clearFilter": "Clear filter",
-    "addAnotherOne": "Add another record"
+    "addAnotherOne": "Add another record",
+    "copyDatasetSchemaNotFoundEvent": "No design datasets found to copy"
   }
 }
