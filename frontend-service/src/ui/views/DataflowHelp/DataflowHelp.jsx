@@ -1,14 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
+import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 import sortBy from 'lodash/sortBy';
 
-import { DataflowHelpHelpConfig } from 'conf/help/dataflowHelp';
 import { config } from 'conf';
+import { DataflowHelpHelpConfig } from 'conf/help/dataflowHelp';
 import { routes } from 'ui/routes';
 
 import { DatasetSchemas } from './_components/DatasetSchemas';
@@ -62,8 +62,9 @@ export const DataflowHelp = withRouter(({ match, history }) => {
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
+      const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
       setIsCustodian(
-        userContext.hasPermission([config.permissions.CUSTODIAN], `${config.permissions.DATAFLOW}${dataflowId}`)
+        userRoles.includes(config.permissions['CUSTODIAN']) || userRoles.includes(config.permissions['DATA_STEWARD'])
       );
     }
   }, [userContext]);
@@ -265,7 +266,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
 
   if (documents) {
     return layout(
-      <>
+      <Fragment>
         <Title title={`${resources.messages['dataflowHelp']} `} subtitle={dataflowName} icon="info" iconSize="3.5rem" />
         <TabView activeIndex={0} hasQueryString={false} onTabClick={e => setSelectedIndex(e)}>
           <TabPanel
@@ -304,9 +305,9 @@ export const DataflowHelp = withRouter(({ match, history }) => {
             />
           </TabPanel>
         </TabView>
-      </>
+      </Fragment>
     );
   } else {
-    return <></>;
+    return <Fragment />;
   }
 });
