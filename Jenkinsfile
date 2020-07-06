@@ -280,6 +280,11 @@ pipeline {
 
             }
         }stage('Cleaning docker images'){
+          when {
+            expression {
+              return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox"
+            }
+          }
           steps {
             script {
               sh 'docker rmi k8s-swi001:5000/dataflow-service:1.0${TAG_SUFIX}'
