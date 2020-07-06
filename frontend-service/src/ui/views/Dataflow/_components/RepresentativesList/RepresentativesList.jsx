@@ -48,7 +48,7 @@ const RepresentativesList = ({
     initialRepresentatives: [],
     isVisibleConfirmDeleteDialog: false,
     refresher: false,
-    representativesHaveError: [],
+    representativeHasError: [],
     representativeIdToDelete: '',
     representatives: [],
     selectedDataProviderGroup: null,
@@ -62,7 +62,7 @@ const RepresentativesList = ({
   }, [formState.refresher]);
 
   useEffect(() => {
-    if (isActiveManageRolesDialog === false && !isEmpty(formState.representativesHaveError)) {
+    if (isActiveManageRolesDialog === false && !isEmpty(formState.representativeHasError)) {
       formDispatcher({
         type: 'REFRESH'
       });
@@ -81,7 +81,7 @@ const RepresentativesList = ({
 
   useEffect(() => {
     autofocusOnEmptyInput(formState);
-  }, [formState.representativesHaveError]);
+  }, [formState.representativeHasError]);
 
   useEffect(() => {
     if (!isEmpty(formState.representatives)) {
@@ -108,7 +108,7 @@ const RepresentativesList = ({
   const providerAccountInputColumnTemplate = representative => {
     let inputData = representative.providerAccount;
 
-    let hasError = formState.representativesHaveError.includes(representative.representativeId);
+    let hasError = formState.representativeHasError.includes(representative.representativeId);
 
     const onAccountChange = (account, dataProviderId) => {
       const { representatives } = formState;
