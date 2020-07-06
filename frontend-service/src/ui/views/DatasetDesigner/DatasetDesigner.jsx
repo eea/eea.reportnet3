@@ -119,7 +119,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         type: 'LOAD_PERMISSIONS',
         payload: {
           permissions: userContext.hasPermission(
-            [config.permissions.PROVIDER],
+            [config.permissions.LEAD_REPORTER],
             `${config.permissions.DATASET}${datasetId}`
           )
         }

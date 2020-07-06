@@ -39,13 +39,54 @@ const useBigButtonList = ({
 
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) {
-      const userRole = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
-
-      setButtonsVisibility(getButtonsVisibility(config.permissions[userRole]));
+      const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
+      console.log(
+        { userRoles },
+        userRoles.map(userRole => config.permissions[userRole])
+      );
+      setButtonsVisibility(getButtonsVisibility(userRoles.map(userRole => config.permissions[userRole])));
     }
   }, [userContext]);
 
-  const getButtonsVisibility = role => ({ manageReporters: role === config.permissions['DATA_CUSTODIAN'] });
+  const getButtonsVisibility = roles => {
+    console.log(
+      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
+        (roles.includes(config.permissions['DATA_STEWARD']) && !roles.includes(config.permissions['EDITOR_WRITE']))
+    );
+    return {
+      dashboard:
+        roles.includes(config.permissions['DATA_CUSTODIAN']) ||
+        roles.includes(config.permissions['DATA_STEWARD']) ||
+        roles.includes(config.permissions['EDITOR_WRITE']),
+      designDatasets:
+        roles.includes(config.permissions['DATA_CUSTODIAN']) ||
+        roles.includes(config.permissions['DATA_STEWARD']) ||
+        roles.includes(config.permissions['EDITOR_WRITE']),
+      groupByRepresentative:
+        !roles.includes(config.permissions['DATA_CUSTODIAN']) &&
+        !roles.includes(config.permissions['DATA_STEWARD']) &&
+        !roles.includes(config.permissions['EDITOR_WRITE']),
+      manageReporters:
+        (roles.includes(config.permissions['DATA_CUSTODIAN']) && !roles.includes(config.permissions['EDITOR_WRITE'])) ||
+        (roles.includes(config.permissions['DATA_STEWARD']) && !roles.includes(config.permissions['EDITOR_WRITE'])),
+      newSchema:
+        roles.includes(config.permissions['DATA_CUSTODIAN']) ||
+        roles.includes(config.permissions['DATA_STEWARD']) ||
+        roles.includes(config.permissions['EDITOR_WRITE']),
+      updateReporters:
+        roles.includes(config.permissions['DATA_CUSTODIAN']) ||
+        roles.includes(config.permissions['DATA_STEWARD']) ||
+        roles.includes(config.permissions['EDITOR_WRITE']),
+      receipt:
+        !roles.includes(config.permissions['DATA_CUSTODIAN']) &&
+        !roles.includes(config.permissions['DATA_STEWARD']) &&
+        !roles.includes(config.permissions['EDITOR_WRITE']),
+      release:
+        !roles.includes(config.permissions['DATA_CUSTODIAN']) &&
+        !roles.includes(config.permissions['DATA_STEWARD']) &&
+        !roles.includes(config.permissions['EDITOR_WRITE'])
+    };
+  };
 
   const manageReportersBigButton = [
     {
@@ -94,7 +135,7 @@ const useBigButtonList = ({
           command: () => onCloneDataflow()
         }
       ],
-      visibility: dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']
+      visibility: buttonsVisibility.newSchema && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']
     }
   ];
 
@@ -144,7 +185,7 @@ const useBigButtonList = ({
     visibility:
       !isUndefined(dataflowState.data.designDatasets) &&
       isEmpty(dataflowState.data.dataCollections) &&
-      dataflowState.isCustodian
+      buttonsVisibility.designDatasets
   }));
 
   const buildGroupByRepresentativeModels = dataflowData => {
@@ -156,7 +197,7 @@ const useBigButtonList = ({
 
     const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.id)).length === 1;
 
-    if (isUniqRepresentative && !dataflowState.isCustodian) {
+    if (isUniqRepresentative && buttonsVisibility.groupByRepresentative) {
       return datasets.map(dataset => {
         const datasetName = dataset.name;
         return {
@@ -210,7 +251,7 @@ const useBigButtonList = ({
       helpClassName: 'dataflow-dashboards-help-step',
       layout: 'defaultBigButton',
       onWheel: getUrl(routes.DASHBOARDS, { dataflowId }, true),
-      visibility: dataflowState.isCustodian && !isEmpty(dataflowState.data.datasets)
+      visibility: buttonsVisibility.dashboard && !isEmpty(dataflowState.data.datasets)
     }
   ];
 
@@ -250,7 +291,9 @@ const useBigButtonList = ({
       handleRedirect: isActiveButton ? () => onShowUpdateDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
       visibility:
-        dataflowState.isCustodian && dataflowState.status === 'DRAFT' && dataflowState.hasRepresentativesWithoutDatasets
+        buttonsVisibility.updateReporters &&
+        dataflowState.status === 'DRAFT' &&
+        dataflowState.hasRepresentativesWithoutDatasets
     }
   ];
 
@@ -303,7 +346,7 @@ const useBigButtonList = ({
         infoStatus: dataflowState.isReceiptOutdated,
         layout: 'defaultBigButton',
         visibility:
-          !dataflowState.isCustodian &&
+          buttonsVisibility.receipt &&
           uniq(representativeNames).length === 1 &&
           !releasedStates.includes(false) &&
           !releasedStates.includes(null)
@@ -329,7 +372,7 @@ const useBigButtonList = ({
         handleRedirect: datasets.length > 1 ? () => {} : () => onShowSnapshotDialog(datasets[0].datasetId),
         layout: datasets.length > 1 ? 'menuBigButton' : 'defaultBigButton',
         visibility:
-          !dataflowState.isCustodian &&
+          !buttonsVisibility.release &&
           dataflowState.status !== 'DESIGN' &&
           !isEmpty(dataflowState.data.datasets) &&
           isUniqRepresentative

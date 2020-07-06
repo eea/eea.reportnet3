@@ -319,7 +319,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onLoadPermission = () => {
     const hasWritePermissions = userContext.hasPermission(
-      [config.permissions.PROVIDER],
+      [config.permissions.LEAD_REPORTER],
       `${config.permissions.DATAFLOW}${dataflowId}`
     );
 
