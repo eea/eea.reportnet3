@@ -393,6 +393,9 @@
         },
         {
           "key": "UPDATE_CONTRIBUTOR_ERROR"
+        },
+        {
+          "key": "COPY_DATASET_SCHEMA_NOT_FOUND_EVENT"
         }
       ]
     },

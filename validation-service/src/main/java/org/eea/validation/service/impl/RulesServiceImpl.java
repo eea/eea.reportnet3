@@ -307,7 +307,7 @@ public class RulesServiceImpl implements RulesService {
     }
 
     // Check if rule is valid
-    kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
+    kieBaseManager.validateRule(datasetSchemaId, rule);
   }
 
   /**
@@ -545,7 +545,7 @@ public class RulesServiceImpl implements RulesService {
     }
 
     // Check if rule is valid
-    kieBaseManager.textRuleCorrect(datasetSchemaId, rule);
+    kieBaseManager.validateRule(datasetSchemaId, rule);
   }
 
   /**
@@ -857,7 +857,7 @@ public class RulesServiceImpl implements RulesService {
 
           // Check if rule is valid
           if (!rule.isAutomatic()) {
-            kieBaseManager.textRuleCorrect(newDatasetSchemaId, rule);
+            kieBaseManager.validateRule(newDatasetSchemaId, rule);
           }
 
           // add the rules sequence

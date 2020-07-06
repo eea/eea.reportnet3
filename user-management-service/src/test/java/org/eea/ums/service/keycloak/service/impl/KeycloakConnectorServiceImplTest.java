@@ -1,10 +1,10 @@
 package org.eea.ums.service.keycloak.service.impl;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.security.jwt.utils.AuthenticationDetails;
@@ -139,7 +139,7 @@ public class KeycloakConnectorServiceImplTest {
   public void getReportnetClientInfo() {
     ClientInfo info = new ClientInfo();
     info.setClientId("reportnet");
-    ClientInfo[] body = new ClientInfo[]{info};
+    ClientInfo[] body = new ClientInfo[] {info};
 
     ResponseEntity<ClientInfo[]> clientInfoResult = new ResponseEntity<>(body, HttpStatus.OK);
     Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
@@ -153,7 +153,7 @@ public class KeycloakConnectorServiceImplTest {
   @Test
   public void getResourceInfo() {
 
-    String[] bodyResourceSet = new String[]{"resource1"};
+    String[] bodyResourceSet = new String[] {"resource1"};
 
     ResponseEntity<String[]> resourceSetInfo = new ResponseEntity<>(bodyResourceSet, HttpStatus.OK);
 
@@ -191,9 +191,9 @@ public class KeycloakConnectorServiceImplTest {
 
     GroupInfo groupInfo = new GroupInfo();
     groupInfo.setId("1");
-    groupInfo.setName("Dataflow-1-DATA_PROVIDER");
+    groupInfo.setName("Dataflow-1-LEAD_REPORTER");
     groupInfo.setPath("/path");
-    GroupInfo[] groupInfos = new GroupInfo[]{groupInfo};
+    GroupInfo[] groupInfos = new GroupInfo[] {groupInfo};
 
     ResponseEntity<GroupInfo[]> responseGroupInfos =
         new ResponseEntity<>(groupInfos, HttpStatus.OK);
@@ -206,7 +206,7 @@ public class KeycloakConnectorServiceImplTest {
     GroupInfo[] result = keycloakConnectorService.getGroupsByUser("user1");
     Assert.assertNotNull(result);
     Assert.assertTrue(result.length > 0);
-    Assert.assertEquals(result[0].getName(), "Dataflow-1-DATA_PROVIDER");
+    Assert.assertEquals(result[0].getName(), "Dataflow-1-LEAD_REPORTER");
 
   }
 
@@ -492,5 +492,58 @@ public class KeycloakConnectorServiceImplTest {
     RoleRepresentation[] result = keycloakConnectorService.getUserRoles("userId");
 
     Assert.assertNotNull(result);
+  }
+
+  @Test
+  public void getGroupsWithSearchTest() {
+    GroupInfo[] groupInfo = new GroupInfo[0];
+    ResponseEntity<GroupInfo[]> responseGroupInfo = new ResponseEntity<>(groupInfo, HttpStatus.OK);
+
+    Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
+        Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(responseGroupInfo);
+
+    Assert.assertNotNull(keycloakConnectorService.getGroupsWithSearch("value"));
+  }
+
+  @Test
+  public void getUsersByGroupIdTest() {
+    UserRepresentation[] userRepresentation = new UserRepresentation[0];
+    ResponseEntity<UserRepresentation[]> responseUserRepresentation =
+        new ResponseEntity<>(userRepresentation, HttpStatus.OK);
+
+    Mockito
+        .when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
+            Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
+        .thenReturn(responseUserRepresentation);
+
+    Assert.assertNotNull(keycloakConnectorService.getUsersByGroupId("value"));
+  }
+
+
+  @Test
+  public void removeUserFromGroup() throws EEAException {
+    ResponseEntity<Void> responseRemoveUserFromGroup = new ResponseEntity<>(null, HttpStatus.OK);
+    Mockito
+        .when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
+            Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
+        .thenReturn(responseRemoveUserFromGroup);
+    keycloakConnectorService.removeUserFromGroup("", "");
+    Mockito.verify(restTemplate, Mockito.times(1)).exchange(Mockito.anyString(),
+        Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class), Mockito.any(Class.class));
+
+  }
+
+  @Test(expected = EEAException.class)
+  public void removeUserFromGroupError() throws EEAException {
+    Mockito.doThrow(new RestClientException("error test")).when(restTemplate).exchange(
+        Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+        Mockito.any(Class.class));
+    try {
+      keycloakConnectorService.removeUserFromGroup("user1", "");
+    } catch (EEAException e) {
+      Assert.assertEquals(String.format(EEAErrorMessage.PERMISSION_NOT_REMOVED, ""),
+          e.getMessage());
+      throw e;
+    }
   }
 }

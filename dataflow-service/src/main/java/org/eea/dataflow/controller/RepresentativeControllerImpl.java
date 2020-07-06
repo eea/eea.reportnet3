@@ -127,7 +127,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
   public List<RepresentativeVO> findRepresentativesByIdDataFlow(
       @PathVariable("dataflowId") Long dataflowId) {
     if (dataflowId == null) {
@@ -153,20 +153,19 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
   public ResponseEntity updateRepresentative(@RequestBody RepresentativeVO representativeVO) {
     String message = null;
     HttpStatus status = HttpStatus.OK;
 
-    if (null == representativeVO.getProviderAccount()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.USER_NOTFOUND);
-    }
-    Pattern p = Pattern.compile(EMAIL_REGEX);
-    Matcher m = p.matcher(representativeVO.getProviderAccount());
-    boolean result = m.matches();
-    if (Boolean.FALSE.equals(result)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          String.format(EEAErrorMessage.NOT_EMAIL, representativeVO.getProviderAccount()));
+    if (null != representativeVO.getProviderAccount()) {
+      Pattern p = Pattern.compile(EMAIL_REGEX);
+      Matcher m = p.matcher(representativeVO.getProviderAccount());
+      boolean result = m.matches();
+      if (Boolean.FALSE.equals(result)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            String.format(EEAErrorMessage.NOT_EMAIL, representativeVO.getProviderAccount()));
+      }
     }
 
     if (representativeVO.getProviderAccount() != null) {
@@ -226,7 +225,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataProvider/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
   public DataProviderVO findDataProviderById(@PathVariable("id") Long dataProviderId) {
     if (null == dataProviderId) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,

@@ -735,6 +735,7 @@
     "clearFilter": "Clear filter",
     "addAnotherOne": "Add another record",
     "noData": "No data to display",
-    "updateContributorError": "Error updating contributor"
+    "updateContributorError": "Error updating contributor",
+    "copyDatasetSchemaNotFoundEvent": "No design datasets found to copy"
   }
 }

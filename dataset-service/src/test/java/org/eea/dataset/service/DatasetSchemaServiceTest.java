@@ -51,6 +51,7 @@ import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ReferencedFieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Assert;
 import org.junit.Before;
@@ -394,8 +395,9 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void deleteGroupTest() {
-    dataSchemaServiceImpl.deleteGroup(1L);
-    Mockito.verify(resourceManagementControllerZull, times(1)).deleteResourceByName(Mockito.any());
+    dataSchemaServiceImpl.deleteGroup(1L, ResourceTypeEnum.DATA_SCHEMA);
+    Mockito.verify(resourceManagementControllerZull, times(1)).getGroupsByIdResourceType(1L,
+        ResourceTypeEnum.DATA_SCHEMA);
   }
 
   /**

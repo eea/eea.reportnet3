@@ -81,6 +81,12 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   private static final String LIST_GROUPS_URL = "/auth/admin/realms/{realm}/groups";
 
   /**
+   * The Constant LIST_GROUPS_URL.
+   */
+  private static final String LIST_GROUPS_URL_WITH_SEARCH =
+      "/auth/admin/realms/{realm}/groups?search={searchParam}";
+
+  /**
    * The Constant GROUP_DETAIL_URL.
    */
   private static final String GROUP_DETAIL_URL = "/auth/admin/realms/{realm}/groups/{groupId}";
@@ -95,11 +101,10 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    */
   private static final String DELETE_USER_GROUP_URL = "/auth/admin/realms/{realm}/groups/{groupId}";
 
-  /**
-   * The Constant ADD_USER_TO_USER_GROUP_URL.
-   */
-  private static final String ADD_USER_TO_USER_GROUP_URL =
-      "/auth/admin/realms/Reportnet/users/{userId}/groups/{groupId}";
+
+  /** The Constant ALTER_USER_TO_USER_GROUP_URL: {@value}. */
+  private static final String ALTER_USER_TO_USER_GROUP_URL =
+      "/auth/admin/realms/{realm}/users/{userId}/groups/{groupId}";
 
   /**
    * The Constant CHECK_USER_PERMISSION.
@@ -170,6 +175,10 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * The Constant USER_URL.
    */
   private static final String USER_URL = "/auth/admin/realms/{realm}/users/{userId}";
+
+  /** The Constant USERS_BY_GROUPS: {@value}. */
+  private static final String USERS_BY_GROUPS =
+      "/auth/admin/realms/{realm}/groups/{groupId}/members";
 
   /**
    * The Constant USER_ROLES_URL.
@@ -243,9 +252,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   @Autowired
   private RestTemplate restTemplate;
 
-  /**
-   * the token monitor
-   */
+  /** the token monitor. */
   @Autowired
   private TokenMonitor tokenMonitor;
 
@@ -483,6 +490,29 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   }
 
   /**
+   * Gets the groups with search.
+   *
+   * @param value the value
+   * @return the groups
+   */
+  @Override
+  public GroupInfo[] getGroupsWithSearch(String value) {
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
+    uriParams.put("searchParam", value);
+
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    HttpEntity<Void> request = createHttpRequest(null, uriParams);
+    ResponseEntity<GroupInfo[]> responseEntity = this.restTemplate.exchange(
+        uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
+            .path(LIST_GROUPS_URL_WITH_SEARCH).buildAndExpand(uriParams).toString(),
+        HttpMethod.GET, request, GroupInfo[].class);
+
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
+        .orElse(null);
+  }
+
+  /**
    * Gets the group detail.
    *
    * @param groupId the group id
@@ -555,6 +585,36 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
         .orElse(null);
   }
 
+  /**
+   * Gets the users.
+   *
+   * @param groupId the group id
+   * @return the user
+   */
+  @Override
+  public UserRepresentation[] getUsersByGroupId(String groupId) {
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
+    uriParams.put(URI_PARAM_GROUP_ID, groupId);
+
+    HttpEntity<UserRepresentation> request = createHttpRequest(null, uriParams);
+
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    ResponseEntity<UserRepresentation[]> responseEntity = this.restTemplate.exchange(
+        uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(USERS_BY_GROUPS)
+            .buildAndExpand(uriParams).toString(),
+        HttpMethod.GET, request, UserRepresentation[].class);
+
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
+        .orElse(null);
+  }
+
+  /**
+   * Gets the user roles.
+   *
+   * @param userId the user id
+   * @return the user roles
+   */
   @Override
   public RoleRepresentation[] getUserRoles(String userId) {
     Map<String, String> uriParams = new HashMap<>();
@@ -637,11 +697,39 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     try {
       this.restTemplate.exchange(
           uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-              .path(ADD_USER_TO_USER_GROUP_URL).buildAndExpand(uriParams).toString(),
+              .path(ALTER_USER_TO_USER_GROUP_URL).buildAndExpand(uriParams).toString(),
           HttpMethod.PUT, request, Void.class);
     } catch (Exception e) {
       LOG_ERROR.error("Error creating permission due to reason {}", e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED, e);
+    }
+
+  }
+
+
+  /**
+   * Removes the user from group.
+   *
+   * @param userId the user id
+   * @param groupId the group id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void removeUserFromGroup(String userId, String groupId) throws EEAException {
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
+    uriParams.put(URI_PARAM_GROUP_ID, groupId);
+    uriParams.put(URI_PARAM_USER_ID, userId);
+    HttpEntity<Void> request = createHttpRequest(null, uriParams);
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    try {
+      this.restTemplate.exchange(
+          uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
+              .path(ALTER_USER_TO_USER_GROUP_URL).buildAndExpand(uriParams).toString(),
+          HttpMethod.DELETE, request, Void.class);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error removing permission due to reason {}", e.getMessage(), e);
+      throw new EEAException(String.format(EEAErrorMessage.PERMISSION_NOT_REMOVED, groupId), e);
     }
 
   }
@@ -659,7 +747,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-            .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+        .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 
@@ -720,7 +808,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-            .path(ADD_ROLE_TO_USER).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+        .path(ADD_ROLE_TO_USER).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 

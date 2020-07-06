@@ -7,12 +7,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.security.jwt.data.CacheTokenVO;
@@ -83,7 +86,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     TokenDataVO tokenDataVO = new TokenDataVO();
     Map<String, Object> claims = new HashMap<>();
     List<String> roles = new ArrayList<>();
-    roles.add("/DATA_PROVIDER");
+    roles.add("/LEAD_REPORTER");
     claims.put("user_groups", roles);
     tokenDataVO.setOtherClaims(claims);
     when(jwtTokenProvider.parseToken("token")).thenReturn(tokenDataVO);
@@ -110,7 +113,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     TokenDataVO tokenDataVO = new TokenDataVO();
     Map<String, Object> claims = new HashMap<>();
     List<String> roles = new ArrayList<>();
-    roles.add("/DATA_PROVIDER");
+    roles.add("/LEAD_REPORTER");
     claims.put("user_groups", roles);
     tokenDataVO.setOtherClaims(claims);
     when(jwtTokenProvider.parseToken("token")).thenReturn(tokenDataVO);
@@ -138,7 +141,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     TokenDataVO tokenDataVO = new TokenDataVO();
     Map<String, Object> claims = new HashMap<>();
     List<String> roles = new ArrayList<>();
-    roles.add("/DATA_PROVIDER");
+    roles.add("/LEAD_REPORTER");
     claims.put("user_groups", roles);
     tokenDataVO.setOtherClaims(claims);
     when(jwtTokenProvider.parseToken("token")).thenReturn(tokenDataVO);
@@ -167,7 +170,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
 
     Map<String, Object> claims = new HashMap<>();
     List<String> roles = new ArrayList<>();
-    roles.add("/DATA_PROVIDER");
+    roles.add("/LEAD_REPORTER");
     claims.put("user_groups", roles);
     tokenDataVO.setOtherClaims(claims);
     when(jwtTokenProvider.parseToken("token")).thenReturn(tokenDataVO);
@@ -194,7 +197,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     TokenDataVO tokenDataVO = new TokenDataVO();
     Map<String, Object> claims = new HashMap<>();
     List<String> roles = new ArrayList<>();
-    roles.add("/DATA_PROVIDER");
+    roles.add("/LEAD_REPORTER");
     claims.put("user_groups", roles);
     tokenDataVO.setOtherClaims(claims);
     ValueOperations<String, CacheTokenVO> operations = Mockito.mock(ValueOperations.class);
@@ -242,7 +245,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   public void createResourceInstance() throws EEAException {
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
     resourceInfoVO.setResourceId(1l);
-    resourceInfoVO.setSecurityRoleEnum(SecurityRoleEnum.DATA_PROVIDER);
+    resourceInfoVO.setSecurityRoleEnum(SecurityRoleEnum.LEAD_REPORTER);
     resourceInfoVO.setResourceTypeEnum(ResourceTypeEnum.DATAFLOW);
 
     ValueOperations<String, CacheTokenVO> operations = Mockito.mock(ValueOperations.class);
@@ -256,13 +259,13 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   }
 
 
-  /**
-   * Removes the user from user group.
-   */
-  @Test(expected = UnsupportedOperationException.class)
-  public void removeUserFromUserGroup() {
-    keycloakSecurityProviderInterfaceService.removeUserFromUserGroup("", "");
-  }
+  // /**
+  // * Removes the user from user group.
+  // */
+  // @Test(expected = UnsupportedOperationException.class)
+  // public void removeUserFromUserGroup() {
+  // keycloakSecurityProviderInterfaceService.removeUserFromUserGroup("", "");
+  // }
 
   /**
    * Gets the resources by user.
@@ -274,7 +277,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     GroupInfo[] groupInfos = new GroupInfo[1];
     GroupInfo groupInfo = new GroupInfo();
     groupInfo.setId("1");
-    groupInfo.setName("Dataflow-1-DATA_PROVIDER");
+    groupInfo.setName("Dataflow-1-LEAD_REPORTER");
     groupInfo.setPath("/path");
     groupInfos[0] = groupInfo;
     when(keycloakConnectorService.getGroupsByUser(Mockito.anyString())).thenReturn(groupInfos);
@@ -288,7 +291,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     Assert.assertNotNull(result);
     Assert.assertEquals(1, result.size());
     Assert.assertEquals(ResourceTypeEnum.DATAFLOW, result.get(0).getResource());
-    Assert.assertEquals(SecurityRoleEnum.DATA_PROVIDER, result.get(0).getRole());
+    Assert.assertEquals(SecurityRoleEnum.LEAD_REPORTER, result.get(0).getRole());
   }
 
   /**
@@ -511,15 +514,15 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     // Configuration of group info for the user "userId1"
     GroupInfo[] groupInfos = new GroupInfo[1];
     GroupInfo groupInfo = new GroupInfo();
-    groupInfo.setName("Dataflow-1-DATA_PROVIDER");
-    groupInfo.setPath("/Dataflow-1-DATA_PROVIDER");
+    groupInfo.setName("Dataflow-1-LEAD_REPORTER");
+    groupInfo.setPath("/Dataflow-1-LEAD_REPORTER");
     groupInfos[0] = groupInfo;
     when(keycloakConnectorService.getGroupsByUser(Mockito.eq("userId1"))).thenReturn(groupInfos);
 
     // Configuration of user roles for user "userId1"
     RoleRepresentation[] roleRepresentations = new RoleRepresentation[1];
     RoleRepresentation roleRepresentation = new RoleRepresentation();
-    roleRepresentation.setName("DATA_PROVIDER");
+    roleRepresentation.setName("LEAD_REPORTER");
     roleRepresentations[0] = roleRepresentation;
     when(keycloakConnectorService.getUserRoles(Mockito.eq("userId1")))
         .thenReturn(roleRepresentations);
@@ -530,8 +533,8 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     Assert.assertEquals(result.getPreferredUsername(), "userName1");
     Assert.assertEquals(result.getGroups().size(), 1);
     Assert.assertEquals(result.getRoles().size(), 1);
-    Assert.assertEquals(result.getGroups().iterator().next(), "Dataflow-1-DATA_PROVIDER");
-    Assert.assertEquals(result.getRoles().iterator().next(), "DATA_PROVIDER");
+    Assert.assertEquals(result.getGroups().iterator().next(), "Dataflow-1-LEAD_REPORTER");
+    Assert.assertEquals(result.getRoles().iterator().next(), "LEAD_REPORTER");
 
   }
 
@@ -610,4 +613,67 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     assertEquals(user,
         keycloakSecurityProviderInterfaceService.setAttributesWithApiKey(user, attributes));
   }
+
+  @Test
+  public void removeContributorFromUserGroup() throws EEAException {
+    GroupInfo[] groups = {new GroupInfo()};
+    Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groups);
+    keycloakSecurityProviderInterfaceService
+        .removeContributorFromUserGroup(Optional.of(new UserRepresentation()), "", "");
+    Mockito.verify(keycloakConnectorService, Mockito.times(1)).removeUserFromGroup(Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test(expected = EEAException.class)
+  public void removeContributorFromUserGroupNoUser() throws EEAException {
+    GroupInfo[] groups = {new GroupInfo()};
+    UserRepresentation[] users = {new UserRepresentation()};
+    Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
+    Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groups);
+    try {
+      keycloakSecurityProviderInterfaceService.removeContributorFromUserGroup(Optional.empty(), "",
+          "");
+    } catch (EEAException e) {
+      assertEquals("Error, user not found", e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test
+  public void removeContributorsFromUserGroup() throws EEAException {
+    List<ResourceAssignationVO> resources = new ArrayList<>();
+    GroupInfo[] groups = {new GroupInfo()};
+    ResourceAssignationVO resource = new ResourceAssignationVO();
+    resource.setEmail("a");
+    resource.setResourceGroup(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE);
+    resources.add(resource);
+    UserRepresentation user = new UserRepresentation();
+    user.setEmail("a");
+    UserRepresentation[] users = {user};
+    Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
+    Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groups);
+    keycloakSecurityProviderInterfaceService.removeContributorsFromUserGroup(resources);
+    Mockito.verify(keycloakConnectorService, Mockito.times(1)).removeUserFromGroup(Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test(expected = EEAException.class)
+  public void removeContributorsFromUserGroupException() throws EEAException {
+    List<ResourceAssignationVO> resources = new ArrayList<>();
+    GroupInfo[] groups = {new GroupInfo()};
+    ResourceAssignationVO resource = new ResourceAssignationVO();
+    resource.setEmail("a");
+    resource.setResourceGroup(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE);
+    resources.add(resource);
+    UserRepresentation[] users = {new UserRepresentation()};
+    Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
+    Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groups);
+    try {
+      keycloakSecurityProviderInterfaceService.removeContributorsFromUserGroup(resources);
+    } catch (EEAException e) {
+      assertEquals("Error, user not found", e.getMessage());
+      throw e;
+    }
+  }
+
 }
