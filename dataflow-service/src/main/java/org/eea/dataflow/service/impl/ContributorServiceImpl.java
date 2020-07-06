@@ -13,6 +13,7 @@ import org.eea.interfaces.vo.contributor.ContributorVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
@@ -22,8 +23,10 @@ import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class ContributorServiceImpl.
@@ -216,26 +219,42 @@ public class ContributorServiceImpl implements ContributorService {
     List<ResourceInfoVO> resourceInfoVOs = new ArrayList<>();
     if (EDITOR.equals(role)) {
 
-      resourceInfoVOs.add(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, securityRoleEnum));
+      ResourceInfoVO resourceDataflow =
+          resourceManagementControllerZull.getResourceDetail(dataflowId, resourceGroupEnumDataflow);
+      if (null == resourceDataflow.getName()) {
+        resourceInfoVOs.add(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, securityRoleEnum));
+      }
       resourceAssignationVOList.add(fillResourceAssignation(dataflowId, contributorVO.getAccount(),
           resourceGroupEnumDataflow));
       for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
-        resourceInfoVOs.add(
-            createGroup(designDatasetVO.getId(), ResourceTypeEnum.DATA_SCHEMA, securityRoleEnum));
+        ResourceInfoVO resourceDataSchema = resourceManagementControllerZull
+            .getResourceDetail(designDatasetVO.getId(), resourceGroupEnum);
+        if (null == resourceDataSchema.getName()) {
+          resourceInfoVOs.add(
+              createGroup(designDatasetVO.getId(), ResourceTypeEnum.DATA_SCHEMA, securityRoleEnum));
+        }
         resourceAssignationVOList.add(fillResourceAssignation(designDatasetVO.getId(),
             contributorVO.getAccount(), resourceGroupEnum));
       }
     } else if (REPORTER.equals(role)) {
-      resourceInfoVOs
-          .add(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.REPORTER_READ));
+      ResourceInfoVO resourceDataflow =
+          resourceManagementControllerZull.getResourceDetail(dataflowId, resourceGroupEnumDataflow);
+      if (null == resourceDataflow.getName()) {
+        resourceInfoVOs.add(
+            createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.REPORTER_READ));
+      }
       resourceAssignationVOList.add(fillResourceAssignation(dataflowId, contributorVO.getAccount(),
           resourceGroupEnumDataflow));
 
       for (ReportingDatasetVO reportingDatasetVO : dataflow.getReportingDatasets()) {
-        resourceInfoVOs.add(
-            createGroup(reportingDatasetVO.getId(), ResourceTypeEnum.DATASET, securityRoleEnum));
-        resourceInfoVOs.add(
-            createGroup(dataflowId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.REPORTER_READ));
+        ResourceInfoVO resourceDataSchema = resourceManagementControllerZull
+            .getResourceDetail(reportingDatasetVO.getId(), resourceGroupEnum);
+        if (null == resourceDataSchema.getName()) {
+          resourceInfoVOs.add(
+              createGroup(reportingDatasetVO.getId(), ResourceTypeEnum.DATASET, securityRoleEnum));
+          resourceInfoVOs.add(createGroup(dataflowId, ResourceTypeEnum.DATA_SCHEMA,
+              SecurityRoleEnum.REPORTER_READ));
+        }
         resourceAssignationVOList.add(fillResourceAssignation(reportingDatasetVO.getId(),
             contributorVO.getAccount(), resourceGroupEnum));
         resourceAssignationVOList.add(fillResourceAssignation(reportingDatasetVO.getId(),
@@ -243,6 +262,7 @@ public class ContributorServiceImpl implements ContributorService {
       }
 
     }
+    // Resources creation
     resourceManagementControllerZull.createResources(resourceInfoVOs);
     // we add data to contributor
     userManagementControllerZull.addContributorsToResources(resourceAssignationVOList);
@@ -299,12 +319,18 @@ public class ContributorServiceImpl implements ContributorService {
 
     // we delete the contributor and after that we create it to update
     if (EDITOR.equals(role) || REPORTER.equals(role)) {
-      try {
-        deleteContributor(dataflowId, contributorVO.getAccount(), role, dataProviderId);
-      } catch (EEAException e) {
-        LOG_ERROR.error("Error deleting contributor with the account: {} in the dataflow {} ",
-            contributorVO.getAccount(), dataflowId);
-        throw new EEAException(e);
+      List<ResourceAccessVO> resourceAccessVOs =
+          userManagementControllerZull.getResourcesByUserEmail(contributorVO.getAccount());
+      if (resourceAccessVOs != null && !resourceAccessVOs.isEmpty()
+          && resourceAccessVOs.stream().anyMatch(resource -> resource.getId().equals(dataflowId)
+              && resource.getResource().equals(ResourceTypeEnum.DATAFLOW))) {
+        try {
+          deleteContributor(dataflowId, contributorVO.getAccount(), role, dataProviderId);
+        } catch (EEAException e) {
+          LOG_ERROR.error("Error deleting contributor with the account: {} in the dataflow {} ",
+              contributorVO.getAccount(), dataflowId);
+          throw new EEAException(e);
+        }
       }
       try {
         createContributor(dataflowId, contributorVO, role);
@@ -313,7 +339,14 @@ public class ContributorServiceImpl implements ContributorService {
             contributorVO.getAccount(), dataflowId);
         throw new EEAException(e);
       }
+    } else {
+      LOG_ERROR.error(
+          "Error creating contributor with the account: {} in the dataflow {}  because the role not avaliable {}",
+          contributorVO.getAccount(), dataflowId, role);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          new StringBuilder("Role ").append(role).append(" doesn't exist").toString());
     }
+
   }
 
   /**
