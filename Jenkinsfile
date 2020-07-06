@@ -175,42 +175,42 @@ pipeline {
                             def app
                             app = docker.build("k8s-swi001:5000/dataflow-service:1.0$TAG_SUFIX", "--build-arg JAR_FILE=target/dataflow-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8020 -f ./Dockerfile ./dataflow-service")
                             app.push()
-                            sh 'docker rmi k8s-swi001:5000/dataflow-service:1.0${TAG_SUFIX}'
+
                         }
                         script {
                             echo 'Dataset Service'
                             def app
                             app = docker.build("k8s-swi001:5000/dataset-service:1.0$TAG_SUFIX", "--build-arg JAR_FILE=target/dataset-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8030 -f ./Dockerfile ./dataset-service")
                             app.push()
-                            sh 'docker rmi k8s-swi001:5000/dataset-service:1.0${TAG_SUFIX}'
+
                         }
                         script {
                             echo 'Recordstore Service'
                             def app
                             app = docker.build("k8s-swi001:5000/recordstore-service:3.0$TAG_SUFIX", "--no-cache --build-arg JAR_FILE=target/recordstore-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=8090 ./recordstore-service/")
                             app.push()
-                            sh 'docker rmi k8s-swi001:5000/recordstore-service:3.0${TAG_SUFIX}'
+
                         }
                         script {
                             echo 'Validation Service'
                             def app
                             app = docker.build("k8s-swi001:5000/validation-service:1.0$TAG_SUFIX", "--build-arg JAR_FILE=target/validation-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8015 -f ./Dockerfile ./validation-service")
                             app.push()
-                            sh 'docker rmi k8s-swi001:5000/validation-service:1.0${TAG_SUFIX}'
+
                         }
                         script {
                             echo 'Collaboration Service'
                             def app
                             app = docker.build("k8s-swi001:5000/collaboration-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/collaboration-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9010 -f ./Dockerfile ./collaboration-service")
                             app.push()
-                            sh 'docker rmi k8s-swi001:5000/collaboration-service:3.0${TAG_SUFIX}'
+
                         }
                         script {
                             echo 'Document Container Service'
                             def app
                             app = docker.build("k8s-swi001:5000/document-container-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/document-container-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9040 -f ./Dockerfile ./document-container-service")
                             app.push()
-                            sh 'docker rmi k8s-swi001:5000/document-container-service:3.0${TAG_SUFIX}'
+
                         }
 
                     }
@@ -230,35 +230,35 @@ pipeline {
                             def app
                             app = docker.build("k8s-swi001:5000/inspire-harvester:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/inspire-harvester-3.0-SNAPSHOT.jar --build-arg MS_PORT=8050 -f ./Dockerfile ./inspire-harvester ")
                             app.push()
-                            sh 'docker rmi k8s-swi001:5000/inspire-harvester:3.0${TAG_SUFIX}'
+
                         }
                          script {
                             echo 'Communication Service'
                             def app
                             app = docker.build("k8s-swi001:5000/communication-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/communication-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9020 -f ./Dockerfile ./communication-service")
                             app.push()
-                            sh 'docker rmi k8s-swi001:5000/communication-service:3.0${TAG_SUFIX}'
+
                          }
                         script {
                             echo 'IndexSearch Service'
                             def app
                             app = docker.build("k8s-swi001:5000/indexsearch-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/indexsearch-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9030 -f ./Dockerfile ./indexsearch-service")
                             app.push()
-                             sh 'docker rmi k8s-swi001:5000/indexsearch-service:3.0${TAG_SUFIX}'
+
                         }
                         script {
                             echo 'User Management Service'
                             def app
                             app = docker.build("k8s-swi001:5000/user-management-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/user-management-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9010 -f ./Dockerfile ./user-management-service")
                             app.push()
-                            sh 'docker rmi k8s-swi001:5000/user-management-service:3.0${TAG_SUFIX}'
+
                         }
                          script {
                             echo 'Rod Service'
                             def app
                             app = docker.build("k8s-swi001:5000/rod-service:3.0$TAG_SUFIX", "--build-arg JAR_FILE=target/rod-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9050 -f ./Dockerfile ./rod-service")
                             app.push()
-                            sh 'docker rmi k8s-swi001:5000/rod-service:3.0${TAG_SUFIX}'
+
                         }
 
 
@@ -273,12 +273,29 @@ pipeline {
                             def app
                             app = docker.build("k8s-swi001:5000/reportnet-frontend-service:3.0$TAG_SUFIX", "--no-cache  ./frontend-service/")
                             app.push()
-                            sh 'docker rmi k8s-swi001:5000/reportnet-frontend-service:3.0${TAG_SUFIX}'
+
                         }
                     }
                 }
 
             }
+        }stage('Cleaning docker images'){
+          steps {
+            script {
+              sh 'docker rmi k8s-swi001:5000/dataflow-service:1.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/dataset-service:1.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/recordstore-service:3.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/validation-service:1.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/collaboration-service:3.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/document-container-service:3.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/inspire-harvester:3.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/communication-service:3.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/indexsearch-service:3.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/user-management-service:3.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/rod-service:3.0${TAG_SUFIX}'
+              sh 'docker rmi k8s-swi001:5000/reportnet-frontend-service:3.0${TAG_SUFIX}'
+            }
+          }
         }
 
 
