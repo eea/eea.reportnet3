@@ -80,12 +80,13 @@ const Dataflow = withRouter(({ history, match }) => {
     isReceiptLoading: false,
     isReceiptOutdated: false,
     isRepresentativeView: false,
+    isShareRightsDialogVisible: false,
     isSnapshotDialogVisible: false,
     name: '',
     obligations: {},
     status: '',
     updatedDatasetSchema: undefined,
-    isShareRightsDialogVisible: false
+    userRoles: []
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -228,8 +229,7 @@ const Dataflow = withRouter(({ history, match }) => {
           ? leftSideBarContext.addModels([propertiesBtn])
           : leftSideBarContext.addModels([propertiesBtn, apiKeyBtn]);
 
-        const isLeadReporter = true;
-        if (isLeadReporter) {
+        if (dataflowState.userRoles.includes([config.permissions['LEAD_REPORTER']])) {
           leftSideBarContext.addModels([propertiesBtn, apiKeyBtn, manageRightsBtn]);
         }
       } else {
@@ -353,9 +353,9 @@ const Dataflow = withRouter(({ history, match }) => {
       `${config.permissions.DATAFLOW}${dataflowId}`
     );
 
-    const userRole = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
+    const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
 
-    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian } });
+    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian, userRoles } });
   };
 
   const checkIsRepresentativeView = (datasets, dataflow) => {
