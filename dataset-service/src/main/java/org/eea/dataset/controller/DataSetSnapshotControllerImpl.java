@@ -58,7 +58,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @GetMapping(value = "/dataset/{idDataset}/listSnapshots",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') OR (hasRole('DATA_CUSTODIAN'))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ') OR (hasRole('DATA_CUSTODIAN'))")
   public List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("idDataset") Long datasetId) {
 
     if (datasetId == null) {
@@ -84,7 +84,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @LockMethod(removeWhenFinish = false)
   @HystrixCommand
   @PostMapping(value = "/dataset/{idDataset}/create", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE')")
   public void createSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
       @RequestBody CreateSnapshotVO createSnapshot) {
@@ -106,7 +106,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{idSnapshot}/dataset/{idDataset}/delete")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE') AND checkPermission('Dataset','MANAGE_DATA')")
   public void deleteSnapshot(@PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
 
@@ -134,7 +134,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @LockMethod(removeWhenFinish = false)
   @PostMapping(value = "/{idSnapshot}/dataset/{idDataset}/restore",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE') AND checkPermission('Dataset','MANAGE_DATA')")
   public void restoreSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
@@ -166,7 +166,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @PutMapping(value = "/{idSnapshot}/dataset/{idDataset}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER')")
   @LockMethod(removeWhenFinish = false)
   public void releaseSnapshot(@PathVariable("idDataset") Long datasetId,
       @LockCriteria(name = "snapshotId") @PathVariable("idSnapshot") Long idSnapshot) {
@@ -192,7 +192,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @GetMapping(value = "/dataschema/{idDesignDataset}/listSnapshots",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE')")
   public List<SnapshotVO> getSchemaSnapshotsByIdDataset(
       @PathVariable("idDesignDataset") Long datasetId) {
 
@@ -221,7 +221,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @PostMapping(value = "/dataschema/{idDatasetSchema}/dataset/{idDesignDataset}/create",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE')")
   public void createSchemaSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDesignDataset") Long datasetId,
       @PathVariable("idDatasetSchema") String idDatasetSchema,
@@ -245,7 +245,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @LockMethod(removeWhenFinish = false)
   @PostMapping(value = "/{idSnapshot}/dataschema/{idDesignDataset}/restore",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE')")
   public void restoreSchemaSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDesignDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
@@ -277,7 +277,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{idSnapshot}/dataschema/{idDesignDataset}/delete")
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE')")
   public void deleteSchemaSnapshot(@PathVariable("idDesignDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) throws Exception {
     // Set the user name on the thread
@@ -307,7 +307,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER')")
   @GetMapping(value = "/receiptPDF/dataflow/{dataflowId}/dataProvider/{dataProviderId}",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public ResponseEntity<StreamingResponseBody> createReceiptPDF(HttpServletResponse response,

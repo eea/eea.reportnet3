@@ -57,7 +57,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
   @PutMapping(value = "/listIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<IntegrationVO> findAllIntegrationsByCriteria(
       @RequestBody IntegrationVO integrationVO) {
@@ -144,7 +144,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
   @PutMapping(value = "/listExtensionsOperations", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<IntegrationVO> findExtensionsAndOperations(@RequestBody IntegrationVO integrationVO) {
     try {
@@ -167,7 +167,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
   @PostMapping(value = "/executeIntegration")
   public ExecutionResultVO executeIntegrationProcess(
       @RequestParam("integrationTool") IntegrationToolTypeEnum integrationToolTypeEnum,

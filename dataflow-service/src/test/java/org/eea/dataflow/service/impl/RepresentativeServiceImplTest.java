@@ -437,5 +437,5 @@ public class RepresentativeServiceImplTest {
     Assert.assertEquals(0, representativeServiceImpl
         .getRepresetativesByDataflowIdAndEmail(1L, "provider@reportnet.net").size());
   }
-  
+
 }

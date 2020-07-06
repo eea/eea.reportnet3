@@ -66,8 +66,6 @@ public interface ResourceManagementController {
   ResourceInfoVO getResourceDetail(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum);
 
-
-
   /**
    * Gets the groups by id resource type.
    *

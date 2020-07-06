@@ -1258,5 +1258,17 @@
   {
     "key": "config/dataset/wait.continue.copy.ms",
     "value": "JHtDT1BZX1NDSEVNQV9XQUlUX01TOjMwMDB9"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.contributor.path",
+    "value": "L2NvbnRyaWJ1dG9yLyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.contributor.serviceId",
+    "value": "ZGF0YWZsb3c="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.contributor.stripPrefix",
+    "value": "ZmFsc2U="
   }
 ]

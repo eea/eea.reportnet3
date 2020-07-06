@@ -288,6 +288,7 @@
     "invalidCharacter": "Invalid character",
     "issues": "Issue",
     "language": "Language",
+    "legalInstrument": "Legal instrument",
     "legalInstruments": "Legal instrument",
     "legalInstrumentDataflowItem": "Legal instrument",
     "levelError": "Level error",
@@ -720,6 +721,7 @@
     "toggleMagazineView": "Switch to magazine view",
     "loadDataflowsError": "Error loading dataflows",
     "clearFilter": "Clear filter",
-    "addAnotherOne": "Add another record"
+    "addAnotherOne": "Add another record",
+    "copyDatasetSchemaNotFoundEvent": "No design datasets found to copy"
   }
 }

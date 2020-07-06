@@ -213,15 +213,18 @@ public interface DatasetSchemaController {
   List<DataSetSchemaVO> findDataSchemasByIdDataflow(@PathVariable("idDataflow") Long idDataflow);
 
 
+
   /**
    * Gets the unique constraints.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
    * @return the unique constraints
    */
-  @GetMapping(value = "{schemaId}/getUniqueConstraints",
+  @GetMapping(value = "{schemaId}/getUniqueConstraints/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  List<UniqueConstraintVO> getUniqueConstraints(@PathVariable("schemaId") String datasetSchemaId);
+  List<UniqueConstraintVO> getUniqueConstraints(@PathVariable("schemaId") String datasetSchemaId,
+      @PathVariable("dataflowId") Long dataflowId);
 
 
   /**
@@ -232,14 +235,16 @@ public interface DatasetSchemaController {
   @PostMapping(value = "/createUniqueConstraint")
   void createUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint);
 
+
   /**
    * Delete unique constraint.
    *
    * @param uniqueConstraintId the unique constraint id
+   * @param dataflowId the dataflow id
    */
-  @DeleteMapping(value = "/deleteUniqueConstraint/{uniqueConstraintId}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  void deleteUniqueConstraint(@PathVariable("uniqueConstraintId") String uniqueConstraintId);
+  @DeleteMapping(value = "/deleteUniqueConstraint/{uniqueConstraintId}/dataflow/{dataflowId}")
+  void deleteUniqueConstraint(@PathVariable("uniqueConstraintId") String uniqueConstraintId,
+      @PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Update unique constraint.

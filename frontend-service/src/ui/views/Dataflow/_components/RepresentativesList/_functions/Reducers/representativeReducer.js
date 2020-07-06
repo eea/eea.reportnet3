@@ -83,7 +83,8 @@ export const reducer = (state, { type, payload }) => {
     case 'ON_ACCOUNT_CHANGE':
       return {
         ...state,
-        representatives: payload.representatives
+        representatives: payload.representatives,
+        representativeHasError: payload.representativeHasError
       };
 
     case 'ON_PROVIDER_CHANGE':

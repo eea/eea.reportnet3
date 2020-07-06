@@ -9,7 +9,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -547,8 +546,9 @@ public class ValidationServiceTest {
     doNothing().when(datasetRepository).deleteValidationTable();
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
     resourceInfoVO.setAttributes(attributes);
-    when(resourceManagementController.getResourceDetail(1L, ResourceGroupEnum.DATASET_PROVIDER))
-        .thenReturn(resourceInfoVO);
+    when(
+        resourceManagementController.getResourceDetail(1L, ResourceGroupEnum.DATASET_LEAD_REPORTER))
+            .thenReturn(resourceInfoVO);
 
     validationServiceImpl.deleteAllValidation(1L);
     Mockito.verify(datasetRepository, times(1)).deleteValidationTable();

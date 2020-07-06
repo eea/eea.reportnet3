@@ -138,7 +138,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @PutMapping(value = "/updateDatasetName")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATAFLOW_EDITOR_WRITE',)")
   public void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
       @RequestParam(value = "datasetName", required = false) String datasetName) {
     if (!datasetMetabaseService.updateDatasetName(datasetId, datasetName)) {
@@ -198,7 +198,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @HystrixCommand
   @GetMapping(value = "/globalStatistics/{dataschemaId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')  OR secondLevelAuthorize(#idDataflow,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ')")
   public List<StatisticsVO> getGlobalStatisticsByDataschemaId(
       @PathVariable("dataschemaId") String dataschemaId) {
 
