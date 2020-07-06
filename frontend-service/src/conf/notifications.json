@@ -390,6 +390,9 @@
         },
         {
           "key": "LOAD_DATAFLOWS_ERROR"
+        },
+        {
+          "key": "COPY_DATASET_SCHEMA_NOT_FOUND_EVENT"
         }
       ]
     },
