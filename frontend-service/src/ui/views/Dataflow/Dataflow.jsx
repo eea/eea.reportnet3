@@ -229,7 +229,7 @@ const Dataflow = withRouter(({ history, match }) => {
           ? leftSideBarContext.addModels([propertiesBtn])
           : leftSideBarContext.addModels([propertiesBtn, apiKeyBtn]);
 
-        if (dataflowState.userRoles.includes([config.permissions['LEAD_REPORTER']])) {
+        if (dataflowState.userRoles.includes(config.permissions['LEAD_REPORTER'])) {
           leftSideBarContext.addModels([propertiesBtn, apiKeyBtn, manageRightsBtn]);
         }
       } else {
@@ -348,12 +348,9 @@ const Dataflow = withRouter(({ history, match }) => {
       `${config.permissions.DATAFLOW}${dataflowId}`
     );
 
-    const isCustodian = userContext.hasPermission(
-      [config.permissions.CUSTODIAN],
-      `${config.permissions.DATAFLOW}${dataflowId}`
-    );
-
     const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
+
+    const isCustodian = userRoles.includes(config.permissions['CUSTODIAN'] || config.permissions['DATA_STEWARD']);
 
     dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian, userRoles } });
   };
