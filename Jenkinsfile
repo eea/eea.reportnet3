@@ -279,7 +279,8 @@ pipeline {
                 }
 
             }
-        }stage('Cleaning docker images'){
+        }
+        stage('Cleaning docker images'){
           when {
             expression {
               return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox"
