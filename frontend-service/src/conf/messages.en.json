@@ -708,6 +708,18 @@
     "cloneSelectedDataflow": "Clone selected dataflow",
     "selectedDataflow": "Selected dataflow",
     "totalDataflows": "Total dataflows",
+    "manageReportersRights": "Manage reporters",
+    "manageEditorsRights": "Manage editors",
+    "selectPermission": "Select",
+    "readPermission": "Read",
+    "readAndWritePermission": "Read/Write",
+    "editorsAccountColumn": "Editor account",
+    "reportersAccountColumn": "Reporter account",
+    "writePermissionsColumn": "Permissions",
+    "editorsRightsDialogConfirmDeleteHeader": "Delete editor",
+    "editorsRightsDialogConfirmDeleteQuestion": "Do you really want to delete this editor?",
+    "reportersRightsDialogConfirmDeleteHeader": "Delete reporter",
+    "reportersRightsDialogConfirmDeleteQuestion": "Do you really want to delete this reporter?",
     "disabledCreateDataCollectionSchemas": "There is already a data collection created",
     "disabledCreateDataCollectionSchemasWithError": "Incomplete schemas. Check that all your schemas have tables and (at least) one field per table",
     "disabledCreateDataCollectionNoProviders": "You haven't assigned yet reporter/s to your dataflow",
@@ -722,6 +734,10 @@
     "loadDataflowsError": "Error loading dataflows",
     "clearFilter": "Clear filter",
     "addAnotherOne": "Add another record",
-    "copyDatasetSchemaNotFoundEvent": "No design datasets found to copy"
+    "noData": "No data to display",
+    "updateContributorError": "Error updating contributor",
+    "copyDatasetSchemaNotFoundEvent": "No design datasets found to copy",
+    "deleteEditorError": "Error deleting editor",
+    "deleteReporterError": "Error deleting reporter"
   }
 }
