@@ -40,49 +40,47 @@ const useBigButtonList = ({
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) {
       const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
-      console.log(
-        { userRoles },
-        userRoles.map(userRole => config.permissions[userRole])
-      );
       setButtonsVisibility(getButtonsVisibility(userRoles.map(userRole => config.permissions[userRole])));
     }
   }, [userContext]);
 
-  const getButtonsVisibility = roles => {
-    console.log(
+  const getButtonsVisibility = roles => ({
+    createDataCollection:
       roles.includes(config.permissions['DATA_CUSTODIAN']) ||
-        (roles.includes(config.permissions['DATA_STEWARD']) && !roles.includes(config.permissions['EDITOR_WRITE']))
-    );
-    return {
-      dashboard:
-        roles.includes(config.permissions['DATA_CUSTODIAN']) ||
-        roles.includes(config.permissions['DATA_STEWARD']) ||
-        roles.includes(config.permissions['EDITOR_WRITE']) ||
-        roles.includes(config.permissions['EDITOR_READ']),
-      designDatasets:
-        roles.includes(config.permissions['DATA_CUSTODIAN']) ||
-        roles.includes(config.permissions['DATA_STEWARD']) ||
-        roles.includes(config.permissions['EDITOR_WRITE']) ||
-        roles.includes(config.permissions['EDITOR_READ']),
-      groupByRepresentative:
-        !roles.includes(config.permissions['DATA_CUSTODIAN']) &&
-        !roles.includes(config.permissions['DATA_STEWARD']) &&
-        !roles.includes(config.permissions['EDITOR_WRITE']) &&
-        !roles.includes(config.permissions['EDITOR_READ']),
-      manageReporters:
-        (roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD'])) &&
-        (!roles.includes(config.permissions['EDITOR_WRITE']) || !roles.includes(config.permissions['EDITOR_READ'])),
-      newSchema:
-        roles.includes(config.permissions['DATA_CUSTODIAN']) ||
-        roles.includes(config.permissions['DATA_STEWARD']) ||
-        roles.includes(config.permissions['EDITOR_WRITE']),
-      updateReporters:
-        (roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD'])) &&
-        (!roles.includes(config.permissions['EDITOR_WRITE']) || !roles.includes(config.permissions['EDITOR_READ'])),
-      receipt: roles.includes(config.permissions['LEAD_REPORTER']) || roles.includes(config.permissions['REPORTER']),
-      release: roles.includes(config.permissions['LEAD_REPORTER']) || roles.includes(config.permissions['REPORTER'])
-    };
-  };
+      roles.includes(config.permissions['DATA_STEWARD']) ||
+      roles.includes(config.permissions['EDITOR_WRITE']),
+    dashboard:
+      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
+      roles.includes(config.permissions['DATA_STEWARD']) ||
+      roles.includes(config.permissions['EDITOR_WRITE']) ||
+      roles.includes(config.permissions['EDITOR_READ']),
+    designDatasets:
+      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
+      roles.includes(config.permissions['DATA_STEWARD']) ||
+      roles.includes(config.permissions['EDITOR_WRITE']) ||
+      roles.includes(config.permissions['EDITOR_READ']),
+    designDatasetsActions:
+      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
+      roles.includes(config.permissions['DATA_STEWARD']) ||
+      roles.includes(config.permissions['EDITOR_WRITE']),
+    groupByRepresentative:
+      !roles.includes(config.permissions['DATA_CUSTODIAN']) &&
+      !roles.includes(config.permissions['DATA_STEWARD']) &&
+      !roles.includes(config.permissions['EDITOR_WRITE']) &&
+      !roles.includes(config.permissions['EDITOR_READ']),
+    manageReporters:
+      (roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD'])) &&
+      (!roles.includes(config.permissions['EDITOR_WRITE']) || !roles.includes(config.permissions['EDITOR_READ'])),
+    newSchema:
+      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
+      roles.includes(config.permissions['DATA_STEWARD']) ||
+      roles.includes(config.permissions['EDITOR_WRITE']),
+    updateReporters:
+      (roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD'])) &&
+      (!roles.includes(config.permissions['EDITOR_WRITE']) || !roles.includes(config.permissions['EDITOR_READ'])),
+    receipt: roles.includes(config.permissions['LEAD_REPORTER']) || roles.includes(config.permissions['REPORTER']),
+    release: roles.includes(config.permissions['LEAD_REPORTER']) || roles.includes(config.permissions['REPORTER'])
+  });
 
   const manageReportersBigButton = [
     {
@@ -138,6 +136,7 @@ const useBigButtonList = ({
   const designDatasetModels = dataflowState.data.designDatasets.map(newDatasetSchema => ({
     buttonClass: 'schemaDataset',
     buttonIcon: 'pencilRuler',
+    canEditName: buttonsVisibility.designDatasetsActions,
     caption: newDatasetSchema.datasetSchemaName,
     dataflowStatus: dataflowState.status,
     datasetSchemaInfo: dataflowState.updatedDatasetSchema,
@@ -158,12 +157,14 @@ const useBigButtonList = ({
       {
         label: resources.messages['rename'],
         icon: 'pencil',
-        disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN']
+        disabled:
+          dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] || !buttonsVisibility.designDatasetsActions
       },
       {
         label: resources.messages['delete'],
         icon: 'trash',
-        disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'],
+        disabled:
+          dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] || !buttonsVisibility.designDatasetsActions,
         command: () => getDeleteSchemaIndex(newDatasetSchema.index)
       }
       // {
@@ -273,7 +274,10 @@ const useBigButtonList = ({
         : !dataflowState.formHasRepresentatives
         ? resources.messages['disabledCreateDataCollectionNoProviders']
         : undefined,
-      visibility: isEmpty(dataflowState.data.dataCollections) && dataflowState.status === 'DESIGN'
+      visibility:
+        isEmpty(dataflowState.data.dataCollections) &&
+        dataflowState.status === 'DESIGN' &&
+        buttonsVisibility.createDataCollection
     }
   ];
 

@@ -20,6 +20,7 @@ export const BigButton = ({
   buttonClass,
   buttonIcon,
   buttonIconClass,
+  canEditName = true,
   caption,
   dataflowStatus,
   datasetSchemaInfo,
@@ -188,7 +189,9 @@ export const BigButton = ({
       ) : (
         <p
           className={styles.caption}
-          onDoubleClick={dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] ? onEnableSchemaNameEdit : null}>
+          onDoubleClick={
+            dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] && canEditName ? onEnableSchemaNameEdit : null
+          }>
           {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         </p>
       )}
