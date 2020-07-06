@@ -3,9 +3,9 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { UniqueConstraintsConfig } from 'conf/domain/model/UniqueConstraints';
 
 export const apiUniqueConstraints = {
-  all: async datasetSchemaId => {
+  all: async (dataflowId, datasetSchemaId) => {
     const response = await HTTPRequester.get({
-      url: getUrl(UniqueConstraintsConfig.all, { datasetSchemaId })
+      url: getUrl(UniqueConstraintsConfig.all, { dataflowId, datasetSchemaId })
     });
     return response.data;
   },
@@ -18,11 +18,9 @@ export const apiUniqueConstraints = {
     return response;
   },
 
-  deleteById: async uniqueConstraintId => {
+  deleteById: async (uniqueConstraintId, dataflowId) => {
     const response = await HTTPRequester.delete({
-      url: getUrl(UniqueConstraintsConfig.delete, {
-        uniqueConstraintId
-      })
+      url: getUrl(UniqueConstraintsConfig.delete, { uniqueConstraintId, dataflowId })
     });
     return response;
   },

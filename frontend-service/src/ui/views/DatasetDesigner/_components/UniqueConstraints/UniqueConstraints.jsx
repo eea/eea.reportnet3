@@ -20,7 +20,13 @@ import { constraintsReducer } from './_functions/Reducers/constraintsReducer';
 
 import { UniqueConstraintsUtils } from './_functions/Utils/UniqueConstraintsUtils';
 
-export const UniqueConstraints = ({ designerState, getManageUniqueConstraint, getUniques, manageDialogs }) => {
+export const UniqueConstraints = ({
+  dataflowId,
+  designerState,
+  getManageUniqueConstraint,
+  getUniques,
+  manageDialogs
+}) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -63,7 +69,7 @@ export const UniqueConstraints = ({ designerState, getManageUniqueConstraint, ge
 
   const onDeleteConstraint = async () => {
     try {
-      const response = await UniqueConstraintsService.deleteById(uniqueId);
+      const response = await UniqueConstraintsService.deleteById(uniqueId, dataflowId);
       if (response.status >= 200 && response.status <= 299) onUpdateData();
     } catch (error) {
       notificationContext.add({ type: 'DELETE_UNIQUE_CONSTRAINT_ERROR' });
@@ -75,7 +81,7 @@ export const UniqueConstraints = ({ designerState, getManageUniqueConstraint, ge
 
   const onLoadConstraints = async () => {
     try {
-      const response = await UniqueConstraintsService.all(datasetSchemaId);
+      const response = await UniqueConstraintsService.all(dataflowId, datasetSchemaId);
       constraintsDispatch({
         type: 'INITIAL_LOAD',
         payload: { data: UniqueConstraintsUtils.parseConstraintsList(response, datasetSchemaAllTables) }
