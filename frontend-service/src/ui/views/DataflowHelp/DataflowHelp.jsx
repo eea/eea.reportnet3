@@ -299,6 +299,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
           </TabPanel>
           <TabPanel headerClassName="dataflowHelp-schemas-help-step" header={resources.messages['datasetSchemas']}>
             <DatasetSchemas
+              dataflowId={dataflowId}
               datasetsSchemas={datasetsSchemas}
               isCustodian={isCustodian}
               onLoadDatasetsSchemas={onLoadDatasetsSchemas}
