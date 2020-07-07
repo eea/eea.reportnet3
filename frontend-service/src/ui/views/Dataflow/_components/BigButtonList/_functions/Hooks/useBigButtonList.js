@@ -197,7 +197,7 @@ const useBigButtonList = ({
 
     const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.id)).length === 1;
 
-    if (isUniqRepresentative && buttonsVisibility.groupByRepresentative) {
+    if (isUniqRepresentative && !buttonsVisibility.groupByRepresentative) {
       return datasets.map(dataset => {
         const datasetName = dataset.name;
         return {
