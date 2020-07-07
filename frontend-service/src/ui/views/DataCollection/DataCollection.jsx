@@ -63,7 +63,8 @@ export const DataCollection = withRouter(({ match, history }) => {
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       setHasWritePermissions(
-        userContext.hasPermission([config.permissions.LEAD_REPORTER], `${config.permissions.DATASET}${datasetId}`)
+        userContext.hasPermission([config.permissions.LEAD_REPORTER], `${config.permissions.DATASET}${datasetId}`) ||
+          userContext.hasPermission([config.permissions.REPORTER_WRITE], `${config.permissions.DATASET}${datasetId}`)
       );
     }
   }, [userContext]);

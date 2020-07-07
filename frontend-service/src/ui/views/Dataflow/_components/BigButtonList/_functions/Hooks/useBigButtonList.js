@@ -64,10 +64,10 @@ const useBigButtonList = ({
       roles.includes(config.permissions['DATA_STEWARD']) ||
       roles.includes(config.permissions['EDITOR_WRITE']),
     groupByRepresentative:
-      !roles.includes(config.permissions['DATA_CUSTODIAN']) &&
-      !roles.includes(config.permissions['DATA_STEWARD']) &&
-      !roles.includes(config.permissions['EDITOR_WRITE']) &&
-      !roles.includes(config.permissions['EDITOR_READ']),
+      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
+      roles.includes(config.permissions['DATA_STEWARD']) ||
+      roles.includes(config.permissions['EDITOR_WRITE']) ||
+      roles.includes(config.permissions['EDITOR_READ']),
     manageReporters:
       (roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD'])) &&
       (!roles.includes(config.permissions['EDITOR_WRITE']) || !roles.includes(config.permissions['EDITOR_READ'])),
@@ -79,7 +79,10 @@ const useBigButtonList = ({
       (roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD'])) &&
       (!roles.includes(config.permissions['EDITOR_WRITE']) || !roles.includes(config.permissions['EDITOR_READ'])),
     receipt: roles.includes(config.permissions['LEAD_REPORTER']) || roles.includes(config.permissions['REPORTER']),
-    release: roles.includes(config.permissions['LEAD_REPORTER']) || roles.includes(config.permissions['REPORTER'])
+    release:
+      roles.includes(config.permissions['LEAD_REPORTER']) &&
+      !roles.includes(config.permissions['REPORTER_WRITE']) &&
+      !roles.includes(config.permissions['REPORTER_READ'])
   });
 
   const manageReportersBigButton = [
@@ -372,7 +375,7 @@ const useBigButtonList = ({
         handleRedirect: datasets.length > 1 ? () => {} : () => onShowSnapshotDialog(datasets[0].datasetId),
         layout: datasets.length > 1 ? 'menuBigButton' : 'defaultBigButton',
         visibility:
-          !buttonsVisibility.release &&
+          buttonsVisibility.release &&
           dataflowState.status !== 'DESIGN' &&
           !isEmpty(dataflowState.data.datasets) &&
           isUniqRepresentative
