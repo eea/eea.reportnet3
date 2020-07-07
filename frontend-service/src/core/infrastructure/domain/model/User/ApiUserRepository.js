@@ -154,19 +154,6 @@ const refreshToken = async () => {
   }
 };
 
-const hasPermission = (user, permissions, entity) => {
-  let allow = false;
-  if (isUndefined(entity)) {
-    if (permissions.filter(permission => user.accessRole.includes(permission)).length > 0) allow = true;
-  } else {
-    permissions.forEach(permission => {
-      const role = `${entity}-${permission}`;
-      if (user.contextRoles.includes(role)) allow = true;
-    });
-  }
-  return allow;
-};
-
 const userRole = (user, entity) => {
   const roleDTO = user.contextRoles.filter(role => role.includes(entity));
   if (roleDTO.length) {
@@ -187,7 +174,6 @@ export const ApiUserRepository = {
   logout,
   oldLogin,
   refreshToken,
-  hasPermission,
   getToken,
   userRole,
   uploadImg

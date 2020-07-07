@@ -1,8 +1,4 @@
 {
-  "dataflowRoles": {
-    "DATA_CUSTODIAN": "REQUESTER",
-    "DATA_PROVIDER": "REPORTER"
-  },
   "dataflowStatus": {
     "DESIGN": "DESIGN",
     "DRAFT": "DRAFT"

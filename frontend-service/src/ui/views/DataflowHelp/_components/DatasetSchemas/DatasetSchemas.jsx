@@ -22,7 +22,7 @@ import { IntegrationService } from 'core/services/Integration';
 import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
 import { ValidationService } from 'core/services/Validation';
 
-const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
+const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
   const resources = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
@@ -148,7 +148,7 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
   const getUniqueList = async datasetsSchemas => {
     try {
       const datasetUniques = datasetsSchemas.map(async datasetSchema => {
-        return await UniqueConstraintsService.all(datasetSchema.datasetSchemaId);
+        return await UniqueConstraintsService.all(dataflowId, datasetSchema.datasetSchemaId);
       });
 
       Promise.all(datasetUniques).then(allUniques => {

@@ -111,7 +111,6 @@ export const onWritePermissionChange = async (
 
 export const onDeleteConfirm = async (formDispatcher, formState, dataflowId, dataProviderId) => {
   try {
-    console.log('account', formState.contributorToDelete.contributor.account, dataProviderId);
     await ContributorService.deleteContributor(
       formState.contributorToDelete.contributor.account,
       dataflowId,

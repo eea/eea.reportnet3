@@ -30,7 +30,6 @@ import { Title } from '../_components/Title/Title';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
-import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
@@ -54,7 +53,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
   const dataflowInitialState = {
     currentUrl: '',
@@ -81,19 +80,20 @@ const Dataflow = withRouter(({ history, match }) => {
     isReceiptLoading: false,
     isReceiptOutdated: false,
     isRepresentativeView: false,
+    isShareRightsDialogVisible: false,
     isSnapshotDialogVisible: false,
     name: '',
     obligations: {},
     status: '',
     updatedDatasetSchema: undefined,
-    isShareRightsDialogVisible: false
+    userRoles: []
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
   useEffect(() => {
-    if (!isNil(user.contextRoles)) onLoadPermission();
-  }, [user]);
+    if (!isNil(userContext.contextRoles)) onLoadPermission();
+  }, [userContext]);
 
   useEffect(() => {
     leftSideBarContext.addHelpSteps(DataflowHelpConfig, 'dataflowHelp');
@@ -124,7 +124,7 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'archive'
+            icon: 'clone'
           }
         ]);
       } else if (representatives.length > 1 && isUndefined(representativeId)) {
@@ -137,7 +137,7 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'archive'
+            icon: 'clone'
           }
         ]);
       } else if (representativeId) {
@@ -154,13 +154,13 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'archive',
+            icon: 'clone',
             href: getUrl(routes.DATAFLOW),
             command: () => history.goBack()
           },
           {
             label: currentRepresentative[0],
-            icon: 'archive'
+            icon: 'clone'
           }
         ]);
       } else if (dataflowState.status === 'DESIGN') {
@@ -173,7 +173,7 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'archive'
+            icon: 'clone'
           }
         ]);
       }
@@ -229,9 +229,14 @@ const Dataflow = withRouter(({ history, match }) => {
           ? leftSideBarContext.addModels([propertiesBtn])
           : leftSideBarContext.addModels([propertiesBtn, apiKeyBtn]);
 
-        const isLeadReporter = true;
-        if (isLeadReporter) {
+        if (
+          dataflowState.userRoles.includes(config.permissions['LEAD_REPORTER']) &&
+          !dataflowState.userRoles.includes(config.permissions['REPORTER_READ']) &&
+          !dataflowState.userRoles.includes(config.permissions['REPORTER_WRITE'])
+        ) {
           leftSideBarContext.addModels([propertiesBtn, apiKeyBtn, manageRightsBtn]);
+        } else {
+          leftSideBarContext.addModels([propertiesBtn, apiKeyBtn]);
         }
       } else {
         leftSideBarContext.addModels([propertiesBtn]);
@@ -344,19 +349,16 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   const onLoadPermission = () => {
-    const hasWritePermissions = UserService.hasPermission(
-      user,
-      [config.permissions.PROVIDER],
+    const hasWritePermissions = userContext.hasPermission(
+      [config.permissions.LEAD_REPORTER],
       `${config.permissions.DATAFLOW}${dataflowId}`
     );
 
-    const isCustodian = UserService.hasPermission(
-      user,
-      [config.permissions.CUSTODIAN],
-      `${config.permissions.DATAFLOW}${dataflowId}`
-    );
+    const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
 
-    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian } });
+    const isCustodian = userRoles.includes(config.permissions['CUSTODIAN'] || config.permissions['DATA_STEWARD']);
+
+    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian, userRoles } });
   };
 
   const checkIsRepresentativeView = (datasets, dataflow) => {
