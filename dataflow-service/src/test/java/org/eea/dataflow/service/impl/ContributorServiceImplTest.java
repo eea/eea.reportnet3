@@ -1,5 +1,6 @@
 package org.eea.dataflow.service.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -14,9 +15,12 @@ import org.eea.interfaces.vo.contributor.ContributorVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +29,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class ContributorServiceImplTest.
@@ -47,6 +53,7 @@ public class ContributorServiceImplTest {
   /** The dataflow controlle zuul. */
   @Mock
   private DataFlowControllerZuul dataflowControllerZuul;
+
   /** The contributor VO write. */
   private ContributorVO contributorVOWrite;
 
@@ -84,8 +91,8 @@ public class ContributorServiceImplTest {
 
     dataflowVO = new DataFlowVO();
     dataflowVO.setId(1L);
-    designDatasets = new ArrayList();
-    reportingDatasets = new ArrayList();
+    designDatasets = new ArrayList<>();
+    reportingDatasets = new ArrayList<>();
     listUserWrite = new ArrayList<>();
 
     DesignDatasetVO designDatasetVO = new DesignDatasetVO();
@@ -155,7 +162,7 @@ public class ContributorServiceImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test()
+  @Test
   public void deleteContributorEditor() throws EEAException {
     when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
     contributorServiceImpl.deleteContributor(1L, "reportnet@reportnet.net", "EDITOR", 1L);
@@ -169,7 +176,7 @@ public class ContributorServiceImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test()
+  @Test
   public void deleteContributorReport() throws EEAException {
     when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
     contributorServiceImpl.deleteContributor(1L, "reportnet@reportnet.net", "REPORTER", 1L);
@@ -183,7 +190,7 @@ public class ContributorServiceImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test()
+  @Test
   public void createContributorEditorRead() throws EEAException {
     when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
@@ -218,7 +225,7 @@ public class ContributorServiceImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test()
+  @Test
   public void createContributorReportRead() throws EEAException {
     when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
@@ -233,11 +240,19 @@ public class ContributorServiceImplTest {
 
   /**
    * Update contributor.
-   * 
+   *
    * @throws EEAException the EEA exception
    */
-  @Test()
+  @Test
   public void updateContributor() throws EEAException {
+    ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
+    resourceAccessVO.setId(1L);
+    resourceAccessVO.setResource(ResourceTypeEnum.DATAFLOW);
+    resourceAccessVO.setRole(SecurityRoleEnum.EDITOR_WRITE);
+    List<ResourceAccessVO> resourceAccessVOs = new ArrayList<>();
+    resourceAccessVOs.add(resourceAccessVO);
+    when(userManagementControllerZull.getResourcesByUserEmail(Mockito.any()))
+        .thenReturn(resourceAccessVOs);
     when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
     when(resourceManagementControllerZull.getResourceDetail(1L,
@@ -248,6 +263,26 @@ public class ContributorServiceImplTest {
     Mockito.verify(dataflowControllerZuul, times(2)).findById(1L);
   }
 
+  @Test
+  public void updateContributorReporterTest() throws EEAException {
+    ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
+    resourceAccessVO.setId(1L);
+    resourceAccessVO.setResource(ResourceTypeEnum.DATASET);
+    resourceAccessVO.setRole(SecurityRoleEnum.REPORTER_READ);
+    List<ResourceAccessVO> resourceAccessVOs = new ArrayList<>();
+    resourceAccessVOs.add(resourceAccessVO);
+    when(userManagementControllerZull.getResourcesByUserEmail(Mockito.any()))
+        .thenReturn(resourceAccessVOs);
+    when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
+    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+    resourceInfoVO.setName("name");
+    when(resourceManagementControllerZull.getResourceDetail(Mockito.any(), Mockito.any()))
+        .thenReturn(resourceInfoVO);
+    when(resourceManagementControllerZull.getResourceDetail(Mockito.any(), Mockito.any()))
+        .thenReturn(resourceInfoVO);
+    contributorServiceImpl.updateContributor(1L, contributorVOWrite, "REPORTER", 1l);
+    Mockito.verify(dataflowControllerZuul, times(1)).findById(1L);
+  }
 
   /**
    * Find contributors by resource id editor test.
@@ -269,4 +304,14 @@ public class ContributorServiceImplTest {
     assertNotNull(contributorServiceImpl.findContributorsByResourceId(1L, 1L, "REPORTER"));
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void updateContributorExceptionTest() throws EEAException {
+    try {
+      contributorServiceImpl.updateContributor(1L, contributorVOWrite, "LEAD_REPORTER", 1l);
+    } catch (ResponseStatusException ex) {
+      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      assertEquals("Role LEAD_REPORTER doesn't exist", ex.getReason());
+      throw ex;
+    }
+  }
 }
