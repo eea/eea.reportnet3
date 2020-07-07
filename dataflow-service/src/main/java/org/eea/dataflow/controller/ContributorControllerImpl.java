@@ -155,7 +155,6 @@ public class ContributorControllerImpl implements ContributorController {
       message = e.getMessage();
       status = HttpStatus.INTERNAL_SERVER_ERROR;
     }
-
     return new ResponseEntity<>(message, status);
   }
 
@@ -187,7 +186,6 @@ public class ContributorControllerImpl implements ContributorController {
       message = e.getMessage();
       status = HttpStatus.INTERNAL_SERVER_ERROR;
     }
-
     return new ResponseEntity<>(message, status);
   }
 
