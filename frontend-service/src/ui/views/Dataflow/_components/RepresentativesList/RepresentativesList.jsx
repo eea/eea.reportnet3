@@ -4,6 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
+import uniq from 'lodash/uniq';
 
 import uuid from 'uuid';
 import styles from './RepresentativesList.module.scss';
@@ -17,7 +18,8 @@ import {
   onAddProvider,
   onDataProviderIdChange,
   onDeleteConfirm,
-  onKeyDown
+  onKeyDown,
+  isValidEmail
 } from './_functions/Utils/representativeUtils';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
@@ -108,18 +110,29 @@ const RepresentativesList = ({
 
     let hasError = formState.representativeHasError.includes(representative.representativeId);
 
-    const onAccountChange = (value, dataProviderId) => {
+    const onAccountChange = (account, dataProviderId) => {
       const { representatives } = formState;
 
       const [thisRepresentative] = representatives.filter(
         thisRepresentative => thisRepresentative.dataProviderId === dataProviderId
       );
-      thisRepresentative.providerAccount = value;
+      thisRepresentative.providerAccount = account;
+
+      let representativeHasError;
+      if (isValidEmail(account)) {
+        representativeHasError = formState.representativeHasError.filter(
+          representativeId => representativeId !== thisRepresentative.representativeId
+        );
+      } else {
+        representativeHasError = formState.representativeHasError;
+        representativeHasError.unshift(thisRepresentative.representativeId);
+      }
 
       formDispatcher({
         type: 'ON_ACCOUNT_CHANGE',
         payload: {
-          representatives
+          representatives,
+          representativeHasError: uniq(representativeHasError)
         }
       });
     };
@@ -134,13 +147,17 @@ const RepresentativesList = ({
             id={isEmpty(inputData) ? 'emptyInput' : undefined}
             onBlur={() => {
               representative.providerAccount = representative.providerAccount.toLowerCase();
-              onAddProvider(formDispatcher, formState, representative, dataflowId);
+              isValidEmail(representative.providerAccount) &&
+                onAddProvider(formDispatcher, formState, representative, dataflowId);
             }}
             onChange={event => onAccountChange(event.target.value, representative.dataProviderId)}
             onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
             placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
             value={inputData}
           />
+          <label for="emptyInput" className="srOnly">
+            {resources.messages['manageRolesDialogInputPlaceholder']}
+          </label>
         </div>
       </>
     );
@@ -156,10 +173,11 @@ const RepresentativesList = ({
     return (
       <>
         <select
-          disabled={representative.hasDatasets}
           className={
             representative.hasDatasets ? `${styles.disabled} ${styles.selectDataProvider}` : styles.selectDataProvider
           }
+          disabled={representative.hasDatasets}
+          id="dataProvider"
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={event => {
             onDataProviderIdChange(formDispatcher, event.target.value, representative, formState);
@@ -174,6 +192,9 @@ const RepresentativesList = ({
             );
           })}
         </select>
+        <label for="dataProvider" className="srOnly">
+          {resources.messages['manageRolesDialogInputPlaceholder']}
+        </label>
       </>
     );
   };
@@ -201,7 +222,7 @@ const RepresentativesList = ({
         <div className={styles.title}>{resources.messages['manageRolesDialogHeader']}</div>
 
         <div>
-          <label htmlFor="dataProvidersDropdown">{resources.messages['manageRolesDialogDropdownLabel']} </label>
+          <label>{resources.messages['manageRolesDialogDropdownLabel']} </label>
           <Dropdown
             ariaLabel={'dataProviders'}
             disabled={formState.representatives.length > 1}

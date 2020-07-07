@@ -390,6 +390,18 @@
         },
         {
           "key": "LOAD_DATAFLOWS_ERROR"
+        },
+        {
+          "key": "UPDATE_CONTRIBUTOR_ERROR"
+        },
+        {
+          "key": "COPY_DATASET_SCHEMA_NOT_FOUND_EVENT"
+        },
+        {
+          "key": "DELETE_EDITOR_ERROR"
+        },
+        {
+          "key": "DELETE_REPORTER_ERROR"
         }
       ]
     },

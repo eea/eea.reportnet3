@@ -90,6 +90,7 @@ const DataflowManagementForm = forwardRef(
                 className={`formField${(!isEmpty(errors.name) && touched.name) || isNameDuplicated ? ' error' : ''}`}>
                 <Field
                   autoComplete="off"
+                  id="dataflowName"
                   innerRef={inputRef}
                   name="name"
                   placeholder={resources.messages['createDataflowName']}
@@ -102,12 +103,16 @@ const DataflowManagementForm = forwardRef(
                   type="text"
                   value={data.name}
                 />
+                <label for="dataflowName" className="srOnly">
+                  {resources.messages['createDataflowName']}
+                </label>
                 <ErrorMessage className="error" name="name" component="div" />
               </div>
 
               <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
                 <Field
                   autoComplete="off"
+                  id="dataflowDescription"
                   name="description"
                   component="textarea"
                   rows="10"
@@ -115,12 +120,16 @@ const DataflowManagementForm = forwardRef(
                   placeholder={resources.messages['createDataflowDescription']}
                   value={data.description}
                 />
+                <label for="dataflowDescription" className="srOnly">
+                  {resources.messages['createDataflowDescription']}
+                </label>
                 <ErrorMessage className="error" name="description" component="div" />
               </div>
 
               <div className={`${styles.search}`}>
                 <Button icon="search" label={resources.messages['searchObligations']} onMouseDown={onSearch} />
                 <Field
+                  id="searchObligation"
                   className={`${styles.searchInput} ${
                     (!isEmpty(errors.obligation) && !isEmpty(touched.obligation) && touched.obligation.title) ||
                     isObligationEmpty
@@ -133,6 +142,9 @@ const DataflowManagementForm = forwardRef(
                   type="text"
                   value={data.obligation.title}
                 />
+                <label for="searchObligation" className="srOnly">
+                  {resources.messages['searchObligations']}
+                </label>
                 <ErrorMessage className="error" name="obligation.title" component="div" />
               </div>
             </fieldset>

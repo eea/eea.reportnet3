@@ -13,6 +13,9 @@ public class RuleOperators {
   /** The fields. */
   private static List<FieldValue> fields;
 
+  /** The country code. */
+  private static String countryCode;
+
   /** The Constant DATE_FORMAT. */
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -22,21 +25,39 @@ public class RuleOperators {
   private RuleOperators() {}
 
   /**
-   * Sets the entity.
+   * Sets the entity for RecordValue.
    *
    * @param recordValue the record value
    * @return true, if successful
    */
   public static boolean setEntity(RecordValue recordValue) {
     fields = recordValue.getFields();
+    countryCode = recordValue.getDataProviderCode();
+    if (null == countryCode) {
+      countryCode = "XX";
+    }
+    return true;
+  }
+
+  /**
+   * Sets the entity for FieldValue.
+   *
+   * @param fieldValue the field value
+   * @return true, if successful
+   */
+  public static boolean setEntity(FieldValue fieldValue) {
+    countryCode = fieldValue.getRecord().getDataProviderCode();
+    if (null == countryCode) {
+      countryCode = "XX";
+    }
     return true;
   }
 
   /**
    * Do nothing when its called with an entity different of RecordValue.
    *
-   * @param fieldValue the field value
-   * @return true, if successful
+   * @param otherEntity the other entity
+   * @return true, if successfule
    */
   public static boolean setEntity(Object otherEntity) {
     return true;
@@ -55,6 +76,19 @@ public class RuleOperators {
       }
     }
     return "";
+  }
+
+  /**
+   * Replace keywords.
+   *
+   * @param regex the regex
+   * @return the string
+   */
+  private static String replaceKeywords(String regex) {
+    if (regex.contains("$COUNTRY_CODE")) {
+      regex = regex.replace("$COUNTRY_CODE", countryCode);
+    }
+    return regex;
   }
 
   /**
@@ -550,7 +584,7 @@ public class RuleOperators {
    */
   public static boolean recordStringMatches(String fieldSchemaId, String regex) {
     try {
-      return getValue(fieldSchemaId).matches(regex);
+      return getValue(fieldSchemaId).matches(replaceKeywords(regex));
     } catch (PatternSyntaxException e) {
       return false;
     } catch (Exception e) {
@@ -1922,12 +1956,12 @@ public class RuleOperators {
    * Field string matches.
    *
    * @param value the value
-   * @param arg2 the arg 2
+   * @param regex the regex
    * @return true, if successful
    */
-  public static boolean fieldStringMatches(String value, String arg2) {
+  public static boolean fieldStringMatches(String value, String regex) {
     try {
-      return value.matches(arg2);
+      return value.matches(replaceKeywords(regex));
     } catch (Exception e) {
       return true;
     }
