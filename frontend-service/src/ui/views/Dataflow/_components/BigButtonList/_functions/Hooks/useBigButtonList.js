@@ -144,40 +144,49 @@ const useBigButtonList = ({
     caption: newDatasetSchema.datasetSchemaName,
     dataflowStatus: dataflowState.status,
     datasetSchemaInfo: dataflowState.updatedDatasetSchema,
-    handleRedirect: () => {
-      handleRedirect(getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true));
-    },
+    enabled: buttonsVisibility.designDatasetsActions,
+    handleRedirect: buttonsVisibility.designDatasetsActions
+      ? () => {
+          handleRedirect(getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true));
+        }
+      : () => {},
+
     helpClassName: 'dataflow-schema-help-step',
     index: newDatasetSchema.index,
     layout: 'defaultBigButton',
-    model: [
-      {
-        label: resources.messages['openDataset'],
-        icon: 'openFolder',
-        command: () => {
-          handleRedirect(getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true));
-        }
-      },
-      {
-        label: resources.messages['rename'],
-        icon: 'pencil',
-        disabled:
-          dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] && buttonsVisibility.designDatasetsActions
-      },
-      {
-        label: resources.messages['delete'],
-        icon: 'trash',
-        disabled:
-          dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] && buttonsVisibility.designDatasetsActions,
-        command: () => getDeleteSchemaIndex(newDatasetSchema.index)
-      }
-      // {
-      //   label: resources.messages['exportDatasetSchema'],
-      //   icon: 'import',
-      //   // disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'],
-      //   command: () => exportDatatableSchema(newDatasetSchema.datasetId, newDatasetSchema.datasetSchemaName)
-      // }
-    ],
+    model: buttonsVisibility.designDatasetsActions
+      ? [
+          {
+            label: resources.messages['openDataset'],
+            icon: 'openFolder',
+            command: () => {
+              handleRedirect(
+                getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true)
+              );
+            }
+          },
+          {
+            label: resources.messages['rename'],
+            icon: 'pencil',
+            disabled:
+              dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] || !buttonsVisibility.designDatasetsActions
+          },
+          {
+            label: resources.messages['delete'],
+            icon: 'trash',
+            disabled:
+              dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] ||
+              !buttonsVisibility.designDatasetsActions,
+            command: () => getDeleteSchemaIndex(newDatasetSchema.index)
+          }
+          // {
+          //   label: resources.messages['exportDatasetSchema'],
+          //   icon: 'import',
+          //   // disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'],
+          //   command: () => exportDatatableSchema(newDatasetSchema.datasetId, newDatasetSchema.datasetSchemaName)
+          // }
+        ]
+      : [],
     onDuplicateName: onDuplicateName,
     onSaveError: onDatasetSchemaNameError,
     onSaveName: onSaveName,
