@@ -14,3 +14,4 @@ eea:
     authenticatedRequest: /user/checkAccess,/user/resources*,/user/add_user_to_resource
     roleProtectedRequest:
       DATA_CUSTODIAN: /resource/create,/resource/delete*,/user/add_contributor_to_resource
+      LEAD_REPORTER: /resource/create, /resource/delete*,/user/add_contributor_to_resource

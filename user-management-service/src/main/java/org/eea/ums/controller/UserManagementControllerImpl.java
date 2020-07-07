@@ -597,4 +597,23 @@ public class UserManagementControllerImpl implements UserManagementController {
           EEAErrorMessage.PERMISSION_NOT_CREATED, e);
     }
   }
+
+  /**
+   * Gets the resources by user email.
+   *
+   * @param email the email
+   * @return the resources by user email
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping("/private/resourcesByMail")
+  public List<ResourceAccessVO> getResourcesByUserEmail(String email) {
+    // Recover user id from email
+    String userId = "";
+    UserRepresentation[] users = keycloakConnectorService.getUsersByEmail(email);
+    if (users != null && users.length == 1) {
+      userId = users[0].getId();
+    }
+    return securityProviderInterfaceService.getResourcesByUser(userId);
+  }
 }

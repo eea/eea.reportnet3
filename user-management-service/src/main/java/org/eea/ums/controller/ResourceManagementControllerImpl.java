@@ -84,6 +84,11 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
     securityProviderInterfaceService.deleteResourceInstancesByName(resourceName);
   }
 
+  /**
+   * Delete resource by dataset id.
+   *
+   * @param datasetIds the dataset ids
+   */
   @Override
   @HystrixCommand
   @DeleteMapping("/delete_by_dataset_id")

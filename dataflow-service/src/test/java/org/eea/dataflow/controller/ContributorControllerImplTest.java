@@ -102,14 +102,6 @@ public class ContributorControllerImplTest {
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, value.getStatusCode());
   }
 
-  @Test
-  public void updateContributorNonEditor() throws EEAException {
-    contributorVOWrite.setRole("REPO");
-    ResponseEntity<?> value = contributorControllerImpl.updateEditor(1L, contributorVOWrite);
-    assertEquals("Role REPO doesn't exist", value.getBody());
-    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
-  }
-
   /**
    * Find contributors by group.
    */
@@ -287,16 +279,4 @@ public class ContributorControllerImplTest {
 
   }
 
-  /**
-   * Update reporter non valid rol throw.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test()
-  public void updateReporterNonValidRolThrow() throws EEAException {
-    ResponseEntity<?> value = contributorControllerImpl.updateReporter(1L, 1L, contributorVORead);
-    assertEquals("Role EDITOR doesn't exist", value.getBody());
-    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
-
-  }
 }

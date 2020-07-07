@@ -620,7 +620,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     // Create DATASET_LEAD_REPORTER and DATA_CUSTODIAN groups
-    // Assign DATAFLOW_LEAD_REPORTER and DATA_PROVIDER to representatives and DATA_CUSTODIAN to self
+    // Assign DATAFLOW_LEAD_REPORTER and LEAD_REPORTER to representatives and DATA_CUSTODIAN to self
     // user
     for (Map.Entry<Long, String> entry : datasetIdsEmails.entrySet()) {
       groups.add(
@@ -647,7 +647,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             .createResources(groups.subList(i, i + 10 > size ? size : i + 10));
       }
 
-      // Persist provider assignments
+      // Persist lead reporter assignments
       size = providerAssignments.size();
       for (int i = 0; i < size; i += 10) {
         userManagementControllerZuul.addContributorsToResources(
