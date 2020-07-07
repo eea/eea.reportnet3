@@ -20,7 +20,6 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
-import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
@@ -40,7 +39,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
   const [dataflowName, setDataflowName] = useState('');
   const [dataCollectionName, setDataCollectionName] = useState();
@@ -62,12 +61,13 @@ export const DataCollection = withRouter(({ match, history }) => {
   let growlRef = useRef();
 
   useEffect(() => {
-    if (!isUndefined(user.contextRoles)) {
+    if (!isUndefined(userContext.contextRoles)) {
       setHasWritePermissions(
-        UserService.hasPermission(user, [config.permissions.PROVIDER], `${config.permissions.DATASET}${datasetId}`)
+        userContext.hasPermission([config.permissions.LEAD_REPORTER], `${config.permissions.DATASET}${datasetId}`) ||
+          userContext.hasPermission([config.permissions.REPORTER_WRITE], `${config.permissions.DATASET}${datasetId}`)
       );
     }
-  }, [user]);
+  }, [userContext]);
 
   useEffect(() => {
     breadCrumbContext.add([

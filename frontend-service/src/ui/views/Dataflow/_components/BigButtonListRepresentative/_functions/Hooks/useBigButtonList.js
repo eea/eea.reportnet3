@@ -1,16 +1,40 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
+import { config } from 'conf';
 import { routes } from 'ui/routes';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, onShowSnapshotDialog, match }) => {
   const resources = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
+
+  const [buttonsVisibility, setButtonsVisibility] = useState({});
+
+  useEffect(() => {
+    if (!isNil(userContext.contextRoles)) {
+      const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowState.id}`);
+      setButtonsVisibility(getButtonsVisibility(userRoles.map(userRole => config.permissions[userRole])));
+      // setButtonsVisibility(
+      //   getButtonsVisibility(['LEAD_REPORTER', 'REPORTER_READ'].map(userRole => config.permissions[userRole]))
+      // );
+    }
+  }, [userContext]);
+
+  const getButtonsVisibility = roles => ({
+    receipt: roles.includes(config.permissions['LEAD_REPORTER']) || roles.includes(config.permissions['REPORTER']),
+    release:
+      roles.includes(config.permissions['LEAD_REPORTER']) &&
+      !roles.includes(config.permissions['REPORTER_WRITE']) &&
+      !roles.includes(config.permissions['REPORTER_READ'])
+  });
 
   const helpButton = {
     layout: 'defaultBigButton',
@@ -94,7 +118,7 @@ const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, on
         infoStatus: dataflowState.isReceiptOutdated,
         layout: 'defaultBigButton',
         visibility:
-          !dataflowState.isCustodian &&
+          buttonsVisibility.receipt &&
           !isUndefined(releasedStates) &&
           !releasedStates.includes(false) &&
           !releasedStates.includes(null)
@@ -119,7 +143,7 @@ const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, on
           filteredDatasets.length > 1 ? () => {} : () => onShowSnapshotDialog(filteredDatasets[0].datasetId),
         layout: filteredDatasets.length > 1 ? 'menuBigButton' : 'defaultBigButton',
         visibility:
-          !dataflowState.isCustodian && dataflowState.status !== 'DESIGN' && !isEmpty(dataflowState.data.datasets)
+          buttonsVisibility.release && dataflowState.status !== 'DESIGN' && !isEmpty(dataflowState.data.datasets)
       }
     ];
 

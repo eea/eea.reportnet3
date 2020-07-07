@@ -26,8 +26,6 @@ const apiContributor = {
   delete: async (account, dataflowId, dataProviderId = '') => {
     const isReporter = !isEmpty(dataProviderId.toString());
 
-    console.log('account', account);
-
     const response = await HTTPRequester.delete({
       url: isReporter
         ? getUrl(ContributorConfig.deleteReporter, { dataflowId, dataProviderId })

@@ -47,7 +47,7 @@ export const BigButtonList = ({
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
   const [cloneDataflow, setCloneDataflow] = useState({});
   const [cloneDialogVisible, setCloneDialogVisible] = useState(false);
@@ -434,7 +434,9 @@ export const BigButtonList = ({
           <p
             dangerouslySetInnerHTML={{
               __html: TextUtils.parseText(resources.messages['dataCollectionExpirationDate'], {
-                expirationData: moment(dataflowState.obligations.expirationDate).format(user.userProps.dateFormat)
+                expirationData: moment(dataflowState.obligations.expirationDate).format(
+                  userContext.userProps.dateFormat
+                )
               })
             }}></p>
         ) : (

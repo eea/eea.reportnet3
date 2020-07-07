@@ -14,7 +14,7 @@ import { PropertiesUtils } from './_functions/Utils/PropertiesUtils';
 
 export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
   const [dialogHeight, setDialogHeight] = useState(null);
 
@@ -31,7 +31,7 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
     dataflowDescription: dataflowState.description,
     dataflowStatus: dataflowState.data.status
   };
-  const parsedObligationsData = PropertiesUtils.parseObligationsData(dataflowState, user.userProps.dateFormat);
+  const parsedObligationsData = PropertiesUtils.parseObligationsData(dataflowState, userContext.userProps.dateFormat);
 
   const dialogFooter = (
     <Button
