@@ -1,13 +1,16 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniq from 'lodash/uniq';
 
+import { config } from 'conf';
 import { routes } from 'ui/routes';
 import DataflowConf from 'conf/dataflow.config.json';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
@@ -30,6 +33,58 @@ const useBigButtonList = ({
   onShowUpdateDataCollectionModal
 }) => {
   const resources = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
+
+  const [buttonsVisibility, setButtonsVisibility] = useState({});
+
+  useEffect(() => {
+    if (!isNil(userContext.contextRoles)) {
+      const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
+      setButtonsVisibility(getButtonsVisibility(userRoles.map(userRole => config.permissions[userRole])));
+      // setButtonsVisibility(getButtonsVisibility(['LEAD_REPORTER'].map(userRole => config.permissions[userRole])));
+    }
+  }, [userContext]);
+
+  const getButtonsVisibility = roles => ({
+    createDataCollection:
+      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
+      roles.includes(config.permissions['DATA_STEWARD']) ||
+      roles.includes(config.permissions['EDITOR_WRITE']),
+    dashboard:
+      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
+      roles.includes(config.permissions['DATA_STEWARD']) ||
+      roles.includes(config.permissions['EDITOR_WRITE']) ||
+      roles.includes(config.permissions['EDITOR_READ']),
+    designDatasets:
+      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
+      roles.includes(config.permissions['DATA_STEWARD']) ||
+      roles.includes(config.permissions['EDITOR_WRITE']) ||
+      roles.includes(config.permissions['EDITOR_READ']),
+    designDatasetsActions:
+      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
+      roles.includes(config.permissions['DATA_STEWARD']) ||
+      roles.includes(config.permissions['EDITOR_WRITE']),
+    groupByRepresentative:
+      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
+      roles.includes(config.permissions['DATA_STEWARD']) ||
+      roles.includes(config.permissions['EDITOR_WRITE']) ||
+      roles.includes(config.permissions['EDITOR_READ']),
+    manageReporters:
+      (roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD'])) &&
+      (!roles.includes(config.permissions['EDITOR_WRITE']) || !roles.includes(config.permissions['EDITOR_READ'])),
+    newSchema:
+      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
+      roles.includes(config.permissions['DATA_STEWARD']) ||
+      roles.includes(config.permissions['EDITOR_WRITE']),
+    updateReporters:
+      (roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD'])) &&
+      (!roles.includes(config.permissions['EDITOR_WRITE']) || !roles.includes(config.permissions['EDITOR_READ'])),
+    receipt: roles.includes(config.permissions['LEAD_REPORTER']) || roles.includes(config.permissions['REPORTER']),
+    release:
+      roles.includes(config.permissions['LEAD_REPORTER']) &&
+      !roles.includes(config.permissions['REPORTER_WRITE']) &&
+      !roles.includes(config.permissions['REPORTER_READ'])
+  });
 
   const manageReportersBigButton = [
     {
@@ -38,7 +93,7 @@ const useBigButtonList = ({
       caption: resources.messages['manageReporters'],
       layout: 'defaultBigButton',
       handleRedirect: () => onShowManageReportersDialog(),
-      visibility: dataflowState.isCustodian
+      visibility: buttonsVisibility.manageReporters
     }
   ];
 
@@ -78,48 +133,60 @@ const useBigButtonList = ({
           command: () => onCloneDataflow()
         }
       ],
-      visibility: dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']
+      visibility: buttonsVisibility.newSchema && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']
     }
   ];
 
   const designDatasetModels = dataflowState.data.designDatasets.map(newDatasetSchema => ({
     buttonClass: 'schemaDataset',
     buttonIcon: 'pencilRuler',
+    canEditName: buttonsVisibility.designDatasetsActions,
     caption: newDatasetSchema.datasetSchemaName,
     dataflowStatus: dataflowState.status,
     datasetSchemaInfo: dataflowState.updatedDatasetSchema,
-    handleRedirect: () => {
-      handleRedirect(getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true));
-    },
+    enabled: buttonsVisibility.designDatasetsActions,
+    handleRedirect: buttonsVisibility.designDatasetsActions
+      ? () => {
+          handleRedirect(getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true));
+        }
+      : () => {},
+
     helpClassName: 'dataflow-schema-help-step',
     index: newDatasetSchema.index,
     layout: 'defaultBigButton',
-    model: [
-      {
-        label: resources.messages['openDataset'],
-        icon: 'openFolder',
-        command: () => {
-          handleRedirect(getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true));
-        }
-      },
-      {
-        label: resources.messages['rename'],
-        icon: 'pencil',
-        disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN']
-      },
-      {
-        label: resources.messages['delete'],
-        icon: 'trash',
-        disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'],
-        command: () => getDeleteSchemaIndex(newDatasetSchema.index)
-      }
-      // {
-      //   label: resources.messages['exportDatasetSchema'],
-      //   icon: 'import',
-      //   // disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'],
-      //   command: () => exportDatatableSchema(newDatasetSchema.datasetId, newDatasetSchema.datasetSchemaName)
-      // }
-    ],
+    model: buttonsVisibility.designDatasetsActions
+      ? [
+          {
+            label: resources.messages['openDataset'],
+            icon: 'openFolder',
+            command: () => {
+              handleRedirect(
+                getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true)
+              );
+            }
+          },
+          {
+            label: resources.messages['rename'],
+            icon: 'pencil',
+            disabled:
+              dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] || !buttonsVisibility.designDatasetsActions
+          },
+          {
+            label: resources.messages['delete'],
+            icon: 'trash',
+            disabled:
+              dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] ||
+              !buttonsVisibility.designDatasetsActions,
+            command: () => getDeleteSchemaIndex(newDatasetSchema.index)
+          }
+          // {
+          //   label: resources.messages['exportDatasetSchema'],
+          //   icon: 'import',
+          //   // disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'],
+          //   command: () => exportDatatableSchema(newDatasetSchema.datasetId, newDatasetSchema.datasetSchemaName)
+          // }
+        ]
+      : [],
     onDuplicateName: onDuplicateName,
     onSaveError: onDatasetSchemaNameError,
     onSaveName: onSaveName,
@@ -128,7 +195,8 @@ const useBigButtonList = ({
     visibility:
       !isUndefined(dataflowState.data.designDatasets) &&
       isEmpty(dataflowState.data.dataCollections) &&
-      dataflowState.isCustodian
+      buttonsVisibility.designDatasets &&
+      dataflowState.status === DataflowConf.dataflowStatus['DESIGN']
   }));
 
   const buildGroupByRepresentativeModels = dataflowData => {
@@ -140,7 +208,7 @@ const useBigButtonList = ({
 
     const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.id)).length === 1;
 
-    if (isUniqRepresentative && !dataflowState.isCustodian) {
+    if (isUniqRepresentative && !buttonsVisibility.groupByRepresentative) {
       return datasets.map(dataset => {
         const datasetName = dataset.name;
         return {
@@ -194,7 +262,7 @@ const useBigButtonList = ({
       helpClassName: 'dataflow-dashboards-help-step',
       layout: 'defaultBigButton',
       onWheel: getUrl(routes.DASHBOARDS, { dataflowId }, true),
-      visibility: dataflowState.isCustodian && !isEmpty(dataflowState.data.datasets)
+      visibility: buttonsVisibility.dashboard && !isEmpty(dataflowState.data.datasets)
     }
   ];
 
@@ -220,7 +288,10 @@ const useBigButtonList = ({
         : !dataflowState.formHasRepresentatives
         ? resources.messages['disabledCreateDataCollectionNoProviders']
         : undefined,
-      visibility: isEmpty(dataflowState.data.dataCollections) && dataflowState.status === 'DESIGN'
+      visibility:
+        isEmpty(dataflowState.data.dataCollections) &&
+        dataflowState.status === 'DESIGN' &&
+        buttonsVisibility.createDataCollection
     }
   ];
 
@@ -234,7 +305,9 @@ const useBigButtonList = ({
       handleRedirect: isActiveButton ? () => onShowUpdateDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
       visibility:
-        dataflowState.isCustodian && dataflowState.status === 'DRAFT' && dataflowState.hasRepresentativesWithoutDatasets
+        buttonsVisibility.updateReporters &&
+        dataflowState.status === 'DRAFT' &&
+        dataflowState.hasRepresentativesWithoutDatasets
     }
   ];
 
@@ -287,7 +360,7 @@ const useBigButtonList = ({
         infoStatus: dataflowState.isReceiptOutdated,
         layout: 'defaultBigButton',
         visibility:
-          !dataflowState.isCustodian &&
+          buttonsVisibility.receipt &&
           uniq(representativeNames).length === 1 &&
           !releasedStates.includes(false) &&
           !releasedStates.includes(null)
@@ -313,7 +386,7 @@ const useBigButtonList = ({
         handleRedirect: datasets.length > 1 ? () => {} : () => onShowSnapshotDialog(datasets[0].datasetId),
         layout: datasets.length > 1 ? 'menuBigButton' : 'defaultBigButton',
         visibility:
-          !dataflowState.isCustodian &&
+          buttonsVisibility.release &&
           dataflowState.status !== 'DESIGN' &&
           !isEmpty(dataflowState.data.datasets) &&
           isUniqRepresentative

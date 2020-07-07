@@ -4,7 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 
 import styles from './CloneSchemas.module.scss';
 
-import { dataflowRoles } from 'conf/dataflow.config.json';
+import { config } from 'conf';
 import { routes } from 'ui/routes';
 
 import { CardsView } from 'ui/views/_components/CardsView';
@@ -26,7 +26,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
   const [cloneSchemasState, cloneSchemasDispatch] = useReducer(cloneSchemasReducer, {
     accepted: [],
@@ -53,7 +53,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
 
   const onLoadDataflows = async () => {
     try {
-      const allDataflows = await DataflowService.all(user.contextRoles);
+      const allDataflows = await DataflowService.all(userContext.contextRoles);
       cloneSchemasDispatch({
         type: 'INITIAL_LOAD',
         payload: {
@@ -81,7 +81,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
 
   const parseDataflowList = dataflows => {
     let parsedDataflows = dataflows.filter(
-      dataflow => dataflow.id !== parseInt(dataflowId) && dataflow.userRole === dataflowRoles.DATA_CUSTODIAN
+      dataflow => dataflow.id !== parseInt(dataflowId) && dataflow.userRole === config.permissions['DATA_CUSTODIAN']
     );
 
     let dataflowsToFilter = [];
@@ -102,7 +102,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
   };
 
   const renderData = () =>
-    user.userProps.listView ? (
+    userContext.userProps.listView ? (
       <TableViewSchemas
         checkedDataflow={cloneSchemasState.chosenDataflow}
         data={cloneSchemasState.filteredData}
@@ -137,7 +137,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
     <div className={styles.cloneSchemas} style={cloneSchemaStyles}>
       <div className={styles.switchDiv}>
         <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
-        <InputSwitch checked={user.userProps.listView} onChange={e => user.onToggleTypeView(e.value)} />
+        <InputSwitch checked={userContext.userProps.listView} onChange={e => userContext.onToggleTypeView(e.value)} />
         <label className={styles.switchTextInput}>{resources.messages['listView']}</label>
       </div>
       <div className={styles.filters}>

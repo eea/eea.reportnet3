@@ -31,7 +31,7 @@ const Dataflows = withRouter(({ match, history }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
   const [tabMenuItems] = useState([
     {
@@ -61,11 +61,11 @@ const Dataflows = withRouter(({ match, history }) => {
   });
 
   useEffect(() => {
-    if (!isNil(user.contextRoles)) {
+    if (!isNil(userContext.contextRoles)) {
       dataFetch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resources.messages, tabMenuActiveItem, user.contextRoles]);
+  }, [resources.messages, tabMenuActiveItem, userContext.contextRoles]);
 
   //Bread Crumbs settings
   useEffect(() => {
@@ -73,8 +73,8 @@ const Dataflows = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    if (!isNil(user.contextRoles)) onLoadPermissions();
-  }, [user]);
+    if (!isNil(userContext.contextRoles)) onLoadPermissions();
+  }, [userContext]);
 
   useEffect(() => {
     if (dataflowsState.isCustodian) {
@@ -99,7 +99,7 @@ const Dataflows = withRouter(({ match, history }) => {
   const dataFetch = async () => {
     isLoading(true);
     try {
-      const allDataflows = await DataflowService.all(user.contextRoles);
+      const allDataflows = await DataflowService.all(userContext.contextRoles);
       dataflowsDispatch({
         type: 'INITIAL_LOAD',
         payload: {
@@ -124,7 +124,7 @@ const Dataflows = withRouter(({ match, history }) => {
   };
 
   const onLoadPermissions = () => {
-    const isCustodian = UserService.hasPermission(user, [config.permissions.CUSTODIAN]);
+    const isCustodian = userContext.hasPermission([config.permissions.CUSTODIAN]);
     dataflowsDispatch({ type: 'HAS_PERMISSION', payload: { isCustodian } });
   };
 
@@ -134,10 +134,10 @@ const Dataflows = withRouter(({ match, history }) => {
   const onRefreshToken = async () => {
     try {
       const userObject = await UserService.refreshToken();
-      user.onTokenRefresh(userObject);
+      userContext.onTokenRefresh(userObject);
     } catch (error) {
       await UserService.logout();
-      user.onLogout();
+      userContext.onLogout();
     }
   };
 
