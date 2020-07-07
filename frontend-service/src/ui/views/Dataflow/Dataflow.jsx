@@ -124,7 +124,7 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'archive'
+            icon: 'clone'
           }
         ]);
       } else if (representatives.length > 1 && isUndefined(representativeId)) {
@@ -137,7 +137,7 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'archive'
+            icon: 'clone'
           }
         ]);
       } else if (representativeId) {
@@ -154,13 +154,13 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'archive',
+            icon: 'clone',
             href: getUrl(routes.DATAFLOW),
             command: () => history.goBack()
           },
           {
             label: currentRepresentative[0],
-            icon: 'archive'
+            icon: 'clone'
           }
         ]);
       } else if (dataflowState.status === 'DESIGN') {
@@ -173,7 +173,7 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'archive'
+            icon: 'clone'
           }
         ]);
       }
@@ -229,8 +229,14 @@ const Dataflow = withRouter(({ history, match }) => {
           ? leftSideBarContext.addModels([propertiesBtn])
           : leftSideBarContext.addModels([propertiesBtn, apiKeyBtn]);
 
-        if (dataflowState.userRoles.includes(config.permissions['LEAD_REPORTER'])) {
+        if (
+          dataflowState.userRoles.includes(config.permissions['LEAD_REPORTER']) &&
+          !dataflowState.userRoles.includes(config.permissions['REPORTER_READ']) &&
+          !dataflowState.userRoles.includes(config.permissions['REPORTER_WRITE'])
+        ) {
           leftSideBarContext.addModels([propertiesBtn, apiKeyBtn, manageRightsBtn]);
+        } else {
+          leftSideBarContext.addModels([propertiesBtn, apiKeyBtn]);
         }
       } else {
         leftSideBarContext.addModels([propertiesBtn]);

@@ -40,10 +40,8 @@ const useBigButtonList = ({
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) {
       const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
-      // setButtonsVisibility(getButtonsVisibility(userRoles.map(userRole => config.permissions[userRole])));
-      setButtonsVisibility(
-        getButtonsVisibility(['LEAD_REPORTER', 'REPORTER_READ'].map(userRole => config.permissions[userRole]))
-      );
+      setButtonsVisibility(getButtonsVisibility(userRoles.map(userRole => config.permissions[userRole])));
+      // setButtonsVisibility(getButtonsVisibility(['LEAD_REPORTER'].map(userRole => config.permissions[userRole])));
     }
   }, [userContext]);
 
