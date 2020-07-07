@@ -319,6 +319,7 @@ public class ContributorServiceImpl implements ContributorService {
 
     // we delete the contributor and after that we create it to update
     if (EDITOR.equals(role) || REPORTER.equals(role)) {
+      // avoid delete if it's a new contributor
       List<ResourceAccessVO> resourceAccessVOs =
           userManagementControllerZull.getResourcesByUserEmail(contributorVO.getAccount());
       if (resourceAccessVOs != null && !resourceAccessVOs.isEmpty()

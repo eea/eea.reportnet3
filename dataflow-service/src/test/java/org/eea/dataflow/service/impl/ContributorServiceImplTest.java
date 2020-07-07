@@ -263,6 +263,11 @@ public class ContributorServiceImplTest {
     Mockito.verify(dataflowControllerZuul, times(2)).findById(1L);
   }
 
+  /**
+   * Update contributor reporter test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateContributorReporterTest() throws EEAException {
     ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
@@ -304,6 +309,11 @@ public class ContributorServiceImplTest {
     assertNotNull(contributorServiceImpl.findContributorsByResourceId(1L, 1L, "REPORTER"));
   }
 
+  /**
+   * Update contributor exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void updateContributorExceptionTest() throws EEAException {
     try {
