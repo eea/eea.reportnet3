@@ -457,7 +457,10 @@ const Dataflow = withRouter(({ history, match }) => {
     manageDialogs('isSnapshotDialogVisible', true);
   };
 
-  useCheckNotifications(['ADD_DATACOLLECTION_COMPLETED_EVENT'], setIsDataUpdated);
+  useCheckNotifications(
+    ['ADD_DATACOLLECTION_COMPLETED_EVENT', 'COPY_DATASET_SCHEMA_COMPLETED_EVENT'],
+    setIsDataUpdated
+  );
 
   const layout = children => (
     <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
