@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.bson.Document;
 import org.bson.json.JsonWriterSettings;
@@ -1464,7 +1465,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         unique.setDatasetSchemaId(datasetSchemaId);
         unique.setTableSchemaId(idTableSchema.toString());
         unique.setFieldSchemaIds(fieldSchemaIds);
-        createUniqueConstraint(unique);
+        List<ObjectId> fields =
+            fieldSchemaIds.stream().map(item -> new ObjectId(item)).collect(Collectors.toList());
+        List<UniqueConstraintSchema> uniques =
+            uniqueConstraintRepository.findByFieldSchemaIds(fields);
+        if (uniques == null || uniques.isEmpty()) {
+          createUniqueConstraint(unique);
+        }
       }
     }
   }
