@@ -173,6 +173,9 @@ public final class EEAErrorMessage {
   /** The Constant PERMISSION_NOT_CREATED: {@value}. */
   public static final String PERMISSION_NOT_CREATED = "Permission not created";
 
+  /** The Constant PERMISSION_NOT_REMOVED: {@value}. */
+  public static final String PERMISSION_NOT_REMOVED = "Permission %s not removed";
+
   /** The Constant ERROR_CREATING_RULE: {@value}. */
   public static final String ERROR_CREATING_RULE = "Error creating rule";
 
@@ -233,6 +236,19 @@ public final class EEAErrorMessage {
 
   /** The Constant DATASET_NOT_REPORTABLE: {@value}. */
   public static final String DATASET_NOT_REPORTABLE = "Dataset %d is not Reportable";
+
+  /** The Constant NOT_EMAIL: {@value}. */
+  public static final String NOT_EMAIL = "%s is not an email";
+
+
+  /** The Constant NO_DESIGNS_TO_COPY: {@value} */
+  public static final String NO_DESIGNS_TO_COPY =
+      "No designs datasets found to copy in the dataflow %s";
+
+  /** The Constant ERROR COPYING SCHEMAS: {@value} */
+  public static final String ERROR_COPYING_SCHEMAS =
+      "Error copying schemas from the dataflow %s to the dataflow %s";
+
 
 
   /**

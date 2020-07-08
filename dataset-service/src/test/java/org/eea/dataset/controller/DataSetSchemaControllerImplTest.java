@@ -22,6 +22,7 @@ import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
@@ -46,6 +47,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -116,6 +120,19 @@ public class DataSetSchemaControllerImplTest {
   @Mock
   private DesignDatasetService designDatasetService;
 
+  @Mock
+  private ContributorControllerZuul contributorControllerZuul;
+
+  /**
+   * The security context.
+   */
+  SecurityContext securityContext;
+
+  /**
+   * The authentication.
+   */
+  Authentication authentication;
+
   /**
    * Inits the mocks.
    */
@@ -123,6 +140,10 @@ public class DataSetSchemaControllerImplTest {
   public void initMocks() {
     datasetSchemaVO = new DataSetSchemaVO();
     datasetSchemaVO.setDescription("description");
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -1023,7 +1044,7 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test
   public void deleteUniqueConstraintTest() throws EEAException {
-    dataSchemaControllerImpl.deleteUniqueConstraint(new ObjectId().toString());
+    dataSchemaControllerImpl.deleteUniqueConstraint(new ObjectId().toString(), 1L);
     Mockito.verify(dataschemaService, times(1)).deleteUniqueConstraint(Mockito.any());
   }
 
@@ -1033,7 +1054,7 @@ public class DataSetSchemaControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void deleteUniqueConstraintIdErrorTest() {
     try {
-      dataSchemaControllerImpl.deleteUniqueConstraint(null);
+      dataSchemaControllerImpl.deleteUniqueConstraint(null, null);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT, e.getReason());
@@ -1050,7 +1071,7 @@ public class DataSetSchemaControllerImplTest {
   public void deleteUniqueConstraintErrorTest() throws EEAException {
     doThrow(EEAException.class).when(dataschemaService).deleteUniqueConstraint(Mockito.any());
     try {
-      dataSchemaControllerImpl.deleteUniqueConstraint(new ObjectId().toString());
+      dataSchemaControllerImpl.deleteUniqueConstraint(new ObjectId().toString(), 1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;
@@ -1166,7 +1187,8 @@ public class DataSetSchemaControllerImplTest {
   public void getUniqueConstraintsTests() {
     List<UniqueConstraintVO> uniques = new ArrayList<>();
     Mockito.when(dataschemaService.getUniqueConstraints(Mockito.any())).thenReturn(uniques);
-    assertEquals(uniques, dataSchemaControllerImpl.getUniqueConstraints(new ObjectId().toString()));
+    assertEquals(uniques,
+        dataSchemaControllerImpl.getUniqueConstraints(new ObjectId().toString(), null));
   }
 
   /**
@@ -1177,7 +1199,7 @@ public class DataSetSchemaControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void getUniqueConstraintsErrorTest() {
     try {
-      dataSchemaControllerImpl.getUniqueConstraints(null);
+      dataSchemaControllerImpl.getUniqueConstraints(null, null);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
@@ -1214,6 +1236,31 @@ public class DataSetSchemaControllerImplTest {
       throw e;
     }
   }
+
+  @Test
+  public void testCopyDesignsFromDataflow() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    dataSchemaControllerImpl.copyDesignsFromDataflow(1L, 1L);
+    Mockito.verify(designDatasetService, times(1)).copyDesignDatasets(Mockito.any(), Mockito.any());
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testCopyDesignsFromDataflowException() throws EEAException {
+    try {
+      doThrow(EEAException.class).when(designDatasetService).copyDesignDatasets(Mockito.anyLong(),
+          Mockito.anyLong());
+      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+      Mockito.when(authentication.getName()).thenReturn("user");
+      dataSchemaControllerImpl.copyDesignsFromDataflow(1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+
 }
 
 

@@ -170,6 +170,7 @@ public class RepresentativeControllerImplTest {
     representativeVO.setProviderAccount(null);
     representativeControllerImpl.updateRepresentative(representativeVO);
     Mockito.verify(representativeService, times(1)).updateDataflowRepresentative(Mockito.any());
+
   }
 
   /**
@@ -261,7 +262,7 @@ public class RepresentativeControllerImplTest {
     Mockito.when(representativeService.createRepresentative(Mockito.any(), Mockito.any()))
         .thenReturn(1L);
     Assert.assertEquals(1,
-        representativeControllerImpl.createRepresentative(1L, new RepresentativeVO()).longValue());
+        representativeControllerImpl.createRepresentative(1L, representativeVO).longValue());
   }
 
   /**
@@ -271,8 +272,6 @@ public class RepresentativeControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createRepresentativeExceptionTest() throws EEAException {
-    Mockito.doThrow(EEAException.class).when(representativeService)
-        .createRepresentative(Mockito.any(), Mockito.any());
     try {
       representativeControllerImpl.createRepresentative(1L, new RepresentativeVO());
     } catch (ResponseStatusException e) {

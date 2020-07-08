@@ -369,7 +369,7 @@ public class DataflowServiceImpl implements DataflowService {
           dataflowId = df.getId();
         }
         userManagementControllerZull.addUserToResource(dataflowId,
-            ResourceGroupEnum.DATAFLOW_PROVIDER);
+            ResourceGroupEnum.DATAFLOW_LEAD_REPORTER);
         LOG.info("The dataflow {} has been added into keycloak", dataflowId);
       }
     }
@@ -437,7 +437,7 @@ public class DataflowServiceImpl implements DataflowService {
         ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN));
 
     resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
-        ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_PROVIDER));
+        ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.LEAD_REPORTER));
 
     // // with that service we assing the group created to a user who create it
     userManagementControllerZull.addUserToResource(dataFlowSaved.getId(),

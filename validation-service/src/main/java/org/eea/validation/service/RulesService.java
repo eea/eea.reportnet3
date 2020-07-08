@@ -1,8 +1,10 @@
 package org.eea.validation.service;
 
+import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
@@ -189,4 +191,14 @@ public interface RulesService {
    * @param datasetId the dataset id
    */
   void deleteDatasetRuleAndIntegrityByDatasetSchemaId(String datasetSchemaId, Long datasetId);
+
+
+  /**
+   * Copy rules schema.
+   *
+   * @param rules the rules
+   * @return the map
+   * @throws EEAException the EEA exception
+   */
+  Map<String, String> copyRulesSchema(CopySchemaVO rules) throws EEAException;
 }

@@ -31,7 +31,6 @@ import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
-import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
@@ -58,7 +57,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
@@ -115,19 +114,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, []);
 
   useEffect(() => {
-    if (!isUndefined(user.contextRoles)) {
+    if (!isUndefined(userContext.contextRoles)) {
       designerDispatch({
         type: 'LOAD_PERMISSIONS',
         payload: {
-          permissions: UserService.hasPermission(
-            user,
-            [config.permissions.PROVIDER],
+          permissions: userContext.hasPermission(
+            [config.permissions.LEAD_REPORTER],
             `${config.permissions.DATASET}${datasetId}`
           )
         }
       });
     }
-  }, [user]);
+  }, [userContext]);
 
   useEffect(() => {
     breadCrumbContext.add([
@@ -450,6 +448,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       style={{ width: '70%' }}
       visible={designerState.isUniqueConstraintsListDialogVisible}>
       <UniqueConstraints
+        dataflowId={dataflowId}
         designerState={designerState}
         getManageUniqueConstraint={manageUniqueConstraint}
         getUniques={getUniqueConstraintsList}
@@ -547,7 +546,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               label={resources.messages['events']}
               onClick={null}
             /> */}
-              {console.log(designerState.datasetHasData)}
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
                   designerState.datasetHasData && designerState.isPreviewModeOn ? ' p-button-animated-blink' : null
@@ -668,6 +666,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         <Integrations dataflowId={dataflowId} designerState={designerState} manageDialogs={manageDialogs} />
 
         <ManageUniqueConstraint
+          dataflowId={dataflowId}
           designerState={designerState}
           manageDialogs={manageDialogs}
           resetUniques={manageUniqueConstraint}

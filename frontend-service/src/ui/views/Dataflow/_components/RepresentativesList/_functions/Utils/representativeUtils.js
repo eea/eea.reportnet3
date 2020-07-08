@@ -38,11 +38,11 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId, fo
     } catch (error) {
       console.error('error on RepresentativeService.add', error);
       if (error.response.status === 400 || error.response.status === 404) {
-        let { representativeHasError } = formState;
-        representativeHasError.unshift(representatives[representatives.length - 1].representativeId);
+        let { representativesHaveError } = formState;
+        representativesHaveError.unshift(representatives[representatives.length - 1].representativeId);
         formDispatcher({
           type: 'MANAGE_ERRORS',
-          payload: { representativeHasError: uniq(representativeHasError) }
+          payload: { representativesHaveError: uniq(representativesHaveError) }
         });
       }
     }
@@ -166,6 +166,16 @@ export const onKeyDown = (event, formDispatcher, formState, representative, data
   }
 };
 
+export const isValidEmail = email => {
+  if (isNil(email)) {
+    return true;
+  }
+
+  const expression = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+  return email.match(expression);
+};
+
 const updateRepresentative = async (formDispatcher, formState, updatedRepresentative) => {
   let isChangedAccount = false;
   const { initialRepresentatives } = formState;
@@ -180,17 +190,17 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
       initialRepresentative.representativeId === updatedRepresentative.representativeId &&
       initialRepresentative.providerAccount === updatedRepresentative.providerAccount
     ) {
-      const filteredInputsWithErrors = formState.representativeHasError.filter(
+      const filteredInputsWithErrors = formState.representativesHaveError.filter(
         representativeId => representativeId !== updatedRepresentative.representativeId
       );
       formDispatcher({
         type: 'MANAGE_ERRORS',
-        payload: { representativeHasError: filteredInputsWithErrors }
+        payload: { representativesHaveError: filteredInputsWithErrors }
       });
     }
   }
 
-  if (isChangedAccount) {
+  if (isChangedAccount && isValidEmail(updatedRepresentative.providerAccount)) {
     try {
       await RepresentativeService.updateProviderAccount(
         parseInt(updatedRepresentative.representativeId),
@@ -203,11 +213,11 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
       console.error('error on RepresentativeService.updateProviderAccount', error);
 
       if (error.response.status === 400 || error.response.status === 404) {
-        let { representativeHasError } = formState;
-        representativeHasError.unshift(updatedRepresentative.representativeId);
+        let { representativesHaveError } = formState;
+        representativesHaveError.unshift(updatedRepresentative.representativeId);
         formDispatcher({
           type: 'MANAGE_ERRORS',
-          payload: { representativeHasError: uniq(representativeHasError) }
+          payload: { representativesHaveError: uniq(representativesHaveError) }
         });
       }
     }

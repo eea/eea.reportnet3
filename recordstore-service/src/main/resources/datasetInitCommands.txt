@@ -47,7 +47,6 @@ CREATE INDEX idx_record_value ON %dataset_name%.field_value(id_record);
 CREATE INDEX idx_field_schema ON %dataset_name%.field_value(id_field_schema);
 CREATE INDEX idx_dataset_value ON %dataset_name%.table_value(dataset_id);
 CREATE INDEX idx_table_schema ON %dataset_name%.table_value(id_table_schema);
-CREATE INDEX idx_table_value ON %dataset_name%.record_value(id_table);
 CREATE INDEX idx_record_schema ON %dataset_name%.record_value(id_record_schema);
 CREATE INDEX idx_table_validation_table ON %dataset_name%.table_validation(id_table);
 CREATE INDEX idx_table_validation_validation ON %dataset_name%.table_validation(id_validation);

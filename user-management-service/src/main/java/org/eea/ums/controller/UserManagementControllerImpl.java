@@ -21,6 +21,7 @@ import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.ums.mapper.UserRepresentationMapper;
 import org.eea.ums.service.BackupManagmentService;
 import org.eea.ums.service.SecurityProviderInterfaceService;
+import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -232,7 +234,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @return the string
    */
   @HystrixCommand
-  @PreAuthorize("checkApiKey(#dataflowId,#provider) AND secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTER','DATAFLOW_PROVIDER')")
+  @PreAuthorize("checkApiKey(#dataflowId,#provider) AND secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_LEAD_REPORTER')")
   @GetMapping("/test-security")
   public String testSecuredService(@RequestParam("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long provider) {
@@ -379,6 +381,28 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   /**
+   * Adds the contributor from resource.
+   *
+   * @param idResource the id resource
+   * @param resourceGroupEnum the resource group enum
+   * @param userMail the user mail
+   */
+  @Override
+  @DeleteMapping("/remove_contributor_from_resource")
+  public void removeContributorFromResource(@RequestParam("idResource") Long idResource,
+      @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum,
+      @RequestParam("userMail") String userMail) {
+    try {
+      securityProviderInterfaceService.removeContributorFromUserGroup(null, userMail,
+          resourceGroupEnum.getGroupName(idResource));
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error adding contributor to resource. Message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.PERMISSION_NOT_CREATED);
+    }
+  }
+
+  /**
    * Adds the contributors to resources.
    *
    * @param resources the resources
@@ -390,6 +414,23 @@ public class UserManagementControllerImpl implements UserManagementController {
       securityProviderInterfaceService.addContributorsToUserGroup(resources);
     } catch (EEAException e) {
       LOG_ERROR.error("Error adding contributor to resource. Message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.PERMISSION_NOT_CREATED);
+    }
+  }
+
+  /**
+   * Adds the contributors from resources.
+   *
+   * @param resources the resources
+   */
+  @Override
+  @DeleteMapping("/remove_contributors_from_resources")
+  public void removeContributorsFromResources(@RequestBody List<ResourceAssignationVO> resources) {
+    try {
+      securityProviderInterfaceService.removeContributorsFromUserGroup(resources);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error removing contributor to resource. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
     }
@@ -419,6 +460,29 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   /**
+   * Adds the user from resources.
+   *
+   * @param resources the resources
+   */
+  @Override
+  @DeleteMapping("/remove_user_from_resources")
+  public void removeUserFromResources(@RequestBody List<ResourceAssignationVO> resources) {
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get(AuthenticationDetails.USER_ID);
+    for (ResourceAssignationVO resource : resources) {
+      try {
+        securityProviderInterfaceService.removeUserFromUserGroup(userId,
+            resource.getResourceGroup().getGroupName(resource.getResourceId()));
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error removing user to resource. Message: {}", e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            EEAErrorMessage.PERMISSION_NOT_CREATED);
+      }
+    }
+  }
+
+  /**
    * Creates the api key.
    *
    * @param dataflowId the dataflow id
@@ -427,7 +491,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER','DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN')")
   @PostMapping("/createApiKey")
   public String createApiKey(@RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "dataProvider", required = false) Long dataProvider) {
@@ -454,7 +518,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_PROVIDER','DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN')")
   @GetMapping("/getApiKey")
   public String getApiKey(@RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "dataProvider", required = false) Long dataProvider) {
@@ -492,6 +556,28 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PostMapping("/authenticateByApiKey/{apiKey}")
   public TokenVO authenticateUserByApiKey(@PathVariable("apiKey") String apiKey) {
     return securityProviderInterfaceService.authenticateApiKey(apiKey);
+  }
+
+
+  /**
+   * Gets the users by group.
+   *
+   * @param group the group
+   * @return the users by group
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/getUsersByGroup/{group}")
+  public List<UserRepresentationVO> getUsersByGroup(@PathVariable("group") String group) {
+    GroupInfo[] groupInfo = keycloakConnectorService.getGroupsWithSearch(group);
+    UserRepresentation[] users = null;
+    if (groupInfo != null && groupInfo.length != 0) {
+      users = keycloakConnectorService.getUsersByGroupId(groupInfo[0].getId());
+    }
+    return users != null
+        ? userRepresentationMapper.entityListToClass(new ArrayList<>(Arrays.asList(users)))
+        : null;
   }
 
   /**

@@ -1,6 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import { isEmpty, isUndefined, isNull, pick } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
+import pick from 'lodash/pick';
 
 import styles from './DatasetSchemas.module.css';
 
@@ -18,7 +22,7 @@ import { IntegrationService } from 'core/services/Integration';
 import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
 import { ValidationService } from 'core/services/Validation';
 
-const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
+const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
   const resources = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
@@ -50,6 +54,47 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
     } else {
       return [];
     }
+  };
+
+  const getAdditionalValidationInfo = (referenceId, entityType, relations, datasets, datasetSchemaId) => {
+    const additionalInfo = {};
+    const dataset = datasets.filter(datasetSchema => datasetSchema.datasetSchemaId === datasetSchemaId);
+    if (dataset.length > 0) {
+      if (!isUndefined(dataset[0].tables)) {
+        dataset[0].tables.forEach(table => {
+          if (!isUndefined(table.records)) {
+            if (entityType.toUpperCase() === 'TABLE' || entityType.toUpperCase() === 'RECORD') {
+              additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
+            } else if (entityType.toUpperCase() === 'FIELD' || entityType.toUpperCase() === 'DATASET') {
+              table.records.forEach(record =>
+                record.fields.forEach(field => {
+                  if (!isNil(field)) {
+                    if (entityType.toUpperCase() === 'FIELD') {
+                      if (field.fieldId === referenceId) {
+                        additionalInfo.tableName = !isUndefined(table.tableSchemaName)
+                          ? table.tableSchemaName
+                          : table.header;
+                        additionalInfo.fieldName = field.name;
+                      }
+                    } else {
+                      if (!isEmpty(relations)) {
+                        if (field.fieldId === relations.links[0].originField.code) {
+                          additionalInfo.tableName = !isUndefined(table.tableSchemaName)
+                            ? table.tableSchemaName
+                            : table.header;
+                          additionalInfo.fieldName = field.name;
+                        }
+                      }
+                    }
+                  }
+                })
+              );
+            }
+          }
+        });
+      }
+    }
+    return additionalInfo;
   };
 
   const getExtensionsOperations = async datasetsSchemas => {
@@ -85,7 +130,7 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
     const dataset = datasets.filter(datasetSchema => datasetSchema.datasetSchemaId === datasetSchemaId);
     if (dataset.length > 0) {
       if (!isUndefined(dataset[0].tables)) {
-        dataset[0].tables.forEach(table =>
+        dataset[0].tables.forEach(table => {
           table.records.filter(record => {
             record.fields.forEach(field => {
               if (field.fieldId === referenceId) {
@@ -93,8 +138,8 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
                 fieldObj.fieldName = field.name;
               }
             });
-          })
-        );
+          });
+        });
         return fieldObj;
       }
     }
@@ -103,7 +148,7 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
   const getUniqueList = async datasetsSchemas => {
     try {
       const datasetUniques = datasetsSchemas.map(async datasetSchema => {
-        return await UniqueConstraintsService.all(datasetSchema.datasetSchemaId);
+        return await UniqueConstraintsService.all(dataflowId, datasetSchema.datasetSchemaId);
       });
 
       Promise.all(datasetUniques).then(allUniques => {
@@ -166,14 +211,15 @@ const DatasetSchemas = ({ datasetsSchemas, isCustodian, onLoadDatasetsSchemas })
             ? allValidations
                 .map(allValidation =>
                   allValidation.validations.map(validation => {
-                    const validationTableAndField = getFieldName(
+                    const additionalInfo = getAdditionalValidationInfo(
                       validation.referenceId,
-                      //validation.idDatasetSchema,
-                      allValidation.datasetSchemaId,
-                      datasetsSchemas
+                      validation.entityType,
+                      validation.relations,
+                      datasetsSchemas,
+                      allValidation.datasetSchemaId
                     );
-                    validation.tableName = validationTableAndField.tableName;
-                    validation.fieldName = validationTableAndField.fieldName;
+                    validation.tableName = additionalInfo.tableName || '';
+                    validation.fieldName = additionalInfo.fieldName || '';
                     validation.expression = getExpressionString(validation.expressions, {
                       label: validation.fieldName,
                       code: validation.id

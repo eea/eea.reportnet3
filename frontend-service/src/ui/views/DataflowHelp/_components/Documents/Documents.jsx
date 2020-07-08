@@ -39,7 +39,7 @@ const Documents = ({
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
   const [allDocuments, setAllDocuments] = useState(documents);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -62,7 +62,7 @@ const Documents = ({
 
   const createFileName = title => `${title.split(' ').join('_')}`;
 
-  const dateColumnTemplate = rowData => <span>{moment(rowData.date).format(user.userProps.dateFormat)}</span>;
+  const dateColumnTemplate = rowData => <span>{moment(rowData.date).format(userContext.userProps.dateFormat)}</span>;
 
   const documentsEditButtons = rowData => (
     <div className={`${styles.documentsEditButtons} dataflowHelp-document-edit-delete-help-step`}>

@@ -11,14 +11,14 @@ import { routes } from 'ui/routes';
 
 const EULogin = ({ location, history }) => {
   const [isLoading] = useState(true);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
   const onLogin = async () => {
     try {
       const params = new URLSearchParams(location.hash);
       const code = params.get('code');
       if (code) {
         const userObject = await UserService.login(code);
-        user.onLogin(userObject);
+        userContext.onLogin(userObject);
         history.push(getUrl(routes.DATAFLOWS));
       } else {
         history.push(getUrl(routes.ACCESS_POINT));
