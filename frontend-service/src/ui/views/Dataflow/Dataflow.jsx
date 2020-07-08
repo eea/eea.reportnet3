@@ -356,7 +356,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
     const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
 
-    const isCustodian = userRoles.includes(config.permissions['CUSTODIAN'] || config.permissions['DATA_STEWARD']);
+    const isCustodian = userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']);
 
     dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian, userRoles } });
   };
