@@ -72,6 +72,9 @@ public class FMEIntegrationManager extends AbstractCrudManager {
       results.add(integrationMapper.entityToClass(integration));
     } else if (integrationVO.getInternalParameters() != null
         && integrationVO.getInternalParameters().size() > 0) {
+      if (integrationVO.getInternalParameters().containsKey("dataflowId")) {
+        integrationVO.getInternalParameters().remove("dataflowId");
+      }
       List<String> parameters =
           new ArrayList<String>(integrationVO.getInternalParameters().keySet());
       String parameter = parameters.get(0);

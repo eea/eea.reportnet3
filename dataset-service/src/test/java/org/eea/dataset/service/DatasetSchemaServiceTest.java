@@ -378,19 +378,6 @@ public class DatasetSchemaServiceTest {
   }
 
   /**
-   * Creates the group and add user test.
-   */
-  @Test
-  public void createGroupAndAddUserTest() {
-    Mockito.doNothing().when(resourceManagementControllerZull).createResource(Mockito.any());
-    Mockito.doNothing().when(userManagementControllerZull).addUserToResource(Mockito.any(),
-        Mockito.any());
-    dataSchemaServiceImpl.createGroupAndAddUser(1L);
-    Mockito.verify(userManagementControllerZull, times(1)).addUserToResource(Mockito.any(),
-        Mockito.any());
-  }
-
-  /**
    * Delete group test.
    */
   @Test

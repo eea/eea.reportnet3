@@ -57,8 +57,10 @@ public interface IntegrationController {
    *
    * @param integrationId the integration id
    */
-  @DeleteMapping(value = "/{integrationId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  void deleteIntegration(@PathVariable("integrationId") Long integrationId);
+  @DeleteMapping(value = "/{integrationId}/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void deleteIntegration(@PathVariable("integrationId") Long integrationId,
+      @PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Update integration.
@@ -91,7 +93,7 @@ public interface IntegrationController {
    * @param integration the integration
    * @return the execution result VO
    */
-  @PostMapping(value = "/executeIntegration")
+  @PostMapping(value = "/private/executeIntegration")
   ExecutionResultVO executeIntegrationProcess(
       @RequestParam("integrationTool") IntegrationToolTypeEnum integrationToolTypeEnum,
       @RequestParam("operation") IntegrationOperationTypeEnum integrationOperationTypeEnum,
