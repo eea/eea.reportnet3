@@ -94,7 +94,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) onLoadPermission();
-  }, [userContext]);
+  }, [userContext, dataflowState.data]);
 
   useEffect(() => {
     leftSideBarContext.addHelpSteps(DataflowHelpConfig, 'dataflowHelp');
@@ -362,7 +362,21 @@ const Dataflow = withRouter(({ history, match }) => {
     onLoadReportingDataflow();
   };
 
+  const getCurrentDatasetId = () => {
+    if (isEmpty(dataflowState.data)) return null;
+
+    const { datasets } = dataflowState.data;
+
+    return first(
+      datasets
+        .filter(dataset => dataset.dataProviderId === parseInt(representativeId))
+        .map(dataset => dataset.datasetId)
+    );
+  };
+
   const onLoadPermission = () => {
+    const currentDatasetId = getCurrentDatasetId();
+
     const hasWritePermissions = userContext.hasPermission(
       [config.permissions.LEAD_REPORTER],
       `${config.permissions.DATAFLOW}${dataflowId}`
@@ -370,14 +384,9 @@ const Dataflow = withRouter(({ history, match }) => {
 
     const entity = isNil(representativeId)
       ? `${config.permissions['DATAFLOW']}${dataflowId}`
-      : `${config.permissions['DATASET']}${777}`;
-
-    console.log('representativeId', representativeId);
-
-    console.log('entity', entity);
+      : `${config.permissions['DATASET']}${currentDatasetId}`;
 
     const userRoles = userContext.getUserRole(entity);
-    console.log('userRoles', userRoles);
 
     const isCustodian = userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']);
 
