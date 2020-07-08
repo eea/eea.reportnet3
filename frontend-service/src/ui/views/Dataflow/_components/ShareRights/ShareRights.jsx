@@ -51,8 +51,10 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
   }, [shareRightsState.isDataUpdated]);
 
   const getAllContributors = async () => {
+    const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
+
     try {
-      const contributors = await ContributorService.all(dataflowId, representativeId);
+      const contributors = await ContributorService.all(dataflowId, dataProvider);
       const emptyContributor = new Contributor({ account: '', dataProviderId: '', isNew: true, writePermission: '' });
 
       shareRightsDispatch({
@@ -82,11 +84,12 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
   };
 
   const onDeleteContributor = async () => {
+    const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
     try {
       const response = await ContributorService.deleteContributor(
         shareRightsState.contributorAccountToDelete,
         dataflowId,
-        representativeId
+        dataProvider
       );
       if (response.status >= 200 && response.status <= 299) {
         onDataChange();
@@ -106,8 +109,9 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
 
   const onUpdateContributor = async contributor => {
     if (contributor.writePermission !== '') {
+      const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
       try {
-        const response = await ContributorService.update(contributor, dataflowId, representativeId);
+        const response = await ContributorService.update(contributor, dataflowId, dataProvider);
         if (response.status >= 200 && response.status <= 299) {
           onDataChange();
         }
