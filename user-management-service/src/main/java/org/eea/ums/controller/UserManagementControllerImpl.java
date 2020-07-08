@@ -119,6 +119,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/checkAccess")
   public Boolean checkResourceAccessPermission(@RequestParam("resource") String resource,
       @RequestParam("scopes") AccessScopeEnum[] scopes) {
@@ -132,6 +133,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/resources")
   public List<ResourceAccessVO> getResourcesByUser() {
     // Recover user id from Security context
@@ -152,6 +154,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/resources_by_type")
   public List<ResourceAccessVO> getResourcesByUser(
       @RequestParam("resourceType") ResourceTypeEnum resourceType) {
@@ -168,6 +171,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/resources_by_role")
   public List<ResourceAccessVO> getResourcesByUser(
       @RequestParam("securityRole") SecurityRoleEnum securityRole) {
@@ -184,6 +188,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/resources_by_type_role")
   public List<ResourceAccessVO> getResourcesByUser(
       @RequestParam("resourceType") ResourceTypeEnum resourceType,
@@ -210,6 +215,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param resourceGroupEnum the resource group enum
    */
   @Override
+  @PreAuthorize("isAuthenticated()")
   @PutMapping("/add_user_to_resource")
   public void addUserToResource(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum) {
@@ -248,6 +254,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @PostMapping("/createUsers")
   public void createUsers(@RequestBody MultipartFile file) {
     try {
@@ -281,6 +288,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/getUserByEmail")
   public UserRepresentationVO getUserByEmail(@RequestParam("email") String email) {
     UserRepresentationVO user = null;
@@ -299,6 +307,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/getUserByUserId")
   public UserRepresentationVO getUserByUserId(@RequestParam("userId") String userId) {
     UserRepresentationVO userVO = null;
@@ -366,6 +375,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param userMail the user mail
    */
   @Override
+  @PreAuthorize("isAuthenticated()")
   @PutMapping("/add_contributor_to_resource")
   public void addContributorToResource(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum,
@@ -388,6 +398,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param userMail the user mail
    */
   @Override
+  @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/remove_contributor_from_resource")
   public void removeContributorFromResource(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum,
@@ -408,6 +419,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param resources the resources
    */
   @Override
+  @PreAuthorize("isAuthenticated()")
   @PutMapping("/add_contributors_to_resources")
   public void addContributorsToResources(@RequestBody List<ResourceAssignationVO> resources) {
     try {
@@ -425,6 +437,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param resources the resources
    */
   @Override
+  @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/remove_contributors_from_resources")
   public void removeContributorsFromResources(@RequestBody List<ResourceAssignationVO> resources) {
     try {
@@ -442,6 +455,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param resources the resources
    */
   @Override
+  @PreAuthorize("isAuthenticated()")
   @PutMapping("/add_user_to_resources")
   public void addUserToResources(@RequestBody List<ResourceAssignationVO> resources) {
     String userId =
@@ -465,6 +479,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param resources the resources
    */
   @Override
+  @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/remove_user_from_resources")
   public void removeUserFromResources(@RequestBody List<ResourceAssignationVO> resources) {
     String userId =
@@ -538,6 +553,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/{userId}/getApiKey")
   public String getApiKey(@PathVariable("userId") String userId,
       @RequestParam("dataflowId") Long dataflowId,
@@ -553,6 +569,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @PostMapping("/authenticateByApiKey/{apiKey}")
   public TokenVO authenticateUserByApiKey(@PathVariable("apiKey") String apiKey) {
     return securityProviderInterfaceService.authenticateApiKey(apiKey);
@@ -606,6 +623,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/private/resourcesByMail")
   public List<ResourceAccessVO> getResourcesByUserEmail(String email) {
     // Recover user id from email
