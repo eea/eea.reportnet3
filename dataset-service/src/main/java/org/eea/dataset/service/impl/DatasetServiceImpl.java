@@ -25,6 +25,7 @@ import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.mapper.RecordValidationMapper;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
+import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValidation;
 import org.eea.dataset.persistence.data.domain.FieldValue;
@@ -1217,6 +1218,18 @@ public class DatasetServiceImpl implements DatasetService {
               .forEach(value -> values.add(value.trim()));
           Collections.sort(values);
           field.setValue(values.toString().substring(1, values.toString().length() - 1));
+        }
+
+        if (DataType.PHONE.equals(field.getType())) {
+          AttachmentValue attachment = new AttachmentValue();
+          attachment.setFileName("prueba");
+          attachment.setFieldValue(field);
+          byte byteArray[] = new byte[10000000];
+          for (int i = 0; i < byteArray.length; i++) {
+            byteArray[i] = '1';
+          }
+          attachment.setContent(byteArray);
+          field.setAttachment(attachment);
         }
       }
 

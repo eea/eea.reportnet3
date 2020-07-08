@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -79,6 +80,9 @@ public class FieldValue {
 
   @Transient
   private ErrorTypeEnum levelError;
+
+  @OneToOne(mappedBy = "fieldValue", cascade = CascadeType.ALL, orphanRemoval = false)
+  private AttachmentValue attachment;
 
   /**
    * Hash code.
