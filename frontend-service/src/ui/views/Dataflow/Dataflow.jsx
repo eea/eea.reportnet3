@@ -217,10 +217,19 @@ const Dataflow = withRouter(({ history, match }) => {
       return;
     }
 
-    if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']) {
+    if (
+      dataflowState.status === DataflowConf.dataflowStatus['DESIGN'] &&
+      dataflowState.userRoles.includes(config.permissions['DATA_CUSTODIAN'])
+    ) {
       leftSideBarContext.addModels([propertiesBtn, editBtn, apiKeyBtn, manageRightsBtn]);
-    } else if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']) {
-      leftSideBarContext.addModels([propertiesBtn, manageRightsBtn]);
+    } else if (
+      dataflowState.status === DataflowConf.dataflowStatus['DRAFT'] &&
+      (dataflowState.userRoles.includes(config.permissions['DATA_CUSTODIAN']) ||
+        dataflowState.userRoles.includes(config.permissions['EDITOR_WRITE']) ||
+        dataflowState.userRoles.includes(config.permissions['EDITOR_READ']) ||
+        dataflowState.userRoles.includes(config.permissions['DATA_STEWARD']))
+    ) {
+      leftSideBarContext.addModels([propertiesBtn]);
     } else {
       if (!dataflowState.isCustodian) {
         dataflowState.data.representatives.length === 1 && isUndefined(representativeId)
@@ -242,7 +251,7 @@ const Dataflow = withRouter(({ history, match }) => {
         leftSideBarContext.addModels([propertiesBtn]);
       }
     }
-  }, [dataflowState.isCustodian, dataflowState.status, representativeId]);
+  }, [dataflowState.userRoles, dataflowState.status, representativeId]);
 
   useEffect(() => {
     if (!isEmpty(dataflowState.data.representatives)) {
