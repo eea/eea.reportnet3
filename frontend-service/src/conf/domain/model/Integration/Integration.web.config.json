@@ -2,6 +2,6 @@
   "all": "/integration/listIntegrations",
   "allExtensionsOperations": "/integration/listExtensionsOperations",
   "create": "/integration/create",
-  "delete": "/integration/{:integrationId}",
+  "delete": "/integration/{:integrationId}/dataflow/{:dataflowId}",
   "update": "/integration/update"
 }

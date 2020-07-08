@@ -356,7 +356,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
     const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
 
-    const isCustodian = userRoles.includes(config.permissions['CUSTODIAN'] || config.permissions['DATA_STEWARD']);
+    const isCustodian = userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']);
 
     dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian, userRoles } });
   };
@@ -457,7 +457,10 @@ const Dataflow = withRouter(({ history, match }) => {
     manageDialogs('isSnapshotDialogVisible', true);
   };
 
-  useCheckNotifications(['ADD_DATACOLLECTION_COMPLETED_EVENT'], setIsDataUpdated);
+  useCheckNotifications(
+    ['ADD_DATACOLLECTION_COMPLETED_EVENT', 'COPY_DATASET_SCHEMA_COMPLETED_EVENT'],
+    setIsDataUpdated
+  );
 
   const layout = children => (
     <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>

@@ -739,6 +739,7 @@
     "copyDatasetSchemaNotFoundEvent": "No design datasets found to copy",
     "deleteEditorError": "Error deleting editor",
     "deleteReporterError": "Error deleting reporter",
+    "accessDenied": "Access denied. Please, check the dataset schema in the dataflow help",
     "uploadAttachement": "Attach file",
     "supportedFileAttachementsTooltip": "Supported file attachements: ",
     "deleteAttachmentHeader": "Delete attachment",
