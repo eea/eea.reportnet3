@@ -21,7 +21,7 @@ import { shareRightsReducer } from './_functions/Reducers/shareRightsReducer';
 
 import { useInputTextFocus } from 'ui/views/_functions/Hooks/useInputTextFocus';
 
-export const ShareRights = ({ dataflowId, dataflowState }) => {
+export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => {
   const { dataProviderId, isCustodian, isShareRightsDialogVisible } = dataflowState;
 
   const notificationContext = useContext(NotificationContext);
@@ -52,7 +52,7 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
 
   const getAllContributors = async () => {
     try {
-      const contributors = await ContributorService.all(dataflowId, dataProviderId);
+      const contributors = await ContributorService.all(dataflowId, representativeId);
       const emptyContributor = new Contributor({ account: '', dataProviderId: '', isNew: true, writePermission: '' });
 
       shareRightsDispatch({
@@ -86,7 +86,7 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
       const response = await ContributorService.deleteContributor(
         shareRightsState.contributorAccountToDelete,
         dataflowId,
-        dataProviderId
+        representativeId
       );
       if (response.status >= 200 && response.status <= 299) {
         onDataChange();
@@ -107,7 +107,7 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
   const onUpdateContributor = async contributor => {
     if (contributor.writePermission !== '') {
       try {
-        const response = await ContributorService.update(contributor, dataflowId, dataProviderId);
+        const response = await ContributorService.update(contributor, dataflowId, representativeId);
         if (response.status >= 200 && response.status <= 299) {
           onDataChange();
         }
