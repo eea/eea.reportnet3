@@ -168,7 +168,7 @@ public class IntegrationControllerImpl implements IntegrationController {
   @Override
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
-  @PostMapping(value = "/executeIntegration")
+  @PostMapping(value = "/private/executeIntegration")
   public ExecutionResultVO executeIntegrationProcess(
       @RequestParam("integrationTool") IntegrationToolTypeEnum integrationToolTypeEnum,
       @RequestParam("operation") IntegrationOperationTypeEnum integrationOperationTypeEnum,
