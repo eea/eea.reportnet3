@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,6 +46,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @RequestMapping(value = "/create", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.CREATED)
   public void createResource(@RequestBody ResourceInfoVO resourceInfoVO) {
@@ -65,6 +67,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
   @ResponseStatus(HttpStatus.OK)
   public void deleteResource(@RequestBody List<ResourceInfoVO> resourceInfoVO) {
@@ -78,6 +81,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @RequestMapping(value = "/delete_by_name", method = RequestMethod.DELETE)
   @ResponseStatus(HttpStatus.OK)
   public void deleteResourceByName(@RequestParam("resourceNames") List<String> resourceName) {
@@ -91,6 +95,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/delete_by_dataset_id")
   public void deleteResourceByDatasetId(@RequestParam("datasetIds") List<Long> datasetIds) {
     securityProviderInterfaceService.deleteResourceInstancesByDatasetId(datasetIds);
@@ -106,6 +111,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/details")
   public ResourceInfoVO getResourceDetail(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum) {
@@ -124,6 +130,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/getResourceInfoVOByResource")
   public List<ResourceInfoVO> getGroupsByIdResourceType(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceType") ResourceTypeEnum resourceType) {
@@ -138,6 +145,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @RequestMapping(value = "/createList", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.CREATED)
   public void createResources(@RequestBody List<ResourceInfoVO> resourceInfoVOs) {
