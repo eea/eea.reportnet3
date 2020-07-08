@@ -48,7 +48,6 @@ import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
-import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.multitenancy.TenantResolver;
@@ -174,27 +173,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         new ObjectId().toString());
 
     return idDataSetSchema;
-  }
-
-  /**
-   * Creates the group and add user.
-   *
-   * @param datasetId the dataset id
-   */
-  @Override
-  public void createGroupAndAddUser(Long datasetId) {
-
-    // Create group Dataschema-X-DATA_CUSTODIAN
-    resourceManagementControllerZull.createResource(
-        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_CUSTODIAN));
-
-    // Create group Dataschema-X-LEAD_REPORTER
-    resourceManagementControllerZull.createResource(
-        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.LEAD_REPORTER));
-
-    // Add user to new group Dataschema-X-DATA_CUSTODIAN
-    userManagementControllerZull.addUserToResource(datasetId,
-        ResourceGroupEnum.DATASCHEMA_CUSTODIAN);
   }
 
   /**

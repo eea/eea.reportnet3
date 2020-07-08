@@ -219,21 +219,10 @@ public class ContributorServiceImpl implements ContributorService {
     final List<ResourceAssignationVO> resourceAssignationVOList = new ArrayList<>();
     List<ResourceInfoVO> resourceInfoVOs = new ArrayList<>();
     if (EDITOR.equals(role)) {
-
-      ResourceInfoVO resourceDataflow =
-          resourceManagementControllerZull.getResourceDetail(dataflowId, resourceGroupEnumDataflow);
-      if (null == resourceDataflow.getName()) {
-        resourceInfoVOs.add(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, securityRoleEnum));
-      }
       resourceAssignationVOList.add(fillResourceAssignation(dataflowId, contributorVO.getAccount(),
           resourceGroupEnumDataflow));
       for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
-        ResourceInfoVO resourceDataSchema = resourceManagementControllerZull
-            .getResourceDetail(designDatasetVO.getId(), resourceGroupEnum);
-        if (null == resourceDataSchema.getName()) {
-          resourceInfoVOs.add(
-              createGroup(designDatasetVO.getId(), ResourceTypeEnum.DATA_SCHEMA, securityRoleEnum));
-        }
+
         resourceAssignationVOList.add(fillResourceAssignation(designDatasetVO.getId(),
             contributorVO.getAccount(), resourceGroupEnum));
       }
@@ -256,18 +245,17 @@ public class ContributorServiceImpl implements ContributorService {
         if (null == resourceDataSchema.getName()) {
           resourceInfoVOs
               .add(createGroup(reportingDatasetId, ResourceTypeEnum.DATASET, securityRoleEnum));
-          resourceInfoVOs.add(createGroup(dataflowId, ResourceTypeEnum.DATA_SCHEMA,
-              SecurityRoleEnum.REPORTER_READ));
         }
         resourceAssignationVOList.add(fillResourceAssignation(reportingDatasetId,
             contributorVO.getAccount(), resourceGroupEnum));
         resourceAssignationVOList.add(fillResourceAssignation(reportingDatasetId,
             contributorVO.getAccount(), resourceGroupEnumDataset));
       }
+      // Resources creation
+      resourceManagementControllerZull.createResources(resourceInfoVOs);
 
     }
-    // Resources creation
-    resourceManagementControllerZull.createResources(resourceInfoVOs);
+
     // we add data to contributor
     userManagementControllerZull.addContributorsToResources(resourceAssignationVOList);
   }
@@ -374,7 +362,6 @@ public class ContributorServiceImpl implements ContributorService {
     List<UserRepresentationVO> usersEditorWrite = userManagementControllerZull
         .getUsersByGroup(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(dataflowId));
 
-
     // It finds all users that have dataflow-xx-data-custodian
     List<UserRepresentationVO> usersCustodian = userManagementControllerZull
         .getUsersByGroup(ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(dataflowId));
@@ -392,16 +379,11 @@ public class ContributorServiceImpl implements ContributorService {
         }
       }
     }
-
-
     // we create resources for any users to add the new resource associated with the new
     // datasetSchema
     if (!CollectionUtils.isEmpty(usersEditorRead) || !CollectionUtils.isEmpty(usersEditorWrite)) {
-
       if (!CollectionUtils.isEmpty(usersEditorRead)) {
         for (UserRepresentationVO userEditorRead : usersEditorRead) {
-          resourceManagementControllerZull.createResource(
-              createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.EDITOR_READ));
           resources.add(fillResourceAssignation(datasetId, userEditorRead.getEmail(),
               ResourceGroupEnum.DATASCHEMA_EDITOR_READ));
 
@@ -409,8 +391,6 @@ public class ContributorServiceImpl implements ContributorService {
       }
       if (!CollectionUtils.isEmpty(usersEditorWrite)) {
         for (UserRepresentationVO userEditorWrite : usersEditorWrite) {
-          resourceManagementControllerZull.createResource(
-              createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.EDITOR_WRITE));
           resources.add(fillResourceAssignation(datasetId, userEditorWrite.getEmail(),
               ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE));
         }
