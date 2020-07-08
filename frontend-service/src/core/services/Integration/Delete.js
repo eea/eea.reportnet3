@@ -1,2 +1,2 @@
-export const Delete = ({ integrationRepository }) => async integrationId =>
-  integrationRepository.deleteById(integrationId);
+export const Delete = ({ integrationRepository }) => async (dataflowId, integrationId) =>
+  integrationRepository.deleteById(dataflowId, integrationId);
