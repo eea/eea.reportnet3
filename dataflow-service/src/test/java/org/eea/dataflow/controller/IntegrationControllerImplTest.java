@@ -149,7 +149,7 @@ public class IntegrationControllerImplTest {
   @Test
   public void testDeleteIntegration() throws EEAException {
 
-    integrationControllerImpl.deleteIntegration(1L);
+    integrationControllerImpl.deleteIntegration(1L, 1L);
     Mockito.verify(integrationService, times(1)).deleteIntegration(Mockito.any());
   }
 
@@ -163,7 +163,7 @@ public class IntegrationControllerImplTest {
   public void testDeleteIntegrationException() throws EEAException {
     try {
       Mockito.doThrow(EEAException.class).when(integrationService).deleteIntegration(Mockito.any());
-      integrationControllerImpl.deleteIntegration(null);
+      integrationControllerImpl.deleteIntegration(null, null);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
