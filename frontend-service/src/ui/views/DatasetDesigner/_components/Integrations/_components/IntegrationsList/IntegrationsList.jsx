@@ -72,7 +72,7 @@ export const IntegrationsList = ({ dataflowId, designerState, getUpdatedData, in
 
   const onLoadIntegrations = async () => {
     try {
-      const response = await IntegrationService.all(designerState.datasetSchemaId);
+      const response = await IntegrationService.all(dataflowId, designerState.datasetSchemaId);
       integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response } });
       integrationsList(response);
     } catch (error) {

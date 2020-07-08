@@ -5,8 +5,9 @@ import { apiIntegration } from 'core/infrastructure/api/domain/model/Integration
 
 import { Integration } from 'core/domain/model/Integration/Integration';
 
-const all = async datasetSchemaId =>
-  parseIntegrationsList(await apiIntegration.all(parseDatasetSchemaId(datasetSchemaId)));
+const all = async (dataflowId, datasetSchemaId) => {
+  return parseIntegrationsList(await apiIntegration.all(parseDatasetSchemaId(datasetSchemaId, dataflowId)));
+};
 
 const allExtensionsOperations = async datasetSchemaId =>
   parseIntegrationsOperationsExtensionsList(
@@ -17,10 +18,10 @@ const create = async integration => apiIntegration.create(parseManageIntegration
 
 const deleteById = async (dataflowId, integrationId) => await apiIntegration.deleteById(dataflowId, integrationId);
 
-const parseDatasetSchemaId = datasetSchemaId => {
+const parseDatasetSchemaId = (datasetSchemaId, dataflowId) => {
   const integration = new Integration();
 
-  integration.internalParameters = { datasetSchemaId: datasetSchemaId };
+  integration.internalParameters = { dataflowId, datasetSchemaId };
 
   return integration;
 };
