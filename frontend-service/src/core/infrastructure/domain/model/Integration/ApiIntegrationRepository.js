@@ -15,9 +15,7 @@ const allExtensionsOperations = async datasetSchemaId =>
 
 const create = async integration => apiIntegration.create(parseManageIntegration(integration));
 
-const deleteById = async integrationId => {
-  return await apiIntegration.deleteById(integrationId);
-};
+const deleteById = async (dataflowId, integrationId) => await apiIntegration.deleteById(dataflowId, integrationId);
 
 const parseDatasetSchemaId = datasetSchemaId => {
   const integration = new Integration();
