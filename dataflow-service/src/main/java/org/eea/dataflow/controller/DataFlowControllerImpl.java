@@ -188,7 +188,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @LockMethod
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_REQUESTER')")
   @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity createDataFlow(
+  public ResponseEntity<?> createDataFlow(
       @RequestBody @LockCriteria(name = "name", path = "name") DataFlowVO dataFlowVO) {
 
     String message = "";
@@ -229,7 +229,7 @@ public class DataFlowControllerImpl implements DataFlowController {
 
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataFlowVO.id,'DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataFlowVO.id,'DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE')")
   @PutMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity updateDataFlow(@RequestBody DataFlowVO dataFlowVO) {
     final Timestamp dateToday = java.sql.Timestamp.valueOf(LocalDateTime.now());
@@ -305,7 +305,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
   @Override
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   @PutMapping("/{dataflowId}/updateStatus")
   public void updateDataFlowStatus(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("status") TypeStatusEnum status,
