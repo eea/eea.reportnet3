@@ -28,9 +28,9 @@ export const apiIntegration = {
     return response;
   },
 
-  deleteById: async integrationId => {
+  deleteById: async (dataflowId, integrationId) => {
     const response = await HTTPRequester.delete({
-      url: getUrl(IntegrationConfig.delete, { integrationId })
+      url: getUrl(IntegrationConfig.delete, { dataflowId, integrationId })
     });
     return response;
   },

@@ -1464,7 +1464,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         unique.setDatasetSchemaId(datasetSchemaId);
         unique.setTableSchemaId(idTableSchema.toString());
         unique.setFieldSchemaIds(fieldSchemaIds);
-        createUniqueConstraint(unique);
+        List<ObjectId> fields = new ArrayList<>();
+        fields.add(new ObjectId(fieldSchemaVO.getId()));
+        List<UniqueConstraintSchema> uniques =
+            uniqueConstraintRepository.findByFieldSchemaIds(fields);
+        if (uniques == null || uniques.isEmpty()) {
+          createUniqueConstraint(unique);
+        }
       }
     }
   }

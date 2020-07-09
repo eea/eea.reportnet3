@@ -439,7 +439,13 @@ public class DataflowServiceImpl implements DataflowService {
     resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
         ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.LEAD_REPORTER));
 
-    // // with that service we assing the group created to a user who create it
+    resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
+        ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.EDITOR_READ));
+
+    resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
+        ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.EDITOR_WRITE));
+
+    // with that service we assing the group created to a user who create it
     userManagementControllerZull.addUserToResource(dataFlowSaved.getId(),
         ResourceGroupEnum.DATAFLOW_CUSTODIAN);
   }

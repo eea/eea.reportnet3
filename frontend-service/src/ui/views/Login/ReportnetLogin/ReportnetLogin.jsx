@@ -37,7 +37,7 @@ const ReportnetLogin = ({ history }) => {
           <div className={styles.logo}>
             <img src={logo} alt="Reportnet" />
             <h1>{resources.messages.appName}</h1>
-            {!isEmpty(loginError) && <div class={styles.error}>{loginError}</div>}
+            {!isEmpty(loginError) && <div className={styles.error}>{loginError}</div>}
             {/* <Link to={routes.DATAFLOWS}>cast</Link> */}
           </div>
           <Formik

@@ -21,7 +21,7 @@ import { shareRightsReducer } from './_functions/Reducers/shareRightsReducer';
 
 import { useInputTextFocus } from 'ui/views/_functions/Hooks/useInputTextFocus';
 
-export const ShareRights = ({ dataflowId, dataflowState }) => {
+export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => {
   const { dataProviderId, isCustodian, isShareRightsDialogVisible } = dataflowState;
 
   const notificationContext = useContext(NotificationContext);
@@ -51,8 +51,10 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
   }, [shareRightsState.isDataUpdated]);
 
   const getAllContributors = async () => {
+    const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
+
     try {
-      const contributors = await ContributorService.all(dataflowId, dataProviderId);
+      const contributors = await ContributorService.all(dataflowId, dataProvider);
       const emptyContributor = new Contributor({ account: '', dataProviderId: '', isNew: true, writePermission: '' });
 
       shareRightsDispatch({
@@ -82,11 +84,12 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
   };
 
   const onDeleteContributor = async () => {
+    const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
     try {
       const response = await ContributorService.deleteContributor(
         shareRightsState.contributorAccountToDelete,
         dataflowId,
-        dataProviderId
+        dataProvider
       );
       if (response.status >= 200 && response.status <= 299) {
         onDataChange();
@@ -106,8 +109,9 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
 
   const onUpdateContributor = async contributor => {
     if (contributor.writePermission !== '') {
+      const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
       try {
-        const response = await ContributorService.update(contributor, dataflowId, dataProviderId);
+        const response = await ContributorService.update(contributor, dataflowId, dataProvider);
         if (response.status >= 200 && response.status <= 299) {
           onDataChange();
         }
