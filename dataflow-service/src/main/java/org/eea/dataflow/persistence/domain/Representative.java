@@ -76,8 +76,8 @@ public class Representative {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final Representative dataflow = (Representative) o;
-    return id.equals(dataflow.id);
+    final Representative representative = (Representative) o;
+    return id.equals(representative.id);
 
   }
 

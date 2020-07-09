@@ -1,13 +1,11 @@
 package org.eea.security.jwt.configuration;
 
-import java.util.HashSet;
 import java.util.Set;
 import org.eea.security.jwt.data.CacheTokenVO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.redis.connection.RedisConfiguration;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
@@ -56,13 +54,11 @@ public class CacheClientSecurityConfiguration {
   public JedisConnectionFactory jedisConnectionFactory() {
 
     JedisPoolConfig poolConfig = createPoolConfig();
-    RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(
-        redisHost, redisPort);
+    RedisStandaloneConfiguration redisStandaloneConfiguration =
+        new RedisStandaloneConfiguration(redisHost, redisPort);
 
-    return new JedisConnectionFactory(
-        redisStandaloneConfiguration,
-        JedisClientConfiguration.builder().usePooling().poolConfig(poolConfig).and()
-            .clientName(serviceInstanceId).build());
+    return new JedisConnectionFactory(redisStandaloneConfiguration, JedisClientConfiguration
+        .builder().usePooling().poolConfig(poolConfig).and().clientName(serviceInstanceId).build());
   }
 
   /**
@@ -76,14 +72,11 @@ public class CacheClientSecurityConfiguration {
 
     JedisPoolConfig poolConfig = createPoolConfig();
 
-    RedisSentinelConfiguration redisStandaloneConfiguration = new RedisSentinelConfiguration(
-        redisMasterSentinel, sentinelNodes);
+    RedisSentinelConfiguration redisStandaloneConfiguration =
+        new RedisSentinelConfiguration(redisMasterSentinel, sentinelNodes);
 
-    return new JedisConnectionFactory(
-        redisStandaloneConfiguration,
-        JedisClientConfiguration.builder().usePooling().poolConfig(poolConfig).and()
-            .clientName(serviceInstanceId)
-            .build());
+    return new JedisConnectionFactory(redisStandaloneConfiguration, JedisClientConfiguration
+        .builder().usePooling().poolConfig(poolConfig).and().clientName(serviceInstanceId).build());
   }
 
   /**

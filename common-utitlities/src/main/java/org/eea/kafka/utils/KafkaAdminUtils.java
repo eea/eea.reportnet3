@@ -1,7 +1,6 @@
 package org.eea.kafka.utils;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -48,12 +47,12 @@ public class KafkaAdminUtils {
   public ConsumerGroupVO getConsumerGroupInfo(final String groupId) {
     ConsumerGroupVO groupDescription = null;
     try {
-      Map<String, ConsumerGroupDescription> groups = adminClient.
-          describeConsumerGroups(Arrays.asList(groupId)).all().get();
+      Map<String, ConsumerGroupDescription> groups =
+          adminClient.describeConsumerGroups(Arrays.asList(groupId)).all().get();
       groupDescription = mapConsumerGroupDescription(groups.get(groupId));
     } catch (InterruptedException | ExecutionException e) {
-      LOG_ERROR
-          .error("Error getting information for the Consumer Group {} from Kafka ", groupId, e);
+      LOG_ERROR.error("Error getting information for the Consumer Group {} from Kafka ", groupId,
+          e);
     }
     return groupDescription;
   }
@@ -64,15 +63,13 @@ public class KafkaAdminUtils {
     ConsumerGroupVO consumerGroupVO = new ConsumerGroupVO();
     consumerGroupVO.setGroupId(consumerGroupDescription.groupId());
     consumerGroupVO.setState(consumerGroupDescription.state().toString());
-    consumerGroupVO.setMembers(consumerGroupDescription.members().stream()
-        .map(member -> {
-          MemberDescriptionVO vo = new MemberDescriptionVO();
-          vo.setClientId(member.clientId());
-          vo.setHost(member.host());
-          vo.setMemberId(member.consumerId());
-          return vo;
-        }).collect(
-            Collectors.toList()));
+    consumerGroupVO.setMembers(consumerGroupDescription.members().stream().map(member -> {
+      MemberDescriptionVO vo = new MemberDescriptionVO();
+      vo.setClientId(member.clientId());
+      vo.setHost(member.host());
+      vo.setMemberId(member.consumerId());
+      return vo;
+    }).collect(Collectors.toList()));
     return consumerGroupVO;
   }
 }

@@ -7,7 +7,6 @@ import org.eea.kafka.domain.EventType;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.util.ValidationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -42,8 +41,7 @@ public class ExecuteValidationProcessCommand extends AbstractEEAEventHandlerComm
   @Override
   public void execute(EEAEventVO eeaEventVO) {
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
-    ThreadPropertiesManager.setVariable("user",
-        eeaEventVO.getData().get("user"));
+    ThreadPropertiesManager.setVariable("user", eeaEventVO.getData().get("user"));
     validationHelper.executeValidation(datasetId, UUID.randomUUID().toString());
   }
 }

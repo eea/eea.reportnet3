@@ -15,7 +15,7 @@ import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.WebLinkRepository;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.ums.UserManagementController;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
@@ -35,6 +35,27 @@ import org.springframework.dao.EmptyResultDataAccessException;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class DataFlowWebLinkServiceImplTest {
+
+
+  /** The dataflow service impl. */
+  @InjectMocks
+  private DataflowServiceWebLinkImpl dataflowServiceWebLinkImpl;
+
+  /** The dataflow repository. */
+  @Mock
+  private DataflowRepository dataflowRepository;
+
+  /** The web link repository. */
+  @Mock
+  private WebLinkRepository webLinkRepository;
+
+  /** The dataflow web link mapper. */
+  @Mock
+  private DataflowWebLinkMapper dataflowWebLinkMapper;
+
+  /** The user management controller zull. */
+  @Mock
+  private UserManagementControllerZull userManagementControllerZull;
 
   /** The weblink VO. */
   private WeblinkVO weblinkVO;
@@ -108,27 +129,6 @@ public class DataFlowWebLinkServiceImplTest {
     MockitoAnnotations.initMocks(this);
   }
 
-  /** The dataflow service impl. */
-  @InjectMocks
-  private DataflowServiceWebLinkImpl dataflowServiceWebLinkImpl;
-
-  /** The dataflow repository. */
-  @Mock
-  private DataflowRepository dataflowRepository;
-
-  /** The web link repository. */
-  @Mock
-  private WebLinkRepository webLinkRepository;
-
-  /** The dataflow web link mapper. */
-  @Mock
-  private DataflowWebLinkMapper dataflowWebLinkMapper;
-
-  /** The user management controller zull. */
-  @Mock
-  private UserManagementController userManagementControllerZull;
-
-
   /**
    * Gets the web link.
    *
@@ -173,7 +173,7 @@ public class DataFlowWebLinkServiceImplTest {
   @Test
   public void saveWebLinkException() throws EEAException {
     when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblink);
-    when(dataflowRepository.findById(1L)).thenReturn(Optional.empty());
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.empty());
     try {
       dataflowServiceWebLinkImpl.saveWebLink(1L, weblinkVOBad);
     } catch (EntityNotFoundException e) {
@@ -189,7 +189,7 @@ public class DataFlowWebLinkServiceImplTest {
   @Test
   public void saveWebLink() throws EEAException {
     when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblink);
-    when(dataflowRepository.findById(1L)).thenReturn(Optional.of(new Dataflow()));
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
     dataflowServiceWebLinkImpl.saveWebLink(1L, weblinkVO);
     Mockito.verify(webLinkRepository, times(1)).save(Mockito.any());
   }
@@ -202,9 +202,9 @@ public class DataFlowWebLinkServiceImplTest {
   @Test
   public void removeWebLinkException() throws EEAException {
     when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
-    when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW,
-        SecurityRoleEnum.DATA_CUSTODIAN)).thenReturn(resources);
-    doThrow(EmptyResultDataAccessException.class).when(webLinkRepository).deleteById(1L);
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(), Mockito.any()))
+        .thenReturn(resources);
+    doThrow(EmptyResultDataAccessException.class).when(webLinkRepository).deleteById(Mockito.any());
     try {
       dataflowServiceWebLinkImpl.removeWebLink(1L);
     } catch (EntityNotFoundException e) {
@@ -220,8 +220,8 @@ public class DataFlowWebLinkServiceImplTest {
   @Test
   public void removeWebLink() throws EEAException {
     when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
-    when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW,
-        SecurityRoleEnum.DATA_CUSTODIAN)).thenReturn(resources);
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(), Mockito.any()))
+        .thenReturn(resources);
     dataflowServiceWebLinkImpl.removeWebLink(Mockito.anyLong());
     Mockito.verify(webLinkRepository, times(1)).deleteById(Mockito.any());
   }
@@ -234,10 +234,10 @@ public class DataFlowWebLinkServiceImplTest {
   @Test
   public void updateWebLinkException() throws EEAException {
     when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
-    when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW,
-        SecurityRoleEnum.DATA_CUSTODIAN)).thenReturn(resources);
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(), Mockito.any()))
+        .thenReturn(resources);
     when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblink);
-    when(webLinkRepository.findById(1L)).thenReturn(Optional.empty());
+    when(webLinkRepository.findById(Mockito.any())).thenReturn(Optional.empty());
     weblinkVO.setId(1L);
     try {
       dataflowServiceWebLinkImpl.updateWebLink(weblinkVO);
@@ -255,9 +255,9 @@ public class DataFlowWebLinkServiceImplTest {
   public void updateWebLink() throws EEAException {
     when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblink);
     when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
-    when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW,
-        SecurityRoleEnum.DATA_CUSTODIAN)).thenReturn(resources);
-    when(webLinkRepository.findById(1L)).thenReturn(Optional.of(new Weblink()));
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(), Mockito.any()))
+        .thenReturn(resources);
+    when(webLinkRepository.findById(Mockito.any())).thenReturn(Optional.of(new Weblink()));
     weblinkVO.setId(1L);
     dataflowServiceWebLinkImpl.updateWebLink(weblinkVO);
     Mockito.verify(webLinkRepository, times(1)).findById(1L);

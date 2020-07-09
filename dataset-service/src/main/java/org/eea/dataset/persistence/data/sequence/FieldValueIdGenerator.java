@@ -1,10 +1,6 @@
 package org.eea.dataset.persistence.data.sequence;
 
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.UUID;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.eea.dataset.persistence.data.domain.FieldValue;

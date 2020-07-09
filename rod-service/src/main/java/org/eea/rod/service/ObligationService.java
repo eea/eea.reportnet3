@@ -3,7 +3,6 @@ package org.eea.rod.service;
 import java.util.Date;
 import java.util.List;
 import org.eea.interfaces.vo.rod.ObligationVO;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * The interface Obligation service.
@@ -21,11 +20,8 @@ public interface ObligationService {
    *
    * @return the list
    */
-  List<ObligationVO> findOpenedObligation(Integer clientId,
-      Integer spatialId,
-      Integer issueId,
-      Date deadlineDateFrom,
-      Date deadlineDateTo);
+  List<ObligationVO> findOpenedObligation(Integer clientId, Integer spatialId, Integer issueId,
+      Date deadlineDateFrom, Date deadlineDateTo);
 
   /**
    * Find obligation by id obligation vo.

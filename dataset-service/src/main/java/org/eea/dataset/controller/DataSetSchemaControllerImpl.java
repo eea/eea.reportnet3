@@ -48,7 +48,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -179,8 +178,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/datasetId/{datasetId}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/datasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_REPORTER_READ','DATASCHEMA_LEAD_REPORTER', 'DATACOLLECTION_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ')")
   public DataSetSchemaVO findDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId) {
     try {
@@ -793,7 +791,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    *
    * @param dataflowIdOrigin the dataflow id origin
    * @param dataflowIdDestination the dataflow id destination
-   * 
+   *
    *        Copy the design datasets of a dataflow (origin) into the current dataflow (target) It's
    *        an async call. It sends a notification when all the process it's done
    */

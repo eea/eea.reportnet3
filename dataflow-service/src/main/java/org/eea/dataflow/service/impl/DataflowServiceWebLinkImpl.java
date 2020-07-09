@@ -15,7 +15,7 @@ import org.eea.dataflow.persistence.repository.WebLinkRepository;
 import org.eea.dataflow.service.DataflowWebLinkService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.ums.UserManagementController;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
@@ -48,7 +48,7 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
 
   /** The user management controller zull. */
   @Autowired
-  private UserManagementController userManagementControllerZull;
+  private UserManagementControllerZull userManagementControllerZull;
 
   /**
    * The Constant LOG.
@@ -82,9 +82,8 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
         .getResourcesByUser(ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN);
 
     // get idDataflow
-    if (!resources.stream().filter(resourceAccessVO -> {
-      return resourceAccessVO.getId().equals(dataFlowId);
-    }).findFirst().isPresent()) {
+    if (resources.stream()
+        .noneMatch(resourceAccessVO -> resourceAccessVO.getId().equals(dataFlowId))) {
       throw new ResourceNoFoundException(EEAErrorMessage.FORBIDDEN);
     }
 
@@ -149,9 +148,8 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
         .getResourcesByUser(ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN);
 
     // get idDataflow
-    if (!resources.stream().filter(resourceAccessVO -> {
-      return resourceAccessVO.getId().equals(dataFlowId);
-    }).findFirst().isPresent()) {
+    if (resources.stream()
+        .noneMatch(resourceAccessVO -> resourceAccessVO.getId().equals(dataFlowId))) {
       throw new ResourceNoFoundException(EEAErrorMessage.FORBIDDEN);
     }
 
@@ -192,9 +190,8 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
       throw new WrongDataExceptions(EEAErrorMessage.URL_FORMAT_INCORRECT);
     }
     // get idDataflow
-    if (!resources.stream().filter(resourceAccessVO -> {
-      return resourceAccessVO.getId().equals(dataFlowId);
-    }).findFirst().isPresent()) {
+    if (resources.stream()
+        .noneMatch(resourceAccessVO -> resourceAccessVO.getId().equals(dataFlowId))) {
       throw new ResourceNoFoundException(EEAErrorMessage.FORBIDDEN);
     }
 
