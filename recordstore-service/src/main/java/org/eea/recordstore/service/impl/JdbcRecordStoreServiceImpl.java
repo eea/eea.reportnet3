@@ -392,6 +392,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               + idPartitionDataset + ") to STDOUT";
 
       printToFile(nameFileFieldValue, copyQueryField, cm);
+
+      // Copy attachment_value
+      String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
+      String copyQueryAttachment =
+          "COPY (SELECT at.id, at.file_name, at.content, at.field_value_id from dataset_"
+              + idReportingDataset + ".attachment_value at) to STDOUT";
+
+      printToFile(nameFileAttachmentValue, copyQueryAttachment, cm);
     }
   }
 
@@ -600,6 +609,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       String copyQueryField = "COPY dataset_" + idReportingDataset
           + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
       copyFromFile(copyQueryField, nameFileFieldValue, cm);
+
+      // Attachment value
+      String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
+
+      String copyQueryAttachment = "COPY dataset_" + idReportingDataset
+          + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
+      copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
 
       if (launchEvent) {
         // Send kafka event to launch Validation
