@@ -448,11 +448,20 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   public void addContributorToUserGroup(Optional<UserRepresentation> contributor, String userMail,
       String groupName) throws EEAException {
     if (!contributor.isPresent()) {
-      UserRepresentation[] users = keycloakConnectorService.getUsers();
-      contributor = Arrays.asList(users).stream()
-          .filter(
-              user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
-          .findFirst();
+      synchronized (users) {
+        contributor = Arrays.asList(users).stream()
+            .filter(
+                user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
+            .findFirst();
+        if (!contributor.isPresent()) {
+          users = keycloakConnectorService.getUsers();//try again just in case the user is New
+          contributor = Arrays.asList(users).stream()
+              .filter(
+                  user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail()
+                      .equals(userMail))
+              .findFirst();
+        }
+      }
     }
     if (contributor.isPresent()) {
       LOG.info("New contributor, the email and the group to be assigned is: {}, {}",
@@ -528,6 +537,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
           contributor =
               Arrays.asList(users).stream().filter(user -> StringUtils.isNotBlank(user.getEmail())
                   && user.getEmail().equals(resourceAssignationVO.getEmail())).findFirst();
+          if (contributor.isPresent()) {
+            contributors.add(contributor.get());
+          }
         }
       }
       try {
