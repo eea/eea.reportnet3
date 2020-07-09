@@ -453,6 +453,8 @@
   --listbox-item-highlight-bg: var(--c-corporate-blue);
   --listbox-item-highlight-bg-hover: var(--gray-10);
   --listbox-item-highlight-color: var(--white);
+  --listbox-item-pk-indicator-bg: var(--gray-25);
+  --listbox-item-pk-indicator-color: var(--main-font-color);
 
   /* Tooltip */
   --tooltip-body-bg: var(--gray-110);

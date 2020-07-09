@@ -35,6 +35,8 @@ const getFieldValues = (columns, header, filterColumns) => {
           ? 'SINGLE SELECT'
           : filteredValues[key] === 'MULTISELECT_CODELIST'
           ? 'MULTIPLE SELECT'
+          : Array.isArray(filteredValues[key])
+          ? filteredValues[key].join(', ')
           : filteredValues[key]
     };
   });

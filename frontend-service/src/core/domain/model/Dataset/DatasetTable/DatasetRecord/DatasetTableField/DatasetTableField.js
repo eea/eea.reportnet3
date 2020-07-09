@@ -6,6 +6,7 @@ export class DatasetTableField {
     fieldSchemaId,
     name,
     pk,
+    pkHasMultipleValues,
     pkMustBeUsed,
     pkReferenced,
     recordId,
@@ -22,6 +23,7 @@ export class DatasetTableField {
     this.fieldSchemaId = fieldSchemaId;
     this.name = name;
     this.pk = pk;
+    this.pkHasMultipleValues = pkHasMultipleValues;
     this.pkMustBeUsed = pkMustBeUsed;
     this.pkReferenced = pkReferenced;
     this.recordId = recordId;

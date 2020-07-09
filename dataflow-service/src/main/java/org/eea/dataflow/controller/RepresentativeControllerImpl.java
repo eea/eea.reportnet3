@@ -1,6 +1,8 @@
 package org.eea.dataflow.controller;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -29,21 +31,25 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
-/** The Class RepresentativeControllerImpl. */
+/* The Class RepresentativeControllerImpl. */
 @RestController
 @RequestMapping(value = "/representative")
 public class RepresentativeControllerImpl implements RepresentativeController {
 
-  /** The representative service. */
+  /* The representative service. */
   @Autowired
   private RepresentativeService representativeService;
 
-  /** The user management controller zull. */
+  /* The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
-  /** The Constant LOG_ERROR. */
+  /* The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /* The Constant EMAIL_REGEX: {@value}. */
+  private static final String EMAIL_REGEX =
+      "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$";
 
   /**
    * Creates the representative.
@@ -58,6 +64,18 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   public Long createRepresentative(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody RepresentativeVO representativeVO) {
+
+    if (null == representativeVO.getProviderAccount()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.USER_NOTFOUND);
+    }
+    Pattern p = Pattern.compile(EMAIL_REGEX);
+    Matcher m = p.matcher(representativeVO.getProviderAccount());
+    boolean result = m.matches();
+    if (Boolean.FALSE.equals(result)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          String.format(EEAErrorMessage.NOT_EMAIL, representativeVO.getProviderAccount()));
+    }
+
     try {
       return representativeService.createRepresentative(dataflowId, representativeVO);
     } catch (EEAException e) {
@@ -109,7 +127,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ')")
   public List<RepresentativeVO> findRepresentativesByIdDataFlow(
       @PathVariable("dataflowId") Long dataflowId) {
     if (dataflowId == null) {
@@ -135,10 +153,21 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
   public ResponseEntity updateRepresentative(@RequestBody RepresentativeVO representativeVO) {
     String message = null;
     HttpStatus status = HttpStatus.OK;
+
+    if (null != representativeVO.getProviderAccount()) {
+      Pattern p = Pattern.compile(EMAIL_REGEX);
+      Matcher m = p.matcher(representativeVO.getProviderAccount());
+      boolean result = m.matches();
+      if (Boolean.FALSE.equals(result)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            String.format(EEAErrorMessage.NOT_EMAIL, representativeVO.getProviderAccount()));
+      }
+    }
+
     if (representativeVO.getProviderAccount() != null) {
       List<UserRepresentationVO> users = userManagementControllerZull.getUsers();
       UserRepresentationVO userRepresentationVO = users.stream()
@@ -196,7 +225,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataProvider/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
+  @PreAuthorize("isAuthenticated()")
   public DataProviderVO findDataProviderById(@PathVariable("id") Long dataProviderId) {
     if (null == dataProviderId) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -213,7 +242,6 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @GetMapping("/private/dataProvider")
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public List<DataProviderVO> findDataProvidersByIds(
       @RequestParam("id") List<Long> dataProviderIds) {
     return representativeService.findDataProvidersByIds(dataProviderIds);

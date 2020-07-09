@@ -46,6 +46,10 @@
   top: -6rem !important;
 }
 
+.qcRulesDialog {
+  width: 90% !important;
+}
+
 :global body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
   box-shadow: 0 0 0 0em var(--blue-100) !important;
 }

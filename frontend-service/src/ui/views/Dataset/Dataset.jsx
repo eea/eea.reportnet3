@@ -25,6 +25,7 @@ import { Snapshots } from 'ui/views/_components/Snapshots';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
+import { TabsValidations } from 'ui/views/_components/TabsValidations';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
@@ -33,7 +34,6 @@ import { WebFormData } from './_components/WebFormData/WebFormData';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { IntegrationService } from 'core/services/Integration';
-import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
@@ -55,10 +55,11 @@ export const Dataset = withRouter(({ match, history }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataflowName, setDataflowName] = useState('');
+  const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [datasetSchemaName, setDatasetSchemaName] = useState();
   // const [datasetSchemas, setDatasetSchemas] = useState([]);
@@ -91,6 +92,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [tableSchemaNames, setTableSchemaNames] = useState([]);
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
+  const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [tableSchemaId, setTableSchemaId] = useState();
 
@@ -115,7 +117,7 @@ export const Dataset = withRouter(({ match, history }) => {
         },
         {
           label: resources.messages['dataflow'],
-          icon: 'archive',
+          icon: 'clone',
           href: getUrl(
             routes.DATAFLOW,
             {
@@ -160,12 +162,13 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [metaData]);
 
   useEffect(() => {
-    if (!isUndefined(user.contextRoles)) {
+    if (!isUndefined(userContext.contextRoles)) {
       setHasWritePermissions(
-        UserService.hasPermission(user, [config.permissions.PROVIDER], `${config.permissions.DATASET}${datasetId}`)
+        userContext.hasPermission([config.permissions.LEAD_REPORTER], `${config.permissions.DATASET}${datasetId}`) ||
+          userContext.hasPermission([config.permissions.REPORTER_WRITE], `${config.permissions.DATASET}${datasetId}`)
       );
     }
-  }, [user]);
+  }, [userContext]);
 
   useEffect(() => {
     onLoadDatasetSchema();
@@ -435,6 +438,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const getDataSchema = async () => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
+      setDatasetSchemaAllTables(datasetSchema.tables);
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       return datasetSchema;
@@ -488,6 +492,7 @@ export const Dataset = withRouter(({ match, history }) => {
               description: field['description'],
               field: field['fieldId'],
               header: field['name'],
+              pkHasMultipleValues: field['pkHasMultipleValues'],
               recordId: field['recordId'],
               referencedField: field['referencedField'],
               table: table['tableSchemaName'],
@@ -559,6 +564,15 @@ export const Dataset = withRouter(({ match, history }) => {
       );
     }
   };
+
+  const validationListFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => onSetVisible(setValidationListDialogVisible, false)}
+    />
+  );
 
   const isWebForm = () => {
     if (isInputSwitchChecked) {
@@ -682,6 +696,16 @@ export const Dataset = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
+                isWebFormMMR ? null : 'p-button-animated-blink'
+              }`}
+              disabled={isWebFormMMR}
+              icon={'horizontalSliders'}
+              label={resources.messages['qcRules']}
+              onClick={() => onSetVisible(setValidationListDialogVisible, true)}
+              ownButtonClasses={null}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary-transparent ${
                 isWebFormMMR || !datasetHasData ? null : 'p-button-animated-blink'
               }`}
               disabled={isWebFormMMR || !datasetHasData}
@@ -737,6 +761,23 @@ export const Dataset = withRouter(({ match, history }) => {
           visible={validationsVisible}
         />
       </Dialog>
+      {validationListDialogVisible && (
+        <Dialog
+          className={styles.qcRulesDialog}
+          dismissableMask={true}
+          footer={validationListFooter}
+          header={resources.messages['qcRules']}
+          onHide={() => onSetVisible(setValidationListDialogVisible, false)}
+          visible={validationListDialogVisible}>
+          <TabsValidations
+            dataset={{ datasetId: datasetId, name: datasetSchemaName }}
+            datasetSchemaAllTables={datasetSchemaAllTables}
+            datasetSchemaId={datasetSchemaId}
+            onHideValidationsDialog={() => onSetVisible(setValidationListDialogVisible, false)}
+            reporting={true}
+          />
+        </Dialog>
+      )}
       <ConfirmDialog
         classNameConfirm={'p-button-danger'}
         header={resources.messages['deleteDatasetHeader']}

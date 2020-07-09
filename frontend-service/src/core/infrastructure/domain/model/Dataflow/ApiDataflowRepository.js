@@ -42,7 +42,7 @@ const all = async userData => {
     const dataflowsRoles = userData.filter(role => role.includes(config.permissions['DATAFLOW']));
     dataflowsRoles.map((item, i) => {
       const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
-      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole: DataflowConf.dataflowRoles[role] });
+      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole: config.permissions[role] });
     });
 
     for (let i = 0; i < pendingDataflowsDTO.length; i++) {
@@ -52,7 +52,7 @@ const all = async userData => {
         ...(isDuplicated
           ? userRoles.filter(item =>
               item.duplicatedRoles
-                ? item.userRole === DataflowConf.dataflowRoles['DATA_CUSTODIAN'] && delete item.duplicatedRoles
+                ? item.userRole === config.permissions['DATA_CUSTODIAN'] && delete item.duplicatedRoles
                 : item
             )
           : userRoles
@@ -73,6 +73,9 @@ const all = async userData => {
 };
 
 const create = async (name, description, obligationId) => await apiDataflow.create(name, description, obligationId);
+
+const cloneDatasetSchemas = async (sourceDataflowId, targetDataflowId) =>
+  await apiDataflow.cloneDatasetSchemas(sourceDataflowId, targetDataflowId);
 
 const completed = async () => {
   const completedDataflowsDTO = await apiDataflow.completed();
@@ -261,6 +264,9 @@ const getAllSchemas = async dataflowId => {
                     description: DataTableFieldDTO.description,
                     fieldId: DataTableFieldDTO.id,
                     pk: !isNull(DataTableFieldDTO.pk) ? DataTableFieldDTO.pk : false,
+                    pkHasMultipleValues: !isNull(DataTableFieldDTO.pkHasMultipleValues)
+                      ? DataTableFieldDTO.pkHasMultipleValues
+                      : false,
                     pkMustBeUsed: !isNull(DataTableFieldDTO.pkMustBeUsed) ? DataTableFieldDTO.pkMustBeUsed : false,
                     pkReferenced: !isNull(DataTableFieldDTO.pkReferenced) ? DataTableFieldDTO.pkReferenced : false,
                     name: DataTableFieldDTO.name,
@@ -514,6 +520,7 @@ export const ApiDataflowRepository = {
   accept,
   accepted,
   all,
+  cloneDatasetSchemas,
   completed,
   create,
   dataflowDetails,

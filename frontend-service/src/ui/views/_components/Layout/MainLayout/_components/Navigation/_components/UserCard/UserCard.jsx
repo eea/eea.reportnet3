@@ -20,13 +20,12 @@ const UserCard = React.memo(() => {
     <div id="userProfile" className={styles.userProfileCard}>
       <div className={styles.userProfile}>
         <a
-          href={getUrl(routes.SETTINGS)}      
-           title="User profile details"
+          href={getUrl(routes.SETTINGS)}
+          title="User profile details"
           onClick={async e => {
             e.preventDefault();
-            
           }}>
-          <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />
+          <FontAwesomeIcon aria-hidden={false} className={styles.avatar} icon={AwesomeIcons('user-profile')} />
           <h5 className={styles.userProfile}>
             {!isUndefined(userContext.preferredUsername) ? userContext.preferredUsername : userContext.name}
           </h5>

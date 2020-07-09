@@ -3,6 +3,7 @@ package org.eea.dataset.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.exception.EEAException;
@@ -419,4 +420,14 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   String getMimetype(String file) throws EEAException;
+
+
+  /**
+   * Copy data.
+   *
+   * @param dictionaryOriginTargetDatasetsId the dictionary origin target datasets id
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   */
+  void copyData(Map<Long, Long> dictionaryOriginTargetDatasetsId,
+      Map<String, String> dictionaryOriginTargetObjectId);
 }

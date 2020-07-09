@@ -22,6 +22,7 @@ import org.eea.validation.persistence.schemas.ReferencedFieldSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
+import org.eea.validation.service.RuleExpressionService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -45,6 +46,9 @@ public class KieBaseManagerTest {
 
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
+
+  @Mock
+  private RuleExpressionService ruleExpressionService;
 
   private DataSetSchema datasetSchema;
   private ObjectId id;
@@ -297,7 +301,7 @@ public class KieBaseManagerTest {
     rule.setReferenceId(id);
     rule.setRuleId(id);
     rule.setThenCondition(thenCondition);
-    kieBaseManager.textRuleCorrect(id.toString(), rule);
+    kieBaseManager.validateRule(id.toString(), rule);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -322,7 +326,9 @@ public class KieBaseManagerTest {
     rule.setThenCondition(thenCondition);
     Mockito.when(schemasRepository.findRecordSchema(Mockito.any(), Mockito.any()))
         .thenReturn(document);
-    kieBaseManager.textRuleCorrect(id.toString(), rule);
+    Mockito.when(ruleExpressionService.isDataTypeCompatible(Mockito.anyString(), Mockito.any(),
+        Mockito.any())).thenReturn(true);
+    kieBaseManager.validateRule(id.toString(), rule);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -342,10 +348,8 @@ public class KieBaseManagerTest {
     rule.setThenCondition(thenCondition);
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(document);
-    kieBaseManager.textRuleCorrect(id.toString(), rule);
+    kieBaseManager.validateRule(id.toString(), rule);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
-
-
 }

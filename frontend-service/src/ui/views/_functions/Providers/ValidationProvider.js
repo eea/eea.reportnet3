@@ -123,7 +123,6 @@ export const ValidationProvider = ({ children }) => {
           });
         },
         onOpenToEdit: (rule, opener, level) => {
-          console.log({ rule });
           dispatch({
             type: 'ON_OPEN_TO_EDIT',
             payload: {

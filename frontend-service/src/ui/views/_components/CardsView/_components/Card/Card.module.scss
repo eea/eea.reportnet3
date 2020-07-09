@@ -71,8 +71,13 @@
   }
 
   .date {
-    display: flex;
     align-items: center;
+    display: flex;
+    grid-column-start: span 2;
+
+    &.cloneSchemas {
+      justify-content: space-between;
+    }
 
     .dueDate {
       font-weight: bold;
@@ -86,6 +91,48 @@
     align-items: center;
     z-index: 1;
   }
+
+  &.DRAFT {
+    background: var(--c-lilac-300);
+    color: var(--white);
+    opacity: 0.8;
+
+    &::before {
+      background-image: url('/assets/img/logo-blanco.png') !important;
+      background-position: 150% 50%;
+      background-repeat: no-repeat;
+      background-size: 50%;
+      border-radius: 15px;
+      bottom: 0;
+      content: '';
+      left: 0;
+      opacity: 1;
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 100%;
+    }
+  }
+
+  // &.DESIGN {
+  //   background: var(--c-lilac-100);
+
+  //   &::before {
+  //     background-image: url('/assets/img/logo.png') !important;
+  //     background-position: 150% 50%;
+  //     background-repeat: no-repeat;
+  //     background-size: 50%;
+  //     border-radius: 15px;
+  //     bottom: 0;
+  //     content: '';
+  //     left: 0;
+  //     opacity: 0.5;
+  //     position: absolute;
+  //     right: 0;
+  //     top: 0;
+  //     width: 100%;
+  //   }
+  // }
 }
 
 .checked {
@@ -124,5 +171,43 @@
     background-repeat: no-repeat;
     background-size: 50% 50%, 50% 50%;
     background-position: 0 0, 100% 0, 100% 100%, 0 100%;
+  }
+
+  &.DRAFT {
+    color: var(--white);
+    opacity: 1;
+
+    &::before {
+      content: '';
+      position: absolute;
+      z-index: -1;
+      left: 2px;
+      top: 2px;
+      width: calc(100% - 4px);
+      height: calc(100% - 4px);
+      background: var(--c-lilac-300);
+      border-radius: 15px;
+      opacity: 1;
+
+      background-image: url('/assets/img/logo.png');
+      background-size: 50%;
+      background-repeat: no-repeat;
+      background-position: 150% 50%;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      z-index: -5;
+      left: -50%;
+      top: -50%;
+      width: 200%;
+      height: 200%;
+      opacity: 0.8;
+      background-color: var(--white);
+      background-repeat: no-repeat;
+      background-size: 50% 50%, 50% 50%;
+      background-position: 0 0, 100% 0, 100% 100%, 0 100%;
+    }
   }
 }

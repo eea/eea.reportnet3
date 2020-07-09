@@ -1,8 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { Fragment, useState, useEffect, useContext, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-import { capitalize, isNull, isUndefined, isEmpty } from 'lodash';
+import capitalize from 'lodash/capitalize';
+import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './ValidationViewer.module.css';
 
@@ -300,48 +302,17 @@ const ValidationViewer = React.memo(
       }
     };
 
-    const totalCountWithoutFilters = () => {
-      return (
-        <span>
-          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
-          {resources.messages['records'].toLowerCase()}
-        </span>
-      );
-    };
-
-    const filteredCount = () => {
-      return (
-        <span>
-          {resources.messages['filtered']}
-          {':'}{' '}
-          {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : totalRecords}
-          {' | '}
-          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
-          {resources.messages['records'].toLowerCase()}
-        </span>
-      );
-    };
-
-    const filteredCountWithSameAsTotalValue = () => {
-      return (
-        <span>
-          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
-          {resources.messages['records'].toLowerCase()} {'('}
-          {resources.messages['filtered'].toLowerCase()}
-          {')'}
-        </span>
-      );
-    };
-
-    const getPaginatorRecordsCount = () => {
-      if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords) || totalFilteredRecords == totalRecords) {
-        return areActiveFilters && totalFilteredRecords !== 0
-          ? filteredCountWithSameAsTotalValue()
-          : totalCountWithoutFilters();
-      } else {
-        return filteredCount();
-      }
-    };
+    const getPaginatorRecordsCount = () => (
+      <Fragment>
+        {areActiveFilters && totalRecords !== totalFilteredRecords
+          ? `${resources.messages['filtered']} : ${totalFilteredRecords} | `
+          : ''}
+        {resources.messages['totalRecords']} {totalRecords} {resources.messages['records'].toLowerCase()}
+        {areActiveFilters && totalRecords === totalFilteredRecords
+          ? ` (${resources.messages['filtered'].toLowerCase()})`
+          : ''}
+      </Fragment>
+    );
 
     const resetFilters = () => {
       setOriginsFilter([]);

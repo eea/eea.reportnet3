@@ -12,6 +12,7 @@ import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { DropDownMenu } from 'ui/views/_components/DropdownButton/_components/DropDownMenu';
 import { Icon } from 'ui/views/_components/Icon';
 import { InputText } from 'ui/views/_components/InputText';
+import ReactTooltip from 'react-tooltip';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -19,9 +20,11 @@ export const BigButton = ({
   buttonClass,
   buttonIcon,
   buttonIconClass,
+  canEditName = true,
   caption,
   dataflowStatus,
   datasetSchemaInfo,
+  enabled = true,
   handleRedirect = () => {},
   helpClassName,
   index,
@@ -33,7 +36,8 @@ export const BigButton = ({
   onSaveError,
   onSaveName,
   onWheel,
-  placeholder
+  placeholder,
+  tooltip
 }) => {
   const resources = useContext(ResourcesContext);
 
@@ -133,8 +137,11 @@ export const BigButton = ({
 
   const defaultBigButton = (
     <>
-      <div className={`${styles.bigButton} ${styles.defaultBigButton} ${styles[buttonClass]} ${helpClassName}`}>
-        <span onClick={() => handleRedirect()} onMouseDown={event => onWheelClick(event)}>
+      <div
+        className={`${styles.bigButton} ${styles.defaultBigButton} ${styles[buttonClass]} ${helpClassName} ${
+          !enabled && styles.bigButtonDisabled
+        }`}>
+        <span onClick={() => handleRedirect()} onMouseDown={event => onWheelClick(event)} data-tip data-for={caption}>
           <FontAwesomeIcon icon={AwesomeIcons(buttonIcon)} className={styles[buttonIconClass]} />
         </span>
         {model && (
@@ -154,7 +161,7 @@ export const BigButton = ({
                 position: 'absolute',
                 top: '0',
                 right: '0',
-                fontSize: '1.3rem',
+                fontSize: '1.1rem',
                 margin: '0 0.5rem',
                 fontWeight: '600'
               }}>
@@ -182,7 +189,9 @@ export const BigButton = ({
       ) : (
         <p
           className={styles.caption}
-          onDoubleClick={dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] ? onEnableSchemaNameEdit : null}>
+          onDoubleClick={
+            dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] && canEditName ? onEnableSchemaNameEdit : null
+          }>
           {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         </p>
       )}
@@ -206,5 +215,14 @@ export const BigButton = ({
     menuBigButton
   };
 
-  return <div className={`${styles.datasetItem}`}>{buttons[layout]}</div>;
+  return (
+    <>
+      <div className={`${styles.datasetItem} ${!enabled && styles.datasetItemDisabled}`}>{buttons[layout]}</div>
+      {tooltip && (
+        <ReactTooltip effect="solid" id={caption} place="top">
+          {tooltip}
+        </ReactTooltip>
+      )}
+    </>
+  );
 };

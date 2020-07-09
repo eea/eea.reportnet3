@@ -97,11 +97,11 @@ export class CustomFileUpload extends Component {
   }
 
   checkValidExtension(file) {
-    const acceptedExtensions = this.props.accept.split(', ');
+    const acceptedExtensions = this.props.accept.toLowerCase().split(', ');
 
     if (file) {
       const extension = file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name;
-      return acceptedExtensions.includes(`.${extension}`);
+      return acceptedExtensions.includes(`.${extension.toLowerCase()}`);
     }
 
     if (this.hasFiles()) {
@@ -109,7 +109,7 @@ export class CustomFileUpload extends Component {
         file => file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name
       );
 
-      return !selectedExtension.some(ext => acceptedExtensions.includes(`.${ext}`));
+      return !selectedExtension.some(ext => acceptedExtensions.includes(`.${ext.toLowerCase()}`));
     }
     return false;
   }

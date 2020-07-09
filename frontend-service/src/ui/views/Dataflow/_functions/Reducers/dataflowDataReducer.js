@@ -10,7 +10,12 @@ export const dataflowDataReducer = (state, { type, payload }) => {
       return { ...state, formHasRepresentatives: payload.formHasRepresentatives };
 
     case 'LOAD_PERMISSIONS':
-      return { ...state, hasWritePermissions: payload.hasWritePermissions, isCustodian: payload.isCustodian };
+      return {
+        ...state,
+        hasWritePermissions: payload.hasWritePermissions,
+        isCustodian: payload.isCustodian,
+        userRoles: payload.userRoles
+      };
 
     case 'MANAGE_DIALOGS':
       return {

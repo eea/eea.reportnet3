@@ -8,7 +8,8 @@ import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
-import { MultiSelect } from 'primereact/multiselect';
+import { MultiSelect } from 'ui/views/_components/MultiSelect';
+//'primereact/multiselect';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -53,13 +54,17 @@ const FieldEditor = ({
     if (isNil(colSchema) || isNil(colSchema.referencedField)) {
       return;
     }
+
+    const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
+
     const referencedFieldValues = await DatasetService.getReferencedFieldValues(
       datasetId,
       isUndefined(colSchema.referencedField.name)
         ? colSchema.referencedField.idPk
         : colSchema.referencedField.referencedField.fieldSchemaId,
-      filter
+      hasMultipleValues ? '' : filter
     );
+
     const linkItems = referencedFieldValues
       .map(referencedField => {
         return {
@@ -68,10 +73,13 @@ const FieldEditor = ({
         };
       })
       .sort((a, b) => a.value - b.value);
-    linkItems.unshift({
-      itemType: resources.messages['noneCodelist'],
-      value: ''
-    });
+
+    if (!hasMultipleValues) {
+      linkItems.unshift({
+        itemType: resources.messages['noneCodelist'],
+        value: ''
+      });
+    }
     setLinkItemsOptions(linkItems);
   };
 
@@ -110,7 +118,7 @@ const FieldEditor = ({
       case 'DATE':
         return 'date';
       case 'TEXT':
-      case 'LONG_TEXT':
+      case 'RICH_TEXT':
         return 'any';
       case 'EMAIL':
         return 'email';
@@ -127,8 +135,8 @@ const FieldEditor = ({
     const longCharacters = 20;
     const decimalCharacters = 40;
     const dateCharacters = 10;
-    const textCharacters = 5000;
-    const longTextCharacters = 10000;
+    const textCharacters = 10000;
+    const richTextCharacters = 10000;
     const emailCharacters = 256;
     const phoneCharacters = 256;
     const urlCharacters = 5000;
@@ -150,7 +158,7 @@ const FieldEditor = ({
             maxLength={textCharacters}
           />
         );
-      case 'LONG_TEXT':
+      case 'RICH_TEXT':
         return (
           <InputText
             keyfilter={getFilter(type)}
@@ -163,7 +171,7 @@ const FieldEditor = ({
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
             type="text"
             value={RecordUtils.getCellValue(cells, cells.field)}
-            maxLength={longTextCharacters}
+            maxLength={richTextCharacters}
           />
         );
       case 'NUMBER_INTEGER':
@@ -317,28 +325,61 @@ const FieldEditor = ({
           />
         );
       case 'LINK':
-        return (
-          <Dropdown
-            appendTo={document.body}
-            currentValue={RecordUtils.getCellValue(cells, cells.field)}
-            filter={true}
-            filterPlaceholder={resources.messages['linkFilterPlaceholder']}
-            filterBy="itemType,value"
-            onChange={e => {
-              setLinkItemsValue(e.target.value.value);
-              onEditorValueChange(cells, e.target.value.value);
-              onEditorSubmitValue(cells, e.target.value.value, record);
-            }}
-            onFilterInputChangeBackend={onFilter}
-            onMouseDown={e => {
-              onEditorValueFocus(cells, e.target.value);
-            }}
-            optionLabel="itemType"
-            options={linkItemsOptions}
-            showFilterClear={true}
-            value={RecordUtils.getLinkValue(linkItemsOptions, linkItemsValue)}
-          />
-        );
+        const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
+        if (hasMultipleValues) {
+          return (
+            <MultiSelect
+              // onChange={e => onChangeForm(field, e.value)}
+              appendTo={document.body}
+              clearButton={false}
+              filter={true}
+              filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+              maxSelectedLabels={10}
+              onChange={e => {
+                try {
+                  setLinkItemsValue(e.value);
+                  onEditorValueChange(cells, e.value);
+                  onEditorSubmitValue(cells, e.value, record);
+                } catch (error) {
+                  console.error(error);
+                }
+              }}
+              onFilterInputChangeBackend={onFilter}
+              onFocus={e => {
+                e.preventDefault();
+                if (!isUndefined(codelistItemValue)) {
+                  onEditorValueFocus(cells, codelistItemValue);
+                }
+              }}
+              options={linkItemsOptions}
+              optionLabel="itemType"
+              value={RecordUtils.getMultiselectValues(linkItemsOptions, linkItemsValue)}
+            />
+          );
+        } else {
+          return (
+            <Dropdown
+              appendTo={document.body}
+              currentValue={RecordUtils.getCellValue(cells, cells.field)}
+              filter={true}
+              filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+              filterBy="itemType,value"
+              onChange={e => {
+                setLinkItemsValue(e.target.value.value);
+                onEditorValueChange(cells, e.target.value.value);
+                onEditorSubmitValue(cells, e.target.value.value, record);
+              }}
+              onFilterInputChangeBackend={onFilter}
+              onMouseDown={e => {
+                onEditorValueFocus(cells, e.target.value);
+              }}
+              optionLabel="itemType"
+              options={linkItemsOptions}
+              showFilterClear={true}
+              value={RecordUtils.getLinkValue(linkItemsOptions, linkItemsValue)}
+            />
+          );
+        }
       case 'CODELIST':
         return (
           <Dropdown
@@ -360,7 +401,6 @@ const FieldEditor = ({
       case 'MULTISELECT_CODELIST':
         return (
           <MultiSelect
-            // onChange={e => onChangeForm(field, e.value)}
             appendTo={document.body}
             maxSelectedLabels={10}
             onChange={e => {

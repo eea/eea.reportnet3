@@ -28,6 +28,9 @@ public class UniqueConstraintVO {
   /** The table schema id. */
   private String tableSchemaId;
 
+  /** The dataflow id. */
+  private String dataflowId;
+
   /**
    * Hash code.
    *

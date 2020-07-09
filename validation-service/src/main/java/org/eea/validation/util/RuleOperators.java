@@ -13,6 +13,9 @@ public class RuleOperators {
   /** The fields. */
   private static List<FieldValue> fields;
 
+  /** The country code. */
+  private static String countryCode;
+
   /** The Constant DATE_FORMAT. */
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -22,23 +25,41 @@ public class RuleOperators {
   private RuleOperators() {}
 
   /**
-   * Sets the entity.
+   * Sets the entity for RecordValue.
    *
    * @param recordValue the record value
    * @return true, if successful
    */
   public static boolean setEntity(RecordValue recordValue) {
     fields = recordValue.getFields();
+    countryCode = recordValue.getDataProviderCode();
+    if (null == countryCode) {
+      countryCode = "XX";
+    }
     return true;
   }
 
   /**
-   * Sets the entity.
+   * Sets the entity for FieldValue.
    *
    * @param fieldValue the field value
    * @return true, if successful
    */
-  public static boolean setEntity(Object fieldValue) {
+  public static boolean setEntity(FieldValue fieldValue) {
+    countryCode = fieldValue.getRecord().getDataProviderCode();
+    if (null == countryCode) {
+      countryCode = "XX";
+    }
+    return true;
+  }
+
+  /**
+   * Do nothing when its called with an entity different of RecordValue.
+   *
+   * @param otherEntity the other entity
+   * @return true, if successfule
+   */
+  public static boolean setEntity(Object otherEntity) {
     return true;
   }
 
@@ -55,6 +76,19 @@ public class RuleOperators {
       }
     }
     return "";
+  }
+
+  /**
+   * Replace keywords.
+   *
+   * @param regex the regex
+   * @return the string
+   */
+  private static String replaceKeywords(String regex) {
+    if (regex.contains("$COUNTRY_CODE")) {
+      regex = regex.replace("$COUNTRY_CODE", countryCode);
+    }
+    return regex;
   }
 
   /**
@@ -312,9 +346,9 @@ public class RuleOperators {
    * @param fieldSchemaId the field schema id
    * @return the string
    */
-  public static String recordStringLength(String fieldSchemaId) {
+  public static Integer recordStringLength(String fieldSchemaId) {
     try {
-      return "" + getValue(fieldSchemaId).length();
+      return Integer.valueOf(getValue(fieldSchemaId).length());
     } catch (Exception e) {
       return null;
     }
@@ -336,21 +370,6 @@ public class RuleOperators {
   }
 
   /**
-   * Record string length equals.
-   *
-   * @param fieldSchemaId the field schema id
-   * @param number the number
-   * @return true, if successful
-   */
-  public static boolean recordStringLengthEquals(String fieldSchemaId, String number) {
-    try {
-      return recordStringLengthEquals(fieldSchemaId, Integer.valueOf(number));
-    } catch (Exception e) {
-      return true;
-    }
-  }
-
-  /**
    * Record string length distinct.
    *
    * @param fieldSchemaId the field schema id
@@ -360,21 +379,6 @@ public class RuleOperators {
   public static boolean recordStringLengthDistinct(String fieldSchemaId, Number number) {
     try {
       return getValue(fieldSchemaId).length() != number.intValue();
-    } catch (Exception e) {
-      return true;
-    }
-  }
-
-  /**
-   * Record string length distinct.
-   *
-   * @param fieldSchemaId the field schema id
-   * @param number the number
-   * @return true, if successful
-   */
-  public static boolean recordStringLengthDistinct(String fieldSchemaId, String number) {
-    try {
-      return recordStringLengthDistinct(fieldSchemaId, Integer.valueOf(number));
     } catch (Exception e) {
       return true;
     }
@@ -396,21 +400,6 @@ public class RuleOperators {
   }
 
   /**
-   * Record string length greater than.
-   *
-   * @param fieldSchemaId the field schema id
-   * @param number the number
-   * @return true, if successful
-   */
-  public static boolean recordStringLengthGreaterThan(String fieldSchemaId, String number) {
-    try {
-      return recordStringLengthGreaterThan(fieldSchemaId, Integer.valueOf(number));
-    } catch (Exception e) {
-      return true;
-    }
-  }
-
-  /**
    * Record string length less than.
    *
    * @param fieldSchemaId the field schema id
@@ -420,21 +409,6 @@ public class RuleOperators {
   public static boolean recordStringLengthLessThan(String fieldSchemaId, Number number) {
     try {
       return getValue(fieldSchemaId).length() < number.intValue();
-    } catch (Exception e) {
-      return true;
-    }
-  }
-
-  /**
-   * Record string length less than.
-   *
-   * @param fieldSchemaId the field schema id
-   * @param number the number
-   * @return true, if successful
-   */
-  public static boolean recordStringLengthLessThan(String fieldSchemaId, String number) {
-    try {
-      return recordStringLengthLessThan(fieldSchemaId, Integer.valueOf(number));
     } catch (Exception e) {
       return true;
     }
@@ -457,22 +431,6 @@ public class RuleOperators {
   }
 
   /**
-   * Record string length greater than or equals than.
-   *
-   * @param fieldSchemaId the field schema id
-   * @param number the number
-   * @return true, if successful
-   */
-  public static boolean recordStringLengthGreaterThanOrEqualsThan(String fieldSchemaId,
-      String number) {
-    try {
-      return recordStringLengthGreaterThanOrEqualsThan(fieldSchemaId, Integer.valueOf(number));
-    } catch (Exception e) {
-      return true;
-    }
-  }
-
-  /**
    * Record string length less than or equals than.
    *
    * @param fieldSchemaId the field schema id
@@ -489,22 +447,6 @@ public class RuleOperators {
   }
 
   /**
-   * Record string length less than or equals than.
-   *
-   * @param fieldSchemaId the field schema id
-   * @param number the number
-   * @return true, if successful
-   */
-  public static boolean recordStringLengthLessThanOrEqualsThan(String fieldSchemaId,
-      String number) {
-    try {
-      return recordStringLengthLessThanOrEqualsThan(fieldSchemaId, Integer.valueOf(number));
-    } catch (Exception e) {
-      return true;
-    }
-  }
-
-  /**
    * Record string length equals record.
    *
    * @param fieldSchemaId1 the field schema id 1
@@ -514,7 +456,7 @@ public class RuleOperators {
   public static boolean recordStringLengthEqualsRecord(String fieldSchemaId1,
       String fieldSchemaId2) {
     try {
-      return recordStringLengthEquals(fieldSchemaId1, getValue(fieldSchemaId2));
+      return recordStringLengthEquals(fieldSchemaId1, Integer.valueOf(getValue(fieldSchemaId2)));
     } catch (Exception e) {
       return true;
     }
@@ -530,7 +472,7 @@ public class RuleOperators {
   public static boolean recordStringLengthDistinctRecord(String fieldSchemaId1,
       String fieldSchemaId2) {
     try {
-      return recordStringLengthDistinct(fieldSchemaId1, getValue(fieldSchemaId2));
+      return recordStringLengthDistinct(fieldSchemaId1, Integer.valueOf(getValue(fieldSchemaId2)));
     } catch (Exception e) {
       return true;
     }
@@ -546,7 +488,8 @@ public class RuleOperators {
   public static boolean recordStringLengthGreaterThanRecord(String fieldSchemaId1,
       String fieldSchemaId2) {
     try {
-      return recordStringLengthGreaterThan(fieldSchemaId1, getValue(fieldSchemaId2));
+      return recordStringLengthGreaterThan(fieldSchemaId1,
+          Integer.valueOf(getValue(fieldSchemaId2)));
     } catch (Exception e) {
       return true;
     }
@@ -562,7 +505,7 @@ public class RuleOperators {
   public static boolean recordStringLengthLessThanRecord(String fieldSchemaId1,
       String fieldSchemaId2) {
     try {
-      return recordStringLengthLessThan(fieldSchemaId1, getValue(fieldSchemaId2));
+      return recordStringLengthLessThan(fieldSchemaId1, Integer.valueOf(getValue(fieldSchemaId2)));
     } catch (Exception e) {
       return true;
     }
@@ -578,7 +521,8 @@ public class RuleOperators {
   public static boolean recordStringLengthGreaterThanOrEqualsThanRecord(String fieldSchemaId1,
       String fieldSchemaId2) {
     try {
-      return recordStringLengthGreaterThanOrEqualsThan(fieldSchemaId1, getValue(fieldSchemaId2));
+      return recordStringLengthGreaterThanOrEqualsThan(fieldSchemaId1,
+          Integer.valueOf(getValue(fieldSchemaId2)));
     } catch (Exception e) {
       return true;
     }
@@ -594,7 +538,8 @@ public class RuleOperators {
   public static boolean recordStringLengthLessThanOrEqualsThanRecord(String fieldSchemaId1,
       String fieldSchemaId2) {
     try {
-      return recordStringLengthLessThanOrEqualsThan(fieldSchemaId1, getValue(fieldSchemaId2));
+      return recordStringLengthLessThanOrEqualsThan(fieldSchemaId1,
+          Integer.valueOf(getValue(fieldSchemaId2)));
     } catch (Exception e) {
       return true;
     }
@@ -639,7 +584,7 @@ public class RuleOperators {
    */
   public static boolean recordStringMatches(String fieldSchemaId, String regex) {
     try {
-      return getValue(fieldSchemaId).matches(regex);
+      return getValue(fieldSchemaId).matches(replaceKeywords(regex));
     } catch (PatternSyntaxException e) {
       return false;
     } catch (Exception e) {
@@ -2011,12 +1956,12 @@ public class RuleOperators {
    * Field string matches.
    *
    * @param value the value
-   * @param arg2 the arg 2
+   * @param regex the regex
    * @return true, if successful
    */
-  public static boolean fieldStringMatches(String value, String arg2) {
+  public static boolean fieldStringMatches(String value, String regex) {
     try {
-      return value.matches(arg2);
+      return value.matches(replaceKeywords(regex));
     } catch (Exception e) {
       return true;
     }

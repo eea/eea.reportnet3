@@ -19,6 +19,7 @@ export class NextPageLink extends Component {
     return (
       <button type="button" className={className} onClick={this.props.onClick} disabled={this.props.disabled}>
         <span className="p-paginator-icon pi pi-caret-right"></span>
+        <span className="srOnly">Next page</span>
       </button>
     );
   }

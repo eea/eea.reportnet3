@@ -50,10 +50,10 @@ public class ResourceManagementControllerImplTest {
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
     Mockito
         .when(securityProviderInterfaceService
-            .getResourceDetails(ResourceGroupEnum.DATAFLOW_PROVIDER.getGroupName(1l)))
+            .getResourceDetails(ResourceGroupEnum.DATAFLOW_LEAD_REPORTER.getGroupName(1l)))
         .thenReturn(resourceInfoVO);
-    ResourceInfoVO result =
-        resourceManagementControllerImpl.getResourceDetail(1L, ResourceGroupEnum.DATAFLOW_PROVIDER);
+    ResourceInfoVO result = resourceManagementControllerImpl.getResourceDetail(1L,
+        ResourceGroupEnum.DATAFLOW_LEAD_REPORTER);
     Assert.assertNotNull(result);
   }
 
@@ -96,7 +96,7 @@ public class ResourceManagementControllerImplTest {
    */
   @Test
   public void createResources() throws EEAException {
-    ArrayList<ResourceInfoVO> resourceList = new ArrayList<ResourceInfoVO>();
+    ArrayList<ResourceInfoVO> resourceList = new ArrayList<>();
     resourceManagementControllerImpl.createResources(resourceList);
     Mockito.verify(securityProviderInterfaceService, times(1)).createResourceInstance(resourceList);
   }

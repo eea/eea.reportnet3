@@ -26,31 +26,48 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
 
+/**
+ * The Class FKValidationUtilsTest.
+ */
 public class FKValidationUtilsTest {
 
+  /** The k validation utils. */
   @InjectMocks
   private FKValidationUtils fKValidationUtils;
 
+  /** The dataset metabase controller zuul. */
   @Mock
   private static DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
+  /** The schemas repository. */
   @Mock
   private static SchemasRepository schemasRepository;
 
+  /** The rules repository. */
   @Mock
   private static RulesRepository rulesRepository;
 
+  /** The field repository. */
   @Mock
   private static FieldRepository fieldRepository;
 
+  /** The data set controller zuul. */
   @Mock
   private static DataSetControllerZuul dataSetControllerZuul;
 
+  /** The dataset. */
   private DatasetValue dataset;
+
+  /** The dataset schema. */
   private DataSetSchema datasetSchema;
+
+  /** The id. */
   private ObjectId id;
 
 
+  /**
+   * Inits the mocks.
+   */
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
@@ -81,6 +98,9 @@ public class FKValidationUtilsTest {
     dataset.setId(1L);
   }
 
+  /**
+   * Test isfield FK warning.
+   */
   @Test
   public void testIsfieldFKWarning() {
     Rule rule = new Rule();
@@ -96,6 +116,9 @@ public class FKValidationUtilsTest {
     assertTrue(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
   }
 
+  /**
+   * Test isfield FK error.
+   */
   @Test
   public void testIsfieldFKError() {
     Rule rule = new Rule();
@@ -111,6 +134,9 @@ public class FKValidationUtilsTest {
     assertTrue(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
   }
 
+  /**
+   * Test isfield FK blocker.
+   */
   @Test
   public void testIsfieldFKBlocker() {
     Rule rule = new Rule();
@@ -126,6 +152,9 @@ public class FKValidationUtilsTest {
     assertTrue(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
   }
 
+  /**
+   * Test isfield FK info.
+   */
   @Test
   public void testIsfieldFKInfo() {
     Rule rule = new Rule();
@@ -141,6 +170,9 @@ public class FKValidationUtilsTest {
     assertTrue(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
   }
 
+  /**
+   * Test isfield FK default.
+   */
   @Test
   public void testIsfieldFKDefault() {
     Rule rule = new Rule();
@@ -156,6 +188,9 @@ public class FKValidationUtilsTest {
     assertTrue(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
   }
 
+  /**
+   * Test isfield FK error false.
+   */
   @Test
   public void testIsfieldFKErrorFalse() {
     Rule rule = new Rule();
@@ -175,4 +210,55 @@ public class FKValidationUtilsTest {
     assertTrue(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.FALSE));
   }
 
+  /**
+   * Test isfield FK error true.
+   */
+  @Test
+  public void testIsfieldFKErrorTrue() {
+    Rule rule = new Rule();
+    rule.setRuleId(id);
+    List<String> thenCondition = new ArrayList<>();
+    thenCondition.add("");
+    thenCondition.add("");
+    List<FieldValue> fields = new ArrayList<>();
+    FieldValue field = new FieldValue();
+    field.setValue("1");
+    fields.add(field);
+    datasetSchema.getTableSchemas().get(0).getRecordSchema().getFieldSchema().get(0)
+        .setPkHasMultipleValues(true);
+    datasetSchema.getTableSchemas().get(0).getRecordSchema().getFieldSchema().get(0)
+        .setPkMustBeUsed(false);
+    rule.setThenCondition(thenCondition);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn(id.toString());
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
+    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
+    Mockito.when(fieldRepository.findByIdFieldSchema(id.toString())).thenReturn(fields);
+    assertTrue(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.FALSE));
+  }
+
+  /**
+   * Test isfield FK error true.
+   */
+  @Test
+  public void testIsfieldFKErrorNotAllValue() {
+    Rule rule = new Rule();
+    rule.setRuleId(id);
+    List<String> thenCondition = new ArrayList<>();
+    thenCondition.add("");
+    thenCondition.add("");
+    List<FieldValue> fields = new ArrayList<>();
+    FieldValue field = new FieldValue();
+    field.setValue("1");
+    fields.add(field);
+    datasetSchema.getTableSchemas().get(0).getRecordSchema().getFieldSchema().get(0)
+        .setPkHasMultipleValues(true);
+    rule.setThenCondition(thenCondition);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn(id.toString());
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
+    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
+    Mockito.when(fieldRepository.findByIdFieldSchema(id.toString())).thenReturn(fields);
+    assertTrue(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.TRUE));
+  }
 }

@@ -280,6 +280,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
       <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
       <Dropdown
         appendTo={document.body}
+        ariaLabel={'integrations'}
         inputId={`${componentName}__${option}`}
         onChange={event => onFillField(event.value, option)}
         optionLabel="label"

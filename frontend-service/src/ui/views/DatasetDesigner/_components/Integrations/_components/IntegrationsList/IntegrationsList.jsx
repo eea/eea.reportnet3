@@ -18,7 +18,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { integrationsListReducer } from './_functions/Reducers/integrationsListReducer';
 
-export const IntegrationsList = ({ designerState, getUpdatedData, integrationsList, manageDialogs }) => {
+export const IntegrationsList = ({ dataflowId, designerState, getUpdatedData, integrationsList, manageDialogs }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -59,7 +59,7 @@ export const IntegrationsList = ({ designerState, getUpdatedData, integrationsLi
 
   const onDeleteIntegration = async () => {
     try {
-      const response = await IntegrationService.deleteById(integrationListState.integrationId);
+      const response = await IntegrationService.deleteById(dataflowId, integrationListState.integrationId);
       if (response.status >= 200 && response.status <= 299) onUpdateData();
     } catch (error) {
       notificationContext.add({ type: 'DELETE_INTEGRATION_ERROR' });
@@ -72,7 +72,7 @@ export const IntegrationsList = ({ designerState, getUpdatedData, integrationsLi
 
   const onLoadIntegrations = async () => {
     try {
-      const response = await IntegrationService.all(designerState.datasetSchemaId);
+      const response = await IntegrationService.all(dataflowId, designerState.datasetSchemaId);
       integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response } });
       integrationsList(response);
     } catch (error) {

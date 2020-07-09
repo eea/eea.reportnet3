@@ -19,6 +19,7 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   datasetTableFieldDesign.description = datasetTableRecordField.description;
   datasetTableFieldDesign.idRecord = datasetTableRecordField.recordId;
   datasetTableFieldDesign.pk = datasetTableRecordField.pk;
+  datasetTableFieldDesign.pkHasMultipleValues = datasetTableRecordField.pkHasMultipleValues;
   datasetTableFieldDesign.pkMustBeUsed = datasetTableRecordField.pkMustBeUsed;
   datasetTableFieldDesign.name = datasetTableRecordField.name;
   datasetTableFieldDesign.referencedField = datasetTableRecordField.referencedField;
@@ -272,6 +273,9 @@ const schemaById = async datasetId => {
                   description: dataTableFieldDTO.description,
                   fieldId: dataTableFieldDTO.id,
                   pk: !isNull(dataTableFieldDTO.pk) ? dataTableFieldDTO.pk : false,
+                  pkHasMultipleValues: !isNull(dataTableFieldDTO.pkHasMultipleValues)
+                    ? dataTableFieldDTO.pkHasMultipleValues
+                    : false,
                   pkMustBeUsed: !isNull(dataTableFieldDTO.pkMustBeUsed) ? dataTableFieldDTO.pkMustBeUsed : false,
                   pkReferenced: !isNull(dataTableFieldDTO.pkReferenced) ? dataTableFieldDTO.pkReferenced : false,
                   name: dataTableFieldDTO.name,
@@ -481,6 +485,7 @@ const updateRecordFieldDesign = async (datasetId, record) => {
   datasetTableFieldDesign.referencedField = record.referencedField;
   datasetTableFieldDesign.required = record.required;
   datasetTableFieldDesign.pk = record.pk;
+  datasetTableFieldDesign.pkHasMultipleValues = record.pkHasMultipleValues;
   datasetTableFieldDesign.pkMustBeUsed = record.pkMustBeUsed;
   const recordUpdated = await apiDataset.updateRecordFieldDesign(datasetId, datasetTableFieldDesign);
   return recordUpdated;

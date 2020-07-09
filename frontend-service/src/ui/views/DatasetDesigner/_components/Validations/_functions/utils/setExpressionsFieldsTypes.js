@@ -6,7 +6,9 @@ export const setExpressionsFieldsTypes = (expressions, table, tabs) => {
       setExpressionsFieldsTypes(expression.expressions, table, tabs);
     } else {
       expression['field1Type'] = getFieldType(table, { code: expression.field1 }, tabs);
-      expression['field2Type'] = getFieldType(table, { code: expression.field2 }, tabs);
+      if (expression.valueTypeSelector !== 'value') {
+        expression['field2Type'] = getFieldType(table, { code: expression.field2 }, tabs);
+      }
     }
   });
 };

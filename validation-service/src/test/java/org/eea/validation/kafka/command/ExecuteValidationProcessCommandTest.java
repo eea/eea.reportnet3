@@ -45,8 +45,10 @@ public class ExecuteValidationProcessCommandTest {
     Map<String, Object> data = new HashMap<>();
     data.put("uuid", "uuid");
     data.put("dataset_id", "1");
+    data.put("user", "user1");
     EEAEventVO eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.COMMAND_VALIDATED_DATASET_COMPLETED);
+
     eeaEventVO.setData(data);
     executeValidationProcessCommand.execute(eeaEventVO);
     Mockito.verify(validationHelper,

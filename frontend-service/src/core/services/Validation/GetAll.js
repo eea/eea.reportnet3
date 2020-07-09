@@ -1,2 +1,2 @@
-export const GetAll = ({ validationRepository }) => async datasetSchemaId =>
-  validationRepository.getAll(datasetSchemaId);
+export const GetAll = ({ validationRepository }) => async (datasetSchemaId, reporting) =>
+  validationRepository.getAll(datasetSchemaId, reporting);

@@ -9,7 +9,7 @@ import uniq from 'lodash/uniq';
 
 import { config } from 'conf';
 
-import styles from './ActionsToolbar.module.css';
+import styles from './ActionsToolbar.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
@@ -32,6 +32,7 @@ const ActionsToolbar = ({
   datasetId,
   exportExtensionsOperationsList,
   hasWritePermissions,
+  hideValidationFilter,
   isDataCollection = false,
   isFilterValidationsActive,
   isLoading,
@@ -260,7 +261,8 @@ const ActionsToolbar = ({
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
           disabled={false}
-          icon={filter.visibilityColumnIcon}
+          icon={'eye'}
+          iconClasses={filter.visibilityColumnIcon === 'eye' ? styles.filterInactive : styles.filterActive}
           label={resources.messages['showHideColumns']}
           onClick={event => {
             dropdownFilterRef.current.show(event);
@@ -283,8 +285,8 @@ const ActionsToolbar = ({
             tableHasErrors ? 'p-button-animated-blink' : null
           }`}
           disabled={!tableHasErrors}
-          icon="filter"
-          iconClasses={!isFilterValidationsActive ? styles.filterInactive : ''}
+          icon={'filter'}
+          iconClasses={!isFilterValidationsActive ? styles.filterInactive : styles.filterActive}
           label={resources.messages['validationFilter']}
           onClick={event => {
             filterMenuRef.current.show(event);
@@ -296,6 +298,7 @@ const ActionsToolbar = ({
           filters={filter.validationDropdown}
           popup={true}
           ref={filterMenuRef}
+          hide={hideValidationFilter}
           id="filterValidationDropdown"
           showFilters={showValidationFilter}
           onShow={e => {

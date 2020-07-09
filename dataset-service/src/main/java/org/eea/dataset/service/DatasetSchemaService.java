@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import java.util.List;
+import java.util.Map;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
@@ -10,7 +11,7 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
-import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 
 /**
  * The Interface DataschemaService.
@@ -58,19 +59,12 @@ public interface DatasetSchemaService {
   void deleteDatasetSchema(String schemaId, Long datasetId);
 
   /**
-   * Creates the group and add user.
-   *
-   * @param datasetId the dataset id
-   */
-  void createGroupAndAddUser(Long datasetId);
-
-  /**
    * Delete group and remove user.
    *
    * @param datasetId the dataset id
-   * @param role the role
+   * @param resourceTypeEnum the resource type enum
    */
-  void deleteGroup(Long datasetId, ResourceGroupEnum... role);
+  void deleteGroup(Long datasetId, ResourceTypeEnum resourceTypeEnum);
 
   /**
    * Replace schema.
@@ -437,5 +431,15 @@ public interface DatasetSchemaService {
    */
   void deleteOnlyUniqueConstraintFromField(String schemaId, String fieldSchemaId)
       throws EEAException;
+
+
+  /**
+   * Copy unique constraints catalogue.
+   *
+   * @param originDatasetSchemaIds the origin dataset schema ids
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   */
+  void copyUniqueConstraintsCatalogue(List<String> originDatasetSchemaIds,
+      Map<String, String> dictionaryOriginTargetObjectId);
 
 }

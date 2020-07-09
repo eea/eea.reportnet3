@@ -1,6 +1,5 @@
 import { GetToken } from './GetToken';
 import { GetConfiguration } from './GetConfiguration';
-import { HasPermission } from './HasPermission';
 import { Login } from './Login';
 import { Logout } from './Logout';
 import { OldLogin } from './OldLogin';
@@ -15,7 +14,6 @@ export const UserService = {
   logout: Logout({ userRepository }),
   oldLogin: OldLogin({ userRepository }),
   refreshToken: RefreshToken({ userRepository }),
-  hasPermission: HasPermission({ userRepository }),
   getConfiguration: GetConfiguration({ userRepository }),
   getToken: GetToken({ userRepository }),
   userRole: UserRole({ userRepository }),

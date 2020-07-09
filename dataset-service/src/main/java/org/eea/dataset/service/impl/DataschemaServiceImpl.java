@@ -3,6 +3,7 @@ package org.eea.dataset.service.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import org.bson.Document;
@@ -36,7 +37,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
-import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -47,9 +47,7 @@ import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
-import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
-import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
@@ -75,10 +73,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The resource management controller zull. */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
-
-  /** The user management controller zull. */
-  @Autowired
-  private UserManagementControllerZull userManagementControllerZull;
 
   /** The data flow controller zuul. */
   @Autowired
@@ -176,58 +170,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Creates the group and add user.
-   *
-   * @param datasetId the dataset id
-   */
-  @Override
-  public void createGroupAndAddUser(Long datasetId) {
-
-    // Create group Dataschema-X-DATA_CUSTODIAN
-    resourceManagementControllerZull.createResource(
-        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_CUSTODIAN));
-
-    // Create group Dataschema-X-DATA_PROVIDER
-    resourceManagementControllerZull.createResource(
-        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_PROVIDER));
-
-    // Add user to new group Dataschema-X-DATA_CUSTODIAN
-    userManagementControllerZull.addUserToResource(datasetId,
-        ResourceGroupEnum.DATASCHEMA_CUSTODIAN);
-  }
-
-  /**
    * Delete group and remove user.
    *
    * @param datasetId the dataset id
-   * @param roles the roles
+   * @param resourceTypeEnum the resource type enum
    */
   @Override
-  public void deleteGroup(Long datasetId, ResourceGroupEnum... roles) {
-    List<String> resources = new ArrayList<>();
-    // Remove groups from list
-    Arrays.asList(roles).stream().forEach(role -> resources.add(role.getGroupName(datasetId)));
-    resourceManagementControllerZull.deleteResourceByName(resources);
-  }
-
-
-  /**
-   * Creates the group.
-   *
-   * @param datasetId the dataset id
-   * @param type the type
-   * @param role the role
-   *
-   * @return the resource info VO
-   */
-  private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
-
-    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
-    resourceInfoVO.setResourceId(datasetId);
-    resourceInfoVO.setResourceTypeEnum(type);
-    resourceInfoVO.setSecurityRoleEnum(role);
-
-    return resourceInfoVO;
+  public void deleteGroup(Long datasetId, ResourceTypeEnum resourceTypeEnum) {
+    // We find all types of data of this schema and delete it
+    List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
+        .getGroupsByIdResourceType(datasetId, ResourceTypeEnum.DATA_SCHEMA);
+    resourceManagementControllerZull.deleteResource(resourceCustodian);
   }
 
   /**
@@ -536,8 +489,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       if (fieldSchemaVO.getReferencedField() != null) {
         // We need to update the fieldSchema is referenced, the property isPKreferenced to true
-        this.updateIsPkReferencedInFieldSchema(
-            fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
+        updateIsPkReferencedInFieldSchema(fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
             fieldSchemaVO.getReferencedField().getIdPk(), true);
       }
       // we create this if to clean blank space at begining and end of any codelistItem
@@ -577,111 +529,123 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     boolean typeModified = false;
     try {
       // Retrieve the FieldSchema from MongoDB
-      Document fieldSchema =
-          schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
+      if (fieldSchemaVO != null) {
+        Document fieldSchema =
+            schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
 
-      if (fieldSchema != null) {
-        // First of all, we update the previous data in the catalog
-        if (DataType.LINK.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))) {
-          // Proceed to the changes needed. Remove the previous reference
-          String previousId = fieldSchema.get("_id").toString();
-          Document previousReferenced =
-              (Document) fieldSchema.get(LiteralConstants.REFERENCED_FIELD);
-          String previousIdPk = previousReferenced.get("idPk").toString();
-          String previousIdDatasetReferenced =
-              previousReferenced.get(LiteralConstants.ID_DATASET_SCHEMA).toString();
-          PkCatalogueSchema catalogue =
-              pkCatalogueRepository.findByIdPk(new ObjectId(previousIdPk));
-          if (catalogue != null) {
-            catalogue.getReferenced().remove(new ObjectId(previousId));
-            pkCatalogueRepository.deleteByIdPk(catalogue.getIdPk());
-            pkCatalogueRepository.save(catalogue);
-            // We need to update the field isReferenced to false from the PK referenced if this was
-            // the only field that was FK
-            if (catalogue.getReferenced() != null && catalogue.getReferenced().isEmpty()) {
-              this.updateIsPkReferencedInFieldSchema(previousIdDatasetReferenced, previousIdPk,
-                  false);
+        if (fieldSchema != null) {
+          // First of all, we update the previous data in the catalog
+          if (DataType.LINK.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))) {
+            // Proceed to the changes needed. Remove the previous reference
+            Document previousReferenced =
+                (Document) fieldSchema.get(LiteralConstants.REFERENCED_FIELD);
+            if (previousReferenced != null && previousReferenced.get("idPk") != null) {
+              String previousId = fieldSchema.get("_id").toString();
+              String previousIdPk = previousReferenced.get("idPk").toString();
+              String previousIdDatasetReferenced =
+                  previousReferenced.get(LiteralConstants.ID_DATASET_SCHEMA).toString();
+              PkCatalogueSchema catalogue =
+                  pkCatalogueRepository.findByIdPk(new ObjectId(previousIdPk));
+              if (catalogue != null) {
+                catalogue.getReferenced().remove(new ObjectId(previousId));
+                pkCatalogueRepository.deleteByIdPk(catalogue.getIdPk());
+                pkCatalogueRepository.save(catalogue);
+                // We need to update the field isReferenced to false from the PK referenced if this
+                // was
+                // the only field that was FK
+                if (catalogue.getReferenced() != null && catalogue.getReferenced().isEmpty()) {
+                  updateIsPkReferencedInFieldSchema(previousIdDatasetReferenced, previousIdPk,
+                      false);
+                }
+
+              }
             }
-
           }
-        }
 
-        // Update UniqueConstraints
-        if (fieldSchemaVO.getPk() != fieldSchema.get(LiteralConstants.PK)) {
-          if (fieldSchemaVO.getPk()) {
-            if (null != fieldSchemaVO && null == fieldSchemaVO.getIdRecord()) {
-              fieldSchemaVO.setIdRecord(fieldSchema.get("idRecord").toString());
+          // Update UniqueConstraints
+          if (fieldSchemaVO.getPk() != fieldSchema.get(LiteralConstants.PK)) {
+            if (fieldSchemaVO.getPk()) {
+              if (null == fieldSchemaVO.getIdRecord()) {
+                fieldSchemaVO.setIdRecord(fieldSchema.get("idRecord").toString());
+              }
+              createUniqueConstraintPK(datasetSchemaId, fieldSchemaVO);
+            } else {
+              deleteOnlyUniqueConstraintFromField(datasetSchemaId, fieldSchemaVO.getId());
             }
-            createUniqueConstraintPK(datasetSchemaId, fieldSchemaVO);
-          } else {
-            deleteOnlyUniqueConstraintFromField(datasetSchemaId, fieldSchemaVO.getId());
           }
-        }
 
-        // Modify it based on FieldSchemaVO data received
-        if (fieldSchemaVO.getType() != null
-            && !fieldSchema.put(LiteralConstants.TYPE_DATA, fieldSchemaVO.getType().getValue())
-                .equals(fieldSchemaVO.getType().getValue())) {
-          typeModified = true;
-          if (!(DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
-              || DataType.CODELIST.equals(fieldSchemaVO.getType()))
-              && fieldSchema.containsKey(LiteralConstants.CODELIST_ITEMS)) {
-            fieldSchema.remove(LiteralConstants.CODELIST_ITEMS);
+          // Modify it based on FieldSchemaVO data received
+          if (fieldSchemaVO.getType() != null
+              && !fieldSchema.put(LiteralConstants.TYPE_DATA, fieldSchemaVO.getType().getValue())
+                  .equals(fieldSchemaVO.getType().getValue())) {
+            typeModified = true;
+            if (!(DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
+                || DataType.CODELIST.equals(fieldSchemaVO.getType()))
+                && fieldSchema.containsKey(LiteralConstants.CODELIST_ITEMS)) {
+              fieldSchema.remove(LiteralConstants.CODELIST_ITEMS);
+            }
           }
-        }
-        if (fieldSchemaVO.getDescription() != null) {
-          fieldSchema.put("description", fieldSchemaVO.getDescription());
-        }
-        if (fieldSchemaVO.getName() != null) {
-          fieldSchema.put("headerName", fieldSchemaVO.getName());
-        }
-        // that if control the codelist to add new items when codelist had already been created
-        // this method work for codelist and multiselect_codedlist
-        if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
-            && (DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
-                || DataType.CODELIST.equals(fieldSchemaVO.getType()))) {
-          // we clean blank space in codelist and multiselect
-          String[] codelistItems = fieldSchemaVO.getCodelistItems();
-          for (int i = 0; i < codelistItems.length; i++) {
-            codelistItems[i] = codelistItems[i].trim();
+          if (fieldSchemaVO.getDescription() != null) {
+            fieldSchema.put("description", fieldSchemaVO.getDescription());
           }
-          fieldSchema.put(LiteralConstants.CODELIST_ITEMS, Arrays.asList(codelistItems));
-          typeModified = true;
-        }
-        if (fieldSchemaVO.getRequired() != null) {
-          fieldSchema.put("required", fieldSchemaVO.getRequired());
-        }
-        if (fieldSchemaVO.getPk() != null) {
-          fieldSchema.put("pk", fieldSchemaVO.getPk());
-        }
-        if (fieldSchemaVO.getPkMustBeUsed() != null) {
-          fieldSchema.put("pkMustBeUsed", fieldSchemaVO.getPkMustBeUsed());
-        }
-        if (fieldSchemaVO.getReferencedField() != null) {
-          Document referenced = new Document();
-          referenced.put(LiteralConstants.ID_DATASET_SCHEMA,
-              new ObjectId(fieldSchemaVO.getReferencedField().getIdDatasetSchema()));
-          referenced.put("idPk", new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
-          fieldSchema.put(LiteralConstants.REFERENCED_FIELD, referenced);
-          // We need to update the fieldSchema that is referenced, the property isPKreferenced to
-          // true
-          this.updateIsPkReferencedInFieldSchema(
-              fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
-              fieldSchemaVO.getReferencedField().getIdPk(), true);
-        }
+          if (fieldSchemaVO.getName() != null) {
+            fieldSchema.put("headerName", fieldSchemaVO.getName());
+          }
+          // that if control the codelist to add new items when codelist had already been created
+          // this method work for codelist and multiselect_codedlist
+          if (fieldSchemaVO.getCodelistItems() != null
+              && fieldSchemaVO.getCodelistItems().length != 0
+              && (DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
+                  || DataType.CODELIST.equals(fieldSchemaVO.getType()))) {
+            // we clean blank space in codelist and multiselect
+            String[] codelistItems = fieldSchemaVO.getCodelistItems();
+            for (int i = 0; i < codelistItems.length; i++) {
+              codelistItems[i] = codelistItems[i].trim();
+            }
+            fieldSchema.put(LiteralConstants.CODELIST_ITEMS, Arrays.asList(codelistItems));
+            typeModified = true;
+          }
+          if (fieldSchemaVO.getRequired() != null) {
+            fieldSchema.put("required", fieldSchemaVO.getRequired());
+          }
+          if (fieldSchemaVO.getPk() != null) {
+            fieldSchema.put("pk", fieldSchemaVO.getPk());
+          }
+          if (fieldSchemaVO.getPkMustBeUsed() != null) {
+            fieldSchema.put("pkMustBeUsed", fieldSchemaVO.getPkMustBeUsed());
+          }
+          if (fieldSchemaVO.getPkHasMultipleValues() != null) {
+            fieldSchema.put("pkHasMultipleValues", fieldSchemaVO.getPkHasMultipleValues());
+          }
+          if (fieldSchemaVO.getReferencedField() != null) {
+            Document referenced = new Document();
+            referenced.put(LiteralConstants.ID_DATASET_SCHEMA,
+                new ObjectId(fieldSchemaVO.getReferencedField().getIdDatasetSchema()));
+            referenced.put("idPk", new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
+            fieldSchema.put(LiteralConstants.REFERENCED_FIELD, referenced);
+            // We need to update the fieldSchema that is referenced, the property isPKreferenced to
+            // true
+            this.updateIsPkReferencedInFieldSchema(
+                fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
+                fieldSchemaVO.getReferencedField().getIdPk(), true);
+          }
 
-        // Save the modified FieldSchema in the MongoDB
-        UpdateResult updateResult =
-            schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema);
-        if (updateResult.getMatchedCount() == 1) {
-          if (updateResult.getModifiedCount() == 1 && typeModified) {
-            return fieldSchemaVO.getType();
+          // Save the modified FieldSchema in the MongoDB
+          UpdateResult updateResult =
+              schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema);
+          if (updateResult.getMatchedCount() == 1) {
+            if (updateResult.getModifiedCount() == 1 && typeModified) {
+              return fieldSchemaVO.getType();
+            }
+            return null;
           }
-          return null;
         }
+        LOG.error(EEAErrorMessage.FIELD_NOT_FOUND);
+        throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
+      } else {
+        LOG.error(EEAErrorMessage.FIELD_NOT_FOUND);
+        throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
       }
-      LOG.error(EEAErrorMessage.FIELD_NOT_FOUND);
-      throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
     } catch (IllegalArgumentException e) {
       throw new EEAException(e);
     }
@@ -1003,7 +967,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       }
     }
     // For fieldSchemas that are FK
-    if (DataType.LINK.equals(fieldSchemaVO.getType())) {
+    if (DataType.LINK.equals(fieldSchemaVO.getType())
+        && fieldSchemaVO.getReferencedField() != null) {
       PkCatalogueSchema catalogue = pkCatalogueRepository
           .findByIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
       if (catalogue != null) {
@@ -1472,8 +1437,47 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         unique.setDatasetSchemaId(datasetSchemaId);
         unique.setTableSchemaId(idTableSchema.toString());
         unique.setFieldSchemaIds(fieldSchemaIds);
-        createUniqueConstraint(unique);
+        List<ObjectId> fields = new ArrayList<>();
+        fields.add(new ObjectId(fieldSchemaVO.getId()));
+        List<UniqueConstraintSchema> uniques =
+            uniqueConstraintRepository.findByFieldSchemaIds(fields);
+        if (uniques == null || uniques.isEmpty()) {
+          createUniqueConstraint(unique);
+        }
       }
     }
+  }
+
+
+  /**
+   * Copy unique constraints catalogue.
+   *
+   * @param originDatasetSchemaIds the origin dataset schema ids
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   */
+  @Override
+  public void copyUniqueConstraintsCatalogue(List<String> originDatasetSchemaIds,
+      Map<String, String> dictionaryOriginTargetObjectId) {
+    // We obtain the UniqueConstraints of the origin dataset schemas, and with the help of the
+    // dictionary we replace the objectIds with the correct ones to finally save them. The result it
+    // will be new constraints in the catalogue with correct data according to the new copied
+    // schemas
+    for (String datasetSchemaId : originDatasetSchemaIds) {
+      List<UniqueConstraintVO> uniques = getUniqueConstraints(datasetSchemaId);
+      for (UniqueConstraintVO uniqueConstraintVO : uniques) {
+        uniqueConstraintVO
+            .setUniqueId(dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getUniqueId()));
+        uniqueConstraintVO.setDatasetSchemaId(dictionaryOriginTargetObjectId.get(datasetSchemaId));
+        uniqueConstraintVO.setTableSchemaId(
+            dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getTableSchemaId()));
+        for (int i = 0; i < uniqueConstraintVO.getFieldSchemaIds().size(); i++) {
+          uniqueConstraintVO.getFieldSchemaIds().set(i,
+              dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getFieldSchemaIds().get(i)));
+        }
+        LOG.info("A unique constraint is going to be created during the copy process");
+        uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
+      }
+    }
+
   }
 }

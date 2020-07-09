@@ -94,7 +94,7 @@ public interface DatasetMetabaseService {
    *
    * @param datasetId the dataset id
    */
-  void createSchemaGroupAndAddUser(Long datasetId);
+  void createSchemaGroup(Long datasetId);
 
   /**
    * Creates the empty dataset.

@@ -27,11 +27,16 @@ import org.eea.validation.persistence.schemas.FieldSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.service.RulesService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UniqueValidationUtils {
+
+
+
   /**
    * The rules repository.
    */
@@ -41,6 +46,13 @@ public class UniqueValidationUtils {
    * The schemas repository.
    */
   private static SchemasRepository schemasRepository;
+
+
+  /** The Constant COLUMN. */
+  private static final String COLUMN = "column_";
+
+  /** The Constant AS. */
+  private static final String AS = "') AS ";
 
   /**
    * The record repository.
@@ -52,13 +64,19 @@ public class UniqueValidationUtils {
    */
   private static DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
-  /** The table repository. */
+  /**
+   * The table repository.
+   */
   private static TableRepository tableRepository;
 
-  /** The rules service. */
+  /**
+   * The rules service.
+   */
   private static RulesService rulesService;
 
-  /** The data set metabase controller zuul. */
+  /**
+   * The data set metabase controller zuul.
+   */
   private static DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /**
@@ -129,6 +147,9 @@ public class UniqueValidationUtils {
     UniqueValidationUtils.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
   }
 
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(UniqueValidationUtils.class);
+
   /**
    * Creates the validation.
    *
@@ -143,28 +164,29 @@ public class UniqueValidationUtils {
     Rule rule = rulesRepository.findRule(new ObjectId(idDatasetSchema), new ObjectId(idRule));
 
     Validation validation = new Validation();
-    validation.setIdRule(rule.getRuleId().toString());
+    if (rule != null) {
+      validation.setIdRule(rule.getRuleId().toString());
 
-    switch (rule.getThenCondition().get(1)) {
-      case "WARNING":
-        validation.setLevelError(ErrorTypeEnum.WARNING);
-        break;
-      case "ERROR":
-        validation.setLevelError(ErrorTypeEnum.ERROR);
-        break;
-      case "INFO":
-        validation.setLevelError(ErrorTypeEnum.INFO);
-        break;
-      default:
-        validation.setLevelError(ErrorTypeEnum.BLOCKER);
-        break;
+      switch (rule.getThenCondition().get(1)) {
+        case "WARNING":
+          validation.setLevelError(ErrorTypeEnum.WARNING);
+          break;
+        case "ERROR":
+          validation.setLevelError(ErrorTypeEnum.ERROR);
+          break;
+        case "INFO":
+          validation.setLevelError(ErrorTypeEnum.INFO);
+          break;
+        default:
+          validation.setLevelError(ErrorTypeEnum.BLOCKER);
+          break;
+      }
+
+      validation.setMessage(rule.getThenCondition().get(0));
+      validation.setTypeEntity(typeEnum);
+      validation.setValidationDate(new Date().toString());
+      validation.setOriginName(origname);
     }
-
-    validation.setMessage(rule.getThenCondition().get(0));
-    validation.setTypeEntity(typeEnum);
-    validation.setValidationDate(new Date().toString());
-    validation.setOriginName(origname);
-
     return validation;
   }
 
@@ -221,6 +243,7 @@ public class UniqueValidationUtils {
    * Mount query.
    *
    * @param fieldSchemaIds the field schema ids
+   *
    * @return the string
    */
   private static String mountDuplicatedQuery(List<String> fieldSchemaIds) {
@@ -231,7 +254,7 @@ public class UniqueValidationUtils {
       String schemaId = iterator.next();
       stringQuery.append(
           "(select fv.value from field_value fv where fv.id_record=rv.id and fv.id_field_schema = '")
-          .append(schemaId).append("') AS ").append("column_" + (i++));
+          .append(schemaId).append(AS).append(COLUMN + (i++));
       if (iterator.hasNext()) {
         stringQuery.append(",");
       }
@@ -242,12 +265,13 @@ public class UniqueValidationUtils {
     i = 1;
     while (iterator.hasNext()) {
       iterator.next();
-      stringQuery.append("column_" + (i++));
+      stringQuery.append(COLUMN + (i++));
       if (iterator.hasNext()) {
         stringQuery.append(",");
       }
     }
     stringQuery.append(") as N from table_1 where column_1 is not null) as t where n>1);");
+    LOG.debug("Drools, Duplicated records query: " + stringQuery.toString());
     return stringQuery.toString();
 
   }
@@ -259,6 +283,7 @@ public class UniqueValidationUtils {
    * @param referencedFields the referenced fields
    * @param datasetOriginId the dataset origin id
    * @param datasetReferencedId the dataset referenced id
+   *
    * @return the string
    */
   private static String mountIntegrityQuery(List<String> originFields,
@@ -272,7 +297,7 @@ public class UniqueValidationUtils {
       stringQuery
           .append("(select fv.value from dataset_" + datasetOriginId
               + ".field_value fv where fv.id_record=rv.id and fv.id_field_schema = '")
-          .append(schemaId).append("') AS ").append("column_" + (i++));
+          .append(schemaId).append(AS).append(COLUMN + (i++));
       if (iterator.hasNext()) {
         stringQuery.append(",");
       }
@@ -286,7 +311,7 @@ public class UniqueValidationUtils {
       stringQuery
           .append("(select fv.value from dataset_" + datasetReferencedId
               + ".field_value fv where fv.id_record=rv.id and fv.id_field_schema = '")
-          .append(schemaId).append("') AS ").append("column_" + (i++));
+          .append(schemaId).append(AS).append(COLUMN + (i++));
       if (iterator.hasNext()) {
         stringQuery.append(",");
       }
@@ -313,13 +338,13 @@ public class UniqueValidationUtils {
    * @param datasetId the dataset id
    * @param idFieldSchema the id field schema
    * @param idRule the id rule
+   *
    * @return the boolean
    */
   public static Boolean uniqueConstraint(String uniqueIdConstraint, String idRule) {
 
     UniqueConstraintVO uniqueConstraint =
         dataSetSchemaControllerZuul.getUniqueConstraint(uniqueIdConstraint);
-
 
     // Get Schema
     String schemaId = uniqueConstraint.getDatasetSchemaId();
@@ -356,15 +381,25 @@ public class UniqueValidationUtils {
   }
 
   /**
-   * Checks if is integrity constraint.
+   * Retrieves data from Referenced column in Master Dataset and from Referencer Column on Dependant
+   * Dataset and checks if ALL data on Referenced Column are in Referencer Column. Additionaly, if
+   * integrity rule determined by param <code>integrityId</code> has Double Reference check active,
+   * it will be checked that all the data on Referencer Column are in Referenced column
    *
+   * Summarizing: Referencer column data must be contained by Referenced column data
+   *
+   * Additionally if double reference check is active: Referenced column data must be contained by
+   * Referencer column data
+   *
+   * @param datasetId the dataset id
    * @param integrityId the integrity id
    * @param idRule the id rule
+   *
    * @return the boolean
    */
   public static Boolean isIntegrityConstraint(DatasetValue datasetId, String integrityId,
       String idRule) {
-    // GetValidationData
+    // Retrieving basic data for validation process
     IntegrityVO integrityVO = rulesService.getIntegrityConstraint(integrityId);
     long datasetIdOrigin = datasetId.getId();
     long datasetIdReferenced = dataSetMetabaseControllerZuul.getIntegrityDatasetId(datasetIdOrigin,
@@ -376,48 +411,50 @@ public class UniqueValidationUtils {
     TableSchema tableSchema =
         getTableSchemaFromIdFieldSchema(datasetSchema, integrityVO.getOriginFields().get(0));
 
+    // pre-creates the validation error that will be saved on database in case there is any error
     Validation validation =
         createValidation(idRule, schemaId, tableSchema.getNameTableSchema(), EntityTypeEnum.TABLE);
 
+    // retrieving data from Referenced column that has not been used on Referencer column
     List<String> notUtilizedRecords =
         recordRepository.queryExecution(mountIntegrityQuery(integrityVO.getOriginFields(),
             integrityVO.getReferencedFields(), datasetIdOrigin, datasetIdReferenced));
 
+    // Retrieving tableValue to store validation data if there are any error
     TableValue tableValue =
         tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
     List<TableValidation> tableValidations =
         tableValue.getTableValidations() != null ? tableValue.getTableValidations()
             : new ArrayList<>();
-    TableValidation tableValidation = new TableValidation();
-    tableValidation.setValidation(validation);
+
+    String auxValidationMessage = validation.getMessage();
 
     if (!notUtilizedRecords.isEmpty()) {
+      // Error: there are records on Referenced Column that are not in Referencer column
+      TableValidation tableValidation = new TableValidation();
+      validation.setMessage(auxValidationMessage + " (OMISSION)");
+      tableValidation.setValidation(validation);
       tableValidation.setTableValue(tableValue);
       tableValidations.add(tableValidation);
     }
+
     List<String> notUtilizedRecords2 = new ArrayList<>();
     if (Boolean.TRUE.equals(integrityVO.getIsDoubleReferenced())) {
-      DataSetSchema datasetSchemaDoubleReference = schemasRepository
-          .findByIdDataSetSchema(new ObjectId(integrityVO.getReferencedDatasetSchemaId()));
-      String tableSchemaName = getTableSchemaFromIdFieldSchema(datasetSchemaDoubleReference,
-          integrityVO.getReferencedFields().get(0)).getNameTableSchema();
+      // Create validation on referenced DS/Table, checking if all data on Referencer Column are in
+      // Referenced column
       notUtilizedRecords2 =
           recordRepository.queryExecution(mountIntegrityQuery(integrityVO.getReferencedFields(),
               integrityVO.getOriginFields(), datasetIdReferenced, datasetIdOrigin));
+
       if (!notUtilizedRecords2.isEmpty()) {
-        validation = createValidation(idRule, schemaId, tableSchemaName, EntityTypeEnum.TABLE);
+        // Error: there are data on Referencer column that are not in Referenced column.
         TableValidation tableValidationReferenced = new TableValidation();
-        tableValidationReferenced.setValidation(validation);
-        if (integrityVO.getOriginDatasetSchemaId()
-            .equals(integrityVO.getReferencedDatasetSchemaId())) {
-          TableSchema tableSchema2 = getTableSchemaFromIdFieldSchema(datasetSchema,
-              integrityVO.getReferencedFields().get(0));
-          TableValue tableValue2 =
-              tableRepository.findByIdTableSchema(tableSchema2.getIdTableSchema().toString());
-          tableValidationReferenced.setTableValue(tableValue2);
-        } else {
-          tableValidationReferenced.setTableValue(tableValue);
-        }
+        Validation validationReference = createValidation(idRule, schemaId,
+            tableSchema.getNameTableSchema(), EntityTypeEnum.TABLE);
+        validationReference.setMessage(auxValidationMessage + " (COMMISSION)");
+        tableValidationReferenced.setValidation(validationReference);
+        tableValidationReferenced.setTableValue(tableValue);
+
         tableValidations.add(tableValidationReferenced);
       }
     }

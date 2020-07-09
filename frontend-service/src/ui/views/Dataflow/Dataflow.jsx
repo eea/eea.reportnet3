@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -20,15 +21,16 @@ import { Button } from 'ui/views/_components/Button';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
+import { ManageRights } from './_components/ManageRights';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { RepresentativesList } from './_components/RepresentativesList';
+import { ShareRights } from './_components/ShareRights';
 import { SnapshotsDialog } from './_components/SnapshotsDialog';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from '../_components/Title/Title';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
-import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
@@ -52,7 +54,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
   const dataflowInitialState = {
     currentUrl: '',
@@ -72,24 +74,27 @@ const Dataflow = withRouter(({ history, match }) => {
     isDataUpdated: false,
     isDeleteDialogVisible: false,
     isEditDialogVisible: false,
+    isManageRightsDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPageLoading: true,
     isPropertiesDialogVisible: false,
     isReceiptLoading: false,
     isReceiptOutdated: false,
     isRepresentativeView: false,
+    isShareRightsDialogVisible: false,
     isSnapshotDialogVisible: false,
     name: '',
     obligations: {},
     status: '',
-    updatedDatasetSchema: undefined
+    updatedDatasetSchema: undefined,
+    userRoles: []
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
   useEffect(() => {
-    if (!isNil(user.contextRoles)) onLoadPermission();
-  }, [user]);
+    if (!isNil(userContext.contextRoles)) onLoadPermission();
+  }, [userContext, dataflowState.data]);
 
   useEffect(() => {
     leftSideBarContext.addHelpSteps(DataflowHelpConfig, 'dataflowHelp');
@@ -120,7 +125,7 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'archive'
+            icon: 'clone'
           }
         ]);
       } else if (representatives.length > 1 && isUndefined(representativeId)) {
@@ -133,7 +138,7 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'archive'
+            icon: 'clone'
           }
         ]);
       } else if (representativeId) {
@@ -150,13 +155,13 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'archive',
+            icon: 'clone',
             href: getUrl(routes.DATAFLOW),
             command: () => history.goBack()
           },
           {
             label: currentRepresentative[0],
-            icon: 'archive'
+            icon: 'clone'
           }
         ]);
       } else if (dataflowState.status === 'DESIGN') {
@@ -169,7 +174,7 @@ const Dataflow = withRouter(({ history, match }) => {
           },
           {
             label: resources.messages['dataflow'],
-            icon: 'archive'
+            icon: 'clone'
           }
         ]);
       }
@@ -177,50 +182,50 @@ const Dataflow = withRouter(({ history, match }) => {
   }, [match.params, dataflowState.data]);
 
   useEffect(() => {
-    const apiKeyBtn = {
-      className: 'dataflow-properties-provider-help-step',
-      icon: 'settings',
-      label: 'sidebarApiKeyBtn',
-      onClick: () => manageDialogs('isApiKeyDialogVisible', true),
-      title: 'sidebarApiKeyBtn'
-    };
+    if (!isEmpty(dataflowState.userRoles)) {
+      const buttonsVisibility = getLeftSidebarButtonsVisibility();
 
-    const editBtn = {
-      className: 'dataflow-edit-help-step',
-      icon: 'edit',
-      label: 'edit',
-      onClick: () => manageDialogs('isEditDialogVisible', true),
-      title: 'edit'
-    };
+      const apiKeyBtn = {
+        className: 'dataflow-properties-provider-help-step',
+        icon: 'settings',
+        isVisible: buttonsVisibility.apiKeyBtn,
+        label: 'sidebarApiKeyBtn',
+        onClick: () => manageDialogs('isApiKeyDialogVisible', true),
+        title: 'sidebarApiKeyBtn'
+      };
 
-    const propertiesBtn = {
-      className: 'dataflow-properties-provider-help-step',
-      icon: 'infoCircle',
-      label: 'properties',
-      onClick: () => manageDialogs('isPropertiesDialogVisible', true),
-      title: 'properties'
-    };
+      const editBtn = {
+        className: 'dataflow-edit-help-step',
+        icon: 'edit',
+        isVisible: buttonsVisibility.editBtn,
+        label: 'edit',
+        onClick: () => manageDialogs('isEditDialogVisible', true),
+        title: 'edit'
+      };
 
-    if (isEmpty(dataflowState.data)) {
-      return;
+      const manageRightsBtn = {
+        className: 'dataflow-properties-provider-help-step',
+        icon: 'userConfig',
+        isVisible: buttonsVisibility.manageRightsBtn,
+        label: dataflowState.isCustodian ? 'manageEditorsRights' : 'manageReportersRights',
+        onClick: () => manageDialogs('isShareRightsDialogVisible', true),
+        title: dataflowState.isCustodian ? 'manageEditorsRights' : 'manageReportersRights'
+      };
+
+      const propertiesBtn = {
+        className: 'dataflow-properties-provider-help-step',
+        icon: 'infoCircle',
+        isVisible: buttonsVisibility.propertiesBtn,
+        label: 'properties',
+        onClick: () => manageDialogs('isPropertiesDialogVisible', true),
+        title: 'properties'
+      };
+
+      const allButtons = [propertiesBtn, editBtn, apiKeyBtn, manageRightsBtn];
+
+      leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
     }
-
-    if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']) {
-      leftSideBarContext.addModels([propertiesBtn, editBtn, apiKeyBtn]);
-    } else if (dataflowState.isCustodian && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']) {
-      leftSideBarContext.addModels([propertiesBtn]);
-    } else {
-      if (!dataflowState.isCustodian) {
-        dataflowState.data.representatives.length === 1 && isUndefined(representativeId)
-          ? leftSideBarContext.addModels([propertiesBtn, apiKeyBtn])
-          : dataflowState.data.representatives.length > 1 && isUndefined(representativeId)
-          ? leftSideBarContext.addModels([propertiesBtn])
-          : leftSideBarContext.addModels([propertiesBtn, apiKeyBtn]);
-      } else {
-        leftSideBarContext.addModels([propertiesBtn]);
-      }
-    }
-  }, [dataflowState.isCustodian, dataflowState.status, representativeId]);
+  }, [dataflowState.userRoles, dataflowState.status, representativeId, dataflowState.datasetId]);
 
   useEffect(() => {
     if (!isEmpty(dataflowState.data.representatives)) {
@@ -239,6 +244,37 @@ const Dataflow = withRouter(({ history, match }) => {
     onLoadSchemasValidations();
   }, [dataflowId, dataflowState.isDataUpdated, representativeId]);
 
+  const getLeftSidebarButtonsVisibility = () => {
+    const { userRoles } = dataflowState;
+
+    const isDesign = dataflowState.status === DataflowConf.dataflowStatus['DESIGN'];
+    const isDraft = dataflowState.status === DataflowConf.dataflowStatus['DRAFT'];
+
+    if (isEmpty(dataflowState.data)) {
+      return { apiKeyBtn: false, editBtn: false, manageRightsBtn: false, propertiesBtn: false };
+    }
+
+    const isRepresentative =
+      dataflowState.data.representatives.length === 1 && isUndefined(representativeId)
+        ? true
+        : dataflowState.data.representatives.length > 1 && isUndefined(representativeId)
+        ? false
+        : true;
+
+    return {
+      apiKeyBtn: isRepresentative,
+
+      editBtn:
+        userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']) && isDesign,
+
+      manageRightsBtn:
+        (isDesign && userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD'])) ||
+        (isDraft && isRepresentative && userRoles.includes(config.permissions['LEAD_REPORTER'])),
+
+      propertiesBtn: true
+    };
+  };
+
   const handleRedirect = target => history.push(target);
 
   const manageRoleDialogFooter = (
@@ -247,6 +283,14 @@ const Dataflow = withRouter(({ history, match }) => {
       icon={'cancel'}
       label={resources.messages['close']}
       onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
+    />
+  );
+  const manageRightsDialogFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => manageDialogs('isShareRightsDialogVisible', false)}
     />
   );
 
@@ -318,20 +362,35 @@ const Dataflow = withRouter(({ history, match }) => {
     onLoadReportingDataflow();
   };
 
+  const getCurrentDatasetId = () => {
+    if (isEmpty(dataflowState.data)) return null;
+
+    const { datasets } = dataflowState.data;
+
+    return first(
+      datasets
+        .filter(dataset => dataset.dataProviderId === parseInt(representativeId))
+        .map(dataset => dataset.datasetId)
+    );
+  };
+
   const onLoadPermission = () => {
-    const hasWritePermissions = UserService.hasPermission(
-      user,
-      [config.permissions.PROVIDER],
+    const currentDatasetId = getCurrentDatasetId();
+
+    const hasWritePermissions = userContext.hasPermission(
+      [config.permissions.LEAD_REPORTER],
       `${config.permissions.DATAFLOW}${dataflowId}`
     );
 
-    const isCustodian = UserService.hasPermission(
-      user,
-      [config.permissions.CUSTODIAN],
-      `${config.permissions.DATAFLOW}${dataflowId}`
-    );
+    const entity = isNil(representativeId)
+      ? `${config.permissions['DATAFLOW']}${dataflowId}`
+      : `${config.permissions['DATASET']}${currentDatasetId}`;
 
-    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian } });
+    const userRoles = userContext.getUserRole(entity);
+
+    const isCustodian = userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']);
+
+    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian, userRoles } });
   };
 
   const checkIsRepresentativeView = (datasets, dataflow) => {
@@ -430,7 +489,10 @@ const Dataflow = withRouter(({ history, match }) => {
     manageDialogs('isSnapshotDialogVisible', true);
   };
 
-  useCheckNotifications(['ADD_DATACOLLECTION_COMPLETED_EVENT'], setIsDataUpdated);
+  useCheckNotifications(
+    ['ADD_DATACOLLECTION_COMPLETED_EVENT', 'COPY_DATASET_SCHEMA_COMPLETED_EVENT'],
+    setIsDataUpdated
+  );
 
   const layout = children => (
     <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
@@ -498,6 +560,38 @@ const Dataflow = withRouter(({ history, match }) => {
             </div>
           </Dialog>
         )}
+
+        <Dialog
+          contentStyle={{ maxHeight: '60vh' }}
+          footer={manageRightsDialogFooter}
+          header={
+            dataflowState.isCustodian
+              ? resources.messages['manageEditorsRights']
+              : resources.messages['manageReportersRights']
+          }
+          onHide={() => manageDialogs('isManageRightsDialogVisible', false)}
+          visible={dataflowState.isManageRightsDialogVisible}>
+          <div className={styles.dialog}>
+            <ManageRights
+              dataflowId={dataflowId}
+              dataflowState={dataflowState}
+              dataProviderId={dataflowState.dataProviderId}
+              isActiveManageRightsDialog={dataflowState.isManageRightsDialogVisible}
+            />
+          </div>
+        </Dialog>
+
+        <Dialog
+          header={
+            dataflowState.isCustodian
+              ? resources.messages['manageEditorsRights']
+              : resources.messages['manageReportersRights']
+          }
+          footer={manageRightsDialogFooter}
+          onHide={() => manageDialogs('isShareRightsDialogVisible', false)}
+          visible={dataflowState.isShareRightsDialogVisible}>
+          <ShareRights dataflowId={dataflowId} dataflowState={dataflowState} representativeId={representativeId} />
+        </Dialog>
 
         <PropertiesDialog dataflowState={dataflowState} manageDialogs={manageDialogs} />
 

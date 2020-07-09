@@ -102,6 +102,7 @@ export const FieldsDesigner = ({
     description,
     fieldId,
     pk,
+    pkHasMultipleValues,
     pkMustBeUsed,
     name,
     recordId,
@@ -115,6 +116,7 @@ export const FieldsDesigner = ({
       description,
       fieldId,
       pk,
+      pkHasMultipleValues,
       pkMustBeUsed,
       name,
       recordId,
@@ -139,6 +141,7 @@ export const FieldsDesigner = ({
     id,
     isLinkChange,
     pk,
+    pkHasMultipleValues,
     pkMustBeUsed,
     name,
     referencedField,
@@ -156,6 +159,7 @@ export const FieldsDesigner = ({
       inmFields[fieldIndex].referencedField = referencedField;
       inmFields[fieldIndex].required = required;
       inmFields[fieldIndex].pk = pk;
+      inmFields[fieldIndex].pkHasMultipleValues = pkHasMultipleValues;
       inmFields[fieldIndex].pkMustBeUsed = pkMustBeUsed;
       onChangeFields(inmFields, isLinkChange, table.tableSchemaId);
       setFields(inmFields);
@@ -258,6 +262,7 @@ export const FieldsDesigner = ({
             description: field.description,
             field: field['fieldId'],
             header: field['name'],
+            pkHasMultipleValues: field['pkHasMultipleValues'],
             recordId: field['recordId'],
             referencedField: field['referencedField'],
             required: field.required,
@@ -344,6 +349,7 @@ export const FieldsDesigner = ({
           fieldId="-1"
           fieldName=""
           fieldLink={null}
+          fieldHasMultipleValues={false}
           fieldMustBeUsed={false}
           fieldRequired={false}
           fieldType=""
@@ -379,9 +385,9 @@ export const FieldsDesigner = ({
                 fieldId={field.fieldId}
                 fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
                 fieldName={field.name}
+                fieldHasMultipleValues={field.pkHasMultipleValues}
                 fieldMustBeUsed={field.pkMustBeUsed}
                 fieldPK={field.pk}
-                fieldPkMustBeUsed={field.pkMustBeUsed}
                 fieldPKReferenced={field.pkReferenced}
                 fieldRequired={Boolean(field.required)}
                 fieldType={field.type}
@@ -467,6 +473,7 @@ export const FieldsDesigner = ({
           className={styles.tableDescriptionInput}
           collapsedHeight={55}
           expandableOnClick={true}
+          id="tableDescription"
           key="tableDescription"
           onChange={e => setTableDescriptionValue(e.target.value)}
           onBlur={() => updateTableDesign({ readOnly: isReadOnlyTable, toPrefill })}
@@ -506,11 +513,15 @@ export const FieldsDesigner = ({
             <Checkbox
               checked={isReadOnlyTable}
               // className={styles.checkRequired}
-              inputId={`${table.tableId}_check`}
+              id={`${table.tableId}_check_readOnly`}
+              inputId={`${table.tableId}_check_readOnly`}
               label="Default"
               onChange={e => onChangeIsReadOnly(e.checked)}
               style={{ width: '70px' }}
             />
+            <label for={`${table.tableId}_check_readOnly`} className="srOnly">
+              {resources.messages['readOnlyTable']}
+            </label>
           </div>
           <div>
             <span className={styles.switchTextInput}>{resources.messages['prefilled']}</span>
@@ -518,23 +529,28 @@ export const FieldsDesigner = ({
               checked={toPrefill}
               disabled={isReadOnlyTable}
               // className={styles.checkRequired}
-              inputId={`${table.tableId}_check`}
+              id={`${table.tableId}_check_to_prefill`}
+              inputId={`${table.tableId}_check_to_prefill`}
               label="Default"
               onChange={e => onChangeToPrefill(e.checked)}
               style={{ width: '70px' }}
             />
+            <label for={`${table.tableId}_check_to_prefill`} className="srOnly">
+              {resources.messages['prefilled']}
+            </label>
           </div>
         </div>
       </div>
       {!isPreviewModeOn && (
         <div className={styles.fieldsHeader}>
-          <label></label>
-          <label>{resources.messages['required']}</label>
+          <label className={styles.requiredWrap}>{resources.messages['required']}</label>
           <span className={styles.PKWrap}>
             <label>{resources.messages['pk']}</label>
             <Button
               className={`${styles.PKInfoButton} p-button-rounded p-button-secondary-transparent`}
               icon="infoCircle"
+              id="infoPk"
+              title={resources.messages['PKTooltip']}
               tooltip={resources.messages['PKTooltip']}
               tooltipOptions={{ position: 'top' }}
             />

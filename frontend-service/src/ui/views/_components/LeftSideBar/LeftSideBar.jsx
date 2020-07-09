@@ -128,7 +128,7 @@ const LeftSideBar = withRouter(({ history }) => {
   };
   const renderOpenClose = () => {
     const openCloseProps = {
-      href: '#',
+      // href: '#',
       onClick: e => {
         e.preventDefault();
         leftSideBarContext.setMenuState();

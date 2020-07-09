@@ -52,6 +52,7 @@ export const Integrations = ({ dataflowId, designerState, manageDialogs }) => {
         style={{ width: '70%' }}
         visible={isIntegrationListDialogVisible}>
         <IntegrationsList
+          dataflowId={dataflowId}
           designerState={designerState}
           getUpdatedData={getUpdatedData}
           integrationsList={getIntegrationsList}

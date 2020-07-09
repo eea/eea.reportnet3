@@ -40,7 +40,7 @@ export const BreadCrumb = ({ className, id, style }) => {
             event.preventDefault();
             onItemClick(event, item);
           }}>
-          <FontAwesomeIcon className="p-breadcrumb-home" icon={AwesomeIcons(item.icon)} />
+          <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons(item.icon)} />
           <span className="p-menuitem-text">{item.label}</span>
         </a>
       </li>

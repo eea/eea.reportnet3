@@ -1,6 +1,7 @@
 package org.eea.dataflow.service;
 
 import java.util.List;
+import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 
@@ -57,6 +58,18 @@ public interface IntegrationService {
    * @throws EEAException the EEA exception
    */
   List<IntegrationVO> getOnlyExtensionsAndOperations(List<IntegrationVO> integrationVOList);
+
+
+  /**
+   * Copy integrations.
+   *
+   * @param dataflowIdDestination the dataflow id destination
+   * @param originDatasetSchemaIds the origin dataset schema ids
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @throws EEAException the EEA exception
+   */
+  void copyIntegrations(Long dataflowIdDestination, List<String> originDatasetSchemaIds,
+      Map<String, String> dictionaryOriginTargetObjectId) throws EEAException;
 
 
 }

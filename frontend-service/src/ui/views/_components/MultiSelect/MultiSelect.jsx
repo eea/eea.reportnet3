@@ -14,6 +14,7 @@ import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 
 export class MultiSelect extends Component {
   static defaultProps = {
+    clearButton: true,
     id: null,
     inputId: null,
     label: null,
@@ -25,6 +26,7 @@ export class MultiSelect extends Component {
     className: null,
     hasSelectedItemsLabel: true,
     inputClassName: null,
+    isFilter: false,
     scrollHeight: '200px',
     placeholder: null,
     fixedPlaceholder: false,
@@ -48,10 +50,12 @@ export class MultiSelect extends Component {
     headerClassName: null,
     onChange: null,
     onFocus: null,
-    onBlur: null
+    onBlur: null,
+    onFilterInputChangeBackend: null
   };
 
   static propTypes = {
+    clearButton: PropTypes.bool,
     id: PropTypes.string,
     inputId: PropTypes.string,
     label: PropTypes.string,
@@ -63,6 +67,7 @@ export class MultiSelect extends Component {
     className: PropTypes.string,
     hasSelectedItemsLabel: PropTypes.bool,
     inputClassName: PropTypes.string,
+    isFilter: PropTypes.bool,
     scrollHeight: PropTypes.string,
     placeholder: PropTypes.string,
     fixedPlaceholder: PropTypes.bool,
@@ -86,7 +91,8 @@ export class MultiSelect extends Component {
     headerClassName: PropTypes.string,
     onChange: PropTypes.func,
     onFocus: PropTypes.func,
-    onBlur: PropTypes.func
+    onBlur: PropTypes.func,
+    onFilterInputChangeBackend: PropTypes.func
   };
 
   constructor(props) {
@@ -220,7 +226,12 @@ export class MultiSelect extends Component {
   }
 
   onFilter(event) {
-    this.setState({ filter: event.query });
+    if (this.props.onFilterInputChangeBackend) {
+      this.props.onFilterInputChangeBackend(event.query);
+      this.setState({ filter: event.query });
+    } else {
+      this.setState({ filter: event.query });
+    }
   }
 
   onPanelClick() {
@@ -469,11 +480,21 @@ export class MultiSelect extends Component {
     });
   }
 
+  onFilterInputChange(event) {
+    if (this.props.onFilterInputChangeBackend) {
+      this.props.onFilterInputChangeBackend(event.target.value);
+      this.setState({ filter: event.target.value });
+    } else {
+      this.setState({ filter: event.target.value });
+    }
+  }
+
   renderHeader(items) {
     return (
       <MultiSelectHeader
         allChecked={this.isAllChecked(items)}
         checkAllHeader={this.props.checkAllHeader}
+        clearButton={this.props.clearButton}
         filter={this.props.filter}
         filterPlaceholder={this.props.filterPlaceholder}
         filterValue={this.state.filter}
@@ -497,7 +518,12 @@ export class MultiSelect extends Component {
     return this.props.hasSelectedItemsLabel ? (
       <div
         className="p-multiselect-label-container"
-        style={{ position: 'absolute', top: '0', paddingTop: '0.1rem', width: '100%' }}>
+        style={{
+          position: this.props.isFilter ? 'absolute' : 'relative',
+          top: '0',
+          paddingTop: '0.1rem',
+          width: '100%'
+        }}>
         <label className={className}>{content || this.props.placeholder || 'empty'}</label>
       </div>
     ) : null;

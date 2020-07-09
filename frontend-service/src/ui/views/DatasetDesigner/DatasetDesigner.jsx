@@ -22,7 +22,7 @@ import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
-import { TabsValidations } from './_components/TabsValidations';
+import { TabsValidations } from 'ui/views/_components/TabsValidations';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
@@ -31,7 +31,6 @@ import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
-import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
@@ -58,7 +57,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
@@ -115,19 +114,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, []);
 
   useEffect(() => {
-    if (!isUndefined(user.contextRoles)) {
+    if (!isUndefined(userContext.contextRoles)) {
       designerDispatch({
         type: 'LOAD_PERMISSIONS',
         payload: {
-          permissions: UserService.hasPermission(
-            user,
-            [config.permissions.PROVIDER],
+          permissions: userContext.hasPermission(
+            [config.permissions.LEAD_REPORTER],
             `${config.permissions.DATASET}${datasetId}`
           )
         }
       });
     }
-  }, [user]);
+  }, [userContext]);
 
   useEffect(() => {
     breadCrumbContext.add([
@@ -140,7 +138,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       {
         command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true)),
         href: getUrl(routes.DATAFLOW, { dataflowId }, true),
-        icon: 'archive',
+        icon: 'clone',
         label: resources.messages['dataflow']
       },
       { label: resources.messages['datasetDesigner'], icon: 'pencilRuler' }
@@ -172,6 +170,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       type: 'GET_METADATA',
       payload: { metaData, dataflowName: metaData.dataflow.name, schemaName: metaData.dataset.name }
     });
+  };
+
+  const changeMode = previewMode => {
+    designerDispatch({ type: 'IS_PREVIEW_MODE_ON', payload: { value: previewMode } });
   };
 
   const changeUrl = () => {
@@ -446,6 +448,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       style={{ width: '70%' }}
       visible={designerState.isUniqueConstraintsListDialogVisible}>
       <UniqueConstraints
+        dataflowId={dataflowId}
         designerState={designerState}
         getManageUniqueConstraint={manageUniqueConstraint}
         getUniques={getUniqueConstraintsList}
@@ -525,6 +528,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             className={styles.datasetDescription}
             collapsedHeight={55}
             expandableOnClick={true}
+            id="datasetDescription"
             key="datasetDescription"
             onBlur={e => onBlurDescription(e.target.value)}
             onChange={e => designerDispatch({ type: 'ON_UPDATE_DESCRIPTION', payload: { value: e.target.value } })}
@@ -533,7 +537,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
             value={designerState.datasetDescription || ''}
           />
-
           <Toolbar>
             <div className="p-toolbar-group-right">
               {/* <Button
@@ -547,7 +550,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 className={`p-button-rounded p-button-secondary-transparent ${
                   designerState.datasetHasData && designerState.isPreviewModeOn ? ' p-button-animated-blink' : null
                 }`}
-                disabled={!designerState.datasetHasData || !designerState.isPreviewModeOn}
+                disabled={!designerState.datasetHasData}
                 icon={'validate'}
                 iconClasses={null}
                 label={resources.messages['validate']}
@@ -561,7 +564,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                     ? 'p-button-animated-blink'
                     : null
                 }`}
-                disabled={!designerState.datasetStatistics.datasetErrors || !designerState.isPreviewModeOn}
+                disabled={!designerState.datasetStatistics.datasetErrors}
                 icon={'warning'}
                 label={resources.messages['showValidations']}
                 onClick={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: true })}
@@ -625,6 +628,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         {renderSwitchView()}
         <TabsDesigner
           activeIndex={filterActiveIndex(designerState.dataViewerOptions.activeIndex)}
+          changeMode={changeMode}
           datasetSchemaDTO={designerState.datasetSchema}
           datasetSchemas={designerState.datasetSchemas}
           datasetStatistics={designerState.datasetStatistics}
@@ -662,6 +666,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         <Integrations dataflowId={dataflowId} designerState={designerState} manageDialogs={manageDialogs} />
 
         <ManageUniqueConstraint
+          dataflowId={dataflowId}
           designerState={designerState}
           manageDialogs={manageDialogs}
           resetUniques={manageUniqueConstraint}

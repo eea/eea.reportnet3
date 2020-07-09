@@ -97,12 +97,12 @@ export const ExpressionSelector = ({
     <>
       <div className={styles.section} style={validationContext.ruleEdit ? { display: 'none' } : {}}>
         <Dropdown
-          value={expressionTypeValue}
-          options={options}
           onChange={e => onExpressionTypeToggle(e.value)}
-          placeholder={resources.messages['expressionTypeDropdownPlaceholder']}
           optionLabel="label"
+          options={options}
+          placeholder={resources.messages['expressionTypeDropdownPlaceholder']}
           style={{ width: '12em' }}
+          value={expressionTypeValue}
         />
       </div>
 

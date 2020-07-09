@@ -7,7 +7,6 @@ import org.eea.interfaces.controller.rod.ObligationController;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.rod.service.ObligationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,16 +33,16 @@ public class ObligationControllerImpl implements ObligationController {
       @RequestParam(value = "issueId", required = false) Integer issueId,
       @RequestParam(value = "deadlineDateFrom", required = false) Long deadlineDateFrom,
       @RequestParam(value = "deadlineDateTo", required = false) Long deadlineDateTo) {
-    Date deadlineFrom = Optional.ofNullable(deadlineDateFrom).map(date -> new Date(date))
-        .orElse(null);
+    Date deadlineFrom =
+        Optional.ofNullable(deadlineDateFrom).map(date -> new Date(date)).orElse(null);
     Date deadlineTo = Optional.ofNullable(deadlineDateTo).map(date -> new Date(date)).orElse(null);
-    return obligationService
-        .findOpenedObligation(clientId, spatialId, issueId, deadlineFrom, deadlineTo);
+    return obligationService.findOpenedObligation(clientId, spatialId, issueId, deadlineFrom,
+        deadlineTo);
   }
 
   @Override
-  @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = {
-      MediaType.APPLICATION_JSON_VALUE})
+  @RequestMapping(value = "/{id}", method = RequestMethod.GET,
+      produces = {MediaType.APPLICATION_JSON_VALUE})
   public ObligationVO findObligationById(@PathVariable(value = "id") Integer id) {
 
     return obligationService.findObligationById(id);

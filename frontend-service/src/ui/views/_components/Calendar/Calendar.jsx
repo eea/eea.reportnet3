@@ -22,6 +22,7 @@ export const Calendar = ({
   readOnlyInput,
   selectionMode,
   showWeek,
+  style,
   value,
   yearNavigator,
   yearRange
@@ -47,6 +48,7 @@ export const Calendar = ({
       readOnlyInput={readOnlyInput}
       selectionMode={selectionMode}
       showWeek={showWeek}
+      style={style}
       value={value}
       yearNavigator={yearNavigator}
       yearRange={yearRange}

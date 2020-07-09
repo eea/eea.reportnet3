@@ -35,6 +35,7 @@ export const FieldDesigner = ({
   fieldPK,
   fieldPKReferenced,
   fieldLink,
+  fieldHasMultipleValues,
   fieldMustBeUsed,
   fieldRequired,
   fieldType,
@@ -60,7 +61,7 @@ export const FieldDesigner = ({
     // { fieldType: 'Latitude', value: 'Geospatial object (Latitude)', fieldTypeIcon: 'map' },
     // { fieldType: 'Longitude', value: 'Geospatial object (Longitude)', fieldTypeIcon: 'map' },
     { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
-    // { fieldType: 'Long_Text', value: 'Long text', fieldTypeIcon: 'align-right' },
+    // { fieldType: 'Rich_Text', value: 'Rich text', fieldTypeIcon: 'align-right' },
     { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
     { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
     { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
@@ -73,7 +74,7 @@ export const FieldDesigner = ({
     { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' }
     // { fieldType: 'Reference', value: 'Reference', fieldTypeIcon: 'link' }
     // { fieldType: 'URL', value: 'Url', fieldTypeIcon: 'url' },
-    // { fieldType: 'LongText', value: 'Long text', fieldTypeIcon: 'text' },
+    // { fieldType: 'RichText', value: 'Rich text', fieldTypeIcon: 'text' },
     // { fieldType: 'LinkData', value: 'Link to a data collection', fieldTypeIcon: 'linkData' },
     // { fieldType: 'Percentage', value: 'Percentage', fieldTypeIcon: 'percentage' },
     // { fieldType: 'Formula', value: 'Formula', fieldTypeIcon: 'formula' },
@@ -95,6 +96,7 @@ export const FieldDesigner = ({
     codelistItems: codelistItems,
     fieldDescriptionValue: fieldDescription,
     fieldLinkValue: fieldLink || null,
+    fieldPkHasMultipleValues: fieldHasMultipleValues || false,
     fieldPkMustBeUsed: fieldMustBeUsed || false,
     fieldPKReferencedValue: fieldPKReferenced || false,
     fieldPKValue: fieldPK,
@@ -269,13 +271,30 @@ export const FieldDesigner = ({
     }
   };
 
-  const onCancelSaveLink = () => {
+  const onCancelSaveLink = (link, pkMustBeUsed, pkHasMultipleValues) => {
     // onCodelistAndLinkShow(fieldId, { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' });
+    if (!isUndefined(fieldId)) {
+      if (fieldId.toString() === '-1') {
+        onFieldAdd({
+          codelistItems,
+          type: 'LINK',
+          referencedField: link,
+          pkMustBeUsed,
+          pkHasMultipleValues
+        });
+      }
+    }
     dispatchFieldDesigner({ type: 'CANCEL_SELECT_LINK' });
   };
 
   const onCancelSaveCodelist = () => {
     // onCodelistAndLinkShow(fieldId, { fieldType: 'Codelist', value: 'Codelist', fieldTypeIcon: 'list' });
+
+    if (!isUndefined(fieldId)) {
+      if (fieldId.toString() === '-1') {
+        onFieldAdd({ codelistItems });
+      }
+    }
     dispatchFieldDesigner({ type: 'CANCEL_SELECT_CODELIST' });
   };
 
@@ -297,6 +316,7 @@ export const FieldDesigner = ({
     codelistItems = fieldDesignerState.codelistItems,
     description = fieldDesignerState.fieldDescriptionValue,
     pk = fieldDesignerState.fieldPKValue,
+    pkHasMultipleValues = fieldDesignerState.pkHasMultipleValues,
     pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
     name = fieldDesignerState.fieldValue,
     recordId = recordSchemaId,
@@ -309,6 +329,7 @@ export const FieldDesigner = ({
         codelistItems,
         description,
         pk,
+        pkHasMultipleValues,
         pkMustBeUsed,
         name,
         recordId,
@@ -328,6 +349,7 @@ export const FieldDesigner = ({
           fieldId: response.data,
           fieldLinkValue: null,
           pk,
+          pkHasMultipleValues,
           pkMustBeUsed,
           name,
           recordId,
@@ -468,9 +490,10 @@ export const FieldDesigner = ({
     dispatchFieldDesigner({ type: 'TOGGLE_CODELIST_EDITOR_VISIBLE', payload: false });
   };
 
-  const onSaveLink = (link, pkMustBeUsed) => {
+  const onSaveLink = (link, pkMustBeUsed, pkHasMultipleValues) => {
     dispatchFieldDesigner({ type: 'SET_LINK', payload: link });
     dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: pkMustBeUsed });
+    dispatchFieldDesigner({ type: 'SET_PK_HAS_MULTIPLE_VALUES', payload: pkHasMultipleValues });
     if (fieldDesignerState.fieldValue === '') {
       onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
     } else {
@@ -480,7 +503,8 @@ export const FieldDesigner = ({
             codelistItems,
             type: 'LINK',
             referencedField: link,
-            pkMustBeUsed
+            pkMustBeUsed,
+            pkHasMultipleValues
           });
         } else {
           fieldUpdate({
@@ -488,7 +512,8 @@ export const FieldDesigner = ({
             isLinkChange: true,
             type: 'LINK',
             referencedField: link,
-            pkMustBeUsed
+            pkMustBeUsed,
+            pkHasMultipleValues
           });
         }
       }
@@ -526,6 +551,7 @@ export const FieldDesigner = ({
     fieldSchemaId = fieldId,
     isLinkChange = false,
     pk = fieldDesignerState.fieldPKValue,
+    pkHasMultipleValues = fieldDesignerState.pkHasMultipleValues,
     pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
     name = fieldDesignerState.fieldValue,
     recordId = recordSchemaId,
@@ -539,6 +565,7 @@ export const FieldDesigner = ({
         description,
         fieldSchemaId,
         pk,
+        pkHasMultipleValues,
         pkMustBeUsed,
         name,
         recordId,
@@ -558,6 +585,7 @@ export const FieldDesigner = ({
           id: fieldId,
           isLinkChange,
           pk,
+          pkHasMultipleValues,
           pkMustBeUsed,
           name,
           recordId,
@@ -600,17 +628,22 @@ export const FieldDesigner = ({
         checked={fieldDesignerState.fieldRequiredValue}
         className={styles.checkRequired}
         disabled={Boolean(fieldDesignerState.fieldPKValue)}
-        inputId={`${fieldId}_check`}
+        id={`${fieldId}_check_required`}
+        inputId={`${fieldId}_check_required`}
         label="Default"
         onChange={e => {
           onRequiredChange(e.checked);
         }}
         style={{ width: '70px' }}
       />
+      <label for={`${fieldId}_check_required`} className="srOnly">
+        {resources.messages['required']}
+      </label>
       <Checkbox
         checked={fieldDesignerState.fieldPKValue}
         className={styles.checkPK}
         disabled={hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)}
+        id={`${fieldId}_check_pk`}
         inputId={`${fieldId}_check_pk`}
         label="Default"
         onChange={e => {
@@ -620,6 +653,9 @@ export const FieldDesigner = ({
         }}
         style={{ width: '35px' }}
       />
+      <label for={`${fieldId}_check_pk`} className="srOnly">
+        {resources.messages['pk']}
+      </label>
     </div>
   );
 
@@ -673,9 +709,7 @@ export const FieldDesigner = ({
     !addField ? (
       <a
         draggable={true}
-        className={`${styles.button} ${styles.deleteButton} ${
-          fieldDesignerState.fieldPKValue || fieldPKReferenced ? styles.disabledDeleteButton : ''
-        }`}
+        className={`${styles.button} ${styles.deleteButton} ${fieldPKReferenced ? styles.disabledDeleteButton : ''}`}
         href="#"
         onClick={e => {
           e.preventDefault();
@@ -694,8 +728,8 @@ export const FieldDesigner = ({
       <InputText
         autoFocus={false}
         className={styles.inputField}
+        id={fieldName}
         // key={`${fieldId}_${index}`} --> Problem with DOM modification
-        ref={inputRef}
         onBlur={e => {
           dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: false });
           onBlurFieldName(e.target.value);
@@ -707,14 +741,19 @@ export const FieldDesigner = ({
         }}
         onKeyDown={e => onKeyChange(e, 'NAME')}
         placeholder={resources.messages['newFieldPlaceHolder']}
+        ref={inputRef}
         required={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue === '' : fieldName === ''}
         value={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue : fieldName}
       />
+      <label for={fieldName} className="srOnly">
+        {resources.messages['newFieldPlaceHolder']}
+      </label>
       <InputTextarea
         autoFocus={false}
         collapsedHeight={33}
         expandableOnClick={true}
         className={styles.inputFieldDescription}
+        id={`${fieldName}_description`}
         key={fieldId}
         onBlur={e => {
           dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: false });
@@ -735,8 +774,11 @@ export const FieldDesigner = ({
       />
       <Dropdown
         appendTo={document.body}
+        ariaLabel={'fieldType'}
         className={styles.dropdownFieldType}
+        inputId={`${fieldName}_fieldType`}
         itemTemplate={fieldTypeTemplate}
+        name={resources.messages['newFieldTypePlaceHolder']}
         onChange={e => onChangeFieldType(e.target.value)}
         onMouseDown={event => {
           event.preventDefault();
@@ -804,6 +846,7 @@ export const FieldDesigner = ({
       ) : null}
       {fieldDesignerState.isLinkSelectorVisible ? (
         <LinkSelector
+          hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
           isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
           mustBeUsed={fieldDesignerState.fieldPkMustBeUsed}
           onCancelSaveLink={onCancelSaveLink}

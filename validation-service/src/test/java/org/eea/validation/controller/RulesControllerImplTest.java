@@ -7,6 +7,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.service.RulesService;
@@ -538,4 +539,29 @@ public class RulesControllerImplTest {
     Mockito.verify(rulesService, times(1))
         .deleteDatasetRuleAndIntegrityByDatasetSchemaId(Mockito.any(), Mockito.any());
   }
+
+  @Test
+  public void testCopyRules() throws EEAException {
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    rulesControllerImpl.copyRulesSchema(new CopySchemaVO());
+    Mockito.verify(rulesService, times(1)).copyRulesSchema(Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testCopyRulesException() throws EEAException {
+
+    try {
+      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+      Mockito.when(authentication.getName()).thenReturn("user");
+      Mockito.doThrow(EEAException.class).when(rulesService).copyRulesSchema(Mockito.any());
+      rulesControllerImpl.copyRulesSchema(new CopySchemaVO());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+
+  }
+
 }

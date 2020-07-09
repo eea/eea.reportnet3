@@ -23,23 +23,21 @@
   font-weight: bold;
   label {
     &:first-child {
-      width: 32px;
+      width: 70px;
+      margin-left: 32px;
     }
     &:nth-child(2) {
-      width: 70px;
-    }
-    &:nth-child(3) {
       width: 35px;
     }
-    &:nth-child(4) {
+    &:nth-child(3) {
       width: 20%;
       margin-right: 0.4rem;
     }
-    &:nth-child(5) {
+    &:nth-child(4) {
       width: 25%;
       margin-right: 0.4rem;
     }
-    &:nth-child(6) {
+    &:nth-child(5) {
       width: 20%;
       margin-right: 0.4rem;
     }

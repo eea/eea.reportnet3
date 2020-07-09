@@ -52,6 +52,11 @@ public class FileTreatmentHelper {
   private static final Logger LOG = LoggerFactory.getLogger(FileTreatmentHelper.class);
 
   /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /**
    * The kafka sender helper.
    */
   @Autowired
@@ -136,7 +141,7 @@ public class FileTreatmentHelper {
           externalParameters.put("fileIS", encodedString);
           integration.setExternalParameters(externalParameters);
         } catch (IOException e) {
-          e.printStackTrace();
+          LOG_ERROR.error("Exception executing file process with message {}", e.getMessage(), e);
         }
         integrationAux.add(integration);
       }

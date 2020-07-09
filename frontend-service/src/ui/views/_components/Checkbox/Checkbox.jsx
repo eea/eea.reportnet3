@@ -9,6 +9,7 @@ const Checkbox = ({
   disabled,
   htmlFor,
   id,
+  inputId,
   isChecked,
   labelClassName,
   labelMessage,
@@ -17,7 +18,7 @@ const Checkbox = ({
 }) => {
   return (
     <>
-      <PrimeCheckbox onChange={onChange} checked={isChecked} disabled={disabled} />
+      <PrimeCheckbox onChange={onChange} checked={isChecked} disabled={disabled} id={id} inputId={inputId} />
     </>
   );
 };

@@ -6,6 +6,10 @@
   list-style: none;
 }
 
+.dataProvidersDropdown {
+  max-width: 16rem;
+}
+
 .btnDelete {
   border: 1px solid var(--c-custom-gray) !important;
   box-shadow: 0em var(--blue-100) !important;

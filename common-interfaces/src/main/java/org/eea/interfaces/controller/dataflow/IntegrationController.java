@@ -4,6 +4,7 @@ import java.util.List;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
+import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -56,8 +57,10 @@ public interface IntegrationController {
    *
    * @param integrationId the integration id
    */
-  @DeleteMapping(value = "/{integrationId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  void deleteIntegration(@PathVariable("integrationId") Long integrationId);
+  @DeleteMapping(value = "/{integrationId}/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void deleteIntegration(@PathVariable("integrationId") Long integrationId,
+      @PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Update integration.
@@ -90,11 +93,20 @@ public interface IntegrationController {
    * @param integration the integration
    * @return the execution result VO
    */
-  @PostMapping(value = "/executeIntegration")
+  @PostMapping(value = "/private/executeIntegration")
   ExecutionResultVO executeIntegrationProcess(
       @RequestParam("integrationTool") IntegrationToolTypeEnum integrationToolTypeEnum,
       @RequestParam("operation") IntegrationOperationTypeEnum integrationOperationTypeEnum,
       @RequestParam("file") final String file, @RequestParam("datasetId") Long datasetId,
       @RequestBody IntegrationVO integration);
+
+
+  /**
+   * Copy integrations.
+   *
+   * @param copyVO the copy VO
+   */
+  @PostMapping(value = "/private/copyIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
+  void copyIntegrations(@RequestBody CopySchemaVO copyVO);
 
 }

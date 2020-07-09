@@ -18,13 +18,23 @@ import { DataflowService } from 'core/services/Dataflow';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const LinkSelector = withRouter(
-  ({ isLinkSelectorVisible, match, mustBeUsed, onCancelSaveLink, onSaveLink, selectedLink, tableSchemaId }) => {
+  ({
+    hasMultipleValues = false,
+    isLinkSelectorVisible,
+    match,
+    mustBeUsed = false,
+    onCancelSaveLink,
+    onSaveLink,
+    selectedLink,
+    tableSchemaId
+  }) => {
     const resources = useContext(ResourcesContext);
     const [datasetSchemas, setDatasetSchemas] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
     const [isVisible, setIsVisible] = useState(isLinkSelectorVisible);
     const [link, setLink] = useState(selectedLink);
+    const [pkHasMultipleValues, setPkHasMultipleValues] = useState(hasMultipleValues);
     const [pkMustBeUsed, setPkMustBeUsed] = useState(mustBeUsed);
-    const [isLoading, setIsLoading] = useState(false);
 
     const {
       params: { dataflowId }
@@ -48,7 +58,7 @@ const LinkSelector = withRouter(
           icon="check"
           label={resources.messages['save']}
           onClick={() => {
-            onSaveLink(link, pkMustBeUsed);
+            onSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
             setIsVisible(false);
           }}
         />
@@ -57,7 +67,7 @@ const LinkSelector = withRouter(
           icon="cancel"
           label={resources.messages['cancel']}
           onClick={() => {
-            onCancelSaveLink();
+            onCancelSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
             setIsVisible(false);
           }}
         />
@@ -118,11 +128,27 @@ const LinkSelector = withRouter(
             <span className={styles.switchTextInput}>{resources.messages['pkValuesMustBeUsed']}</span>
             <Checkbox
               checked={pkMustBeUsed}
+              id={'pkMustBeUsed_check'}
               inputId={'pkMustBeUsed_check'}
               label="Default"
               onChange={e => setPkMustBeUsed(e.checked)}
               style={{ width: '70px', marginLeft: '0.5rem' }}
             />
+            <label for={'pkMustBeUsed_check'} className="srOnly">
+              {resources.messages['pkValuesMustBeUsed']}
+            </label>
+            <span className={styles.switchTextInput}>{resources.messages['pkHasMultipleValues']}</span>
+            <Checkbox
+              checked={pkHasMultipleValues}
+              id={'pkHasMultipleValues_check'}
+              inputId={'pkHasMultipleValues_check'}
+              label="Default"
+              onChange={e => setPkHasMultipleValues(e.checked)}
+              style={{ width: '70px', marginLeft: '0.5rem' }}
+            />
+            <label for={'pkHasMultipleValues_check'} className="srOnly">
+              {resources.messages['pkHasMultipleValues']}
+            </label>
           </div>
           <div className={styles.selectedLinkWrapper}>
             <span>{`${resources.messages['selectedLink']}: `}</span>
@@ -141,7 +167,7 @@ const LinkSelector = withRouter(
         header={resources.messages['linkSelector']}
         modal={true}
         onHide={() => {
-          onCancelSaveLink();
+          onCancelSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
           setIsVisible(false);
         }}
         style={{ minWidth: '55%' }}

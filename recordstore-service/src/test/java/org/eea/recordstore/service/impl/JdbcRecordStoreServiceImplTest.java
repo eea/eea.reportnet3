@@ -2,7 +2,6 @@ package org.eea.recordstore.service.impl;
 
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.times;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -87,7 +86,7 @@ public class JdbcRecordStoreServiceImplTest {
   @Test
   public void createEmptyDataSet() throws RecordStoreAccessException {
     jdbcRecordStoreService.createEmptyDataSet("", "");
-    Mockito.verify(jdbcTemplate, Mockito.times(94)).execute(Mockito.anyString());
+    Mockito.verify(jdbcTemplate, Mockito.times(93)).execute(Mockito.anyString());
   }
 
   @Test(expected = UnsupportedOperationException.class)

@@ -214,8 +214,10 @@ const Chips = ({
       <li className="p-chips-input-token">
         <InputText
           aria-labelledby={ariaLabelledBy}
+          aria-hidden={disabled || isMaxedOut()}
           className={hasErrors ? styles.chipsTokenError : ''}
           disabled={disabled || isMaxedOut()}
+          id={name}
           keyfilter={forbiddenCommas ? 'noComma' : ''}
           name={name}
           onBlur={onBlurChips}
@@ -228,6 +230,9 @@ const Chips = ({
           ref={inputElement}
           type="text"
         />
+        <label for={name} className="srOnly">
+          {name}
+        </label>
       </li>
     );
   };
@@ -272,7 +277,7 @@ const Chips = ({
       return (
         <ul ref={listElement} className={className} onClick={focusInput}>
           {items}
-          {inputElement}
+          {!disabled && inputElement}
           {hasErrors && showErrorMessage && renderErrorMessage()}
         </ul>
       );

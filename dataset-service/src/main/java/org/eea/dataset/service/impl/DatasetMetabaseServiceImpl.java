@@ -394,7 +394,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     List<ResourceInfoVO> groups = new ArrayList<>();
     Set<Long> datasetIds = datasetIdsEmail.keySet();
     for (Long datasetId : datasetIds) {
-      groups.add(createGroup(datasetId, ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_PROVIDER));
+      groups.add(createGroup(datasetId, ResourceTypeEnum.DATASET, SecurityRoleEnum.LEAD_REPORTER));
       groups.add(createGroup(datasetId, ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_CUSTODIAN));
     }
     resourceManagementControllerZuul.createResources(groups);
@@ -404,7 +404,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     datasetIdsEmail.forEach((Long id, String email) -> {
 
       ResourceAssignationVO resourceDP =
-          fillResourceAssignation(id, email, ResourceGroupEnum.DATASET_PROVIDER);
+          fillResourceAssignation(id, email, ResourceGroupEnum.DATASET_LEAD_REPORTER);
       resourcesProviders.add(resourceDP);
 
       ResourceAssignationVO resourceDC =
@@ -460,19 +460,29 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param datasetId the dataset id
    */
   @Override
-  public void createSchemaGroupAndAddUser(Long datasetId) {
+  public void createSchemaGroup(Long datasetId) {
 
     // Create group Dataschema-X-DATA_CUSTODIAN
     resourceManagementControllerZuul.createResource(
         createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_CUSTODIAN));
 
-    // Create group Dataschema-X-DATA_PROVIDER
+    // Create group Dataschema-X-LEAD_REPORTER
     resourceManagementControllerZuul.createResource(
-        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_PROVIDER));
+        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.LEAD_REPORTER));
 
-    // Add user to new group Dataschema-X-DATA_CUSTODIAN
-    userManagementControllerZuul.addUserToResource(datasetId,
-        ResourceGroupEnum.DATASCHEMA_CUSTODIAN);
+    // Create group Dataschema-X-REPORTER_READ
+    resourceManagementControllerZuul.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.REPORTER_READ));
+
+    // Create group Dataschema-X-EDITOR_READ
+    resourceManagementControllerZuul.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.EDITOR_READ));
+
+    // Create group Dataschema-X-EDITOR_WRITE
+    resourceManagementControllerZuul.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.EDITOR_WRITE));
+
+
   }
 
 
@@ -527,7 +537,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
             designDatasetRepository.save((DesignDataset) dataset);
             recordStoreControllerZull.createEmptyDataset(
                 LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
-            this.createSchemaGroupAndAddUser(dataset.getId());
+            this.createSchemaGroup(dataset.getId());
             idDesignDataset = dataset.getId();
             break;
           case COLLECTION:

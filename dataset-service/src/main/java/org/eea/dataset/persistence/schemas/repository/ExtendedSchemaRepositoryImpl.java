@@ -15,11 +15,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 
@@ -42,6 +45,10 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The mongo converter. */
+  @Autowired
+  private MongoConverter mongoConverter;
 
   /**
    * Delete table schema by id.
@@ -341,5 +348,21 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     }
 
     return null != document ? (Document) document : null;
+  }
+
+
+  /**
+   * Update schema document.
+   *
+   * @param schema the schema
+   */
+  @Override
+  public void updateSchemaDocument(DataSetSchema schema) {
+    Document document = new Document();
+    mongoConverter.write(schema, document);
+    mongoTemplate.getCollection(LiteralConstants.DATASET_SCHEMA).replaceOne(
+        Filters.eq("_id", schema.getIdDataSetSchema()), document,
+        new ReplaceOptions().upsert(true));
+
   }
 }

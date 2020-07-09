@@ -14,9 +14,17 @@
   transition: 0.08s ease-in;
 }
 
+.bigButtonDisabled {
+  cursor: default !important;
+}
+
 .datasetItem :global .p-button.p-button-icon-only .p-button-text {
   padding: 0px !important;
   height: 0px !important;
+}
+
+.datasetItemDisabled {
+  opacity: 0.5;
 }
 
 .defaultBigButton {
@@ -109,6 +117,11 @@
   transform: rotate(90deg);
 } */
 .newItem .siteMap {
+  width: 2.5rem;
+  transform: rotate(180deg) !important;
+}
+
+.newItem .siteMapDisabled {
   width: 2.5rem;
   transform: rotate(180deg) !important;
 }

@@ -47,6 +47,9 @@ public class FieldSchemaVO {
   /** The pk must be used. */
   private Boolean pkMustBeUsed;
 
+  /** The pk has multiple values. */
+  private Boolean pkHasMultipleValues;
+
   /**
    * Hash code.
    *
