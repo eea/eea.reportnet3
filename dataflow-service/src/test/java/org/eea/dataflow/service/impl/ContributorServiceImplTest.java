@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.contributor.ContributorVO;
@@ -49,9 +49,9 @@ public class ContributorServiceImplTest {
   @Mock
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
-  /** The dataflow controlle zuul. */
+  /** The data set metabase controller zuul. */
   @Mock
-  private DataFlowControllerZuul dataflowControllerZuul;
+  private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /** The contributor VO write. */
   private ContributorVO contributorVOWrite;

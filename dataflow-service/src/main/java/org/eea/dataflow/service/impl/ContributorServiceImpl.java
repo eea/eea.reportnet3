@@ -6,11 +6,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.eea.dataflow.service.ContributorService;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.contributor.ContributorVO;
-import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
@@ -49,10 +48,6 @@ public class ContributorServiceImpl implements ContributorService {
   /** The Constant REPORTER: {@value}. */
   private static final String REPORTER = "REPORTER";
 
-  /** The dataflow controlle zuul. */
-  @Autowired
-  private DataFlowControllerZuul dataflowControllerZuul;
-
   /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
@@ -60,6 +55,10 @@ public class ContributorServiceImpl implements ContributorService {
   /** The resource management controller zull. */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
+
+  /** The data set metabase controller zuul. */
+  @Autowired
+  private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /**
    * Find contributors by id dataflow.
@@ -75,9 +74,8 @@ public class ContributorServiceImpl implements ContributorService {
     List<ContributorVO> contributorVOList = new ArrayList<>();
 
     if (EDITOR.equals(role) || REPORTER.equals(role)) {
-      DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId);
       Long referenceId = EDITOR.equals(role) ? dataflowId
-          : dataflow.getReportingDatasets().stream()
+          : dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId).stream()
               .filter(
                   reportingDatasetVO -> reportingDatasetVO.getDataProviderId().equals(providerId))
               .map(ReportingDatasetVO::getId).findFirst().orElse(null);
@@ -126,7 +124,6 @@ public class ContributorServiceImpl implements ContributorService {
   @Override
   public void deleteContributor(Long dataflowId, String account, String role, Long dataProviderId)
       throws EEAException {
-    DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId);
 
     ResourceGroupEnum resourceGroupEnumWrite = null;
     ResourceGroupEnum resourceGroupEnumRead = null;
@@ -158,10 +155,11 @@ public class ContributorServiceImpl implements ContributorService {
       resourcesProviders
           .add(fillResourceAssignation(dataflowId, account, resourceGroupEnumDataflowRead));
       List<Long> ids = EDITOR.equals(role)
-          ? dataflow.getDesignDatasets().stream().map(DesignDatasetVO::getId)
-              .collect(Collectors.toList())
-          : dataflow.getReportingDatasets().stream().filter(
-              reportingDatasetVO -> reportingDatasetVO.getDataProviderId().equals(dataProviderId))
+          ? dataSetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(dataflowId).stream()
+              .map(DesignDatasetVO::getId).collect(Collectors.toList())
+          : dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId).stream()
+              .filter(reportingDatasetVO -> reportingDatasetVO.getDataProviderId()
+                  .equals(dataProviderId))
               .map(ReportingDatasetVO::getId).collect(Collectors.toList());
       for (Long id : ids) {
         // remove resources
@@ -185,7 +183,6 @@ public class ContributorServiceImpl implements ContributorService {
   @Override
   public void createContributor(Long dataflowId, ContributorVO contributorVO, String role,
       Long dataProviderId) throws EEAException {
-    DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId);
     SecurityRoleEnum securityRoleEnum = null;
     ResourceGroupEnum resourceGroupEnum = null;
     ResourceGroupEnum resourceGroupEnumDataflow = null;
@@ -221,7 +218,8 @@ public class ContributorServiceImpl implements ContributorService {
     if (EDITOR.equals(role)) {
       resourceAssignationVOList.add(fillResourceAssignation(dataflowId, contributorVO.getAccount(),
           resourceGroupEnumDataflow));
-      for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
+      for (DesignDatasetVO designDatasetVO : dataSetMetabaseControllerZuul
+          .findDesignDataSetIdByDataflowId(dataflowId)) {
 
         resourceAssignationVOList.add(fillResourceAssignation(designDatasetVO.getId(),
             contributorVO.getAccount(), resourceGroupEnum));
@@ -236,7 +234,8 @@ public class ContributorServiceImpl implements ContributorService {
       resourceAssignationVOList.add(fillResourceAssignation(dataflowId, contributorVO.getAccount(),
           resourceGroupEnumDataflow));
 
-      for (Long reportingDatasetId : dataflow.getReportingDatasets().stream()
+      for (Long reportingDatasetId : dataSetMetabaseControllerZuul
+          .findReportingDataSetIdByDataflowId(dataflowId).stream()
           .filter(
               reportingDatasetVO -> reportingDatasetVO.getDataProviderId().equals(dataProviderId))
           .map(ReportingDatasetVO::getId).collect(Collectors.toList())) {
