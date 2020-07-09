@@ -213,7 +213,7 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
     <Fragment>
       <div>
         {isEmpty(shareRightsState.contributors) ? (
-          <div>{resources.messages['noData']}</div>
+          <Spinner style={{ top: 0 }} />
         ) : (
           <DataTable value={shareRightsState.contributors}>
             <Column
