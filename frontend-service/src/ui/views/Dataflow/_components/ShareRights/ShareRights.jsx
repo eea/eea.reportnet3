@@ -45,7 +45,7 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
     ? resources.messages['editorsRightsDialogConfirmDeleteHeader']
     : resources.messages['reportersRightsDialogConfirmDeleteHeader'];
 
-  useInputTextFocus(isShareRightsDialogVisible, inputRef);
+  // useInputTextFocus(isShareRightsDialogVisible, inputRef);
 
   useEffect(() => {
     getAllContributors();
@@ -75,11 +75,19 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
     return email.match(expression);
   };
 
+  const isExistingAccount = account => {
+    const sameAccounts = shareRightsState.contributors.filter(contributor => contributor.account === account);
+
+    return sameAccounts.length > 1;
+  };
+
   const updateContributor = contributor => {
-    if (!isValidEmail(contributor.account)) {
-      return;
-    }
-    if (contributor.writePermission !== '') {
+    shareRightsDispatch({
+      type: 'SET_ACCOUNT_HAS_ERROR',
+      payload: { accountHasError: !isValidEmail(contributor.account) || isExistingAccount(contributor.account) }
+    });
+
+    if (contributor.writePermission !== '' && !shareRightsState.accountHasError) {
       onUpdateContributor(contributor);
     }
   };
@@ -132,9 +140,11 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
     const [thisContributor] = contributors.filter(thisContributor => thisContributor.account === contributor.account);
     thisContributor.writePermission = newWritePermission;
 
-    shareRightsDispatch({ type: 'ON_WRITE_PERMISSION_CHANGE', payload: { contributors } });
+    if (!shareRightsState.accountHasError) {
+      shareRightsDispatch({ type: 'ON_WRITE_PERMISSION_CHANGE', payload: { contributors } });
+    }
 
-    if (isValidEmail(contributor.account)) {
+    if (isValidEmail(contributor.account) && !shareRightsState.accountHasError) {
       onUpdateContributor(thisContributor);
     }
   };
@@ -146,7 +156,7 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
 
     shareRightsDispatch({
       type: 'ON_SET_ACCOUNT',
-      payload: { contributors, accountHasError: !isValidEmail(inputValue) }
+      payload: { contributors, accountHasError: !isValidEmail(inputValue) || isExistingAccount(inputValue) }
     });
   };
 
@@ -198,18 +208,19 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
   };
 
   const renderAccountTemplate = contributor => {
+    const hasError =
+      !isEmpty(contributor.account) &&
+      contributor.isNew &&
+      (!isValidEmail(contributor.account) || isExistingAccount(contributor.account));
     return (
-      <div
-        className={`formField ${contributor.isNew && shareRightsState.accountHasError && 'error'}`}
-        style={{ marginBottom: '0rem' }}>
-        <InputText
+      <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
+        <input
           autoFocus={contributor.isNew}
           disabled={!contributor.isNew}
           id={isEmpty(contributor.account) ? 'emptyInput' : contributor.account}
           onBlur={() => updateContributor(contributor)}
           onChange={event => onSetAccount(event.target.value)}
           placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
-          ref={inputRef}
           value={contributor.account}
         />
       </div>
