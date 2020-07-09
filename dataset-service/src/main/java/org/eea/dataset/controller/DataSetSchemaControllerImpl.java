@@ -811,10 +811,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
           SecurityContextHolder.getContext().getAuthentication().getName());
       designDatasetService.copyDesignDatasets(dataflowIdOrigin, dataflowIdDestination);
     } catch (EEAException e) {
-      /*
-       * datasetService.releaseLock(LockSignature.COPY_DATASET_SCHEMA.getValue(), dataflowIdOrigin,
-       * dataflowIdDestination);
-       */
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
