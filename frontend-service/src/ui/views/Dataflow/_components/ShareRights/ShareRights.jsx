@@ -137,7 +137,7 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
 
   const onWritePermissionChange = async (contributor, newWritePermission) => {
     const { contributors } = shareRightsState;
-    const [thisContributor] = contributors.filter(thisContributor => thisContributor.account === contributor.account);
+    const [thisContributor] = contributors.filter(thisContributor => thisContributor.id === contributor.id);
     thisContributor.writePermission = newWritePermission;
 
     if (!shareRightsState.accountHasError) {
