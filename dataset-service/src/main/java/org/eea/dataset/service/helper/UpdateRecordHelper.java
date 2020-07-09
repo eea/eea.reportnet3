@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -186,18 +185,6 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     releaseKafkaEvent(EventType.COMMAND_EXECUTE_NEW_DESIGN_FIELD_PROPAGATION, value);
 
   }
-
-
-  /**
-   * Save all records.
-   *
-   * @param datasetId the dataset id
-   * @param listaGeneral the lista general
-   */
-  public void saveAllRecords(Long datasetId, List<RecordValue> listaGeneral) {
-    datasetService.saveAllRecords(datasetId, listaGeneral);
-  }
-
 
 
 }
