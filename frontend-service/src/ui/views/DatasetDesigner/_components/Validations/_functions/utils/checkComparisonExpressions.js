@@ -5,7 +5,7 @@ import last from 'lodash/last';
 const checkLastExpressionWithUnion = expression => {
   const { valueTypeSelector, field2 } = expression;
   let cField2 = field2;
-  if (valueTypeSelector === 'value') cField2 = field2.toString();
+  if (valueTypeSelector === 'value' && field2) cField2 = field2.toString();
   return (
     isEmpty(expression.union) ||
     isEmpty(expression.field1) ||
