@@ -21,9 +21,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -66,8 +65,7 @@ public interface DatasetController {
    *
    * @param dataset the dataset
    */
-  @RequestMapping(value = "/update", method = RequestMethod.PUT,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
   void updateDataset(@RequestBody DataSetVO dataset);
 
 
@@ -109,7 +107,7 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @return the by id
    */
-  @RequestMapping(value = "{id}", method = RequestMethod.GET)
+  @GetMapping(value = "{id}")
   DataSetVO getById(@PathVariable("id") Long datasetId);
 
   /**
@@ -128,7 +126,7 @@ public interface DatasetController {
    * @param idTableSchema the id table schema
    * @param records the records
    */
-  @RequestMapping(value = "/{id}/table/{idTableSchema}/record", method = RequestMethod.POST,
+  @PostMapping(value = "/{id}/table/{idTableSchema}/record",
       produces = MediaType.APPLICATION_JSON_VALUE)
   void insertRecords(@PathVariable("id") final Long datasetId,
       @PathVariable("idTableSchema") final String idTableSchema,
@@ -140,8 +138,7 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param records the records
    */
-  @RequestMapping(value = "/{id}/updateRecord", method = RequestMethod.PUT,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(value = "/{id}/updateRecord", produces = MediaType.APPLICATION_JSON_VALUE)
   void updateRecords(@PathVariable("id") Long datasetId, @RequestBody List<RecordVO> records);
 
   /**
@@ -150,8 +147,7 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param recordId the record id
    */
-  @RequestMapping(value = "/{id}/record/{recordId}", method = RequestMethod.DELETE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @DeleteMapping(value = "/{id}/record/{recordId}", produces = MediaType.APPLICATION_JSON_VALUE)
   void deleteRecord(@PathVariable("id") Long datasetId, @PathVariable("recordId") String recordId);
 
   /**
@@ -197,8 +193,7 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param field the field
    */
-  @RequestMapping(value = "/{id}/updateField", method = RequestMethod.PUT,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(value = "/{id}/updateField", produces = MediaType.APPLICATION_JSON_VALUE)
   void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field);
 
   /**

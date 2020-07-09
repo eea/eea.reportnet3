@@ -56,8 +56,7 @@ public interface DatasetSchemaController {
    * @param datasetId the dataset id
    * @return the data set schema VO
    */
-  @RequestMapping(value = "/datasetId/{datasetId}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/datasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetSchemaVO findDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId);
 
   /**
@@ -271,7 +270,7 @@ public interface DatasetSchemaController {
    *
    * @param dataflowIdOrigin the dataflow id origin
    * @param dataflowIdDestination the dataflow id destination
-   * 
+   *
    *        Copy the design datasets of a dataflow (origin) into the current dataflow (target) It's
    *        an async call. It sends a notification when all the process it's done
    */
