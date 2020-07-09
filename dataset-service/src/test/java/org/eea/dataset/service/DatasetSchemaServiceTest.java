@@ -403,39 +403,41 @@ public class DatasetSchemaServiceTest {
   }
 
   /**
-   * Creates the field schema test 1.
+   * Creates the field schema test.
    *
    * @throws EEAException the EEA exception
    */
   @Test
-  public void createFieldSchemaTest1() throws EEAException {
+  public void createFieldSchemaTest() throws EEAException {
+    ReferencedFieldSchemaVO referencedField = new ReferencedFieldSchemaVO();
+    referencedField.setIdDatasetSchema("5eb4269d06390651aced7c93");
+    referencedField.setIdPk("5eb4269d06390651aced7c93");
+
+    String[] codelistItems = new String[] {"item1", "item2", "item3"};
+
+    FieldSchemaVO field = new FieldSchemaVO();
+    field.setReferencedField(referencedField);
+    field.setCodelistItems(codelistItems);
+    field.setType(DataType.CODELIST);
+
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any())).thenReturn(null);
     Mockito.when(schemasRepository.createFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
-    Assert.assertNotNull(dataSchemaServiceImpl.createFieldSchema("<id>", new FieldSchemaVO()));
+
+    String response = dataSchemaServiceImpl.createFieldSchema("5eb4269d06390651aced7c93", field);
+    Assert.assertNotEquals("", response);
   }
 
   /**
-   * Creates the field schema test 2.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void createFieldSchemaTest2() throws EEAException {
-    Mockito.when(schemasRepository.createFieldSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
-    Assert.assertEquals("", dataSchemaServiceImpl.createFieldSchema("<id>", new FieldSchemaVO()));
-  }
-
-  /**
-   * Creates the field schema test 3.
+   * Creates the field schema exception test.
    *
    * @throws EEAException the EEA exception
    */
   @Test(expected = EEAException.class)
-  public void createFieldSchemaTest3() throws EEAException {
+  public void createFieldSchemaExceptionTest() throws EEAException {
     Mockito.when(schemasRepository.createFieldSchema(Mockito.any(), Mockito.any()))
         .thenThrow(IllegalArgumentException.class);
-    dataSchemaServiceImpl.createFieldSchema("<id>", new FieldSchemaVO());
+    dataSchemaServiceImpl.createFieldSchema("5eb4269d06390651aced7c93", new FieldSchemaVO());
   }
 
   /**
@@ -1438,12 +1440,20 @@ public class DatasetSchemaServiceTest {
     Mockito.verify(pkCatalogueRepository, times(1)).findByIdPk(Mockito.any());
   }
 
+  /**
+   * Creates the unique constraint test.
+   */
   @Test
   public void createUniqueConstraintTest() {
     dataSchemaServiceImpl.createUniqueConstraint(new UniqueConstraintVO());
     Mockito.verify(uniqueConstraintRepository, times(1)).save(Mockito.any());
   }
 
+  /**
+   * Delete unique constraint test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void deleteUniqueConstraintTest() throws EEAException {
     Mockito.when(uniqueConstraintRepository.findById(Mockito.any()))
@@ -1454,6 +1464,9 @@ public class DatasetSchemaServiceTest {
     Mockito.verify(uniqueConstraintRepository, times(1)).deleteByUniqueId(Mockito.any());
   }
 
+  /**
+   * Update unique constraint test.
+   */
   @Test
   public void updateUniqueConstraintTest() {
     UniqueConstraintVO unique = new UniqueConstraintVO();
@@ -1463,6 +1476,11 @@ public class DatasetSchemaServiceTest {
     Mockito.verify(uniqueConstraintRepository, times(1)).save(Mockito.any());
   }
 
+  /**
+   * Gets the unique constraints test.
+   *
+   * @return the unique constraints test
+   */
   @Test
   public void getUniqueConstraintsTest() {
     List<UniqueConstraintVO> uniques = new ArrayList<>();
@@ -1472,6 +1490,12 @@ public class DatasetSchemaServiceTest {
 
   }
 
+  /**
+   * Gets the unique constraint test.
+   *
+   * @return the unique constraint test
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void getUniqueConstraintTest() throws EEAException {
     String id = new ObjectId().toString();
@@ -1483,6 +1507,11 @@ public class DatasetSchemaServiceTest {
     }
   }
 
+  /**
+   * Delete uniques constraint from field.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void deleteUniquesConstraintFromField() throws EEAException {
     List<UniqueConstraintVO> uniques = new ArrayList<>();
@@ -1505,6 +1534,11 @@ public class DatasetSchemaServiceTest {
   }
 
 
+  /**
+   * Delete uniques constraint from table.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void deleteUniquesConstraintFromTable() throws EEAException {
     List<UniqueConstraintSchema> uniques = new ArrayList<>();
@@ -1520,6 +1554,11 @@ public class DatasetSchemaServiceTest {
     Mockito.verify(uniqueConstraintRepository, times(1)).deleteByUniqueId(Mockito.any());
   }
 
+  /**
+   * Delete uniques constraint from dataset.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void deleteUniquesConstraintFromDataset() throws EEAException {
     List<UniqueConstraintVO> uniques = new ArrayList<>();
@@ -1539,6 +1578,11 @@ public class DatasetSchemaServiceTest {
     Mockito.verify(uniqueConstraintRepository, times(1)).deleteByUniqueId(Mockito.any());
   }
 
+  /**
+   * Delete only unique constraint from field one test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void deleteOnlyUniqueConstraintFromFieldOneTest() throws EEAException {
     List<UniqueConstraintVO> uniques = new ArrayList<>();
@@ -1560,6 +1604,11 @@ public class DatasetSchemaServiceTest {
     Mockito.verify(uniqueConstraintRepository, times(1)).deleteByUniqueId(Mockito.any());
   }
 
+  /**
+   * Delete only unique constraint from field not found test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void deleteOnlyUniqueConstraintFromFieldNotFoundTest() throws EEAException {
     List<UniqueConstraintVO> uniques = new ArrayList<>();
@@ -1576,6 +1625,9 @@ public class DatasetSchemaServiceTest {
     Mockito.verify(uniqueConstraintRepository, times(0)).deleteByUniqueId(Mockito.any());
   }
 
+  /**
+   * Creates the unique constraint PK test.
+   */
   @Test
   public void createUniqueConstraintPKTest() {
     ObjectId idRecord = new ObjectId();
@@ -1598,6 +1650,9 @@ public class DatasetSchemaServiceTest {
         Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test copy unique constraints catalogue.
+   */
   @Test
   public void testCopyUniqueConstraintsCatalogue() {
     String datasetSchemaId = "5ce524fad31fc52540abae73";

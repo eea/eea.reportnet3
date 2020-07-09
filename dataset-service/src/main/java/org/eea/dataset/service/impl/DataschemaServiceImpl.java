@@ -37,7 +37,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
-import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -49,7 +48,6 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
-import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
@@ -75,10 +73,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The resource management controller zull. */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
-
-  /** The user management controller zull. */
-  @Autowired
-  private UserManagementControllerZull userManagementControllerZull;
 
   /** The data flow controller zuul. */
   @Autowired
@@ -187,26 +181,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
         .getGroupsByIdResourceType(datasetId, ResourceTypeEnum.DATA_SCHEMA);
     resourceManagementControllerZull.deleteResource(resourceCustodian);
-  }
-
-
-  /**
-   * Creates the group.
-   *
-   * @param datasetId the dataset id
-   * @param type the type
-   * @param role the role
-   *
-   * @return the resource info VO
-   */
-  private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
-
-    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
-    resourceInfoVO.setResourceId(datasetId);
-    resourceInfoVO.setResourceTypeEnum(type);
-    resourceInfoVO.setSecurityRoleEnum(role);
-
-    return resourceInfoVO;
   }
 
   /**
@@ -515,8 +489,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       if (fieldSchemaVO.getReferencedField() != null) {
         // We need to update the fieldSchema is referenced, the property isPKreferenced to true
-        this.updateIsPkReferencedInFieldSchema(
-            fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
+        updateIsPkReferencedInFieldSchema(fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
             fieldSchemaVO.getReferencedField().getIdPk(), true);
       }
       // we create this if to clean blank space at begining and end of any codelistItem
