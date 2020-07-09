@@ -86,9 +86,12 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
       type: 'SET_ACCOUNT_HAS_ERROR',
       payload: { accountHasError: !isValidEmail(contributor.account) || isExistingAccount(contributor.account) }
     });
-
-    if (contributor.writePermission !== '' && !shareRightsState.accountHasError) {
+    if (!contributor.isNew) {
       onUpdateContributor(contributor);
+    } else {
+      if (isValidEmail(contributor.account) && !shareRightsState.accountHasError) {
+        onUpdateContributor(contributor);
+      }
     }
   };
 
@@ -128,7 +131,7 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
         }
       } catch (error) {
         notificationContext.add({ type: 'UPDATE_CONTRIBUTOR_ERROR' });
-        if (error.status >= 400 && error.status <= 404) {
+        if (error.response.status === 404) {
           shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError: true } });
         }
       }
@@ -142,10 +145,6 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
 
     if (!shareRightsState.accountHasError) {
       shareRightsDispatch({ type: 'ON_WRITE_PERMISSION_CHANGE', payload: { contributors } });
-    }
-
-    if (isValidEmail(contributor.account) && !shareRightsState.accountHasError) {
-      onUpdateContributor(thisContributor);
     }
   };
 
@@ -211,7 +210,10 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
     const hasError =
       !isEmpty(contributor.account) &&
       contributor.isNew &&
-      (!isValidEmail(contributor.account) || isExistingAccount(contributor.account));
+      (!isValidEmail(contributor.account) ||
+        isExistingAccount(contributor.account) ||
+        shareRightsState.accountHasError);
+
     return (
       <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
         <input
