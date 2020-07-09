@@ -54,11 +54,11 @@ export const EuHeader = ({ globanElementStyle, euHeaderElementStyle }) => {
           </a>
         </div>
         <div className={styles.searchBarWrapper}>
-          <div className={styles.language}>English</div>
-          <div className={styles.searchBar}>
+          {/* <div className={styles.language}>English</div> */}
+          {/* <div className={styles.searchBar}>
             <InputText onChange={e => setSearchInput(e.target.value)} />
             <button onClick={e => onSearch()}>Search...</button>
-          </div>
+          </div> */}
         </div>
       </div>
     </Fragment>

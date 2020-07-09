@@ -149,12 +149,12 @@ export const EuFooter = ({ leftMargin }) => {
           <div className={styles.footerTop}>
             {topContent.map(block => {
               return (
-                <div className={styles.contentBlock}>
+                <div key={block.blockTitle} className={styles.contentBlock}>
                   <h3>{block.blockTitle}</h3>
                   <div className={styles.linksWrapper}>
                     {block.content.map(blockContent => {
                       return (
-                        <p>
+                        <p key={blockContent.title}>
                           <a href={blockContent.url}>{blockContent.title}</a>
                         </p>
                       );
@@ -168,7 +168,7 @@ export const EuFooter = ({ leftMargin }) => {
         <div className={styles.footerBottom}>
           <div className="rep-container">
             {bottomContent.map(link => {
-              return <a href={link.url}>{link.title}</a>;
+              return <a key={link.title} href={link.url}>{link.title}</a>;
             })}
           </div>
         </div>
