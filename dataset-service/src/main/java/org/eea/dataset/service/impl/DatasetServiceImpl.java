@@ -60,6 +60,7 @@ import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
+import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -301,6 +302,10 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
+
+  /** The update record helper. */
+  @Autowired
+  private UpdateRecordHelper updateRecordHelper;
 
   /**
    * Process file.
@@ -2029,7 +2034,7 @@ public class DatasetServiceImpl implements DatasetService {
             // save values
             TenantResolver
                 .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset));
-            saveAllRecords(targetDataset, recordDesignValuesList);
+            updateRecordHelper.saveAllRecords(targetDataset, recordDesignValuesList);
           }
         }
       }
