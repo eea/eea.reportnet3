@@ -63,8 +63,12 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
+      console.log({ userRoles });
       setIsCustodian(
-        userRoles.includes(config.permissions['CUSTODIAN']) || userRoles.includes(config.permissions['DATA_STEWARD'])
+        userRoles.includes(config.permissions['DATA_CUSTODIAN']) ||
+          userRoles.includes(config.permissions['DATA_STEWARD']) ||
+          userRoles.includes(config.permissions['EDITOR_WRITE']) ||
+          userRoles.includes(config.permissions['EDITOR_READ'])
       );
     }
   }, [userContext]);
@@ -157,7 +161,9 @@ export const DataflowHelp = withRouter(({ match, history }) => {
 
   const onLoadDatasetSchema = async datasetId => {
     try {
+      console.log({ datasetId });
       const datasetSchema = await DatasetService.schemaById(datasetId);
+      console.log({ datasetSchema });
       if (!isEmpty(datasetSchema)) {
         if (isCustodian) {
           const datasetMetaData = await DatasetService.getMetaData(datasetId);
@@ -184,6 +190,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const onLoadDatasetsSchemas = async () => {
     try {
       const dataflow = await DataflowService.reporting(dataflowId);
+      console.log({ isCustodian });
       if (!isCustodian) {
         if (!isEmpty(dataflow.datasets)) {
           const uniqueDatasetSchemas = dataflow.datasets.filter((dataset, pos, arr) => {

@@ -460,7 +460,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param datasetId the dataset id
    */
   @Override
-  public void createSchemaGroupAndAddUser(Long datasetId) {
+  public void createSchemaGroup(Long datasetId) {
 
     // Create group Dataschema-X-DATA_CUSTODIAN
     resourceManagementControllerZuul.createResource(
@@ -470,12 +470,19 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     resourceManagementControllerZuul.createResource(
         createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.LEAD_REPORTER));
 
+    // Create group Dataschema-X-REPORTER_READ
     resourceManagementControllerZuul.createResource(
         createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.REPORTER_READ));
 
-    // Add user to new group Dataschema-X-DATA_CUSTODIAN
-    userManagementControllerZuul.addUserToResource(datasetId,
-        ResourceGroupEnum.DATASCHEMA_CUSTODIAN);
+    // Create group Dataschema-X-EDITOR_READ
+    resourceManagementControllerZuul.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.EDITOR_READ));
+
+    // Create group Dataschema-X-EDITOR_WRITE
+    resourceManagementControllerZuul.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.EDITOR_WRITE));
+
+
   }
 
 
@@ -530,7 +537,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
             designDatasetRepository.save((DesignDataset) dataset);
             recordStoreControllerZull.createEmptyDataset(
                 LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
-            this.createSchemaGroupAndAddUser(dataset.getId());
+            this.createSchemaGroup(dataset.getId());
             idDesignDataset = dataset.getId();
             break;
           case COLLECTION:

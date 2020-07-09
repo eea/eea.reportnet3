@@ -3,7 +3,6 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 
 const apiContributor = {
   all: async (dataflowId, dataProviderId = '') => {

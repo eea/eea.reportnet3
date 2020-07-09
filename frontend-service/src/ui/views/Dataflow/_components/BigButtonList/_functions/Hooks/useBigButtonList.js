@@ -192,6 +192,7 @@ const useBigButtonList = ({
     onSaveName: onSaveName,
     onWheel: getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true),
     placeholder: resources.messages['datasetSchemaNamePlaceholder'],
+    tooltip: !buttonsVisibility.designDatasetsActions ? resources.messages['accessDenied'] : '',
     visibility:
       !isUndefined(dataflowState.data.designDatasets) &&
       isEmpty(dataflowState.data.dataCollections) &&
