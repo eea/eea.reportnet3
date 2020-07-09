@@ -1,14 +1,15 @@
-import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useState, useReducer, useRef } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uuid from 'uuid';
 
+import styles from './ShareRights.module.scss';
+
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
-import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { Contributor } from 'core/domain/model/Contributor/Contributor';
@@ -18,8 +19,6 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { shareRightsReducer } from './_functions/Reducers/shareRightsReducer';
-
-import { useInputTextFocus } from 'ui/views/_functions/Hooks/useInputTextFocus';
 
 export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => {
   const { dataProviderId, isCustodian, isShareRightsDialogVisible } = dataflowState;
@@ -37,6 +36,8 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
     isDataUpdated: false,
     isDeleteDialogVisible: false
   });
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const deleteConfirmMessage =
     resources.messages[`${isCustodian ? 'editors' : 'reporters'}RightsDialogConfirmDeleteQuestion`];
@@ -124,6 +125,7 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
   const onUpdateContributor = async contributor => {
     if (contributor.writePermission !== '') {
       const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
+      setIsLoading(true);
       try {
         const response = await ContributorService.update(contributor, dataflowId, dataProvider);
         if (response.status >= 200 && response.status <= 299) {
@@ -134,6 +136,8 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
         if (error.response.status === 404) {
           shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError: true } });
         }
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -219,6 +223,7 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
         <input
           autoFocus={contributor.isNew}
           disabled={!contributor.isNew}
+          className={!contributor.isNew && styles.disabledInput}
           id={isEmpty(contributor.account) ? 'emptyInput' : contributor.account}
           onBlur={() => updateContributor(contributor)}
           onChange={event => onSetAccount(event.target.value)}
@@ -235,18 +240,24 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
         {isEmpty(shareRightsState.contributors) ? (
           <Spinner style={{ top: 0 }} />
         ) : (
-          <DataTable value={shareRightsState.contributors}>
-            <Column
-              body={renderAccountTemplate}
-              header={
-                dataflowState.isCustodian
-                  ? resources.messages['editorsAccountColumn']
-                  : resources.messages['reportersAccountColumn']
-              }
-            />
-            <Column body={renderWritePermissionsColumnTemplate} header={resources.messages['writePermissionsColumn']} />
-            <Column body={renderDeleteColumnTemplate} style={{ width: '60px' }} />
-          </DataTable>
+          <div className={styles.table}>
+            {isLoading && <Spinner className={styles.spinner} style={{ top: 0, left: 0, zIndex: 6000 }} />}
+            <DataTable value={shareRightsState.contributors}>
+              <Column
+                body={renderAccountTemplate}
+                header={
+                  dataflowState.isCustodian
+                    ? resources.messages['editorsAccountColumn']
+                    : resources.messages['reportersAccountColumn']
+                }
+              />
+              <Column
+                body={renderWritePermissionsColumnTemplate}
+                header={resources.messages['writePermissionsColumn']}
+              />
+              <Column body={renderDeleteColumnTemplate} style={{ width: '60px' }} />
+            </DataTable>
+          </div>
         )}
       </div>
 
