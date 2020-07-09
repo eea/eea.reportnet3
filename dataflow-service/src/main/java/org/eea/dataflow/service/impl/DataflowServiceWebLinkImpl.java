@@ -82,9 +82,8 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
         .getResourcesByUser(ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN);
 
     // get idDataflow
-    if (!resources.stream().filter(resourceAccessVO -> {
-      return resourceAccessVO.getId().equals(dataFlowId);
-    }).findFirst().isPresent()) {
+    if (resources.stream()
+        .noneMatch(resourceAccessVO -> resourceAccessVO.getId().equals(dataFlowId))) {
       throw new ResourceNoFoundException(EEAErrorMessage.FORBIDDEN);
     }
 
@@ -149,9 +148,8 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
         .getResourcesByUser(ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN);
 
     // get idDataflow
-    if (!resources.stream().filter(resourceAccessVO -> {
-      return resourceAccessVO.getId().equals(dataFlowId);
-    }).findFirst().isPresent()) {
+    if (!resources.stream()
+        .noneMatch(resourceAccessVO -> resourceAccessVO.getId().equals(dataFlowId))) {
       throw new ResourceNoFoundException(EEAErrorMessage.FORBIDDEN);
     }
 
@@ -192,9 +190,8 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
       throw new WrongDataExceptions(EEAErrorMessage.URL_FORMAT_INCORRECT);
     }
     // get idDataflow
-    if (!resources.stream().filter(resourceAccessVO -> {
-      return resourceAccessVO.getId().equals(dataFlowId);
-    }).findFirst().isPresent()) {
+    if (!resources.stream()
+        .noneMatch(resourceAccessVO -> resourceAccessVO.getId().equals(dataFlowId))) {
       throw new ResourceNoFoundException(EEAErrorMessage.FORBIDDEN);
     }
 
