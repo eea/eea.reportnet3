@@ -1,10 +1,5 @@
 package org.eea.dataflow.integration.executor.fme.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.common.io.ByteSource;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,15 +9,11 @@ import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
 import org.eea.dataflow.integration.executor.fme.domain.SubmitResult;
 import org.eea.utils.LiteralConstants;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -95,8 +86,7 @@ public class FMECommunicationService {
     headerInfo.put("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
     headerInfo.put("Content-Type", "application/octet-stream");
     headerInfo.put("Accept", "application/json");
-    HttpEntity<byte[]> request =
-        createHttpRequest(file, uriParams, headerInfo);
+    HttpEntity<byte[]> request = createHttpRequest(file, uriParams, headerInfo);
     RestTemplate restTemplate = new RestTemplate();
     ResponseEntity<FileSubmitResult> checkResult = restTemplate.exchange(uriComponentsBuilder
         .scheme(fmeScheme).host(fmeHost)
