@@ -395,14 +395,14 @@ public class ContributorServiceImpl implements ContributorService {
               ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE));
         }
       }
-      userManagementControllerZull.addContributorsToResources(resources);
-
       LOG.info("Create role editor for dataflow {} with the dataset id {}", dataflowId, datasetId);
     } else {
       LOG.info(
           "Didn't create role editor for dataflow {} with the dataset id {}, because it hasn't editors associated",
           dataflowId, datasetId);
     }
+    // we add all contributors to all users
+    userManagementControllerZull.addContributorsToResources(resources);
   }
 
 }
