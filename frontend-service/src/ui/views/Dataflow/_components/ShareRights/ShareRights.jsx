@@ -33,6 +33,7 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
     accountHasError: false,
     contributorAccountToDelete: '',
     contributors: [],
+    isContributorDeleting: false,
     isDataUpdated: false,
     isDeleteDialogVisible: false
   });
@@ -84,6 +85,7 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
   };
 
   const onDeleteContributor = async () => {
+    onToggleDeletingContributor(true);
     const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
     try {
       const response = await ContributorService.deleteContributor(
@@ -99,6 +101,7 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
 
       notificationContext.add({ type: notificationKey });
     } finally {
+      onToggleDeletingContributor(false);
       shareRightsDispatch({ type: 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG', payload: { isDeleteDialogVisible: false } });
     }
   };
@@ -145,6 +148,10 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
       type: 'ON_SET_ACCOUNT',
       payload: { contributors, accountHasError: !isValidEmail(inputValue) }
     });
+  };
+
+  const onToggleDeletingContributor = value => {
+    shareRightsDispatch({ type: 'TOGGLE_DELETING_CONTRIBUTOR', payload: { isDeleting: value } });
   };
 
   const renderDeleteColumnTemplate = contributor =>
@@ -233,7 +240,9 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
       {shareRightsState.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={shareRightsState.isContributorDeleting}
           header={deleteConfirmHeader}
+          iconConfirm={shareRightsState.isContributorDeleting ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteContributor()}
