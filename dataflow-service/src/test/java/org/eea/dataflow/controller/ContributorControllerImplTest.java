@@ -211,6 +211,8 @@ public class ContributorControllerImplTest {
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(userRepresentationVO);
     contributorControllerImpl.deleteReporter(1L, 1L, contributorVORead);
+    Mockito.verify(contributorService, times(1)).deleteContributor(1L, "read@reportnet.net",
+        "REPORTER", 1L);
   }
 
   /**
