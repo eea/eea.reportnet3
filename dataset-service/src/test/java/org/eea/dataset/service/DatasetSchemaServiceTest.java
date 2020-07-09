@@ -53,6 +53,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -1671,5 +1672,57 @@ public class DatasetSchemaServiceTest {
     dataSchemaServiceImpl.copyUniqueConstraintsCatalogue(Arrays.asList(datasetSchemaId),
         dictionaryOriginTargetObjectId);
     Mockito.verify(uniqueConstraintRepository, times(1)).save(Mockito.any());
+  }
+
+  /**
+   * Update field schema link test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateFieldSchemaLinkTest() throws EEAException {
+    FieldSchemaVO fieldSchemaVO = Mockito.mock(FieldSchemaVO.class);
+    Document document = Mockito.mock(Document.class);
+    PkCatalogueSchema catalogue = Mockito.mock(PkCatalogueSchema.class);
+    DataSetSchema datasetSchema = Mockito.mock(DataSetSchema.class);
+    String[] codelistItems = new String[] {"item1", "item2", "item3"};
+    ReferencedFieldSchemaVO referenced = Mockito.mock(ReferencedFieldSchemaVO.class);
+    Mockito.when(fieldSchemaVO.getId()).thenReturn("5ce524fad31fc52540abae73");
+    Mockito.when(fieldSchemaVO.getPk()).thenReturn(Boolean.TRUE);
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(document);
+    Mockito.when(document.get(LiteralConstants.TYPE_DATA)).thenReturn(DataType.LINK.getValue());
+    Mockito.when(document.get(LiteralConstants.REFERENCED_FIELD)).thenReturn(document);
+    Mockito.when(document.get("idPk")).thenReturn(new ObjectId("5ce524fad31fc52540abae73"));
+    Mockito.when(document.get("_id")).thenReturn(new ObjectId("5ce524fad31fc52540abae73"));
+    Mockito.when(document.get(LiteralConstants.ID_DATASET_SCHEMA))
+        .thenReturn(new ObjectId("5ce524fad31fc52540abae73"));
+    Mockito.when(pkCatalogueRepository.findByIdPk(Mockito.any())).thenReturn(catalogue);
+    Mockito.when(catalogue.getReferenced()).thenReturn(new ArrayList<>());
+    Mockito.when(catalogue.getIdPk()).thenReturn(null);
+    Mockito.doNothing().when(pkCatalogueRepository).deleteByIdPk(Mockito.any());
+    Mockito.when(pkCatalogueRepository.save(Mockito.any())).thenReturn(null);
+    Mockito.when(document.put("pkReferenced", Boolean.FALSE)).thenReturn(null);
+    Mockito.when(schemasRepository.updateFieldSchema(Mockito.anyString(), Mockito.any()))
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
+    Mockito.when(document.get(LiteralConstants.PK)).thenReturn(Boolean.FALSE);
+    Mockito.when(document.get("idRecord")).thenReturn(new ObjectId("5ce524fad31fc52540abae73"));
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
+    Mockito.when(datasetSchema.getTableSchemas()).thenReturn(new ArrayList<>());
+    Mockito.when(fieldSchemaVO.getType()).thenReturn(DataType.NUMBER_DECIMAL);
+    Mockito.when(document.put(LiteralConstants.TYPE_DATA, DataType.NUMBER_DECIMAL.getValue()))
+        .thenReturn(DataType.TEXT.getValue());
+    Mockito.when(document.containsKey(LiteralConstants.CODELIST_ITEMS)).thenReturn(true);
+    Mockito.when(document.remove(Mockito.any())).thenReturn(null);
+    Mockito.when(fieldSchemaVO.getDescription()).thenReturn("");
+    Mockito.when(document.put("description", "")).thenReturn(null);
+    Mockito.when(fieldSchemaVO.getName()).thenReturn("");
+    Mockito.when(document.put("headerName", "")).thenReturn(null);
+    Mockito.when(fieldSchemaVO.getCodelistItems()).thenReturn(codelistItems);
+    Mockito.when(fieldSchemaVO.getReferencedField()).thenReturn(referenced);
+    Mockito.when(referenced.getIdDatasetSchema()).thenReturn("5ce524fad31fc52540abae73");
+    Mockito.when(referenced.getIdPk()).thenReturn("5ce524fad31fc52540abae73");
+    Assert.assertEquals(DataType.NUMBER_DECIMAL,
+        dataSchemaServiceImpl.updateFieldSchema("5ce524fad31fc52540abae73", fieldSchemaVO));
   }
 }

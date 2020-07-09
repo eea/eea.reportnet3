@@ -554,7 +554,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
                 // was
                 // the only field that was FK
                 if (catalogue.getReferenced() != null && catalogue.getReferenced().isEmpty()) {
-                  this.updateIsPkReferencedInFieldSchema(previousIdDatasetReferenced, previousIdPk,
+                  updateIsPkReferencedInFieldSchema(previousIdDatasetReferenced, previousIdPk,
                       false);
                 }
 
