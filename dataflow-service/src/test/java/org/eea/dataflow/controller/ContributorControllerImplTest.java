@@ -163,7 +163,7 @@ public class ContributorControllerImplTest {
     try {
       contributorControllerImpl.deleteEditor(1L, contributorVOWrite);
     } catch (ResponseStatusException ex) {
-      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
       assertEquals("The email write@reportnet.net doesn't exist in repornet", ex.getReason());
       throw ex;
     }

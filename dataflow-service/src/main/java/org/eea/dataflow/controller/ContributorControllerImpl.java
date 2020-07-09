@@ -223,7 +223,7 @@ public class ContributorControllerImpl implements ContributorController {
       LOG_ERROR.error(
           "Error creating contributor with the account: {} in the dataflow {} because the email doesn't exist in the system",
           account, dataflowId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, new StringBuilder("The email ")
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, new StringBuilder("The email ")
           .append(account).append(" doesn't exist in repornet").toString());
     }
   }
