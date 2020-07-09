@@ -28,6 +28,9 @@ export const shareRightsReducer = (state, { type, payload }) => {
     case 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG':
       return { ...state, isDeleteDialogVisible: payload.isDeleteDialogVisible };
 
+    case 'TOGGLE_DELETING_CONTRIBUTOR':
+      return { ...state, isContributorDeleting: payload.isDeleting };
+
     default:
       return state;
   }

@@ -66,9 +66,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       console.log({ userRoles });
       setIsCustodian(
         userRoles.includes(config.permissions['DATA_CUSTODIAN']) ||
-          userRoles.includes(config.permissions['DATA_STEWARD']) ||
-          userRoles.includes(config.permissions['EDITOR_WRITE']) ||
-          userRoles.includes(config.permissions['EDITOR_READ'])
+          userRoles.includes(config.permissions['DATA_STEWARD'])
       );
     }
   }, [userContext]);
