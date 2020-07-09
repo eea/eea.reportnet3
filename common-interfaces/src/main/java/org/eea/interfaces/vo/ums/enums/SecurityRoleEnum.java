@@ -72,6 +72,6 @@ public enum SecurityRoleEnum {
   @JsonCreator
   public static SecurityRoleEnum fromValue(String value) {
     return Arrays.stream(SecurityRoleEnum.values()).filter(e -> e.role.equals(value)).findFirst()
-        .get();
+        .orElse(null);
   }
 }

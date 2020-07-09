@@ -139,7 +139,12 @@ public class FKValidationUtils {
         schemasRepository.findByIdDataSetSchema(new ObjectId(fkSchemaId));
     FieldSchema idFieldSchemaPk = getPKFieldFromFKField(datasetSchemaFK, idFieldSchema);
 
-    String idFieldSchemaPKString = idFieldSchemaPk.getReferencedField().getIdPk().toString();
+    String idFieldSchemaPKString = "";
+    if (null != idFieldSchemaPk && null != idFieldSchemaPk.getReferencedField()
+        && null != idFieldSchemaPk.getReferencedField().getIdPk()) {
+      idFieldSchemaPKString = idFieldSchemaPk.getReferencedField().getIdPk().toString();
+    }
+
 
     FieldSchema fkFieldSchema = getPKFieldSchemaFromSchema(datasetSchemaFK, idFieldSchema);
 
