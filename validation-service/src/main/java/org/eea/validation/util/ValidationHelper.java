@@ -11,7 +11,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import javax.annotation.PostConstruct;
-import lombok.AllArgsConstructor;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.ConsumerGroupVO;
@@ -40,6 +39,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import lombok.AllArgsConstructor;
 
 /**
  * The Class ValidationHelper.
@@ -192,9 +192,8 @@ public class ValidationHelper implements DisposableBean {
    * @param isCoordinator the is coordinator
    */
   public void initializeProcess(String processId, boolean isCoordinator) {
-    ValidationProcessVO process =
-        new ValidationProcessVO(0, new ConcurrentLinkedDeque<>(), null, isCoordinator,
-            (String) ThreadPropertiesManager.getVariable("user"));
+    ValidationProcessVO process = new ValidationProcessVO(0, new ConcurrentLinkedDeque<>(), null,
+        isCoordinator, (String) ThreadPropertiesManager.getVariable("user"));
     synchronized (processesMap) {
       processesMap.put(processId, process);
     }
@@ -265,9 +264,7 @@ public class ValidationHelper implements DisposableBean {
               }
               tasksToBeSent--;
             }
-            LOG.info(
-                "Sent next {} tasks for process {}",
-                sentTasks, processId);
+            LOG.info("Sent next {} tasks for process {}", sentTasks, processId);
           }
           LOG.info(
               "There are still {} tasks to be sent and {} pending Ok's to be received for process {}",
@@ -296,14 +293,12 @@ public class ValidationHelper implements DisposableBean {
    *
    * @throws EEAException the eea exception
    */
-  public void processValidation(EEAEventVO eeaEventVO, String processId,
-      Long datasetId,
-      Validator validator, EventType notificationEventType)
-      throws EEAException {
+  public void processValidation(EEAEventVO eeaEventVO, String processId, Long datasetId,
+      Validator validator, EventType notificationEventType) throws EEAException {
     ValidationTask validationTask = new ValidationTask(eeaEventVO, validator, datasetId,
         this.getKieBase(processId, datasetId), processId, notificationEventType);
 
-    //first every task is always queued up to ensure the order
+    // first every task is always queued up to ensure the order
 
     if (((ThreadPoolExecutor) validationExecutorService).getActiveCount() == maxRunningTasks) {
       LOG.info(
@@ -493,7 +488,8 @@ public class ValidationHelper implements DisposableBean {
       Map<String, Object> value = new HashMap<>();
       value.put(LiteralConstants.DATASET_ID, datasetId);
       value.put("uuid", processId);
-      //Setting as user the requesting one as it is being taken from ThreadPropertiesManager and validation threads inheritances from it. This is a side effect.
+      // Setting as user the requesting one as it is being taken from ThreadPropertiesManager and
+      // validation threads inheritances from it. This is a side effect.
       value.put("user", notificationUser);
       Integer pendingValidations = processesMap.get(processId).getPendingValidations().size();
       if (pendingValidations > 0) {
@@ -507,8 +503,7 @@ public class ValidationHelper implements DisposableBean {
 
       kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value,
-          NotificationVO.builder().user(notificationUser)
-              .datasetId(datasetId).build());
+          NotificationVO.builder().user(notificationUser).datasetId(datasetId).build());
       isFinished = true;
     }
     return isFinished;
@@ -593,24 +588,22 @@ public class ValidationHelper implements DisposableBean {
 
       LOG.info(
           "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
-          validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads
-      );
+          validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
       try {
-        validationTask.validator
-            .performValidation(validationTask.eeaEventVO, validationTask.datasetId,
-                validationTask.kieBase);
+        validationTask.validator.performValidation(validationTask.eeaEventVO,
+            validationTask.datasetId, validationTask.kieBase);
       } catch (EEAException e) {
-        LOG_ERROR
-            .error("Error processing validations for dataset {} due to exception {}",
-                validationTask.datasetId,
-                e);
+        LOG_ERROR.error("Error processing validations for dataset {} due to exception {}",
+            validationTask.datasetId, e);
         validationTask.eeaEventVO.getData().put("error", e);
       } finally {
 
-        // if this is the coordinator validation instance, then no need to send message, just to update
+        // if this is the coordinator validation instance, then no need to send message, just to
+        // update
         // expected pending ok's and verify if process is finished
         if (isProcessCoordinator(validationTask.processId)) {
-          // if it's not finished a message with the next task will be sent as part of the reducePendingTasks execution
+          // if it's not finished a message with the next task will be sent as part of the
+          // reducePendingTasks execution
           try {
             reducePendingTasks(validationTask.datasetId, validationTask.processId);
           } catch (EEAException e) {
