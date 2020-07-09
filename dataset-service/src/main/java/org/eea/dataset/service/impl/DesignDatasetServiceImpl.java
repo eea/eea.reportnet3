@@ -23,6 +23,7 @@ import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
@@ -109,6 +110,11 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
 
+  /** The contributor controller zuul. */
+  @Autowired
+  private ContributorControllerZuul contributorControllerZuul;
+
+  /** The time to wait before continue copy. */
   @Value("${wait.continue.copy.ms}")
   private Long timeToWaitBeforeContinueCopy;
 
@@ -234,6 +240,8 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
           Thread.sleep(timeToWaitBeforeContinueCopy);
           fillAndUpdateDesignDatasetCopied(schemaVO, newIdDatasetSchema,
               dictionaryOriginTargetObjectId, datasetId.get(), mapDatasetIdFKRelations);
+          contributorControllerZuul.createAssociatedPermissions(idDataflowDestination,
+              datasetId.get());
         }
 
         // Modify the FK, if the schemas copied have fields of type Link, to update the relations to
