@@ -3,6 +3,7 @@ package org.eea.dataset.service;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.impl.DesignDatasetServiceImpl;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
@@ -54,21 +56,29 @@ import org.springframework.web.server.ResponseStatusException;
 public class DesignDatasetServiceTest {
 
 
-  /** The design dataset service. */
+  /**
+   * The design dataset service.
+   */
   @InjectMocks
   private DesignDatasetServiceImpl designDatasetService;
 
 
-  /** The design dataset repository. */
+  /**
+   * The design dataset repository.
+   */
   @Mock
   private DesignDatasetRepository designDatasetRepository;
 
 
-  /** The design dataset mapper. */
+  /**
+   * The design dataset mapper.
+   */
   @Mock
   private DesignDatasetMapper designDatasetMapper;
 
-  /** The file common. */
+  /**
+   * The file common.
+   */
   @Mock
   private FileCommonUtils fileCommon;
 
@@ -95,13 +105,16 @@ public class DesignDatasetServiceTest {
   private FieldSchemaNoRulesMapper fieldSchemaNoRulesMapper;
 
   @Mock
-  private DatasetSchemaController dataSchemaController;
+  private DatasetSchemaController datasetSchemaController;
 
   @Mock
   private RulesControllerZuul rulesControllerZuul;
 
   @Mock
   private IntegrationControllerZuul integrationControllerZuul;
+
+  @Mock
+  private ContributorControllerZuul contributorControllerZuul;
 
   /**
    * Inits the mocks.
@@ -212,7 +225,7 @@ public class DesignDatasetServiceTest {
     when(dataschemaService.createEmptyDataSetSchema(Mockito.anyLong())).thenReturn(new ObjectId());
     when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-            .thenReturn(CompletableFuture.completedFuture(1L));
+        .thenReturn(CompletableFuture.completedFuture(1L));
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
         .thenReturn(table);

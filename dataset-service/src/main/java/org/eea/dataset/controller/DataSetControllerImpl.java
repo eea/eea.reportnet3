@@ -209,7 +209,8 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-        && datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE)) {
+        && Boolean.TRUE.equals(
+            datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE))) {
       datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
       LOG_ERROR.error(
           "Error importing a file into a table of the dataset {}. The table is read only",
@@ -304,7 +305,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "{id}", method = RequestMethod.GET)
+  @GetMapping(value = "{id}")
   @Deprecated
   public DataSetVO getById(Long datasetId) {
     if (datasetId == null) {
@@ -353,8 +354,8 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-        && datasetService.getTableReadOnly(datasetId, records.get(0).getIdRecordSchema(),
-            EntityTypeEnum.RECORD)) {
+        && Boolean.TRUE.equals(datasetService.getTableReadOnly(datasetId,
+            records.get(0).getIdRecordSchema(), EntityTypeEnum.RECORD))) {
       LOG_ERROR.error("Error updating records in the datasetId {}. The table is read only",
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
@@ -383,7 +384,8 @@ public class DataSetControllerImpl implements DatasetController {
   public void deleteRecord(@PathVariable("id") final Long datasetId,
       @PathVariable("recordId") final String recordId) {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-        && datasetService.getTableReadOnly(datasetId, recordId, EntityTypeEnum.RECORD)) {
+        && Boolean.TRUE
+            .equals(datasetService.getTableReadOnly(datasetId, recordId, EntityTypeEnum.RECORD))) {
       LOG_ERROR.error("Error deleting record in the datasetId {}. The table is read only",
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
@@ -407,7 +409,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/{id}/table/{idTableSchema}/record", method = RequestMethod.POST,
+  @PostMapping(value = "/{id}/table/{idTableSchema}/record",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   public void insertRecords(@PathVariable("id") final Long datasetId,

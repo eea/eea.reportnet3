@@ -15,25 +15,52 @@ import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
 
+/**
+ * The Interface IntegrationMapper.
+ */
 @Mapper(componentModel = "spring")
 public interface IntegrationMapper extends IMapper<Integration, IntegrationVO> {
 
 
+  /**
+   * Entity to class.
+   *
+   * @param entity the entity
+   * @return the integration VO
+   */
   @Override
   IntegrationVO entityToClass(Integration entity);
 
 
+  /**
+   * Class to entity.
+   *
+   * @param model the model
+   * @return the integration
+   */
   @Override
   Integration classToEntity(IntegrationVO model);
 
+  /**
+   * Map internal.
+   *
+   * @param list the list
+   * @return the map
+   */
   default Map<String, String> mapInternal(List<InternalOperationParameters> list) {
-    Map<String, String> mapOperation = new HashMap<String, String>();
+    Map<String, String> mapOperation = new HashMap<>();
     for (InternalOperationParameters internal : list) {
       mapOperation.put(internal.getParameter(), internal.getValue());
     }
     return mapOperation;
   }
 
+  /**
+   * Map internal.
+   *
+   * @param map the map
+   * @return the list
+   */
   default List<InternalOperationParameters> mapInternal(Map<String, String> map) {
     List<InternalOperationParameters> list = new ArrayList<>();
     for (Map.Entry<String, String> entry : map.entrySet()) {
@@ -45,14 +72,26 @@ public interface IntegrationMapper extends IMapper<Integration, IntegrationVO> {
     return list;
   }
 
+  /**
+   * Map external.
+   *
+   * @param list the list
+   * @return the map
+   */
   default Map<String, String> mapExternal(List<ExternalOperationParameters> list) {
-    Map<String, String> mapOperation = new HashMap<String, String>();
+    Map<String, String> mapOperation = new HashMap<>();
     for (ExternalOperationParameters external : list) {
       mapOperation.put(external.getParameter(), external.getValue());
     }
     return mapOperation;
   }
 
+  /**
+   * Map external.
+   *
+   * @param map the map
+   * @return the list
+   */
   default List<ExternalOperationParameters> mapExternal(Map<String, String> map) {
     List<ExternalOperationParameters> list = new ArrayList<>();
     for (Map.Entry<String, String> entry : map.entrySet()) {
@@ -64,16 +103,21 @@ public interface IntegrationMapper extends IMapper<Integration, IntegrationVO> {
     return list;
   }
 
+  /**
+   * Fill integration.
+   *
+   * @param integration the integration
+   */
   @AfterMapping
   default void fillIntegration(@MappingTarget Integration integration) {
     if (integration.getExternalParameters() != null
-        && integration.getExternalParameters().size() > 0) {
+        && !integration.getExternalParameters().isEmpty()) {
       for (ExternalOperationParameters external : integration.getExternalParameters()) {
         external.setIntegration(integration);
       }
     }
     if (integration.getInternalParameters() != null
-        && integration.getInternalParameters().size() > 0) {
+        && !integration.getInternalParameters().isEmpty()) {
       for (InternalOperationParameters internal : integration.getInternalParameters()) {
         internal.setIntegration(integration);
         if ("dataflowId".equals(internal.getParameter())) {

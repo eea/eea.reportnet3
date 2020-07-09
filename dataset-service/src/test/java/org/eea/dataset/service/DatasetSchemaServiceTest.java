@@ -1581,6 +1581,7 @@ public class DatasetSchemaServiceTest {
     ObjectId idRecord = new ObjectId();
     FieldSchemaVO field = new FieldSchemaVO();
     field.setIdRecord(idRecord.toString());
+    field.setId(new ObjectId().toString());
     ArrayList<TableSchema> tableSchemas = new ArrayList<>();
     TableSchema table = new TableSchema();
     table.setIdTableSchema(new ObjectId());

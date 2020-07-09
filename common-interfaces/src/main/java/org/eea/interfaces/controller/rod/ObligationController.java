@@ -1,10 +1,8 @@
 package org.eea.interfaces.controller.rod;
 
-import java.util.Date;
 import java.util.List;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

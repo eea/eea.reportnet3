@@ -1,18 +1,12 @@
 package org.eea.dataset.persistence.data.sequence;
 
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.UUID;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The Class RecordValueGenerator.

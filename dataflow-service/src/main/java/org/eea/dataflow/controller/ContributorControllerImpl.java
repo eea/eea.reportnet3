@@ -140,7 +140,7 @@ public class ContributorControllerImpl implements ContributorController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   @PutMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> updateEditor(@PathVariable("dataflowId") Long dataflowId,
+  public ResponseEntity updateEditor(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody ContributorVO contributorVO) {
     // we can only update an editor, reporter or reporter partition role
     // mock
@@ -171,7 +171,7 @@ public class ContributorControllerImpl implements ContributorController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
   @PutMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> updateReporter(@PathVariable("dataflowId") Long dataflowId,
+  public ResponseEntity updateReporter(@PathVariable("dataflowId") Long dataflowId,
       @PathVariable("dataProviderId") Long dataProviderId,
       @RequestBody ContributorVO contributorVO) {
     // we can only update an editor, reporter or reporter partition role
@@ -223,7 +223,7 @@ public class ContributorControllerImpl implements ContributorController {
       LOG_ERROR.error(
           "Error creating contributor with the account: {} in the dataflow {} because the email doesn't exist in the system",
           account, dataflowId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, new StringBuilder("The email ")
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, new StringBuilder("The email ")
           .append(account).append(" doesn't exist in repornet").toString());
     }
   }

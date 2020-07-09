@@ -17,8 +17,7 @@ public interface RepresentativeService {
    * @return the long
    * @throws EEAException the EEA exception
    */
-  Long createRepresentative(final Long dataflowId, final RepresentativeVO representativeVO)
-      throws EEAException;
+  Long createRepresentative(Long dataflowId, RepresentativeVO representativeVO) throws EEAException;
 
   /**
    * Delete dataflow representative.
@@ -26,7 +25,7 @@ public interface RepresentativeService {
    * @param representativeId the representative id
    * @throws EEAException the EEA exception
    */
-  void deleteDataflowRepresentative(final Long representativeId) throws EEAException;
+  void deleteDataflowRepresentative(Long representativeId) throws EEAException;
 
   /**
    * Update dataflow representative.
@@ -35,7 +34,7 @@ public interface RepresentativeService {
    * @return the long
    * @throws EEAException the EEA exception
    */
-  Long updateDataflowRepresentative(final RepresentativeVO representativeVO) throws EEAException;
+  Long updateDataflowRepresentative(RepresentativeVO representativeVO) throws EEAException;
 
   /**
    * Gets the all data provider types.

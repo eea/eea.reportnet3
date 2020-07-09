@@ -59,6 +59,7 @@ import org.eea.dataset.service.file.FileParseContextImpl;
 import org.eea.dataset.service.file.FileParserFactory;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
+import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -345,6 +346,10 @@ public class DatasetServiceTest {
   /** The integration controller. */
   @Mock
   private IntegrationControllerZuul integrationController;
+
+  /** The update record helper. */
+  @Mock
+  private UpdateRecordHelper updateRecordHelper;
 
   /**
    * The field value.
@@ -2175,6 +2180,7 @@ public class DatasetServiceTest {
     when(fieldRepository.findByRecord(Mockito.any())).thenReturn(fieldValues);
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(Mockito.any()))
         .thenReturn(Optional.of(new PartitionDataSetMetabase()));
+
 
     datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
