@@ -17,9 +17,20 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
-const DataFormFieldEditor = ({ autoFocus, column, datasetId, field, fieldValue = '', onChangeForm, type }) => {
-  const inputRef = useRef(null);
+const DataFormFieldEditor = ({
+  autoFocus,
+  column,
+  datasetId,
+  field,
+  fieldValue = '',
+  isVisible,
+  onChangeForm,
+  type
+}) => {
   const resources = useContext(ResourcesContext);
+
+  const inputRef = useRef(null);
+
   const [columnWithLinks, setColumnWithLinks] = useState([]);
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [mapCoordinates, setMapCoordinates] = useState();
@@ -31,10 +42,10 @@ const DataFormFieldEditor = ({ autoFocus, column, datasetId, field, fieldValue =
   }, []);
 
   useEffect(() => {
-    if (autoFocus) {
+    if (inputRef.current && isVisible && autoFocus) {
       inputRef.current.element.focus();
     }
-  }, []);
+  }, [inputRef.current, isVisible]);
 
   const onFilter = async filter => {
     onLoadColsSchema(filter);

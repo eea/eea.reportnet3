@@ -23,6 +23,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 export const WebLinks = ({
   dataflowId,
   isCustodian,
+  isToolbarVisible,
   onLoadWebLinks,
   setSortFieldWeblinks,
   setSortOrderWeblinks,
@@ -66,7 +67,7 @@ export const WebLinks = ({
         />
       ));
 
-    if (isCustodian) webLinkColArray = [...webLinkColArray, webLinkEditionColumn];
+    if (isToolbarVisible) webLinkColArray = [...webLinkColArray, webLinkEditionColumn];
 
     setWebLinksColumns(webLinkColArray);
   }, [webLinks]);
@@ -185,7 +186,7 @@ export const WebLinks = ({
 
   return (
     <Fragment>
-      {isCustodian ? (
+      {isToolbarVisible ? (
         <Toolbar className={styles.weblinksToolbar}>
           <div className="p-toolbar-group-left">
             <Button
