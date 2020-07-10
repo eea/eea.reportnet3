@@ -63,6 +63,7 @@ const DataForm = ({
                       ? ''
                       : field.fieldData[column.field]
                   }
+                  isVisible={editDialogVisible}
                   onChangeForm={onChangeForm}
                   type={column.type}></DataFormFieldEditor>
               </div>
@@ -114,6 +115,7 @@ const DataForm = ({
                       ? ''
                       : field.fieldData[column.field]
                   }
+                  isVisible={addDialogVisible}
                   onChangeForm={onChangeForm}
                   type={column.type}></DataFormFieldEditor>
               </div>
