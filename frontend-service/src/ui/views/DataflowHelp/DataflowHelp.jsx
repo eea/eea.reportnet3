@@ -53,6 +53,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isToolbarVisible, setIsToolbarVisible] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [sortFieldDocuments, setSortFieldDocuments] = useState();
   const [sortFieldWeblinks, setSortFieldWeblinks] = useState();
@@ -69,6 +70,11 @@ export const DataflowHelp = withRouter(({ match, history }) => {
           userRoles.includes(config.permissions['DATA_STEWARD']) ||
           userRoles.includes(config.permissions['EDITOR_WRITE']) ||
           userRoles.includes(config.permissions['EDITOR_READ'])
+      );
+
+      setIsToolbarVisible(
+        userRoles.includes(config.permissions['DATA_CUSTODIAN']) ||
+          userRoles.includes(config.permissions['DATA_STEWARD'])
       );
     }
   }, [userContext]);
@@ -284,6 +290,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
               documents={documents}
               isCustodian={isCustodian}
               isDeletingDocument={isDeletingDocument}
+              isToolbarVisible={isToolbarVisible}
               onLoadDocuments={onLoadDocuments}
               setIsDeletingDocument={setIsDeletingDocument}
               setSortFieldDocuments={setSortFieldDocuments}
@@ -296,6 +303,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
             <WebLinks
               dataflowId={dataflowId}
               isCustodian={isCustodian}
+              isToolbarVisible={isToolbarVisible}
               onLoadWebLinks={onLoadWebLinks}
               setSortFieldWeblinks={setSortFieldWeblinks}
               setSortOrderWeblinks={setSortOrderWeblinks}

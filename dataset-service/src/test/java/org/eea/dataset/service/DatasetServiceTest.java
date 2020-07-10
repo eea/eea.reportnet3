@@ -2183,6 +2183,6 @@ public class DatasetServiceTest {
 
 
     datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
-    Mockito.verify(updateRecordHelper, times(1)).saveAllRecords(Mockito.any(), Mockito.any());
+    Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
 }

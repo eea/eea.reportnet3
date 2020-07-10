@@ -1,11 +1,17 @@
 import { apiContributor } from 'core/infrastructure/api/domain/model/Contributor';
 import { Contributor } from 'core/domain/model/Contributor/Contributor';
-import isEmpty from 'lodash/isEmpty';
+
+import sortBy from 'lodash/sortBy';
 
 const all = async (dataflowId, dataProviderId) => {
   const contributorsDTO = await apiContributor.all(dataflowId, dataProviderId);
 
-  return contributorsDTO.map(contributorDTO => new Contributor(contributorDTO));
+  const contributors = contributorsDTO.map((contributorDTO, i) => {
+    contributorDTO.id = i + 1;
+    return new Contributor(contributorDTO);
+  });
+
+  return sortBy(contributors, ['account']);
 };
 
 const deleteContributor = async (account, dataflowId, dataProviderId) => {
