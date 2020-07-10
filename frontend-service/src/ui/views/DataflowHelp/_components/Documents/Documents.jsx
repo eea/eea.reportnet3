@@ -27,10 +27,11 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const Documents = ({
+  dataflowId,
   documents,
   isCustodian,
   isDeletingDocument,
-  dataflowId,
+  isToolbarVisible,
   setIsDeletingDocument,
   setSortFieldDocuments,
   setSortOrderDocuments,
@@ -171,7 +172,7 @@ const Documents = ({
 
   return (
     <Fragment>
-      {isCustodian ? (
+      {isToolbarVisible ? (
         <Toolbar className={styles.documentsToolbar}>
           <div className="p-toolbar-group-left">
             <Button
@@ -266,7 +267,7 @@ const Documents = ({
           header={resources.messages['file']}
           style={{ textAlign: 'center', width: '8em' }}
         />
-        {isCustodian && !isEmpty(documents) ? (
+        {isToolbarVisible && !isEmpty(documents) ? (
           <Column
             className={styles.crudColumn}
             body={documentsEditButtons}
