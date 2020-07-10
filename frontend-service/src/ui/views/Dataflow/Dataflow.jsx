@@ -582,15 +582,20 @@ const Dataflow = withRouter(({ history, match }) => {
         </Dialog>
 
         <Dialog
+          footer={manageRightsDialogFooter}
           header={
             dataflowState.isCustodian
               ? resources.messages['manageEditorsRights']
               : resources.messages['manageReportersRights']
           }
-          footer={manageRightsDialogFooter}
           onHide={() => manageDialogs('isShareRightsDialogVisible', false)}
           visible={dataflowState.isShareRightsDialogVisible}>
-          <ShareRights dataflowId={dataflowId} dataflowState={dataflowState} representativeId={representativeId} />
+          <ShareRights
+            dataflowId={dataflowId}
+            dataProviderId={dataflowState.dataProviderId}
+            isCustodian={dataflowState.isCustodian}
+            representativeId={representativeId}
+          />
         </Dialog>
 
         <PropertiesDialog dataflowState={dataflowState} manageDialogs={manageDialogs} />
