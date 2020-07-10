@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useState, useReducer, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useState, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -20,13 +20,9 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { shareRightsReducer } from './_functions/Reducers/shareRightsReducer';
 
-export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => {
-  const { dataProviderId, isCustodian, isShareRightsDialogVisible } = dataflowState;
-
+export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, representativeId }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-
-  const inputRef = useRef(null);
 
   const [shareRightsState, shareRightsDispatch] = useReducer(shareRightsReducer, {
     accountHasError: false,
@@ -45,8 +41,6 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
   const deleteConfirmHeader = isCustodian
     ? resources.messages['editorsRightsDialogConfirmDeleteHeader']
     : resources.messages['reportersRightsDialogConfirmDeleteHeader'];
-
-  // useInputTextFocus(isShareRightsDialogVisible, inputRef);
 
   useEffect(() => {
     getAllContributors();
@@ -132,7 +126,6 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
           onDataChange();
         }
       } catch (error) {
-        notificationContext.add({ type: 'UPDATE_CONTRIBUTOR_ERROR' });
         if (error.response.status === 404) {
           shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError: true } });
         }
@@ -246,7 +239,7 @@ export const ShareRights = ({ dataflowId, dataflowState, representativeId }) => 
               <Column
                 body={renderAccountTemplate}
                 header={
-                  dataflowState.isCustodian
+                  isCustodian
                     ? resources.messages['editorsAccountColumn']
                     : resources.messages['reportersAccountColumn']
                 }
