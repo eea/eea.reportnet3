@@ -47,9 +47,9 @@ const useBigButtonList = ({
 
   const getButtonsVisibility = roles => ({
     createDataCollection:
-      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
-      roles.includes(config.permissions['DATA_STEWARD']) ||
-      roles.includes(config.permissions['EDITOR_WRITE']),
+      roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD']),
+    cloneSchemasFromDataflow:
+      roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD']),
     dashboard:
       roles.includes(config.permissions['DATA_CUSTODIAN']) ||
       roles.includes(config.permissions['DATA_STEWARD']) ||
@@ -110,6 +110,27 @@ const useBigButtonList = ({
     }
   ];
 
+  const newSchemaModel = buttonsVisibility.cloneSchemasFromDataflow
+    ? [
+        {
+          label: resources.messages['createNewEmptyDatasetSchema'],
+          icon: 'add',
+          command: () => onShowNewSchemaDialog()
+        },
+        {
+          label: resources.messages['cloneSchemasFromDataflow'],
+          icon: 'add',
+          command: () => onCloneDataflow()
+        }
+      ]
+    : [
+        {
+          label: resources.messages['createNewEmptyDatasetSchema'],
+          icon: 'add',
+          command: () => onShowNewSchemaDialog()
+        }
+      ];
+
   const newSchemaBigButton = [
     {
       buttonClass: 'newItem',
@@ -121,18 +142,7 @@ const useBigButtonList = ({
       layout: 'menuBigButton',
       // layout: 'defaultBigButton',
       handleRedirect: () => onShowNewSchemaDialog(),
-      model: [
-        {
-          label: resources.messages['createNewEmptyDatasetSchema'],
-          icon: 'add',
-          command: () => onShowNewSchemaDialog()
-        },
-        {
-          label: resources.messages['cloneSchemasFromDataflow'],
-          icon: 'add',
-          command: () => onCloneDataflow()
-        }
-      ],
+      model: newSchemaModel,
       visibility: buttonsVisibility.newSchema && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']
     }
   ];
