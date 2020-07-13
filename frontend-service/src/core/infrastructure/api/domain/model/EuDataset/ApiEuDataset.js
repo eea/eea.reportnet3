@@ -1,0 +1,20 @@
+import { EuDatasetConfig } from 'conf/domain/model/EuDataset';
+import { getUrl } from 'core/infrastructure/CoreUtils';
+import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
+
+const apiEuDataset = {
+  copyDataCollection: async dataflowId => {
+    const response = await HTTPRequester.post({
+      url: getUrl(EuDatasetConfig.createDataCollection, { dataflowId })
+    });
+    return response;
+  },
+
+  exportEuDataset: async dataflowId => {
+    const response = await HTTPRequester.post({
+      url: getUrl(EuDatasetConfig.updateDataCollectionNewRepresentatives, { dataflowId })
+    });
+    return response;
+  }
+};
+export { apiEuDataset };
