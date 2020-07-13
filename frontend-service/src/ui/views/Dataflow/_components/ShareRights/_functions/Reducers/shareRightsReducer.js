@@ -4,7 +4,7 @@ export const shareRightsReducer = (state, { type, payload }) => {
       return { ...state, account: payload.email };
 
     case 'GET_ALL_CONTRIBUTORS':
-      return { ...state, contributors: payload.contributors };
+      return { ...state, contributors: payload.contributors, clonedContributors: payload.clonedContributors };
 
     case 'ON_DATA_CHANGE':
       return { ...state, isDataUpdated: payload.isDataUpdated };
