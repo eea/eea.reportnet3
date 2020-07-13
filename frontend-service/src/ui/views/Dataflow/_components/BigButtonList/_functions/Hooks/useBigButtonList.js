@@ -91,8 +91,8 @@ const useBigButtonList = ({
       buttonClass: 'manageReporters',
       buttonIcon: 'manageReporters',
       caption: resources.messages['manageReporters'],
-      layout: 'defaultBigButton',
       handleRedirect: () => onShowManageReportersDialog(),
+      layout: 'defaultBigButton',
       visibility: buttonsVisibility.manageReporters
     }
   ];
@@ -102,47 +102,37 @@ const useBigButtonList = ({
       buttonClass: 'dataflowHelp',
       buttonIcon: 'info',
       caption: resources.messages['dataflowHelp'],
-      layout: 'defaultBigButton',
       handleRedirect: () => handleRedirect(getUrl(routes.DOCUMENTS, { dataflowId }, true)),
       helpClassName: 'dataflow-documents-weblinks-help-step',
+      layout: 'defaultBigButton',
       onWheel: getUrl(routes.DOCUMENTS, { dataflowId }, true),
       visibility: true
     }
   ];
 
-  const newSchemaModel = buttonsVisibility.cloneSchemasFromDataflow
-    ? [
-        {
-          label: resources.messages['createNewEmptyDatasetSchema'],
-          icon: 'add',
-          command: () => onShowNewSchemaDialog()
-        },
-        {
-          label: resources.messages['cloneSchemasFromDataflow'],
-          icon: 'add',
-          command: () => onCloneDataflow()
-        }
-      ]
-    : [
-        {
-          label: resources.messages['createNewEmptyDatasetSchema'],
-          icon: 'add',
-          command: () => onShowNewSchemaDialog()
-        }
-      ];
+  const newSchemaModel = [
+    {
+      label: resources.messages['createNewEmptyDatasetSchema'],
+      icon: 'add',
+      command: () => onShowNewSchemaDialog()
+    },
+    {
+      label: resources.messages['cloneSchemasFromDataflow'],
+      icon: 'add',
+      command: () => onCloneDataflow()
+    }
+  ];
 
   const newSchemaBigButton = [
     {
       buttonClass: 'newItem',
       buttonIcon: 'plus',
       buttonIconClass: 'newItemCross',
-      // caption: resources.messages['newItem'],
       caption: resources.messages['newSchema'],
-      helpClassName: 'dataflow-new-item-help-step',
-      layout: 'menuBigButton',
-      // layout: 'defaultBigButton',
       handleRedirect: () => onShowNewSchemaDialog(),
-      model: newSchemaModel,
+      helpClassName: 'dataflow-new-item-help-step',
+      layout: buttonsVisibility.cloneSchemasFromDataflow ? 'menuBigButton' : 'defaultBigButton',
+      model: buttonsVisibility.cloneSchemasFromDataflow ? newSchemaModel : [],
       visibility: buttonsVisibility.newSchema && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']
     }
   ];
