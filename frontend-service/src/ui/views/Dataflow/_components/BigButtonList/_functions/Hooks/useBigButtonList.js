@@ -47,9 +47,9 @@ const useBigButtonList = ({
 
   const getButtonsVisibility = roles => ({
     createDataCollection:
-      roles.includes(config.permissions['DATA_CUSTODIAN']) ||
-      roles.includes(config.permissions['DATA_STEWARD']) ||
-      roles.includes(config.permissions['EDITOR_WRITE']),
+      roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD']),
+    cloneSchemasFromDataflow:
+      roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD']),
     dashboard:
       roles.includes(config.permissions['DATA_CUSTODIAN']) ||
       roles.includes(config.permissions['DATA_STEWARD']) ||
@@ -91,8 +91,8 @@ const useBigButtonList = ({
       buttonClass: 'manageReporters',
       buttonIcon: 'manageReporters',
       caption: resources.messages['manageReporters'],
-      layout: 'defaultBigButton',
       handleRedirect: () => onShowManageReportersDialog(),
+      layout: 'defaultBigButton',
       visibility: buttonsVisibility.manageReporters
     }
   ];
@@ -102,11 +102,24 @@ const useBigButtonList = ({
       buttonClass: 'dataflowHelp',
       buttonIcon: 'info',
       caption: resources.messages['dataflowHelp'],
-      layout: 'defaultBigButton',
       handleRedirect: () => handleRedirect(getUrl(routes.DOCUMENTS, { dataflowId }, true)),
       helpClassName: 'dataflow-documents-weblinks-help-step',
+      layout: 'defaultBigButton',
       onWheel: getUrl(routes.DOCUMENTS, { dataflowId }, true),
       visibility: true
+    }
+  ];
+
+  const newSchemaModel = [
+    {
+      label: resources.messages['createNewEmptyDatasetSchema'],
+      icon: 'add',
+      command: () => onShowNewSchemaDialog()
+    },
+    {
+      label: resources.messages['cloneSchemasFromDataflow'],
+      icon: 'add',
+      command: () => onCloneDataflow()
     }
   ];
 
@@ -115,24 +128,11 @@ const useBigButtonList = ({
       buttonClass: 'newItem',
       buttonIcon: 'plus',
       buttonIconClass: 'newItemCross',
-      // caption: resources.messages['newItem'],
       caption: resources.messages['newSchema'],
-      helpClassName: 'dataflow-new-item-help-step',
-      layout: 'menuBigButton',
-      // layout: 'defaultBigButton',
       handleRedirect: () => onShowNewSchemaDialog(),
-      model: [
-        {
-          label: resources.messages['createNewEmptyDatasetSchema'],
-          icon: 'add',
-          command: () => onShowNewSchemaDialog()
-        },
-        {
-          label: resources.messages['cloneSchemasFromDataflow'],
-          icon: 'add',
-          command: () => onCloneDataflow()
-        }
-      ],
+      helpClassName: 'dataflow-new-item-help-step',
+      layout: buttonsVisibility.cloneSchemasFromDataflow ? 'menuBigButton' : 'defaultBigButton',
+      model: buttonsVisibility.cloneSchemasFromDataflow ? newSchemaModel : [],
       visibility: buttonsVisibility.newSchema && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']
     }
   ];
