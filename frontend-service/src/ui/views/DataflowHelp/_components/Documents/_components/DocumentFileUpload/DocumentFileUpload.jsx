@@ -151,15 +151,19 @@ const DocumentFileUpload = ({
           <fieldset>
             <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
               <Field
+                id={'descriptionDocumentFileUpload'}
                 innerRef={inputRef}
                 name="description"
                 placeholder={resources.messages['fileDescription']}
                 type="text"
                 value={values.description}
               />
+              <label for="descriptionDocumentFileUpload" className="srOnly">
+                {resources.messages['description']}
+              </label>
             </div>
             <div className={`formField${!isEmpty(errors.lang) && touched.lang ? ' error' : ''}`}>
-              <Field name="lang" component="select" value={values.lang}>
+              <Field id={'selectLanguage'} name="lang" component="select" value={values.lang}>
                 <option value="">{resources.messages['selectLang']}</option>
                 {sortBy(config.languages, ['name']).map(language => (
                   <option key={language.code} value={language.code}>
@@ -167,21 +171,30 @@ const DocumentFileUpload = ({
                   </option>
                 ))}
               </Field>
+              <label for="selectLanguage" className="srOnly">
+                {resources.messages['selectLang']}
+              </label>
             </div>
           </fieldset>
           <fieldset>
             <div className={`formField${!isEmpty(errors.uploadFile) && touched.uploadFile ? ' error' : ''}`}>
               <Field name="uploadFile">
                 {() => (
-                  <input
-                    className="uploadFile"
-                    name="uploadFile"
-                    onChange={event => {
-                      setFieldValue('uploadFile', event.currentTarget.files[0]);
-                    }}
-                    placeholder="file upload"
-                    type="file"
-                  />
+                  <span>
+                    <input
+                      className="uploadFile"
+                      id={'uploadDocument'}
+                      name="uploadFile"
+                      onChange={event => {
+                        setFieldValue('uploadFile', event.currentTarget.files[0]);
+                      }}
+                      placeholder="file upload"
+                      type="file"
+                    />
+                    <label for="uploadDocument" className="srOnly">
+                      {resources.messages['uploadDocument']}
+                    </label>
+                  </span>
                 )}
               </Field>
               <ErrorMessage name="uploadFile" component="div" />
