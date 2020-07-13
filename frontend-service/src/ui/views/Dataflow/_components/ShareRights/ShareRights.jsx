@@ -116,6 +116,12 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
     shareRightsDispatch({ type: 'ON_DATA_CHANGE', payload: { isDataUpdated: !shareRightsState.isDataUpdated } });
   };
 
+  const onEnterKey = (key, contributor) => {
+    if (key === 'Enter') {
+      onUpdateContributor(contributor);
+    }
+  };
+
   const onUpdateContributor = async contributor => {
     if (contributor.writePermission !== '') {
       const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
@@ -188,7 +194,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
 
     return (
       <select
-        // onKeyDown={event => onKeyDown(event, formDispatcher, formState, contributor, dataflowId)}
+        onKeyDown={event => onEnterKey(event.key, contributor)}
         onBlur={() => updateContributor(contributor)}
         onChange={event => onWritePermissionChange(contributor, event.target.value)}
         value={contributor.writePermission}>
