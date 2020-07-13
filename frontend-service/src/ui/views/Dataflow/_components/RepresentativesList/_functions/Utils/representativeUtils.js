@@ -61,7 +61,7 @@ export const getAllDataProviders = async (selectedDataProviderGroup, representat
 
     const providersNoSelect = [...responseAllDataProviders];
     if (representatives.length <= responseAllDataProviders.length) {
-      responseAllDataProviders.unshift({ dataProviderId: '', label: 'Select...' });
+      responseAllDataProviders.unshift({ dataProviderId: '', label: ' Select...' });
     }
 
     formDispatcher({
