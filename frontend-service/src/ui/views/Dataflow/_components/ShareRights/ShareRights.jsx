@@ -130,7 +130,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
 
   const onEnterKey = (key, contributor) => {
     if (key === 'Enter') {
-      onUpdateContributor(contributor);
+      isRightChanged(contributor) && onUpdateContributor(contributor);
     }
   };
 
