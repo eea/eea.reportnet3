@@ -1,20 +1,17 @@
-import React, { useContext, useEffect, useReducer, useRef, useState } from 'react';
+import React, { useContext } from 'react';
 
 import styles from './EUDatasetToolbar.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
-import { Menu } from 'primereact/menu';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-export const EUDatasetToolbar = ({ datasetHasErrors, handleDialogs, isRefreshHighlighted, onLoadDatasetSchema }) => {
+export const EUDatasetToolbar = ({ datasetHasErrors, handleDialogs, isRefreshHighlighted, onRefresh }) => {
   const resources = useContext(ResourcesContext);
-  const userContext = useContext(UserContext);
 
   return (
-    <div className={styles.ButtonsBar}>
+    <div className={styles.toolbar}>
       <Toolbar>
         <div className="p-toolbar-group-left">
           <Button
@@ -52,7 +49,7 @@ export const EUDatasetToolbar = ({ datasetHasErrors, handleDialogs, isRefreshHig
             } p-button-animated-blink`}
             icon={'refresh'}
             label={resources.messages['refresh']}
-            onClick={() => onLoadDatasetSchema()}
+            onClick={() => onRefresh()}
           />
         </div>
       </Toolbar>

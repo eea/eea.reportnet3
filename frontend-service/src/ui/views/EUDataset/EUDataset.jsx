@@ -17,6 +17,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { EUDatasetToolbar } from './_components/EUDatasetToolbar';
+import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
@@ -57,6 +58,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     // isDeleteDialogVisible: false,
     // isValidateDialogVisible: false,
     // isValidationListDialogVisible: false,
+    datasetData: { hasData: false, hasErrors: false, name: '' },
     dataflowName: '',
     datasetHasData: false,
     datasetHasErrors: false,
@@ -87,8 +89,6 @@ export const EUDataset = withRouter(({ history, match }) => {
     tableSchemaNames: [],
     validationsVisible: false
   });
-
-  console.log('euDatasetState', euDatasetState);
 
   const {
     dataflowName,
@@ -284,8 +284,6 @@ export const EUDataset = withRouter(({ history, match }) => {
         }));
       });
 
-      isWebFormMMR(datasetStatistics.datasetSchemaName);
-
       euDatasetDispatch({
         type: 'ON_LOAD_DATASET_SCHEMA',
         payload: {
@@ -297,6 +295,8 @@ export const EUDataset = withRouter(({ history, match }) => {
           tableSchemaNames: tableSchemaNamesList
         }
       });
+
+      isWebFormMMR(datasetStatistics.datasetSchemaName);
     } catch (error) {
       const {
         dataflow: { name: dataflowName },
@@ -380,6 +380,24 @@ export const EUDataset = withRouter(({ history, match }) => {
     />
   );
 
+  // const renderWebFormInputSwitch = () => {
+  //   if (isWebFormMMR) {
+  //     return (
+  //       <div className={styles.InputSwitchContainer}>
+  //         <div className={styles.InputSwitchDiv}>
+  //           <span className={styles.InputSwitchText}>{resources.messages['grid']}</span>
+  //           <InputSwitch
+  //             checked={euDatasetState.isInputSwitchChecked}
+  //             className={styles.WebFormInputSwitch}
+  //             onChange={event => euDatasetDispatch({ type: 'ON_TOGGLE_VIEW', payload: { value: event.value } })}
+  //           />
+  //           <span className={styles.InputSwitchText}>{resources.messages['webForm']}</span>
+  //         </div>
+  //       </div>
+  //     );
+  //   }
+  // };
+
   if (euDatasetState.isLoading) return renderLayout(<Spinner />);
 
   return renderLayout(
@@ -390,7 +408,11 @@ export const EUDataset = withRouter(({ history, match }) => {
         subtitle={`${dataflowName} - ${datasetName}`}
         title={datasetSchemaName}
       />
-      <EUDatasetToolbar handleDialogs={handleDialogs} />
+      <EUDatasetToolbar
+        handleDialogs={handleDialogs}
+        isRefreshHighlighted={euDatasetState.isRefreshHighlighted}
+        onRefresh={onLoadDatasetSchema}
+      />
       {renderTabsSchema()}
 
       {renderDialogLayout(
@@ -405,7 +427,6 @@ export const EUDataset = withRouter(({ history, match }) => {
         />,
         'validationList'
       )}
-
       {renderDialogLayout(
         <TabsValidations
           dataset={{ datasetId: datasetId, name: datasetSchemaName }}

@@ -55,6 +55,9 @@ export const euDatasetReducer = (state, { type, payload }) => {
     case 'ON_TAB_CHANGE':
       return { ...state, dataViewerOptions: { ...state.dataViewerOptions, activeIndex: payload.activeIndex } };
 
+    case 'ON_TOGGLE_VIEW':
+      return { ...state, isInputSwitchChecked: payload.value };
+
     default:
       return state;
   }
