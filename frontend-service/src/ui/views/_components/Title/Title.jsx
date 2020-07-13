@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import styles from './Title.module.css';
 
-const Title = React.memo(({ icon, iconSize, title, subtitle }) => {
+const Title = React.memo(({ icon, iconSize, subtitle, title }) => {
   return (
     <div className={styles.titleWrap}>
       <div className={styles.iconWrap}>
