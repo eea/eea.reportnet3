@@ -84,6 +84,9 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
       fContributor => fContributor.account === contributor.account
     );
 
+    if (contributor.isNew) {
+      return true;
+    }
     return initialContributor.writePermission !== JSON.parse(contributor.writePermission);
   };
 
@@ -130,7 +133,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
 
   const onEnterKey = (key, contributor) => {
     if (key === 'Enter') {
-      isRightChanged(contributor) && onUpdateContributor(contributor);
+      isValidEmail(contributor.account) && isRightChanged(contributor) && onUpdateContributor(contributor);
     }
   };
 
