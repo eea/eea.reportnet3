@@ -13,11 +13,15 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
+import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { EUDatasetToolbar } from './_components/EUDatasetToolbar';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
+import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
+import { TabsValidations } from 'ui/views/_components/TabsValidations';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -64,7 +68,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     isDataDeleted: false,
     isDatasetReleased: false,
     isDeleteDialogVisible: false,
-    isDialogVisible: { dashboard: false, deleteData: false, importData: false, validationList: false },
+    isDialogVisible: { dashboard: false, deleteData: false, importData: false, validationList: false, validate: false },
     isInputSwitchChecked: false,
     isLoading: true,
     isLoadingFile: false,
@@ -93,6 +97,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     isDataDeleted,
     isDatasetReleased,
     isDialogVisible,
+    isValidationSelected,
     levelErrorTypes,
     metaData,
     tableSchema,
@@ -104,7 +109,7 @@ export const EUDataset = withRouter(({ history, match }) => {
   }, []);
 
   useEffect(() => {
-    onLoadDatasetSchema();
+    // onLoadDatasetSchema();
   }, [isDataDeleted]);
 
   useEffect(() => {
@@ -306,6 +311,44 @@ export const EUDataset = withRouter(({ history, match }) => {
     euDatasetDispatch({ type: 'ON_TAB_CHANGE', payload: { activeIndex: tableSchemaId.index } });
   };
 
+  const onSelectValidation = (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
+    euDatasetDispatch({
+      type: 'ON_SELECT_VALIDATION',
+      payload: {
+        activeIndex: tableSchemaId,
+        isValidationSelected: false,
+        recordPositionId: posIdRecord,
+        selectedRecordErrorId: selectedRecordErrorId
+      }
+    });
+
+    handleDialogs('validationList', false);
+  };
+
+  const renderConfirmDialogLayout = (onConfirm, option) =>
+    isDialogVisible[option] && (
+      <ConfirmDialog
+        header={resources.messages[`${option}`]}
+        labelCancel={resources.messages['no']}
+        labelConfirm={resources.messages['yes']}
+        onConfirm={() => onConfirm()}
+        onHide={() => handleDialogs(option, false)}
+        visible={isDialogVisible[option]}>
+        {resources.messages[`${option}`]}
+      </ConfirmDialog>
+    );
+
+  const renderDialogLayout = (children, option) =>
+    isDialogVisible[option] && (
+      <Dialog
+        header={resources.messages[`${option}`]}
+        onHide={() => handleDialogs(option, false)}
+        style={{ width: '80%' }}
+        visible={isDialogVisible[option]}>
+        {children}
+      </Dialog>
+    );
+
   const renderLayout = children => (
     <MainLayout>
       <div className="rep-container">{children}</div>
@@ -336,8 +379,34 @@ export const EUDataset = withRouter(({ history, match }) => {
         subtitle={`${dataflowName} - ${datasetName}`}
         title={`${getDatasetTitle()}`}
       />
-      <EUDatasetToolbar />
+      <EUDatasetToolbar handleDialogs={handleDialogs} />
       {renderTabsSchema()}
+
+      {renderDialogLayout(
+        <ValidationViewer
+          datasetId={datasetId}
+          datasetName={datasetName}
+          hasWritePermissions={hasWritePermissions}
+          levelErrorTypes={levelErrorTypes}
+          onSelectValidation={onSelectValidation}
+          tableSchemaNames={euDatasetState.tableSchemaNames}
+          visible={isDialogVisible.validationList}
+        />,
+        'validationList'
+      )}
+
+      {renderDialogLayout(
+        <TabsValidations
+          dataset={{ datasetId: datasetId, name: datasetSchemaName }}
+          datasetSchemaAllTables={euDatasetState.datasetSchemaAllTables}
+          // datasetSchemaId={datasetSchemaId}
+          onHideValidationsDialog={() => handleDialogs('validationList', false)}
+        />,
+        'validationList'
+      )}
+
+      {renderConfirmDialogLayout(() => {}, 'deleteData')}
+      {renderConfirmDialogLayout(() => {}, 'validate')}
     </Fragment>
   );
 });
