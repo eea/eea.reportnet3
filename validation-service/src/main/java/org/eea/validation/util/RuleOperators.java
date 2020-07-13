@@ -85,8 +85,8 @@ public class RuleOperators {
    * @return the string
    */
   private static String replaceKeywords(String regex) {
-    if (regex.contains("$COUNTRY_CODE")) {
-      regex = regex.replace("$COUNTRY_CODE", countryCode);
+    if (regex.contains("{%R3_COUNTRY_CODE%}")) {
+      regex = regex.replace("{%R3_COUNTRY_CODE%}", countryCode);
     }
     return regex;
   }
