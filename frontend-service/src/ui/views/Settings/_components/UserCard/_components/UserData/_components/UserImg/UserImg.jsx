@@ -67,6 +67,7 @@ const UserImg = () => {
     config.avatars.map(avatar => (
       <div className={styles.gridItem}>
         <img
+          alt="Image to choose"
           className={styles.gridItem}
           src={avatar.base64}
           onClick={() => {
@@ -117,6 +118,7 @@ const UserImg = () => {
           type="file"
         />
         <img
+          alt="User profile image"
           data-tip
           data-for="addAvatar"
           data-event="click"
