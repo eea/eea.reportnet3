@@ -110,6 +110,7 @@ const UserImg = () => {
       <div className={styles.imageWrapper}>
         <input
           accept="image/*"
+          id={'userIcon'}
           onChange={handleImageUpload}
           ref={imageUploader}
           style={{
@@ -117,6 +118,9 @@ const UserImg = () => {
           }}
           type="file"
         />
+        <label for="userIcon" className="srOnly">
+          {resources.messages['selectImage']}
+        </label>
         <img
           alt="User profile image"
           data-tip
