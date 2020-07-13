@@ -14,14 +14,15 @@ import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { EUDatasetToolbar } from './_components/EUDatasetToolbar';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
+import { TabsValidations } from 'ui/views/_components/TabsValidations';
 import { Title } from 'ui/views/_components/Title';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
-import { TabsValidations } from 'ui/views/_components/TabsValidations';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -30,10 +31,11 @@ import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContex
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { euDatasetReducer } from './_functions/euDatasetReducer';
+
+import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 
@@ -50,6 +52,11 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const [euDatasetState, euDatasetDispatch] = useReducer(euDatasetReducer, {
     // dialogVisibility: { validationList: false, dashboards: false, delete: false, input: false },
+    // isDashDialogVisible: false,
+    // isDatasetReleased: false,
+    // isDeleteDialogVisible: false,
+    // isValidateDialogVisible: false,
+    // isValidationListDialogVisible: false,
     dataflowName: '',
     datasetHasData: false,
     datasetHasErrors: false,
@@ -64,17 +71,12 @@ export const EUDataset = withRouter(({ history, match }) => {
     exportExtensionsOperationsList: [],
     FMEExportExtensions: [],
     hasWritePermissions: false,
-    isDashDialogVisible: false,
     isDataDeleted: false,
-    isDatasetReleased: false,
-    isDeleteDialogVisible: false,
     isDialogVisible: { dashboard: false, deleteData: false, importData: false, validationList: false, validate: false },
     isInputSwitchChecked: false,
     isLoading: true,
     isLoadingFile: false,
     isRefreshHighlighted: false,
-    isValidateDialogVisible: false,
-    isValidationListDialogVisible: false,
     isValidationSelected: false,
     isWebFormMMR: false,
     levelErrorTypes: [],
@@ -106,10 +108,12 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   useEffect(() => {
     callSetMetaData();
+    getDataflowName();
+    // onLoadDataflow();
   }, []);
 
   useEffect(() => {
-    // onLoadDatasetSchema();
+    onLoadDatasetSchema();
   }, [isDataDeleted]);
 
   useEffect(() => {
@@ -128,17 +132,9 @@ export const EUDataset = withRouter(({ history, match }) => {
           label: resources.messages['dataflow']
         }
       ];
-      if (breadCrumbContext.model.find(model => model.icon === 'representative')) {
-        breadCrumbs.push({
-          command: () =>
-            history.push(getUrl(routes.REPRESENTATIVE, { dataflowId, representative: metaData.dataset.name }, true)),
-          href: getUrl(routes.REPRESENTATIVE, { dataflowId, representative: metaData.dataset.name }, true),
-          icon: 'representative',
-          label: !isUndefined(metaData.dataset) ? metaData.dataset.name : resources.messages['representative']
-        });
-      }
 
-      breadCrumbs.push({ label: resources.messages['dataset'], icon: 'dataset' });
+      breadCrumbs.push({ label: resources.messages['euDataset'], icon: 'euDataset' });
+
       breadCrumbContext.add(breadCrumbs);
       leftSideBarContext.removeModels();
     }
@@ -146,6 +142,15 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const callSetMetaData = async () => {
     euDatasetDispatch({ type: 'GET_METADATA', payload: { metadata: await getMetadata({ dataflowId, datasetId }) } });
+  };
+
+  const getDataflowName = async () => {
+    try {
+      const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
+      euDatasetDispatch({ type: 'GET_DATAFLOW_NAME', payload: { name: dataflowData.name } });
+    } catch (error) {
+      notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
+    }
   };
 
   const getDataSchema = async () => {
@@ -165,10 +170,10 @@ export const EUDataset = withRouter(({ history, match }) => {
     }
   };
 
-  const getDatasetTitle = () => {
-    const datasetReleasedTitle = `${datasetSchemaName} (${resources.messages['released'].toString().toLowerCase()})`;
-    return isDatasetReleased ? datasetReleasedTitle : datasetSchemaName;
-  };
+  // const getDatasetTitle = () => {
+  //   const datasetReleasedTitle = `${datasetSchemaName} (${resources.messages['released'].toString().toLowerCase()})`;
+  //   return isDatasetReleased ? datasetReleasedTitle : datasetSchemaName;
+  // };
 
   const getMetadata = async ids => {
     try {
@@ -214,27 +219,31 @@ export const EUDataset = withRouter(({ history, match }) => {
     }
   };
 
-  const onLoadDataflow = async () => {
-    try {
-      const dataflow = await DataflowService.reporting(match.params.dataflowId);
-      const dataset = dataflow.datasets.filter(datasets => datasets.datasetId == datasetId);
-      //   setIsDatasetReleased(dataset[0].isReleased);
-    } catch (error) {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'REPORTING_ERROR',
-        content: { dataflowId, dataflowName, datasetId, datasetName }
-      });
-      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-        history.push(getUrl(routes.DATAFLOWS));
-      }
-    } finally {
-      isLoading(false);
-    }
-  };
+  // const onLoadDataflow = async () => {
+  //   try {
+  //     const dataflow = await DataflowService.reporting(match.params.dataflowId);
+  //     const dataset = dataflow.datasets.filter(datasets => datasets.datasetId == datasetId);
+  //     //   setIsDatasetReleased(dataset[0].isReleased);
+  //   } catch (error) {
+  //     const {
+  //       dataflow: { name: dataflowName },
+  //       dataset: { name: datasetName }
+  //     } = await getMetadata({ dataflowId, datasetId });
+  //     notificationContext.add({
+  //       type: 'REPORTING_ERROR',
+  //       content: { dataflowId, dataflowName, datasetId, datasetName }
+  //     });
+  //     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+  //       history.push(getUrl(routes.DATAFLOWS));
+  //     }
+  //   } finally {
+  //     isLoading(false);
+  //   }
+  // };
+
+  const onHighlightRefresh = value => euDatasetDispatch({ type: 'ON_HIGHLIGHT_REFRESH', payload: { value } });
+
+  useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
 
   const onLoadDatasetSchema = async () => {
     // onHighlightRefresh(false);
@@ -371,13 +380,15 @@ export const EUDataset = withRouter(({ history, match }) => {
     />
   );
 
+  if (euDatasetState.isLoading) return renderLayout(<Spinner />);
+
   return renderLayout(
     <Fragment>
       <Title
-        icon="dataset"
+        icon="euDataset"
         iconSize="3.5rem"
         subtitle={`${dataflowName} - ${datasetName}`}
-        title={`${getDatasetTitle()}`}
+        title={datasetSchemaName}
       />
       <EUDatasetToolbar handleDialogs={handleDialogs} />
       {renderTabsSchema()}
@@ -403,6 +414,14 @@ export const EUDataset = withRouter(({ history, match }) => {
           onHideValidationsDialog={() => handleDialogs('validationList', false)}
         />,
         'validationList'
+      )}
+      {renderDialogLayout(
+        <Dashboard
+          levelErrorTypes={levelErrorTypes}
+          refresh={isDialogVisible.dashboard}
+          tableSchemaNames={euDatasetState.tableSchemaNames}
+        />,
+        'dashboard'
       )}
 
       {renderConfirmDialogLayout(() => {}, 'deleteData')}

@@ -37,14 +37,14 @@ export const EUDatasetToolbar = ({ datasetHasErrors, handleDialogs, isRefreshHig
             icon={'warning'}
             iconClasses={datasetHasErrors ? 'warning' : ''}
             label={resources.messages['showValidations']}
-            onClick={() => handleDialogs('validate', true)}
+            onClick={() => handleDialogs('validationList', true)}
           />
           <Button
             className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
             // disabled={isWebFormMMR || !datasetHasData}
             icon={'dashboard'}
             label={resources.messages['dashboards']}
-            onClick={() => handleDialogs('validate', true)}
+            onClick={() => handleDialogs('dashboard', true)}
           />
           <Button
             className={`p-button-rounded p-button-${
