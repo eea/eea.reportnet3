@@ -5,12 +5,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.eea.dataflow.integration.executor.fme.domain.Collection;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
+import org.eea.dataflow.integration.executor.fme.domain.FMECollection;
 import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
 import org.eea.dataflow.integration.executor.fme.domain.SubmitResult;
-import org.eea.dataflow.mapper.CollectionMapper;
-import org.eea.interfaces.vo.integration.CollectionVO;
+import org.eea.dataflow.integration.executor.fme.mapper.FMECollectionMapper;
+import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
 import org.eea.utils.LiteralConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,7 +45,7 @@ public class FMECommunicationService {
   private String fmeToken;
 
   @Autowired
-  private CollectionMapper collectionMapper;
+  private FMECollectionMapper fmeCollectionMapper;
 
   /**
    * Submit async job.
@@ -173,7 +173,7 @@ public class FMECommunicationService {
    *
    * @return the collection
    */
-  public CollectionVO findRepository() {
+  public FMECollectionVO findRepository() {
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("limit", String.valueOf(-1));
@@ -185,17 +185,16 @@ public class FMECommunicationService {
     HttpEntity<Void> request = createHttpRequest(null, uriParams, headerInfo);
 
     RestTemplate restTemplate = new RestTemplate();
-    ResponseEntity<Collection> responseEntity =
-        restTemplate
-            .exchange(
-                uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path("fmerest/v3/repositories")
-                    .buildAndExpand(uriParams).toString(),
-                HttpMethod.GET, request, Collection.class);
+    ResponseEntity<FMECollection> responseEntity =
+        restTemplate.exchange(
+            uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path("fmerest/v3/repositories")
+                .buildAndExpand(uriParams).toString(),
+            HttpMethod.GET, request, FMECollection.class);
 
-    Collection result =
+    FMECollection result =
         Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
 
-    return collectionMapper.entityToClass(result);
+    return fmeCollectionMapper.entityToClass(result);
   }
 
   /**
@@ -204,7 +203,7 @@ public class FMECommunicationService {
    * @param repository the repository
    * @return the collection
    */
-  public CollectionVO findItems(String repository) {
+  public FMECollectionVO findItems(String repository) {
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("repository", repository);
@@ -216,14 +215,14 @@ public class FMECommunicationService {
     HttpEntity<Void> request = createHttpRequest(null, uriParams, headerInfo);
 
     RestTemplate restTemplate = new RestTemplate();
-    ResponseEntity<Collection> responseEntity = restTemplate.exchange(uriComponentsBuilder
+    ResponseEntity<FMECollection> responseEntity = restTemplate.exchange(uriComponentsBuilder
         .scheme(fmeScheme).host(fmeHost).path("fmerest/v3/repositories/{repository}/items")
-        .buildAndExpand(uriParams).toString(), HttpMethod.GET, request, Collection.class);
+        .buildAndExpand(uriParams).toString(), HttpMethod.GET, request, FMECollection.class);
 
-    Collection result =
+    FMECollection result =
         Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
 
-    return collectionMapper.entityToClass(result);
+    return fmeCollectionMapper.entityToClass(result);
 
   }
 

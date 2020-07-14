@@ -1,4 +1,4 @@
-package org.eea.interfaces.vo.integration;
+package org.eea.interfaces.vo.integration.fme;
 
 import java.io.Serializable;
 import java.util.List;
@@ -12,7 +12,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class CollectionVO implements Serializable {
+public class FMECollectionVO implements Serializable {
 
   private static final long serialVersionUID = 5709304389024312767L;
 
@@ -20,6 +20,6 @@ public class CollectionVO implements Serializable {
   private Integer totalCount;
 
   /** The items. */
-  private List<ItemVO> items;
+  private List<FMEItemVO> items;
 
 }

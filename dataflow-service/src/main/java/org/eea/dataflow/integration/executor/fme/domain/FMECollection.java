@@ -11,7 +11,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Collection {
+public class FMECollection {
 
   /** The limit. */
   private Integer limit;
@@ -23,6 +23,6 @@ public class Collection {
   private Integer totalCount;
 
   /** The items. */
-  private List<Item> items;
+  private List<FMEItem> items;
 
 }

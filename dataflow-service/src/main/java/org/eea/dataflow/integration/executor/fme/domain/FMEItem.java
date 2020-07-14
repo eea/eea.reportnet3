@@ -10,7 +10,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Item {
+public class FMEItem {
 
   /** The description. */
   private String description;

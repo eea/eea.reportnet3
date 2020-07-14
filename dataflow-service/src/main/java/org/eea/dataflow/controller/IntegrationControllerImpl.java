@@ -2,7 +2,6 @@ package org.eea.dataflow.controller;
 
 import java.util.List;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
-import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController;
@@ -10,7 +9,6 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
-import org.eea.interfaces.vo.integration.CollectionVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -46,10 +43,6 @@ public class IntegrationControllerImpl implements IntegrationController {
   /** The FME integration executor factory. */
   @Autowired
   private IntegrationExecutorFactory integrationExecutorFactory;
-
-  /** The FME communication service. */
-  @Autowired
-  private FMECommunicationService fmeCommunicationService;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -204,31 +197,5 @@ public class IntegrationControllerImpl implements IntegrationController {
   }
 
 
-  /**
-   * Find repositories.
-   *
-   * @return the collection VO
-   */
-  @Override
-  @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ')")
-  @GetMapping(value = "/findRepositories", produces = MediaType.APPLICATION_JSON_VALUE)
-  public CollectionVO findRepositories() {
-    return fmeCommunicationService.findRepository();
-  }
-
-  /**
-   * Find items.
-   *
-   * @param repository the repository
-   * @return the collection VO
-   */
-  @Override
-  @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ')")
-  @GetMapping(value = "/findItems", produces = MediaType.APPLICATION_JSON_VALUE)
-  public CollectionVO findItems(@RequestParam("repository") String repository) {
-    return fmeCommunicationService.findItems(repository);
-  }
 
 }

@@ -1,4 +1,4 @@
-package org.eea.interfaces.vo.integration;
+package org.eea.interfaces.vo.integration.fme;
 
 import java.io.Serializable;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class ItemVO implements Serializable {
+public class FMEItemVO implements Serializable {
 
   private static final long serialVersionUID = 7386037189878102052L;
 
