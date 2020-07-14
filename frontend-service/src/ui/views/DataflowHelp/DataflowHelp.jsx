@@ -184,7 +184,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       //   history.push(getUrl(routes.DATAFLOWS));
       // }
       notificationContext.add({
-        type: 'LOAD_SCHEMA_FAILED_EVENT',
+        type: 'IMPORT_DESIGN_FAILED_EVENT',
         content: {
           datasetId
         }

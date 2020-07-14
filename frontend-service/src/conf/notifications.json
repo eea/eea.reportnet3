@@ -7,7 +7,7 @@
       "fixed": false,
       "types": [
         {
-          "key": "LOAD_DATA_FAILED_EVENT",
+          "key": "IMPORT_REPORTING_FAILED_EVENT",
           "navigateTo": {
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
@@ -42,7 +42,7 @@
           }
         },
         {
-          "key": "LOAD_SCHEMA_FAILED_EVENT",
+          "key": "IMPORT_DESIGN_FAILED_EVENT",
           "navigateTo": {
             "section": "DATASET_SCHEMA",
             "parameters": ["datasetId", "datasetId"]
@@ -424,7 +424,21 @@
           }
         },
         {
-          "key": "LOAD_DATA_COMPLETED_EVENT",
+          "key": "IMPORT_REPORTING_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "EXTERNAL_IMPORT_COMPLETE_EVENT",
           "navigateTo": {
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
@@ -480,7 +494,14 @@
           }
         },
         {
-          "key": "LOAD_SCHEMA_COMPLETED_EVENT",
+          "key": "IMPORT_DESIGN_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT",
           "navigateTo": {
             "section": "DATASET_SCHEMA",
             "parameters": ["dataflowId", "datasetId"]

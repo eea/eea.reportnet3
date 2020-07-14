@@ -299,8 +299,8 @@
     "linkSelector": "Select a Link",
     "listView": "List view",
     "loadCountriesError": "Error loading countries data",
-    "loadDataCompletedEvent": "Loaded data completed for <strong title='{:tableSchemaName}'>{:shortTableSchemaName} at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "loadDataFailedEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName} at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "importReportingCompletedEvent": "Loaded data completed for <strong title='{:tableSchemaName}'>{:shortTableSchemaName} at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "importReportingFailedEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName} at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "loadDataflowDataError": "Error loading dataflow",
     "loadDatasetsError": "Error loading datasets",
     "loadDocumentsError": "Error loading documents",
@@ -309,8 +309,8 @@
     "loadOpenedObligationError": "Error loading obligations",
     "loadOrganizationsError": "Error loading organizations data",
     "loadReceiptDataError": "Error loading receipt data",
-    "loadSchemaCompletedEvent": "<strong title='{:tableSchemaName}'>{:shortTableSchemaName} Schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "loadSchemaFailedEvent": "Failed loading <strong title='{:tableSchemaName}'>{:shortTableSchemaName} schema at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "importDesignCompletedEvent": "<strong title='{:tableSchemaName}'>{:shortTableSchemaName} Schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "importDesignFailedEvent": "Failed loading <strong title='{:tableSchemaName}'>{:shortTableSchemaName} schema at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "loadSnapshotsListError": "Error loading dataset copies",
     "loadWebLinksError": "Error loading web links",
     "localhostAlert": "Local environment",
@@ -743,6 +743,8 @@
     "errorLoadingEuDatasetSchema": "Error loading EUDataset schema",
     "deleteDataEuDatasetConfirm": "Are you sure you want to delete the dataset data? You won't be able to recover it, please consider creating a copy before.",
     "copyDataCollectionEuDatasetError": "Error copying data from Data Collections to EU Datasets",
-    "exportEuDatasetError": "Error exporting data from EU Datasets"
+    "exportEuDatasetError": "Error exporting data from EU Datasets",
+    "externalImportDesignCompletedEvent": "<strong title='{:datasetName}'>{:shortDatasetName} Schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "externalImportReportingCompletedEvent": "<strong title='{:datasetName}'>{:shortDatasetName} Schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>"
   }
 }
