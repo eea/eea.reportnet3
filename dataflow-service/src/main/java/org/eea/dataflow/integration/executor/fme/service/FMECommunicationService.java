@@ -10,8 +10,16 @@ import org.eea.dataflow.integration.executor.fme.domain.FMECollection;
 import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
 import org.eea.dataflow.integration.executor.fme.domain.SubmitResult;
 import org.eea.dataflow.integration.executor.fme.mapper.FMECollectionMapper;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
+import org.eea.interfaces.vo.integration.fme.FMEOperationInfoVO;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -32,20 +40,31 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 public class FMECommunicationService {
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The fme host. */
   // fme.discomap.eea.europa.eu
   @Value("${integration.fme.host}")
   private String fmeHost;
 
+  /** The fme scheme. */
   // https
   @Value("${integration.fme.scheme}")
   private String fmeScheme;
 
+  /** The fme token. */
   // Basic UmVwb3J0bmV0MzpSZXBvcnRuZXQzXzIwMjAh
   @Value("${integration.fme.token}")
   private String fmeToken;
 
+  /** The fme collection mapper. */
   @Autowired
   private FMECollectionMapper fmeCollectionMapper;
+
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Submit async job.
@@ -226,6 +245,37 @@ public class FMECommunicationService {
 
   }
 
+  /**
+   * Operation finished.
+   *
+   * @param fmeOperationInfoVO the fme operation info VO
+   */
+  public void operationFinished(FMEOperationInfoVO fmeOperationInfoVO) {
+
+    EventType eventType;
+    Long datasetId = fmeOperationInfoVO.getDatasetId();
+    String user = (String) ThreadPropertiesManager.getVariable("user");
+    NotificationVO notificationVO = NotificationVO.builder().user(user).datasetId(datasetId)
+        .dataflowId(fmeOperationInfoVO.getDataflowId()).fileName(fmeOperationInfoVO.getFileName())
+        .build();
+
+    switch (fmeOperationInfoVO.getFmiOperation()) {
+      case IMPORT:
+        eventType = null != fmeOperationInfoVO.getProviderId()
+            ? EventType.EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT
+            : EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
+        break;
+      default:
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+      kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error realeasing event {}", eventType, e);
+    }
+  }
 
   /**
    * Creates the http request.
@@ -233,7 +283,7 @@ public class FMECommunicationService {
    * @param <T> the generic type
    * @param body the body
    * @param uriParams the uri params
-   *
+   * @param headerInfo the header info
    * @return the http entity
    */
   private <T> HttpEntity<T> createHttpRequest(T body, Map<String, String> uriParams,
