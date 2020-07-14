@@ -600,6 +600,18 @@
     "value": "ZmFsc2U="
   },
   {
+    "key": "config/apiGateway/zuul.routes.fme.path",
+    "value": "L2ZtZS8qKg=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.fme.serviceId",
+    "value": "ZGF0YWZsb3c="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.fme.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
     "key": "config/apiGateway/zuul.retryable",
     "value": "dHJ1ZQ=="
   },
