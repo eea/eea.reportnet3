@@ -4,10 +4,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
+import org.eea.dataflow.integration.executor.fme.domain.FMECollection;
 import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
 import org.eea.dataflow.integration.executor.fme.domain.SubmitResult;
+import org.eea.dataflow.integration.executor.fme.mapper.FMECollectionMapper;
+import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
 import org.eea.utils.LiteralConstants;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -38,6 +43,9 @@ public class FMECommunicationService {
   // Basic UmVwb3J0bmV0MzpSZXBvcnRuZXQzXzIwMjAh
   @Value("${integration.fme.token}")
   private String fmeToken;
+
+  @Autowired
+  private FMECollectionMapper fmeCollectionMapper;
 
   /**
    * Submit async job.
@@ -75,6 +83,15 @@ public class FMECommunicationService {
     return result;
   }
 
+  /**
+   * Send file.
+   *
+   * @param file the file
+   * @param idDataset the id dataset
+   * @param idProvider the id provider
+   * @param fileName the file name
+   * @return the file submit result
+   */
   public FileSubmitResult sendFile(byte[] file, Long idDataset, String idProvider,
       String fileName) {
 
@@ -103,6 +120,15 @@ public class FMECommunicationService {
   }
 
 
+  /**
+   * Receive file.
+   *
+   * @param file the file
+   * @param idDataset the id dataset
+   * @param idProvider the id provider
+   * @param fileName the file name
+   * @return the file submit result
+   */
   public FileSubmitResult receiveFile(byte[] file, Long idDataset, String idProvider,
       String fileName) {
     MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
@@ -138,6 +164,65 @@ public class FMECommunicationService {
       result = checkResult.getBody();
     }
     return result;
+
+  }
+
+
+  /**
+   * Find repository.
+   *
+   * @return the collection
+   */
+  public FMECollectionVO findRepository() {
+
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put("limit", String.valueOf(-1));
+    uriParams.put("offset", String.valueOf(-1));
+    Map<String, String> headerInfo = new HashMap<>();
+    headerInfo.put("Accept", "application/json");
+
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    HttpEntity<Void> request = createHttpRequest(null, uriParams, headerInfo);
+
+    RestTemplate restTemplate = new RestTemplate();
+    ResponseEntity<FMECollection> responseEntity =
+        restTemplate.exchange(
+            uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path("fmerest/v3/repositories")
+                .buildAndExpand(uriParams).toString(),
+            HttpMethod.GET, request, FMECollection.class);
+
+    FMECollection result =
+        Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
+
+    return fmeCollectionMapper.entityToClass(result);
+  }
+
+  /**
+   * Find items.
+   *
+   * @param repository the repository
+   * @return the collection
+   */
+  public FMECollectionVO findItems(String repository) {
+
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put("repository", repository);
+    uriParams.put("type", "WORKSPACE");
+    Map<String, String> headerInfo = new HashMap<>();
+    headerInfo.put("Accept", "application/json");
+
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    HttpEntity<Void> request = createHttpRequest(null, uriParams, headerInfo);
+
+    RestTemplate restTemplate = new RestTemplate();
+    ResponseEntity<FMECollection> responseEntity = restTemplate.exchange(uriComponentsBuilder
+        .scheme(fmeScheme).host(fmeHost).path("fmerest/v3/repositories/{repository}/items")
+        .buildAndExpand(uriParams).toString(), HttpMethod.GET, request, FMECollection.class);
+
+    FMECollection result =
+        Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
+
+    return fmeCollectionMapper.entityToClass(result);
 
   }
 

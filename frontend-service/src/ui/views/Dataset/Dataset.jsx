@@ -1,15 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef } from 'react';
-
 import { withRouter } from 'react-router-dom';
-import { capitalize, isUndefined } from 'lodash';
+
 import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
 import uniq from 'lodash/uniq';
 
 import styles from './Dataset.module.css';
 
 import { config } from 'conf';
-import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
@@ -17,19 +16,17 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
-import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { Snapshots } from 'ui/views/_components/Snapshots';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
+import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { TabsValidations } from 'ui/views/_components/TabsValidations';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
-import { WebFormData } from './_components/WebFormData/WebFormData';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -43,8 +40,8 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useReporterDataset';
 
-import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { MetadataUtils } from 'ui/views/_functions/Utils';
 
 export const Dataset = withRouter(({ match, history }) => {
   const {
@@ -70,31 +67,29 @@ export const Dataset = withRouter(({ match, history }) => {
     selectedRecordErrorId: -1,
     activeIndex: null
   });
+  const [datasetHasData, setDatasetHasData] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
   const [exportExtensionsOperationsList, setExportExtensionsOperationsList] = useState([]);
-  const [datasetHasData, setDatasetHasData] = useState(false);
   const [FMEExportExtensions, setFMEExportExtensions] = useState([]);
+  const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
-  const [isInputSwitchChecked, setIsInputSwitchChecked] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
   const [isValidationSelected, setIsValidationSelected] = useState(false);
-  const [isWebFormMMR, setIsWebFormMMR] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingFile, setLoadingFile] = useState(false);
   const [metaData, setMetaData] = useState({});
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
+  const [tableSchemaId, setTableSchemaId] = useState();
   const [tableSchemaNames, setTableSchemaNames] = useState([]);
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
-  const [validationsVisible, setValidationsVisible] = useState(false);
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
-  const [hasWritePermissions, setHasWritePermissions] = useState(false);
-  const [tableSchemaId, setTableSchemaId] = useState();
+  const [validationsVisible, setValidationsVisible] = useState(false);
 
   let exportMenuRef = useRef();
 
@@ -298,16 +293,6 @@ export const Dataset = withRouter(({ match, history }) => {
     return `${fileName}.${fileType}`;
   };
 
-  const checkIsWebFormMMR = datasetName => {
-    const mmrDatasetName = 'MMR_TEST';
-    if (datasetName.toString().toLowerCase() === mmrDatasetName.toString().toLowerCase()) {
-      setIsInputSwitchChecked(true);
-      setIsWebFormMMR(true);
-    } else {
-      setIsWebFormMMR(false);
-    }
-  };
-
   const getPosition = button => {
     const buttonTopPosition = button.top;
     const buttonLeftPosition = button.left;
@@ -324,15 +309,6 @@ export const Dataset = withRouter(({ match, history }) => {
       if (dataDeleted) {
         setIsDataDeleted(true);
       }
-      // notificationContext.add({
-      //   type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_SUCCESS',
-      //   content: {
-      //     dataflowId,
-      //     datasetId,
-      //     dataflowName,
-      //     datasetName
-      //   }
-      // });
     } catch (error) {
       const {
         dataflow: { name: dataflowName },
@@ -468,7 +444,6 @@ export const Dataset = withRouter(({ match, history }) => {
       );
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
       setDatasetName(datasetStatistics.datasetSchemaName);
-      checkIsWebFormMMR(datasetStatistics.datasetSchemaName);
       const tableSchemaNamesList = [];
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
@@ -512,7 +487,6 @@ export const Dataset = withRouter(({ match, history }) => {
       const datasetError = {
         type: error.message,
         content: {
-          // dataflowId,
           datasetId,
           dataflowName,
           datasetName
@@ -543,26 +517,11 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const onTabChange = tableSchemaId => {
     setDataViewerOptions({ ...dataViewerOptions, activeIndex: tableSchemaId.index });
-    // setActiveIndex(tableSchemaId.index);
   };
 
   const datasetTitle = () => {
     let datasetReleasedTitle = `${datasetSchemaName} (${resources.messages['released'].toString().toLowerCase()})`;
     return isDatasetReleased ? datasetReleasedTitle : datasetSchemaName;
-  };
-
-  const showWebFormInputSwitch = () => {
-    if (isWebFormMMR) {
-      return (
-        <div className={styles.InputSwitchContainer}>
-          <div className={styles.InputSwitchDiv}>
-            <span className={styles.InputSwitchText}>{resources.messages['grid']}</span>
-            {WebFormInputSwitch}
-            <span className={styles.InputSwitchText}>{resources.messages['webForm']}</span>
-          </div>
-        </div>
-      );
-    }
   };
 
   const validationListFooter = (
@@ -574,30 +533,6 @@ export const Dataset = withRouter(({ match, history }) => {
     />
   );
 
-  const isWebForm = () => {
-    if (isInputSwitchChecked) {
-      return <WebFormData datasetId={datasetId} tableSchemaId={tableSchemaId} />;
-    } else {
-      return (
-        <TabsSchema
-          activeIndex={dataViewerOptions.activeIndex}
-          hasWritePermissions={hasWritePermissions}
-          isDatasetDeleted={isDataDeleted}
-          isValidationSelected={isValidationSelected}
-          isWebFormMMR={isWebFormMMR}
-          levelErrorTypes={levelErrorTypes}
-          onLoadTableData={onLoadTableData}
-          onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-          recordPositionId={dataViewerOptions.recordPositionId}
-          selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
-          setIsValidationSelected={setIsValidationSelected}
-          tables={tableSchema}
-          tableSchemaColumns={tableSchemaColumns}
-        />
-      );
-    }
-  };
-
   const layout = children => {
     return (
       <MainLayout>
@@ -605,16 +540,6 @@ export const Dataset = withRouter(({ match, history }) => {
       </MainLayout>
     );
   };
-
-  let WebFormInputSwitch = (
-    <InputSwitch
-      className={styles.WebFormInputSwitch}
-      checked={isInputSwitchChecked}
-      onChange={e => {
-        setIsInputSwitchChecked(e.value);
-      }}
-    />
-  );
 
   if (loading) {
     return layout(<Spinner />);
@@ -656,27 +581,20 @@ export const Dataset = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
-                !hasWritePermissions || isWebFormMMR ? null : 'p-button-animated-blink'
+                !hasWritePermissions ? null : 'p-button-animated-blink'
               }`}
               icon={'trash'}
               label={resources.messages['deleteDatasetData']}
-              disabled={!hasWritePermissions || isWebFormMMR}
+              disabled={!hasWritePermissions}
               onClick={() => onSetVisible(setDeleteDialogVisible, true)}
             />
           </div>
           <div className="p-toolbar-group-right">
-            {/* <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
-              disabled={true}
-              icon={'clock'}
-              label={resources.messages['events']}
-              onClick={null}
-            /> */}
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
-                !hasWritePermissions || isWebFormMMR || !datasetHasData ? null : 'p-button-animated-blink'
+                !hasWritePermissions || !datasetHasData ? null : 'p-button-animated-blink'
               }`}
-              disabled={!hasWritePermissions || isWebFormMMR || !datasetHasData}
+              disabled={!hasWritePermissions || !datasetHasData}
               icon={'validate'}
               label={resources.messages['validate']}
               onClick={() => onSetVisible(setValidateDialogVisible, true)}
@@ -685,9 +603,9 @@ export const Dataset = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
-                !datasetHasErrors || isWebFormMMR ? null : 'p-button-animated-blink'
+                !datasetHasErrors ? null : 'p-button-animated-blink'
               }`}
-              disabled={!datasetHasErrors || isWebFormMMR}
+              disabled={!datasetHasErrors}
               icon={'warning'}
               label={resources.messages['showValidations']}
               onClick={() => onSetVisible(setValidationsVisible, true)}
@@ -695,10 +613,7 @@ export const Dataset = withRouter(({ match, history }) => {
               iconClasses={datasetHasErrors ? 'warning' : ''}
             />
             <Button
-              className={`p-button-rounded p-button-secondary-transparent ${
-                isWebFormMMR ? null : 'p-button-animated-blink'
-              }`}
-              disabled={isWebFormMMR}
+              className={'p-button-rounded p-button-secondary-transparent p-button-animated-blink'}
               icon={'horizontalSliders'}
               label={resources.messages['qcRules']}
               onClick={() => onSetVisible(setValidationListDialogVisible, true)}
@@ -706,9 +621,9 @@ export const Dataset = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
-                isWebFormMMR || !datasetHasData ? null : 'p-button-animated-blink'
+                !datasetHasData ? null : 'p-button-animated-blink'
               }`}
-              disabled={isWebFormMMR || !datasetHasData}
+              disabled={!datasetHasData}
               icon={'dashboard'}
               label={resources.messages['dashboards']}
               onClick={() => onSetVisible(setDashDialogVisible, true)}
@@ -741,8 +656,20 @@ export const Dataset = withRouter(({ match, history }) => {
         visible={dashDialogVisible}>
         <Dashboard refresh={dashDialogVisible} levelErrorTypes={levelErrorTypes} tableSchemaNames={tableSchemaNames} />
       </Dialog>
-      {showWebFormInputSwitch()}
-      {isWebForm()}
+      <TabsSchema
+        activeIndex={dataViewerOptions.activeIndex}
+        hasWritePermissions={hasWritePermissions}
+        isDatasetDeleted={isDataDeleted}
+        isValidationSelected={isValidationSelected}
+        levelErrorTypes={levelErrorTypes}
+        onLoadTableData={onLoadTableData}
+        onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+        recordPositionId={dataViewerOptions.recordPositionId}
+        selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
+        setIsValidationSelected={setIsValidationSelected}
+        tables={tableSchema}
+        tableSchemaColumns={tableSchemaColumns}
+      />
       <Dialog
         className={styles.paginatorValidationViewer}
         dismissableMask={true}

@@ -20,6 +20,7 @@ import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
 import { DataCollectionService } from 'core/services/DataCollection';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
+import { EuDatasetService } from 'core/services/EuDataset';
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -273,10 +274,28 @@ export const BigButtonList = ({
     setIsDuplicated(false);
   };
 
+  const onCopyDataCollectionToEuDataset = async () => {
+    try {
+      await EuDatasetService.copyDataCollection(dataflowId);
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({ type: 'COPY_DATA_COLLECTION_EU_DATASET_ERROR' });
+    }
+  };
+
+  const onExportEuDataset = async () => {
+    try {
+      await EuDatasetService.exportEuDataset(dataflowId);
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({ type: 'EXPORT_EU_DATASET_ERROR' });
+    }
+  };
+
   const onLoadReceiptData = async () => {
     try {
       setIsReceiptLoading(true);
-      const response = await ConfirmationReceiptService.get(dataflowId, dataflowState.dataProviderId);
+      const response = await ConfirmationReceiptService.download(dataflowId, dataflowState.dataProviderId);
 
       downloadPdf(response);
       onCleanUpReceipt();
@@ -326,13 +345,14 @@ export const BigButtonList = ({
     useBigButtonList({
       dataflowId,
       dataflowState,
-      // exportDatatableSchema,
       getDeleteSchemaIndex,
       handleRedirect,
       isActiveButton,
       onCloneDataflow,
+      onCopyDataCollectionToEuDataset,
       onDatasetSchemaNameError,
       onDuplicateName,
+      onExportEuDataset,
       onLoadReceiptData,
       onSaveName,
       onShowDataCollectionModal,

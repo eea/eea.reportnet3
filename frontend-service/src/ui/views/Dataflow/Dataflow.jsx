@@ -254,12 +254,24 @@ const Dataflow = withRouter(({ history, match }) => {
       return { apiKeyBtn: false, editBtn: false, manageRightsBtn: false, propertiesBtn: false };
     }
 
-    const isRepresentative =
-      dataflowState.data.representatives.length === 1 && isUndefined(representativeId)
-        ? true
-        : dataflowState.data.representatives.length > 1 && isUndefined(representativeId)
-        ? false
-        : true;
+    let isRepresentative;
+    if (isDesign) {
+      isRepresentative =
+        dataflowState.data.representatives.length === 1 && isUndefined(representativeId)
+          ? true
+          : dataflowState.data.representatives.length > 1 && isUndefined(representativeId)
+          ? false
+          : true;
+    }
+
+    if (isDraft) {
+      isRepresentative =
+        dataflowState.data.datasets.length === 1 && isUndefined(representativeId)
+          ? true
+          : dataflowState.data.datasets.length > 1 && isUndefined(representativeId)
+          ? false
+          : true;
+    }
 
     return {
       apiKeyBtn: isRepresentative,

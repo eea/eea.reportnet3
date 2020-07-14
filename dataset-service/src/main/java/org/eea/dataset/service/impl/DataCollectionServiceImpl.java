@@ -159,9 +159,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  /** The user management controller zull. */
-  @Autowired
-  private UserManagementControllerZull userManagementControllerZull;
 
   /** The design dataset repository. */
   @Autowired
@@ -183,12 +180,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    */
   private static final String NAME_DC = "Data Collection - %s";
 
+  /** The Constant NAME_EU. */
+  private static final String NAME_EU = "EU Dataset - %s";
+
   /**
    * The Constant UPDATE_DATAFLOW_STATUS.
    */
   private static final String UPDATE_DATAFLOW_STATUS =
       "update dataflow set status = '%s', deadline_date = '%s' where id = %d";
 
+  /** The Constant UPDATE_REPRESENTATIVE_HAS_DATASETS. */
   private static final String UPDATE_REPRESENTATIVE_HAS_DATASETS =
       "update representative set has_datasets = %b where id = %d;";
 
@@ -198,11 +199,18 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private static final String INSERT_DC_INTO_DATASET =
       "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema) values ('%s', %d, '%s', '%s') returning id";
 
+  /** The Constant INSERT_EU_INTO_DATASET. */
+  private static final String INSERT_EU_INTO_DATASET =
+      "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema) values ('%s', %d, '%s', '%s') returning id";
+
   /**
    * The Constant INSERT_DC_INTO_DATA_COLLECTION.
    */
   private static final String INSERT_DC_INTO_DATA_COLLECTION =
       "insert into data_collection (id, due_date) values (%d, '%s')";
+
+  /** The Constant INSERT_EU_INTO_EU_DATASET. */
+  private static final String INSERT_EU_INTO_EU_DATASET = "insert into eu_dataset (id) values (%d)";
 
   /**
    * The Constant INSERT_RD_INTO_DATASET.
@@ -363,6 +371,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     List<Long> dataCollectionIds = new ArrayList<>();
     Map<Long, String> datasetIdsEmails = new HashMap<>();
     Map<Long, String> datasetIdsAndSchemaIds = new HashMap<>();
+    List<Long> euDatasetIds = new ArrayList<>();
 
     try (Connection connection = metabaseDataSource.getConnection();
         Statement statement = connection.createStatement()) {
@@ -392,6 +401,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             Long dataCollectionId = persistDC(statement, design, time, dataflowId, dueDate);
             dataCollectionIds.add(dataCollectionId);
             datasetIdsAndSchemaIds.put(dataCollectionId, design.getDatasetSchema());
+
+            // 6b. Create the EU Dataset
+            Long euDatasetId = persistEU(statement, design, time, dataflowId);
+            euDatasetIds.add(euDatasetId);
+            datasetIdsAndSchemaIds.put(euDatasetId, design.getDatasetSchema());
           }
 
           // 7. Create Reporting Dataset in metabase
@@ -425,7 +439,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
         statement.executeBatch();
         // 8. Create permissions
-        createPermissions(datasetIdsEmails, dataCollectionIds, dataflowId);
+        createPermissions(datasetIdsEmails, dataCollectionIds, euDatasetIds, dataflowId);
         // 9. Delete editors
         removePermissionEditors(dataflowId);
 
@@ -567,6 +581,30 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
   }
 
+
+  /**
+   * Persist EU.
+   *
+   * @param metabaseStatement the metabase statement
+   * @param design the design
+   * @param time the time
+   * @param dataflowId the dataflow id
+   * @return the long
+   * @throws SQLException the SQL exception
+   */
+  private Long persistEU(Statement metabaseStatement, DesignDatasetVO design, String time,
+      Long dataflowId) throws SQLException {
+    try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_EU_INTO_DATASET, time,
+        dataflowId, String.format(NAME_EU, design.getDataSetName().replace("'", "''")),
+        design.getDatasetSchema()))) {
+      rs.next();
+      Long datasetId = rs.getLong(1);
+      metabaseStatement.addBatch(String.format(INSERT_EU_INTO_EU_DATASET, datasetId));
+      metabaseStatement.addBatch(String.format(INSERT_INTO_PARTITION_DATASET, datasetId));
+      return datasetId;
+    }
+  }
+
   /**
    * Persist RD.
    *
@@ -595,17 +633,18 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
   }
 
+
   /**
    * Creates the permissions.
    *
    * @param datasetIdsEmails the dataset ids emails
    * @param dataCollectionIds the data collection ids
+   * @param euDatasetIds the eu dataset ids
    * @param dataflowId the dataflow id
-   *
    * @throws EEAException the EEA exception
    */
   private void createPermissions(Map<Long, String> datasetIdsEmails, List<Long> dataCollectionIds,
-      Long dataflowId) throws EEAException {
+      List<Long> euDatasetIds, Long dataflowId) throws EEAException {
 
     List<ResourceInfoVO> groups = new ArrayList<>();
     List<ResourceAssignationVO> providerAssignments = new ArrayList<>();
@@ -617,6 +656,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           SecurityRoleEnum.DATA_CUSTODIAN));
       custodianAssignments.add(
           createAssignments(dataCollectionId, null, ResourceGroupEnum.DATACOLLECTION_CUSTODIAN));
+    }
+
+    // Create EUDataset groups and assign custodian to self user
+    for (Long euDatasetId : euDatasetIds) {
+      groups.add(
+          createGroup(euDatasetId, ResourceTypeEnum.EU_DATASET, SecurityRoleEnum.DATA_CUSTODIAN));
+      custodianAssignments
+          .add(createAssignments(euDatasetId, null, ResourceGroupEnum.EUDATASET_CUSTODIAN));
     }
 
     // Create DATASET_LEAD_REPORTER and DATA_CUSTODIAN groups

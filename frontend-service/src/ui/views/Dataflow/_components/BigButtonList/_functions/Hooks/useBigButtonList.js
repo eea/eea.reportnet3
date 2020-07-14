@@ -17,13 +17,14 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 const useBigButtonList = ({
   dataflowId,
   dataflowState,
-  // exportDatatableSchema,
   getDeleteSchemaIndex,
   handleRedirect,
   isActiveButton,
   onCloneDataflow,
+  onCopyDataCollectionToEuDataset,
   onDatasetSchemaNameError,
   onDuplicateName,
+  onExportEuDataset,
   onLoadReceiptData,
   onSaveName,
   onShowDataCollectionModal,
@@ -49,6 +50,10 @@ const useBigButtonList = ({
     createDataCollection:
       roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD']),
     cloneSchemasFromDataflow:
+      roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD']),
+    copyDataCollectionToEuDataset:
+      roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD']),
+    exportEuDataset:
       roles.includes(config.permissions['DATA_CUSTODIAN']) || roles.includes(config.permissions['DATA_STEWARD']),
     dashboard:
       roles.includes(config.permissions['DATA_CUSTODIAN']) ||
@@ -313,7 +318,7 @@ const useBigButtonList = ({
   ];
 
   const dataCollectionModels = dataflowState.data.dataCollections.map(dataCollection => ({
-    buttonClass: 'schemaDataset',
+    buttonClass: 'dataCollection',
     buttonIcon: 'dataCollection',
     caption: dataCollection.dataCollectionName,
     handleRedirect: () => {
@@ -321,29 +326,19 @@ const useBigButtonList = ({
     },
     helpClassName: 'dataflow-datacollection-help-step',
     layout: 'defaultBigButton',
-    // model: [
-    //   {
-    //     label: resources.messages['rename'],
-    //     icon: 'pencil',
-    //     disabled: true
-    //   },
-    //   {
-    //     label: resources.messages['duplicate'],
-    //     icon: 'clone',
-    //     disabled: true
-    //   },
-    //   {
-    //     label: resources.messages['delete'],
-    //     icon: 'trash',
-    //     disabled: true
-    //   },
-    //   {
-    //     label: resources.messages['properties'],
-    //     icon: 'info',
-    //     disabled: true
-    //   }
-    // ],
     visibility: !isEmpty(dataflowState.data.dataCollections)
+  }));
+
+  const euDatasetModels = dataflowState.data.euDatasets.map(euDataset => ({
+    buttonClass: 'euDataset',
+    buttonIcon: 'euDataset',
+    caption: euDataset.euDatasetName,
+    handleRedirect: () => {
+      handleRedirect(getUrl(routes.EU_DATASET, { dataflowId, datasetId: euDataset.euDatasetId }, true));
+    },
+    helpClassName: 'dataflow-eudataset-help-step',
+    layout: 'defaultBigButton',
+    visibility: !isEmpty(dataflowState.data.euDatasets)
   }));
 
   const onBuildReceiptButton = () => {
@@ -408,6 +403,30 @@ const useBigButtonList = ({
     return properties;
   };
 
+  const copyDataCollectionToEuDatasetBigButton = [
+    {
+      buttonClass: 'schemaDataset',
+      buttonIcon: 'angleDoubleRight',
+      caption: 'Copy Data Collections to EU Datasets',
+      handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onCopyDataCollectionToEuDataset(),
+      layout: 'defaultBigButton',
+      visibility:
+        buttonsVisibility.copyDataCollectionToEuDataset && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']
+    }
+  ];
+
+  const exportEuDatasetBigButton = [
+    {
+      buttonClass: 'schemaDataset',
+      buttonIcon: 'fileExport',
+      caption: 'Export EU Datasets',
+      handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onExportEuDataset(),
+      layout: 'defaultBigButton',
+      visibility:
+        buttonsVisibility.copyDataCollectionToEuDataset && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']
+    }
+  ];
+
   const receiptBigButton = onBuildReceiptButton();
 
   const releaseBigButton = onBuildReleaseButton();
@@ -417,6 +436,9 @@ const useBigButtonList = ({
     ...helpBigButton,
     ...dashboardBigButton,
     ...dataCollectionModels,
+    ...copyDataCollectionToEuDatasetBigButton,
+    ...euDatasetModels,
+    ...exportEuDatasetBigButton,
     ...designDatasetModels,
     ...newSchemaBigButton,
     ...createDataCollection,

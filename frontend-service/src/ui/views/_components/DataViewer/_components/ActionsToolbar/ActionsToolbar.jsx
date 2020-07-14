@@ -38,7 +38,6 @@ const ActionsToolbar = ({
   isLoading,
   isTableDeleted,
   isValidationSelected,
-  isWebFormMMR,
   levelErrorTypesWithCorrects,
   onRefresh,
   onSetVisible,
@@ -49,6 +48,7 @@ const ActionsToolbar = ({
   setDeleteDialogVisible,
   setImportDialogVisible,
   showValidationFilter,
+  showWriteButtons,
   tableHasErrors,
   tableId,
   tableName,
@@ -212,23 +212,22 @@ const ActionsToolbar = ({
   return (
     <Toolbar className={styles.actionsToolbar}>
       <div className="p-toolbar-group-left">
-        <Button
+        {showWriteButtons && <Button
           className={`p-button-rounded p-button-secondary ${
-            !hasWritePermissions || tableReadOnly || isWebFormMMR ? null : 'p-button-animated-blink'
+            !hasWritePermissions || tableReadOnly ? null : 'p-button-animated-blink'
           }`}
-          disabled={!hasWritePermissions || tableReadOnly || isWebFormMMR}
-          icon={'export'}
+          disabled={!hasWritePermissions || tableReadOnly}
+          icon={'import'}
           label={resources.messages['import']}
           onClick={() => setImportDialogVisible(true)}
-        />
+        />}
         <Button
           id="buttonExportTable"
           className={`p-button-rounded p-button-secondary-transparent ${
             isDataCollection ? null : 'p-button-animated-blink'
           }`}
-          // disabled={!hasWritePermissions}
           disabled={isDataCollection}
-          icon={isLoadingFile ? 'spinnerAnimate' : 'import'}
+          icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
           label={resources.messages['exportTable']}
           onClick={event => {
             onUpdateData();
@@ -244,19 +243,19 @@ const ActionsToolbar = ({
           ref={exportMenuRef}
         />
 
-        <Button
+        {showWriteButtons && <Button
           className={`p-button-rounded p-button-secondary-transparent ${
-            !hasWritePermissions || tableReadOnly || isWebFormMMR || isUndefined(records.totalRecords) || isTableDeleted
+            !hasWritePermissions || tableReadOnly || isUndefined(records.totalRecords) || isTableDeleted
               ? null
               : 'p-button-animated-blink'
           }`}
           disabled={
-            !hasWritePermissions || tableReadOnly || isWebFormMMR || isUndefined(records.totalRecords) || isTableDeleted
+            !hasWritePermissions || tableReadOnly || isUndefined(records.totalRecords) || isTableDeleted
           }
           icon={'trash'}
           label={resources.messages['deleteTable']}
           onClick={() => onSetVisible(setDeleteDialogVisible, true)}
-        />
+        />}
 
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
@@ -280,7 +279,7 @@ const ActionsToolbar = ({
           }}
         />
 
-        <Button
+        {showWriteButtons && <Button
           className={`p-button-rounded p-button-secondary-transparent ${
             tableHasErrors ? 'p-button-animated-blink' : null
           }`}
@@ -291,7 +290,7 @@ const ActionsToolbar = ({
           onClick={event => {
             filterMenuRef.current.show(event);
           }}
-        />
+        />}
         <DropdownFilter
           className={!isLoading ? 'p-button-animated-blink' : null}
           disabled={isLoading}
