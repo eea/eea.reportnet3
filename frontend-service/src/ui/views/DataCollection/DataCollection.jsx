@@ -1,12 +1,11 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import { withRouter } from 'react-router-dom';
-import { capitalize, isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './DataCollection.module.css';
 
 import { DatasetConfig } from 'conf/domain/model/Dataset';
-import { config } from 'conf';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
@@ -240,6 +239,7 @@ export const DataCollection = withRouter(({ match, history }) => {
     <TabsSchema
       activeIndex={dataViewerOptions.activeIndex}
       hasWritePermissions={false}
+      showWriteButtons={false}
       isDataCollection={true}
       levelErrorTypes={levelErrorTypes}
       onLoadTableData={onLoadTableData}
@@ -278,7 +278,7 @@ export const DataCollection = withRouter(({ match, history }) => {
         <Toolbar>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary`}
+              className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'export'}
               label={resources.messages['export']}
