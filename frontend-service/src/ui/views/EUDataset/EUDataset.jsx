@@ -379,7 +379,6 @@ export const EUDataset = withRouter(({ history, match }) => {
       activeIndex={dataViewerOptions.activeIndex}
       hasWritePermissions={hasWritePermissions}
       isDataCollection={true}
-      isWebFormMMR={false}
       levelErrorTypes={levelErrorTypes}
       onLoadTableData={onLoadTableData}
       onTabChange={tableSchemaId => onTabChange(tableSchemaId)}

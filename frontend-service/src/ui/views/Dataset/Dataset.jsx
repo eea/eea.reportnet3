@@ -27,7 +27,6 @@ import { TabsValidations } from 'ui/views/_components/TabsValidations';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
-import { WebFormData } from './_components/WebFormData/WebFormData';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -310,15 +309,6 @@ export const Dataset = withRouter(({ match, history }) => {
       if (dataDeleted) {
         setIsDataDeleted(true);
       }
-      // notificationContext.add({
-      //   type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_SUCCESS',
-      //   content: {
-      //     dataflowId,
-      //     datasetId,
-      //     dataflowName,
-      //     datasetName
-      //   }
-      // });
     } catch (error) {
       const {
         dataflow: { name: dataflowName },
@@ -497,7 +487,6 @@ export const Dataset = withRouter(({ match, history }) => {
       const datasetError = {
         type: error.message,
         content: {
-          // dataflowId,
           datasetId,
           dataflowName,
           datasetName
@@ -528,7 +517,6 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const onTabChange = tableSchemaId => {
     setDataViewerOptions({ ...dataViewerOptions, activeIndex: tableSchemaId.index });
-    // setActiveIndex(tableSchemaId.index);
   };
 
   const datasetTitle = () => {
@@ -602,13 +590,6 @@ export const Dataset = withRouter(({ match, history }) => {
             />
           </div>
           <div className="p-toolbar-group-right">
-            {/* <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
-              disabled={true}
-              icon={'clock'}
-              label={resources.messages['events']}
-              onClick={null}
-            /> */}
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
                 !hasWritePermissions || !datasetHasData ? null : 'p-button-animated-blink'
