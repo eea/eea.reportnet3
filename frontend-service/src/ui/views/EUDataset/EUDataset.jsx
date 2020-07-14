@@ -74,6 +74,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     FMEExportExtensions: [],
     hasWritePermissions: false,
     isDataDeleted: false,
+    isDataUpdated: false,
     isDialogVisible: { dashboard: false, deleteData: false, importData: false, validationList: false, validate: false },
     isInputSwitchChecked: false,
     isLoading: true,
@@ -114,7 +115,7 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   useEffect(() => {
     onLoadDatasetSchema();
-  }, [isDataDeleted]);
+  }, [euDatasetState.isDataUpdated, isDataDeleted]);
 
   useEffect(() => {
     if (!isUndefined(metaData.dataset)) {
@@ -193,6 +194,8 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const handleDialogs = (dialog, value) => euDatasetDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
 
+  const isDataUpdated = value => euDatasetDispatch({ type: 'IS_DATA_UPDATED', payload: { value } });
+
   const isLoading = value => euDatasetDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const isWebFormMMR = datasetName => {
@@ -201,6 +204,26 @@ export const EUDataset = withRouter(({ history, match }) => {
     const value = datasetName.toString().toLowerCase() === mmrDatasetName.toString().toLowerCase();
 
     euDatasetDispatch({ type: 'IS_WEB_FORM_MMR', payload: { value } });
+  };
+
+  const onConfirmDelete = async () => {
+    handleDialogs('deleteData', false);
+
+    try {
+      const response = await DatasetService.deleteDataById(datasetId);
+      if (response.status >= 200 && response.status <= 299) {
+        isDataUpdated(!euDatasetState.isDataUpdated);
+      }
+    } catch (error) {
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await getMetadata({ dataflowId, datasetId });
+      notificationContext.add({
+        type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
+        content: { dataflowId, datasetId, dataflowName, datasetName }
+      });
+    }
   };
 
   const onConfirmValidate = async () => {
@@ -246,10 +269,10 @@ export const EUDataset = withRouter(({ history, match }) => {
   useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
 
   const onLoadDatasetSchema = async () => {
-    // onHighlightRefresh(false);
+    isLoading(true);
+    onHighlightRefresh(false);
 
     try {
-      isLoading(true);
       const datasetSchema = await getDataSchema();
       const datasetStatistics = await getStatisticsById(
         datasetId,
@@ -304,7 +327,8 @@ export const EUDataset = withRouter(({ history, match }) => {
       } = await getMetadata({ dataflowId, datasetId });
       //   setDatasetName(datasetName);
       const datasetError = { type: error.message, content: { dataflowName, datasetId, datasetName } };
-      notificationContext.add(datasetError);
+      // notificationContext.add(datasetError);
+      notificationContext.add({ type: 'ERROR_LOADING_EU_DATASET_SCHEMA' });
 
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         history.push(getUrl(routes.DATAFLOW, { dataflowId }));
@@ -337,13 +361,13 @@ export const EUDataset = withRouter(({ history, match }) => {
   const renderConfirmDialogLayout = (onConfirm, option) =>
     isDialogVisible[option] && (
       <ConfirmDialog
-        header={resources.messages[`${option}`]}
+        header={resources.messages[`${option}EuDatasetHeader`]}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
         onConfirm={() => onConfirm()}
         onHide={() => handleDialogs(option, false)}
         visible={isDialogVisible[option]}>
-        {resources.messages[`${option}`]}
+        {resources.messages[`${option}EuDatasetConfirm`]}
       </ConfirmDialog>
     );
 
@@ -445,8 +469,8 @@ export const EUDataset = withRouter(({ history, match }) => {
         'dashboard'
       )}
 
-      {renderConfirmDialogLayout(() => {}, 'deleteData')}
-      {renderConfirmDialogLayout(() => {}, 'validate')}
+      {renderConfirmDialogLayout(() => onConfirmDelete(), 'deleteData')}
+      {renderConfirmDialogLayout(() => onConfirmValidate(), 'validate')}
     </Fragment>
   );
 });

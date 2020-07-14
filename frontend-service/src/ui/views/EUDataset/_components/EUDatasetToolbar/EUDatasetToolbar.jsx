@@ -7,7 +7,13 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const EUDatasetToolbar = ({ datasetHasErrors, handleDialogs, isRefreshHighlighted, onRefresh }) => {
+export const EUDatasetToolbar = ({
+  datasetHasErrors,
+  datasetHasData,
+  handleDialogs,
+  isRefreshHighlighted,
+  onRefresh
+}) => {
   const resources = useContext(ResourcesContext);
 
   return (
@@ -30,7 +36,7 @@ export const EUDatasetToolbar = ({ datasetHasErrors, handleDialogs, isRefreshHig
           />
           <Button
             className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-            // disabled={!datasetHasErrors || isWebFormMMR}
+            disabled={!datasetHasErrors}
             icon={'warning'}
             iconClasses={datasetHasErrors ? 'warning' : ''}
             label={resources.messages['showValidations']}
@@ -38,7 +44,7 @@ export const EUDatasetToolbar = ({ datasetHasErrors, handleDialogs, isRefreshHig
           />
           <Button
             className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-            // disabled={isWebFormMMR || !datasetHasData}
+            disabled={!datasetHasData}
             icon={'dashboard'}
             label={resources.messages['dashboards']}
             onClick={() => handleDialogs('dashboard', true)}
