@@ -1,7 +1,6 @@
 import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 
@@ -17,7 +16,6 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { EUDatasetToolbar } from './_components/EUDatasetToolbar';
-import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
@@ -76,12 +74,10 @@ export const EUDataset = withRouter(({ history, match }) => {
     isDataDeleted: false,
     isDataUpdated: false,
     isDialogVisible: { dashboard: false, deleteData: false, importData: false, validationList: false, validate: false },
-    isInputSwitchChecked: false,
     isLoading: true,
     isLoadingFile: false,
     isRefreshHighlighted: false,
     isValidationSelected: false,
-    isWebFormMMR: false,
     levelErrorTypes: [],
     metaData: {},
     tableSchema: undefined,
@@ -198,14 +194,6 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const isLoading = value => euDatasetDispatch({ type: 'IS_LOADING', payload: { value } });
 
-  const isWebFormMMR = datasetName => {
-    const mmrDatasetName = 'MMR_TEST';
-
-    const value = datasetName.toString().toLowerCase() === mmrDatasetName.toString().toLowerCase();
-
-    euDatasetDispatch({ type: 'IS_WEB_FORM_MMR', payload: { value } });
-  };
-
   const onConfirmDelete = async () => {
     handleDialogs('deleteData', false);
 
@@ -318,8 +306,6 @@ export const EUDataset = withRouter(({ history, match }) => {
           tableSchemaNames: tableSchemaNamesList
         }
       });
-
-      isWebFormMMR(datasetStatistics.datasetSchemaName);
     } catch (error) {
       const {
         dataflow: { name: dataflowName },
@@ -403,24 +389,6 @@ export const EUDataset = withRouter(({ history, match }) => {
       tableSchemaColumns={tableSchemaColumns}
     />
   );
-
-  // const renderWebFormInputSwitch = () => {
-  //   if (isWebFormMMR) {
-  //     return (
-  //       <div className={styles.InputSwitchContainer}>
-  //         <div className={styles.InputSwitchDiv}>
-  //           <span className={styles.InputSwitchText}>{resources.messages['grid']}</span>
-  //           <InputSwitch
-  //             checked={euDatasetState.isInputSwitchChecked}
-  //             className={styles.WebFormInputSwitch}
-  //             onChange={event => euDatasetDispatch({ type: 'ON_TOGGLE_VIEW', payload: { value: event.value } })}
-  //           />
-  //           <span className={styles.InputSwitchText}>{resources.messages['webForm']}</span>
-  //         </div>
-  //       </div>
-  //     );
-  //   }
-  // };
 
   if (euDatasetState.isLoading) return renderLayout(<Spinner />);
 

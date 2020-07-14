@@ -20,9 +20,6 @@ export const euDatasetReducer = (state, { type, payload }) => {
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
 
-    case 'IS_WEB_FORM_MMR':
-      return { ...state, isInputSwitchChecked: payload.value, isWebFormMMR: payload.value };
-
     case 'ON_HIGHLIGHT_REFRESH':
       return { ...state, isRefreshHighlighted: payload.value };
 
@@ -54,9 +51,6 @@ export const euDatasetReducer = (state, { type, payload }) => {
 
     case 'ON_TAB_CHANGE':
       return { ...state, dataViewerOptions: { ...state.dataViewerOptions, activeIndex: payload.activeIndex } };
-
-    case 'ON_TOGGLE_VIEW':
-      return { ...state, isInputSwitchChecked: payload.value };
 
     default:
       return state;
