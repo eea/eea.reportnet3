@@ -1,5 +1,6 @@
 import React, { Fragment, useContext, useEffect, useState, useReducer } from 'react';
 
+import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uuid from 'uuid';
@@ -26,8 +27,10 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
 
   const [shareRightsState, shareRightsDispatch] = useReducer(shareRightsReducer, {
     accountHasError: false,
+    accountNotFound: true,
     contributorAccountToDelete: '',
     contributors: [],
+    clonedContributors: [],
     isContributorDeleting: false,
     isDataUpdated: false,
     isDeleteDialogVisible: false
@@ -52,10 +55,11 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
     try {
       const contributors = await ContributorService.all(dataflowId, dataProvider);
       const emptyContributor = new Contributor({ account: '', dataProviderId: '', isNew: true, writePermission: '' });
+      const clonedContributors = cloneDeep(contributors);
 
       shareRightsDispatch({
         type: 'GET_ALL_CONTRIBUTORS',
-        payload: { contributors: [...contributors, emptyContributor] }
+        payload: { contributors: [...contributors, emptyContributor], clonedContributors }
       });
     } catch (error) {}
   };
@@ -70,19 +74,34 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
     return email.match(expression);
   };
 
-  const isExistingAccount = account => {
+  const isUsedAccount = account => {
     const sameAccounts = shareRightsState.contributors.filter(contributor => contributor.account === account);
 
     return sameAccounts.length > 1;
   };
 
+  const isRightChanged = contributor => {
+    const [initialContributor] = shareRightsState.clonedContributors.filter(
+      fContributor => fContributor.account === contributor.account
+    );
+
+    if (contributor.isNew) {
+      return true;
+    }
+    return initialContributor.writePermission !== JSON.parse(contributor.writePermission);
+  };
+
   const updateContributor = contributor => {
     shareRightsDispatch({
       type: 'SET_ACCOUNT_HAS_ERROR',
-      payload: { accountHasError: !isValidEmail(contributor.account) || isExistingAccount(contributor.account) }
+      payload: {
+        accountHasError:
+          !isValidEmail(contributor.account) || isUsedAccount(contributor.account) || !shareRightsState.accountNotFound
+      }
     });
+
     if (!contributor.isNew) {
-      onUpdateContributor(contributor);
+      isRightChanged(contributor) && onUpdateContributor(contributor);
     } else {
       if (isValidEmail(contributor.account) && !shareRightsState.accountHasError) {
         onUpdateContributor(contributor);
@@ -116,6 +135,12 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
     shareRightsDispatch({ type: 'ON_DATA_CHANGE', payload: { isDataUpdated: !shareRightsState.isDataUpdated } });
   };
 
+  const onEnterKey = (key, contributor) => {
+    if (key === 'Enter') {
+      isValidEmail(contributor.account) && isRightChanged(contributor) && onUpdateContributor(contributor);
+    }
+  };
+
   const onUpdateContributor = async contributor => {
     if (contributor.writePermission !== '') {
       const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
@@ -127,7 +152,10 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
         }
       } catch (error) {
         if (error.response.status === 404) {
-          shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError: true } });
+          shareRightsDispatch({
+            type: 'SET_ACCOUNT_NOT_FOUND',
+            payload: { accountNotFound: true, accountHasError: true }
+          });
         }
       } finally {
         setIsLoading(false);
@@ -140,7 +168,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
     const [thisContributor] = contributors.filter(thisContributor => thisContributor.id === contributor.id);
     thisContributor.writePermission = newWritePermission;
 
-    if (!shareRightsState.accountHasError) {
+    if (!shareRightsState.accountHasError || !shareRightsState.accountNotFound) {
       shareRightsDispatch({ type: 'ON_WRITE_PERMISSION_CHANGE', payload: { contributors } });
     }
   };
@@ -152,7 +180,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
 
     shareRightsDispatch({
       type: 'ON_SET_ACCOUNT',
-      payload: { contributors, accountHasError: !isValidEmail(inputValue) || isExistingAccount(inputValue) }
+      payload: { contributors, accountHasError: !isValidEmail(inputValue) || isUsedAccount(inputValue) }
     });
   };
 
@@ -188,7 +216,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
 
     return (
       <select
-        // onKeyDown={event => onKeyDown(event, formDispatcher, formState, contributor, dataflowId)}
+        onKeyDown={event => onEnterKey(event.key, contributor)}
         onBlur={() => updateContributor(contributor)}
         onChange={event => onWritePermissionChange(contributor, event.target.value)}
         value={contributor.writePermission}>
@@ -204,19 +232,14 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
   };
 
   const renderAccountTemplate = contributor => {
-    const hasError =
-      !isEmpty(contributor.account) &&
-      contributor.isNew &&
-      (!isValidEmail(contributor.account) ||
-        isExistingAccount(contributor.account) ||
-        shareRightsState.accountHasError);
+    const hasError = !isEmpty(contributor.account) && contributor.isNew && shareRightsState.accountHasError;
 
     return (
-      <div className={`formField ${hasError && 'error'}`} style={{ marginBottom: '0rem' }}>
+      <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
         <input
           autoFocus={contributor.isNew}
           disabled={!contributor.isNew}
-          className={!contributor.isNew && styles.disabledInput}
+          className={!contributor.isNew ? styles.disabledInput : ''}
           id={isEmpty(contributor.account) ? 'emptyInput' : contributor.account}
           onBlur={() => updateContributor(contributor)}
           onChange={event => onSetAccount(event.target.value)}

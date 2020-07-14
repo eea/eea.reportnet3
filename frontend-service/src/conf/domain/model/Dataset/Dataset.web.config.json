@@ -26,6 +26,5 @@
   "updateTableDataRecord": "/dataset/{:datasetId}/updateRecord",
   "updateTableDesign": "/dataschema/{:datasetId}/tableSchema",
   "validateDataset": "/validation/dataset/{:datasetId}",
-  "validationViewer": "/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}",
-  "webFormDataViewer": "/dataset/TableValueDataset/{:datasetId}?idTableSchema={:tableSchemaId}"
+  "validationViewer": "/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}"
 }

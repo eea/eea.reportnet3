@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import { withRouter } from 'react-router-dom';
 import { capitalize, isEmpty, isUndefined } from 'lodash';
@@ -25,7 +25,6 @@ import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContex
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { MetadataUtils } from 'ui/views/_functions/Utils';
@@ -50,8 +49,6 @@ export const DataCollection = withRouter(({ match, history }) => {
     selectedRecordErrorId: -1,
     activeIndex: null
   });
-  const [hasWritePermissions, setHasWritePermissions] = useState(false);
-  const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tableSchema, setTableSchema] = useState();
@@ -59,15 +56,6 @@ export const DataCollection = withRouter(({ match, history }) => {
   const [tableSchemaNames, setTableSchemaNames] = useState([]);
 
   let growlRef = useRef();
-
-  useEffect(() => {
-    if (!isUndefined(userContext.contextRoles)) {
-      setHasWritePermissions(
-        userContext.hasPermission([config.permissions.LEAD_REPORTER], `${config.permissions.DATASET}${datasetId}`) ||
-          userContext.hasPermission([config.permissions.REPORTER_WRITE], `${config.permissions.DATASET}${datasetId}`)
-      );
-    }
-  }, [userContext]);
 
   useEffect(() => {
     breadCrumbContext.add([
@@ -251,9 +239,8 @@ export const DataCollection = withRouter(({ match, history }) => {
   const onRenderTabsSchema = (
     <TabsSchema
       activeIndex={dataViewerOptions.activeIndex}
-      hasWritePermissions={hasWritePermissions}
+      hasWritePermissions={false}
       isDataCollection={true}
-      isWebFormMMR={false}
       levelErrorTypes={levelErrorTypes}
       onLoadTableData={onLoadTableData}
       onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
@@ -285,7 +272,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   }
 
   return layout(
-    <SnapshotContext.Provider value={{}}>
+    <Fragment>
       <Title title={dataCollectionName} subtitle={dataflowName} icon="dataCollection" iconSize="3.5rem" />
       <div className={styles.ButtonsBar}>
         <Toolbar>
@@ -293,55 +280,13 @@ export const DataCollection = withRouter(({ match, history }) => {
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={true}
-              icon={'import'}
+              icon={'export'}
               label={resources.messages['export']}
-            />
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
-              disabled={true}
-              icon={'trash'}
-              label={resources.messages['deleteDatasetData']}
-            />
-          </div>
-          <div className="p-toolbar-group-right">
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
-              disabled={true}
-              icon={'validate'}
-              iconClasses={null}
-              label={resources.messages['validate']}
-              ownButtonClasses={null}
-            />
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
-              disabled={true}
-              icon={'warning'}
-              iconClasses={''}
-              label={resources.messages['showValidations']}
-              ownButtonClasses={null}
-            />
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
-              disabled={true}
-              icon={'dashboard'}
-              label={resources.messages['dashboards']}
-            />
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
-              disabled={true}
-              icon={'camera'}
-              label={resources.messages['snapshots']}
-            />
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-              icon={'refresh'}
-              label={resources.messages['refresh']}
-              onClick={() => onLoadDatasetSchema()}
             />
           </div>
         </Toolbar>
       </div>
       {onRenderTabsSchema}
-    </SnapshotContext.Provider>
+    </Fragment>
   );
 });

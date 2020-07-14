@@ -17,7 +17,6 @@ export const TabsSchema = ({
   isDataCollection,
   isDatasetDeleted,
   isValidationSelected,
-  isWebFormMMR,
   levelErrorTypes,
   onLoadTableData,
   onTabChange,
@@ -43,7 +42,6 @@ export const TabsSchema = ({
                   isDataCollection={isDataCollection}
                   isDatasetDeleted={isDatasetDeleted}
                   isValidationSelected={isValidationSelected}
-                  isWebFormMMR={isWebFormMMR}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
                   onLoadTableData={onLoadTableData}
