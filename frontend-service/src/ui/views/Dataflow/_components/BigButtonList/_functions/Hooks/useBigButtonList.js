@@ -318,7 +318,7 @@ const useBigButtonList = ({
   ];
 
   const dataCollectionModels = dataflowState.data.dataCollections.map(dataCollection => ({
-    buttonClass: 'schemaDataset',
+    buttonClass: 'dataCollection',
     buttonIcon: 'dataCollection',
     caption: dataCollection.dataCollectionName,
     handleRedirect: () => {
@@ -329,16 +329,16 @@ const useBigButtonList = ({
     visibility: !isEmpty(dataflowState.data.dataCollections)
   }));
 
-  const euDatasetModels = dataflowState.data.dataCollections.map(euDataset => ({
+  const euDatasetModels = dataflowState.data.euDatasets.map(euDataset => ({
     buttonClass: 'euDataset',
     buttonIcon: 'euDataset',
-    caption: euDataset.dataCollectionName,
+    caption: euDataset.euDatasetName,
     handleRedirect: () => {
-      handleRedirect(getUrl(routes.EU_DATASET, { dataflowId, datasetId: euDataset.dataCollectionId }, true));
+      handleRedirect(getUrl(routes.EU_DATASET, { dataflowId, datasetId: euDataset.euDatasetId }, true));
     },
     helpClassName: 'dataflow-eudataset-help-step',
     layout: 'defaultBigButton',
-    visibility: !isEmpty(dataflowState.data.dataCollections)
+    visibility: !isEmpty(dataflowState.data.euDatasets)
   }));
 
   const onBuildReceiptButton = () => {

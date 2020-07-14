@@ -38,7 +38,6 @@ const ActionsToolbar = ({
   isLoading,
   isTableDeleted,
   isValidationSelected,
-  isWebFormMMR,
   levelErrorTypesWithCorrects,
   onRefresh,
   onSetVisible,
@@ -214,9 +213,9 @@ const ActionsToolbar = ({
       <div className="p-toolbar-group-left">
         <Button
           className={`p-button-rounded p-button-secondary ${
-            !hasWritePermissions || tableReadOnly || isWebFormMMR ? null : 'p-button-animated-blink'
+            !hasWritePermissions || tableReadOnly ? null : 'p-button-animated-blink'
           }`}
-          disabled={!hasWritePermissions || tableReadOnly || isWebFormMMR}
+          disabled={!hasWritePermissions || tableReadOnly}
           icon={'export'}
           label={resources.messages['import']}
           onClick={() => setImportDialogVisible(true)}
@@ -246,12 +245,12 @@ const ActionsToolbar = ({
 
         <Button
           className={`p-button-rounded p-button-secondary-transparent ${
-            !hasWritePermissions || tableReadOnly || isWebFormMMR || isUndefined(records.totalRecords) || isTableDeleted
+            !hasWritePermissions || tableReadOnly || isUndefined(records.totalRecords) || isTableDeleted
               ? null
               : 'p-button-animated-blink'
           }`}
           disabled={
-            !hasWritePermissions || tableReadOnly || isWebFormMMR || isUndefined(records.totalRecords) || isTableDeleted
+            !hasWritePermissions || tableReadOnly || isUndefined(records.totalRecords) || isTableDeleted
           }
           icon={'trash'}
           label={resources.messages['deleteTable']}
