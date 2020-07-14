@@ -325,7 +325,7 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public void createAutomaticRules(String datasetSchemaId, String referenceId, DataType typeData,
       EntityTypeEnum typeEntityEnum, Long datasetId, boolean required) throws EEAException {
-    Document document = new Document();
+    Document document;
     List<Rule> ruleList = new ArrayList<>();
     // we use that if to sort between a rule required and rule for any other type(Boolean,
     // number etc)

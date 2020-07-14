@@ -242,7 +242,7 @@ public class DataSetControllerImpl implements DatasetController {
   @LockMethod(removeWhenFinish = false)
   @HystrixCommand
   @DeleteMapping(value = "{id}/deleteImportData")
-  @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_EDITOR_WRITE') AND checkPermission('Dataset','MANAGE_DATA')")
+  @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN') AND checkPermission('Dataset','MANAGE_DATA')")
   public void deleteImportData(
       @LockCriteria(name = "id") @PathVariable("id") final Long dataSetId) {
     if (dataSetId == null || dataSetId < 1) {
@@ -445,7 +445,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @DeleteMapping(value = "{datasetId}/deleteImportTable/{tableSchemaId}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void deleteImportTable(
       @LockCriteria(name = "datasetId") @PathVariable("datasetId") final Long datasetId,
       @LockCriteria(
@@ -549,7 +549,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PutMapping(value = "/{id}/updateField", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void updateField(@PathVariable("id") final Long datasetId,
       @RequestBody final FieldVO field) {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
