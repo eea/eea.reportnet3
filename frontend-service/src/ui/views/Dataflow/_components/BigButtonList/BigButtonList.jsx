@@ -350,7 +350,7 @@ export const BigButtonList = ({
   return (
     <>
       <div className={styles.buttonsWrapper}>
-        <div className={styles.splitButtonWrapper}>
+        <div className={`${styles.splitButtonWrapper} dataflow-big-buttons-help-step`}>
           <div className={styles.datasetItem}>{bigButtonList}</div>
         </div>
       </div>

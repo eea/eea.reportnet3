@@ -186,7 +186,7 @@ const Dataflow = withRouter(({ history, match }) => {
       const buttonsVisibility = getLeftSidebarButtonsVisibility();
 
       const apiKeyBtn = {
-        className: 'dataflow-properties-provider-help-step',
+        className: 'dataflow-api-key-help-step',
         icon: 'settings',
         isVisible: buttonsVisibility.apiKeyBtn,
         label: 'sidebarApiKeyBtn',
@@ -204,7 +204,7 @@ const Dataflow = withRouter(({ history, match }) => {
       };
 
       const manageRightsBtn = {
-        className: 'dataflow-properties-provider-help-step',
+        className: 'dataflow-manage-rights-help-step',
         icon: 'userConfig',
         isVisible: buttonsVisibility.manageRightsBtn,
         label: dataflowState.isCustodian ? 'manageEditorsRights' : 'manageReportersRights',
@@ -213,7 +213,7 @@ const Dataflow = withRouter(({ history, match }) => {
       };
 
       const propertiesBtn = {
-        className: 'dataflow-properties-provider-help-step',
+        className: 'dataflow-properties-help-step',
         icon: 'infoCircle',
         isVisible: buttonsVisibility.propertiesBtn,
         label: 'properties',
@@ -514,6 +514,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {!dataflowState.isRepresentativeView && isNil(representativeId) ? (
           <BigButtonList
+            className="dataflow-big-buttons-help-step"
             dataflowState={dataflowState}
             handleRedirect={handleRedirect}
             onCleanUpReceipt={onCleanUpReceipt}

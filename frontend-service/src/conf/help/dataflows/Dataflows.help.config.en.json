@@ -1,32 +1,24 @@
 {
   "steps": [
     {
-      "content": "This is your dataflow list",
+      "content": "The main part of the page comprises the list of dataflows which you have access to – ‘My dataflows’",
       "target": ".dataflowList-help-step"
     },
     {
-      "content": "You can filter them by multiple parameteres",
+      "content": "A dataflow. On the dataflow card, you can see various metadata – Your role; Delivery date; Dataflow name; Dataflow description; Associated obligation and instrument; Status",
+      "target": ".dataflowList-first-dataflow-help-step"
+    },
+    {
+      "content": "Filters and sort on the various metadata of the dataflows list allow you to find things easily in the dataflows list",
       "target": ".dataflowList-filters-help-step"
     },
     {
-      "content": "Here you will see the dataflow delivery date...",
-      "target": ".dataflowList-delivery-date-help-step"
+      "content": "This button will expand the menu, to show the icon labels",
+      "target": ".dataflowList-left-side-bar-expand-help-step"
     },
     {
-      "content": "...the name and description...",
-      "target": ".dataflowList-name-description-help-step"
-    },
-    {
-      "content": "...the legal instrument and obligation...",
-      "target": ".dataflowList-obligation-description-help-step"
-    },
-    {
-      "content": "...and the status",
-      "target": ".dataflowList-status-help-step"
-    },
-    {
-      "content": "You can create a new dataflow",
-      "target": ".dataflowList-create-dataflow-help-step"
+      "content": "The static menu is available on every page and has four buttons. From top to button, the buttons are",
+      "target": ".dataflowList-left-side-bar-top-section-help-step"
     }
   ]
 }

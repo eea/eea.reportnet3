@@ -129,13 +129,14 @@ const LeftSideBar = withRouter(({ history }) => {
   const renderOpenClose = () => {
     const openCloseProps = {
       // href: '#',
+      className: 'dataflowList-left-side-bar-expand-help-step',
+      icon: leftSideBarContext.isLeftSideBarOpened ? 'angleDoubleLeft' : 'angleDoubleRight',
+      label: '',
       onClick: e => {
         e.preventDefault();
         leftSideBarContext.setMenuState();
       },
-      title: 'expandSidebar',
-      icon: leftSideBarContext.isLeftSideBarOpened ? 'angleDoubleLeft' : 'angleDoubleRight',
-      label: ''
+      title: 'expandSidebar'
     };
     return <LeftSideBarButton {...openCloseProps} />;
   };
@@ -160,7 +161,7 @@ const LeftSideBar = withRouter(({ history }) => {
       <div className={`${styles.leftSideBar}${leftSideBarContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}>
         {
           <>
-            <div className={styles.barSection}>
+            <div className={`${styles.barSection} dataflowList-left-side-bar-top-section-help-step`}>
               {renderHome()}
               {renderUserProfile()}
               {renderHelp()}
