@@ -18,8 +18,10 @@ const TitleWithItem = React.memo(({ icon, iconSize, title, subtitle, items }) =>
         </div>
       </div>
       <div className={styles.itemsContainer}>
-        {items.map(item => (
-          <div className={styles.itemContainer}>{item}</div>
+        {items.map((item, i) => (
+          <div className={styles.itemContainer} key={i}>
+            {item}
+          </div>
         ))}
       </div>
     </div>
