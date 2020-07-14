@@ -31,6 +31,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.rod.ObligationController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
@@ -41,6 +42,7 @@ import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
@@ -155,6 +157,9 @@ public class DataFlowServiceImplTest {
 
   @Mock
   private ObligationController obligationController;
+
+  @Mock
+  private EUDatasetControllerZuul euDatasetControllerZuul;
 
   /**
    * The dataflows.
@@ -751,6 +756,10 @@ public class DataFlowServiceImplTest {
     DataCollectionVO dcVO = new DataCollectionVO();
     dcVO.setId(1L);
     dataFlowVO.setDataCollections(Arrays.asList(dcVO));
+    EUDatasetVO euDatasetVO = new EUDatasetVO();
+    euDatasetVO.setId(3L);
+    List<EUDatasetVO> euDatasetVOs = new ArrayList<>();
+    euDatasetVOs.add(euDatasetVO);
 
     Dataflow dataflowEntity = new Dataflow();
     Set<Representative> representatives = new HashSet<>();
@@ -767,6 +776,7 @@ public class DataFlowServiceImplTest {
         .thenReturn(designDatasetVOs);
     when(dataCollectionControllerZuul.findDataCollectionIdByDataflowId(1L))
         .thenReturn(Arrays.asList(dcVO));
+    when(euDatasetControllerZuul.findEUDatasetByDataflowId(1L)).thenReturn(euDatasetVOs);
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(dataflowEntity));
     dataflowServiceImpl.deleteDataFlow(1L);
     doThrow(MockitoException.class).when(dataflowRepository).deleteNativeDataflow(Mockito.any());
