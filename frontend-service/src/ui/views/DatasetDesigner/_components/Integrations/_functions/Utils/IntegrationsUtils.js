@@ -6,7 +6,8 @@ const parseIntegration = data => ({
   isUpdatedVisible: true,
   name: data.integrationName,
   operation: { label: data.operation, value: data.operation },
-  processName: data.internalParameters.processName
+  processName: data.internalParameters.processName,
+  repository: data.internalParameters.repository
 });
 
 const parseIntegrationsList = (data = []) => data.map(integration => parseIntegration(integration))[0];

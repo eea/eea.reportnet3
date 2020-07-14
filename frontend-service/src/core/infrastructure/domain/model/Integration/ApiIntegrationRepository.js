@@ -1,3 +1,4 @@
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import sortBy from 'lodash/sortBy';
 
@@ -17,6 +18,12 @@ const allExtensionsOperations = async datasetSchemaId =>
 const create = async integration => apiIntegration.create(parseManageIntegration(integration));
 
 const deleteById = async (dataflowId, integrationId) => await apiIntegration.deleteById(dataflowId, integrationId);
+
+const getProcesses = async repositoryName => parseProcessList(await apiIntegration.getProcesses(repositoryName));
+
+const getRepositories = async () => parseRepositoryList(await apiIntegration.getRepositories());
+
+const update = async integration => apiIntegration.update(parseManageIntegration(integration));
 
 const parseDatasetSchemaId = (datasetSchemaId, dataflowId) => {
   const integration = new Integration();
@@ -75,7 +82,8 @@ const parseManageIntegration = integration => ({
     dataflowId: integration.dataflowId,
     datasetSchemaId: integration.datasetSchemaId,
     fileExtension: integration.fileExtension,
-    processName: integration.processName
+    processName: integration.processName.value,
+    repository: integration.repository.value
   },
   name: integration.name,
   operation: integration.operation.value,
@@ -88,6 +96,26 @@ const parseIntegrationOperationExtension = integration => ({
   operation: integration.operation
 });
 
-const update = async integration => apiIntegration.update(parseManageIntegration(integration));
+const parseRepositoryList = repositoryList => parseKeyValue(repositoryList);
 
-export const ApiIntegrationRepository = { all, allExtensionsOperations, create, deleteById, update };
+const parseProcessList = processList => parseKeyValue(processList);
+
+const parseKeyValue = list => {
+  const listDTO = [];
+
+  if (!isNil(list) && !isEmpty(list.items)) {
+    list.items.map(item => listDTO.push({ label: item.name, value: item.name }));
+  }
+
+  return listDTO;
+};
+
+export const ApiIntegrationRepository = {
+  all,
+  allExtensionsOperations,
+  create,
+  deleteById,
+  getProcesses,
+  getRepositories,
+  update
+};

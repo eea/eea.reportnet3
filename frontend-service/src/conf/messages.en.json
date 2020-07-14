@@ -745,6 +745,9 @@
     "copyDataCollectionEuDatasetError": "Error copying data from Data Collections to EU Datasets",
     "exportEuDatasetError": "Error exporting data from EU Datasets",
     "externalImportDesignCompletedEvent": "<strong title='{:datasetName}'>{:shortDatasetName} Schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "externalImportReportingCompletedEvent": "<strong title='{:datasetName}'>{:shortDatasetName} Schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>"
+    "externalImportReportingCompletedEvent": "<strong title='{:datasetName}'>{:shortDatasetName} Schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "repository": "Repository",
+    "repositoryPlaceHolder": "Select a repository",
+    "processNamePlaceHolder": "Select a process"
   }
 }
