@@ -74,7 +74,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
     return email.match(expression);
   };
 
-  const isExistingAccount = account => {
+  const isUsedAccount = account => {
     const sameAccounts = shareRightsState.contributors.filter(contributor => contributor.account === account);
 
     return sameAccounts.length > 1;
@@ -94,7 +94,10 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
   const updateContributor = contributor => {
     shareRightsDispatch({
       type: 'SET_ACCOUNT_HAS_ERROR',
-      payload: { accountHasError: !isValidEmail(contributor.account) || isExistingAccount(contributor.account) }
+      payload: {
+        accountHasError:
+          !isValidEmail(contributor.account) || isUsedAccount(contributor.account) || !shareRightsState.accountNotFound
+      }
     });
 
     if (!contributor.isNew) {
@@ -149,7 +152,10 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
         }
       } catch (error) {
         if (error.response.status === 404) {
-          shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError: true } });
+          shareRightsDispatch({
+            type: 'SET_ACCOUNT_NOT_FOUND',
+            payload: { accountNotFound: true, accountHasError: true }
+          });
         }
       } finally {
         setIsLoading(false);
@@ -162,7 +168,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
     const [thisContributor] = contributors.filter(thisContributor => thisContributor.id === contributor.id);
     thisContributor.writePermission = newWritePermission;
 
-    if (!shareRightsState.accountHasError) {
+    if (!shareRightsState.accountHasError || !shareRightsState.accountNotFound) {
       shareRightsDispatch({ type: 'ON_WRITE_PERMISSION_CHANGE', payload: { contributors } });
     }
   };
@@ -174,7 +180,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
 
     shareRightsDispatch({
       type: 'ON_SET_ACCOUNT',
-      payload: { contributors, accountHasError: !isValidEmail(inputValue) || isExistingAccount(inputValue) }
+      payload: { contributors, accountHasError: !isValidEmail(inputValue) || isUsedAccount(inputValue) }
     });
   };
 
@@ -226,12 +232,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
   };
 
   const renderAccountTemplate = contributor => {
-    const hasError =
-      !isEmpty(contributor.account) &&
-      contributor.isNew &&
-      (!isValidEmail(contributor.account) ||
-        isExistingAccount(contributor.account) ||
-        shareRightsState.accountHasError);
+    const hasError = !isEmpty(contributor.account) && contributor.isNew && shareRightsState.accountHasError;
 
     return (
       <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
