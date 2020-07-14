@@ -25,6 +25,9 @@ export const shareRightsReducer = (state, { type, payload }) => {
     case 'SET_ACCOUNT_HAS_ERROR':
       return { ...state, accountHasError: payload.accountHasError };
 
+    case 'SET_ACCOUNT_NOT_FOUND':
+      return { ...state, accountNotFound: payload.accountNotFound, accountHasError: payload.accountHasError };
+
     case 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG':
       return { ...state, isDeleteDialogVisible: payload.isDeleteDialogVisible };
 

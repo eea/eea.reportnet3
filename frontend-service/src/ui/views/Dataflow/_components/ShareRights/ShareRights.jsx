@@ -27,6 +27,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
 
   const [shareRightsState, shareRightsDispatch] = useReducer(shareRightsReducer, {
     accountHasError: false,
+    accountNotFound: true,
     contributorAccountToDelete: '',
     contributors: [],
     clonedContributors: [],
