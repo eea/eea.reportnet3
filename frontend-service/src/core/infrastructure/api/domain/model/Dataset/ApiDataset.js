@@ -431,16 +431,5 @@ export const apiDataset = {
       console.error(`Error calling dataset data validation: ${error}`);
       return false;
     }
-  },
-  webFormDataById: async (datasetId, tableSchemaId) => {
-    const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON
-        ? '/jsons/response_dataset_values2.json'
-        : getUrl(DatasetConfig.webFormDataViewer, {
-            datasetId: datasetId,
-            tableSchemaId: tableSchemaId
-          })
-    });
-    return response.data;
   }
 };

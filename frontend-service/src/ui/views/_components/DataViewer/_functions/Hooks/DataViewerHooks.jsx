@@ -79,7 +79,6 @@ export const useSetColumns = (
   hasWritePermissions,
   initialCellValue,
   isDataCollection,
-  isWebFormMMR,
   records,
   resources,
   setIsColumnInfoVisible,
@@ -224,7 +223,7 @@ export const useSetColumns = (
         <Column
           body={dataTemplate}
           className={invisibleColumn}
-          editor={hasWritePermissions && !isWebFormMMR ? row => cellDataEditor(row, records.selectedRecord) : null}
+          editor={hasWritePermissions ? row => cellDataEditor(row, records.selectedRecord) : null}
           field={column.field}
           header={
             <React.Fragment>
@@ -286,11 +285,11 @@ export const useSetColumns = (
       />
     );
 
-    if (!isDataCollection && !isWebFormMMR) {
+    if (!isDataCollection) {
       hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
     }
 
-    if (isDataCollection && !isWebFormMMR) {
+    if (isDataCollection) {
       columnsArr.unshift(providerCode);
     }
 
