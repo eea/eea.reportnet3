@@ -30,6 +30,14 @@ public enum EventType {
   IMPORT_DESIGN_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "import_design_failed_event",
       true),
 
+  /** The external import reporting completed event. */
+  EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "external_import_reporting_completed_event", true),
+
+  /** The external import design completed event. */
+  EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "external_import_design_completed_event", true),
+
   /** The load record completed event. */
   RECORD_UPDATED_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "upload_record_completed_key", true),
