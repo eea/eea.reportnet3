@@ -4,7 +4,7 @@ import isEqual from 'lodash/isEqual';
 import isNil from 'lodash/isNil';
 import moment from 'moment';
 import remove from 'lodash/remove';
-import uniqWith from 'lodash/uniqWith';
+import uniqBy from 'lodash/uniqBy';
 
 import styles from './BigButtonList.module.css';
 
@@ -342,7 +342,7 @@ export const BigButtonList = ({
     </Fragment>
   );
 
-  const bigButtonList = uniqWith(
+  const bigButtonList = uniqBy(
     useBigButtonList({
       dataflowId,
       dataflowState,
@@ -363,7 +363,7 @@ export const BigButtonList = ({
       onShowUpdateDataCollectionModal,
       updatedDatasetSchema
     }),
-    isEqual
+    'caption'
   )
     .filter(button => button.visibility)
     .map((button, i) => <BigButton key={i} {...button} />);
