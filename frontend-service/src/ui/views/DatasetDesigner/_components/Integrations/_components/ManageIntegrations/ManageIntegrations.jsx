@@ -121,6 +121,8 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
     }
   };
 
+  console.log({manageIntegrationsState})
+
   const getUpdatedData = () => manageIntegrationsDispatch({ type: 'GET_UPDATED_DATA', payload: updatedData });
 
   const onAddParameter = () => {
