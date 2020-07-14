@@ -280,7 +280,7 @@ export const BigButtonList = ({
       await EuDatasetService.copyDataCollection(dataflowId);
     } catch (error) {
       console.error(error);
-      notificationContext.add({ type: 'LOAD_RECEIPT_DATA_ERROR' });
+      notificationContext.add({ type: 'COPY_DATA_COLLECTION_EU_DATASET_ERROR' });
     }
   };
 
@@ -289,7 +289,7 @@ export const BigButtonList = ({
       await EuDatasetService.exportEuDataset(dataflowId);
     } catch (error) {
       console.error(error);
-      notificationContext.add({ type: 'LOAD_RECEIPT_DATA_ERROR' });
+      notificationContext.add({ type: 'EXPORT_EU_DATASET_ERROR' });
     }
   };
 
