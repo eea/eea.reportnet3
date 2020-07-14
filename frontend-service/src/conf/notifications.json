@@ -402,6 +402,9 @@
         },
         {
           "key": "DELETE_REPORTER_ERROR"
+        },
+        {
+          "key": "ERROR_LOADING_EU_DATASET_SCHEMA"
         }
       ]
     },

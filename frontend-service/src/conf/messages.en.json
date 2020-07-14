@@ -739,6 +739,9 @@
     "copyDatasetSchemaNotFoundEvent": "No design datasets found to copy",
     "deleteEditorError": "Error deleting editor",
     "deleteReporterError": "Error deleting reporter",
-    "accessDenied": "Access denied. Please, check the dataset schema in the dataflow help"
+    "accessDenied": "Access denied. Please, check the dataset schema in the dataflow help",
+    "euDataset": "EU Dataset",
+    "errorLoadingEuDatasetSchema": "Error loading EUDataset schema",
+    "deleteDataEuDatasetConfirm": "Are you sure you want to delete the dataset data? You won't be able to recover it, please consider creating a copy before."
   }
 }
