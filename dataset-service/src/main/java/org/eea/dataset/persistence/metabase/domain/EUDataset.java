@@ -24,14 +24,6 @@ public class EUDataset extends DataSetMetabase {
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
-  /** The name. */
-  @Column(name = "NAME")
-  private String name;
-
-  /** The visible. */
-  @Column(name = "VISIBLE")
-  private Boolean visible;
-
 
 
   /**
@@ -60,7 +52,7 @@ public class EUDataset extends DataSetMetabase {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, visible);
+    return Objects.hash(id);
   }
 
 }

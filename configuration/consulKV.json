@@ -1270,5 +1270,17 @@
   {
     "key": "config/apiGateway/zuul.routes.contributor.stripPrefix",
     "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.eudataset.path",
+    "value": "L2V1ZGF0YXNldC8qKg=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.eudataset.serviceId",
+    "value": "ZGF0YXNldA=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.eudataset.stripPrefix",
+    "value": "ZmFsc2U="
   }
 ]

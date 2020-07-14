@@ -323,9 +323,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     if (null != checkResult && null != checkResult.getBody()) {
       result = checkResult.getBody();
     }
-    String permission = null != result && null != result.getStatus() ? result.getStatus() : "DENY";
 
-    return permission;
+    return null != result && null != result.getStatus() ? result.getStatus() : "DENY";
   }
 
   /**
@@ -401,7 +400,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     map.add("password", password);
     map.add(LiteralConstants.CLIENT_SECRET, secret);
     map.add(LiteralConstants.CLIENT_ID, clientId);
-    if (admin) {
+    if (Boolean.TRUE.equals(admin)) {
       map.add("scope", "openid info offline_access");
     }
     return map;
@@ -487,8 +486,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
                     .buildAndExpand(uriParams).toString(),
                 HttpMethod.GET, request, GroupInfo[].class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
-        .orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
 
   /**
@@ -510,8 +508,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             .path(LIST_GROUPS_URL_WITH_SEARCH).buildAndExpand(uriParams).toString(),
         HttpMethod.GET, request, GroupInfo[].class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
-        .orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
 
   /**
@@ -537,8 +534,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
                     .path(GROUP_DETAIL_URL).buildAndExpand(uriParams).toString(),
                 HttpMethod.GET, request, GroupInfo.class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
-        .orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
 
   /**
@@ -583,8 +579,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             .buildAndExpand(uriParams).toString(),
         HttpMethod.GET, request, UserRepresentation.class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
-        .orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
 
   /**
@@ -607,8 +602,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             .buildAndExpand(uriParams).toString(),
         HttpMethod.GET, request, UserRepresentation[].class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
-        .orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
 
   /**
@@ -776,8 +770,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             .buildAndExpand(uriParams).toString(),
         HttpMethod.GET, request, UserRepresentation[].class);
 
-    return Optional.ofNullable(responseEntity).map(entity -> entity.getBody()).map(entity -> entity)
-        .orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
 
   /**
@@ -997,8 +990,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
     HttpHeaders headers = createBasicHeaders(headerInfo);
 
-    HttpEntity<T> request = new HttpEntity<>(body, headers);
-    return request;
+    return new HttpEntity<>(body, headers);
   }
 
   /**
@@ -1017,8 +1009,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     headerInfo.put("Content-Type", "application/json");
     HttpHeaders headers = createBasicHeaders(headerInfo);
 
-    HttpEntity<T> request = new HttpEntity<>(body, headers);
-    return request;
+    return new HttpEntity<>(body, headers);
   }
 
 

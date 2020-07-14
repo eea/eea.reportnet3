@@ -61,7 +61,7 @@ export const getAllDataProviders = async (selectedDataProviderGroup, representat
 
     const providersNoSelect = [...responseAllDataProviders];
     if (representatives.length <= responseAllDataProviders.length) {
-      responseAllDataProviders.unshift({ dataProviderId: '', label: 'Select...' });
+      responseAllDataProviders.unshift({ dataProviderId: '', label: ' Select...' });
     }
 
     formDispatcher({
@@ -104,7 +104,7 @@ export const getInitialData = async (formDispatcher, dataflowId, formState) => {
   await getProviderTypes(formDispatcher);
   await getAllRepresentatives(dataflowId, formDispatcher, formState);
   if (!isEmpty(formState.representatives)) {
-    await getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
+    await getAllDataProviders(formState.selectedDataProviderGroup, formState.representatives, formDispatcher);
     createUnusedOptionsList(formDispatcher);
   }
 };
