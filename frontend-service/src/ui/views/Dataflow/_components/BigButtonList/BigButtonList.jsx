@@ -1,6 +1,5 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
-import isEqual from 'lodash/isEqual';
 import isNil from 'lodash/isNil';
 import moment from 'moment';
 import remove from 'lodash/remove';
