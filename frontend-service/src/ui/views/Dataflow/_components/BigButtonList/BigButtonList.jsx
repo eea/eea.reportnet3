@@ -1,9 +1,10 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
+import isEqual from 'lodash/isEqual';
 import isNil from 'lodash/isNil';
 import moment from 'moment';
 import remove from 'lodash/remove';
-import uniqBy from 'lodash/uniqBy';
+import uniqWith from 'lodash/uniqWith';
 
 import styles from './BigButtonList.module.css';
 
@@ -20,6 +21,7 @@ import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
 import { DataCollectionService } from 'core/services/DataCollection';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
+import { EuDatasetService } from 'core/services/EuDataset';
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -273,10 +275,28 @@ export const BigButtonList = ({
     setIsDuplicated(false);
   };
 
+  const onCopyDataCollectionToEuDataset = async () => {
+    try {
+      await EuDatasetService.copyDataCollection(dataflowId);
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({ type: 'LOAD_RECEIPT_DATA_ERROR' });
+    }
+  };
+
+  const onExportEuDataset = async () => {
+    try {
+      await EuDatasetService.exportEuDataset(dataflowId);
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({ type: 'LOAD_RECEIPT_DATA_ERROR' });
+    }
+  };
+
   const onLoadReceiptData = async () => {
     try {
       setIsReceiptLoading(true);
-      const response = await ConfirmationReceiptService.get(dataflowId, dataflowState.dataProviderId);
+      const response = await ConfirmationReceiptService.download(dataflowId, dataflowState.dataProviderId);
 
       downloadPdf(response);
       onCleanUpReceipt();
@@ -322,17 +342,18 @@ export const BigButtonList = ({
     </Fragment>
   );
 
-  const bigButtonList = uniqBy(
+  const bigButtonList = uniqWith(
     useBigButtonList({
       dataflowId,
       dataflowState,
-      // exportDatatableSchema,
       getDeleteSchemaIndex,
       handleRedirect,
       isActiveButton,
       onCloneDataflow,
+      onCopyDataCollectionToEuDataset,
       onDatasetSchemaNameError,
       onDuplicateName,
+      onExportEuDataset,
       onLoadReceiptData,
       onSaveName,
       onShowDataCollectionModal,
@@ -342,7 +363,7 @@ export const BigButtonList = ({
       onShowUpdateDataCollectionModal,
       updatedDatasetSchema
     }),
-    'caption'
+    isEqual
   )
     .filter(button => button.visibility)
     .map((button, i) => <BigButton key={i} {...button} />);

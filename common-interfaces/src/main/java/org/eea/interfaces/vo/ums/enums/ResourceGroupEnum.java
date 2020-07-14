@@ -79,7 +79,10 @@ public enum ResourceGroupEnum {
   DATASET_REPORTER_READ("Dataset-%s-REPORTER_READ"),
 
   /** The dataflow reporter read. */
-  DATAFLOW_REPORTER_READ("Dataflow-%s-REPORTER_READ");
+  DATAFLOW_REPORTER_READ("Dataflow-%s-REPORTER_READ"),
+
+  /** The eudataset custodian. */
+  EUDATASET_CUSTODIAN("EUDataset-%s-DATA_CUSTODIAN");
 
 
   /** The expression. */

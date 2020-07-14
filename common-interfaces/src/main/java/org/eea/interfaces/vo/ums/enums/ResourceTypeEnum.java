@@ -1,8 +1,8 @@
 package org.eea.interfaces.vo.ums.enums;
 
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 
 /**
  * The enum Resource enum.
@@ -32,10 +32,9 @@ public enum ResourceTypeEnum {
    * Dataset resource enum.
    */
   DATASET("Dataset"),
-  /**
-   * Eu dataset resource enum.
-   */
-  EU_DATASET("EuDataset"),
+
+  /** The eu dataset. */
+  EU_DATASET("EUDataset"),
   /**
    * Join request resource enum.
    */
@@ -83,8 +82,7 @@ public enum ResourceTypeEnum {
   @JsonCreator
   public static ResourceTypeEnum fromValue(String value) {
     return Arrays.stream(ResourceTypeEnum.values()).filter(e -> e.resource.equals(value))
-        .findFirst()
-        .get();
+        .findFirst().get();
   }
 
 }

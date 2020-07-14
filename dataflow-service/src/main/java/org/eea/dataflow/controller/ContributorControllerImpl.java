@@ -38,6 +38,9 @@ public class ContributorControllerImpl implements ContributorController {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ContributorControllerImpl.class);
 
+  /** The Constant THE_EMAIL: {@value}. */
+  private static final String THE_EMAIL_NOT_EXISTS = "The email %s doesn't exist in repornet";
+
   /** The Constant EDITOR: {@value}. */
   private static final String EDITOR = "EDITOR";
 
@@ -67,7 +70,11 @@ public class ContributorControllerImpl implements ContributorController {
       checkAccount(dataflowId, contributorVO.getAccount());
       contributorService.deleteContributor(dataflowId, contributorVO.getAccount(), EDITOR, null);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error deleting the contributor {}.in the dataflow: {}",
+      if (HttpStatus.NOT_FOUND.toString().equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+            String.format(THE_EMAIL_NOT_EXISTS, contributorVO.getAccount()));
+      }
+      LOG_ERROR.error("Error deleting the editor {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
@@ -92,7 +99,11 @@ public class ContributorControllerImpl implements ContributorController {
       contributorService.deleteContributor(dataflowId, contributorVO.getAccount(), REPORTER,
           dataProviderId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error deleting the contributor {}.in the dataflow: {}",
+      if (HttpStatus.NOT_FOUND.toString().equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+            String.format(THE_EMAIL_NOT_EXISTS, contributorVO.getAccount()));
+      }
+      LOG_ERROR.error("Error deleting the reporter {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
@@ -150,10 +161,16 @@ public class ContributorControllerImpl implements ContributorController {
       checkAccount(dataflowId, contributorVO.getAccount());
       contributorService.updateContributor(dataflowId, contributorVO, EDITOR, null);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error update the contributor {}.in the dataflow: {}",
-          contributorVO.getAccount(), dataflowId);
-      message = e.getMessage();
-      status = HttpStatus.INTERNAL_SERVER_ERROR;
+      if (HttpStatus.NOT_FOUND.toString().equals(e.getMessage())) {
+        message = String.format(THE_EMAIL_NOT_EXISTS, contributorVO.getAccount());
+        status = HttpStatus.NOT_FOUND;
+      } else {
+        message = e.getMessage();
+        status = HttpStatus.INTERNAL_SERVER_ERROR;
+      }
+      LOG_ERROR.error("Error update the editor {}.in the dataflow: {}", contributorVO.getAccount(),
+          dataflowId);
+
     }
     return new ResponseEntity<>(message, status);
   }
@@ -181,10 +198,15 @@ public class ContributorControllerImpl implements ContributorController {
       checkAccount(dataflowId, contributorVO.getAccount());
       contributorService.updateContributor(dataflowId, contributorVO, REPORTER, dataProviderId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error update the contributor {}.in the dataflow: {}",
+      if (HttpStatus.NOT_FOUND.toString().equals(e.getMessage())) {
+        message = String.format(THE_EMAIL_NOT_EXISTS, contributorVO.getAccount());
+        status = HttpStatus.NOT_FOUND;
+      } else {
+        message = e.getMessage();
+        status = HttpStatus.INTERNAL_SERVER_ERROR;
+      }
+      LOG_ERROR.error("Error update the reporter {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
-      message = e.getMessage();
-      status = HttpStatus.INTERNAL_SERVER_ERROR;
     }
     return new ResponseEntity<>(message, status);
   }
@@ -215,16 +237,17 @@ public class ContributorControllerImpl implements ContributorController {
    *
    * @param dataflowId the dataflow id
    * @param account the account
+   * @throws EEAException
    */
-  private void checkAccount(Long dataflowId, String account) {
+  private void checkAccount(Long dataflowId, String account) throws EEAException {
     // check if the email is correct
     UserRepresentationVO emailUser = userManagementControllerZull.getUserByEmail(account);
-    if (null == emailUser || null == emailUser.getEmail()) {
+    if (null == emailUser || null == emailUser.getEmail()
+        || !emailUser.getEmail().equals(account)) {
       LOG_ERROR.error(
           "Error creating contributor with the account: {} in the dataflow {} because the email doesn't exist in the system",
           account, dataflowId);
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, new StringBuilder("The email ")
-          .append(account).append(" doesn't exist in repornet").toString());
+      throw new EEAException(HttpStatus.NOT_FOUND.toString());
     }
   }
 

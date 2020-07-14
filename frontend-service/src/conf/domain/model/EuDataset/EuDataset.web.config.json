@@ -1,0 +1,4 @@
+{
+  "copyDataCollection": "/euDataset/copyDataCollection/{:dataflowId}",
+  "export": "/euDataset/export/{:dataflowId}"
+}
