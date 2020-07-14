@@ -172,21 +172,7 @@ public class FKValidationUtils {
 
     if (!pkMustBeUsed) {
 
-      for (FieldValue field : fkFields) {
-        if (Boolean.FALSE.equals(checkPK(pkList, field,
-            null != fkFieldSchema ? fkFieldSchema.getPkHasMultipleValues() : Boolean.FALSE))) {
-          List<FieldValidation> fieldValidationList =
-              field.getFieldValidations() != null ? field.getFieldValidations() : new ArrayList<>();
-          FieldValidation fieldValidation = new FieldValidation();
-          fieldValidation.setValidation(pkValidation);
-          FieldValue fieldValue = new FieldValue();
-          fieldValue.setId(field.getId());
-          fieldValidation.setFieldValue(fieldValue);
-          fieldValidationList.add(fieldValidation);
-          field.setFieldValidations(fieldValidationList);
-          errorFields.add(field);
-        }
-      }
+      createFieldValueValidation(fkFieldSchema, pkList, fkFields, pkValidation, errorFields);
 
       saveFieldValidations(errorFields);
 
@@ -197,21 +183,56 @@ public class FKValidationUtils {
       if (null != fkFieldSchema && null != fkFieldSchema.getPkMustBeUsed()
           && fkFieldSchema.getPkMustBeUsed()) {
 
-        // Values must be
-        Set<String> pkSet = new HashSet<>();
-        pkSet.addAll(pkList);
-        if (Boolean.TRUE.equals(fkFieldSchema.getPkHasMultipleValues())) {
-          // we look one by one to know if all values are avaliable
-          checkAllValuesMulti(pkSet, fkFields);
-        } else {
-          // Values must check
-          fkFields.stream().forEach(field -> pkSet.remove(field.getValue()));
-        }
-        return pkSet.isEmpty();
+        return setValuesToValidate(fkFieldSchema, pkList, fkFields);
       }
 
     }
     return true;
+  }
+
+
+  private static Boolean setValuesToValidate(FieldSchema fkFieldSchema, List<String> pkList,
+      List<FieldValue> fkFields) {
+    // Values must be
+    Set<String> pkSet = new HashSet<>();
+    pkSet.addAll(pkList);
+    if (Boolean.TRUE.equals(fkFieldSchema.getPkHasMultipleValues())) {
+      // we look one by one to know if all values are avaliable
+      checkAllValuesMulti(pkSet, fkFields);
+    } else {
+      // Values must check
+      fkFields.stream().forEach(field -> pkSet.remove(field.getValue()));
+    }
+    return pkSet.isEmpty();
+  }
+
+
+  /**
+   * Creates the field value validation.
+   *
+   * @param fkFieldSchema the fk field schema
+   * @param pkList the pk list
+   * @param fkFields the fk fields
+   * @param pkValidation the pk validation
+   * @param errorFields the error fields
+   */
+  private static void createFieldValueValidation(FieldSchema fkFieldSchema, List<String> pkList,
+      List<FieldValue> fkFields, Validation pkValidation, List<FieldValue> errorFields) {
+    for (FieldValue field : fkFields) {
+      if (Boolean.FALSE.equals(checkPK(pkList, field,
+          null != fkFieldSchema ? fkFieldSchema.getPkHasMultipleValues() : Boolean.FALSE))) {
+        List<FieldValidation> fieldValidationList =
+            field.getFieldValidations() != null ? field.getFieldValidations() : new ArrayList<>();
+        FieldValidation fieldValidation = new FieldValidation();
+        fieldValidation.setValidation(pkValidation);
+        FieldValue fieldValue = new FieldValue();
+        fieldValue.setId(field.getId());
+        fieldValidation.setFieldValue(fieldValue);
+        fieldValidationList.add(fieldValidation);
+        field.setFieldValidations(fieldValidationList);
+        errorFields.add(field);
+      }
+    }
   }
 
 
