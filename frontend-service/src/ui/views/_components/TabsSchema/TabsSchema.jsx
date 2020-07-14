@@ -13,7 +13,7 @@ import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 export const TabsSchema = ({
   activeIndex = 0,
   buttonsList = undefined,
-  hasWritePermissions,
+  hasWritePermissions = false,
   isDataCollection,
   isDatasetDeleted,
   isValidationSelected,
@@ -23,6 +23,7 @@ export const TabsSchema = ({
   recordPositionId,
   selectedRecordErrorId,
   setIsValidationSelected,
+  showWriteButtons = true,
   tables,
   tableSchemaColumns
 }) => {
@@ -39,6 +40,7 @@ export const TabsSchema = ({
                 <DataViewer
                   buttonsList={buttonsList}
                   hasWritePermissions={hasWritePermissions}
+                  showWriteButtons={showWriteButtons}
                   isDataCollection={isDataCollection}
                   isDatasetDeleted={isDatasetDeleted}
                   isValidationSelected={isValidationSelected}
