@@ -4,6 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
+import orderBy from 'lodash/orderBy';
 import uniq from 'lodash/uniq';
 
 import uuid from 'uuid';
@@ -168,7 +169,11 @@ const RepresentativesList = ({
       option => option.dataProviderId === representative.dataProviderId
     );
 
-    const remainingOptionsAndSelectedOption = selectedOptionForThisSelect.concat(formState.unusedDataProvidersOptions);
+    const remainingOptionsAndSelectedOption = orderBy(
+      selectedOptionForThisSelect.concat(formState.unusedDataProvidersOptions),
+      ['label'],
+      ['asc']
+    );
 
     return (
       <>
