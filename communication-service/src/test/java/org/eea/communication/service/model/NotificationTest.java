@@ -29,8 +29,8 @@ public class NotificationTest {
    */
   @Test
   public void notificationTest() {
-    Notification notification = new Notification(EventType.LOAD_DATA_COMPLETED_EVENT, null);
-    Assert.assertEquals(EventType.LOAD_DATA_COMPLETED_EVENT, notification.getType());
+    Notification notification = new Notification(EventType.IMPORT_REPORTING_COMPLETED_EVENT, null);
+    Assert.assertEquals(EventType.IMPORT_REPORTING_COMPLETED_EVENT, notification.getType());
     Assert.assertNull(notification.getContent());
   }
 }

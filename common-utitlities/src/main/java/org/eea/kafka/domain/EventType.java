@@ -8,23 +8,27 @@ public enum EventType {
   /** The connection created event. */
   CONNECTION_CREATED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "connection_key", true),
 
+  /** The spread data event. */
   SPREAD_DATA_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "connection_key", true),
 
   /** The validation finished event. */
   VALIDATION_FINISHED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_finished_key", true),
 
-  /** The load data completed event. */
-  LOAD_DATA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "load_data_completed_key", true),
+  /** The import reporting completed event. */
+  IMPORT_REPORTING_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_reporting_completed_event", true),
 
-  /** The load data completed event. */
-  LOAD_DATA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "load_data_failed_key", true),
+  /** The import reporting failed event. */
+  IMPORT_REPORTING_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_reporting_failed_event", true),
 
-  /** The load schema completed event. */
-  LOAD_SCHEMA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "load_schema_completed_key",
+  /** The import design completed event. */
+  IMPORT_DESIGN_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_design_completed_event", true),
+
+  /** The import design failed event. */
+  IMPORT_DESIGN_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "import_design_failed_event",
       true),
-
-  /** The load schema failed event. */
-  LOAD_SCHEMA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "load_schema_failed_key", true),
 
   /** The load record completed event. */
   RECORD_UPDATED_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,

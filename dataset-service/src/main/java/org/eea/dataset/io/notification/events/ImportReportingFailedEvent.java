@@ -15,10 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * The Class LoadDataCompletedEvent.
+ * The Class LoadDataFailedEvent.
  */
 @Component
-public class LoadSchemaCompletedEvent implements NotificableEventHandler {
+public class ImportReportingFailedEvent implements NotificableEventHandler {
 
   /** The dataset service. */
   @Autowired
@@ -42,7 +42,7 @@ public class LoadSchemaCompletedEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.LOAD_SCHEMA_COMPLETED_EVENT;
+    return EventType.IMPORT_REPORTING_FAILED_EVENT;
   }
 
   /**
@@ -50,7 +50,7 @@ public class LoadSchemaCompletedEvent implements NotificableEventHandler {
    *
    * @param notificationVO the notification VO
    * @return the map
-   * @throws EEAException the EEA exception
+   * @throws EEAException
    */
   @Override
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
@@ -77,6 +77,7 @@ public class LoadSchemaCompletedEvent implements NotificableEventHandler {
     notification.put("dataflowName", dataflowName);
     notification.put("tableSchemaName", tableSchemaName);
     notification.put("fileName", notificationVO.getFileName());
+    notification.put("error", notificationVO.getError());
     return notification;
   }
 }
