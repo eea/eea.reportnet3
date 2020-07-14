@@ -74,7 +74,10 @@ public enum ObjectAccessRoleEnum {
   DATASET_REPORTER_WRITE("ROLE_DATASET-%s-REPORTER_WRITE"),
 
   /** The dataset reporter read. */
-  DATASET_REPORTER_READ("ROLE_DATASET-%s-REPORTER_READ");
+  DATASET_REPORTER_READ("ROLE_DATASET-%s-REPORTER_READ"),
+
+  /** The eudataset custodian. */
+  EUDATASET_CUSTODIAN("ROLE_EUDATASET-%s-DATA_CUSTODIAN");
 
 
   /** The expression. */
