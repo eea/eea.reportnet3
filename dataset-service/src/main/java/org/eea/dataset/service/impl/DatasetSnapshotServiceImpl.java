@@ -187,6 +187,22 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
 
   /**
+   * Gets the by id.
+   *
+   * @param idSnapshot the id snapshot
+   * @return the by id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public SnapshotVO getById(Long idSnapshot) throws EEAException {
+    Snapshot snapshot = snapshotRepository.findById(idSnapshot).orElse(null);
+    if (snapshot == null) {
+      throw new EEAException(String.format("Snapshot with id %s Not found", idSnapshot));
+    }
+    return snapshotMapper.entityToClass(snapshot);
+  }
+
+  /**
    * Gets the snapshots by id dataset.
    *
    * @param datasetId the dataset id
@@ -319,6 +335,27 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, idPartition,
         DatasetTypeEnum.REPORTING, (String) ThreadPropertiesManager.getVariable("user"), false,
         deleteData);
+  }
+
+  /**
+   * Restore snapshot to clone data.
+   *
+   * @param datasetOrigin the dataset origin
+   * @param idDatasetDestination the id dataset destination
+   * @param idSnapshot the id snapshot
+   * @param deleteData the delete data
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Async
+  public void restoreSnapshotToCloneData(Long datasetOrigin, Long idDatasetDestination,
+      Long idSnapshot, Boolean deleteData, DatasetTypeEnum datasetType) throws EEAException {
+
+    // 1. Delete the dataset values implied
+    // we need the partitionId. By now only consider the user root
+    Long idPartition = obtainPartition(datasetOrigin, "root").getId();
+    recordStoreControllerZull.restoreSnapshotData(idDatasetDestination, idSnapshot, idPartition,
+        datasetType, (String) ThreadPropertiesManager.getVariable("user"), false, deleteData);
   }
 
   /**
@@ -738,4 +775,5 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     receiptPDFGenerator.generatePDF(receipt, out);
   }
+
 }

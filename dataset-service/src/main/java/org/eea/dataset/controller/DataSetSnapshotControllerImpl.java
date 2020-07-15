@@ -48,6 +48,25 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
+   * Gets the by id.
+   *
+   * @param idSnapshot the id snapshot
+   * @return the by id
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/{idSnapshot}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public SnapshotVO getById(@PathVariable("idSnapshot") Long idSnapshot) {
+    SnapshotVO snapshot = null;
+    try {
+      snapshot = datasetSnapshotService.getById(idSnapshot);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error getting the snapshot. ", e.getMessage(), e);
+    }
+    return snapshot;
+  }
+
+  /**
    * Gets the snapshots by id dataset.
    *
    * @param datasetId the dataset id
@@ -321,4 +340,5 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
 
     return new ResponseEntity<>(stream, HttpStatus.OK);
   }
+
 }

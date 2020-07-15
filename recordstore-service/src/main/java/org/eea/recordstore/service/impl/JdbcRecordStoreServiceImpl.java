@@ -23,8 +23,10 @@ import javax.sql.DataSource;
 import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -175,6 +177,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   @Autowired
   private DataCollectionControllerZuul dataCollectionControllerZuul;
+
+  /** The data set snapshot controller zuul. */
+  @Autowired
+  private DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul;
 
 
   /**
@@ -555,6 +561,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       if (deleteData) {
         String sql = "";
         switch (datasetType) {
+          case EUDATASET:
           case REPORTING:
             sql = "DELETE FROM dataset_" + idReportingDataset
                 + ".record_value WHERE dataset_partition_id=" + partitionId;
@@ -605,9 +612,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         // Send kafka event to launch Validation
         final EEAEventVO event = new EEAEventVO();
         event.setEventType(successEventType);
-
-        kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION,
-            idReportingDataset);
+        if (!DatasetTypeEnum.EUDATASET.equals(datasetType)) {
+          kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION,
+              idReportingDataset);
+        } else {
+          SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
+          dataSetSnapshotControllerZuul.deleteSnapshot(snapshot.getDatasetId(), idSnapshot);
+        }
         try {
           kafkaSenderUtils.releaseNotificableKafkaEvent(successEventType, value,
               NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
@@ -641,7 +652,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
       lockService.removeLockByCriteria(criteria);
     }
-
 
   }
 

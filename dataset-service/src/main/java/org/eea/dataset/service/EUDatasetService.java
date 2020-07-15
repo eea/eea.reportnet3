@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import java.util.List;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 
 
@@ -18,5 +19,12 @@ public interface EUDatasetService {
    */
   List<EUDatasetVO> getEUDatasetByDataflowId(Long idDataflow);
 
+  /**
+   * Populate EU dataset with data collection.
+   *
+   * @param dataflowId the dataflow id
+   * @throws EEAException the EEA exception
+   */
+  void populateEUDatasetWithDataCollection(Long dataflowId) throws EEAException;
 
 }
