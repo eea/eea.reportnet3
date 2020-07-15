@@ -749,6 +749,8 @@
     "repository": "Repository",
     "repositoryPlaceHolder": "Select a repository",
     "processNamePlaceHolder": "Select a process",
-    "matchStringTooltip": "{%R3_COUNTRY_CODE%} can be used"
+    "matchStringTooltip": "{%R3_COUNTRY_CODE%} can be used",
+    "deleteContributorButtonTableHeader": "Delete contributor",
+    "deleteRepresentativeButtonTableHeader": "Delete representative"
   }
 }

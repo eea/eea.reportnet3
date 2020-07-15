@@ -282,7 +282,12 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
                 body={renderWritePermissionsColumnTemplate}
                 header={resources.messages['writePermissionsColumn']}
               />
-              <Column body={renderDeleteColumnTemplate} style={{ width: '60px' }} />
+              <Column
+                body={renderDeleteColumnTemplate}
+                style={{ width: '60px' }}
+                className={styles.emptyTableHeader}
+                header={resources.messages['deleteContributorButtonTableHeader']}
+              />
             </DataTable>
           </div>
         )}
