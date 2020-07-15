@@ -395,8 +395,8 @@ export const EUDataset = withRouter(({ history, match }) => {
       <Title
         icon="euDataset"
         iconSize="3.5rem"
-        subtitle={`${dataflowName} - ${datasetName}`}
-        title={datasetSchemaName}
+        subtitle={`${dataflowName}`}
+        title={datasetName}
       />
       <EUDatasetToolbar
         handleDialogs={handleDialogs}

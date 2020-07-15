@@ -121,8 +121,6 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
     }
   };
 
-  console.log({manageIntegrationsState})
-
   const getUpdatedData = () => manageIntegrationsDispatch({ type: 'GET_UPDATED_DATA', payload: updatedData });
 
   const onAddParameter = () => {
@@ -190,7 +188,9 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
     manageIntegrationsDispatch({ type: 'TOGGLE_EDIT_VIEW', payload: { id, isEdit: true, keyData, valueData } });
   };
 
-  const onFillField = (data, name) => manageIntegrationsDispatch({ type: 'ON_FILL', payload: { data, name } });
+  const onFillField = (data, name) => manageIntegrationsDispatch({ type: 'ON_FILL', payload: { data, name } })
+
+  const onFillFieldRepository = (data, name) => manageIntegrationsDispatch({ type: 'ON_FILL_REPOSITORY', payload: { data, name, processName: [] } })
 
   const onResetParameterInput = () => {
     manageIntegrationsDispatch({
@@ -330,7 +330,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
           filter={optionList[option].length > 7}
           disabled={isEmpty(optionList[option])}
           inputId={`${componentName}__${option}`}
-          onChange={event => onFillField(event.value, option)}
+          onChange={event => option === "repository" ? onFillFieldRepository(event.value, option) : onFillField(event.value, option)}
           optionLabel="label"
           options={optionList[option]}
           placeholder={resources.messages[`${option}PlaceHolder`]}

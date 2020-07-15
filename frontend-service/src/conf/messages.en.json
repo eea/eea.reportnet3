@@ -233,7 +233,7 @@
     "expandAll": "Expand all",
     "expandSidebar": "Expand sidebar",
     "expirationDate": "Date range",
-    "export": "Export dataset data",
+    "exportDataset": "Export dataset data",
     "exportDataByIdError": "Failed exporting data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "exportTable": "Export table data",
     "exportTableDataByIdError": "Failed exporting data",
@@ -282,7 +282,7 @@
     "groupBy": "Group by",
     "groupValidationsError": "Failed group validation at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "help": "Help",
-    "importTable": "Import table",
+    "importTable": "Import table data",
     "importFromFile": "Import from file",
     "info": "Info",
     "invalidCharacter": "Invalid character",
@@ -749,7 +749,7 @@
     "repository": "Repository",
     "repositoryPlaceHolder": "Select a repository",
     "processNamePlaceHolder": "Select a process",
-    "importDataset": "Import dataset",    
+    "importDataset": "Import dataset data",    
     "uploadTable": "Import data in table "
   }
 }

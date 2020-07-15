@@ -94,8 +94,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
 
-  console.log('extensionsOperationsList', extensionsOperationsList)
-
   let exportMenuRef = useRef();
 
   const callSetMetaData = async () => {
@@ -242,7 +240,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const getFileExtensions = async () => {
     try {
       const response = await IntegrationService.allExtensionsOperations(datasetSchemaId);
-      console.log('response', response)
       setExtensionsOperationsList(ExtensionUtils.groupOperations('operation', response));
     } catch (error) {
       notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
@@ -608,7 +605,7 @@ export const Dataset = withRouter(({ match, history }) => {
               id="buttonExportDataset"
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
               icon={loadingFile ? 'spinnerAnimate' : 'export'}
-              label={resources.messages['export']}
+              label={resources.messages['exportDataset']}
               onClick={event => exportMenuRef.current.show(event)}
             />
             <Menu

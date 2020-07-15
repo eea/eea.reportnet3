@@ -518,7 +518,7 @@ export const FieldsDesigner = ({
               onChange={e => onChangeIsReadOnly(e.checked)}
               style={{ width: '70px' }}
             />
-            <label for={`${table.tableId}_check_readOnly`} className="srOnly">
+            <label htmlFor={`${table.tableId}_check_readOnly`} className="srOnly">
               {resources.messages['readOnlyTable']}
             </label>
           </div>
@@ -534,7 +534,7 @@ export const FieldsDesigner = ({
               onChange={e => onChangeToPrefill(e.checked)}
               style={{ width: '70px' }}
             />
-            <label for={`${table.tableId}_check_to_prefill`} className="srOnly">
+            <label htmlFor={`${table.tableId}_check_to_prefill`} className="srOnly">
               {resources.messages['prefilled']}
             </label>
           </div>

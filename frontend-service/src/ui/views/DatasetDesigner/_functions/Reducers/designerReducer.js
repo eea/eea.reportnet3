@@ -1,5 +1,8 @@
 export const designerReducer = (state, { type, payload }) => {
   switch (type) {
+    case 'GET_EXPORT_LIST':
+      return { ...state, exportButtonsList: payload.exportList };
+
     case 'GET_DATASET_DATA':
       return {
         ...state,
@@ -34,6 +37,12 @@ export const designerReducer = (state, { type, payload }) => {
 
     case 'IS_PREVIEW_MODE_ON':
       return { ...state, isPreviewModeOn: payload.value };
+
+    case 'LOAD_EXTERNAL_EXTENSIONS':
+      return {
+        ...state,
+        extensionsOperationsList: { ...state.extensionsOperationsList, export: payload.export, import: payload.import }
+      };
 
     case 'LOAD_DATASET_SCHEMAS':
       return { ...state, datasetSchemas: payload.schemas };
