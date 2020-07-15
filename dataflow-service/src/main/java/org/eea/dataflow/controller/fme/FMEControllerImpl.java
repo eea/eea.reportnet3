@@ -31,27 +31,30 @@ public class FMEControllerImpl implements FMEController {
   /**
    * Find repositories.
    *
+   * @param datasetId the dataset id
    * @return the collection VO
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE') OR (hasRole('DATA_CUSTODIAN')) OR (hasRole('DATA_STEWARD'))")
   @GetMapping(value = "/findRepositories", produces = MediaType.APPLICATION_JSON_VALUE)
-  public FMECollectionVO findRepositories() {
+  public FMECollectionVO findRepositories(@RequestParam("datasetId") Long datasetId) {
     return fmeCommunicationService.findRepository();
   }
 
   /**
    * Find items.
    *
+   * @param datasetId the dataset id
    * @param repository the repository
    * @return the collection VO
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE') OR (hasRole('DATA_CUSTODIAN')) OR (hasRole('DATA_STEWARD'))")
   @GetMapping(value = "/findItems", produces = MediaType.APPLICATION_JSON_VALUE)
-  public FMECollectionVO findItems(@RequestParam("repository") String repository) {
+  public FMECollectionVO findItems(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("repository") String repository) {
     return fmeCommunicationService.findItems(repository);
   }
 

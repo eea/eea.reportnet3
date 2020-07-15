@@ -40,14 +40,14 @@ public class FMEControllerImplTest {
   @Test
   public void findRepositoriesTest() {
     Mockito.when(fmeCommunicationService.findRepository()).thenReturn(null);
-    fmeControllerImpl.findRepositories();
+    fmeControllerImpl.findRepositories(1L);
     Mockito.verify(fmeCommunicationService, times(1)).findRepository();
   }
 
   @Test
   public void findItemsTest() {
     Mockito.when(fmeCommunicationService.findItems(Mockito.anyString())).thenReturn(null);
-    fmeControllerImpl.findItems("repository");
+    fmeControllerImpl.findItems(1L, "repository");
     Mockito.verify(fmeCommunicationService, times(1)).findItems(Mockito.anyString());
   }
 
