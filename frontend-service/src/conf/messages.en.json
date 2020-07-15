@@ -98,7 +98,7 @@
     "dataflowDetailsError": "Failed loading dataflow information",
     "dataflowHelp": "Dataflow help",
     "dataflowHelpHelp": "Documents, weblinks and dataset schemas help",
-    "dataflowListHelp": "Dataflows help",
+    "dataflowListHelp": "My dataflows",
     "dataflowNameExists": "Dataflow name already exists, please choose another one",
     "dataflowObligationEmpty": "Obligation is a required field",
     "dataflows": "Dataflows",
@@ -743,6 +743,8 @@
     "errorLoadingEuDatasetSchema": "Error loading EUDataset schema",
     "deleteDataEuDatasetConfirm": "Are you sure you want to delete the dataset data? You won't be able to recover it, please consider creating a copy before.",
     "copyDataCollectionEuDatasetError": "Error copying data from Data Collections to EU Datasets",
-    "exportEuDatasetError": "Error exporting data from EU Datasets"
+    "exportEuDatasetError": "Error exporting data from EU Datasets",
+    "dataflowProviderHelp": "My dataflow",
+    "dataflowRequesterHelp": "My dataflow"
   }
 }

@@ -1,7 +1,7 @@
 {
   "steps": [
     {
-      "content": "‘Supporting documents‘ - Documents to support the data delivery for example reporting guidance or templates",
+      "content": "‘Supporting documents’ - Documents to support the data delivery for example reporting guidance or templates",
       "target": ".dataflowHelp-documents-help-step"
     },
     {
