@@ -284,9 +284,9 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
               />
               <Column
                 body={renderDeleteColumnTemplate}
-                style={{ width: '60px' }}
                 className={styles.emptyTableHeader}
                 header={resources.messages['deleteContributorButtonTableHeader']}
+                style={{ width: '60px' }}
               />
             </DataTable>
           </div>
