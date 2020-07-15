@@ -7,7 +7,7 @@
       "fixed": false,
       "types": [
         {
-          "key": "LOAD_DATA_FAILED_EVENT",
+          "key": "IMPORT_REPORTING_FAILED_EVENT",
           "navigateTo": {
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
@@ -42,7 +42,7 @@
           }
         },
         {
-          "key": "LOAD_SCHEMA_FAILED_EVENT",
+          "key": "IMPORT_DESIGN_FAILED_EVENT",
           "navigateTo": {
             "section": "DATASET_SCHEMA",
             "parameters": ["datasetId", "datasetId"]
@@ -296,26 +296,30 @@
         },
         {
           "key": "DATAFLOW_NAME_EXISTS",
-          "lifeTime": 5000,
-          "fixed": false
+          "lifeTime": 5000
         },
         {
           "key": "LOAD_RECEIPT_DATA_ERROR",
-          "lifeTime": 5000,
-          "fixed": false
+          "lifeTime": 5000
+        },
+        {
+          "key": "COPY_DATA_COLLECTION_EU_DATASET_ERROR",
+          "lifeTime": 5000
+        },
+        {
+          "key": "EXPORT_EU_DATASET_ERROR",
+          "lifeTime": 5000
         },
         {
           "key": "RELEASE_BLOCKED_EVENT",
-          "lifeTime": 5000,
-          "fixed": false
+          "lifeTime": 5000
         },
         {
           "key": "VALIDATION_SERVICE_GET_ALL_ERROR"
         },
         {
           "key": "DELETE_RULE_ERROR",
-          "lifeTime": 5000,
-          "fixed": false
+          "lifeTime": 5000
         },
         {
           "key": "QC_RULE_CREATION_ERROR"
@@ -331,8 +335,7 @@
         },
         {
           "key": "DATAFLOW_OBLIGATION_EMPTY",
-          "lifeTime": 5000,
-          "fixed": false
+          "lifeTime": 5000
         },
         {
           "key": "LOAD_COUNTRIES_ERROR"
@@ -421,7 +424,21 @@
           }
         },
         {
-          "key": "LOAD_DATA_COMPLETED_EVENT",
+          "key": "IMPORT_REPORTING_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "EXTERNAL_IMPORT_COMPLETE_EVENT",
           "navigateTo": {
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
@@ -477,7 +494,14 @@
           }
         },
         {
-          "key": "LOAD_SCHEMA_COMPLETED_EVENT",
+          "key": "IMPORT_DESIGN_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT",
           "navigateTo": {
             "section": "DATASET_SCHEMA",
             "parameters": ["dataflowId", "datasetId"]

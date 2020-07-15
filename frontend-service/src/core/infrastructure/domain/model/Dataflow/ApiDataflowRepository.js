@@ -16,6 +16,7 @@ import { Dataset } from 'core/domain/model/Dataset/Dataset';
 import { DatasetTable } from 'core/domain/model/Dataset/DatasetTable/DatasetTable';
 import { DatasetTableField } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableField/DatasetTableField';
 import { DatasetTableRecord } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableRecord';
+import { EuDataset } from 'core/domain/model/EuDataset/EuDataset';
 import { LegalInstrument } from 'core/domain/model/Obligation/LegalInstrument/LegalInstrument';
 import { Obligation } from 'core/domain/model/Obligation/Obligation';
 import { Representative } from 'core/domain/model/Representative/Representative';
@@ -343,6 +344,7 @@ const parseDataflowDTO = dataflowDTO =>
     description: dataflowDTO.description,
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: parseDocumentListDTO(dataflowDTO.documents),
+    euDatasets: parseEuDatasetListDTO(dataflowDTO.euDatasets),
     expirationDate: dataflowDTO.deadlineDate > 0 ? moment.unix(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
     id: dataflowDTO.id,
     name: dataflowDTO.name,
@@ -355,185 +357,209 @@ const parseDataflowDTO = dataflowDTO =>
     weblinks: parseWebLinkListDTO(dataflowDTO.weblinks)
   });
 
-const parseDataCollectionListDTO = dataCollectionsDTO => {
-  if (!isNull(dataCollectionsDTO) && !isUndefined(dataCollectionsDTO)) {
-    const dataCollections = [];
-    dataCollectionsDTO.forEach(dataCollectionDTO => {
-      dataCollections.push(parseDataCollectionDTO(dataCollectionDTO));
+  const parseDataCollectionListDTO = dataCollectionsDTO => {
+    if (!isNull(dataCollectionsDTO) && !isUndefined(dataCollectionsDTO)) {
+      const dataCollections = [];
+      dataCollectionsDTO.forEach(dataCollectionDTO => {
+        dataCollections.push(parseDataCollectionDTO(dataCollectionDTO));
+      });
+      return dataCollections;
+    }
+    return;
+  };
+
+  const parseDataCollectionDTO = dataCollectionDTO => {
+    return new DataCollection({
+      creationDate: dataCollectionDTO.creationDate,
+      dataCollectionId: dataCollectionDTO.id,
+      dataCollectionName: dataCollectionDTO.dataSetName,
+      dataflowId: dataCollectionDTO.idDataflow,
+      datasetSchemaId: dataCollectionDTO.datasetSchema,
+      expirationDate: dataCollectionDTO.dueDate,
+      status: dataCollectionDTO.status
     });
-    return dataCollections;
-  }
-  return;
-};
+  };
 
-const parseDataCollectionDTO = dataCollectionDTO => {
-  return new DataCollection({
-    creationDate: dataCollectionDTO.creationDate,
-    dataCollectionId: dataCollectionDTO.id,
-    dataCollectionName: dataCollectionDTO.dataSetName,
-    dataflowId: dataCollectionDTO.idDataflow,
-    datasetSchemaId: dataCollectionDTO.datasetSchema,
-    expirationDate: dataCollectionDTO.dueDate,
-    status: dataCollectionDTO.status
-  });
-};
-
-const parseDatasetListDTO = datasetsDTO => {
-  if (!isNull(datasetsDTO) && !isUndefined(datasetsDTO)) {
-    const datasets = [];
-    datasetsDTO.forEach(datasetDTO => {
-      datasets.push(parseDatasetDTO(datasetDTO));
+  const parseEuDatasetListDTO = euDatasetsDTO => {
+    if (!isNull(euDatasetsDTO) && !isUndefined(euDatasetsDTO)) {
+      const euDatasets = [];
+      euDatasetsDTO.forEach(euDatasetDTO => {
+        euDatasets.push(parseEuDatasetDTO(euDatasetDTO));
+      });
+      return euDatasets;
+    }
+    return;
+  };
+  
+  const parseEuDatasetDTO = euDatasetDTO => {
+    return new EuDataset({
+      creationDate: euDatasetDTO.creationDate,
+      euDatasetId: euDatasetDTO.id,
+      euDatasetName: euDatasetDTO.dataSetName,
+      dataflowId: euDatasetDTO.idDataflow,
+      datasetSchemaId: euDatasetDTO.datasetSchema,
+      expirationDate: euDatasetDTO.dueDate,
+      status: euDatasetDTO.status
     });
-    return datasets;
-  }
-  return;
-};
+  };
 
-const parseDatasetDTO = datasetDTO =>
-  new Dataset({
-    datasetId: datasetDTO.id,
-    datasetSchemaId: datasetDTO.datasetSchema,
-    datasetSchemaName: datasetDTO.dataSetName,
-    isReleased: datasetDTO.isReleased,
-    name: datasetDTO.nameDatasetSchema,
-    dataProviderId: datasetDTO.dataProviderId
-  });
-
-const parseDocumentListDTO = documentsDTO => {
-  if (!isNull(documentsDTO) && !isUndefined(documentsDTO)) {
-    const documents = [];
-    documentsDTO.forEach(documentDTO => {
-      documents.push(parseDocumentDTO(documentDTO));
+  const parseDatasetListDTO = datasetsDTO => {
+    if (!isNull(datasetsDTO) && !isUndefined(datasetsDTO)) {
+      const datasets = [];
+      datasetsDTO.forEach(datasetDTO => {
+        datasets.push(parseDatasetDTO(datasetDTO));
+      });
+      return datasets;
+    }
+    return;
+  };
+  
+  const parseDatasetDTO = datasetDTO =>
+    new Dataset({
+      datasetId: datasetDTO.id,
+      datasetSchemaId: datasetDTO.datasetSchema,
+      datasetSchemaName: datasetDTO.dataSetName,
+      isReleased: datasetDTO.isReleased,
+      name: datasetDTO.nameDatasetSchema,
+      dataProviderId: datasetDTO.dataProviderId
     });
-    return documents;
-  }
-  return;
-};
-
-const parseDocumentDTO = documentDTO => {
-  return new Document({
-    category: documentDTO.category,
-    description: documentDTO.description,
-    id: documentDTO.id,
-    language: documentDTO.language,
-    title: documentDTO.name
-  });
-};
-
-const parseLegalInstrument = legalInstrumentDTO => {
-  if (!isNil(legalInstrumentDTO)) {
-    return new LegalInstrument({
-      alias: legalInstrumentDTO.sourceAlias,
-      id: legalInstrumentDTO.sourceId,
-      title: legalInstrumentDTO.sourceTitle
+  
+  const parseDocumentListDTO = documentsDTO => {
+    if (!isNull(documentsDTO) && !isUndefined(documentsDTO)) {
+      const documents = [];
+      documentsDTO.forEach(documentDTO => {
+        documents.push(parseDocumentDTO(documentDTO));
+      });
+      return documents;
+    }
+    return;
+  };
+  
+  const parseDocumentDTO = documentDTO => {
+    return new Document({
+      category: documentDTO.category,
+      description: documentDTO.description,
+      id: documentDTO.id,
+      language: documentDTO.language,
+      title: documentDTO.name
     });
-  }
-  return;
-};
-
-const parseObligationDTO = obligationDTO => {
-  if (!isNil(obligationDTO)) {
-    return new Obligation({
-      comment: obligationDTO.comment,
-      countries: obligationDTO.countries,
-      description: obligationDTO.description,
-      expirationDate: !isNil(obligationDTO.nextDeadline)
-        ? moment.unix(obligationDTO.nextDeadline / 1000).format('YYYY-MM-DD')
-        : null,
-      issues: obligationDTO.issues,
-      legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),
-      obligationId: obligationDTO.obligationId,
-      reportingFrequency: obligationDTO.reportFreq,
-      reportingFrequencyDetail: obligationDTO.reportFreqDetail,
-      title: obligationDTO.oblTitle,
-      validSince: obligationDTO.validSince,
-      validTo: obligationDTO.validTo
+  };
+  
+  const parseLegalInstrument = legalInstrumentDTO => {
+    if (!isNil(legalInstrumentDTO)) {
+      return new LegalInstrument({
+        alias: legalInstrumentDTO.sourceAlias,
+        id: legalInstrumentDTO.sourceId,
+        title: legalInstrumentDTO.sourceTitle
+      });
+    }
+    return;
+  };
+  
+  const parseObligationDTO = obligationDTO => {
+    if (!isNil(obligationDTO)) {
+      return new Obligation({
+        comment: obligationDTO.comment,
+        countries: obligationDTO.countries,
+        description: obligationDTO.description,
+        expirationDate: !isNil(obligationDTO.nextDeadline)
+          ? moment.unix(obligationDTO.nextDeadline / 1000).format('YYYY-MM-DD')
+          : null,
+        issues: obligationDTO.issues,
+        legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),
+        obligationId: obligationDTO.obligationId,
+        reportingFrequency: obligationDTO.reportFreq,
+        reportingFrequencyDetail: obligationDTO.reportFreqDetail,
+        title: obligationDTO.oblTitle,
+        validSince: obligationDTO.validSince,
+        validTo: obligationDTO.validTo
+      });
+    }
+  };
+  
+  const parseRepresentativeListDTO = representativesDTO => {
+    if (!isNull(representativesDTO) && !isUndefined(representativesDTO)) {
+      const representatives = [];
+      representativesDTO.forEach(representativeDTO => {
+        representatives.push(parseRepresentativeDTO(representativeDTO));
+      });
+      return representatives;
+    }
+    return;
+  };
+  
+  const parseRepresentativeDTO = representativeDTO => {
+    return new Representative({
+      dataProviderGroupId: representativeDTO.dataProviderGroupId,
+      dataProviderId: representativeDTO.dataProviderId,
+      id: representativeDTO.id,
+      isReceiptDownloaded: representativeDTO.receiptDownloaded,
+      isReceiptOutdated: representativeDTO.receiptOutdated,
+      providerAccount: representativeDTO.providerAccount,
+      hasDatasets: representativeDTO.hasDatasets
     });
-  }
-};
-
-const parseRepresentativeListDTO = representativesDTO => {
-  if (!isNull(representativesDTO) && !isUndefined(representativesDTO)) {
-    const representatives = [];
-    representativesDTO.forEach(representativeDTO => {
-      representatives.push(parseRepresentativeDTO(representativeDTO));
+  };
+  
+  const parseWebLinkListDTO = webLinksDTO => {
+    if (!isNull(webLinksDTO) && !isUndefined(webLinksDTO)) {
+      const webLinks = [];
+      webLinksDTO.forEach(webLinkDTO => {
+        webLinks.push(parseWebLinkDTO(webLinkDTO));
+      });
+      return webLinks;
+    }
+    return;
+  };
+  
+  const parseWebLinkDTO = webLinkDTO => new WebLink(webLinkDTO);
+  
+  const pending = async () => {
+    const pendingDataflowsDTO = await apiDataflow.pending();
+    return parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'PENDING'));
+  };
+  
+  const reject = async dataflowId => {
+    const status = await apiDataflow.reject(dataflowId);
+    return status;
+  };
+  
+  const reporting = async dataflowId => {
+    const reportingDataflowDTO = await apiDataflow.reporting(dataflowId);
+    const dataflow = parseDataflowDTO(reportingDataflowDTO);
+    dataflow.datasets.sort((a, b) => {
+      let datasetName_A = a.datasetSchemaName;
+      let datasetName_B = b.datasetSchemaName;
+      return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
     });
-    return representatives;
-  }
-  return;
-};
-
-const parseRepresentativeDTO = representativeDTO => {
-  return new Representative({
-    dataProviderGroupId: representativeDTO.dataProviderGroupId,
-    dataProviderId: representativeDTO.dataProviderId,
-    id: representativeDTO.id,
-    isReceiptDownloaded: representativeDTO.receiptDownloaded,
-    isReceiptOutdated: representativeDTO.receiptOutdated,
-    providerAccount: representativeDTO.providerAccount,
-    hasDatasets: representativeDTO.hasDatasets
-  });
-};
-
-const parseWebLinkListDTO = webLinksDTO => {
-  if (!isNull(webLinksDTO) && !isUndefined(webLinksDTO)) {
-    const webLinks = [];
-    webLinksDTO.forEach(webLinkDTO => {
-      webLinks.push(parseWebLinkDTO(webLinkDTO));
-    });
-    return webLinks;
-  }
-  return;
-};
-
-const parseWebLinkDTO = webLinkDTO => new WebLink(webLinkDTO);
-
-const pending = async () => {
-  const pendingDataflowsDTO = await apiDataflow.pending();
-  return parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'PENDING'));
-};
-
-const reject = async dataflowId => {
-  const status = await apiDataflow.reject(dataflowId);
-  return status;
-};
-
-const reporting = async dataflowId => {
-  const reportingDataflowDTO = await apiDataflow.reporting(dataflowId);
-  const dataflow = parseDataflowDTO(reportingDataflowDTO);
-  dataflow.datasets.sort((a, b) => {
-    let datasetName_A = a.datasetSchemaName;
-    let datasetName_B = b.datasetSchemaName;
-    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
-  });
-  return dataflow;
-};
-
-const schemasValidation = async dataflowId => {
-  return await apiDataflow.schemasValidation(dataflowId);
-};
-
-const update = async (dataflowId, name, description, obligationId) =>
-  await apiDataflow.update(dataflowId, name, description, obligationId);
-
-export const ApiDataflowRepository = {
-  accept,
-  accepted,
-  all,
-  cloneDatasetSchemas,
-  completed,
-  create,
-  dataflowDetails,
-  datasetsReleasedStatus,
-  datasetsValidationStatistics,
-  deleteById,
-  generateApiKey,
-  getAllSchemas,
-  getApiKey,
-  newEmptyDatasetSchema,
-  pending,
-  reject,
-  reporting,
-  schemasValidation,
-  update
-};
+    return dataflow;
+  };
+  
+  const schemasValidation = async dataflowId => {
+    return await apiDataflow.schemasValidation(dataflowId);
+  };
+  
+  const update = async (dataflowId, name, description, obligationId) =>
+    await apiDataflow.update(dataflowId, name, description, obligationId);
+  
+  export const ApiDataflowRepository = {
+    accept,
+    accepted,
+    all,
+    cloneDatasetSchemas,
+    completed,
+    create,
+    dataflowDetails,
+    datasetsReleasedStatus,
+    datasetsValidationStatistics,
+    deleteById,
+    generateApiKey,
+    getAllSchemas,
+    getApiKey,
+    newEmptyDatasetSchema,
+    pending,
+    reject,
+    reporting,
+    schemasValidation,
+    update
+  };
+  

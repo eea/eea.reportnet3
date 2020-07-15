@@ -3,5 +3,7 @@
   "allExtensionsOperations": "/integration/listExtensionsOperations",
   "create": "/integration/create",
   "delete": "/integration/{:integrationId}/dataflow/{:dataflowId}",
+  "getProcesses": "/fme/findItems?repository={:repositoryName}",
+  "getRepositories": "/fme/findRepositories",
   "update": "/integration/update"
 }

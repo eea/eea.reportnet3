@@ -278,7 +278,6 @@ export const FieldsDesigner = ({
           hasWritePermissions={true}
           isPreviewModeOn={isPreviewModeOn}
           isValidationSelected={isValidationSelected}
-          isWebFormMMR={false}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
           onLoadTableData={onLoadTableData}

@@ -61,8 +61,7 @@ const DataViewer = withRouter(
     isDatasetDeleted = false,
     isDataCollection,
     isValidationSelected,
-    isWebFormMMR,
-    levelErrorTypes,
+    //levelErrorTypes,
     match: {
       params: { datasetId, dataflowId }
     },
@@ -70,6 +69,7 @@ const DataViewer = withRouter(
     recordPositionId,
     selectedRecordErrorId,
     setIsValidationSelected,
+    showWriteButtons,
     tableHasErrors,
     tableId,
     tableName,
@@ -187,7 +187,6 @@ const DataViewer = withRouter(
       hasWritePermissions && !tableReadOnly,
       initialCellValue,
       isDataCollection,
-      isWebFormMMR,
       records,
       resources,
       setIsColumnInfoVisible,
@@ -905,6 +904,7 @@ const DataViewer = withRouter(
           datasetId={datasetId}
           exportExtensionsOperationsList={extensionsOperationsList.export}
           hasWritePermissions={hasWritePermissions}
+          showWriteButtons={showWriteButtons}
           hideValidationFilter={hideValidationFilter}
           fileExtensions={extensionsOperationsList.export}
           isDataCollection={isDataCollection}
@@ -912,7 +912,6 @@ const DataViewer = withRouter(
           isTableDeleted={isTableDeleted}
           isLoading={isLoading}
           isValidationSelected={isValidationSelected}
-          isWebFormMMR={isWebFormMMR}
           levelErrorTypesWithCorrects={levelErrorTypesWithCorrects}
           onRefresh={onRefresh}
           onSetVisible={onSetVisible}
@@ -938,7 +937,7 @@ const DataViewer = withRouter(
             id={tableId}
             first={records.firstPageRecord}
             footer={
-              hasWritePermissions && !tableReadOnly && !isWebFormMMR ? (
+              hasWritePermissions && !tableReadOnly ? (
                 <Footer
                   hasWritePermissions={hasWritePermissions && !tableReadOnly}
                   onAddClick={() => {

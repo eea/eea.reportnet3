@@ -20,6 +20,7 @@ import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -30,10 +31,15 @@ import org.springframework.util.StringUtils;
 @Component
 public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorService {
 
+  /** The r 3 base. */
+  @Value("${integration.fme.callback.urlbase}")
+  private String r3base;
+
   /**
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   /**
    * The fme feign service.
    */
@@ -58,12 +64,10 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
   @Autowired
   private UserManagementController userManagementController;
 
-
   /**
    * The Constant LOG.
    */
   private static final Logger LOG = LoggerFactory.getLogger(FMEIntegrationExecutorService.class);
-
 
   /**
    * Gets the executor type.
@@ -127,7 +131,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     if (null == apiKey) {
       LOG.info("ApiKey not exits");
       apiKey = userManagementController.createApiKey(dataflowId, dataproviderId);
-      LOG.info("ApiKey created");
+      LOG.info("ApiKey created for Provider ID: {} and Dataflow ID: {} ", dataproviderId,
+          dataflowId);
     }
 
     FMEAsyncJob fmeAsyncJob = new FMEAsyncJob();
@@ -150,11 +155,13 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         // providerId
         parameters.add(saveParameter("providerId", paramDataProvider));
         // datasetDataId
-        parameters.add(saveParameter("datasetDataId", datasetId));
+        parameters.add(saveParameter("datasetId", datasetId));
         // folder
         parameters.add(saveParameter("folder", datasetId + "/" + paramDataProvider));
         // apikey
         parameters.add(saveParameter("apiKey", "ApiKey " + apiKey));
+        // base URL
+        parameters.add(saveParameter("baseUrl", r3base));
 
         fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Export");
@@ -167,13 +174,15 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         // providerId
         parameters.add(saveParameter("providerId", paramDataProvider));
         // datasetDataId
-        parameters.add(saveParameter("datasetDataId", datasetId));
+        parameters.add(saveParameter("datasetId", datasetId));
         // inputfile
         parameters.add(saveParameter("inputfile", fileName));
         // folder
         parameters.add(saveParameter("folder", datasetId + "/" + paramDataProvider));
         // apikey
         parameters.add(saveParameter("apiKey", "ApiKey " + apiKey));
+        // base URL
+        parameters.add(saveParameter("baseUrl", r3base));
 
         fmeAsyncJob.setPublishedParameters(parameters);
 

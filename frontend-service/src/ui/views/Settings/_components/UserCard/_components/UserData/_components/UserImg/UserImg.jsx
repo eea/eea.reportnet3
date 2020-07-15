@@ -64,8 +64,8 @@ const UserImg = () => {
   };
 
   const listOfImages = () =>
-    config.avatars.map(avatar => (
-      <div className={styles.gridItem}>
+    config.avatars.map((avatar, i) => (
+      <div className={styles.gridItem} key={i}>
         <img
           alt="Image to choose"
           className={styles.gridItem}
