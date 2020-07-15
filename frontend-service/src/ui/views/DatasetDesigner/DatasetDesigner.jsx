@@ -51,8 +51,8 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
 
 import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
-import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
 import { ExtensionUtils, MetadataUtils } from 'ui/views/_functions/Utils';
+import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
 
 export const DatasetDesigner = withRouter(({ history, match }) => {
   const {
@@ -240,14 +240,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     const externalExtensionsItems = [
       {
         label: resources.messages['externalExtensions'],
-        items: extensionsOperationsList.export.map(type => {
-          console.log('type', type);
-          return {
-            command: () => onExportData(type.fileExtension.toUpperCase()),
-            icon: config.icons['archive'],
-            label: `${type.fileExtension.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
-          };
-        })
+        items: extensionsOperationsList.export.map(type => ({
+          command: () => onExportData(type.fileExtension.toUpperCase()),
+          icon: config.icons['archive'],
+          label: `${type.fileExtension.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
+        }))
       }
     ];
 
