@@ -1,16 +1,16 @@
 package org.eea.interfaces.controller.dataflow.integration.fme;
 
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
+import org.eea.interfaces.vo.integration.fme.FMEOperationInfoVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * The Interface FMEController.
- */
+/** The Interface FMEController. */
 public interface FMEController {
-
 
   /**
    * The Interface FMEControllerZuul.
@@ -28,7 +28,6 @@ public interface FMEController {
   @GetMapping(value = "/findRepositories", produces = MediaType.APPLICATION_JSON_VALUE)
   FMECollectionVO findRepositories();
 
-
   /**
    * Find items.
    *
@@ -38,5 +37,11 @@ public interface FMEController {
   @GetMapping(value = "/findItems", produces = MediaType.APPLICATION_JSON_VALUE)
   FMECollectionVO findItems(@RequestParam("repository") String repository);
 
-
+  /**
+   * Operation finished.
+   *
+   * @param fmeOperationInfoVO the fme operation info VO
+   */
+  @PostMapping("/operationFinished")
+  void operationFinished(@RequestBody FMEOperationInfoVO fmeOperationInfoVO);
 }
