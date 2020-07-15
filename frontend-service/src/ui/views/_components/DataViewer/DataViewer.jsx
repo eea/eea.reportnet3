@@ -61,7 +61,7 @@ const DataViewer = withRouter(
     isDatasetDeleted = false,
     isDataCollection,
     isValidationSelected,
-    levelErrorTypes,
+    //levelErrorTypes,
     match: {
       params: { datasetId, dataflowId }
     },
@@ -69,6 +69,7 @@ const DataViewer = withRouter(
     recordPositionId,
     selectedRecordErrorId,
     setIsValidationSelected,
+    showWriteButtons,
     tableHasErrors,
     tableId,
     tableName,
@@ -903,6 +904,7 @@ const DataViewer = withRouter(
           datasetId={datasetId}
           exportExtensionsOperationsList={extensionsOperationsList.export}
           hasWritePermissions={hasWritePermissions}
+          showWriteButtons={showWriteButtons}
           hideValidationFilter={hideValidationFilter}
           fileExtensions={extensionsOperationsList.export}
           isDataCollection={isDataCollection}

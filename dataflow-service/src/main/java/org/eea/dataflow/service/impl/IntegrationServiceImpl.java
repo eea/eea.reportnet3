@@ -142,7 +142,7 @@ public class IntegrationServiceImpl implements IntegrationService {
       Map<String, String> dictionaryOriginTargetObjectId) throws EEAException {
     for (String originDatasetSchemaId : originDatasetSchemaIds) {
       IntegrationVO integrationCriteria = new IntegrationVO();
-      integrationCriteria.getInternalParameters().put("datasetSchemaId", originDatasetSchemaId);
+      integrationCriteria.getInternalParameters().put(DATASETSCHEMAID, originDatasetSchemaId);
       List<IntegrationVO> integrations = getAllIntegrationsByCriteria(integrationCriteria);
       for (IntegrationVO integration : integrations) {
         // we've got the origin integrations. We intend to change the dataflow and the
@@ -151,7 +151,7 @@ public class IntegrationServiceImpl implements IntegrationService {
         LOG.info(
             "There are integrations to be copied into the datasetSchemaId {} in the dataflowId {}",
             dictionaryOriginTargetObjectId.get(originDatasetSchemaId), dataflowIdDestination);
-        integration.getInternalParameters().put("datasetSchemaId",
+        integration.getInternalParameters().put(DATASETSCHEMAID,
             dictionaryOriginTargetObjectId.get(originDatasetSchemaId));
         integration.getInternalParameters().put("dataflowId", dataflowIdDestination.toString());
         createIntegration(integration);
