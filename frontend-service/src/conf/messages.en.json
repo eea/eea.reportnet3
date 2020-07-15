@@ -753,6 +753,7 @@
     "uploadTable": "Import data in table ",
     "externalExtensions": "External extensions",
     "errorLoadingRepositories": "Error loading repositories",
-    "errorLoadingProcesses": "Error loading processes"
+    "errorLoadingProcesses": "Error loading processes",
+    "matchStringTooltip": "{%R3_COUNTRY_CODE%} can be used"
   }
 }
