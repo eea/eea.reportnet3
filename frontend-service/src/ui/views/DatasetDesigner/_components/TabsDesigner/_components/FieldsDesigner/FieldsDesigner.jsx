@@ -25,7 +25,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 
 export const FieldsDesigner = ({
-  activeIndex,
+  //activeIndex,
   datasetId,
   datasetSchemas,
   isPreviewModeOn,
