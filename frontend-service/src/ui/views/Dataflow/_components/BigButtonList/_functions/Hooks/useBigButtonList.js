@@ -97,7 +97,7 @@ const useBigButtonList = ({
       buttonIcon: 'manageReporters',
       caption: resources.messages['manageReporters'],
       handleRedirect: () => onShowManageReportersDialog(),
-      helpClassName: 'dataflow-big-buttons-dataflowHelp-help-step',
+      helpClassName: 'dataflow-big-buttons-manageReporters-help-step',
       layout: 'defaultBigButton',
       visibility: buttonsVisibility.manageReporters
     }

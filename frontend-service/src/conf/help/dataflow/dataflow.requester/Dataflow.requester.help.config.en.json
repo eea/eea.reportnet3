@@ -17,15 +17,19 @@
       "target": ".dataflow-big-buttons-help-step"
     },
     {
-      "content": "1. The dataflow help – documents, links and technical overview of the reporting schema",
+      "content": "1. Manage reporters – ?",
+      "target": ".dataflow-big-buttons-manageReporters-help-step"
+    },
+    {
+      "content": "2. The dataflow help – documents, links and technical overview of the reporting schema",
       "target": ".dataflow-big-buttons-dataflowHelp-help-step"
     },
     {
-      "content": "2. The reporting dataset where data and information are submitted",
+      "content": "3. The reporting dataset where data and information are submitted",
       "target": ".dataflow-dataset-help-step"
     },
     {
-      "content": "3. ‘Release to data collection’ for submitting your reported data",
+      "content": "4. ‘Release to data collection’ for submitting your reported data",
       "target": ".dataflow-big-buttons-release-help-step"
     }
   ]

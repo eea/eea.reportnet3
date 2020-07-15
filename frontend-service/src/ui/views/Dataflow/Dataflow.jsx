@@ -98,6 +98,7 @@ const Dataflow = withRouter(({ history, match }) => {
   }, [userContext, dataflowState.data]);
 
   useEffect(() => {
+    console.log('dataflowState', dataflowState.isCustodian);
     leftSideBarContext.addHelpSteps(
       dataflowState.isCustodian ? DataflowRequesterHelpConfig : DataflowProviderHelpConfig,
       'dataflowProviderHelp'
