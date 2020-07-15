@@ -39,57 +39,60 @@ const LeftSideBar = withRouter(({ history }) => {
 
   const renderHome = () => {
     const userButtonProps = {
+      className: 'dataflowList-left-side-bar-home-help-step',
       href: getUrl(routes['DATAFLOWS']),
+      icon: 'home',
+      label: 'myDataflows',
       onClick: e => {
         e.preventDefault();
         history.push(getUrl(routes['DATAFLOWS']));
       },
-      title: 'myDataflows',
-      icon: 'home',
-      label: 'myDataflows'
+      title: 'myDataflows'
     };
     return <LeftSideBarButton {...userButtonProps} />;
   };
 
   const renderUserProfile = () => {
     const userButtonProps = {
+      className: 'dataflowList-left-side-bar-user-profile-help-step',
       href: getUrl(routes['SETTINGS']),
+      icon: 'user-profile',
+      label: 'userSettings',
       onClick: e => {
         e.preventDefault();
         history.push(getUrl(routes['SETTINGS']));
       },
-      title: 'userSettings',
-      icon: 'user-profile',
-      label: 'userSettings'
+      title: 'userSettings'
     };
     return <LeftSideBarButton {...userButtonProps} />;
   };
   const renderUserNotifications = () => {
     const userNotificationsProps = {
       buttonType: 'notifications',
+      className: 'dataflowList-left-side-bar-notifications-help-step',
       href: '#',
+      icon: 'notifications',
+      label: 'notifications',
       onClick: async e => {
         e.preventDefault();
         if (notificationContext.all.length > 0) setIsNotificationVisible(true);
       },
-      title: 'notifications',
-      icon: 'notifications',
-      label: 'notifications'
+      title: 'notifications'
     };
     return <LeftSideBarButton {...userNotificationsProps} />;
   };
 
   const renderHelp = () => {
     const userHelpProps = {
+      className: 'dataflowList-left-side-bar-help-help-step',
       href: '#',
+      label: 'help',
+      icon: 'questionCircle',
       onClick: async e => {
         e.preventDefault();
         setRun(true);
       },
-      title: 'help',
-      icon: 'questionCircle',
-      // label: leftSideBarContext.helpTitle
-      label: 'help'
+      title: 'help'
     };
     return <LeftSideBarButton {...userHelpProps} />;
   };
