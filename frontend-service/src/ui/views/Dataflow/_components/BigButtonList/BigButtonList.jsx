@@ -1,10 +1,9 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
-import isEqual from 'lodash/isEqual';
 import isNil from 'lodash/isNil';
 import moment from 'moment';
 import remove from 'lodash/remove';
-import uniqWith from 'lodash/uniqWith';
+import uniqBy from 'lodash/uniqBy';
 
 import styles from './BigButtonList.module.css';
 
@@ -280,7 +279,7 @@ export const BigButtonList = ({
       await EuDatasetService.copyDataCollection(dataflowId);
     } catch (error) {
       console.error(error);
-      notificationContext.add({ type: 'LOAD_RECEIPT_DATA_ERROR' });
+      notificationContext.add({ type: 'COPY_DATA_COLLECTION_EU_DATASET_ERROR' });
     }
   };
 
@@ -289,7 +288,7 @@ export const BigButtonList = ({
       await EuDatasetService.exportEuDataset(dataflowId);
     } catch (error) {
       console.error(error);
-      notificationContext.add({ type: 'LOAD_RECEIPT_DATA_ERROR' });
+      notificationContext.add({ type: 'EXPORT_EU_DATASET_ERROR' });
     }
   };
 
@@ -342,7 +341,7 @@ export const BigButtonList = ({
     </Fragment>
   );
 
-  const bigButtonList = uniqWith(
+  const bigButtonList = uniqBy(
     useBigButtonList({
       dataflowId,
       dataflowState,
@@ -363,7 +362,7 @@ export const BigButtonList = ({
       onShowUpdateDataCollectionModal,
       updatedDatasetSchema
     }),
-    isEqual
+    'caption'
   )
     .filter(button => button.visibility)
     .map((button, i) => <BigButton key={i} {...button} />);

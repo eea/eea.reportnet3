@@ -21,7 +21,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
  * The Class EUDatasetControllerImpl.
  */
 @RestController
-@RequestMapping("/eudataset")
+@RequestMapping("/euDataset")
 public class EUDatasetControllerImpl implements EUDatasetController {
 
 

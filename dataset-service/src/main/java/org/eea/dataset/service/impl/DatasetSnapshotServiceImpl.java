@@ -393,56 +393,69 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       Long idDataCollection = dataCollection.isPresent() ? dataCollection.get().getId() : null;
 
       // Delete data of the same provider
-      if (provider != null && idDataCollection != null) {
-        datasetService.deleteRecordValuesByProvider(idDataCollection, provider.getCode());
-
-        // Restore data from snapshot
-        try {
-          // Mark the receipt button as outdated because a new release has been done, so it would be
-          // necessary to generate a new receipt
-          Long idDataflow = datasetService.getDataFlowIdById(idDataset);
-          List<RepresentativeVO> representatives =
-              representativeControllerZuul.findRepresentativesByIdDataFlow(idDataflow).stream()
-                  .filter(r -> r.getDataProviderId().equals(idDataProvider))
-                  .collect(Collectors.toList());
-          if (!representatives.isEmpty()) {
-            RepresentativeVO representative = representatives.get(0);
-            // We only update the representative if the receipt is not outdated
-            if (false == representative.getReceiptOutdated()) {
-              representative.setReceiptOutdated(true);
-              representativeControllerZuul.updateRepresentative(representative);
-              LOG.info("Receipt from the representative {} marked as outdated",
-                  representative.getId());
-            }
-          }
-
-          // This method will release the lock and the notification
-          restoreSnapshot(idDataCollection, idSnapshot, false);
-          // Check if the snapshot is released
-          snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
-          // Add the date of the release
-          Optional<Snapshot> snapshot = snapshotRepository.findById(idSnapshot);
-          if (snapshot.isPresent()) {
-            snapshot.get().setDateReleased(java.sql.Timestamp.valueOf(LocalDateTime.now()));
-            snapshotRepository.save(snapshot.get());
-          }
-
-          LOG.info("Snapshot {} released", idSnapshot);
-        } catch (EEAException e) {
-          LOG_ERROR.error(e.getMessage());
-          releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idSnapshot, e.getMessage());
-          removeLock(idSnapshot, LockSignature.RELEASE_SNAPSHOT);
-        }
-      } else {
-        LOG_ERROR.error("Error in release snapshot");
-        releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idSnapshot,
-            "Error in release snapshot");
-        removeLock(idSnapshot, LockSignature.RELEASE_SNAPSHOT);
-      }
+      deleteDataProvider(idDataset, idSnapshot, idDataProvider, provider, idDataCollection);
     } else {
       LOG_ERROR.error("Error releasing snapshot, the snapshot contains blocker errors");
       releaseEvent(EventType.RELEASE_BLOCKED_EVENT, idSnapshot,
           "The snapshot contains blocker errors");
+      removeLock(idSnapshot, LockSignature.RELEASE_SNAPSHOT);
+    }
+  }
+
+  /**
+   * Delete data provider.
+   *
+   * @param idDataset the id dataset
+   * @param idSnapshot the id snapshot
+   * @param idDataProvider the id data provider
+   * @param provider the provider
+   * @param idDataCollection the id data collection
+   */
+  private void deleteDataProvider(Long idDataset, Long idSnapshot, final Long idDataProvider,
+      DataProviderVO provider, Long idDataCollection) {
+    if (provider != null && idDataCollection != null) {
+      datasetService.deleteRecordValuesByProvider(idDataCollection, provider.getCode());
+
+      // Restore data from snapshot
+      try {
+        // Mark the receipt button as outdated because a new release has been done, so it would be
+        // necessary to generate a new receipt
+        Long idDataflow = datasetService.getDataFlowIdById(idDataset);
+        List<RepresentativeVO> representatives = representativeControllerZuul
+            .findRepresentativesByIdDataFlow(idDataflow).stream()
+            .filter(r -> r.getDataProviderId().equals(idDataProvider)).collect(Collectors.toList());
+        if (!representatives.isEmpty()) {
+          RepresentativeVO representative = representatives.get(0);
+          // We only update the representative if the receipt is not outdated
+          if (false == representative.getReceiptOutdated()) {
+            representative.setReceiptOutdated(true);
+            representativeControllerZuul.updateRepresentative(representative);
+            LOG.info("Receipt from the representative {} marked as outdated",
+                representative.getId());
+          }
+        }
+
+        // This method will release the lock and the notification
+        restoreSnapshot(idDataCollection, idSnapshot, false);
+        // Check if the snapshot is released
+        snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
+        // Add the date of the release
+        Optional<Snapshot> snapshot = snapshotRepository.findById(idSnapshot);
+        if (snapshot.isPresent()) {
+          snapshot.get().setDateReleased(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+          snapshotRepository.save(snapshot.get());
+        }
+
+        LOG.info("Snapshot {} released", idSnapshot);
+      } catch (EEAException e) {
+        LOG_ERROR.error(e.getMessage());
+        releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idSnapshot, e.getMessage());
+        removeLock(idSnapshot, LockSignature.RELEASE_SNAPSHOT);
+      }
+    } else {
+      LOG_ERROR.error("Error in release snapshot");
+      releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idSnapshot,
+          "Error in release snapshot");
       removeLock(idSnapshot, LockSignature.RELEASE_SNAPSHOT);
     }
   }

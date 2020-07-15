@@ -8,6 +8,9 @@ export const euDatasetReducer = (state, { type, payload }) => {
         levelErrorTypes: payload.errorTypes
       };
 
+    case 'GET_DATAFLOW_NAME':
+      return { ...state, dataflowName: payload.name };
+
     case 'GET_METADATA':
       return { ...state, metaData: payload.metadata };
 
@@ -17,8 +20,8 @@ export const euDatasetReducer = (state, { type, payload }) => {
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
 
-    case 'IS_WEB_FORM_MMR':
-      return { ...state, isInputSwitchChecked: payload.value, isWebFormMMR: payload.value };
+    case 'ON_HIGHLIGHT_REFRESH':
+      return { ...state, isRefreshHighlighted: payload.value };
 
     case 'ON_LOAD_TABLE_DATA':
       return { ...state, datasetHasData: payload.hasData };

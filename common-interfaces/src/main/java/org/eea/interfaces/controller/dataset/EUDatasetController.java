@@ -18,7 +18,7 @@ public interface EUDatasetController {
   /**
    * The Interface EUDatasetControllerZuul.
    */
-  @FeignClient(value = "dataset", contextId = "eudataset", path = "/eudataset")
+  @FeignClient(value = "dataset", contextId = "euDataset", path = "/euDataset")
   interface EUDatasetControllerZuul extends EUDatasetController {
 
   }

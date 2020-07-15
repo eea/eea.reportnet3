@@ -1,16 +1,16 @@
-export class DataCollection {
+export class EuDataset {
   constructor({
     creationDate,
-    dataCollectionId,
-    dataCollectionName,
+    euDatasetId,
+    euDatasetName,
     dataflowId,
     datasetSchemaId,
     expirationDate,
     status
   } = {}) {
     this.creationDate = creationDate;
-    this.dataCollectionId = dataCollectionId;
-    this.dataCollectionName = dataCollectionName;
+    this.euDatasetId = euDatasetId;
+    this.euDatasetName = euDatasetName;
     this.dataflowId = dataflowId;
     this.datasetSchemaId = datasetSchemaId;
     this.expirationDate = expirationDate;
