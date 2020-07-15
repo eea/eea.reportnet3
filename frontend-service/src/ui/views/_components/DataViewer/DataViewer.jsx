@@ -7,8 +7,8 @@ import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
-import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { config } from 'conf';
+import { DatasetConfig } from 'conf/domain/model/Dataset';
 
 import styles from './DataViewer.module.css';
 
@@ -21,7 +21,6 @@ import { Chips } from 'ui/views/_components/Chips';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContextMenu } from 'ui/views/_components/ContextMenu';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataForm } from './_components/DataForm';
 import { DataTable } from 'ui/views/_components/DataTable';
@@ -39,14 +38,14 @@ import { IntegrationService } from 'core/services/Integration';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { recordReducer } from './_functions/Reducers/recordReducer';
 import { sortReducer } from './_functions/Reducers/sortReducer';
 
 import { DataViewerUtils } from './_functions/Utils/DataViewerUtils';
 import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
-import { MetadataUtils } from 'ui/views/_functions/Utils/MetadataUtils';
-import { RecordUtils } from 'ui/views/_functions/Utils';
+import { ExtensionUtils, MetadataUtils, RecordUtils} from 'ui/views/_functions/Utils';
 import {
   useLoadColsSchemasAndColumnOptions,
   useContextMenu,
@@ -255,7 +254,7 @@ const DataViewer = withRouter(
     const getFileExtensions = async () => {
       try {
         const response = await IntegrationService.allExtensionsOperations(datasetSchemaId);
-        setExtensionsOperationsList(DataViewerUtils.groupOperations('operation', response));
+        setExtensionsOperationsList(ExtensionUtils.groupOperations('operation', response));
       } catch (error) {
         notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
       }
@@ -891,7 +890,6 @@ const DataViewer = withRouter(
           colsSchema={colsSchema}
           dataflowId={dataflowId}
           datasetId={datasetId}
-          exportExtensionsOperationsList={extensionsOperationsList.export}
           hasWritePermissions={hasWritePermissions}
           showWriteButtons={showWriteButtons}
           hideValidationFilter={hideValidationFilter}
@@ -1017,7 +1015,7 @@ const DataViewer = withRouter(
             className={styles.Dialog}
             dismissableMask={false}
             footer={renderCustomFileUploadFooter}
-            header={`${resources.messages['uploadDataset']}${tableName}`}
+            header={`${resources.messages['uploadTable']}${tableName}`}
             onHide={() => setImportTableDialogVisible(false)}
             visible={importTableDialogVisible}>
             <CustomFileUpload
@@ -1031,7 +1029,7 @@ const DataViewer = withRouter(
               multiple={false}
               name="file"
               onUpload={onUpload}
-              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.loadDataTable, {
+              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadData, {
                 datasetId: datasetId,
                 tableId: tableId
               })}`}

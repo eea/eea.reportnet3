@@ -64,12 +64,11 @@ const parseIntegrationsList = integrationsDTO => {
   return;
 };
 
-const parseIntegrationsOperationsExtensionsList = integrationsDTO => {
-  if (!isNil(integrationsDTO)) {
-    const integrations = [];
-    integrationsDTO.forEach(integrationDTO => integrations.push(parseIntegrationOperationExtension(integrationDTO)));
-
-    return integrations;
+const parseIntegrationsOperationsExtensionsList = integrations => {
+  if (!isNil(integrations)) {
+    const integrationsDTO = [];
+    integrations.forEach(integration => integrationsDTO.push(parseIntegrationOperationExtension(integration)));
+    return integrationsDTO;
   }
   return;
 };

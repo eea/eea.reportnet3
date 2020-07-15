@@ -29,7 +29,6 @@ const ActionsToolbar = ({
   colsSchema,
   dataflowId,
   datasetId,
-  exportExtensionsOperationsList,
   hasWritePermissions,
   hideValidationFilter,
   isDataCollection = false,
@@ -102,7 +101,7 @@ const ActionsToolbar = ({
     }
   }, [exportTableData]);
 
-  const exportExtensionItems = config.exportTypes.map(type => ({
+  const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => ({
     label: type.text,
     icon: config.icons['archive'],
     command: () => onExportTableData(type.code)
@@ -185,7 +184,7 @@ const ActionsToolbar = ({
           }`}
           disabled={!hasWritePermissions || tableReadOnly}
           icon={'import'}
-          label={resources.messages['import']}
+          label={resources.messages['importTable']}
           onClick={() => setImportTableDialogVisible(true)}
         />}
         <Button

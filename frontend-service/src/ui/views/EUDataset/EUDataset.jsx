@@ -68,7 +68,6 @@ export const EUDataset = withRouter(({ history, match }) => {
     exportButtonsList: [],
     exportDatasetData: undefined,
     exportDatasetDataName: '',
-    exportExtensionsOperationsList: [],
     FMEExportExtensions: [],
     hasWritePermissions: false,
     isDataDeleted: false,
