@@ -57,7 +57,7 @@ public class FMEControllerImpl implements FMEController {
 
   @Override
   @PostMapping("/operationFinished")
-  @PreAuthorize("checkApiKey(#fmeOperationInfoVO.internalParameters['dataflowId'], #fmeOperationInfoVO.internalParameters['providerId'])")
+  @PreAuthorize("checkApiKey(#fmeOperationInfoVO.dataflowId, #fmeOperationInfoVO.providerId)")
   public void operationFinished(@RequestBody FMEOperationInfoVO fmeOperationInfoVO) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
