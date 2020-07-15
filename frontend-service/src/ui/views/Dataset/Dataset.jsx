@@ -194,10 +194,10 @@ export const Dataset = withRouter(({ match, history }) => {
   } = useReporterDataset(datasetId, dataflowId);
 
   useEffect(() => {
-      callSetMetaData();
-      getDataflowName();
-      getDatasetSchemaId();
-      onLoadDataflow();
+    callSetMetaData();
+    getDataflowName();
+    getDatasetSchemaId();
+    onLoadDataflow();
   }, []);
 
   useEffect(() => {
@@ -285,7 +285,7 @@ export const Dataset = withRouter(({ match, history }) => {
     return `${fileName}.${fileType}`;
   };
 
-  const getPosition = e => {    
+  const getPosition = e => {
     const exportButton = e.currentTarget;
     const left = `${exportButton.offsetLeft}px`;
     const topValue = exportButton.offsetHeight + exportButton.offsetTop + 3;
@@ -553,9 +553,10 @@ export const Dataset = withRouter(({ match, history }) => {
     //setIsTableDeleted(false);
   };
 
-  const getImportExtensions = extensionsOperationsList.import.map(file => `.${file.fileExtension}`)
-      .join(', ')
-      .toLowerCase();
+  const getImportExtensions = extensionsOperationsList.import
+    .map(file => `.${file.fileExtension}`)
+    .join(', ')
+    .toLowerCase();
 
   const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
     getImportExtensions.split(', ')
@@ -592,15 +593,17 @@ export const Dataset = withRouter(({ match, history }) => {
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">
-            {hasWritePermissions && !isEmpty(extensionsOperationsList.import) && <Button
-              className={`p-button-rounded p-button-secondary ${
-                !hasWritePermissions ? null : 'p-button-animated-blink'
-              }`}
-              disabled={!hasWritePermissions}
-              icon={'import'}
-              label={resources.messages['importDataset']}
-              onClick={() => setImportDatasetDialogVisible(true)}
-            />}
+            {hasWritePermissions && !isEmpty(extensionsOperationsList.import) && (
+              <Button
+                className={`p-button-rounded p-button-secondary ${
+                  !hasWritePermissions ? null : 'p-button-animated-blink'
+                }`}
+                disabled={!hasWritePermissions}
+                icon={'import'}
+                label={resources.messages['importDataset']}
+                onClick={() => setImportDatasetDialogVisible(true)}
+              />
+            )}
             <Button
               id="buttonExportDataset"
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
@@ -613,7 +616,8 @@ export const Dataset = withRouter(({ match, history }) => {
               popup={true}
               ref={exportMenuRef}
               id="exportDataSetMenu"
-              onShow={e => { getPosition(e);
+              onShow={e => {
+                getPosition(e);
               }}
             />
             <Button
@@ -743,31 +747,31 @@ export const Dataset = withRouter(({ match, history }) => {
         </Dialog>
       )}
       {importDatasetDialogVisible && (
-          <Dialog
-            className={styles.Dialog}
-            dismissableMask={false}
-            footer={renderCustomFileUploadFooter}
-            header={`${resources.messages['uploadDataset']}${datasetName}`}
-            onHide={() => setImportDatasetDialogVisible(false)}
-            visible={importDatasetDialogVisible}>
-            <CustomFileUpload
-              accept={getImportExtensions}
-              chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv)$/"
-              className={styles.FileUpload}
-              fileLimit={1}
-              infoTooltip={infoExtensionsTooltip}
-              invalidExtensionMessage={resources.messages['invalidExtensionFile']}
-              mode="advanced"
-              multiple={false}
-              name="file"
-              onUpload={onUpload}
-              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadData, {
-                datasetId: datasetId,
-                tableId: null
-              })}`}
-            />
-          </Dialog>
-        )}
+        <Dialog
+          className={styles.Dialog}
+          dismissableMask={false}
+          footer={renderCustomFileUploadFooter}
+          header={`${resources.messages['uploadDataset']}${datasetName}`}
+          onHide={() => setImportDatasetDialogVisible(false)}
+          visible={importDatasetDialogVisible}>
+          <CustomFileUpload
+            accept={getImportExtensions}
+            chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv)$/"
+            className={styles.FileUpload}
+            fileLimit={1}
+            infoTooltip={infoExtensionsTooltip}
+            invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+            mode="advanced"
+            multiple={false}
+            name="file"
+            onUpload={onUpload}
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadData, {
+              datasetId: datasetId,
+              tableId: null
+            })}`}
+          />
+        </Dialog>
+      )}
       <ConfirmDialog
         classNameConfirm={'p-button-danger'}
         header={resources.messages['deleteDatasetHeader']}

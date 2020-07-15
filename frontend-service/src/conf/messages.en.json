@@ -749,7 +749,8 @@
     "repository": "Repository",
     "repositoryPlaceHolder": "Select a repository",
     "processNamePlaceHolder": "Select a process",
-    "importDataset": "Import dataset data",    
-    "uploadTable": "Import data in table "
+    "importDataset": "Import dataset data",
+    "uploadTable": "Import data in table ",
+    "externalExtensions": "External extensions"
   }
 }
