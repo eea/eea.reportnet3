@@ -751,6 +751,7 @@
     "processNamePlaceHolder": "Select a process",
     "matchStringTooltip": "{%R3_COUNTRY_CODE%} can be used",
     "deleteContributorButtonTableHeader": "Delete contributor",
-    "deleteRepresentativeButtonTableHeader": "Delete representative"
+    "deleteRepresentativeButtonTableHeader": "Delete representative",
+    "deleteFieldLabel": "Delete field"
   }
 }
