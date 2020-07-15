@@ -10,7 +10,8 @@ import uniq from 'lodash/uniq';
 import styles from './Dataflow.module.scss';
 
 import { config } from 'conf';
-import { DataflowHelpConfig } from 'conf/help/dataflow';
+import { DataflowRequesterHelpConfig } from 'conf/help/dataflow/dataflow.requester';
+import { DataflowProviderHelpConfig } from 'conf/help/dataflow/dataflow.provider';
 import { routes } from 'ui/routes';
 import DataflowConf from 'conf/dataflow.config.json';
 
@@ -97,7 +98,10 @@ const Dataflow = withRouter(({ history, match }) => {
   }, [userContext, dataflowState.data]);
 
   useEffect(() => {
-    leftSideBarContext.addHelpSteps(DataflowHelpConfig, 'dataflowHelp');
+    leftSideBarContext.addHelpSteps(
+      dataflowState.isCustodian ? DataflowRequesterHelpConfig : DataflowProviderHelpConfig,
+      'dataflowProviderHelp'
+    );
   }, [
     dataflowState.data,
     dataflowState.designDatasetSchemas,

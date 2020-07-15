@@ -5,7 +5,6 @@ import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
-import { DatasetSchemaHelpConfig } from '/conf/help/datasetSchema2';
 import styles from './DatasetSchema.module.scss';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';

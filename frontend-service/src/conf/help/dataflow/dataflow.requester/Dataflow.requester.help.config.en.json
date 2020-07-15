@@ -1,0 +1,20 @@
+{
+  "steps": [
+    {
+      "content": "‘Properties’ displays the information regarding the dataflow, reporting obligation and legal instrument (extracted from ROD)",
+      "target": ".dataflow-properties-help-step"
+    },
+    {
+      "content": "‘API-key’ displays a dialog showing the parameters which are needed to access the Reportnet 3 API",
+      "target": ".dataflow-api-key-help-step"
+    },
+    {
+      "content": "‘Manage editors displays a dialog where a data custodian can provide access to the dataflow for other editors",
+      "target": ".dataflow-manage-rights-help-step"
+    },
+    {
+      "content": "The main part of the page are icons which take you to the components of the dataflow:",
+      "target": ".dataflow-big-buttons-help-step"
+    }
+  ]
+}
