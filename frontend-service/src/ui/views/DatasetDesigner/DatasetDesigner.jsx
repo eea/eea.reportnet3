@@ -82,7 +82,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     exportDatasetData: {},
     exportDatasetDataName: '',
     extensionsOperationsList: { export: [], import: [] },
-    externalExportListExtensions: [],
     hasWritePermissions: false,
     initialDatasetDescription: '',
     isDataUpdated: false,
@@ -186,7 +185,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   useEffect(() => {
     getExportList();
-  }, [designerState.datasetSchemaName, designerState.externalExportListExtensions]);
+  }, [designerState.datasetSchemaName, designerState.extensionsOperationsList]);
 
   useEffect(() => {
     if (!isEmpty(designerState.exportDatasetData)) {
@@ -230,7 +229,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const getExportList = () => {
-    const { externalExportListExtensions } = designerState;
+    const { extensionsOperationsList } = designerState;
 
     const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => ({
       command: () => onExportData(type.code),
@@ -241,18 +240,23 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     const externalExtensionsItems = [
       {
         label: resources.messages['externalExtensions'],
-        items: externalExportListExtensions.map(type => ({
-          command: () => onExportData(type.code),
-          icon: config.icons['archive'],
-          label: type.text
-        }))
+        items: extensionsOperationsList.export.map(type => {
+          console.log('type', type);
+          return {
+            command: () => onExportData(type.fileExtension.toUpperCase()),
+            icon: config.icons['archive'],
+            label: `${type.fileExtension.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
+          };
+        })
       }
     ];
 
     designerDispatch({
       type: 'GET_EXPORT_LIST',
       payload: {
-        exportList: internalExtensionList.concat(!isEmpty(externalExportListExtensions) ? externalExtensionsItems : [])
+        exportList: internalExtensionList.concat(
+          !isEmpty(extensionsOperationsList.export) ? externalExtensionsItems : []
+        )
       }
     });
   };
