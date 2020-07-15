@@ -55,6 +55,11 @@ public class FMEControllerImpl implements FMEController {
     return fmeCommunicationService.findItems(repository);
   }
 
+  /**
+   * Operation finished.
+   *
+   * @param fmeOperationInfoVO the fme operation info VO
+   */
   @Override
   @PostMapping("/operationFinished")
   @PreAuthorize("checkApiKey(#fmeOperationInfoVO.dataflowId, #fmeOperationInfoVO.providerId)")
