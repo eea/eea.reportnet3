@@ -748,6 +748,7 @@
     "externalImportReportingCompletedEvent": "<strong title='{:datasetName}'>{:shortDatasetName} Schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "repository": "Repository",
     "repositoryPlaceHolder": "Select a repository",
-    "processNamePlaceHolder": "Select a process"
+    "processNamePlaceHolder": "Select a process",
+    "matchStringTooltip": "{%R3_COUNTRY_CODE%} can be used"
   }
 }
