@@ -259,7 +259,7 @@ public class FMECommunicationService {
         .dataflowId(fmeOperationInfoVO.getDataflowId()).fileName(fmeOperationInfoVO.getFileName())
         .build();
 
-    switch (fmeOperationInfoVO.getFmiOperation()) {
+    switch (fmeOperationInfoVO.getFmeOperation()) {
       case IMPORT:
         eventType = null != fmeOperationInfoVO.getProviderId()
             ? EventType.EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT

@@ -25,6 +25,6 @@ public class FMEOperationInfoVO implements Serializable {
   /** The file name. */
   private String fileName;
 
-  /** The fmi operation. */
-  private FMEOperation fmiOperation;
+  /** The fme operation. */
+  private FMEOperation fmeOperation;
 }
