@@ -75,7 +75,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
   const [extensionsOperationsList, setExtensionsOperationsList] = useState({ export: [], import: [] });
-  const [FMEExportExtensions, setFMEExportExtensions] = useState([]);
+  const [externalExportExtensions, setFMEExportExtensions] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importDatasetDialogVisible, setImportDatasetDialogVisible] = useState(false);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
@@ -169,12 +169,12 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [isDataDeleted]);
 
   useEffect(() => {
-    if (isEmpty(FMEExportExtensions)) {
-      setExportButtonsList(reportNetExtensionsItems);
+    if (isEmpty(externalExportExtensions)) {
+      setExportButtonsList(internalExtensions);
     } else {
-      setExportButtonsList(reportNetExtensionsItems.concat(FMEExtensionsItems));
+      setExportButtonsList(internalExtensions.concat(externalExtensions));
     }
-  }, [datasetName, FMEExportExtensions]);
+  }, [datasetName, externalExportExtensions]);
 
   useEffect(() => {
     if (!isUndefined(exportDatasetData)) {
@@ -220,16 +220,16 @@ export const Dataset = withRouter(({ match, history }) => {
     setFMEExportExtensions(parseUniqsExportExtensions(uniqsExportExtensions));
   };
 
-  const reportNetExtensionsItems = config.exportTypes.exportDatasetTypes.map(type => ({
+  const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => ({
     label: type.text,
     icon: config.icons['archive'],
     command: () => onExportData(type.code)
   }));
 
-  const FMEExtensionsItems = [
+  const externalExtensions = [
     {
       label: 'FME Extensions',
-      items: FMEExportExtensions.map(type => ({
+      items: externalExportExtensions.map(type => ({
         label: type.text,
         icon: config.icons['archive'],
         command: () => onExportData(type.code)

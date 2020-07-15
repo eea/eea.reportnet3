@@ -85,6 +85,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     externalExportListExtensions: [],
     hasWritePermissions: false,
     initialDatasetDescription: '',
+    isDataUpdated: false,
     isImportDatasetDialogVisible: false,
     isIntegrationListDialogVisible: false,
     isIntegrationManageDialogVisible: false,
@@ -181,7 +182,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (designerState.datasetSchemaId) getFileExtensions();
-  }, [designerState.datasetSchemaId, designerState.isImportDatasetDialogVisible]);
+  }, [designerState.datasetSchemaId, designerState.isImportDatasetDialogVisible, designerState.isDataUpdated]);
 
   useEffect(() => {
     getExportList();
@@ -483,6 +484,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       type: 'SET_DATAVIEWER_OPTIONS',
       payload: { ...designerState.dataViewerOptions, activeIndex: tableSchemaId.index }
     });
+  };
+
+  const onUpdateData = () => {
+    designerDispatch({ type: 'ON_UPDATE_DATA', payload: { isUpdated: !designerState.isDataUpdated } });
   };
 
   const onUpdateDescription = async description => {
@@ -819,6 +824,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           datasetId={datasetId}
           designerState={designerState}
           manageDialogs={manageDialogs}
+          onUpdateData={onUpdateData}
         />
 
         <ManageUniqueConstraint

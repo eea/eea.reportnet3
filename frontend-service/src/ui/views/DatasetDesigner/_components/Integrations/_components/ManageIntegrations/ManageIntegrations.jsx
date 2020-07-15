@@ -30,6 +30,7 @@ export const ManageIntegrations = ({
   designerState,
   integrationsList,
   manageDialogs,
+  onUpdateData,
   updatedData
 }) => {
   const { datasetSchemaId, isIntegrationManageDialogVisible } = designerState;
@@ -157,6 +158,7 @@ export const ManageIntegrations = ({
       const response = await IntegrationService.create(manageIntegrationsState);
       if (response.status >= 200 && response.status <= 299) {
         manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
+        onUpdateData();
       }
     } catch (error) {
       notificationContext.add({ type: 'CREATE_INTEGRATION_ERROR' });
@@ -251,6 +253,7 @@ export const ManageIntegrations = ({
       const response = await IntegrationService.update(manageIntegrationsState);
       if (response.status >= 200 && response.status <= 299) {
         manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
+        onUpdateData();
       }
     } catch (error) {
       notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' });

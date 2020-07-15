@@ -61,6 +61,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'ON_EXPORT_DATA':
       return { ...state, exportDatasetData: payload.data, exportDatasetDataName: payload.name };
 
+    case 'ON_UPDATE_DATA':
+      return { ...state, isDataUpdated: payload.isUpdated };
+
     case 'ON_UPDATE_DESCRIPTION':
       return { ...state, datasetDescription: payload.value };
 
