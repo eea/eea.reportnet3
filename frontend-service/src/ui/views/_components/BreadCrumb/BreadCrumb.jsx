@@ -41,7 +41,7 @@ export const BreadCrumb = ({ className, id, style }) => {
             onItemClick(event, item);
           }}>
           <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons(item.icon)} />
-          <span className="p-menuitem-text">{item.label}</span>
+          <span className="p-menuitem-text">{item.label ? item.label : <span className="srOnly">home</span>}</span>
         </a>
       </li>
     );
