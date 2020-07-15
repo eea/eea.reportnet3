@@ -11,6 +11,7 @@ export const apiIntegration = {
 
     return response.data;
   },
+
   allExtensionsOperations: async integration => {
     const response = await HTTPRequester.update({
       url: getUrl(IntegrationConfig.allExtensionsOperations),
@@ -33,6 +34,22 @@ export const apiIntegration = {
       url: getUrl(IntegrationConfig.delete, { dataflowId, integrationId })
     });
     return response;
+  },
+
+  getProcesses: async repositoryName => {
+    const response = await HTTPRequester.get({
+      url: getUrl(IntegrationConfig.getProcesses, { repositoryName })
+    });
+
+    return response.data;
+  },
+
+  getRepositories: async () => {
+    const response = await HTTPRequester.get({
+      url: getUrl(IntegrationConfig.getRepositories)
+    });
+
+    return response.data;
   },
 
   update: async integration => {
