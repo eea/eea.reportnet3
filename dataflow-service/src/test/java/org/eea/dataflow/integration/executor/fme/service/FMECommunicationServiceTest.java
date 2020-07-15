@@ -37,7 +37,7 @@ public class FMECommunicationServiceTest {
     fmeOperationInfoVO.setDatasetId(1L);
     fmeOperationInfoVO.setDataflowId(1L);
     fmeOperationInfoVO.setFileName("fileName");
-    fmeOperationInfoVO.setFmiOperation(FMEOperation.IMPORT);
+    fmeOperationInfoVO.setFmeOperation(FMEOperation.IMPORT);
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
@@ -56,7 +56,7 @@ public class FMECommunicationServiceTest {
     fmeOperationInfoVO.setDataflowId(1L);
     fmeOperationInfoVO.setProviderId(1L);
     fmeOperationInfoVO.setFileName("fileName");
-    fmeOperationInfoVO.setFmiOperation(FMEOperation.IMPORT);
+    fmeOperationInfoVO.setFmeOperation(FMEOperation.IMPORT);
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
@@ -75,7 +75,7 @@ public class FMECommunicationServiceTest {
     fmeOperationInfoVO.setDataflowId(1L);
     fmeOperationInfoVO.setProviderId(1L);
     fmeOperationInfoVO.setFileName("fileName");
-    fmeOperationInfoVO.setFmiOperation(FMEOperation.EXPORT);
+    fmeOperationInfoVO.setFmeOperation(FMEOperation.EXPORT);
     try {
       fmeCommunicationService.operationFinished(fmeOperationInfoVO);
     } catch (UnsupportedOperationException e) {
@@ -91,7 +91,7 @@ public class FMECommunicationServiceTest {
     fmeOperationInfoVO.setDataflowId(1L);
     fmeOperationInfoVO.setProviderId(1L);
     fmeOperationInfoVO.setFileName("fileName");
-    fmeOperationInfoVO.setFmiOperation(FMEOperation.IMPORT);
+    fmeOperationInfoVO.setFmeOperation(FMEOperation.IMPORT);
     Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
         .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
     fmeCommunicationService.operationFinished(fmeOperationInfoVO);
