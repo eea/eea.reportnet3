@@ -66,6 +66,9 @@ public class FMECommunicationService {
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
+  @Autowired
+  private RestTemplate restTemplate;
+
   /**
    * Submit async job.
    *
@@ -87,16 +90,15 @@ public class FMECommunicationService {
     headerInfo.put("Content-Type", "application/json");
 
     HttpEntity<FMEAsyncJob> request = createHttpRequest(fmeAsyncJob, uriParams, headerInfo);
-    RestTemplate restTemplate = new RestTemplate();
     ResponseEntity<SubmitResult> checkResult =
-        restTemplate.exchange(
+        this.restTemplate.exchange(
             uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
                 .path("fmerest/v3/transformations/submit/{repository}/{workspace}")
                 .buildAndExpand(uriParams).toString(),
             HttpMethod.POST, request, SubmitResult.class);
 
     Integer result = 0;
-    if (null != checkResult && null != checkResult.getBody()) {
+    if (null != checkResult.getBody()) {
       result = checkResult.getBody().getId();
     }
     return result;
@@ -123,15 +125,14 @@ public class FMECommunicationService {
     headerInfo.put("Content-Type", "application/octet-stream");
     headerInfo.put("Accept", "application/json");
     HttpEntity<byte[]> request = createHttpRequest(file, uriParams, headerInfo);
-    RestTemplate restTemplate = new RestTemplate();
-    ResponseEntity<FileSubmitResult> checkResult = restTemplate.exchange(uriComponentsBuilder
+    ResponseEntity<FileSubmitResult> checkResult = this.restTemplate.exchange(uriComponentsBuilder
         .scheme(fmeScheme).host(fmeHost)
         .path(
             "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}?createDirectories=true&overwrite=true")
         .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, FileSubmitResult.class);
 
     FileSubmitResult result = new FileSubmitResult();
-    if (null != checkResult && null != checkResult.getBody()) {
+    if (null != checkResult.getBody()) {
       result = checkResult.getBody();
     }
     return result;
@@ -157,6 +158,7 @@ public class FMECommunicationService {
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("datasetId", String.valueOf(idDataset));
     uriParams.put("providerId", idProvider);
+    uriParams.put("fileName", fileName);
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
     headerInfo.put("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
@@ -170,16 +172,16 @@ public class FMECommunicationService {
     HttpEntity<MultiValueMap<String, Object>> request =
         createHttpRequest(body, uriParams, headerInfo);
 
-    RestTemplate restTemplate = new RestTemplate();
-    restTemplate.getMessageConverters().add(mappingJackson2HttpMessageConverter);
-    ResponseEntity<FileSubmitResult> checkResult = restTemplate.exchange(uriComponentsBuilder
+    this.restTemplate.getMessageConverters().add(mappingJackson2HttpMessageConverter);
+
+    ResponseEntity<FileSubmitResult> checkResult = this.restTemplate.exchange(uriComponentsBuilder
         .scheme(fmeScheme).host(fmeHost)
         .path(
             "fmerest/v3/resources/connections/Reportnet3/download/{datasetId}/{providerId}/{fileName}")
         .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, FileSubmitResult.class);
 
     FileSubmitResult result = new FileSubmitResult();
-    if (null != checkResult && null != checkResult.getBody()) {
+    if (null != checkResult.getBody()) {
       result = checkResult.getBody();
     }
     return result;
@@ -203,9 +205,8 @@ public class FMECommunicationService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     HttpEntity<Void> request = createHttpRequest(null, uriParams, headerInfo);
 
-    RestTemplate restTemplate = new RestTemplate();
     ResponseEntity<FMECollection> responseEntity =
-        restTemplate.exchange(
+        this.restTemplate.exchange(
             uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path("fmerest/v3/repositories")
                 .buildAndExpand(uriParams).toString(),
             HttpMethod.GET, request, FMECollection.class);
@@ -233,8 +234,7 @@ public class FMECommunicationService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     HttpEntity<Void> request = createHttpRequest(null, uriParams, headerInfo);
 
-    RestTemplate restTemplate = new RestTemplate();
-    ResponseEntity<FMECollection> responseEntity = restTemplate.exchange(uriComponentsBuilder
+    ResponseEntity<FMECollection> responseEntity = this.restTemplate.exchange(uriComponentsBuilder
         .scheme(fmeScheme).host(fmeHost).path("fmerest/v3/repositories/{repository}/items")
         .buildAndExpand(uriParams).toString(), HttpMethod.GET, request, FMECollection.class);
 
@@ -289,11 +289,8 @@ public class FMECommunicationService {
   private <T> HttpEntity<T> createHttpRequest(T body, Map<String, String> uriParams,
       Map<String, String> headerInfo) {
     headerInfo.put(LiteralConstants.AUTHORIZATION_HEADER, fmeToken);
-
     HttpHeaders headers = createBasicHeaders(headerInfo);
-
-    HttpEntity<T> request = new HttpEntity<>(body, headers);
-    return request;
+    return new HttpEntity<>(body, headers);
   }
 
   /**
