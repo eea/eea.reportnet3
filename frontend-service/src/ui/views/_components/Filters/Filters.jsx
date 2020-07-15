@@ -200,7 +200,7 @@ export const Filters = ({
             }}
           />
         )}
-        <label className={!filterState.labelAnimations[property] ? styles.labelDown : ''} htmlFor={property}>
+        <label className={!filterState.labelAnimations[property] ? styles.labelDown : styles.label} htmlFor={property}>
           {resources.messages[property]}
         </label>
       </span>
@@ -276,7 +276,9 @@ export const Filters = ({
             onClick={() => onFilterData(property, '')}
           />
         )}
-        <label htmlFor={property}>{resources.messages[property]}</label>
+        <label className={styles.label} htmlFor={property}>
+          {resources.messages[property]}
+        </label>
       </span>
     </span>
   );
@@ -338,6 +340,7 @@ export const Filters = ({
       )}
 
       <label
+        className={styles.label}
         htmlFor={'searchInput'}
         dangerouslySetInnerHTML={{
           __html: TextUtils.parseText(resources.messages['searchAllLabel'], {

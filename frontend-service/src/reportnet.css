@@ -70,7 +70,7 @@
   --c-purple-100: #dd7fd3;
   /* lilac */
   --c-lilac-400: #6f5091;
-  --c-lilac-300: #7474c1;
+  --c-lilac-300: #6d6dc0;
   --c-lilac-200: #b4b5df;
   --c-lilac-100: #dbe2e9;
   /* black-rose */
@@ -105,7 +105,7 @@
   --statusBox-blocker-bg: 194, 200, 207;
   --statusBox-blocker-color: 0, 0, 0;
   --statusBox-error-bg: #ffcdd2;
-  --statusBox-error-color: #c63737;
+  --statusBox-error-color: #a6093d;
   --statusBox-info-bg: #b3e5fc;
   --statusBox-info-color: #23547b;
   --statusBox-warning-bg: #ffd8b2;
