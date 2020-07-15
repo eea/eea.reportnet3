@@ -814,7 +814,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         {validationsListDialog()}
         {renderUniqueConstraintsDialog()}
 
-        <Integrations dataflowId={dataflowId} designerState={designerState} manageDialogs={manageDialogs} />
+        <Integrations
+          dataflowId={dataflowId}
+          datasetId={datasetId}
+          designerState={designerState}
+          manageDialogs={manageDialogs}
+        />
 
         <ManageUniqueConstraint
           dataflowId={dataflowId}

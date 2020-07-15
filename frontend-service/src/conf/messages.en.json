@@ -751,6 +751,8 @@
     "processNamePlaceHolder": "Select a process",
     "importDataset": "Import dataset data",
     "uploadTable": "Import data in table ",
-    "externalExtensions": "External extensions"
+    "externalExtensions": "External extensions",
+    "errorLoadingRepositories": "Error loading repositories",
+    "errorLoadingProcesses": "Error loading processes"
   }
 }

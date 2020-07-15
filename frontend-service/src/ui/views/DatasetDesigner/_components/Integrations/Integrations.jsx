@@ -9,7 +9,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { IntegrationsUtils } from './_functions/Utils/IntegrationsUtils';
 
-export const Integrations = ({ dataflowId, designerState, manageDialogs }) => {
+export const Integrations = ({ dataflowId, datasetId, designerState, manageDialogs }) => {
   const { isIntegrationListDialogVisible, isIntegrationManageDialogVisible } = designerState;
 
   const resources = useContext(ResourcesContext);
@@ -63,10 +63,11 @@ export const Integrations = ({ dataflowId, designerState, manageDialogs }) => {
       {isIntegrationManageDialogVisible && (
         <ManageIntegrations
           dataflowId={dataflowId}
+          datasetId={datasetId}
           designerState={designerState}
+          integrationsList={integrationsList}
           manageDialogs={manageDialogs}
           updatedData={updatedData}
-          integrationsList={integrationsList}
         />
       )}
     </Fragment>

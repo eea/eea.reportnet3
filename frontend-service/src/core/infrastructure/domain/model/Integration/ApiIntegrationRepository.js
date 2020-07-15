@@ -19,9 +19,10 @@ const create = async integration => apiIntegration.create(parseManageIntegration
 
 const deleteById = async (dataflowId, integrationId) => await apiIntegration.deleteById(dataflowId, integrationId);
 
-const getProcesses = async repositoryName => parseProcessList(await apiIntegration.getProcesses(repositoryName));
+const getProcesses = async (repositoryName, datasetId) =>
+  parseProcessList(await apiIntegration.getProcesses(repositoryName, datasetId));
 
-const getRepositories = async () => parseRepositoryList(await apiIntegration.getRepositories());
+const getRepositories = async datasetId => parseRepositoryList(await apiIntegration.getRepositories(datasetId));
 
 const update = async integration => apiIntegration.update(parseManageIntegration(integration));
 
