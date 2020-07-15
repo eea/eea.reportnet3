@@ -23,19 +23,22 @@ public interface FMEController {
   /**
    * Find repositories.
    *
+   * @param datasetId the dataset id
    * @return the collection
    */
   @GetMapping(value = "/findRepositories", produces = MediaType.APPLICATION_JSON_VALUE)
-  FMECollectionVO findRepositories();
+  FMECollectionVO findRepositories(@RequestParam("datasetId") Long datasetId);
 
   /**
    * Find items.
    *
+   * @param datasetId the dataset id
    * @param repository the repository
    * @return the collection VO
    */
   @GetMapping(value = "/findItems", produces = MediaType.APPLICATION_JSON_VALUE)
-  FMECollectionVO findItems(@RequestParam("repository") String repository);
+  FMECollectionVO findItems(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("repository") String repository);
 
   /**
    * Operation finished.
