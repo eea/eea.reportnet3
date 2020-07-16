@@ -53,6 +53,7 @@ public class KafkaAdminUtils {
     } catch (InterruptedException | ExecutionException e) {
       LOG_ERROR.error("Error getting information for the Consumer Group {} from Kafka ", groupId,
           e);
+      Thread.currentThread().interrupt();
     }
     return groupDescription;
   }

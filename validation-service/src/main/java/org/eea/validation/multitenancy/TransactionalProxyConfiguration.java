@@ -14,9 +14,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class TransactionalProxyConfiguration {
 
-  @Autowired
-  @Qualifier("validationService")
-  private ValidationService validationService;
 
   /**
    * Proxy dataset service dataset service.
@@ -24,7 +21,9 @@ public class TransactionalProxyConfiguration {
    * @return the dataset service
    */
   @Bean
-  public ValidationService proxyValidationService() {
+  @Autowired
+  public ValidationService proxyValidationService(
+      @Qualifier("validationService") ValidationService validationService) {
     return (ValidationService) Proxy.newProxyInstance(
         TransactionalProxyConfiguration.class.getClassLoader(),
         new Class[]{ValidationService.class},

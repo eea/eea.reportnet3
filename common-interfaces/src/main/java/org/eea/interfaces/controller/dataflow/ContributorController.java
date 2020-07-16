@@ -77,7 +77,7 @@ public interface ContributorController {
    * @return the response entity
    */
   @PutMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  ResponseEntity<?> updateEditor(@PathVariable("dataflowId") Long dataflowId,
+  ResponseEntity updateEditor(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody ContributorVO contributorVO);
 
   /**
@@ -90,7 +90,7 @@ public interface ContributorController {
    */
   @PutMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  ResponseEntity<?> updateReporter(@PathVariable("dataflowId") Long dataflowId,
+  ResponseEntity updateReporter(@PathVariable("dataflowId") Long dataflowId,
       @PathVariable("dataProviderId") Long dataProviderId,
       @RequestBody ContributorVO contributorVO);
 
