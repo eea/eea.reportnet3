@@ -9,7 +9,10 @@ public enum FMEOperation {
   IMPORT("IMPORT"),
 
   /** The export. */
-  EXPORT("EXPORT");
+  EXPORT("EXPORT"),
+
+  /** The export eu dataset. */
+  EXPORT_EU_DATASET("EXPORT_EU_DATASET");
 
   /** The value. */
   private final String value;
