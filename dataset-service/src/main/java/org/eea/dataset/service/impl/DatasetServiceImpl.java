@@ -576,8 +576,9 @@ public class DatasetServiceImpl implements DatasetService {
 
       LOG.info(
           "Total records found in datasetId {} idTableSchema {}: {}. Now in page {}, {} records by page",
-          datasetId, idTableSchema, recordVOs.size(), pageable.getPageNumber(),
-          pageable.getPageSize());
+          datasetId, idTableSchema, recordVOs.size(),
+          pageable != null ? pageable.getPageNumber() : null,
+          pageable != null ? pageable.getPageSize() : null);
       if (null != fields) {
         LOG.info("Ordered by idFieldSchema {}", commonShortFields);
       }

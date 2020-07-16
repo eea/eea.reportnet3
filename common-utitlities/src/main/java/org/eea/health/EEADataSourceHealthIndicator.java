@@ -2,11 +2,11 @@ package org.eea.health;
 
 import java.util.Map;
 import javax.sql.DataSource;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.jdbc.DataSourceHealthIndicator;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Slf4j
@@ -20,7 +20,8 @@ public class EEADataSourceHealthIndicator extends DataSourceHealthIndicator {
 
   @Autowired
   public EEADataSourceHealthIndicator(Map<String, DataSource> dataSources) {
-    super(dataSources.values().stream().findFirst().get(), "SELECT 1");
+    super(dataSources.values().stream().findFirst().orElseThrow(IllegalStateException::new),
+        "SELECT 1");
   }
 
   @Override
