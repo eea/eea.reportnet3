@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
  * The Class LoadDataCompletedEvent.
  */
 @Component
-public class LoadDataCompletedEvent implements NotificableEventHandler {
+public class ImportDesignCompletedEvent implements NotificableEventHandler {
 
   /** The dataset service. */
   @Autowired
@@ -42,7 +42,7 @@ public class LoadDataCompletedEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.LOAD_DATA_COMPLETED_EVENT;
+    return EventType.IMPORT_DESIGN_COMPLETED_EVENT;
   }
 
   /**

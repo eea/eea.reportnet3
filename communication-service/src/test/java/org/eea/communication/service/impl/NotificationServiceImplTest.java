@@ -40,7 +40,7 @@ public class NotificationServiceImplTest {
   public void sendTest1() {
     Mockito.doNothing().when(template).convertAndSendToUser(Mockito.anyString(),
         Mockito.anyString(), Mockito.any());
-    Assert.assertTrue(notificationServiceImpl.send("user", EventType.LOAD_DATA_COMPLETED_EVENT,
+    Assert.assertTrue(notificationServiceImpl.send("user", EventType.IMPORT_REPORTING_COMPLETED_EVENT,
         new HashMap<String, Object>()));
   }
 
@@ -51,7 +51,7 @@ public class NotificationServiceImplTest {
   public void sendTest2() {
     Mockito.doNothing().when(template).convertAndSendToUser(Mockito.anyString(),
         Mockito.anyString(), Mockito.any());
-    Assert.assertFalse(notificationServiceImpl.send(null, EventType.LOAD_DATA_COMPLETED_EVENT,
+    Assert.assertFalse(notificationServiceImpl.send(null, EventType.IMPORT_REPORTING_COMPLETED_EVENT,
         new HashMap<String, Object>()));
   }
 
@@ -62,7 +62,7 @@ public class NotificationServiceImplTest {
   public void sendTest3() {
     Mockito.doNothing().when(template).convertAndSendToUser(Mockito.anyString(),
         Mockito.anyString(), Mockito.any());
-    Assert.assertFalse(notificationServiceImpl.send("", EventType.LOAD_DATA_COMPLETED_EVENT,
+    Assert.assertFalse(notificationServiceImpl.send("", EventType.IMPORT_REPORTING_COMPLETED_EVENT,
         new HashMap<String, Object>()));
   }
 
@@ -74,6 +74,6 @@ public class NotificationServiceImplTest {
     Mockito.doNothing().when(template).convertAndSendToUser(Mockito.anyString(),
         Mockito.anyString(), Mockito.any());
     Assert.assertFalse(
-        notificationServiceImpl.send("user", EventType.LOAD_DATA_COMPLETED_EVENT, null));
+        notificationServiceImpl.send("user", EventType.IMPORT_REPORTING_COMPLETED_EVENT, null));
   }
 }

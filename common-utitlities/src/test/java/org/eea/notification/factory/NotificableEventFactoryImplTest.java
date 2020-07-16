@@ -48,7 +48,7 @@ public class NotificableEventFactoryImplTest {
   @Test
   public void getNotificableEventHandlerTest1() {
     Mockito.when(notificableEvents.containsKey(Mockito.any())).thenReturn(false);
-    notificableEventFactoryImpl.getNotificableEventHandler(EventType.LOAD_DATA_COMPLETED_EVENT);
+    notificableEventFactoryImpl.getNotificableEventHandler(EventType.IMPORT_REPORTING_COMPLETED_EVENT);
     Mockito.when(notificableEventHandler.getEventType()).thenReturn(null);
     Assert.assertNull(notificableEventHandler.getEventType());
   }
@@ -63,9 +63,9 @@ public class NotificableEventFactoryImplTest {
     Mockito.when(notificableEvents.containsKey(Mockito.any())).thenReturn(true);
     Mockito.when(notificableEvents.get(Mockito.any())).thenReturn(notificableEventHandler);
     Mockito.when(notificableEventHandler.getEventType())
-        .thenReturn(EventType.LOAD_DATA_COMPLETED_EVENT);
-    notificableEventFactoryImpl.getNotificableEventHandler(EventType.LOAD_DATA_COMPLETED_EVENT);
-    Assert.assertEquals(EventType.LOAD_DATA_COMPLETED_EVENT,
+        .thenReturn(EventType.IMPORT_REPORTING_COMPLETED_EVENT);
+    notificableEventFactoryImpl.getNotificableEventHandler(EventType.IMPORT_REPORTING_COMPLETED_EVENT);
+    Assert.assertEquals(EventType.IMPORT_REPORTING_COMPLETED_EVENT,
         notificableEventHandler.getEventType());
   }
 }

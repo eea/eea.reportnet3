@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
  * The Class LoadDataFailedEvent.
  */
 @Component
-public class LoadSchemaFailedEvent implements NotificableEventHandler {
+public class ImportDesignFailedEvent implements NotificableEventHandler {
 
   /** The dataset service. */
   @Autowired
@@ -42,7 +42,7 @@ public class LoadSchemaFailedEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.LOAD_SCHEMA_FAILED_EVENT;
+    return EventType.IMPORT_DESIGN_FAILED_EVENT;
   }
 
   /**
