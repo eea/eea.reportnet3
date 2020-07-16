@@ -24,6 +24,7 @@ import org.eea.dataset.persistence.metabase.domain.Statistics;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
@@ -141,9 +142,15 @@ public class DatasetMetabaseServiceTest {
   @Mock
   private DatasetService datasetService;
 
+
+  @Mock
+  private EUDatasetRepository euDatasetRepository;
+
   ForeignRelations foreignRelations;
 
   DataSetMetabase dataSetMetabase;
+
+
 
   /**
    * Inits the mocks.

@@ -30,14 +30,17 @@ public interface DatasetSnapshotService {
    */
   List<SnapshotVO> getSnapshotsByIdDataset(Long datasetId) throws EEAException;
 
+
   /**
    * Adds the snapshot.
    *
    * @param idDataset the id dataset
    * @param description the description
    * @param released the released
+   * @param partitionIdDestination the partition id destination
    */
-  void addSnapshot(Long idDataset, String description, Boolean released);
+  void addSnapshot(Long idDataset, String description, Boolean released,
+      Long partitionIdDestination);
 
   /**
    * Removes the snapshot.

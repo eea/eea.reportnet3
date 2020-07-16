@@ -50,11 +50,6 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
   List<Snapshot> findByReportingDatasetAndRelease(@Param("datasetIds") List<Long> datasetIds,
       @Param("released") Boolean released);
 
-  /**
-   * Find by reporting dataset id.
-   *
-   * @param idDataset the id dataset
-   * @return the list
-   */
-  List<Snapshot> findByReportingDatasetId(@Param("idReportingDataset") Long idDataset);
+  @Query(value = "select max(s) from Snapshot s where s.reportingDataset.id= :reportingId")
+  Snapshot findFirstByReportingDatasetId(@Param("reportingId") Long reportingId);
 }

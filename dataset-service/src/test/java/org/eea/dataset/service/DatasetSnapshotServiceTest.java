@@ -218,7 +218,7 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(Optional.empty());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, "test", false);
+    datasetSnapshotService.addSnapshot(1L, "test", false, null);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -239,7 +239,7 @@ public class DatasetSnapshotServiceTest {
         Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, "test", false);
+    datasetSnapshotService.addSnapshot(1L, "test", false, 1L);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -259,7 +259,7 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(Optional.empty());
     Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
         .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, "test", true);
+    datasetSnapshotService.addSnapshot(1L, "test", true, 1L);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
