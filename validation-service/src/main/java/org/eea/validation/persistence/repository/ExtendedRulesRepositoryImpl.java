@@ -20,7 +20,7 @@ import com.mongodb.client.result.UpdateResult;
  * The Class ExtendedRulesRepositoryImpl.
  */
 public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
-
+  
 
   /** The Constant RULES: {@value}. */
   private static final String RULES = "$rules";
@@ -32,10 +32,10 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   private static final String FILTER = "$filter";
 
   /** The Constant WHENCONDITION: {@value}. */
-  private static final String UNDERSCORE_WHENCONDITION = "whenCondition";
+  private static final String WHEN_CONDITION = "whenCondition";
 
   /** The Constant REFERENCEID: {@value}. */
-  private static final String UNDERSCORE_REFERENCEID = "referenceId";
+  private static final String REFERENCE_ID = "referenceId";
 
   /** The mongo template. */
   @Autowired
@@ -76,7 +76,7 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
    */
   @Override
   public boolean deleteRuleByReferenceId(ObjectId datasetSchemaId, ObjectId referenceId) {
-    Document pullCriteria = new Document(UNDERSCORE_REFERENCEID, referenceId);
+    Document pullCriteria = new Document(REFERENCE_ID, referenceId);
     Update update = new Update().pull(LiteralConstants.RULES, pullCriteria);
     Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId));
     return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
@@ -91,8 +91,8 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
    */
   @Override
   public boolean deleteRuleRequired(ObjectId datasetSchemaId, ObjectId referenceId) {
-    Document pullCriteria = new Document(UNDERSCORE_REFERENCEID, referenceId)
-        .append(UNDERSCORE_WHENCONDITION, "isBlank(value)");
+    Document pullCriteria =
+        new Document(REFERENCE_ID, referenceId).append(WHEN_CONDITION, "isBlank(value)");
     Update update = new Update().pull(LiteralConstants.RULES, pullCriteria);
     Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId));
     return mongoTemplate.updateFirst(query, update, RulesSchema.class).getModifiedCount() == 1;
@@ -138,10 +138,9 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
    */
   @Override
   public boolean existsRuleRequired(ObjectId datasetSchemaId, ObjectId referenceId) {
-    Query query =
-        new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId)).addCriteria(
-            Criteria.where(LiteralConstants.RULES).elemMatch(Criteria.where(UNDERSCORE_REFERENCEID)
-                .is(referenceId).and(UNDERSCORE_WHENCONDITION).is("isBlank(value)")));
+    Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId))
+        .addCriteria(Criteria.where(LiteralConstants.RULES).elemMatch(
+            Criteria.where(REFERENCE_ID).is(referenceId).and(WHEN_CONDITION).is("isBlank(value)")));
     return mongoTemplate.count(query, RulesSchema.class) == 1;
   }
 
@@ -329,7 +328,7 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   @Override
   public boolean deleteRuleHighLevelLike(ObjectId datasetSchemaId, String fieldSchemaLike) {
     Document pullCriteria =
-        new Document(UNDERSCORE_WHENCONDITION, java.util.regex.Pattern.compile(fieldSchemaLike));
+        new Document(WHEN_CONDITION, java.util.regex.Pattern.compile(fieldSchemaLike));
     Update update = new Update().pull(LiteralConstants.RULES, pullCriteria);
     Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId));
     return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
