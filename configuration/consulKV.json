@@ -240,6 +240,14 @@
     "value": "JHtSM19IT1NUOmh0dHA6Ly9ybjNzYW5kYm94LmFsdGlhLmVzfQ=="
   },
   {
+    "key": "config/dataflow/integration.fme.default.repository",
+    "value": "JHtGTUVfUkVQT1NJVE9SWTpSZXBvcnROZXRUZXN0aW5nfQ=="
+  },
+  {
+    "key": "config/dataflow/integration.fme.eu.job",
+    "value": "JHtGTUVfRVVfSk9COkV4cG9ydF9FVV9kYXRhc2V0LmZtd30="
+  },
+  {
     "key": "config/dataflow/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
     "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
   },
