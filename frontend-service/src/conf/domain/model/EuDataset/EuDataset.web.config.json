@@ -1,4 +1,4 @@
 {
   "copyDataCollection": "/euDataset/populateData/dataflow/{:dataflowId}",
-  "export": "/euDataset/export/{:dataflowId}"
+  "export": "/integration/executeEUDatasetExport?dataflowId={:dataflowId}"
 }
