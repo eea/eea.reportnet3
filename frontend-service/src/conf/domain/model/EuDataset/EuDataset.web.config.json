@@ -1,4 +1,4 @@
 {
-  "copyDataCollection": "/euDataset/copyDataCollection/{:dataflowId}",
+  "copyDataCollection": "/euDataset/populateData/dataflow/{:dataflowId}",
   "export": "/euDataset/export/{:dataflowId}"
 }

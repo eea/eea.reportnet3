@@ -1,5 +1,11 @@
 export const manageIntegrationsReducer = (state, { type, payload }) => {
   switch (type) {
+    case 'GET_PROCESSES':
+      return { ...state, processes: payload.data };
+
+    case 'GET_REPOSITORIES':
+      return { ...state, repositories: payload.data };
+
     case 'GET_UPDATED_DATA':
       return { ...state, ...payload };
 
