@@ -104,11 +104,11 @@ public interface IntegrationController {
   /**
    * Execute EU dataset export.
    *
-   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
    * @return the execution result VO
    */
   @PostMapping(value = "/executeEUDatasetExport")
-  ExecutionResultVO executeEUDatasetExport(@RequestParam("datasetId") Long datasetId);
+  List<ExecutionResultVO> executeEUDatasetExport(@RequestParam("dataflowId") Long dataflowId);
 
   /**
    * Copy integrations.
