@@ -314,7 +314,7 @@ const ComparisonExpression = ({
     }
     if (operatorType === 'string') {
       if (operatorValue === 'MATCH') {
-        const valueBtnCC = '{%R3_COUNTRY_CODE%}';
+        const valueBtnCC = `${expressionValues.expressionValue}{%R3_COUNTRY_CODE%}`;
         return (
           <span className={styles.inputStringMatch}>
             <InputText
