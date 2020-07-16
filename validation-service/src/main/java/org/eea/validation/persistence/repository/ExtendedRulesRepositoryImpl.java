@@ -25,6 +25,21 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   @Autowired
   private MongoTemplate mongoTemplate;
 
+  /** The Constant RULES: {@value}. */
+  private static final String RULES = "$rules";
+
+  /** The Constant INPUT: {@value}. */
+  private static final String INPUT = "input";
+
+  /** The Constant FILTER: {@value}. */
+  private static final String FILTER = "$filter";
+
+  /** The Constant WHENCONDITION: {@value}. */
+  private static final String WHENCONDITION = "whenCondition";
+
+  /** The Constant REFERENCEID: {@value}. */
+  private static final String REFERENCEID = "referenceId";
+
   /**
    * Delete by id dataset schema.
    *
@@ -60,7 +75,7 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
    */
   @Override
   public boolean deleteRuleByReferenceId(ObjectId datasetSchemaId, ObjectId referenceId) {
-    Document pullCriteria = new Document("referenceId", referenceId);
+    Document pullCriteria = new Document(REFERENCEID, referenceId);
     Update update = new Update().pull(LiteralConstants.RULES, pullCriteria);
     Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId));
     return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
@@ -76,7 +91,7 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   @Override
   public boolean deleteRuleRequired(ObjectId datasetSchemaId, ObjectId referenceId) {
     Document pullCriteria =
-        new Document("referenceId", referenceId).append("whenCondition", "isBlank(value)");
+        new Document(REFERENCEID, referenceId).append(WHENCONDITION, "isBlank(value)");
     Update update = new Update().pull(LiteralConstants.RULES, pullCriteria);
     Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId));
     return mongoTemplate.updateFirst(query, update, RulesSchema.class).getModifiedCount() == 1;
@@ -123,8 +138,8 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   @Override
   public boolean existsRuleRequired(ObjectId datasetSchemaId, ObjectId referenceId) {
     Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId))
-        .addCriteria(Criteria.where(LiteralConstants.RULES).elemMatch(Criteria.where("referenceId")
-            .is(referenceId).and("whenCondition").is("isBlank(value)")));
+        .addCriteria(Criteria.where(LiteralConstants.RULES).elemMatch(
+            Criteria.where(REFERENCEID).is(referenceId).and(WHENCONDITION).is("isBlank(value)")));
     return mongoTemplate.count(query, RulesSchema.class) == 1;
   }
 
@@ -155,10 +170,10 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   @CheckForNull
   public Rule findRule(ObjectId datasetSchemaId, ObjectId ruleId) {
     Document filterExpression = new Document();
-    filterExpression.append("input", "$rules");
+    filterExpression.append(INPUT, RULES);
     filterExpression.append("as", "rule");
     filterExpression.append("cond", new Document("$eq", Arrays.asList("$$rule._id", ruleId)));
-    Document filter = new Document("$filter", filterExpression);
+    Document filter = new Document(FILTER, filterExpression);
     RulesSchema rulesSchema = mongoTemplate.aggregate(Aggregation.newAggregation(
         Aggregation.match(Criteria.where(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId)),
         Aggregation.project().and(aggregationOperationContext -> filter)
@@ -186,10 +201,10 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     List<RulesSchema> result;
     if (enable) {
       Document filterExpression = new Document();
-      filterExpression.append("input", "$rules");
+      filterExpression.append(INPUT, RULES);
       filterExpression.append("as", "rule");
       filterExpression.append("cond", new Document("$eq", Arrays.asList("$$rule.enabled", true)));
-      Document filter = new Document("$filter", filterExpression);
+      Document filter = new Document(FILTER, filterExpression);
       result = mongoTemplate.aggregate(Aggregation.newAggregation(
           Aggregation.match(Criteria.where(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId)),
           Aggregation.project(LiteralConstants.ID_DATASET_SCHEMA)
@@ -217,12 +232,12 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     List<RulesSchema> result;
     if (required) {
       Document filterExpression = new Document();
-      filterExpression.append("input", "$rules");
+      filterExpression.append(INPUT, RULES);
       filterExpression.append("as", "rule");
       // look for FC rules
       filterExpression.append("cond",
           new Document("$lte", Arrays.asList("$$rule.shortCode", "FT")));
-      Document filter = new Document("$filter", filterExpression);
+      Document filter = new Document(FILTER, filterExpression);
       result = mongoTemplate.aggregate(Aggregation.newAggregation(
           Aggregation.match(Criteria.where(LiteralConstants.ID_DATASET_SCHEMA).is(idDatasetSchema)),
           Aggregation.project(LiteralConstants.ID_DATASET_SCHEMA)
@@ -230,10 +245,10 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
           RulesSchema.class, RulesSchema.class).getMappedResults();
     } else {
       Document filterExpression = new Document();
-      filterExpression.append("input", "$rules");
+      filterExpression.append(INPUT, RULES);
       filterExpression.append("as", "rule");
       filterExpression.append("cond", new Document("$gt", Arrays.asList("$$rule.shortCode", "FT")));
-      Document filter = new Document("$filter", filterExpression);
+      Document filter = new Document(FILTER, filterExpression);
       result = mongoTemplate.aggregate(Aggregation.newAggregation(
           Aggregation.match(Criteria.where(LiteralConstants.ID_DATASET_SCHEMA).is(idDatasetSchema)),
           Aggregation.project(LiteralConstants.ID_DATASET_SCHEMA)
@@ -274,10 +289,10 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     Document enabled = new Document("$eq", Arrays.asList("$$rule.enabled", true));
     Document verified = new Document("$eq", Arrays.asList("$$rule.verified", true));
     Document filterExpression = new Document();
-    filterExpression.append("input", "$rules");
+    filterExpression.append(INPUT, RULES);
     filterExpression.append("as", "rule");
     filterExpression.append("cond", new Document("$and", Arrays.asList(enabled, verified)));
-    Document filter = new Document("$filter", filterExpression);
+    Document filter = new Document(FILTER, filterExpression);
     result = mongoTemplate.aggregate(Aggregation.newAggregation(
         Aggregation.match(Criteria.where(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId)),
         Aggregation.project(LiteralConstants.ID_DATASET_SCHEMA)
@@ -312,7 +327,7 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   @Override
   public boolean deleteRuleHighLevelLike(ObjectId datasetSchemaId, String fieldSchemaLike) {
     Document pullCriteria =
-        new Document("whenCondition", java.util.regex.Pattern.compile(fieldSchemaLike));
+        new Document(WHENCONDITION, java.util.regex.Pattern.compile(fieldSchemaLike));
     Update update = new Update().pull(LiteralConstants.RULES, pullCriteria);
     Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId));
     return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
