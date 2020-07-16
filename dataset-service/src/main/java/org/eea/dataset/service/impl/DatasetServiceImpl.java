@@ -165,7 +165,9 @@ public class DatasetServiceImpl implements DatasetService {
   private ReportingDatasetRepository reportingDatasetRepository;
 
 
-  /** The dataflow controller zull. */
+  /**
+   * The dataflow controller zull.
+   */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZull;
 
@@ -352,12 +354,12 @@ public class DatasetServiceImpl implements DatasetService {
    * Save all records.
    *
    * @param datasetId the dataset id
-   * @param listaGeneral the lista general
+   * @param recordValues the lista general
    */
   @Override
   @Transactional
-  public void saveAllRecords(Long datasetId, List<RecordValue> listaGeneral) {
-    recordRepository.saveAll(listaGeneral);
+  public void saveAllRecords(Long datasetId, List<RecordValue> recordValues) {
+    recordRepository.saveAll(recordValues);
   }
 
 
@@ -625,6 +627,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param mapFields the map fields
    * @param sortFieldsArray the sort fields array
    * @param newFields the new fields
+   *
    * @return the table VO
    */
   private TableVO fieldsMap(final String idTableSchema, Pageable pageable, final String fields,
@@ -1222,7 +1225,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param records the records
    * @param idTableSchema the id table schema
+   *
    * @return the long
+   *
    * @throws EEAException the EEA exception
    */
   private Long throwsMethods(final Long datasetId, final List<RecordVO> records,
@@ -1982,6 +1987,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param objectId the object id
    * @param readOnly the read only
    * @param schema the schema
+   *
    * @return the boolean
    */
   private Boolean tableForReadOnly(String objectId, Boolean readOnly, DataSetSchema schema) {
@@ -2001,6 +2007,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param objectId the object id
    * @param readOnly the read only
    * @param schema the schema
+   *
    * @return the boolean
    */
   private Boolean recordForReadOnly(String objectId, Boolean readOnly, DataSetSchema schema) {
@@ -2020,6 +2027,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param objectId the object id
    * @param readOnly the read only
    * @param schema the schema
+   *
    * @return the boolean
    */
   private Boolean fieldForReadOnly(String objectId, Boolean readOnly, DataSetSchema schema) {
@@ -2091,7 +2099,6 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
-
   /**
    * Copy data.
    *
@@ -2137,6 +2144,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the table from schema.
    *
    * @param originDesign the origin design
+   *
    * @return the table from schema
    */
   private List<TableSchema> getTableFromSchema(DesignDataset originDesign) {
@@ -2161,6 +2169,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param targetDataset the target dataset
    * @param listOfTablesFiltered the list of tables filtered
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   *
    * @return the list
    */
   private List<RecordValue> replaceData(Long originDataset, Long targetDataset,
@@ -2198,7 +2207,6 @@ public class DatasetServiceImpl implements DatasetService {
       recordAux.setTableValue(tableAux);
       recordAux.setIdRecordSchema(dictionaryOriginTargetObjectId.get(record.getIdRecordSchema()));
       recordAux.setDatasetPartitionId(datasetPartitionId);
-
 
       TenantResolver.setTenantName(
           String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));

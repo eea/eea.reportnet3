@@ -75,7 +75,7 @@ const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isRelea
                     placeholder={resources.messages.createSnapshotPlaceholder}
                     type="text"
                   />
-                  <label for="createSnapshotDescription" className="srOnly">
+                  <label htmlFor="createSnapshotDescription" className="srOnly">
                     {resources.messages['createSnapshotPlaceholder']}
                   </label>
                   <div className={styles.createButtonWrapper}>

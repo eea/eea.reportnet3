@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -9,10 +9,12 @@ import uniq from 'lodash/uniq';
 import styles from './Dataset.module.css';
 
 import { config } from 'conf';
+import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
@@ -40,8 +42,8 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useReporterDataset';
 
-import { getUrl } from 'core/infrastructure/CoreUtils';
-import { MetadataUtils } from 'ui/views/_functions/Utils';
+import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
+import { ExtensionUtils, MetadataUtils } from 'ui/views/_functions/Utils';
 
 export const Dataset = withRouter(({ match, history }) => {
   const {
@@ -72,9 +74,10 @@ export const Dataset = withRouter(({ match, history }) => {
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
-  const [exportExtensionsOperationsList, setExportExtensionsOperationsList] = useState([]);
-  const [FMEExportExtensions, setFMEExportExtensions] = useState([]);
+  const [extensionsOperationsList, setExtensionsOperationsList] = useState({ export: [], import: [] });
+  const [externalExportExtensions, setExternalExportExtensions] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
+  const [importDatasetDialogVisible, setImportDatasetDialogVisible] = useState(false);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
@@ -96,10 +99,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const callSetMetaData = async () => {
     setMetaData(await getMetadata({ datasetId, dataflowId }));
   };
-
-  useEffect(() => {
-    callSetMetaData();
-  }, []);
 
   useEffect(() => {
     if (!isUndefined(metaData.dataset)) {
@@ -170,12 +169,12 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [isDataDeleted]);
 
   useEffect(() => {
-    if (isEmpty(FMEExportExtensions)) {
-      setExportButtonsList(reportNetExtensionsItems);
+    if (isEmpty(externalExportExtensions)) {
+      setExportButtonsList(internalExtensions);
     } else {
-      setExportButtonsList(reportNetExtensionsItems.concat(FMEExtensionsItems));
+      setExportButtonsList(internalExtensions.concat(externalExtensions));
     }
-  }, [datasetName, FMEExportExtensions]);
+  }, [datasetName, externalExportExtensions]);
 
   useEffect(() => {
     if (!isUndefined(exportDatasetData)) {
@@ -195,25 +194,19 @@ export const Dataset = withRouter(({ match, history }) => {
   } = useReporterDataset(datasetId, dataflowId);
 
   useEffect(() => {
-    try {
-      getDataflowName();
-      onLoadDataflow();
-    } catch (error) {
-      console.error(error.response);
-    }
-  }, []);
-
-  useEffect(() => {
+    callSetMetaData();
+    getDataflowName();
     getDatasetSchemaId();
+    onLoadDataflow();
   }, []);
 
   useEffect(() => {
-    getFileExtensions();
-  }, []);
+    if (datasetSchemaId) getFileExtensions();
+  }, [datasetSchemaId, importDatasetDialogVisible]);
 
   useEffect(() => {
-    getReportNetandFMEExportExtensions(exportExtensionsOperationsList);
-  }, [exportExtensionsOperationsList]);
+    getExportExtensions(extensionsOperationsList.export);
+  }, [extensionsOperationsList]);
 
   const parseUniqsExportExtensions = exportExtensionsOperationsList => {
     return exportExtensionsOperationsList.map(uniqExportExtension => ({
@@ -222,21 +215,21 @@ export const Dataset = withRouter(({ match, history }) => {
     }));
   };
 
-  const getReportNetandFMEExportExtensions = exportExtensionsOperationsList => {
+  const getExportExtensions = exportExtensionsOperationsList => {
     const uniqsExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
-    setFMEExportExtensions(parseUniqsExportExtensions(uniqsExportExtensions));
+    setExternalExportExtensions(parseUniqsExportExtensions(uniqsExportExtensions));
   };
 
-  const reportNetExtensionsItems = config.exportTypes.map(type => ({
+  const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => ({
     label: type.text,
     icon: config.icons['archive'],
     command: () => onExportData(type.code)
   }));
 
-  const FMEExtensionsItems = [
+  const externalExtensions = [
     {
-      label: 'FME Extensions',
-      items: FMEExportExtensions.map(type => ({
+      label: resources.messages['externalExtensions'],
+      items: externalExportExtensions.map(type => ({
         label: type.text,
         icon: config.icons['archive'],
         command: () => onExportData(type.code)
@@ -244,22 +237,21 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   ];
 
+  const getFileExtensions = async () => {
+    try {
+      const response = await IntegrationService.allExtensionsOperations(datasetSchemaId);
+      setExtensionsOperationsList(ExtensionUtils.groupOperations('operation', response));
+    } catch (error) {
+      notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
+    }
+  };
+
   const getDatasetSchemaId = async () => {
     try {
       const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
       setDatasetSchemaId(metadata.datasetSchemaId);
     } catch (error) {
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
-    }
-  };
-
-  const getFileExtensions = async () => {
-    try {
-      const response = await IntegrationService.allExtensionsOperations(datasetSchemaId);
-      response.filter(integration => integration.operation === 'EXPORT');
-      setExportExtensionsOperationsList(response);
-    } catch (error) {
-      notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
     }
   };
 
@@ -293,13 +285,14 @@ export const Dataset = withRouter(({ match, history }) => {
     return `${fileName}.${fileType}`;
   };
 
-  const getPosition = button => {
-    const buttonTopPosition = button.top;
-    const buttonLeftPosition = button.left;
-
-    const exportDatasetMenu = document.getElementById('exportDataSetMenu');
-    exportDatasetMenu.style.top = buttonTopPosition;
-    exportDatasetMenu.style.left = buttonLeftPosition;
+  const getPosition = e => {
+    const exportButton = e.currentTarget;
+    const left = `${exportButton.offsetLeft}px`;
+    const topValue = exportButton.offsetHeight + exportButton.offsetTop + 3;
+    const top = `${topValue}px `;
+    const menu = exportButton.nextElementSibling;
+    menu.style.top = top;
+    menu.style.left = left;
   };
 
   const onConfirmDelete = async () => {
@@ -541,6 +534,43 @@ export const Dataset = withRouter(({ match, history }) => {
     );
   };
 
+  const onUpload = async () => {
+    setImportDatasetDialogVisible(false);
+    const {
+      dataflow: { name: dataflowName },
+      dataset: { name: datasetName }
+    } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+    notificationContext.add({
+      type: 'DATASET_DATA_LOADING_INIT',
+      content: {
+        datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
+        title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX),
+        datasetLoading: resources.messages['datasetLoading'],
+        dataflowName,
+        datasetName
+      }
+    });
+    //setIsTableDeleted(false);
+  };
+
+  const getImportExtensions = extensionsOperationsList.import
+    .map(file => `.${file.fileExtension}`)
+    .join(', ')
+    .toLowerCase();
+
+  const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
+    getImportExtensions.split(', ')
+  ).join(', ')}`;
+
+  const renderCustomFileUploadFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => setImportDatasetDialogVisible(false)}
+    />
+  );
+
   if (loading) {
     return layout(<Spinner />);
   }
@@ -563,11 +593,22 @@ export const Dataset = withRouter(({ match, history }) => {
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">
+            {hasWritePermissions && !isEmpty(extensionsOperationsList.import) && (
+              <Button
+                className={`p-button-rounded p-button-secondary ${
+                  !hasWritePermissions ? null : 'p-button-animated-blink'
+                }`}
+                disabled={!hasWritePermissions}
+                icon={'import'}
+                label={resources.messages['importDataset']}
+                onClick={() => setImportDatasetDialogVisible(true)}
+              />
+            )}
             <Button
+              id="buttonExportDataset"
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-              // disabled={!hasWritePermissions}
-              icon={loadingFile ? 'spinnerAnimate' : 'import'}
-              label={resources.messages['export']}
+              icon={loadingFile ? 'spinnerAnimate' : 'export'}
+              label={resources.messages['exportDataset']}
               onClick={event => exportMenuRef.current.show(event)}
             />
             <Menu
@@ -576,7 +617,7 @@ export const Dataset = withRouter(({ match, history }) => {
               ref={exportMenuRef}
               id="exportDataSetMenu"
               onShow={e => {
-                getPosition(e.target.style);
+                getPosition(e);
               }}
             />
             <Button
@@ -702,6 +743,32 @@ export const Dataset = withRouter(({ match, history }) => {
             datasetSchemaId={datasetSchemaId}
             onHideValidationsDialog={() => onSetVisible(setValidationListDialogVisible, false)}
             reporting={true}
+          />
+        </Dialog>
+      )}
+      {importDatasetDialogVisible && (
+        <Dialog
+          className={styles.Dialog}
+          dismissableMask={false}
+          footer={renderCustomFileUploadFooter}
+          header={`${resources.messages['uploadDataset']}${datasetName}`}
+          onHide={() => setImportDatasetDialogVisible(false)}
+          visible={importDatasetDialogVisible}>
+          <CustomFileUpload
+            accept={getImportExtensions}
+            chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv)$/"
+            className={styles.FileUpload}
+            fileLimit={1}
+            infoTooltip={infoExtensionsTooltip}
+            invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+            mode="advanced"
+            multiple={false}
+            name="file"
+            onUpload={onUpload}
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadData, {
+              datasetId: datasetId,
+              tableId: null
+            })}`}
           />
         </Dialog>
       )}

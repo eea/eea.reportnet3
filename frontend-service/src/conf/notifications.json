@@ -408,6 +408,12 @@
         },
         {
           "key": "ERROR_LOADING_EU_DATASET_SCHEMA"
+        },
+        {
+          "key": "ERROR_LOADING_REPOSITORIES"
+        },
+        {
+          "key": "ERROR_LOADING_PROCESSES"
         }
       ]
     },

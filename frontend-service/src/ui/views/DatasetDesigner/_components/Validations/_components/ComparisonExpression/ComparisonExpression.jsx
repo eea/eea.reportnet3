@@ -312,6 +312,26 @@ const ComparisonExpression = ({
         />
       );
     }
+    if (operatorType === 'string') {
+      if (operatorValue === 'MATCH') {
+        return (
+          <span className={styles.inputStringMatch}>
+            <InputText
+              disabled={isDisabled}
+              onChange={e => onUpdateExpressionField('field2', e.target.value)}
+              placeholder={resourcesContext.messages.value}
+              value={expressionValues.expressionValue}
+            />
+            <Button
+              className={`${styles.info} p-button-rounded p-button-secondary-transparent`}
+              icon="infoCircle"
+              tooltip={resourcesContext.messages['matchStringTooltip']}
+              tooltipOptions={{ position: 'top', hideDelay: 5000 }}
+            />
+          </span>
+        );
+      }
+    }
 
     if (operatorType === 'number') {
       if (operatorValue === 'MATCH') {
