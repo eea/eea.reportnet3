@@ -187,6 +187,22 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
 
   /**
+   * Gets the by id.
+   *
+   * @param idSnapshot the id snapshot
+   * @return the by id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public SnapshotVO getById(Long idSnapshot) throws EEAException {
+    Snapshot snapshot = snapshotRepository.findById(idSnapshot).orElse(null);
+    if (snapshot == null) {
+      throw new EEAException(String.format("Snapshot with id %s Not found", idSnapshot));
+    }
+    return snapshotMapper.entityToClass(snapshot);
+  }
+
+  /**
    * Gets the snapshots by id dataset.
    *
    * @param datasetId the dataset id
@@ -204,16 +220,19 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     return snapshotMapper.entityListToClass(snapshots);
   }
 
+
   /**
    * Adds the snapshot.
    *
    * @param idDataset the id dataset
    * @param description the description
    * @param released the released
+   * @param partitionIdDestination the partition id destination
    */
   @Override
   @Async
-  public void addSnapshot(Long idDataset, String description, Boolean released) {
+  public void addSnapshot(Long idDataset, String description, Boolean released,
+      Long partitionIdDestination) {
 
     Long snapshotId = 0L;
     List<Validation> isBlocked = null;
@@ -238,6 +257,15 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // 2. Create the data file of the snapshot, calling to recordstore-service
       // we need the partitionId. By now only consider the user root
       Long idPartition = obtainPartition(idDataset, "root").getId();
+
+      // The partitionIdDestination will come with data only in the case of the EUDataset. We need
+      // to put in that case
+      // the partitionId of the destination, cause we try to make a snapshot from a DataCollection
+      // to a EUDataset, so we need in
+      // the snapshot files the partitionId of the EUDataset
+      if (partitionIdDestination != null) {
+        idPartition = partitionIdDestination;
+      }
       recordStoreControllerZull.createSnapshotData(idDataset, snap.getId(), idPartition);
 
 
@@ -322,6 +350,27 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   }
 
   /**
+   * Restore snapshot to clone data.
+   *
+   * @param datasetOrigin the dataset origin
+   * @param idDatasetDestination the id dataset destination
+   * @param idSnapshot the id snapshot
+   * @param deleteData the delete data
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Async
+  public void restoreSnapshotToCloneData(Long datasetOrigin, Long idDatasetDestination,
+      Long idSnapshot, Boolean deleteData, DatasetTypeEnum datasetType) throws EEAException {
+
+    // 1. Delete the dataset values implied
+    // we need the partitionId. By now only consider the user root
+    Long idPartition = obtainPartition(datasetOrigin, "root").getId();
+    recordStoreControllerZull.restoreSnapshotData(idDatasetDestination, idSnapshot, idPartition,
+        datasetType, (String) ThreadPropertiesManager.getVariable("user"), false, deleteData);
+  }
+
+  /**
    * Release snapshot.
    *
    * @param idDataset the id dataset
@@ -361,7 +410,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       LOG_ERROR.error("Error releasing snapshot, the snapshot contains blocker errors");
       releaseEvent(EventType.RELEASE_BLOCKED_EVENT, idSnapshot,
           "The snapshot contains blocker errors");
-      removeLock(idSnapshot, LockSignature.RELEASE_SNAPSHOT);
+      removeLock(idDataset, LockSignature.RELEASE_SNAPSHOT);
     }
   }
 
@@ -413,13 +462,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       } catch (EEAException e) {
         LOG_ERROR.error(e.getMessage());
         releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idSnapshot, e.getMessage());
-        removeLock(idSnapshot, LockSignature.RELEASE_SNAPSHOT);
+        removeLock(idDataset, LockSignature.RELEASE_SNAPSHOT);
       }
     } else {
       LOG_ERROR.error("Error in release snapshot");
       releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idSnapshot,
           "Error in release snapshot");
-      removeLock(idSnapshot, LockSignature.RELEASE_SNAPSHOT);
+      removeLock(idDataset, LockSignature.RELEASE_SNAPSHOT);
     }
   }
 
@@ -751,4 +800,5 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     receiptPDFGenerator.generatePDF(receipt, out);
   }
+
 }

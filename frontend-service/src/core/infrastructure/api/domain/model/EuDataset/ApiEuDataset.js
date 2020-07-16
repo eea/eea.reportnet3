@@ -12,7 +12,7 @@ const apiEuDataset = {
 
   exportEuDataset: async dataflowId => {
     const response = await HTTPRequester.post({
-      url: getUrl(EuDatasetConfig.updateDataCollectionNewRepresentatives, { dataflowId })
+      url: getUrl(EuDatasetConfig.export, { dataflowId })
     });
     return response;
   }
