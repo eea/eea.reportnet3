@@ -15,7 +15,8 @@ const isDuplicatedIntegration = (integration, incomingIntegration) => {
     isUpdatedVisible: integration.isUpdatedVisible,
     name: integration.name,
     operation: integration.operation,
-    processName: integration.processName
+    processName: integration.processName,
+    repository: integration.repository
   };
 
   return isEqual([currentIntegration].sort(), [incomingIntegration].sort());
@@ -36,7 +37,7 @@ const isDuplicatedParameter = (id, parameters, value) => {
 };
 
 const isFormEmpty = state => {
-  const requiredKeys = ['fileExtension', 'name', 'operation', 'processName'];
+  const requiredKeys = ['fileExtension', 'name', 'operation', 'repository', 'processName'];
   const isEmptyForm = [];
   for (let index = 0; index < requiredKeys.length; index++) {
     const key = requiredKeys[index];
@@ -91,7 +92,7 @@ const onUpdateCompleteParameter = (id, state) => {
 };
 
 const printError = (field, state) => {
-  const requiredFields = ['fileExtension', 'name', 'operation', 'processName'];
+  const requiredFields = ['fileExtension', 'name', 'operation', 'repository', 'processName'];
 
   return state.displayErrors && requiredFields.includes(field) && isEmpty(state[field]) ? 'error' : undefined;
 };

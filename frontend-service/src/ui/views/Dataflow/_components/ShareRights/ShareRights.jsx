@@ -27,7 +27,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
 
   const [shareRightsState, shareRightsDispatch] = useReducer(shareRightsReducer, {
     accountHasError: false,
-    accountNotFound: true,
+    accountNotFound: false,
     contributorAccountToDelete: '',
     contributors: [],
     clonedContributors: [],
@@ -55,11 +55,12 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
     try {
       const contributors = await ContributorService.all(dataflowId, dataProvider);
       const emptyContributor = new Contributor({ account: '', dataProviderId: '', isNew: true, writePermission: '' });
-      const clonedContributors = cloneDeep(contributors);
+      const contributorsWithNew = [...contributors, emptyContributor];
+      const clonedContributors = cloneDeep(contributorsWithNew);
 
       shareRightsDispatch({
         type: 'GET_ALL_CONTRIBUTORS',
-        payload: { contributors: [...contributors, emptyContributor], clonedContributors }
+        payload: { contributors: contributorsWithNew, clonedContributors }
       });
     } catch (error) {}
   };
@@ -74,21 +75,18 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
     return email.match(expression);
   };
 
-  const isUsedAccount = account => {
+  const isRepeatedAccount = account => {
     const sameAccounts = shareRightsState.contributors.filter(contributor => contributor.account === account);
 
     return sameAccounts.length > 1;
   };
 
-  const isRightChanged = contributor => {
+  const isPermissionChanged = contributor => {
     const [initialContributor] = shareRightsState.clonedContributors.filter(
-      fContributor => fContributor.account === contributor.account
+      fContributor => fContributor.id === contributor.id
     );
 
-    if (contributor.isNew) {
-      return true;
-    }
-    return initialContributor.writePermission !== JSON.parse(contributor.writePermission);
+    return JSON.stringify(initialContributor.writePermission) !== JSON.stringify(contributor.writePermission);
   };
 
   const updateContributor = contributor => {
@@ -96,12 +94,14 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
       type: 'SET_ACCOUNT_HAS_ERROR',
       payload: {
         accountHasError:
-          !isValidEmail(contributor.account) || isUsedAccount(contributor.account) || !shareRightsState.accountNotFound
+          !isValidEmail(contributor.account) ||
+          isRepeatedAccount(contributor.account) ||
+          shareRightsState.accountNotFound
       }
     });
 
     if (!contributor.isNew) {
-      isRightChanged(contributor) && onUpdateContributor(contributor);
+      isPermissionChanged(contributor) && onUpdateContributor(contributor);
     } else {
       if (isValidEmail(contributor.account) && !shareRightsState.accountHasError) {
         onUpdateContributor(contributor);
@@ -137,7 +137,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
 
   const onEnterKey = (key, contributor) => {
     if (key === 'Enter') {
-      isValidEmail(contributor.account) && isRightChanged(contributor) && onUpdateContributor(contributor);
+      isValidEmail(contributor.account) && isPermissionChanged(contributor) && onUpdateContributor(contributor);
     }
   };
 
@@ -168,9 +168,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
     const [thisContributor] = contributors.filter(thisContributor => thisContributor.id === contributor.id);
     thisContributor.writePermission = newWritePermission;
 
-    if (!shareRightsState.accountHasError || !shareRightsState.accountNotFound) {
-      shareRightsDispatch({ type: 'ON_WRITE_PERMISSION_CHANGE', payload: { contributors } });
-    }
+    shareRightsDispatch({ type: 'ON_WRITE_PERMISSION_CHANGE', payload: { contributors } });
   };
 
   const onSetAccount = inputValue => {
@@ -180,7 +178,11 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
 
     shareRightsDispatch({
       type: 'ON_SET_ACCOUNT',
-      payload: { contributors, accountHasError: !isValidEmail(inputValue) || isUsedAccount(inputValue) }
+      payload: {
+        contributors,
+        accountHasError: !isValidEmail(inputValue) || isRepeatedAccount(inputValue),
+        accountNotFound: false
+      }
     });
   };
 
