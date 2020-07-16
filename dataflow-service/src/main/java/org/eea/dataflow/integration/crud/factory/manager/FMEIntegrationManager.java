@@ -51,7 +51,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
   private static final String DATAFLOW_ID = "dataflowId";
 
   /** The Constant DATASETSCHEMA_ID: {@value}. */
-  private static final String DATASETSCHEMA_ID = "datasetSchemaId";
+  private static final String DATASET_SCHEMA_ID = "datasetSchemaId";
 
   /**
    * Gets the tool type.
@@ -113,7 +113,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
     if (integrationVO.getInternalParameters() == null
         || integrationVO.getInternalParameters().size() == 0
         || !integrationVO.getInternalParameters().containsKey(DATAFLOW_ID)
-        || !integrationVO.getInternalParameters().containsKey(DATASETSCHEMA_ID)) {
+        || !integrationVO.getInternalParameters().containsKey(DATASET_SCHEMA_ID)) {
       LOG_ERROR.error(
           "Error updating an integration: Internal parameters don't have dataflowId or datasetSchemaId");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -145,7 +145,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
     if (integrationVO.getInternalParameters() == null
         || integrationVO.getInternalParameters().size() == 0
         || !integrationVO.getInternalParameters().containsKey(DATAFLOW_ID)
-        || !integrationVO.getInternalParameters().containsKey(DATASETSCHEMA_ID)) {
+        || !integrationVO.getInternalParameters().containsKey(DATASET_SCHEMA_ID)) {
       LOG_ERROR.error(
           "Error creating an integration: Internal parameters don't have dataflowId or datasetSchemaId");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
