@@ -753,8 +753,8 @@
     "externalExtensions": "External extensions",
     "errorLoadingRepositories": "Error loading repositories",
     "errorLoadingProcesses": "Error loading processes",
-    "matchStringTooltip": "{%R3_COUNTRY_CODE%} can be used",
     "validateEuDatasetHeader": "Validate EU dataset",
-    "deleteDataEuDatasetHeader": "Delete EU dataset data"
+    "deleteDataEuDatasetHeader": "Delete EU dataset data",
+    "matchStringTooltip": "Click to use Country code variable"
   }
 }
