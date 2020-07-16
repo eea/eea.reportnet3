@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useRef, useState, useReducer } from 'reac
 
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 import uniq from 'lodash/uniq';
@@ -30,7 +29,6 @@ const ActionsToolbar = ({
   colsSchema,
   dataflowId,
   datasetId,
-  exportExtensionsOperationsList,
   hasWritePermissions,
   hideValidationFilter,
   isDataCollection = false,
@@ -39,14 +37,14 @@ const ActionsToolbar = ({
   isTableDeleted,
   isValidationSelected,
   levelErrorTypesWithCorrects,
-  onRefresh,
+  //onRefresh,
   onSetVisible,
   originalColumns,
   onUpdateData,
   records,
   setColumns,
   setDeleteDialogVisible,
-  setImportDialogVisible,
+  setImportTableDialogVisible,
   showValidationFilter,
   showWriteButtons,
   tableHasErrors,
@@ -57,7 +55,6 @@ const ActionsToolbar = ({
   const [exportTableData, setExportTableData] = useState(undefined);
   const [exportTableDataName, setExportTableDataName] = useState('');
   const [isLoadingFile, setIsLoadingFile] = useState(false);
-  const [FMEExportExtensions, setFMEExportExtensions] = useState([]);
 
   const [filter, dispatchFilter] = useReducer(filterReducer, {
     validationDropdown: [],
@@ -104,42 +101,11 @@ const ActionsToolbar = ({
     }
   }, [exportTableData]);
 
-  useEffect(() => {
-    getReportNetandFMEExportExtensions(exportExtensionsOperationsList);
-  }, [exportExtensionsOperationsList]);
-
-  const parseUniqsExportExtensions = exportExtensionsOperationsList => {
-    return exportExtensionsOperationsList.map(uniqExportExtension => ({
-      text: `${uniqExportExtension.toUpperCase()} (.${uniqExportExtension.toLowerCase()})`,
-      code: uniqExportExtension.toLowerCase()
-    }));
-  };
-
-  const getReportNetandFMEExportExtensions = exportExtensionsOperationsList => {
-    const uniqsExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
-    setFMEExportExtensions(parseUniqsExportExtensions(uniqsExportExtensions));
-  };
-
-  const reportNetExtensionsItems = config.exportTypes.map(type => ({
+  const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => ({
     label: type.text,
     icon: config.icons['archive'],
     command: () => onExportTableData(type.code)
   }));
-
-  const FMEExtensionsItems = [
-    {
-      label: 'FME Extensions',
-      items: FMEExportExtensions.map(type => ({
-        label: type.text,
-        icon: config.icons['archive'],
-        command: () => onExportTableData(type.code)
-      }))
-    }
-  ];
-
-  const totalExtensionsItems = isEmpty(FMEExportExtensions)
-    ? reportNetExtensionsItems
-    : reportNetExtensionsItems.concat(FMEExtensionsItems);
 
   const onExportTableData = async fileType => {
     setIsLoadingFile(true);
@@ -212,14 +178,14 @@ const ActionsToolbar = ({
   return (
     <Toolbar className={styles.actionsToolbar}>
       <div className="p-toolbar-group-left">
-        {showWriteButtons && <Button
+        {(hasWritePermissions || showWriteButtons) && <Button
           className={`p-button-rounded p-button-secondary ${
             !hasWritePermissions || tableReadOnly ? null : 'p-button-animated-blink'
           }`}
           disabled={!hasWritePermissions || tableReadOnly}
           icon={'import'}
-          label={resources.messages['import']}
-          onClick={() => setImportDialogVisible(true)}
+          label={resources.messages['importTable']}
+          onClick={() => setImportTableDialogVisible(true)}
         />}
         <Button
           id="buttonExportTable"
@@ -237,13 +203,13 @@ const ActionsToolbar = ({
         <Menu
           className={styles.menu}
           id="exportTableMenu"
-          model={totalExtensionsItems}
+          model={exportExtensionItems}
           onShow={e => getExportButtonPosition(e)}
           popup={true}
           ref={exportMenuRef}
         />
 
-        {showWriteButtons && <Button
+        {(hasWritePermissions || showWriteButtons) && <Button
           className={`p-button-rounded p-button-secondary-transparent ${
             !hasWritePermissions || tableReadOnly || isUndefined(records.totalRecords) || isTableDeleted
               ? null
@@ -279,7 +245,7 @@ const ActionsToolbar = ({
           }}
         />
 
-        {showWriteButtons && <Button
+        {(hasWritePermissions || showWriteButtons) && <Button
           className={`p-button-rounded p-button-secondary-transparent ${
             tableHasErrors ? 'p-button-animated-blink' : null
           }`}

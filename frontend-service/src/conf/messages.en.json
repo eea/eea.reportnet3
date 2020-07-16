@@ -233,7 +233,7 @@
     "expandAll": "Expand all",
     "expandSidebar": "Expand sidebar",
     "expirationDate": "Date range",
-    "export": "Export dataset data",
+    "exportDataset": "Export dataset data",
     "exportDataByIdError": "Failed exporting data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "exportTable": "Export table data",
     "exportTableDataByIdError": "Failed exporting data",
@@ -282,7 +282,7 @@
     "groupBy": "Group by",
     "groupValidationsError": "Failed group validation at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "help": "Help",
-    "import": "Import",
+    "importTable": "Import table data",
     "importFromFile": "Import from file",
     "info": "Info",
     "invalidCharacter": "Invalid character",
@@ -517,7 +517,7 @@
     "updateFieldByIdError": "Failed updating field",
     "updateRecordsByIdError": "Failed updating record",
     "upload": "Upload",
-    "uploadDataset": "Import data in table ",
+    "uploadDataset": "Import data in dataset ",
     "uploadDocument": "Upload document",
     "uploadDocumentCompletedEvent": "{:fileName} Document uploaded at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
     "uploadDocumentFailedEvent": "Error uploading {:fileName} document at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
@@ -748,6 +748,12 @@
     "externalImportReportingCompletedEvent": "<strong title='{:datasetName}'>{:shortDatasetName} Schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "repository": "Repository",
     "repositoryPlaceHolder": "Select a repository",
-    "processNamePlaceHolder": "Select a process"
+    "processNamePlaceHolder": "Select a process",
+    "importDataset": "Import dataset data",
+    "uploadTable": "Import data in table ",
+    "externalExtensions": "External extensions",
+    "errorLoadingRepositories": "Error loading repositories",
+    "errorLoadingProcesses": "Error loading processes",
+    "matchStringTooltip": "{%R3_COUNTRY_CODE%} can be used"
   }
 }

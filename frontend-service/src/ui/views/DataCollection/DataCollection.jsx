@@ -281,7 +281,7 @@ export const DataCollection = withRouter(({ match, history }) => {
               className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
               icon={'export'}
-              label={resources.messages['export']}
+              label={resources.messages['exportDataset']}
             />
           </div>
         </Toolbar>

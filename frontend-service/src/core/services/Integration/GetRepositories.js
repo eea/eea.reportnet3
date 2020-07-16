@@ -1,1 +1,2 @@
-export const GetRepositories = ({ integrationRepository }) => async () => integrationRepository.getRepositories();
+export const GetRepositories = ({ integrationRepository }) => async datasetId =>
+  integrationRepository.getRepositories(datasetId);
