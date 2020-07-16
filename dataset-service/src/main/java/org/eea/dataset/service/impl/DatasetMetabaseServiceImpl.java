@@ -143,6 +143,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private ForeignRelationsRepository foreignRelationsRepository;
 
+  /** The eu dataset repository. */
   @Autowired
   private EUDatasetRepository euDatasetRepository;
 
