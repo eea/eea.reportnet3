@@ -20,7 +20,6 @@ import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseR
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
-import org.eea.exception.EEAException;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -79,7 +78,6 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
    * Execute.
    *
    * @param eeaEventVO the eea event VO
-   * @throws EEAException the EEA exception
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) {
@@ -114,14 +112,7 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
   private void spreadData(List<DesignDataset> designs, Long datasetId, String idDatasetSchema) {
     for (DesignDataset design : designs) {
       // get tables from schema
-      DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
-      List<TableSchema> listOfTables = schema.getTableSchemas();
-      List<TableSchema> listOfTablesFiltered = new ArrayList<>();
-      for (TableSchema desingTableToPrefill : listOfTables) {
-        if (Boolean.TRUE.equals(desingTableToPrefill.getToPrefill())) {
-          listOfTablesFiltered.add(desingTableToPrefill);
-        }
-      }
+      List<TableSchema> listOfTablesFiltered = getTablesFromSchema(idDatasetSchema);
       // get the data from designs datasets
       if (!listOfTablesFiltered.isEmpty()) {
 
@@ -149,31 +140,8 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
           datasetPartitionId = datasetPartition.get().getId();
         }
 
-        for (RecordValue record : recordDesignValues) {
-          RecordValue recordAux = new RecordValue();
-          TableValue tableAux = record.getTableValue();
-          TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
-          tableAux.setId(
-              tableRepository.findIdByIdTableSchema(record.getTableValue().getIdTableSchema()));
-
-          recordAux.setTableValue(tableAux);
-          recordAux.setIdRecordSchema(record.getIdRecordSchema());
-          recordAux.setDatasetPartitionId(datasetPartitionId);
-
-          TenantResolver.setTenantName(String.format(DATASET_ID, design.getId().toString()));
-          List<FieldValue> fieldValues = fieldRepository.findByRecord(record);
-          List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
-          for (FieldValue field : fieldValues) {
-            FieldValue auxField = new FieldValue();
-            auxField.setValue(field.getValue());
-            auxField.setIdFieldSchema(field.getIdFieldSchema());
-            auxField.setType(field.getType());
-            auxField.setRecord(recordAux);
-            fieldValuesOnlyValues.add(auxField);
-          }
-          recordAux.setFields(fieldValuesOnlyValues);
-          recordDesignValuesList.add(recordAux);
-        }
+        recordDesingAssignation(datasetId, design, recordDesignValues, recordDesignValuesList,
+            datasetPartitionId);
         if (!recordDesignValuesList.isEmpty()) {
           // save values
           TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
@@ -181,5 +149,62 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
         }
       }
     }
+  }
+
+  /**
+   * Record desing assignation.
+   *
+   * @param datasetId the dataset id
+   * @param design the design
+   * @param recordDesignValues the record design values
+   * @param recordDesignValuesList the record design values list
+   * @param datasetPartitionId the dataset partition id
+   */
+  private void recordDesingAssignation(Long datasetId, DesignDataset design,
+      List<RecordValue> recordDesignValues, List<RecordValue> recordDesignValuesList,
+      Long datasetPartitionId) {
+    for (RecordValue record : recordDesignValues) {
+      RecordValue recordAux = new RecordValue();
+      TableValue tableAux = record.getTableValue();
+      TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
+      tableAux
+          .setId(tableRepository.findIdByIdTableSchema(record.getTableValue().getIdTableSchema()));
+
+      recordAux.setTableValue(tableAux);
+      recordAux.setIdRecordSchema(record.getIdRecordSchema());
+      recordAux.setDatasetPartitionId(datasetPartitionId);
+
+      TenantResolver.setTenantName(String.format(DATASET_ID, design.getId().toString()));
+      List<FieldValue> fieldValues = fieldRepository.findByRecord(record);
+      List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
+      for (FieldValue field : fieldValues) {
+        FieldValue auxField = new FieldValue();
+        auxField.setValue(field.getValue());
+        auxField.setIdFieldSchema(field.getIdFieldSchema());
+        auxField.setType(field.getType());
+        auxField.setRecord(recordAux);
+        fieldValuesOnlyValues.add(auxField);
+      }
+      recordAux.setFields(fieldValuesOnlyValues);
+      recordDesignValuesList.add(recordAux);
+    }
+  }
+
+  /**
+   * Gets the tables from schema.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return the tables from schema
+   */
+  private List<TableSchema> getTablesFromSchema(String idDatasetSchema) {
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
+    List<TableSchema> listOfTables = schema.getTableSchemas();
+    List<TableSchema> listOfTablesFiltered = new ArrayList<>();
+    for (TableSchema desingTableToPrefill : listOfTables) {
+      if (Boolean.TRUE.equals(desingTableToPrefill.getToPrefill())) {
+        listOfTablesFiltered.add(desingTableToPrefill);
+      }
+    }
+    return listOfTablesFiltered;
   }
 }

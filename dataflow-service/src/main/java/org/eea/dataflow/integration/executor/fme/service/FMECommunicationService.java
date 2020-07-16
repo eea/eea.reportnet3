@@ -69,6 +69,16 @@ public class FMECommunicationService {
   @Autowired
   private RestTemplate restTemplate;
 
+
+  /** The Constant APPLICATION_JSON: {@value}. */
+  private static final String APPLICATION_JSON = "application/json";
+
+  /** The Constant CONTENT_TYPE: {@value}. */
+  private static final String CONTENT_TYPE = "Content-Type";
+
+  /** The Constant ACCEPT: {@value}. */
+  private static final String ACCEPT = "Accept";
+
   /**
    * Submit async job.
    *
@@ -87,7 +97,7 @@ public class FMECommunicationService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Content-Type", "application/json");
+    headerInfo.put(CONTENT_TYPE, APPLICATION_JSON);
 
     HttpEntity<FMEAsyncJob> request = createHttpRequest(fmeAsyncJob, uriParams, headerInfo);
     ResponseEntity<SubmitResult> checkResult =
@@ -122,8 +132,8 @@ public class FMECommunicationService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
     headerInfo.put("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-    headerInfo.put("Content-Type", "application/octet-stream");
-    headerInfo.put("Accept", "application/json");
+    headerInfo.put(CONTENT_TYPE, "application/octet-stream");
+    headerInfo.put(ACCEPT, APPLICATION_JSON);
     HttpEntity<byte[]> request = createHttpRequest(file, uriParams, headerInfo);
     ResponseEntity<FileSubmitResult> checkResult = this.restTemplate.exchange(uriComponentsBuilder
         .scheme(fmeScheme).host(fmeHost)
@@ -162,7 +172,7 @@ public class FMECommunicationService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
     headerInfo.put("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-    headerInfo.put("Content-Type", "application/octet-stream");
+    headerInfo.put(CONTENT_TYPE, "application/octet-stream");
 
     MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter =
         new MappingJackson2HttpMessageConverter();
@@ -200,7 +210,7 @@ public class FMECommunicationService {
     uriParams.put("limit", String.valueOf(-1));
     uriParams.put("offset", String.valueOf(-1));
     Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Accept", "application/json");
+    headerInfo.put(ACCEPT, APPLICATION_JSON);
 
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     HttpEntity<Void> request = createHttpRequest(null, uriParams, headerInfo);
@@ -229,7 +239,7 @@ public class FMECommunicationService {
     uriParams.put("repository", repository);
     uriParams.put("type", "WORKSPACE");
     Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Accept", "application/json");
+    headerInfo.put(ACCEPT, APPLICATION_JSON);
 
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     HttpEntity<Void> request = createHttpRequest(null, uriParams, headerInfo);
