@@ -68,8 +68,6 @@ export const EUDataset = withRouter(({ history, match }) => {
     exportButtonsList: [],
     exportDatasetData: undefined,
     exportDatasetDataName: '',
-    exportExtensionsOperationsList: [],
-    FMEExportExtensions: [],
     hasWritePermissions: false,
     isDataDeleted: false,
     isDataUpdated: false,
@@ -396,8 +394,8 @@ export const EUDataset = withRouter(({ history, match }) => {
       <Title
         icon="euDataset"
         iconSize="3.5rem"
-        subtitle={`${dataflowName} - ${datasetName}`}
-        title={datasetSchemaName}
+        subtitle={`${dataflowName}`}
+        title={datasetName}
       />
       <EUDatasetToolbar
         handleDialogs={handleDialogs}
