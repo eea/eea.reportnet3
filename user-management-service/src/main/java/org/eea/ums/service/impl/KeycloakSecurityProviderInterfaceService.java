@@ -640,8 +640,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     for (UserRepresentation userRepresentation : keycloakConnectorService.getUsers()) {
       if (null != userRepresentation.getAttributes()
           && 1 <= userRepresentation.getAttributes().size()
-          && userRepresentation.getAttributes().containsKey("ApiKeys")) {
-        List<String> apiKeys = userRepresentation.getAttributes().get("ApiKeys");
+          && userRepresentation.getAttributes().containsKey(APIKEYS)) {
+        List<String> apiKeys = userRepresentation.getAttributes().get(APIKEYS);
         // an api key in attributes is represented as a string where positions are:
         // ApiKeyValue,dataflowId,dataproviderId
 
