@@ -42,12 +42,16 @@ public class FMEIntegrationManager extends AbstractCrudManager {
   @Autowired
   private IntegrationMapper integrationMapper;
 
+  /** The operation parameters repository. */
   @Autowired
   private OperationParametersRepository operationParametersRepository;
 
 
   /** The Constant DATAFLOW_ID: {@value}. */
   private static final String DATAFLOW_ID = "dataflowId";
+
+  /** The Constant DATASETSCHEMA_ID: {@value}. */
+  private static final String DATASETSCHEMA_ID = "datasetSchemaId";
 
   /**
    * Gets the tool type.
@@ -78,8 +82,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
       if (integrationVO.getInternalParameters().containsKey(DATAFLOW_ID)) {
         integrationVO.getInternalParameters().remove(DATAFLOW_ID);
       }
-      List<String> parameters =
-          new ArrayList<String>(integrationVO.getInternalParameters().keySet());
+      List<String> parameters = new ArrayList<>(integrationVO.getInternalParameters().keySet());
       String parameter = parameters.get(0);
       String value = integrationVO.getInternalParameters().get(parameter);
       List<Integration> integrationList =
@@ -110,7 +113,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
     if (integrationVO.getInternalParameters() == null
         || integrationVO.getInternalParameters().size() == 0
         || !integrationVO.getInternalParameters().containsKey(DATAFLOW_ID)
-        || !integrationVO.getInternalParameters().containsKey("datasetSchemaId")) {
+        || !integrationVO.getInternalParameters().containsKey(DATASETSCHEMA_ID)) {
       LOG_ERROR.error(
           "Error updating an integration: Internal parameters don't have dataflowId or datasetSchemaId");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -142,7 +145,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
     if (integrationVO.getInternalParameters() == null
         || integrationVO.getInternalParameters().size() == 0
         || !integrationVO.getInternalParameters().containsKey(DATAFLOW_ID)
-        || !integrationVO.getInternalParameters().containsKey("datasetSchemaId")) {
+        || !integrationVO.getInternalParameters().containsKey(DATASETSCHEMA_ID)) {
       LOG_ERROR.error(
           "Error creating an integration: Internal parameters don't have dataflowId or datasetSchemaId");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
