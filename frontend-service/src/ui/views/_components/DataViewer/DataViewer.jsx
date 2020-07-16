@@ -6,10 +6,9 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
-import uniq from 'lodash/uniq';
 
-import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { config } from 'conf';
+import { DatasetConfig } from 'conf/domain/model/Dataset';
 
 import styles from './DataViewer.module.css';
 
@@ -22,7 +21,6 @@ import { Chips } from 'ui/views/_components/Chips';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContextMenu } from 'ui/views/_components/ContextMenu';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataForm } from './_components/DataForm';
 import { DataTable } from 'ui/views/_components/DataTable';
@@ -40,14 +38,14 @@ import { IntegrationService } from 'core/services/Integration';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { recordReducer } from './_functions/Reducers/recordReducer';
 import { sortReducer } from './_functions/Reducers/sortReducer';
 
 import { DataViewerUtils } from './_functions/Utils/DataViewerUtils';
 import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
-import { MetadataUtils } from 'ui/views/_functions/Utils/MetadataUtils';
-import { RecordUtils } from 'ui/views/_functions/Utils';
+import { ExtensionUtils, MetadataUtils, RecordUtils} from 'ui/views/_functions/Utils';
 import {
   useLoadColsSchemasAndColumnOptions,
   useContextMenu,
@@ -87,7 +85,7 @@ const DataViewer = withRouter(
     const [editDialogVisible, setEditDialogVisible] = useState(false);
     const [extensionsOperationsList, setExtensionsOperationsList] = useState({ export: [], import: [] });
     const [fetchedData, setFetchedData] = useState([]);
-    const [importDialogVisible, setImportDialogVisible] = useState(false);
+    const [importTableDialogVisible, setImportTableDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
     const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
     const [isDataUpdated, setIsDataUpdated] = useState(false);
@@ -242,7 +240,7 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       if (datasetSchemaId) getFileExtensions();
-    }, [datasetSchemaId, isDataUpdated, importDialogVisible]);
+    }, [datasetSchemaId, isDataUpdated, importTableDialogVisible]);
 
     const getMetadata = async () => {
       try {
@@ -256,7 +254,7 @@ const DataViewer = withRouter(
     const getFileExtensions = async () => {
       try {
         const response = await IntegrationService.allExtensionsOperations(datasetSchemaId);
-        setExtensionsOperationsList(DataViewerUtils.groupOperations('operation', response));
+        setExtensionsOperationsList(ExtensionUtils.groupOperations('operation', response));
       } catch (error) {
         notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
       }
@@ -444,7 +442,6 @@ const DataViewer = withRouter(
         setIsTableDeleted(true);
         dispatchRecords({ type: 'SET_TOTAL', payload: 0 });
         dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
-        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
       } catch (error) {
         const {
           dataflow: { name: dataflowName },
@@ -469,7 +466,6 @@ const DataViewer = withRouter(
       try {
         await DatasetService.deleteRecordById(datasetId, records.selectedRecord.recordId);
 
-        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         const calcRecords = records.totalFilteredRecords >= 0 ? records.totalFilteredRecords : records.totalRecords;
         const page =
           (calcRecords - 1) / records.recordsPerPage === 1
@@ -551,8 +547,6 @@ const DataViewer = withRouter(
                 tableName
               }
             });
-          } finally {
-            snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           }
         }
         if (isEditing) {
@@ -650,7 +644,6 @@ const DataViewer = withRouter(
         try {
           setIsSaving(true);
           await DatasetService.addRecordsById(datasetId, tableId, [parseMultiselect(record)]);
-          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           setIsTableDeleted(false);
           onRefresh();
         } catch (error) {
@@ -679,7 +672,6 @@ const DataViewer = withRouter(
         try {
           await DatasetService.updateRecordsById(datasetId, parseMultiselect(record));
           onRefresh();
-          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         } catch (error) {
           const {
             dataflow: { name: dataflowName },
@@ -722,7 +714,7 @@ const DataViewer = withRouter(
     const onUpdateData = () => setIsDataUpdated(!isDataUpdated);
 
     const onUpload = async () => {
-      setImportDialogVisible(false);
+      setImportTableDialogVisible(false);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
@@ -863,7 +855,7 @@ const DataViewer = withRouter(
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
         label={resources.messages['close']}
-        onClick={() => setImportDialogVisible(false)}
+        onClick={() => setImportTableDialogVisible(false)}
       />
     );
 
@@ -886,23 +878,12 @@ const DataViewer = withRouter(
       }
     };
 
-    const getImportExtensions = [{ datasetSchemaId, fileExtension: 'csv', operation: 'IMPORT' }]
-      .concat(extensionsOperationsList.import)
-      .map(file => `.${file.fileExtension}`)
-      .join(', ')
-      .toLowerCase();
-
-    const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
-      getImportExtensions.split(', ')
-    ).join(', ')}`;
-
     return (
       <SnapshotContext.Provider>
         <ActionsToolbar
           colsSchema={colsSchema}
           dataflowId={dataflowId}
           datasetId={datasetId}
-          exportExtensionsOperationsList={extensionsOperationsList.export}
           hasWritePermissions={hasWritePermissions}
           showWriteButtons={showWriteButtons}
           hideValidationFilter={hideValidationFilter}
@@ -920,7 +901,7 @@ const DataViewer = withRouter(
           records={records}
           setColumns={setColumns}
           setDeleteDialogVisible={setDeleteDialogVisible}
-          setImportDialogVisible={setImportDialogVisible}
+          setImportTableDialogVisible={setImportTableDialogVisible}
           setRecordErrorPositionId={setRecordErrorPositionId}
           showValidationFilter={showValidationFilter}
           tableHasErrors={tableHasErrors}
@@ -937,7 +918,7 @@ const DataViewer = withRouter(
             id={tableId}
             first={records.firstPageRecord}
             footer={
-              hasWritePermissions && !tableReadOnly ? (
+              hasWritePermissions && !tableReadOnly && !isDataCollection ? (
                 <Footer
                   hasWritePermissions={hasWritePermissions && !tableReadOnly}
                   onAddClick={() => {
@@ -1023,26 +1004,26 @@ const DataViewer = withRouter(
           </Dialog>
         )}
 
-        {importDialogVisible && (
+        {importTableDialogVisible && (
           <Dialog
             className={styles.Dialog}
             dismissableMask={false}
             footer={renderCustomFileUploadFooter}
-            header={`${resources.messages['uploadDataset']}${tableName}`}
-            onHide={() => setImportDialogVisible(false)}
-            visible={importDialogVisible}>
+            header={`${resources.messages['uploadTable']}${tableName}`}
+            onHide={() => setImportTableDialogVisible(false)}
+            visible={importTableDialogVisible}>
             <CustomFileUpload
-              accept={getImportExtensions}
-              chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv|doc)$/"
+              accept=".csv"
+              chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv)$/"
               className={styles.FileUpload}
               fileLimit={1}
-              infoTooltip={infoExtensionsTooltip}
+              infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} .csv`}
+              invalidExtensionMessage={resources.messages['invalidExtensionFile']}
               mode="advanced"
               multiple={false}
-              invalidExtensionMessage={resources.messages['invalidExtensionFile']}
               name="file"
               onUpload={onUpload}
-              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.loadDataTable, {
+              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadData, {
                 datasetId: datasetId,
                 tableId: tableId
               })}`}

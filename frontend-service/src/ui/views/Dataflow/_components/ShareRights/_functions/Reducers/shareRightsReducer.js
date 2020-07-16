@@ -17,7 +17,12 @@ export const shareRightsReducer = (state, { type, payload }) => {
       };
 
     case 'ON_SET_ACCOUNT':
-      return { ...state, contributors: payload.contributors, accountHasError: payload.accountHasError };
+      return {
+        ...state,
+        contributors: payload.contributors,
+        accountHasError: payload.accountHasError,
+        accountNotFound: payload.accountNotFound
+      };
 
     case 'ON_WRITE_PERMISSION_CHANGE':
       return { ...state, contributors: payload.contributors };

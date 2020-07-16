@@ -40,13 +40,13 @@ export const TabsSchema = ({
                 <DataViewer
                   buttonsList={buttonsList}
                   hasWritePermissions={hasWritePermissions}
-                  showWriteButtons={showWriteButtons}
                   isDataCollection={isDataCollection}
                   isDatasetDeleted={isDatasetDeleted}
                   isValidationSelected={isValidationSelected}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
                   onLoadTableData={onLoadTableData}
+                  showWriteButtons={showWriteButtons}
                   tableHasErrors={tableHasErrors}
                   tableId={table.id}
                   tableName={table.name}

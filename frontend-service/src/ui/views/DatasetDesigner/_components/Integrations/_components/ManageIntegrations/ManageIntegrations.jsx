@@ -24,7 +24,15 @@ import { useLockBodyScroll } from 'ui/views/_functions/Hooks/useLockBodyScroll';
 import { ManageIntegrationsUtils } from './_functions/Utils/ManageIntegrationsUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
-export const ManageIntegrations = ({ dataflowId, designerState, integrationsList, manageDialogs, updatedData }) => {
+export const ManageIntegrations = ({
+  dataflowId,
+  datasetId,
+  designerState,
+  integrationsList,
+  manageDialogs,
+  onUpdateData,
+  updatedData
+}) => {
   const { datasetSchemaId, isIntegrationManageDialogVisible } = designerState;
   const componentName = 'integration';
 
@@ -48,17 +56,19 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
     id: null,
     isUpdatedVisible: false,
     name: '',
-    operation: '',
+    operation: {},
     parameterKey: '',
     parametersErrors: { content: '', header: '', isDialogVisible: false, option: '' },
     parameterValue: '',
-    processName: '',
+    processes: [],
+    processName: {},
+    repositories: [],
+    repository: {},
     tool: 'FME'
   });
 
   const { editorView, externalParameters, parameterKey, parameterValue, parametersErrors } = manageIntegrationsState;
   const {
-    isDuplicatedIntegration,
     isDuplicatedIntegrationName,
     isDuplicatedParameter,
     isFormEmpty,
@@ -68,7 +78,6 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
 
   const isEditingParameter = isParameterEditing(externalParameters);
   const isEmptyForm = isFormEmpty(manageIntegrationsState);
-  const isIntegrationDuplicated = isDuplicatedIntegration(manageIntegrationsState, updatedData);
   const isIntegrationNameDuplicated = isDuplicatedIntegrationName(
     manageIntegrationsState.name,
     integrationsList,
@@ -80,11 +89,46 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
     if (!isEmpty(updatedData)) getUpdatedData();
   }, [updatedData]);
 
+  useEffect(() => {
+    getRepositories();
+  }, []);
+
+  useEffect(() => {
+    getProcesses();
+  }, [manageIntegrationsState.repository]);
+
   useInputTextFocus(editorView.isEditing, editParameterRef);
   useInputTextFocus(isEditingParameter, parameterRef);
   useInputTextFocus(isIntegrationManageDialogVisible, integrationNameRef);
 
   useLockBodyScroll(parametersErrors.isDialogVisible);
+
+  const getRepositories = async () => {
+    try {
+      manageIntegrationsDispatch({
+        type: 'GET_REPOSITORIES',
+        payload: { data: await IntegrationService.getRepositories(datasetId) }
+      });
+    } catch (error) {
+      notificationContext.add({ type: 'ERROR_LOADING_REPOSITORIES' });
+    }
+  };
+
+  const getProcesses = async () => {
+    console.log({manageIntegrationsState})
+    if (!isEmpty(manageIntegrationsState.repository)) {
+      try {
+        manageIntegrationsDispatch({
+          type: 'GET_PROCESSES',
+          payload: { data: await IntegrationService.getProcesses(manageIntegrationsState.repository.value, datasetId) }
+        });
+      } catch (error) {
+        notificationContext.add({ type: 'ERROR_LOADING_PROCESSES' });
+      }
+    } else {
+      manageIntegrationsDispatch({ type: 'GET_PROCESSES', payload: { data: [] } });
+    }
+  };
 
   const getUpdatedData = () => manageIntegrationsDispatch({ type: 'GET_UPDATED_DATA', payload: updatedData });
 
@@ -115,6 +159,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
       const response = await IntegrationService.create(manageIntegrationsState);
       if (response.status >= 200 && response.status <= 299) {
         manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
+        onUpdateData();
       }
     } catch (error) {
       notificationContext.add({ type: 'CREATE_INTEGRATION_ERROR' });
@@ -154,6 +199,10 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
   };
 
   const onFillField = (data, name) => manageIntegrationsDispatch({ type: 'ON_FILL', payload: { data, name } });
+
+  const onFillFieldRepository = (data, name) => {
+    manageIntegrationsDispatch({ type: 'ON_FILL_REPOSITORY', payload: { data, name, processName: [] } });
+  };
 
   const onResetParameterInput = () => {
     manageIntegrationsDispatch({
@@ -205,6 +254,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
       const response = await IntegrationService.update(manageIntegrationsState);
       if (response.status >= 200 && response.status <= 299) {
         manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
+        onUpdateData();
       }
     } catch (error) {
       notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' });
@@ -261,7 +311,6 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
   const renderDialogLayout = children => (
     <Dialog
       closeOnEscape={false}
-      // closeOnEscape={isEditingParameter}
       footer={renderDialogFooter}
       header={
         !isEmpty(updatedData)
@@ -275,24 +324,38 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
     </Dialog>
   );
 
-  const renderDropdownLayout = option => (
-    <div className={`${styles.field} ${styles[option]} formField ${printError(option, manageIntegrationsState)}`}>
-      <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
-      <Dropdown
-        appendTo={document.body}
-        ariaLabel={'integrations'}
-        inputId={`${componentName}__${option}`}
-        onChange={event => onFillField(event.value, option)}
-        optionLabel="label"
-        options={[
-          { label: 'IMPORT', value: 'IMPORT' },
-          { label: 'EXPORT', value: 'EXPORT' }
-        ]}
-        placeholder={resources.messages[`${option}PlaceHolder`]}
-        value={manageIntegrationsState[option]}
-      />
-    </div>
-  );
+  const renderDropdownLayout = (options = []) => {
+    const optionList = {
+      operation: [
+        { label: 'IMPORT', value: 'IMPORT' },
+        { label: 'EXPORT', value: 'EXPORT' }
+      ],
+      repository: manageIntegrationsState.repositories,
+      processName: manageIntegrationsState.processes
+    };
+
+    return options.map((option, index) => (
+      <div
+        className={`${styles.field} ${styles[option]} formField ${printError(option, manageIntegrationsState)}`}
+        key={index}>
+        <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
+        <Dropdown
+          appendTo={document.body}
+          ariaLabel={'integrations'}
+          filter={optionList[option].length > 7}
+          disabled={isEmpty(optionList[option])}
+          inputId={`${componentName}__${option}`}
+          onChange={event =>
+            option === 'repository' ? onFillFieldRepository(event.value, option) : onFillField(event.value, option)
+          }
+          optionLabel="label"
+          options={optionList[option]}
+          placeholder={resources.messages[`${option}PlaceHolder`]}
+          value={manageIntegrationsState[option]}
+        />
+      </div>
+    ));
+  };
 
   const renderEditorInput = (option, parameter, id) => {
     return (
@@ -370,9 +433,9 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
     <Fragment>
       <div className={styles.content}>
         <div className={styles.group}>{renderInputLayout(['name', 'description'])}</div>
+        <div className={styles.group}>{renderDropdownLayout(['repository', 'processName'])}</div>
         <div className={styles.group}>
-          {renderInputLayout(['processName'])}
-          {renderDropdownLayout('operation')}
+          {renderDropdownLayout(['operation'])}
           {renderInputLayout(['fileExtension'])}
         </div>
         <div className={styles.group}>
