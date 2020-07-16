@@ -1033,7 +1033,7 @@ public class DatasetServiceImpl implements DatasetService {
       List<TableValue> allTableValues = dataset.getTableValues();
 
       DataSetMetabase datasetMb =
-          reportingDatasetRepository.findById(datasetId).orElse(new ReportingDataset());
+          dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
 
       DataSetSchema schema =
           schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
