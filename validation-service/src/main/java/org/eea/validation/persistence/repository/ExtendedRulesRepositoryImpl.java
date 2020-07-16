@@ -20,7 +20,7 @@ import com.mongodb.client.result.UpdateResult;
  * The Class ExtendedRulesRepositoryImpl.
  */
 public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
-  
+
 
   /** The Constant RULES: {@value}. */
   private static final String RULES = "$rules";
@@ -31,10 +31,10 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   /** The Constant FILTER: {@value}. */
   private static final String FILTER = "$filter";
 
-  /** The Constant WHENCONDITION: {@value}. */
+  /** The Constant WHEN_CONDITION: {@value}. */
   private static final String WHEN_CONDITION = "whenCondition";
 
-  /** The Constant REFERENCEID: {@value}. */
+  /** The Constant REFERENCE_ID: {@value}. */
   private static final String REFERENCE_ID = "referenceId";
 
   /** The mongo template. */
