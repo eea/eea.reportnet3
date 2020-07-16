@@ -31,7 +31,10 @@ import org.springframework.util.StringUtils;
 @Component
 public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorService {
 
-  /** The r 3 base. */
+  private static final String REPOSITORY = "repository";
+  /**
+   * The r 3 base.
+   */
   @Value("${integration.fme.callback.urlbase}")
   private String r3base;
 
@@ -118,7 +121,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
     DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     Long dataflowId = 0L;
-    if (null != integration.getInternalParameters().get("repository")) {
+    if (null != integration.getInternalParameters().get(REPOSITORY)) {
       dataflowId = dataset.getDataflowId();
     } else {
       dataflowId = dataSetControllerZuul.getDataFlowIdById(datasetId);
@@ -138,8 +141,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     FMEAsyncJob fmeAsyncJob = new FMEAsyncJob();
     String workspace = integration.getInternalParameters().get("processName");
     String repository = null;
-    if (null != integration.getInternalParameters().get("repository")) {
-      repository = integration.getInternalParameters().get("repository");
+    if (null != integration.getInternalParameters().get(REPOSITORY)) {
+      repository = integration.getInternalParameters().get(REPOSITORY);
     } else {
       repository = "ReportNetTesting";
     }
