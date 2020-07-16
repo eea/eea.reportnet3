@@ -106,6 +106,11 @@ public class EUDatasetServiceImpl implements EUDatasetService {
   @Override
   @Async
   public void populateEUDatasetWithDataCollection(Long dataflowId) throws EEAException {
+    // First we lock some operations
+    List<ReportingDatasetVO> reportings =
+        reportingDatasetService.getDataSetIdByDataflowId(dataflowId);
+    addLocksRelatedToPopulateEU(reportings);
+
     // Load the dataCollections to be copied
     List<DataCollection> dataCollectionList = dataCollectionRepository.findByDataflowId(dataflowId);
     List<EUDataset> euDatasetList = euDatasetRepository.findByDataflowId(dataflowId);
@@ -121,7 +126,7 @@ public class EUDatasetServiceImpl implements EUDatasetService {
 
 
     try {
-      Thread.sleep(10000L);
+      Thread.sleep(60000L);
     } catch (InterruptedException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -133,6 +138,9 @@ public class EUDatasetServiceImpl implements EUDatasetService {
       datasetSnapshotService.restoreSnapshotToCloneData(entry.getKey(), entry.getValue(),
           snap.getId(), true, DatasetTypeEnum.EUDATASET);
     }
+    // Finally, we release the locks
+    removeLocksRelatedToPopulateEU(reportings, dataflowId);
+
     // borrar los snapshots
   }
 
@@ -176,8 +184,8 @@ public class EUDatasetServiceImpl implements EUDatasetService {
     }
   }
 
-  private void removeLocksRelatedToPopulateEU(List<ReportingDatasetVO> reportings, Long dataflowId)
-      throws EEAException {
+  private void removeLocksRelatedToPopulateEU(List<ReportingDatasetVO> reportings,
+      Long dataflowId) {
     List<Object> criteria = new ArrayList<>();
     criteria.add(LockSignature.POPULATE_EU_DATASET.getValue());
     criteria.add(dataflowId);
