@@ -36,17 +36,17 @@ export const apiIntegration = {
     return response;
   },
 
-  getProcesses: async repositoryName => {
+  getProcesses: async (repositoryName, datasetId) => {
     const response = await HTTPRequester.get({
-      url: getUrl(IntegrationConfig.getProcesses, { repositoryName })
+      url: getUrl(IntegrationConfig.getProcesses, { datasetId, repositoryName })
     });
 
     return response.data;
   },
 
-  getRepositories: async () => {
+  getRepositories: async datasetId => {
     const response = await HTTPRequester.get({
-      url: getUrl(IntegrationConfig.getRepositories)
+      url: getUrl(IntegrationConfig.getRepositories, { datasetId })
     });
 
     return response.data;

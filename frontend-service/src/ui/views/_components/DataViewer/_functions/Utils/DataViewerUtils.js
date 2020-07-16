@@ -80,16 +80,6 @@ const getLevelError = validations => {
   return levelError;
 };
 
-const groupOperations = (operation, list) => {
-  const extensionList = list.reduce((objectsByKeyValue, obj) => {
-    const value = obj[operation].toLowerCase();
-    objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
-    return objectsByKeyValue;
-  }, {});
-
-  return { export: extensionList['export'] || [], import: extensionList['import'] || [] };
-};
-
 const groupValidations = (recordData, blockerMessage, errorMessage, warningMessage, infoMessage) => {
   let validations = [];
   if (recordData.recordValidations && !isUndefined(recordData.recordValidations)) {
@@ -212,7 +202,6 @@ export const DataViewerUtils = {
   getColumnByHeader,
   getFieldValues,
   getLevelError,
-  groupOperations,
   groupValidations,
   orderValidationsByLevelError,
   parseData

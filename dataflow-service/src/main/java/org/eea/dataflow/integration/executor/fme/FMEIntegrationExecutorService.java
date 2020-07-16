@@ -31,7 +31,10 @@ import org.springframework.util.StringUtils;
 @Component
 public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorService {
 
-  /** The r 3 base. */
+  private static final String REPOSITORY = "repository";
+  /**
+   * The r 3 base.
+   */
   @Value("${integration.fme.callback.urlbase}")
   private String r3base;
 
