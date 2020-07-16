@@ -17,7 +17,6 @@ import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
-import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.dataset.persistence.metabase.domain.SnapshotSchema;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
@@ -241,7 +240,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       Snapshot snap = new Snapshot();
       snap.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now()));
       snap.setDescription(description);
-      ReportingDataset reportingDataset = new ReportingDataset();
+      DataSetMetabase reportingDataset = new DataSetMetabase();
       reportingDataset.setId(idDataset);
       snap.setReportingDataset(reportingDataset);
       snap.setDataSetName("snapshot from dataset_" + idDataset);

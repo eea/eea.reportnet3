@@ -74,6 +74,10 @@ public enum EventType {
   ADD_DATASET_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "add_dataset_snapshot_completed_event", true),
 
+  /** The add datacollection snapshot completed event. */
+  ADD_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "add_dataCollection_snapshot_completed_event", true),
+
   /** The add dataset snapshot failed event. */
   ADD_DATASET_SNAPSHOT_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "add_dataset_snapshot_failed_event", true),

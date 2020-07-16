@@ -617,7 +617,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               idReportingDataset);
         } else {
           SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
-          dataSetSnapshotControllerZuul.deleteSnapshot(snapshot.getDatasetId(), idSnapshot);
+          System.out.println(snapshot.getId());
+          // dataSetSnapshotControllerZuul.deleteSnapshot(snapshot.getDatasetId(), idSnapshot);
         }
         try {
           kafkaSenderUtils.releaseNotificableKafkaEvent(successEventType, value,

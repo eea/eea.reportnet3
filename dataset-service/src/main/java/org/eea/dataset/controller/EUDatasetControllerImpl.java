@@ -5,11 +5,13 @@ import org.eea.dataset.service.EUDatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.EUDatasetController;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -67,6 +69,9 @@ public class EUDatasetControllerImpl implements EUDatasetController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   public void populateDataFromDataCollection(@PathVariable("dataflowId") Long dataflowId) {
     try {
+      // Set the user name on the thread
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
       euDatasetService.populateEUDatasetWithDataCollection(dataflowId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error populating the EU Dataset because: {}", e.getMessage());
