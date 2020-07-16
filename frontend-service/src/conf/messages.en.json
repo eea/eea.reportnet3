@@ -754,6 +754,6 @@
     "externalExtensions": "External extensions",
     "errorLoadingRepositories": "Error loading repositories",
     "errorLoadingProcesses": "Error loading processes",
-    "matchStringTooltip": "{%R3_COUNTRY_CODE%} can be used"
+    "matchStringTooltip": "Click to use Country code variable"
   }
 }
