@@ -306,17 +306,14 @@ public class ValidationServiceImpl implements ValidationService {
     // Validating tables
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     TableValue table = tableRepository.findById(idTable).orElse(null);
-    // dataset.getTableValues().stream().forEach(table -> {
     KieSession session = kieBase.newKieSession();
 
     try {
       if (table != null) {
-        List<TableValidation> validations = new ArrayList<>();
-        validations = runTableValidations(table, session);
+        List<TableValidation> validations = runTableValidations(table, session);
         if (table.getTableValidations() != null) {
-          table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
-            tableValidation.setTableValue(table);
-          });
+          table.getTableValidations().stream().filter(Objects::nonNull)
+              .forEach(tableValidation -> tableValidation.setTableValue(table));
         }
         tableValidationRepository.saveAll(validations);
       }

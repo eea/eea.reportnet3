@@ -518,8 +518,7 @@ public class ValidationHelper implements DisposableBean {
           pendingOk = 0;
         }
 
-        pendingOk++;
-        processesMap.get(processId).setPendingOks(pendingOk);
+        processesMap.get(processId).setPendingOks(++pendingOk);
         EEAEventVO eeaEventVO = new EEAEventVO();
         eeaEventVO.setEventType(eventType);
         eeaEventVO.setData(value);
