@@ -180,7 +180,8 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
       type: 'ON_SET_ACCOUNT',
       payload: {
         contributors,
-        accountHasError: !isValidEmail(inputValue) || isRepeatedAccount(inputValue)
+        accountHasError: !isValidEmail(inputValue) || isRepeatedAccount(inputValue),
+        accountNotFound: false
       }
     });
   };
