@@ -636,7 +636,7 @@ export const FieldDesigner = ({
         }}
         style={{ width: '70px' }}
       />
-      <label for={`${fieldId}_check_required`} className="srOnly">
+      <label htmlFor={`${fieldId}_check_required`} className="srOnly">
         {resources.messages['required']}
       </label>
       <Checkbox
@@ -653,7 +653,7 @@ export const FieldDesigner = ({
         }}
         style={{ width: '35px' }}
       />
-      <label for={`${fieldId}_check_pk`} className="srOnly">
+      <label htmlFor={`${fieldId}_check_pk`} className="srOnly">
         {resources.messages['pk']}
       </label>
     </div>
@@ -746,7 +746,7 @@ export const FieldDesigner = ({
         required={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue === '' : fieldName === ''}
         value={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue : fieldName}
       />
-      <label for={fieldName} className="srOnly">
+      <label htmlFor={fieldName} className="srOnly">
         {resources.messages['newFieldPlaceHolder']}
       </label>
       <InputTextarea

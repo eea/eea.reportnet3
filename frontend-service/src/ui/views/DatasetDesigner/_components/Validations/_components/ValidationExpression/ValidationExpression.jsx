@@ -215,7 +215,7 @@ const ValidationExpression = ({
               className={`${styles.info} p-button-rounded p-button-secondary-transparent`}
               icon="infoCircle"
               tooltip={resourcesContext.messages['matchStringTooltip']}
-              tooltipOptions={{ position: 'top' }}
+              tooltipOptions={{ position: 'top', hideDelay: 5000 }}
             />
           </span>
         );
