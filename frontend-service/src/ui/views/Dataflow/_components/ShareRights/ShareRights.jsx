@@ -86,7 +86,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
       fContributor => fContributor.id === contributor.id
     );
 
-    return JSON.stringify(initialContributor.writePermission) !== contributor.writePermission;
+    return JSON.stringify(initialContributor.writePermission) !== JSON.stringify(contributor.writePermission);
   };
 
   const updateContributor = contributor => {
