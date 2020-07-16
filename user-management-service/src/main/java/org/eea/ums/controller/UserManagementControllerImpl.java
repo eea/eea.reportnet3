@@ -569,7 +569,6 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("isAuthenticated()")
   @PostMapping("/authenticateByApiKey/{apiKey}")
   public TokenVO authenticateUserByApiKey(@PathVariable("apiKey") String apiKey) {
     return securityProviderInterfaceService.authenticateApiKey(apiKey);

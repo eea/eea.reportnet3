@@ -17,10 +17,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-public class LoadDataCompletedEventTest {
+public class ImportDesignFailedEventTest {
 
   @InjectMocks
-  private LoadDataCompletedEvent loadDataCompletedEvent;
+  private ImportDesignFailedEvent loadSchemaFailedEvent;
 
   @Mock
   private DatasetService datasetService;
@@ -47,16 +47,16 @@ public class LoadDataCompletedEventTest {
 
   @Test
   public void getEventTypeTest() {
-    Assert.assertEquals(EventType.LOAD_DATA_COMPLETED_EVENT, loadDataCompletedEvent.getEventType());
+    Assert.assertEquals(EventType.IMPORT_DESIGN_FAILED_EVENT, loadSchemaFailedEvent.getEventType());
   }
 
   @Test
   public void getMapTest() throws EEAException {
-    Assert.assertEquals(8,
-        loadDataCompletedEvent.getMap(NotificationVO.builder().user("user").datasetId(1L)
-            .dataflowId(1L).datasetName("datasetName").dataflowName("dataflowName")
-            .tableSchemaId("tableSchemaId").tableSchemaName("tableSchemaName").fileName("fileName")
-            .build()).size());
+    Assert.assertEquals(9, loadSchemaFailedEvent
+        .getMap(NotificationVO.builder().user("user").datasetId(1L).dataflowId(1L)
+            .datasetName("datasetName").dataflowName("dataflowName").tableSchemaId("tableSchemaId")
+            .tableSchemaName("tableSchemaName").fileName("fileName").error("error").build())
+        .size());
   }
 
   @Test
@@ -70,10 +70,7 @@ public class LoadDataCompletedEventTest {
         .thenReturn("tableSchemaName");
     Mockito.when(datasetMetabaseVO.getDataSetName()).thenReturn("datasetName");
     Mockito.when(dataflowVO.getName()).thenReturn("dataflowName");
-    Assert.assertEquals(8,
-        loadDataCompletedEvent
-            .getMap(
-                NotificationVO.builder().user("user").datasetId(1L).fileName("fileName").build())
-            .size());
+    Assert.assertEquals(9, loadSchemaFailedEvent.getMap(NotificationVO.builder().user("user")
+        .datasetId(1L).fileName("fileName").error("error").build()).size());
   }
 }

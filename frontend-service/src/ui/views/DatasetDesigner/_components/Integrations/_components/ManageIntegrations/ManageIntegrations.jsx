@@ -24,7 +24,15 @@ import { useLockBodyScroll } from 'ui/views/_functions/Hooks/useLockBodyScroll';
 import { ManageIntegrationsUtils } from './_functions/Utils/ManageIntegrationsUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
-export const ManageIntegrations = ({ dataflowId, designerState, integrationsList, manageDialogs, updatedData }) => {
+export const ManageIntegrations = ({
+  dataflowId,
+  datasetId,
+  designerState,
+  integrationsList,
+  manageDialogs,
+  onUpdateData,
+  updatedData
+}) => {
   const { datasetSchemaId, isIntegrationManageDialogVisible } = designerState;
   const componentName = 'integration';
 
@@ -99,29 +107,28 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
     try {
       manageIntegrationsDispatch({
         type: 'GET_REPOSITORIES',
-        payload: { data: await IntegrationService.getRepositories() }
+        payload: { data: await IntegrationService.getRepositories(datasetId) }
       });
     } catch (error) {
-      //add noti
+      notificationContext.add({ type: 'ERROR_LOADING_REPOSITORIES' });
     }
   };
 
   const getProcesses = async () => {
+    console.log({manageIntegrationsState})
     if (!isEmpty(manageIntegrationsState.repository)) {
       try {
         manageIntegrationsDispatch({
           type: 'GET_PROCESSES',
-          payload: { data: await IntegrationService.getProcesses(manageIntegrationsState.repository.value) }
+          payload: { data: await IntegrationService.getProcesses(manageIntegrationsState.repository.value, datasetId) }
         });
       } catch (error) {
-        //add noti
+        notificationContext.add({ type: 'ERROR_LOADING_PROCESSES' });
       }
     } else {
       manageIntegrationsDispatch({ type: 'GET_PROCESSES', payload: { data: [] } });
     }
   };
-
-  console.log({manageIntegrationsState})
 
   const getUpdatedData = () => manageIntegrationsDispatch({ type: 'GET_UPDATED_DATA', payload: updatedData });
 
@@ -152,6 +159,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
       const response = await IntegrationService.create(manageIntegrationsState);
       if (response.status >= 200 && response.status <= 299) {
         manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
+        onUpdateData();
       }
     } catch (error) {
       notificationContext.add({ type: 'CREATE_INTEGRATION_ERROR' });
@@ -191,6 +199,10 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
   };
 
   const onFillField = (data, name) => manageIntegrationsDispatch({ type: 'ON_FILL', payload: { data, name } });
+
+  const onFillFieldRepository = (data, name) => {
+    manageIntegrationsDispatch({ type: 'ON_FILL_REPOSITORY', payload: { data, name, processName: [] } });
+  };
 
   const onResetParameterInput = () => {
     manageIntegrationsDispatch({
@@ -242,6 +254,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
       const response = await IntegrationService.update(manageIntegrationsState);
       if (response.status >= 200 && response.status <= 299) {
         manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
+        onUpdateData();
       }
     } catch (error) {
       notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' });
@@ -322,7 +335,9 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
     };
 
     return options.map((option, index) => (
-      <div className={`${styles.field} ${styles[option]} formField ${printError(option, manageIntegrationsState)}`} key={index}>
+      <div
+        className={`${styles.field} ${styles[option]} formField ${printError(option, manageIntegrationsState)}`}
+        key={index}>
         <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
         <Dropdown
           appendTo={document.body}
@@ -330,14 +345,17 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
           filter={optionList[option].length > 7}
           disabled={isEmpty(optionList[option])}
           inputId={`${componentName}__${option}`}
-          onChange={event => onFillField(event.value, option)}
+          onChange={event =>
+            option === 'repository' ? onFillFieldRepository(event.value, option) : onFillField(event.value, option)
+          }
           optionLabel="label"
           options={optionList[option]}
           placeholder={resources.messages[`${option}PlaceHolder`]}
           value={manageIntegrationsState[option]}
         />
       </div>
-  ))};
+    ));
+  };
 
   const renderEditorInput = (option, parameter, id) => {
     return (
@@ -415,8 +433,7 @@ export const ManageIntegrations = ({ dataflowId, designerState, integrationsList
     <Fragment>
       <div className={styles.content}>
         <div className={styles.group}>{renderInputLayout(['name', 'description'])}</div>
-        <div className={styles.group}>
-          {renderDropdownLayout(['repository', 'processName'])}</div>
+        <div className={styles.group}>{renderDropdownLayout(['repository', 'processName'])}</div>
         <div className={styles.group}>
           {renderDropdownLayout(['operation'])}
           {renderInputLayout(['fileExtension'])}
