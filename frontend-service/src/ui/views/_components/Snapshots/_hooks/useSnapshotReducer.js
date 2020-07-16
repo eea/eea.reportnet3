@@ -61,18 +61,6 @@ const useSnapshotReducer = (
           action: onRestoreSnapshot
         };
 
-      case 'mark_as_restored':
-        return {
-          ...state,
-          restored: state.snapshotId
-        };
-
-      case 'clear_restored':
-        return {
-          ...state,
-          restored: undefined
-        };
-
       default:
         return state;
     }

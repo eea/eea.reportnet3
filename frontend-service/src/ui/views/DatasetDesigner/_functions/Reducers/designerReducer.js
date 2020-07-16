@@ -31,6 +31,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'HIGHLIGHT_REFRESH':
       return { ...state, isRefreshHighlighted: payload.value };
 
+    case 'UPDATED_IS_DUPLICATED':
+      return { ...state, isDuplicatedToManageUnique: payload.value };
+
     case 'INITIAL_DATASET_DESCRIPTION':
       return { ...state, initialDatasetDescription: payload.value };
 

@@ -182,7 +182,7 @@ const ActionsToolbar = ({
           className={`p-button-rounded p-button-secondary ${
             !hasWritePermissions || tableReadOnly ? null : 'p-button-animated-blink'
           }`}
-          disabled={!hasWritePermissions || tableReadOnly}
+          disabled={!hasWritePermissions || tableReadOnly || isDataCollection}
           icon={'import'}
           label={resources.messages['importTable']}
           onClick={() => setImportTableDialogVisible(true)}

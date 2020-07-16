@@ -203,6 +203,7 @@ const ValidationExpression = ({
     }
     if (operatorType === 'string') {
       if (operatorValue === 'MATCH') {
+        const valueBtnCC = `${expressionValues.expressionValue}{%R3_COUNTRY_CODE%}`;
         return (
           <span className={styles.inputStringMatch}>
             <InputText
@@ -212,10 +213,11 @@ const ValidationExpression = ({
               value={expressionValues.expressionValue}
             />
             <Button
-              className={`${styles.info} p-button-rounded p-button-secondary-transparent`}
-              icon="infoCircle"
+              className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
+              label="CC"
               tooltip={resourcesContext.messages['matchStringTooltip']}
-              tooltipOptions={{ position: 'top', hideDelay: 5000 }}
+              tooltipOptions={{ position: 'top' }}
+              onClick={e => onUpdateExpressionField('expressionValue', valueBtnCC)}
             />
           </span>
         );
