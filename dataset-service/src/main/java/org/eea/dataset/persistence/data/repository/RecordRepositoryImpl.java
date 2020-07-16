@@ -36,7 +36,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   private EntityManager entityManager;
 
   /** The Constant WHERE_TV: {@value}. */
-  private static final String WHERE_TVIDTABLESCHEMA = "WHERE tv.idTableSchema = :idTableSchema ";
+  private static final String WHERE_ID_TABLE_SCHEMA = "WHERE tv.idTableSchema = :idTableSchema ";
 
   /** The Constant AS_ORDER_CRITERIA: {@value} */
   private static final String AS_ORDER_CRITERIA = ") as order_criteria_%s ";
@@ -106,15 +106,15 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   /** The Constant MASTER_QUERY: {@value}. */
   private static final String MASTER_QUERY =
-      "SELECT rv %s from RecordValue rv INNER JOIN rv.tableValue tv " + WHERE_TVIDTABLESCHEMA;
+      "SELECT rv %s from RecordValue rv INNER JOIN rv.tableValue tv " + WHERE_ID_TABLE_SCHEMA;
 
   /** The Constant MASTER_QUERY_NO_ORDER: {@value}. */
   private static final String MASTER_QUERY_NO_ORDER =
-      "SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv " + WHERE_TVIDTABLESCHEMA;
+      "SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv " + WHERE_ID_TABLE_SCHEMA;
 
   /** The Constant MASTER_QUERY_COUNT: {@value}. */
   private static final String MASTER_QUERY_COUNT =
-      "SELECT count(rv) from RecordValue rv INNER JOIN rv.tableValue tv " + WHERE_TVIDTABLESCHEMA;
+      "SELECT count(rv) from RecordValue rv INNER JOIN rv.tableValue tv " + WHERE_ID_TABLE_SCHEMA;
 
   /** The Constant FINAL_MASTER_QUERY: {@value}. */
   private static final String FINAL_MASTER_QUERY = " order by %s";
