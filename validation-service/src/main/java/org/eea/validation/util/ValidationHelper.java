@@ -541,7 +541,7 @@ public class ValidationHelper implements DisposableBean {
 
 
   @AllArgsConstructor
-  private class ValidationTask {
+  private static class ValidationTask {
 
     /**
      * The Eea event vo.

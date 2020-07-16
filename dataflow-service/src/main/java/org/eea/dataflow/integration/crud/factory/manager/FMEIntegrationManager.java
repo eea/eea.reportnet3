@@ -2,6 +2,7 @@ package org.eea.dataflow.integration.crud.factory.manager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.eea.dataflow.integration.crud.factory.AbstractCrudManager;
 import org.eea.dataflow.mapper.IntegrationMapper;
 import org.eea.dataflow.persistence.domain.Integration;
@@ -25,34 +26,33 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 public class FMEIntegrationManager extends AbstractCrudManager {
 
-  private static final String DATAFLOW_ID = "dataflowId";
 
-  private static final String DATASET_SCHEMA_ID = "datasetSchemaId";
   /**
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(FMEIntegrationManager.class);
 
-  /**
-   * The integration repository.
-   */
+  /** The integration repository. */
   @Autowired
   private IntegrationRepository integrationRepository;
 
-  /**
-   * The integration mapper.
-   */
+  /** The integration mapper. */
   @Autowired
   private IntegrationMapper integrationMapper;
 
+  /** The operation parameters repository. */
   @Autowired
   private OperationParametersRepository operationParametersRepository;
 
+
+  /** The Constant DATAFLOW_ID: {@value}. */
+  private static final String DATAFLOW_ID = "dataflowId";
+
+  /** The Constant DATASETSCHEMA_ID: {@value}. */
+  private static final String DATASET_SCHEMA_ID = "datasetSchemaId";
 
   /**
    * Gets the tool type.
@@ -68,9 +68,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
    * Gets the.
    *
    * @param integrationVO the integration VO
-   *
    * @return the list
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -78,15 +76,16 @@ public class FMEIntegrationManager extends AbstractCrudManager {
 
     List<IntegrationVO> results = new ArrayList<>();
     if (integrationVO.getId() != null) {
-      Integration integration = integrationRepository.findById(integrationVO.getId()).get();
+      Optional<Integration> integrationOptional =
+          integrationRepository.findById(integrationVO.getId());
+      Integration integration = integrationOptional.isPresent() ? integrationOptional.get() : null;
       results.add(integrationMapper.entityToClass(integration));
     } else if (integrationVO.getInternalParameters() != null
         && integrationVO.getInternalParameters().size() > 0) {
       if (integrationVO.getInternalParameters().containsKey(DATAFLOW_ID)) {
         integrationVO.getInternalParameters().remove(DATAFLOW_ID);
       }
-      List<String> parameters =
-          new ArrayList<>(integrationVO.getInternalParameters().keySet());
+      List<String> parameters = new ArrayList<>(integrationVO.getInternalParameters().keySet());
       String parameter = parameters.get(0);
       String value = integrationVO.getInternalParameters().get(parameter);
       List<Integration> integrationList =
@@ -105,7 +104,6 @@ public class FMEIntegrationManager extends AbstractCrudManager {
    * Update.
    *
    * @param integrationVO the integration VO
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -142,7 +140,6 @@ public class FMEIntegrationManager extends AbstractCrudManager {
    * Creates the.
    *
    * @param integrationVO the integration VO
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -168,7 +165,6 @@ public class FMEIntegrationManager extends AbstractCrudManager {
    * Delete.
    *
    * @param integrationId the integration id
-   *
    * @throws EEAException the EEA exception
    */
   @Override

@@ -72,6 +72,9 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
    */
   private static final Logger LOG = LoggerFactory.getLogger(FMEIntegrationExecutorService.class);
 
+  /** The Constant REPOSITORY: {@value}. */
+  private static final String REPOSITORY = "repository";
+
   /**
    * Gets the executor type.
    *
@@ -147,6 +150,29 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
       repository = "ReportNetTesting";
     }
 
+    return switchIntegrationOperatorEnum(integrationOperationTypeEnum, datasetId, fileName,
+        integration, dataflowId, dataproviderId, apiKey, fmeAsyncJob, workspace, repository);
+  }
+
+  /**
+   * Switch integration operator enum.
+   *
+   * @param integrationOperationTypeEnum the integration operation type enum
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @param integration the integration
+   * @param dataflowId the dataflow id
+   * @param dataproviderId the dataprovider id
+   * @param apiKey the api key
+   * @param fmeAsyncJob the fme async job
+   * @param workspace the workspace
+   * @param repository the repository
+   * @return the execution result VO
+   */
+  private ExecutionResultVO switchIntegrationOperatorEnum(
+      IntegrationOperationTypeEnum integrationOperationTypeEnum, Long datasetId, String fileName,
+      IntegrationVO integration, Long dataflowId, Long dataproviderId, String apiKey,
+      FMEAsyncJob fmeAsyncJob, String workspace, String repository) {
     List<PublishedParameter> parameters = new ArrayList<>();
     String paramDataProvider =
         StringUtils.isEmpty(dataproviderId) ? "design" : String.valueOf(dataproviderId);
