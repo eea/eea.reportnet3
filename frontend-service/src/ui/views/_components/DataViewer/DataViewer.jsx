@@ -442,7 +442,6 @@ const DataViewer = withRouter(
         setIsTableDeleted(true);
         dispatchRecords({ type: 'SET_TOTAL', payload: 0 });
         dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
-        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
       } catch (error) {
         const {
           dataflow: { name: dataflowName },
@@ -467,7 +466,6 @@ const DataViewer = withRouter(
       try {
         await DatasetService.deleteRecordById(datasetId, records.selectedRecord.recordId);
 
-        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         const calcRecords = records.totalFilteredRecords >= 0 ? records.totalFilteredRecords : records.totalRecords;
         const page =
           (calcRecords - 1) / records.recordsPerPage === 1
@@ -549,8 +547,6 @@ const DataViewer = withRouter(
                 tableName
               }
             });
-          } finally {
-            snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           }
         }
         if (isEditing) {
@@ -648,7 +644,6 @@ const DataViewer = withRouter(
         try {
           setIsSaving(true);
           await DatasetService.addRecordsById(datasetId, tableId, [parseMultiselect(record)]);
-          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           setIsTableDeleted(false);
           onRefresh();
         } catch (error) {
@@ -677,7 +672,6 @@ const DataViewer = withRouter(
         try {
           await DatasetService.updateRecordsById(datasetId, parseMultiselect(record));
           onRefresh();
-          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         } catch (error) {
           const {
             dataflow: { name: dataflowName },
@@ -924,7 +918,7 @@ const DataViewer = withRouter(
             id={tableId}
             first={records.firstPageRecord}
             footer={
-              hasWritePermissions && !tableReadOnly ? (
+              hasWritePermissions && !tableReadOnly && !isDataCollection ? (
                 <Footer
                   hasWritePermissions={hasWritePermissions && !tableReadOnly}
                   onAddClick={() => {
