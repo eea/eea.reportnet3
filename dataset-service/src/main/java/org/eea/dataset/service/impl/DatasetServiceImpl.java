@@ -544,27 +544,10 @@ public class DatasetServiceImpl implements DatasetService {
     Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
 
     // Check if we need to put all the records without pagination
-    if (pageable == null && totalRecords > 0) {
-      pageable = PageRequest.of(0, totalRecords.intValue());
-    }
-    if (pageable == null && totalRecords == 0) {
-      pageable = PageRequest.of(0, 20);
-    }
+    pageable = calculatePageable(pageable, totalRecords);
 
-    if (null == fields && (null == levelError || levelError.length == 5)) {
-
-      records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
-
-      List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(records);
-      result.setTotalFilteredRecords(0L);
-      result.setRecords(recordVOs);
-
-    } else {
-
-      result = fieldsMap(idTableSchema, pageable, fields, levelError, commonShortFields, mapFields,
-          sortFieldsArray, newFields);
-
-    }
+    result = calculatedErrorsAndRecordsToSee(idTableSchema, pageable, fields, levelError,
+        commonShortFields, mapFields, sortFieldsArray, newFields, result);
 
     // Table with out values
     if (null == result.getRecords() || result.getRecords().isEmpty()) {
@@ -613,6 +596,59 @@ public class DatasetServiceImpl implements DatasetService {
 
     }
     result.setTotalRecords(totalRecords);
+    return result;
+  }
+
+  /**
+   * Calculate pageable.
+   *
+   * @param pageable the pageable
+   * @param totalRecords the total records
+   * @return the pageable
+   */
+  private Pageable calculatePageable(Pageable pageable, Long totalRecords) {
+    if (pageable == null && totalRecords > 0) {
+      pageable = PageRequest.of(0, totalRecords.intValue());
+    }
+    if (pageable == null && totalRecords == 0) {
+      pageable = PageRequest.of(0, 20);
+    }
+    return pageable;
+  }
+
+  /**
+   * Calculated errors and records to see.
+   *
+   * @param idTableSchema the id table schema
+   * @param pageable the pageable
+   * @param fields the fields
+   * @param levelError the level error
+   * @param commonShortFields the common short fields
+   * @param mapFields the map fields
+   * @param sortFieldsArray the sort fields array
+   * @param newFields the new fields
+   * @param result the result
+   * @return the table VO
+   */
+  private TableVO calculatedErrorsAndRecordsToSee(final String idTableSchema, Pageable pageable,
+      final String fields, ErrorTypeEnum[] levelError, List<String> commonShortFields,
+      Map<String, Integer> mapFields, List<SortField> sortFieldsArray, SortField[] newFields,
+      TableVO result) {
+    List<RecordValue> records;
+    if (null == fields && (null == levelError || levelError.length == 5)) {
+
+      records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
+
+      List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(records);
+      result.setTotalFilteredRecords(0L);
+      result.setRecords(recordVOs);
+
+    } else {
+
+      result = fieldsMap(idTableSchema, pageable, fields, levelError, commonShortFields, mapFields,
+          sortFieldsArray, newFields);
+
+    }
     return result;
   }
 
