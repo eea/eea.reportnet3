@@ -31,7 +31,6 @@ import org.springframework.util.StringUtils;
 @Component
 public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorService {
 
-  private static final String REPOSITORY = "repository";
   /**
    * The r 3 base.
    */
