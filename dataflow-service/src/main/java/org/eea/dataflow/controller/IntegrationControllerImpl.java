@@ -182,16 +182,10 @@ public class IntegrationControllerImpl implements IntegrationController {
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_STEWARD')")
   @PostMapping(value = "/executeEUDatasetExport")
-  public ExecutionResultVO executeEUDatasetExport(@RequestParam("datasetId") Long datasetId) {
-    IntegrationToolTypeEnum integrationToolTypeEnum = IntegrationToolTypeEnum.FME;
-    IntegrationOperationTypeEnum integrationOperationTypeEnum =
-        IntegrationOperationTypeEnum.EXPORT_EU_DATASET;
-    IntegrationVO integration = new IntegrationVO();
-    integration.setTool(integrationToolTypeEnum);
-    integration.setOperation(integrationOperationTypeEnum);
+  public List<ExecutionResultVO> executeEUDatasetExport(
+      @RequestParam("dataflowId") Long dataflowId) {
+    return integrationService.executeEUDatasetExport(dataflowId);
 
-    return integrationExecutorFactory.getExecutor(integrationToolTypeEnum)
-        .execute(integrationOperationTypeEnum, null, datasetId, integration);
   }
 
 
