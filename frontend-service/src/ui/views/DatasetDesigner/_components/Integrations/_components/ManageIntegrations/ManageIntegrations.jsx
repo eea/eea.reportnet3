@@ -115,6 +115,7 @@ export const ManageIntegrations = ({
   };
 
   const getProcesses = async () => {
+    console.log({manageIntegrationsState})
     if (!isEmpty(manageIntegrationsState.repository)) {
       try {
         manageIntegrationsDispatch({

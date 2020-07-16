@@ -237,7 +237,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       label: type.text
     }));
 
-    const externalExtensionsItems = [
+    const externalExtensions = [
       {
         label: resources.messages['externalExtensions'],
         items: extensionsOperationsList.export.map(type => ({
@@ -252,7 +252,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       type: 'GET_EXPORT_LIST',
       payload: {
         exportList: internalExtensionList.concat(
-          !isEmpty(extensionsOperationsList.export) ? externalExtensionsItems : []
+          !isEmpty(extensionsOperationsList.export) ? externalExtensions : []
         )
       }
     });
@@ -403,6 +403,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
+  
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
   useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
@@ -563,6 +564,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       />
     </Fragment>
   );
+
+  const renderCustomFileUploadFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => manageDialogs('isImportDatasetDialogVisible', false)}
+    />
+  );
+
 
   const renderSwitchView = () => (
     <div className={styles.switchDivInput}>
@@ -880,7 +891,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           <Dialog
             className={styles.Dialog}
             dismissableMask={false}
-            // footer={renderCustomFileUploadFooter}
+            footer={renderCustomFileUploadFooter}
             header={`${resources.messages['uploadDataset']}${designerState.datasetSchemaName}`}
             onHide={() => manageDialogs('isImportDatasetDialogVisible', false)}
             visible={designerState.isImportDatasetDialogVisible}>

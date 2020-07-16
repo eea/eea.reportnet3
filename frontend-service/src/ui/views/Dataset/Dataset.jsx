@@ -75,7 +75,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
   const [extensionsOperationsList, setExtensionsOperationsList] = useState({ export: [], import: [] });
-  const [externalExportExtensions, setFMEExportExtensions] = useState([]);
+  const [externalExportExtensions, setExternalExportExtensions] = useState([]);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importDatasetDialogVisible, setImportDatasetDialogVisible] = useState(false);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
@@ -205,7 +205,7 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [datasetSchemaId, importDatasetDialogVisible]);
 
   useEffect(() => {
-    getReportNetandFMEExportExtensions(extensionsOperationsList.export);
+    getExportExtensions(extensionsOperationsList.export);
   }, [extensionsOperationsList]);
 
   const parseUniqsExportExtensions = exportExtensionsOperationsList => {
@@ -215,9 +215,9 @@ export const Dataset = withRouter(({ match, history }) => {
     }));
   };
 
-  const getReportNetandFMEExportExtensions = exportExtensionsOperationsList => {
+  const getExportExtensions = exportExtensionsOperationsList => {
     const uniqsExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
-    setFMEExportExtensions(parseUniqsExportExtensions(uniqsExportExtensions));
+    setExternalExportExtensions(parseUniqsExportExtensions(uniqsExportExtensions));
   };
 
   const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => ({
@@ -228,7 +228,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const externalExtensions = [
     {
-      label: 'FME Extensions',
+      label: resources.messages['externalExtensions'],
       items: externalExportExtensions.map(type => ({
         label: type.text,
         icon: config.icons['archive'],
