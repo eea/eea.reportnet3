@@ -574,8 +574,9 @@ public class DatasetServiceImpl implements DatasetService {
 
       LOG.info(
           "Total records found in datasetId {} idTableSchema {}: {}. Now in page {}, {} records by page",
-          datasetId, idTableSchema, recordVOs.size(), pageable.getPageNumber(),
-          pageable.getPageSize());
+          datasetId, idTableSchema, recordVOs.size(),
+          pageable != null ? pageable.getPageNumber() : null,
+          pageable != null ? pageable.getPageSize() : null);
       if (null != fields) {
         LOG.info("Ordered by idFieldSchema {}", commonShortFields);
       }
@@ -2124,7 +2125,7 @@ public class DatasetServiceImpl implements DatasetService {
             // save values
             TenantResolver
                 .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset));
-            saveAllRecords(targetDataset, recordDesignValuesList);
+            recordRepository.saveAll(recordDesignValuesList);
           }
         }
       }

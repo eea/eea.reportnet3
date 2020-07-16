@@ -2,6 +2,7 @@ package org.eea.dataflow.integration.crud.factory.manager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.eea.dataflow.integration.crud.factory.AbstractCrudManager;
 import org.eea.dataflow.mapper.IntegrationMapper;
 import org.eea.dataflow.persistence.domain.Integration;
@@ -68,7 +69,9 @@ public class FMEIntegrationManager extends AbstractCrudManager {
 
     List<IntegrationVO> results = new ArrayList<>();
     if (integrationVO.getId() != null) {
-      Integration integration = integrationRepository.findById(integrationVO.getId()).get();
+      Optional<Integration> integrationOptional =
+          integrationRepository.findById(integrationVO.getId());
+      Integration integration = integrationOptional.isPresent() ? integrationOptional.get() : null;
       results.add(integrationMapper.entityToClass(integration));
     } else if (integrationVO.getInternalParameters() != null
         && integrationVO.getInternalParameters().size() > 0) {
