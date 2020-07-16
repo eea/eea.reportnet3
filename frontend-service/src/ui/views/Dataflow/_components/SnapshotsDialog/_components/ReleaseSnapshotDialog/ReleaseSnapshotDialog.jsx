@@ -36,14 +36,11 @@ export const ReleaseSnapshotDialog = ({
     } catch (error) {
       setIsLoading(false);
       if (error.response.data == DataflowConf.errorTypes['copyWithErrors']) {
-        notificationContext.add({
-          type: 'RELEASE_BLOCKED_EVENT'
-        });
+        notificationContext.add({ type: 'RELEASE_BLOCKED_EVENT' });
+      } else if (error.response.status === 423) {
+        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });        
       } else {
-        notificationContext.add({
-          type: 'CREATE_BY_ID_REPORTER_ERROR',
-          content: {}
-        });
+        notificationContext.add({ type: 'CREATE_BY_ID_REPORTER_ERROR', content: {} });
       }
     } finally {
       hideReleaseDialog();
@@ -57,10 +54,12 @@ export const ReleaseSnapshotDialog = ({
       onLoadSnapshotList(datasetId);
     } catch (error) {
       setIsLoading(false);
-      notificationContext.add({
-        type: 'RELEASED_BY_ID_REPORTER_ERROR',
-        content: {}
-      });
+
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });               
+      } else {        
+        notificationContext.add({ type: 'RELEASED_BY_ID_REPORTER_ERROR', content: {} });
+      }
     } finally {
       hideReleaseDialog();
     }

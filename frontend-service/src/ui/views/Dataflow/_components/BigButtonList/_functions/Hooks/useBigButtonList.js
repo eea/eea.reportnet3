@@ -408,7 +408,7 @@ const useBigButtonList = ({
       buttonClass: 'schemaDataset',
       buttonIcon: 'angleDoubleRight',
       caption: 'Copy Data Collections to EU Datasets',
-      handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onCopyDataCollectionToEuDataset(),
+      handleRedirect: () => onCopyDataCollectionToEuDataset(),
       layout: 'defaultBigButton',
       visibility:
         buttonsVisibility.copyDataCollectionToEuDataset && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']
@@ -420,7 +420,7 @@ const useBigButtonList = ({
       buttonClass: 'schemaDataset',
       buttonIcon: 'fileExport',
       caption: 'Export EU Datasets',
-      handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onExportEuDataset(),
+      handleRedirect: () => onExportEuDataset(),
       layout: 'defaultBigButton',
       visibility:
         buttonsVisibility.copyDataCollectionToEuDataset && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']
