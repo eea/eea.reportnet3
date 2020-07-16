@@ -18,6 +18,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
@@ -202,5 +203,19 @@ public class FileTreatmentHelperTest {
         "5d4abe555b1c1e0001477410");
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void exectueFileProcessETLTest() {
+    List<IntegrationVO> integrations = new ArrayList<>();
+    IntegrationVO integration = new IntegrationVO();
+    integration.setOperation(IntegrationOperationTypeEnum.IMPORT);
+    integrations.add(integration);
+    Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
+        .thenReturn(integrations);
+    fileTreatmentHelper.executeFileProcess(1L, "fileName", new ByteArrayInputStream(new byte[0]),
+        "5d4abe555b1c1e0001477410");
+    Mockito.verify(integrationController, times(1)).executeIntegrationProcess(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 }
