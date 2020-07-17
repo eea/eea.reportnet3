@@ -43,7 +43,11 @@ public enum LockSignature {
   UPDATE_DATA_COLLECTION("DataCollectionControllerImpl.updateDataCollection(..)"),
 
   /** The copy dataset schema. */
-  COPY_DATASET_SCHEMA("DataSetSchemaControllerImpl.copyDesignsFromDataflow(..)");
+  COPY_DATASET_SCHEMA("DataSetSchemaControllerImpl.copyDesignsFromDataflow(..)"),
+
+  /** The populate eu dataset. */
+  POPULATE_EU_DATASET("EUDatasetControllerImpl.populateDataFromDataCollection(..)");
+
 
   /** The value. */
   private final String value;

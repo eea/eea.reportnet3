@@ -34,7 +34,7 @@ public class Snapshot extends DataSetMetabase {
   /** The reporting dataset. */
   @ManyToOne
   @JoinColumn(name = "REPORTING_DATASET_ID")
-  private ReportingDataset reportingDataset;
+  private DataSetMetabase reportingDataset;
 
   /** The release. */
   @Column(name = "RELEASE")

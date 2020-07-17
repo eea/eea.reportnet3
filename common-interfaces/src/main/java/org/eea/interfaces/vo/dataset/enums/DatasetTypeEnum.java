@@ -18,7 +18,10 @@ public enum DatasetTypeEnum {
 
 
   /** The collection. */
-  COLLECTION("COLLECTION");
+  COLLECTION("COLLECTION"),
+
+  /** The eudataset. */
+  EUDATASET("EUDATASET");
 
 
   /** The value. */

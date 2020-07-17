@@ -48,6 +48,26 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
+   * Gets the by id.
+   *
+   * @param idSnapshot the id snapshot
+   * @return the by id
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/{idSnapshot}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("isAuthenticated()")
+  public SnapshotVO getById(@PathVariable("idSnapshot") Long idSnapshot) {
+    SnapshotVO snapshot = null;
+    try {
+      snapshot = datasetSnapshotService.getById(idSnapshot);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error getting the snapshot. ", e.getMessage(), e);
+    }
+    return snapshot;
+  }
+
+  /**
    * Gets the snapshots by id dataset.
    *
    * @param datasetId the dataset id
@@ -94,7 +114,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
 
     // This method will release the lock
     datasetSnapshotService.addSnapshot(datasetId, createSnapshot.getDescription(),
-        createSnapshot.getReleased());
+        createSnapshot.getReleased(), null);
   }
 
   /**
@@ -106,7 +126,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{idSnapshot}/dataset/{idDataset}/delete")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE') AND checkPermission('Dataset','MANAGE_DATA')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATACOLLECTION_CUSTODIAN')")
   public void deleteSnapshot(@PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
 
@@ -168,8 +188,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER')")
   @LockMethod(removeWhenFinish = false)
-  public void releaseSnapshot(@PathVariable("idDataset") Long datasetId,
-      @LockCriteria(name = "snapshotId") @PathVariable("idSnapshot") Long idSnapshot) {
+  public void releaseSnapshot(
+      @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
+      @PathVariable("idSnapshot") Long idSnapshot) {
 
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
@@ -321,4 +342,5 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
 
     return new ResponseEntity<>(stream, HttpStatus.OK);
   }
+
 }

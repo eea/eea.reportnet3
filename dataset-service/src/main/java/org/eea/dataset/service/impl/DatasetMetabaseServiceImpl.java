@@ -25,6 +25,7 @@ import org.eea.dataset.persistence.metabase.domain.Statistics;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
@@ -141,6 +142,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    */
   @Autowired
   private ForeignRelationsRepository foreignRelationsRepository;
+
+  /** The eu dataset repository. */
+  @Autowired
+  private EUDatasetRepository euDatasetRepository;
 
 
   /**
@@ -717,6 +722,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       type = DatasetTypeEnum.REPORTING;
     } else if (dataCollectionRepository.existsById(datasetId)) {
       type = DatasetTypeEnum.COLLECTION;
+    } else if (euDatasetRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.EUDATASET;
     }
 
     return type;
