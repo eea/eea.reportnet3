@@ -56,16 +56,20 @@ public class EUDatasetServiceImpl implements EUDatasetService {
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
 
+  /** The snapshot repository. */
   @Autowired
   private SnapshotRepository snapshotRepository;
 
 
+  /** The lock service. */
   @Autowired
   private LockService lockService;
 
+  /** The reporting dataset service. */
   @Autowired
   private ReportingDatasetService reportingDatasetService;
 
+  /** The partition data set metabase repository. */
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
@@ -109,7 +113,7 @@ public class EUDatasetServiceImpl implements EUDatasetService {
     // First we lock some operations
     List<ReportingDatasetVO> reportings =
         reportingDatasetService.getDataSetIdByDataflowId(dataflowId);
-    addLocksRelatedToPopulateEU(reportings);
+    addLocksRelatedToPopulateEU(reportings, dataflowId);
 
     // Load the dataCollections to be copied
     List<DataCollection> dataCollectionList = dataCollectionRepository.findByDataflowId(dataflowId);
@@ -170,8 +174,16 @@ public class EUDatasetServiceImpl implements EUDatasetService {
   }
 
 
-  private void addLocksRelatedToPopulateEU(List<ReportingDatasetVO> reportings)
+  /**
+   * Adds the locks related to populate EU.
+   *
+   * @param reportings the reportings
+   * @param dataflowId the dataflow id
+   * @throws EEAException the EEA exception
+   */
+  private void addLocksRelatedToPopulateEU(List<ReportingDatasetVO> reportings, Long dataflowId)
       throws EEAException {
+    // Locks to avoid a provider can release a snapshot
     for (ReportingDatasetVO reporting : reportings) {
       Map<String, Object> mapCriteria = new HashMap<>();
       mapCriteria.put("signature", LockSignature.RELEASE_SNAPSHOT.getValue());
@@ -180,15 +192,36 @@ public class EUDatasetServiceImpl implements EUDatasetService {
           SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
           mapCriteria);
     }
+    // Lock to avoid export EUDataset while is copying data
+    Map<String, Object> mapCriteriaExport = new HashMap<>();
+    mapCriteriaExport.put("signature", LockSignature.RELEASE_SNAPSHOT.getValue());
+    mapCriteriaExport.put("dataflowId", dataflowId);
+    lockService.createLock(new Timestamp(System.currentTimeMillis()),
+        SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
+        mapCriteriaExport);
   }
 
+  /**
+   * Removes the locks related to populate EU.
+   *
+   * @param reportings the reportings
+   * @param dataflowId the dataflow id
+   */
   private void removeLocksRelatedToPopulateEU(List<ReportingDatasetVO> reportings,
       Long dataflowId) {
+    // Release lock to the copy data to EU
     List<Object> criteria = new ArrayList<>();
     criteria.add(LockSignature.POPULATE_EU_DATASET.getValue());
     criteria.add(dataflowId);
     lockService.removeLockByCriteria(criteria);
 
+    // Release lock to the export EU
+    List<Object> criteriaExport = new ArrayList<>();
+    criteriaExport.add(LockSignature.EXPORT_EU_DATASET.getValue());
+    criteriaExport.add(dataflowId);
+    lockService.removeLockByCriteria(criteriaExport);
+
+    // Release locks to avoid a provider can release a snapshot
     for (ReportingDatasetVO reporting : reportings) {
       List<Object> criteriaReporting = new ArrayList<>();
       criteriaReporting.add(LockSignature.RELEASE_SNAPSHOT.getValue());
@@ -199,40 +232,14 @@ public class EUDatasetServiceImpl implements EUDatasetService {
   }
 
 
-  public void pruebaLock(Long dataflowId) throws EEAException, InterruptedException {
-
-    List<ReportingDatasetVO> reportings =
-        reportingDatasetService.getDataSetIdByDataflowId(dataflowId);
-
-    for (ReportingDatasetVO reporting : reportings) {
-      List<Object> criteriaReporting = new ArrayList<>();
-      criteriaReporting.add(LockSignature.RELEASE_SNAPSHOT.getValue());
-      criteriaReporting.add(reporting.getId());
-      Map<String, Object> mapa = new HashMap<>();
-      mapa.put("signature", LockSignature.RELEASE_SNAPSHOT.getValue());
-      mapa.put("datasetId", reporting.getId());
-      lockService.createLock(new Timestamp(System.currentTimeMillis()),
-          SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD, mapa);
-    }
-
-    Thread.sleep(60000L);
-
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.POPULATE_EU_DATASET.getValue());
-    criteria.add(dataflowId);
-    lockService.removeLockByCriteria(criteria);
-
-    for (ReportingDatasetVO reporting : reportings) {
-      List<Object> criteriaReporting = new ArrayList<>();
-      criteriaReporting.add(LockSignature.RELEASE_SNAPSHOT.getValue());
-      criteriaReporting.add(reporting.getId());
-
-      lockService.removeLockByCriteria(criteriaReporting);
-    }
-
-  }
-
-
+  /**
+   * Obtain partition.
+   *
+   * @param datasetId the dataset id
+   * @param user the user
+   * @return the partition data set metabase
+   * @throws EEAException the EEA exception
+   */
   private PartitionDataSetMetabase obtainPartition(final Long datasetId, final String user)
       throws EEAException {
     final PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository

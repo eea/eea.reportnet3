@@ -1,6 +1,7 @@
 package org.eea.dataflow;
 
 
+import org.eea.lock.annotation.EnableLockAspect;
 import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.eea.swagger.EnableEEASwagger;
 import org.springframework.boot.SpringApplication;
@@ -19,6 +20,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @EnableEEASwagger
 @EeaEnableSecurity
 @EnableCaching
+@EnableLockAspect
 public class DataFlowApplication {
 
 

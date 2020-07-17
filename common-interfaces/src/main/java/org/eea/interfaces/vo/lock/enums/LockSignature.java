@@ -46,7 +46,10 @@ public enum LockSignature {
   COPY_DATASET_SCHEMA("DataSetSchemaControllerImpl.copyDesignsFromDataflow(..)"),
 
   /** The populate eu dataset. */
-  POPULATE_EU_DATASET("EUDatasetControllerImpl.populateDataFromDataCollection(..)");
+  POPULATE_EU_DATASET("EUDatasetControllerImpl.populateDataFromDataCollection(..)"),
+
+  /** The export eu dataset. */
+  EXPORT_EU_DATASET("IntegrationControllerImpl.executeEUDatasetExport(..)");
 
 
   /** The value. */

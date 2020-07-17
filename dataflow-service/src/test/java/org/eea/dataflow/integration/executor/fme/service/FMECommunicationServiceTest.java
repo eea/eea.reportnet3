@@ -124,21 +124,6 @@ public class FMECommunicationServiceTest {
         Mockito.any());
   }
 
-  @Test(expected = UnsupportedOperationException.class)
-  public void operationFinishedUnsupportedTest() throws EEAException {
-    FMEOperationInfoVO fmeOperationInfoVO = new FMEOperationInfoVO();
-    fmeOperationInfoVO.setDatasetId(1L);
-    fmeOperationInfoVO.setDataflowId(1L);
-    fmeOperationInfoVO.setProviderId(1L);
-    fmeOperationInfoVO.setFileName("fileName");
-    fmeOperationInfoVO.setFmeOperation(FMEOperation.EXPORT_EU_DATASET);
-    try {
-      fmeCommunicationService.operationFinished(fmeOperationInfoVO);
-    } catch (UnsupportedOperationException e) {
-      Assert.assertEquals("Not yet implemented", e.getMessage());
-      throw e;
-    }
-  }
 
   @Test
   public void operationFinishedKafkaExceptionTest() throws EEAException {

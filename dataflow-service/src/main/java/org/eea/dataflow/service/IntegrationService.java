@@ -73,12 +73,14 @@ public interface IntegrationService {
       Map<String, String> dictionaryOriginTargetObjectId) throws EEAException;
 
 
+
   /**
    * Execute EU dataset export.
    *
    * @param dataflowId the dataflow id
-   * @return the execution result VO
+   * @return the list
+   * @throws EEAException the EEA exception
    */
-  public List<ExecutionResultVO> executeEUDatasetExport(Long dataflowId);
+  public List<ExecutionResultVO> executeEUDatasetExport(Long dataflowId) throws EEAException;
 
 }
