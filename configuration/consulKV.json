@@ -241,7 +241,7 @@
   },
   {
     "key": "config/dataflow/integration.fme.default.repository",
-    "value": "${FME_REPOSITORY:ReportNetTesting}"
+    "value": "JHtGTUVfUkVQT1NJVE9SWTpSZXBvcnROZXRUZXN0aW5nfQ=="
   },
   {
     "key": "config/dataflow/integration.fme.eu.job",
