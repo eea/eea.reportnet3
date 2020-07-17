@@ -49,6 +49,7 @@ public interface DatasetController {
    * @param pageSize the page size
    * @param fields the fields
    * @param levelError the level error
+   *
    * @return the data tables values
    */
   @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -80,6 +81,13 @@ public interface DatasetController {
   void loadTableData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
       @PathVariable(value = "idTableSchema") String idTableSchema);
 
+  @HystrixCommand
+  @PostMapping("{id}/loadDatasetData")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ')")
+  void loadTableData(
+      @PathVariable("id") Long datasetId,
+      @RequestParam("file") MultipartFile file);
+
   /**
    * Delete import data.
    *
@@ -94,6 +102,7 @@ public interface DatasetController {
    * @param id the id
    * @param idDataset the id dataset
    * @param type the type
+   *
    * @return the table from any object id
    */
   @GetMapping(value = "findPositionFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -105,6 +114,7 @@ public interface DatasetController {
    * Gets the by id.
    *
    * @param datasetId the dataset id
+   *
    * @return the by id
    */
   @GetMapping(value = "{id}")
@@ -114,6 +124,7 @@ public interface DatasetController {
    * Gets the data flow id by id.
    *
    * @param datasetId the dataset id
+   *
    * @return the data flow id by id
    */
   @GetMapping("{id}/dataflow")
@@ -161,14 +172,15 @@ public interface DatasetController {
       @PathVariable("tableSchemaId") final String tableSchemaId);
 
 
-
   /**
    * Export file.
    *
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param mimeType the mime type
+   *
    * @return the response entity
+   *
    * @throws Exception the exception
    */
   @GetMapping("/exportFile")
@@ -202,6 +214,7 @@ public interface DatasetController {
    * @param datasetIdOrigin the dataset id origin
    * @param idFieldSchema the id field schema
    * @param searchValue the search value
+   *
    * @return the field values referenced
    */
   @GetMapping("/{id}/getFieldsValuesReferenced")
@@ -215,6 +228,7 @@ public interface DatasetController {
    *
    * @param datasetIdOrigin the dataset id origin
    * @param idFieldSchema the id field schema
+   *
    * @return the referenced dataset id
    */
   @GetMapping("/private/getReferencedDatasetId")
@@ -225,6 +239,7 @@ public interface DatasetController {
    * Gets the dataset type.
    *
    * @param datasetId the dataset id
+   *
    * @return the dataset type
    */
   @GetMapping("/private/datasetType/{datasetId}")
@@ -236,6 +251,7 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   *
    * @return the ETL dataset VO
    */
   @GetMapping("/{datasetId}/etlExport")

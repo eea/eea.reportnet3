@@ -62,32 +62,46 @@ public class FileTreatmentHelper {
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /** The data set mapper. */
+  /**
+   * The data set mapper.
+   */
   @Autowired
   private DataSetMapper dataSetMapper;
 
-  /** The lock service. */
+  /**
+   * The lock service.
+   */
   @Autowired
   private LockService lockService;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /** The representative controller zuul. */
+  /**
+   * The representative controller zuul.
+   */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /** The dataset schema service. */
+  /**
+   * The dataset schema service.
+   */
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
-  /** The integration controller. */
+  /**
+   * The integration controller.
+   */
   @Autowired
   private IntegrationControllerZuul integrationController;
 
@@ -109,7 +123,6 @@ public class FileTreatmentHelper {
   @Async
   public void executeFileProcess(final Long datasetId, final String fileName, final InputStream is,
       String tableSchemaId) {
-
 
     // Integration process
     String fileExtension = null;
@@ -156,6 +169,62 @@ public class FileTreatmentHelper {
     } else {
       // REP-3 file process
       rep3FileProcess(datasetId, fileName, is, tableSchemaId);
+    }
+  }
+
+
+  /**
+   * Launch the file process in a external system using an existing integration configured for this
+   * purposes. If not integration is found then it will launch an EEAException
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @param is the is
+   *
+   * @throws EEAException the eea exception
+   */
+  public void executeExternalIntegrationFileProcess(Long datasetId, String fileName, InputStream is)
+      throws EEAException {
+    String fileExtension = null;
+    String datasetSchemaId = null;
+    try {
+      fileExtension = datasetService.getMimetype(fileName);
+      datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+    IntegrationVO integrationVO = new IntegrationVO();
+    Map<String, String> internalParameters = new HashMap<>();
+    internalParameters.put("datasetSchemaId", datasetSchemaId);
+    integrationVO.setInternalParameters(internalParameters);
+    List<IntegrationVO> integrationAux = new ArrayList<>();
+    List<IntegrationVO> integrations =
+        integrationController.findAllIntegrationsByCriteria(integrationVO);
+    List<String> auxExtensionList = new ArrayList<>();
+    integrations.stream().forEach(integration -> {
+      if (IntegrationOperationTypeEnum.IMPORT.equals(integration.getOperation())) {
+        auxExtensionList.add(integration.getInternalParameters().get("fileExtension"));
+        Map<String, String> externalParameters = new HashMap<>();
+        byte[] imageBytes;
+        try {
+          imageBytes = IOUtils.toByteArray(is);
+          String encodedString = Base64.getEncoder().encodeToString(imageBytes);
+          is.close();
+          externalParameters.put("fileIS", encodedString);
+          integration.setExternalParameters(externalParameters);
+        } catch (IOException e) {
+          LOG_ERROR.error("Exception executing file process with message {}", e.getMessage(), e);
+        }
+        integrationAux.add(integration);
+      }
+    });
+    if (auxExtensionList.contains(fileExtension)) {
+      integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
+          IntegrationOperationTypeEnum.IMPORT, fileName, datasetId, integrationAux.get(0));
+    } else {
+      throw new EEAException(
+          String.format("Error loading data into dataset %s via external integration", datasetId));
     }
   }
 
@@ -321,4 +390,6 @@ public class FileTreatmentHelper {
 
     return generalList;
   }
+
+
 }

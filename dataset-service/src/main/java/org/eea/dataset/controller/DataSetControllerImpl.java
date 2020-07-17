@@ -100,7 +100,9 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   private DesignDatasetService designDatasetService;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
@@ -189,7 +191,7 @@ public class DataSetControllerImpl implements DatasetController {
   public void loadTableData(
       @LockCriteria(name = "datasetId") @PathVariable("id") final Long datasetId,
       @RequestParam("file") final MultipartFile file, @LockCriteria(
-          name = "idTableSchema") @PathVariable(value = "idTableSchema") String idTableSchema) {
+      name = "idTableSchema") @PathVariable(value = "idTableSchema", required = false) String idTableSchema) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -210,7 +212,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && Boolean.TRUE.equals(
-            datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE))) {
+        datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE))) {
       datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
       LOG_ERROR.error(
           "Error importing a file into a table of the dataset {}. The table is read only",
@@ -232,6 +234,40 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+  @Override
+  @HystrixCommand
+  @PostMapping("{id}/loadDatasetData")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ')")
+  public void loadTableData(
+      @PathVariable("id") final Long datasetId,
+      @RequestParam("file") final MultipartFile file) {
+
+    // check if dataset is reportable
+    if (!datasetService.isDatasetReportable(datasetId)) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, datasetId));
+    }
+
+    // filter if the file is empty
+    if (file == null || file.isEmpty()) {
+      LOG_ERROR.error(
+          "Error importing a file into a table of the datasetId {}. The file is null or empty",
+          datasetId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
+    }
+    // extract the filename
+    String fileName = file.getOriginalFilename();
+
+    // extract the file content
+    try {
+      InputStream is = file.getInputStream();
+      fileTreatmentHelper.executeExternalIntegrationFileProcess(datasetId, fileName, is);
+    } catch (IOException | EEAException e) {
+      LOG_ERROR.error("Error importing a file into dataset {}. Message: {}",
+          datasetId, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
 
   /**
    * Delete import data.
@@ -355,7 +391,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && Boolean.TRUE.equals(datasetService.getTableReadOnly(datasetId,
-            records.get(0).getIdRecordSchema(), EntityTypeEnum.RECORD))) {
+        records.get(0).getIdRecordSchema(), EntityTypeEnum.RECORD))) {
       LOG_ERROR.error("Error updating records in the datasetId {}. The table is read only",
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
@@ -385,7 +421,7 @@ public class DataSetControllerImpl implements DatasetController {
       @PathVariable("recordId") final String recordId) {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && Boolean.TRUE
-            .equals(datasetService.getTableReadOnly(datasetId, recordId, EntityTypeEnum.RECORD))) {
+        .equals(datasetService.getTableReadOnly(datasetId, recordId, EntityTypeEnum.RECORD))) {
       LOG_ERROR.error("Error deleting record in the datasetId {}. The table is read only",
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
@@ -554,7 +590,7 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestBody final FieldVO field) {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && datasetService.getTableReadOnly(datasetId, field.getIdFieldSchema(),
-            EntityTypeEnum.FIELD)) {
+        EntityTypeEnum.FIELD)) {
       LOG_ERROR.error("Error updating a field in the dataset {}. The table is read only",
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
@@ -621,6 +657,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   *
    * @return the ETL dataset VO
    */
   @Override
