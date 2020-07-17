@@ -9,6 +9,9 @@ export const manageIntegrationsReducer = (state, { type, payload }) => {
     case 'GET_UPDATED_DATA':
       return { ...state, ...payload };
 
+    case 'IS_LOADING':
+      return { ...state, isLoading: payload.value };
+
     case 'MANAGE_PARAMETERS':
       return { ...state, externalParameters: payload.data, parameterKey: '', parameterValue: '' };
 

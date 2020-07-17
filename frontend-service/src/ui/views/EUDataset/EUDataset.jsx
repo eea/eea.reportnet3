@@ -225,12 +225,12 @@ export const EUDataset = withRouter(({ history, match }) => {
       await DatasetService.validateDataById(datasetId);
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
-        content: { dataflowId, dataflowName, datasetId, /* datasetName */ }
+        content: { dataflowId, dataflowName, datasetId,  datasetName  }
       });
     } catch (error) {
       notificationContext.add({
         type: 'VALIDATE_DATA_BY_ID_ERROR',
-        content: { dataflowId, dataflowName, datasetId, /* datasetName */ }
+        content: { dataflowId, dataflowName, datasetId,  datasetName  }
       });
     }
   };
@@ -350,10 +350,12 @@ export const EUDataset = withRouter(({ history, match }) => {
   };
 
   const renderConfirmDialogLayout = (onConfirm, option) =>{
+    const confirmClassName = { deleteData: 'p-button-danger', validate: '' }
     const dialogContent = { deleteData: 'deleteDatasetConfirm', validate: 'validateDatasetConfirm' }
 
     return isDialogVisible[option] && (
       <ConfirmDialog
+        classNameConfirm={confirmClassName[option]}
         header={resources.messages[`${option}EuDatasetHeader`]}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
