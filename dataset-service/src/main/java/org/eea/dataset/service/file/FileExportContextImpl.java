@@ -29,13 +29,14 @@ public class FileExportContextImpl implements IFileExportContext {
    * @param dataflowId the dataflow id
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
+   * @param includeCountryCode the include country code
    * @return the byte[]
    * @throws IOException Signals that an I/O exception has occurred.
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
-  public byte[] fileWriter(Long dataflowId, Long partitionId, String idTableSchema)
-      throws IOException, EEAException {
-    return writerStrategy.writeFile(dataflowId, partitionId, idTableSchema);
+  public byte[] fileWriter(Long dataflowId, Long partitionId, String idTableSchema,
+      boolean includeCountryCode) throws IOException, EEAException {
+    return writerStrategy.writeFile(dataflowId, partitionId, idTableSchema, includeCountryCode);
   }
 }

@@ -833,37 +833,54 @@ public class RulesServiceImpl implements RulesService {
         // We copy only the rules that are not of type Link, because these one are created
         // automatically in the process when we update the fieldSchema in previous calls of the copy
         // process
-        if (StringUtils.isNotBlank(rule.getWhenCondition())
-            && !rule.getWhenCondition().contains("isfieldFK")) {
-
-          LOG.info("A new rule is going to be created in the copy schema process");
-          // Here we change the fields of the rule involved with the help of the dictionary
-          dictionaryOriginTargetObjectId = fillRuleCopied(rule, dictionaryOriginTargetObjectId);
-
-          // If the rule is a Dataset type, we need to do the same process with the
-          // IntegritySchema
-          if (EntityTypeEnum.DATASET.equals(rule.getType())) {
-            copyIntegrity(originDatasetSchemaId, dictionaryOriginTargetObjectId, rule);
-          }
-
-          // Validate the rule if it's not automatic
-          if (!rule.isAutomatic()) {
-            validateRule(rule);
-          }
-          // Create the new rule
-          if (!rulesRepository.createNewRule(new ObjectId(newDatasetSchemaId), rule)) {
-            throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
-          }
-
-          // Check if rule is valid
-          if (!rule.isAutomatic()) {
-            kieBaseManager.validateRule(newDatasetSchemaId, rule);
-          }
-
-          // add the rules sequence
-          rulesSequenceRepository.updateSequence(new ObjectId(newDatasetSchemaId));
-        }
+        dictionaryOriginTargetObjectId = copyData(dictionaryOriginTargetObjectId,
+            originDatasetSchemaId, newDatasetSchemaId, rule);
       }
+    }
+    return dictionaryOriginTargetObjectId;
+  }
+
+  /**
+   * Copy data.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param newDatasetSchemaId the new dataset schema id
+   * @param rule the rule
+   * @return the map
+   * @throws EEAException the EEA exception
+   */
+  private Map<String, String> copyData(Map<String, String> dictionaryOriginTargetObjectId,
+      String originDatasetSchemaId, String newDatasetSchemaId, Rule rule) throws EEAException {
+    if (StringUtils.isNotBlank(rule.getWhenCondition())
+        && !rule.getWhenCondition().contains("isfieldFK")) {
+
+      LOG.info("A new rule is going to be created in the copy schema process");
+      // Here we change the fields of the rule involved with the help of the dictionary
+      dictionaryOriginTargetObjectId = fillRuleCopied(rule, dictionaryOriginTargetObjectId);
+
+      // If the rule is a Dataset type, we need to do the same process with the
+      // IntegritySchema
+      if (EntityTypeEnum.DATASET.equals(rule.getType())) {
+        copyIntegrity(originDatasetSchemaId, dictionaryOriginTargetObjectId, rule);
+      }
+
+      // Validate the rule if it's not automatic
+      if (!rule.isAutomatic()) {
+        validateRule(rule);
+      }
+      // Create the new rule
+      if (!rulesRepository.createNewRule(new ObjectId(newDatasetSchemaId), rule)) {
+        throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
+      }
+
+      // Check if rule is valid
+      if (!rule.isAutomatic()) {
+        kieBaseManager.validateRule(newDatasetSchemaId, rule);
+      }
+
+      // add the rules sequence
+      rulesSequenceRepository.updateSequence(new ObjectId(newDatasetSchemaId));
     }
     return dictionaryOriginTargetObjectId;
   }

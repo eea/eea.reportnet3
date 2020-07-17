@@ -175,7 +175,6 @@ public class DatasetSnapshotServiceTest {
   @Mock
   private UniqueConstraintRepository uniqueConstraintRepository;
 
-
   /**
    * Inits the mocks.
    */
@@ -397,7 +396,7 @@ public class DatasetSnapshotServiceTest {
     Mockito.when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(dataCollection));
     datasetSnapshotService.releaseSnapshot(1L, 1L);
-    Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(3)).removeLockByCriteria(Mockito.any());
   }
 
 
@@ -414,7 +413,7 @@ public class DatasetSnapshotServiceTest {
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(new DataProviderVO());
     datasetSnapshotService.releaseSnapshot(1L, 1L);
-    Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(3)).removeLockByCriteria(Mockito.any());
   }
 
   /**
@@ -428,7 +427,7 @@ public class DatasetSnapshotServiceTest {
     isBlocked.add(new Validation());
     Mockito.when(validationRepository.findByLevelError(Mockito.any())).thenReturn(isBlocked);
     datasetSnapshotService.releaseSnapshot(1L, 1L);
-    Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(2)).removeLockByCriteria(Mockito.any());
   }
 
 
