@@ -64,9 +64,11 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
   @Autowired
   private TableRepository tableRepository;
 
+  /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
+  /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
