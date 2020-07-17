@@ -85,6 +85,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     hasWritePermissions: false,
     initialDatasetDescription: '',
     isDataUpdated: false,
+    isDuplicatedToManageUnique: false,
     isImportDatasetDialogVisible: false,
     isIntegrationListDialogVisible: false,
     isIntegrationManageDialogVisible: false,
@@ -251,9 +252,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     designerDispatch({
       type: 'GET_EXPORT_LIST',
       payload: {
-        exportList: internalExtensionList.concat(
-          !isEmpty(extensionsOperationsList.export) ? externalExtensions : []
-        )
+        exportList: internalExtensionList.concat(!isEmpty(extensionsOperationsList.export) ? externalExtensions : [])
       }
     });
   };
@@ -403,7 +402,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
   useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
@@ -574,7 +572,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     />
   );
 
-
   const renderSwitchView = () => (
     <div className={styles.switchDivInput}>
       <div className={styles.switchDiv}>
@@ -603,6 +600,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         designerState={designerState}
         getManageUniqueConstraint={manageUniqueConstraint}
         getUniques={getUniqueConstraintsList}
+        setIsDuplicatedToManageUnique={setIsDuplicatedToManageUnique}
         manageDialogs={manageDialogs}
       />
     </Dialog>
@@ -628,6 +626,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       />
     </Fragment>
   );
+
+  const setIsDuplicatedToManageUnique = value =>
+    designerDispatch({ type: 'UPDATED_IS_DUPLICATED', payload: { value } });
 
   const validationsListDialog = () => {
     if (designerState.validationListDialogVisible) {

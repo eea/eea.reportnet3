@@ -275,6 +275,11 @@ public class FMECommunicationService {
             ? EventType.EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT
             : EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
         break;
+      case EXPORT:
+        eventType = null != fmeOperationInfoVO.getProviderId()
+            ? EventType.EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT
+            : EventType.EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT;
+        break;
       default:
         throw new UnsupportedOperationException("Not yet implemented");
     }

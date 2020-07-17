@@ -72,13 +72,13 @@ const DataflowManagementForm = forwardRef(
             if (error.response.data === DataflowConf.errorTypes['dataflowExists']) {
               setIsNameDuplicated(true);
               notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
+            } else {
+              const notification = isEditForm
+                ? { type: 'DATAFLOW_UPDATING_ERROR', content: { dataflowId: data.id, dataflowName: values.name } }
+                : { type: 'DATAFLOW_CREATION_ERROR', content: { dataflowName: values.name } };
+              
+              notificationContext.add(notification);
             }
-
-            const notification = isEditForm
-              ? { type: 'DATAFLOW_UPDATING_ERROR', content: { dataflowId: data.id, dataflowName: values.name } }
-              : { type: 'DATAFLOW_CREATION_ERROR', content: { dataflowName: values.name } };
-
-            notificationContext.add(notification);
           } finally {
             onSubmit(false);
           }
