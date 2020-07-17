@@ -108,7 +108,7 @@ public class FMECommunicationService {
             HttpMethod.POST, request, SubmitResult.class);
 
     Integer result = 0;
-    if (null != checkResult.getBody()) {
+    if (null != checkResult && null != checkResult.getBody()) {
       result = checkResult.getBody().getId();
     }
     return result;
