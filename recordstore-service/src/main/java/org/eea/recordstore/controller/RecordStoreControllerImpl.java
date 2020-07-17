@@ -77,7 +77,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @RequestMapping(value = "/dataset/create/{datasetName}", method = RequestMethod.POST)
   public void createEmptyDataset(@PathVariable("datasetName") final String datasetName,
       @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema) {
-    // TODO neeed to create standar
+    // TODO need to create standard
     try {
       recordStoreService.createEmptyDataSet(datasetName, idDatasetSchema);
     } catch (final RecordStoreAccessException e) {
@@ -86,17 +86,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     }
   }
 
-  @RequestMapping(value = "/dataset/create/{datasetName}/poc", method = RequestMethod.POST)
-  public void createEmptyDatasetPoc(@PathVariable("datasetName") final String datasetName,
-      @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema) {
-    // TODO neeed to create standar
-    try {
-      recordStoreService.createEmptyDataSet(datasetName, idDatasetSchema);
-    } catch (final RecordStoreAccessException e) {
-      LOG_ERROR.error(e.getMessage(), e);
-      // TODO Error control
-    }
-  }
+
 
   /**
    * Gets the connection to dataset.

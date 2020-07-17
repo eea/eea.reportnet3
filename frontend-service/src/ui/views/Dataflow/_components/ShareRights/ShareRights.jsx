@@ -86,7 +86,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
       fContributor => fContributor.id === contributor.id
     );
 
-    return JSON.stringify(initialContributor.writePermission) !== contributor.writePermission;
+    return JSON.stringify(initialContributor.writePermission) !== JSON.stringify(contributor.writePermission);
   };
 
   const updateContributor = contributor => {
@@ -180,7 +180,8 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
       type: 'ON_SET_ACCOUNT',
       payload: {
         contributors,
-        accountHasError: !isValidEmail(inputValue) || isRepeatedAccount(inputValue)
+        accountHasError: !isValidEmail(inputValue) || isRepeatedAccount(inputValue),
+        accountNotFound: false
       }
     });
   };

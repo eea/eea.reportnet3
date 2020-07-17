@@ -51,7 +51,7 @@ public class FMECommunicationServiceTest {
   }
 
   @Test
-  public void operationFinishedDesignTest() throws EEAException {
+  public void operationFinishedImportDesignTest() throws EEAException {
     FMEOperationInfoVO fmeOperationInfoVO = new FMEOperationInfoVO();
     fmeOperationInfoVO.setDatasetId(1L);
     fmeOperationInfoVO.setDataflowId(1L);
@@ -69,13 +69,50 @@ public class FMECommunicationServiceTest {
   }
 
   @Test
-  public void operationFinishedReportingTest() throws EEAException {
+  public void operationFinishedImportReportingTest() throws EEAException {
     FMEOperationInfoVO fmeOperationInfoVO = new FMEOperationInfoVO();
     fmeOperationInfoVO.setDatasetId(1L);
     fmeOperationInfoVO.setDataflowId(1L);
     fmeOperationInfoVO.setProviderId(1L);
     fmeOperationInfoVO.setFileName("fileName");
     fmeOperationInfoVO.setFmeOperation(FMEOperation.IMPORT);
+    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
+        Mockito.any());
+    fmeCommunicationService.operationFinished(fmeOperationInfoVO);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test
+  public void operationFinishedExporttDesignTest() throws EEAException {
+    FMEOperationInfoVO fmeOperationInfoVO = new FMEOperationInfoVO();
+    fmeOperationInfoVO.setDatasetId(1L);
+    fmeOperationInfoVO.setDataflowId(1L);
+    fmeOperationInfoVO.setFileName("fileName");
+    fmeOperationInfoVO.setFmeOperation(FMEOperation.EXPORT);
+    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
+        Mockito.any());
+    fmeCommunicationService.operationFinished(fmeOperationInfoVO);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test
+  public void operationFinishedExportReportingTest() throws EEAException {
+    FMEOperationInfoVO fmeOperationInfoVO = new FMEOperationInfoVO();
+    fmeOperationInfoVO.setDatasetId(1L);
+    fmeOperationInfoVO.setDataflowId(1L);
+    fmeOperationInfoVO.setProviderId(1L);
+    fmeOperationInfoVO.setFileName("fileName");
+    fmeOperationInfoVO.setFmeOperation(FMEOperation.EXPORT);
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
@@ -94,7 +131,7 @@ public class FMECommunicationServiceTest {
     fmeOperationInfoVO.setDataflowId(1L);
     fmeOperationInfoVO.setProviderId(1L);
     fmeOperationInfoVO.setFileName("fileName");
-    fmeOperationInfoVO.setFmeOperation(FMEOperation.EXPORT);
+    fmeOperationInfoVO.setFmeOperation(FMEOperation.EXPORT_EU_DATASET);
     try {
       fmeCommunicationService.operationFinished(fmeOperationInfoVO);
     } catch (UnsupportedOperationException e) {

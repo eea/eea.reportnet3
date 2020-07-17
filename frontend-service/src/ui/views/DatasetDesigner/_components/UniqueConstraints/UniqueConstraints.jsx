@@ -25,7 +25,8 @@ export const UniqueConstraints = ({
   designerState,
   getManageUniqueConstraint,
   getUniques,
-  manageDialogs
+  manageDialogs,
+  setIsDuplicatedToManageUnique
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -86,6 +87,7 @@ export const UniqueConstraints = ({
         type: 'INITIAL_LOAD',
         payload: { data: UniqueConstraintsUtils.parseConstraintsList(response, datasetSchemaAllTables) }
       });
+      setIsDuplicatedToManageUnique(false);
     } catch (error) {
       notificationContext.add({ type: 'LOAD_UNIQUE_CONSTRAINTS_ERROR' });
     } finally {

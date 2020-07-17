@@ -50,13 +50,6 @@ export const EUDataset = withRouter(({ history, match }) => {
   const userContext = useContext(UserContext);
 
   const [euDatasetState, euDatasetDispatch] = useReducer(euDatasetReducer, {
-    // dialogVisibility: { validationList: false, dashboards: false, delete: false, input: false },
-    // isDashDialogVisible: false,
-    // isDatasetReleased: false,
-    // isDeleteDialogVisible: false,
-    // isValidateDialogVisible: false,
-    // isValidationListDialogVisible: false,
-    datasetData: { hasData: false, hasErrors: false, name: '' },
     dataflowName: '',
     datasetHasData: false,
     datasetHasErrors: false,
@@ -110,6 +103,10 @@ export const EUDataset = withRouter(({ history, match }) => {
   useEffect(() => {
     onLoadDatasetSchema();
   }, [euDatasetState.isDataUpdated, isDataDeleted]);
+
+  useEffect(() => {
+    getWritePermissions()
+  }, [userContext]);
 
   useEffect(() => {
     if (!isUndefined(metaData.dataset)) {
@@ -186,6 +183,15 @@ export const EUDataset = withRouter(({ history, match }) => {
     }
   };
 
+  const getWritePermissions = () => {
+    if (!isUndefined(userContext.contextRoles)) {
+      const userRoles = userContext.getUserRole(`${config.permissions['DATASET']}${datasetId}`);
+      const hasWritePermissions = userRoles.map(roles => roles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']))
+
+      euDatasetDispatch({ type: 'HAS_WRITE_PERMISSIONS', payload: { hasWritePermissions } })
+    }
+  }
+
   const handleDialogs = (dialog, value) => euDatasetDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
 
   const isDataUpdated = value => euDatasetDispatch({ type: 'IS_DATA_UPDATED', payload: { value } });
@@ -213,17 +219,18 @@ export const EUDataset = withRouter(({ history, match }) => {
   };
 
   const onConfirmValidate = async () => {
+    handleDialogs('validate', false)
+
     try {
-      //   setValidateDialogVisible(false);
       await DatasetService.validateDataById(datasetId);
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
-        content: { dataflowId, dataflowName, datasetId, datasetName }
+        content: { dataflowId, dataflowName, datasetId, /* datasetName */ }
       });
     } catch (error) {
       notificationContext.add({
         type: 'VALIDATE_DATA_BY_ID_ERROR',
-        content: { dataflowId, dataflowName, datasetId, datasetName }
+        content: { dataflowId, dataflowName, datasetId, /* datasetName */ }
       });
     }
   };
@@ -342,8 +349,10 @@ export const EUDataset = withRouter(({ history, match }) => {
     handleDialogs('validationList', false);
   };
 
-  const renderConfirmDialogLayout = (onConfirm, option) =>
-    isDialogVisible[option] && (
+  const renderConfirmDialogLayout = (onConfirm, option) =>{
+    const dialogContent = { deleteData: 'deleteDatasetConfirm', validate: 'validateDatasetConfirm' }
+
+    return isDialogVisible[option] && (
       <ConfirmDialog
         header={resources.messages[`${option}EuDatasetHeader`]}
         labelCancel={resources.messages['no']}
@@ -351,9 +360,9 @@ export const EUDataset = withRouter(({ history, match }) => {
         onConfirm={() => onConfirm()}
         onHide={() => handleDialogs(option, false)}
         visible={isDialogVisible[option]}>
-        {resources.messages[`${option}EuDatasetConfirm`]}
+        {resources.messages[dialogContent[option]]}
       </ConfirmDialog>
-    );
+    )};
 
   const renderDialogLayout = (children, option) =>
     isDialogVisible[option] && (
@@ -394,10 +403,12 @@ export const EUDataset = withRouter(({ history, match }) => {
       <Title
         icon="euDataset"
         iconSize="3.5rem"
-        subtitle={`${dataflowName}`}
+        subtitle={dataflowName}
         title={datasetName}
       />
       <EUDatasetToolbar
+        datasetHasData={euDatasetState.datasetHasData}
+        datasetHasErrors={euDatasetState.datasetHasErrors}
         handleDialogs={handleDialogs}
         isRefreshHighlighted={euDatasetState.isRefreshHighlighted}
         onRefresh={onLoadDatasetSchema}

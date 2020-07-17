@@ -46,6 +46,22 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+
+  /** The Constant TABLESCHEMAS_RECORDSCHEMA_FIELDSCHEMAS_ID: {@value}. */
+  private static final String TABLESCHEMAS_RECORDSCHEMA_FIELDSCHEMAS_ID =
+      "tableSchemas.recordSchema.fieldSchemas._id";
+
+  /** The Constant TABLESCHEMAS_$_RECORDSCHEMA_FIELDSCHEMAS: {@value}. */
+  private static final String TABLESCHEMAS_RECORDSCHEMA_FIELDSCHEMAS =
+      "tableSchemas.$.recordSchema.fieldSchemas";
+
+  /** The Constant TABLESCHEMAS_ID: {@value}. */
+  private static final String TABLESCHEMAS_ID = "tableSchemas._id";
+
+
+  /** The Constant TABLESCHEMAS: {@value} */
+  private static final String TABLESCHEMAS = "tableSchemas.$";
+
   /** The mongo converter. */
   @Autowired
   private MongoConverter mongoConverter;
@@ -100,9 +116,9 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     try {
       return mongoOperations.updateMulti(
           new Query(new Criteria("_id").is(new ObjectId(datasetSchemaId)))
-              .addCriteria(new Criteria("tableSchemas.recordSchema.fieldSchemas._id")
+              .addCriteria(new Criteria(TABLESCHEMAS_RECORDSCHEMA_FIELDSCHEMAS_ID)
                   .is(new ObjectId(fieldSchemaId))),
-          new Update().pull("tableSchemas.$.recordSchema.fieldSchemas",
+          new Update().pull(TABLESCHEMAS_RECORDSCHEMA_FIELDSCHEMAS,
               new BasicDBObject("_id", new ObjectId(fieldSchemaId))),
           DataSetSchema.class);
     } catch (IllegalArgumentException e) {
@@ -125,7 +141,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     try {
       return mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA).updateMany(
           new Document("_id", new ObjectId(datasetSchemaId))
-              .append("tableSchemas.recordSchema.fieldSchemas._id", fieldSchema.get("_id")),
+              .append(TABLESCHEMAS_RECORDSCHEMA_FIELDSCHEMAS_ID, fieldSchema.get("_id")),
           new Document("$set",
               new Document("tableSchemas.$.recordSchema.fieldSchemas.$[fieldSchemaId]",
                   fieldSchema)),
@@ -152,7 +168,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
       return mongoOperations.updateMulti(
           new Query(new Criteria("_id").is(new ObjectId(datasetSchemaId))).addCriteria(
               new Criteria("tableSchemas.recordSchema._id").is(fieldSchema.getIdRecord())),
-          new Update().push("tableSchemas.$.recordSchema.fieldSchemas", fieldSchema),
+          new Update().push(TABLESCHEMAS_RECORDSCHEMA_FIELDSCHEMAS, fieldSchema),
           DataSetSchema.class);
     } catch (IllegalArgumentException e) {
       LOG_ERROR.error("error creating field: ", e);
@@ -173,7 +189,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
       throws EEAException {
     try {
       return mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA).updateOne(
-          new Document("_id", new ObjectId(datasetSchemaId)).append("tableSchemas._id",
+          new Document("_id", new ObjectId(datasetSchemaId)).append(TABLESCHEMAS_ID,
               tableSchema.get("_id")),
           new Document("$set", new Document("tableSchemas.$[tableSchemaId]", tableSchema)),
           new UpdateOptions().arrayFilters(
@@ -227,7 +243,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
       return mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA).updateMany(
           new Document("_id", new ObjectId(idDatasetSchema)).append("tableSchemas.recordSchema._id",
               fieldSchema.get("idRecord")),
-          new Document("$push", new Document("tableSchemas.$.recordSchema.fieldSchemas",
+          new Document("$push", new Document(TABLESCHEMAS_RECORDSCHEMA_FIELDSCHEMAS,
               new Document("$each", list).append("$position", position))));
     } catch (IllegalArgumentException e) {
       LOG_ERROR.error("error inserting field: ", e);
@@ -246,9 +262,9 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   public Document findTableSchema(String datasetSchemaId, String tableSchemaId) {
 
     Document document = mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA)
-        .find(new Document("_id", new ObjectId(datasetSchemaId)).append("tableSchemas._id",
+        .find(new Document("_id", new ObjectId(datasetSchemaId)).append(TABLESCHEMAS_ID,
             new ObjectId(tableSchemaId)))
-        .projection(new Document("_id", 0).append("tableSchemas.$", 1)).first();
+        .projection(new Document("_id", 0).append(TABLESCHEMAS, 1)).first();
 
     if (document != null) {
       Object tableSchemas = document.get(LiteralConstants.TABLE_SCHEMAS);
@@ -276,8 +292,8 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
 
     Object document = mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA)
         .find(new Document("_id", new ObjectId(datasetSchemaId))
-            .append("tableSchemas.recordSchema.fieldSchemas._id", new ObjectId(fieldSchemaId)))
-        .projection(new Document("_id", 0).append("tableSchemas.$", 1)).first();
+            .append(TABLESCHEMAS_RECORDSCHEMA_FIELDSCHEMAS_ID, new ObjectId(fieldSchemaId)))
+        .projection(new Document("_id", 0).append(TABLESCHEMAS, 1)).first();
 
     // Null check, secure data type casting and secure array access by index can be avoid as the
     // query would return null if the requested structure does not match.
@@ -329,9 +345,9 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   public Document findRecordSchema(String datasetSchemaId, String tableSchemaId) {
 
     Object document = mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA)
-        .find(new Document("_id", new ObjectId(datasetSchemaId)).append("tableSchemas._id",
+        .find(new Document("_id", new ObjectId(datasetSchemaId)).append(TABLESCHEMAS_ID,
             new ObjectId(tableSchemaId)))
-        .projection(new Document("_id", 0).append("tableSchemas.$", 1)).first();
+        .projection(new Document("_id", 0).append(TABLESCHEMAS, 1)).first();
 
     // Null check, secure data type casting and secure array access by index can be avoid as the
     // query would return null if the requested structure does not match.

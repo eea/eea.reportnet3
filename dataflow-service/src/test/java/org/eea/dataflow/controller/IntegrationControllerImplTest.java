@@ -202,6 +202,11 @@ public class IntegrationControllerImplTest {
     }
   }
 
+  /**
+   * Test copy integrations.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testCopyIntegrations() throws EEAException {
     Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
@@ -215,6 +220,11 @@ public class IntegrationControllerImplTest {
         Mockito.any());
   }
 
+  /**
+   * Test copy integrations exception.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testCopyIntegrationsException() throws EEAException {
     try {
