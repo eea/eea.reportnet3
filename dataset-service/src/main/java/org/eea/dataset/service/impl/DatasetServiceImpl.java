@@ -2110,8 +2110,8 @@ public class DatasetServiceImpl implements DatasetService {
    * @return the boolean
    */
   @Override
-  public Boolean isDatasetReportable(Long idDataset) {
-    Boolean result = false;
+  public boolean isDatasetReportable(Long idDataset) {
+    boolean result = false;
     // Check if dataset is a designDataset
     final Optional<DesignDataset> designDataset = designDatasetRepository.findById(idDataset);
     if (designDataset.isPresent()) {

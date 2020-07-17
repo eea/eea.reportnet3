@@ -172,60 +172,70 @@ public class FileTreatmentHelper {
     }
   }
 
-
   /**
-   * Launch the file process in a external system using an existing integration configured for this
-   * purposes. If not integration is found then it will launch an EEAException
+   * Execute external integration file process.
    *
    * @param datasetId the dataset id
    * @param fileName the file name
-   * @param is the is
-   *
-   * @throws EEAException the eea exception
+   * @param inputStream the input stream
+   * @throws EEAException the EEA exception
    */
-  public void executeExternalIntegrationFileProcess(Long datasetId, String fileName, InputStream is)
-      throws EEAException {
-    String fileExtension = null;
-    String datasetSchemaId = null;
-    try {
-      fileExtension = datasetService.getMimetype(fileName);
-      datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+  public void executeExternalIntegrationFileProcess(Long datasetId, String fileName,
+      InputStream inputStream) throws EEAException {
 
-    } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-    }
-    IntegrationVO integrationVO = new IntegrationVO();
+    String fileExtension = datasetService.getMimetype(fileName);
+    String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+
+    // Create the IntegrationVO used as criteria.
     Map<String, String> internalParameters = new HashMap<>();
     internalParameters.put("datasetSchemaId", datasetSchemaId);
-    integrationVO.setInternalParameters(internalParameters);
-    List<IntegrationVO> integrationAux = new ArrayList<>();
+    IntegrationVO integrationCriteria = new IntegrationVO();
+    integrationCriteria.setInternalParameters(internalParameters);
+
+    // Find all integrations matching the criteria.
     List<IntegrationVO> integrations =
-        integrationController.findAllIntegrationsByCriteria(integrationVO);
-    List<String> auxExtensionList = new ArrayList<>();
-    integrations.stream().forEach(integration -> {
-      if (IntegrationOperationTypeEnum.IMPORT.equals(integration.getOperation())) {
-        auxExtensionList.add(integration.getInternalParameters().get("fileExtension"));
-        Map<String, String> externalParameters = new HashMap<>();
-        byte[] imageBytes;
-        try {
-          imageBytes = IOUtils.toByteArray(is);
-          String encodedString = Base64.getEncoder().encodeToString(imageBytes);
-          is.close();
-          externalParameters.put("fileIS", encodedString);
-          integration.setExternalParameters(externalParameters);
-        } catch (IOException e) {
-          LOG_ERROR.error("Exception executing file process with message {}", e.getMessage(), e);
-        }
-        integrationAux.add(integration);
-      }
-    });
-    if (auxExtensionList.contains(fileExtension)) {
+        integrationController.findAllIntegrationsByCriteria(integrationCriteria);
+
+    // Find the IntegrationVO with IMPORT operation for the given file extension.
+    IntegrationVO integrationVO = filterImportIntegration(integrations, fileExtension, inputStream);
+
+    if (null != integrationVO) {
       integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
-          IntegrationOperationTypeEnum.IMPORT, fileName, datasetId, integrationAux.get(0));
+          IntegrationOperationTypeEnum.IMPORT, fileName, datasetId, integrationVO);
     } else {
       throw new EEAException(
           String.format("Error loading data into dataset %s via external integration", datasetId));
     }
+  }
+
+  /**
+   * Filter import integration.
+   *
+   * @param integrations the integrations
+   * @param fileExtension the file extension
+   * @param inputStream the input stream
+   * @return the integration VO
+   */
+  private IntegrationVO filterImportIntegration(List<IntegrationVO> integrations,
+      String fileExtension, InputStream inputStream) {
+    for (IntegrationVO integration : integrations) {
+      if (IntegrationOperationTypeEnum.IMPORT.equals(integration.getOperation())) {
+        String integrationExtension = integration.getInternalParameters().get("fileExtension");
+        if (integrationExtension.equals(fileExtension)) {
+          try {
+            byte[] byteArray = IOUtils.toByteArray(inputStream);
+            String encodedString = Base64.getEncoder().encodeToString(byteArray);
+            Map<String, String> externalParameters = new HashMap<>();
+            externalParameters.put("fileIS", encodedString);
+            integration.setExternalParameters(externalParameters);
+            return integration;
+          } catch (IOException e) {
+            LOG_ERROR.error("Exception executing file process with message {}", e.getMessage(), e);
+          }
+        }
+      }
+    }
+    return null;
   }
 
   /**
