@@ -78,6 +78,17 @@ object ExecutionConfiguration {
             .pause(requestPauseTime)
         }
     })
+    executionFunctions.put("post_noBody_file_useFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], requestPauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer) => {
+      val feeder = new CSVFeeder("../" + requestName + "_param.csv")
+      scenario(requestName)
+        .repeat(getExpresionOutOfInteger(numberExecutions)) {
+          feed(feeder.apply()).exec(http(requestName)
+            .post(endpoint)
+            .formUpload(keyFileName, fileName)
+            .headers(requestHeaders))
+            .pause(requestPauseTime)
+        }
+    })
     executionFunctions.put("post_bodyJson_noFile_noFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], requestPauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer) => {
       scenario(requestName)
         .repeat(getExpresionOutOfInteger(numberExecutions)) {
@@ -116,6 +127,16 @@ object ExecutionConfiguration {
             .headers(requestHeaders))
             .pause(requestPauseTime)
         }
+    })
+    executionFunctions.put("delete_noBody_noFile_useFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], requestPauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer) => {
+      //val param_feeder=Iterator.continually(getRandomValue(getDataFeeder("../"+requestName+"_param.csv")))
+      val feeder = new CSVFeeder("../" + requestName + "_param.csv")
+      scenario(requestName).repeat(getExpresionOutOfInteger(numberExecutions)) {
+        feed(feeder.apply()).exec(http(requestName)
+          .delete(endpoint)
+          .headers(requestHeaders))
+          .pause(requestPauseTime)
+      }
     })
 
     return executionFunctions;

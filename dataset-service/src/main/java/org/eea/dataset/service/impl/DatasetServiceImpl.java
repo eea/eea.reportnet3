@@ -84,6 +84,7 @@ import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -165,7 +166,9 @@ public class DatasetServiceImpl implements DatasetService {
   private ReportingDatasetRepository reportingDatasetRepository;
 
 
-  /** The dataflow controller zull. */
+  /**
+   * The dataflow controller zull.
+   */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZull;
 
@@ -352,12 +355,12 @@ public class DatasetServiceImpl implements DatasetService {
    * Save all records.
    *
    * @param datasetId the dataset id
-   * @param listaGeneral the lista general
+   * @param recordValues the lista general
    */
   @Override
   @Transactional
-  public void saveAllRecords(Long datasetId, List<RecordValue> listaGeneral) {
-    recordRepository.saveAll(listaGeneral);
+  public void saveAllRecords(Long datasetId, List<RecordValue> recordValues) {
+    recordRepository.saveAll(recordValues);
   }
 
 
@@ -542,13 +545,107 @@ public class DatasetServiceImpl implements DatasetService {
     Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
 
     // Check if we need to put all the records without pagination
+    pageable = calculatePageable(pageable, totalRecords);
+
+    result = calculatedErrorsAndRecordsToSee(idTableSchema, pageable, fields, levelError,
+        commonShortFields, mapFields, sortFieldsArray, newFields, result);
+
+    // Table with out values
+    if (null == result.getRecords() || result.getRecords().isEmpty()) {
+      result.setRecords(new ArrayList<>());
+      LOG.info("No records founded in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
+
+    } else {
+      List<RecordVO> recordVOs = result.getRecords();
+
+      LOG.info(
+          "Total records found in datasetId {} idTableSchema {}: {}. Now in page {}, {} records by page",
+          datasetId, idTableSchema, recordVOs.size(),
+          pageable != null ? pageable.getPageNumber() : null,
+          pageable != null ? pageable.getPageSize() : null);
+      if (null != fields) {
+        LOG.info("Ordered by idFieldSchema {}", commonShortFields);
+      }
+
+      // 5º retrieve validations to set them into the final result
+      retrieveValidations(recordVOs);
+
+    }
+    result.setTotalRecords(totalRecords);
+    return result;
+  }
+
+  /**
+   * Retrieve validations.
+   *
+   * @param recordVOs the record V os
+   */
+  private void retrieveValidations(List<RecordVO> recordVOs) {
+    // retrieve validations to set them into the final result
+    List<String> recordIds = recordVOs.stream().map(RecordVO::getId).collect(Collectors.toList());
+    Map<String, List<FieldValidation>> fieldValidations = this.getFieldValidations(recordIds);
+    Map<String, List<RecordValidation>> recordValidations = this.getRecordValidations(recordIds);
+    recordVOs.stream().forEach(record -> {
+      record.getFields().stream().forEach(field -> {
+        List<FieldValidationVO> validations =
+            fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId()));
+        field.setFieldValidations(validations);
+        if (null != validations && !validations.isEmpty()) {
+          field.setLevelError(
+              validations.stream().map(validation -> validation.getValidation().getLevelError())
+                  .filter(error -> error.equals(ErrorTypeEnum.ERROR)).findFirst()
+                  .orElse(ErrorTypeEnum.WARNING));
+        }
+      });
+
+      List<RecordValidationVO> validations =
+          recordValidationMapper.entityListToClass(recordValidations.get(record.getId()));
+      record.setRecordValidations(validations);
+      if (null != validations && !validations.isEmpty()) {
+        record.setLevelError(
+            validations.stream().map(validation -> validation.getValidation().getLevelError())
+                .filter(error -> error.equals(ErrorTypeEnum.ERROR)).findFirst()
+                .orElse(ErrorTypeEnum.WARNING));
+      }
+    });
+  }
+
+  /**
+   * Calculate pageable.
+   *
+   * @param pageable the pageable
+   * @param totalRecords the total records
+   * @return the pageable
+   */
+  private Pageable calculatePageable(Pageable pageable, Long totalRecords) {
     if (pageable == null && totalRecords > 0) {
       pageable = PageRequest.of(0, totalRecords.intValue());
     }
     if (pageable == null && totalRecords == 0) {
       pageable = PageRequest.of(0, 20);
     }
+    return pageable;
+  }
 
+  /**
+   * Calculated errors and records to see.
+   *
+   * @param idTableSchema the id table schema
+   * @param pageable the pageable
+   * @param fields the fields
+   * @param levelError the level error
+   * @param commonShortFields the common short fields
+   * @param mapFields the map fields
+   * @param sortFieldsArray the sort fields array
+   * @param newFields the new fields
+   * @param result the result
+   * @return the table VO
+   */
+  private TableVO calculatedErrorsAndRecordsToSee(final String idTableSchema, Pageable pageable,
+      final String fields, ErrorTypeEnum[] levelError, List<String> commonShortFields,
+      Map<String, Integer> mapFields, List<SortField> sortFieldsArray, SortField[] newFields,
+      TableVO result) {
+    List<RecordValue> records;
     if (null == fields && (null == levelError || levelError.length == 5)) {
 
       records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
@@ -563,53 +660,6 @@ public class DatasetServiceImpl implements DatasetService {
           sortFieldsArray, newFields);
 
     }
-
-    // Table with out values
-    if (null == result.getRecords() || result.getRecords().isEmpty()) {
-      result.setRecords(new ArrayList<>());
-      LOG.info("No records founded in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
-
-    } else {
-      List<RecordVO> recordVOs = result.getRecords();
-
-      LOG.info(
-          "Total records found in datasetId {} idTableSchema {}: {}. Now in page {}, {} records by page",
-          datasetId, idTableSchema, recordVOs.size(), pageable.getPageNumber(),
-          pageable.getPageSize());
-      if (null != fields) {
-        LOG.info("Ordered by idFieldSchema {}", commonShortFields);
-      }
-
-      // 5º retrieve validations to set them into the final result
-      List<String> recordIds = recordVOs.stream().map(RecordVO::getId).collect(Collectors.toList());
-      Map<String, List<FieldValidation>> fieldValidations = this.getFieldValidations(recordIds);
-      Map<String, List<RecordValidation>> recordValidations = this.getRecordValidations(recordIds);
-      recordVOs.stream().forEach(record -> {
-        record.getFields().stream().forEach(field -> {
-          List<FieldValidationVO> validations =
-              fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId()));
-          field.setFieldValidations(validations);
-          if (null != validations && !validations.isEmpty()) {
-            field.setLevelError(
-                validations.stream().map(validation -> validation.getValidation().getLevelError())
-                    .filter(error -> error.equals(ErrorTypeEnum.ERROR)).findFirst()
-                    .orElse(ErrorTypeEnum.WARNING));
-          }
-        });
-
-        List<RecordValidationVO> validations =
-            recordValidationMapper.entityListToClass(recordValidations.get(record.getId()));
-        record.setRecordValidations(validations);
-        if (null != validations && !validations.isEmpty()) {
-          record.setLevelError(
-              validations.stream().map(validation -> validation.getValidation().getLevelError())
-                  .filter(error -> error.equals(ErrorTypeEnum.ERROR)).findFirst()
-                  .orElse(ErrorTypeEnum.WARNING));
-        }
-      });
-
-    }
-    result.setTotalRecords(totalRecords);
     return result;
   }
 
@@ -624,6 +674,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param mapFields the map fields
    * @param sortFieldsArray the sort fields array
    * @param newFields the new fields
+   *
    * @return the table VO
    */
   private TableVO fieldsMap(final String idTableSchema, Pageable pageable, final String fields,
@@ -1033,7 +1084,7 @@ public class DatasetServiceImpl implements DatasetService {
       List<TableValue> allTableValues = dataset.getTableValues();
 
       DataSetMetabase datasetMb =
-          reportingDatasetRepository.findById(datasetId).orElse(new ReportingDataset());
+          dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
 
       DataSetSchema schema =
           schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
@@ -1221,7 +1272,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param records the records
    * @param idTableSchema the id table schema
+   *
    * @return the long
+   *
    * @throws EEAException the EEA exception
    */
   private Long throwsMethods(final Long datasetId, final List<RecordVO> records,
@@ -1341,9 +1394,13 @@ public class DatasetServiceImpl implements DatasetService {
       // Get the dataFlowId from the metabase
       Long idDataflow = getDataFlowIdById(datasetId);
 
+      // Find if the dataset type is EU to include the countryCode
+      DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
+      boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType);
+
       final IFileExportContext context = fileExportFactory.createContext(mimeType);
       LOG.info("End of exportFile");
-      return context.fileWriter(idDataflow, datasetId, idTableSchema);
+      return context.fileWriter(idDataflow, datasetId, idTableSchema, includeCountryCode);
     }
 
   }
@@ -1981,6 +2038,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param objectId the object id
    * @param readOnly the read only
    * @param schema the schema
+   *
    * @return the boolean
    */
   private Boolean tableForReadOnly(String objectId, Boolean readOnly, DataSetSchema schema) {
@@ -2000,6 +2058,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param objectId the object id
    * @param readOnly the read only
    * @param schema the schema
+   *
    * @return the boolean
    */
   private Boolean recordForReadOnly(String objectId, Boolean readOnly, DataSetSchema schema) {
@@ -2019,6 +2078,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param objectId the object id
    * @param readOnly the read only
    * @param schema the schema
+   *
    * @return the boolean
    */
   private Boolean fieldForReadOnly(String objectId, Boolean readOnly, DataSetSchema schema) {
@@ -2090,7 +2150,6 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
-
   /**
    * Copy data.
    *
@@ -2124,7 +2183,7 @@ public class DatasetServiceImpl implements DatasetService {
             // save values
             TenantResolver
                 .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset));
-            saveAllRecords(targetDataset, recordDesignValuesList);
+            recordRepository.saveAll(recordDesignValuesList);
           }
         }
       }
@@ -2136,6 +2195,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the table from schema.
    *
    * @param originDesign the origin design
+   *
    * @return the table from schema
    */
   private List<TableSchema> getTableFromSchema(DesignDataset originDesign) {
@@ -2160,6 +2220,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param targetDataset the target dataset
    * @param listOfTablesFiltered the list of tables filtered
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   *
    * @return the list
    */
   private List<RecordValue> replaceData(Long originDataset, Long targetDataset,
@@ -2197,7 +2258,6 @@ public class DatasetServiceImpl implements DatasetService {
       recordAux.setTableValue(tableAux);
       recordAux.setIdRecordSchema(dictionaryOriginTargetObjectId.get(record.getIdRecordSchema()));
       recordAux.setDatasetPartitionId(datasetPartitionId);
-
 
       TenantResolver.setTenantName(
           String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));

@@ -77,7 +77,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @RequestMapping(value = "/dataset/create/{datasetName}", method = RequestMethod.POST)
   public void createEmptyDataset(@PathVariable("datasetName") final String datasetName,
       @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema) {
-    // TODO neeed to create standar
+    // TODO need to create standard
     try {
       recordStoreService.createEmptyDataSet(datasetName, idDatasetSchema);
     } catch (final RecordStoreAccessException e) {
@@ -86,17 +86,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     }
   }
 
-  @RequestMapping(value = "/dataset/create/{datasetName}/poc", method = RequestMethod.POST)
-  public void createEmptyDatasetPoc(@PathVariable("datasetName") final String datasetName,
-      @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema) {
-    // TODO neeed to create standar
-    try {
-      recordStoreService.createEmptyDataSet(datasetName, idDatasetSchema);
-    } catch (final RecordStoreAccessException e) {
-      LOG_ERROR.error(e.getMessage(), e);
-      // TODO Error control
-    }
-  }
+
 
   /**
    * Gets the connection to dataset.
@@ -192,33 +182,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
 
   }
 
-  /**
-   * Restore snapshot data.
-   *
-   * @param datasetId the dataset id
-   * @param idSnapshot the id snapshot
-   * @param idPartition the id partition
-   * @param datasetType the dataset type
-   */
-  @PostMapping("/dataset/{datasetId}/snapshot/restore/poc")
-  public void restoreSnapshotDataPOC(@PathVariable("datasetId") Long datasetId,
-      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
-      @RequestParam(value = "partitionId", required = true) Long idPartition,
-      @RequestParam(value = "typeDataset", required = true) DatasetTypeEnum datasetType,
-      @RequestParam(value = "user", required = true) String user,
-      @RequestParam(value = "isSchemaSnapshot", required = true) Boolean isSchemaSnapshot,
-      @RequestParam(value = "deleteData", defaultValue = "true") Boolean deleteData) {
 
-    try {
-      ThreadPropertiesManager.setVariable("user", user);
-      recordStoreService.restoreDataSnapshotPoc(datasetId, idSnapshot, idPartition, datasetType,
-          isSchemaSnapshot, deleteData);
-    } catch (SQLException | IOException e) {
-      LOG_ERROR.error(e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-    }
-
-  }
 
   @RequestMapping(value = "/dataset/{datasetId}/snapshot/create/poc", method = RequestMethod.POST)
   public void createSnapshotDataPoc(@PathVariable("datasetId") Long datasetId,

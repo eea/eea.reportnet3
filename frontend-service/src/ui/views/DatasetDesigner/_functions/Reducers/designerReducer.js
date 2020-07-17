@@ -1,5 +1,10 @@
+import { sample } from 'lodash';
+
 export const designerReducer = (state, { type, payload }) => {
   switch (type) {
+    case 'GET_EXPORT_LIST':
+      return { ...state, exportButtonsList: payload.exportList };
+
     case 'GET_DATASET_DATA':
       return {
         ...state,
@@ -26,14 +31,26 @@ export const designerReducer = (state, { type, payload }) => {
     case 'HIGHLIGHT_REFRESH':
       return { ...state, isRefreshHighlighted: payload.value };
 
+    case 'UPDATED_IS_DUPLICATED':
+      return { ...state, isDuplicatedToManageUnique: payload.value };
+
     case 'INITIAL_DATASET_DESCRIPTION':
       return { ...state, initialDatasetDescription: payload.value };
 
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
 
+    case 'IS_LOADING_FILE':
+      return { ...state, isLoadingFile: payload.value };
+
     case 'IS_PREVIEW_MODE_ON':
       return { ...state, isPreviewModeOn: payload.value };
+
+    case 'LOAD_EXTERNAL_EXTENSIONS':
+      return {
+        ...state,
+        extensionsOperationsList: { ...state.extensionsOperationsList, export: payload.export, import: payload.import }
+      };
 
     case 'LOAD_DATASET_SCHEMAS':
       return { ...state, datasetSchemas: payload.schemas };
@@ -43,6 +60,12 @@ export const designerReducer = (state, { type, payload }) => {
 
     case 'MANAGE_UNIQUE_CONSTRAINT_DATA':
       return { ...state, manageUniqueConstraintData: { ...state.manageUniqueConstraintData, ...payload.data } };
+
+    case 'ON_EXPORT_DATA':
+      return { ...state, exportDatasetData: payload.data, exportDatasetDataName: payload.name };
+
+    case 'ON_UPDATE_DATA':
+      return { ...state, isDataUpdated: payload.isUpdated };
 
     case 'ON_UPDATE_DESCRIPTION':
       return { ...state, datasetDescription: payload.value };

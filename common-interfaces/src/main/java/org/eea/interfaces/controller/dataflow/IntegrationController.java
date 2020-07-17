@@ -102,11 +102,22 @@ public interface IntegrationController {
 
 
   /**
+   * Execute EU dataset export.
+   *
+   * @param dataflowId the dataflow id
+   * @return the execution result VO
+   */
+  @PostMapping(value = "/executeEUDatasetExport")
+  List<ExecutionResultVO> executeEUDatasetExport(@RequestParam("dataflowId") Long dataflowId);
+
+  /**
    * Copy integrations.
    *
    * @param copyVO the copy VO
    */
   @PostMapping(value = "/private/copyIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
   void copyIntegrations(@RequestBody CopySchemaVO copyVO);
+
+
 
 }

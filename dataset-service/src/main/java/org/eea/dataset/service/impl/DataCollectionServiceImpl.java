@@ -266,6 +266,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    *
    * @param datasetIds the dataset ids
    * @param dataflowId the dataflow id
+   * @param isCreation the is creation
    */
   @Override
   public void undoDataCollectionCreation(List<Long> datasetIds, Long dataflowId,
@@ -282,6 +283,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     dataflowControllerZuul.updateDataFlowStatus(dataflowId, TypeStatusEnum.DESIGN, null);
   }
 
+  /**
+   * Release lock and notification.
+   *
+   * @param dataflowId the dataflow id
+   * @param errorMessage the error message
+   * @param isCreation the is creation
+   */
   private void releaseLockAndNotification(Long dataflowId, String errorMessage,
       boolean isCreation) {
     String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
@@ -357,16 +365,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             .map(RepresentativeVO::getDataProviderId).collect(Collectors.toList()));
 
     // 4. Map representatives to providers
-    Map<Long, String> map = new HashMap<>();
-    for (RepresentativeVO representative : representatives) {
-      for (DataProviderVO dataProvider : dataProviders) {
-        if (dataProvider.getId().equals(representative.getDataProviderId())) {
-          map.put(representative.getDataProviderId(), dataProvider.getLabel());
-          dataProviders.remove(dataProvider);
-          break;
-        }
-      }
-    }
+    Map<Long, String> map = mapRepresentativesToProviders(representatives, dataProviders);
 
     List<Long> dataCollectionIds = new ArrayList<>();
     Map<Long, String> datasetIdsEmails = new HashMap<>();
@@ -410,31 +409,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
           // 7. Create Reporting Dataset in metabase
 
-          for (RepresentativeVO representative : representatives) {
-            Long datasetId = persistRD(statement, design, representative, time, dataflowId,
-                map.get(representative.getDataProviderId()));
-            datasetIdsEmails.put(datasetId, representative.getProviderAccount());
-            datasetIdsAndSchemaIds.put(datasetId, design.getDatasetSchema());
-
-            FKDataCollection newReporting = new FKDataCollection();
-            newReporting.setRepresentative(map.get(representative.getDataProviderId()));
-            newReporting.setIdDatasetSchemaOrigin(design.getDatasetSchema());
-            newReporting.setIdDatasetOrigin(datasetId);
-            newReporting.setFks(
-                datasetSchemaService.getReferencedFieldsBySchema(design.getDatasetSchema()));
-            newReportingDatasetsRegistry.add(newReporting);
-            if (!integritieVOs.isEmpty()) {
-              for (IntegrityVO integritieVO : integritieVOs) {
-                IntegrityDataCollection integrityDataCollection = new IntegrityDataCollection();
-                integrityDataCollection.setIdDatasetOrigin(datasetId);
-                integrityDataCollection.setIdDatasetSchemaOrigin(design.getDatasetSchema());
-                integrityDataCollection.setDataProviderId(representative.getDataProviderId());
-                integrityDataCollection
-                    .setIdDatasetSchemaReferenced(integritieVO.getReferencedDatasetSchemaId());
-                lIntegrityDataCollections.add(integrityDataCollection);
-              }
-            }
-          }
+          createReportingDatasetInMetabase(dataflowId, time, representatives, map, datasetIdsEmails,
+              datasetIdsAndSchemaIds, statement, newReportingDatasetsRegistry,
+              lIntegrityDataCollections, design, integritieVOs);
         }
 
         statement.executeBatch();
@@ -466,6 +443,77 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       }
     } catch (SQLException e) {
       LOG_ERROR.error("Error rolling back: ", e);
+    }
+  }
+
+  /**
+   * Map representatives to providers.
+   *
+   * @param representatives the representatives
+   * @param dataProviders the data providers
+   * @return the map
+   */
+  private Map<Long, String> mapRepresentativesToProviders(List<RepresentativeVO> representatives,
+      List<DataProviderVO> dataProviders) {
+    Map<Long, String> map = new HashMap<>();
+    for (RepresentativeVO representative : representatives) {
+      for (DataProviderVO dataProvider : dataProviders) {
+        if (dataProvider.getId().equals(representative.getDataProviderId())) {
+          map.put(representative.getDataProviderId(), dataProvider.getLabel());
+          dataProviders.remove(dataProvider);
+          break;
+        }
+      }
+    }
+    return map;
+  }
+
+  /**
+   * Creates the reporting dataset in metabase.
+   *
+   * @param dataflowId the dataflow id
+   * @param time the time
+   * @param representatives the representatives
+   * @param map the map
+   * @param datasetIdsEmails the dataset ids emails
+   * @param datasetIdsAndSchemaIds the dataset ids and schema ids
+   * @param statement the statement
+   * @param newReportingDatasetsRegistry the new reporting datasets registry
+   * @param lIntegrityDataCollections the l integrity data collections
+   * @param design the design
+   * @param integritieVOs the integritie V os
+   * @throws SQLException the SQL exception
+   */
+  private void createReportingDatasetInMetabase(Long dataflowId, String time,
+      List<RepresentativeVO> representatives, Map<Long, String> map,
+      Map<Long, String> datasetIdsEmails, Map<Long, String> datasetIdsAndSchemaIds,
+      Statement statement, List<FKDataCollection> newReportingDatasetsRegistry,
+      List<IntegrityDataCollection> lIntegrityDataCollections, DesignDatasetVO design,
+      List<IntegrityVO> integritieVOs) throws SQLException {
+    for (RepresentativeVO representative : representatives) {
+      Long datasetId = persistRD(statement, design, representative, time, dataflowId,
+          map.get(representative.getDataProviderId()));
+      datasetIdsEmails.put(datasetId, representative.getProviderAccount());
+      datasetIdsAndSchemaIds.put(datasetId, design.getDatasetSchema());
+
+      FKDataCollection newReporting = new FKDataCollection();
+      newReporting.setRepresentative(map.get(representative.getDataProviderId()));
+      newReporting.setIdDatasetSchemaOrigin(design.getDatasetSchema());
+      newReporting.setIdDatasetOrigin(datasetId);
+      newReporting
+          .setFks(datasetSchemaService.getReferencedFieldsBySchema(design.getDatasetSchema()));
+      newReportingDatasetsRegistry.add(newReporting);
+      if (!integritieVOs.isEmpty()) {
+        for (IntegrityVO integritieVO : integritieVOs) {
+          IntegrityDataCollection integrityDataCollection = new IntegrityDataCollection();
+          integrityDataCollection.setIdDatasetOrigin(datasetId);
+          integrityDataCollection.setIdDatasetSchemaOrigin(design.getDatasetSchema());
+          integrityDataCollection.setDataProviderId(representative.getDataProviderId());
+          integrityDataCollection
+              .setIdDatasetSchemaReferenced(integritieVO.getReferencedDatasetSchemaId());
+          lIntegrityDataCollections.add(integrityDataCollection);
+        }
+      }
     }
   }
 
@@ -545,7 +593,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    *
    * @param connection the connection
    * @param dataflowId the dataflow id
-   *
+   * @param isCreation the is creation
    * @throws SQLException the SQL exception
    */
   private void releaseLockAndRollback(Connection connection, Long dataflowId, boolean isCreation)
@@ -650,6 +698,77 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     List<ResourceAssignationVO> providerAssignments = new ArrayList<>();
     List<ResourceAssignationVO> custodianAssignments = new ArrayList<>();
 
+    createGroupsAndAssings(datasetIdsEmails, dataCollectionIds, euDatasetIds, dataflowId, groups,
+        providerAssignments, custodianAssignments);
+
+    // Persist changes in KeyCloak guaranteeing transactionality
+    // Insert in chunks to prevent Hystrix timeout
+    int chunks = 0;
+    try {
+
+      // Persist groups
+      int size = groups.size();
+      chunks = persistGroups(groups, chunks, size);
+
+      // Persist lead reporter assignments
+      size = providerAssignments.size();
+      persistLeadReporterAssignments(providerAssignments, size);
+
+      // Persist custodian assignments
+      size = custodianAssignments.size();
+      persistCustodianAssigments(custodianAssignments, size);
+    } catch (Exception e) {
+      // Undo group creation
+      int size = chunks * 10 < groups.size() ? chunks * 10 : groups.size();
+      List<Long> rollback = groups.subList(0, size).stream().map(ResourceInfoVO::getResourceId)
+          .collect(Collectors.toList());
+      for (int i = 0; i < size; i += 10) {
+        resourceManagementControllerZuul
+            .deleteResourceByDatasetId(rollback.subList(i, i + 10 > size ? size : i + 10));
+      }
+      throw new EEAException(e);
+    }
+  }
+
+  private void persistCustodianAssigments(List<ResourceAssignationVO> custodianAssignments,
+      int size) {
+    for (int i = 0; i < size; i += 10) {
+      userManagementControllerZuul
+          .addUserToResources(custodianAssignments.subList(i, i + 10 > size ? size : i + 10));
+    }
+  }
+
+  private void persistLeadReporterAssignments(List<ResourceAssignationVO> providerAssignments,
+      int size) {
+    for (int i = 0; i < size; i += 10) {
+      userManagementControllerZuul.addContributorsToResources(
+          providerAssignments.subList(i, i + 10 > size ? size : i + 10));
+    }
+  }
+
+  private int persistGroups(List<ResourceInfoVO> groups, int chunks, int size) {
+    for (int i = 0; i < size; i += 10, chunks++) {
+      resourceManagementControllerZuul
+          .createResources(groups.subList(i, i + 10 > size ? size : i + 10));
+    }
+    return chunks;
+  }
+
+  /**
+   * Creates the groups and assings.
+   *
+   * @param datasetIdsEmails the dataset ids emails
+   * @param dataCollectionIds the data collection ids
+   * @param euDatasetIds the eu dataset ids
+   * @param dataflowId the dataflow id
+   * @param groups the groups
+   * @param providerAssignments the provider assignments
+   * @param custodianAssignments the custodian assignments
+   */
+  private void createGroupsAndAssings(Map<Long, String> datasetIdsEmails,
+      List<Long> dataCollectionIds, List<Long> euDatasetIds, Long dataflowId,
+      List<ResourceInfoVO> groups, List<ResourceAssignationVO> providerAssignments,
+      List<ResourceAssignationVO> custodianAssignments) {
     // Create DataCollection groups and assign custodian to self user
     for (Long dataCollectionId : dataCollectionIds) {
       groups.add(createGroup(dataCollectionId, ResourceTypeEnum.DATA_COLLECTION,
@@ -680,43 +799,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_CUSTODIAN));
       custodianAssignments
           .add(createAssignments(entry.getKey(), null, ResourceGroupEnum.DATASET_CUSTODIAN));
-    }
-
-    // Persist changes in KeyCloak guaranteeing transactionality
-    // Insert in chunks to prevent Hystrix timeout
-    int chunks = 0;
-    try {
-
-      // Persist groups
-      int size = groups.size();
-      for (int i = 0; i < size; i += 10, chunks++) {
-        resourceManagementControllerZuul
-            .createResources(groups.subList(i, i + 10 > size ? size : i + 10));
-      }
-
-      // Persist lead reporter assignments
-      size = providerAssignments.size();
-      for (int i = 0; i < size; i += 10) {
-        userManagementControllerZuul.addContributorsToResources(
-            providerAssignments.subList(i, i + 10 > size ? size : i + 10));
-      }
-
-      // Persist custodian assignments
-      size = custodianAssignments.size();
-      for (int i = 0; i < size; i += 10) {
-        userManagementControllerZuul
-            .addUserToResources(custodianAssignments.subList(i, i + 10 > size ? size : i + 10));
-      }
-    } catch (Exception e) {
-      // Undo group creation
-      int size = chunks * 10 < groups.size() ? chunks * 10 : groups.size();
-      List<Long> rollback = groups.subList(0, size).stream().map(ResourceInfoVO::getResourceId)
-          .collect(Collectors.toList());
-      for (int i = 0; i < size; i += 10) {
-        resourceManagementControllerZuul
-            .deleteResourceByDatasetId(rollback.subList(i, i + 10 > size ? size : i + 10));
-      }
-      throw new EEAException(e);
     }
   }
 

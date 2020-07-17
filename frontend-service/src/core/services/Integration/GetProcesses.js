@@ -1,2 +1,2 @@
-export const GetProcesses = ({ integrationRepository }) => async repository =>
-  integrationRepository.getProcesses(repository);
+export const GetProcesses = ({ integrationRepository }) => async (repository, datasetId) =>
+  integrationRepository.getProcesses(repository, datasetId);

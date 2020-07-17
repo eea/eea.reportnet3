@@ -12,7 +12,6 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { UserService } from 'core/services/User';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 
-import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';

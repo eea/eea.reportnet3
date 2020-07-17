@@ -9,6 +9,9 @@ export const manageIntegrationsReducer = (state, { type, payload }) => {
     case 'GET_UPDATED_DATA':
       return { ...state, ...payload };
 
+    case 'IS_LOADING':
+      return { ...state, isLoading: payload.value };
+
     case 'MANAGE_PARAMETERS':
       return { ...state, externalParameters: payload.data, parameterKey: '', parameterValue: '' };
 
@@ -22,6 +25,9 @@ export const manageIntegrationsReducer = (state, { type, payload }) => {
 
     case 'ON_FILL':
       return { ...state, [payload.name]: payload.data };
+
+    case 'ON_FILL_REPOSITORY':
+      return { ...state, [payload.name]: payload.data, processName: payload.processName };
 
     case 'SHOW_ERRORS':
       return { ...state, displayErrors: payload.value };

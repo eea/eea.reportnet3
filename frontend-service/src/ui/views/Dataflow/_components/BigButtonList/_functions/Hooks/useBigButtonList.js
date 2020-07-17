@@ -408,9 +408,12 @@ const useBigButtonList = ({
   const copyDataCollectionToEuDatasetBigButton = [
     {
       buttonClass: 'schemaDataset',
-      buttonIcon: 'angleDoubleRight',
+      buttonIcon: dataflowState.isCopyDataCollectionToEuDatasetLoading ? 'spinner' : 'angleDoubleRight',
+      buttonIconClass: dataflowState.isCopyDataCollectionToEuDatasetLoading ? 'spinner' : '',
       caption: 'Copy Data Collections to EU Datasets',
-      handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onCopyDataCollectionToEuDataset(),
+      handleRedirect: dataflowState.isCopyDataCollectionToEuDatasetLoading
+        ? () => {}
+        : () => onCopyDataCollectionToEuDataset(),
       layout: 'defaultBigButton',
       visibility:
         buttonsVisibility.copyDataCollectionToEuDataset && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']
@@ -420,9 +423,10 @@ const useBigButtonList = ({
   const exportEuDatasetBigButton = [
     {
       buttonClass: 'schemaDataset',
-      buttonIcon: 'fileExport',
+      buttonIcon: dataflowState.isExportEuDatasetLoading ? 'spinner' : 'fileExport',
+      buttonIconClass: dataflowState.isExportEuDatasetLoading ? 'spinner' : '',
       caption: 'Export EU Datasets',
-      handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onExportEuDataset(),
+      handleRedirect: dataflowState.isExportEuDatasetLoading ? () => {} : () => onExportEuDataset(),
       layout: 'defaultBigButton',
       visibility:
         buttonsVisibility.copyDataCollectionToEuDataset && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']

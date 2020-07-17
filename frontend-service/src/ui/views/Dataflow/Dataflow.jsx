@@ -70,11 +70,13 @@ const Dataflow = withRouter(({ history, match }) => {
     hasWritePermissions: false,
     id: dataflowId,
     isApiKeyDialogVisible: false,
+    isCopyDataCollectionToEuDatasetLoading: false,
     isCustodian: false,
     isDataSchemaCorrect: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
     isEditDialogVisible: false,
+    isExportEuDatasetLoading: false,
     isManageRightsDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPageLoading: true,
@@ -342,6 +344,18 @@ const Dataflow = withRouter(({ history, match }) => {
       payload: { hasRepresentativesWithoutDatasets: value }
     });
 
+  const setIsCopyDataCollectionToEuDatasetLoading = value =>
+    dataflowDispatch({
+      type: 'SET_IS_COPY_DATA_COLLECTION_TO_EU_DATASET_LOADING',
+      payload: { isLoading: value }
+    });
+  
+  const setIsExportEuDatasetLoading = value =>
+  dataflowDispatch({
+    type: 'SET_IS_EXPORT_EU_DATASET',
+    payload: { isExportEuDatasetLoading: value }
+  });
+
   const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
 
   const setIsPageLoading = isPageLoading =>
@@ -539,6 +553,8 @@ const Dataflow = withRouter(({ history, match }) => {
             onShowManageReportersDialog={onShowManageReportersDialog}
             onShowSnapshotDialog={onShowSnapshotDialog}
             onUpdateData={setIsDataUpdated}
+            setIsCopyDataCollectionToEuDatasetLoading={setIsCopyDataCollectionToEuDatasetLoading}
+            setIsExportEuDatasetLoading={setIsExportEuDatasetLoading}
             setIsReceiptLoading={setIsReceiptLoading}
             setUpdatedDatasetSchema={setUpdatedDatasetSchema}
           />

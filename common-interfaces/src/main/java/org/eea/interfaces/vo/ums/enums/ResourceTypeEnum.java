@@ -82,7 +82,7 @@ public enum ResourceTypeEnum {
   @JsonCreator
   public static ResourceTypeEnum fromValue(String value) {
     return Arrays.stream(ResourceTypeEnum.values()).filter(e -> e.resource.equals(value))
-        .findFirst().get();
+        .findFirst().orElseThrow(IllegalStateException::new);
   }
 
 }

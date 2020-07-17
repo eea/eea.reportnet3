@@ -17,10 +17,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-public class LoadSchemaCompletedEventTest {
+public class ImportReportingFailedEventTest {
 
   @InjectMocks
-  private LoadSchemaCompletedEvent loadSchemaCompletedEvent;
+  private ImportReportingFailedEvent loadDataFailedEvent;
 
   @Mock
   private DatasetService datasetService;
@@ -47,17 +47,16 @@ public class LoadSchemaCompletedEventTest {
 
   @Test
   public void getEventTypeTest() {
-    Assert.assertEquals(EventType.LOAD_SCHEMA_COMPLETED_EVENT,
-        loadSchemaCompletedEvent.getEventType());
+    Assert.assertEquals(EventType.IMPORT_REPORTING_FAILED_EVENT, loadDataFailedEvent.getEventType());
   }
 
   @Test
   public void getMapTest() throws EEAException {
-    Assert.assertEquals(8,
-        loadSchemaCompletedEvent.getMap(NotificationVO.builder().user("user").datasetId(1L)
-            .dataflowId(1L).datasetName("datasetName").dataflowName("dataflowName")
-            .tableSchemaId("tableSchemaId").tableSchemaName("tableSchemaName").fileName("fileName")
-            .build()).size());
+    Assert.assertEquals(9, loadDataFailedEvent
+        .getMap(NotificationVO.builder().user("user").datasetId(1L).dataflowId(1L)
+            .datasetName("datasetName").dataflowName("dataflowName").tableSchemaId("tableSchemaId")
+            .tableSchemaName("tableSchemaName").fileName("fileName").error("error").build())
+        .size());
   }
 
   @Test
@@ -71,10 +70,7 @@ public class LoadSchemaCompletedEventTest {
         .thenReturn("tableSchemaName");
     Mockito.when(datasetMetabaseVO.getDataSetName()).thenReturn("datasetName");
     Mockito.when(dataflowVO.getName()).thenReturn("dataflowName");
-    Assert.assertEquals(8,
-        loadSchemaCompletedEvent
-            .getMap(
-                NotificationVO.builder().user("user").datasetId(1L).fileName("fileName").build())
-            .size());
+    Assert.assertEquals(9, loadDataFailedEvent.getMap(NotificationVO.builder().user("user")
+        .datasetId(1L).fileName("fileName").error("error").build()).size());
   }
 }
