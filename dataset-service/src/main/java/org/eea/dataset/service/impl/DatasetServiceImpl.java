@@ -568,36 +568,46 @@ public class DatasetServiceImpl implements DatasetService {
       }
 
       // 5º retrieve validations to set them into the final result
-      List<String> recordIds = recordVOs.stream().map(RecordVO::getId).collect(Collectors.toList());
-      Map<String, List<FieldValidation>> fieldValidations = this.getFieldValidations(recordIds);
-      Map<String, List<RecordValidation>> recordValidations = this.getRecordValidations(recordIds);
-      recordVOs.stream().forEach(record -> {
-        record.getFields().stream().forEach(field -> {
-          List<FieldValidationVO> validations =
-              fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId()));
-          field.setFieldValidations(validations);
-          if (null != validations && !validations.isEmpty()) {
-            field.setLevelError(
-                validations.stream().map(validation -> validation.getValidation().getLevelError())
-                    .filter(error -> error.equals(ErrorTypeEnum.ERROR)).findFirst()
-                    .orElse(ErrorTypeEnum.WARNING));
-          }
-        });
+      retrieveValidations(recordVOs);
 
-        List<RecordValidationVO> validations =
-            recordValidationMapper.entityListToClass(recordValidations.get(record.getId()));
-        record.setRecordValidations(validations);
+    }
+    result.setTotalRecords(totalRecords);
+    return result;
+  }
+
+  /**
+   * Retrieve validations.
+   *
+   * @param recordVOs the record V os
+   */
+  private void retrieveValidations(List<RecordVO> recordVOs) {
+    // retrieve validations to set them into the final result
+    List<String> recordIds = recordVOs.stream().map(RecordVO::getId).collect(Collectors.toList());
+    Map<String, List<FieldValidation>> fieldValidations = this.getFieldValidations(recordIds);
+    Map<String, List<RecordValidation>> recordValidations = this.getRecordValidations(recordIds);
+    recordVOs.stream().forEach(record -> {
+      record.getFields().stream().forEach(field -> {
+        List<FieldValidationVO> validations =
+            fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId()));
+        field.setFieldValidations(validations);
         if (null != validations && !validations.isEmpty()) {
-          record.setLevelError(
+          field.setLevelError(
               validations.stream().map(validation -> validation.getValidation().getLevelError())
                   .filter(error -> error.equals(ErrorTypeEnum.ERROR)).findFirst()
                   .orElse(ErrorTypeEnum.WARNING));
         }
       });
 
-    }
-    result.setTotalRecords(totalRecords);
-    return result;
+      List<RecordValidationVO> validations =
+          recordValidationMapper.entityListToClass(recordValidations.get(record.getId()));
+      record.setRecordValidations(validations);
+      if (null != validations && !validations.isEmpty()) {
+        record.setLevelError(
+            validations.stream().map(validation -> validation.getValidation().getLevelError())
+                .filter(error -> error.equals(ErrorTypeEnum.ERROR)).findFirst()
+                .orElse(ErrorTypeEnum.WARNING));
+      }
+    });
   }
 
   /**

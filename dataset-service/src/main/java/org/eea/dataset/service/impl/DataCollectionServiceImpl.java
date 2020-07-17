@@ -708,24 +708,15 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
       // Persist groups
       int size = groups.size();
-      for (int i = 0; i < size; i += 10, chunks++) {
-        resourceManagementControllerZuul
-            .createResources(groups.subList(i, i + 10 > size ? size : i + 10));
-      }
+      chunks = persistGroups(groups, chunks, size);
 
       // Persist lead reporter assignments
       size = providerAssignments.size();
-      for (int i = 0; i < size; i += 10) {
-        userManagementControllerZuul.addContributorsToResources(
-            providerAssignments.subList(i, i + 10 > size ? size : i + 10));
-      }
+      persistLeadReporterAssignments(providerAssignments, size);
 
       // Persist custodian assignments
       size = custodianAssignments.size();
-      for (int i = 0; i < size; i += 10) {
-        userManagementControllerZuul
-            .addUserToResources(custodianAssignments.subList(i, i + 10 > size ? size : i + 10));
-      }
+      persistCustodianAssigments(custodianAssignments, size);
     } catch (Exception e) {
       // Undo group creation
       int size = chunks * 10 < groups.size() ? chunks * 10 : groups.size();
@@ -737,6 +728,30 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       }
       throw new EEAException(e);
     }
+  }
+
+  private void persistCustodianAssigments(List<ResourceAssignationVO> custodianAssignments,
+      int size) {
+    for (int i = 0; i < size; i += 10) {
+      userManagementControllerZuul
+          .addUserToResources(custodianAssignments.subList(i, i + 10 > size ? size : i + 10));
+    }
+  }
+
+  private void persistLeadReporterAssignments(List<ResourceAssignationVO> providerAssignments,
+      int size) {
+    for (int i = 0; i < size; i += 10) {
+      userManagementControllerZuul.addContributorsToResources(
+          providerAssignments.subList(i, i + 10 > size ? size : i + 10));
+    }
+  }
+
+  private int persistGroups(List<ResourceInfoVO> groups, int chunks, int size) {
+    for (int i = 0; i < size; i += 10, chunks++) {
+      resourceManagementControllerZuul
+          .createResources(groups.subList(i, i + 10 > size ? size : i + 10));
+    }
+    return chunks;
   }
 
   /**
