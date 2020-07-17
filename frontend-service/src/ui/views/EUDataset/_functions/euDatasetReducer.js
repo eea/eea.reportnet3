@@ -17,6 +17,9 @@ export const euDatasetReducer = (state, { type, payload }) => {
     case 'HANDLE_DIALOGS':
       return { ...state, isDialogVisible: { ...state.isDialogVisible, [payload.dialog]: payload.value } };
 
+    case 'HAS_WRITE_PERMISSIONS':
+      return { ...state, hasWritePermissions: payload.hasWritePermissions };
+
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
 

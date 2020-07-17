@@ -279,7 +279,11 @@ export const BigButtonList = ({
       await EuDatasetService.copyDataCollection(dataflowId);
     } catch (error) {
       console.error(error);
-      notificationContext.add({ type: 'COPY_DATA_COLLECTION_EU_DATASET_ERROR' });
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });        
+      } else {        
+        notificationContext.add({ type: 'COPY_DATA_COLLECTION_EU_DATASET_ERROR' });
+      }
     }
   };
 
@@ -288,7 +292,11 @@ export const BigButtonList = ({
       await EuDatasetService.exportEuDataset(dataflowId);
     } catch (error) {
       console.error(error);
-      notificationContext.add({ type: 'EXPORT_EU_DATASET_ERROR' });
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });               
+      } else {        
+        notificationContext.add({ type: 'EXPORT_EU_DATASET_ERROR' });
+      }
     }
   };
 

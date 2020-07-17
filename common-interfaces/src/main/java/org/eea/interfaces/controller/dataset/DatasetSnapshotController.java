@@ -30,6 +30,15 @@ public interface DatasetSnapshotController {
   }
 
   /**
+   * Gets the by id.
+   *
+   * @param idSnapshot the id snapshot
+   * @return the by id
+   */
+  @GetMapping(value = "/private/{idSnapshot}", produces = MediaType.APPLICATION_JSON_VALUE)
+  SnapshotVO getById(@PathVariable("idSnapshot") Long idSnapshot);
+
+  /**
    * Gets the snapshots by id dataset.
    *
    * @param datasetId the dataset id

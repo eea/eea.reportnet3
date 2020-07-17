@@ -84,6 +84,7 @@ import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -1083,7 +1084,7 @@ public class DatasetServiceImpl implements DatasetService {
       List<TableValue> allTableValues = dataset.getTableValues();
 
       DataSetMetabase datasetMb =
-          reportingDatasetRepository.findById(datasetId).orElse(new ReportingDataset());
+          dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
 
       DataSetSchema schema =
           schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
@@ -1393,9 +1394,13 @@ public class DatasetServiceImpl implements DatasetService {
       // Get the dataFlowId from the metabase
       Long idDataflow = getDataFlowIdById(datasetId);
 
+      // Find if the dataset type is EU to include the countryCode
+      DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
+      boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType);
+
       final IFileExportContext context = fileExportFactory.createContext(mimeType);
       LOG.info("End of exportFile");
-      return context.fileWriter(idDataflow, datasetId, idTableSchema);
+      return context.fileWriter(idDataflow, datasetId, idTableSchema, includeCountryCode);
     }
 
   }

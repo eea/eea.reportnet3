@@ -99,6 +99,18 @@ public interface RecordStoreService {
       DatasetTypeEnum typeDataset, Boolean isSchemaSnapshot, Boolean deleteData)
       throws SQLException, IOException, RecordStoreAccessException;
 
+  /**
+   * Restore data snapshot poc.
+   *
+   * @param idReportingDataset the id reporting dataset
+   * @param idSnapshot the id snapshot
+   * @param partitionId the partition id
+   * @param datasetType the dataset type
+   * @param isSchemaSnapshot the is schema snapshot
+   * @param deleteData the delete data
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Async
   void restoreDataSnapshotPoc(Long idReportingDataset, Long idSnapshot, Long partitionId,
       DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
@@ -132,4 +144,5 @@ public interface RecordStoreService {
    * @param isCreation the is creation
    */
   void createSchemas(Map<Long, String> datasetIdAndSchemaId, Long dataflowId, boolean isCreation);
+
 }

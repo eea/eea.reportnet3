@@ -179,6 +179,23 @@ public class IntegrationControllerImpl implements IntegrationController {
 
 
   /**
+   * Execute EU dataset export.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_STEWARD')")
+  @PostMapping(value = "/executeEUDatasetExport")
+  public List<ExecutionResultVO> executeEUDatasetExport(
+      @RequestParam("dataflowId") Long dataflowId) {
+    return integrationService.executeEUDatasetExport(dataflowId);
+
+  }
+
+
+  /**
    * Copy integrations.
    *
    * @param copyVO the copy VO
