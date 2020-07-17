@@ -107,11 +107,7 @@ public class FMECommunicationService {
                 .buildAndExpand(uriParams).toString(),
             HttpMethod.POST, request, SubmitResult.class);
 
-    Integer result = 0;
-    if (null != checkResult && null != checkResult.getBody()) {
-      result = checkResult.getBody().getId();
-    }
-    return result;
+    return checkResult != null && checkResult.getBody() != null ? checkResult.getBody().getId() : 0;
   }
 
   /**

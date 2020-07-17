@@ -247,8 +247,7 @@ public class ValidationHelper implements DisposableBean {
     if (checkStartedProcess(processId)) {
       synchronized (processesMap) {
         Integer pendingOk = processesMap.get(processId).getPendingOks();
-        pendingOk--;
-        processesMap.get(processId).setPendingOks(pendingOk);
+        processesMap.get(processId).setPendingOks(--pendingOk);
         if (!this.checkFinishedValidations(datasetId, processId)) {
           // process is not over, but still it could happen that there is no task to be sent
           // remember pendingOks > pendingValidations.size()
@@ -547,8 +546,7 @@ public class ValidationHelper implements DisposableBean {
           pendingOk = 0;
         }
 
-        pendingOk++;
-        processesMap.get(processId).setPendingOks(pendingOk);
+        processesMap.get(processId).setPendingOks(++pendingOk);
         EEAEventVO eeaEventVO = new EEAEventVO();
         eeaEventVO.setEventType(eventType);
         eeaEventVO.setData(value);
