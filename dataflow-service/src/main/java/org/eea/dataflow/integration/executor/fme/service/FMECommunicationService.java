@@ -40,29 +40,42 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 public class FMECommunicationService {
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+  private static final Logger LOG = LoggerFactory.getLogger(FMECommunicationService.class);
 
-  /** The fme host. */
+  /**
+   * The fme host.
+   */
   // fme.discomap.eea.europa.eu
   @Value("${integration.fme.host}")
   private String fmeHost;
 
-  /** The fme scheme. */
+  /**
+   * The fme scheme.
+   */
   // https
   @Value("${integration.fme.scheme}")
   private String fmeScheme;
 
-  /** The fme token. */
+  /**
+   * The fme token.
+   */
   // Basic UmVwb3J0bmV0MzpSZXBvcnRuZXQzXzIwMjAh
   @Value("${integration.fme.token}")
   private String fmeToken;
 
-  /** The fme collection mapper. */
+  /**
+   * The fme collection mapper.
+   */
   @Autowired
   private FMECollectionMapper fmeCollectionMapper;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
@@ -70,13 +83,19 @@ public class FMECommunicationService {
   private RestTemplate restTemplate;
 
 
-  /** The Constant APPLICATION_JSON: {@value}. */
+  /**
+   * The Constant APPLICATION_JSON: {@value}.
+   */
   private static final String APPLICATION_JSON = "application/json";
 
-  /** The Constant CONTENT_TYPE: {@value}. */
+  /**
+   * The Constant CONTENT_TYPE: {@value}.
+   */
   private static final String CONTENT_TYPE = "Content-Type";
 
-  /** The Constant ACCEPT: {@value}. */
+  /**
+   * The Constant ACCEPT: {@value}.
+   */
   private static final String ACCEPT = "Accept";
 
   /**
@@ -117,6 +136,7 @@ public class FMECommunicationService {
    * @param idDataset the id dataset
    * @param idProvider the id provider
    * @param fileName the file name
+   *
    * @return the file submit result
    */
   public FileSubmitResult sendFile(byte[] file, Long idDataset, String idProvider,
@@ -153,6 +173,7 @@ public class FMECommunicationService {
    * @param idDataset the id dataset
    * @param idProvider the id provider
    * @param fileName the file name
+   *
    * @return the file submit result
    */
   public FileSubmitResult receiveFile(byte[] file, Long idDataset, String idProvider,
@@ -227,6 +248,7 @@ public class FMECommunicationService {
    * Find items.
    *
    * @param repository the repository
+   *
    * @return the collection
    */
   public FMECollectionVO findItems(String repository) {
@@ -265,6 +287,7 @@ public class FMECommunicationService {
         .dataflowId(fmeOperationInfoVO.getDataflowId()).fileName(fmeOperationInfoVO.getFileName())
         .build();
 
+    LOG.info("Setting operation {} coming from FME as finished", fmeOperationInfoVO);
     switch (fmeOperationInfoVO.getFmeOperation()) {
       case IMPORT:
         eventType = null != fmeOperationInfoVO.getProviderId()
@@ -298,6 +321,7 @@ public class FMECommunicationService {
    * @param body the body
    * @param uriParams the uri params
    * @param headerInfo the header info
+   *
    * @return the http entity
    */
   private <T> HttpEntity<T> createHttpRequest(T body, Map<String, String> uriParams,
