@@ -200,7 +200,12 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    datasetSnapshotService.releaseSnapshot(datasetId, idSnapshot);
+    try {
+      datasetSnapshotService.releaseSnapshot(datasetId, idSnapshot);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error releasing a snapshot. ", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
+    }
   }
 
   /**
