@@ -41,6 +41,8 @@ export const BigButtonList = ({
   onShowManageReportersDialog,
   onShowSnapshotDialog,
   onUpdateData,
+  setIsCopyDataCollectionToEuDatasetLoading,
+  setIsExportEuDatasetLoading,
   setIsReceiptLoading,
   setUpdatedDatasetSchema,
   updatedDatasetSchema
@@ -72,6 +74,8 @@ export const BigButtonList = ({
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
   useCheckNotifications(['UPDATE_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
+  useCheckNotifications(['', ''], setIsCopyDataCollectionToEuDatasetLoading, false);
+  useCheckNotifications(['', ''], setIsExportEuDatasetLoading, false);
 
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
@@ -275,10 +279,14 @@ export const BigButtonList = ({
   };
 
   const onCopyDataCollectionToEuDataset = async () => {
+    notificationContext.add({ type: 'COPY_TO_EU_DATASET_INIT' });
+    setIsCopyDataCollectionToEuDatasetLoading(true);
+
     try {
       await EuDatasetService.copyDataCollection(dataflowId);
     } catch (error) {
-      console.error(error);
+      setIsCopyDataCollectionToEuDatasetLoading(false);
+
       if (error.response.status === 423) {
         notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });        
       } else {        
@@ -288,10 +296,14 @@ export const BigButtonList = ({
   };
 
   const onExportEuDataset = async () => {
+    notificationContext.add({ type: 'EXPORT_EU_DATASET_INIT' })
+    setIsExportEuDatasetLoading(true)
+
     try {
       await EuDatasetService.exportEuDataset(dataflowId);
     } catch (error) {
-      console.error(error);
+      setIsExportEuDatasetLoading(false)
+
       if (error.response.status === 423) {
         notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });               
       } else {        

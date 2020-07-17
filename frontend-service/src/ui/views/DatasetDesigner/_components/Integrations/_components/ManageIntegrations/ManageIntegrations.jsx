@@ -10,6 +10,7 @@ import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import { Spinner } from 'ui/views/_components/Spinner';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -54,6 +55,7 @@ export const ManageIntegrations = ({
     externalParameters: [],
     fileExtension: '',
     id: null,
+    isLoading: true,
     isUpdatedVisible: false,
     name: '',
     operation: {},
@@ -111,11 +113,12 @@ export const ManageIntegrations = ({
       });
     } catch (error) {
       notificationContext.add({ type: 'ERROR_LOADING_REPOSITORIES' });
+    } finally {
+      isLoading(false)
     }
   };
 
   const getProcesses = async () => {
-    console.log({manageIntegrationsState})
     if (!isEmpty(manageIntegrationsState.repository)) {
       try {
         manageIntegrationsDispatch({
@@ -131,6 +134,8 @@ export const ManageIntegrations = ({
   };
 
   const getUpdatedData = () => manageIntegrationsDispatch({ type: 'GET_UPDATED_DATA', payload: updatedData });
+
+  const isLoading = value => manageIntegrationsDispatch({ type: 'IS_LOADING', payload: { value } })
 
   const onAddParameter = () => {
     manageIntegrationsDispatch({
@@ -428,6 +433,8 @@ export const ManageIntegrations = ({
 
     return <ul className={styles.list}>{data}</ul>;
   };
+
+  if (manageIntegrationsState.isLoading) return renderDialogLayout(<Spinner style={{ top: 0 }} />)
 
   return renderDialogLayout(
     <Fragment>

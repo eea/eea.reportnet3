@@ -1023,7 +1023,7 @@ const DataViewer = withRouter(
               multiple={false}
               name="file"
               onUpload={onUpload}
-              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadData, {
+              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableData, {
                 datasetId: datasetId,
                 tableId: tableId
               })}`}

@@ -907,9 +907,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               multiple={false}
               name="file"
               onUpload={onUpload}
-              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadData, {
-                datasetId: datasetId,
-                tableId: null
+              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importDatasetData, {
+                datasetId: datasetId
               })}`}
             />
           </Dialog>
