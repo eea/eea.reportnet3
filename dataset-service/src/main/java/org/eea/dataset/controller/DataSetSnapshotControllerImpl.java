@@ -67,6 +67,23 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     return snapshot;
   }
 
+
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/schemaSnapshot/{idSnapshot}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("isAuthenticated()")
+  public SnapshotVO getSchemaById(@PathVariable("idSnapshot") Long idSnapshot) {
+    SnapshotVO snapshot = null;
+    try {
+      snapshot = datasetSnapshotService.getSchemaById(idSnapshot);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error getting the snapshot schema. ", e.getMessage(), e);
+    }
+    return snapshot;
+  }
+
+
   /**
    * Gets the snapshots by id dataset.
    *

@@ -5,12 +5,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.eea.dataset.mapper.EUDatasetMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
-import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
@@ -22,7 +20,6 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.lock.service.LockService;
@@ -124,24 +121,6 @@ public class EUDatasetServiceImpl implements EUDatasetService {
           false, obtainPartition(relatedDatasetsByIds.get(dataCollection.getId()), "root").getId());
     }
 
-
-    try {
-      Thread.sleep(60000L);
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-
-    for (Entry<Long, Long> entry : relatedDatasetsByIds.entrySet()) {
-      LOG.info("Voy a buscar los snapshots del datasetId {}", entry.getKey());
-      Snapshot snap = snapshotRepository.findFirstByReportingDatasetId(entry.getKey());
-      datasetSnapshotService.restoreSnapshotToCloneData(entry.getKey(), entry.getValue(),
-          snap.getId(), true, DatasetTypeEnum.EUDATASET);
-    }
-    // Finally, we release the locks
-    removeLocksRelatedToPopulateEU(reportings, dataflowId);
-
-    // borrar los snapshots
   }
 
   /**
@@ -184,41 +163,15 @@ public class EUDatasetServiceImpl implements EUDatasetService {
     }
   }
 
-  private void removeLocksRelatedToPopulateEU(List<ReportingDatasetVO> reportings,
-      Long dataflowId) {
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.POPULATE_EU_DATASET.getValue());
-    criteria.add(dataflowId);
-    lockService.removeLockByCriteria(criteria);
-
-    for (ReportingDatasetVO reporting : reportings) {
-      List<Object> criteriaReporting = new ArrayList<>();
-      criteriaReporting.add(LockSignature.RELEASE_SNAPSHOT.getValue());
-      criteriaReporting.add(reporting.getId());
-
-      lockService.removeLockByCriteria(criteriaReporting);
-    }
-  }
-
-
-  public void pruebaLock(Long dataflowId) throws EEAException, InterruptedException {
-
+  /**
+   * Removes the locks related to populate EU.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  public void removeLocksRelatedToPopulateEU(Long dataflowId) {
     List<ReportingDatasetVO> reportings =
         reportingDatasetService.getDataSetIdByDataflowId(dataflowId);
-
-    for (ReportingDatasetVO reporting : reportings) {
-      List<Object> criteriaReporting = new ArrayList<>();
-      criteriaReporting.add(LockSignature.RELEASE_SNAPSHOT.getValue());
-      criteriaReporting.add(reporting.getId());
-      Map<String, Object> mapa = new HashMap<>();
-      mapa.put("signature", LockSignature.RELEASE_SNAPSHOT.getValue());
-      mapa.put("datasetId", reporting.getId());
-      lockService.createLock(new Timestamp(System.currentTimeMillis()),
-          SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD, mapa);
-    }
-
-    Thread.sleep(60000L);
-
     List<Object> criteria = new ArrayList<>();
     criteria.add(LockSignature.POPULATE_EU_DATASET.getValue());
     criteria.add(dataflowId);
@@ -231,10 +184,16 @@ public class EUDatasetServiceImpl implements EUDatasetService {
 
       lockService.removeLockByCriteria(criteriaReporting);
     }
-
   }
 
-
+  /**
+   * Obtain partition.
+   *
+   * @param datasetId the dataset id
+   * @param user the user
+   * @return the partition data set metabase
+   * @throws EEAException the EEA exception
+   */
   private PartitionDataSetMetabase obtainPartition(final Long datasetId, final String user)
       throws EEAException {
     final PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository

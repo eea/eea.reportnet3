@@ -5,13 +5,13 @@ import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
-import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +28,6 @@ public class DataCollectionSnapshotCommand extends AbstractEEAEventHandlerComman
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-  @Autowired
-  private SnapshotRepository snapshotRepository;
 
   @Autowired
   private EUDatasetRepository euDatasetRepository;
@@ -61,15 +58,15 @@ public class DataCollectionSnapshotCommand extends AbstractEEAEventHandlerComman
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
     Long snapshotId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("snapshot_id")));
+    ThreadPropertiesManager.setVariable("user", String.valueOf(eeaEventVO.getData().get("user")));
 
     DataCollection dataCollection = dataCollectionRepository.findById(datasetId).orElse(null);
     if (dataCollection != null) {
       List<EUDataset> euDatasetList = euDatasetRepository.findByDataflowIdAndDatasetSchema(
           dataCollection.getDataflowId(), dataCollection.getDatasetSchema());
       if (!euDatasetList.isEmpty()) {
-        Long euDatasetId = euDatasetList.get(0).getId();
-        datasetSnapshotService.restoreSnapshotToCloneData(dataCollection.getId(), euDatasetId,
-            snapshotId, true, DatasetTypeEnum.EUDATASET);
+        datasetSnapshotService.restoreSnapshotToCloneData(dataCollection.getId(),
+            euDatasetList.get(0).getId(), snapshotId, true, DatasetTypeEnum.EUDATASET);
       }
     }
   }

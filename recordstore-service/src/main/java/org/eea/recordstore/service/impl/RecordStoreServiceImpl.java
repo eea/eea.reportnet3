@@ -343,13 +343,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
   }
 
-  @Override
-  public void restoreDataSnapshotPoc(Long idReportingDataset, Long idSnapshot, Long partitionId,
-      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
-      throws SQLException, IOException {
-
-  }
-
   /**
    * Delete data snapshot.
    *

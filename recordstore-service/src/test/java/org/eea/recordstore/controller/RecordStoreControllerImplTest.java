@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
@@ -164,7 +165,8 @@ public class RecordStoreControllerImplTest {
   }
 
   @Test
-  public void testCreateSnapshot() throws SQLException, IOException, RecordStoreAccessException {
+  public void testCreateSnapshot()
+      throws SQLException, IOException, RecordStoreAccessException, EEAException {
     recordStoreControllerImpl.createSnapshotData(1L, 1L, 1L);
 
     Mockito.verify(recordStoreService, times(1)).createDataSnapshot(Mockito.any(), Mockito.any(),

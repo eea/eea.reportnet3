@@ -78,6 +78,10 @@ public enum EventType {
   RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "dataset_snapshot_restored_completed_key", true),
 
+  /** The restore datacollection snapshot completed event. */
+  RESTORE_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "dataCollection_snapshot_restored_completed_key", true),
+
   /** The restore dataset snapshot failed event. */
   RESTORE_DATASET_SNAPSHOT_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "dataset_snapshot_restored_failed_key", true),
@@ -109,6 +113,10 @@ public enum EventType {
   /** The add dataset schema snapshot failed event. */
   ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "add_dataset_schema_snapshot_failed_event", true),
+
+  /** The copy data to eudataset completed event. */
+  COPY_DATA_TO_EUDATASET_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "copy_data_to_eudataset_completed_event", true),
 
   /** The command execute validation. */
   COMMAND_EXECUTE_VALIDATION(LiteralConstants.COMMAND_TOPIC, "execute_validations_key", false),

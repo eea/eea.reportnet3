@@ -35,8 +35,18 @@ public interface DatasetSnapshotController {
    * @param idSnapshot the id snapshot
    * @return the by id
    */
-  @GetMapping(value = "/{idSnapshot}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/{idSnapshot}", produces = MediaType.APPLICATION_JSON_VALUE)
   SnapshotVO getById(@PathVariable("idSnapshot") Long idSnapshot);
+
+  /**
+   * Gets the schema by id.
+   *
+   * @param idSnapshot the id snapshot
+   * @return the schema by id
+   */
+  @GetMapping(value = "/private/schemaSnapshot/{idSnapshot}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  SnapshotVO getSchemaById(@PathVariable("idSnapshot") Long idSnapshot);
 
   /**
    * Gets the snapshots by id dataset.

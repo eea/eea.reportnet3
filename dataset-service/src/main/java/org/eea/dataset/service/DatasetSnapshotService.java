@@ -22,6 +22,15 @@ public interface DatasetSnapshotService {
   SnapshotVO getById(Long idSnapshot) throws EEAException;
 
   /**
+   * Gets the schema by id.
+   *
+   * @param idSnapshot the id snapshot
+   * @return the schema by id
+   * @throws EEAException the EEA exception
+   */
+  SnapshotVO getSchemaById(Long idSnapshot) throws EEAException;
+
+  /**
    * Gets the snapshots by id dataset.
    *
    * @param datasetId the dataset id

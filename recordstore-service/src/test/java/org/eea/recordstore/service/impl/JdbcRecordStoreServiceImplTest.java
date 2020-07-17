@@ -135,7 +135,7 @@ public class JdbcRecordStoreServiceImplTest {
 
 
   @Test
-  public void testCreateSnapshot() throws SQLException, IOException {
+  public void testCreateSnapshot() throws SQLException, IOException, EEAException {
     List<String> datasets = new ArrayList<>();
     datasets.add("dataset_1");
     PowerMockito.mockStatic(DriverManager.class);

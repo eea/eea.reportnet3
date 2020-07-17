@@ -179,7 +179,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   private static final String FILE_PATTERN_NAME_UNIQUE = "uniqueSnapshot_%s-DesignDataset_%s";
 
   /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseServiceImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DatasetSnapshotServiceImpl.class);
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -199,6 +199,22 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       throw new EEAException(String.format("Snapshot with id %s Not found", idSnapshot));
     }
     return snapshotMapper.entityToClass(snapshot);
+  }
+
+  /**
+   * Gets the schema by id.
+   *
+   * @param idSnapshot the id snapshot
+   * @return the schema by id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public SnapshotVO getSchemaById(Long idSnapshot) throws EEAException {
+    SnapshotSchema snapshot = snapshotSchemaRepository.findById(idSnapshot).orElse(null);
+    if (snapshot == null) {
+      throw new EEAException(String.format("Snapshot Schema with id %s Not found", idSnapshot));
+    }
+    return snapshotSchemaMapper.entityToClass(snapshot);
   }
 
   /**
@@ -233,7 +249,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   public void addSnapshot(Long idDataset, String description, Boolean released,
       Long partitionIdDestination) {
 
-    Long snapshotId = 0L;
     List<Validation> isBlocked = null;
     try {
       setTenant(idDataset);
@@ -249,9 +264,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       snap.setDataSetName("snapshot from dataset_" + idDataset);
       snap.setRelease(false);
       snap.setBlocked(isBlocked != null && !isBlocked.isEmpty());
+      snap.setForceRelease(released);
       snapshotRepository.save(snap);
       LOG.info("Snapshot {} created into the metabase", snap.getId());
-      snapshotId = snap.getId();
+      snap.getId();
 
       // 2. Create the data file of the snapshot, calling to recordstore-service
       // we need the partitionId. By now only consider the user root
@@ -267,13 +283,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
       recordStoreControllerZull.createSnapshotData(idDataset, snap.getId(), idPartition);
 
-
-      LOG.info("Snapshot {} data files created", snap.getId());
-      releaseEvent(EventType.ADD_DATASET_SNAPSHOT_COMPLETED_EVENT, idDataset, null);
     } catch (Exception e) {
       LOG_ERROR.error("Error creating snapshot for dataset {}", idDataset, e);
       releaseEvent(EventType.ADD_DATASET_SNAPSHOT_FAILED_EVENT, idDataset, e.getMessage());
-    } finally {
       // Release the lock manually
       List<Object> criteria = new ArrayList<>();
       criteria.add(LockSignature.CREATE_SNAPSHOT.getValue());
@@ -281,9 +293,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       lockService.removeLockByCriteria(criteria);
     }
     // release snapshot when the user press create+release
-    if (released) {
-      datasetSnapshotController.releaseSnapshot(idDataset, snapshotId);
-    }
   }
 
   /**
@@ -572,11 +581,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       Long idPartition = obtainPartition(idDataset, "root").getId();
       recordStoreControllerZull.createSnapshotData(idDataset, idSnapshot, idPartition);
       LOG.info("Snapshot schema {} data files created", idSnapshot);
-      releaseEvent(EventType.ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT, idDataset, null);
     } catch (Exception e) {
       LOG_ERROR.error("Error creating snapshot for dataset schema {}", idDataset, e);
       releaseEvent(EventType.ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT, idDataset, e.getMessage());
-    } finally {
       // Release the lock manually
       List<Object> criteria = new ArrayList<>();
       criteria.add(LockSignature.CREATE_SCHEMA_SNAPSHOT.getValue());
