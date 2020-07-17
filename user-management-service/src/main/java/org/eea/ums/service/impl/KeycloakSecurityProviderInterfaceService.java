@@ -64,7 +64,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   /**
    * The Constant APIKEYS.
    */
-  private static final String APIKEYS = "ApiKeys";
+  private static final String API_KEYS = "ApiKeys";
   /**
    * The keycloak connector service.
    */
@@ -640,8 +640,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     for (UserRepresentation userRepresentation : keycloakConnectorService.getUsers()) {
       if (null != userRepresentation.getAttributes()
           && 1 <= userRepresentation.getAttributes().size()
-          && userRepresentation.getAttributes().containsKey(APIKEYS)) {
-        List<String> apiKeys = userRepresentation.getAttributes().get(APIKEYS);
+          && userRepresentation.getAttributes().containsKey(API_KEYS)) {
+        List<String> apiKeys = userRepresentation.getAttributes().get(API_KEYS);
         // an api key in attributes is represented as a string where positions are:
         // ApiKeyValue,dataflowId,dataproviderId
 
@@ -710,7 +710,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     Map<String, List<String>> attributes =
         user.getAttributes() != null ? user.getAttributes() : new HashMap<>();
     List<String> apiKeys =
-        attributes.get(APIKEYS) != null ? attributes.get(APIKEYS) : new ArrayList<>();
+        attributes.get(API_KEYS) != null ? attributes.get(API_KEYS) : new ArrayList<>();
     String newValueAttribute = dataflowId + "," + dataProvider;
     // Find and remove old key
     if (!apiKeys.isEmpty()) {
@@ -722,7 +722,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       }
     }
     apiKeys.add(apiKey + "," + newValueAttribute);
-    attributes.put(APIKEYS, apiKeys);
+    attributes.put(API_KEYS, apiKeys);
     user.setAttributes(attributes);
     keycloakConnectorService.updateUser(user);
     return apiKey;
@@ -750,7 +750,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     Map<String, List<String>> attributes =
         user.getAttributes() != null ? user.getAttributes() : new HashMap<>();
     List<String> apiKeys =
-        attributes.get(APIKEYS) != null ? attributes.get(APIKEYS) : new ArrayList<>();
+        attributes.get(API_KEYS) != null ? attributes.get(API_KEYS) : new ArrayList<>();
     String findValue = "," + dataflowId + "," + dataProvider;
     if (!apiKeys.isEmpty()) {
       for (String keyString : apiKeys) {
@@ -834,7 +834,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   public UserRepresentation getUserWithoutKeys(String userId) {
     UserRepresentation user = keycloakConnectorService.getUser(userId);
     if (user != null && user.getAttributes() != null) {
-      user.getAttributes().remove(APIKEYS);
+      user.getAttributes().remove(API_KEYS);
     }
     return user;
   }
@@ -850,8 +850,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Override
   public UserRepresentation setAttributesWithApiKey(UserRepresentation user,
       Map<String, List<String>> attributes) {
-    if (user.getAttributes() != null && user.getAttributes().get(APIKEYS) != null) {
-      attributes.put(APIKEYS, user.getAttributes().get(APIKEYS));
+    if (user.getAttributes() != null && user.getAttributes().get(API_KEYS) != null) {
+      attributes.put(API_KEYS, user.getAttributes().get(API_KEYS));
     }
     user.setAttributes(attributes);
     return user;
