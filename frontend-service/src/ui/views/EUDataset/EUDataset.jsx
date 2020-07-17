@@ -179,8 +179,6 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const handleDialogs = (dialog, value) => euDatasetDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
 
-  const isDataUpdated = value => euDatasetDispatch({ type: 'IS_DATA_UPDATED', payload: { value } });
-
   const isLoading = value => euDatasetDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onConfirmDelete = async () => {
@@ -188,9 +186,7 @@ export const EUDataset = withRouter(({ history, match }) => {
 
     try {
       const response = await DatasetService.deleteDataById(datasetId);
-      if (response.status >= 200 && response.status <= 299) {
-        isDataUpdated(!euDatasetState.isDataUpdated);
-      }
+      if (response) onUpdateData(!euDatasetState.isDataUpdated);
     } catch (error) {
       const {
         dataflow: { name: dataflowName },
@@ -313,6 +309,8 @@ export const EUDataset = withRouter(({ history, match }) => {
   };
 
   const onSetIsValidationSelected = value => euDatasetDispatch({ type: 'IS_VALIDATION_SELECTED', payload: { value } });
+
+  const onUpdateData = value => euDatasetDispatch({ type: 'IS_DATA_UPDATED', payload: { value } });
 
   const renderConfirmDialogLayout = (onConfirm, option) => {
     const confirmClassName = { deleteData: 'p-button-danger', validate: '' };
