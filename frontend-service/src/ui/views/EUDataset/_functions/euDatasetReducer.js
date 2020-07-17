@@ -4,6 +4,7 @@ export const euDatasetReducer = (state, { type, payload }) => {
       return {
         ...state,
         datasetSchemaAllTables: payload.allTables,
+        datasetSchemaId: payload.schemaId,
         datasetSchemaName: payload.schemaName,
         levelErrorTypes: payload.errorTypes
       };
