@@ -173,14 +173,12 @@ public class EUDatasetServiceImpl implements EUDatasetService {
   private void addLocksRelatedToPopulateEU(List<ReportingDatasetVO> reportings)
       throws EEAException {
     for (ReportingDatasetVO reporting : reportings) {
-      List<Object> criteriaReporting = new ArrayList<>();
-      criteriaReporting.add(LockSignature.RELEASE_SNAPSHOT.getValue());
-      criteriaReporting.add(reporting.getId());
-      Map<String, Object> mapa = new HashMap<>();
-      mapa.put("signature", LockSignature.RELEASE_SNAPSHOT.getValue());
-      mapa.put("datasetId", reporting.getId());
+      Map<String, Object> mapCriteria = new HashMap<>();
+      mapCriteria.put("signature", LockSignature.RELEASE_SNAPSHOT.getValue());
+      mapCriteria.put("datasetId", reporting.getId());
       lockService.createLock(new Timestamp(System.currentTimeMillis()),
-          SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD, mapa);
+          SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
+          mapCriteria);
     }
   }
 
