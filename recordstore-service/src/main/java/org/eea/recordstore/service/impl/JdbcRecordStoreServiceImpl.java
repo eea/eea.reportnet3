@@ -93,6 +93,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private static final String GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA =
       "grant all privileges on all sequences in schema %s to %s;";
 
+  /** The Constant COPY_DATASET. */
+  private static final String COPY_DATASET = "COPY dataset_";
+
+  /** The Constant SNAPSHOT. */
+  private static final String SNAPSHOT = "snapshot_";
   /**
    * The user postgre db.
    */
@@ -494,13 +499,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {
 
     String nameFileDatasetValue =
-        "snapshot_" + idSnapshot + LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX;
-    String nameFileTableValue =
-        "snapshot_" + idSnapshot + LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX;
+        SNAPSHOT + idSnapshot + LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX;
+    String nameFileTableValue = SNAPSHOT + idSnapshot + LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX;
     String nameFileRecordValue =
-        "snapshot_" + idSnapshot + LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX;
-    String nameFileFieldValue =
-        "snapshot_" + idSnapshot + LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX;
+        SNAPSHOT + idSnapshot + LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX;
+    String nameFileFieldValue = SNAPSHOT + idSnapshot + LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX;
 
     Path path1 = Paths.get(pathSnapshot + nameFileDatasetValue);
     Files.deleteIfExists(path1);
@@ -609,7 +612,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
               LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
 
-          String copyQueryTable = "COPY dataset_" + idReportingDataset
+          String copyQueryTable = COPY_DATASET + idReportingDataset
               + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
           copyFromFile(copyQueryTable, nameFileTableValue, cm);
           break;
@@ -620,7 +623,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
           LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
 
-      String copyQueryRecord = "COPY dataset_" + idReportingDataset
+      String copyQueryRecord = COPY_DATASET + idReportingDataset
           + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
       copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
 
@@ -628,29 +631,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
           LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
 
-      String copyQueryField = "COPY dataset_" + idReportingDataset
+      String copyQueryField = COPY_DATASET + idReportingDataset
           + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
       copyFromFile(copyQueryField, nameFileFieldValue, cm);
 
 
       if (launchEvent) {
-        // Send kafka event to launch Validation
-        final EEAEventVO event = new EEAEventVO();
-        event.setEventType(successEventType);
-        if (!DatasetTypeEnum.EUDATASET.equals(datasetType)) {
-          kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION,
-              idReportingDataset);
-        } else {
-
-          dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
-        }
-        try {
-          kafkaSenderUtils.releaseNotificableKafkaEvent(successEventType, value,
-              NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-                  .datasetId(idReportingDataset).build());
-        } catch (EEAException e) {
-          LOG.error("Error realeasing event {}: ", successEventType, e);
-        }
+        launchEvent(idReportingDataset, idSnapshot, datasetType, successEventType, value,
+            datasetIdFromSnapshot);
       }
 
       LOG.info("Snapshot {} restored", idSnapshot);
@@ -675,6 +663,37 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       lockService.removeLockByCriteria(criteria);
     }
 
+  }
+
+  /**
+   * Launch event.
+   *
+   * @param idReportingDataset the id reporting dataset
+   * @param idSnapshot the id snapshot
+   * @param datasetType the dataset type
+   * @param successEventType the success event type
+   * @param value the value
+   * @param datasetIdFromSnapshot the dataset id from snapshot
+   */
+  private void launchEvent(Long idReportingDataset, Long idSnapshot, DatasetTypeEnum datasetType,
+      EventType successEventType, Map<String, Object> value, Long datasetIdFromSnapshot) {
+    // Send kafka event to launch Validation
+    final EEAEventVO event = new EEAEventVO();
+    event.setEventType(successEventType);
+    if (!DatasetTypeEnum.EUDATASET.equals(datasetType)) {
+      kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION,
+          idReportingDataset);
+    } else {
+
+      dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
+    }
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(successEventType, value,
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .datasetId(idReportingDataset).build());
+    } catch (EEAException e) {
+      LOG.error("Error realeasing event {}: ", successEventType, e);
+    }
   }
 
 
