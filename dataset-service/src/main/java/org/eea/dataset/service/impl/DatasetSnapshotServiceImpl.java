@@ -195,9 +195,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   public SnapshotVO getById(Long idSnapshot) throws EEAException {
     Snapshot snapshot = snapshotRepository.findById(idSnapshot).orElse(null);
-    if (snapshot == null) {
-      throw new EEAException(String.format("Snapshot with id %s Not found", idSnapshot));
-    }
     return snapshotMapper.entityToClass(snapshot);
   }
 
@@ -211,9 +208,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   public SnapshotVO getSchemaById(Long idSnapshot) throws EEAException {
     SnapshotSchema snapshot = snapshotSchemaRepository.findById(idSnapshot).orElse(null);
-    if (snapshot == null) {
-      throw new EEAException(String.format("Snapshot Schema with id %s Not found", idSnapshot));
-    }
     return snapshotSchemaMapper.entityToClass(snapshot);
   }
 
@@ -364,18 +358,21 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param idDatasetDestination the id dataset destination
    * @param idSnapshot the id snapshot
    * @param deleteData the delete data
+   * @param datasetType the dataset type
+   * @param user the user
    * @throws EEAException the EEA exception
    */
   @Override
   @Async
   public void restoreSnapshotToCloneData(Long datasetOrigin, Long idDatasetDestination,
-      Long idSnapshot, Boolean deleteData, DatasetTypeEnum datasetType) throws EEAException {
+      Long idSnapshot, Boolean deleteData, DatasetTypeEnum datasetType, String user)
+      throws EEAException {
 
     // 1. Delete the dataset values implied
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(datasetOrigin, "root").getId();
     recordStoreControllerZull.restoreSnapshotData(idDatasetDestination, idSnapshot, idPartition,
-        datasetType, (String) ThreadPropertiesManager.getVariable("user"), false, deleteData);
+        datasetType, user, false, deleteData);
   }
 
   /**

@@ -66,7 +66,8 @@ public class DataCollectionSnapshotCommand extends AbstractEEAEventHandlerComman
           dataCollection.getDataflowId(), dataCollection.getDatasetSchema());
       if (!euDatasetList.isEmpty()) {
         datasetSnapshotService.restoreSnapshotToCloneData(dataCollection.getId(),
-            euDatasetList.get(0).getId(), snapshotId, true, DatasetTypeEnum.EUDATASET);
+            euDatasetList.get(0).getId(), snapshotId, true, DatasetTypeEnum.EUDATASET,
+            (String) ThreadPropertiesManager.getVariable("user"));
       }
     }
   }

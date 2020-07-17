@@ -460,6 +460,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     SnapshotVO snapshot = null;
     snapshot = dataSetSnapshotControllerZuul.getSchemaById(idSnapshot);
     if (snapshot != null) {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+          EventType.ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT, null,
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .datasetId(idDataset).build());
     } else {
       if (DatasetTypeEnum.COLLECTION.equals(dataSetMetabaseControllerZuul.getType(idDataset))) {
         Map<String, Object> value = new HashMap<>();
@@ -621,6 +625,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         String sql = "";
         switch (datasetType) {
           case EUDATASET:
+            sql = "DELETE FROM dataset_" + idReportingDataset + ".record_value";
+            break;
           case REPORTING:
             sql = "DELETE FROM dataset_" + idReportingDataset
                 + ".record_value WHERE dataset_partition_id=" + partitionId;

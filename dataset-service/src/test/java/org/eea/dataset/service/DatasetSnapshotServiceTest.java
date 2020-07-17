@@ -299,7 +299,8 @@ public class DatasetSnapshotServiceTest {
 
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    datasetSnapshotService.restoreSnapshotToCloneData(1L, 1L, 1L, true, DatasetTypeEnum.EUDATASET);
+    datasetSnapshotService.restoreSnapshotToCloneData(1L, 1L, 1L, true, DatasetTypeEnum.EUDATASET,
+        "user");
     Mockito.verify(recordStoreControllerZull, times(1)).restoreSnapshotData(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }

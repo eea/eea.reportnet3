@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -138,11 +139,14 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @RequestMapping(value = "/dataset/{datasetId}/snapshot/create", method = RequestMethod.POST)
   public void createSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
       @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset) {
     try {
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
       recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset);
       LOG.info("Snapshot created");
     } catch (SQLException | IOException | RecordStoreAccessException | EEAException e) {
