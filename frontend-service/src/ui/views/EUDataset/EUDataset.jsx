@@ -3,8 +3,6 @@ import { withRouter } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
 
-import styles from './EUDataset.module.scss';
-
 import { config } from 'conf';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
@@ -54,15 +52,11 @@ export const EUDataset = withRouter(({ history, match }) => {
     datasetSchemaId: null,
     datasetSchemaName: '',
     dataViewerOptions: { activeIndex: null, recordPositionId: -1, selectedRecordErrorId: -1 },
-    exportButtonsList: [],
-    exportDatasetData: undefined,
-    exportDatasetDataName: '',
     hasWritePermissions: false,
     isDataDeleted: false,
     isDataUpdated: false,
     isDialogVisible: { dashboard: false, deleteData: false, importData: false, validationList: false, validate: false },
     isLoading: true,
-    isLoadingFile: false,
     isRefreshHighlighted: false,
     isValidationSelected: false,
     levelErrorTypes: [],
@@ -70,8 +64,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     tableSchema: undefined,
     tableSchemaColumns: undefined,
     tableSchemaId: undefined,
-    tableSchemaNames: [],
-    validationsVisible: false
+    tableSchemaNames: []
   });
 
   const {
@@ -81,7 +74,6 @@ export const EUDataset = withRouter(({ history, match }) => {
     dataViewerOptions,
     hasWritePermissions,
     isDataDeleted,
-    isDatasetReleased,
     isDialogVisible,
     isValidationSelected,
     levelErrorTypes,
@@ -93,7 +85,6 @@ export const EUDataset = withRouter(({ history, match }) => {
   useEffect(() => {
     callSetMetaData();
     getDataflowName();
-    // onLoadDataflow();
   }, []);
 
   useEffect(() => {
@@ -158,11 +149,6 @@ export const EUDataset = withRouter(({ history, match }) => {
       throw new Error('SCHEMA_BY_ID_ERROR');
     }
   };
-
-  // const getDatasetTitle = () => {
-  //   const datasetReleasedTitle = `${datasetSchemaName} (${resources.messages['released'].toString().toLowerCase()})`;
-  //   return isDatasetReleased ? datasetReleasedTitle : datasetSchemaName;
-  // };
 
   const getMetadata = async ids => {
     try {
@@ -233,28 +219,6 @@ export const EUDataset = withRouter(({ history, match }) => {
       });
     }
   };
-
-  // const onLoadDataflow = async () => {
-  //   try {
-  //     const dataflow = await DataflowService.reporting(match.params.dataflowId);
-  //     const dataset = dataflow.datasets.filter(datasets => datasets.datasetId == datasetId);
-  //     //   setIsDatasetReleased(dataset[0].isReleased);
-  //   } catch (error) {
-  //     const {
-  //       dataflow: { name: dataflowName },
-  //       dataset: { name: datasetName }
-  //     } = await getMetadata({ dataflowId, datasetId });
-  //     notificationContext.add({
-  //       type: 'REPORTING_ERROR',
-  //       content: { dataflowId, dataflowName, datasetId, datasetName }
-  //     });
-  //     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-  //       history.push(getUrl(routes.DATAFLOWS));
-  //     }
-  //   } finally {
-  //     isLoading(false);
-  //   }
-  // };
 
   const onHighlightRefresh = value => euDatasetDispatch({ type: 'ON_HIGHLIGHT_REFRESH', payload: { value } });
 
@@ -348,6 +312,8 @@ export const EUDataset = withRouter(({ history, match }) => {
     handleDialogs('validationList', false);
   };
 
+  const onSetIsValidationSelected = value => euDatasetDispatch({ type: 'IS_VALIDATION_SELECTED', payload: { value } });
+
   const renderConfirmDialogLayout = (onConfirm, option) => {
     const confirmClassName = { deleteData: 'p-button-danger', validate: '' };
     const dialogContent = { deleteData: 'deleteDatasetConfirm', validate: 'validateDatasetConfirm' };
@@ -390,11 +356,14 @@ export const EUDataset = withRouter(({ history, match }) => {
       activeIndex={dataViewerOptions.activeIndex}
       hasWritePermissions={hasWritePermissions}
       isDataCollection={true}
+      isDatasetDeleted={isDataDeleted}
+      isValidationSelected={isValidationSelected}
       levelErrorTypes={levelErrorTypes}
       onLoadTableData={onLoadTableData}
       onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
       recordPositionId={dataViewerOptions.recordPositionId}
       selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
+      setIsValidationSelected={onSetIsValidationSelected}
       tables={tableSchema}
       tableSchemaColumns={tableSchemaColumns}
     />
