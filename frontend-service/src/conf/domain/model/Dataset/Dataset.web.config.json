@@ -13,7 +13,7 @@
   "deleteTableDesign": "/dataschema/{:datasetId}/tableSchema/{:tableSchemaId}",
   "exportDatasetData": "/dataset/exportFile?datasetId={:datasetId}&mimeType={:fileType}",
   "exportDatasetTableData": "/dataset/exportFile?datasetId={:datasetId}&idTableSchema={:tableSchemaId}&mimeType={:fileType}",
-  "importDatasetData": "/dataset/{:datasetId}/loadDatasetData/",
+  "importDatasetData": "/dataset/{:datasetId}/loadDatasetData",
   "importTableData": "/dataset/{:datasetId}/loadTableData/{:tableId}",
   "listValidations": "/validation/listValidations/{:datasetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}&levelErrorsFilter={:levelErrorsFilter}&typeEntitiesFilter={:typeEntitiesFilter}&originsFilter={:originsFilter}",
   "loadStatistics": "/datasetmetabase/{:datasetId}/loadStatistics",
