@@ -431,8 +431,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       // release snapshot when the user press create+release
     } catch (Exception e) {
       LOG_ERROR.error("Error creating snapshot for dataset {}", idDataset, e);
+      Map<String, Object> value = new HashMap<>();
+      value.put(LiteralConstants.DATASET_ID, idDataset);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADD_DATASET_SNAPSHOT_FAILED_EVENT,
-          null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+          value, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
               .datasetId(idDataset).error(e.getMessage()).build());
     } finally {
       // Release the lock manually
@@ -459,26 +461,28 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private void notificationAndCheckRelease(Long idDataset, Long idSnapshot) throws EEAException {
     SnapshotVO snapshot = null;
     snapshot = dataSetSnapshotControllerZuul.getSchemaById(idSnapshot);
+    Map<String, Object> value = new HashMap<>();
+    value.put(LiteralConstants.DATASET_ID, idDataset);
     if (snapshot != null) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(
-          EventType.ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT, null,
+          EventType.ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT, value,
           NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
               .datasetId(idDataset).build());
     } else {
       if (DatasetTypeEnum.COLLECTION.equals(dataSetMetabaseControllerZuul.getType(idDataset))) {
-        Map<String, Object> value = new HashMap<>();
-        value.put("user", ThreadPropertiesManager.getVariable("user"));
-        value.put("dataset_id", idDataset);
-        value.put("snapshot_id", idSnapshot);
+        Map<String, Object> valueEU = new HashMap<>();
+        valueEU.put("user", ThreadPropertiesManager.getVariable("user"));
+        valueEU.put("dataset_id", idDataset);
+        valueEU.put("snapshot_id", idSnapshot);
         kafkaSenderUtils.releaseKafkaEvent(EventType.ADD_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT,
-            value);
+            valueEU);
       } else {
         snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
         if (Boolean.TRUE.equals(snapshot.getForceRelease())) {
           dataSetSnapshotControllerZuul.releaseSnapshot(idDataset, idSnapshot);
         }
         kafkaSenderUtils.releaseNotificableKafkaEvent(
-            EventType.ADD_DATASET_SNAPSHOT_COMPLETED_EVENT, null,
+            EventType.ADD_DATASET_SNAPSHOT_COMPLETED_EVENT, value,
             NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
                 .datasetId(idDataset).build());
       }
@@ -613,6 +617,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
     // We get the datasetId from the snapshot
     SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
+    if (snapshot == null) {
+      snapshot = dataSetSnapshotControllerZuul.getSchemaById(idSnapshot);
+    }
     Long datasetIdFromSnapshot = snapshot.getDatasetId();
 
     try (
