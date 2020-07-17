@@ -81,11 +81,14 @@ public interface DatasetController {
   void loadTableData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
       @PathVariable(value = "idTableSchema") String idTableSchema);
 
-  @HystrixCommand
+  /**
+   * Load table data.
+   *
+   * @param datasetId the dataset id
+   * @param file the file
+   */
   @PostMapping("{id}/loadDatasetData")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ')")
-  void loadTableData(
-      @PathVariable("id") Long datasetId,
+  void loadDatasetData(@PathVariable("id") Long datasetId,
       @RequestParam("file") MultipartFile file);
 
   /**
