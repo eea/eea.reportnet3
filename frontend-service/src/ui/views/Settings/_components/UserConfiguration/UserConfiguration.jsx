@@ -130,7 +130,7 @@ const UserConfiguration = () => {
   const rowsInPaginationDropdown = (
     <React.Fragment>
       <Dropdown
-        id={`urlWebLinks`}
+        id={`rowsPage`}
         name="rowPerPage"
         options={resources.userParameters['defaultRowsPage']}
         onChange={async e => {
@@ -144,8 +144,8 @@ const UserConfiguration = () => {
         placeholder="select"
         value={userContext.userProps.rowsPerPage}
       />
-      <label for="urlWebLinks" className="srOnly">
-        {resources.messages['url']}
+      <label for="rowsPage" className="srOnly">
+        {resources.messages['defaultRowsPage']}
       </label>
     </React.Fragment>
   );

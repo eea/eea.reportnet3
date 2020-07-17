@@ -759,6 +759,9 @@
     "validateEuDatasetHeader": "Validate EU dataset",
     "deleteDataEuDatasetHeader": "Delete EU dataset data",
     "matchStringTooltip": "Click to use Country code variable",
-    "dataCollectionLockedError": "The process is locked because Data Collections are opened in exclusive use"
+    "dataCollectionLockedError": "The process is locked because Data Collections are opened in exclusive use",
+    "recordId": "Record id",
+    "datasetPartitionId": "Dataset partition id",
+    "tableSchemaId": "Table schema id"
   }
 }
