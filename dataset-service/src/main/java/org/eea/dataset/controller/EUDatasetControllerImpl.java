@@ -5,6 +5,8 @@ import org.eea.dataset.service.EUDatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.EUDatasetController;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
+import org.eea.lock.annotation.LockCriteria;
+import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,8 +68,10 @@ public class EUDatasetControllerImpl implements EUDatasetController {
   @Override
   @HystrixCommand
   @PostMapping("/populateData/dataflow/{dataflowId}")
+  @LockMethod(removeWhenFinish = false)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
-  public void populateDataFromDataCollection(@PathVariable("dataflowId") Long dataflowId) {
+  public void populateDataFromDataCollection(
+      @LockCriteria(name = "dataflowId") @PathVariable("dataflowId") Long dataflowId) {
     try {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
