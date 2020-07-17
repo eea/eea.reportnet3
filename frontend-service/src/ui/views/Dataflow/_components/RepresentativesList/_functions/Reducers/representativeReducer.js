@@ -99,6 +99,12 @@ export const reducer = (state, { type, payload }) => {
         selectedDataProviderGroup: payload
       };
 
+    case 'SET_IS_LOADING':
+      return {
+        ...state,
+        isLoading: payload.isLoading
+      };
+
     case 'SHOW_CONFIRM_DIALOG':
       return {
         ...state,

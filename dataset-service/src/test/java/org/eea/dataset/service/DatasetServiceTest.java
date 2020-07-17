@@ -1304,8 +1304,9 @@ public class DatasetServiceTest {
     // Mockito.any())).thenReturn(Optional.of(partition));
     // when(reportingDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
-    when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(expectedResult);
+    when(
+        contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+            .thenReturn(expectedResult);
     assertEquals("not equals", expectedResult, datasetService.exportFile(1L, "csv", ""));
   }
 

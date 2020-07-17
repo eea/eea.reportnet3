@@ -24,7 +24,15 @@ export const autofocusOnEmptyInput = formState => {
 
 const addRepresentative = async (formDispatcher, representatives, dataflowId, formState) => {
   const newRepresentative = representatives.filter(representative => isNil(representative.representativeId));
-  if (!isEmpty(newRepresentative[0].providerAccount) && !isEmpty(newRepresentative[0].dataProviderId)) {
+  if (
+    !isEmpty(newRepresentative[0].providerAccount) &&
+    isValidEmail(newRepresentative[0].providerAccount) &&
+    !isEmpty(newRepresentative[0].dataProviderId)
+  ) {
+    formDispatcher({
+      type: 'SET_IS_LOADING',
+      payload: { isLoading: true }
+    });
     try {
       await RepresentativeService.add(
         dataflowId,
@@ -45,6 +53,11 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId, fo
           payload: { representativesHaveError: uniq(representativesHaveError) }
         });
       }
+    } finally {
+      formDispatcher({
+        type: 'SET_IS_LOADING',
+        payload: { isLoading: false }
+      });
     }
   }
 };
@@ -117,6 +130,10 @@ export const onAddProvider = (formDispatcher, formState, representative, dataflo
 
 export const onDataProviderIdChange = async (formDispatcher, newDataProviderId, representative, formState) => {
   if (!isNil(representative.representativeId)) {
+    formDispatcher({
+      type: 'SET_IS_LOADING',
+      payload: { isLoading: true }
+    });
     try {
       await RepresentativeService.updateDataProviderId(
         parseInt(representative.representativeId),
@@ -127,6 +144,11 @@ export const onDataProviderIdChange = async (formDispatcher, newDataProviderId, 
       });
     } catch (error) {
       console.error('error on RepresentativeService.updateDataProviderId', error);
+    } finally {
+      formDispatcher({
+        type: 'SET_IS_LOADING',
+        payload: { isLoading: false }
+      });
     }
   } else {
     const { representatives } = formState;
@@ -201,6 +223,10 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
   }
 
   if (isChangedAccount && isValidEmail(updatedRepresentative.providerAccount)) {
+    formDispatcher({
+      type: 'SET_IS_LOADING',
+      payload: { isLoading: true }
+    });
     try {
       await RepresentativeService.updateProviderAccount(
         parseInt(updatedRepresentative.representativeId),
@@ -220,6 +246,11 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
           payload: { representativesHaveError: uniq(representativesHaveError) }
         });
       }
+    } finally {
+      formDispatcher({
+        type: 'SET_IS_LOADING',
+        payload: { isLoading: false }
+      });
     }
   }
 };

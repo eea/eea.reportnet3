@@ -53,9 +53,9 @@ const RepresentativesList = ({
     representativeIdToDelete: '',
     representatives: [],
     selectedDataProviderGroup: null,
-    unusedDataProvidersOptions: []
+    unusedDataProvidersOptions: [],
+    isLoading: false
   };
-
   const [formState, formDispatcher] = useReducer(reducer, initialState);
 
   useEffect(() => {
@@ -247,24 +247,27 @@ const RepresentativesList = ({
       </div>
 
       {!isNil(formState.selectedDataProviderGroup) && !isEmpty(formState.allPossibleDataProviders) ? (
-        <DataTable
-          value={
-            formState.representatives.length > formState.allPossibleDataProvidersNoSelect.length
-              ? formState.representatives.filter(representative => !isNil(representative.representativeId))
-              : formState.representatives
-          }>
-          <Column
-            body={providerAccountInputColumnTemplate}
-            header={resources.messages['manageRolesDialogAccountColumn']}
-          />
-          <Column body={dropdownColumnTemplate} header={resources.messages['manageRolesDialogDataProviderColumn']} />
-          <Column
-            body={deleteBtnColumnTemplate}
-            className={styles.emptyTableHeader}
-            header={resources.messages['deleteRepresentativeButtonTableHeader']}
-            style={{ width: '60px' }}
-          />
-        </DataTable>
+        <div className={styles.table}>
+          {formState.isLoading && <Spinner className={styles.spinner} style={{ top: 0, left: 0, zIndex: 6000 }} />}
+          <DataTable
+            value={
+              formState.representatives.length > formState.allPossibleDataProvidersNoSelect.length
+                ? formState.representatives.filter(representative => !isNil(representative.representativeId))
+                : formState.representatives
+            }>
+            <Column
+              body={providerAccountInputColumnTemplate}
+              header={resources.messages['manageRolesDialogAccountColumn']}
+            />
+            <Column body={dropdownColumnTemplate} header={resources.messages['manageRolesDialogDataProviderColumn']} />
+            <Column
+              body={deleteBtnColumnTemplate}
+              className={styles.emptyTableHeader}
+              header={resources.messages['deleteRepresentativeButtonTableHeader']}
+              style={{ width: '60px' }}
+            />
+          </DataTable>
+        </div>
       ) : (
         <p className={styles.chooseRepresentative}>{resources.messages['manageRolesDialogNoRepresentativesMessage']}</p>
       )}
