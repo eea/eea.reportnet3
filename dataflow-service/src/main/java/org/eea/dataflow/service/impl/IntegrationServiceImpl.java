@@ -193,7 +193,7 @@ public class IntegrationServiceImpl implements IntegrationService {
   @Override
   public List<ExecutionResultVO> executeEUDatasetExport(Long dataflowId) throws EEAException {
 
-    addLock(dataflowId);
+    // addLock(dataflowId);
     IntegrationToolTypeEnum integrationToolTypeEnum = IntegrationToolTypeEnum.FME;
     IntegrationOperationTypeEnum integrationOperationTypeEnum =
         IntegrationOperationTypeEnum.EXPORT_EU_DATASET;
@@ -209,7 +209,7 @@ public class IntegrationServiceImpl implements IntegrationService {
         dataset -> resultList.add(integrationExecutorFactory.getExecutor(integrationToolTypeEnum)
             .execute(integrationOperationTypeEnum, null, dataset.getId(), integration)));
 
-    releaseLock(dataflowId);
+    // releaseLock(dataflowId);
     return resultList;
   }
 

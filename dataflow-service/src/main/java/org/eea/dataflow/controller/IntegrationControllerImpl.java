@@ -10,8 +10,6 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
-import org.eea.lock.annotation.LockCriteria;
-import org.eea.lock.annotation.LockMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -189,10 +187,10 @@ public class IntegrationControllerImpl implements IntegrationController {
   @Override
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_STEWARD')")
-  @LockMethod(removeWhenFinish = false)
+  // @LockMethod(removeWhenFinish = false)
   @PostMapping(value = "/executeEUDatasetExport")
   public List<ExecutionResultVO> executeEUDatasetExport(
-      @LockCriteria(name = "dataflowId") @RequestParam("dataflowId") Long dataflowId) {
+      @RequestParam("dataflowId") Long dataflowId) {
     try {
       return integrationService.executeEUDatasetExport(dataflowId);
     } catch (EEAException e) {

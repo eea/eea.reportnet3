@@ -193,12 +193,13 @@ public class EUDatasetServiceImpl implements EUDatasetService {
           mapCriteria);
     }
     // Lock to avoid export EUDataset while is copying data
-    Map<String, Object> mapCriteriaExport = new HashMap<>();
-    mapCriteriaExport.put("signature", LockSignature.RELEASE_SNAPSHOT.getValue());
-    mapCriteriaExport.put("dataflowId", dataflowId);
-    lockService.createLock(new Timestamp(System.currentTimeMillis()),
-        SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
-        mapCriteriaExport);
+    /*
+     * Map<String, Object> mapCriteriaExport = new HashMap<>(); mapCriteriaExport.put("signature",
+     * LockSignature.EXPORT_EU_DATASET.getValue()); mapCriteriaExport.put("dataflowId", dataflowId);
+     * lockService.createLock(new Timestamp(System.currentTimeMillis()),
+     * SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
+     * mapCriteriaExport);
+     */
   }
 
   /**
@@ -216,10 +217,11 @@ public class EUDatasetServiceImpl implements EUDatasetService {
     lockService.removeLockByCriteria(criteria);
 
     // Release lock to the export EU
-    List<Object> criteriaExport = new ArrayList<>();
-    criteriaExport.add(LockSignature.EXPORT_EU_DATASET.getValue());
-    criteriaExport.add(dataflowId);
-    lockService.removeLockByCriteria(criteriaExport);
+    /*
+     * List<Object> criteriaExport = new ArrayList<>();
+     * criteriaExport.add(LockSignature.EXPORT_EU_DATASET.getValue());
+     * criteriaExport.add(dataflowId); lockService.removeLockByCriteria(criteriaExport);
+     */
 
     // Release locks to avoid a provider can release a snapshot
     for (ReportingDatasetVO reporting : reportings) {
