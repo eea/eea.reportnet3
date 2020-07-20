@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -641,7 +642,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   @Test(expected = EEAException.class)
   public void removeContributorFromUserGroupNoUser() throws EEAException {
     GroupInfo[] groups = {new GroupInfo()};
-    UserRepresentation[] users = {new UserRepresentation()};
+    List<UserRepresentation> users = Arrays.asList(new UserRepresentation[]{});
     // Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
     ReflectionTestUtils.setField(keycloakSecurityProviderInterfaceService, "users", users);
     Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groups);
@@ -664,7 +665,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     resources.add(resource);
     UserRepresentation user = new UserRepresentation();
     user.setEmail("a");
-    UserRepresentation[] users = {user};
+    List<UserRepresentation> users = Arrays.asList(new UserRepresentation[]{user});
     // Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
     ReflectionTestUtils.setField(keycloakSecurityProviderInterfaceService, "users", users);
     Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groups);
@@ -681,7 +682,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     resource.setEmail("a");
     resource.setResourceGroup(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE);
     resources.add(resource);
-    UserRepresentation[] users = {new UserRepresentation()};
+    List<UserRepresentation> users = Arrays.asList(new UserRepresentation[]{});
     // Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
     ReflectionTestUtils.setField(keycloakSecurityProviderInterfaceService, "users", users);
     Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groups);
