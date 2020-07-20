@@ -763,8 +763,8 @@
     "copyDataToEudatasetCompletedEvent": "Data collections copied to EU datasets correctly",
     "externalExportEudatasetFailedEvent": "Error exporting EU datasets",
     "copyDataToEudatasetFailedEvent": "Error copying data collections to EU datasets",
-    "matchStringTooltip": "{%R3_COUNTRY_CODE%} can be used",
     "dataflowProviderHelp": "My dataflow",
-    "dataflowRequesterHelp": "My dataflow"
+    "dataflowRequesterHelp": "My dataflow",
+    "datasetSchemaHelpConfig": "My reporting dataset"
   }
 }

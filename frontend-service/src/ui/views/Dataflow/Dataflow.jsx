@@ -100,7 +100,6 @@ const Dataflow = withRouter(({ history, match }) => {
   }, [userContext, dataflowState.data]);
 
   useEffect(() => {
-    console.log('dataflowState', dataflowState.isCustodian);
     leftSideBarContext.addHelpSteps(
       dataflowState.isCustodian ? DataflowRequesterHelpConfig : DataflowProviderHelpConfig,
       'dataflowProviderHelp'
@@ -112,7 +111,8 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowState.isCustodian,
     dataflowState.isDataSchemaCorrect,
     dataflowState.status,
-    dataflowState.id
+    dataflowState.id,
+    userContext
   ]);
 
   //Bread Crumbs settings

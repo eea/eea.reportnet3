@@ -12,6 +12,8 @@ import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { routes } from 'ui/routes';
 
+import { DatasetSchemaHelpConfig } from 'conf/help/datasetSchema';
+
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
@@ -110,6 +112,7 @@ export const Dataset = withRouter(({ match, history }) => {
           command: () => history.push(getUrl(routes.DATAFLOWS))
         },
         {
+          className: 'datasetSchema-breadcrumb-back-help-step',
           label: resources.messages['dataflow'],
           icon: 'clone',
           href: getUrl(
@@ -162,6 +165,10 @@ export const Dataset = withRouter(({ match, history }) => {
           userContext.hasPermission([config.permissions.REPORTER_WRITE], `${config.permissions.DATASET}${datasetId}`)
       );
     }
+  }, [userContext]);
+
+  useEffect(() => {
+    leftSideBarContext.addHelpSteps(DatasetSchemaHelpConfig, 'datasetSchemaHelpConfig');
   }, [userContext]);
 
   useEffect(() => {
@@ -592,10 +599,10 @@ export const Dataset = withRouter(({ match, history }) => {
       />
       <div className={styles.ButtonsBar}>
         <Toolbar>
-          <div className="p-toolbar-group-left">
+          <div className="p-toolbar-group-left datasetSchema-buttonsbar-dataset-data-help-step">
             {hasWritePermissions && !isEmpty(extensionsOperationsList.import) && (
               <Button
-                className={`p-button-rounded p-button-secondary ${
+                className={`p-button-rounded p-button-secondary datasetSchema-buttonsbar-dataset-data-help-step ${
                   !hasWritePermissions ? null : 'p-button-animated-blink'
                 }`}
                 disabled={!hasWritePermissions}
@@ -605,9 +612,8 @@ export const Dataset = withRouter(({ match, history }) => {
               />
             )}
             <Button
-            
               id="buttonExportDataset"
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-data-help-step`}
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
               icon={loadingFile ? 'spinnerAnimate' : 'export'}
               label={resources.messages['exportDataset']}
               onClick={event => exportMenuRef.current.show(event)}
