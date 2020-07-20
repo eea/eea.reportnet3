@@ -170,7 +170,9 @@ const LeftSideBar = withRouter(({ history }) => {
               {renderUserNotifications()}
             </div>
             <hr />
-            <div className={styles.barSection}>{renderSectionButtons()}</div>
+            <div className={`${styles.barSection} dataflowList-left-side-bar-mid-section-help-step`}>
+              {renderSectionButtons()}
+            </div>
             <hr />
             <div className={styles.barSection}>
               {renderLogout()}

@@ -526,7 +526,10 @@ export const BigButtonList = ({
         </ConfirmDialog>
       )}
 
-      <button ref={receiptBtnRef} style={{ display: 'none' }}>
+      <button
+        className="dataflow-big-buttons-confirmation-receipt-help-step"
+        ref={receiptBtnRef}
+        style={{ display: 'none' }}>
         <span className="srOnly">{resources.messages['confirmationReceipt']}</span>
       </button>
     </>

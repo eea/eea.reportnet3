@@ -512,7 +512,7 @@
     "updateDatacollectionFailedEvent": "Error occurred on datasets assignation to new representatives",
     "updateDataCollectionHeader": "Create datasets for new representatives",
     "updateDataCollectionMessage": "Do you want to create datasets for the new representatives?",
-    "updateDataflow": "Update dataflow",
+    "updateDataflow": "Edit dataflow",
     "updatedDocumentCompletedEvent": "{:fileName} Document updated at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
     "updateFieldByIdError": "Failed updating field",
     "updateRecordsByIdError": "Failed updating record",
@@ -768,7 +768,7 @@
     "confirmReleaseCopyIntroduction": "Copy you are releasing:",
     "confirmReleaseCurrentDataIntroduction": "Copy you are copying and releasing:",
     "confirmReleaseAndCopyExtraMessage": "You are also creating a copy of this data.",
-    "dataflowProviderHelp": "My dataflow",
+    "dataflowReporterHelp": "My dataflow",
     "dataflowRequesterHelp": "My dataflow",
     "datasetSchemaHelpConfig": "My reporting dataset"
   }

@@ -1,0 +1,20 @@
+{
+  "steps": [
+    {
+      "content": "Add new reporters to the dataflow",
+      "target": ".dataflow-big-buttons-manageReporters-help-step"
+    },
+    {
+      "content": "Dashboards present an overview of the reporting process (validations, release status)",
+      "target": ".dataflow-dashboards-help-step"
+    },
+    {
+      "content": "View the collated submitted data from here",
+      "target": ".dataflow-datacollection-help-step"
+    },
+    {
+      "content": "You can see the reporting status of each single country by clicking on the icon associated with the country name (only one country is shown in the above)",
+      "target": ".dataflow-dataset-container-help-step"
+    }
+  ]
+}

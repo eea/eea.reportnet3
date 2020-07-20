@@ -5,7 +5,7 @@
       "target": ".dataflowList-help-step"
     },
     {
-      "content": "A dataflow. On the dataflow card, you can see various metadata – Your role; Delivery date; Dataflow name; Dataflow description; Associated obligation and instrument; Status",
+      "content": "A dataflow is colour coded according to the current status – grey in design and purple when reporting is open. On the dataflow card, you can see various metadata – Your role; Delivery date; Dataflow name; Dataflow description; Associated obligation and instrument; Status",
       "target": ".dataflowList-first-dataflow-help-step"
     },
     {
@@ -29,12 +29,20 @@
       "target": ".dataflowList-left-side-bar-user-profile-help-step"
     },
     {
-      "content": "3. Help – Triggers a help walkthough of the page you are currently on",
+      "content": "3. Help – Triggers a help walkthrough of the page you are currently on",
       "target": ".dataflowList-left-side-bar-help-help-step"
     },
     {
       "content": "4. Notifications – Provides the history of all notifications (which appear in the top right of the screen) as a list",
       "target": ".dataflowList-left-side-bar-notifications-help-step"
+    },
+    {
+      "content": "Below the line is the context menu. The context menu changes on each screen. On this screen, you can",
+      "target": ".dataflowList-left-side-bar-mid-section-help-step"
+    },
+    {
+      "content": "Create a new dataflow",
+      "target": ".dataflowList-left-side-bar-create-dataflow-help-step"
     }
   ]
 }

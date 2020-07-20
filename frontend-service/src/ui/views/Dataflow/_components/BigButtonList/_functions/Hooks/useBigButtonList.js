@@ -136,7 +136,7 @@ const useBigButtonList = ({
       buttonIconClass: 'newItemCross',
       caption: resources.messages['newSchema'],
       handleRedirect: () => onShowNewSchemaDialog(),
-      helpClassName: 'dataflow-new-item-help-step',
+      helpClassName: 'dataflow-new-schema-help-step',
       layout: buttonsVisibility.cloneSchemasFromDataflow ? 'menuBigButton' : 'defaultBigButton',
       model: buttonsVisibility.cloneSchemasFromDataflow ? newSchemaModel : [],
       visibility: buttonsVisibility.newSchema && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']
@@ -284,7 +284,7 @@ const useBigButtonList = ({
         : 'spinner',
       caption: resources.messages['createDataCollection'],
       enabled: checkDisabledDataCollectionButton(),
-      helpClassName: 'dataflow-datacollection-help-step',
+      helpClassName: 'dataflow-create-datacollection-help-step',
       handleRedirect:
         isActiveButton && checkDisabledDataCollectionButton() ? () => onShowDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
@@ -308,7 +308,7 @@ const useBigButtonList = ({
       buttonIcon: isActiveButton ? 'siteMap' : 'spinner',
       buttonIconClass: isActiveButton ? 'siteMap' : 'spinner',
       caption: resources.messages['updateDataCollection'],
-      helpClassName: 'dataflow-datacollection-help-step',
+      // helpClassName: 'dataflow-datacollection-help-step',
       handleRedirect: isActiveButton ? () => onShowUpdateDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
       visibility:
@@ -354,6 +354,7 @@ const useBigButtonList = ({
         buttonIconClass: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
         caption: resources.messages['confirmationReceipt'],
         handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onLoadReceiptData(),
+        helpClassName: 'dataflow-big-buttons-confirmation-receipt-help-step',
         infoStatus: dataflowState.isReceiptOutdated,
         layout: 'defaultBigButton',
         visibility:

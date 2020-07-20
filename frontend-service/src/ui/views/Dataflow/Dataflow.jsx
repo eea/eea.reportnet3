@@ -10,8 +10,9 @@ import uniq from 'lodash/uniq';
 import styles from './Dataflow.module.scss';
 
 import { config } from 'conf';
+import { DataflowDraftRequesterHelpConfig } from 'conf/help/dataflow/dataflow.requester/dataflow.requester.draft';
 import { DataflowRequesterHelpConfig } from 'conf/help/dataflow/dataflow.requester';
-import { DataflowProviderHelpConfig } from 'conf/help/dataflow/dataflow.provider';
+import { DataflowReporterHelpConfig } from 'conf/help/dataflow/dataflow.reporter';
 import { routes } from 'ui/routes';
 import DataflowConf from 'conf/dataflow.config.json';
 
@@ -100,10 +101,15 @@ const Dataflow = withRouter(({ history, match }) => {
   }, [userContext, dataflowState.data]);
 
   useEffect(() => {
-    leftSideBarContext.addHelpSteps(
-      dataflowState.isCustodian ? DataflowRequesterHelpConfig : DataflowProviderHelpConfig,
-      'dataflowProviderHelp'
-    );
+    if (dataflowState.isCustodian) {
+      if (dataflowState.status === 'DRAFT') {
+        leftSideBarContext.addHelpSteps(DataflowDraftRequesterHelpConfig, 'dataflowReporterHelp');
+      } else {
+        leftSideBarContext.addHelpSteps(DataflowRequesterHelpConfig, 'dataflowReporterHelp');
+      }
+    } else {
+      leftSideBarContext.addHelpSteps(DataflowReporterHelpConfig, 'dataflowReporterHelp');
+    }
   }, [
     dataflowState.data,
     dataflowState.designDatasetSchemas,
@@ -349,12 +355,12 @@ const Dataflow = withRouter(({ history, match }) => {
       type: 'SET_IS_COPY_DATA_COLLECTION_TO_EU_DATASET_LOADING',
       payload: { isLoading: value }
     });
-  
+
   const setIsExportEuDatasetLoading = value =>
-  dataflowDispatch({
-    type: 'SET_IS_EXPORT_EU_DATASET',
-    payload: { isExportEuDatasetLoading: value }
-  });
+    dataflowDispatch({
+      type: 'SET_IS_EXPORT_EU_DATASET',
+      payload: { isExportEuDatasetLoading: value }
+    });
 
   const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
 

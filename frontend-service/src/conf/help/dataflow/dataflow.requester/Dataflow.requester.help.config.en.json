@@ -1,36 +1,36 @@
 {
   "steps": [
     {
-      "content": "‘Properties’ displays the information regarding the dataflow, reporting obligation and legal instrument (extracted from ROD)",
+      "content": "The icon marked with ‘i’ will display the information regarding the dataflow, reporting obligation and legal instrument (extracted from ROD)",
       "target": ".dataflow-properties-help-step"
     },
     {
-      "content": "‘API-key’ displays a dialog showing the parameters which are needed to access the Reportnet 3 API",
+      "content": "The pencil icon enables to edit the name, description or associated obligation of the dataflow as well as to delete it (explained in 3.1.2)",
+      "target": ".dataflow-edit-help-step"
+    },
+    {
+      "content": "The cog button displays the API key and other parameters for accessing Reportnet3 programmatically",
       "target": ".dataflow-api-key-help-step"
     },
     {
-      "content": "‘Manage editors’ displays a dialog where a data custodian can provide access to the dataflow for other editors",
+      "content": "This button displays a dialogue to manage (add) other users to collaborate in the dataflow design ",
       "target": ".dataflow-manage-rights-help-step"
     },
     {
-      "content": "The main part of the page are icons which take you to the components of the dataflow:",
-      "target": ".dataflow-big-buttons-help-step"
-    },
-    {
-      "content": "1. Manage reporters – ?",
+      "content": "This button displays a dialogue to manage (add) reporters to the dataflow (explained in 3.1.6)",
       "target": ".dataflow-big-buttons-manageReporters-help-step"
     },
     {
-      "content": "2. The dataflow help – documents, links and technical overview of the reporting schema",
+      "content": "For accessing to the dataflow help page (explained in 3.2)",
       "target": ".dataflow-big-buttons-dataflowHelp-help-step"
     },
     {
-      "content": "3. The reporting dataset where data and information are submitted",
-      "target": ".dataflow-dataset-help-step"
+      "content": "By clicking on ‘New schema’, you can create a new dataset schema or clone and existing one (explained in 3.3)",
+      "target": ".dataflow-new-schema-help-step"
     },
     {
-      "content": "4. ‘Release to data collection’ for submitting your reported data",
-      "target": ".dataflow-big-buttons-release-help-step"
+      "content": "The ‘Create data collections’ button published the dataflow out to the reporters. It is enabled when there is a schema, and a reporter has been added (explained in 3.1.7)",
+      "target": ".dataflow-create-datacollection-help-step"
     }
   ]
 }
