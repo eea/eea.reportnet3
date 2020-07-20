@@ -125,14 +125,13 @@ public class FMECommunicationService {
       checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
           .path("fmerest/v3/transformations/submit/{repository}/{workspace}")
           .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, SubmitResult.class);
+      LOG.info("FME called successfully: HTTP:{}", checkResult.getStatusCode());
     } catch (HttpStatusCodeException exception) {
       LOG_ERROR.error("Status code: {} message: {}", exception.getStatusCode().value(),
           exception.getMessage());
-      return 0;
     }
-    LOG.info("FME called successfully: HTTP:{}", checkResult.getStatusCode());
 
-    return checkResult.getBody() != null ? checkResult.getBody().getId() : 0;
+    return checkResult != null && checkResult.getBody() != null ? checkResult.getBody().getId() : 0;
   }
 
   /**
