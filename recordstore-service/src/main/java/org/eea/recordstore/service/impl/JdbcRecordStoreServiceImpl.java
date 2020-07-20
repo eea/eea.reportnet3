@@ -462,6 +462,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       if ("dataset".equals(type)) {
         criteria.add(LockSignature.CREATE_SNAPSHOT.getValue());
         criteria.add(idDataset);
+        SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
+        criteria.add(snapshot.getForceRelease());
         lockService.removeLockByCriteria(criteria);
       }
       if ("schema".equals(type)) {
