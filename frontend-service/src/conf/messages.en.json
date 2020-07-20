@@ -755,6 +755,13 @@
     "errorLoadingProcesses": "Error loading processes",
     "validateEuDatasetHeader": "Validate EU dataset",
     "deleteDataEuDatasetHeader": "Delete EU dataset data",
-    "matchStringTooltip": "Click to use Country code variable"
+    "matchStringTooltip": "Click to use Country code variable",
+    "dataCollectionLockedError": "The process is locked because Data Collections are opened in exclusive use",
+    "copyToEuDatasetInit": "Copying data collections to EU datasets",
+    "exportEuDatasetInit": "Exporting EU datasets data",
+    "externalExportEudatasetCompletedEvent": "EU datasets exported correctly",
+    "copyDataToEudatasetCompletedEvent": "Data collections copied to EU datasets correctly",
+    "externalExportEudatasetFailedEvent": "Error exporting EU datasets",
+    "copyDataToEudatasetFailedEvent": "Error copying data collections to EU datasets"
   }
 }

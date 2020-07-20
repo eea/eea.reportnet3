@@ -46,6 +46,10 @@ public enum EventType {
   EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "external_export_design_completed_event", true),
 
+  /** The external export eudataset completed event. */
+  EXTERNAL_EXPORT_EUDATASET_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "external_export_eudataset_completed_event", true),
+
   /** The load record completed event. */
   RECORD_UPDATED_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "upload_record_completed_key", true),

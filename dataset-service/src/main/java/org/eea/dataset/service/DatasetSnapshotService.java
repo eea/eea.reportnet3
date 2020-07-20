@@ -91,7 +91,7 @@ public interface DatasetSnapshotService {
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
    */
-  void releaseSnapshot(Long idDataset, Long idSnapshot);
+  void releaseSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
 
 
   /**

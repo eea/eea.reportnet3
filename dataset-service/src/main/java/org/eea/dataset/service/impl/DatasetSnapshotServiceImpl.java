@@ -3,9 +3,12 @@ package org.eea.dataset.service.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.bson.types.ObjectId;
@@ -50,6 +53,7 @@ import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.kafka.domain.EventType;
@@ -284,6 +288,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       List<Object> criteria = new ArrayList<>();
       criteria.add(LockSignature.CREATE_SNAPSHOT.getValue());
       criteria.add(idDataset);
+      criteria.add(released);
       lockService.removeLockByCriteria(criteria);
     }
     // release snapshot when the user press create+release
@@ -380,10 +385,16 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
+   * @throws EEAException
    */
   @Override
   @Async
-  public void releaseSnapshot(Long idDataset, Long idSnapshot) {
+  public void releaseSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
+
+    // First of all, we create a lock to prevent copy data from DC to EU dataset while this process
+    // is releasign to DC
+    Long dataflowId = datasetService.getDataFlowIdById(idDataset);
+    addLockRelatedToCopyDataToEUDataset(dataflowId);
 
     // Get if the snapshot contains blocker errors
     setTenant(idDataset);
@@ -411,11 +422,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
       // Delete data of the same provider
       deleteDataProvider(idDataset, idSnapshot, idDataProvider, provider, idDataCollection);
+      removeLockRelatedToCopyDataToEUDataset(dataflowId);
     } else {
       LOG_ERROR.error("Error releasing snapshot, the snapshot contains blocker errors");
       releaseEvent(EventType.RELEASE_BLOCKED_EVENT, idSnapshot,
           "The snapshot contains blocker errors");
       removeLock(idDataset, LockSignature.RELEASE_SNAPSHOT);
+      removeLockRelatedToCopyDataToEUDataset(dataflowId);
     }
   }
 
@@ -430,6 +443,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   private void deleteDataProvider(Long idDataset, Long idSnapshot, final Long idDataProvider,
       DataProviderVO provider, Long idDataCollection) {
+    Long idDataflow = datasetService.getDataFlowIdById(idDataset);
     if (provider != null && idDataCollection != null) {
       datasetService.deleteRecordValuesByProvider(idDataCollection, provider.getCode());
 
@@ -437,7 +451,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       try {
         // Mark the receipt button as outdated because a new release has been done, so it would be
         // necessary to generate a new receipt
-        Long idDataflow = datasetService.getDataFlowIdById(idDataset);
         List<RepresentativeVO> representatives = representativeControllerZuul
             .findRepresentativesByIdDataFlow(idDataflow).stream()
             .filter(r -> r.getDataProviderId().equals(idDataProvider)).collect(Collectors.toList());
@@ -468,12 +481,14 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         LOG_ERROR.error(e.getMessage());
         releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idSnapshot, e.getMessage());
         removeLock(idDataset, LockSignature.RELEASE_SNAPSHOT);
+        removeLockRelatedToCopyDataToEUDataset(idDataflow);
       }
     } else {
       LOG_ERROR.error("Error in release snapshot");
       releaseEvent(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT, idSnapshot,
           "Error in release snapshot");
       removeLock(idDataset, LockSignature.RELEASE_SNAPSHOT);
+      removeLockRelatedToCopyDataToEUDataset(idDataflow);
     }
   }
 
@@ -802,6 +817,33 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     }
 
     receiptPDFGenerator.generatePDF(receipt, out);
+  }
+
+
+  /**
+   * Adds the lock related to copy data to EU dataset.
+   *
+   * @param dataflowId the dataflow id
+   * @throws EEAException the EEA exception
+   */
+  private void addLockRelatedToCopyDataToEUDataset(Long dataflowId) throws EEAException {
+    Map<String, Object> mapCriteria = new HashMap<>();
+    mapCriteria.put("signature", LockSignature.POPULATE_EU_DATASET.getValue());
+    mapCriteria.put("dataflowId", dataflowId);
+    lockService.createLock(new Timestamp(System.currentTimeMillis()),
+        (String) ThreadPropertiesManager.getVariable("user"), LockType.METHOD, mapCriteria);
+  }
+
+  /**
+   * Removes the lock related to copy data to EU dataset.
+   *
+   * @param dataflowId the dataflow id
+   */
+  private void removeLockRelatedToCopyDataToEUDataset(Long dataflowId) {
+    List<Object> criteria = new ArrayList<>();
+    criteria.add(LockSignature.POPULATE_EU_DATASET.getValue());
+    criteria.add(dataflowId);
+    lockService.removeLockByCriteria(criteria);
   }
 
 }

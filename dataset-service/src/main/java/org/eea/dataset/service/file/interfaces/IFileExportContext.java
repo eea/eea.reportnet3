@@ -16,11 +16,12 @@ public interface IFileExportContext {
    * @param dataflowId the dataflow id
    * @param datasetId the partition id
    * @param idTableSchema the id table schema
+   * @param includeCountryCode the include country code
    * @return the string
    * @throws InvalidFileException the invalid file exception
    * @throws IOException Signals that an I/O exception has occurred.
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
-  byte[] fileWriter(Long dataflowId, Long datasetId, String idTableSchema)
-      throws InvalidFileException, IOException, EEAException;
+  byte[] fileWriter(Long dataflowId, Long datasetId, String idTableSchema,
+      boolean includeCountryCode) throws InvalidFileException, IOException, EEAException;
 }

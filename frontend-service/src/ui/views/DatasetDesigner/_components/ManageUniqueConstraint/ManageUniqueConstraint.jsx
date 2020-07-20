@@ -23,6 +23,7 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
   const {
     datasetSchemaAllTables,
     datasetSchemaId,
+    isDuplicatedToManageUnique,
     isManageUniqueConstraintDialogVisible,
     manageUniqueConstraintData,
     uniqueConstraintsList
@@ -53,7 +54,13 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
   }, [selectedTable]);
 
   useEffect(() => {
-    if (!isEmpty(uniqueConstraintsList) || !isEmpty(duplicatedList)) setIsDuplicated(checkDuplicates());
+    setIsDuplicated(isDuplicatedToManageUnique);
+  }, [uniqueConstraintsList]);
+
+  useEffect(() => {
+    if (!isEmpty(uniqueConstraintsList) || !isEmpty(duplicatedList)) {
+      setIsDuplicated(checkDuplicates());
+    }
   }, [selectedFields, duplicatedList]);
 
   const checkDuplicates = () => {
@@ -68,6 +75,7 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
     for (let index = 0; index < filteredFields.length; index++) {
       duplicated.push(isEqual(filteredFields[index].sort(), fields.sort()));
     }
+
     return duplicated.includes(true);
   };
 

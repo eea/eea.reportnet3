@@ -1,1 +1,2 @@
-export const ExportEuDataset = ({ euDatasetRepository }) => async dataflowId => euDatasetRepository.export(dataflowId);
+export const ExportEuDataset = ({ euDatasetRepository }) => async dataflowId =>
+  euDatasetRepository.exportEuDataset(dataflowId);
