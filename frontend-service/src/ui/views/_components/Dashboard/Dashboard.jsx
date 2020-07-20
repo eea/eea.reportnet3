@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { capitalize, isUndefined } from 'lodash';
+import capitalize from 'lodash/capitalize';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './Dashboard.module.css';
 
