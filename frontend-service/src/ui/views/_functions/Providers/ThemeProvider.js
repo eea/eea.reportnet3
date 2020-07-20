@@ -290,7 +290,8 @@ export const ThemeProvider = ({ children }) => {
         'tooltip-arrow-bg': 'var(--gray-110)',
         'user-image-bg-hover': 'var(--main-font-color)',
         'user-image-bg-opacity': '0.6',
-        'map-marker-color': 'var(--c-corporate-blue-lighter)'
+        'map-marker-color': 'var(--c-corporate-blue-lighter)',
+        'text-filters': 'var(--gray-75)'
       },
       dark: {
         bg: 'var(--c-dark-blue)',
@@ -556,7 +557,8 @@ export const ThemeProvider = ({ children }) => {
         'tooltip-arrow-bg': 'var(--gray-110)',
         'user-image-bg-hover': 'var(--main-font-color)',
         'user-image-bg-opacity': '0.6',
-        'map-marker-color': 'var(--white)'
+        'map-marker-color': 'var(--white)',
+        'text-filters': 'var(--white)'
       }
     }
   });

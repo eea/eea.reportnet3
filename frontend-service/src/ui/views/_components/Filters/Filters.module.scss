@@ -181,7 +181,7 @@
     width: 65% !important;
 
     label {
-      color: var(--gray-75);
+      color: var(--text-filters);
     }
 
     li {
@@ -284,7 +284,7 @@
     }
 
     label {
-      color: var(--gray-75);
+      color: var(--text-filters);
       text-transform: capitalize;
     }
   }
@@ -319,11 +319,11 @@
   .labelDown {
     font-size: 10pt !important;
     top: 50% !important;
-    color: var(--gray-75);
+    color: var(--text-filters);
   }
 
   .label {
-    color: var(--gray-75);
+    color: var(--text-filters);
   }
 }
 
