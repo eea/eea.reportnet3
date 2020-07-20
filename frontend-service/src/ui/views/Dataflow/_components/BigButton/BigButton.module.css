@@ -9,6 +9,10 @@
   padding: 2.3rem 2.7rem;
 }
 
+.bigButton svg {
+  max-width: 32px;
+}
+
 .bigButton > span:hover svg {
   transform: scale(1.25);
   transition: 0.08s ease-in;
