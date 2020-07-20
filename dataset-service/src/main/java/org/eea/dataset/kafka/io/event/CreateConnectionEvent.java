@@ -72,8 +72,9 @@ public class CreateConnectionEvent extends AbstractEEAEventHandlerCommand {
         Map<String, Object> result = new HashMap<>();
         result.put(LiteralConstants.DATASET_ID, idDataset.toString());
         result.put(LiteralConstants.ID_DATASET_SCHEMA, idDatasetSchema);
-        sendEvent(result);
-
+        if (datasetService.isReportingDataset(idDataset)) {
+          sendEvent(result);
+        }
       } catch (EEAException e) {
         LOG_ERROR.error(
             "Error executing the processes after creating a new empty dataset. Error message: {}",
