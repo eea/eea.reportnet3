@@ -60,7 +60,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background-color: var(--white);
+  background-color: var(--bg);
+  box-shadow: var(--header-box-shadow);
   .europeanUnionLogo {
     a {
       background-image: url('/assets/img/logo--en.svg');
