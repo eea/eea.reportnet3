@@ -765,6 +765,7 @@
     "externalExportEudatasetCompletedEvent": "EU datasets exported correctly",
     "copyDataToEudatasetCompletedEvent": "Data collections copied to EU datasets correctly",
     "externalExportEudatasetFailedEvent": "Error exporting EU datasets",
-    "copyDataToEudatasetFailedEvent": "Error copying data collections to EU datasets"
+    "copyDataToEudatasetFailedEvent": "Error copying data collections to EU datasets",
+    "eea": "European Environment Agency"
   }
 }
