@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { capitalize, isUndefined } from 'lodash';
@@ -192,35 +192,33 @@ const Dashboard = withRouter(
       };
 
       const renderDashboard = () => {
-        if (isLoading) {
-          return <Spinner className={styles.dashBoardSpinner} />;
+        if (
+          !isUndefined(dashboardData.datasets) &&
+          dashboardData.datasets.length > 0 &&
+          ![].concat.apply([], dashboardData.datasets[0].totalData).every(total => total === 0)
+        ) {
+          return (
+            <div className={styles.chartDiv}>
+              <StatusList
+                filterDispatch={statusDispatcher}
+                filteredStatusTypes={updatedState.filterStatus}
+                statusTypes={levelErrorTypes}
+              />
+              <Chart
+                data={updatedState.dashboardData}
+                height="95%"
+                options={dashboardOptions}
+                ref={chartRef}
+                type="bar"
+              />
+            </div>
+          );
         } else {
-          if (
-            !isUndefined(dashboardData.datasets) &&
-            dashboardData.datasets.length > 0 &&
-            ![].concat.apply([], dashboardData.datasets[0].totalData).every(total => total === 0)
-          ) {
-            return (
-              <div className={styles.chartDiv}>
-                <StatusList
-                  filterDispatch={statusDispatcher}
-                  filteredStatusTypes={updatedState.filterStatus}
-                  statusTypes={levelErrorTypes}
-                />
-                <Chart
-                  ref={chartRef}
-                  type="bar"
-                  data={updatedState.dashboardData}
-                  options={dashboardOptions}
-                  height="95%"
-                />
-              </div>
-            );
-          } else {
-            return <div className={styles.NoErrorData}>{resources.messages['noErrorData']}</div>;
-          }
+          return <div className={styles.NoErrorData}>{resources.messages['noErrorData']}</div>;
         }
       };
+
+      if (isLoading) return <Spinner className={styles.dashBoardSpinner} />;
 
       return (
         <React.Fragment>
