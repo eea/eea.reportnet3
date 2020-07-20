@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useRef } from 'react';
 
 import isUndefined from 'lodash/isUndefined';
 
@@ -77,7 +77,7 @@ export const BigButtonListRepresentative = ({
               match,
               onLoadReceiptData,
               onShowSnapshotDialog
-            }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <></>))}
+            }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <Fragment key={i} />))}
           </div>
         </div>
       </div>
