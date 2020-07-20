@@ -41,6 +41,8 @@ export const BigButtonList = ({
   onShowManageReportersDialog,
   onShowSnapshotDialog,
   onUpdateData,
+  setIsCopyDataCollectionToEuDatasetLoading,
+  setIsExportEuDatasetLoading,
   setIsReceiptLoading,
   setUpdatedDatasetSchema,
   updatedDatasetSchema
@@ -72,6 +74,8 @@ export const BigButtonList = ({
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
   useCheckNotifications(['UPDATE_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
+  useCheckNotifications(['', ''], setIsCopyDataCollectionToEuDatasetLoading, false);
+  useCheckNotifications(['', ''], setIsExportEuDatasetLoading, false);
 
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
@@ -275,26 +279,38 @@ export const BigButtonList = ({
   };
 
   const onCopyDataCollectionToEuDataset = async () => {
+    setIsCopyDataCollectionToEuDatasetLoading(true);
+
     try {
-      await EuDatasetService.copyDataCollection(dataflowId);
+      const response = await EuDatasetService.copyDataCollection(dataflowId);
+      if (response.status >= 200 && response.status <= 299) {
+        notificationContext.add({ type: 'COPY_TO_EU_DATASET_INIT' });
+      }
     } catch (error) {
-      console.error(error);
+      setIsCopyDataCollectionToEuDatasetLoading(false);
+
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });        
-      } else {        
+        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });
+      } else {
         notificationContext.add({ type: 'COPY_DATA_COLLECTION_EU_DATASET_ERROR' });
       }
     }
   };
 
   const onExportEuDataset = async () => {
+    setIsExportEuDatasetLoading(true);
+
     try {
-      await EuDatasetService.exportEuDataset(dataflowId);
+      const response = await EuDatasetService.exportEuDataset(dataflowId);
+      if (response.status >= 200 && response.status <= 299) {
+        notificationContext.add({ type: 'EXPORT_EU_DATASET_INIT' });
+      }
     } catch (error) {
-      console.error(error);
+      setIsExportEuDatasetLoading(false);
+
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });               
-      } else {        
+        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });
+      } else {
         notificationContext.add({ type: 'EXPORT_EU_DATASET_ERROR' });
       }
     }

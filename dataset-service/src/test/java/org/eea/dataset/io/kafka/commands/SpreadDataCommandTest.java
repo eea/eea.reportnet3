@@ -22,6 +22,10 @@ import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseR
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.junit.Assert;
@@ -69,10 +73,15 @@ public class SpreadDataCommandTest {
   @Mock
   private SchemasRepository schemasRepository;
 
-
   /** The table repository. */
   @Mock
   private TableRepository tableRepository;
+
+  @Mock
+  private RepresentativeControllerZuul representativeControllerZuul;
+
+  @Mock
+  private DatasetMetabaseService datasetMetabaseService;
 
   /** The eea event VO. */
   private EEAEventVO eeaEventVO;
@@ -152,6 +161,12 @@ public class SpreadDataCommandTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(Mockito.any()))
         .thenReturn(Optional.of(new PartitionDataSetMetabase()));
     when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(1L);
+    DataSetMetabaseVO datasetVO = new DataSetMetabaseVO();
+    datasetVO.setDataProviderId(1L);
+    when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(datasetVO);
+    DataProviderVO dataprovider = new DataProviderVO();
+    dataprovider.setCode("ES");
+    when(representativeControllerZuul.findDataProviderById(Mockito.any())).thenReturn(dataprovider);
     spreadDataCommand.execute(eeaEventVO);
     Mockito.verify(designDatasetRepository, times(1)).findByDataflowId(Mockito.anyLong());
   }
