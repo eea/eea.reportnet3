@@ -4,6 +4,7 @@
 package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -22,6 +23,7 @@ import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
+import org.eea.dataset.persistence.metabase.domain.SnapshotSchema;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
@@ -236,8 +238,6 @@ public class DatasetSnapshotServiceTest {
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(recordStoreControllerZull).createSnapshotData(Mockito.any(), Mockito.any(),
         Mockito.any());
-    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
     datasetSnapshotService.addSnapshot(1L, "test", false, 1L);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
@@ -482,8 +482,6 @@ public class DatasetSnapshotServiceTest {
     doNothing().when(documentControllerZuul).uploadSchemaSnapshotDocument(Mockito.any(),
         Mockito.any(), Mockito.any());
     when(schemaRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(new DataSetSchema());
-    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
     datasetSnapshotService.addSchemaSnapshot(1L, "5db99d0bb67ca68cb8fa7053", "test");
     Mockito.verify(snapshotSchemaRepository, times(1)).save(Mockito.any());
   }
@@ -639,15 +637,16 @@ public class DatasetSnapshotServiceTest {
     Mockito.verify(representativeControllerZuul, times(1)).updateRepresentative(Mockito.any());
   }
 
-  @Test(expected = EEAException.class)
+  @Test
   public void getByIdExceptionTest() throws EEAException {
     when(snapshotRepository.findById(Mockito.any())).thenReturn(Optional.empty());
-    try {
-      datasetSnapshotService.getById(1L);
-    } catch (EEAException e) {
-      assertEquals("Snapshot with id 1 Not found", e.getMessage());
-      throw e;
-    }
+    assertNull("Snapshot with id 1 Not found", datasetSnapshotService.getById(1L));
+  }
+
+  @Test
+  public void getByIdSchemaExceptionTest() throws EEAException {
+    when(snapshotSchemaRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    assertNull("Snapshot with id 1 Not found", datasetSnapshotService.getSchemaById(1L));
   }
 
   @Test
@@ -659,5 +658,14 @@ public class DatasetSnapshotServiceTest {
     assertEquals(snap, datasetSnapshotService.getById(1L));
   }
 
+  @Test
+  public void getSchemaByIdTest() throws EEAException {
+    SnapshotVO snap = new SnapshotVO();
+    snap.setId(1L);
+    when(snapshotSchemaRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new SnapshotSchema()));
+    when(snapshotSchemaMapper.entityToClass(Mockito.any())).thenReturn(snap);
+    assertEquals(snap, datasetSnapshotService.getSchemaById(1L));
+  }
 
 }

@@ -7,13 +7,20 @@ import static org.mockito.Mockito.times;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
 import org.eea.recordstore.service.impl.JdbcRecordStoreServiceImpl;
+import org.eea.security.authorization.ObjectAccessRoleEnum;
+import org.eea.security.jwt.utils.EeaUserDetails;
+import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +29,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * The Class RecordStoreControllerImplTest.
@@ -54,6 +64,16 @@ public class RecordStoreControllerImplTest {
    */
   @Before
   public void initMocks() {
+    ThreadPropertiesManager.setVariable("user", "user");
+    Set<String> roles = new HashSet<>();
+    roles.add(ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER.getAccessRole(1L));
+    UserDetails userDetails = EeaUserDetails.create("test", roles);
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    Map<String, String> details = new HashMap<>();
+    details.put("", "");
+    authenticationToken.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     MockitoAnnotations.initMocks(this);
   }
 
