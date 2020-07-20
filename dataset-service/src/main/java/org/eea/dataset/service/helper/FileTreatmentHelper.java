@@ -62,32 +62,46 @@ public class FileTreatmentHelper {
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /** The data set mapper. */
+  /**
+   * The data set mapper.
+   */
   @Autowired
   private DataSetMapper dataSetMapper;
 
-  /** The lock service. */
+  /**
+   * The lock service.
+   */
   @Autowired
   private LockService lockService;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /** The representative controller zuul. */
+  /**
+   * The representative controller zuul.
+   */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /** The dataset schema service. */
+  /**
+   * The dataset schema service.
+   */
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
-  /** The integration controller. */
+  /**
+   * The integration controller.
+   */
   @Autowired
   private IntegrationControllerZuul integrationController;
 
@@ -109,7 +123,6 @@ public class FileTreatmentHelper {
   @Async
   public void executeFileProcess(final Long datasetId, final String fileName, final InputStream is,
       String tableSchemaId) {
-
 
     // Integration process
     String fileExtension = null;
@@ -157,6 +170,72 @@ public class FileTreatmentHelper {
       // REP-3 file process
       rep3FileProcess(datasetId, fileName, is, tableSchemaId);
     }
+  }
+
+  /**
+   * Execute external integration file process.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @param inputStream the input stream
+   * @throws EEAException the EEA exception
+   */
+  public void executeExternalIntegrationFileProcess(Long datasetId, String fileName,
+      InputStream inputStream) throws EEAException {
+
+    String fileExtension = datasetService.getMimetype(fileName);
+    String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+
+    // Create the IntegrationVO used as criteria.
+    Map<String, String> internalParameters = new HashMap<>();
+    internalParameters.put("datasetSchemaId", datasetSchemaId);
+    IntegrationVO integrationCriteria = new IntegrationVO();
+    integrationCriteria.setInternalParameters(internalParameters);
+
+    // Find all integrations matching the criteria.
+    List<IntegrationVO> integrations =
+        integrationController.findAllIntegrationsByCriteria(integrationCriteria);
+
+    // Find the IntegrationVO with IMPORT operation for the given file extension.
+    IntegrationVO integrationVO = filterImportIntegration(integrations, fileExtension, inputStream);
+
+    if (null != integrationVO) {
+      integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
+          IntegrationOperationTypeEnum.IMPORT, fileName, datasetId, integrationVO);
+    } else {
+      throw new EEAException(
+          String.format("Error loading data into dataset %s via external integration", datasetId));
+    }
+  }
+
+  /**
+   * Filter import integration.
+   *
+   * @param integrations the integrations
+   * @param fileExtension the file extension
+   * @param inputStream the input stream
+   * @return the integration VO
+   */
+  private IntegrationVO filterImportIntegration(List<IntegrationVO> integrations,
+      String fileExtension, InputStream inputStream) {
+    for (IntegrationVO integration : integrations) {
+      if (IntegrationOperationTypeEnum.IMPORT.equals(integration.getOperation())) {
+        String integrationExtension = integration.getInternalParameters().get("fileExtension");
+        if (integrationExtension.equals(fileExtension)) {
+          try {
+            byte[] byteArray = IOUtils.toByteArray(inputStream);
+            String encodedString = Base64.getEncoder().encodeToString(byteArray);
+            Map<String, String> externalParameters = new HashMap<>();
+            externalParameters.put("fileIS", encodedString);
+            integration.setExternalParameters(externalParameters);
+            return integration;
+          } catch (IOException e) {
+            LOG_ERROR.error("Exception executing file process with message {}", e.getMessage(), e);
+          }
+        }
+      }
+    }
+    return null;
   }
 
   /**
@@ -321,4 +400,6 @@ public class FileTreatmentHelper {
 
     return generalList;
   }
+
+
 }
