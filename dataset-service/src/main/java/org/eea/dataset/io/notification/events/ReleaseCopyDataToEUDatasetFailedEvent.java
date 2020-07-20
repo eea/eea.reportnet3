@@ -2,32 +2,26 @@ package org.eea.dataset.io.notification.events;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
-
 /**
- * The Class CopyDatasetSchemaFailedEvent.
+ * The Class RestoreDatasetSnapshotFailedEvent.
  */
 @Component
-public class CopyDatasetSchemaFailedEvent implements NotificableEventHandler {
+public class ReleaseCopyDataToEUDatasetFailedEvent implements NotificableEventHandler {
 
-  /** The dataset service. */
+
+  /** The data set metabase repository. */
   @Autowired
-  private DatasetService datasetService;
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-
-
-  /** The dataflow controller zuul. */
-  @Autowired
-  private DataFlowControllerZuul dataflowControllerZuul;
 
   /**
    * Gets the event type.
@@ -36,7 +30,7 @@ public class CopyDatasetSchemaFailedEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.COPY_DATASET_SCHEMA_FAILED_EVENT;
+    return EventType.COPY_DATA_TO_EUDATASET_FAILED_EVENT;
   }
 
   /**
@@ -48,19 +42,17 @@ public class CopyDatasetSchemaFailedEvent implements NotificableEventHandler {
    */
   @Override
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
-
-    Long dataflowId = notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
-        : datasetService.getDataFlowIdById(notificationVO.getDatasetId());
-
-    String dataflowName =
-        notificationVO.getDataflowName() != null ? notificationVO.getDataflowName()
-            : dataflowControllerZuul.getMetabaseById(dataflowId).getName();
+    Long datasetId = notificationVO.getDatasetId();
+    String datasetName = notificationVO.getDatasetName() != null ? notificationVO.getDatasetName()
+        : dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase())
+            .getDataSetName();
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
-    notification.put("dataflowId", dataflowId);
-    notification.put("dataflowName", dataflowName);
+    notification.put("datasetId", datasetId);
+    notification.put("datasetName", datasetName);
     notification.put("error", notificationVO.getError());
     return notification;
   }
+
 }

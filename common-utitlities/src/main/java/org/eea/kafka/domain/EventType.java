@@ -118,6 +118,10 @@ public enum EventType {
   COPY_DATA_TO_EUDATASET_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "copy_data_to_eudataset_completed_event", true),
 
+  /** The copy data to eudataset failed event. */
+  COPY_DATA_TO_EUDATASET_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "copy_data_to_eudataset_failed_event", true),
+
   /** The command execute validation. */
   COMMAND_EXECUTE_VALIDATION(LiteralConstants.COMMAND_TOPIC, "execute_validations_key", false),
 
