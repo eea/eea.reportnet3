@@ -279,34 +279,38 @@ export const BigButtonList = ({
   };
 
   const onCopyDataCollectionToEuDataset = async () => {
-    notificationContext.add({ type: 'COPY_TO_EU_DATASET_INIT' });
     setIsCopyDataCollectionToEuDatasetLoading(true);
 
     try {
-      await EuDatasetService.copyDataCollection(dataflowId);
+      const response = await EuDatasetService.copyDataCollection(dataflowId);
+      if (response.status >= 200 && response.status <= 299) {
+        notificationContext.add({ type: 'COPY_TO_EU_DATASET_INIT' });
+      }
     } catch (error) {
       setIsCopyDataCollectionToEuDatasetLoading(false);
 
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });        
-      } else {        
+        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });
+      } else {
         notificationContext.add({ type: 'COPY_DATA_COLLECTION_EU_DATASET_ERROR' });
       }
     }
   };
 
   const onExportEuDataset = async () => {
-    notificationContext.add({ type: 'EXPORT_EU_DATASET_INIT' })
-    setIsExportEuDatasetLoading(true)
+    setIsExportEuDatasetLoading(true);
 
     try {
-      await EuDatasetService.exportEuDataset(dataflowId);
+      const response = await EuDatasetService.exportEuDataset(dataflowId);
+      if (response.status >= 200 && response.status <= 299) {
+        notificationContext.add({ type: 'EXPORT_EU_DATASET_INIT' });
+      }
     } catch (error) {
-      setIsExportEuDatasetLoading(false)
+      setIsExportEuDatasetLoading(false);
 
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });               
-      } else {        
+        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });
+      } else {
         notificationContext.add({ type: 'EXPORT_EU_DATASET_ERROR' });
       }
     }

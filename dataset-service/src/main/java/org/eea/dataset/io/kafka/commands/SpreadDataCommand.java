@@ -20,6 +20,9 @@ import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseR
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -60,6 +63,14 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
   /** The table repository. */
   @Autowired
   private TableRepository tableRepository;
+
+  /** The representative controller zuul. */
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
+
+  /** The dataset metabase service. */
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
 
   /** The Constant DATASET_ID. */
   private static final String DATASET_ID = "dataset_%s";
@@ -173,6 +184,17 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
       recordAux.setTableValue(tableAux);
       recordAux.setIdRecordSchema(record.getIdRecordSchema());
       recordAux.setDatasetPartitionId(datasetPartitionId);
+
+      Long dataProviderId =
+          datasetMetabaseService.findDatasetMetabase(datasetId).getDataProviderId();
+
+      if (null != dataProviderId) {
+        DataProviderVO dataprovider =
+            representativeControllerZuul.findDataProviderById(dataProviderId);
+        if (null != dataprovider && null != dataprovider.getCode()) {
+          recordAux.setDataProviderCode(dataprovider.getCode());
+        }
+      }
 
       TenantResolver.setTenantName(String.format(DATASET_ID, design.getId().toString()));
       List<FieldValue> fieldValues = fieldRepository.findByRecord(record);
