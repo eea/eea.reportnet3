@@ -43,6 +43,12 @@ export const EUDatasetToolbar = ({
             onClick={() => handleDialogs('validationList', true)}
           />
           <Button
+            className={'p-button-rounded p-button-secondary-transparent p-button-animated-blink'}
+            icon={'horizontalSliders'}
+            label={resources.messages['qcRules']}
+            onClick={() => handleDialogs('qcRules', true)}
+          />
+          <Button
             className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
             disabled={!datasetHasData}
             icon={'dashboard'}
