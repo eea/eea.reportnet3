@@ -277,7 +277,7 @@ public class DataSetControllerImpl implements DatasetController {
   @LockMethod(removeWhenFinish = false)
   @HystrixCommand
   @DeleteMapping(value = "{id}/deleteImportData")
-  @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN') AND checkPermission('Dataset','MANAGE_DATA')")
+  @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void deleteImportData(
       @LockCriteria(name = "id") @PathVariable("id") final Long dataSetId) {
     if (dataSetId == null || dataSetId < 1) {
