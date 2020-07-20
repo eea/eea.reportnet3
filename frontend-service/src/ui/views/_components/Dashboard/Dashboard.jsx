@@ -212,7 +212,7 @@ const Dashboard = withRouter(
                   type="bar"
                   data={updatedState.dashboardData}
                   options={dashboardOptions}
-                  height="120"
+                  height="95"
                 />
               </div>
             );
