@@ -229,7 +229,7 @@ public class IntegrationServiceImpl implements IntegrationService {
     List<Object> criteriaCopy = new ArrayList<>();
     criteriaCopy.add(LockSignature.POPULATE_EU_DATASET.getValue());
     criteriaCopy.add(dataflowId);
-    lockService.removeLockByCriteria(criteria);
+    lockService.removeLockByCriteria(criteriaCopy);
   }
 
 
