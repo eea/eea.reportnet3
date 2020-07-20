@@ -204,7 +204,13 @@ const Dashboard = withRouter(
                 filteredStatusTypes={updatedState.filterStatus}
                 statusTypes={levelErrorTypes}
               />
-              <Chart ref={chartRef} type="bar" data={updatedState.dashboardData} options={dashboardOptions} />
+              <Chart
+                data={updatedState.dashboardData}
+                height="95%"
+                options={dashboardOptions}
+                ref={chartRef}
+                type="bar"
+              />
             </div>
           );
         } else {
