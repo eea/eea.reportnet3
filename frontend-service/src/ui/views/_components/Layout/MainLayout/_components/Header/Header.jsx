@@ -57,11 +57,11 @@ const Header = withRouter(({ history, onLeftSideBarStyleChange }) => {
           transition: '0.5s'
         });
         setHeaderElementStyle({
-          height: '196px',
+          height: '180px',
           transition: '0.5s'
         });
         onLeftSideBarStyleChange({
-          top: '196px',
+          top: '180px',
           transition: '0.5s'
         });
       } else {
