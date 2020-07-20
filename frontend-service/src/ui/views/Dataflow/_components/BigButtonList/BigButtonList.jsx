@@ -74,8 +74,16 @@ export const BigButtonList = ({
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
   useCheckNotifications(['UPDATE_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
-  useCheckNotifications(['', ''], setIsCopyDataCollectionToEuDatasetLoading, false);
-  useCheckNotifications(['', ''], setIsExportEuDatasetLoading, false);
+  useCheckNotifications(
+    ['COPY_DATA_TO_EUDATASET_COMPLETED_EVENT', 'COPY_DATA_TO_EUDATASET_FAILED_EVENT'],
+    setIsCopyDataCollectionToEuDatasetLoading,
+    false
+  );
+  useCheckNotifications(
+    ['EXTERNAL_EXPORT_EUDATASET_COMPLETED_EVENT', 'EXTERNAL_EXPORT_EUDATASET_FAILED_EVENT'],
+    setIsExportEuDatasetLoading,
+    false
+  );
 
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
