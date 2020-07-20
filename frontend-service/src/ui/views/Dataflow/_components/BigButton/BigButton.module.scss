@@ -1,0 +1,158 @@
+.datasetItem {
+  .bigButton {
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 2rem;
+    margin-right: 1rem !important;
+    max-width: fit-content;
+
+    > span {
+      padding: 2.3rem 2.7rem;
+
+      &:hover svg {
+        transform: scale(1.25);
+        transition: 0.08s ease-in;
+      }
+    }
+
+    .spinner {
+      animation: spinnerAnimation 1s linear infinite;
+    }
+
+    svg {
+      max-width: 32px;
+    }
+  }
+
+  .bigButtonDisabled {
+    cursor: default !important;
+  }
+
+  .defaultBigButton,
+  .menuBigButton {
+    align-items: center;
+    color: var(--white);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+
+    span {
+      border-radius: 10px;
+      color: var(--white);
+
+      &:hover {
+        color: var(--white);
+      }
+    }
+  }
+
+  .dashboard {
+    background-color: var(--c-purple-400);
+
+    span:hover {
+      background-color: var(--c-purple-300);
+    }
+  }
+
+  .dataflowHelp {
+    background-color: var(--c-orange-200);
+
+    span:hover {
+      background-color: var(--c-orange-300);
+    }
+  }
+
+  .dataset,
+  .dataCollection {
+    background-color: var(--c-corporate-blue);
+
+    span:hover {
+      background-color: var(--c-blue-400);
+    }
+  }
+
+  .schemaDataset,
+  .manageReporters {
+    background-color: var(--c-blue-green);
+
+    span:hover {
+      background-color: var(--c-aquamarine);
+    }
+  }
+
+  .newItem {
+    background-color: var(--c-blue-300);
+
+    span:hover {
+      background-color: var(--c-blue-200);
+
+      .siteMap {
+        transform: rotate(180deg) scale(1.25) !important;
+      }
+    }
+
+    .siteMap {
+      transform: rotate(180deg) !important;
+      width: 2.5rem;
+    }
+
+    .siteMapDisabled {
+      transform: rotate(180deg) !important;
+      width: 2.5rem;
+    }
+  }
+
+  .euDataset {
+    background-color: var(--c-pink);
+
+    span:hover {
+      background-color: var(--c-pink);
+    }
+  }
+
+  .caption {
+    box-sizing: content-box;
+    color: var(--main-font-color);
+    margin: 0.75rem 0.5rem;
+    max-width: 100px;
+    text-align: center;
+    word-wrap: break-word;
+  }
+
+  .inputText {
+    word-wrap: break-word;
+    max-width: fit-content;
+    margin: 0.25rem !important;
+  }
+}
+
+.datasetItemDisabled {
+  opacity: 0.5;
+
+  .bigButton {
+    > span {
+      &:hover svg {
+        transform: scale(1);
+      }
+    }
+  }
+}
+
+.datasetItem :global .p-button.p-button-icon-only .p-button-text {
+  height: 0px !important;
+  padding: 0px !important;
+}
+
+:global .svg-inline--fa {
+  min-width: 2rem;
+}
+
+@keyframes spinnerAnimation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
