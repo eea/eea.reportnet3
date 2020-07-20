@@ -20,7 +20,6 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.lock.service.LockService;
@@ -197,11 +196,12 @@ public class EUDatasetServiceImpl implements EUDatasetService {
   /**
    * Removes the locks related to populate EU.
    *
-   * @param reportings the reportings
    * @param dataflowId the dataflow id
    */
-  public void removeLocksRelatedToPopulateEU(List<ReportingDatasetVO> reportings,
-      Long dataflowId) {
+  @Override
+  public void removeLocksRelatedToPopulateEU(Long dataflowId) {
+    List<ReportingDatasetVO> reportings =
+        reportingDatasetService.getDataSetIdByDataflowId(dataflowId);
     // Release lock to the copy data to EU
     List<Object> criteria = new ArrayList<>();
     criteria.add(LockSignature.POPULATE_EU_DATASET.getValue());
