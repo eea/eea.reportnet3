@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.codehaus.plexus.util.StringUtils;
 import org.drools.template.ObjectDataCompiler;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
@@ -35,6 +34,8 @@ import org.kie.api.builder.Results;
 import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
 import org.kie.internal.utils.KieHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -43,8 +44,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class KieBaseManager {
 
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(KieBaseManager.class);
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   /** The Constant REGULATION_TEMPLATE_FILE. */
   private static final String REGULATION_TEMPLATE_FILE = "/templateRules.drl";
+
+  /** The Constant REGULATION_TEMPLATE_FILE. */
+  private static final String TYPE_DATA = "typeData";
 
   /** The rules repository. */
   @Autowired
@@ -95,7 +105,6 @@ public class KieBaseManager {
       schemaRules.getRules().stream().forEach(rule -> {
         String schemasDrools = "";
         String originName = "";
-        StringBuilder expression = new StringBuilder("");
         TypeValidation typeValidation = null;
         switch (rule.getType()) {
           case DATASET:
@@ -107,72 +116,17 @@ public class KieBaseManager {
           case TABLE:
             schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
             typeValidation = TypeValidation.TABLE;
-            for (TableSchema table : dataSetSchema.getTableSchemas()) {
-              if (table.getIdTableSchema().equals(rule.getReferenceId())) {
-                originName = table.getNameTableSchema();
-              }
-            }
-
+            originName = fillTableOriginName(dataSetSchema, rule, originName);
             break;
           case RECORD:
             schemasDrools = SchemasDrools.ID_RECORD_SCHEMA.getValue();
             typeValidation = TypeValidation.RECORD;
-            for (TableSchema table : dataSetSchema.getTableSchemas()) {
-              if (table.getRecordSchema().getIdRecordSchema().equals(rule.getReferenceId())) {
-                originName = table.getNameTableSchema();
-              }
-            }
+            originName = fillRecordOriginName(dataSetSchema, rule, originName);
             break;
           case FIELD:
             schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
             typeValidation = TypeValidation.FIELD;
-            for (TableSchema table : dataSetSchema.getTableSchemas()) {
-              for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-                if (field.getIdFieldSchema().equals(rule.getReferenceId())) {
-                  originName = table.getNameTableSchema();
-                }
-              }
-            }
-
-            // if the type is field and isnt automatic we create the rules to validate check if
-            // the
-            // data are correct
-            Document documentField = schemasRepository.findFieldSchema(datasetSchemaId,
-                rule.getReferenceId().toString());
-            DataType dataType = DataType.valueOf(documentField.get("typeData").toString());
-
-            // that switch clear the validations , and check if the datas in values are correct
-            if (null != dataType && !rule.isAutomatic()) {
-              switch (dataType) {
-                case NUMBER_INTEGER:
-                  expression.append("( !isBlank(value) || isNumberInteger(value) && ");
-                  break;
-                case NUMBER_DECIMAL:
-                  expression.append("( !isBlank(value) || isNumberDecimal(value) && ");
-                  break;
-                case DATE:
-                  expression.append("( !isBlank(value) || isDateYYYYMMDD(value) && ");
-                  break;
-                case BOOLEAN:
-                  expression.append("( !isBlank(value) || isBoolean(value) && ");;
-                  break;
-                case COORDINATE_LAT:
-                  expression.append("( !isBlank(value) || isCordenateLat(value) && ");
-                  break;
-                case COORDINATE_LONG:
-                  expression.append("( !isBlank(value) || isCordenateLong(value) && ");
-                  break;
-                default:
-                  expression.append("( !isBlank(value) || ");
-                  break;
-              }
-            }
-            if (!StringUtils.isBlank(expression.toString())) {
-              String whenConditionWithParenthesis = new StringBuilder("").append("(")
-                  .append(rule.getWhenCondition()).append(")").toString();
-              rule.setWhenCondition(
-                  expression.append(whenConditionWithParenthesis).append(")").toString());
-            }
+            originName = fillFieldOriginName(dataSetSchema, rule, originName);
         }
         ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
             rule.getRuleId().toString(), typeValidation, schemasDrools,
@@ -186,95 +140,156 @@ public class KieBaseManager {
     return kieHelper.build();
   }
 
+
+  /**
+   * Fill table origin name.
+   *
+   * @param dataSetSchema the data set schema
+   * @param rule the rule
+   * @param originName the origin name
+   * @return the string
+   */
+  private String fillTableOriginName(DataSetSchema dataSetSchema, Rule rule, String originName) {
+    for (TableSchema table : dataSetSchema.getTableSchemas()) {
+      if (table.getIdTableSchema().equals(rule.getReferenceId())) {
+        originName = table.getNameTableSchema();
+      }
+    }
+    return originName;
+  }
+
+  /**
+   * Fill record origin name.
+   *
+   * @param dataSetSchema the data set schema
+   * @param rule the rule
+   * @param originName the origin name
+   * @return the string
+   */
+  private String fillRecordOriginName(DataSetSchema dataSetSchema, Rule rule, String originName) {
+    for (TableSchema table : dataSetSchema.getTableSchemas()) {
+      if (table.getRecordSchema().getIdRecordSchema().equals(rule.getReferenceId())) {
+        originName = table.getNameTableSchema();
+      }
+    }
+    return originName;
+  }
+
+  /**
+   * Fill field origin name.
+   *
+   * @param dataSetSchema the data set schema
+   * @param rule the rule
+   * @param originName the origin name
+   * @return the string
+   */
+  private String fillFieldOriginName(DataSetSchema dataSetSchema, Rule rule, String originName) {
+    for (TableSchema table : dataSetSchema.getTableSchemas()) {
+      for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+        if (field.getIdFieldSchema().equals(rule.getReferenceId())) {
+          originName = table.getNameTableSchema();
+        }
+      }
+    }
+    return originName;
+  }
+
+  /**
+   * Text rule correct.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param rule the rule
+   */
+  @Async
+  @SuppressWarnings("unchecked")
+  public void validateRule(String datasetSchemaId, Rule rule) {
+
+    Map<String, DataType> dataTypeMap = new HashMap<>();
+    EntityTypeEnum ruleType = rule.getType();
+    String ruleExpressionString = rule.getWhenCondition();
+    EventType notificationEventType = null;
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user((String) ThreadPropertiesManager.getVariable("user")).datasetSchemaId(datasetSchemaId)
+        .shortCode(rule.getShortCode()).error("The QC Rule is disabled").build();
+
+    switch (ruleType) {
+      case RECORD:
+        String recordSchemaId = rule.getReferenceId().toString();
+        Document recordSchema = schemasRepository.findRecordSchema(datasetSchemaId, recordSchemaId);
+        for (Document field : (ArrayList<Document>) recordSchema.get("fieldSchemas")) {
+          String fieldSchemaId = field.get("_id").toString();
+          DataType fieldDataType = DataType.valueOf(field.get(TYPE_DATA).toString());
+          dataTypeMap.put(fieldSchemaId, fieldDataType);
+        }
+        break;
+      case FIELD:
+        String fieldSchemaId = rule.getReferenceId().toString();
+        Document fieldSchema = schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaId);
+        dataTypeMap.put("VALUE", DataType.valueOf(fieldSchema.get(TYPE_DATA).toString()));
+        break;
+      default:
+        validateWithKiebase(datasetSchemaId, rule, notificationVO);
+        return;
+    }
+
+    if (ruleExpressionService.isDataTypeCompatible(ruleExpressionString, ruleType, dataTypeMap)) {
+      notificationEventType = EventType.VALIDATED_QC_RULE_EVENT;
+      rule.setVerified(true);
+      LOG.info("Rule validation passed: {}", rule);
+    } else {
+      notificationEventType = EventType.INVALIDATED_QC_RULE_EVENT;
+      rule.setVerified(false);
+      rule.setEnabled(false);
+      LOG.info("Rule validation not passed: {}", rule);
+    }
+
+    rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+    releaseNotification(notificationEventType, notificationVO);
+  }
+
   /**
    * Text rule and put disable if is the rule have not correct format.
    *
    * @param datasetSchemaId the dataset schema id
    * @param rule the rule
+   * @param notificationVO the notification VO
    * @return true, if successful
-   * @throws EEAException the EEA exception
    */
   @Async
-  @SuppressWarnings("unchecked")
-  public void textRuleCorrect(String datasetSchemaId, Rule rule) throws EEAException {
+  public void validateWithKiebase(String datasetSchemaId, Rule rule,
+      NotificationVO notificationVO) {
 
-    Map<String, DataType> dataTypeMap = new HashMap<>();
-    String ruleExpressionString = null;
-    if (!EntityTypeEnum.DATASET.equals(rule.getType())
-        && !EntityTypeEnum.TABLE.equals(rule.getType())) {
-      ruleExpressionString = rule.getWhenCondition();
-    }
-    TypeValidation typeValidation = TypeValidation.DATASET;
-    String schemasDrools = "";
-    switch (rule.getType()) {
-      case DATASET:
-        return;
-      case TABLE:
-        schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
-        typeValidation = TypeValidation.TABLE;
-        break;
-      case RECORD:
-        schemasDrools = SchemasDrools.ID_RECORD_SCHEMA.getValue();
-        typeValidation = TypeValidation.RECORD;
-        List<Document> fields = (ArrayList<Document>) schemasRepository
-            .findRecordSchema(datasetSchemaId, rule.getReferenceId().toString())
-            .get("fieldSchemas");
-        for (Document field : fields) {
-          String fieldSchemaId = field.get("_id").toString();
-          DataType dataType = DataType.valueOf(field.get("typeData").toString());
-          dataTypeMap.put(fieldSchemaId, dataType);
-        }
-        break;
-      case FIELD:
-        schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
-        typeValidation = TypeValidation.FIELD;
-        Document document =
-            schemasRepository.findFieldSchema(datasetSchemaId, rule.getReferenceId().toString());
-        DataType dataType = DataType.valueOf(document.get("typeData").toString());
-        dataTypeMap.put("VALUE", dataType);
-        break;
-    }
+    if (EntityTypeEnum.TABLE.equals(rule.getType())) {
+      EventType notificationEventType = null;
+      KieServices kieServices = KieServices.Factory.get();
+      ObjectDataCompiler compiler = new ObjectDataCompiler();
+      List<Map<String, String>> ruleAttribute = new ArrayList<>();
 
-    if (null != ruleExpressionString && !ruleExpressionService
-        .isDataTypeCompatible(ruleExpressionString, rule.getType(), dataTypeMap)) {
-      rule.setVerified(false);
-      rule.setEnabled(false);
+      ruleAttribute.add(passDataToMap(rule.getReferenceId().toString(), rule.getRuleId().toString(),
+          TypeValidation.TABLE, SchemasDrools.ID_TABLE_SCHEMA.toString(), rule.getWhenCondition(),
+          rule.getThenCondition().get(0), rule.getThenCondition().get(1), ""));
+
+      // We create the same text like in kiebase and with that part we check if the rule is correct
+      KieHelper kieHelperTest = kiebaseAssemble(compiler, kieServices, ruleAttribute);
+
+      // Check rule integrity
+      Results results = kieHelperTest.verify();
+
+      if (results.hasMessages(Message.Level.ERROR)) {
+        notificationEventType = EventType.INVALIDATED_QC_RULE_EVENT;
+        rule.setVerified(false);
+        rule.setEnabled(false);
+        LOG.info("Rule validation with Kiebase not passed: {}", rule);
+      } else {
+        notificationEventType = EventType.VALIDATED_QC_RULE_EVENT;
+        rule.setVerified(true);
+        LOG.info("Rule validation with Kiebase passed: {}", rule);
+      }
+
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.INVALIDATED_QC_RULE_EVENT, null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .datasetSchemaId(datasetSchemaId).error("The QC Rule is disabled")
-              .shortCode(rule.getShortCode()).build());
-      return;
-    }
-
-    KieServices kieServices = KieServices.Factory.get();
-    ObjectDataCompiler compiler = new ObjectDataCompiler();
-    List<Map<String, String>> ruleAttribute = new ArrayList<>();
-
-    ruleAttribute.add(passDataToMap(rule.getReferenceId().toString(), rule.getRuleId().toString(),
-        typeValidation, schemasDrools, rule.getWhenCondition(), rule.getThenCondition().get(0),
-        rule.getThenCondition().get(1), ""));
-
-    // We create the same text like in kiebase and with that part we check if the rule is correct
-    KieHelper kieHelperTest = kiebaseAssemble(compiler, kieServices, ruleAttribute);
-
-    // Check rule integrity
-    Results results = kieHelperTest.verify();
-
-    if (results.hasMessages(Message.Level.ERROR)) {
-      rule.setVerified(false);
-      rule.setEnabled(false);
-      rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.INVALIDATED_QC_RULE_EVENT, null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .datasetSchemaId(datasetSchemaId).error("The QC Rule is disabled")
-              .shortCode(rule.getShortCode()).build());
+      releaseNotification(notificationEventType, notificationVO);
     } else {
-      rule.setVerified(true);
-      rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATED_QC_RULE_EVENT, null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build());
+      LOG.info("Not a validable rule: {}", rule);
     }
   }
 
@@ -331,4 +346,17 @@ public class KieBaseManager {
     return ruleAdd;
   }
 
+  /**
+   * Release notification.
+   *
+   * @param eventType the event type
+   * @param notificationVO the notification VO
+   */
+  private void releaseNotification(EventType eventType, NotificationVO notificationVO) {
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Unable to release notification: {}, {}", eventType, notificationVO);
+    }
+  }
 }

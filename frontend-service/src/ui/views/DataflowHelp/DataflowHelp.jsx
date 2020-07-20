@@ -1,14 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
+import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 import sortBy from 'lodash/sortBy';
 
-import { DataflowHelpHelpConfig } from 'conf/help/dataflowHelp';
 import { config } from 'conf';
+import { DataflowHelpHelpConfig } from 'conf/help/dataflowHelp';
 import { routes } from 'ui/routes';
 
 import { DatasetSchemas } from './_components/DatasetSchemas';
@@ -23,7 +23,6 @@ import { WebLinks } from './_components/WebLinks';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { DocumentService } from 'core/services/Document';
-import { UserService } from 'core/services/User';
 import { WebLinkService } from 'core/services/WebLink';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
@@ -45,7 +44,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
   const [dataflowName, setDataflowName] = useState();
   const [datasetsSchemas, setDatasetsSchemas] = useState([]);
@@ -54,6 +53,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isToolbarVisible, setIsToolbarVisible] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [sortFieldDocuments, setSortFieldDocuments] = useState();
   const [sortFieldWeblinks, setSortFieldWeblinks] = useState();
@@ -62,12 +62,21 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const [webLinks, setWebLinks] = useState([]);
 
   useEffect(() => {
-    if (!isUndefined(user.contextRoles)) {
+    if (!isUndefined(userContext.contextRoles)) {
+      const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
       setIsCustodian(
-        UserService.hasPermission(user, [config.permissions.CUSTODIAN], `${config.permissions.DATAFLOW}${dataflowId}`)
+        userRoles.includes(config.permissions['DATA_CUSTODIAN']) ||
+          userRoles.includes(config.permissions['DATA_STEWARD']) ||
+          userRoles.includes(config.permissions['EDITOR_WRITE']) ||
+          userRoles.includes(config.permissions['EDITOR_READ'])
+      );
+
+      setIsToolbarVisible(
+        userRoles.includes(config.permissions['DATA_CUSTODIAN']) ||
+          userRoles.includes(config.permissions['DATA_STEWARD'])
       );
     }
-  }, [user]);
+  }, [userContext]);
 
   //Bread Crumbs settings
   useEffect(() => {
@@ -163,6 +172,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const onLoadDatasetSchema = async datasetId => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
+
       if (!isEmpty(datasetSchema)) {
         if (isCustodian) {
           const datasetMetaData = await DatasetService.getMetaData(datasetId);
@@ -177,7 +187,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       //   history.push(getUrl(routes.DATAFLOWS));
       // }
       notificationContext.add({
-        type: 'LOAD_SCHEMA_FAILED_EVENT',
+        type: 'IMPORT_DESIGN_FAILED_EVENT',
         content: {
           datasetId
         }
@@ -189,6 +199,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const onLoadDatasetsSchemas = async () => {
     try {
       const dataflow = await DataflowService.reporting(dataflowId);
+
       if (!isCustodian) {
         if (!isEmpty(dataflow.datasets)) {
           const uniqueDatasetSchemas = dataflow.datasets.filter((dataset, pos, arr) => {
@@ -271,7 +282,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
 
   if (documents) {
     return layout(
-      <>
+      <Fragment>
         <Title title={`${resources.messages['dataflowHelp']} `} subtitle={dataflowName} icon="info" iconSize="3.5rem" />
         <TabView activeIndex={0} hasQueryString={false} onTabClick={e => setSelectedIndex(e)}>
           <TabPanel
@@ -282,6 +293,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
               documents={documents}
               isCustodian={isCustodian}
               isDeletingDocument={isDeletingDocument}
+              isToolbarVisible={isToolbarVisible}
               onLoadDocuments={onLoadDocuments}
               setIsDeletingDocument={setIsDeletingDocument}
               setSortFieldDocuments={setSortFieldDocuments}
@@ -294,6 +306,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
             <WebLinks
               dataflowId={dataflowId}
               isCustodian={isCustodian}
+              isToolbarVisible={isToolbarVisible}
               onLoadWebLinks={onLoadWebLinks}
               setSortFieldWeblinks={setSortFieldWeblinks}
               setSortOrderWeblinks={setSortOrderWeblinks}
@@ -304,15 +317,16 @@ export const DataflowHelp = withRouter(({ match, history }) => {
           </TabPanel>
           <TabPanel headerClassName="dataflowHelp-schemas-help-step" header={resources.messages['datasetSchemas']}>
             <DatasetSchemas
+              dataflowId={dataflowId}
               datasetsSchemas={datasetsSchemas}
               isCustodian={isCustodian}
               onLoadDatasetsSchemas={onLoadDatasetsSchemas}
             />
           </TabPanel>
         </TabView>
-      </>
+      </Fragment>
     );
   } else {
-    return <></>;
+    return <Fragment />;
   }
 });

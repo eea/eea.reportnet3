@@ -24,10 +24,10 @@ import {
   faCog,
   faCogs,
   faCoins,
+  faCube,
   faDatabase,
   faDice,
   faDiceFour,
-  faDiceSix,
   faDraftingCompass,
   faDrawPolygon,
   faExternalLinkAlt,
@@ -39,6 +39,7 @@ import {
   faFileCsv,
   faFileDownload,
   faFileExcel,
+  faFileExport,
   faFileImage,
   faFilePdf,
   faFilePowerpoint,
@@ -69,7 +70,6 @@ import {
   faShareAlt,
   faSitemap,
   faSortAlphaDown,
-  faSortAlphaUp,
   faSortAlphaUpAlt,
   faSquareRootAlt,
   faTasks,
@@ -85,108 +85,30 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
-  faSquare as farSquareRegular,
-  faCheckSquare as faCheckSquareRegular,
+  faBell,
   faCalendarAlt,
+  faCheckSquare as faCheckSquareRegular,
+  faCircle,
   faClone,
   faComments,
-  faQuestionCircle as farQuestionCircle,
-  faCircle,
+  faEyeSlash,
   faMinusSquare,
   faPlusSquare,
-  faEyeSlash,
-  faBell,
-  faSave
+  faQuestionCircle as farQuestionCircle,
+  faSave,
+  faSquare as farSquareRegular
 } from '@fortawesome/free-regular-svg-icons';
 
 export const AwesomeIcons = icon => {
   switch (icon) {
-    case 'pdf':
-      return faFilePdf;
-    case 'xls':
-      return faFileExcel;
-    case 'xlsx':
-      return faFileExcel;
-    case 'ods':
-      return faFileExcel;
-    case 'csv':
-      return faFileCsv;
-    case 'doc':
-      return faFileWord;
-    case 'docx':
-      return faFileWord;
-    case 'aif':
-      return faFileAudio;
-    case 'mp3':
-      return faFileAudio;
-    case 'ogg':
-      return faFileAudio;
-    case 'wav':
-      return faFileAudio;
-    case 'wma':
-      return faFileAudio;
-    case 'mpa':
-      return faFileAudio;
     case '7z':
       return faFileArchive;
-    case 'zip':
-      return faFileArchive;
-    case 'tar.gz':
-      return faFileArchive;
-    case 'rar':
-      return faFileArchive;
-    case 'pkg':
-      return faFileArchive;
-    case 'json':
-      return faFileCode;
-    case 'xml':
-      return faFileCode;
-    case 'mdb':
-      return faDatabase;
-    case 'sql':
-      return faDatabase;
     case 'ai':
       return faFileImage;
-    case 'bmp':
-      return faFileImage;
-    case 'gif':
-      return faFileImage;
-    case 'ico':
-      return faFileImage;
-    case 'png':
-      return faFileImage;
-    case 'psd':
-      return faFileImage;
-    case 'jpg':
-      return faFileImage;
-    case 'jpeg':
-      return faFileImage;
-    case 'tif':
-      return faFileImage;
-    case 'tiff':
-      return faFileImage;
-    case 'pps':
-      return faFilePowerpoint;
-    case 'ppt':
-      return faFilePowerpoint;
-    case 'pptx':
-      return faFilePowerpoint;
-    case 'odp':
-      return faFilePowerpoint;
-    case 'key':
-      return faFilePowerpoint;
-    case 'mov':
-      return faFileVideo;
-    case 'mp4':
-      return faFileVideo;
-    case 'avi':
-      return faFileVideo;
-    case 'mpg':
-      return faFileVideo;
-    case 'mpeg':
-      return faFileVideo;
-    case 'wmv':
-      return faFileVideo;
+    case 'aif':
+      return faFileAudio;
+    case 'align-right':
+      return faAlignRight;
     case 'alphabeticOrderDown':
       return faSortAlphaDown;
     case 'alphabeticOrderUp':
@@ -195,164 +117,248 @@ export const AwesomeIcons = icon => {
       return faAngleDoubleUp;
     case 'angleSingleUp':
       return faAngleUp;
+    case 'angleDoubleLeft':
+      return faAngleDoubleLeft;
+    case 'angleDoubleRight':
+      return faAngleDoubleRight;
     case 'angleDown':
       return faAngleDown;
     case 'angleRight':
       return faAngleRight;
+    case 'angleUp':
+      return faAngleDoubleUp;
+    case 'archive':
+      return faArchive;
     case 'arrowDown':
       return faArrowDown;
     case 'arrowUp':
       return faArrowUp;
-    case 'boolean':
-      return faToggleOff;
-    case 'check':
-      return faCheck;
-    case 'delete':
-      return faTrashAlt;
-    case 'disk':
-      return faSave;
-    case 'dropDown':
-      return faCaretDown;
-    case 'eye':
-      return faEye;
-    case 'eyeSlash':
-      return faEyeSlash;
+    case 'avi':
+      return faFileVideo;
     case 'barChart':
       return faChartBar;
-    case 'dataset':
-      return faDatabase;
-    case 'plus':
-      return faPlus;
-    case 'minusSquare':
-      return faMinusSquare;
-    case 'plusSquare':
-      return faPlusSquare;
-    case 'square':
-      return farSquareRegular;
-    case 'checkedSquare':
-      return faCheckSquareRegular;
-    case 'archive':
-      return faArchive;
+    case 'bmp':
+      return faFileImage;
+    case 'boolean':
+      return faToggleOff;
     case 'broom':
       return faBroom;
-    case 'pencilRuler':
-      return faPencilRuler;
-    case 'user-profile':
-      return faUserCircle;
+    case 'calendar':
+      return faCalendarAlt;
+    case 'check':
+      return faCheck;
+    case 'checkedSquare':
+      return faCheckSquareRegular;
+    case 'circle':
+      return faCircle;
     case 'clip':
       return faPaperclip;
     case 'clipboard':
       return faClipboard;
-    case 'email':
-      return faAt;
-    case 'calendar':
-      return faCalendarAlt;
-    case 'circle':
-      return faCircle;
+    case 'clone':
+      return faClone;
+    case 'cofings':
+      return faCogs;
+    case 'collapsed':
+      return faCaretRight;
+    case 'comments':
+      return faComments;
     case 'compass':
       return faDraftingCompass;
+    case 'cross':
+      return faTimes;
+    case 'csv':
+      return faFileCsv;
+    case 'dataCollection':
+      return faLayerGroup;
+    case 'dataset':
+      return faDatabase;
+    case 'delete':
+      return faTrashAlt;
+    case 'disk':
+      return faSave;
+    case 'doc':
+      return faFileWord;
+    case 'docx':
+      return faFileWord;
+    case 'dropDown':
+      return faCaretDown;
+    case 'edit':
+      return faPen;
+    case 'email':
+      return faAt;
+    case 'euDataset':
+      return faCube;
+    case 'expanded':
+      return faCaretDown;
+    case 'externalLink':
+      return faExternalLinkAlt;
+    case 'eye':
+      return faEye;
+    case 'eyeSlash':
+      return faEyeSlash;
+    case 'fileDownload':
+      return faFileDownload;
+    case 'fileExport':
+      return faFileExport;
+    case 'folder':
+      return faFolder;
     case 'formula':
       return faSquareRootAlt;
+    case 'gif':
+      return faFileImage;
+    case 'home':
+      return faHome;
+    case 'ico':
+      return faFileImage;
+    case 'info':
+      return faInfo;
+    case 'infoCircle':
+      return faInfoCircle;
     case 'italic':
       return faItalic;
+    case 'jpeg':
+      return faFileImage;
+    case 'jpg':
+      return faFileImage;
+    case 'json':
+      return faFileCode;
+    case 'key':
+      return faFilePowerpoint;
     case 'link':
       return faLink;
     case 'linkData':
       return faVectorSquare;
     case 'list':
       return faList;
+    case 'list':
+      return faThList;
     case 'listClipboard':
       return faClipboardList;
+    case 'localhostAlert':
+      return faIgloo;
+    case 'logout':
+      return faPowerOff;
+    case 'manageReporters':
+      return faUsersCog;
     case 'map':
       return faMapMarkedAlt;
+    case 'mdb':
+      return faDatabase;
+    case 'minusSquare':
+      return faMinusSquare;
+    case 'mobile':
+      return faPhone;
+    case 'mov':
+      return faFileVideo;
     case 'move':
       return faBars;
+    case 'mp3':
+      return faFileAudio;
+    case 'mp4':
+      return faFileVideo;
+    case 'mpa':
+      return faFileAudio;
+    case 'mpeg':
+      return faFileVideo;
+    case 'mpg':
+      return faFileVideo;
+    case 'multiselect':
+      return faTasks;
     case 'notifications':
       return faBell;
     case 'number-decimal':
       return faDice;
+    case 'number-integer':
+      return faDiceFour;
+    case 'odp':
+      return faFilePowerpoint;
+    case 'ods':
+      return faFileExcel;
+    case 'ogg':
+      return faFileAudio;
+    case 'palette':
+      return faPalette;
+    case 'pdf':
+      return faFilePdf;
+    case 'pencilRuler':
+      return faPencilRuler;
     case 'percentage':
       return faPercentage;
+    case 'pkg':
+      return faFileArchive;
+    case 'plus':
+      return faPlus;
+    case 'plusSquare':
+      return faPlusSquare;
+    case 'png':
+      return faFileImage;
     case 'point':
       return faMapPin;
     case 'polygon':
       return faDrawPolygon;
-    case 'text':
-      return faAlignJustify;
-    case 'url':
-      return faGlobeEurope;
-    case 'clone':
-      return faClone;
-    case 'share':
-      return faShareAlt;
-    case 'comments':
-      return faComments;
-    case 'info':
-      return faInfo;
-    case 'infoCircle':
-      return faInfoCircle;
-    case 'list':
-      return faThList;
+    case 'power-off':
+      return faPowerOff;
+    case 'pps':
+      return faFilePowerpoint;
+    case 'ppt':
+      return faFilePowerpoint;
+    case 'pptx':
+      return faFilePowerpoint;
+    case 'psd':
+      return faFileImage;
     case 'question':
       return faQuestion;
     case 'questionCircle':
       return farQuestionCircle;
-    case 'home':
-      return faHome;
+    case 'rar':
+      return faFileArchive;
     case 'released':
       return faCloudUploadAlt;
-    case 'dataCollection':
-      return faLayerGroup;
     case 'representative':
       return faCoins;
+    case 'settings':
+      return faCog;
+    case 'share':
+      return faShareAlt;
     case 'siteMap':
       return faSitemap;
     case 'spinner':
       return faCircleNotch;
-    case 'angleDoubleLeft':
-      return faAngleDoubleLeft;
-    case 'angleDoubleRight':
-      return faAngleDoubleRight;
-    case 'logout':
-      return faPowerOff;
-    case 'settings':
-      return faCog;
-    case 'edit':
-      return faPen;
-    case 'manageReporters':
-      return faUsersCog;
+    case 'sql':
+      return faDatabase;
+    case 'square':
+      return farSquareRegular;
+    case 'tar.gz':
+      return faFileArchive;
+    case 'text':
+      return faAlignJustify;
+    case 'tif':
+      return faFileImage;
+    case 'tiff':
+      return faFileImage;
+    case 'url':
+      return faGlobeEurope;
+    case 'user-profile':
+      return faUserCircle;
     case 'userConfig':
       return faUserCog;
-    case 'localhostAlert':
-      return faIgloo;
-    case 'fileDownload':
-      return faFileDownload;
-    case 'cross':
-      return faTimes;
-    case 'palette':
-      return faPalette;
-    case 'cofings':
-      return faCogs;
-    case 'folder':
-      return faFolder;
-    case 'expanded':
-      return faCaretDown;
-    case 'collapsed':
-      return faCaretRight;
     case 'userShield':
       return faUserShield;
-    case 'externalLink':
-      return faExternalLinkAlt;
-    case 'power-off':
-      return faPowerOff;
-    case 'align-right':
-      return faAlignRight;
-    case 'number-integer':
-      return faDiceFour;
-    case 'mobile':
-      return faPhone;
-    case 'multiselect':
-      return faTasks;
+    case 'wav':
+      return faFileAudio;
+    case 'wma':
+      return faFileAudio;
+    case 'wmv':
+      return faFileVideo;
+    case 'xls':
+      return faFileExcel;
+    case 'xlsx':
+      return faFileExcel;
+    case 'xml':
+      return faFileCode;
+    case 'zip':
+      return faFileArchive;
     default:
       return faFileAlt;
   }

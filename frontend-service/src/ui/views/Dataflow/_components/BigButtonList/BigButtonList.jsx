@@ -20,6 +20,7 @@ import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
 import { DataCollectionService } from 'core/services/DataCollection';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
+import { EuDatasetService } from 'core/services/EuDataset';
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -40,6 +41,8 @@ export const BigButtonList = ({
   onShowManageReportersDialog,
   onShowSnapshotDialog,
   onUpdateData,
+  setIsCopyDataCollectionToEuDatasetLoading,
+  setIsExportEuDatasetLoading,
   setIsReceiptLoading,
   setUpdatedDatasetSchema,
   updatedDatasetSchema
@@ -47,7 +50,7 @@ export const BigButtonList = ({
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
   const [cloneDataflow, setCloneDataflow] = useState({});
   const [cloneDialogVisible, setCloneDialogVisible] = useState(false);
@@ -71,6 +74,8 @@ export const BigButtonList = ({
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
   useCheckNotifications(['UPDATE_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
+  useCheckNotifications(['', ''], setIsCopyDataCollectionToEuDatasetLoading, false);
+  useCheckNotifications(['', ''], setIsExportEuDatasetLoading, false);
 
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
@@ -273,10 +278,48 @@ export const BigButtonList = ({
     setIsDuplicated(false);
   };
 
+  const onCopyDataCollectionToEuDataset = async () => {
+    setIsCopyDataCollectionToEuDatasetLoading(true);
+
+    try {
+      const response = await EuDatasetService.copyDataCollection(dataflowId);
+      if (response.status >= 200 && response.status <= 299) {
+        notificationContext.add({ type: 'COPY_TO_EU_DATASET_INIT' });
+      }
+    } catch (error) {
+      setIsCopyDataCollectionToEuDatasetLoading(false);
+
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });
+      } else {
+        notificationContext.add({ type: 'COPY_DATA_COLLECTION_EU_DATASET_ERROR' });
+      }
+    }
+  };
+
+  const onExportEuDataset = async () => {
+    setIsExportEuDatasetLoading(true);
+
+    try {
+      const response = await EuDatasetService.exportEuDataset(dataflowId);
+      if (response.status >= 200 && response.status <= 299) {
+        notificationContext.add({ type: 'EXPORT_EU_DATASET_INIT' });
+      }
+    } catch (error) {
+      setIsExportEuDatasetLoading(false);
+
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });
+      } else {
+        notificationContext.add({ type: 'EXPORT_EU_DATASET_ERROR' });
+      }
+    }
+  };
+
   const onLoadReceiptData = async () => {
     try {
       setIsReceiptLoading(true);
-      const response = await ConfirmationReceiptService.get(dataflowId, dataflowState.dataProviderId);
+      const response = await ConfirmationReceiptService.download(dataflowId, dataflowState.dataProviderId);
 
       downloadPdf(response);
       onCleanUpReceipt();
@@ -326,13 +369,14 @@ export const BigButtonList = ({
     useBigButtonList({
       dataflowId,
       dataflowState,
-      // exportDatatableSchema,
       getDeleteSchemaIndex,
       handleRedirect,
       isActiveButton,
       onCloneDataflow,
+      onCopyDataCollectionToEuDataset,
       onDatasetSchemaNameError,
       onDuplicateName,
+      onExportEuDataset,
       onLoadReceiptData,
       onSaveName,
       onShowDataCollectionModal,
@@ -434,7 +478,9 @@ export const BigButtonList = ({
           <p
             dangerouslySetInnerHTML={{
               __html: TextUtils.parseText(resources.messages['dataCollectionExpirationDate'], {
-                expirationData: moment(dataflowState.obligations.expirationDate).format(user.userProps.dateFormat)
+                expirationData: moment(dataflowState.obligations.expirationDate).format(
+                  userContext.userProps.dateFormat
+                )
               })
             }}></p>
         ) : (

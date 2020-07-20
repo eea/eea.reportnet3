@@ -173,6 +173,9 @@ public final class EEAErrorMessage {
   /** The Constant PERMISSION_NOT_CREATED: {@value}. */
   public static final String PERMISSION_NOT_CREATED = "Permission not created";
 
+  /** The Constant PERMISSION_NOT_REMOVED: {@value}. */
+  public static final String PERMISSION_NOT_REMOVED = "Permission %s not removed";
+
   /** The Constant ERROR_CREATING_RULE: {@value}. */
   public static final String ERROR_CREATING_RULE = "Error creating rule";
 

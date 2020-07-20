@@ -4,6 +4,8 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
+import orderBy from 'lodash/orderBy';
+import uniq from 'lodash/uniq';
 
 import uuid from 'uuid';
 import styles from './RepresentativesList.module.scss';
@@ -17,7 +19,8 @@ import {
   onAddProvider,
   onDataProviderIdChange,
   onDeleteConfirm,
-  onKeyDown
+  onKeyDown,
+  isValidEmail
 } from './_functions/Utils/representativeUtils';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
@@ -50,9 +53,9 @@ const RepresentativesList = ({
     representativeIdToDelete: '',
     representatives: [],
     selectedDataProviderGroup: null,
-    unusedDataProvidersOptions: []
+    unusedDataProvidersOptions: [],
+    isLoading: false
   };
-
   const [formState, formDispatcher] = useReducer(reducer, initialState);
 
   useEffect(() => {
@@ -108,18 +111,29 @@ const RepresentativesList = ({
 
     let hasError = formState.representativeHasError.includes(representative.representativeId);
 
-    const onAccountChange = (value, dataProviderId) => {
+    const onAccountChange = (account, dataProviderId) => {
       const { representatives } = formState;
 
       const [thisRepresentative] = representatives.filter(
         thisRepresentative => thisRepresentative.dataProviderId === dataProviderId
       );
-      thisRepresentative.providerAccount = value;
+      thisRepresentative.providerAccount = account;
+
+      let representativeHasError;
+      if (isValidEmail(account)) {
+        representativeHasError = formState.representativeHasError.filter(
+          representativeId => representativeId !== thisRepresentative.representativeId
+        );
+      } else {
+        representativeHasError = formState.representativeHasError;
+        representativeHasError.unshift(thisRepresentative.representativeId);
+      }
 
       formDispatcher({
         type: 'ON_ACCOUNT_CHANGE',
         payload: {
-          representatives
+          representatives,
+          representativeHasError: uniq(representativeHasError)
         }
       });
     };
@@ -134,13 +148,17 @@ const RepresentativesList = ({
             id={isEmpty(inputData) ? 'emptyInput' : undefined}
             onBlur={() => {
               representative.providerAccount = representative.providerAccount.toLowerCase();
-              onAddProvider(formDispatcher, formState, representative, dataflowId);
+              isValidEmail(representative.providerAccount) &&
+                onAddProvider(formDispatcher, formState, representative, dataflowId);
             }}
             onChange={event => onAccountChange(event.target.value, representative.dataProviderId)}
             onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
             placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
             value={inputData}
           />
+          <label for="emptyInput" className="srOnly">
+            {resources.messages['manageRolesDialogInputPlaceholder']}
+          </label>
         </div>
       </>
     );
@@ -151,15 +169,20 @@ const RepresentativesList = ({
       option => option.dataProviderId === representative.dataProviderId
     );
 
-    const remainingOptionsAndSelectedOption = selectedOptionForThisSelect.concat(formState.unusedDataProvidersOptions);
+    const remainingOptionsAndSelectedOption = orderBy(
+      selectedOptionForThisSelect.concat(formState.unusedDataProvidersOptions),
+      ['label'],
+      ['asc']
+    );
 
     return (
       <>
         <select
-          disabled={representative.hasDatasets}
           className={
             representative.hasDatasets ? `${styles.disabled} ${styles.selectDataProvider}` : styles.selectDataProvider
           }
+          disabled={representative.hasDatasets}
+          id="dataProvider"
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={event => {
             onDataProviderIdChange(formDispatcher, event.target.value, representative, formState);
@@ -174,6 +197,9 @@ const RepresentativesList = ({
             );
           })}
         </select>
+        <label for="dataProvider" className="srOnly">
+          {resources.messages['manageRolesDialogInputPlaceholder']}
+        </label>
       </>
     );
   };
@@ -201,7 +227,7 @@ const RepresentativesList = ({
         <div className={styles.title}>{resources.messages['manageRolesDialogHeader']}</div>
 
         <div>
-          <label htmlFor="dataProvidersDropdown">{resources.messages['manageRolesDialogDropdownLabel']} </label>
+          <label>{resources.messages['manageRolesDialogDropdownLabel']} </label>
           <Dropdown
             ariaLabel={'dataProviders'}
             disabled={formState.representatives.length > 1}
@@ -217,19 +243,22 @@ const RepresentativesList = ({
       </div>
 
       {!isNil(formState.selectedDataProviderGroup) && !isEmpty(formState.allPossibleDataProviders) ? (
-        <DataTable
-          value={
-            formState.representatives.length > formState.allPossibleDataProvidersNoSelect.length
-              ? formState.representatives.filter(representative => !isNil(representative.representativeId))
-              : formState.representatives
-          }>
-          <Column
-            body={providerAccountInputColumnTemplate}
-            header={resources.messages['manageRolesDialogAccountColumn']}
-          />
-          <Column body={dropdownColumnTemplate} header={resources.messages['manageRolesDialogDataProviderColumn']} />
-          <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
-        </DataTable>
+        <div className={styles.table}>
+          {formState.isLoading && <Spinner className={styles.spinner} style={{ top: 0, left: 0, zIndex: 6000 }} />}
+          <DataTable
+            value={
+              formState.representatives.length > formState.allPossibleDataProvidersNoSelect.length
+                ? formState.representatives.filter(representative => !isNil(representative.representativeId))
+                : formState.representatives
+            }>
+            <Column
+              body={providerAccountInputColumnTemplate}
+              header={resources.messages['manageRolesDialogAccountColumn']}
+            />
+            <Column body={dropdownColumnTemplate} header={resources.messages['manageRolesDialogDataProviderColumn']} />
+            <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
+          </DataTable>
+        </div>
       ) : (
         <p className={styles.chooseRepresentative}>{resources.messages['manageRolesDialogNoRepresentativesMessage']}</p>
       )}

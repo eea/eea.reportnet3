@@ -20,6 +20,7 @@ import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -31,9 +32,48 @@ import org.springframework.util.StringUtils;
 public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorService {
 
   /**
+   * The r 3 base.
+   */
+  @Value("${integration.fme.callback.urlbase}")
+  private String r3base;
+
+  /** The default repository. */
+  @Value("${integration.fme.default.repository}")
+  private String defaultRepository;
+
+  /** The EU job. */
+  @Value("${integration.fme.eu.job}")
+  private String euDatasetJob;
+
+  /**
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant REPOSITORY: {@value}. */
+  private static final String REPOSITORY = "repository";
+
+  /** The Constant WORKSPACE: {@value}. */
+  private static final String WORKSPACE = "workspace";
+
+  /** The Constant DATASET_ID: {@value}. */
+  private static final String DATASET_ID = "datasetId";
+
+  /** The Constant DATAFLOW_ID: {@value}. */
+  private static final String DATAFLOW_ID = "dataflowId";
+
+  /** The Constant PROVIDER_ID: {@value}. */
+  private static final String PROVIDER_ID = "providerId";
+
+  /** The Constant APIKEY_PROPERTY: {@value}. */
+  private static final String APIKEY_PROPERTY = "apiKey";
+
+  /** The Constant APIKEY_TOKEN: {@value}. */
+  private static final String APIKEY_TOKEN = "ApiKey ";
+
+  /** The Constant BASE_URL: {@value}. */
+  private static final String BASE_URL = "baseUrl";
+
   /**
    * The fme feign service.
    */
@@ -57,7 +97,6 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
    */
   @Autowired
   private UserManagementController userManagementController;
-
 
   /**
    * The Constant LOG.
@@ -109,12 +148,12 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         }
       }
     } catch (IllegalArgumentException | SecurityException e) {
-      LOG_ERROR.error("Error getting params in FME Integration Executor: ", e.getMessage());
+      LOG_ERROR.error("Error getting params in FME Integration Executor: {} ", e.getMessage());
     }
 
     DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-    Long dataflowId = 0L;
-    if (null != integration.getInternalParameters().get("repository")) {
+    Long dataflowId;
+    if (null != integration.getInternalParameters().get(REPOSITORY)) {
       dataflowId = dataset.getDataflowId();
     } else {
       dataflowId = dataSetControllerZuul.getDataFlowIdById(datasetId);
@@ -122,58 +161,88 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
     Long dataproviderId = dataset.getDataProviderId();
 
-    String apiKey = userManagementController.getApiKey(dataflowId, dataproviderId);
-
-    if (null == apiKey) {
-      LOG.info("ApiKey not exits");
-      apiKey = userManagementController.createApiKey(dataflowId, dataproviderId);
-      LOG.info("ApiKey created");
-    }
+    String apiKey = getApiKey(dataflowId, dataproviderId);
 
     FMEAsyncJob fmeAsyncJob = new FMEAsyncJob();
     String workspace = integration.getInternalParameters().get("processName");
     String repository = null;
-    if (null != integration.getInternalParameters().get("repository")) {
-      repository = integration.getInternalParameters().get("repository");
+    if (null != integration.getInternalParameters().get(REPOSITORY)) {
+      repository = integration.getInternalParameters().get(REPOSITORY);
     } else {
-      repository = "ReportNetTesting";
+      repository = defaultRepository;
     }
 
+
+    Map<String, Long> integrationOperationParams = new HashMap<>();
+    integrationOperationParams.put(DATASET_ID, datasetId);
+    integrationOperationParams.put(DATAFLOW_ID, dataflowId);
+    integrationOperationParams.put(PROVIDER_ID, dataproviderId);
+
+
+    Map<String, String> fmeParams = new HashMap<>();
+    fmeParams.put(WORKSPACE, workspace);
+    fmeParams.put(REPOSITORY, repository);
+
+
+    return switchIntegrationOperatorEnum(integrationOperationTypeEnum, fileName, integration,
+        apiKey, fmeAsyncJob, integrationOperationParams, fmeParams);
+  }
+
+  /**
+   * Switch integration operator enum.
+   *
+   * @param integrationOperationTypeEnum the integration operation type enum
+   * @param fileName the file name
+   * @param integration the integration
+   * @param apiKey the api key
+   * @param fmeAsyncJob the fme async job
+   * @param integrationOperationParams the integration operation params
+   * @param fmeParams the fme params
+   * @return the execution result VO
+   */
+  private ExecutionResultVO switchIntegrationOperatorEnum(
+      IntegrationOperationTypeEnum integrationOperationTypeEnum, String fileName,
+      IntegrationVO integration, String apiKey, FMEAsyncJob fmeAsyncJob,
+      Map<String, Long> integrationOperationParams, Map<String, String> fmeParams) {
+
     List<PublishedParameter> parameters = new ArrayList<>();
-    String paramDataProvider =
-        StringUtils.isEmpty(dataproviderId) ? "design" : String.valueOf(dataproviderId);
+
+    String paramDataProvider = null;
+
+    if (null != integrationOperationParams.get(PROVIDER_ID)) {
+      paramDataProvider =
+          StringUtils.isEmpty(integrationOperationParams.get(PROVIDER_ID).toString()) ? "design"
+              : String.valueOf(integrationOperationParams.get(PROVIDER_ID));
+    }
+    // dataflowId
+    parameters.add(saveParameter(DATAFLOW_ID, integrationOperationParams.get(DATAFLOW_ID)));
+    // datasetDataId
+    parameters.add(saveParameter(DATASET_ID, integrationOperationParams.get(DATASET_ID)));
+    // apikey
+    parameters.add(saveParameter(APIKEY_PROPERTY, APIKEY_TOKEN + apiKey));
+    // base URL
+    parameters.add(saveParameter(BASE_URL, r3base));
+
     switch (integrationOperationTypeEnum) {
       case EXPORT:
-        LOG.info("");
-        // dataflowId
-        parameters.add(saveParameter("dataflowId", dataflowId));
         // providerId
-        parameters.add(saveParameter("providerId", paramDataProvider));
-        // datasetDataId
-        parameters.add(saveParameter("datasetDataId", datasetId));
+        parameters.add(saveParameter(PROVIDER_ID, paramDataProvider));
         // folder
-        parameters.add(saveParameter("folder", datasetId + "/" + paramDataProvider));
-        // apikey
-        parameters.add(saveParameter("apiKey", "ApiKey " + apiKey));
+        parameters.add(saveParameter("folder",
+            integrationOperationParams.get(DATASET_ID) + "/" + paramDataProvider));
 
         fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Export");
-        return executeSubmit(repository, workspace, fmeAsyncJob);
+        return executeSubmit(fmeParams.get(REPOSITORY), fmeParams.get(WORKSPACE), fmeAsyncJob);
 
       case IMPORT:
-
-        // dataflowId
-        parameters.add(saveParameter("dataflowId", dataflowId));
         // providerId
-        parameters.add(saveParameter("providerId", paramDataProvider));
-        // datasetDataId
-        parameters.add(saveParameter("datasetDataId", datasetId));
+        parameters.add(saveParameter(PROVIDER_ID, paramDataProvider));
         // inputfile
         parameters.add(saveParameter("inputfile", fileName));
         // folder
-        parameters.add(saveParameter("folder", datasetId + "/" + paramDataProvider));
-        // apikey
-        parameters.add(saveParameter("apiKey", "ApiKey " + apiKey));
+        parameters.add(saveParameter("folder",
+            integrationOperationParams.get(DATASET_ID) + "/" + paramDataProvider));
 
         fmeAsyncJob.setPublishedParameters(parameters);
 
@@ -181,14 +250,51 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
             Base64.getDecoder().decode(integration.getExternalParameters().get("fileIS"));
 
         LOG.info("Upload file to FME");
-        fmeCommunicationService.sendFile(decodedBytes, datasetId, paramDataProvider, fileName);
+        fmeCommunicationService.sendFile(decodedBytes, integrationOperationParams.get(DATASET_ID),
+            paramDataProvider, fileName);
         LOG.info("File uploaded");
         LOG.info("Executing FME Import");
-        return executeSubmit(repository, workspace, fmeAsyncJob);
+        return executeSubmit(fmeParams.get(REPOSITORY), fmeParams.get(WORKSPACE), fmeAsyncJob);
+
+      case EXPORT_EU_DATASET:
+
+        // DataBaseConnectionPublic
+        parameters.add(saveParameter("DataBaseConnectionPublic", ""));
+        // mode
+        parameters.add(saveParameter("mode", ""));
+
+        fmeAsyncJob.setPublishedParameters(parameters);
+        LOG.info("Executing FME Export EU Dataset");
+        return executeSubmit(defaultRepository, euDatasetJob, fmeAsyncJob);
+
       default:
         return null;
 
     }
+  }
+
+  /**
+   * Gets the api key.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataproviderId the dataprovider id
+   * @return the api key
+   */
+  private String getApiKey(Long dataflowId, Long dataproviderId) {
+
+    String apiKey = userManagementController.getApiKey(dataflowId, dataproviderId);
+
+    if (null == apiKey) {
+      LOG.info("ApiKey not exits");
+      apiKey = userManagementController.createApiKey(dataflowId, dataproviderId);
+      if (null != dataproviderId) {
+        LOG.info("ApiKey created for Provider ID: {} and Dataflow ID: {} ", dataproviderId,
+            dataflowId);
+      } else {
+        LOG.info("ApiKey created for Dataflow ID: {} ", dataflowId);
+      }
+    }
+    return apiKey;
   }
 
   /**
@@ -225,7 +331,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     try {
       executionResult = fmeCommunicationService.submitAsyncJob(repository, workspace, fmeAsyncJob);
     } catch (Exception e) {
-      LOG_ERROR.error("Error invoking FME due to reason {}", e, e.getMessage());
+      LOG_ERROR.error("Error invoking FME due to reason {}", e.getMessage());
     }
     executionResultParams.put("id", executionResult);
     executionResultVO.setExecutionResultParams(executionResultParams);

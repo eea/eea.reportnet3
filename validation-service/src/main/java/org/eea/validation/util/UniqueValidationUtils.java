@@ -27,11 +27,15 @@ import org.eea.validation.persistence.schemas.FieldSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.service.RulesService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UniqueValidationUtils {
+
+
 
   /**
    * The rules repository.
@@ -42,6 +46,13 @@ public class UniqueValidationUtils {
    * The schemas repository.
    */
   private static SchemasRepository schemasRepository;
+
+
+  /** The Constant COLUMN. */
+  private static final String COLUMN = "column_";
+
+  /** The Constant AS. */
+  private static final String AS = "') AS ";
 
   /**
    * The record repository.
@@ -135,6 +146,9 @@ public class UniqueValidationUtils {
       DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul) {
     UniqueValidationUtils.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
   }
+
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(UniqueValidationUtils.class);
 
   /**
    * Creates the validation.
@@ -240,7 +254,7 @@ public class UniqueValidationUtils {
       String schemaId = iterator.next();
       stringQuery.append(
           "(select fv.value from field_value fv where fv.id_record=rv.id and fv.id_field_schema = '")
-          .append(schemaId).append("') AS ").append("column_" + (i++));
+          .append(schemaId).append(AS).append(COLUMN + (i++));
       if (iterator.hasNext()) {
         stringQuery.append(",");
       }
@@ -251,12 +265,13 @@ public class UniqueValidationUtils {
     i = 1;
     while (iterator.hasNext()) {
       iterator.next();
-      stringQuery.append("column_" + (i++));
+      stringQuery.append(COLUMN + (i++));
       if (iterator.hasNext()) {
         stringQuery.append(",");
       }
     }
     stringQuery.append(") as N from table_1 where column_1 is not null) as t where n>1);");
+    LOG.debug("Drools, Duplicated records query: " + stringQuery.toString());
     return stringQuery.toString();
 
   }
@@ -282,7 +297,7 @@ public class UniqueValidationUtils {
       stringQuery
           .append("(select fv.value from dataset_" + datasetOriginId
               + ".field_value fv where fv.id_record=rv.id and fv.id_field_schema = '")
-          .append(schemaId).append("') AS ").append("column_" + (i++));
+          .append(schemaId).append(AS).append(COLUMN + (i++));
       if (iterator.hasNext()) {
         stringQuery.append(",");
       }
@@ -296,7 +311,7 @@ public class UniqueValidationUtils {
       stringQuery
           .append("(select fv.value from dataset_" + datasetReferencedId
               + ".field_value fv where fv.id_record=rv.id and fv.id_field_schema = '")
-          .append(schemaId).append("') AS ").append("column_" + (i++));
+          .append(schemaId).append(AS).append(COLUMN + (i++));
       if (iterator.hasNext()) {
         stringQuery.append(",");
       }
@@ -422,8 +437,8 @@ public class UniqueValidationUtils {
       tableValidation.setTableValue(tableValue);
       tableValidations.add(tableValidation);
     }
-    List<String> notUtilizedRecords2 = new ArrayList<>();
 
+    List<String> notUtilizedRecords2 = new ArrayList<>();
     if (Boolean.TRUE.equals(integrityVO.getIsDoubleReferenced())) {
       // Create validation on referenced DS/Table, checking if all data on Referencer Column are in
       // Referenced column
@@ -434,8 +449,10 @@ public class UniqueValidationUtils {
       if (!notUtilizedRecords2.isEmpty()) {
         // Error: there are data on Referencer column that are not in Referenced column.
         TableValidation tableValidationReferenced = new TableValidation();
-        validation.setMessage(auxValidationMessage + " (COMMISSION)");
-        tableValidationReferenced.setValidation(validation);
+        Validation validationReference = createValidation(idRule, schemaId,
+            tableSchema.getNameTableSchema(), EntityTypeEnum.TABLE);
+        validationReference.setMessage(auxValidationMessage + " (COMMISSION)");
+        tableValidationReferenced.setValidation(validationReference);
         tableValidationReferenced.setTableValue(tableValue);
 
         tableValidations.add(tableValidationReferenced);

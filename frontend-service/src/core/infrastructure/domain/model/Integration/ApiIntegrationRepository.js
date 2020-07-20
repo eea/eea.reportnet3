@@ -1,3 +1,4 @@
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import sortBy from 'lodash/sortBy';
 
@@ -5,8 +6,9 @@ import { apiIntegration } from 'core/infrastructure/api/domain/model/Integration
 
 import { Integration } from 'core/domain/model/Integration/Integration';
 
-const all = async datasetSchemaId =>
-  parseIntegrationsList(await apiIntegration.all(parseDatasetSchemaId(datasetSchemaId)));
+const all = async (dataflowId, datasetSchemaId) => {
+  return parseIntegrationsList(await apiIntegration.all(parseDatasetSchemaId(datasetSchemaId, dataflowId)));
+};
 
 const allExtensionsOperations = async datasetSchemaId =>
   parseIntegrationsOperationsExtensionsList(
@@ -15,14 +17,19 @@ const allExtensionsOperations = async datasetSchemaId =>
 
 const create = async integration => apiIntegration.create(parseManageIntegration(integration));
 
-const deleteById = async integrationId => {
-  return await apiIntegration.deleteById(integrationId);
-};
+const deleteById = async (dataflowId, integrationId) => await apiIntegration.deleteById(dataflowId, integrationId);
 
-const parseDatasetSchemaId = datasetSchemaId => {
+const getProcesses = async (repositoryName, datasetId) =>
+  parseProcessList(await apiIntegration.getProcesses(repositoryName, datasetId));
+
+const getRepositories = async datasetId => parseRepositoryList(await apiIntegration.getRepositories(datasetId));
+
+const update = async integration => apiIntegration.update(parseManageIntegration(integration));
+
+const parseDatasetSchemaId = (datasetSchemaId, dataflowId) => {
   const integration = new Integration();
 
-  integration.internalParameters = { datasetSchemaId: datasetSchemaId };
+  integration.internalParameters = { dataflowId, datasetSchemaId };
 
   return integration;
 };
@@ -58,12 +65,11 @@ const parseIntegrationsList = integrationsDTO => {
   return;
 };
 
-const parseIntegrationsOperationsExtensionsList = integrationsDTO => {
-  if (!isNil(integrationsDTO)) {
-    const integrations = [];
-    integrationsDTO.forEach(integrationDTO => integrations.push(parseIntegrationOperationExtension(integrationDTO)));
-
-    return integrations;
+const parseIntegrationsOperationsExtensionsList = integrations => {
+  if (!isNil(integrations)) {
+    const integrationsDTO = [];
+    integrations.forEach(integration => integrationsDTO.push(parseIntegrationOperationExtension(integration)));
+    return integrationsDTO;
   }
   return;
 };
@@ -76,7 +82,8 @@ const parseManageIntegration = integration => ({
     dataflowId: integration.dataflowId,
     datasetSchemaId: integration.datasetSchemaId,
     fileExtension: integration.fileExtension,
-    processName: integration.processName
+    processName: integration.processName.value,
+    repository: integration.repository.value
   },
   name: integration.name,
   operation: integration.operation.value,
@@ -89,6 +96,26 @@ const parseIntegrationOperationExtension = integration => ({
   operation: integration.operation
 });
 
-const update = async integration => apiIntegration.update(parseManageIntegration(integration));
+const parseRepositoryList = repositoryList => parseKeyValue(repositoryList);
 
-export const ApiIntegrationRepository = { all, allExtensionsOperations, create, deleteById, update };
+const parseProcessList = processList => parseKeyValue(processList);
+
+const parseKeyValue = list => {
+  const listDTO = [];
+
+  if (!isNil(list) && !isEmpty(list.items)) {
+    list.items.map(item => listDTO.push({ label: item.name, value: item.name }));
+  }
+
+  return listDTO;
+};
+
+export const ApiIntegrationRepository = {
+  all,
+  allExtensionsOperations,
+  create,
+  deleteById,
+  getProcesses,
+  getRepositories,
+  update
+};

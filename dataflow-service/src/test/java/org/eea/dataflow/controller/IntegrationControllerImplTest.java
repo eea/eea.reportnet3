@@ -149,7 +149,7 @@ public class IntegrationControllerImplTest {
   @Test
   public void testDeleteIntegration() throws EEAException {
 
-    integrationControllerImpl.deleteIntegration(1L);
+    integrationControllerImpl.deleteIntegration(1L, 1L);
     Mockito.verify(integrationService, times(1)).deleteIntegration(Mockito.any());
   }
 
@@ -163,7 +163,7 @@ public class IntegrationControllerImplTest {
   public void testDeleteIntegrationException() throws EEAException {
     try {
       Mockito.doThrow(EEAException.class).when(integrationService).deleteIntegration(Mockito.any());
-      integrationControllerImpl.deleteIntegration(null);
+      integrationControllerImpl.deleteIntegration(null, null);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
@@ -202,6 +202,11 @@ public class IntegrationControllerImplTest {
     }
   }
 
+  /**
+   * Test copy integrations.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testCopyIntegrations() throws EEAException {
     Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
@@ -215,6 +220,11 @@ public class IntegrationControllerImplTest {
         Mockito.any());
   }
 
+  /**
+   * Test copy integrations exception.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testCopyIntegrationsException() throws EEAException {
     try {

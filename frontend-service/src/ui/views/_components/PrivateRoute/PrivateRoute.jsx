@@ -9,13 +9,13 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const PrivateRoute = ({ component: Component, path }) => {
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
   return (
     <Route
       path={path}
       render={props =>
-        userStorage.hasToken() || !isUndefined(user.id) ? (
+        userStorage.hasToken() || !isUndefined(userContext.id) ? (
           <Component />
         ) : (
           <Redirect

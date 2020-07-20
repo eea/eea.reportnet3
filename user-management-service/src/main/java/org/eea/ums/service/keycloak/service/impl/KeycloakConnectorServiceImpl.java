@@ -32,12 +32,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -81,6 +83,12 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   private static final String LIST_GROUPS_URL = "/auth/admin/realms/{realm}/groups";
 
   /**
+   * The Constant LIST_GROUPS_URL.
+   */
+  private static final String LIST_GROUPS_URL_WITH_SEARCH =
+      "/auth/admin/realms/{realm}/groups?search={searchParam}";
+
+  /**
    * The Constant GROUP_DETAIL_URL.
    */
   private static final String GROUP_DETAIL_URL = "/auth/admin/realms/{realm}/groups/{groupId}";
@@ -95,11 +103,10 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    */
   private static final String DELETE_USER_GROUP_URL = "/auth/admin/realms/{realm}/groups/{groupId}";
 
-  /**
-   * The Constant ADD_USER_TO_USER_GROUP_URL.
-   */
-  private static final String ADD_USER_TO_USER_GROUP_URL =
-      "/auth/admin/realms/Reportnet/users/{userId}/groups/{groupId}";
+
+  /** The Constant ALTER_USER_TO_USER_GROUP_URL: {@value}. */
+  private static final String ALTER_USER_TO_USER_GROUP_URL =
+      "/auth/admin/realms/{realm}/users/{userId}/groups/{groupId}";
 
   /**
    * The Constant CHECK_USER_PERMISSION.
@@ -170,6 +177,10 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * The Constant USER_URL.
    */
   private static final String USER_URL = "/auth/admin/realms/{realm}/users/{userId}";
+
+  /** The Constant USERS_BY_GROUPS: {@value}. */
+  private static final String USERS_BY_GROUPS =
+      "/auth/admin/realms/{realm}/groups/{groupId}/members";
 
   /**
    * The Constant USER_ROLES_URL.
@@ -243,9 +254,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   @Autowired
   private RestTemplate restTemplate;
 
-  /**
-   * the token monitor
-   */
+  /** the token monitor. */
   @Autowired
   private TokenMonitor tokenMonitor;
 
@@ -314,9 +323,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     if (null != checkResult && null != checkResult.getBody()) {
       result = checkResult.getBody();
     }
-    String permission = null != result && null != result.getStatus() ? result.getStatus() : "DENY";
 
-    return permission;
+    return null != result && null != result.getStatus() ? result.getStatus() : "DENY";
   }
 
   /**
@@ -392,7 +400,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     map.add("password", password);
     map.add(LiteralConstants.CLIENT_SECRET, secret);
     map.add(LiteralConstants.CLIENT_ID, clientId);
-    if (admin) {
+    if (Boolean.TRUE.equals(admin)) {
       map.add("scope", "openid info offline_access");
     }
     return map;
@@ -478,8 +486,29 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
                     .buildAndExpand(uriParams).toString(),
                 HttpMethod.GET, request, GroupInfo[].class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
-        .orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
+  }
+
+  /**
+   * Gets the groups with search.
+   *
+   * @param value the value
+   * @return the groups
+   */
+  @Override
+  public GroupInfo[] getGroupsWithSearch(String value) {
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
+    uriParams.put("searchParam", value);
+
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    HttpEntity<Void> request = createHttpRequest(null, uriParams);
+    ResponseEntity<GroupInfo[]> responseEntity = this.restTemplate.exchange(
+        uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
+            .path(LIST_GROUPS_URL_WITH_SEARCH).buildAndExpand(uriParams).toString(),
+        HttpMethod.GET, request, GroupInfo[].class);
+
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
 
   /**
@@ -505,8 +534,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
                     .path(GROUP_DETAIL_URL).buildAndExpand(uriParams).toString(),
                 HttpMethod.GET, request, GroupInfo.class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
-        .orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
 
   /**
@@ -551,10 +579,38 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             .buildAndExpand(uriParams).toString(),
         HttpMethod.GET, request, UserRepresentation.class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
-        .orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
 
+  /**
+   * Gets the users.
+   *
+   * @param groupId the group id
+   * @return the user
+   */
+  @Override
+  public UserRepresentation[] getUsersByGroupId(String groupId) {
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
+    uriParams.put(URI_PARAM_GROUP_ID, groupId);
+
+    HttpEntity<UserRepresentation> request = createHttpRequest(null, uriParams);
+
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    ResponseEntity<UserRepresentation[]> responseEntity = this.restTemplate.exchange(
+        uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(USERS_BY_GROUPS)
+            .buildAndExpand(uriParams).toString(),
+        HttpMethod.GET, request, UserRepresentation[].class);
+
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
+  }
+
+  /**
+   * Gets the user roles.
+   *
+   * @param userId the user id
+   * @return the user roles
+   */
   @Override
   public RoleRepresentation[] getUserRoles(String userId) {
     Map<String, String> uriParams = new HashMap<>();
@@ -589,6 +645,12 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     try {
       this.restTemplate.postForEntity(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
           .path(CREATE_USER_GROUP_URL).buildAndExpand(uriParams).toString(), request, Void.class);
+    } catch (HttpClientErrorException ex) {
+      if (HttpStatus.CONFLICT.equals(ex.getStatusCode())) {
+        LOG_ERROR.error("Error creating permission, already created");
+      } else {
+        throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED);
+      }
     } catch (Exception e) {
       throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED);
     }
@@ -637,11 +699,39 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     try {
       this.restTemplate.exchange(
           uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-              .path(ADD_USER_TO_USER_GROUP_URL).buildAndExpand(uriParams).toString(),
+              .path(ALTER_USER_TO_USER_GROUP_URL).buildAndExpand(uriParams).toString(),
           HttpMethod.PUT, request, Void.class);
     } catch (Exception e) {
       LOG_ERROR.error("Error creating permission due to reason {}", e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED, e);
+    }
+
+  }
+
+
+  /**
+   * Removes the user from group.
+   *
+   * @param userId the user id
+   * @param groupId the group id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void removeUserFromGroup(String userId, String groupId) throws EEAException {
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
+    uriParams.put(URI_PARAM_GROUP_ID, groupId);
+    uriParams.put(URI_PARAM_USER_ID, userId);
+    HttpEntity<Void> request = createHttpRequest(null, uriParams);
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    try {
+      this.restTemplate.exchange(
+          uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
+              .path(ALTER_USER_TO_USER_GROUP_URL).buildAndExpand(uriParams).toString(),
+          HttpMethod.DELETE, request, Void.class);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error removing permission due to reason {}", e.getMessage(), e);
+      throw new EEAException(String.format(EEAErrorMessage.PERMISSION_NOT_REMOVED, groupId), e);
     }
 
   }
@@ -659,7 +749,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-            .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+        .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 
@@ -680,8 +770,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             .buildAndExpand(uriParams).toString(),
         HttpMethod.GET, request, UserRepresentation[].class);
 
-    return Optional.ofNullable(responseEntity).map(entity -> entity.getBody()).map(entity -> entity)
-        .orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
 
   /**
@@ -720,7 +809,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-            .path(ADD_ROLE_TO_USER).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+        .path(ADD_ROLE_TO_USER).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 
@@ -901,8 +990,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
     HttpHeaders headers = createBasicHeaders(headerInfo);
 
-    HttpEntity<T> request = new HttpEntity<>(body, headers);
-    return request;
+    return new HttpEntity<>(body, headers);
   }
 
   /**
@@ -921,8 +1009,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     headerInfo.put("Content-Type", "application/json");
     HttpHeaders headers = createBasicHeaders(headerInfo);
 
-    HttpEntity<T> request = new HttpEntity<>(body, headers);
-    return request;
+    return new HttpEntity<>(body, headers);
   }
 
 

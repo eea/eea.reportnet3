@@ -33,7 +33,7 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
 
 
   /** The Constant ROLE. */
-  private static final String ROLE = "DATA_PROVIDER";
+  private static final String ROLE = "LEAD_REPORTER";
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");

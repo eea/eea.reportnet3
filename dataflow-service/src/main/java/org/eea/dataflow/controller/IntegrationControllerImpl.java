@@ -40,10 +40,9 @@ public class IntegrationControllerImpl implements IntegrationController {
   @Autowired
   private IntegrationService integrationService;
 
-  /** The FME integration executor service. */
+  /** The FME integration executor factory. */
   @Autowired
   private IntegrationExecutorFactory integrationExecutorFactory;
-
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -57,7 +56,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ')")
   @PutMapping(value = "/listIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<IntegrationVO> findAllIntegrationsByCriteria(
       @RequestBody IntegrationVO integrationVO) {
@@ -81,7 +80,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#integration.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
   public void createIntegration(@RequestBody IntegrationVO integration) {
 
@@ -103,9 +102,10 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  @DeleteMapping(value = "/{integrationId}")
-  public void deleteIntegration(@PathVariable("integrationId") Long integrationId) {
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
+  @DeleteMapping(value = "/{integrationId}/dataflow/{dataflowId}")
+  public void deleteIntegration(@PathVariable("integrationId") Long integrationId,
+      @PathVariable("dataflowId") Long dataflowId) {
 
     try {
       integrationService.deleteIntegration(integrationId);
@@ -124,7 +124,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#integration.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
   public void updateIntegration(@RequestBody IntegrationVO integration) {
 
@@ -144,7 +144,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ')")
   @PutMapping(value = "/listExtensionsOperations", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<IntegrationVO> findExtensionsAndOperations(@RequestBody IntegrationVO integrationVO) {
     try {
@@ -167,8 +167,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_PROVIDER')")
-  @PostMapping(value = "/executeIntegration")
+  @PostMapping(value = "/private/executeIntegration")
   public ExecutionResultVO executeIntegrationProcess(
       @RequestParam("integrationTool") IntegrationToolTypeEnum integrationToolTypeEnum,
       @RequestParam("operation") IntegrationOperationTypeEnum integrationOperationTypeEnum,
@@ -180,13 +179,29 @@ public class IntegrationControllerImpl implements IntegrationController {
 
 
   /**
+   * Execute EU dataset export.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_STEWARD')")
+  @PostMapping(value = "/executeEUDatasetExport")
+  public List<ExecutionResultVO> executeEUDatasetExport(
+      @RequestParam("dataflowId") Long dataflowId) {
+    return integrationService.executeEUDatasetExport(dataflowId);
+
+  }
+
+
+  /**
    * Copy integrations.
    *
    * @param copyVO the copy VO
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @PostMapping(value = "/private/copyIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
   public void copyIntegrations(@RequestBody CopySchemaVO copyVO) {
     try {
@@ -197,5 +212,7 @@ public class IntegrationControllerImpl implements IntegrationController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
+
+
 
 }

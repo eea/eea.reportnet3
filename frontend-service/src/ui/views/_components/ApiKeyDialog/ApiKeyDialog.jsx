@@ -115,11 +115,15 @@ const ApiKeyDialog = ({
                 <div className={styles.flex}>
                   <textarea
                     className={styles.textarea}
+                    id="apiKey"
                     readOnly
                     ref={textRef => setTextAreaRef(textRef)}
                     rows={1}
                     value={apiKey}
                   />
+                  <label for="apiKey" className="srOnly">
+                    {apiKey}
+                  </label>
                   <Button
                     tooltip={resources.messages['copyToClipboardSuccess']}
                     tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}

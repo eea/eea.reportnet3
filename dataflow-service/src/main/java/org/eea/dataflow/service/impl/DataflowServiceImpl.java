@@ -24,6 +24,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.rod.ObligationController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
@@ -111,6 +112,10 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private ObligationController obligationController;
 
+  /** The eu dataset controller zuul. */
+  @Autowired
+  private EUDatasetControllerZuul euDatasetControllerZuul;
+
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
 
@@ -163,6 +168,8 @@ public class DataflowServiceImpl implements DataflowService {
     // also, add to the filter the data collection
     datasets
         .addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_COLLECTION));
+    // and the eu datasets
+    datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.EU_DATASET));
     List<Long> datasetsIds =
         datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
@@ -178,6 +185,10 @@ public class DataflowServiceImpl implements DataflowService {
     dataflowVO.setDataCollections(
         dataCollectionControllerZuul.findDataCollectionIdByDataflowId(id).stream()
             .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
+    // Add the EU datasets
+    dataflowVO.setEuDatasets(euDatasetControllerZuul.findEUDatasetByDataflowId(id).stream()
+        .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
 
     // Add the representatives
     if (includeAllRepresentatives) {
@@ -369,7 +380,7 @@ public class DataflowServiceImpl implements DataflowService {
           dataflowId = df.getId();
         }
         userManagementControllerZull.addUserToResource(dataflowId,
-            ResourceGroupEnum.DATAFLOW_PROVIDER);
+            ResourceGroupEnum.DATAFLOW_LEAD_REPORTER);
         LOG.info("The dataflow {} has been added into keycloak", dataflowId);
       }
     }
@@ -437,9 +448,15 @@ public class DataflowServiceImpl implements DataflowService {
         ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN));
 
     resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
-        ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_PROVIDER));
+        ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.LEAD_REPORTER));
 
-    // // with that service we assing the group created to a user who create it
+    resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
+        ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.EDITOR_READ));
+
+    resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
+        ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.EDITOR_WRITE));
+
+
     userManagementControllerZull.addUserToResource(dataFlowSaved.getId(),
         ResourceGroupEnum.DATAFLOW_CUSTODIAN);
   }

@@ -53,10 +53,14 @@ export const TableViewSchemas = ({
       <div className={styles.checkColum}>
         <Checkbox
           id={`${row.id}_checkbox`}
+          inputId={`${row.id}_checkbox`}
           isChecked={checkedDataflow.id === row.id}
           onChange={() => onSelectDataflow(row)}
           role="checkbox"
         />
+        <label for={`${row.id}_checkbox`} className="srOnly">
+          {resources.messages['selectedDataflow']}
+        </label>
       </div>
     );
   };

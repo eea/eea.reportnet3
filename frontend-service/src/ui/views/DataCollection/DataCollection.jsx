@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import { withRouter } from 'react-router-dom';
-import { capitalize, isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './DataCollection.module.css';
 
 import { DatasetConfig } from 'conf/domain/model/Dataset';
-import { config } from 'conf';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
@@ -20,13 +19,11 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
-import { UserService } from 'core/services/User';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { MetadataUtils } from 'ui/views/_functions/Utils';
@@ -40,7 +37,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
   const [dataflowName, setDataflowName] = useState('');
   const [dataCollectionName, setDataCollectionName] = useState();
@@ -51,8 +48,6 @@ export const DataCollection = withRouter(({ match, history }) => {
     selectedRecordErrorId: -1,
     activeIndex: null
   });
-  const [hasWritePermissions, setHasWritePermissions] = useState(false);
-  const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tableSchema, setTableSchema] = useState();
@@ -60,14 +55,6 @@ export const DataCollection = withRouter(({ match, history }) => {
   const [tableSchemaNames, setTableSchemaNames] = useState([]);
 
   let growlRef = useRef();
-
-  useEffect(() => {
-    if (!isUndefined(user.contextRoles)) {
-      setHasWritePermissions(
-        UserService.hasPermission(user, [config.permissions.PROVIDER], `${config.permissions.DATASET}${datasetId}`)
-      );
-    }
-  }, [user]);
 
   useEffect(() => {
     breadCrumbContext.add([
@@ -255,9 +242,9 @@ export const DataCollection = withRouter(({ match, history }) => {
   const onRenderTabsSchema = (
     <TabsSchema
       activeIndex={dataViewerOptions.activeIndex}
-      hasWritePermissions={hasWritePermissions}
+      hasWritePermissions={false}
+      showWriteButtons={false}
       isDataCollection={true}
-      isWebFormMMR={false}
       levelErrorTypes={levelErrorTypes}
       onLoadTableData={onLoadTableData}
       onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
@@ -289,63 +276,21 @@ export const DataCollection = withRouter(({ match, history }) => {
   }
 
   return layout(
-    <SnapshotContext.Provider value={{}}>
+    <Fragment>
       <Title title={dataCollectionName} subtitle={dataflowName} icon="dataCollection" iconSize="3.5rem" />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={true}
-              icon={'import'}
-              label={resources.messages['export']}
-            />
-            <Button
               className={`p-button-rounded p-button-secondary-transparent`}
               disabled={true}
-              icon={'trash'}
-              label={resources.messages['deleteDatasetData']}
-            />
-          </div>
-          <div className="p-toolbar-group-right">
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
-              disabled={true}
-              icon={'validate'}
-              iconClasses={null}
-              label={resources.messages['validate']}
-              ownButtonClasses={null}
-            />
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
-              disabled={true}
-              icon={'warning'}
-              iconClasses={''}
-              label={resources.messages['showValidations']}
-              ownButtonClasses={null}
-            />
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
-              disabled={true}
-              icon={'dashboard'}
-              label={resources.messages['dashboards']}
-            />
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
-              disabled={true}
-              icon={'camera'}
-              label={resources.messages['snapshots']}
-            />
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-              icon={'refresh'}
-              label={resources.messages['refresh']}
-              onClick={() => onLoadDatasetSchema()}
+              icon={'export'}
+              label={resources.messages['exportDataset']}
             />
           </div>
         </Toolbar>
       </div>
       {onRenderTabsSchema}
-    </SnapshotContext.Provider>
+    </Fragment>
   );
 });

@@ -22,7 +22,9 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.impl.DesignDatasetServiceImpl;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
@@ -34,6 +36,7 @@ import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ReferencedFieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,6 +46,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -54,21 +60,29 @@ import org.springframework.web.server.ResponseStatusException;
 public class DesignDatasetServiceTest {
 
 
-  /** The design dataset service. */
+  /**
+   * The design dataset service.
+   */
   @InjectMocks
   private DesignDatasetServiceImpl designDatasetService;
 
 
-  /** The design dataset repository. */
+  /**
+   * The design dataset repository.
+   */
   @Mock
   private DesignDatasetRepository designDatasetRepository;
 
 
-  /** The design dataset mapper. */
+  /**
+   * The design dataset mapper.
+   */
   @Mock
   private DesignDatasetMapper designDatasetMapper;
 
-  /** The file common. */
+  /**
+   * The file common.
+   */
   @Mock
   private FileCommonUtils fileCommon;
 
@@ -95,13 +109,16 @@ public class DesignDatasetServiceTest {
   private FieldSchemaNoRulesMapper fieldSchemaNoRulesMapper;
 
   @Mock
-  private DatasetSchemaController dataSchemaController;
+  private DatasetSchemaController datasetSchemaController;
 
   @Mock
   private RulesControllerZuul rulesControllerZuul;
 
   @Mock
   private IntegrationControllerZuul integrationControllerZuul;
+
+  @Mock
+  private ContributorControllerZuul contributorControllerZuul;
 
   /**
    * Inits the mocks.
@@ -226,4 +243,25 @@ public class DesignDatasetServiceTest {
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
+  @Test(expected = EEAException.class)
+  public void copyDesignDatasetsExceptionTest() throws EEAException {
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
+    Mockito.when(designDatasetRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    Mockito.when(designDatasetMapper.entityListToClass(Mockito.any()))
+        .thenReturn(Arrays.asList(new DesignDatasetVO()));
+    Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.anyLong()))
+        .thenThrow(EEAException.class);
+    Mockito.doNothing().when(datasetService).releaseLock(Mockito.any());
+    try {
+      designDatasetService.copyDesignDatasets(1L, 2L);
+    } catch (EEAException e) {
+      Assert.assertEquals(String.format(EEAErrorMessage.ERROR_COPYING_SCHEMAS, 1L, 2L),
+          e.getMessage());
+      throw e;
+    }
+  }
 }

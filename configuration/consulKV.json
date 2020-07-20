@@ -236,6 +236,18 @@
     "value": "JHtGTUVfSE9TVDpmbWUuZGlzY29tYXAuZWVhLmV1cm9wYS5ldX0="
   },
   {
+    "key": "config/dataflow/integration.fme.callback.urlbase",
+    "value": "JHtSM19IT1NUOmh0dHA6Ly9ybjNzYW5kYm94LmFsdGlhLmVzfQ=="
+  },
+  {
+    "key": "config/dataflow/integration.fme.default.repository",
+    "value": "JHtGTUVfUkVQT1NJVE9SWTpSZXBvcnROZXRUZXN0aW5nfQ=="
+  },
+  {
+    "key": "config/dataflow/integration.fme.eu.job",
+    "value": "JHtGTUVfRVVfSk9COkV4cG9ydF9FVV9kYXRhc2V0LmZtd30="
+  },
+  {
     "key": "config/dataflow/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
     "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
   },
@@ -593,6 +605,18 @@
   },
   {
     "key": "config/apiGateway/zuul.routes.obligation.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.fme.path",
+    "value": "L2ZtZS8qKg=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.fme.serviceId",
+    "value": "ZGF0YWZsb3c="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.fme.stripPrefix",
     "value": "ZmFsc2U="
   },
   {
@@ -1258,5 +1282,29 @@
   {
     "key": "config/dataset/wait.continue.copy.ms",
     "value": "JHtDT1BZX1NDSEVNQV9XQUlUX01TOjMwMDB9"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.contributor.path",
+    "value": "L2NvbnRyaWJ1dG9yLyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.contributor.serviceId",
+    "value": "ZGF0YWZsb3c="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.contributor.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.eudataset.path",
+    "value": "L2V1RGF0YXNldC8qKg=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.eudataset.serviceId",
+    "value": "ZGF0YXNldA=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.eudataset.stripPrefix",
+    "value": "ZmFsc2U="
   }
 ]

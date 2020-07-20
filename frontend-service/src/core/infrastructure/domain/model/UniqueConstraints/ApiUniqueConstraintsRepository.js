@@ -5,17 +5,18 @@ import { apiUniqueConstraints } from 'core/infrastructure/api/domain/model/Uniqu
 
 import { UniqueConstraint } from 'core/domain/model/UniqueConstraints/UniqueConstraint';
 
-const all = async datasetSchemaId => parseConstraintsList(await apiUniqueConstraints.all(datasetSchemaId));
+const all = async (dataflowId, datasetSchemaId) =>
+  parseConstraintsList(await apiUniqueConstraints.all(dataflowId, datasetSchemaId));
 
-const create = async (datasetSchemaId, fieldSchemaIds, tableSchemaId) =>
-  await apiUniqueConstraints.create(datasetSchemaId, fieldSchemaIds, tableSchemaId);
+const create = async (dataflowId, datasetSchemaId, fieldSchemaIds, tableSchemaId) =>
+  await apiUniqueConstraints.create(dataflowId, datasetSchemaId, fieldSchemaIds, tableSchemaId);
 
-const deleteById = async uniqueConstraintId => {
-  return await apiUniqueConstraints.deleteById(uniqueConstraintId);
+const deleteById = async (dataflowId, uniqueConstraintId) => {
+  return await apiUniqueConstraints.deleteById(dataflowId, uniqueConstraintId);
 };
 
-const update = async (datasetSchemaId, fieldSchemaIds, tableSchemaId, uniqueId) => {
-  return await apiUniqueConstraints.update(datasetSchemaId, fieldSchemaIds, tableSchemaId, uniqueId);
+const update = async (dataflowId, datasetSchemaId, fieldSchemaIds, tableSchemaId, uniqueId) => {
+  return await apiUniqueConstraints.update(dataflowId, datasetSchemaId, fieldSchemaIds, tableSchemaId, uniqueId);
 };
 
 const parseConstraint = constraintDTO => new UniqueConstraint(constraintDTO);

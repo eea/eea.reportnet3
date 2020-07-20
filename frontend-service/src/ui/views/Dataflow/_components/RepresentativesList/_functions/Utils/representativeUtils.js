@@ -24,7 +24,15 @@ export const autofocusOnEmptyInput = formState => {
 
 const addRepresentative = async (formDispatcher, representatives, dataflowId, formState) => {
   const newRepresentative = representatives.filter(representative => isNil(representative.representativeId));
-  if (!isEmpty(newRepresentative[0].providerAccount) && !isEmpty(newRepresentative[0].dataProviderId)) {
+  if (
+    !isEmpty(newRepresentative[0].providerAccount) &&
+    isValidEmail(newRepresentative[0].providerAccount) &&
+    !isEmpty(newRepresentative[0].dataProviderId)
+  ) {
+    formDispatcher({
+      type: 'SET_IS_LOADING',
+      payload: { isLoading: true }
+    });
     try {
       await RepresentativeService.add(
         dataflowId,
@@ -38,13 +46,18 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId, fo
     } catch (error) {
       console.error('error on RepresentativeService.add', error);
       if (error.response.status === 400 || error.response.status === 404) {
-        let { representativeHasError } = formState;
-        representativeHasError.unshift(representatives[representatives.length - 1].representativeId);
+        let { representativesHaveError } = formState;
+        representativesHaveError.unshift(representatives[representatives.length - 1].representativeId);
         formDispatcher({
           type: 'MANAGE_ERRORS',
-          payload: { representativeHasError: uniq(representativeHasError) }
+          payload: { representativesHaveError: uniq(representativesHaveError) }
         });
       }
+    } finally {
+      formDispatcher({
+        type: 'SET_IS_LOADING',
+        payload: { isLoading: false }
+      });
     }
   }
 };
@@ -61,7 +74,7 @@ export const getAllDataProviders = async (selectedDataProviderGroup, representat
 
     const providersNoSelect = [...responseAllDataProviders];
     if (representatives.length <= responseAllDataProviders.length) {
-      responseAllDataProviders.unshift({ dataProviderId: '', label: 'Select...' });
+      responseAllDataProviders.unshift({ dataProviderId: '', label: ' Select...' });
     }
 
     formDispatcher({
@@ -104,7 +117,7 @@ export const getInitialData = async (formDispatcher, dataflowId, formState) => {
   await getProviderTypes(formDispatcher);
   await getAllRepresentatives(dataflowId, formDispatcher, formState);
   if (!isEmpty(formState.representatives)) {
-    await getAllDataProviders(formState.selectedDataProviderGroup, formDispatcher);
+    await getAllDataProviders(formState.selectedDataProviderGroup, formState.representatives, formDispatcher);
     createUnusedOptionsList(formDispatcher);
   }
 };
@@ -117,6 +130,10 @@ export const onAddProvider = (formDispatcher, formState, representative, dataflo
 
 export const onDataProviderIdChange = async (formDispatcher, newDataProviderId, representative, formState) => {
   if (!isNil(representative.representativeId)) {
+    formDispatcher({
+      type: 'SET_IS_LOADING',
+      payload: { isLoading: true }
+    });
     try {
       await RepresentativeService.updateDataProviderId(
         parseInt(representative.representativeId),
@@ -127,6 +144,11 @@ export const onDataProviderIdChange = async (formDispatcher, newDataProviderId, 
       });
     } catch (error) {
       console.error('error on RepresentativeService.updateDataProviderId', error);
+    } finally {
+      formDispatcher({
+        type: 'SET_IS_LOADING',
+        payload: { isLoading: false }
+      });
     }
   } else {
     const { representatives } = formState;
@@ -166,6 +188,16 @@ export const onKeyDown = (event, formDispatcher, formState, representative, data
   }
 };
 
+export const isValidEmail = email => {
+  if (isNil(email)) {
+    return true;
+  }
+
+  const expression = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+  return email.match(expression);
+};
+
 const updateRepresentative = async (formDispatcher, formState, updatedRepresentative) => {
   let isChangedAccount = false;
   const { initialRepresentatives } = formState;
@@ -180,17 +212,21 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
       initialRepresentative.representativeId === updatedRepresentative.representativeId &&
       initialRepresentative.providerAccount === updatedRepresentative.providerAccount
     ) {
-      const filteredInputsWithErrors = formState.representativeHasError.filter(
+      const filteredInputsWithErrors = formState.representativesHaveError.filter(
         representativeId => representativeId !== updatedRepresentative.representativeId
       );
       formDispatcher({
         type: 'MANAGE_ERRORS',
-        payload: { representativeHasError: filteredInputsWithErrors }
+        payload: { representativesHaveError: filteredInputsWithErrors }
       });
     }
   }
 
-  if (isChangedAccount) {
+  if (isChangedAccount && isValidEmail(updatedRepresentative.providerAccount)) {
+    formDispatcher({
+      type: 'SET_IS_LOADING',
+      payload: { isLoading: true }
+    });
     try {
       await RepresentativeService.updateProviderAccount(
         parseInt(updatedRepresentative.representativeId),
@@ -203,13 +239,18 @@ const updateRepresentative = async (formDispatcher, formState, updatedRepresenta
       console.error('error on RepresentativeService.updateProviderAccount', error);
 
       if (error.response.status === 400 || error.response.status === 404) {
-        let { representativeHasError } = formState;
-        representativeHasError.unshift(updatedRepresentative.representativeId);
+        let { representativesHaveError } = formState;
+        representativesHaveError.unshift(updatedRepresentative.representativeId);
         formDispatcher({
           type: 'MANAGE_ERRORS',
-          payload: { representativeHasError: uniq(representativeHasError) }
+          payload: { representativesHaveError: uniq(representativesHaveError) }
         });
       }
+    } finally {
+      formDispatcher({
+        type: 'SET_IS_LOADING',
+        payload: { isLoading: false }
+      });
     }
   }
 };

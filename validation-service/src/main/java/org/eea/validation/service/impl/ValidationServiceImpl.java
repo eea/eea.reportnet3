@@ -306,16 +306,14 @@ public class ValidationServiceImpl implements ValidationService {
     // Validating tables
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     TableValue table = tableRepository.findById(idTable).orElse(null);
-    // dataset.getTableValues().stream().forEach(table -> {
     KieSession session = kieBase.newKieSession();
-    List<TableValidation> validations = new ArrayList<>();
+
     try {
       if (table != null) {
-        validations = runTableValidations(table, session);
+        List<TableValidation> validations = runTableValidations(table, session);
         if (table.getTableValidations() != null) {
-          table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
-            tableValidation.setTableValue(table);
-          });
+          table.getTableValidations().stream().filter(Objects::nonNull)
+              .forEach(tableValidation -> tableValidation.setTableValue(table));
         }
         tableValidationRepository.saveAll(validations);
       }
@@ -413,7 +411,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   private void initVariablesToValidate(Long datasetId) {
     ResourceInfoVO resourceInfoVO = resourceManagementController.getResourceDetail(datasetId,
-        ResourceGroupEnum.DATASET_PROVIDER);
+        ResourceGroupEnum.DATASET_LEAD_REPORTER);
     String countryCode = "''";
     String dataCallYear = "" + new LocalDate().getYear();
     if (null != resourceInfoVO.getAttributes() && resourceInfoVO.getAttributes().size() > 0) {

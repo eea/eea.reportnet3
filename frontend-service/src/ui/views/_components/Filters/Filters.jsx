@@ -220,10 +220,14 @@ export const Filters = ({
         <span className={styles.checkbox}>
           <Checkbox
             id={`matchMode_checkbox`}
+            inputId={`matchMode_checkbox`}
             isChecked={filterState.matchMode}
             onChange={() => onToggleMatchMode()}
             role="checkbox"
           />
+          <label for={`matchMode_checkbox`} className="srOnly">
+            {resources.messages['strictModeCheckboxFilter']}
+          </label>
         </span>
       </span>
     </Fragment>

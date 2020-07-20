@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class RuleExpressionServiceImpl implements RuleExpressionService {
 
+  /** The Constant VALUE */
+  private static final String VALUE = "VALUE";
+
   /**
    * Converts a String containing a rule expression (Java code) into a RuleExpressionDTO data
    * structure.
@@ -278,7 +281,7 @@ public class RuleExpressionServiceImpl implements RuleExpressionService {
    * @return the int
    */
   private int readValue(int index, RuleExpressionDTO ruleExpressionDTO) {
-    ruleExpressionDTO.getParams().add("VALUE");
+    ruleExpressionDTO.getParams().add(VALUE);
     return index + "value".length();
   }
 
@@ -334,7 +337,7 @@ public class RuleExpressionServiceImpl implements RuleExpressionService {
 
     if (branch instanceof String) {
       String string = (String) branch;
-      if (string.equals("VALUE")) {
+      if (string.equals(VALUE)) {
         return "value";
       }
       return "\"" + string.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
@@ -394,7 +397,7 @@ public class RuleExpressionServiceImpl implements RuleExpressionService {
   private boolean isDataTypeCompatibleString(Map<String, DataType> dataTypeMap,
       String superInputType, String string) {
 
-    if (string.equals("VALUE") || ObjectId.isValid(string)) {
+    if (string.equals(VALUE) || ObjectId.isValid(string)) {
       return superInputType.equals(dataTypeMap.get(string).getJavaType());
     }
 

@@ -1,6 +1,10 @@
 package org.eea.security.jwt.expression;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
@@ -29,46 +33,68 @@ public class EeaSecurityExpressionRootTest {
   @Before
   public void init() {
     Set<String> roles = new HashSet<>();
-    roles.add(ObjectAccessRoleEnum.DATAFLOW_PROVIDER.getAccessRole(DATAFLOW_ID));
+    roles.add(ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER.getAccessRole(DATAFLOW_ID));
     UserDetails userDetails = EeaUserDetails.create("test", roles);
-    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-        userDetails, null, userDetails.getAuthorities());
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    Map<String, String> details = new HashMap<>();
+    details.put("", "");
+    authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
     Mockito.reset(userManagementControllerZull);
 
-    eeaSecurityExpressionRoot = new EeaSecurityExpressionRoot(authenticationToken,
-        userManagementControllerZull);
+    eeaSecurityExpressionRoot =
+        new EeaSecurityExpressionRoot(authenticationToken, userManagementControllerZull);
 
   }
 
   @Test
   public void secondLevelAuthorize() {
-    Assert.assertTrue(eeaSecurityExpressionRoot
-        .secondLevelAuthorize(DATAFLOW_ID, ObjectAccessRoleEnum.DATAFLOW_PROVIDER));
+    Assert.assertTrue(eeaSecurityExpressionRoot.secondLevelAuthorize(DATAFLOW_ID,
+        ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER));
   }
 
   @Test
   public void secondLevelAuthorizeUnauthorized() {
-    Assert.assertFalse(eeaSecurityExpressionRoot
-        .secondLevelAuthorize(DATAFLOW_ID, ObjectAccessRoleEnum.DATAFLOW_REQUESTER));
+    Assert.assertFalse(eeaSecurityExpressionRoot.secondLevelAuthorize(DATAFLOW_ID,
+        ObjectAccessRoleEnum.DATAFLOW_REQUESTER));
   }
 
   @Test
   public void checkPermission() {
-    Mockito.when(
-        userManagementControllerZull.checkResourceAccessPermission(Mockito.anyString(), Mockito.any(
-            AccessScopeEnum[].class))).thenReturn(true);
-    Assert.assertTrue(eeaSecurityExpressionRoot
-        .checkPermission("", AccessScopeEnum.CREATE));
+    Mockito.when(userManagementControllerZull.checkResourceAccessPermission(Mockito.anyString(),
+        Mockito.any(AccessScopeEnum[].class))).thenReturn(true);
+    Assert.assertTrue(eeaSecurityExpressionRoot.checkPermission("", AccessScopeEnum.CREATE));
   }
 
   @Test
   public void checkPermissionUnauthorized() {
-    Mockito.when(
-        userManagementControllerZull.checkResourceAccessPermission(Mockito.anyString(), Mockito.any(
-            AccessScopeEnum[].class))).thenReturn(false);
-    Assert.assertFalse(eeaSecurityExpressionRoot
-        .checkPermission("", AccessScopeEnum.CREATE));
+    Mockito.when(userManagementControllerZull.checkResourceAccessPermission(Mockito.anyString(),
+        Mockito.any(AccessScopeEnum[].class))).thenReturn(false);
+    Assert.assertFalse(eeaSecurityExpressionRoot.checkPermission("", AccessScopeEnum.CREATE));
   }
+
+  @Test
+  public void checkApiKeyTest() {
+    assertFalse(eeaSecurityExpressionRoot.checkApiKey(1L, 1L));
+  }
+
+  @Test
+  public void setGetFilterObject() {
+    eeaSecurityExpressionRoot.setFilterObject(DATAFLOW_ID);
+    assertEquals(DATAFLOW_ID, eeaSecurityExpressionRoot.getFilterObject());
+  }
+
+  @Test
+  public void setGetReturnObject() {
+    eeaSecurityExpressionRoot.setReturnObject(DATAFLOW_ID);
+    assertEquals(DATAFLOW_ID, eeaSecurityExpressionRoot.getReturnObject());
+  }
+
+  @Test
+  public void getThis() {
+    assertEquals(eeaSecurityExpressionRoot, eeaSecurityExpressionRoot.getThis());
+  }
+
 }

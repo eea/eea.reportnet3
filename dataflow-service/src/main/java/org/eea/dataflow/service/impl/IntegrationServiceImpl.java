@@ -7,9 +7,14 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import org.eea.dataflow.integration.crud.factory.CrudManager;
 import org.eea.dataflow.integration.crud.factory.CrudManagerFactory;
+import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
+import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
+import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +32,12 @@ public class IntegrationServiceImpl implements IntegrationService {
   @Autowired
   private CrudManagerFactory crudManagerFactory;
 
+  /** The FME integration executor factory. */
+  @Autowired
+  private IntegrationExecutorFactory integrationExecutorFactory;
+
+  @Autowired
+  private EUDatasetControllerZuul euDatasetControllerZuul;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationServiceImpl.class);
@@ -142,7 +153,7 @@ public class IntegrationServiceImpl implements IntegrationService {
       Map<String, String> dictionaryOriginTargetObjectId) throws EEAException {
     for (String originDatasetSchemaId : originDatasetSchemaIds) {
       IntegrationVO integrationCriteria = new IntegrationVO();
-      integrationCriteria.getInternalParameters().put("datasetSchemaId", originDatasetSchemaId);
+      integrationCriteria.getInternalParameters().put(DATASETSCHEMAID, originDatasetSchemaId);
       List<IntegrationVO> integrations = getAllIntegrationsByCriteria(integrationCriteria);
       for (IntegrationVO integration : integrations) {
         // we've got the origin integrations. We intend to change the dataflow and the
@@ -151,12 +162,41 @@ public class IntegrationServiceImpl implements IntegrationService {
         LOG.info(
             "There are integrations to be copied into the datasetSchemaId {} in the dataflowId {}",
             dictionaryOriginTargetObjectId.get(originDatasetSchemaId), dataflowIdDestination);
-        integration.getInternalParameters().put("datasetSchemaId",
+        integration.getInternalParameters().put(DATASETSCHEMAID,
             dictionaryOriginTargetObjectId.get(originDatasetSchemaId));
         integration.getInternalParameters().put("dataflowId", dataflowIdDestination.toString());
         createIntegration(integration);
       }
     }
+  }
+
+
+  /**
+   * Execute EU dataset export.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Override
+  public List<ExecutionResultVO> executeEUDatasetExport(Long dataflowId) {
+
+    IntegrationToolTypeEnum integrationToolTypeEnum = IntegrationToolTypeEnum.FME;
+    IntegrationOperationTypeEnum integrationOperationTypeEnum =
+        IntegrationOperationTypeEnum.EXPORT_EU_DATASET;
+    IntegrationVO integration = new IntegrationVO();
+    integration.setTool(integrationToolTypeEnum);
+    integration.setOperation(integrationOperationTypeEnum);
+
+    List<EUDatasetVO> euDatasets = euDatasetControllerZuul.findEUDatasetByDataflowId(dataflowId);
+
+    List<ExecutionResultVO> resultList = new ArrayList<>();
+
+    euDatasets.stream().forEach(
+        dataset -> resultList.add(integrationExecutorFactory.getExecutor(integrationToolTypeEnum)
+            .execute(integrationOperationTypeEnum, null, dataset.getId(), integration)));
+
+    return resultList;
+
   }
 
 

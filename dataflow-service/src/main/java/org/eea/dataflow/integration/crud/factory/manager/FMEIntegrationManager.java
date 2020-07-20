@@ -2,6 +2,7 @@ package org.eea.dataflow.integration.crud.factory.manager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.eea.dataflow.integration.crud.factory.AbstractCrudManager;
 import org.eea.dataflow.mapper.IntegrationMapper;
 import org.eea.dataflow.persistence.domain.Integration;
@@ -42,9 +43,16 @@ public class FMEIntegrationManager extends AbstractCrudManager {
   @Autowired
   private IntegrationMapper integrationMapper;
 
+  /** The operation parameters repository. */
   @Autowired
   private OperationParametersRepository operationParametersRepository;
 
+
+  /** The Constant DATAFLOW_ID: {@value}. */
+  private static final String DATAFLOW_ID = "dataflowId";
+
+  /** The Constant DATASETSCHEMA_ID: {@value}. */
+  private static final String DATASET_SCHEMA_ID = "datasetSchemaId";
 
   /**
    * Gets the tool type.
@@ -68,12 +76,16 @@ public class FMEIntegrationManager extends AbstractCrudManager {
 
     List<IntegrationVO> results = new ArrayList<>();
     if (integrationVO.getId() != null) {
-      Integration integration = integrationRepository.findById(integrationVO.getId()).get();
+      Optional<Integration> integrationOptional =
+          integrationRepository.findById(integrationVO.getId());
+      Integration integration = integrationOptional.isPresent() ? integrationOptional.get() : null;
       results.add(integrationMapper.entityToClass(integration));
     } else if (integrationVO.getInternalParameters() != null
         && integrationVO.getInternalParameters().size() > 0) {
-      List<String> parameters =
-          new ArrayList<String>(integrationVO.getInternalParameters().keySet());
+      if (integrationVO.getInternalParameters().containsKey(DATAFLOW_ID)) {
+        integrationVO.getInternalParameters().remove(DATAFLOW_ID);
+      }
+      List<String> parameters = new ArrayList<>(integrationVO.getInternalParameters().keySet());
       String parameter = parameters.get(0);
       String value = integrationVO.getInternalParameters().get(parameter);
       List<Integration> integrationList =
@@ -103,8 +115,8 @@ public class FMEIntegrationManager extends AbstractCrudManager {
     }
     if (integrationVO.getInternalParameters() == null
         || integrationVO.getInternalParameters().size() == 0
-        || !integrationVO.getInternalParameters().containsKey("dataflowId")
-        || !integrationVO.getInternalParameters().containsKey("datasetSchemaId")) {
+        || !integrationVO.getInternalParameters().containsKey(DATAFLOW_ID)
+        || !integrationVO.getInternalParameters().containsKey(DATASET_SCHEMA_ID)) {
       LOG_ERROR.error(
           "Error updating an integration: Internal parameters don't have dataflowId or datasetSchemaId");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -135,8 +147,8 @@ public class FMEIntegrationManager extends AbstractCrudManager {
 
     if (integrationVO.getInternalParameters() == null
         || integrationVO.getInternalParameters().size() == 0
-        || !integrationVO.getInternalParameters().containsKey("dataflowId")
-        || !integrationVO.getInternalParameters().containsKey("datasetSchemaId")) {
+        || !integrationVO.getInternalParameters().containsKey(DATAFLOW_ID)
+        || !integrationVO.getInternalParameters().containsKey(DATASET_SCHEMA_ID)) {
       LOG_ERROR.error(
           "Error creating an integration: Internal parameters don't have dataflowId or datasetSchemaId");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

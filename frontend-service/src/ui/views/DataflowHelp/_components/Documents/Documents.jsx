@@ -27,10 +27,11 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const Documents = ({
+  dataflowId,
   documents,
   isCustodian,
   isDeletingDocument,
-  dataflowId,
+  isToolbarVisible,
   setIsDeletingDocument,
   setSortFieldDocuments,
   setSortOrderDocuments,
@@ -39,7 +40,7 @@ const Documents = ({
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const user = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
   const [allDocuments, setAllDocuments] = useState(documents);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -62,7 +63,7 @@ const Documents = ({
 
   const createFileName = title => `${title.split(' ').join('_')}`;
 
-  const dateColumnTemplate = rowData => <span>{moment(rowData.date).format(user.userProps.dateFormat)}</span>;
+  const dateColumnTemplate = rowData => <span>{moment(rowData.date).format(userContext.userProps.dateFormat)}</span>;
 
   const documentsEditButtons = rowData => (
     <div className={`${styles.documentsEditButtons} dataflowHelp-document-edit-delete-help-step`}>
@@ -171,7 +172,7 @@ const Documents = ({
 
   return (
     <Fragment>
-      {isCustodian ? (
+      {isToolbarVisible ? (
         <Toolbar className={styles.documentsToolbar}>
           <div className="p-toolbar-group-left">
             <Button
@@ -266,7 +267,7 @@ const Documents = ({
           header={resources.messages['file']}
           style={{ textAlign: 'center', width: '8em' }}
         />
-        {isCustodian && !isEmpty(documents) ? (
+        {isToolbarVisible && !isEmpty(documents) ? (
           <Column
             className={styles.crudColumn}
             body={documentsEditButtons}

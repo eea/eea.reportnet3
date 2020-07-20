@@ -165,17 +165,12 @@ public class RepresentativeControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void updateRepresentativeSuccessNoAccountTest() throws EEAException {
     representativeVO.setProviderAccount(null);
-    // Mockito.verify(representativeService, times(1)).updateDataflowRepresentative(Mockito.any());
-    try {
-      representativeControllerImpl.updateRepresentative(representativeVO);
-    } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      assertEquals(EEAErrorMessage.USER_NOTFOUND, e.getReason());
-      throw e;
-    }
+    representativeControllerImpl.updateRepresentative(representativeVO);
+    Mockito.verify(representativeService, times(1)).updateDataflowRepresentative(Mockito.any());
+
   }
 
   /**

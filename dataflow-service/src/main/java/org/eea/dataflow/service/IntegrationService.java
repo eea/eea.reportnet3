@@ -3,6 +3,7 @@ package org.eea.dataflow.service;
 import java.util.List;
 import java.util.Map;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 
 
@@ -71,5 +72,13 @@ public interface IntegrationService {
   void copyIntegrations(Long dataflowIdDestination, List<String> originDatasetSchemaIds,
       Map<String, String> dictionaryOriginTargetObjectId) throws EEAException;
 
+
+  /**
+   * Execute EU dataset export.
+   *
+   * @param dataflowId the dataflow id
+   * @return the execution result VO
+   */
+  public List<ExecutionResultVO> executeEUDatasetExport(Long dataflowId);
 
 }

@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isEmpty, isUndefined } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './BigButton.module.css';
 
@@ -20,6 +21,7 @@ export const BigButton = ({
   buttonClass,
   buttonIcon,
   buttonIconClass,
+  canEditName = true,
   caption,
   dataflowStatus,
   datasetSchemaInfo,
@@ -143,7 +145,7 @@ export const BigButton = ({
         <span onClick={() => handleRedirect()} onMouseDown={event => onWheelClick(event)} data-tip data-for={caption}>
           <FontAwesomeIcon icon={AwesomeIcons(buttonIcon)} className={styles[buttonIconClass]} />
         </span>
-        {model && (
+        {model && !isEmpty(model) && (
           <DropdownButton
             icon="caretDown"
             model={designModel}
@@ -188,7 +190,9 @@ export const BigButton = ({
       ) : (
         <p
           className={styles.caption}
-          onDoubleClick={dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] ? onEnableSchemaNameEdit : null}>
+          onDoubleClick={
+            dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] && canEditName ? onEnableSchemaNameEdit : null
+          }>
           {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         </p>
       )}
