@@ -18,7 +18,7 @@ export const Footer = withRouter(({ history, leftMargin }) => {
       <div className={styles.Footer}>
         <div className="rep-container">
           <div className={styles.footerContent}>
-            <div className={styles.eeaLogo}>
+            <div className={styles.reportnetLogo}>
               <a href="https://www.eea.europa.eu/" className={styles.title} title={resources.messages['eea']}>
                 <img height="50px" src={eeaLogo} alt={resources.messages['eea']} className={styles.appLogo} />
               </a>
