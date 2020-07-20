@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 
-import styles from './BigButton.module.css';
+import styles from './BigButton.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import DataflowConf from 'conf/dataflow.config.json';

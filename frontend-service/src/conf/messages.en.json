@@ -763,6 +763,11 @@
     "copyDataToEudatasetCompletedEvent": "Data collections copied to EU datasets correctly",
     "externalExportEudatasetFailedEvent": "Error exporting EU datasets",
     "copyDataToEudatasetFailedEvent": "Error copying data collections to EU datasets",
+    "confirmReleaseCopy": "Are you sure you want to release this copy to the data collection?",
+    "confirmReleaseCurrentData": "Are you sure you want to release the current data to the data collection?",
+    "confirmReleaseCopyIntroduction": "Copy you are releasing:",
+    "confirmReleaseCurrentDataIntroduction": "Copy you are copying and releasing:",
+    "confirmReleaseAndCopyExtraMessage": "You are also creating a copy of this data.",
     "dataflowProviderHelp": "My dataflow",
     "dataflowRequesterHelp": "My dataflow",
     "datasetSchemaHelpConfig": "My reporting dataset"
