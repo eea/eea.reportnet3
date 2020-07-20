@@ -120,6 +120,11 @@ const Dataflow = withRouter(({ history, match }) => {
       if (representatives.length === 1) {
         breadCrumbContext.add([
           {
+            label: resources.messages['homeBreadcrumb'],
+            href: getUrl(routes.DATAFLOWS),
+            command: () => history.push(getUrl(routes.DATAFLOWS))
+          },
+          {
             label: resources.messages['dataflows'],
             icon: 'home',
             href: getUrl(routes.DATAFLOWS),
@@ -132,6 +137,11 @@ const Dataflow = withRouter(({ history, match }) => {
         ]);
       } else if (representatives.length > 1 && isUndefined(representativeId)) {
         breadCrumbContext.add([
+          {
+            label: resources.messages['homeBreadcrumb'],
+            href: getUrl(routes.DATAFLOWS),
+            command: () => history.push(getUrl(routes.DATAFLOWS))
+          },
           {
             label: resources.messages['dataflows'],
             icon: 'home',
@@ -149,6 +159,11 @@ const Dataflow = withRouter(({ history, match }) => {
           .map(representative => representative.name);
 
         breadCrumbContext.add([
+          {
+            label: resources.messages['homeBreadcrumb'],
+            href: getUrl(routes.DATAFLOWS),
+            command: () => history.push(getUrl(routes.DATAFLOWS))
+          },
           {
             label: resources.messages['dataflows'],
             icon: 'home',
@@ -168,6 +183,11 @@ const Dataflow = withRouter(({ history, match }) => {
         ]);
       } else if (dataflowState.status === 'DESIGN') {
         breadCrumbContext.add([
+          {
+            label: resources.messages['homeBreadcrumb'],
+            href: getUrl(routes.DATAFLOWS),
+            command: () => history.push(getUrl(routes.DATAFLOWS))
+          },
           {
             label: resources.messages['dataflows'],
             icon: 'home',

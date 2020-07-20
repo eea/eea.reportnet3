@@ -40,6 +40,11 @@ export const DataflowDashboards = withRouter(
     useEffect(() => {
       breadCrumbContext.add([
         {
+          label: resources.messages['homeBreadcrumb'],
+          href: getUrl(routes.DATAFLOWS),
+          command: () => history.push(getUrl(routes.DATAFLOWS))
+        },
+        {
           label: resources.messages['dataflows'],
           icon: 'home',
           href: routes.DATAFLOWS,
