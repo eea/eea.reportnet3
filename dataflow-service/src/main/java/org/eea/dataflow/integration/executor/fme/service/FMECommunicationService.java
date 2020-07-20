@@ -31,6 +31,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -118,15 +119,20 @@ public class FMECommunicationService {
     Map<String, String> headerInfo = new HashMap<>();
     headerInfo.put(CONTENT_TYPE, APPLICATION_JSON);
 
-    HttpEntity<FMEAsyncJob> request = createHttpRequest(fmeAsyncJob, uriParams, headerInfo);
-    ResponseEntity<SubmitResult> checkResult =
-        this.restTemplate.exchange(
-            uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
-                .path("fmerest/v3/transformations/submit/{repository}/{workspace}")
-                .buildAndExpand(uriParams).toString(),
-            HttpMethod.POST, request, SubmitResult.class);
+    ResponseEntity<SubmitResult> checkResult = null;
+    try {
+      HttpEntity<FMEAsyncJob> request = createHttpRequest(fmeAsyncJob, uriParams, headerInfo);
+      checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
+          .path("fmerest/v3/transformations/submit/{repository}/{workspace}")
+          .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, SubmitResult.class);
+    } catch (HttpStatusCodeException exception) {
+      LOG_ERROR.error("Status code: {} message: {}", exception.getStatusCode().value(),
+          exception.getMessage());
+      return 0;
+    }
+    LOG.info("FME called successfully: HTTP:{}", checkResult.getStatusCode());
 
-    return checkResult != null && checkResult.getBody() != null ? checkResult.getBody().getId() : 0;
+    return checkResult.getBody() != null ? checkResult.getBody().getId() : 0;
   }
 
   /**
