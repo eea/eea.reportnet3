@@ -22,6 +22,15 @@ public interface DatasetSnapshotService {
   SnapshotVO getById(Long idSnapshot) throws EEAException;
 
   /**
+   * Gets the schema by id.
+   *
+   * @param idSnapshot the id snapshot
+   * @return the schema by id
+   * @throws EEAException the EEA exception
+   */
+  SnapshotVO getSchemaById(Long idSnapshot) throws EEAException;
+
+  /**
    * Gets the snapshots by id dataset.
    *
    * @param datasetId the dataset id
@@ -69,10 +78,12 @@ public interface DatasetSnapshotService {
    * @param idDatasetDestination the id dataset destination
    * @param idSnapshot the id snapshot
    * @param deleteData the delete data
+   * @param datasetType the dataset type
+   * @param user the user
    * @throws EEAException the EEA exception
    */
   void restoreSnapshotToCloneData(Long datasetOrigin, Long idDatasetDestination, Long idSnapshot,
-      Boolean deleteData, DatasetTypeEnum datasetType) throws EEAException;
+      Boolean deleteData, DatasetTypeEnum datasetType, String user) throws EEAException;
 
   /**
    * Release snapshot.

@@ -27,4 +27,11 @@ public interface EUDatasetService {
    */
   void populateEUDatasetWithDataCollection(Long dataflowId) throws EEAException;
 
+  /**
+   * Removes the locks related to populate EU.
+   *
+   * @param dataflowId the dataflow id
+   */
+  void removeLocksRelatedToPopulateEU(Long dataflowId);
+
 }

@@ -20,6 +20,13 @@ public interface EUDatasetRepository extends CrudRepository<EUDataset, Long> {
    */
   List<EUDataset> findByDataflowId(Long dataflowId);
 
-
+  /**
+   * Find by dataflow id and dataset schema.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetSchema the dataset schema
+   * @return the list
+   */
+  List<EUDataset> findByDataflowIdAndDatasetSchema(Long dataflowId, String datasetSchema);
 
 }

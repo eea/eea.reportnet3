@@ -20,7 +20,6 @@ import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
-import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.dataset.persistence.metabase.domain.SnapshotSchema;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
@@ -184,7 +183,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   private static final String FILE_PATTERN_NAME_UNIQUE = "uniqueSnapshot_%s-DesignDataset_%s";
 
   /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseServiceImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DatasetSnapshotServiceImpl.class);
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -200,10 +199,20 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   public SnapshotVO getById(Long idSnapshot) throws EEAException {
     Snapshot snapshot = snapshotRepository.findById(idSnapshot).orElse(null);
-    if (snapshot == null) {
-      throw new EEAException(String.format("Snapshot with id %s Not found", idSnapshot));
-    }
     return snapshotMapper.entityToClass(snapshot);
+  }
+
+  /**
+   * Gets the schema by id.
+   *
+   * @param idSnapshot the id snapshot
+   * @return the schema by id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public SnapshotVO getSchemaById(Long idSnapshot) throws EEAException {
+    SnapshotSchema snapshot = snapshotSchemaRepository.findById(idSnapshot).orElse(null);
+    return snapshotSchemaMapper.entityToClass(snapshot);
   }
 
   /**
@@ -238,7 +247,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   public void addSnapshot(Long idDataset, String description, Boolean released,
       Long partitionIdDestination) {
 
-    Long snapshotId = 0L;
     List<Validation> isBlocked = null;
     try {
       setTenant(idDataset);
@@ -248,15 +256,15 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       Snapshot snap = new Snapshot();
       snap.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now()));
       snap.setDescription(description);
-      ReportingDataset reportingDataset = new ReportingDataset();
+      DataSetMetabase reportingDataset = new DataSetMetabase();
       reportingDataset.setId(idDataset);
       snap.setReportingDataset(reportingDataset);
       snap.setDataSetName("snapshot from dataset_" + idDataset);
-      snap.setRelease(false);
+      snap.setRelease(released);
       snap.setBlocked(isBlocked != null && !isBlocked.isEmpty());
       snapshotRepository.save(snap);
       LOG.info("Snapshot {} created into the metabase", snap.getId());
-      snapshotId = snap.getId();
+      snap.getId();
 
       // 2. Create the data file of the snapshot, calling to recordstore-service
       // we need the partitionId. By now only consider the user root
@@ -272,13 +280,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
       recordStoreControllerZull.createSnapshotData(idDataset, snap.getId(), idPartition);
 
-
-      LOG.info("Snapshot {} data files created", snap.getId());
-      releaseEvent(EventType.ADD_DATASET_SNAPSHOT_COMPLETED_EVENT, idDataset, null);
     } catch (Exception e) {
       LOG_ERROR.error("Error creating snapshot for dataset {}", idDataset, e);
       releaseEvent(EventType.ADD_DATASET_SNAPSHOT_FAILED_EVENT, idDataset, e.getMessage());
-    } finally {
       // Release the lock manually
       List<Object> criteria = new ArrayList<>();
       criteria.add(LockSignature.CREATE_SNAPSHOT.getValue());
@@ -287,9 +291,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       lockService.removeLockByCriteria(criteria);
     }
     // release snapshot when the user press create+release
-    if (released) {
-      datasetSnapshotController.releaseSnapshot(idDataset, snapshotId);
-    }
   }
 
   /**
@@ -361,18 +362,21 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param idDatasetDestination the id dataset destination
    * @param idSnapshot the id snapshot
    * @param deleteData the delete data
+   * @param datasetType the dataset type
+   * @param user the user
    * @throws EEAException the EEA exception
    */
   @Override
   @Async
   public void restoreSnapshotToCloneData(Long datasetOrigin, Long idDatasetDestination,
-      Long idSnapshot, Boolean deleteData, DatasetTypeEnum datasetType) throws EEAException {
+      Long idSnapshot, Boolean deleteData, DatasetTypeEnum datasetType, String user)
+      throws EEAException {
 
     // 1. Delete the dataset values implied
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(datasetOrigin, "root").getId();
     recordStoreControllerZull.restoreSnapshotData(idDatasetDestination, idSnapshot, idPartition,
-        datasetType, (String) ThreadPropertiesManager.getVariable("user"), false, deleteData);
+        datasetType, user, false, deleteData);
   }
 
   /**
@@ -588,11 +592,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       Long idPartition = obtainPartition(idDataset, "root").getId();
       recordStoreControllerZull.createSnapshotData(idDataset, idSnapshot, idPartition);
       LOG.info("Snapshot schema {} data files created", idSnapshot);
-      releaseEvent(EventType.ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT, idDataset, null);
     } catch (Exception e) {
       LOG_ERROR.error("Error creating snapshot for dataset schema {}", idDataset, e);
       releaseEvent(EventType.ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT, idDataset, e.getMessage());
-    } finally {
       // Release the lock manually
       List<Object> criteria = new ArrayList<>();
       criteria.add(LockSignature.CREATE_SCHEMA_SNAPSHOT.getValue());
