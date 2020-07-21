@@ -402,7 +402,7 @@ export const BigButtonList = ({
   return (
     <>
       <div className={styles.buttonsWrapper}>
-        <div className={styles.splitButtonWrapper}>
+        <div className={`${styles.splitButtonWrapper} dataflow-big-buttons-help-step`}>
           <div className={styles.datasetItem}>{bigButtonList}</div>
         </div>
       </div>
@@ -526,7 +526,10 @@ export const BigButtonList = ({
         </ConfirmDialog>
       )}
 
-      <button ref={receiptBtnRef} style={{ display: 'none' }}>
+      <button
+        className="dataflow-big-buttons-confirmation-receipt-help-step"
+        ref={receiptBtnRef}
+        style={{ display: 'none' }}>
         <span className="srOnly">{resources.messages['confirmationReceipt']}</span>
       </button>
     </>

@@ -8,7 +8,8 @@ import isUndefined from 'lodash/isUndefined';
 import sortBy from 'lodash/sortBy';
 
 import { config } from 'conf';
-import { DataflowHelpHelpConfig } from 'conf/help/dataflowHelp';
+import { DataflowHelpReporterHelpConfig } from 'conf/help/dataflowHelp/dataflowHelp.reporter';
+import { DataflowHelpRequesterHelpConfig } from 'conf/help/dataflowHelp/dataflowHelp.requester';
 import { routes } from 'ui/routes';
 
 import { DatasetSchemas } from './_components/DatasetSchemas';
@@ -82,6 +83,11 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   useEffect(() => {
     breadCrumbContext.add([
       {
+        label: resources.messages['homeBreadcrumb'],
+        href: getUrl(routes.DATAFLOWS),
+        command: () => history.push(getUrl(routes.DATAFLOWS))
+      },
+      {
         label: resources.messages['dataflows'],
         icon: 'home',
         href: getUrl(routes.DATAFLOWS),
@@ -115,7 +121,10 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    leftSideBarContext.addHelpSteps(DataflowHelpHelpConfig, 'dataflowHelpHelp');
+    leftSideBarContext.addHelpSteps(
+      isCustodian ? DataflowHelpRequesterHelpConfig : DataflowHelpReporterHelpConfig,
+      'dataflowHelpHelp'
+    );
   }, [documents, webLinks, datasetsSchemas, selectedIndex]);
 
   // useEffect(() => {

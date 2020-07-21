@@ -1,0 +1,12 @@
+{
+  "steps": [
+    {
+      "content": "Metadata in this field will be reflected on the Dataflow help page",
+      "target": ".datasetSchema-metadata-help-step"
+    },
+    {
+      "content": "Click here to add a Table by clicking the tab with a ‘+’ icon",
+      "target": ".datasetSchema-new-table-help-step"
+    }
+  ]
+}

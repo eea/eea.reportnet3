@@ -7,6 +7,7 @@ import { config } from 'conf';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
+import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -14,6 +15,7 @@ import { EUDatasetToolbar } from './_components/EUDatasetToolbar';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
+import { TabsValidations } from 'ui/views/_components/TabsValidations';
 import { Title } from 'ui/views/_components/Title';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
 
@@ -26,7 +28,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-import { euDatasetReducer } from './_functions/euDatasetReducer';
+import { euDatasetReducer } from './_functions/Reducers/euDatasetReducer';
 
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
@@ -55,7 +57,14 @@ export const EUDataset = withRouter(({ history, match }) => {
     hasWritePermissions: false,
     isDataDeleted: false,
     isDataUpdated: false,
-    isDialogVisible: { dashboard: false, deleteData: false, importData: false, validationList: false, validate: false },
+    isDialogVisible: {
+      dashboard: false,
+      deleteData: false,
+      importData: false,
+      qcRules: false,
+      validate: false,
+      validationList: false
+    },
     isLoading: true,
     isRefreshHighlighted: false,
     isValidationSelected: false,
@@ -332,16 +341,29 @@ export const EUDataset = withRouter(({ history, match }) => {
     );
   };
 
-  const renderDialogLayout = (children, option) =>
-    isDialogVisible[option] && (
-      <Dialog
-        header={resources.messages[`${option}`]}
-        onHide={() => handleDialogs(option, false)}
-        style={{ width: '80%' }}
-        visible={isDialogVisible[option]}>
-        {children}
-      </Dialog>
+  const renderDialogLayout = (children, option) => {
+    const dialogFooter = (
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => handleDialogs(option, false)}
+      />
     );
+
+    return (
+      isDialogVisible[option] && (
+        <Dialog
+          header={resources.messages[`${option}`]}
+          footer={dialogFooter}
+          onHide={() => handleDialogs(option, false)}
+          style={{ width: '80%' }}
+          visible={isDialogVisible[option]}>
+          {children}
+        </Dialog>
+      )
+    );
+  };
 
   const renderLayout = children => (
     <MainLayout>
@@ -400,6 +422,15 @@ export const EUDataset = withRouter(({ history, match }) => {
           tableSchemaNames={euDatasetState.tableSchemaNames}
         />,
         'dashboard'
+      )}
+      {renderDialogLayout(
+        <TabsValidations
+          dataset={{ datasetId: datasetId, name: datasetSchemaName }}
+          datasetSchemaAllTables={euDatasetState.datasetSchemaAllTables}
+          datasetSchemaId={euDatasetState.datasetSchemaId}
+          reporting={true}
+        />,
+        'qcRules'
       )}
 
       {renderConfirmDialogLayout(() => onConfirmDelete(), 'deleteData')}
