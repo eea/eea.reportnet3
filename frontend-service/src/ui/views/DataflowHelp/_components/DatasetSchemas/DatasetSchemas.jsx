@@ -211,6 +211,10 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
             ? allValidations
                 .map(allValidation =>
                   allValidation.validations.map(validation => {
+                    const datasetSchema = datasetsSchemas.filter(
+                      datasetSchema => datasetSchema.datasetSchemaId === allValidation.datasetSchemaId
+                    );
+
                     const additionalInfo = getAdditionalValidationInfo(
                       validation.referenceId,
                       validation.entityType,
@@ -220,10 +224,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
                     );
                     validation.tableName = additionalInfo.tableName || '';
                     validation.fieldName = additionalInfo.fieldName || '';
-                    validation.expression = getExpressionString(validation.expressions, {
-                      label: validation.fieldName,
-                      code: validation.id
-                    });
+                    validation.expression = getExpressionString(validation, datasetSchema[0].tables);
                     validation.datasetSchemaId = allValidation.datasetSchemaId;
                     if (!isCustodian) {
                       return pick(

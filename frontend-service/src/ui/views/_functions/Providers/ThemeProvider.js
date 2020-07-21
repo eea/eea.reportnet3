@@ -291,7 +291,10 @@ export const ThemeProvider = ({ children }) => {
         'user-image-bg-hover': 'var(--main-font-color)',
         'user-image-bg-opacity': '0.6',
         'map-marker-color': 'var(--c-corporate-blue-lighter)',
-        'text-filters': 'var(--gray-75)'
+        'text-filters': 'var(--gray-75)',
+        'header-footer-bg': 'var(--gray-10)',
+        'eu-footer-bottom': 'var(--eu-footer-bottom-bg)',
+        'eu-footer-title': 'var(--gray-110)'
       },
       dark: {
         bg: 'var(--c-dark-blue)',
@@ -558,7 +561,10 @@ export const ThemeProvider = ({ children }) => {
         'user-image-bg-hover': 'var(--main-font-color)',
         'user-image-bg-opacity': '0.6',
         'map-marker-color': 'var(--white)',
-        'text-filters': 'var(--white)'
+        'text-filters': 'var(--white)',
+        'header-footer-bg': 'var(--c-dark-blue)',
+        'eu-footer-bottom': 'var(--c-dark-blue)',
+        'eu-footer-title': 'var(--white)'
       }
     }
   });
