@@ -308,7 +308,7 @@ const useBigButtonList = ({
       buttonIcon: isActiveButton ? 'siteMap' : 'spinner',
       buttonIconClass: isActiveButton ? 'siteMap' : 'spinner',
       caption: resources.messages['updateDataCollection'],
-      // helpClassName: 'dataflow-datacollection-help-step',
+      helpClassName: 'dataflow-updateNewRepresentatives-help-step',
       handleRedirect: isActiveButton ? () => onShowUpdateDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
       visibility:
