@@ -54,7 +54,7 @@ const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isRelea
             validationSchema={snapshotValidationSchema}
             onSubmit={values => {
               snapshotContext.snapshotDispatch({
-                type: 'create_snapshot',
+                type: 'CREATE_SNAPSHOT',
                 payload: {
                   description: values.createSnapshotDescription
                 }

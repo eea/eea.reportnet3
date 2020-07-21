@@ -13,7 +13,7 @@ const useSnapshotReducer = (
 
   const snapshotReducer = (state, { type, payload }) => {
     switch (type) {
-      case 'create_snapshot':
+      case 'CREATE_SNAPSHOT':
         setIsSnapshotDialogVisible(true);
 
         return {
@@ -27,7 +27,7 @@ const useSnapshotReducer = (
           action: onCreateSnapshot
         };
 
-      case 'delete_snapshot':
+      case 'DELETE_SNAPSHOT':
         setIsSnapshotDialogVisible(true);
 
         return {
@@ -41,7 +41,7 @@ const useSnapshotReducer = (
           action: onDeleteSnapshot
         };
 
-      case 'release_snapshot':
+      case 'RELEASE_SNAPSHOT':
         setIsSnapshotDialogVisible(true);
 
         return {
@@ -55,7 +55,7 @@ const useSnapshotReducer = (
           action: onReleaseSnapshot
         };
 
-      case 'restore_snapshot':
+      case 'RESTORE_SNAPSHOT':
         setIsSnapshotDialogVisible(true);
 
         return {
