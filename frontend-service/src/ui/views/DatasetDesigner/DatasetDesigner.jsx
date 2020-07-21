@@ -698,7 +698,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             className={`${styles.datasetDescription} datasetSchema-metadata-help-step`}
             collapsedHeight={55}
             expandableOnClick={true}
-            helpClassName="datasetSchema-metadata-help-step"
             id="datasetDescription"
             key="datasetDescription"
             onBlur={e => onBlurDescription(e.target.value)}
