@@ -41,7 +41,7 @@ export const EuFooter = ({ leftMargin }) => {
           url: 'https://europa.eu/european-union/contact/social-networks_en'
         },
         {
-          title: 'channels',
+          title: 'Channels',
           url: 'https://europa.eu/european-union/contact/social-networks_en'
         }
       ]
