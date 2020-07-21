@@ -82,7 +82,7 @@ public class UpdateDatacollectionFailedEventTest {
    */
   @Test
   public void getMapFromMinimumDataTest() throws EEAException {
-    Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
     Assert.assertEquals(4,
         updateDatacollectionFailedEvent
             .getMap(NotificationVO.builder().user("user").dataflowId(1L).error("error").build())
