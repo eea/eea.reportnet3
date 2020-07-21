@@ -42,7 +42,8 @@ const Snapshots = ({
         onHide={() => setIsSnapshotDialogVisible(false)}
         showHeader={false}
         visible={isSnapshotDialogVisible}>
-        <h2>{snapshotContext.snapshotState.dialogConfirmMessage}</h2>
+        <p className={styles.dialogQuestion}>{snapshotContext.snapshotState.dialogConfirmQuestion}</p>
+        <p>{snapshotContext.snapshotState.dialogConfirmMessage}</p>
         <ul>
           <li>
             <strong>{resources.messages.creationDate}: </strong>

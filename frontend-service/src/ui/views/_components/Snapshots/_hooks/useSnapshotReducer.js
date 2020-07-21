@@ -22,7 +22,8 @@ const useSnapshotReducer = (
           creationDate: Date.now(),
           description: payload.description,
           dialogMessage: resources.messages.createSnapshotMessage,
-          dialogConfirmMessage: resources.messages.createSnapshotMessage,
+          dialogConfirmMessage: resources.messages.createSnapshotConfirmationMessage,
+          dialogConfirmQuestion: resources.messages.createSnapshotConfirmationQuestion,
           action: onCreateSnapshot
         };
 
@@ -35,7 +36,8 @@ const useSnapshotReducer = (
           creationDate: payload.creationDate,
           description: payload.description,
           dialogMessage: resources.messages.deleteSnapshotMessage,
-          dialogConfirmMessage: resources.messages.deleteSnapshotMessage,
+          dialogConfirmMessage: resources.messages.deleteSnapshotConfirmationMessage,
+          dialogConfirmQuestion: resources.messages.deleteSnapshotConfirmationQuestion,
           action: onDeleteSnapshot
         };
 
@@ -48,7 +50,8 @@ const useSnapshotReducer = (
           creationDate: payload.creationDate,
           description: payload.description,
           dialogMessage: resources.messages.releaseSnapshotMessage,
-          dialogConfirmMessage: resources.messages.releaseSnapshotMessage,
+          dialogConfirmMessage: resources.messages.releaseSnapshotConfirmationMessage,
+          dialogConfirmQuestion: resources.messages.releaseSnapshotConfirmationQuestion,
           action: onReleaseSnapshot
         };
 
@@ -61,7 +64,8 @@ const useSnapshotReducer = (
           creationDate: payload.creationDate,
           description: payload.description,
           dialogMessage: resources.messages.restoreSnapshotMessage,
-          dialogConfirmMessage: resources.messages.restoreSnapshotMessage,
+          dialogConfirmMessage: resources.messages.restoreSnapshotConfirmationMessage,
+          dialogConfirmQuestion: resources.messages.restoreSnapshotConfirmationQuestion,
           action: onRestoreSnapshot
         };
 

@@ -17,6 +17,7 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
     description: '',
     dialogMessage: '',
     dialogConfirmMessage: '',
+    dialogConfirmQuestion: '',
     datasetSchemaId,
     datasetId,
     snapShotId: '',
