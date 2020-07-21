@@ -30,6 +30,8 @@ import { tabsValidationsReducer } from './Reducers/tabsValidationsReducer';
 
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
+import { getExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getExpressionString';
+
 const TabsValidations = withRouter(
   ({ dataset, datasetSchemaAllTables, datasetSchemaId, onHideValidationsDialog, reporting = false }) => {
     const notificationContext = useContext(NotificationContext);
@@ -92,6 +94,7 @@ const TabsValidations = withRouter(
             );
             validation.table = additionalInfo.tableName || '';
             validation.field = additionalInfo.fieldName || '';
+            validation.fieldName = additionalInfo.fieldName || '';
           });
         }
 
@@ -133,6 +136,8 @@ const TabsValidations = withRouter(
         {rowData.enabled ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
       </div>
     );
+
+    const expressionsTemplate = rowData => getExpressionString(rowData, datasetSchemaAllTables);
 
     const getAdditionalValidationInfo = (referenceId, entityType, relations) => {
       const additionalInfo = {};
@@ -202,15 +207,16 @@ const TabsValidations = withRouter(
         { id: 'name', index: 4 },
         { id: 'description', index: 5 },
         { id: 'message', index: 6 },
-        { id: 'entityType', index: 7 },
-        { id: 'levelError', index: 8 },
-        { id: 'automatic', index: 9 },
-        { id: 'enabled', index: 10 },
-        { id: 'referenceId', index: 11 },
-        { id: 'activationGroup', index: 12 },
-        { id: 'date', index: 13 },
-        { id: 'actionButtons', index: 14 },
-        { id: 'isCorrect', index: 15 }
+        { id: 'expressions', index: 7 },
+        { id: 'entityType', index: 8 },
+        { id: 'levelError', index: 9 },
+        { id: 'automatic', index: 10 },
+        { id: 'enabled', index: 11 },
+        { id: 'referenceId', index: 12 },
+        { id: 'activationGroup', index: 13 },
+        { id: 'date', index: 14 },
+        { id: 'actionButtons', index: 15 },
+        { id: 'isCorrect', index: 16 }
       ];
 
       return validations
@@ -311,6 +317,7 @@ const TabsValidations = withRouter(
         if (field === 'enabled') template = enabledTemplate;
         if (field === 'isCorrect') template = correctTemplate;
         if (field === 'levelError') template = levelErrorTemplate;
+        if (field === 'expressions') template = expressionsTemplate;
         return (
           <Column
             body={template}

@@ -228,8 +228,13 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         // providerId
         parameters.add(saveParameter(PROVIDER_ID, paramDataProvider));
         // folder
-        parameters.add(saveParameter("folder",
-            integrationOperationParams.get(DATASET_ID) + "/" + paramDataProvider));
+        if (null != paramDataProvider) {
+          parameters.add(saveParameter("folder",
+              integrationOperationParams.get(DATASET_ID) + "/" + paramDataProvider));
+        } else {
+          parameters.add(saveParameter("folder", integrationOperationParams.get(DATASET_ID)));
+        }
+
 
         fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Export");
@@ -241,8 +246,12 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         // inputfile
         parameters.add(saveParameter("inputfile", fileName));
         // folder
-        parameters.add(saveParameter("folder",
-            integrationOperationParams.get(DATASET_ID) + "/" + paramDataProvider));
+        if (null != paramDataProvider) {
+          parameters.add(saveParameter("folder",
+              integrationOperationParams.get(DATASET_ID) + "/" + paramDataProvider));
+        } else {
+          parameters.add(saveParameter("folder", integrationOperationParams.get(DATASET_ID)));
+        }
 
         fmeAsyncJob.setPublishedParameters(parameters);
 

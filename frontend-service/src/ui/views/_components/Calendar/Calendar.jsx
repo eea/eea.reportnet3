@@ -12,6 +12,7 @@ export const Calendar = ({
   inline,
   inputClassName,
   inputId,
+  keepInvalid,
   key,
   maxDate,
   minDate,
@@ -38,6 +39,7 @@ export const Calendar = ({
       inline={inline}
       inputClassName={inputClassName}
       inputId={inputId}
+      keepInvalid={keepInvalid}
       key={key}
       maxDate={maxDate}
       minDate={minDate}

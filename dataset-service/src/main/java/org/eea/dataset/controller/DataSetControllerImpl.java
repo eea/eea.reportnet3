@@ -100,7 +100,9 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   private DesignDatasetService designDatasetService;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
@@ -232,6 +234,45 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+  /**
+   * Load dataset data.
+   *
+   * @param datasetId the dataset id
+   * @param file the file
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping("{id}/loadDatasetData")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ')")
+  public void loadDatasetData(@PathVariable("id") final Long datasetId,
+      @RequestParam("file") final MultipartFile file) {
+
+    // check if dataset is reportable
+    if (!datasetService.isDatasetReportable(datasetId)) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, datasetId));
+    }
+
+    // filter if the file is empty
+    if (file == null || file.isEmpty()) {
+      LOG_ERROR.error(
+          "Error importing a file into a table of the datasetId {}. The file is null or empty",
+          datasetId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
+    }
+    // extract the filename
+    String fileName = file.getOriginalFilename();
+
+    // extract the file content
+    try {
+      fileTreatmentHelper.executeExternalIntegrationFileProcess(datasetId, fileName,
+          file.getInputStream());
+    } catch (IOException | EEAException e) {
+      LOG_ERROR.error("Error importing a file into dataset {}. Message: {}", datasetId,
+          e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
 
   /**
    * Delete import data.
@@ -621,6 +662,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   *
    * @return the ETL dataset VO
    */
   @Override

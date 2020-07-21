@@ -75,7 +75,8 @@ const DataFormFieldEditor = ({
     // onEditorSubmitValue(cells, coordinates.join(', '));
   };
 
-  const formatDate = date => {
+  const formatDate = (date, isInvalidDate) => {
+    if (isInvalidDate) return '';
     let d = new Date(date),
       month = '' + (d.getMonth() + 1),
       day = '' + d.getDate(),
@@ -247,13 +248,13 @@ const DataFormFieldEditor = ({
   const renderCalendar = (field, fieldValue) => {
     return (
       <Calendar
-        onChange={e => onChangeForm(field, formatDate(e.target.value))}
+        onChange={e => onChangeForm(field, formatDate(e.target.value, isNil(e.target.value)))}
         appendTo={document.body}
         baseZIndex={9999}
         dateFormat="yy-mm-dd"
         monthNavigator={true}
         style={{ width: '60px' }}
-        value={new Date(formatDate(fieldValue))}
+        value={new Date(formatDate(fieldValue, isNil(fieldValue)))}
         yearNavigator={true}
         yearRange="2010:2030"
       />

@@ -14,7 +14,8 @@ export const designerReducer = (state, { type, payload }) => {
         datasetSchemaId: payload.schemaId,
         datasetStatistics: payload.datasetStatistics,
         levelErrorTypes: payload.levelErrorTypes,
-        tableSchemaNames: payload.tableSchemaNames
+        tableSchemaNames: payload.tableSchemaNames,
+        isLoadedSchema: true
       };
 
     case 'GET_METADATA':

@@ -120,7 +120,7 @@
   --statusBox-draft-color: #694382;
   --statusBox-designer-bg: #c2c8cf;
 
-  --header-height: 4rem;
+  --header-height: 180px;
 
   /* Theme switcher */
   --bg: var(--white);
@@ -479,6 +479,9 @@
 
   /* Map */
   --map-marker-color: var(--c-corporate-blue-lighter);
+
+  /*Eu header footer*/
+  --eu-footer-bottom-bg: #d9d9d9;
 }
 body {
   margin: 0px;

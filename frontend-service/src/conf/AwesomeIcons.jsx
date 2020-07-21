@@ -5,6 +5,7 @@ import {
   faAngleDoubleRight,
   faAngleDoubleUp,
   faAngleDown,
+  faAngleUp,
   faAngleRight,
   faArchive,
   faArrowDown,
@@ -56,6 +57,7 @@ import {
   faList,
   faMapMarkedAlt,
   faMapPin,
+  faMinus,
   faPalette,
   faPaperclip,
   faPen,
@@ -111,6 +113,10 @@ export const AwesomeIcons = icon => {
       return faSortAlphaDown;
     case 'alphabeticOrderUp':
       return faSortAlphaUpAlt;
+    case 'angleUp':
+      return faAngleDoubleUp;
+    case 'angleSingleUp':
+      return faAngleUp;
     case 'angleDoubleLeft':
       return faAngleDoubleLeft;
     case 'angleDoubleRight':
