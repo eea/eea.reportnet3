@@ -3,11 +3,11 @@ import { useContext } from 'react';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const useSnapshotReducer = (
-  setIsSnapshotDialogVisible,
   onCreateSnapshot,
   onDeleteSnapshot,
+  onReleaseSnapshot,
   onRestoreSnapshot,
-  onReleaseSnapshot
+  setIsSnapshotDialogVisible
 ) => {
   const resources = useContext(ResourcesContext);
 
@@ -18,13 +18,13 @@ const useSnapshotReducer = (
 
         return {
           ...state,
-          snapShotId: '',
+          action: onCreateSnapshot,
           creationDate: Date.now(),
           description: payload.description,
-          dialogMessage: resources.messages.createSnapshotMessage,
           dialogConfirmMessage: resources.messages.createSnapshotConfirmationMessage,
           dialogConfirmQuestion: resources.messages.createSnapshotConfirmationQuestion,
-          action: onCreateSnapshot
+          dialogMessage: resources.messages.createSnapshotMessage,
+          snapShotId: ''
         };
 
       case 'DELETE_SNAPSHOT':
@@ -32,13 +32,13 @@ const useSnapshotReducer = (
 
         return {
           ...state,
-          snapShotId: payload.id,
+          action: onDeleteSnapshot,
           creationDate: payload.creationDate,
           description: payload.description,
-          dialogMessage: resources.messages.deleteSnapshotMessage,
           dialogConfirmMessage: resources.messages.deleteSnapshotConfirmationMessage,
           dialogConfirmQuestion: resources.messages.deleteSnapshotConfirmationQuestion,
-          action: onDeleteSnapshot
+          dialogMessage: resources.messages.deleteSnapshotMessage,
+          snapShotId: payload.id
         };
 
       case 'RELEASE_SNAPSHOT':
@@ -46,13 +46,13 @@ const useSnapshotReducer = (
 
         return {
           ...state,
-          snapShotId: payload.id,
+          action: onReleaseSnapshot,
           creationDate: payload.creationDate,
           description: payload.description,
-          dialogMessage: resources.messages.releaseSnapshotMessage,
           dialogConfirmMessage: resources.messages.releaseSnapshotConfirmationMessage,
           dialogConfirmQuestion: resources.messages.releaseSnapshotConfirmationQuestion,
-          action: onReleaseSnapshot
+          dialogMessage: resources.messages.releaseSnapshotMessage,
+          snapShotId: payload.id
         };
 
       case 'RESTORE_SNAPSHOT':
@@ -60,13 +60,13 @@ const useSnapshotReducer = (
 
         return {
           ...state,
-          snapShotId: payload.id,
+          action: onRestoreSnapshot,
           creationDate: payload.creationDate,
           description: payload.description,
-          dialogMessage: resources.messages.restoreSnapshotMessage,
           dialogConfirmMessage: resources.messages.restoreSnapshotConfirmationMessage,
           dialogConfirmQuestion: resources.messages.restoreSnapshotConfirmationQuestion,
-          action: onRestoreSnapshot
+          dialogMessage: resources.messages.restoreSnapshotMessage,
+          snapShotId: payload.id
         };
 
       default:
