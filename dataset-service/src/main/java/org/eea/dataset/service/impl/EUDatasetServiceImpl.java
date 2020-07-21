@@ -183,23 +183,35 @@ public class EUDatasetServiceImpl implements EUDatasetService {
    */
   private void addLocksRelatedToPopulateEU(List<ReportingDatasetVO> reportings, Long dataflowId)
       throws EEAException {
-    // Locks to avoid a provider can release a snapshot
+
     for (ReportingDatasetVO reporting : reportings) {
+      // Locks to avoid a provider can release a snapshot
       Map<String, Object> mapCriteria = new HashMap<>();
       mapCriteria.put("signature", LockSignature.RELEASE_SNAPSHOT.getValue());
       mapCriteria.put("datasetId", reporting.getId());
       lockService.createLock(new Timestamp(System.currentTimeMillis()),
           SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
           mapCriteria);
+
+      // Lock to avoid a provider can create+release a snapshot
+      Map<String, Object> mapCreateRelease = new HashMap<>();
+      mapCreateRelease.put("signature", LockSignature.CREATE_SNAPSHOT.getValue());
+      mapCreateRelease.put("datasetId", reporting.getId());
+      mapCreateRelease.put("released", true);
+      lockService.createLock(new Timestamp(System.currentTimeMillis()),
+          SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
+          mapCreateRelease);
     }
+
+
     // Lock to avoid export EUDataset while is copying data
-    /*
-     * Map<String, Object> mapCriteriaExport = new HashMap<>(); mapCriteriaExport.put("signature",
-     * LockSignature.EXPORT_EU_DATASET.getValue()); mapCriteriaExport.put("dataflowId", dataflowId);
-     * lockService.createLock(new Timestamp(System.currentTimeMillis()),
-     * SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
-     * mapCriteriaExport);
-     */
+    Map<String, Object> mapCriteriaExport = new HashMap<>();
+    mapCriteriaExport.put("signature", LockSignature.EXPORT_EU_DATASET.getValue());
+    mapCriteriaExport.put("dataflowId", dataflowId);
+    lockService.createLock(new Timestamp(System.currentTimeMillis()),
+        SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
+        mapCriteriaExport);
+
   }
 
   /**
@@ -217,19 +229,23 @@ public class EUDatasetServiceImpl implements EUDatasetService {
     lockService.removeLockByCriteria(criteria);
 
     // Release lock to the export EU
-    /*
-     * List<Object> criteriaExport = new ArrayList<>();
-     * criteriaExport.add(LockSignature.EXPORT_EU_DATASET.getValue());
-     * criteriaExport.add(dataflowId); lockService.removeLockByCriteria(criteriaExport);
-     */
+    List<Object> criteriaExport = new ArrayList<>();
+    criteriaExport.add(LockSignature.EXPORT_EU_DATASET.getValue());
+    criteriaExport.add(dataflowId);
+    lockService.removeLockByCriteria(criteriaExport);
 
-    // Release locks to avoid a provider can release a snapshot
     for (ReportingDatasetVO reporting : reportings) {
+      // Release locks to avoid a provider can release a snapshot
       List<Object> criteriaReporting = new ArrayList<>();
       criteriaReporting.add(LockSignature.RELEASE_SNAPSHOT.getValue());
       criteriaReporting.add(reporting.getId());
-
       lockService.removeLockByCriteria(criteriaReporting);
+      // Release locks to avoid a provider can create+release a snapshot
+      List<Object> criteriaCreateRelease = new ArrayList<>();
+      criteriaCreateRelease.add(LockSignature.CREATE_SNAPSHOT.getValue());
+      criteriaCreateRelease.add(reporting.getId());
+      criteriaCreateRelease.add(true);
+      lockService.removeLockByCriteria(criteriaCreateRelease);
     }
   }
 

@@ -107,7 +107,8 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE')")
   public void createSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
-      @RequestBody CreateSnapshotVO createSnapshot) {
+      @LockCriteria(name = "released",
+          path = "released") @RequestBody CreateSnapshotVO createSnapshot) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
