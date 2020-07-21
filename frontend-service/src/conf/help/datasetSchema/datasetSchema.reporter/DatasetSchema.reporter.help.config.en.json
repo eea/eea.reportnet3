@@ -1,0 +1,16 @@
+{
+  "steps": [
+    {
+      "content": "Metadata in this field will be reflected on the Dataflow help page",
+      "target": ".datasetDescription"
+    },
+    {
+      "content": "sasas",
+      "target": ".datasetSchema-export-dataset-data-help-step"
+    },
+    {
+      "content": "Filters and sort on the various metadata of the dataflows list allow you to find things easily in the dataflows list",
+      "target": ".dataflowList-left-side-bar-expand-help-step"
+    }
+  ]
+}
