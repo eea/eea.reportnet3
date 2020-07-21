@@ -93,31 +93,33 @@ const RelationExpression = ({
       <span
         onBlur={() => onAddToClickedFields('originField')}
         className={`${styles.tableField} formField ${printRequiredFieldError('originField')}`}>
+        <label htmlFor="originField">{resourcesContext.messages['originField']}</label>
         <Dropdown
           appendTo={document.body}
           disabled={isDisabled}
           onChange={e => onUpdateRelationExpressionField('originField', e.value)}
           optionLabel="label"
           options={originFields}
-          placeholder={resourcesContext.messages.originField}
+          placeholder={resourcesContext.messages['originFieldPlaceholder']}
           value={expressionValues.originField}
         />
       </span>
       <span
         onBlur={() => onAddToClickedFields('referencedField')}
         className={`${styles.tableField} formField ${printRequiredFieldError('referencedField')}`}>
+        <label htmlFor="referencedField">{resourcesContext.messages['referencedField']}</label>
         <Dropdown
           appendTo={document.body}
           disabled={isDisabled}
           onChange={e => onUpdateRelationExpressionField('referencedField', e.value)}
           optionLabel="label"
           options={referencedFields}
-          placeholder={resourcesContext.messages.referencedField}
+          placeholder={resourcesContext.messages['referencedFieldPlaceholder']}
           value={expressionValues.referencedField}
         />
       </span>
 
-      <span>
+      <span className={styles.deleteButtonWrap}>
         <Button
           className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton} p-button-animated-blink`}
           disabled={isDisabled}

@@ -47,7 +47,8 @@ public class ImportReportingFailedEventTest {
 
   @Test
   public void getEventTypeTest() {
-    Assert.assertEquals(EventType.IMPORT_REPORTING_FAILED_EVENT, loadDataFailedEvent.getEventType());
+    Assert.assertEquals(EventType.IMPORT_REPORTING_FAILED_EVENT,
+        loadDataFailedEvent.getEventType());
   }
 
   @Test
@@ -64,7 +65,7 @@ public class ImportReportingFailedEventTest {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any()))
         .thenReturn(datasetMetabaseVO);
-    Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
     Mockito.when(datasetMetabaseVO.getDatasetSchema()).thenReturn("dataseSchemaId");
     Mockito.when(dataschemaService.getTableSchemaName(Mockito.any(), Mockito.any()))
         .thenReturn("tableSchemaName");

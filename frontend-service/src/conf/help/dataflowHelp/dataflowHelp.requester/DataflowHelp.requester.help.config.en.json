@@ -1,0 +1,16 @@
+{
+  "steps": [
+    {
+      "content": "Upload the documents to support the data delivery for example reporting guidance or templates",
+      "target": ".dataflowHelp-documents-help-step"
+    },
+    {
+      "content": "Add the web links to external resources relevant to the reporting",
+      "target": ".dataflowHelp-weblinks-help-step"
+    },
+    {
+      "content": "View the information on the dataset schema – QC rules, table and field names and descriptions",
+      "target": ".dataflowHelp-schemas-help-step"
+    }
+  ]
+}
