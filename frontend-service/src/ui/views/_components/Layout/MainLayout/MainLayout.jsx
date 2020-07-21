@@ -29,7 +29,8 @@ const MainLayout = ({ children }) => {
   const [margin, setMargin] = useState('50px');
   const [leftSideBarStyle, setLeftSideBarStyle] = useState({});
   const [mainContentStyle, setMainContentStyle] = useState({
-    height: `${window.innerHeight - 180}px`
+    height: `${window.innerHeight - 180}px`,
+    minHeight: `${window.innerHeight - 180}px`
   });
 
   const getUserConfiguration = async () => {
@@ -66,10 +67,9 @@ const MainLayout = ({ children }) => {
 
     if (!isEmpty(mainContentStyle) && header.clientHeight + pageContent.children[0].clientHeight > window.innerHeight) {
       setMainContentStyle({
-        height: 'auto'
+        height: 'auto',
+        minHeight: `${window.innerHeight - 180}px`
       });
-    } else {
-      setMainContentStyle({ height: `${window.innerHeight - 180}px` });
     }
   };
 
