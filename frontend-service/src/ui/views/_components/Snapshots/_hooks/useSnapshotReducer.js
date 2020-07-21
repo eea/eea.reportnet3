@@ -13,52 +13,60 @@ const useSnapshotReducer = (
 
   const snapshotReducer = (state, { type, payload }) => {
     switch (type) {
-      case 'create_snapshot':
+      case 'CREATE_SNAPSHOT':
         setIsSnapshotDialogVisible(true);
 
         return {
           ...state,
-          snapShotId: '',
+          action: onCreateSnapshot,
           creationDate: Date.now(),
           description: payload.description,
+          dialogConfirmMessage: resources.messages.createSnapshotConfirmationMessage,
+          dialogConfirmQuestion: resources.messages.createSnapshotConfirmationQuestion,
           dialogMessage: resources.messages.createSnapshotMessage,
-          action: onCreateSnapshot
+          snapShotId: ''
         };
 
-      case 'delete_snapshot':
+      case 'DELETE_SNAPSHOT':
         setIsSnapshotDialogVisible(true);
 
         return {
           ...state,
-          snapShotId: payload.id,
+          action: onDeleteSnapshot,
           creationDate: payload.creationDate,
           description: payload.description,
+          dialogConfirmMessage: resources.messages.deleteSnapshotConfirmationMessage,
+          dialogConfirmQuestion: resources.messages.deleteSnapshotConfirmationQuestion,
           dialogMessage: resources.messages.deleteSnapshotMessage,
-          action: onDeleteSnapshot
+          snapShotId: payload.id
         };
 
-      case 'release_snapshot':
+      case 'RELEASE_SNAPSHOT':
         setIsSnapshotDialogVisible(true);
 
         return {
           ...state,
-          snapShotId: payload.id,
+          action: onReleaseSnapshot,
           creationDate: payload.creationDate,
           description: payload.description,
+          dialogConfirmMessage: resources.messages.releaseSnapshotConfirmationMessage,
+          dialogConfirmQuestion: resources.messages.releaseSnapshotConfirmationQuestion,
           dialogMessage: resources.messages.releaseSnapshotMessage,
-          action: onReleaseSnapshot
+          snapShotId: payload.id
         };
 
-      case 'restore_snapshot':
+      case 'RESTORE_SNAPSHOT':
         setIsSnapshotDialogVisible(true);
 
         return {
           ...state,
-          snapShotId: payload.id,
+          action: onRestoreSnapshot,
           creationDate: payload.creationDate,
           description: payload.description,
+          dialogConfirmMessage: resources.messages.restoreSnapshotConfirmationMessage,
+          dialogConfirmQuestion: resources.messages.restoreSnapshotConfirmationQuestion,
           dialogMessage: resources.messages.restoreSnapshotMessage,
-          action: onRestoreSnapshot
+          snapShotId: payload.id
         };
 
       default:
