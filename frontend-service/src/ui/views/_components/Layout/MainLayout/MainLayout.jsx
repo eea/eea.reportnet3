@@ -29,7 +29,7 @@ const MainLayout = ({ children }) => {
   const [margin, setMargin] = useState('50px');
   const [leftSideBarStyle, setLeftSideBarStyle] = useState({});
   const [mainContentStyle, setMainContentStyle] = useState({
-    height: `${window.innerHeight - 196}px`
+    height: `${window.innerHeight - 180}px`
   });
 
   const getUserConfiguration = async () => {
@@ -60,7 +60,7 @@ const MainLayout = ({ children }) => {
     }
   }, []);
 
-  useEffect(() => {
+  const calculateMainContentHeight = () => {
     const header = document.getElementById('header');
     const pageContent = document.getElementById('pageContent');
 
@@ -68,7 +68,20 @@ const MainLayout = ({ children }) => {
       setMainContentStyle({
         height: 'auto'
       });
+    } else {
+      setMainContentStyle({ height: `${window.innerHeight - 180}px` });
     }
+  };
+
+  useEffect(() => {
+    window.addEventListener('resize', calculateMainContentHeight);
+    return () => {
+      window.removeEventListener('resize', calculateMainContentHeight);
+    };
+  });
+
+  useEffect(() => {
+    calculateMainContentHeight();
   }, [children]);
 
   useEffect(() => {
