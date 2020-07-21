@@ -463,14 +463,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         criteria.add(LockSignature.CREATE_SNAPSHOT.getValue());
         criteria.add(idDataset);
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
-        criteria.add(snapshot.getForceRelease());
+        criteria.add(snapshot.getRelease());
         lockService.removeLockByCriteria(criteria);
       }
       if ("schema".equals(type)) {
         List<Object> criteria2 = new ArrayList<>();
         criteria2.add(LockSignature.CREATE_SCHEMA_SNAPSHOT.getValue());
         criteria2.add(idDataset);
-        lockService.removeLockByCriteria(criteria);
+        lockService.removeLockByCriteria(criteria2);
       }
     }
   }
@@ -536,7 +536,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     switch (type) {
       case "dataset":
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
-        if (Boolean.TRUE.equals(snapshot.getForceRelease())) {
+        if (Boolean.TRUE.equals(snapshot.getRelease())) {
           dataSetSnapshotControllerZuul.releaseSnapshot(idDataset, idSnapshot);
         }
         kafkaSenderUtils.releaseNotificableKafkaEvent(
@@ -695,6 +695,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
     Long datasetIdFromSnapshot = snapshot.getDatasetId();
 
+
     try (
         Connection con = DriverManager.getConnection(conexion.getConnectionString(),
             conexion.getUser(), conexion.getPassword());
@@ -803,7 +804,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       List<Object> criteria = new ArrayList<>();
       criteria.add(signature);
       criteria.add(datasetIdFromSnapshot);
-
       lockService.removeLockByCriteria(criteria);
     }
 

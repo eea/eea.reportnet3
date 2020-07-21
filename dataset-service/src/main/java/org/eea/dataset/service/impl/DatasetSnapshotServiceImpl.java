@@ -260,9 +260,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       reportingDataset.setId(idDataset);
       snap.setReportingDataset(reportingDataset);
       snap.setDataSetName("snapshot from dataset_" + idDataset);
-      snap.setRelease(false);
+      snap.setRelease(released);
       snap.setBlocked(isBlocked != null && !isBlocked.isEmpty());
-      snap.setForceRelease(released);
       snapshotRepository.save(snap);
       LOG.info("Snapshot {} created into the metabase", snap.getId());
       snap.getId();

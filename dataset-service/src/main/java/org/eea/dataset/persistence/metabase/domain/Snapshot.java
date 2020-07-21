@@ -47,9 +47,6 @@ public class Snapshot extends DataSetMetabase {
   @Column(name = "BLOCKED")
   private Boolean blocked;
 
-  /** The force release. */
-  @Column(name = "FORCE_RELEASE")
-  private Boolean forceRelease;
 
 
   /**
