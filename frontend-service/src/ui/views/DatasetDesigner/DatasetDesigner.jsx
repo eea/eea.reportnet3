@@ -9,8 +9,9 @@ import uniq from 'lodash/uniq';
 import styles from './DatasetDesigner.module.scss';
 
 import { config } from 'conf';
-import { DatasetSchemaRequesterHelpConfig } from 'conf/help/datasetSchema/datasetSchema.requester';
-import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/datasetSchema.reporter';
+import { DatasetSchemaRequesterEmptyHelpConfig } from 'conf/help/datasetSchema/requester/empty';
+import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchema/requester/withTabs';
+import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/reporter';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { routes } from 'ui/routes';
 
@@ -91,7 +92,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     isImportDatasetDialogVisible: false,
     isIntegrationListDialogVisible: false,
     isIntegrationManageDialogVisible: false,
-    isLoadedSchema: false,
     isLoading: true,
     isLoadingFile: false,
     isManageUniqueConstraintDialogVisible: false,
@@ -174,12 +174,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       if (userContext.accessRole[0] === 'DATA_CUSTODIAN') {
-        leftSideBarContext.addHelpSteps(DatasetSchemaRequesterHelpConfig, 'datasetSchemaRequesterHelpConfig');
+        console.log('designerState', designerState);
+        leftSideBarContext.addHelpSteps(DatasetSchemaRequesterEmptyHelpConfig, 'datasetSchemaRequesterHelpConfig');
       } else {
         leftSideBarContext.addHelpSteps(DatasetSchemaReporterHelpConfig, 'datasetSchemaReporterHelpConfig');
       }
     }
-  }, [userContext, designerDispatch.isLoadedSchema]);
+  }, [userContext, designerState]);
 
   useEffect(() => {
     if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener)
