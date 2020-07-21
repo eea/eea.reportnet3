@@ -779,6 +779,14 @@
     "dataflowReporterHelp": "My dataflow",
     "dataflowRequesterHelp": "My dataflow",
     "datasetSchemaReporterHelpConfig": "My reporting dataset",
-    "datasetSchemaRequesterHelpConfig": "My schema"
+    "datasetSchemaRequesterHelpConfig": "My schema",
+    "createSnapshotConfirmationMessage": "Copy you are creating:",
+    "deleteSnapshotConfirmationMessage": "Copy you are deleting:",
+    "releaseSnapshotConfirmationMessage": "Copy you are releasing:",
+    "restoreSnapshotConfirmationMessage": "Copy you are restoring:",
+    "createSnapshotConfirmationQuestion": "Are you sure you what to create this copy?",
+    "deleteSnapshotConfirmationQuestion": "Are you sure you what to delete this copy?",
+    "releaseSnapshotConfirmationQuestion": "Are you sure you what to release this copy to the data collection?",
+    "restoreSnapshotConfirmationQuestion": "Are you sure you what to restore this copy?"
   }
 }
