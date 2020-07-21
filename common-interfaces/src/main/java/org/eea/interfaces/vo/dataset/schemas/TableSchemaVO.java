@@ -10,6 +10,12 @@ import lombok.ToString;
  */
 @Getter
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 public class TableSchemaVO {
 
@@ -23,14 +29,16 @@ public class TableSchemaVO {
   private String nameTableSchema;
 
   /** The read only. */
-  private Boolean readOnly;
+  private boolean readOnly;
 
   /** The record schema. */
   private RecordSchemaVO recordSchema;
 
   /** The to prefill. */
-  private Boolean toPrefill;
+  private boolean toPrefill;
 
+  /** The not empty. */
+  private boolean notEmpty;
 
   /**
    * Hash code.
@@ -39,7 +47,7 @@ public class TableSchemaVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idTableSchema, description, nameTableSchema, recordSchema);
+    return Objects.hash(idTableSchema, description, nameTableSchema, recordSchema, notEmpty);
   }
 
   /**
@@ -60,6 +68,7 @@ public class TableSchemaVO {
     return Objects.equals(idTableSchema, other.idTableSchema)
         && Objects.equals(description, other.description)
         && Objects.equals(nameTableSchema, other.nameTableSchema)
-        && Objects.equals(recordSchema, other.recordSchema);
+        && Objects.equals(recordSchema, other.recordSchema)
+        && Objects.equals(notEmpty, other.notEmpty);
   }
 }

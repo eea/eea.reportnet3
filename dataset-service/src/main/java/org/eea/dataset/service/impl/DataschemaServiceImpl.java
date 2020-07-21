@@ -360,6 +360,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     RecordSchemaVO recordSchemaVO = new RecordSchemaVO();
     recordSchemaVO.setIdRecordSchema(recordSchemaId.toString());
     tableSchemaVO.setRecordSchema(recordSchemaVO);
+    tableSchemaVO.setToPrefill(Boolean.TRUE);
     return (tableSchemaVO);
   }
 
@@ -393,7 +394,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (tableSchemaVO.getToPrefill() != null) {
           tableSchema.put("toPrefill", tableSchemaVO.getToPrefill());
         }
-
+        if (tableSchemaVO.getNotEmpty() != null) {
+          tableSchema.put("notEmpty", tableSchemaVO.getNotEmpty());
+        }
         // Guardar el TableSchema modificado en MongoDB
         if (schemasRepository.updateTableSchema(datasetSchemaId, tableSchema)
             .getModifiedCount() == 1) {

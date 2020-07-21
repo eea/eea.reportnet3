@@ -13,6 +13,12 @@ import lombok.ToString;
  */
 @Getter
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 public class TableSchema {
   /** The id table schema. */
@@ -35,12 +41,15 @@ public class TableSchema {
 
   /** The read only. */
   @Field(value = "readOnly")
-  private Boolean readOnly;
+  private boolean readOnly;
 
   /** The to prefill. */
   @Field(value = "toPrefill")
-  private Boolean toPrefill;
+  private boolean toPrefill;
 
+  /** The not empty. */
+  @Field(value = "notEmpty")
+  private boolean notEmpty;
 
   /** The record schema. */
   @Field(value = "recordSchema")
@@ -53,7 +62,8 @@ public class TableSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataSet, idTableSchema, nameTableSchema, recordSchema, description);
+    return Objects.hash(idDataSet, idTableSchema, nameTableSchema, recordSchema, description,
+        notEmpty);
   }
 
   /**
@@ -75,7 +85,8 @@ public class TableSchema {
         && Objects.equals(idTableSchema, other.idTableSchema)
         && Objects.equals(nameTableSchema, other.nameTableSchema)
         && Objects.equals(recordSchema, other.recordSchema)
-        && Objects.equals(description, other.description);
+        && Objects.equals(description, other.description)
+        && Objects.equals(notEmpty, other.notEmpty);
   }
 
 

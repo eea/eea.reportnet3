@@ -189,3 +189,11 @@ function boolean isUniqueConstraint(String uniqueIdConstraint,String idRule){
 function boolean isIntegrityConstraint(DatasetValue datasetId,String integrityId, String idRule){
 	return UniqueValidationUtils.isIntegrityConstraint(datasetId,integrityId,idRule);
 }
+
+//////////////////////////////////////////VALIDATION TABLE FILLED////////////////////////////////////////////////////////////
+function boolean isTableEmpty(RecordValue records){
+	if(null == records || records.isEmpty()){
+		return false;
+	}
+	return true;
+}
