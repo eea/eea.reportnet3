@@ -12,6 +12,9 @@ import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { routes } from 'ui/routes';
 
+import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/datasetSchema.reporter';
+import { DatasetSchemaRequesterHelpConfig } from 'conf/help/datasetSchema/datasetSchema.requester';
+
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
@@ -115,6 +118,7 @@ export const Dataset = withRouter(({ match, history }) => {
           command: () => history.push(getUrl(routes.DATAFLOWS))
         },
         {
+          className: 'datasetSchema-breadcrumb-back-help-step',
           label: resources.messages['dataflow'],
           icon: 'clone',
           href: getUrl(
@@ -168,6 +172,10 @@ export const Dataset = withRouter(({ match, history }) => {
       );
     }
   }, [userContext]);
+
+  // useEffect(() => {
+  //   leftSideBarContext.addHelpSteps(DatasetSchemaReporterHelpConfig, 'datasetSchemaHelpConfig');
+  // }, [userContext]);
 
   useEffect(() => {
     onLoadDatasetSchema();
@@ -597,10 +605,10 @@ export const Dataset = withRouter(({ match, history }) => {
       />
       <div className={styles.ButtonsBar}>
         <Toolbar>
-          <div className="p-toolbar-group-left">
+          <div className="p-toolbar-group-left datasetSchema-buttonsbar-dataset-data-help-step">
             {hasWritePermissions && !isEmpty(extensionsOperationsList.import) && (
               <Button
-                className={`p-button-rounded p-button-secondary ${
+                className={`p-button-rounded p-button-secondary datasetSchema-buttonsbar-dataset-data-help-step ${
                   !hasWritePermissions ? null : 'p-button-animated-blink'
                 }`}
                 disabled={!hasWritePermissions}
