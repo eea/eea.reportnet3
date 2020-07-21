@@ -33,6 +33,7 @@ const EULogin = ({ location, history }) => {
   }, []);
   return (
     <div className="rp-container">
+      {console.log('EULogin')}
       <div className={`${styles.loginBoxContainer}`}>
         {isLoading && <img className={styles.logo} alt="EEA logo" src={logo} />}
       </div>

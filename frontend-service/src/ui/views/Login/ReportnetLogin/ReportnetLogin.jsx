@@ -32,6 +32,7 @@ const ReportnetLogin = ({ history }) => {
   });
   return (
     <div className="rp-container login">
+      {console.log('ReportnetLogin')}
       <div className={`${styles.loginBoxContainer}`}>
         <div className={`${styles.loginBox}`}>
           <div className={styles.logo}>
