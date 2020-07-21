@@ -2,6 +2,8 @@ import React, { useContext } from 'react';
 
 import styles from './BreadCrumb.module.scss';
 
+import isNil from 'lodash/isNil';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
@@ -40,7 +42,9 @@ export const BreadCrumb = ({ className, id, style }) => {
             event.preventDefault();
             onItemClick(event, item);
           }}>
-          <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons(item.icon)} />
+          {!isNil(item.icon) && (
+            <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons(item.icon)} />
+          )}
           <span className="p-menuitem-text">{item.label}</span>
         </a>
       </li>

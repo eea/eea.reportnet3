@@ -20,6 +20,11 @@ const PrivacyStatement = withRouter(({ history }) => {
   useEffect(() => {
     breadCrumbContext.add([
       {
+        label: resources.messages['homeBreadcrumb'],
+        href: getUrl(routes.DATAFLOWS),
+        command: () => history.push(getUrl(routes.DATAFLOWS))
+      },
+      {
         label: '',
         icon: 'home',
         href: getUrl(routes.DATAFLOWS),

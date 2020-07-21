@@ -74,8 +74,16 @@ export const BigButtonList = ({
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
   useCheckNotifications(['UPDATE_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
-  useCheckNotifications(['', ''], setIsCopyDataCollectionToEuDatasetLoading, false);
-  useCheckNotifications(['', ''], setIsExportEuDatasetLoading, false);
+  useCheckNotifications(
+    ['COPY_DATA_TO_EUDATASET_COMPLETED_EVENT', 'COPY_DATA_TO_EUDATASET_FAILED_EVENT'],
+    setIsCopyDataCollectionToEuDatasetLoading,
+    false
+  );
+  useCheckNotifications(
+    ['EXTERNAL_EXPORT_EUDATASET_COMPLETED_EVENT', 'EXTERNAL_EXPORT_EUDATASET_FAILED_EVENT'],
+    setIsExportEuDatasetLoading,
+    false
+  );
 
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
@@ -279,34 +287,38 @@ export const BigButtonList = ({
   };
 
   const onCopyDataCollectionToEuDataset = async () => {
-    notificationContext.add({ type: 'COPY_TO_EU_DATASET_INIT' });
     setIsCopyDataCollectionToEuDatasetLoading(true);
 
     try {
-      await EuDatasetService.copyDataCollection(dataflowId);
+      const response = await EuDatasetService.copyDataCollection(dataflowId);
+      if (response.status >= 200 && response.status <= 299) {
+        notificationContext.add({ type: 'COPY_TO_EU_DATASET_INIT' });
+      }
     } catch (error) {
       setIsCopyDataCollectionToEuDatasetLoading(false);
 
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });        
-      } else {        
+        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });
+      } else {
         notificationContext.add({ type: 'COPY_DATA_COLLECTION_EU_DATASET_ERROR' });
       }
     }
   };
 
   const onExportEuDataset = async () => {
-    notificationContext.add({ type: 'EXPORT_EU_DATASET_INIT' })
-    setIsExportEuDatasetLoading(true)
+    setIsExportEuDatasetLoading(true);
 
     try {
-      await EuDatasetService.exportEuDataset(dataflowId);
+      const response = await EuDatasetService.exportEuDataset(dataflowId);
+      if (response.status >= 200 && response.status <= 299) {
+        notificationContext.add({ type: 'EXPORT_EU_DATASET_INIT' });
+      }
     } catch (error) {
-      setIsExportEuDatasetLoading(false)
+      setIsExportEuDatasetLoading(false);
 
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });               
-      } else {        
+        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });
+      } else {
         notificationContext.add({ type: 'EXPORT_EU_DATASET_ERROR' });
       }
     }
@@ -390,7 +402,7 @@ export const BigButtonList = ({
   return (
     <>
       <div className={styles.buttonsWrapper}>
-        <div className={styles.splitButtonWrapper}>
+        <div className={`${styles.splitButtonWrapper} dataflow-big-buttons-help-step`}>
           <div className={styles.datasetItem}>{bigButtonList}</div>
         </div>
       </div>
@@ -514,7 +526,10 @@ export const BigButtonList = ({
         </ConfirmDialog>
       )}
 
-      <button ref={receiptBtnRef} style={{ display: 'none' }}>
+      <button
+        className="dataflow-big-buttons-confirmation-receipt-help-step"
+        ref={receiptBtnRef}
+        style={{ display: 'none' }}>
         <span className="srOnly">{resources.messages['confirmationReceipt']}</span>
       </button>
     </>

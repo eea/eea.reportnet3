@@ -6,7 +6,8 @@ import isNil from 'lodash/isNil';
 import styles from './Dataflows.module.scss';
 
 import { config } from 'conf';
-import { DataflowsHelpConfig } from 'conf/help/dataflows';
+import { DataflowsRequesterHelpConfig } from 'conf/help/dataflows/dataflows.requester';
+import { DataflowsReporterHelpConfig } from 'conf/help/dataflows/dataflows.reporter';
 
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { DataflowsList } from './_components/DataflowsList';
@@ -69,7 +70,14 @@ const Dataflows = withRouter(({ match, history }) => {
 
   //Bread Crumbs settings
   useEffect(() => {
-    breadCrumbContext.add([{ label: resources.messages['dataflows'], icon: 'home' }]);
+    breadCrumbContext.add([
+      {
+        label: resources.messages['homeBreadcrumb'],
+        href: getUrl(routes.DATAFLOWS),
+        command: () => history.push(getUrl(routes.DATAFLOWS))
+      },
+      { label: resources.messages['dataflows'], icon: 'home' }
+    ]);
   }, []);
 
   useEffect(() => {
@@ -80,7 +88,7 @@ const Dataflows = withRouter(({ match, history }) => {
     if (dataflowsState.isCustodian) {
       leftSideBarContext.addModels([
         {
-          className: 'dataflowList-create-dataflow-help-step',
+          className: 'dataflowList-left-side-bar-create-dataflow-help-step',
           icon: 'plus',
           label: 'createNewDataflow',
           onClick: () => manageDialogs('isAddDialogVisible', true),
@@ -93,7 +101,10 @@ const Dataflows = withRouter(({ match, history }) => {
   }, [dataflowsState.isCustodian]);
 
   useEffect(() => {
-    leftSideBarContext.addHelpSteps(DataflowsHelpConfig, 'dataflowListHelp');
+    leftSideBarContext.addHelpSteps(
+      dataflowsState.isCustodian ? DataflowsRequesterHelpConfig : DataflowsReporterHelpConfig,
+      'dataflowListHelp'
+    );
   }, [dataflowsState]);
 
   const dataFetch = async () => {

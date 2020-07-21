@@ -5,7 +5,10 @@ import org.eea.interfaces.controller.dataflow.integration.fme.FMEController;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
 import org.eea.interfaces.vo.integration.fme.FMEOperationInfoVO;
 import org.eea.thread.ThreadPropertiesManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
@@ -27,6 +31,9 @@ public class FMEControllerImpl implements FMEController {
   /** The FME communication service. */
   @Autowired
   private FMECommunicationService fmeCommunicationService;
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Find repositories.
@@ -70,7 +77,13 @@ public class FMEControllerImpl implements FMEController {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
-    fmeCommunicationService.operationFinished(fmeOperationInfoVO);
+    try {
+      fmeCommunicationService.operationFinished(fmeOperationInfoVO);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in the operationFinished controller with the message: {}",
+          e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
 
 }
