@@ -96,13 +96,13 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
             onAddNewRelation={onAddNewRelation}
             onDatasetSchemaChange={onDatasetSchemaChange}
             onDoubleReferencedChange={onDoubleReferencedChange}
+            onExpressionTypeToggle={onExpressionTypeToggle}
+            onGetFieldType={onGetFieldType}
             onInfoFieldChange={onInfoFieldChange}
             onReferencedTableChange={onReferencedTableChange}
             onRelationDelete={onRelationDelete}
             onRelationFieldUpdate={onRelationFieldUpdate}
             onRelationsErrors={onRelationsErrors}
-            onExpressionTypeToggle={onExpressionTypeToggle}
-            onGetFieldType={onGetFieldType}
             showRequiredFields={tabsChanges.expression}
             tabsChanges={tabsChanges}
           />
@@ -555,7 +555,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
                       disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
                       icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
                       id={`${componentName}__update`}
-                      label={resourcesContext.messages.update}
+                      label={resourcesContext.messages['update']}
                       onClick={() => onUpdateValidationRule()}
                       type="button"
                     />
@@ -571,7 +571,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
                       }
                       icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
                       id={`${componentName}__create`}
-                      label={resourcesContext.messages.create}
+                      label={resourcesContext.messages['create']}
                       onClick={() => onCreateValidationRule()}
                       type="button"
                     />
@@ -579,7 +579,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
                 )}
                 {(creationFormState.isValidationCreationDisabled || isSubmitDisabled) && (
                   <ReactTooltip className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
-                    <span>{resourcesContext.messages.fcSubmitButtonDisabled}</span>
+                    <span>{resourcesContext.messages['fcSubmitButtonDisabled']}</span>
                   </ReactTooltip>
                 )}
 
@@ -587,7 +587,7 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
                   className="p-button-secondary p-button-text-icon-left"
                   icon="cancel"
                   id={`${componentName}__cancel`}
-                  label={resourcesContext.messages.cancel}
+                  label={resourcesContext.messages['cancel']}
                   onClick={() => onHide()}
                   type="button"
                 />
