@@ -31,6 +31,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -118,13 +119,17 @@ public class FMECommunicationService {
     Map<String, String> headerInfo = new HashMap<>();
     headerInfo.put(CONTENT_TYPE, APPLICATION_JSON);
 
-    HttpEntity<FMEAsyncJob> request = createHttpRequest(fmeAsyncJob, uriParams, headerInfo);
-    ResponseEntity<SubmitResult> checkResult =
-        this.restTemplate.exchange(
-            uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
-                .path("fmerest/v3/transformations/submit/{repository}/{workspace}")
-                .buildAndExpand(uriParams).toString(),
-            HttpMethod.POST, request, SubmitResult.class);
+    ResponseEntity<SubmitResult> checkResult = null;
+    try {
+      HttpEntity<FMEAsyncJob> request = createHttpRequest(fmeAsyncJob, uriParams, headerInfo);
+      checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
+          .path("fmerest/v3/transformations/submit/{repository}/{workspace}")
+          .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, SubmitResult.class);
+      LOG.info("FME called successfully: HTTP:{}", checkResult.getStatusCode());
+    } catch (HttpStatusCodeException exception) {
+      LOG_ERROR.error("Status code: {} message: {}", exception.getStatusCode().value(),
+          exception.getMessage());
+    }
 
     return checkResult != null && checkResult.getBody() != null ? checkResult.getBody().getId() : 0;
   }
@@ -144,18 +149,24 @@ public class FMECommunicationService {
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("datasetId", String.valueOf(idDataset));
-    uriParams.put("providerId", idProvider);
+    String path =
+        "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}?createDirectories=true&overwrite=true";
+    if (null != idProvider) {
+      uriParams.put("providerId", idProvider);
+      path =
+          "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}?createDirectories=true&overwrite=true";
+    }
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
     headerInfo.put("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
     headerInfo.put(CONTENT_TYPE, "application/octet-stream");
     headerInfo.put(ACCEPT, APPLICATION_JSON);
     HttpEntity<byte[]> request = createHttpRequest(file, uriParams, headerInfo);
-    ResponseEntity<FileSubmitResult> checkResult = this.restTemplate.exchange(uriComponentsBuilder
-        .scheme(fmeScheme).host(fmeHost)
-        .path(
-            "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}?createDirectories=true&overwrite=true")
-        .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, FileSubmitResult.class);
+    ResponseEntity<FileSubmitResult> checkResult =
+        this.restTemplate.exchange(
+            uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(path)
+                .buildAndExpand(uriParams).toString(),
+            HttpMethod.POST, request, FileSubmitResult.class);
 
     FileSubmitResult result = new FileSubmitResult();
     if (null != checkResult.getBody()) {
