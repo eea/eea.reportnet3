@@ -22,6 +22,7 @@ const useSnapshotReducer = (
           creationDate: Date.now(),
           description: payload.description,
           dialogMessage: resources.messages.createSnapshotMessage,
+          dialogConfirmMessage: resources.messages.createSnapshotMessage,
           action: onCreateSnapshot
         };
 
@@ -34,6 +35,7 @@ const useSnapshotReducer = (
           creationDate: payload.creationDate,
           description: payload.description,
           dialogMessage: resources.messages.deleteSnapshotMessage,
+          dialogConfirmMessage: resources.messages.deleteSnapshotMessage,
           action: onDeleteSnapshot
         };
 
@@ -46,6 +48,7 @@ const useSnapshotReducer = (
           creationDate: payload.creationDate,
           description: payload.description,
           dialogMessage: resources.messages.releaseSnapshotMessage,
+          dialogConfirmMessage: resources.messages.releaseSnapshotMessage,
           action: onReleaseSnapshot
         };
 
@@ -58,6 +61,7 @@ const useSnapshotReducer = (
           creationDate: payload.creationDate,
           description: payload.description,
           dialogMessage: resources.messages.restoreSnapshotMessage,
+          dialogConfirmMessage: resources.messages.restoreSnapshotMessage,
           action: onRestoreSnapshot
         };
 
