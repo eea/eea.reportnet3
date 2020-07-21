@@ -7,10 +7,6 @@
     {
       "content": "Click here to add a Table by clicking the tab with a ‘+’ icon",
       "target": ".datasetSchema-new-table-help-step"
-    },
-    {
-      "content": "TES TEST and sort on the various metadata of the dataflows list allow you to find things easily in the dataflows list",
-      "target": ".dataflowList-left-side-bar-expand-help-step"
     }
   ]
 }

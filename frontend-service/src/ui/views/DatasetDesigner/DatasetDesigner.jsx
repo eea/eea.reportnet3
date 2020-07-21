@@ -91,6 +91,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     isImportDatasetDialogVisible: false,
     isIntegrationListDialogVisible: false,
     isIntegrationManageDialogVisible: false,
+    isLoadedSchema: false,
     isLoading: true,
     isLoadingFile: false,
     isManageUniqueConstraintDialogVisible: false,
@@ -168,14 +169,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       if (userContext.accessRole[0] === 'DATA_CUSTODIAN') {
-        console.log(userContext.accessRole[0], userContext.accessRole[0] === 'DATA_CUSTODIAN');
         leftSideBarContext.addHelpSteps(DatasetSchemaRequesterHelpConfig, 'datasetSchemaRequesterHelpConfig');
       } else {
-        console.log(userContext.accessRole[0]);
         leftSideBarContext.addHelpSteps(DatasetSchemaReporterHelpConfig, 'datasetSchemaReporterHelpConfig');
       }
     }
-  }, [userContext]);
+  }, [userContext, designerDispatch.isLoadedSchema]);
 
   useEffect(() => {
     if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener)
