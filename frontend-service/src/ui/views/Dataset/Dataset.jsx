@@ -12,7 +12,8 @@ import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { routes } from 'ui/routes';
 
-import { DatasetSchemaHelpConfig } from 'conf/help/datasetSchema';
+import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/datasetSchema.reporter';
+import { DatasetSchemaRequesterHelpConfig } from 'conf/help/datasetSchema/datasetSchema.requester';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -167,9 +168,9 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   }, [userContext]);
 
-  useEffect(() => {
-    leftSideBarContext.addHelpSteps(DatasetSchemaHelpConfig, 'datasetSchemaHelpConfig');
-  }, [userContext]);
+  // useEffect(() => {
+  //   leftSideBarContext.addHelpSteps(DatasetSchemaReporterHelpConfig, 'datasetSchemaHelpConfig');
+  // }, [userContext]);
 
   useEffect(() => {
     onLoadDatasetSchema();

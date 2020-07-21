@@ -9,6 +9,8 @@ import uniq from 'lodash/uniq';
 import styles from './DatasetDesigner.module.scss';
 
 import { config } from 'conf';
+import { DatasetSchemaRequesterHelpConfig } from 'conf/help/datasetSchema/datasetSchema.requester';
+import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/datasetSchema.reporter';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { routes } from 'ui/routes';
 
@@ -162,6 +164,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     leftSideBarContext.removeModels();
     callSetMetaData();
   }, []);
+
+  useEffect(() => {
+    if (!isUndefined(userContext.contextRoles)) {
+      if (userContext.accessRole[0] === 'DATA_CUSTODIAN') {
+        console.log(userContext.accessRole[0], userContext.accessRole[0] === 'DATA_CUSTODIAN');
+        leftSideBarContext.addHelpSteps(DatasetSchemaRequesterHelpConfig, 'datasetSchemaRequesterHelpConfig');
+      } else {
+        console.log(userContext.accessRole[0]);
+        leftSideBarContext.addHelpSteps(DatasetSchemaReporterHelpConfig, 'datasetSchemaReporterHelpConfig');
+      }
+    }
+  }, [userContext]);
 
   useEffect(() => {
     if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener)
@@ -677,9 +691,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         <h4 className={styles.descriptionLabel}>{resources.messages['newDatasetSchemaDescriptionPlaceHolder']}</h4>
         <div className={styles.ButtonsBar}>
           <InputTextarea
-            className={styles.datasetDescription}
+            className={`${styles.datasetDescription} datasetSchema-metadata-help-step`}
             collapsedHeight={55}
             expandableOnClick={true}
+            helpClassName="datasetSchema-metadata-help-step"
             id="datasetDescription"
             key="datasetDescription"
             onBlur={e => onBlurDescription(e.target.value)}

@@ -770,6 +770,7 @@
     "confirmReleaseAndCopyExtraMessage": "You are also creating a copy of this data.",
     "dataflowReporterHelp": "My dataflow",
     "dataflowRequesterHelp": "My dataflow",
-    "datasetSchemaHelpConfig": "My reporting dataset"
+    "datasetSchemaReporterHelpConfig": "My reporting dataset",
+    "datasetSchemaRequesterHelpConfig": "My schema"
   }
 }

@@ -1,8 +1,8 @@
 {
   "steps": [
     {
-      "content": "‘aaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "target": ".datasetSchema-buttonsbar-dataset-data-help-step"
+      "content": "Metadata in this field will be reflected on the Dataflow help page",
+      "target": ".datasetDescription"
     },
     {
       "content": "sasas",
