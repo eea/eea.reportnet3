@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import { routes } from 'ui/routes';
 import Joyride, { STATUS } from 'react-joyride';
@@ -16,8 +16,9 @@ import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarCont
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+import { isEmpty } from 'lodash';
 
-const LeftSideBar = withRouter(({ history }) => {
+const LeftSideBar = withRouter(({ history, style }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -169,10 +170,12 @@ const LeftSideBar = withRouter(({ history }) => {
               {renderHelp()}
               {renderUserNotifications()}
             </div>
-            <hr />
-            <div className={`${styles.barSection} dataflowList-left-side-bar-mid-section-help-step`}>
-              {renderSectionButtons()}
-            </div>
+            {!isEmpty(renderSectionButtons()) && (
+              <Fragment>
+                <hr />
+                <div className={`${styles.barSection} dataflowList-left-side-bar-mid-section-help-step`}>{renderSectionButtons()}</div>
+              </Fragment>
+            )}
             <hr />
             <div className={styles.barSection}>
               {renderLogout()}
