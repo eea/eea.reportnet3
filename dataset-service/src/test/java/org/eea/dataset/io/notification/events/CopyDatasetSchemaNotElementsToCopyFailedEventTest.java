@@ -66,7 +66,8 @@ public class CopyDatasetSchemaNotElementsToCopyFailedEventTest {
    */
   @Test
   public void testGetMapNulls() throws EEAException {
-    Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any()))
+        .thenReturn(new DataFlowVO());
     Assert.assertNull(
         copyDatasetSchemaNotElementsToCopyFailedEvent.getMap(NotificationVO.builder().user("user")
             .datasetId(1L).datasetName("datasetName").error("error").build()).get("dataflowName"));
