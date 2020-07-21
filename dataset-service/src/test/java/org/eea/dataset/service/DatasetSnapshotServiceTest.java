@@ -544,6 +544,45 @@ public class DatasetSnapshotServiceTest {
         Mockito.any(), Mockito.any());
   }
 
+  @Test
+  public void testRestoreSchemaSnapshotException() throws Exception {
+    try {
+      DataSetSchema schema = new DataSetSchema();
+      schema.setIdDataSetSchema(new ObjectId("5ce524fad31fc52540abae73"));
+      ObjectMapper objectMapper = new ObjectMapper();
+      ObjectMapper objectMapper2 = new ObjectMapper();
+      ObjectMapper objectMapper3 = new ObjectMapper();
+
+      RulesSchema rule = new RulesSchema();
+      rule.setIdDatasetSchema(new ObjectId("5ce524fad31fc52540abae73"));
+
+      UniqueConstraintSchema unique = new UniqueConstraintSchema();
+      unique.setUniqueId(new ObjectId("5ce524fad31fc52540abae73"));
+      unique.setDatasetSchemaId(new ObjectId("5ce524fad31fc52540abae73"));
+      UniqueConstraintSchema unique2 = new UniqueConstraintSchema();
+      unique2.setUniqueId(new ObjectId("5db99d0bb67ca68cb8fa7053"));
+      unique2.setDatasetSchemaId(new ObjectId("5db99d0bb67ca68cb8fa7053"));
+      List<UniqueConstraintSchema> listUnique = new ArrayList<>();
+      listUnique.add(unique);
+      listUnique.add(unique2);
+
+
+      when(documentControllerZuul.getSnapshotDocument(Mockito.any(), Mockito.any())).thenReturn(
+          objectMapper.writeValueAsBytes(schema), objectMapper2.writeValueAsBytes(rule),
+          objectMapper3.writeValueAsBytes(listUnique));
+
+      Mockito.doNothing().when(rulesControllerZuul).deleteRulesSchema(Mockito.anyString());
+      when(rulesRepository.save(Mockito.any())).thenReturn(new RulesSchema());
+
+      when(uniqueConstraintRepository.deleteByDatasetSchemaId(Mockito.any())).thenReturn(0L);
+      when(uniqueConstraintRepository.saveAll(Mockito.any())).thenReturn(new ArrayList<>());
+      doThrow(new EEAException("failed")).when(schemaService)
+          .updatePKCatalogueAndForeignsAfterSnapshot(Mockito.any(), Mockito.any());
+      datasetSnapshotService.restoreSchemaSnapshot(1L, 1L);
+    } catch (EEAException e) {
+      Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
+    }
+  }
 
   /**
    * Test delete all schema snapshots.
