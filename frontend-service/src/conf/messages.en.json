@@ -784,9 +784,9 @@
     "deleteSnapshotConfirmationMessage": "Copy you are deleting:",
     "releaseSnapshotConfirmationMessage": "Copy you are releasing:",
     "restoreSnapshotConfirmationMessage": "Copy you are restoring:",
-    "createSnapshotConfirmationQuestion": "Are you sure you what to create this copy?",
-    "deleteSnapshotConfirmationQuestion": "Are you sure you what to delete this copy?",
-    "releaseSnapshotConfirmationQuestion": "Are you sure you what to release this copy to the data collection?",
-    "restoreSnapshotConfirmationQuestion": "Are you sure you what to restore this copy?"
+    "createSnapshotConfirmationQuestion": "Are you sure you want to create a copy of this dataset?",
+    "deleteSnapshotConfirmationQuestion": "Are you sure you want to delete this dataset copy?",
+    "releaseSnapshotConfirmationQuestion": "Are you sure you want to release this copy to the data collection?",
+    "restoreSnapshotConfirmationQuestion": "Are you sure you want to restore this dataset copy?"
   }
 }
