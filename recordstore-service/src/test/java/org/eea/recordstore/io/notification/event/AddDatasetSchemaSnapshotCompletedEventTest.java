@@ -16,10 +16,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-public class ReleaseDatasetSnapshotCompletedEventTest {
+public class AddDatasetSchemaSnapshotCompletedEventTest {
 
   @InjectMocks
-  private ReleaseDatasetSnapshotCompletedEvent releaseDatasetSnapshotCompletedEvent;
+  private AddDatasetSchemaSnapshotCompletedEvent addDatasetSchemaSnapshotCompletedEvent;
 
   @Mock
   private DataSetControllerZuul dataSetControllerZuul;
@@ -28,29 +28,31 @@ public class ReleaseDatasetSnapshotCompletedEventTest {
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
   @Mock
-  private DataSetMetabaseVO datasetVO;
-
-  @Mock
-  private DataFlowVO dataflowVO;
+  private DataSetMetabaseVO datasetMetabaseVO;
 
   @Mock
   private DataFlowControllerZuul dataflowControllerZuul;
 
+  @Mock
+  private DataFlowVO dataflowVO;
+
   @Before
   public void initMocks() {
+    dataflowVO = new DataFlowVO();
+    dataflowVO.setName("dataflowName");
     MockitoAnnotations.initMocks(this);
   }
 
   @Test
   public void getEventTypeTest() {
-    Assert.assertEquals(EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT,
-        releaseDatasetSnapshotCompletedEvent.getEventType());
+    Assert.assertEquals(EventType.ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT,
+        addDatasetSchemaSnapshotCompletedEvent.getEventType());
   }
 
   @Test
   public void getMapTest() throws EEAException {
     Assert.assertEquals(5,
-        releaseDatasetSnapshotCompletedEvent
+        addDatasetSchemaSnapshotCompletedEvent
             .getMap(NotificationVO.builder().user("user").datasetId(1L).dataflowId(1L)
                 .datasetName("datasetName").dataflowName("dataflowName").build())
             .size());
@@ -58,13 +60,13 @@ public class ReleaseDatasetSnapshotCompletedEventTest {
 
   @Test
   public void getMapFromMinimumDataTest() throws EEAException {
-    Mockito.when(dataSetControllerZuul.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    Mockito.when(dataSetControllerZuul.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
-        .thenReturn(datasetVO);
-    Mockito.when(datasetVO.getDataSetName()).thenReturn("datasetName");
+        .thenReturn(datasetMetabaseVO);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(datasetMetabaseVO.getDataSetName()).thenReturn("datasetName");
     Mockito.when(dataflowVO.getName()).thenReturn("dataflowName");
-    Assert.assertEquals(5, releaseDatasetSnapshotCompletedEvent
+    Assert.assertEquals(5, addDatasetSchemaSnapshotCompletedEvent
         .getMap(NotificationVO.builder().user("user").datasetId(1L).build()).size());
   }
 }

@@ -19,7 +19,7 @@ public class ReleaseCopyDataToEUDatasetFailedEvent implements NotificableEventHa
 
   /** The dataset metabase controller zuul. */
   @Autowired
-  private DataSetMetabaseControllerZuul datasetMetabaseController;
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
 
   /**
@@ -43,7 +43,7 @@ public class ReleaseCopyDataToEUDatasetFailedEvent implements NotificableEventHa
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
     Long datasetId = notificationVO.getDatasetId();
     String datasetName = notificationVO.getDatasetName() != null ? notificationVO.getDatasetName()
-        : datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataSetName();
+        : datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataSetName();
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());

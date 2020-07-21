@@ -24,7 +24,7 @@ public class AddDatasetSchemaSnapshotCompletedEvent implements NotificableEventH
 
   /** The dataset metabase service. */
   @Autowired
-  private DataSetMetabaseControllerZuul datasetMetabaseController;
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
   /** The dataflow controller zuul. */
   @Autowired
@@ -53,7 +53,7 @@ public class AddDatasetSchemaSnapshotCompletedEvent implements NotificableEventH
     Long dataflowId = notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
         : dataSetControllerZuul.getDataFlowIdById(notificationVO.getDatasetId());
     String datasetName = notificationVO.getDatasetName() != null ? notificationVO.getDatasetName()
-        : datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataSetName();
+        : datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataSetName();
     String dataflowName =
         notificationVO.getDataflowName() != null ? notificationVO.getDataflowName()
             : dataflowControllerZuul.getMetabaseById(dataflowId).getName();

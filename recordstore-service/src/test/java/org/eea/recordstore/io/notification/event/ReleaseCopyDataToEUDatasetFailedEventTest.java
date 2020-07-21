@@ -13,19 +13,16 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-public class ReleaseDatasetSnapshotFailedEventTest {
+public class ReleaseCopyDataToEUDatasetFailedEventTest {
 
   @InjectMocks
-  private ReleaseDatasetSnapshotFailedEvent releaseDatasetSnapshotFailedEvent;
-
+  private ReleaseCopyDataToEUDatasetFailedEvent releaseCopyDataToEUDatasetFailedEvent;
 
   @Mock
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
   @Mock
-  private DataSetMetabaseVO datasetVO;
-
-
+  private DataSetMetabaseVO datasetMetabaseVO;
 
   @Before
   public void initMocks() {
@@ -34,24 +31,23 @@ public class ReleaseDatasetSnapshotFailedEventTest {
 
   @Test
   public void getEventTypeTest() {
-    Assert.assertEquals(EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT,
-        releaseDatasetSnapshotFailedEvent.getEventType());
+    Assert.assertEquals(EventType.COPY_DATA_TO_EUDATASET_FAILED_EVENT,
+        releaseCopyDataToEUDatasetFailedEvent.getEventType());
   }
 
   @Test
   public void getMapTest() throws EEAException {
-    Assert.assertEquals(4,
-        releaseDatasetSnapshotFailedEvent.getMap(
-            NotificationVO.builder().user("user").datasetId(1L).datasetName("datasetName").build())
-            .size());
+    Assert.assertEquals(4, releaseCopyDataToEUDatasetFailedEvent.getMap(NotificationVO.builder()
+        .user("user").datasetId(1L).datasetName("datasetName").error("error").build()).size());
   }
 
   @Test
   public void getMapFromMinimumDataTest() throws EEAException {
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
-        .thenReturn(datasetVO);
-    Mockito.when(datasetVO.getDataSetName()).thenReturn("datasetName");
-    Assert.assertEquals(4, releaseDatasetSnapshotFailedEvent
-        .getMap(NotificationVO.builder().user("user").datasetId(1L).build()).size());
+        .thenReturn(datasetMetabaseVO);
+    Mockito.when(datasetMetabaseVO.getDataSetName()).thenReturn("datasetName");
+    Assert.assertEquals(4, releaseCopyDataToEUDatasetFailedEvent
+        .getMap(NotificationVO.builder().user("user").datasetId(1L).error("error").build()).size());
   }
+
 }
