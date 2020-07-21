@@ -53,7 +53,7 @@ export const designerReducer = (state, { type, payload }) => {
       };
 
     case 'LOAD_DATASET_SCHEMAS':
-      return { ...state, datasetSchemas: payload.schemas };
+      return { ...state, datasetSchemas: payload.schemas, areLoadedSchemas: true };
 
     case 'MANAGE_DIALOGS':
       return { ...state, [payload.dialog]: payload.value, [payload.secondDialog]: payload.secondValue };

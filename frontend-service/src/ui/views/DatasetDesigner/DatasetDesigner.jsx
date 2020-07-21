@@ -70,6 +70,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const validationContext = useContext(ValidationContext);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
+    areLoadedSchemas: false,
     dashDialogVisible: false,
     dataflowName: '',
     datasetDescription: '',
@@ -174,8 +175,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       if (userContext.accessRole[0] === 'DATA_CUSTODIAN') {
-        console.log('designerState', designerState);
-        leftSideBarContext.addHelpSteps(DatasetSchemaRequesterEmptyHelpConfig, 'datasetSchemaRequesterHelpConfig');
+        console.log('designerState.datasetSchemaAllTables', designerState.datasetSchemaAllTables);
+        if (designerState.datasetSchemaAllTables >= 2) {
+          console.log('1');
+          leftSideBarContext.addHelpSteps(DatasetSchemaRequesterWithTabsHelpConfig, 'datasetSchemaRequesterHelpConfig');
+        } else {
+          console.log('2');
+          leftSideBarContext.addHelpSteps(DatasetSchemaRequesterEmptyHelpConfig, 'datasetSchemaRequesterHelpConfig');
+        }
       } else {
         leftSideBarContext.addHelpSteps(DatasetSchemaReporterHelpConfig, 'datasetSchemaReporterHelpConfig');
       }
