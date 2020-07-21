@@ -98,7 +98,7 @@
     "dataflowDetailsError": "Failed loading dataflow information",
     "dataflowHelp": "Dataflow help",
     "dataflowHelpHelp": "Documents, weblinks and dataset schemas help",
-    "dataflowListHelp": "Dataflows help",
+    "dataflowListHelp": "My dataflows",
     "dataflowNameExists": "Dataflow name already exists, please choose another one",
     "dataflowObligationEmpty": "Obligation is a required field",
     "dataflows": "Dataflows",
@@ -512,7 +512,7 @@
     "updateDatacollectionFailedEvent": "Error occurred on datasets assignation to new representatives",
     "updateDataCollectionHeader": "Create datasets for new representatives",
     "updateDataCollectionMessage": "Do you want to create datasets for the new representatives?",
-    "updateDataflow": "Update dataflow",
+    "updateDataflow": "Edit dataflow",
     "updatedDocumentCompletedEvent": "{:fileName} Document updated at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
     "updateFieldByIdError": "Failed updating field",
     "updateRecordsByIdError": "Failed updating record",
@@ -771,6 +771,10 @@
     "confirmReleaseCurrentData": "Are you sure you want to release the current data to the data collection?",
     "confirmReleaseCopyIntroduction": "Copy you are releasing:",
     "confirmReleaseCurrentDataIntroduction": "Copy you are copying and releasing:",
-    "confirmReleaseAndCopyExtraMessage": "You are also creating a copy of this data."
+    "confirmReleaseAndCopyExtraMessage": "You are also creating a copy of this data.",
+    "dataflowReporterHelp": "My dataflow",
+    "dataflowRequesterHelp": "My dataflow",
+    "datasetSchemaReporterHelpConfig": "My reporting dataset",
+    "datasetSchemaRequesterHelpConfig": "My schema"
   }
 }

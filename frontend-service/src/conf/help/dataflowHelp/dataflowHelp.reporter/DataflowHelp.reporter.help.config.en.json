@@ -1,0 +1,16 @@
+{
+  "steps": [
+    {
+      "content": "‘Supporting documents’ - Documents to support the data delivery for example reporting guidance or templates",
+      "target": ".dataflowHelp-documents-help-step"
+    },
+    {
+      "content": "‘Web links’ to external resources relevant to the reporting",
+      "target": ".dataflowHelp-weblinks-help-step"
+    },
+    {
+      "content": "‘Dataset schemas’ - Information on the dataset schema – QC rules, table and field names and descriptions ",
+      "target": ".dataflowHelp-schemas-help-step"
+    }
+  ]
+}
