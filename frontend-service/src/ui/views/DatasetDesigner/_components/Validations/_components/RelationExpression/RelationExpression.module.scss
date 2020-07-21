@@ -1,7 +1,10 @@
 .expression {
+  --tableFieldWidth: 200px;
+
+  align-items: flex-end;
   display: flex;
   justify-content: flex-start;
-  --tableFieldWidth: 200px;
+
   .tableField {
     width: var(--tableFieldWidth);
     :global .p-dropdown {
@@ -9,10 +12,15 @@
     }
     margin-right: 16px;
   }
-  .deleteButton {
-    border: 1px solid var(--c-custom-gray) !important;
-    box-shadow: 0 0 0 0em var(--blue-120) !important;
-    color: var(--errors) !important;
-    margin: 0 !important;
+
+  .deleteButtonWrap {
+    margin-bottom: 1rem;
+    
+    .deleteButton {
+      border: 1px solid var(--c-custom-gray) !important;
+      box-shadow: 0 0 0 0em var(--blue-120) !important;
+      color: var(--errors) !important;
+      margin: 0 !important;
+    }
   }
 }
