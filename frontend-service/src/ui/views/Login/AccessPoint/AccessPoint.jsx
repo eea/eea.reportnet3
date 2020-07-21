@@ -12,7 +12,6 @@ export const AccessPoint = () => {
   const resources = useContext(ResourcesContext);
   return (
     <div className="rp-container">
-      {console.log('AccessPoint')}
       <div className={`${styles.loginBoxContainer}`}>
         <div className={`${styles.loginBox}`}>
           <div className={styles.logo}>

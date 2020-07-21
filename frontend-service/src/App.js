@@ -34,7 +34,6 @@ import { ValidationProvider } from 'ui/views/_functions/Providers/ValidationProv
 const App = () => {
   return (
     <div className={styles.app}>
-      {console.log('window.env.REACT_APP_EULOGIN == true', window.env.REACT_APP_EULOGIN == true)}
       <ResourcesProvider>
         <NotificationProvider>
           <UserProvider>
