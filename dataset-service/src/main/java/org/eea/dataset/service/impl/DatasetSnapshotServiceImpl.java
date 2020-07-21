@@ -283,6 +283,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       List<Object> criteria = new ArrayList<>();
       criteria.add(LockSignature.CREATE_SNAPSHOT.getValue());
       criteria.add(idDataset);
+      criteria.add(released);
       lockService.removeLockByCriteria(criteria);
     }
     // release snapshot when the user press create+release

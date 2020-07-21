@@ -410,7 +410,7 @@ public interface DatasetService {
    * @param idDataset the id dataset
    * @return the boolean
    */
-  Boolean isDatasetReportable(Long idDataset);
+  boolean isDatasetReportable(Long idDataset);
 
   /**
    * Gets the mimetype.
