@@ -12,7 +12,6 @@ import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.EUDatasetService;
 import org.eea.dataset.service.ReportingDatasetService;
@@ -52,11 +51,6 @@ public class EUDatasetServiceImpl implements EUDatasetService {
   /** The data collection service. */
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
-
-  /** The snapshot repository. */
-  @Autowired
-  private SnapshotRepository snapshotRepository;
-
 
   /** The lock service. */
   @Autowired

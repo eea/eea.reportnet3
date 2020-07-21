@@ -1,9 +1,8 @@
-package org.eea.dataset.service;
+package org.eea.dataset.service.impl;
 
 import static org.mockito.Mockito.times;
 import org.eea.dataset.mapper.EUDatasetMapper;
 import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
-import org.eea.dataset.service.impl.EUDatasetServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,9 +12,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
-
 @RunWith(MockitoJUnitRunner.class)
-public class EUDatasetServiceTest {
+public class EUDatasetServiceImplTest {
 
 
   @InjectMocks
@@ -40,6 +38,5 @@ public class EUDatasetServiceTest {
     euDatasetService.getEUDatasetByDataflowId(Mockito.anyLong());
     Mockito.verify(euDatasetRepository, times(1)).findByDataflowId(Mockito.any());
   }
-
 
 }
