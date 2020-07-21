@@ -10,7 +10,9 @@ import uniq from 'lodash/uniq';
 import styles from './Dataflow.module.scss';
 
 import { config } from 'conf';
-import { DataflowHelpConfig } from 'conf/help/dataflow';
+import { DataflowDraftRequesterHelpConfig } from 'conf/help/dataflow/dataflow.requester/dataflow.requester.draft';
+import { DataflowRequesterHelpConfig } from 'conf/help/dataflow/dataflow.requester';
+import { DataflowReporterHelpConfig } from 'conf/help/dataflow/dataflow.reporter';
 import { routes } from 'ui/routes';
 import DataflowConf from 'conf/dataflow.config.json';
 
@@ -99,7 +101,15 @@ const Dataflow = withRouter(({ history, match }) => {
   }, [userContext, dataflowState.data]);
 
   useEffect(() => {
-    leftSideBarContext.addHelpSteps(DataflowHelpConfig, 'dataflowHelp');
+    if (dataflowState.isCustodian) {
+      if (dataflowState.status === 'DRAFT') {
+        leftSideBarContext.addHelpSteps(DataflowDraftRequesterHelpConfig, 'dataflowReporterHelp');
+      } else {
+        leftSideBarContext.addHelpSteps(DataflowRequesterHelpConfig, 'dataflowReporterHelp');
+      }
+    } else {
+      leftSideBarContext.addHelpSteps(DataflowReporterHelpConfig, 'dataflowReporterHelp');
+    }
   }, [
     dataflowState.data,
     dataflowState.designDatasetSchemas,
@@ -107,7 +117,8 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowState.isCustodian,
     dataflowState.isDataSchemaCorrect,
     dataflowState.status,
-    dataflowState.id
+    dataflowState.id,
+    userContext
   ]);
 
   //Bread Crumbs settings
@@ -208,7 +219,7 @@ const Dataflow = withRouter(({ history, match }) => {
       const buttonsVisibility = getLeftSidebarButtonsVisibility();
 
       const apiKeyBtn = {
-        className: 'dataflow-properties-provider-help-step',
+        className: 'dataflow-api-key-help-step',
         icon: 'settings',
         isVisible: buttonsVisibility.apiKeyBtn,
         label: 'sidebarApiKeyBtn',
@@ -226,7 +237,7 @@ const Dataflow = withRouter(({ history, match }) => {
       };
 
       const manageRightsBtn = {
-        className: 'dataflow-properties-provider-help-step',
+        className: 'dataflow-manage-rights-help-step',
         icon: 'userConfig',
         isVisible: buttonsVisibility.manageRightsBtn,
         label: dataflowState.isCustodian ? 'manageEditorsRights' : 'manageReportersRights',
@@ -235,7 +246,7 @@ const Dataflow = withRouter(({ history, match }) => {
       };
 
       const propertiesBtn = {
-        className: 'dataflow-properties-provider-help-step',
+        className: 'dataflow-properties-help-step',
         icon: 'infoCircle',
         isVisible: buttonsVisibility.propertiesBtn,
         label: 'properties',
@@ -364,12 +375,12 @@ const Dataflow = withRouter(({ history, match }) => {
       type: 'SET_IS_COPY_DATA_COLLECTION_TO_EU_DATASET_LOADING',
       payload: { isLoading: value }
     });
-  
+
   const setIsExportEuDatasetLoading = value =>
-  dataflowDispatch({
-    type: 'SET_IS_EXPORT_EU_DATASET',
-    payload: { isExportEuDatasetLoading: value }
-  });
+    dataflowDispatch({
+      type: 'SET_IS_EXPORT_EU_DATASET',
+      payload: { isExportEuDatasetLoading: value }
+    });
 
   const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
 
@@ -560,6 +571,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {!dataflowState.isRepresentativeView && isNil(representativeId) ? (
           <BigButtonList
+            className="dataflow-big-buttons-help-step"
             dataflowState={dataflowState}
             handleRedirect={handleRedirect}
             onCleanUpReceipt={onCleanUpReceipt}
