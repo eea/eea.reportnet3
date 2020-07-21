@@ -66,7 +66,13 @@ export const FieldComparison = ({
         </div>
       </div>
       <div className={styles.section}>
-        <textarea name="" id="" cols="30" readOnly rows="5" value={creationFormState.validationRuleString}></textarea>
+        <textarea
+          cols="30"
+          id="fieldComparisonTextarea"
+          name=""
+          readOnly
+          rows="5"
+          value={creationFormState.validationRuleString}></textarea>
       </div>
     </React.Fragment>
   );

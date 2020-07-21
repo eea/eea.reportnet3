@@ -176,20 +176,22 @@ const ActionsToolbar = ({
   };
 
   return (
-    <Toolbar className={styles.actionsToolbar}>
+    <Toolbar className={`${styles.actionsToolbar} datasetSchema-buttonsbar-dataset-data-help-step`}>
       <div className="p-toolbar-group-left">
-        {(hasWritePermissions || showWriteButtons) && <Button
-          className={`p-button-rounded p-button-secondary ${
-            !hasWritePermissions || tableReadOnly ? null : 'p-button-animated-blink'
-          }`}
-          disabled={!hasWritePermissions || tableReadOnly || isDataCollection}
-          icon={'import'}
-          label={resources.messages['importTable']}
-          onClick={() => setImportTableDialogVisible(true)}
-        />}
+        {(hasWritePermissions || showWriteButtons) && (
+          <Button
+            className={`p-button-rounded p-button-secondary ${
+              !hasWritePermissions || tableReadOnly ? null : 'p-button-animated-blink'
+            }`}
+            disabled={!hasWritePermissions || tableReadOnly || isDataCollection}
+            icon={'import'}
+            label={resources.messages['importTable']}
+            onClick={() => setImportTableDialogVisible(true)}
+          />
+        )}
         <Button
           id="buttonExportTable"
-          className={`p-button-rounded p-button-secondary-transparent ${
+          className={`p-button-rounded p-button-secondary-transparent datasetSchema-buttonsbar-dataset-data-help-step ${
             isDataCollection ? null : 'p-button-animated-blink'
           }`}
           disabled={isDataCollection}
@@ -209,19 +211,19 @@ const ActionsToolbar = ({
           ref={exportMenuRef}
         />
 
-        {(hasWritePermissions || showWriteButtons) && <Button
-          className={`p-button-rounded p-button-secondary-transparent ${
-            !hasWritePermissions || tableReadOnly || isUndefined(records.totalRecords) || isTableDeleted
-              ? null
-              : 'p-button-animated-blink'
-          }`}
-          disabled={
-            !hasWritePermissions || tableReadOnly || isUndefined(records.totalRecords) || isTableDeleted
-          }
-          icon={'trash'}
-          label={resources.messages['deleteTable']}
-          onClick={() => onSetVisible(setDeleteDialogVisible, true)}
-        />}
+        {(hasWritePermissions || showWriteButtons) && (
+          <Button
+            className={`p-button-rounded p-button-secondary-transparent datasetSchema-delete-table-help-step ${
+              !hasWritePermissions || tableReadOnly || isUndefined(records.totalRecords) || isTableDeleted
+                ? null
+                : 'p-button-animated-blink'
+            }`}
+            disabled={!hasWritePermissions || tableReadOnly || isUndefined(records.totalRecords) || isTableDeleted}
+            icon={'trash'}
+            label={resources.messages['deleteTable']}
+            onClick={() => onSetVisible(setDeleteDialogVisible, true)}
+          />
+        )}
 
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
@@ -245,18 +247,20 @@ const ActionsToolbar = ({
           }}
         />
 
-        {(hasWritePermissions || showWriteButtons) && <Button
-          className={`p-button-rounded p-button-secondary-transparent ${
-            tableHasErrors ? 'p-button-animated-blink' : null
-          }`}
-          disabled={!tableHasErrors}
-          icon={'filter'}
-          iconClasses={!isFilterValidationsActive ? styles.filterInactive : styles.filterActive}
-          label={resources.messages['validationFilter']}
-          onClick={event => {
-            filterMenuRef.current.show(event);
-          }}
-        />}
+        {(hasWritePermissions || showWriteButtons) && (
+          <Button
+            className={`p-button-rounded p-button-secondary-transparent ${
+              tableHasErrors ? 'p-button-animated-blink' : null
+            }`}
+            disabled={!tableHasErrors}
+            icon={'filter'}
+            iconClasses={!isFilterValidationsActive ? styles.filterInactive : styles.filterActive}
+            label={resources.messages['validationFilter']}
+            onClick={event => {
+              filterMenuRef.current.show(event);
+            }}
+          />
+        )}
         <DropdownFilter
           className={!isLoading ? 'p-button-animated-blink' : null}
           disabled={isLoading}
