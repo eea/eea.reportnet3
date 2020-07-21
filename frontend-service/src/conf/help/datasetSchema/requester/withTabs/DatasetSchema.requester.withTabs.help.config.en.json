@@ -2,7 +2,7 @@
   "steps": [
     {
       "content": "Click here to add a Table by clicking the tab with a ‘+’ icon",
-      "target": ".datasetSchema-new-table-help-step"
+      "target": ".datasetSchema-created-table-help-step"
     }
   ]
 }

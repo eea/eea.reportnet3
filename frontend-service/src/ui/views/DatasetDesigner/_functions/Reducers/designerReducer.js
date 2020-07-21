@@ -71,7 +71,7 @@ export const designerReducer = (state, { type, payload }) => {
       return { ...state, datasetDescription: payload.value };
 
     case 'ON_UPDATE_TABLES':
-      return { ...state, datasetSchemaAllTables: payload.tables };
+      return { ...state, datasetSchemaAllTables: payload.tables, areUpdatingTables: true };
 
     case 'SET_DATASET_HAS_DATA':
       return { ...state, datasetHasData: payload.hasData };

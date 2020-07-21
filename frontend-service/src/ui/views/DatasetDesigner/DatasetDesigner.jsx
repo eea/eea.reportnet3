@@ -71,6 +71,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
+    areUpdatingTables: false,
     dashDialogVisible: false,
     dataflowName: '',
     datasetDescription: '',
@@ -175,19 +176,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       if (userContext.accessRole[0] === 'DATA_CUSTODIAN') {
-        console.log('designerState.datasetSchemaAllTables', designerState.datasetSchemaAllTables);
-        if (designerState.datasetSchemaAllTables >= 2) {
-          console.log('1');
+        if (designerState.datasetSchemaAllTables.length > 1) {
           leftSideBarContext.addHelpSteps(DatasetSchemaRequesterWithTabsHelpConfig, 'datasetSchemaRequesterHelpConfig');
         } else {
-          console.log('2');
           leftSideBarContext.addHelpSteps(DatasetSchemaRequesterEmptyHelpConfig, 'datasetSchemaRequesterHelpConfig');
         }
       } else {
         leftSideBarContext.addHelpSteps(DatasetSchemaReporterHelpConfig, 'datasetSchemaReporterHelpConfig');
       }
     }
-  }, [userContext, designerState]);
+  }, [userContext, designerState, designerState.areLoadingSchemas, designerState.areUpdatingTables]);
 
   useEffect(() => {
     if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener)

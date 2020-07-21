@@ -284,9 +284,13 @@ const Tab = ({
           draggable={designMode ? (!addTab ? true : false) : false}
           aria-controls={ariaControls}
           aria-selected={selected}
-          className={`${
-            editable ? styles.p_tabview_design : addTab ? styles.p_tabview_design_add : styles.p_tabview_noDesign
-          } datasetSchema-new-table-help-step`}
+          className={
+            editable
+              ? styles.p_tabview_design
+              : addTab
+              ? `${styles.p_tabview_design_add} datasetSchema-new-table-help-step`
+              : styles.p_tabview_noDesign
+          }
           href={'#' + ariaControls}
           id={id}
           onMouseDownCapture={e => {
