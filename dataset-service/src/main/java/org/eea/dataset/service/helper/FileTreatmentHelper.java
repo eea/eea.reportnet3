@@ -221,7 +221,7 @@ public class FileTreatmentHelper {
     for (IntegrationVO integration : integrations) {
       if (IntegrationOperationTypeEnum.IMPORT.equals(integration.getOperation())) {
         String integrationExtension = integration.getInternalParameters().get("fileExtension");
-        if (integrationExtension.equals(fileExtension)) {
+        if (integrationExtension.equalsIgnoreCase(fileExtension)) {
           try {
             byte[] byteArray = IOUtils.toByteArray(inputStream);
             String encodedString = Base64.getEncoder().encodeToString(byteArray);
