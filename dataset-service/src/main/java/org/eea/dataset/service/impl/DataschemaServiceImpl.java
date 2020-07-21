@@ -394,8 +394,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (tableSchemaVO.getToPrefill() != null) {
           tableSchema.put("toPrefill", tableSchemaVO.getToPrefill());
         }
-        if (tableSchemaVO.getNotEmpty() != null) {
-          tableSchema.put("notEmpty", tableSchemaVO.getNotEmpty());
+        tableSchema.put("notEmpty", tableSchemaVO.isNotEmpty());
+        if (true == tableSchemaVO.isNotEmpty()) {
+
+        } else {
+
         }
         // Guardar el TableSchema modificado en MongoDB
         if (schemasRepository.updateTableSchema(datasetSchemaId, tableSchema)

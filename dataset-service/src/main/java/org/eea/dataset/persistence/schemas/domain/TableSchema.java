@@ -41,11 +41,11 @@ public class TableSchema {
 
   /** The read only. */
   @Field(value = "readOnly")
-  private boolean readOnly;
+  private Boolean readOnly;
 
   /** The to prefill. */
   @Field(value = "toPrefill")
-  private boolean toPrefill;
+  private Boolean toPrefill;
 
   /** The not empty. */
   @Field(value = "notEmpty")

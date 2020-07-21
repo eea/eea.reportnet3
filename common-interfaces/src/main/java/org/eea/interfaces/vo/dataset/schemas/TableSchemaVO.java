@@ -29,13 +29,13 @@ public class TableSchemaVO {
   private String nameTableSchema;
 
   /** The read only. */
-  private boolean readOnly;
+  private Boolean readOnly;
 
   /** The record schema. */
   private RecordSchemaVO recordSchema;
 
   /** The to prefill. */
-  private boolean toPrefill;
+  private Boolean toPrefill;
 
   /** The not empty. */
   private boolean notEmpty;
