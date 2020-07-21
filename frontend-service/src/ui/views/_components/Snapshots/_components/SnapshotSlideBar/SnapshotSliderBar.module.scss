@@ -1,3 +1,6 @@
+:global .p-sidebar-right {
+  height: calc(100% - 180px) !important;
+}
 .content {
 }
 .p-sidebar-close {
@@ -33,6 +36,7 @@
   overflow-x: hidden;
   overflow-y: auto;
   width: 30em !important;
+  height: auto;
 }
 .newContainer {
   display: flex;
