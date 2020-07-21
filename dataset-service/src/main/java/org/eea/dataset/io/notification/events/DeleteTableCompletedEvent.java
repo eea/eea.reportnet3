@@ -62,7 +62,7 @@ public class DeleteTableCompletedEvent implements NotificableEventHandler {
         : datasetVO.getDataSetName();
     String dataflowName =
         notificationVO.getDataflowName() != null ? notificationVO.getDataflowName()
-            : dataflowControllerZuul.findById(dataflowId).getName();
+            : dataflowControllerZuul.getMetabaseById(dataflowId).getName();
     String tableSchemaId = notificationVO.getTableSchemaId();
     String tableSchemaName =
         notificationVO.getTableSchemaName() != null ? notificationVO.getTableSchemaName()
