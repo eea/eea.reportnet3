@@ -48,6 +48,7 @@ public class Snapshot extends DataSetMetabase {
   private Boolean blocked;
 
 
+
   /**
    * Equals.
    *

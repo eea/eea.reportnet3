@@ -20,7 +20,7 @@ public class ReleaseDatasetSnapshotFailedEventTest {
 
 
   @Mock
-  private DataSetMetabaseControllerZuul datasetMetabaseController;
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
   @Mock
   private DataSetMetabaseVO datasetVO;
@@ -48,7 +48,7 @@ public class ReleaseDatasetSnapshotFailedEventTest {
 
   @Test
   public void getMapFromMinimumDataTest() throws EEAException {
-    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.any()))
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(datasetVO);
     Mockito.when(datasetVO.getDataSetName()).thenReturn("datasetName");
     Assert.assertEquals(4, releaseDatasetSnapshotFailedEvent

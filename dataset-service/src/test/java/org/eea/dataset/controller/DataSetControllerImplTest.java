@@ -43,6 +43,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -1017,4 +1018,61 @@ public class DataSetControllerImplTest {
     }
   }
 
+  @Test
+  public void loadDatasetDataTest() throws EEAException {
+    MultipartFile file = Mockito.mock(MultipartFile.class);
+    Mockito.when(datasetService.isDatasetReportable(Mockito.anyLong())).thenReturn(Boolean.TRUE);
+    Mockito.when(file.isEmpty()).thenReturn(false);
+    Mockito.when(file.getOriginalFilename()).thenReturn("fileName");
+    Mockito.doNothing().when(fileTreatmentHelper)
+        .executeExternalIntegrationFileProcess(Mockito.anyLong(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.loadDatasetData(1L, file);
+    Mockito.verify(fileTreatmentHelper, times(1))
+        .executeExternalIntegrationFileProcess(Mockito.anyLong(), Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void loadDatasetDataTestIntegrationException() throws EEAException {
+    MultipartFile file = Mockito.mock(MultipartFile.class);
+    Mockito.when(datasetService.isDatasetReportable(Mockito.anyLong())).thenReturn(Boolean.TRUE);
+    Mockito.when(file.isEmpty()).thenReturn(false);
+    Mockito.when(file.getOriginalFilename()).thenReturn("fileName");
+    Mockito
+        .doThrow(new EEAException(
+            String.format("Error loading data into dataset %s via external integration", 1L)))
+        .when(fileTreatmentHelper)
+        .executeExternalIntegrationFileProcess(Mockito.anyLong(), Mockito.any(), Mockito.any());
+    try {
+      dataSetControllerImpl.loadDatasetData(1L, file);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(e.getReason(),
+          String.format("Error loading data into dataset %s via external integration", 1L));
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void loadDatasetDataEmptyFile() {
+    MultipartFile file = Mockito.mock(MultipartFile.class);
+    Mockito.when(datasetService.isDatasetReportable(Mockito.anyLong())).thenReturn(Boolean.TRUE);
+    Mockito.when(file.isEmpty()).thenReturn(true);
+    try {
+      dataSetControllerImpl.loadDatasetData(1L, file);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(e.getReason(), EEAErrorMessage.FILE_FORMAT);
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void loadDatasetDataDatasetNotReportable() {
+    MultipartFile file = Mockito.mock(MultipartFile.class);
+    Mockito.when(datasetService.isDatasetReportable(Mockito.anyLong())).thenReturn(Boolean.FALSE);
+    try {
+      dataSetControllerImpl.loadDatasetData(1L, file);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(e.getReason(), String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, 1L));
+      throw e;
+    }
+  }
 }

@@ -67,6 +67,23 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     return snapshot;
   }
 
+
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/schemaSnapshot/{idSnapshot}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("isAuthenticated()")
+  public SnapshotVO getSchemaById(@PathVariable("idSnapshot") Long idSnapshot) {
+    SnapshotVO snapshot = null;
+    try {
+      snapshot = datasetSnapshotService.getSchemaById(idSnapshot);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error getting the snapshot schema. ", e.getMessage(), e);
+    }
+    return snapshot;
+  }
+
+
   /**
    * Gets the snapshots by id dataset.
    *
@@ -107,7 +124,8 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE')")
   public void createSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
-      @RequestBody CreateSnapshotVO createSnapshot) {
+      @LockCriteria(name = "released",
+          path = "released") @RequestBody CreateSnapshotVO createSnapshot) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -154,7 +172,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @LockMethod(removeWhenFinish = false)
   @PostMapping(value = "/{idSnapshot}/dataset/{idDataset}/restore",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE') AND checkPermission('Dataset','MANAGE_DATA')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE')")
   public void restoreSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {

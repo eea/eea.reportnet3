@@ -364,13 +364,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  @Override
-  public void restoreDataSnapshotPoc(Long idReportingDataset, Long idSnapshot, Long partitionId,
-      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
-      throws SQLException, IOException {
-    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
-  }
-
   /**
    * Delete data snapshot.
    *
