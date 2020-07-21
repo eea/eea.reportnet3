@@ -434,14 +434,16 @@ const updateTableDescriptionDesign = async (
   tableSchemaId,
   tableSchemaDescription,
   tableSchemaIsReadOnly,
-  datasetId
+  datasetId,
+  tableSchemaNotEmpty
 ) => {
   const tableSchemaUpdated = await apiDataset.updateTableDescriptionDesign(
     tableSchemaToPrefill,
     tableSchemaId,
     tableSchemaDescription,
     tableSchemaIsReadOnly,
-    datasetId
+    datasetId,
+    tableSchemaNotEmpty
   );
   return tableSchemaUpdated;
 };

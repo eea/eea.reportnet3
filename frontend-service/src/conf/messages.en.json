@@ -775,6 +775,7 @@
     "dataflowReporterHelp": "My dataflow",
     "dataflowRequesterHelp": "My dataflow",
     "datasetSchemaReporterHelpConfig": "My reporting dataset",
-    "datasetSchemaRequesterHelpConfig": "My schema"
+    "datasetSchemaRequesterHelpConfig": "My schema",
+    "notEmpty": "Not empty"
   }
 }

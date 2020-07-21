@@ -111,12 +111,13 @@ export const TabsDesigner = withRouter(
       }
     };
 
-    const onChangeTableProperties = (tableSchemaId, tableSchemaDescription, readOnly, toPrefill) => {
+    const onChangeTableProperties = (tableSchemaId, tableSchemaDescription, readOnly, toPrefill, notEmpty) => {
       const inmTabs = [...tabs];
       const tabIdx = getIndexByTableSchemaId(tableSchemaId, inmTabs);
       inmTabs[tabIdx].description = tableSchemaDescription;
       inmTabs[tabIdx].readOnly = readOnly;
       inmTabs[tabIdx].toPrefill = toPrefill;
+      inmTabs[tabIdx].notEmpty = notEmpty;
       setTabs(inmTabs);
     };
 
@@ -127,6 +128,7 @@ export const TabsDesigner = withRouter(
         inmDatasetSchema.tables.forEach((table, idx) => {
           table.addTab = false;
           table.toPrefill = table.tableSchemaToPrefill;
+          table.notEmpty = table.tableSchemaNotEmpty;
           table.description = table.tableSchemaDescription;
           table.editable = editable;
           table.hasErrors =
