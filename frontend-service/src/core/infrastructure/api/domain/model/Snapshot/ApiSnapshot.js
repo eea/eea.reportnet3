@@ -35,21 +35,17 @@ export const apiSnapshot = {
     return response;
   },
   restoreByIdDesigner: async (datasetSchemaId, snapshotId) => {
-    try {
-      const response = await HTTPRequester.post({
-        url: getUrl(SnapshotConfig.restoreSnapshotDesigner, {
-          datasetSchemaId: datasetSchemaId,
-          snapshotId: snapshotId
-        }),
-        data: {
-          snapshotId
-        }
-      });
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error restoring the snapshot: ${error}`);
-      return false;
-    }
+    const response = await HTTPRequester.post({
+      url: getUrl(SnapshotConfig.restoreSnapshotDesigner, {
+        datasetSchemaId: datasetSchemaId,
+        snapshotId: snapshotId
+      }),
+      data: {
+        snapshotId
+      }
+    });
+
+    return response.data;
   },
   releaseByIdDesigner: async (datasetSchemaId, snapshotId) => {
     const response = await HTTPRequester.update({
@@ -84,57 +80,33 @@ export const apiSnapshot = {
         released: isReleased
       }
     });
-    return response;
+    return response.data;
   },
   deleteByIdReporter: async (datasetId, snapshotId) => {
-    try {
-      const response = await HTTPRequester.delete({
-        url: getUrl(SnapshotConfig.deleteSnapshotByIdReporter, {
-          datasetId,
-          snapshotId: snapshotId
-        })
-      });
-
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error deleting snapshot data: ${error}`);
-      return false;
-    }
+    const response = await HTTPRequester.delete({
+      url: getUrl(SnapshotConfig.deleteSnapshotByIdReporter, {
+        datasetId,
+        snapshotId: snapshotId
+      })
+    });
+    return response.data;
   },
   restoreByIdReporter: async (dataflowId, datasetId, snapshotId) => {
-    try {
-      const response = await HTTPRequester.post({
-        url: getUrl(SnapshotConfig.restoreSnapshotReporter, {
-          dataflowId,
-          datasetId,
-          snapshotId
-        }),
-        data: {
-          snapshotId
-        }
-      });
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error restoring the snapshot: ${error}`);
-      return false;
-    }
+    const response = await HTTPRequester.post({
+      url: getUrl(SnapshotConfig.restoreSnapshotReporter, {
+        dataflowId,
+        datasetId,
+        snapshotId
+      }),
+      data: { snapshotId }
+    });
+    return response.data;
   },
   releaseByIdReporter: async (dataflowId, datasetId, snapshotId) => {
-    try {
-      const response = await HTTPRequester.update({
-        url: getUrl(SnapshotConfig.releaseSnapshotReporter, {
-          dataflowId,
-          datasetId,
-          snapshotId
-        }),
-        data: {
-          snapshotId
-        }
-      });
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error releasing the snapshot: ${error}`);
-      return false;
-    }
+    const response = await HTTPRequester.update({
+      url: getUrl(SnapshotConfig.releaseSnapshotReporter, { dataflowId, datasetId, snapshotId }),
+      data: { snapshotId }
+    });
+    return response.data;
   }
 };
