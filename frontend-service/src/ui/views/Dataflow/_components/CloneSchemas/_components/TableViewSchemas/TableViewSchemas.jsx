@@ -78,7 +78,14 @@ export const TableViewSchemas = ({
     </div>
   );
 
-  const renderCheckColum = <Column key="checkId" body={row => onLoadCheckButton(row)} />;
+  const renderCheckColum = (
+    <Column
+      key="checkId"
+      className={styles.emptyTableHeader}
+      header={resources.messages['selectedDataflow']}
+      body={row => onLoadCheckButton(row)}
+    />
+  );
 
   const renderColumns = dataflows => {
     const fieldColumns = getOrderedFields(Object.keys(dataflows[0])).map(field => {

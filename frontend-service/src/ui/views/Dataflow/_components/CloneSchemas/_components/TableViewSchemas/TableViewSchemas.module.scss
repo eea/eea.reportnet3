@@ -18,3 +18,9 @@
     float: center;
   }
 }
+
+.emptyTableHeader {
+  :global .p-column-title {
+    display: none;
+  }
+}

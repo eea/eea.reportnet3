@@ -111,6 +111,8 @@ const RepresentativesList = ({
 
     let hasError = formState.representativeHasError.includes(representative.representativeId);
 
+    const labelId = uuid.v4();
+
     const onAccountChange = (account, dataProviderId) => {
       const { representatives } = formState;
 
@@ -145,7 +147,7 @@ const RepresentativesList = ({
             autoFocus={isNil(representative.representativeId)}
             className={representative.hasDatasets ? styles.disabled : undefined}
             disabled={representative.hasDatasets}
-            id={isEmpty(inputData) ? 'emptyInput' : undefined}
+            id={isEmpty(inputData) ? 'emptyInput' : labelId}
             onBlur={() => {
               representative.providerAccount = representative.providerAccount.toLowerCase();
               isValidEmail(representative.providerAccount) &&
@@ -156,7 +158,7 @@ const RepresentativesList = ({
             placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
             value={inputData}
           />
-          <label for="emptyInput" className="srOnly">
+          <label htmlFor={isEmpty(inputData) ? 'emptyInput' : labelId} className="srOnly">
             {resources.messages['manageRolesDialogInputPlaceholder']}
           </label>
         </div>
@@ -175,14 +177,19 @@ const RepresentativesList = ({
       ['asc']
     );
 
+    const labelId = uuid.v4();
+
     return (
       <>
+        <label htmlFor={labelId} className="srOnly">
+          {resources.messages['manageRolesDialogInputPlaceholder']}
+        </label>
         <select
           className={
             representative.hasDatasets ? `${styles.disabled} ${styles.selectDataProvider}` : styles.selectDataProvider
           }
           disabled={representative.hasDatasets}
-          id="dataProvider"
+          id={labelId}
           onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
           onChange={event => {
             onDataProviderIdChange(formDispatcher, event.target.value, representative, formState);
@@ -197,9 +204,6 @@ const RepresentativesList = ({
             );
           })}
         </select>
-        <label for="dataProvider" className="srOnly">
-          {resources.messages['manageRolesDialogInputPlaceholder']}
-        </label>
       </>
     );
   };
@@ -256,7 +260,12 @@ const RepresentativesList = ({
               header={resources.messages['manageRolesDialogAccountColumn']}
             />
             <Column body={dropdownColumnTemplate} header={resources.messages['manageRolesDialogDataProviderColumn']} />
-            <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
+            <Column
+              body={deleteBtnColumnTemplate}
+              className={styles.emptyTableHeader}
+              header={resources.messages['deleteRepresentativeButtonTableHeader']}
+              style={{ width: '60px' }}
+            />
           </DataTable>
         </div>
       ) : (
