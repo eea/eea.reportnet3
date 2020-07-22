@@ -5,16 +5,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.eea.dataset.mapper.EUDatasetMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
-import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.EUDatasetService;
 import org.eea.dataset.service.ReportingDatasetService;
@@ -22,7 +19,6 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.lock.service.LockService;
@@ -55,11 +51,6 @@ public class EUDatasetServiceImpl implements EUDatasetService {
   /** The data collection service. */
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
-
-  /** The snapshot repository. */
-  @Autowired
-  private SnapshotRepository snapshotRepository;
-
 
   /** The lock service. */
   @Autowired
@@ -128,24 +119,6 @@ public class EUDatasetServiceImpl implements EUDatasetService {
           false, obtainPartition(relatedDatasetsByIds.get(dataCollection.getId()), "root").getId());
     }
 
-
-    try {
-      Thread.sleep(60000L);
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-
-    for (Entry<Long, Long> entry : relatedDatasetsByIds.entrySet()) {
-      LOG.info("Voy a buscar los snapshots del datasetId {}", entry.getKey());
-      Snapshot snap = snapshotRepository.findFirstByReportingDatasetId(entry.getKey());
-      datasetSnapshotService.restoreSnapshotToCloneData(entry.getKey(), entry.getValue(),
-          snap.getId(), true, DatasetTypeEnum.EUDATASET);
-    }
-    // Finally, we release the locks
-    removeLocksRelatedToPopulateEU(reportings, dataflowId);
-
-    // borrar los snapshots
   }
 
   /**
@@ -217,11 +190,12 @@ public class EUDatasetServiceImpl implements EUDatasetService {
   /**
    * Removes the locks related to populate EU.
    *
-   * @param reportings the reportings
    * @param dataflowId the dataflow id
    */
-  private void removeLocksRelatedToPopulateEU(List<ReportingDatasetVO> reportings,
-      Long dataflowId) {
+  @Override
+  public void removeLocksRelatedToPopulateEU(Long dataflowId) {
+    List<ReportingDatasetVO> reportings =
+        reportingDatasetService.getDataSetIdByDataflowId(dataflowId);
     // Release lock to the copy data to EU
     List<Object> criteria = new ArrayList<>();
     criteria.add(LockSignature.POPULATE_EU_DATASET.getValue());

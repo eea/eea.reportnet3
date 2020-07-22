@@ -18,6 +18,8 @@ const useReporterDataset = (datasetId, dataflowId) => {
     createdAt: '',
     description: '',
     dialogMessage: '',
+    dialogConfirmMessage: '',
+    dialogConfirmQuestion: '',
     dataflowId,
     datasetId,
     snapShotId: '',

@@ -97,6 +97,7 @@ const useBigButtonList = ({
       buttonIcon: 'manageReporters',
       caption: resources.messages['manageReporters'],
       handleRedirect: () => onShowManageReportersDialog(),
+      helpClassName: 'dataflow-big-buttons-manageReporters-help-step',
       layout: 'defaultBigButton',
       visibility: buttonsVisibility.manageReporters
     }
@@ -108,7 +109,7 @@ const useBigButtonList = ({
       buttonIcon: 'info',
       caption: resources.messages['dataflowHelp'],
       handleRedirect: () => handleRedirect(getUrl(routes.DOCUMENTS, { dataflowId }, true)),
-      helpClassName: 'dataflow-documents-weblinks-help-step',
+      helpClassName: 'dataflow-big-buttons-dataflowHelp-help-step',
       layout: 'defaultBigButton',
       onWheel: getUrl(routes.DOCUMENTS, { dataflowId }, true),
       visibility: true
@@ -135,7 +136,7 @@ const useBigButtonList = ({
       buttonIconClass: 'newItemCross',
       caption: resources.messages['newSchema'],
       handleRedirect: () => onShowNewSchemaDialog(),
-      helpClassName: 'dataflow-new-item-help-step',
+      helpClassName: 'dataflow-new-schema-help-step',
       layout: buttonsVisibility.cloneSchemasFromDataflow ? 'menuBigButton' : 'defaultBigButton',
       model: buttonsVisibility.cloneSchemasFromDataflow ? newSchemaModel : [],
       visibility: buttonsVisibility.newSchema && dataflowState.status === DataflowConf.dataflowStatus['DESIGN']
@@ -283,7 +284,7 @@ const useBigButtonList = ({
         : 'spinner',
       caption: resources.messages['createDataCollection'],
       enabled: checkDisabledDataCollectionButton(),
-      helpClassName: 'dataflow-datacollection-help-step',
+      helpClassName: 'dataflow-create-datacollection-help-step',
       handleRedirect:
         isActiveButton && checkDisabledDataCollectionButton() ? () => onShowDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
@@ -307,7 +308,7 @@ const useBigButtonList = ({
       buttonIcon: isActiveButton ? 'siteMap' : 'spinner',
       buttonIconClass: isActiveButton ? 'siteMap' : 'spinner',
       caption: resources.messages['updateDataCollection'],
-      helpClassName: 'dataflow-datacollection-help-step',
+      helpClassName: 'dataflow-updateNewRepresentatives-help-step',
       handleRedirect: isActiveButton ? () => onShowUpdateDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
       visibility:
@@ -353,6 +354,7 @@ const useBigButtonList = ({
         buttonIconClass: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
         caption: resources.messages['confirmationReceipt'],
         handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onLoadReceiptData(),
+        helpClassName: 'dataflow-big-buttons-confirmation-receipt-help-step',
         infoStatus: dataflowState.isReceiptOutdated,
         layout: 'defaultBigButton',
         visibility:
@@ -380,6 +382,7 @@ const useBigButtonList = ({
         buttonIconClass: 'released',
         caption: resources.messages['releaseDataCollection'],
         handleRedirect: datasets.length > 1 ? () => {} : () => onShowSnapshotDialog(datasets[0].datasetId),
+        helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: datasets.length > 1 ? 'menuBigButton' : 'defaultBigButton',
         visibility:
           buttonsVisibility.release &&

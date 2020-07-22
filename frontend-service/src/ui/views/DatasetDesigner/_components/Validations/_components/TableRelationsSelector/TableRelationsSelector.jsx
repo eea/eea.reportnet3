@@ -75,15 +75,16 @@ export const TableRelationsSelector = ({
   };
   return (
     <>
+      <p className={styles.title}>{resources.messages['tableRelationsTitle']}</p>
       <div className={styles.section}>
         <div className={styles.fieldsGroup}>
           <div className={styles.field}>
-            <label htmlFor="dataset">{resources.messages.targetDatasetSchema}</label>
+            <label htmlFor="dataset">{resources.messages['targetDatasetSchema']}</label>
             <Dropdown
               id={`${componentName}__dataset`}
               disabled={relations.links.length > 1}
-              filterPlaceholder={resources.messages.targetDatasetSchema}
-              placeholder={resources.messages.targetDatasetSchema}
+              filterPlaceholder={resources.messages['referenceSchemaPlaceholder']}
+              placeholder={resources.messages['referenceSchemaPlaceholder']}
               optionLabel="label"
               options={creationFormState.datasetSchemas}
               onChange={e => onDatasetSchemaChange(e.target.value)}
@@ -91,12 +92,12 @@ export const TableRelationsSelector = ({
             />
           </div>
           <div className={styles.field}>
-            <label htmlFor="table">{resources.messages.targetTable}</label>
+            <label htmlFor="table">{resources.messages['targetTable']}</label>
             <Dropdown
               id={`${componentName}__table`}
               disabled={relations.links.length > 1}
-              filterPlaceholder={resources.messages.targetTable}
-              placeholder={resources.messages.targetTable}
+              filterPlaceholder={resources.messages['referenceTablePlaceholder']}
+              placeholder={resources.messages['referenceTablePlaceholder']}
               optionLabel="label"
               options={
                 creationFormState.candidateRule.relations.referencedDatasetSchema.code ===
@@ -109,7 +110,7 @@ export const TableRelationsSelector = ({
             />
           </div>
           <div className={styles.checkbox}>
-            <span>{resources.messages['pkValuesMustBeUsed']}</span>
+            <span>{resources.messages['datasetReferenceMustBeUsed']}</span>
             <Checkbox
               isChecked={creationFormState.candidateRule.relations.isDoubleReferenced}
               inputId={'isDoubleReferenced_check'}
@@ -118,7 +119,7 @@ export const TableRelationsSelector = ({
               style={{ width: '70px', marginLeft: '0.5rem', marginTop: '5px' }}
             />
             <label for={'isDoubleReferenced_check'} className="srOnly">
-              {resources.messages['pkValuesMustBeUsed']}
+              {resources.messages['datasetReferenceMustBeUsed']}
             </label>
           </div>
         </div>

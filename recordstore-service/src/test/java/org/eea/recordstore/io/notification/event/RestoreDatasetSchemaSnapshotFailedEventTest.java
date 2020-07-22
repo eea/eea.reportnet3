@@ -62,11 +62,9 @@ public class RestoreDatasetSchemaSnapshotFailedEventTest {
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(datasetVO);
     Mockito.when(datasetVO.getDataSetName()).thenReturn("datasetName");
-    Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
     Mockito.when(dataflowVO.getName()).thenReturn("dataflowName");
-    Assert.assertEquals(6,
-        restoreDatasetSchemaSnapshotFailedEvent
-            .getMap(NotificationVO.builder().user("user").datasetId(1L).error("error").build())
-            .size());;
+    Assert.assertEquals(6, restoreDatasetSchemaSnapshotFailedEvent
+        .getMap(NotificationVO.builder().user("user").datasetId(1L).error("error").build()).size());
   }
 }

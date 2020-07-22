@@ -11,6 +11,7 @@ import { Icon } from 'ui/views/_components/Icon';
 export const Button = ({
   className = null,
   disabled = false,
+  helpClassName = '',
   icon = null,
   iconClasses = null,
   iconPos = 'left',
@@ -32,7 +33,7 @@ export const Button = ({
   if (layout === 'simple') {
     return (
       <button
-        className={className}
+        className={`${className} ${helpClassName}`}
         disabled={disabled}
         id={id}
         label={label}
@@ -53,7 +54,7 @@ export const Button = ({
       <>
         <PrimeButton
           id={id}
-          className={className}
+          className={`${className} ${helpClassName}`}
           disabled={disabled}
           icon={iconClassName}
           iconPos={icon ? iconPos : null}

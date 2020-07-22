@@ -454,7 +454,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
                 user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
             .findFirst();
         if (!contributor.isPresent()) {
-          users.removeAll(users); // just in case the user was not found in
+          users.removeAll(Arrays.asList(users)); // just in case the user was not found in
           users.addAll(Arrays.asList(keycloakConnectorService.getUsers()));
           contributor = users.stream().filter(
               user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
@@ -531,7 +531,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         if (contributor.isPresent()) {
           contributors.add(contributor.get());
         } else {
-          users.removeAll(users); // just in case the user was not found in
+          users.removeAll(Arrays.asList(users)); // just in case the user was not found in
           users.addAll(Arrays.asList(keycloakConnectorService.getUsers()));
 
           // first try because it was a new user
