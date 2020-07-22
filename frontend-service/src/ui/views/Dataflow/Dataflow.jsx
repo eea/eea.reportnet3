@@ -10,9 +10,9 @@ import uniq from 'lodash/uniq';
 import styles from './Dataflow.module.scss';
 
 import { config } from 'conf';
-import { DataflowDraftRequesterHelpConfig } from 'conf/help/dataflow/dataflow.requester/dataflow.requester.draft';
-import { DataflowRequesterHelpConfig } from 'conf/help/dataflow/dataflow.requester';
-import { DataflowReporterHelpConfig } from 'conf/help/dataflow/dataflow.reporter';
+import { DataflowDraftRequesterHelpConfig } from 'conf/help/dataflow/requester/draft';
+import { DataflowRequesterHelpConfig } from 'conf/help/dataflow/requester';
+import { DataflowReporterHelpConfig } from 'conf/help/dataflow/reporter';
 import { routes } from 'ui/routes';
 import DataflowConf from 'conf/dataflow.config.json';
 

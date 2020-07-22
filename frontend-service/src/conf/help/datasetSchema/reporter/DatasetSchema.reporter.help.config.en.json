@@ -1,0 +1,76 @@
+{
+  "steps": [
+    {
+      "content": "The top menu bar provides various functions which operate on the whole dataset:",
+      "target": ".datasetSchema-toolbar-dataset-data-help-step"
+    },
+    {
+      "content": "‘Export dataset data’- Exports the whole dataset into a downloadable file",
+      "target": ".datasetSchema-export-dataset-help-step"
+    },
+    {
+      "content": "‘Delete dataset data’- Deletes all the data in the dataset",
+      "target": ".dataset-deleteDataset-help-step"
+    },
+    {
+      "content": "‘Validate’- Runs validations for the whole dataset NB: This can take some time",
+      "target": ".dataset-validate-help-step"
+    },
+    {
+      "content": "‘Show validations’- Shows a table of all the validation issues found across the whole dataset",
+      "target": ".dataset-showValidations-help-step"
+    },
+    {
+      "content": "‘QC rules’ – shows a list of all the validations which have been created for the dataset",
+      "target": ".datasetSchema-qcRules-help-step"
+    },
+    {
+      "content": "‘Dashboards’ - Provides a visualisation of the validation feedback",
+      "target": ".dataset-dashboards-help-step"
+    },
+    {
+      "content": "‘Manage copies’ - Functionality to save copies of the data",
+      "target": ".datasetSchema-manageCopies-help-step"
+    },
+    {
+      "content": "‘Refresh’- After import, validation and restore copy, you need to refresh the tables",
+      "target": ".dataset-refresh-help-step"
+    },
+    {
+      "content": "This menu bar provides functionality applicable to the selected (visible) table",
+      "target": ".datasetSchema-table-toolbar-help-step"
+    },
+    {
+      "content": "‘Import’- import data into the table from an external file",
+      "target": ".datasetSchema-import-table-help-step"
+    },
+    {
+      "content": "‘Export table data’- export data from the table into an external file",
+      "target": ".datasetSchema-export-table-help-step"
+    },
+    {
+      "content": "Delete table data’- Deletes all the data in the selected table",
+      "target": ".datasetSchema-delete-table-help-step"
+    },
+    {
+      "content": "‘Show/hide columns’",
+      "target": ".datasetSchema-showColumn-help-step"
+    },
+    {
+      "content": "‘Validation filter’- Show/hide records based on validation results",
+      "target": ".datasetSchema-validationFilter-help-step"
+    },
+    {
+      "content": "Column heading – however the mouse over the ‘i’ icon to see a pop-up with the field type and description",
+      "target": ".datasetSchema-columnHeader-help-step"
+    },
+    {
+      "content": "Below the table are buttons to add single records or paste single or multiple records",
+      "target": ".datasetSchema-addRecordsBar-help-step"
+    },
+    {
+      "content": "Navigate back to the dataflow overview using the breadcrumb. The delivery of the data is triggered from the dataflow page",
+      "target": ".datasetSchema-breadcrumb-back-help-step"
+    }
+  ]
+}
