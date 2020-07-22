@@ -2,15 +2,39 @@
   "steps": [
     {
       "content": "The top menu bar provides various functions which operate on the whole dataset:",
-      "target": ".datasetDescription"
+      "target": ".dataset-topMenuBar-help-step"
     },
     {
-      "content": "sasas",
-      "target": ".datasetSchema-export-dataset-data-help-step"
+      "content": "‘Export dataset data’- Exports the whole dataset into a downloadable file",
+      "target": ".dataset-exportDataset-help-step"
     },
     {
-      "content": "Filters and sort on the various metadata of the dataflows list allow you to find things easily in the dataflows list",
-      "target": ".dataflowList-left-side-bar-expand-help-step"
+      "content": "‘Delete dataset data’- Deletes all the data in the dataset",
+      "target": ".dataset-deleteDataset-help-step"
+    },
+    {
+      "content": "‘Validate’- Runs validations for the whole dataset NB: This can take some time",
+      "target": ".dataset-validate-help-step"
+    },
+    {
+      "content": "‘Show validations’- Shows a table of all the validation issues found across the whole dataset",
+      "target": ".dataset-showValidations-help-step"
+    },
+    {
+      "content": "‘QC rules’ – shows a list of all the validations which have been created for the dataset",
+      "target": ".datasetSchema-qcRules-help-step"
+    },
+    {
+      "content": "‘Dashboards’ - Provides a visualisation of the validation feedback",
+      "target": ".dataset-dashboards-help-step"
+    },
+    {
+      "content": "‘Manage copies’ - Functionality to save copies of the data",
+      "target": ".datasetSchema-manageCopies-help-step"
+    },
+    {
+      "content": "‘Refresh’- After import, validation and restore copy, you need to refresh the tables",
+      "target": ".dataset-refresh-help-step"
     }
   ]
 }

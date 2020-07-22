@@ -10,6 +10,7 @@ import styles from './Dataset.module.css';
 
 import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
+import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/reporter';
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
@@ -173,6 +174,12 @@ export const Dataset = withRouter(({ match, history }) => {
   useEffect(() => {
     onLoadDatasetSchema();
   }, [isDataDeleted]);
+
+  useEffect(() => {
+    if (!isUndefined(userContext.contextRoles)) {
+      leftSideBarContext.addHelpSteps(DatasetSchemaReporterHelpConfig, 'datasetSchemaReporterHelpConfig');
+    }
+  }, [userContext, isDataDeleted]);
 
   useEffect(() => {
     if (isEmpty(externalExportExtensions)) {

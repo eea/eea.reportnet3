@@ -182,6 +182,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           leftSideBarContext.addHelpSteps(DatasetSchemaRequesterEmptyHelpConfig, 'datasetSchemaRequesterHelpConfig');
         }
       } else {
+        console.log('test');
         leftSideBarContext.addHelpSteps(DatasetSchemaReporterHelpConfig, 'datasetSchemaReporterHelpConfig');
       }
     }
