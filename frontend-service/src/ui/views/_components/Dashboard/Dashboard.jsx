@@ -223,7 +223,7 @@ const Dashboard = withRouter(
 
       return (
         <React.Fragment>
-          <h1 className={styles.dashboardTitle}>{dashboardTitle}</h1>
+          {dashboardTitle && <h1 className={styles.dashboardTitle}>{dashboardTitle}</h1>}
           <span
             className={styles.dashboardWarning}
             dangerouslySetInnerHTML={{
