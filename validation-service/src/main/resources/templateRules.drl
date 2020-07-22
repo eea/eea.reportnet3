@@ -191,8 +191,8 @@ function boolean isIntegrityConstraint(DatasetValue datasetId,String integrityId
 }
 
 //////////////////////////////////////////VALIDATION TABLE FILLED////////////////////////////////////////////////////////////
-function boolean isTableEmpty(RecordValue records){
-	if(null == records || records.isEmpty()){
+function boolean isTableEmpty(TableValue tableValue){
+	if(null == tableValue.getRecords() ||  tableValue.getRecords().isEmpty()){
 		return false;
 	}
 	return true;
