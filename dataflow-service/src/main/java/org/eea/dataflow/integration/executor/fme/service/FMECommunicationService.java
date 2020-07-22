@@ -11,6 +11,7 @@ import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
 import org.eea.dataflow.integration.executor.fme.domain.SubmitResult;
 import org.eea.dataflow.integration.executor.fme.mapper.FMECollectionMapper;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.integration.enums.FMEOperation;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
 import org.eea.interfaces.vo.integration.fme.FMEOperationInfoVO;
 import org.eea.kafka.domain.EventType;
@@ -313,7 +314,9 @@ public class FMECommunicationService {
 
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
-      kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+      if (FMEOperation.IMPORT.equals(fmeOperationInfoVO.getFmeOperation())) {
+        kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+      }
     } catch (EEAException e) {
       LOG_ERROR.error("Error realeasing event {}", eventType, e);
     }
