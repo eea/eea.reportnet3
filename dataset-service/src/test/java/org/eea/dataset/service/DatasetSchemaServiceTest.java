@@ -764,6 +764,9 @@ public class DatasetSchemaServiceTest {
   public void createTableSchemaTest() throws EEAException {
     Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
         .thenReturn(new TableSchema());
+    Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn(new ObjectId().toString());
+    Mockito.when(rulesControllerZuul.updateSequence(Mockito.any())).thenReturn(1L);
     dataSchemaServiceImpl.createTableSchema(new ObjectId().toString(), new TableSchemaVO(), 1L);
     Mockito.verify(schemasRepository, times(1)).insertTableSchema(Mockito.any(), Mockito.any());
   }
