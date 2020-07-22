@@ -720,6 +720,7 @@ export const FieldDesigner = ({
           event.stopPropagation();
         }}>
         <FontAwesomeIcon icon={AwesomeIcons('delete')} />
+        <span className="srOnly">{resources.messages['deleteFieldLabel']}</span>
       </a>
     ) : null;
 

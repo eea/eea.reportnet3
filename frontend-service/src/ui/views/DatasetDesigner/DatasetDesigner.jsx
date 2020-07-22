@@ -897,7 +897,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           className={styles.paginatorValidationViewer}
           dismissableMask={true}
           header={resources.messages['titleValidations']}
-          maximizable
           onHide={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: false })}
           style={{ width: '80%' }}
           visible={designerState.isValidationViewerVisible}>

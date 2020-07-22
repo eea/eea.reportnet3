@@ -721,7 +721,6 @@ export const Dataset = withRouter(({ match, history }) => {
         className={styles.paginatorValidationViewer}
         dismissableMask={true}
         header={resources.messages['titleValidations']}
-        maximizable
         onHide={() => onSetVisible(setValidationsVisible, false)}
         style={{ width: '80%' }}
         visible={validationsVisible}>

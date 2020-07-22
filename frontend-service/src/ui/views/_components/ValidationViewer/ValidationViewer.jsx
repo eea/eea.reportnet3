@@ -77,12 +77,29 @@ const ValidationViewer = React.memo(
 
       let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={col.header} />);
 
-      columnsArr.push(<Column key="recordId" field="recordId" header="" className={styles.invisibleHeader} />);
       columnsArr.push(
-        <Column key="datasetPartitionId" field="datasetPartitionId" header="" className={styles.invisibleHeader} />
+        <Column
+          key="recordId"
+          field="recordId"
+          header={resources.messages['recordId']}
+          className={styles.invisibleHeader}
+        />
       );
       columnsArr.push(
-        <Column key="tableSchemaId" field="tableSchemaId" header="" className={styles.invisibleHeader} />
+        <Column
+          key="datasetPartitionId"
+          field="datasetPartitionId"
+          header={resources.messages['datasetPartitionId']}
+          className={styles.invisibleHeader}
+        />
+      );
+      columnsArr.push(
+        <Column
+          key="tableSchemaId"
+          field="tableSchemaId"
+          className={styles.invisibleHeader}
+          header={resources.messages['tableSchemaId']}
+        />
       );
 
       setColumns(columnsArr);
