@@ -210,15 +210,19 @@ public class FileTreatmentHelperTest {
   }
 
   @Test
-  public void exectueFileProcessETLTest() {
+  public void exectueFileProcessETLTest() throws EEAException {
     List<IntegrationVO> integrations = new ArrayList<>();
     IntegrationVO integration = new IntegrationVO();
+    Map<String, String> internalParameters = new HashMap<String, String>();
+    internalParameters.put("fileExtension", "csv");
+    integration.setInternalParameters(internalParameters);
     integration.setOperation(IntegrationOperationTypeEnum.IMPORT);
     integrations.add(integration);
+    Mockito.when(datasetService.getMimetype(Mockito.any())).thenReturn("csv");
     Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
         .thenReturn(integrations);
-    fileTreatmentHelper.executeFileProcess(1L, "fileName", new ByteArrayInputStream(new byte[0]),
-        "5d4abe555b1c1e0001477410");
+    fileTreatmentHelper.executeFileProcess(1L, "fileName.csv",
+        new ByteArrayInputStream(new byte[0]), "5d4abe555b1c1e0001477410");
     Mockito.verify(integrationController, times(1)).executeIntegrationProcess(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
