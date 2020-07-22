@@ -37,12 +37,8 @@
       "target": ".datasetSchema-switchDesignToData-help-step"
     },
     {
-      "content": "Make it read-only (code lists or reference data)",
-      "target": ".datasetSchema-readOnly-help-step"
-    },
-    {
       "content": "Prefill a table with data and make it read-only (code lists or reference data)",
-      "target": ".datasetSchema-prefill-help-step"
+      "target": ".datasetSchema-readOnlyAndPrefill-help-step"
     }
   ]
 }

@@ -506,7 +506,7 @@ export const FieldsDesigner = ({
             onClick={() => validationContext.onOpenModalFromRow(table.recordSchemaId)}
           />
         </div>
-        <div className={styles.switchDiv}>
+        <div className={`${styles.switchDiv} datasetSchema-readOnlyAndPrefill-help-step`}>
           <div>
             <span className={styles.switchTextInput}>{resources.messages['readOnlyTable']}</span>
             <Checkbox
