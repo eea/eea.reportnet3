@@ -9,7 +9,7 @@ export const routes = {
   DATASET_SCHEMA: '/dataflow/:dataflowId/datasetSchema/:datasetId',
   DATASET: '/dataflow/:dataflowId/dataset/:datasetId',
   DOCUMENTS: '/dataflow/:dataflowId/documents',
-  EU_DATASET: '/dataflow/:dataflowId/eudataset/:datasetId',
+  EU_DATASET: '/dataflow/:dataflowId/euDataset/:datasetId',
   EULOGIN: '/eulogin',
   LOGIN: '/',
   PRIVACY_STATEMENT: '/privacyPolicy',
