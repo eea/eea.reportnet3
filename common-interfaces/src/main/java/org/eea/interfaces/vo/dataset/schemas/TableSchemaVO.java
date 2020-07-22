@@ -10,12 +10,6 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class TableSchemaVO {
 
@@ -38,7 +32,7 @@ public class TableSchemaVO {
   private Boolean toPrefill;
 
   /** The not empty. */
-  private boolean notEmpty;
+  private Boolean notEmpty;
 
   /**
    * Hash code.

@@ -92,11 +92,15 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
             <div
               className={`formField${!isEmpty(errors.datasetSchemaName) && touched.datasetSchemaName ? ' error' : ''}`}>
               <Field
+                id={'datasetSchemaName'}
                 innerRef={inputRef}
                 name="datasetSchemaName"
                 placeholder={resources.messages['createDatasetSchemaName']}
                 type="text"
               />
+              <label for="datasetSchemaName" className="srOnly">
+                {resources.messages['createDatasetSchemaName']}
+              </label>
               <ErrorMessage className="error" name="datasetSchemaName" component="div" />
             </div>
           </fieldset>

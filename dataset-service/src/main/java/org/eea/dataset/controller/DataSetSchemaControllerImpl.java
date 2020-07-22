@@ -2,7 +2,6 @@ package org.eea.dataset.controller;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -29,13 +28,11 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
-import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -314,18 +311,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       tableSchemaVO = dataschemaService.createTableSchema(
           dataschemaService.getDatasetSchemaId(datasetId), tableSchemaVO, datasetId);
       datasetService.saveTablePropagation(datasetId, tableSchemaVO);
-
-      RuleVO ruleVO = new RuleVO();
-      ruleVO.setReferenceId(tableSchemaVO.getIdTableSchema());
-      ruleVO.setRuleName(LiteralConstants.RULE_TABLE_MANDATORY);
-      ruleVO.setEnabled(true);
-      ruleVO.setType(EntityTypeEnum.TABLE);
-      ruleVO.setThenCondition(Arrays.asList("Mandatory table has no records", "ERROR"));
-      ruleVO.setDescription(
-          "When a table is marked as mandatory, checks at least one record is added");
-      ruleVO.setShortCode("TB01");
-
-      rulesControllerZuul.createNewRule(datasetId, ruleVO);
       return tableSchemaVO;
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -346,8 +331,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void updateTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody TableSchemaVO tableSchemaVO) {
     try {
-      dataschemaService.updateTableSchema(dataschemaService.getDatasetSchemaId(datasetId),
-          tableSchemaVO);
+      dataschemaService.updateTableSchema(datasetId, tableSchemaVO);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID, e);

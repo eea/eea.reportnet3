@@ -27,8 +27,11 @@
   padding-bottom: 0 !important;
 }
 
-.hideColumn {
+.emptyTableHeader {
   display: none;
+  :global .p-column-title {
+    display: none;
+  }
 }
 
 .deleteRowButton {
