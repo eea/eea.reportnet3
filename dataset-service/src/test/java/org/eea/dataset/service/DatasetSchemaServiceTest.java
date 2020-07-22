@@ -664,27 +664,36 @@ public class DatasetSchemaServiceTest {
   }
 
   /**
-   * Update table schema test 1.
+   * Update table schema table not found exception test.
    *
    * @throws EEAException the EEA exception
    */
-  @Test
-  public void updateTableSchemaTest1() throws EEAException {
+  @Test(expected = EEAException.class)
+  public void updateTableSchemaTableNotFoundExceptionTest() throws EEAException {
+    DataSetMetabase dataSetMetabase = new DataSetMetabase();
+    dataSetMetabase.setDatasetSchema("5eb4269d06390651aced7c93");
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(dataSetMetabase));
     Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(null);
     try {
-      dataSchemaServiceImpl.updateTableSchema(new ObjectId().toString(), new TableSchemaVO());
+      dataSchemaServiceImpl.updateTableSchema(1L, new TableSchemaVO());
     } catch (EEAException e) {
       Assert.assertEquals(EEAErrorMessage.TABLE_NOT_FOUND, e.getMessage());
+      throw e;
     }
   }
 
   /**
-   * Update table schema test 2.
+   * Update table schema test.
    *
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateTableSchemaTest2() throws EEAException {
+  public void updateTableSchemaTest() throws EEAException {
+    DataSetMetabase dataSetMetabase = new DataSetMetabase();
+    dataSetMetabase.setDatasetSchema("5eb4269d06390651aced7c93");
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(dataSetMetabase));
     Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(tableSchema);
     Mockito.when(tableSchemaVO.getDescription()).thenReturn("description");
@@ -694,17 +703,21 @@ public class DatasetSchemaServiceTest {
     Mockito.when(tableSchema.put(Mockito.any(), Mockito.any())).thenReturn(null);
     Mockito.when(schemasRepository.updateTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
-    dataSchemaServiceImpl.updateTableSchema(new ObjectId().toString(), tableSchemaVO);
+    dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVO);
     Mockito.verify(schemasRepository, times(1)).updateTableSchema(Mockito.any(), Mockito.any());
   }
 
   /**
-   * Update table schema test 3.
+   * Update table schema null values test.
    *
    * @throws EEAException the EEA exception
    */
-  @Test
-  public void updateTableSchemaTest3() throws EEAException {
+  @Test(expected = EEAException.class)
+  public void updateTableSchemaNullValuesTest() throws EEAException {
+    DataSetMetabase dataSetMetabase = new DataSetMetabase();
+    dataSetMetabase.setDatasetSchema("5eb4269d06390651aced7c93");
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(dataSetMetabase));
     Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(tableSchema);
     Mockito.when(tableSchemaVO.getDescription()).thenReturn(null);
@@ -714,25 +727,31 @@ public class DatasetSchemaServiceTest {
     Mockito.when(schemasRepository.updateTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
     try {
-      dataSchemaServiceImpl.updateTableSchema(new ObjectId().toString(), tableSchemaVO);
+      dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVO);
     } catch (EEAException e) {
       Assert.assertEquals(EEAErrorMessage.TABLE_NOT_FOUND, e.getMessage());
+      throw e;
     }
   }
 
   /**
-   * Update table schema test 4.
+   * Update table schema illegal argument exception test.
    *
    * @throws EEAException the EEA exception
    */
-  @Test
-  public void updateTableSchemaTest4() throws EEAException {
+  @Test(expected = EEAException.class)
+  public void updateTableSchemaIllegalArgumentExceptionTest() throws EEAException {
+    DataSetMetabase dataSetMetabase = new DataSetMetabase();
+    dataSetMetabase.setDatasetSchema("5eb4269d06390651aced7c93");
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(dataSetMetabase));
     Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any()))
         .thenThrow(IllegalArgumentException.class);
     try {
-      dataSchemaServiceImpl.updateTableSchema("fail", tableSchemaVO);
+      dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVO);
     } catch (EEAException e) {
       Assert.assertEquals(IllegalArgumentException.class, e.getCause().getClass());
+      throw e;
     }
   }
 

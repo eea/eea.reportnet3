@@ -82,7 +82,6 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private KieBaseManager kieBaseManager;
 
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
 
@@ -807,7 +806,6 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
-
   /**
    * Copy rules schema.
    *
@@ -838,6 +836,12 @@ public class RulesServiceImpl implements RulesService {
       }
     }
     return dictionaryOriginTargetObjectId;
+  }
+
+  @Override
+  public void deleteNotEmptyRule(String tableSchemaId, Long datasetId) {
+    // TODO Auto-generated method stub
+
   }
 
   /**
@@ -884,8 +888,6 @@ public class RulesServiceImpl implements RulesService {
     }
     return dictionaryOriginTargetObjectId;
   }
-
-
 
   /**
    * Fill rule copied.
@@ -935,11 +937,8 @@ public class RulesServiceImpl implements RulesService {
         }
       });
     }
-
-
     return dictionaryOriginTargetObjectId;
   }
-
 
   /**
    * Copy integrity.
@@ -979,7 +978,5 @@ public class RulesServiceImpl implements RulesService {
           datasetReferencedId, integrity.getOriginDatasetSchemaId().toString(),
           integrity.getReferencedDatasetSchemaId().toString());
     }
-
   }
-
 }
