@@ -8,6 +8,8 @@ import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
 import org.eea.dataflow.integration.executor.fme.domain.SubmitResult;
 import org.eea.dataflow.integration.executor.fme.mapper.FMECollectionMapper;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.integration.enums.FMEOperation;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
 import org.eea.interfaces.vo.integration.fme.FMEOperationInfoVO;
@@ -44,6 +46,9 @@ public class FMECommunicationServiceTest {
   @Mock
   private FMECollectionMapper fmeCollectionMapper;
 
+  @Mock
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
+
   @Before
   public void initMocks() {
     ThreadPropertiesManager.setVariable("user", "user");
@@ -61,6 +66,8 @@ public class FMECommunicationServiceTest {
         Mockito.any(), Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
         Mockito.any());
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
     fmeCommunicationService.operationFinished(fmeOperationInfoVO);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -80,6 +87,8 @@ public class FMECommunicationServiceTest {
         Mockito.any(), Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
         Mockito.any());
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
     fmeCommunicationService.operationFinished(fmeOperationInfoVO);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -96,13 +105,11 @@ public class FMECommunicationServiceTest {
     fmeOperationInfoVO.setFmeOperation(FMEOperation.EXPORT);
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
-        Mockito.any());
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
     fmeCommunicationService.operationFinished(fmeOperationInfoVO);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),
-        Mockito.any());
   }
 
   @Test
@@ -115,13 +122,11 @@ public class FMECommunicationServiceTest {
     fmeOperationInfoVO.setFmeOperation(FMEOperation.EXPORT);
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
-        Mockito.any());
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
     fmeCommunicationService.operationFinished(fmeOperationInfoVO);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),
-        Mockito.any());
   }
 
 
@@ -135,6 +140,8 @@ public class FMECommunicationServiceTest {
     fmeOperationInfoVO.setFmeOperation(FMEOperation.IMPORT);
     Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
         .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
     fmeCommunicationService.operationFinished(fmeOperationInfoVO);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());

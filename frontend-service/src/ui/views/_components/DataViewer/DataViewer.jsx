@@ -45,7 +45,7 @@ import { sortReducer } from './_functions/Reducers/sortReducer';
 
 import { DataViewerUtils } from './_functions/Utils/DataViewerUtils';
 import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
-import { ExtensionUtils, MetadataUtils, RecordUtils} from 'ui/views/_functions/Utils';
+import { ExtensionUtils, MetadataUtils, RecordUtils } from 'ui/views/_functions/Utils';
 import {
   useLoadColsSchemasAndColumnOptions,
   useContextMenu,
@@ -511,6 +511,7 @@ const DataViewer = withRouter(
         onEditorSubmitValue(props, event.target.value, record);
       } else if (event.key === 'Tab') {
         event.preventDefault();
+        onEditorSubmitValue(props, event.target.value, record);
       }
     };
 
