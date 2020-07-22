@@ -216,11 +216,15 @@ export const DataflowManagement = ({
           <p>
             <InputText
               autoFocus={true}
+              id={'deleteDataflow'}
               className={`${styles.inputText}`}
               onChange={event => onConfirmDeleteDataflow(event)}
               ref={deleteInputRef}
               value={state.deleteInput}
             />
+            <label for="deleteDataflow" className="srOnly">
+              {resources.messages['deleteDataflowButton']}
+            </label>
           </p>
         </ConfirmDialog>
       )}
