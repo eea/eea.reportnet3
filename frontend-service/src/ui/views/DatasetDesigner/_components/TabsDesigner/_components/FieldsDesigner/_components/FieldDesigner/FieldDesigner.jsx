@@ -636,7 +636,7 @@ export const FieldDesigner = ({
         }}
         style={{ width: '70px' }}
       />
-      <label htmlFor={`${fieldId}_check_required`} className="srOnly">
+      <label htmlFor={`${fieldId}_check_required`} className="srOnly datasetSchema-required-help-step">
         {resources.messages['required']}
       </label>
       <Checkbox
@@ -653,7 +653,7 @@ export const FieldDesigner = ({
         }}
         style={{ width: '35px' }}
       />
-      <label htmlFor={`${fieldId}_check_pk`} className="srOnly">
+      <label htmlFor={`${fieldId}_check_pk`} className="srOnly datasetSchema-pk-help-step">
         {resources.messages['pk']}
       </label>
     </div>
@@ -801,7 +801,7 @@ export const FieldDesigner = ({
     <React.Fragment>
       <div
         draggable={!addField}
-        className={`${styles.draggableFieldDiv} fieldRow`}
+        className={`${styles.draggableFieldDiv} fieldRow datasetSchema-fieldDesigner-help-step`}
         onDragEnd={e => {
           onFieldDragEnd(e);
         }}

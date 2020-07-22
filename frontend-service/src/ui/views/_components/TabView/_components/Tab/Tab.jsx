@@ -266,7 +266,7 @@ const Tab = ({
           }}></div> */}
       </div>
       <li
-        className={`${className} p-tabview-nav-li`}
+        className={`${className} p-tabview-nav-li datasetSchema-new-table-help-step`}
         onContextMenu={e => {
           if (designMode && !addTab) {
             const contextMenus = document.getElementsByClassName('p-contextmenu p-component');
@@ -288,7 +288,7 @@ const Tab = ({
             editable
               ? styles.p_tabview_design
               : addTab
-              ? `${styles.p_tabview_design_add} datasetSchema-new-table-help-step`
+              ? `${styles.p_tabview_design_add} datasetSchema-created-table-help-step`
               : styles.p_tabview_noDesign
           }
           href={'#' + ariaControls}

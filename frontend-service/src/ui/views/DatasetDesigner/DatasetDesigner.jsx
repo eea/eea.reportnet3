@@ -598,7 +598,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const renderSwitchView = () => (
     <div className={styles.switchDivInput}>
-      <div className={styles.switchDiv}>
+      <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
         <span className={styles.switchTextInput}>{resources.messages['design']}</span>
         <InputSwitch
           checked={designerState.isPreviewModeOn}
@@ -635,7 +635,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       <div className="p-toolbar-group-left">
         <Button
           className="p-button-secondary p-button-animated-blink"
-          icon={'plus'}
+          icon={''}
           label={resources.messages['addUniqueConstraint']}
           onClick={() =>
             manageDialogs('isUniqueConstraintsListDialogVisible', false, 'isManageUniqueConstraintDialogVisible', true)
@@ -766,7 +766,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               />
 
               <Button
-                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-qcRules-help-step`}
                 disabled={false}
                 icon={'horizontalSliders'}
                 iconClasses={null}
@@ -798,7 +798,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: true })}
               />
               <Button
-                className={`p-button-rounded p-button-secondary-transparent ${
+                className={`p-button-rounded p-button-secondary-transparent datasetSchema-manageCopies-help-step ${
                   !designerState.hasWritePermissions ? 'p-button-animated-blink' : null
                 }`}
                 disabled={designerState.hasWritePermissions}
