@@ -291,9 +291,13 @@ export const ThemeProvider = ({ children }) => {
         'user-image-bg-hover': 'var(--main-font-color)',
         'user-image-bg-opacity': '0.6',
         'map-marker-color': 'var(--c-corporate-blue-lighter)',
+        'font-filters': 'var(--gray-75)',
         'header-footer-bg': 'var(--gray-10)',
         'eu-footer-bottom': 'var(--eu-footer-bottom-bg)',
-        'eu-footer-title': 'var(--gray-110)'
+        'eu-footer-title': 'var(--gray-110)',
+        'font-release-date': 'var(--c-green)',
+        'eu-link-footer-bottom': 'var(--eu-footer-bottom-font)',
+        'eu-link-hover-footer-bottom': 'var(--c-corporate-blue-lighter)'
       },
       dark: {
         bg: 'var(--c-dark-blue)',
@@ -560,9 +564,13 @@ export const ThemeProvider = ({ children }) => {
         'user-image-bg-hover': 'var(--main-font-color)',
         'user-image-bg-opacity': '0.6',
         'map-marker-color': 'var(--white)',
+        'font-filters': 'var(--white)',
         'header-footer-bg': 'var(--c-dark-blue)',
         'eu-footer-bottom': 'var(--c-dark-blue)',
-        'eu-footer-title': 'var(--white)'
+        'eu-footer-title': 'var(--white)',
+        'font-release-date': 'var(--success-color-darker)',
+        'eu-link-footer-bottom': 'var(--c-corporate-yellow)',
+        'eu-link-hover-footer-bottom': 'var(--c-corporate-yellow-lighter)'
       }
     }
   });

@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import { isNull } from 'lodash';
-import uuid from 'uuid';
 
 import './Dropdown.scss';
 

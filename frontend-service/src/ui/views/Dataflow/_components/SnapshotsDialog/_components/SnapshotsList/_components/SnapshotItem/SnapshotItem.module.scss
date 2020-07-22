@@ -38,7 +38,7 @@ p {
   }
 }
 .is_released_snapshot {
-  color: green;
+  color: var(--font-release-date);
 }
 .listItemData .listActions button:nth-last-of-type(1) {
   margin-right: 0;

@@ -180,6 +180,10 @@
     padding-left: 0em;
     width: 65% !important;
 
+    label {
+      color: var(--font-filters);
+    }
+
     li {
       opacity: 0.8;
 
@@ -278,6 +282,11 @@
       white-space: nowrap;
       width: 95%;
     }
+
+    label {
+      color: var(--font-filters);
+      text-transform: capitalize;
+    }
   }
 
   .searchInput {
@@ -310,6 +319,11 @@
   .labelDown {
     font-size: 10pt !important;
     top: 50% !important;
+    color: var(--font-filters);
+  }
+
+  .label {
+    color: var(--font-filters);
   }
 }
 

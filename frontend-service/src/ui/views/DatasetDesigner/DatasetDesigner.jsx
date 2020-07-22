@@ -777,15 +777,17 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               />
 
               <Button
-                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                className={`p-button-rounded p-button-secondary-transparent ${styles.integrationsButton}`}
                 icon={'export'}
-                iconClasses={styles.integrationsButton}
+                iconClasses={styles.integrationsButtonIcon}
                 label={resources.messages['externalIntegrations']}
                 onClick={() => manageDialogs('isIntegrationListDialogVisible', true)}
               />
 
               <Button
-                className={`p-button-rounded p-button-secondary-transparent`}
+                className={`p-button-rounded p-button-secondary-transparent ${
+                  designerState.datasetHasData && 'p-button-animated-blink'
+                }`}
                 disabled={!designerState.datasetHasData}
                 icon={'dashboard'}
                 label={resources.messages['dashboards']}
@@ -891,7 +893,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           className={styles.paginatorValidationViewer}
           dismissableMask={true}
           header={resources.messages['titleValidations']}
-          maximizable
           onHide={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: false })}
           style={{ width: '80%' }}
           visible={designerState.isValidationViewerVisible}>
