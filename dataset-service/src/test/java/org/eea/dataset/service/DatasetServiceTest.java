@@ -2110,7 +2110,7 @@ public class DatasetServiceTest {
     Mockito.when(designDatasetRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new DesignDataset()));
     Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
-    Mockito.when(dataflowControllerZull.findById(Mockito.any())).thenReturn(dataflow);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     assertTrue(datasetService.isDatasetReportable(1L));
   }
 
@@ -2121,7 +2121,7 @@ public class DatasetServiceTest {
     Mockito.when(designDatasetRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new DesignDataset()));
     Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
-    Mockito.when(dataflowControllerZull.findById(Mockito.any())).thenReturn(dataflow);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     assertFalse(datasetService.isDatasetReportable(1L));
   }
 
@@ -2137,7 +2137,7 @@ public class DatasetServiceTest {
     Mockito.when(reportingDatasetRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new ReportingDataset()));
     Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
-    Mockito.when(dataflowControllerZull.findById(Mockito.any())).thenReturn(dataflow);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     assertTrue(datasetService.isDatasetReportable(1L));
   }
 
@@ -2148,7 +2148,7 @@ public class DatasetServiceTest {
     Mockito.when(reportingDatasetRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new ReportingDataset()));
     Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
-    Mockito.when(dataflowControllerZull.findById(Mockito.any())).thenReturn(dataflow);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     assertFalse(datasetService.isDatasetReportable(1L));
   }
 

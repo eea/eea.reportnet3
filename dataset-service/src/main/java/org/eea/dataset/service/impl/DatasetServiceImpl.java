@@ -539,7 +539,6 @@ public class DatasetServiceImpl implements DatasetService {
     List<String> commonShortFields = new ArrayList<>();
     Map<String, Integer> mapFields = new HashMap<>();
     List<SortField> sortFieldsArray = new ArrayList<>();
-    List<RecordValue> records = null;
     SortField[] newFields = null;
     TableVO result = new TableVO();
     Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
@@ -2289,7 +2288,7 @@ public class DatasetServiceImpl implements DatasetService {
     // Get the dataFlowId from the metabase
     Long dataflowId = getDataFlowIdById(idDataset);
     // get de dataflow
-    return dataflowControllerZull.findById(dataflowId);
+    return dataflowControllerZull.getMetabaseById(dataflowId);
   }
 
 }

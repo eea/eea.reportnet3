@@ -321,5 +321,16 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
         originDatasetSchemaId, referencedDatasetSchemaId);
   }
 
+  /**
+   * Gets the type.
+   *
+   * @param datasetId the dataset id
+   * @return the type
+   */
+  @Override
+  @GetMapping("/private/getType/{datasetId}")
+  public DatasetTypeEnum getType(@PathVariable("datasetId") Long datasetId) {
+    return datasetMetabaseService.getDatasetType(datasetId);
+  }
 
 }
