@@ -853,8 +853,8 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public void deleteNotEmptyRule(String tableSchemaId, Long datasetId) {
-    // TODO Auto-generated method stub
-
+    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+    rulesRepository.deleteNotEmptyRule(new ObjectId(tableSchemaId), new ObjectId(datasetSchemaId));
   }
 
   /**

@@ -333,4 +333,20 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId));
     return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
   }
+
+  /**
+   * Delete not empty rule.
+   *
+   * @param tableSchemaId the table schema id
+   * @param datasetSchemaId the dataset schema id
+   * @return true, if successful
+   */
+  @Override
+  public boolean deleteNotEmptyRule(ObjectId tableSchemaId, ObjectId datasetSchemaId) {
+    Document pullCriteria =
+        new Document(REFERENCE_ID, tableSchemaId).append(WHEN_CONDITION, "isTableEmpty(this)");
+    Update update = new Update().pull(LiteralConstants.RULES, pullCriteria);
+    Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId));
+    return mongoTemplate.updateFirst(query, update, RulesSchema.class).getModifiedCount() == 1;
+  }
 }
