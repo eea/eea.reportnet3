@@ -178,7 +178,6 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
-      console.log('test');
       leftSideBarContext.addHelpSteps(DatasetSchemaReporterHelpConfig, 'datasetSchemaReporterHelpConfig');
     }
   }, [userContext, isDataLoaded, tableSchemaColumns]);
