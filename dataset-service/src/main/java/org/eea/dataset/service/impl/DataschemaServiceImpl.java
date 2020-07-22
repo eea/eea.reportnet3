@@ -1622,7 +1622,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     ruleVO
         .setDescription("When a table is marked as mandatory, checks at least one record is added");
 
-
     Long shortcode = rulesControllerZuul
         .updateSequence(datasetMetabaseService.findDatasetSchemaIdById(datasetId).toString());
     ruleVO.setShortCode("TB" + shortcode);

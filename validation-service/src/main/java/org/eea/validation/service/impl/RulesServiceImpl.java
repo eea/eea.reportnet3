@@ -18,6 +18,7 @@ import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.utils.LiteralConstants;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
@@ -299,6 +300,12 @@ public class RulesServiceImpl implements RulesService {
           .getDesignDatasetIdByDatasetSchemaId(integrityVO.getReferencedDatasetSchemaId());
       dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetId, datasetReferencedId,
           integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
+    } else if (EntityTypeEnum.TABLE.equals(ruleVO.getType())
+        && ruleVO.getRuleName().equalsIgnoreCase(LiteralConstants.RULE_TABLE_MANDATORY)) {
+      rule.setAutomatic(true);
+      rule.setVerified(true);
+      rule.setEnabled(true);
+      rule.setWhenCondition("isTableEmpty(this)");
     }
     validateRule(rule);
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
