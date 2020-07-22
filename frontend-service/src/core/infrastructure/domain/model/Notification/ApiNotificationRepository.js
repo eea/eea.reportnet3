@@ -68,7 +68,7 @@ const getSectionValidationRedirectionUrl = sectionDTO => {
     } else if (sectionDTO === 'DESIGN') {
       return 'DATASET_SCHEMA';
     } else {
-      return 'DATA_COLLECTION';
+      return 'EU_DATASET';
     }
   }
 };
