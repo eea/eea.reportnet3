@@ -749,6 +749,9 @@
     "repository": "Repository",
     "repositoryPlaceHolder": "Select a repository",
     "processNamePlaceHolder": "Select a process",
+    "deleteContributorButtonTableHeader": "Delete contributor",
+    "deleteRepresentativeButtonTableHeader": "Delete representative",
+    "deleteFieldLabel": "Delete field",
     "importDataset": "Import dataset data",
     "uploadTable": "Import data in table ",
     "externalExtensions": "External extensions",
@@ -758,6 +761,9 @@
     "deleteDataEuDatasetHeader": "Delete EU dataset data",
     "matchStringTooltip": "Click to use Country code variable",
     "dataCollectionLockedError": "The process is locked because Data Collections are opened in exclusive use",
+    "recordId": "Record id",
+    "datasetPartitionId": "Dataset partition id",
+    "tableSchemaId": "Table schema id",
     "copyToEuDatasetInit": "Copying data collections to EU datasets",
     "exportEuDatasetInit": "Exporting EU datasets data",
     "externalExportEudatasetCompletedEvent": "EU datasets exported correctly",
@@ -779,6 +785,14 @@
     "dataflowReporterHelp": "My dataflow",
     "dataflowRequesterHelp": "My dataflow",
     "datasetSchemaReporterHelpConfig": "My reporting dataset",
-    "datasetSchemaRequesterHelpConfig": "My schema"
+    "datasetSchemaRequesterHelpConfig": "My schema",
+    "createSnapshotConfirmationMessage": "Copy you are creating:",
+    "deleteSnapshotConfirmationMessage": "Copy you are deleting:",
+    "releaseSnapshotConfirmationMessage": "Copy you are releasing:",
+    "restoreSnapshotConfirmationMessage": "Copy you are restoring:",
+    "createSnapshotConfirmationQuestion": "Are you sure you want to create a copy of this dataset?",
+    "deleteSnapshotConfirmationQuestion": "Are you sure you want to delete this dataset copy?",
+    "releaseSnapshotConfirmationQuestion": "Are you sure you want to release this copy to the data collection?",
+    "restoreSnapshotConfirmationQuestion": "Are you sure you want to restore this dataset copy?"
   }
 }

@@ -275,7 +275,7 @@ const Documents = ({
             style={{ width: '5em' }}
           />
         ) : (
-          <Column className={styles.hideColumn} />
+          <Column className={styles.emptyTableHeader} header={resources.messages['documentsActionColumns']} />
         )}
       </DataTable>
       {documents.length === 0 && (

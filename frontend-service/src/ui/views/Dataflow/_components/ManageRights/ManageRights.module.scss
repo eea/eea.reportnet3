@@ -41,3 +41,9 @@
 .disabled {
   color: #5f5f5f !important;
 }
+
+.emptyTableHeader {
+  :global .p-column-title {
+    display: none;
+  }
+}

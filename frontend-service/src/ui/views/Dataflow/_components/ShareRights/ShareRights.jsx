@@ -217,19 +217,25 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
         ];
 
     return (
-      <select
-        onKeyDown={event => onEnterKey(event.key, contributor)}
-        onBlur={() => updateContributor(contributor)}
-        onChange={event => onWritePermissionChange(contributor, event.target.value)}
-        value={contributor.writePermission}>
-        {writePermissionsOptions.map(option => {
-          return (
-            <option key={uuid.v4()} className="p-dropdown-item" value={option.writePermission}>
-              {option.label}
-            </option>
-          );
-        })}
-      </select>
+      <>
+        <select
+          id="dataProvider"
+          onKeyDown={event => onEnterKey(event.key, contributor)}
+          onBlur={() => updateContributor(contributor)}
+          onChange={event => onWritePermissionChange(contributor, event.target.value)}
+          value={contributor.writePermission}>
+          {writePermissionsOptions.map(option => {
+            return (
+              <option key={uuid.v4()} className="p-dropdown-item" value={option.writePermission}>
+                {option.label}
+              </option>
+            );
+          })}
+        </select>
+        <label for="dataProvider" className="srOnly">
+          {resources.messages['manageRolesDialogInputPlaceholder']}
+        </label>
+      </>
     );
   };
 
@@ -243,11 +249,15 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
           disabled={!contributor.isNew}
           className={!contributor.isNew ? styles.disabledInput : ''}
           id={isEmpty(contributor.account) ? 'emptyInput' : contributor.account}
+          inputId={'contributorAccount'}
           onBlur={() => updateContributor(contributor)}
           onChange={event => onSetAccount(event.target.value)}
           placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
           value={contributor.account}
         />
+        <label for="emptyInput" className="srOnly">
+          {resources.messages['manageRolesDialogInputPlaceholder']}
+        </label>
       </div>
     );
   };
@@ -273,7 +283,12 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
                 body={renderWritePermissionsColumnTemplate}
                 header={resources.messages['writePermissionsColumn']}
               />
-              <Column body={renderDeleteColumnTemplate} style={{ width: '60px' }} />
+              <Column
+                body={renderDeleteColumnTemplate}
+                className={styles.emptyTableHeader}
+                header={resources.messages['deleteContributorButtonTableHeader']}
+                style={{ width: '60px' }}
+              />
             </DataTable>
           </div>
         )}

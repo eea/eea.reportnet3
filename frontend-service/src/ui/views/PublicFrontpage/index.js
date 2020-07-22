@@ -1,0 +1,1 @@
+export { PublicFrontpage } from './PublicFrontpage';
