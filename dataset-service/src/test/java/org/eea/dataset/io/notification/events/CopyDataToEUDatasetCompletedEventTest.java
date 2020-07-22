@@ -14,10 +14,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-public class ReleaseCopyDataToEUDatasetFailedEventTest {
+public class CopyDataToEUDatasetCompletedEventTest {
 
   @InjectMocks
-  private ReleaseCopyDataToEUDatasetFailedEvent releaseCopyDataToEUDatasetFailedEvent;
+  private CopyDataToEUDatasetCompletedEvent copyDataToEUDatasetCompletedEvent;
 
   @Mock
   private DataSetMetabaseRepository dataSetMetabaseRepository;
@@ -32,14 +32,16 @@ public class ReleaseCopyDataToEUDatasetFailedEventTest {
 
   @Test
   public void getEventTypeTest() {
-    Assert.assertEquals(EventType.COPY_DATA_TO_EUDATASET_FAILED_EVENT,
-        releaseCopyDataToEUDatasetFailedEvent.getEventType());
+    Assert.assertEquals(EventType.COPY_DATA_TO_EUDATASET_COMPLETED_EVENT,
+        copyDataToEUDatasetCompletedEvent.getEventType());
   }
 
   @Test
   public void getMapTest() throws EEAException {
-    Assert.assertEquals(4, releaseCopyDataToEUDatasetFailedEvent.getMap(NotificationVO.builder()
-        .user("user").datasetId(1L).datasetName("datasetName").error("error").build()).size());
+    Assert.assertEquals(3,
+        copyDataToEUDatasetCompletedEvent.getMap(
+            NotificationVO.builder().user("user").datasetId(1L).datasetName("datasetName").build())
+            .size());
   }
 
   @Test
@@ -47,8 +49,8 @@ public class ReleaseCopyDataToEUDatasetFailedEventTest {
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(dataSetMetabase));
     Mockito.when(dataSetMetabase.getDataSetName()).thenReturn("datasetName");
-    Assert.assertEquals(4, releaseCopyDataToEUDatasetFailedEvent
-        .getMap(NotificationVO.builder().user("user").datasetId(1L).error("error").build()).size());
+    Assert.assertEquals(3, copyDataToEUDatasetCompletedEvent
+        .getMap(NotificationVO.builder().user("user").datasetId(1L).build()).size());
   }
 
 }

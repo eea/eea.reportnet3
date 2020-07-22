@@ -793,6 +793,12 @@
     "createSnapshotConfirmationQuestion": "Are you sure you want to create a copy of this dataset?",
     "deleteSnapshotConfirmationQuestion": "Are you sure you want to delete this dataset copy?",
     "releaseSnapshotConfirmationQuestion": "Are you sure you want to release this copy to the data collection?",
-    "restoreSnapshotConfirmationQuestion": "Are you sure you want to restore this dataset copy?"
+    "restoreSnapshotConfirmationQuestion": "Are you sure you want to restore this dataset copy?",
+    "anOfficialWebsite": "An official website of the European Union",
+    "howDoYouKnow": "How do you know?",
+    "allOfficialEuropeanUnionWebsiteAddresses": "All official European Union website addresses are in the europa.eu domain.",
+    "seeAllEUInstitutions": "See all EU institutions and bodies",
+    "home": "Home - European Commission",
+    "search...": "Search..."
   }
 }
