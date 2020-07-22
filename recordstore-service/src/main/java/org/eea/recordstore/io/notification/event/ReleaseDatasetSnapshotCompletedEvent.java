@@ -26,7 +26,7 @@ public class ReleaseDatasetSnapshotCompletedEvent implements NotificableEventHan
 
   /** The dataset metabase controller zuul. */
   @Autowired
-  private DataSetMetabaseControllerZuul datasetMetabaseController;
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
   /** The dataflow controller zuul. */
   @Autowired
@@ -55,10 +55,10 @@ public class ReleaseDatasetSnapshotCompletedEvent implements NotificableEventHan
     Long dataflowId = notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
         : dataSetControllerZuul.getDataFlowIdById(notificationVO.getDatasetId());
     String datasetName = notificationVO.getDatasetName() != null ? notificationVO.getDatasetName()
-        : datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataSetName();
+        : datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataSetName();
     String dataflowName =
         notificationVO.getDataflowName() != null ? notificationVO.getDataflowName()
-            : dataflowControllerZuul.findById(dataflowId).getName();
+            : dataflowControllerZuul.getMetabaseById(dataflowId).getName();
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());

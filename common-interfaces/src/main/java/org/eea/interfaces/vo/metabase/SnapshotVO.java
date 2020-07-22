@@ -36,4 +36,5 @@ public class SnapshotVO implements Serializable {
   /** The reporting dataset id. */
   private Long datasetId;
 
+
 }

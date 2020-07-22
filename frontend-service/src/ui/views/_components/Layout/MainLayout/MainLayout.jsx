@@ -29,7 +29,8 @@ const MainLayout = ({ children }) => {
   const [margin, setMargin] = useState('50px');
   const [leftSideBarStyle, setLeftSideBarStyle] = useState({});
   const [mainContentStyle, setMainContentStyle] = useState({
-    height: `${window.innerHeight - 196}px`
+    height: `${window.innerHeight - 180}px`,
+    minHeight: `${window.innerHeight - 180}px`
   });
 
   const getUserConfiguration = async () => {
@@ -60,22 +61,34 @@ const MainLayout = ({ children }) => {
     }
   }, []);
 
-  useEffect(() => {
+  const calculateMainContentHeight = () => {
     const header = document.getElementById('header');
     const pageContent = document.getElementById('pageContent');
 
     if (!isEmpty(mainContentStyle) && header.clientHeight + pageContent.children[0].clientHeight > window.innerHeight) {
       setMainContentStyle({
-        height: 'auto'
+        height: 'auto',
+        minHeight: `${window.innerHeight - 180}px`
       });
     }
-  }, [children]);
+  };
 
   useEffect(() => {
-    if (mainContentStyle.height === 'auto') {
-      window.scrollTo(0, 0);
-    }
-  }, [mainContentStyle]);
+    window.addEventListener('resize', calculateMainContentHeight);
+    return () => {
+      window.removeEventListener('resize', calculateMainContentHeight);
+    };
+  });
+
+  useEffect(() => {
+    calculateMainContentHeight();
+  }, [children]);
+
+  // useEffect(() => {
+  //   if (mainContentStyle.height === 'auto') {
+  //     window.scrollTo(0, 0);
+  //   }
+  // }, [mainContentStyle]);
 
   useEffect(() => {
     async function fetchData() {

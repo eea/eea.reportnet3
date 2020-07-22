@@ -52,7 +52,7 @@ const SnapshotItem = ({ itemData, isReleaseVisible }) => {
           className={`${styles.btn} rp-btn secondary`}
           onClick={() => {
             snapshotContext.snapshotDispatch({
-              type: 'restore_snapshot',
+              type: 'RESTORE_SNAPSHOT',
               payload: { ...itemData }
             });
           }}
@@ -72,7 +72,7 @@ const SnapshotItem = ({ itemData, isReleaseVisible }) => {
                 itemData.isReleased
                   ? {}
                   : {
-                      type: 'release_snapshot',
+                      type: 'RELEASE_SNAPSHOT',
                       payload: { ...itemData }
                     }
               )
@@ -90,7 +90,7 @@ const SnapshotItem = ({ itemData, isReleaseVisible }) => {
           className={`${styles.btn} rp-btn warning`}
           onClick={() =>
             snapshotContext.snapshotDispatch({
-              type: 'delete_snapshot',
+              type: 'DELETE_SNAPSHOT',
               payload: { ...itemData }
             })
           }

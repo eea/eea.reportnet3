@@ -9,6 +9,7 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
+import org.eea.thread.ThreadPropertiesManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -51,6 +52,7 @@ public class RestoreDatasetSnapshotFailedEvent implements NotificableEventHandle
    */
   @Override
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
+    ThreadPropertiesManager.setVariable("user", notificationVO.getUser());
     Long datasetId = notificationVO.getDatasetId();
     Long dataflowId = notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
         : dataSetControllerZuul.getDataFlowIdById(notificationVO.getDatasetId());
@@ -58,7 +60,7 @@ public class RestoreDatasetSnapshotFailedEvent implements NotificableEventHandle
         : datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataSetName();
     String dataflowName =
         notificationVO.getDataflowName() != null ? notificationVO.getDataflowName()
-            : dataflowControllerZuul.findById(dataflowId).getName();
+            : dataflowControllerZuul.getMetabaseById(dataflowId).getName();
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
