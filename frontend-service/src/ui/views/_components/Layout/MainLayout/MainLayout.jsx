@@ -84,11 +84,11 @@ const MainLayout = ({ children }) => {
     calculateMainContentHeight();
   }, [children]);
 
-  useEffect(() => {
-    if (mainContentStyle.height === 'auto') {
-      window.scrollTo(0, 0);
-    }
-  }, [mainContentStyle]);
+  // useEffect(() => {
+  //   if (mainContentStyle.height === 'auto') {
+  //     window.scrollTo(0, 0);
+  //   }
+  // }, [mainContentStyle]);
 
   useEffect(() => {
     async function fetchData() {
