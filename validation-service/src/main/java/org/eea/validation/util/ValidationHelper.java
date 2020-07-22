@@ -87,15 +87,21 @@ public class ValidationHelper implements DisposableBean {
   @Value("${validation.recordBatchSize}")
   private int recordBatchSize;
 
-  /** The task released tax. */
+  /**
+   * The task released tax.
+   */
   @Value("${validation.tasks.release.tax}")
   private int taskReleasedTax;
 
-  /** The initial tax. */
+  /**
+   * The initial tax.
+   */
   @Value("${validation.tasks.initial.tax}")
   private int initialTax;
 
-  /** The max running tasks. */
+  /**
+   * The max running tasks.
+   */
   @Value("${validation.tasks.parallelism}")
   private int maxRunningTasks;
 
@@ -105,7 +111,9 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private TableRepository tableRepository;
 
-  /** the kafka admin utils. */
+  /**
+   * the kafka admin utils.
+   */
   @Autowired
   private KafkaAdminUtils kafkaAdminUtils;
 
@@ -115,7 +123,9 @@ public class ValidationHelper implements DisposableBean {
   private Map<String, ValidationProcessVO> processesMap;
 
 
-  /** The validation executor service. */
+  /**
+   * The validation executor service.
+   */
   private ExecutorService validationExecutorService;
 
 
@@ -486,7 +496,9 @@ public class ValidationHelper implements DisposableBean {
    *
    * @param datasetId the dataset id
    * @param processId the uuid
+   *
    * @return true, if successful
+   *
    * @throws EEAException the EEA exception
    */
   private boolean checkFinishedValidations(final Long datasetId, final String processId)
@@ -517,8 +529,8 @@ public class ValidationHelper implements DisposableBean {
         // this is just a warning messages to show an abnormal situation finishing validation
         // process
         LOG.warn(
-            "There are still {} pending tasks to be sent, they will not be sent as process is finished",
-            pendingValidations);
+            "There are still {} pending tasks to be sent for process {}, they will not be sent as process is finished",
+            pendingValidations, processId);
       }
       this.finishProcess(processId);
 
@@ -561,6 +573,7 @@ public class ValidationHelper implements DisposableBean {
    * Check started process.
    *
    * @param processId the process id
+   *
    * @return true, if successful
    */
   private boolean checkStartedProcess(String processId) {
@@ -573,16 +586,6 @@ public class ValidationHelper implements DisposableBean {
   }
 
 
-  /**
-   * Instantiates a new validation task.
-   *
-   * @param eeaEventVO the eea event VO
-   * @param validator the validator
-   * @param datasetId the dataset id
-   * @param kieBase the kie base
-   * @param processId the process id
-   * @param notificationEventType the notification event type
-   */
   @AllArgsConstructor
   private class ValidationTask {
 
@@ -619,7 +622,9 @@ public class ValidationHelper implements DisposableBean {
    */
   private class ValidationTasksExecutorThread implements Runnable {
 
-    /** The validation task. */
+    /**
+     * The validation task.
+     */
     private ValidationTask validationTask;
 
     /**
