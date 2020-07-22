@@ -184,6 +184,13 @@ public interface DatasetMetabaseController {
       @RequestParam("originDatasetSchemaId") String originDatasetSchemaId,
       @RequestParam("referencedDatasetSchemaId") String referencedDatasetSchemaId);
 
-
+  /**
+   * Gets the type.
+   *
+   * @param datasetId the dataset id
+   * @return the type
+   */
+  @GetMapping("/private/getType/{datasetId}")
+  DatasetTypeEnum getType(@PathVariable("datasetId") Long datasetId);
 
 }

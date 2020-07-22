@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 /**
  * The Class FMEIntegrationExecutorService.
@@ -205,15 +204,11 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
       IntegrationVO integration, String apiKey, FMEAsyncJob fmeAsyncJob,
       Map<String, Long> integrationOperationParams, Map<String, String> fmeParams) {
 
+    Long providerId = integrationOperationParams.get(PROVIDER_ID);
+    String paramDataProvider = null != providerId ? providerId.toString() : "design";
+
     List<PublishedParameter> parameters = new ArrayList<>();
 
-    String paramDataProvider = null;
-
-    if (null != integrationOperationParams.get(PROVIDER_ID)) {
-      paramDataProvider =
-          StringUtils.isEmpty(integrationOperationParams.get(PROVIDER_ID).toString()) ? "design"
-              : String.valueOf(integrationOperationParams.get(PROVIDER_ID));
-    }
     // dataflowId
     parameters.add(saveParameter(DATAFLOW_ID, integrationOperationParams.get(DATAFLOW_ID)));
     // datasetDataId
@@ -228,13 +223,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         // providerId
         parameters.add(saveParameter(PROVIDER_ID, paramDataProvider));
         // folder
-        if (null != paramDataProvider) {
-          parameters.add(saveParameter("folder",
-              integrationOperationParams.get(DATASET_ID) + "/" + paramDataProvider));
-        } else {
-          parameters.add(saveParameter("folder", integrationOperationParams.get(DATASET_ID)));
-        }
-
+        parameters.add(saveParameter("folder",
+            integrationOperationParams.get(DATASET_ID) + "/" + paramDataProvider));
 
         fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Export");
@@ -246,12 +236,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         // inputfile
         parameters.add(saveParameter("inputfile", fileName));
         // folder
-        if (null != paramDataProvider) {
-          parameters.add(saveParameter("folder",
-              integrationOperationParams.get(DATASET_ID) + "/" + paramDataProvider));
-        } else {
-          parameters.add(saveParameter("folder", integrationOperationParams.get(DATASET_ID)));
-        }
+        parameters.add(saveParameter("folder",
+            integrationOperationParams.get(DATASET_ID) + "/" + paramDataProvider));
 
         fmeAsyncJob.setPublishedParameters(parameters);
 
