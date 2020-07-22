@@ -1621,7 +1621,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     ruleVO.setThenCondition(Arrays.asList("Mandatory table has no records", "ERROR"));
     ruleVO
         .setDescription("When a table is marked as mandatory, checks at least one record is added");
-    ruleVO.setShortCode("TB01");
+
+
+    Long shortcode = rulesControllerZuul
+        .updateSequence(datasetMetabaseService.findDatasetSchemaIdById(datasetId).toString());
+    ruleVO.setShortCode("TB" + shortcode);
 
     rulesControllerZuul.createNewRule(datasetId, ruleVO);
     LOG.info("Created notEmpty rule for TableSchema {}", tableSchemaId);

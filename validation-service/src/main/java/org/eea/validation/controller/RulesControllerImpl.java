@@ -423,4 +423,15 @@ public class RulesControllerImpl implements RulesController {
       @RequestParam("datasetId") Long datasetId) {
     rulesService.deleteNotEmptyRule(tableSchemaId, datasetId);
   }
+
+  /**
+   * Update sequence.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the long
+   */
+  @GetMapping("/private/updateSequence")
+  public Long updateSequence(@RequestParam("datasetSchemaId") String datasetSchemaId) {
+    return rulesService.updateSequence(datasetSchemaId);
+  }
 }

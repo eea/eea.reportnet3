@@ -247,4 +247,13 @@ public interface RulesController {
   @GetMapping("/private/deleteNotEmptyRule")
   void deleteNotEmptyRule(@RequestParam("tableSchemaId") String tableSchemaId,
       @RequestParam("datasetId") Long datasetId);
+
+  /**
+   * Update sequence.
+   *
+   * @param tableSchemaId the table schema id
+   * @return the long
+   */
+  @GetMapping("/private/updateSequence")
+  Long updateSequence(@RequestParam("datasetSchemaId") String datasetSchemaId);
 }

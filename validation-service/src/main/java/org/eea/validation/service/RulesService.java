@@ -209,4 +209,12 @@ public interface RulesService {
    * @param datasetId the dataset id
    */
   void deleteNotEmptyRule(String tableSchemaId, Long datasetId);
+
+  /**
+   * Update sequence.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the long
+   */
+  Long updateSequence(String datasetSchemaId);
 }

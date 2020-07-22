@@ -838,6 +838,12 @@ public class RulesServiceImpl implements RulesService {
     return dictionaryOriginTargetObjectId;
   }
 
+  /**
+   * Delete not empty rule.
+   *
+   * @param tableSchemaId the table schema id
+   * @param datasetId the dataset id
+   */
   @Override
   public void deleteNotEmptyRule(String tableSchemaId, Long datasetId) {
     // TODO Auto-generated method stub
@@ -978,5 +984,16 @@ public class RulesServiceImpl implements RulesService {
           datasetReferencedId, integrity.getOriginDatasetSchemaId().toString(),
           integrity.getReferencedDatasetSchemaId().toString());
     }
+  }
+
+  /**
+   * Return update sequence.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the long
+   */
+  @Override
+  public Long updateSequence(String datasetSchemaId) {
+    return rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
   }
 }
