@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import styles from './EuHeader.module.scss';
 
@@ -7,7 +7,11 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { InputText } from 'primereact/inputtext';
 
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+
 export const EuHeader = ({ globanElementStyle, euHeaderElementStyle }) => {
+  const userContext = useContext(UserContext);
+
   const [searchInput, setSearchInput] = useState('');
   const [openGloban, setOpenGloban] = useState(false);
   const onSearch = () => {
@@ -49,7 +53,14 @@ export const EuHeader = ({ globanElementStyle, euHeaderElementStyle }) => {
       </div>
       <div id="euHeader" style={euHeaderElementStyle} className={styles.euHeader}>
         <div className={styles.europeanUnionLogo}>
-          <a href="https://europa.eu/european-union/index_en" title="Home - European Union">
+          <a
+            className={`${
+              userContext.userProps.visualTheme === 'light'
+                ? styles.europeanUnionBlackLogo
+                : styles.europeanUnionWhiteLogo
+            }`}
+            href="https://europa.eu/european-union/index_en"
+            title="Home - European Union">
             <span>Home - European Commission</span>
           </a>
         </div>
