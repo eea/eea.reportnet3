@@ -152,7 +152,7 @@ const LeftSideBar = withRouter(({ history, style }) => {
         run={run}
         scrollToFirstStep={true}
         showProgress={true}
-        showSkipButton={true}
+        showSkipButton={false}
         steps={leftSideBarContext.steps}
         styles={{
           options: {
@@ -173,7 +173,9 @@ const LeftSideBar = withRouter(({ history, style }) => {
             {!isEmpty(renderSectionButtons()) && (
               <Fragment>
                 <hr />
-                <div className={`${styles.barSection} dataflowList-left-side-bar-mid-section-help-step`}>{renderSectionButtons()}</div>
+                <div className={`${styles.barSection} dataflowList-left-side-bar-mid-section-help-step`}>
+                  {renderSectionButtons()}
+                </div>
               </Fragment>
             )}
             <hr />
