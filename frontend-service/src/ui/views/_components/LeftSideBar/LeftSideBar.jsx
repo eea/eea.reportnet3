@@ -1,7 +1,7 @@
 import React, { useState, useContext, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import { routes } from 'ui/routes';
-import Joyride, { STATUS } from 'react-joyride';
+import Joyride, { ACTIONS, EVENTS, LIFECYCLE, STATUS } from 'react-joyride';
 
 import styles from './LeftSideBar.module.scss';
 
@@ -31,14 +31,17 @@ const LeftSideBar = withRouter(({ history, style }) => {
 
   const handleJoyrideCallback = data => {
     const { action, index, status, type } = data;
-    const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
-    const continueEvents = ['step:after'];
 
-    if (continueEvents.includes(type)) {
-      setHelpIndex(helpIndex + (data.action === 'back' ? -1 : 1));
-    } else if (finishedStatuses.includes(status) || data.action === 'close') {
-      setHelpIndex(-1);
+    if ([ACTIONS.CLOSE].includes(action)) {
+      setHelpIndex(0);
       setRun(false);
+    } else {
+      if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
+        setHelpIndex(helpIndex + (data.action === 'prev' ? -1 : 1));
+      } else if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+        setHelpIndex(-1);
+        setRun(false);
+      }
     }
   };
 
