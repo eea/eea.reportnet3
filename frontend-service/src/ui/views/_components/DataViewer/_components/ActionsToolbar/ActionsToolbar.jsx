@@ -176,11 +176,11 @@ const ActionsToolbar = ({
   };
 
   return (
-    <Toolbar className={`${styles.actionsToolbar} datasetSchema-buttonsbar-dataset-data-help-step`}>
+    <Toolbar className={`${styles.actionsToolbar} datasetSchema-table-toolbar-help-step`}>
       <div className="p-toolbar-group-left">
         {(hasWritePermissions || showWriteButtons) && (
           <Button
-            className={`p-button-rounded p-button-secondary ${
+            className={`p-button-rounded p-button-secondary datasetSchema-import-table-help-step ${
               !hasWritePermissions || tableReadOnly ? null : 'p-button-animated-blink'
             }`}
             disabled={!hasWritePermissions || tableReadOnly || isDataCollection}
@@ -191,7 +191,7 @@ const ActionsToolbar = ({
         )}
         <Button
           id="buttonExportTable"
-          className={`p-button-rounded p-button-secondary-transparent datasetSchema-buttonsbar-dataset-data-help-step ${
+          className={`p-button-rounded p-button-secondary-transparent datasetSchema-export-table-help-step ${
             isDataCollection ? null : 'p-button-animated-blink'
           }`}
           disabled={isDataCollection}
@@ -226,7 +226,7 @@ const ActionsToolbar = ({
         )}
 
         <Button
-          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-showColumn-help-step`}
           disabled={false}
           icon={'eye'}
           iconClasses={filter.visibilityColumnIcon === 'eye' ? styles.filterInactive : styles.filterActive}
@@ -249,7 +249,7 @@ const ActionsToolbar = ({
 
         {(hasWritePermissions || showWriteButtons) && (
           <Button
-            className={`p-button-rounded p-button-secondary-transparent ${
+            className={`p-button-rounded p-button-secondary-transparent datasetSchema-validationFilter-help-step ${
               tableHasErrors ? 'p-button-animated-blink' : null
             }`}
             disabled={!tableHasErrors}

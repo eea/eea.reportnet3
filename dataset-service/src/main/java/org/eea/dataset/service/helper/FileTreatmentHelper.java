@@ -46,6 +46,9 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 public class FileTreatmentHelper {
 
+  /** The Constant FILE_EXTENSION: {@value}. */
+  private static final String FILE_EXTENSION = "fileExtension";
+
   /**
    * The Constant LOG.
    */
@@ -142,9 +145,10 @@ public class FileTreatmentHelper {
     List<IntegrationVO> integrations =
         integrationController.findAllIntegrationsByCriteria(integrationVO);
     List<String> auxExtensionList = new ArrayList<>();
-    integrations.stream().forEach(integration -> {
-      if (IntegrationOperationTypeEnum.IMPORT.equals(integration.getOperation())) {
-        auxExtensionList.add(integration.getInternalParameters().get("fileExtension"));
+    for (IntegrationVO integration : integrations) {
+      if (IntegrationOperationTypeEnum.IMPORT.equals(integration.getOperation())
+          && fileExtension.equals(integration.getInternalParameters().get(FILE_EXTENSION))) {
+        auxExtensionList.add(integration.getInternalParameters().get(FILE_EXTENSION));
         Map<String, String> externalParameters = new HashMap<>();
         byte[] imageBytes;
         try {
@@ -158,7 +162,7 @@ public class FileTreatmentHelper {
         }
         integrationAux.add(integration);
       }
-    });
+    }
     if (auxExtensionList.contains(fileExtension)) {
       try {
         integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
@@ -220,7 +224,7 @@ public class FileTreatmentHelper {
       String fileExtension, InputStream inputStream) {
     for (IntegrationVO integration : integrations) {
       if (IntegrationOperationTypeEnum.IMPORT.equals(integration.getOperation())) {
-        String integrationExtension = integration.getInternalParameters().get("fileExtension");
+        String integrationExtension = integration.getInternalParameters().get(FILE_EXTENSION);
         if (integrationExtension.equalsIgnoreCase(fileExtension)) {
           try {
             byte[] byteArray = IOUtils.toByteArray(inputStream);
