@@ -110,16 +110,7 @@ const Dataflow = withRouter(({ history, match }) => {
     } else {
       leftSideBarContext.addHelpSteps(DataflowReporterHelpConfig, 'dataflowReporterHelp');
     }
-  }, [
-    dataflowState.data,
-    dataflowState.designDatasetSchemas,
-    dataflowState.formHasRepresentatives,
-    dataflowState.isCustodian,
-    dataflowState.isDataSchemaCorrect,
-    dataflowState.status,
-    dataflowState.id,
-    userContext
-  ]);
+  }, [userContext, dataflowState]);
 
   //Bread Crumbs settings
   useEffect(() => {
