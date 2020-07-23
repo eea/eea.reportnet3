@@ -391,7 +391,6 @@ export const TabsDesigner = withRouter(
                 return (
                   <TabPanel
                     addTab={tab.addTab}
-                    className="datasetSchema-new-table-help-step"
                     editable={tab.editable}
                     hasPKReferenced={tab.hasPKReferenced}
                     header={tab.header}

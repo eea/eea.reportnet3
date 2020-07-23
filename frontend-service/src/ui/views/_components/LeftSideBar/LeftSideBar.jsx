@@ -1,7 +1,7 @@
 import React, { useState, useContext, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import { routes } from 'ui/routes';
-import Joyride, { STATUS } from 'react-joyride';
+import Joyride, { ACTIONS, EVENTS, LIFECYCLE, STATUS } from 'react-joyride';
 
 import styles from './LeftSideBar.module.scss';
 
@@ -27,13 +27,22 @@ const LeftSideBar = withRouter(({ history, style }) => {
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
   const [logoutConfirmVisible, setLogoutConfirmVisible] = useState(undefined);
   const [run, setRun] = useState(false);
+  const [helpIndex, setHelpIndex] = useState();
 
   const handleJoyrideCallback = data => {
-    const { status } = data;
-    const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+    const { action, index, status, type } = data;
 
-    if (finishedStatuses.includes(status)) {
+    if ([ACTIONS.CLOSE].includes(action)) {
+      setHelpIndex(0);
       setRun(false);
+    } else {
+      if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
+        setHelpIndex(helpIndex + (data.action === 'prev' ? -1 : 1));
+      } else {
+        if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+          setRun(false);
+        }
+      }
     }
   };
 
@@ -152,7 +161,8 @@ const LeftSideBar = withRouter(({ history, style }) => {
         run={run}
         scrollToFirstStep={true}
         showProgress={true}
-        showSkipButton={true}
+        showSkipButton={false}
+        stepIndex={helpIndex}
         steps={leftSideBarContext.steps}
         styles={{
           options: {
@@ -173,7 +183,9 @@ const LeftSideBar = withRouter(({ history, style }) => {
             {!isEmpty(renderSectionButtons()) && (
               <Fragment>
                 <hr />
-                <div className={`${styles.barSection} dataflowList-left-side-bar-mid-section-help-step`}>{renderSectionButtons()}</div>
+                <div className={`${styles.barSection} dataflowList-left-side-bar-mid-section-help-step`}>
+                  {renderSectionButtons()}
+                </div>
               </Fragment>
             )}
             <hr />

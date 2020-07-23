@@ -72,6 +72,16 @@ export class BodyCell extends Component {
   bindDocumentEditListener() {
     if (!this.documentEditListener) {
       this.documentEditListener = event => {
+        let selection = '';
+        if (window.getSelection) {
+          selection = window.getSelection();
+        } else if (document.selection) {
+          selection = document.selection.createRange();
+        }
+
+        if (selection.toString() !== '') {
+          this.editingCellClick = true;
+        }
         if (!this.editingCellClick) {
           this.switchCellToViewMode(true);
         }
