@@ -38,9 +38,10 @@ const LeftSideBar = withRouter(({ history, style }) => {
     } else {
       if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
         setHelpIndex(helpIndex + (data.action === 'prev' ? -1 : 1));
-      } else if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
-        setHelpIndex(-1);
-        setRun(false);
+      } else {
+        if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+          setRun(false);
+        }
       }
     }
   };
