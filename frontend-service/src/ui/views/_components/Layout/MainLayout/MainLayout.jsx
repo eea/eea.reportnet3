@@ -117,7 +117,7 @@ const MainLayout = ({ children }) => {
 
   const onToggleSideBar = hover => {};
 
-  const onMainContentChange = updatedMainContentStyle => {
+  const onMainContentStyleChange = updatedMainContentStyle => {
     const newMainContentStyle = { ...mainContentStyle, ...updatedMainContentStyle };
 
     setMainContentStyle(newMainContentStyle);
@@ -130,7 +130,7 @@ const MainLayout = ({ children }) => {
   useSocket();
   return (
     <div id={styles.mainLayoutContainer}>
-      <Header onMainContentChange={onMainContentChange} />
+      <Header onMainContentStyleChange={onMainContentStyleChange} />
       <div id="mainContent" className={styles.mainContent} style={mainContentStyle}>
         <LeftSideBar onToggleSideBar={onToggleSideBar} style={leftSideBarStyle} />
         <div id="pageContent" className={styles.pageContent} style={pageContentStyle}>

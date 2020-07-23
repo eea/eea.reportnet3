@@ -24,7 +24,7 @@ import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-const Header = withRouter(({ history, onMainContentChange }) => {
+const Header = withRouter(({ history, onMainContentStyleChange }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -61,7 +61,7 @@ const Header = withRouter(({ history, onMainContentChange }) => {
           height: '180px',
           transition: '0.5s'
         });
-        onMainContentChange({
+        onMainContentStyleChange({
           marginTop: '180px',
           transition: '0.5s'
         });
@@ -78,7 +78,7 @@ const Header = withRouter(({ history, onMainContentChange }) => {
           height: '70px',
           transition: '0.5s'
         });
-        onMainContentChange({
+        onMainContentStyleChange({
           marginTop: '70px',
           transition: '0.5s'
         });
