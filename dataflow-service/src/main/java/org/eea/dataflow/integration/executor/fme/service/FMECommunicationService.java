@@ -11,6 +11,9 @@ import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
 import org.eea.dataflow.integration.executor.fme.domain.SubmitResult;
 import org.eea.dataflow.integration.executor.fme.mapper.FMECollectionMapper;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.integration.enums.FMEOperation;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
 import org.eea.interfaces.vo.integration.fme.FMEOperationInfoVO;
 import org.eea.kafka.domain.EventType;
@@ -80,8 +83,13 @@ public class FMECommunicationService {
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The rest template. */
   @Autowired
   private RestTemplate restTemplate;
+
+  /** The dataset metabase controller zuul. */
+  @Autowired
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
 
   /**
@@ -288,9 +296,13 @@ public class FMECommunicationService {
     EventType eventType;
     Long datasetId = fmeOperationInfoVO.getDatasetId();
     String user = (String) ThreadPropertiesManager.getVariable("user");
+    DataSetMetabaseVO datasetMetabase = new DataSetMetabaseVO();
+    if (datasetId != null) {
+      datasetMetabase = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    }
     NotificationVO notificationVO = NotificationVO.builder().user(user).datasetId(datasetId)
         .dataflowId(fmeOperationInfoVO.getDataflowId()).fileName(fmeOperationInfoVO.getFileName())
-        .build();
+        .datasetName(datasetMetabase.getDataSetName()).build();
 
     LOG.info("Setting operation {} coming from FME as finished", fmeOperationInfoVO);
     switch (fmeOperationInfoVO.getFmeOperation()) {
@@ -313,7 +325,9 @@ public class FMECommunicationService {
 
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
-      kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+      if (FMEOperation.IMPORT.equals(fmeOperationInfoVO.getFmeOperation())) {
+        kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+      }
     } catch (EEAException e) {
       LOG_ERROR.error("Error realeasing event {}", eventType, e);
     }
