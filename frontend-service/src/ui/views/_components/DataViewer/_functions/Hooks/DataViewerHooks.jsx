@@ -229,7 +229,7 @@ export const useSetColumns = (
             <React.Fragment>
               {column.header}
               <Button
-                className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
+                className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent datasetSchema-columnHeaderInfo-help-step`}
                 icon="infoCircle"
                 onClick={() => {
                   onShowFieldInfo(column.header, true);
