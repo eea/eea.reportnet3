@@ -46,7 +46,7 @@ export const apiDataset = {
           : getUrl(DatasetConfig.addTableDesign, {
               datasetId
             }),
-        data: { nameTableSchema: tableSchemaName }
+        data: { nameTableSchema: tableSchemaName, notEmpty: true }
       });
       return response;
     } catch (error) {
