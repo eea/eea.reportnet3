@@ -62,7 +62,7 @@
     },
     {
       "content": "Column heading – however the mouse over the ‘i’ icon to see a pop-up with the field type and description",
-      "target": ".datasetSchema-columnHeader-help-step"
+      "target": ".datasetSchema-columnHeaderInfo-help-step"
     },
     {
       "content": "Below the table are buttons to add single records or paste single or multiple records",

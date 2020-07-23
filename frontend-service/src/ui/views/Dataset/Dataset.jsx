@@ -157,6 +157,7 @@ export const Dataset = withRouter(({ match, history }) => {
             )
         });
       }
+      console.log('breadCrumbs', breadCrumbs);
       breadCrumbs.push({ label: resources.messages['dataset'], icon: 'dataset' });
       breadCrumbContext.add(breadCrumbs);
       leftSideBarContext.removeModels();

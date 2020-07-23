@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
+import { isUndefined, isEmpty } from 'lodash';
 
 export const BreadCrumb = ({ className, id, style }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
@@ -30,8 +31,7 @@ export const BreadCrumb = ({ className, id, style }) => {
   };
 
   const onLoadItem = item => {
-    const className = '';
-
+    const className = !isUndefined(item.className) || !isEmpty(item.className) ? item.className : '';
     return (
       <li role="menuitem" className={className} style={item.style}>
         <a
