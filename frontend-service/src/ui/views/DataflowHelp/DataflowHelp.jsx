@@ -127,12 +127,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     );
   }, [documents, webLinks, datasetsSchemas, selectedIndex]);
 
-  // useEffect(() => {
-  //   if (!isEmpty(steps)) {
-  //     leftSideBarContext.addHelpSteps('dataflowHelpHelp', steps);
-  //   }
-  // }, [steps]);
-
   useEffect(() => {
     setIsLoading(true);
     fetchDocumentsData();
