@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Field, Form } from 'formik';
@@ -23,6 +23,19 @@ const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isRelea
   const isVisible = snapshotContext.isSnapshotsBarVisible;
   const setIsVisible = snapshotContext.setIsSnapshotsBarVisible;
 
+  const [slideBarStyle, setSlideBarStyle] = useState({});
+
+  useEffect(() => {
+    const documentElement = document.compatMode === 'CSS1Compat' ? document.documentElement : document.body;
+
+    const headerHeight = document.getElementById('header').clientHeight;
+
+    setSlideBarStyle({
+      height: `${documentElement.clientHeight - headerHeight}px`,
+      top: `${headerHeight}px`
+    });
+  }, [isVisible]);
+
   useEffect(() => {
     showScrollingBar(isVisible);
   }, [isVisible]);
@@ -44,9 +57,10 @@ const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isRelea
     <Sidebar
       blockScroll={true}
       className={styles.sidebar}
-      onHide={e => setIsVisible()}
+      onHide={() => setIsVisible()}
       position="right"
-      visible={isVisible}>
+      visible={isVisible}
+      style={slideBarStyle}>
       <div className={styles.content}>
         <div className={styles.title}>
           <h3>{resources.messages.createSnapshotTitle}</h3>
@@ -65,7 +79,7 @@ const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isRelea
               });
               values.createSnapshotDescription = '';
             }}
-            render={({ errors, touched, isSubmitting }) => (
+            render={({ errors, touched }) => (
               <Form className={styles.createForm}>
                 <div
                   className={`${styles.snapshotForm} formField ${styles.createInputAndButtonWrapper} ${
@@ -100,7 +114,7 @@ const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isRelea
         ) : snapshotListData.length > 0 ? (
           <SnapshotsList snapshotListData={snapshotListData} isReleaseVisible={isReleaseVisible} />
         ) : (
-          <h3>{resources.messages.snapshotsDontExist}</h3>
+          <h3>{resources.messages.snapshotsDoNotExist}</h3>
         )}
       </div>
     </Sidebar>

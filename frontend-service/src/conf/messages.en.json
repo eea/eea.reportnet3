@@ -474,7 +474,7 @@
     "snapshotRestoringError": "Copy restoring error at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "snapshotRestoringSuccess": "Copy restoring success at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "snapshots": "Manage copies",
-    "snapshotsDontExist": "There are no copies created",
+    "snapshotsDoNotExist": "There are no copies created",
     "sort": "Sort",
     "state": "state",
     "status": "Status",
