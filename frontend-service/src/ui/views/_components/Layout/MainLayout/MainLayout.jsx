@@ -1,10 +1,8 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { isUndefined } from 'lodash';
 
 import styles from './MainLayout.module.css';
-
-import isEmpty from 'lodash/isEmpty';
 
 import { Footer } from './_components';
 import { Header } from './_components/Header';
@@ -21,6 +19,7 @@ import { UserService } from 'core/services/User';
 import { useSocket } from 'ui/views/_components/Layout/MainLayout/_hooks';
 
 const MainLayout = ({ children }) => {
+  const element = document.compatMode === 'CSS1Compat' ? document.documentElement : document.body;
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notifications = useContext(NotificationContext);
   const themeContext = useContext(ThemeContext);
@@ -32,6 +31,30 @@ const MainLayout = ({ children }) => {
     height: `auto`,
     minHeight: `${window.innerHeight - 180}px`
   });
+  const [pageContentStyle, setPageContentStyle] = useState({
+    maxWidth: `${element.clientWidth - 50}px`
+  });
+
+  useEffect(() => {
+    window.addEventListener('resize', calculateMainContentWidth);
+    return () => {
+      window.removeEventListener('resize', calculateMainContentWidth);
+    };
+  });
+
+  const calculateMainContentWidth = () => {
+    const clientWidth = element.clientWidth;
+
+    const maxWidth = leftSideBarContext.isLeftSideBarOpened
+      ? { maxWidth: `${clientWidth - 200}px` }
+      : { maxWidth: `${clientWidth - 50}px` };
+
+    setPageContentStyle({ ...maxWidth });
+  };
+
+  useEffect(() => {
+    calculateMainContentWidth();
+  }, [leftSideBarContext.isLeftSideBarOpened]);
 
   const getUserConfiguration = async () => {
     try {
@@ -89,7 +112,7 @@ const MainLayout = ({ children }) => {
     } else {
       setMargin('50px');
     }
-  }, [leftSideBarContext]);
+  }, [leftSideBarContext.isLeftSideBarOpened]);
 
   const onToggleSideBar = hover => {};
 
@@ -102,8 +125,8 @@ const MainLayout = ({ children }) => {
     <div id={styles.mainLayoutContainer}>
       <Header onLeftSideBarStyleChange={onLeftSideBarStyleChange} />
       <div id="mainContent" className={styles.mainContent} style={mainContentStyle}>
-        <LeftSideBar onToggleSideBar={onToggleSideBar} style={leftSideBarStyle} style={leftSideBarStyle} />
-        <div id="pageContent" className={styles.pageContent}>
+        <LeftSideBar onToggleSideBar={onToggleSideBar} style={leftSideBarStyle} />
+        <div id="pageContent" className={styles.pageContent} style={pageContentStyle}>
           {children}
         </div>
       </div>

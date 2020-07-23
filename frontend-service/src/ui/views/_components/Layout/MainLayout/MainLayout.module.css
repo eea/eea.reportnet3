@@ -8,6 +8,7 @@
   display: flex;
 }
 .pageContent {
+  transition: all 500ms ease 0ms;
   width: 100%;
 }
 .disclaimer {
