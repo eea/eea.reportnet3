@@ -15,7 +15,13 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 
-const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isReleaseVisible }) => {
+const SnapshotSlideBar = ({
+  isLoadingSnapshotListData,
+  isReleaseVisible,
+  isSnapshotDialogVisible,
+  snapshotListData
+}) => {
+  const [slideBarStyle, setSlideBarStyle] = useState({});
   const snapshotContext = useContext(SnapshotContext);
   const resources = useContext(ResourcesContext);
   const form = useRef(null);
@@ -23,9 +29,15 @@ const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isRelea
   const isVisible = snapshotContext.isSnapshotsBarVisible;
   const setIsVisible = snapshotContext.setIsSnapshotsBarVisible;
 
-  const [slideBarStyle, setSlideBarStyle] = useState({});
+  useEffect(() => {
+    resetSlideBarPositionAndSize();
+  }, [isVisible, isSnapshotDialogVisible]);
 
   useEffect(() => {
+    showScrollingBar();
+  }, [isVisible, isSnapshotDialogVisible]);
+
+  const resetSlideBarPositionAndSize = () => {
     const documentElement = document.compatMode === 'CSS1Compat' ? document.documentElement : document.body;
 
     const headerHeight = document.getElementById('header').clientHeight;
@@ -34,14 +46,11 @@ const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isRelea
       height: `${documentElement.clientHeight - headerHeight}px`,
       top: `${headerHeight}px`
     });
-  }, [isVisible]);
+  };
 
-  useEffect(() => {
-    showScrollingBar(isVisible);
-  }, [isVisible]);
-
-  const showScrollingBar = isVisible => {
+  const showScrollingBar = () => {
     const bodySelector = document.querySelector('body');
+
     isVisible ? (bodySelector.style.overflow = 'hidden') : (bodySelector.style.overflow = 'hidden auto');
   };
 
