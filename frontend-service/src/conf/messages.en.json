@@ -98,7 +98,7 @@
     "dataflowDetailsError": "Failed loading dataflow information",
     "dataflowHelp": "Dataflow help",
     "dataflowHelpHelp": "Documents, weblinks and dataset schemas help",
-    "dataflowListHelp": "My dataflows",
+    "dataflowListRequesterHelp": "This is the main page where you can create a new dataflow or enter to the ones you have access or you have created",
     "dataflowNameExists": "Dataflow name already exists, please choose another one",
     "dataflowObligationEmpty": "Obligation is a required field",
     "dataflows": "Dataflows",
@@ -782,10 +782,10 @@
     "originFieldPlaceholder": "Select field",
     "referencedFieldPlaceholder": "Select field",
     "tableRelationsTitle": "Note: By default, all reference field values must be found in the target field values",
-    "dataflowReporterHelp": "My dataflow",
-    "dataflowRequesterHelp": "My dataflow",
-    "datasetSchemaReporterHelpConfig": "My reporting dataset",
-    "datasetSchemaRequesterHelpConfig": "My schema",
+    "dataflowReporterHelp": "Here you can see information of your dataset, enter to it and release the data to the data collection",
+    "dataflowRequesterDraftHelp": "Here you can see the data collections data and manage the EU Datasets",
+    "datasetSchemaReporterHelpConfig": "Here you have the tools to enter the data that is going to be released to the data collection",
+    "datasetSchemaRequesterWithTabsHelpConfig": "These are tools:",
     "createSnapshotConfirmationMessage": "Copy you are creating:",
     "deleteSnapshotConfirmationMessage": "Copy you are deleting:",
     "releaseSnapshotConfirmationMessage": "Copy you are releasing:",
@@ -799,6 +799,9 @@
     "allOfficialEuropeanUnionWebsiteAddresses": "All official European Union website addresses are in the europa.eu domain.",
     "seeAllEUInstitutions": "See all EU institutions and bodies",
     "home": "Home - European Commission",
-    "search...": "Search..."
+    "search...": "Search...",
+    "dataflowListReporterHelp": "This is the main page where you can see the list of dataflows you have access",
+    "dataflowRequesterDesignHelp": "Here you have the tools to manage your schema. You can create schemas, edit the dataflow, assign editors and create the data collections",
+    "datasetSchemaRequesterEmptyHelpConfig": "Here you have the tools to design your schema. Open me again when you have created your first table."
   }
 }
