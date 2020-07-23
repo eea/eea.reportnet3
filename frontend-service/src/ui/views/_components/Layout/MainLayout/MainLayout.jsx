@@ -43,8 +43,6 @@ const MainLayout = ({ children }) => {
   });
 
   const calculateMainContentWidth = () => {
-    const element = document.compatMode === 'CSS1Compat' ? document.documentElement : document.body;
-
     const clientWidth = element.clientWidth;
 
     const maxWidth = leftSideBarContext.isLeftSideBarOpened
