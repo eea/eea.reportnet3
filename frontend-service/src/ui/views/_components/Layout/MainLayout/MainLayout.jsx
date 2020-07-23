@@ -29,7 +29,8 @@ const MainLayout = ({ children }) => {
   const [leftSideBarStyle, setLeftSideBarStyle] = useState({});
   const [mainContentStyle, setMainContentStyle] = useState({
     height: `auto`,
-    minHeight: `${window.innerHeight - 180}px`
+    minHeight: `${window.innerHeight - 180}px`,
+    marginTop: '180px'
   });
   const [pageContentStyle, setPageContentStyle] = useState({
     maxWidth: `${element.clientWidth - 50}px`
@@ -116,14 +117,20 @@ const MainLayout = ({ children }) => {
 
   const onToggleSideBar = hover => {};
 
-  const onLeftSideBarStyleChange = sideBarStyle => {
-    setLeftSideBarStyle(sideBarStyle);
+  const onMainContentChange = updatedMainContentStyle => {
+    const newMainContentStyle = { ...mainContentStyle, ...updatedMainContentStyle };
+
+    setMainContentStyle(newMainContentStyle);
   };
+
+  useEffect(() => {
+    console.log('leftSideBarStyle', leftSideBarStyle);
+  }, [leftSideBarStyle]);
 
   useSocket();
   return (
     <div id={styles.mainLayoutContainer}>
-      <Header onLeftSideBarStyleChange={onLeftSideBarStyleChange} />
+      <Header onMainContentChange={onMainContentChange} />
       <div id="mainContent" className={styles.mainContent} style={mainContentStyle}>
         <LeftSideBar onToggleSideBar={onToggleSideBar} style={leftSideBarStyle} />
         <div id="pageContent" className={styles.pageContent} style={pageContentStyle}>
