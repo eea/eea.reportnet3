@@ -1,5 +1,6 @@
 package org.eea.dataflow.service.impl;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,13 +8,22 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import org.eea.dataflow.integration.crud.factory.CrudManager;
 import org.eea.dataflow.integration.crud.factory.CrudManagerFactory;
+import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
+import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
+import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.lock.enums.LockType;
+import org.eea.lock.service.LockService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 
@@ -26,6 +36,18 @@ public class IntegrationServiceImpl implements IntegrationService {
   /** The crud manager factory. */
   @Autowired
   private CrudManagerFactory crudManagerFactory;
+
+  /** The FME integration executor factory. */
+  @Autowired
+  private IntegrationExecutorFactory integrationExecutorFactory;
+
+  /** The eu dataset controller zuul. */
+  @Autowired
+  private EUDatasetControllerZuul euDatasetControllerZuul;
+
+  /** The lock service. */
+  @Autowired
+  private LockService lockService;
 
 
   /** The Constant LOG. */
@@ -142,7 +164,7 @@ public class IntegrationServiceImpl implements IntegrationService {
       Map<String, String> dictionaryOriginTargetObjectId) throws EEAException {
     for (String originDatasetSchemaId : originDatasetSchemaIds) {
       IntegrationVO integrationCriteria = new IntegrationVO();
-      integrationCriteria.getInternalParameters().put("datasetSchemaId", originDatasetSchemaId);
+      integrationCriteria.getInternalParameters().put(DATASETSCHEMAID, originDatasetSchemaId);
       List<IntegrationVO> integrations = getAllIntegrationsByCriteria(integrationCriteria);
       for (IntegrationVO integration : integrations) {
         // we've got the origin integrations. We intend to change the dataflow and the
@@ -151,7 +173,7 @@ public class IntegrationServiceImpl implements IntegrationService {
         LOG.info(
             "There are integrations to be copied into the datasetSchemaId {} in the dataflowId {}",
             dictionaryOriginTargetObjectId.get(originDatasetSchemaId), dataflowIdDestination);
-        integration.getInternalParameters().put("datasetSchemaId",
+        integration.getInternalParameters().put(DATASETSCHEMAID,
             dictionaryOriginTargetObjectId.get(originDatasetSchemaId));
         integration.getInternalParameters().put("dataflowId", dataflowIdDestination.toString());
         createIntegration(integration);
@@ -159,5 +181,72 @@ public class IntegrationServiceImpl implements IntegrationService {
     }
   }
 
+
+
+  /**
+   * Execute EU dataset export.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<ExecutionResultVO> executeEUDatasetExport(Long dataflowId) throws EEAException {
+
+    addLock(dataflowId);
+    IntegrationToolTypeEnum integrationToolTypeEnum = IntegrationToolTypeEnum.FME;
+    IntegrationOperationTypeEnum integrationOperationTypeEnum =
+        IntegrationOperationTypeEnum.EXPORT_EU_DATASET;
+    IntegrationVO integration = new IntegrationVO();
+    integration.setTool(integrationToolTypeEnum);
+    integration.setOperation(integrationOperationTypeEnum);
+
+    List<EUDatasetVO> euDatasets = euDatasetControllerZuul.findEUDatasetByDataflowId(dataflowId);
+
+    List<ExecutionResultVO> resultList = new ArrayList<>();
+
+    euDatasets.stream().forEach(
+        dataset -> resultList.add(integrationExecutorFactory.getExecutor(integrationToolTypeEnum)
+            .execute(integrationOperationTypeEnum, null, dataset.getId(), integration)));
+
+    releaseLock(dataflowId);
+    return resultList;
+  }
+
+  /**
+   * Release lock.
+   *
+   * @param dataflowId the dataflow id
+   */
+  private void releaseLock(Long dataflowId) {
+    // Remove lock to the operation export from EU dataset
+    List<Object> criteria = new ArrayList<>();
+    criteria.add(LockSignature.EXPORT_EU_DATASET.getValue());
+    criteria.add(dataflowId);
+    lockService.removeLockByCriteria(criteria);
+
+    // Remove lock to the operation copy data to EU dataset
+    List<Object> criteriaCopy = new ArrayList<>();
+    criteriaCopy.add(LockSignature.POPULATE_EU_DATASET.getValue());
+    criteriaCopy.add(dataflowId);
+    lockService.removeLockByCriteria(criteriaCopy);
+  }
+
+
+  /**
+   * Adds the lock.
+   *
+   * @param dataflowId the dataflow id
+   * @throws EEAException the EEA exception
+   */
+  private void addLock(Long dataflowId) throws EEAException {
+    // Lock to avoid export EUDataset while is copying data
+    Map<String, Object> mapCriteriaExport = new HashMap<>();
+    mapCriteriaExport.put("signature", LockSignature.POPULATE_EU_DATASET.getValue());
+    mapCriteriaExport.put("dataflowId", dataflowId);
+    lockService.createLock(new Timestamp(System.currentTimeMillis()),
+        SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
+        mapCriteriaExport);
+  }
 
 }

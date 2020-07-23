@@ -1,7 +1,7 @@
-import { Get } from './Get';
+import { Download } from './Download';
 
 import { confirmationReceiptRepository } from 'core/domain/model/ConfirmationReceipt/ConfirmationReceiptRepository';
 
 export const ConfirmationReceiptService = {
-  get: Get({ confirmationReceiptRepository })
+  download: Download({ confirmationReceiptRepository })
 };

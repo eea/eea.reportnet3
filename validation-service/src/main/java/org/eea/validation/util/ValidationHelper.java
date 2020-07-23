@@ -87,12 +87,21 @@ public class ValidationHelper implements DisposableBean {
   @Value("${validation.recordBatchSize}")
   private int recordBatchSize;
 
+  /**
+   * The task released tax.
+   */
   @Value("${validation.tasks.release.tax}")
   private int taskReleasedTax;
 
+  /**
+   * The initial tax.
+   */
   @Value("${validation.tasks.initial.tax}")
   private int initialTax;
 
+  /**
+   * The max running tasks.
+   */
   @Value("${validation.tasks.parallelism}")
   private int maxRunningTasks;
 
@@ -103,7 +112,7 @@ public class ValidationHelper implements DisposableBean {
   private TableRepository tableRepository;
 
   /**
-   * the kafka admin utils
+   * the kafka admin utils.
    */
   @Autowired
   private KafkaAdminUtils kafkaAdminUtils;
@@ -114,6 +123,9 @@ public class ValidationHelper implements DisposableBean {
   private Map<String, ValidationProcessVO> processesMap;
 
 
+  /**
+   * The validation executor service.
+   */
   private ExecutorService validationExecutorService;
 
 
@@ -125,6 +137,9 @@ public class ValidationHelper implements DisposableBean {
     processesMap = new ConcurrentHashMap<>();
   }
 
+  /**
+   * Inits the.
+   */
   @PostConstruct
   private void init() {
     validationExecutorService = Executors.newFixedThreadPool(maxRunningTasks);
@@ -186,7 +201,7 @@ public class ValidationHelper implements DisposableBean {
   }
 
   /**
-   * Initialize process control structure for the given processId as coordinator or as a worker
+   * Initialize process control structure for the given processId as coordinator or as a worker.
    *
    * @param processId the process id
    * @param isCoordinator the is coordinator
@@ -204,8 +219,6 @@ public class ValidationHelper implements DisposableBean {
    *
    * @param datasetId the dataset id
    * @param processId the uu id
-   *
-   * @throws EEAException the EEA exception
    */
   @Async
   @LockMethod(removeWhenFinish = false, isController = false)
@@ -244,27 +257,13 @@ public class ValidationHelper implements DisposableBean {
     if (checkStartedProcess(processId)) {
       synchronized (processesMap) {
         Integer pendingOk = processesMap.get(processId).getPendingOks();
-        pendingOk--;
-        processesMap.get(processId).setPendingOks(pendingOk);
+        processesMap.get(processId).setPendingOks(--pendingOk);
         if (!this.checkFinishedValidations(datasetId, processId)) {
           // process is not over, but still it could happen that there is no task to be sent
           // remember pendingOks > pendingValidations.size()
           Integer pendingValidations = processesMap.get(processId).getPendingValidations().size();
           if (pendingValidations > 0) {
-            // there are more tasks to be sent, just send them out, at least, one more task
-            int tasksToBeSent = this.taskReleasedTax;
-            int sentTasks = 0;
-            while (tasksToBeSent > 0) {
-              if (processesMap.get(processId).getPendingValidations().size() >= 1) {
-                this.kafkaSenderUtils
-                    .releaseKafkaEvent(processesMap.get(processId).getPendingValidations().poll());
-                sentTasks++;
-              } else {
-                break;
-              }
-              tasksToBeSent--;
-            }
-            LOG.info("Sent next {} tasks for process {}", sentTasks, processId);
+            pendingValidationProcess(processId);
           }
           LOG.info(
               "There are still {} tasks to be sent and {} pending Ok's to be received for process {}",
@@ -274,6 +273,33 @@ public class ValidationHelper implements DisposableBean {
     }
   }
 
+  /**
+   * Pending validation process.
+   *
+   * @param processId the process id
+   */
+  private void pendingValidationProcess(final String processId) {
+    // there are more tasks to be sent, just send them out, at least, one more task
+    int tasksToBeSent = this.taskReleasedTax;
+    int sentTasks = 0;
+    while (tasksToBeSent > 0) {
+      if (processesMap.get(processId).getPendingValidations().size() >= 1) {
+        this.kafkaSenderUtils
+            .releaseKafkaEvent(processesMap.get(processId).getPendingValidations().poll());
+        sentTasks++;
+      } else {
+        break;
+      }
+      tasksToBeSent--;
+    }
+    LOG.info("Sent next {} tasks for process {}", sentTasks, processId);
+  }
+
+  /**
+   * Destroy.
+   *
+   * @throws Exception the exception
+   */
   @Override
   public void destroy() throws Exception {
     if (null != validationExecutorService) {
@@ -311,6 +337,11 @@ public class ValidationHelper implements DisposableBean {
   }
 
 
+  /**
+   * Start process.
+   *
+   * @param processId the process id
+   */
   private void startProcess(final String processId) {
     if (checkStartedProcess(processId)) {
       ConsumerGroupVO consumerGroupVO = kafkaAdminUtils.getConsumerGroupInfo();
@@ -466,6 +497,8 @@ public class ValidationHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @param processId the uuid
    *
+   * @return true, if successful
+   *
    * @throws EEAException the EEA exception
    */
   private boolean checkFinishedValidations(final Long datasetId, final String processId)
@@ -496,8 +529,8 @@ public class ValidationHelper implements DisposableBean {
         // this is just a warning messages to show an abnormal situation finishing validation
         // process
         LOG.warn(
-            "There are still {} pending tasks to be sent, they will not be sent as process is finished",
-            pendingValidations);
+            "There are still {} pending tasks to be sent for process {}, they will not be sent as process is finished",
+            pendingValidations, processId);
       }
       this.finishProcess(processId);
 
@@ -509,6 +542,13 @@ public class ValidationHelper implements DisposableBean {
     return isFinished;
   }
 
+  /**
+   * Adds the validation task to process.
+   *
+   * @param processId the process id
+   * @param eventType the event type
+   * @param value the value
+   */
   private void addValidationTaskToProcess(final String processId, final EventType eventType,
       final Map<String, Object> value) {
     if (checkStartedProcess(processId)) {
@@ -518,8 +558,7 @@ public class ValidationHelper implements DisposableBean {
           pendingOk = 0;
         }
 
-        pendingOk++;
-        processesMap.get(processId).setPendingOks(pendingOk);
+        processesMap.get(processId).setPendingOks(++pendingOk);
         EEAEventVO eeaEventVO = new EEAEventVO();
         eeaEventVO.setEventType(eventType);
         eeaEventVO.setData(value);
@@ -530,6 +569,13 @@ public class ValidationHelper implements DisposableBean {
   }
 
 
+  /**
+   * Check started process.
+   *
+   * @param processId the process id
+   *
+   * @return true, if successful
+   */
   private boolean checkStartedProcess(String processId) {
     boolean isProcessStarted = processesMap.containsKey(processId);
     if (!isProcessStarted) {
@@ -571,15 +617,29 @@ public class ValidationHelper implements DisposableBean {
     EventType notificationEventType;
   }
 
+  /**
+   * The Class ValidationTasksExecutorThread.
+   */
   private class ValidationTasksExecutorThread implements Runnable {
 
+    /**
+     * The validation task.
+     */
     private ValidationTask validationTask;
 
+    /**
+     * Instantiates a new validation tasks executor thread.
+     *
+     * @param validationTask the validation task
+     */
     public ValidationTasksExecutorThread(ValidationTask validationTask) {
       this.validationTask = validationTask;
     }
 
 
+    /**
+     * Run.
+     */
     @Override
     public void run() {
 

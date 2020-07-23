@@ -34,8 +34,7 @@
         margin-bottom: 0.2rem;
       }
 
-      &.name,
-      &.processName {
+      &.name {
         width: var(--fieldWidth);
       }
 
@@ -44,12 +43,15 @@
       }
 
       &.operation,
-      &.fileExtension {
-        width: calc(100% / 3);
+      &.fileExtension,
+      &.repository,
+      &.processName {
+        width: 50%;
       }
 
       &.description,
-      &.fileExtension {
+      &.fileExtension,
+      &.processName {
         margin-right: 0;
       }
 

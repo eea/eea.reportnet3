@@ -31,8 +31,8 @@ import { checkValidation } from 'ui/views/DatasetDesigner/_components/Validation
 import { deleteExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpression';
 import { deleteExpressionRecursively } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpressionRecursively';
 import { getDatasetSchemaTableFields } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getDatasetSchemaTableFields';
-import { getExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getExpressionString';
 import { getEmptyExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getEmptyExpression';
+import { getFieldExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getFieldExpressionString';
 import { getFieldType } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getFieldType';
 import { getSelectedFieldById } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedFieldById';
 import { getSelectedTableByFieldId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTablebyFieldId';
@@ -191,7 +191,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
 
     creationFormDispatch({
       type: 'SET_EXPRESSIONS_STRING',
-      payload: getExpressionString(expressions, field)
+      payload: getFieldExpressionString(expressions, field)
     });
   }, [creationFormState.candidateRule]);
 

@@ -4,8 +4,11 @@ import { isUndefined } from 'lodash';
 
 import styles from './MainLayout.module.css';
 
+import isEmpty from 'lodash/isEmpty';
+
 import { Footer } from './_components';
 import { Header } from './_components/Header';
+import { EuFooter } from './_components/EuFooter';
 import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
@@ -24,6 +27,11 @@ const MainLayout = ({ children }) => {
   const userContext = useContext(UserContext);
 
   const [margin, setMargin] = useState('50px');
+  const [leftSideBarStyle, setLeftSideBarStyle] = useState({});
+  const [mainContentStyle, setMainContentStyle] = useState({
+    height: `auto`,
+    minHeight: `${window.innerHeight - 180}px`
+  });
 
   const getUserConfiguration = async () => {
     try {
@@ -85,15 +93,23 @@ const MainLayout = ({ children }) => {
 
   const onToggleSideBar = hover => {};
 
+  const onLeftSideBarStyleChange = sideBarStyle => {
+    setLeftSideBarStyle(sideBarStyle);
+  };
+
   useSocket();
   return (
     <div id={styles.mainLayoutContainer}>
-      <Header />
-      <div className={styles.mainContent} style={{ marginLeft: margin, transition: '0.5s' }}>
-        <LeftSideBar onToggleSideBar={onToggleSideBar} />
-        {children}
+      <Header onLeftSideBarStyleChange={onLeftSideBarStyleChange} />
+      <div id="mainContent" className={styles.mainContent} style={mainContentStyle}>
+        <LeftSideBar onToggleSideBar={onToggleSideBar} style={leftSideBarStyle} style={leftSideBarStyle} />
+        <div id="pageContent" className={styles.pageContent}>
+          {children}
+        </div>
       </div>
-      <Footer />
+
+      <Footer leftMargin={margin} />
+      <EuFooter leftMargin={margin} />
     </div>
   );
 };

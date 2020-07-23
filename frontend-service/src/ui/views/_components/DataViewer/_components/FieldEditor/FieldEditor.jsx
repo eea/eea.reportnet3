@@ -83,7 +83,9 @@ const FieldEditor = ({
     setLinkItemsOptions(linkItems);
   };
 
-  const formatDate = date => {
+  const formatDate = (date, isInvalidDate) => {
+    if (isInvalidDate) return '';
+
     let d = new Date(date),
       month = '' + (d.getMonth() + 1),
       day = '' + d.getDate(),
@@ -267,12 +269,13 @@ const FieldEditor = ({
           // />
           <Calendar
             onChange={e => {
-              onEditorValueChange(cells, formatDate(e.target.value));
-              onEditorSubmitValue(cells, formatDate(e.target.value), record);
+              onEditorValueChange(cells, formatDate(e.target.value, isNil(e.target.value)));
+              onEditorSubmitValue(cells, formatDate(e.target.value, isNil(e.target.value)));
             }}
-            onFocus={e => onEditorValueFocus(cells, formatDate(e.target.value))}
+            onFocus={e => onEditorValueFocus(cells, formatDate(e.target.value, isNil(e.target.value)))}
             appendTo={document.body}
             dateFormat="yy-mm-dd"
+            // keepInvalid={true}
             monthNavigator={true}
             value={new Date(RecordUtils.getCellValue(cells, cells.field))}
             yearNavigator={true}

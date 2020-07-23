@@ -4,8 +4,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
@@ -18,6 +21,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
@@ -26,6 +30,7 @@ import org.eea.lock.service.LockService;
 import org.eea.notification.event.NotificableEventHandler;
 import org.eea.notification.factory.NotificableEventFactory;
 import org.eea.thread.ThreadPropertiesManager;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -202,5 +207,69 @@ public class FileTreatmentHelperTest {
         "5d4abe555b1c1e0001477410");
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void exectueFileProcessETLTest() throws EEAException {
+    List<IntegrationVO> integrations = new ArrayList<>();
+    IntegrationVO integration = new IntegrationVO();
+    Map<String, String> internalParameters = new HashMap<String, String>();
+    internalParameters.put("fileExtension", "csv");
+    integration.setInternalParameters(internalParameters);
+    integration.setOperation(IntegrationOperationTypeEnum.IMPORT);
+    integrations.add(integration);
+    Mockito.when(datasetService.getMimetype(Mockito.any())).thenReturn("csv");
+    Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
+        .thenReturn(integrations);
+    fileTreatmentHelper.executeFileProcess(1L, "fileName.csv",
+        new ByteArrayInputStream(new byte[0]), "5d4abe555b1c1e0001477410");
+    Mockito.verify(integrationController, times(1)).executeIntegrationProcess(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void executeExternalIntegrationFileProcess() throws EEAException {
+    InputStream inputStream = new ByteArrayInputStream("".getBytes());
+    Map<String, String> internalParameters = new HashMap<>();
+    internalParameters.put("fileExtension", "csv");
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setOperation(IntegrationOperationTypeEnum.IMPORT);
+    integrationVO.setInternalParameters(internalParameters);
+    List<IntegrationVO> integrations = new ArrayList<>();
+    integrations.add(integrationVO);
+    Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("csv");
+    Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.anyLong()))
+        .thenReturn("5d4abe555b1c1e0001477410");
+    Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
+        .thenReturn(integrations);
+    Mockito.when(integrationController.executeIntegrationProcess(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(null);
+    fileTreatmentHelper.executeExternalIntegrationFileProcess(1L, "fileName", inputStream);
+    Mockito.verify(integrationController, times(1)).executeIntegrationProcess(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = EEAException.class)
+  public void executeExternalIntegrationFileProcessNoIntegrationException() throws EEAException {
+    InputStream inputStream = new ByteArrayInputStream("".getBytes());
+    Map<String, String> internalParameters = new HashMap<>();
+    internalParameters.put("fileExtension", "csv");
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setOperation(IntegrationOperationTypeEnum.EXPORT);
+    integrationVO.setInternalParameters(internalParameters);
+    List<IntegrationVO> integrations = new ArrayList<>();
+    integrations.add(integrationVO);
+    Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("csv");
+    Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.anyLong()))
+        .thenReturn("5d4abe555b1c1e0001477410");
+    Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
+        .thenReturn(integrations);
+    try {
+      fileTreatmentHelper.executeExternalIntegrationFileProcess(1L, "fileName", inputStream);
+    } catch (EEAException e) {
+      Assert.assertEquals(e.getMessage(),
+          String.format("Error loading data into dataset %s via external integration", 1L));
+      throw e;
+    }
   }
 }

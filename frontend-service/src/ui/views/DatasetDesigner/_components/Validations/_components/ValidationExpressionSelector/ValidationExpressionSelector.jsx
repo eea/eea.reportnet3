@@ -11,10 +11,7 @@ export const ValidationExpressionSelector = props => {
   if (props.expressionValues.expressions && props.expressionValues.expressions.length > 0) {
     return <ValidationExpressionGroup {...props} />;
   }
-  if (expressionType === 'fieldComparison') {
-    return <ComparisonExpression {...props} />;
-  }
-  if (expressionType === 'ifThenClause') {
+  if (expressionType === 'fieldComparison' || expressionType === 'ifThenClause') {
     return <ComparisonExpression {...props} />;
   }
   if (expressionType === 'fieldRelations') {

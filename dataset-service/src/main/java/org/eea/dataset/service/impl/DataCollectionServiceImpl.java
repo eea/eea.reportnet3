@@ -18,13 +18,16 @@ import org.eea.dataset.mapper.DataCollectionMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.service.DataCollectionService;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.model.FKDataCollection;
@@ -42,6 +45,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
@@ -159,13 +163,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  /** The user management controller zull. */
-  @Autowired
-  private UserManagementControllerZull userManagementControllerZull;
 
   /** The design dataset repository. */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
+
+  /** The dataset metabase service. */
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
+
+  /** The eu dataset repository. */
+  @Autowired
+  private EUDatasetRepository euDatasetRepository;
+
 
 
   /**
@@ -183,12 +193,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    */
   private static final String NAME_DC = "Data Collection - %s";
 
+  /** The Constant NAME_EU. */
+  private static final String NAME_EU = "EU Dataset - %s";
+
   /**
    * The Constant UPDATE_DATAFLOW_STATUS.
    */
   private static final String UPDATE_DATAFLOW_STATUS =
       "update dataflow set status = '%s', deadline_date = '%s' where id = %d";
 
+  /** The Constant UPDATE_REPRESENTATIVE_HAS_DATASETS. */
   private static final String UPDATE_REPRESENTATIVE_HAS_DATASETS =
       "update representative set has_datasets = %b where id = %d;";
 
@@ -198,11 +212,18 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private static final String INSERT_DC_INTO_DATASET =
       "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema) values ('%s', %d, '%s', '%s') returning id";
 
+  /** The Constant INSERT_EU_INTO_DATASET. */
+  private static final String INSERT_EU_INTO_DATASET =
+      "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema) values ('%s', %d, '%s', '%s') returning id";
+
   /**
    * The Constant INSERT_DC_INTO_DATA_COLLECTION.
    */
   private static final String INSERT_DC_INTO_DATA_COLLECTION =
       "insert into data_collection (id, due_date) values (%d, '%s')";
+
+  /** The Constant INSERT_EU_INTO_EU_DATASET. */
+  private static final String INSERT_EU_INTO_EU_DATASET = "insert into eu_dataset (id) values (%d)";
 
   /**
    * The Constant INSERT_RD_INTO_DATASET.
@@ -258,6 +279,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    *
    * @param datasetIds the dataset ids
    * @param dataflowId the dataflow id
+   * @param isCreation the is creation
    */
   @Override
   public void undoDataCollectionCreation(List<Long> datasetIds, Long dataflowId,
@@ -274,6 +296,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     dataflowControllerZuul.updateDataFlowStatus(dataflowId, TypeStatusEnum.DESIGN, null);
   }
 
+  /**
+   * Release lock and notification.
+   *
+   * @param dataflowId the dataflow id
+   * @param errorMessage the error message
+   * @param isCreation the is creation
+   */
   private void releaseLockAndNotification(Long dataflowId, String errorMessage,
       boolean isCreation) {
     String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
@@ -349,20 +378,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             .map(RepresentativeVO::getDataProviderId).collect(Collectors.toList()));
 
     // 4. Map representatives to providers
-    Map<Long, String> map = new HashMap<>();
-    for (RepresentativeVO representative : representatives) {
-      for (DataProviderVO dataProvider : dataProviders) {
-        if (dataProvider.getId().equals(representative.getDataProviderId())) {
-          map.put(representative.getDataProviderId(), dataProvider.getLabel());
-          dataProviders.remove(dataProvider);
-          break;
-        }
-      }
-    }
+    Map<Long, String> map = mapRepresentativesToProviders(representatives, dataProviders);
 
     List<Long> dataCollectionIds = new ArrayList<>();
     Map<Long, String> datasetIdsEmails = new HashMap<>();
     Map<Long, String> datasetIdsAndSchemaIds = new HashMap<>();
+    Map<Long, String> datasetIdsAndSchemaIdsFromDC = new HashMap<>();
+    Map<Long, String> datasetIdsAndSchemaIdsFromEU = new HashMap<>();
+    List<Long> euDatasetIds = new ArrayList<>();
 
     try (Connection connection = metabaseDataSource.getConnection();
         Statement statement = connection.createStatement()) {
@@ -382,6 +405,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
 
         List<FKDataCollection> newReportingDatasetsRegistry = new ArrayList<>();
+        List<FKDataCollection> newDCsRegistry = new ArrayList<>();
+        List<FKDataCollection> newEUsRegistry = new ArrayList<>();
         List<IntegrityDataCollection> lIntegrityDataCollections = new ArrayList<>();
         for (DesignDatasetVO design : designs) {
           RulesSchemaVO rulesSchemaVO =
@@ -392,40 +417,30 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             Long dataCollectionId = persistDC(statement, design, time, dataflowId, dueDate);
             dataCollectionIds.add(dataCollectionId);
             datasetIdsAndSchemaIds.put(dataCollectionId, design.getDatasetSchema());
+            datasetIdsAndSchemaIdsFromDC.put(dataCollectionId, design.getDatasetSchema());
+
+            // 6b. Create the EU Dataset
+            Long euDatasetId = persistEU(statement, design, time, dataflowId);
+            euDatasetIds.add(euDatasetId);
+            datasetIdsAndSchemaIds.put(euDatasetId, design.getDatasetSchema());
+            datasetIdsAndSchemaIdsFromEU.put(euDatasetId, design.getDatasetSchema());
+
+            prepareFKAndIntegrityForEUandDC(dataCollectionId, newDCsRegistry,
+                lIntegrityDataCollections, design, integritieVOs);
+            prepareFKAndIntegrityForEUandDC(euDatasetId, newEUsRegistry, lIntegrityDataCollections,
+                design, integritieVOs);
           }
 
           // 7. Create Reporting Dataset in metabase
 
-          for (RepresentativeVO representative : representatives) {
-            Long datasetId = persistRD(statement, design, representative, time, dataflowId,
-                map.get(representative.getDataProviderId()));
-            datasetIdsEmails.put(datasetId, representative.getProviderAccount());
-            datasetIdsAndSchemaIds.put(datasetId, design.getDatasetSchema());
-
-            FKDataCollection newReporting = new FKDataCollection();
-            newReporting.setRepresentative(map.get(representative.getDataProviderId()));
-            newReporting.setIdDatasetSchemaOrigin(design.getDatasetSchema());
-            newReporting.setIdDatasetOrigin(datasetId);
-            newReporting.setFks(
-                datasetSchemaService.getReferencedFieldsBySchema(design.getDatasetSchema()));
-            newReportingDatasetsRegistry.add(newReporting);
-            if (!integritieVOs.isEmpty()) {
-              for (IntegrityVO integritieVO : integritieVOs) {
-                IntegrityDataCollection integrityDataCollection = new IntegrityDataCollection();
-                integrityDataCollection.setIdDatasetOrigin(datasetId);
-                integrityDataCollection.setIdDatasetSchemaOrigin(design.getDatasetSchema());
-                integrityDataCollection.setDataProviderId(representative.getDataProviderId());
-                integrityDataCollection
-                    .setIdDatasetSchemaReferenced(integritieVO.getReferencedDatasetSchemaId());
-                lIntegrityDataCollections.add(integrityDataCollection);
-              }
-            }
-          }
+          createReportingDatasetInMetabase(dataflowId, time, representatives, map, datasetIdsEmails,
+              datasetIdsAndSchemaIds, statement, newReportingDatasetsRegistry,
+              lIntegrityDataCollections, design, integritieVOs);
         }
 
         statement.executeBatch();
         // 8. Create permissions
-        createPermissions(datasetIdsEmails, dataCollectionIds, dataflowId);
+        createPermissions(datasetIdsEmails, dataCollectionIds, euDatasetIds, dataflowId);
         // 9. Delete editors
         removePermissionEditors(dataflowId);
 
@@ -433,6 +448,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         // Add into the foreign_relations table from metabase the dataset origin-destination
         // relation, if applies
         addForeignRelationsFromNewReportings(newReportingDatasetsRegistry);
+        addForeignRelationsFromNewDCandEUs(newDCsRegistry);
+        addForeignRelationsFromNewDCandEUs(newEUsRegistry);
         if (lIntegrityDataCollections != null) {
           addDatasetForeignRelations(lIntegrityDataCollections);
         }
@@ -453,6 +470,112 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     } catch (SQLException e) {
       LOG_ERROR.error("Error rolling back: ", e);
     }
+  }
+
+  /**
+   * Map representatives to providers.
+   *
+   * @param representatives the representatives
+   * @param dataProviders the data providers
+   * @return the map
+   */
+  private Map<Long, String> mapRepresentativesToProviders(List<RepresentativeVO> representatives,
+      List<DataProviderVO> dataProviders) {
+    Map<Long, String> map = new HashMap<>();
+    for (RepresentativeVO representative : representatives) {
+      for (DataProviderVO dataProvider : dataProviders) {
+        if (dataProvider.getId().equals(representative.getDataProviderId())) {
+          map.put(representative.getDataProviderId(), dataProvider.getLabel());
+          dataProviders.remove(dataProvider);
+          break;
+        }
+      }
+    }
+    return map;
+  }
+
+  /**
+   * Creates the reporting dataset in metabase.
+   *
+   * @param dataflowId the dataflow id
+   * @param time the time
+   * @param representatives the representatives
+   * @param map the map
+   * @param datasetIdsEmails the dataset ids emails
+   * @param datasetIdsAndSchemaIds the dataset ids and schema ids
+   * @param statement the statement
+   * @param newReportingDatasetsRegistry the new reporting datasets registry
+   * @param lIntegrityDataCollections the l integrity data collections
+   * @param design the design
+   * @param integritieVOs the integritie V os
+   * @throws SQLException the SQL exception
+   */
+  private void createReportingDatasetInMetabase(Long dataflowId, String time,
+      List<RepresentativeVO> representatives, Map<Long, String> map,
+      Map<Long, String> datasetIdsEmails, Map<Long, String> datasetIdsAndSchemaIds,
+      Statement statement, List<FKDataCollection> newReportingDatasetsRegistry,
+      List<IntegrityDataCollection> lIntegrityDataCollections, DesignDatasetVO design,
+      List<IntegrityVO> integritieVOs) throws SQLException {
+    for (RepresentativeVO representative : representatives) {
+      Long datasetId = persistRD(statement, design, representative, time, dataflowId,
+          map.get(representative.getDataProviderId()));
+      datasetIdsEmails.put(datasetId, representative.getProviderAccount());
+      datasetIdsAndSchemaIds.put(datasetId, design.getDatasetSchema());
+
+      FKDataCollection newReporting = new FKDataCollection();
+      newReporting.setRepresentative(map.get(representative.getDataProviderId()));
+      newReporting.setIdDatasetSchemaOrigin(design.getDatasetSchema());
+      newReporting.setIdDatasetOrigin(datasetId);
+      newReporting
+          .setFks(datasetSchemaService.getReferencedFieldsBySchema(design.getDatasetSchema()));
+      newReportingDatasetsRegistry.add(newReporting);
+      if (!integritieVOs.isEmpty()) {
+        for (IntegrityVO integritieVO : integritieVOs) {
+          IntegrityDataCollection integrityDataCollection = new IntegrityDataCollection();
+          integrityDataCollection.setIdDatasetOrigin(datasetId);
+          integrityDataCollection.setIdDatasetSchemaOrigin(design.getDatasetSchema());
+          integrityDataCollection.setDataProviderId(representative.getDataProviderId());
+          integrityDataCollection
+              .setIdDatasetSchemaReferenced(integritieVO.getReferencedDatasetSchemaId());
+          lIntegrityDataCollections.add(integrityDataCollection);
+        }
+      }
+    }
+  }
+
+
+  /**
+   * Prepare FK and integrity for E uand DC.
+   *
+   * @param datasetIdFromDCorEU the dataset id from D cor EU
+   * @param newDCandEUsRegistry the new D cand E us registry
+   * @param lIntegrityDataCollections the l integrity data collections
+   * @param design the design
+   * @param integritieVOs the integritie V os
+   */
+  private void prepareFKAndIntegrityForEUandDC(Long datasetIdFromDCorEU,
+      List<FKDataCollection> newDCandEUsRegistry,
+      List<IntegrityDataCollection> lIntegrityDataCollections, DesignDatasetVO design,
+      List<IntegrityVO> integritieVOs) {
+
+    FKDataCollection newReporting = new FKDataCollection();
+    newReporting.setIdDatasetSchemaOrigin(design.getDatasetSchema());
+    newReporting.setIdDatasetOrigin(datasetIdFromDCorEU);
+    newReporting
+        .setFks(datasetSchemaService.getReferencedFieldsBySchema(design.getDatasetSchema()));
+    newDCandEUsRegistry.add(newReporting);
+    if (!integritieVOs.isEmpty()) {
+      for (IntegrityVO integritieVO : integritieVOs) {
+        IntegrityDataCollection integrityDataCollection = new IntegrityDataCollection();
+        integrityDataCollection.setIdDatasetOrigin(datasetIdFromDCorEU);
+        integrityDataCollection.setIdDatasetSchemaOrigin(design.getDatasetSchema());
+        integrityDataCollection
+            .setIdDatasetSchemaReferenced(integritieVO.getReferencedDatasetSchemaId());
+        lIntegrityDataCollections.add(integrityDataCollection);
+      }
+    }
+
+
   }
 
   /**
@@ -508,12 +631,28 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       datasetOrigin.setId(integrityDataCollection.getIdDatasetOrigin());
       foreignRelation.setIdDatasetOrigin(datasetOrigin);
       DataSetMetabase datasetDestination = new DataSetMetabase();
-      Optional<DataSetMetabase> datasetMetabase =
-          dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderId(
-              integrityDataCollection.getIdDatasetSchemaReferenced(),
-              integrityDataCollection.getDataProviderId());
-      if (datasetMetabase.isPresent()) {
-        datasetDestination.setId(datasetMetabase.get().getId());
+      DatasetTypeEnum typeDataset =
+          datasetMetabaseService.getDatasetType(integrityDataCollection.getIdDatasetOrigin());
+      if (DatasetTypeEnum.REPORTING.equals(typeDataset)) {
+        Optional<DataSetMetabase> datasetMetabase =
+            dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderId(
+                integrityDataCollection.getIdDatasetSchemaReferenced(),
+                integrityDataCollection.getDataProviderId());
+        if (datasetMetabase.isPresent()) {
+          datasetDestination.setId(datasetMetabase.get().getId());
+        }
+      } else if (DatasetTypeEnum.COLLECTION.equals(typeDataset)) {
+        Optional<DataCollection> datasetCollection = dataCollectionRepository
+            .findFirstByDatasetSchema(integrityDataCollection.getIdDatasetSchemaReferenced());
+        if (datasetCollection.isPresent()) {
+          datasetDestination.setId(datasetCollection.get().getId());
+        }
+      } else if (DatasetTypeEnum.EUDATASET.equals(typeDataset)) {
+        Optional<EUDataset> euDataset = euDatasetRepository
+            .findFirstByDatasetSchema(integrityDataCollection.getIdDatasetSchemaReferenced());
+        if (euDataset.isPresent()) {
+          datasetDestination.setId(euDataset.get().getId());
+        }
       }
       foreignRelation.setIdDatasetDestination(datasetDestination);
       foreignRelation.setIdPk(integrityDataCollection.getIdDatasetSchemaOrigin());
@@ -531,7 +670,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    *
    * @param connection the connection
    * @param dataflowId the dataflow id
-   *
+   * @param isCreation the is creation
    * @throws SQLException the SQL exception
    */
   private void releaseLockAndRollback(Connection connection, Long dataflowId, boolean isCreation)
@@ -567,6 +706,30 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
   }
 
+
+  /**
+   * Persist EU.
+   *
+   * @param metabaseStatement the metabase statement
+   * @param design the design
+   * @param time the time
+   * @param dataflowId the dataflow id
+   * @return the long
+   * @throws SQLException the SQL exception
+   */
+  private Long persistEU(Statement metabaseStatement, DesignDatasetVO design, String time,
+      Long dataflowId) throws SQLException {
+    try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_EU_INTO_DATASET, time,
+        dataflowId, String.format(NAME_EU, design.getDataSetName().replace("'", "''")),
+        design.getDatasetSchema()))) {
+      rs.next();
+      Long datasetId = rs.getLong(1);
+      metabaseStatement.addBatch(String.format(INSERT_EU_INTO_EU_DATASET, datasetId));
+      metabaseStatement.addBatch(String.format(INSERT_INTO_PARTITION_DATASET, datasetId));
+      return datasetId;
+    }
+  }
+
   /**
    * Persist RD.
    *
@@ -595,28 +758,128 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
   }
 
+
   /**
    * Creates the permissions.
    *
    * @param datasetIdsEmails the dataset ids emails
    * @param dataCollectionIds the data collection ids
+   * @param euDatasetIds the eu dataset ids
    * @param dataflowId the dataflow id
-   *
    * @throws EEAException the EEA exception
    */
   private void createPermissions(Map<Long, String> datasetIdsEmails, List<Long> dataCollectionIds,
-      Long dataflowId) throws EEAException {
+      List<Long> euDatasetIds, Long dataflowId) throws EEAException {
 
     List<ResourceInfoVO> groups = new ArrayList<>();
     List<ResourceAssignationVO> providerAssignments = new ArrayList<>();
     List<ResourceAssignationVO> custodianAssignments = new ArrayList<>();
 
+    createGroupsAndAssings(datasetIdsEmails, dataCollectionIds, euDatasetIds, dataflowId, groups,
+        providerAssignments, custodianAssignments);
+
+    // Persist changes in KeyCloak guaranteeing transactionality
+    // Insert in chunks to prevent Hystrix timeout
+    int chunks = 0;
+    try {
+
+      // Persist groups
+      int size = groups.size();
+      chunks = persistGroups(groups, chunks, size);
+
+      // Persist lead reporter assignments
+      size = providerAssignments.size();
+      persistLeadReporterAssignments(providerAssignments, size);
+
+      // Persist custodian assignments
+      size = custodianAssignments.size();
+      persistCustodianAssigments(custodianAssignments, size);
+    } catch (Exception e) {
+      // Undo group creation
+      int size = chunks * 10 < groups.size() ? chunks * 10 : groups.size();
+      List<Long> rollback = groups.subList(0, size).stream().map(ResourceInfoVO::getResourceId)
+          .collect(Collectors.toList());
+      for (int i = 0; i < size; i += 10) {
+        resourceManagementControllerZuul
+            .deleteResourceByDatasetId(rollback.subList(i, i + 10 > size ? size : i + 10));
+      }
+      throw new EEAException(e);
+    }
+  }
+
+  /**
+   * Persist custodian assigments.
+   *
+   * @param custodianAssignments the custodian assignments
+   * @param size the size
+   */
+  private void persistCustodianAssigments(List<ResourceAssignationVO> custodianAssignments,
+      int size) {
+    for (int i = 0; i < size; i += 10) {
+      userManagementControllerZuul
+          .addUserToResources(custodianAssignments.subList(i, i + 10 > size ? size : i + 10));
+    }
+  }
+
+  /**
+   * Persist lead reporter assignments.
+   *
+   * @param providerAssignments the provider assignments
+   * @param size the size
+   */
+  private void persistLeadReporterAssignments(List<ResourceAssignationVO> providerAssignments,
+      int size) {
+    for (int i = 0; i < size; i += 10) {
+      userManagementControllerZuul.addContributorsToResources(
+          providerAssignments.subList(i, i + 10 > size ? size : i + 10));
+    }
+  }
+
+  /**
+   * Persist groups.
+   *
+   * @param groups the groups
+   * @param chunks the chunks
+   * @param size the size
+   * @return the int
+   */
+  private int persistGroups(List<ResourceInfoVO> groups, int chunks, int size) {
+    for (int i = 0; i < size; i += 10, chunks++) {
+      resourceManagementControllerZuul
+          .createResources(groups.subList(i, i + 10 > size ? size : i + 10));
+    }
+    return chunks;
+  }
+
+  /**
+   * Creates the groups and assings.
+   *
+   * @param datasetIdsEmails the dataset ids emails
+   * @param dataCollectionIds the data collection ids
+   * @param euDatasetIds the eu dataset ids
+   * @param dataflowId the dataflow id
+   * @param groups the groups
+   * @param providerAssignments the provider assignments
+   * @param custodianAssignments the custodian assignments
+   */
+  private void createGroupsAndAssings(Map<Long, String> datasetIdsEmails,
+      List<Long> dataCollectionIds, List<Long> euDatasetIds, Long dataflowId,
+      List<ResourceInfoVO> groups, List<ResourceAssignationVO> providerAssignments,
+      List<ResourceAssignationVO> custodianAssignments) {
     // Create DataCollection groups and assign custodian to self user
     for (Long dataCollectionId : dataCollectionIds) {
       groups.add(createGroup(dataCollectionId, ResourceTypeEnum.DATA_COLLECTION,
           SecurityRoleEnum.DATA_CUSTODIAN));
       custodianAssignments.add(
           createAssignments(dataCollectionId, null, ResourceGroupEnum.DATACOLLECTION_CUSTODIAN));
+    }
+
+    // Create EUDataset groups and assign custodian to self user
+    for (Long euDatasetId : euDatasetIds) {
+      groups.add(
+          createGroup(euDatasetId, ResourceTypeEnum.EU_DATASET, SecurityRoleEnum.DATA_CUSTODIAN));
+      custodianAssignments
+          .add(createAssignments(euDatasetId, null, ResourceGroupEnum.EUDATASET_CUSTODIAN));
     }
 
     // Create DATASET_LEAD_REPORTER and DATA_CUSTODIAN groups
@@ -633,43 +896,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_CUSTODIAN));
       custodianAssignments
           .add(createAssignments(entry.getKey(), null, ResourceGroupEnum.DATASET_CUSTODIAN));
-    }
-
-    // Persist changes in KeyCloak guaranteeing transactionality
-    // Insert in chunks to prevent Hystrix timeout
-    int chunks = 0;
-    try {
-
-      // Persist groups
-      int size = groups.size();
-      for (int i = 0; i < size; i += 10, chunks++) {
-        resourceManagementControllerZuul
-            .createResources(groups.subList(i, i + 10 > size ? size : i + 10));
-      }
-
-      // Persist lead reporter assignments
-      size = providerAssignments.size();
-      for (int i = 0; i < size; i += 10) {
-        userManagementControllerZuul.addContributorsToResources(
-            providerAssignments.subList(i, i + 10 > size ? size : i + 10));
-      }
-
-      // Persist custodian assignments
-      size = custodianAssignments.size();
-      for (int i = 0; i < size; i += 10) {
-        userManagementControllerZuul
-            .addUserToResources(custodianAssignments.subList(i, i + 10 > size ? size : i + 10));
-      }
-    } catch (Exception e) {
-      // Undo group creation
-      int size = chunks * 10 < groups.size() ? chunks * 10 : groups.size();
-      List<Long> rollback = groups.subList(0, size).stream().map(ResourceInfoVO::getResourceId)
-          .collect(Collectors.toList());
-      for (int i = 0; i < size; i += 10) {
-        resourceManagementControllerZuul
-            .deleteResourceByDatasetId(rollback.subList(i, i + 10 > size ? size : i + 10));
-      }
-      throw new EEAException(e);
     }
   }
 
@@ -768,4 +994,37 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       foreignRelationsRepository.saveAll(foreignRelations);
     }
   }
+
+
+  /**
+   * Adds the foreign relations from new D cand E us.
+   *
+   * @param newDCandEUsRegistry the new D cand E us registry
+   */
+  private void addForeignRelationsFromNewDCandEUs(List<FKDataCollection> newDCandEUsRegistry) {
+    List<ForeignRelations> foreignRelations = new ArrayList<>();
+
+    for (FKDataCollection fkData : newDCandEUsRegistry) {
+      if (fkData.getFks() != null && !fkData.getFks().isEmpty()) {
+        for (ReferencedFieldSchema referenced : fkData.getFks()) {
+          ForeignRelations foreign = new ForeignRelations();
+          foreign.setIdPk(referenced.getIdPk().toString());
+          DataSetMetabase dsOrigin = new DataSetMetabase();
+          dsOrigin.setId(fkData.getIdDatasetOrigin());
+          foreign.setIdDatasetOrigin(dsOrigin);
+          DataSetMetabase dsDestination = new DataSetMetabase();
+          dsDestination.setId(findIdDatasetDestination(referenced.getIdDatasetSchema().toString(),
+              newDCandEUsRegistry));
+          foreign.setIdDatasetDestination(dsDestination);
+          foreignRelations.add(foreign);
+        }
+      }
+    }
+
+    // Save all the FK relations between dc and eus into the metabase
+    if (!foreignRelations.isEmpty()) {
+      foreignRelationsRepository.saveAll(foreignRelations);
+    }
+  }
+
 }

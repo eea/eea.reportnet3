@@ -25,7 +25,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 
 export const FieldsDesigner = ({
-  activeIndex,
+  //activeIndex,
   datasetId,
   datasetSchemas,
   isPreviewModeOn,
@@ -126,7 +126,7 @@ export const FieldsDesigner = ({
     });
     onChangeFields(inmFields, type.toUpperCase() === 'LINK', table.tableSchemaId);
     setFields(inmFields);
-    window.scrollTo(0, document.body.scrollHeight);
+    // window.scrollTo(0, document.body.scrollHeight);
   };
 
   const onFieldDelete = (deletedFieldIndex, deletedFieldType) => {
@@ -278,7 +278,6 @@ export const FieldsDesigner = ({
           hasWritePermissions={true}
           isPreviewModeOn={isPreviewModeOn}
           isValidationSelected={isValidationSelected}
-          isWebFormMMR={false}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
           onLoadTableData={onLoadTableData}
@@ -487,7 +486,7 @@ export const FieldsDesigner = ({
         />
         <div className={styles.constraintsButtons}>
           <Button
-            className={`p-button-secondary p-button-animated-blink`}
+            className={`p-button-secondary p-button-animated-blink datasetSchema-uniques-help-step`}
             icon={'key'}
             label={resources.messages['addUniqueConstraint']}
             onClick={() => {
@@ -501,13 +500,13 @@ export const FieldsDesigner = ({
           />
 
           <Button
-            className="p-button-secondary p-button-animated-blink"
+            className="p-button-secondary p-button-animated-blink datasetSchema-rowConstraint-help-step"
             icon={'horizontalSliders'}
             label={resources.messages['addRowConstraint']}
             onClick={() => validationContext.onOpenModalFromRow(table.recordSchemaId)}
           />
         </div>
-        <div className={styles.switchDiv}>
+        <div className={`${styles.switchDiv} datasetSchema-readOnlyAndPrefill-help-step`}>
           <div>
             <span className={styles.switchTextInput}>{resources.messages['readOnlyTable']}</span>
             <Checkbox
@@ -519,7 +518,7 @@ export const FieldsDesigner = ({
               onChange={e => onChangeIsReadOnly(e.checked)}
               style={{ width: '70px' }}
             />
-            <label for={`${table.tableId}_check_readOnly`} className="srOnly">
+            <label htmlFor={`${table.tableId}_check_readOnly`} className="srOnly">
               {resources.messages['readOnlyTable']}
             </label>
           </div>
@@ -535,7 +534,7 @@ export const FieldsDesigner = ({
               onChange={e => onChangeToPrefill(e.checked)}
               style={{ width: '70px' }}
             />
-            <label for={`${table.tableId}_check_to_prefill`} className="srOnly">
+            <label htmlFor={`${table.tableId}_check_to_prefill`} className="srOnly">
               {resources.messages['prefilled']}
             </label>
           </div>

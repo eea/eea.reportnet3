@@ -64,9 +64,10 @@ const UserImg = () => {
   };
 
   const listOfImages = () =>
-    config.avatars.map(avatar => (
-      <div className={styles.gridItem}>
+    config.avatars.map((avatar, i) => (
+      <div className={styles.gridItem} key={i}>
         <img
+          alt="Image to choose"
           className={styles.gridItem}
           src={avatar.base64}
           onClick={() => {
@@ -109,6 +110,7 @@ const UserImg = () => {
       <div className={styles.imageWrapper}>
         <input
           accept="image/*"
+          id={'userIcon'}
           onChange={handleImageUpload}
           ref={imageUploader}
           style={{
@@ -116,7 +118,11 @@ const UserImg = () => {
           }}
           type="file"
         />
+        <label for="userIcon" className="srOnly">
+          {resources.messages['selectImage']}
+        </label>
         <img
+          alt="User profile image"
           data-tip
           data-for="addAvatar"
           data-event="click"

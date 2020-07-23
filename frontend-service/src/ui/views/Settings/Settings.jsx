@@ -23,6 +23,11 @@ const Settings = withRouter(({ history }) => {
   useEffect(() => {
     breadCrumbContext.add([
       {
+        label: resources.messages['homeBreadcrumb'],
+        href: getUrl(routes.DATAFLOWS),
+        command: () => history.push(getUrl(routes.DATAFLOWS))
+      },
+      {
         label: '',
         icon: 'home',
         href: getUrl(routes.DATAFLOWS),
@@ -53,7 +58,7 @@ const Settings = withRouter(({ history }) => {
         leftSideBarConfig={{
           buttons: []
         }}>
-        <div className>
+        <div>
           <div className="rep-container">{children}</div>
         </div>
       </MainLayout>

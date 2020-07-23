@@ -52,7 +52,14 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
 
   const paginatorRightText = `${resources.messages['totalObligations']}: ${data.length}`;
 
-  const renderCheckColum = <Column key="checkId" body={row => onLoadCheckButton(row)} />;
+  const renderCheckColum = (
+    <Column
+      key="checkId"
+      className={styles.emptyTableHeader}
+      header={resources.messages['selectedObligation']}
+      body={row => onLoadCheckButton(row)}
+    />
+  );
 
   const renderColumns = data => {
     const repOblCols = [];

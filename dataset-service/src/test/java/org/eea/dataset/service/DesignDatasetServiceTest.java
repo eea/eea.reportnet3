@@ -3,7 +3,6 @@ package org.eea.dataset.service;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,6 +22,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.impl.DesignDatasetServiceImpl;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
@@ -36,6 +36,7 @@ import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ReferencedFieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +46,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -225,7 +229,7 @@ public class DesignDatasetServiceTest {
     when(dataschemaService.createEmptyDataSetSchema(Mockito.anyLong())).thenReturn(new ObjectId());
     when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(CompletableFuture.completedFuture(1L));
+            .thenReturn(CompletableFuture.completedFuture(1L));
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
         .thenReturn(table);
@@ -239,4 +243,25 @@ public class DesignDatasetServiceTest {
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
+  @Test(expected = EEAException.class)
+  public void copyDesignDatasetsExceptionTest() throws EEAException {
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
+    Mockito.when(designDatasetRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    Mockito.when(designDatasetMapper.entityListToClass(Mockito.any()))
+        .thenReturn(Arrays.asList(new DesignDatasetVO()));
+    Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.anyLong()))
+        .thenThrow(EEAException.class);
+    Mockito.doNothing().when(datasetService).releaseLock(Mockito.any());
+    try {
+      designDatasetService.copyDesignDatasets(1L, 2L);
+    } catch (EEAException e) {
+      Assert.assertEquals(String.format(EEAErrorMessage.ERROR_COPYING_SCHEMAS, 1L, 2L),
+          e.getMessage());
+      throw e;
+    }
+  }
 }

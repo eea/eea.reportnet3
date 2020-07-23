@@ -24,9 +24,13 @@ const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isRelea
   const setIsVisible = snapshotContext.setIsSnapshotsBarVisible;
 
   useEffect(() => {
+    showScrollingBar(isVisible);
+  }, [isVisible]);
+
+  const showScrollingBar = isVisible => {
     const bodySelector = document.querySelector('body');
     isVisible ? (bodySelector.style.overflow = 'hidden') : (bodySelector.style.overflow = 'hidden auto');
-  }, [isVisible]);
+  };
 
   const snapshotValidationSchema = Yup.object().shape({
     createSnapshotDescription: Yup.string().required()
@@ -54,7 +58,7 @@ const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isRelea
             validationSchema={snapshotValidationSchema}
             onSubmit={values => {
               snapshotContext.snapshotDispatch({
-                type: 'create_snapshot',
+                type: 'CREATE_SNAPSHOT',
                 payload: {
                   description: values.createSnapshotDescription
                 }
@@ -75,7 +79,7 @@ const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isRelea
                     placeholder={resources.messages.createSnapshotPlaceholder}
                     type="text"
                   />
-                  <label for="createSnapshotDescription" className="srOnly">
+                  <label htmlFor="createSnapshotDescription" className="srOnly">
                     {resources.messages['createSnapshotPlaceholder']}
                   </label>
                   <div className={styles.createButtonWrapper}>

@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import { isNull } from 'lodash';
-import uuid from 'uuid';
 
 import './Dropdown.scss';
 
@@ -572,7 +571,7 @@ export class Dropdown extends Component {
           {placeHolderOption}
           {option}
         </select>
-        <label for={this.props.name} className="srOnly">
+        <label htmlFor={this.props.name} className="srOnly">
           {this.props.name}
         </label>
       </div>

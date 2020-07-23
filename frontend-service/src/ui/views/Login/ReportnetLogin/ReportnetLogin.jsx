@@ -70,6 +70,7 @@ const ReportnetLogin = ({ history }) => {
                 <fieldset>
                   <label htmlFor="userName">{resources.messages.loginUserName}</label>
                   <Field
+                    id={'userName'}
                     name="userName"
                     type="text"
                     placeholder={resources.messages.loginUserName}
@@ -83,6 +84,7 @@ const ReportnetLogin = ({ history }) => {
                 <fieldset>
                   <label htmlFor="password">{resources.messages.loginPassword}</label>
                   <Field
+                    id={'password'}
                     name="password"
                     type="password"
                     placeholder={resources.messages.loginPassword}

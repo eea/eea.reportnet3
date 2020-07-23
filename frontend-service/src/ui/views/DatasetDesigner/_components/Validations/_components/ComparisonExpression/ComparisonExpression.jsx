@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -32,20 +32,32 @@ const ComparisonExpression = ({
   showRequiredFields
 }) => {
   const componentName = 'fieldComparison';
-  const resourcesContext = useContext(ResourcesContext);
   const { expressionId } = expressionValues;
+  const {
+    validations: { operatorTypes: operatorTypesConf, operatorByType, fieldByOperatorType }
+  } = config;
+
+  const resourcesContext = useContext(ResourcesContext);
+  const inputStringMatchRef = useRef(null);
   const [clickedFields, setClickedFields] = useState([]);
+  const [disabledFields, setDisabledFields] = useState({});
   const [fieldType, setFieldType] = useState(null);
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [operatorValues, setOperatorValues] = useState([]);
   const [secondFieldOptions, setSecondFieldOptions] = useState();
   const [tableFields, setTableFields] = useState([]);
-  const {
-    validations: { operatorTypes: operatorTypesConf, operatorByType, fieldByOperatorType }
-  } = config;
-  const [disabledFields, setDisabledFields] = useState({});
   const [valueKeyFilter, setValueKeyFilter] = useState();
   const [valueTypeSelectorOptions, setValueTypeSelectorOptions] = useState([]);
+  const [isActiveStringMatchInput, setIsActiveStringMatchInput] = useState(false);
+
+  useEffect(() => {
+    if (inputStringMatchRef.current && isActiveStringMatchInput) {
+      inputStringMatchRef.current.element.focus();
+    }
+    return () => {
+      setIsActiveStringMatchInput(false);
+    };
+  }, [inputStringMatchRef.current, isActiveStringMatchInput]);
 
   useEffect(() => {
     setValueTypeSelectorOptions([
@@ -233,6 +245,11 @@ const ComparisonExpression = ({
     }, 300);
   };
 
+  const onCCButtonClick = ccButtonValue => {
+    onUpdateExpressionField('field2', ccButtonValue);
+    setIsActiveStringMatchInput(true);
+  };
+
   const onDeleteFromClickedFields = field => {
     const cClickedFields = [...clickedFields];
 
@@ -311,6 +328,29 @@ const ComparisonExpression = ({
           value={field2}
         />
       );
+    }
+    if (operatorType === 'string') {
+      if (operatorValue === 'MATCH') {
+        const ccButtonValue = `${field2}{%R3_COUNTRY_CODE%}`;
+        return (
+          <span className={styles.inputStringMatch}>
+            <InputText
+              disabled={isDisabled}
+              onChange={e => onUpdateExpressionField('field2', e.target.value)}
+              placeholder={resourcesContext.messages.value}
+              value={field2}
+              ref={inputStringMatchRef}
+            />
+            <Button
+              className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
+              label="CC"
+              tooltip={resourcesContext.messages['matchStringTooltip']}
+              tooltipOptions={{ position: 'top' }}
+              onClick={() => onCCButtonClick(ccButtonValue)}
+            />
+          </span>
+        );
+      }
     }
 
     if (operatorType === 'number') {
@@ -476,13 +516,11 @@ const ComparisonExpression = ({
           value={expressionValues.valueTypeSelector}
         />
       </span>
-      <span
-        onBlur={() => onAddToClickedFields('field2')}
-        className={`${styles.operatorType} formField ${printRequiredFieldError('field2')}`}>
+      <span onBlur={() => onAddToClickedFields('field2')} className={`formField ${printRequiredFieldError('field2')}`}>
         {getValueField()}
       </span>
 
-      <div className={styles.deleteBtnWrap}>
+      <span className={`formField ${styles.deleteButtonWrap}`}>
         <Button
           className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton} p-button-animated-blink`}
           disabled={isDisabled}
@@ -490,7 +528,7 @@ const ComparisonExpression = ({
           onClick={() => onExpressionDelete(expressionId)}
           type="button"
         />
-      </div>
+      </span>
     </li>
   );
 };
