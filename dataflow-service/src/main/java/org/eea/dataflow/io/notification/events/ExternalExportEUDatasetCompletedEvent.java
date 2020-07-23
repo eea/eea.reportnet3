@@ -2,7 +2,6 @@ package org.eea.dataflow.io.notification.events;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.lang.StringUtils;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EventType;
@@ -49,10 +48,11 @@ public class ExternalExportEUDatasetCompletedEvent implements NotificableEventHa
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
     notification.put("dataflowId", dataflowId);
+    notification.put("datasetId", notificationVO.getDatasetId());
+    notification.put("datasetName", notificationVO.getDatasetName());
     notification.put("dataflowName", dataflowName);
-    if (StringUtils.isNotBlank(notificationVO.getFileName())) {
-      notification.put("fileName", notificationVO.getFileName());
-    }
+    notification.put("fileName", notificationVO.getFileName());
+
     return notification;
   }
 }
