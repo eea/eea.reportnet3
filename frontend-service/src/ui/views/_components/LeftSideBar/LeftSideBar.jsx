@@ -27,15 +27,39 @@ const LeftSideBar = withRouter(({ history, style }) => {
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
   const [logoutConfirmVisible, setLogoutConfirmVisible] = useState(undefined);
   const [run, setRun] = useState(false);
+  const [helpIndex, setHelpIndex] = useState(0);
 
   const handleJoyrideCallback = data => {
-    const { status } = data;
-    const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+    const { action, index, status, type } = data;
+    console.log('data', data);
 
-    if (finishedStatuses.includes(status)) {
+    const notFinishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+    const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+    // const closeAction = [ACTION.CLOSE];
+
+    if (notFinishedStatuses.includes(type)) {
+      // Update state to advance the tour
+      setHelpIndex(0);
+      setRun(false);
+    } else if (finishedStatuses.includes(status) || data.action === 'close') {
+      // Need to set our running state to false, so we can restart if we click start again.
+      setHelpIndex(0);
       setRun(false);
     }
+
+    console.log(type);
   };
+
+  // const handleJoyrideCallback = data => {
+  //   const { status } = data;
+  //   const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+  //   setHelpIndex(helpIndex + 1);
+
+  //   if (finishedStatuses.includes(status)) {
+  //     setHelpIndex(0);
+  //     setRun(false);
+  //   }
+  // };
 
   const renderHome = () => {
     const userButtonProps = {
@@ -153,6 +177,7 @@ const LeftSideBar = withRouter(({ history, style }) => {
         scrollToFirstStep={true}
         showProgress={true}
         showSkipButton={false}
+        // stepIndex={helpIndex}
         steps={leftSideBarContext.steps}
         styles={{
           options: {
