@@ -2314,7 +2314,3 @@ body .p-dialog.edit-table.calendar-table .p-dialog-content {
 .p-growl.p-growl-topright {
   top: 75px !important;
 }
-
-.p-sidebar-right {
-  top: var(--header-height);
-}
