@@ -64,7 +64,6 @@
   box-shadow: var(--header-box-shadow);
   .europeanUnionLogo {
     a {
-      background-image: url('/assets/img/logo--en.svg');
       height: 56px;
       width: 325px;
       display: block;
@@ -72,7 +71,16 @@
         display: none;
       }
     }
+    .europeanUnionBlackLogo {
+      background-image: url('/assets/img/logo--en.svg');
+    }
+
+    .europeanUnionWhiteLogo {
+      background-repeat: no-repeat;
+      background-image: url('/assets/img/logo--white--en.svg');
+    }
   }
+
   .searchBarWrapper {
     display: flex;
     justify-content: flex-start;

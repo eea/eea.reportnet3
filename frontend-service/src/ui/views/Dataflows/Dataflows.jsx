@@ -6,8 +6,8 @@ import isNil from 'lodash/isNil';
 import styles from './Dataflows.module.scss';
 
 import { config } from 'conf';
-import { DataflowsRequesterHelpConfig } from 'conf/help/dataflows/dataflows.requester';
-import { DataflowsReporterHelpConfig } from 'conf/help/dataflows/dataflows.reporter';
+import { DataflowsRequesterHelpConfig } from 'conf/help/dataflows/requester';
+import { DataflowsReporterHelpConfig } from 'conf/help/dataflows/reporter';
 
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { DataflowsList } from './_components/DataflowsList';
@@ -101,9 +101,10 @@ const Dataflows = withRouter(({ match, history }) => {
   }, [dataflowsState.isCustodian]);
 
   useEffect(() => {
+    const messageStep0 = dataflowsState.isCustodian ? 'dataflowListRequesterHelp' : 'dataflowListReporterHelp';
     leftSideBarContext.addHelpSteps(
       dataflowsState.isCustodian ? DataflowsRequesterHelpConfig : DataflowsReporterHelpConfig,
-      'dataflowListHelp'
+      messageStep0
     );
   }, [dataflowsState]);
 

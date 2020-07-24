@@ -44,14 +44,9 @@ const parse = ({ type, content = {}, message, config, routes }) => {
         });
       }
       contentKeys.forEach(key => {
-        if (isUndefined(navigateTo)) {
+        if (isUndefined(navigateTo) || !navigateTo.parameters.includes(key)) {
           const shortKey = camelCase(`short-${kebabCase(key)}`);
           content[shortKey] = TextUtils.ellipsis(content[key], generalConfig.notifications.STRING_LENGTH_MAX);
-        } else {
-          if (!navigateTo.parameters.includes(key)) {
-            const shortKey = camelCase(`short-${kebabCase(key)}`);
-            content[shortKey] = TextUtils.ellipsis(content[key], generalConfig.notifications.STRING_LENGTH_MAX);
-          }
         }
       });
       notificationDTO.message = TextUtils.parseText(notificationDTO.message, content);
