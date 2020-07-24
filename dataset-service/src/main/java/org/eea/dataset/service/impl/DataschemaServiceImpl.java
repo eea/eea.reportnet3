@@ -357,10 +357,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (null == tableSchemaVO.getToPrefill()) {
       tableSchemaVO.setToPrefill(false);
     }
-    if (null == tableSchemaVO.getNotEmpty()) {
-      tableSchemaVO.setNotEmpty(false);
-    }
-
     RecordSchema recordSchema = new RecordSchema();
     recordSchema.setIdRecordSchema(recordSchemaId);
     recordSchema.setIdTableSchema(tableSchemaId);
@@ -371,6 +367,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     schemasRepository.insertTableSchema(table, id);
     LOG.info("Created TableSchema {}: {}", tableSchemaId, table);
+
 
     createNotEmptyRule(tableSchemaId.toString(), datasetId);
 
