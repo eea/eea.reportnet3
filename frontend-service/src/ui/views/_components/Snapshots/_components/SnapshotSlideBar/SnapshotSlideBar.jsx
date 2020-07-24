@@ -34,7 +34,9 @@ const SnapshotSlideBar = ({
   }, [isVisible, isSnapshotDialogVisible]);
 
   useEffect(() => {
-    showScrollingBar();
+    setTimeout(() => {
+      showScrollingBar();
+    }, 0);
   }, [isVisible, isSnapshotDialogVisible]);
 
   const showScrollingBar = () => {
