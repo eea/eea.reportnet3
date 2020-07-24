@@ -47,7 +47,7 @@ export const Dialog = ({
     visible && (body.style.overflow = 'hidden');
 
     return () => {
-      false && (body.style.overflow = 'hidden auto');
+      body.style.overflow = 'hidden auto';
     };
   }, [visible]);
   return (
