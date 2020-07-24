@@ -357,6 +357,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (null == tableSchemaVO.getToPrefill()) {
       tableSchemaVO.setToPrefill(false);
     }
+    if (null == tableSchemaVO.getNotEmpty()) {
+      tableSchemaVO.setNotEmpty(false);
+    }
+
     RecordSchema recordSchema = new RecordSchema();
     recordSchema.setIdRecordSchema(recordSchemaId);
     recordSchema.setIdTableSchema(tableSchemaId);
@@ -368,8 +372,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schemasRepository.insertTableSchema(table, id);
     LOG.info("Created TableSchema {}: {}", tableSchemaId, table);
 
-
-    createNotEmptyRule(tableSchemaId.toString(), datasetId);
+    if (Boolean.TRUE.equals(tableSchemaVO.getNotEmpty())) {
+      createNotEmptyRule(tableSchemaId.toString(), datasetId);
+    }
 
     return tableSchemaVO;
   }
@@ -436,8 +441,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       throws EEAException {
     DataSetSchema datasetSchema =
         schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
-    TableSchema table = getTableSchema(tableSchemaId, datasetSchema);
-    if (table == null) {
+    TableSchema tableSchema = getTableSchema(tableSchemaId, datasetSchema);
+    if (tableSchema == null) {
       LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
       throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
     }
@@ -462,7 +467,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     schemasRepository.deleteTableSchemaById(tableSchemaId);
 
-    deleteNotEmptyRule(tableSchemaId, datasetId);
+    // Delete the notEmpty rule if exists
+    if (Boolean.TRUE.equals(tableSchema.getNotEmpty())) {
+      deleteNotEmptyRule(tableSchemaId, datasetId);
+    }
   }
 
   /**

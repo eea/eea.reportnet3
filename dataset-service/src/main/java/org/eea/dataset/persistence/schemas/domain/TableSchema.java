@@ -32,7 +32,6 @@ public class TableSchema {
   @Field(value = "idDataSet")
   private ObjectId idDataSet;
 
-
   /** The read only. */
   @Field(value = "readOnly")
   private Boolean readOnly;
@@ -43,7 +42,7 @@ public class TableSchema {
 
   /** The not empty. */
   @Field(value = "notEmpty")
-  private boolean notEmpty;
+  private Boolean notEmpty;
 
   /** The record schema. */
   @Field(value = "recordSchema")
@@ -82,6 +81,4 @@ public class TableSchema {
         && Objects.equals(description, other.description)
         && Objects.equals(notEmpty, other.notEmpty);
   }
-
-
 }
