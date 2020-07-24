@@ -1,0 +1,31 @@
+.mainContainer {
+  position: relative;
+  top: var(--header-height);
+  height: auto;
+  min-height: calc(100vh - var(--header-height));
+  .pageContent {
+    display: flex;
+    margin: 2rem 0 4rem 0;
+    .frontText {
+      width: 100%;
+      padding: 2rem;
+      -webkit-box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
+      -moz-box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
+      box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
+      border-radius: 5px;
+      table {
+        border: 1px solid #ccc;
+        th {
+          text-align: left;
+          padding: 1rem;
+        }
+        td {
+          padding: 1rem;
+        }
+      }
+    }
+    .sideBar {
+      width: 30%;
+    }
+  }
+}
