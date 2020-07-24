@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
@@ -35,50 +36,34 @@ import com.github.dockerjava.api.model.Container;
 @RunWith(MockitoJUnitRunner.class)
 public class RecordStoreServiceImplTest {
 
-  /** The record store service impl. */
+  /**
+   * The record store service impl.
+   */
   @InjectMocks
   private RecordStoreServiceImpl recordStoreServiceImpl;
 
-  /** The record store controller impl. */
-  @InjectMocks
-  private RecordStoreControllerImpl recordStoreControllerImpl;
 
-  /** The docker interface service impl. */
-  @InjectMocks
-  private DockerInterfaceServiceImpl dockerInterfaceServiceImpl;
-
-  /** The record store service. */
-  @Mock
-  private RecordStoreService recordStoreService;
-
-  /** The docker interface service. */
+  /**
+   * The docker interface service.
+   */
   @Mock
   private DockerInterfaceService dockerInterfaceService;
 
-  /** The kafka sender. */
+  /**
+   * The kafka sender.
+   */
   @Mock
   private KafkaSender kafkaSender;
 
-  /** The docker client. */
-  @Mock
-  private DockerClientBuilderBean dockerClient;
 
-  /** The command. */
-  @Mock
-  private CreateContainerCmd command;
-
-  /** The docker. */
-  @Mock
-  private DockerClient docker;
-
-  /** The jdbc template. */
-  @Mock
-  private JdbcTemplate jdbcTemplate;
-
-  /** The Constant DATASET. */
+  /**
+   * The Constant DATASET.
+   */
   private static final String DATASET = "dataset_1";
 
-  /** The Constant FAILED. */
+  /**
+   * The Constant FAILED.
+   */
   private static final String FAILED = "failed";
 
 
