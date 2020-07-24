@@ -308,10 +308,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public TableSchemaVO createTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody TableSchemaVO tableSchemaVO) {
     try {
-      TableSchemaVO response = dataschemaService.createTableSchema(
+      tableSchemaVO = dataschemaService.createTableSchema(
           dataschemaService.getDatasetSchemaId(datasetId), tableSchemaVO, datasetId);
       datasetService.saveTablePropagation(datasetId, tableSchemaVO);
-      return response;
+      return tableSchemaVO;
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID, e);
@@ -331,8 +331,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void updateTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody TableSchemaVO tableSchemaVO) {
     try {
-      dataschemaService.updateTableSchema(dataschemaService.getDatasetSchemaId(datasetId),
-          tableSchemaVO);
+      dataschemaService.updateTableSchema(datasetId, tableSchemaVO);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID, e);
