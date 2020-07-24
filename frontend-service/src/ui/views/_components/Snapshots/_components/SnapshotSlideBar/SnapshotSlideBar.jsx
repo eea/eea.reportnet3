@@ -37,6 +37,12 @@ const SnapshotSlideBar = ({
     showScrollingBar();
   }, [isVisible, isSnapshotDialogVisible]);
 
+  const showScrollingBar = () => {
+    const bodySelector = document.querySelector('body');
+
+    isVisible ? (bodySelector.style.overflow = 'hidden') : (bodySelector.style.overflow = 'hidden auto');
+  };
+
   const resetSlideBarPositionAndSize = () => {
     const documentElement = document.compatMode === 'CSS1Compat' ? document.documentElement : document.body;
 
@@ -46,12 +52,6 @@ const SnapshotSlideBar = ({
       height: `${documentElement.clientHeight - headerHeight}px`,
       top: `${headerHeight}px`
     });
-  };
-
-  const showScrollingBar = () => {
-    const bodySelector = document.querySelector('body');
-
-    isVisible ? (bodySelector.style.overflow = 'hidden') : (bodySelector.style.overflow = 'hidden auto');
   };
 
   const snapshotValidationSchema = Yup.object().shape({
