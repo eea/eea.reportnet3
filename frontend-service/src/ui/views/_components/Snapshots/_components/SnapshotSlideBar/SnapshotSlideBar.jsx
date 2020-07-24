@@ -34,10 +34,8 @@ const SnapshotSlideBar = ({
   }, [isVisible, isSnapshotDialogVisible]);
 
   useEffect(() => {
-    setTimeout(() => {
-      showScrollingBar();
-    }, 0);
-  }, [isVisible, isSnapshotDialogVisible]);
+    showScrollingBar();
+  }, [slideBarStyle]);
 
   const showScrollingBar = () => {
     const bodySelector = document.querySelector('body');
