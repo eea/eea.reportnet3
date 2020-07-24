@@ -126,7 +126,7 @@ export const FieldsDesigner = ({
     });
     onChangeFields(inmFields, type.toUpperCase() === 'LINK', table.tableSchemaId);
     setFields(inmFields);
-    window.scrollTo(0, document.body.scrollHeight);
+    // window.scrollTo(0, document.body.scrollHeight);
   };
 
   const onFieldDelete = (deletedFieldIndex, deletedFieldType) => {
@@ -486,7 +486,7 @@ export const FieldsDesigner = ({
         />
         <div className={styles.constraintsButtons}>
           <Button
-            className={`p-button-secondary p-button-animated-blink`}
+            className={`p-button-secondary p-button-animated-blink datasetSchema-uniques-help-step`}
             icon={'key'}
             label={resources.messages['addUniqueConstraint']}
             onClick={() => {
@@ -500,13 +500,13 @@ export const FieldsDesigner = ({
           />
 
           <Button
-            className="p-button-secondary p-button-animated-blink"
+            className="p-button-secondary p-button-animated-blink datasetSchema-rowConstraint-help-step"
             icon={'horizontalSliders'}
             label={resources.messages['addRowConstraint']}
             onClick={() => validationContext.onOpenModalFromRow(table.recordSchemaId)}
           />
         </div>
-        <div className={styles.switchDiv}>
+        <div className={`${styles.switchDiv} datasetSchema-readOnlyAndPrefill-help-step`}>
           <div>
             <span className={styles.switchTextInput}>{resources.messages['readOnlyTable']}</span>
             <Checkbox

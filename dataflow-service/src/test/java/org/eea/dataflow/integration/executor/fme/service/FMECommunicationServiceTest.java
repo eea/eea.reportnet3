@@ -44,6 +44,7 @@ public class FMECommunicationServiceTest {
   @Mock
   private FMECollectionMapper fmeCollectionMapper;
 
+
   @Before
   public void initMocks() {
     ThreadPropertiesManager.setVariable("user", "user");
@@ -96,13 +97,9 @@ public class FMECommunicationServiceTest {
     fmeOperationInfoVO.setFmeOperation(FMEOperation.EXPORT);
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
-        Mockito.any());
     fmeCommunicationService.operationFinished(fmeOperationInfoVO);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),
-        Mockito.any());
   }
 
   @Test
@@ -115,13 +112,9 @@ public class FMECommunicationServiceTest {
     fmeOperationInfoVO.setFmeOperation(FMEOperation.EXPORT);
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
-        Mockito.any());
     fmeCommunicationService.operationFinished(fmeOperationInfoVO);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),
-        Mockito.any());
   }
 
 
@@ -135,6 +128,7 @@ public class FMECommunicationServiceTest {
     fmeOperationInfoVO.setFmeOperation(FMEOperation.IMPORT);
     Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
         .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
+
     fmeCommunicationService.operationFinished(fmeOperationInfoVO);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());

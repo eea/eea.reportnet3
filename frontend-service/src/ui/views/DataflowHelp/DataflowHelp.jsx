@@ -8,8 +8,8 @@ import isUndefined from 'lodash/isUndefined';
 import sortBy from 'lodash/sortBy';
 
 import { config } from 'conf';
-import { DataflowHelpReporterHelpConfig } from 'conf/help/dataflowHelp/dataflowHelp.reporter';
-import { DataflowHelpRequesterHelpConfig } from 'conf/help/dataflowHelp/dataflowHelp.requester';
+import { DataflowHelpReporterHelpConfig } from 'conf/help/dataflowHelp/reporter';
+import { DataflowHelpRequesterHelpConfig } from 'conf/help/dataflowHelp/requester';
 import { routes } from 'ui/routes';
 
 import { DatasetSchemas } from './_components/DatasetSchemas';
@@ -126,12 +126,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       'dataflowHelpHelp'
     );
   }, [documents, webLinks, datasetsSchemas, selectedIndex]);
-
-  // useEffect(() => {
-  //   if (!isEmpty(steps)) {
-  //     leftSideBarContext.addHelpSteps('dataflowHelpHelp', steps);
-  //   }
-  // }, [steps]);
 
   useEffect(() => {
     setIsLoading(true);

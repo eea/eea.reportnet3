@@ -1,0 +1,44 @@
+{
+  "steps": [
+    {
+      "content": "Add more tables by clicking the tab with a ‘+’ icon. By double clicking on the table, it is possible to rename tables. Drag and drop allows you to change the order of the tables. Right clicking enables you to delete the table",
+      "target": ".datasetSchema-created-table-help-step"
+    },
+    {
+      "content": "Add fields by typing in Field name and Field description (to be reflected on the Dataflow help page). You can choose the field type from the dropdown menu",
+      "target": ".datasetSchema-fieldDesigner-help-step"
+    },
+    {
+      "content": "Once clicked on the Required, the reporter must enter data to that particular field",
+      "target": ".datasetSchema-required-help-step"
+    },
+    {
+      "content": "Primary Key (PK) links the fields in the different tables together",
+      "target": ".datasetSchema-pk-help-step"
+    },
+    {
+      "content": "Manage table and field restrictions (QC rules) from this button",
+      "target": ".datasetSchema-qcRules-help-step"
+    },
+    {
+      "content": "Save a copy of the design schema that you can always revert back to",
+      "target": ".datasetSchema-manageCopies-help-step"
+    },
+    {
+      "content": "Add uniqueness constraints (QC rules) to records in a table",
+      "target": ".datasetSchema-uniques-help-step"
+    },
+    {
+      "content": "Add a row constraint to the defined fields",
+      "target": ".datasetSchema-rowConstraint-help-step"
+    },
+    {
+      "content": "By switching the toggle from ‘Design’ to ‘View data’ to test a schema design",
+      "target": ".datasetSchema-switchDesignToData-help-step"
+    },
+    {
+      "content": "Prefill a table with data and make it read-only (code lists or reference data)",
+      "target": ".datasetSchema-readOnlyAndPrefill-help-step"
+    }
+  ]
+}

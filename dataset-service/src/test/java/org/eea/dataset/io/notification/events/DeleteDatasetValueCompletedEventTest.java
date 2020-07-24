@@ -75,7 +75,8 @@ public class DeleteDatasetValueCompletedEventTest {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any()))
         .thenReturn(new DataSetMetabaseVO());
-    Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any()))
+        .thenReturn(new DataFlowVO());
     Assert.assertNull(deleteDatasetValueCompletedEvent
         .getMap(NotificationVO.builder().user("user").datasetId(1L).error("error").build())
         .get("datasetName"));

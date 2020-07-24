@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
  * The Class RestoreDatasetSnapshotFailedEvent.
  */
 @Component
-public class ReleaseCopyDataToEUDatasetFailedEvent implements NotificableEventHandler {
+public class CopyDataToEUDatasetFailedEvent implements NotificableEventHandler {
 
 
   /** The data set metabase repository. */

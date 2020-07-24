@@ -45,7 +45,7 @@
           "key": "IMPORT_DESIGN_FAILED_EVENT",
           "navigateTo": {
             "section": "DATASET_SCHEMA",
-            "parameters": ["datasetId", "datasetId"]
+            "parameters": ["dataflowId", "datasetId"]
           }
         },
         {
@@ -603,18 +603,10 @@
           }
         },
         {
-          "key": "EXTERNAL_EXPORT_EUDATASET_COMPLETED_EVENT",
-          "navigateTo": {
-            "section": "DATAFLOW",
-            "parameters": ["dataflowId"]
-          }
+          "key": "EXTERNAL_EXPORT_EUDATASET_COMPLETED_EVENT"
         },
         {
-          "key": "COPY_DATA_TO_EUDATASET_COMPLETED_EVENT",
-          "navigateTo": {
-            "section": "DATAFLOW",
-            "parameters": ["dataflowId"]
-          }
+          "key": "COPY_DATA_TO_EUDATASET_COMPLETED_EVENT"
         },
         {
           "key": "COPY_DATASET_SCHEMA_COMPLETED_EVENT"
