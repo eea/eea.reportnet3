@@ -22,9 +22,14 @@ const parseUserConfiguration = userConfiguration => {
 
 const parseUserImage = data => {
   if (!isUndefined(data) && !isEmpty(data)) {
-    data.userImage.sort();
-    data.userImage = data.userImage.map(token => token.split('~')[1]);
-    return data;
+    const undefinedUserImage = data.userImage.filter(token => token.split('~')[1] === 'undefined');
+    if (!isUndefined(undefinedUserImage) && undefinedUserImage.length > 0) {
+      data.userImage = [];
+    } else {
+      data.userImage.sort();
+      data.userImage = data.userImage.map(token => token.split('~')[1]);
+      return data;
+    }
   }
 };
 
