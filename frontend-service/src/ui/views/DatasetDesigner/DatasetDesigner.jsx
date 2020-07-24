@@ -639,7 +639,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       <div className="p-toolbar-group-left">
         <Button
           className="p-button-secondary p-button-animated-blink"
-          icon={''}
+          icon={'plus'}
           label={resources.messages['addUniqueConstraint']}
           onClick={() =>
             manageDialogs('isUniqueConstraintsListDialogVisible', false, 'isManageUniqueConstraintDialogVisible', true)

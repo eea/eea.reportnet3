@@ -626,7 +626,7 @@ export const FieldDesigner = ({
       )}
       <Checkbox
         checked={fieldDesignerState.fieldRequiredValue}
-        className={styles.checkRequired}
+        className={`${styles.checkRequired} datasetSchema-required-help-step`}
         disabled={Boolean(fieldDesignerState.fieldPKValue)}
         id={`${fieldId}_check_required`}
         inputId={`${fieldId}_check_required`}
@@ -636,12 +636,12 @@ export const FieldDesigner = ({
         }}
         style={{ width: '70px' }}
       />
-      <label htmlFor={`${fieldId}_check_required`} className="srOnly datasetSchema-required-help-step">
+      <label htmlFor={`${fieldId}_check_required`} className="srOnly">
         {resources.messages['required']}
       </label>
       <Checkbox
         checked={fieldDesignerState.fieldPKValue}
-        className={styles.checkPK}
+        className={`${styles.checkPK} datasetSchema-pk-help-step`}
         disabled={hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)}
         id={`${fieldId}_check_pk`}
         inputId={`${fieldId}_check_pk`}
@@ -653,7 +653,7 @@ export const FieldDesigner = ({
         }}
         style={{ width: '35px' }}
       />
-      <label htmlFor={`${fieldId}_check_pk`} className="srOnly datasetSchema-pk-help-step">
+      <label htmlFor={`${fieldId}_check_pk`} className="srOnly">
         {resources.messages['pk']}
       </label>
     </div>

@@ -3,12 +3,14 @@ export const UpdateTableDescriptionDesign = ({ datasetRepository }) => async (
   tableSchemaId,
   tableSchemaDescription,
   tableSchemaIsReadOnly,
-  datasetId
+  datasetId,
+  tableSchemaNotEmpty
 ) =>
   datasetRepository.updateTableDescriptionDesign(
     tableSchemaToPrefill,
     tableSchemaId,
     tableSchemaDescription,
     tableSchemaIsReadOnly,
-    datasetId
+    datasetId,
+    tableSchemaNotEmpty
   );
