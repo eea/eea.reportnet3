@@ -1,4 +1,5 @@
 export const dataflowDataReducer = (state, { type, payload }) => {
+  // console.log('type', type, 'payload', payload);
   switch (type) {
     case 'INITIAL_LOAD':
       return { ...state, ...payload };
@@ -40,7 +41,7 @@ export const dataflowDataReducer = (state, { type, payload }) => {
       return { ...state, dataProviderId: payload.id };
 
     case 'SET_DATASET_ID_TO_SNAPSHOT_PROPS':
-      return { ...state, datasetIdToSnapshotProps: payload.id };
+      return { ...state, datasetIdToSnapshotProps: payload.id, datasetNameToSnapshotProps: payload.name };
 
     case 'SET_DESIGN_DATASET_SCHEMAS':
       return { ...state, designDatasetSchemas: payload.designDatasets };

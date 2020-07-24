@@ -20,6 +20,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 export const SnapshotsDialog = ({
   dataflowId,
   datasetId,
+  datasetName,
   hideSnapshotDialog,
   isSnapshotDialogVisible,
   manageDialogs
@@ -36,6 +37,9 @@ export const SnapshotsDialog = ({
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
   const [snapshotDescription, setSnapshotDescription] = useState();
   const [snapshotsListData, setSnapshotsListData] = useState([]);
+
+  console.log('datasetId', datasetId);
+  console.log('datasetName', datasetName);
 
   useCheckNotifications(
     [
@@ -117,7 +121,7 @@ export const SnapshotsDialog = ({
       <Dialog
         className={styles.releaseSnapshotsDialog}
         footer={snapshotDialogFooter}
-        header={`${resources.messages['snapshots']}`}
+        header={`${resources.messages['release']} ${datasetName}`}
         onHide={() => {
           manageDialogs('isSnapshotDialogVisible', false);
           setIsSnapshotInputActive(false);
