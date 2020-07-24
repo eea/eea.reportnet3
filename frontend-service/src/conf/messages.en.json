@@ -802,6 +802,7 @@
     "search...": "Search...",
     "dataflowListReporterHelp": "This is the main page where you can see the list of dataflows you have access",
     "dataflowRequesterDesignHelp": "Here you have the tools to manage your schema. You can create schemas, edit the dataflow, assign editors and create the data collections",
-    "datasetSchemaRequesterEmptyHelpConfig": "Here you have the tools to design your schema. Open me again when you have created your first table."
+    "datasetSchemaRequesterEmptyHelpConfig": "Here you have the tools to design your schema. Open me again when you have created your first table.",
+    "notEmpty": "Not empty"
   }
 }

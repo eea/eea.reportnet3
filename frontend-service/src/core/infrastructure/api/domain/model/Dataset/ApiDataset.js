@@ -46,7 +46,7 @@ export const apiDataset = {
           : getUrl(DatasetConfig.addTableDesign, {
               datasetId
             }),
-        data: { nameTableSchema: tableSchemaName }
+        data: { nameTableSchema: tableSchemaName, notEmpty: true }
       });
       return response;
     } catch (error) {
@@ -373,7 +373,8 @@ export const apiDataset = {
     tableSchemaId,
     tableSchemaDescription,
     tableSchemaIsReadOnly,
-    datasetId
+    datasetId,
+    tableSchemaNotEmpty
   ) => {
     try {
       const response = await HTTPRequester.update({
@@ -386,7 +387,8 @@ export const apiDataset = {
           idTableSchema: tableSchemaId,
           description: tableSchemaDescription,
           readOnly: tableSchemaIsReadOnly,
-          toPrefill: tableSchemaToPrefill
+          toPrefill: tableSchemaToPrefill,
+          notEmpty: tableSchemaNotEmpty
         }
       });
 
