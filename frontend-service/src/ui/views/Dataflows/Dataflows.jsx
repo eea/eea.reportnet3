@@ -101,9 +101,10 @@ const Dataflows = withRouter(({ match, history }) => {
   }, [dataflowsState.isCustodian]);
 
   useEffect(() => {
+    const messageStep0 = dataflowsState.isCustodian ? 'dataflowListRequesterHelp' : 'dataflowListReporterHelp';
     leftSideBarContext.addHelpSteps(
       dataflowsState.isCustodian ? DataflowsRequesterHelpConfig : DataflowsReporterHelpConfig,
-      'dataflowListHelp'
+      messageStep0
     );
   }, [dataflowsState]);
 

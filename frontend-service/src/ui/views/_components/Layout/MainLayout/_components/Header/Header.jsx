@@ -24,7 +24,7 @@ import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-const Header = withRouter(({ history, onLeftSideBarStyleChange }) => {
+const Header = withRouter(({ history, onMainContentStyleChange }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -44,10 +44,11 @@ const Header = withRouter(({ history, onLeftSideBarStyleChange }) => {
   });
   const [headerElementStyle, setHeaderElementStyle] = useState({});
   useEffect(() => {
-    var prevScrollpos = window.pageYOffset;
-    window.onscroll = function () {
-      var currentScrollPos = window.pageYOffset;
-      if (prevScrollpos > currentScrollPos) {
+    let prevScrollPos = window.pageYOffset;
+    window.onscroll = () => {
+      const currentScrollPos = window.pageYOffset;
+
+      if (prevScrollPos > currentScrollPos) {
         setGlobanElementStyle({
           marginTop: '0',
           transition: '0.5s'
@@ -60,8 +61,8 @@ const Header = withRouter(({ history, onLeftSideBarStyleChange }) => {
           height: '180px',
           transition: '0.5s'
         });
-        onLeftSideBarStyleChange({
-          top: '180px',
+        onMainContentStyleChange({
+          marginTop: '180px',
           transition: '0.5s'
         });
       } else {
@@ -77,12 +78,12 @@ const Header = withRouter(({ history, onLeftSideBarStyleChange }) => {
           height: '70px',
           transition: '0.5s'
         });
-        onLeftSideBarStyleChange({
-          top: '70px',
+        onMainContentStyleChange({
+          marginTop: '70px',
           transition: '0.5s'
         });
       }
-      prevScrollpos = currentScrollPos;
+      prevScrollPos = currentScrollPos;
     };
   }, []);
 
@@ -161,7 +162,7 @@ const Header = withRouter(({ history, onLeftSideBarStyleChange }) => {
         history.push(getUrl(routes.SETTINGS));
       }}>
       <img
-        alt="User avatar"
+        alt="User image"
         className={styles.userAvatar}
         icon={
           <FontAwesomeIcon aria-hidden={false} icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />

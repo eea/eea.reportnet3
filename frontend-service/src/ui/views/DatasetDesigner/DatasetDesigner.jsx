@@ -177,9 +177,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     if (!isUndefined(userContext.contextRoles)) {
       if (userContext.accessRole[0] === 'DATA_CUSTODIAN') {
         if (designerState.datasetSchemaAllTables.length > 1) {
-          leftSideBarContext.addHelpSteps(DatasetSchemaRequesterWithTabsHelpConfig, 'datasetSchemaRequesterHelpConfig');
+          leftSideBarContext.addHelpSteps(
+            DatasetSchemaRequesterWithTabsHelpConfig,
+            'datasetSchemaRequesterWithTabsHelpConfig'
+          );
         } else {
-          leftSideBarContext.addHelpSteps(DatasetSchemaRequesterEmptyHelpConfig, 'datasetSchemaRequesterHelpConfig');
+          leftSideBarContext.addHelpSteps(
+            DatasetSchemaRequesterEmptyHelpConfig,
+            'datasetSchemaRequesterEmptyHelpConfig'
+          );
         }
       }
     }
@@ -633,7 +639,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       <div className="p-toolbar-group-left">
         <Button
           className="p-button-secondary p-button-animated-blink"
-          icon={''}
+          icon={'plus'}
           label={resources.messages['addUniqueConstraint']}
           onClick={() =>
             manageDialogs('isUniqueConstraintsListDialogVisible', false, 'isManageUniqueConstraintDialogVisible', true)
