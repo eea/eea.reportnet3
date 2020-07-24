@@ -55,7 +55,7 @@ const TabsValidations = withRouter(
     });
 
     useEffect(() => {
-      setHasValidations(!noValidations());
+      setHasValidations(!checkIsEmptyValidations());
     }, [tabsValidationsState.validationList]);
 
     useEffect(() => {
@@ -349,11 +349,11 @@ const TabsValidations = withRouter(
 
     const validationId = value => tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_ID', payload: { value } });
 
-    const noValidations = () =>
+    const checkIsEmptyValidations = () =>
       isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList);
 
     const validationList = () => {
-      if (noValidations()) {
+      if (checkIsEmptyValidations()) {
         return (
           <div>
             <div className={styles.noValidations}>{resources.messages['emptyValidations']}</div>
@@ -418,7 +418,7 @@ const TabsValidations = withRouter(
     if (tabsValidationsState.isLoading) return <Spinner className={styles.positioning} />;
 
     return (
-      <div className={noValidations() ? styles.noValidations : styles.validations}>
+      <div className={checkIsEmptyValidations() ? styles.noValidations : styles.validations}>
         {validationList()}
         {tabsValidationsState.isDeleteDialogVisible && deleteValidationDialog()}
       </div>
