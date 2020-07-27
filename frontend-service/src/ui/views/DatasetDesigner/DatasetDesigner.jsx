@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -68,6 +68,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
+  const [hasValidations, setHasValidations] = useState();
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -84,7 +85,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     datasetStatistics: [],
     dataViewerOptions: { activeIndex: 0, isValidationSelected: false, recordPositionId: -1, selectedRecordErrorId: -1 },
     exportButtonsList: [],
-    exportDatasetData: {},
+    exportDatasetData: null,
     exportDatasetDataName: '',
     extensionsOperationsList: { export: [], import: [] },
     hasWritePermissions: false,
@@ -217,7 +218,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, [designerState.datasetSchemaName, designerState.extensionsOperationsList]);
 
   useEffect(() => {
-    if (!isEmpty(designerState.exportDatasetData)) {
+
+    if (!isNil(designerState.exportDatasetData)) {
       DownloadFile(designerState.exportDatasetData, designerState.exportDatasetDataName);
     }
   }, [designerState.exportDatasetData]);
@@ -293,7 +295,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         type: 'LOAD_EXTERNAL_EXTENSIONS',
         payload: { export: externalExtension.export, import: externalExtension.import }
       });
-      // setExtensionsOperationsList(ExtensionUtils.groupOperations('operation', response));
     } catch (error) {
       notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
     }
@@ -412,8 +413,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const onExportData = async fileType => {
     isLoadingFile(true);
     try {
-      const datasetData = await DatasetService.exportDataById(datasetId, fileType);
       const datasetName = createFileName(designerState.datasetSchemaName, fileType);
+      const datasetData = await DatasetService.exportDataById(datasetId, fileType);
 
       designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData, name: datasetName } });
     } catch (error) {
@@ -662,7 +663,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     if (designerState.validationListDialogVisible) {
       return (
         <Dialog
-          className={styles.qcRulesDialog}
+          className={hasValidations ? styles.qcRulesDialog : styles.qcRulesDialogEmpty}
           dismissableMask={true}
           footer={renderActionButtonsValidationDialog}
           header={resources.messages['qcRules']}
@@ -673,6 +674,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             datasetSchemaAllTables={designerState.datasetSchemaAllTables}
             datasetSchemaId={designerState.datasetSchemaId}
             onHideValidationsDialog={onHideValidationsDialog}
+            setHasValidations={setHasValidations}
           />
         </Dialog>
       );

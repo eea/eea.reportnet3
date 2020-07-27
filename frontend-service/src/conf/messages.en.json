@@ -588,10 +588,10 @@
     "longFieldFormatRestriction": "Maximum of 20 characters",
     "decimalFieldFormatRestriction": "Maximum of 40 characters",
     "dateFieldFormatRestriction": "YYYY-MM-DD",
-    "textFieldFormatRestriction": "Maximum of 5000 characters",
+    "textFieldFormatRestriction": "Maximum of 10000 characters",
     "richTextFieldFormatRestriction": "Maximum of 10000 characters",
     "emailFieldFormatRestriction": "Maximum of 256 characters",
-    "urlFieldFormatRestriction": "Maximum of 5000 characters",
+    "urlFieldFormatRestriction": "Maximum of 10000 characters",
     "phoneNumberFieldFormatRestriction": "Maximum of 256 characters",
     "errorTypePlaceholder": "Select an error type",
     "emptyTabHeaderError": "The table name is empty, please enter one.",
@@ -803,6 +803,6 @@
     "dataflowListReporterHelp": "This is the main page where you can see the list of dataflows you have access",
     "dataflowRequesterDesignHelp": "Here you have the tools to manage your schema. You can create schemas, edit the dataflow, assign editors and create the data collections",
     "datasetSchemaRequesterEmptyHelpConfig": "Here you have the tools to design your schema. Open me again when you have created your first table.",
-    "notEmpty": "Not empty"
+    "notEmpty": "Mandatory table"
   }
 }

@@ -292,7 +292,6 @@ export const TabsDesigner = withRouter(
       if (tableDeleted) {
         const inmTabs = [...tabs];
         inmTabs.splice(deletedTabIndx, 1);
-        console.log({ activeIndex, deletedTabIndx });
         inmTabs.forEach(tab => {
           if (tab.addTab) tab.index = -1;
         });
