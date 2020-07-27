@@ -1,8 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
-import isNil from 'lodash/isNil';
-
 import capitalize from 'lodash/capitalize';
+import isNil from 'lodash/isNil';
 import sanitizeHtml from 'sanitize-html';
 
 import { Growl } from 'primereact/growl';
@@ -11,10 +10,11 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const Notifications = () => {
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [position, setPosition] = useState({ marginTop: '-5px' });
+
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
-  const [position, setPosition] = useState({ marginTop: '-5px' });
-  const [headerHeight, setHeaderHeight] = useState(0);
 
   let growlRef = useRef();
 
@@ -42,20 +42,6 @@ const Notifications = () => {
     recalculatePosition();
   }, [headerHeight]);
 
-  const recalculatePosition = () => {
-    if (headerHeight === 180) {
-      setPosition({
-        marginTop: `${106}px`
-      });
-    }
-
-    if (headerHeight === 70) {
-      setPosition({
-        marginTop: `${-5}px`
-      });
-    }
-  };
-
   useEffect(() => {
     notificationContext.toShow.map(notification => {
       const message = (
@@ -81,6 +67,20 @@ const Notifications = () => {
       notificationContext.clearToShow();
     }
   }, [notificationContext.toShow]);
+
+  const recalculatePosition = () => {
+    if (headerHeight === 180) {
+      setPosition({
+        marginTop: `${106}px`
+      });
+    }
+
+    if (headerHeight === 70) {
+      setPosition({
+        marginTop: `${-5}px`
+      });
+    }
+  };
 
   return <Growl ref={growlRef} style={position} />;
 };
