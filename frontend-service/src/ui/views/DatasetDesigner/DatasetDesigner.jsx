@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -68,6 +68,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
+  const [hasValidations, setHasValidations] = useState();
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -639,7 +640,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       <div className="p-toolbar-group-left">
         <Button
           className="p-button-secondary p-button-animated-blink"
-          icon={''}
+          icon={'plus'}
           label={resources.messages['addUniqueConstraint']}
           onClick={() =>
             manageDialogs('isUniqueConstraintsListDialogVisible', false, 'isManageUniqueConstraintDialogVisible', true)
@@ -662,7 +663,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     if (designerState.validationListDialogVisible) {
       return (
         <Dialog
-          className={styles.qcRulesDialog}
+          className={hasValidations ? styles.qcRulesDialog : styles.qcRulesDialogEmpty}
           dismissableMask={true}
           footer={renderActionButtonsValidationDialog}
           header={resources.messages['qcRules']}
@@ -673,6 +674,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             datasetSchemaAllTables={designerState.datasetSchemaAllTables}
             datasetSchemaId={designerState.datasetSchemaId}
             onHideValidationsDialog={onHideValidationsDialog}
+            setHasValidations={setHasValidations}
           />
         </Dialog>
       );

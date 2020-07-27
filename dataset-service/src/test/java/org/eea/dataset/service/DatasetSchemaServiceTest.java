@@ -761,13 +761,32 @@ public class DatasetSchemaServiceTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void createTableSchemaTest() throws EEAException {
+  public void createTableSchemaRuleCreationTest() throws EEAException {
+    TableSchemaVO tableSchemaVO = new TableSchemaVO();
+    tableSchemaVO.setNotEmpty(true);
+
     Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
         .thenReturn(new TableSchema());
     Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn(new ObjectId().toString());
     Mockito.when(rulesControllerZuul.updateSequence(Mockito.any())).thenReturn(1L);
-    dataSchemaServiceImpl.createTableSchema(new ObjectId().toString(), new TableSchemaVO(), 1L);
+    dataSchemaServiceImpl.createTableSchema(new ObjectId().toString(), tableSchemaVO, 1L);
+    Mockito.verify(schemasRepository, times(1)).insertTableSchema(Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Creates the table schema no rule creation test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createTableSchemaNoRuleCreationTest() throws EEAException {
+    TableSchemaVO tableSchemaVO = new TableSchemaVO();
+    tableSchemaVO.setNotEmpty(null);
+
+    Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
+        .thenReturn(new TableSchema());
+    dataSchemaServiceImpl.createTableSchema(new ObjectId().toString(), tableSchemaVO, 1L);
     Mockito.verify(schemasRepository, times(1)).insertTableSchema(Mockito.any(), Mockito.any());
   }
 

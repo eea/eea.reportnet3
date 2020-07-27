@@ -123,13 +123,13 @@ const UserImg = () => {
         </label>
         <img
           alt="User profile image"
+          className={styles.userDataIcon}
           data-tip
           data-for="addAvatar"
           data-event="click"
           ref={uploadedImage}
           icon={<FontAwesomeIcon icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />}
           src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
-          className={styles.userDataIcon}
           // onClick={() => imageUploader.current.click()}
         />
         <Icon icon="edit" className={styles.editIcon} />
