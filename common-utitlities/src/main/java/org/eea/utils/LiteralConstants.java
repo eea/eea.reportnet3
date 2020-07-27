@@ -20,7 +20,7 @@ public final class LiteralConstants {
   /** The Constant PK: {@value}. */
   public static final String PK = "pk";
 
-  /** The Constant DATASET_FORMAT_NAME. */
+  /** The Constant DATASET_FORMAT_NAME: {@value}. */
   public static final String DATASET_FORMAT_NAME = "dataset_%s";
 
   /** The Constant SNAPSHOT_EXTENSION: {@value}. */
@@ -94,6 +94,9 @@ public final class LiteralConstants {
 
   /** The Constant SNAPSHOT_FILE_FIELD_SUFFIX: {@value}. */
   public static final String SNAPSHOT_FILE_FIELD_SUFFIX = "_table_FieldValue.snap";
+
+  /** The Constant RULE_TABLE_MANDATORY: {@value}. */
+  public static final String RULE_TABLE_MANDATORY = "Mandatory table records check";
 
 
   /** The Constant SNAPSHOT_FILE_ATTACHMENT_SUFFIX. */

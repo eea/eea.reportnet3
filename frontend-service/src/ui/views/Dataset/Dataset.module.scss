@@ -1,0 +1,58 @@
+.ButtonsBar {
+  margin-bottom: 0.5rem;
+  padding: 0.25rem;
+}
+
+.Dialog {
+  width: 55vw;
+}
+
+.FileUpload .span {
+  width: 100%;
+  min-height: 120px;
+}
+
+.warning > span {
+  color: red;
+}
+
+:global .p-tabview.p-tabview-top {
+  padding-bottom: 80px;
+}
+
+.InputSwitchContainer {
+  width: 100%;
+}
+
+.InputSwitchDiv {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  margin-right: 0;
+  width: fit-content;
+}
+
+.InputSwitchText {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-block-start: 0.5rem;
+  margin-block-end: 0.5rem;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  padding: 5px;
+}
+
+.paginatorValidationViewer :global .p-dropdown-panel {
+  top: -6rem !important;
+}
+
+.qcRulesDialog {
+  width: 90% !important;
+}
+
+.qcRulesDialogEmpty {
+  width: 70% !important;
+}
+:global body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
+  box-shadow: 0 0 0 0em var(--blue-100) !important;
+}

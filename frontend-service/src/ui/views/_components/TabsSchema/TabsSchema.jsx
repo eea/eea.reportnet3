@@ -13,17 +13,17 @@ import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 export const TabsSchema = ({
   activeIndex = 0,
   buttonsList = undefined,
-  hasWritePermissions,
+  hasWritePermissions = false,
   isDataCollection,
   isDatasetDeleted,
   isValidationSelected,
-  isWebFormMMR,
   levelErrorTypes,
   onLoadTableData,
   onTabChange,
   recordPositionId,
   selectedRecordErrorId,
   setIsValidationSelected,
+  showWriteButtons = true,
   tables,
   tableSchemaColumns
 }) => {
@@ -43,10 +43,10 @@ export const TabsSchema = ({
                   isDataCollection={isDataCollection}
                   isDatasetDeleted={isDatasetDeleted}
                   isValidationSelected={isValidationSelected}
-                  isWebFormMMR={isWebFormMMR}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
                   onLoadTableData={onLoadTableData}
+                  showWriteButtons={showWriteButtons}
                   tableHasErrors={tableHasErrors}
                   tableId={table.id}
                   tableName={table.name}

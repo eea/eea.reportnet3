@@ -59,13 +59,6 @@ public interface DatasetSchemaService {
   void deleteDatasetSchema(String schemaId, Long datasetId);
 
   /**
-   * Creates the group and add user.
-   *
-   * @param datasetId the dataset id
-   */
-  void createGroupAndAddUser(Long datasetId);
-
-  /**
    * Delete group and remove user.
    *
    * @param datasetId the dataset id
@@ -109,22 +102,21 @@ public interface DatasetSchemaService {
   /**
    * Update name table schema.
    *
-   * @param datasetSchemaid the dataset schemaid
+   * @param datasetId the dataset id
    * @param tableSchema the table schema
-   *
    * @throws EEAException the EEA exception
    */
-  void updateTableSchema(String datasetSchemaid, TableSchemaVO tableSchema) throws EEAException;
+  void updateTableSchema(Long datasetId, TableSchemaVO tableSchema) throws EEAException;
 
   /**
    * Delete table schema.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the id table schema
    * @param datasetId the dataset id
    * @throws EEAException the EEA exception
    */
-  void deleteTableSchema(String datasetSchemaId, String idTableSchema, Long datasetId)
+  void deleteTableSchema(String datasetSchemaId, String tableSchemaId, Long datasetId)
       throws EEAException;
 
   /**

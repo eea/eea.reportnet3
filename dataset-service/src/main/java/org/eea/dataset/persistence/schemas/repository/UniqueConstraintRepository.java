@@ -48,4 +48,13 @@ public interface UniqueConstraintRepository
   List<UniqueConstraintSchema> findByTableSchemaId(ObjectId tableSchemaId);
 
 
+  /**
+   * Find by field schema ids.
+   *
+   * @param fieldSchemaIds the field schema ids
+   * @return the list
+   */
+  List<UniqueConstraintSchema> findByFieldSchemaIds(List<ObjectId> fieldSchemaIds);
+
+
 }

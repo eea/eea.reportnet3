@@ -35,6 +35,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class UniqueValidationUtils {
 
+
+
   /**
    * The rules repository.
    */
@@ -44,6 +46,13 @@ public class UniqueValidationUtils {
    * The schemas repository.
    */
   private static SchemasRepository schemasRepository;
+
+
+  /** The Constant COLUMN. */
+  private static final String COLUMN = "column_";
+
+  /** The Constant AS. */
+  private static final String AS = "') AS ";
 
   /**
    * The record repository.
@@ -245,7 +254,7 @@ public class UniqueValidationUtils {
       String schemaId = iterator.next();
       stringQuery.append(
           "(select fv.value from field_value fv where fv.id_record=rv.id and fv.id_field_schema = '")
-          .append(schemaId).append("') AS ").append("column_" + (i++));
+          .append(schemaId).append(AS).append(COLUMN + (i++));
       if (iterator.hasNext()) {
         stringQuery.append(",");
       }
@@ -256,7 +265,7 @@ public class UniqueValidationUtils {
     i = 1;
     while (iterator.hasNext()) {
       iterator.next();
-      stringQuery.append("column_" + (i++));
+      stringQuery.append(COLUMN + (i++));
       if (iterator.hasNext()) {
         stringQuery.append(",");
       }
@@ -288,7 +297,7 @@ public class UniqueValidationUtils {
       stringQuery
           .append("(select fv.value from dataset_" + datasetOriginId
               + ".field_value fv where fv.id_record=rv.id and fv.id_field_schema = '")
-          .append(schemaId).append("') AS ").append("column_" + (i++));
+          .append(schemaId).append(AS).append(COLUMN + (i++));
       if (iterator.hasNext()) {
         stringQuery.append(",");
       }
@@ -302,7 +311,7 @@ public class UniqueValidationUtils {
       stringQuery
           .append("(select fv.value from dataset_" + datasetReferencedId
               + ".field_value fv where fv.id_record=rv.id and fv.id_field_schema = '")
-          .append(schemaId).append("') AS ").append("column_" + (i++));
+          .append(schemaId).append(AS).append(COLUMN + (i++));
       if (iterator.hasNext()) {
         stringQuery.append(",");
       }

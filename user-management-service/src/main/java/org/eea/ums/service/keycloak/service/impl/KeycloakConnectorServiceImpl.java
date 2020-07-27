@@ -32,12 +32,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -321,9 +323,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     if (null != checkResult && null != checkResult.getBody()) {
       result = checkResult.getBody();
     }
-    String permission = null != result && null != result.getStatus() ? result.getStatus() : "DENY";
 
-    return permission;
+    return null != result && null != result.getStatus() ? result.getStatus() : "DENY";
   }
 
   /**
@@ -399,7 +400,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     map.add("password", password);
     map.add(LiteralConstants.CLIENT_SECRET, secret);
     map.add(LiteralConstants.CLIENT_ID, clientId);
-    if (admin) {
+    if (Boolean.TRUE.equals(admin)) {
       map.add("scope", "openid info offline_access");
     }
     return map;
@@ -485,8 +486,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
                     .buildAndExpand(uriParams).toString(),
                 HttpMethod.GET, request, GroupInfo[].class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
-        .orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
 
   /**
@@ -508,8 +508,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             .path(LIST_GROUPS_URL_WITH_SEARCH).buildAndExpand(uriParams).toString(),
         HttpMethod.GET, request, GroupInfo[].class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
-        .orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
 
   /**
@@ -535,8 +534,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
                     .path(GROUP_DETAIL_URL).buildAndExpand(uriParams).toString(),
                 HttpMethod.GET, request, GroupInfo.class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
-        .orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
 
   /**
@@ -581,8 +579,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             .buildAndExpand(uriParams).toString(),
         HttpMethod.GET, request, UserRepresentation.class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
-        .orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
 
   /**
@@ -605,8 +602,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             .buildAndExpand(uriParams).toString(),
         HttpMethod.GET, request, UserRepresentation[].class);
 
-    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
-        .orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
 
   /**
@@ -649,6 +645,12 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     try {
       this.restTemplate.postForEntity(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
           .path(CREATE_USER_GROUP_URL).buildAndExpand(uriParams).toString(), request, Void.class);
+    } catch (HttpClientErrorException ex) {
+      if (HttpStatus.CONFLICT.equals(ex.getStatusCode())) {
+        LOG_ERROR.error("Error creating permission, already created");
+      } else {
+        throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED);
+      }
     } catch (Exception e) {
       throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED);
     }
@@ -768,8 +770,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             .buildAndExpand(uriParams).toString(),
         HttpMethod.GET, request, UserRepresentation[].class);
 
-    return Optional.ofNullable(responseEntity).map(entity -> entity.getBody()).map(entity -> entity)
-        .orElse(null);
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
 
   /**
@@ -989,8 +990,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
     HttpHeaders headers = createBasicHeaders(headerInfo);
 
-    HttpEntity<T> request = new HttpEntity<>(body, headers);
-    return request;
+    return new HttpEntity<>(body, headers);
   }
 
   /**
@@ -1009,8 +1009,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     headerInfo.put("Content-Type", "application/json");
     HttpHeaders headers = createBasicHeaders(headerInfo);
 
-    HttpEntity<T> request = new HttpEntity<>(body, headers);
-    return request;
+    return new HttpEntity<>(body, headers);
   }
 
 

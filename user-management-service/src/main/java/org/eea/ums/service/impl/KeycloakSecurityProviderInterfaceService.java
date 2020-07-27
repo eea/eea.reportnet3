@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -63,7 +64,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   /**
    * The Constant APIKEYS.
    */
-  private static final String APIKEYS = "ApiKeys";
+  private static final String API_KEYS = "ApiKeys";
   /**
    * The keycloak connector service.
    */
@@ -90,6 +91,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Autowired
   private JwtTokenProvider jwtTokenProvider;
 
+
+  private List<UserRepresentation> users;
+
+  @PostConstruct
+  private void init() {
+    users = Arrays.asList(keycloakConnectorService.getUsers());
+  }
 
   /**
    * Do login.
@@ -349,8 +357,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   /**
    * Removes the user from user group.
    *
-   * @param userId the user resourceId
-   * @param groupId the group resourceId
+   * @param userId the user userId
+   * @param groupName the group name
+   *
    * @throws EEAException
    */
   @Override
@@ -439,11 +448,19 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   public void addContributorToUserGroup(Optional<UserRepresentation> contributor, String userMail,
       String groupName) throws EEAException {
     if (!contributor.isPresent()) {
-      UserRepresentation[] users = keycloakConnectorService.getUsers();
-      contributor = Arrays.asList(users).stream()
-          .filter(
+      synchronized (users) {
+        contributor = users.stream()
+            .filter(
+                user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
+            .findFirst();
+        if (!contributor.isPresent()) {
+          users.removeAll(Arrays.asList(users)); // just in case the user was not found in
+          users.addAll(Arrays.asList(keycloakConnectorService.getUsers()));
+          contributor = users.stream().filter(
               user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
-          .findFirst();
+              .findFirst();
+        }
+      }
     }
     if (contributor.isPresent()) {
       LOG.info("New contributor, the email and the group to be assigned is: {}, {}",
@@ -470,11 +487,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   public void removeContributorFromUserGroup(Optional<UserRepresentation> contributor,
       String userMail, String groupName) throws EEAException {
     if (!contributor.isPresent()) {
-      UserRepresentation[] users = keycloakConnectorService.getUsers();
-      contributor = Arrays.asList(users).stream()
-          .filter(
-              user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
-          .findFirst();
+      synchronized (users) {
+        contributor = users.stream()
+            .filter(
+                user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
+            .findFirst();
+
+      }
     }
     if (contributor.isPresent()) {
       LOG.info("remove contributor to user group, the email and the group to be removed is: {}, {}",
@@ -502,13 +521,27 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
 
     List<UserRepresentation> contributors = new ArrayList<>();
     int cont = 0;
+
     for (ResourceAssignationVO resourceAssignationVO : resources) {
-      UserRepresentation[] users = keycloakConnectorService.getUsers();
-      Optional<UserRepresentation> contributor =
-          Arrays.asList(users).stream().filter(user -> StringUtils.isNotBlank(user.getEmail())
-              && user.getEmail().equals(resourceAssignationVO.getEmail())).findFirst();
-      if (contributor.isPresent()) {
-        contributors.add(contributor.get());
+      Optional<UserRepresentation> contributor = Optional.empty();
+      synchronized (users) {
+        contributor =
+            users.stream().filter(user -> StringUtils.isNotBlank(user.getEmail())
+                && user.getEmail().equals(resourceAssignationVO.getEmail())).findFirst();
+        if (contributor.isPresent()) {
+          contributors.add(contributor.get());
+        } else {
+          users.removeAll(Arrays.asList(users)); // just in case the user was not found in
+          users.addAll(Arrays.asList(keycloakConnectorService.getUsers()));
+
+          // first try because it was a new user
+          contributor =
+              users.stream().filter(user -> StringUtils.isNotBlank(user.getEmail())
+                  && user.getEmail().equals(resourceAssignationVO.getEmail())).findFirst();
+          if (contributor.isPresent()) {
+            contributors.add(contributor.get());
+          }
+        }
       }
       try {
 
@@ -539,10 +572,12 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     List<UserRepresentation> contributors = new ArrayList<>();
     int cont = 0;
     for (ResourceAssignationVO resourceAssignationVO : resources) {
-      UserRepresentation[] users = keycloakConnectorService.getUsers();
-      Optional<UserRepresentation> contributor =
-          Arrays.asList(users).stream().filter(user -> StringUtils.isNotBlank(user.getEmail())
-              && user.getEmail().equals(resourceAssignationVO.getEmail())).findFirst();
+      Optional<UserRepresentation> contributor = Optional.empty();
+      synchronized (users) {
+        contributor =
+            users.stream().filter(user -> StringUtils.isNotBlank(user.getEmail())
+                && user.getEmail().equals(resourceAssignationVO.getEmail())).findFirst();
+      }
       if (contributor.isPresent()) {
         contributors.add(contributor.get());
       }
@@ -604,11 +639,12 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   public TokenVO authenticateApiKey(String apiKey) {
     List<UserRepresentation> userRepresentations = new ArrayList<>();
     Long dataflowId = 0l;
+
     for (UserRepresentation userRepresentation : keycloakConnectorService.getUsers()) {
       if (null != userRepresentation.getAttributes()
           && 1 <= userRepresentation.getAttributes().size()
-          && userRepresentation.getAttributes().containsKey("ApiKeys")) {
-        List<String> apiKeys = userRepresentation.getAttributes().get("ApiKeys");
+          && userRepresentation.getAttributes().containsKey(API_KEYS)) {
+        List<String> apiKeys = userRepresentation.getAttributes().get(API_KEYS);
         // an api key in attributes is represented as a string where positions are:
         // ApiKeyValue,dataflowId,dataproviderId
 
@@ -631,7 +667,11 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       Set<String> userGroups = new HashSet<>();
       for (GroupInfo groupInfo : keycloakConnectorService.getGroupsByUser(user.getId())) {
         if (groupInfo.getName()
-            .equals(ResourceGroupEnum.DATAFLOW_LEAD_REPORTER.getGroupName(dataflowId))) {
+            .equals(ResourceGroupEnum.DATAFLOW_LEAD_REPORTER.getGroupName(dataflowId))
+            || groupInfo.getName()
+            .equals(ResourceGroupEnum.DATAFLOW_REPORTER_READ.getGroupName(dataflowId))
+            || groupInfo.getName()
+            .equals(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(dataflowId))) {
           userGroups.add(groupInfo.getName());
         }
       }
@@ -673,7 +713,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     Map<String, List<String>> attributes =
         user.getAttributes() != null ? user.getAttributes() : new HashMap<>();
     List<String> apiKeys =
-        attributes.get(APIKEYS) != null ? attributes.get(APIKEYS) : new ArrayList<>();
+        attributes.get(API_KEYS) != null ? attributes.get(API_KEYS) : new ArrayList<>();
     String newValueAttribute = dataflowId + "," + dataProvider;
     // Find and remove old key
     if (!apiKeys.isEmpty()) {
@@ -685,7 +725,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       }
     }
     apiKeys.add(apiKey + "," + newValueAttribute);
-    attributes.put(APIKEYS, apiKeys);
+    attributes.put(API_KEYS, apiKeys);
     user.setAttributes(attributes);
     keycloakConnectorService.updateUser(user);
     return apiKey;
@@ -713,7 +753,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     Map<String, List<String>> attributes =
         user.getAttributes() != null ? user.getAttributes() : new HashMap<>();
     List<String> apiKeys =
-        attributes.get(APIKEYS) != null ? attributes.get(APIKEYS) : new ArrayList<>();
+        attributes.get(API_KEYS) != null ? attributes.get(API_KEYS) : new ArrayList<>();
     String findValue = "," + dataflowId + "," + dataProvider;
     if (!apiKeys.isEmpty()) {
       for (String keyString : apiKeys) {
@@ -749,13 +789,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       Optional.ofNullable(token.getOtherClaims())
           .map(claims -> (List<String>) claims.get("user_groups"))
           .filter(groups -> groups.size() > 0).ifPresent(groups -> {
-            groups.stream().map(group -> {
-              if (group.startsWith("/")) {
-                group = group.substring(1);
-              }
-              return group.toUpperCase();
-            }).forEach(eeaGroups::add);
-          });
+        groups.stream().map(group -> {
+          if (group.startsWith("/")) {
+            group = group.substring(1);
+          }
+          return group.toUpperCase();
+        }).forEach(eeaGroups::add);
+      });
 
       tokenVO.setRoles(token.getRoles());
       tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
@@ -797,7 +837,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   public UserRepresentation getUserWithoutKeys(String userId) {
     UserRepresentation user = keycloakConnectorService.getUser(userId);
     if (user != null && user.getAttributes() != null) {
-      user.getAttributes().remove(APIKEYS);
+      user.getAttributes().remove(API_KEYS);
     }
     return user;
   }
@@ -813,8 +853,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Override
   public UserRepresentation setAttributesWithApiKey(UserRepresentation user,
       Map<String, List<String>> attributes) {
-    if (user.getAttributes() != null && user.getAttributes().get(APIKEYS) != null) {
-      attributes.put(APIKEYS, user.getAttributes().get(APIKEYS));
+    if (user.getAttributes() != null && user.getAttributes().get(API_KEYS) != null) {
+      attributes.put(API_KEYS, user.getAttributes().get(API_KEYS));
     }
     user.setAttributes(attributes);
     return user;

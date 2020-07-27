@@ -42,7 +42,7 @@ public class AddDatacollectionFailedEvent implements NotificableEventHandler {
     Long dataflowId = notificationVO.getDataflowId();
     String dataflowName =
         notificationVO.getDataflowName() != null ? notificationVO.getDataflowName()
-            : dataflowControllerZuul.findById(dataflowId).getName();
+            : dataflowControllerZuul.getMetabaseById(dataflowId).getName();
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());

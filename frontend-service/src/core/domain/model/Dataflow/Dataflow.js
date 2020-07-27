@@ -6,6 +6,7 @@ export class Dataflow {
     description,
     designDatasets,
     documents,
+    euDatasets,
     expirationDate,
     id,
     name,
@@ -23,6 +24,7 @@ export class Dataflow {
     this.description = description;
     this.designDatasets = designDatasets;
     this.documents = documents;
+    this.euDatasets = euDatasets;
     this.expirationDate = expirationDate;
     this.id = id;
     this.name = name;

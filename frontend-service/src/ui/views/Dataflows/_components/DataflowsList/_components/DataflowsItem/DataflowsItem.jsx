@@ -53,7 +53,9 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
       <div
         className={
           type === 'accepted' || type === 'completed'
-            ? `${styles.container} ${styles.accepted} ${styles[itemContent.status]}`
+            ? `${styles.container} ${styles.accepted} ${
+                styles[itemContent.status]
+              } dataflowList-first-dataflow-help-step`
             : `${styles.container} ${styles[itemContent.status]}`
         }>
         {type === 'accepted' ? (

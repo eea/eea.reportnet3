@@ -1,12 +1,10 @@
 package org.eea.kafka.domain;
 
-import com.google.common.base.Objects;
 import java.util.Collection;
+import com.google.common.base.Objects;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.apache.kafka.clients.admin.MemberDescription;
-import org.apache.kafka.common.ConsumerGroupState;
 
 /**
  * The type Consumer group vo.

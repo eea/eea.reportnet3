@@ -46,6 +46,17 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   private static final Pattern DATASET_NAME_PATTERN = Pattern.compile("((?)dataset_[0-9]+)");
 
+  /** The Constant OPERATION_NOT_IMPLEMENTED_YET. */
+  private static final String OPERATION_NOT_IMPLEMENTED_YET = "Operation not implemented yet";
+
+
+  /** The Constant ERROR_EXECUTING_DOCKER_COMMAND. */
+  private static final String ERROR_EXECUTING_DOCKER_COMMAND =
+      "Error executing docker command to create the dataset. %s";
+
+  /** The Constant ERROR_EXECUTING_DOCKER_COMMAND_LOG. */
+  private static final String ERROR_EXECUTING_DOCKER_COMMAND_LOG =
+      "Error executing docker command to create the dataset. {}";
   /**
    * The docker interface service.
    */
@@ -136,10 +147,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       dockerInterfaceService.executeCommandInsideContainer(container, "/bin/bash", "-c", "psql -h "
           + ipPostgreDb + " -U " + userPostgreDb + " -p 5432 -d datasets -f /pgwal/init.sql ");
     } catch (final InterruptedException e) {
-      LOG_ERROR.error("Error executing docker command to create the dataset. {}", e.getMessage());
+      LOG_ERROR.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
       throw new RecordStoreAccessException(
-          String.format("Error executing docker command to create the dataset. %s", e.getMessage()),
-          e);
+          String.format(ERROR_EXECUTING_DOCKER_COMMAND, e.getMessage()), e);
     }
   }
 
@@ -184,9 +194,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
         dockerInterfaceService.executeCommandInsideContainer(container, "psql", "-h", ipPostgreDb,
             "-U", userPostgreDb, "-p", "5432", "-d", "datasets", "-c", command);
       } catch (final InterruptedException e) {
-        LOG_ERROR.error("Error executing docker command to create the dataset. {}", e.getMessage());
-        throw new RecordStoreAccessException(String
-            .format("Error executing docker command to create the dataset. %s", e.getMessage()), e);
+        LOG_ERROR.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
+        throw new RecordStoreAccessException(
+            String.format(ERROR_EXECUTING_DOCKER_COMMAND, e.getMessage()), e);
       }
     }
 
@@ -211,7 +221,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   @Override
   public void createDataSetFromOther(final String sourceDatasetName,
       final String destinationDataSetName) {
-    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
   /**
@@ -280,10 +290,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
         }
       }
     } catch (final InterruptedException e) {
-      LOG_ERROR.error("Error executing docker command to create the dataset. {}", e.getMessage());
+      LOG_ERROR.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
       throw new RecordStoreAccessException(
-          String.format("Error executing docker command to create the dataset. %s", e.getMessage()),
-          e);
+          String.format(ERROR_EXECUTING_DOCKER_COMMAND, e.getMessage()), e);
     }
     return datasets;
   }
@@ -319,7 +328,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   @Override
   public void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset)
       throws SQLException, IOException, RecordStoreAccessException {
-    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
   /**
@@ -340,16 +349,21 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
       DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
       throws SQLException, IOException, RecordStoreAccessException {
-    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
-  @Override
-  public void restoreDataSnapshotPoc(Long idReportingDataset, Long idSnapshot, Long partitionId,
-      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
-      throws SQLException, IOException {
-
-  }
-
+  /**
+   * Restore data snapshot poc.
+   *
+   * @param idReportingDataset the id reporting dataset
+   * @param idSnapshot the id snapshot
+   * @param partitionId the partition id
+   * @param datasetType the dataset type
+   * @param isSchemaSnapshot the is schema snapshot
+   * @param deleteData the delete data
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   /**
    * Delete data snapshot.
    *
@@ -360,7 +374,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {
-    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
   /**
@@ -370,7 +384,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void deleteDataset(String datasetSchemaName) {
-    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
   /**
@@ -382,6 +396,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void createSchemas(Map<Long, String> data, Long dataflowId, boolean isCreation) {
-    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 }

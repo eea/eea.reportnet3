@@ -1,7 +1,8 @@
+import isNil from 'lodash/isNil';
 import isObject from 'lodash/isObject';
 
 const ellipsis = (rawText = '', limit) => {
-  if (rawText.length > limit - 3) {
+  if (!isNil(rawText) && rawText.length > limit - 3) {
     return `${rawText.substr(0, limit - 3)}...`;
   }
   return rawText;
@@ -11,11 +12,7 @@ const parseText = (rawText = '', param = {}) => {
   let text = rawText;
   if (isObject(param)) {
     Object.keys(param).forEach(key => {
-      if (param[key]) {
-        text = text.replace(`{:${key}}`, param[key]);
-      } else {
-        text = text.replace(`{:${key}}`, '');
-      }
+      text = text.replace(new RegExp(`{:${key}}`.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'), 'g'), param[key] || '');
     });
   }
   return text;

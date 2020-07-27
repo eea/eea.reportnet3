@@ -37,11 +37,13 @@
   left: 50%;
   transform: translateX(-50%);
 }
-.selectDataProvider {
-  color: var(--dropdown-panel-color);
-  background-color: var(--dropdown-panel-bg);
-}
 
 .disabled {
   color: #5f5f5f !important;
+}
+
+.emptyTableHeader {
+  :global .p-column-title {
+    display: none;
+  }
 }

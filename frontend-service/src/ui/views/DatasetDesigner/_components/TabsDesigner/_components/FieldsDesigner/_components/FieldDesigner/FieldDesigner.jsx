@@ -626,7 +626,7 @@ export const FieldDesigner = ({
       )}
       <Checkbox
         checked={fieldDesignerState.fieldRequiredValue}
-        className={styles.checkRequired}
+        className={`${styles.checkRequired} datasetSchema-required-help-step`}
         disabled={Boolean(fieldDesignerState.fieldPKValue)}
         id={`${fieldId}_check_required`}
         inputId={`${fieldId}_check_required`}
@@ -636,12 +636,12 @@ export const FieldDesigner = ({
         }}
         style={{ width: '70px' }}
       />
-      <label for={`${fieldId}_check_required`} className="srOnly">
+      <label htmlFor={`${fieldId}_check_required`} className="srOnly">
         {resources.messages['required']}
       </label>
       <Checkbox
         checked={fieldDesignerState.fieldPKValue}
-        className={styles.checkPK}
+        className={`${styles.checkPK} datasetSchema-pk-help-step`}
         disabled={hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)}
         id={`${fieldId}_check_pk`}
         inputId={`${fieldId}_check_pk`}
@@ -653,7 +653,7 @@ export const FieldDesigner = ({
         }}
         style={{ width: '35px' }}
       />
-      <label for={`${fieldId}_check_pk`} className="srOnly">
+      <label htmlFor={`${fieldId}_check_pk`} className="srOnly">
         {resources.messages['pk']}
       </label>
     </div>
@@ -720,6 +720,7 @@ export const FieldDesigner = ({
           event.stopPropagation();
         }}>
         <FontAwesomeIcon icon={AwesomeIcons('delete')} />
+        <span className="srOnly">{resources.messages['deleteFieldLabel']}</span>
       </a>
     ) : null;
 
@@ -745,7 +746,7 @@ export const FieldDesigner = ({
         required={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue === '' : fieldName === ''}
         value={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue : fieldName}
       />
-      <label for={fieldName} className="srOnly">
+      <label htmlFor={fieldName} className="srOnly">
         {resources.messages['newFieldPlaceHolder']}
       </label>
       <InputTextarea
@@ -801,7 +802,7 @@ export const FieldDesigner = ({
     <React.Fragment>
       <div
         draggable={!addField}
-        className={`${styles.draggableFieldDiv} fieldRow`}
+        className={`${styles.draggableFieldDiv} fieldRow datasetSchema-fieldDesigner-help-step`}
         onDragEnd={e => {
           onFieldDragEnd(e);
         }}

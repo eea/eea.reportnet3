@@ -70,10 +70,11 @@ public class CSVWriterStrategyTest {
     fields.add(fieldValue);
     record.setFields(fields);
     records.add(record);
+    record.setDataProviderCode("ES");
     fieldSchemas.add(fieldSchema);
     Mockito.when(fileCommon.getRecordValues(Mockito.any(), Mockito.any())).thenReturn(records);
     Mockito.when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any())).thenReturn(fieldSchemas);
-    csvWriterStrategy.writeFile(1L, 1L, "");
+    csvWriterStrategy.writeFile(1L, 1L, "", true);
     Mockito.verify(fileCommon, times(1)).getFieldSchemas(Mockito.any(), Mockito.any());
     Mockito.verify(fileCommon, times(1)).getRecordValues(Mockito.any(), Mockito.any());
   }
@@ -102,7 +103,7 @@ public class CSVWriterStrategyTest {
     fieldSchemas.add(fieldSchema);
     Mockito.when(fileCommon.getRecordValues(Mockito.any(), Mockito.any())).thenReturn(records);
     Mockito.when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any())).thenReturn(fieldSchemas);
-    csvWriterStrategy.writeFile(1L, 1L, "");
+    csvWriterStrategy.writeFile(1L, 1L, "", false);
     Mockito.verify(fileCommon, times(1)).getFieldSchemas(Mockito.any(), Mockito.any());
     Mockito.verify(fileCommon, times(1)).getRecordValues(Mockito.any(), Mockito.any());
   }

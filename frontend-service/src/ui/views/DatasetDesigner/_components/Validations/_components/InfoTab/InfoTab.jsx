@@ -127,7 +127,7 @@ export const InfoTab = ({
           className={`${styles.field} ${styles.qcShortCode} formField ${printError('shortCode')}`}
           onBlur={() => onAddToClickedFields('shortCode')}
           onFocus={() => onDeleteFromClickedFields('shortCode')}>
-          <label htmlFor="shortCode">{resourcesContext.messages['ruleShortCode']}</label>
+          <label htmlFor={`${componentName}__shortCode`}>{resourcesContext.messages['ruleShortCode']}</label>
           <InputText
             id={`${componentName}__shortCode`}
             onChange={e => onInfoFieldChange('shortCode', e.target.value)}
@@ -151,7 +151,7 @@ export const InfoTab = ({
           className={`${styles.field} ${styles.qcName} formField ${printError('name')}`}
           onBlur={() => onAddToClickedFields('name')}
           onFocus={() => onDeleteFromClickedFields('name')}>
-          <label htmlFor="name">{resourcesContext.messages['ruleName']}</label>
+          <label htmlFor={`${componentName}__name`}>{resourcesContext.messages['ruleName']}</label>
           <InputText
             id={`${componentName}__name`}
             onChange={e => onInfoFieldChange('name', e.target.value)}
@@ -161,7 +161,7 @@ export const InfoTab = ({
         </div>
 
         <div className={`${styles.field} ${styles.qcDescription} formField`}>
-          <label htmlFor="description">{resourcesContext.messages['description']}</label>
+          <label htmlFor={`${componentName}__description`}>{resourcesContext.messages['description']}</label>
           <InputText
             id={`${componentName}__description`}
             onChange={e => onInfoFieldChange('description', e.target.value)}
@@ -194,7 +194,7 @@ export const InfoTab = ({
           className={`${styles.field} ${styles.qcErrorMessage} formField ${printError('errorMessage')}`}
           onBlur={() => onAddToClickedFields('errorMessage')}
           onFocus={() => onDeleteFromClickedFields('errorMessage')}>
-          <label htmlFor="errorMessage">{resourcesContext.messages['ruleErrorMessage']}</label>
+          <label htmlFor={`${componentName}__errorMessage`}>{resourcesContext.messages['ruleErrorMessage']}</label>
           <InputText
             id={`${componentName}__errorMessage`}
             onChange={e => onInfoFieldChange('errorMessage', e.target.value)}

@@ -4,6 +4,7 @@
 package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -22,6 +23,7 @@ import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
+import org.eea.dataset.persistence.metabase.domain.SnapshotSchema;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
@@ -47,6 +49,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -174,7 +177,6 @@ public class DatasetSnapshotServiceTest {
   @Mock
   private UniqueConstraintRepository uniqueConstraintRepository;
 
-
   /**
    * Inits the mocks.
    */
@@ -217,7 +219,7 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(Optional.empty());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, "test", false);
+    datasetSnapshotService.addSnapshot(1L, "test", false, null);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -236,9 +238,7 @@ public class DatasetSnapshotServiceTest {
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(recordStoreControllerZull).createSnapshotData(Mockito.any(), Mockito.any(),
         Mockito.any());
-    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, "test", false);
+    datasetSnapshotService.addSnapshot(1L, "test", false, 1L);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -258,7 +258,7 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(Optional.empty());
     Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
         .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, "test", true);
+    datasetSnapshotService.addSnapshot(1L, "test", true, 1L);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -294,6 +294,22 @@ public class DatasetSnapshotServiceTest {
    * @throws Exception the exception
    */
   @Test
+  public void restoreSnapshotToCloneDataTest() throws Exception {
+
+    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
+        Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
+    datasetSnapshotService.restoreSnapshotToCloneData(1L, 1L, 1L, true, DatasetTypeEnum.EUDATASET,
+        "user");
+    Mockito.verify(recordStoreControllerZull, times(1)).restoreSnapshotData(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Test restore snapshots.
+   *
+   * @throws Exception the exception
+   */
+  @Test
   public void testRestoreSnapshots() throws Exception {
 
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
@@ -302,7 +318,6 @@ public class DatasetSnapshotServiceTest {
     Mockito.verify(partitionDataSetMetabaseRepository, times(1))
         .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any());
   }
-
 
   /**
    * Release snapshot.
@@ -382,7 +397,7 @@ public class DatasetSnapshotServiceTest {
     Mockito.when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(dataCollection));
     datasetSnapshotService.releaseSnapshot(1L, 1L);
-    Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(3)).removeLockByCriteria(Mockito.any());
   }
 
 
@@ -399,7 +414,7 @@ public class DatasetSnapshotServiceTest {
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(new DataProviderVO());
     datasetSnapshotService.releaseSnapshot(1L, 1L);
-    Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(3)).removeLockByCriteria(Mockito.any());
   }
 
   /**
@@ -413,7 +428,7 @@ public class DatasetSnapshotServiceTest {
     isBlocked.add(new Validation());
     Mockito.when(validationRepository.findByLevelError(Mockito.any())).thenReturn(isBlocked);
     datasetSnapshotService.releaseSnapshot(1L, 1L);
-    Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(2)).removeLockByCriteria(Mockito.any());
   }
 
 
@@ -467,8 +482,6 @@ public class DatasetSnapshotServiceTest {
     doNothing().when(documentControllerZuul).uploadSchemaSnapshotDocument(Mockito.any(),
         Mockito.any(), Mockito.any());
     when(schemaRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(new DataSetSchema());
-    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
     datasetSnapshotService.addSchemaSnapshot(1L, "5db99d0bb67ca68cb8fa7053", "test");
     Mockito.verify(snapshotSchemaRepository, times(1)).save(Mockito.any());
   }
@@ -531,6 +544,45 @@ public class DatasetSnapshotServiceTest {
         Mockito.any(), Mockito.any());
   }
 
+  @Test
+  public void testRestoreSchemaSnapshotException() throws Exception {
+    try {
+      DataSetSchema schema = new DataSetSchema();
+      schema.setIdDataSetSchema(new ObjectId("5ce524fad31fc52540abae73"));
+      ObjectMapper objectMapper = new ObjectMapper();
+      ObjectMapper objectMapper2 = new ObjectMapper();
+      ObjectMapper objectMapper3 = new ObjectMapper();
+
+      RulesSchema rule = new RulesSchema();
+      rule.setIdDatasetSchema(new ObjectId("5ce524fad31fc52540abae73"));
+
+      UniqueConstraintSchema unique = new UniqueConstraintSchema();
+      unique.setUniqueId(new ObjectId("5ce524fad31fc52540abae73"));
+      unique.setDatasetSchemaId(new ObjectId("5ce524fad31fc52540abae73"));
+      UniqueConstraintSchema unique2 = new UniqueConstraintSchema();
+      unique2.setUniqueId(new ObjectId("5db99d0bb67ca68cb8fa7053"));
+      unique2.setDatasetSchemaId(new ObjectId("5db99d0bb67ca68cb8fa7053"));
+      List<UniqueConstraintSchema> listUnique = new ArrayList<>();
+      listUnique.add(unique);
+      listUnique.add(unique2);
+
+
+      when(documentControllerZuul.getSnapshotDocument(Mockito.any(), Mockito.any())).thenReturn(
+          objectMapper.writeValueAsBytes(schema), objectMapper2.writeValueAsBytes(rule),
+          objectMapper3.writeValueAsBytes(listUnique));
+
+      Mockito.doNothing().when(rulesControllerZuul).deleteRulesSchema(Mockito.anyString());
+      when(rulesRepository.save(Mockito.any())).thenReturn(new RulesSchema());
+
+      when(uniqueConstraintRepository.deleteByDatasetSchemaId(Mockito.any())).thenReturn(0L);
+      when(uniqueConstraintRepository.saveAll(Mockito.any())).thenReturn(new ArrayList<>());
+      doThrow(new EEAException("failed")).when(schemaService)
+          .updatePKCatalogueAndForeignsAfterSnapshot(Mockito.any(), Mockito.any());
+      datasetSnapshotService.restoreSchemaSnapshot(1L, 1L);
+    } catch (EEAException e) {
+      Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
+    }
+  }
 
   /**
    * Test delete all schema snapshots.
@@ -623,4 +675,36 @@ public class DatasetSnapshotServiceTest {
     datasetSnapshotService.createReceiptPDF(null, 1L, 1L);
     Mockito.verify(representativeControllerZuul, times(1)).updateRepresentative(Mockito.any());
   }
+
+  @Test
+  public void getByIdExceptionTest() throws EEAException {
+    when(snapshotRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    assertNull("Snapshot with id 1 Not found", datasetSnapshotService.getById(1L));
+  }
+
+  @Test
+  public void getByIdSchemaExceptionTest() throws EEAException {
+    when(snapshotSchemaRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    assertNull("Snapshot with id 1 Not found", datasetSnapshotService.getSchemaById(1L));
+  }
+
+  @Test
+  public void getByIdTest() throws EEAException {
+    SnapshotVO snap = new SnapshotVO();
+    snap.setId(1L);
+    when(snapshotRepository.findById(Mockito.any())).thenReturn(Optional.of(new Snapshot()));
+    when(snapshotMapper.entityToClass(Mockito.any())).thenReturn(snap);
+    assertEquals(snap, datasetSnapshotService.getById(1L));
+  }
+
+  @Test
+  public void getSchemaByIdTest() throws EEAException {
+    SnapshotVO snap = new SnapshotVO();
+    snap.setId(1L);
+    when(snapshotSchemaRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new SnapshotSchema()));
+    when(snapshotSchemaMapper.entityToClass(Mockito.any())).thenReturn(snap);
+    assertEquals(snap, datasetSnapshotService.getSchemaById(1L));
+  }
+
 }

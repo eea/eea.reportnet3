@@ -19,7 +19,6 @@ import { GetMetaData } from './GetMetaData';
 import { GetReferencedFieldValues } from './GetReferencedFieldValues';
 import { GetSchema } from './GetSchema';
 import { GetStatistics } from './GetStatistics';
-import { GetWebFormData } from './GetWebFormData';
 import { OrderRecordFieldDesign } from './OrderRecordFieldDesign';
 import { OrderTableDesign } from './OrderTableDesign';
 import { UpdateDatasetDescriptionDesign } from './UpdateDatasetDescriptionDesign';
@@ -60,6 +59,5 @@ export const DatasetService = {
   updateSchemaNameById: UpdateSchemaName({ datasetRepository }),
   updateTableDescriptionDesign: UpdateTableDescriptionDesign({ datasetRepository }),
   updateTableNameDesign: UpdateTableNameDesign({ datasetRepository }),
-  validateDataById: ValidateData({ datasetRepository }),
-  webFormDataById: GetWebFormData({ datasetRepository })
+  validateDataById: ValidateData({ datasetRepository })
 };

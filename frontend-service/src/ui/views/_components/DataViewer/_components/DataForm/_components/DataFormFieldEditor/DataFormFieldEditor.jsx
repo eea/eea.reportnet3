@@ -17,9 +17,20 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
-const DataFormFieldEditor = ({ autoFocus, column, datasetId, field, fieldValue = '', onChangeForm, type }) => {
-  const inputRef = useRef(null);
+const DataFormFieldEditor = ({
+  autoFocus,
+  column,
+  datasetId,
+  field,
+  fieldValue = '',
+  isVisible,
+  onChangeForm,
+  type
+}) => {
   const resources = useContext(ResourcesContext);
+
+  const inputRef = useRef(null);
+
   const [columnWithLinks, setColumnWithLinks] = useState([]);
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [mapCoordinates, setMapCoordinates] = useState();
@@ -31,10 +42,10 @@ const DataFormFieldEditor = ({ autoFocus, column, datasetId, field, fieldValue =
   }, []);
 
   useEffect(() => {
-    if (autoFocus) {
+    if (inputRef.current && isVisible && autoFocus) {
       inputRef.current.element.focus();
     }
-  }, []);
+  }, [inputRef.current, isVisible]);
 
   const onFilter = async filter => {
     onLoadColsSchema(filter);
@@ -64,7 +75,8 @@ const DataFormFieldEditor = ({ autoFocus, column, datasetId, field, fieldValue =
     // onEditorSubmitValue(cells, coordinates.join(', '));
   };
 
-  const formatDate = date => {
+  const formatDate = (date, isInvalidDate) => {
+    if (isInvalidDate) return '';
     let d = new Date(date),
       month = '' + (d.getMonth() + 1),
       day = '' + d.getDate(),
@@ -236,13 +248,13 @@ const DataFormFieldEditor = ({ autoFocus, column, datasetId, field, fieldValue =
   const renderCalendar = (field, fieldValue) => {
     return (
       <Calendar
-        onChange={e => onChangeForm(field, formatDate(e.target.value))}
+        onChange={e => onChangeForm(field, formatDate(e.target.value, isNil(e.target.value)))}
         appendTo={document.body}
         baseZIndex={9999}
         dateFormat="yy-mm-dd"
         monthNavigator={true}
         style={{ width: '60px' }}
-        value={new Date(formatDate(fieldValue))}
+        value={new Date(formatDate(fieldValue, isNil(fieldValue)))}
         yearNavigator={true}
         yearRange="2010:2030"
       />

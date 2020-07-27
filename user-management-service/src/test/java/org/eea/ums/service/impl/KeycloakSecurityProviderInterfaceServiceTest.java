@@ -3,7 +3,9 @@ package org.eea.ums.service.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,29 +39,40 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * The Class KeycloakSecurityProviderInterfaceServiceTest.
  */
 public class KeycloakSecurityProviderInterfaceServiceTest {
 
-  /** The keycloak security provider interface service. */
+  /**
+   * The keycloak security provider interface service.
+   */
   @InjectMocks
   private KeycloakSecurityProviderInterfaceService keycloakSecurityProviderInterfaceService;
 
-  /** The keycloak connector service. */
+  /**
+   * The keycloak connector service.
+   */
   @Mock
   private KeycloakConnectorService keycloakConnectorService;
 
-  /** The group info mapper. */
+  /**
+   * The group info mapper.
+   */
   @Mock
   private GroupInfoMapper groupInfoMapper;
 
-  /** The jwt token provider. */
+  /**
+   * The jwt token provider.
+   */
   @Mock
   private JwtTokenProvider jwtTokenProvider;
 
-  /** The security redis template. */
+  /**
+   * The security redis template.
+   */
   @Mock
   private RedisTemplate<String, CacheTokenVO> securityRedisTemplate;
 
@@ -217,8 +230,8 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   @Test
   public void checkAccessPermission() {
     when(keycloakConnectorService.checkUserPermision("Dataflow",
-        new AccessScopeEnum[] {AccessScopeEnum.CREATE})).thenReturn("PERMIT");
-    AccessScopeEnum[] scopes = new AccessScopeEnum[] {AccessScopeEnum.CREATE};
+        new AccessScopeEnum[]{AccessScopeEnum.CREATE})).thenReturn("PERMIT");
+    AccessScopeEnum[] scopes = new AccessScopeEnum[]{AccessScopeEnum.CREATE};
     boolean checkedAccessPermission =
         keycloakSecurityProviderInterfaceService.checkAccessPermission("Dataflow", scopes);
     Assert.assertTrue(checkedAccessPermission);
@@ -257,7 +270,6 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     Mockito.verify(this.keycloakConnectorService, Mockito.times(1))
         .createGroupDetail(Mockito.any(GroupInfo.class));
   }
-
 
   // /**
   // * Removes the user from user group.
@@ -411,6 +423,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
    * Gets the api key empty test.
    *
    * @return the api key empty test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -426,6 +439,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
    * Gets the api key attributes test.
    *
    * @return the api key attributes test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -443,6 +457,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
    * Gets the api key full attributes test.
    *
    * @return the api key full attributes test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -627,8 +642,9 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   @Test(expected = EEAException.class)
   public void removeContributorFromUserGroupNoUser() throws EEAException {
     GroupInfo[] groups = {new GroupInfo()};
-    UserRepresentation[] users = {new UserRepresentation()};
-    Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
+    List<UserRepresentation> users = Arrays.asList(new UserRepresentation[]{});
+    // Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
+    ReflectionTestUtils.setField(keycloakSecurityProviderInterfaceService, "users", users);
     Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groups);
     try {
       keycloakSecurityProviderInterfaceService.removeContributorFromUserGroup(Optional.empty(), "",
@@ -649,8 +665,9 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     resources.add(resource);
     UserRepresentation user = new UserRepresentation();
     user.setEmail("a");
-    UserRepresentation[] users = {user};
-    Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
+    List<UserRepresentation> users = Arrays.asList(new UserRepresentation[]{user});
+    // Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
+    ReflectionTestUtils.setField(keycloakSecurityProviderInterfaceService, "users", users);
     Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groups);
     keycloakSecurityProviderInterfaceService.removeContributorsFromUserGroup(resources);
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).removeUserFromGroup(Mockito.any(),
@@ -665,8 +682,9 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     resource.setEmail("a");
     resource.setResourceGroup(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE);
     resources.add(resource);
-    UserRepresentation[] users = {new UserRepresentation()};
-    Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
+    List<UserRepresentation> users = Arrays.asList(new UserRepresentation[]{});
+    // Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
+    ReflectionTestUtils.setField(keycloakSecurityProviderInterfaceService, "users", users);
     Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groups);
     try {
       keycloakSecurityProviderInterfaceService.removeContributorsFromUserGroup(resources);

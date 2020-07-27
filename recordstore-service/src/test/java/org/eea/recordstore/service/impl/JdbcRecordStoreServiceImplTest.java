@@ -11,7 +11,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -58,6 +62,15 @@ public class JdbcRecordStoreServiceImplTest {
 
   @Mock
   private LockService lockService;
+
+  @Mock
+  private DataCollectionControllerZuul dataCollectionControllerZuul;
+
+  @Mock
+  private DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul;
+
+  @Mock
+  private DataSetControllerZuul datasetControllerZuul;
 
   @Before
   public void initMocks() {
@@ -122,8 +135,10 @@ public class JdbcRecordStoreServiceImplTest {
 
 
   @Test
-  public void testCreateSnapshot() throws SQLException, IOException {
+  public void testCreateSnapshot() throws SQLException, IOException, EEAException {
     List<String> datasets = new ArrayList<>();
+    Mockito.when(dataSetSnapshotControllerZuul.getSchemaById(Mockito.any()))
+        .thenReturn(new SnapshotVO());
     datasets.add("dataset_1");
     PowerMockito.mockStatic(DriverManager.class);
 
@@ -183,6 +198,10 @@ public class JdbcRecordStoreServiceImplTest {
     ReflectionTestUtils.setField(jdbcRecordStoreService, "pathSnapshot", "./src/test/resources/");
     Mockito.doNothing().when(kafkaSender).releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(),
         Mockito.any());
+    Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
+    SnapshotVO snap = new SnapshotVO();
+    snap.setDatasetId(1L);
+    Mockito.when(dataSetSnapshotControllerZuul.getById(Mockito.any())).thenReturn(snap);
     jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false);
     Mockito.verify(kafkaSender, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());

@@ -18,6 +18,7 @@ import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.utils.LiteralConstants;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
@@ -81,7 +82,6 @@ public class RulesServiceImpl implements RulesService {
   /** The kie base manager. */
   @Autowired
   private KieBaseManager kieBaseManager;
-
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
@@ -300,6 +300,12 @@ public class RulesServiceImpl implements RulesService {
           .getDesignDatasetIdByDatasetSchemaId(integrityVO.getReferencedDatasetSchemaId());
       dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetId, datasetReferencedId,
           integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
+    } else if (EntityTypeEnum.TABLE.equals(ruleVO.getType())
+        && ruleVO.getRuleName().equalsIgnoreCase(LiteralConstants.RULE_TABLE_MANDATORY)) {
+      rule.setAutomatic(true);
+      rule.setVerified(true);
+      rule.setEnabled(true);
+      rule.setWhenCondition("isTableEmpty(this)");
     }
     validateRule(rule);
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
@@ -325,7 +331,7 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public void createAutomaticRules(String datasetSchemaId, String referenceId, DataType typeData,
       EntityTypeEnum typeEntityEnum, Long datasetId, boolean required) throws EEAException {
-    Document document = new Document();
+    Document document;
     List<Rule> ruleList = new ArrayList<>();
     // we use that if to sort between a rule required and rule for any other type(Boolean,
     // number etc)
@@ -807,7 +813,6 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
-
   /**
    * Copy rules schema.
    *
@@ -833,42 +838,69 @@ public class RulesServiceImpl implements RulesService {
         // We copy only the rules that are not of type Link, because these one are created
         // automatically in the process when we update the fieldSchema in previous calls of the copy
         // process
-        if (StringUtils.isNotBlank(rule.getWhenCondition())
-            && !rule.getWhenCondition().contains("isfieldFK")) {
-
-          LOG.info("A new rule is going to be created in the copy schema process");
-          // Here we change the fields of the rule involved with the help of the dictionary
-          dictionaryOriginTargetObjectId = fillRuleCopied(rule, dictionaryOriginTargetObjectId);
-
-          // If the rule is a Dataset type, we need to do the same process with the
-          // IntegritySchema
-          if (EntityTypeEnum.DATASET.equals(rule.getType())) {
-            copyIntegrity(originDatasetSchemaId, dictionaryOriginTargetObjectId, rule);
-          }
-
-          // Validate the rule if it's not automatic
-          if (!rule.isAutomatic()) {
-            validateRule(rule);
-          }
-          // Create the new rule
-          if (!rulesRepository.createNewRule(new ObjectId(newDatasetSchemaId), rule)) {
-            throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
-          }
-
-          // Check if rule is valid
-          if (!rule.isAutomatic()) {
-            kieBaseManager.validateRule(newDatasetSchemaId, rule);
-          }
-
-          // add the rules sequence
-          rulesSequenceRepository.updateSequence(new ObjectId(newDatasetSchemaId));
-        }
+        dictionaryOriginTargetObjectId = copyData(dictionaryOriginTargetObjectId,
+            originDatasetSchemaId, newDatasetSchemaId, rule);
       }
     }
     return dictionaryOriginTargetObjectId;
   }
 
+  /**
+   * Delete not empty rule.
+   *
+   * @param tableSchemaId the table schema id
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void deleteNotEmptyRule(String tableSchemaId, Long datasetId) {
+    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+    rulesRepository.deleteNotEmptyRule(new ObjectId(tableSchemaId), new ObjectId(datasetSchemaId));
+  }
 
+  /**
+   * Copy data.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param originDatasetSchemaId the origin dataset schema id
+   * @param newDatasetSchemaId the new dataset schema id
+   * @param rule the rule
+   * @return the map
+   * @throws EEAException the EEA exception
+   */
+  private Map<String, String> copyData(Map<String, String> dictionaryOriginTargetObjectId,
+      String originDatasetSchemaId, String newDatasetSchemaId, Rule rule) throws EEAException {
+    if (StringUtils.isNotBlank(rule.getWhenCondition())
+        && !rule.getWhenCondition().contains("isfieldFK")) {
+
+      LOG.info("A new rule is going to be created in the copy schema process");
+      // Here we change the fields of the rule involved with the help of the dictionary
+      dictionaryOriginTargetObjectId = fillRuleCopied(rule, dictionaryOriginTargetObjectId);
+
+      // If the rule is a Dataset type, we need to do the same process with the
+      // IntegritySchema
+      if (EntityTypeEnum.DATASET.equals(rule.getType())) {
+        copyIntegrity(originDatasetSchemaId, dictionaryOriginTargetObjectId, rule);
+      }
+
+      // Validate the rule if it's not automatic
+      if (!rule.isAutomatic()) {
+        validateRule(rule);
+      }
+      // Create the new rule
+      if (!rulesRepository.createNewRule(new ObjectId(newDatasetSchemaId), rule)) {
+        throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
+      }
+
+      // Check if rule is valid
+      if (!rule.isAutomatic()) {
+        kieBaseManager.validateRule(newDatasetSchemaId, rule);
+      }
+
+      // add the rules sequence
+      rulesSequenceRepository.updateSequence(new ObjectId(newDatasetSchemaId));
+    }
+    return dictionaryOriginTargetObjectId;
+  }
 
   /**
    * Fill rule copied.
@@ -918,11 +950,8 @@ public class RulesServiceImpl implements RulesService {
         }
       });
     }
-
-
     return dictionaryOriginTargetObjectId;
   }
-
 
   /**
    * Copy integrity.
@@ -962,7 +991,16 @@ public class RulesServiceImpl implements RulesService {
           datasetReferencedId, integrity.getOriginDatasetSchemaId().toString(),
           integrity.getReferencedDatasetSchemaId().toString());
     }
-
   }
 
+  /**
+   * Return update sequence.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the long
+   */
+  @Override
+  public Long updateSequence(String datasetSchemaId) {
+    return rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
+  }
 }

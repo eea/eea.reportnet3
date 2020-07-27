@@ -23,6 +23,7 @@ import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
@@ -109,6 +110,11 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
 
+  /** The contributor controller zuul. */
+  @Autowired
+  private ContributorControllerZuul contributorControllerZuul;
+
+  /** The time to wait before continue copy. */
   @Value("${wait.continue.copy.ms}")
   private Long timeToWaitBeforeContinueCopy;
 
@@ -234,6 +240,8 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
           Thread.sleep(timeToWaitBeforeContinueCopy);
           fillAndUpdateDesignDatasetCopied(schemaVO, newIdDatasetSchema,
               dictionaryOriginTargetObjectId, datasetId.get(), mapDatasetIdFKRelations);
+          contributorControllerZuul.createAssociatedPermissions(idDataflowDestination,
+              datasetId.get());
         }
 
         // Modify the FK, if the schemas copied have fields of type Link, to update the relations to
@@ -314,10 +322,9 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
     schema.setDescription(schemaOrigin.getDescription());
     // table level
     for (TableSchemaVO tableVO : schemaOrigin.getTableSchemas()) {
-      TableSchema table = new TableSchema();
       ObjectId newTableId = new ObjectId();
       dictionaryOriginTargetObjectId.put(tableVO.getIdTableSchema(), newTableId.toString());
-      table = tableSchemaMapper.classToEntity(tableVO);
+      TableSchema table = tableSchemaMapper.classToEntity(tableVO);
       table.setIdTableSchema(newTableId);
       // record level
       RecordSchema record = new RecordSchema();
@@ -330,24 +337,16 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         record.setIdTableSchema(newTableId);
         // field level
         for (FieldSchemaVO fieldVO : tableVO.getRecordSchema().getFieldSchema()) {
-          FieldSchema field = new FieldSchema();
           ObjectId newFieldId = new ObjectId();
           dictionaryOriginTargetObjectId.put(fieldVO.getId(), newFieldId.toString());
-          field = fieldSchemaNoRulesMapper.classToEntity(fieldVO);
+          FieldSchema field = fieldSchemaNoRulesMapper.classToEntity(fieldVO);
           field.setIdFieldSchema(newFieldId);
           field.setIdRecord(newRecordId);
           record.getFieldSchema().add(field);
 
           // if the type is Link we store to later modify the schema id's with the proper fk
           // relations after all the process it's done
-          if (DataType.LINK.equals(field.getType())) {
-            List<FieldSchemaVO> listFK = new ArrayList<>();
-            if (mapDatasetIdFKRelations.containsKey(datasetId)) {
-              listFK = mapDatasetIdFKRelations.get(datasetId);
-            }
-            listFK.add(fieldVO);
-            mapDatasetIdFKRelations.put(datasetId, listFK);
-          }
+          mapLinkResult(datasetId, mapDatasetIdFKRelations, fieldVO, field);
         }
         table.setRecordSchema(record);
       }
@@ -360,6 +359,27 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
     schemasRepository.updateSchemaDocument(schema);
 
     return dictionaryOriginTargetObjectId;
+  }
+
+
+  /**
+   * Map link result.
+   *
+   * @param datasetId the dataset id
+   * @param mapDatasetIdFKRelations the map dataset id FK relations
+   * @param fieldVO the field VO
+   * @param field the field
+   */
+  private void mapLinkResult(Long datasetId, Map<Long, List<FieldSchemaVO>> mapDatasetIdFKRelations,
+      FieldSchemaVO fieldVO, FieldSchema field) {
+    if (DataType.LINK.equals(field.getType())) {
+      List<FieldSchemaVO> listFK = new ArrayList<>();
+      if (mapDatasetIdFKRelations.containsKey(datasetId)) {
+        listFK = mapDatasetIdFKRelations.get(datasetId);
+      }
+      listFK.add(fieldVO);
+      mapDatasetIdFKRelations.put(datasetId, listFK);
+    }
   }
 
 
@@ -384,15 +404,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
           field.setIdRecord(dictionaryOriginTargetObjectId.get(field.getIdRecord()));
         }
         if (field.getReferencedField() != null) {
-          if (dictionaryOriginTargetObjectId
-              .containsKey(field.getReferencedField().getIdDatasetSchema())) {
-            field.getReferencedField().setIdDatasetSchema(dictionaryOriginTargetObjectId
-                .get(field.getReferencedField().getIdDatasetSchema()));
-          }
-          if (dictionaryOriginTargetObjectId.containsKey(field.getReferencedField().getIdPk())) {
-            field.getReferencedField()
-                .setIdPk(dictionaryOriginTargetObjectId.get(field.getReferencedField().getIdPk()));
-          }
+          referenceFieldDictionary(dictionaryOriginTargetObjectId, field);
         }
         // with the fieldVO updated with the objectIds of the cloned dataset, we modify the field to
         // update all the things
@@ -400,6 +412,26 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         dataschemaController.updateFieldSchema(datasetId, field);
       }
     });
+  }
+
+
+  /**
+   * Reference field dictionary.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param field the field
+   */
+  private void referenceFieldDictionary(Map<String, String> dictionaryOriginTargetObjectId,
+      FieldSchemaVO field) {
+    if (dictionaryOriginTargetObjectId
+        .containsKey(field.getReferencedField().getIdDatasetSchema())) {
+      field.getReferencedField().setIdDatasetSchema(
+          dictionaryOriginTargetObjectId.get(field.getReferencedField().getIdDatasetSchema()));
+    }
+    if (dictionaryOriginTargetObjectId.containsKey(field.getReferencedField().getIdPk())) {
+      field.getReferencedField()
+          .setIdPk(dictionaryOriginTargetObjectId.get(field.getReferencedField().getIdPk()));
+    }
   }
 
 

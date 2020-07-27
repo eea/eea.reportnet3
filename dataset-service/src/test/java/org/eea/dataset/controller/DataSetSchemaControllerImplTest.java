@@ -463,7 +463,6 @@ public class DataSetSchemaControllerImplTest {
 
   }
 
-
   /**
    * Update table schema test.
    *
@@ -471,7 +470,6 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test
   public void updateTableSchemaTest() throws EEAException {
-    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     dataSchemaControllerImpl.updateTableSchema(1L, new TableSchemaVO());
     Mockito.verify(dataschemaService, times(1)).updateTableSchema(Mockito.any(), Mockito.any());
   }
@@ -483,7 +481,6 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void updateTableSchemaTestException() throws EEAException {
-    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     doThrow(EEAException.class).when(dataschemaService).updateTableSchema(Mockito.any(),
         Mockito.any());
     try {

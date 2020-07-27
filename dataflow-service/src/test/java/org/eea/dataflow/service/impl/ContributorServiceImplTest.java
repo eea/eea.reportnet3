@@ -2,17 +2,15 @@ package org.eea.dataflow.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.contributor.ContributorVO;
-import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
@@ -50,9 +48,9 @@ public class ContributorServiceImplTest {
   @Mock
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
-  /** The dataflow controlle zuul. */
+  /** The data set metabase controller zuul. */
   @Mock
-  private DataFlowControllerZuul dataflowControllerZuul;
+  private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /** The contributor VO write. */
   private ContributorVO contributorVOWrite;
@@ -60,8 +58,6 @@ public class ContributorServiceImplTest {
   /** The contributor VO read. */
   private ContributorVO contributorVORead;
 
-  /** The dataflow VO. */
-  private DataFlowVO dataflowVO;
 
   /** The design datasets. */
   private List<DesignDatasetVO> designDatasets;
@@ -89,8 +85,6 @@ public class ContributorServiceImplTest {
     contributorVORead.setRole("EDITOR");
     contributorVORead.setWritePermission(false);
 
-    dataflowVO = new DataFlowVO();
-    dataflowVO.setId(1L);
     designDatasets = new ArrayList<>();
     reportingDatasets = new ArrayList<>();
     listUserWrite = new ArrayList<>();
@@ -103,59 +97,9 @@ public class ContributorServiceImplTest {
     reportingDatasetVO.setDataProviderId(1L);
     reportingDatasetVO.setId(1L);
     reportingDatasets.add(reportingDatasetVO);
-    dataflowVO.setReportingDatasets(reportingDatasets);
-    dataflowVO.setDesignDatasets(designDatasets);
     listUserWrite.add(new UserRepresentationVO());
     MockitoAnnotations.initMocks(this);
   }
-
-  /**
-   * Insert document exception 1 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void createAssociatedPermissionsEmpty() throws EEAException {
-    List<UserRepresentationVO> usersEditorRead = new ArrayList();
-    List<UserRepresentationVO> usersEditorWrite = new ArrayList();
-    when(userManagementControllerZull
-        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_EDITOR_READ.getGroupName(1L)))
-            .thenReturn(usersEditorRead);
-    when(userManagementControllerZull
-        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(1L)))
-            .thenReturn(usersEditorWrite);
-    contributorServiceImpl.createAssociatedPermissions(1L, 1L);
-    Mockito.verify(userManagementControllerZull, times(2)).getUsersByGroup((Mockito.any()));
-  }
-
-  /**
-   * Creates the associated permissions filled.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void createAssociatedPermissionsFilled() throws EEAException {
-    List<UserRepresentationVO> usersEditorRead = new ArrayList();
-    UserRepresentationVO userRepresentationVORead = new UserRepresentationVO();
-    userRepresentationVORead.setEmail("reportnet@reportnet.net");
-    usersEditorRead.add(userRepresentationVORead);
-    List<UserRepresentationVO> usersEditorWrite = new ArrayList();
-    UserRepresentationVO userRepresentationVOWrite = new UserRepresentationVO();
-    userRepresentationVOWrite.setEmail("reportnet@reportnet.net");
-    usersEditorWrite.add(userRepresentationVOWrite);
-    when(userManagementControllerZull
-        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_EDITOR_READ.getGroupName(1L)))
-            .thenReturn(usersEditorRead);
-    when(userManagementControllerZull
-        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(1L)))
-            .thenReturn(usersEditorWrite);
-    doNothing().when(resourceManagementControllerZull).createResource(Mockito.any());
-    contributorServiceImpl.createAssociatedPermissions(1L, 1L);
-    Mockito.verify(userManagementControllerZull, times(1))
-        .addContributorsToResources(Mockito.any());
-  }
-
-
 
   /**
    * Delete contributor editor.
@@ -164,7 +108,8 @@ public class ContributorServiceImplTest {
    */
   @Test
   public void deleteContributorEditor() throws EEAException {
-    when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
+    when(dataSetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(1L))
+        .thenReturn(designDatasets);
     contributorServiceImpl.deleteContributor(1L, "reportnet@reportnet.net", "EDITOR", 1L);
     Mockito.verify(userManagementControllerZull, times(1))
         .removeContributorsFromResources(Mockito.any());
@@ -178,7 +123,8 @@ public class ContributorServiceImplTest {
    */
   @Test
   public void deleteContributorReport() throws EEAException {
-    when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
+    when(dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(1L))
+        .thenReturn(reportingDatasets);
     contributorServiceImpl.deleteContributor(1L, "reportnet@reportnet.net", "REPORTER", 1L);
     Mockito.verify(userManagementControllerZull, times(1))
         .removeContributorsFromResources(Mockito.any());
@@ -192,14 +138,10 @@ public class ContributorServiceImplTest {
    */
   @Test
   public void createContributorEditorRead() throws EEAException {
-    when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
-    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
-    when(resourceManagementControllerZull.getResourceDetail(1L,
-        ResourceGroupEnum.DATAFLOW_EDITOR_READ)).thenReturn(resourceInfoVO);
-    when(resourceManagementControllerZull.getResourceDetail(1L,
-        ResourceGroupEnum.DATASCHEMA_EDITOR_READ)).thenReturn(resourceInfoVO);
-    contributorServiceImpl.createContributor(1L, contributorVORead, "EDITOR");
-    Mockito.verify(dataflowControllerZuul, times(1)).findById(1L);
+    when(dataSetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(1L))
+        .thenReturn(designDatasets);
+    contributorServiceImpl.createContributor(1L, contributorVORead, "EDITOR", null);
+    Mockito.verify(dataSetMetabaseControllerZuul, times(1)).findDesignDataSetIdByDataflowId(1L);
   }
 
   /**
@@ -209,15 +151,10 @@ public class ContributorServiceImplTest {
    */
   @Test()
   public void createContributorEditorWrite() throws EEAException {
-    when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
-    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
-    when(resourceManagementControllerZull.getResourceDetail(1L,
-        ResourceGroupEnum.DATAFLOW_EDITOR_WRITE)).thenReturn(resourceInfoVO);
-    when(resourceManagementControllerZull.getResourceDetail(1L,
-        ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE)).thenReturn(resourceInfoVO);
-    contributorServiceImpl.createContributor(1L, contributorVOWrite, "EDITOR");
-
-    Mockito.verify(dataflowControllerZuul, times(1)).findById(1L);
+    when(dataSetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(1L))
+        .thenReturn(designDatasets);
+    contributorServiceImpl.createContributor(1L, contributorVOWrite, "EDITOR", null);
+    Mockito.verify(dataSetMetabaseControllerZuul, times(1)).findDesignDataSetIdByDataflowId(1L);
   }
 
   /**
@@ -227,16 +164,16 @@ public class ContributorServiceImplTest {
    */
   @Test
   public void createContributorReportRead() throws EEAException {
-    when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
+    when(dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(1L))
+        .thenReturn(reportingDatasets);
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
     when(resourceManagementControllerZull.getResourceDetail(1L,
         ResourceGroupEnum.DATAFLOW_REPORTER_READ)).thenReturn(resourceInfoVO);
     when(resourceManagementControllerZull.getResourceDetail(1L,
         ResourceGroupEnum.DATASCHEMA_REPORTER_READ)).thenReturn(resourceInfoVO);
-    contributorServiceImpl.createContributor(1L, contributorVORead, "REPORTER");
-    Mockito.verify(dataflowControllerZuul, times(1)).findById(1L);
+    contributorServiceImpl.createContributor(1L, contributorVORead, "REPORTER", 1L);
+    Mockito.verify(dataSetMetabaseControllerZuul, times(1)).findReportingDataSetIdByDataflowId(1L);
   }
-
 
   /**
    * Update contributor.
@@ -253,14 +190,10 @@ public class ContributorServiceImplTest {
     resourceAccessVOs.add(resourceAccessVO);
     when(userManagementControllerZull.getResourcesByUserEmail(Mockito.any()))
         .thenReturn(resourceAccessVOs);
-    when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
-    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
-    when(resourceManagementControllerZull.getResourceDetail(1L,
-        ResourceGroupEnum.DATAFLOW_EDITOR_WRITE)).thenReturn(resourceInfoVO);
-    when(resourceManagementControllerZull.getResourceDetail(1L,
-        ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE)).thenReturn(resourceInfoVO);
+    when(dataSetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(1L))
+        .thenReturn(designDatasets);
     contributorServiceImpl.updateContributor(1L, contributorVOWrite, "EDITOR", 1l);
-    Mockito.verify(dataflowControllerZuul, times(2)).findById(1L);
+    Mockito.verify(dataSetMetabaseControllerZuul, times(2)).findDesignDataSetIdByDataflowId(1L);
   }
 
   /**
@@ -278,7 +211,8 @@ public class ContributorServiceImplTest {
     resourceAccessVOs.add(resourceAccessVO);
     when(userManagementControllerZull.getResourcesByUserEmail(Mockito.any()))
         .thenReturn(resourceAccessVOs);
-    when(dataflowControllerZuul.findById(1L)).thenReturn(dataflowVO);
+    when(dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(1L))
+        .thenReturn(reportingDatasets);
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
     resourceInfoVO.setName("name");
     when(resourceManagementControllerZull.getResourceDetail(Mockito.any(), Mockito.any()))
@@ -286,7 +220,7 @@ public class ContributorServiceImplTest {
     when(resourceManagementControllerZull.getResourceDetail(Mockito.any(), Mockito.any()))
         .thenReturn(resourceInfoVO);
     contributorServiceImpl.updateContributor(1L, contributorVOWrite, "REPORTER", 1l);
-    Mockito.verify(dataflowControllerZuul, times(1)).findById(1L);
+    Mockito.verify(dataSetMetabaseControllerZuul, times(1)).findReportingDataSetIdByDataflowId(1L);
   }
 
   /**
@@ -294,7 +228,6 @@ public class ContributorServiceImplTest {
    */
   @Test
   public void findContributorsByResourceIdEditorTest() {
-    when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
     assertNotNull(contributorServiceImpl.findContributorsByResourceId(1L, 1L, "EDITOR"));
   }
 
@@ -304,7 +237,8 @@ public class ContributorServiceImplTest {
   @Test
   public void findContributorsByResourceIdReporterTest() {
     reportingDatasets.get(0).setDataProviderId(2L);
-    when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
+    when(dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(Mockito.any()))
+        .thenReturn(reportingDatasets);
     when(userManagementControllerZull.getUsersByGroup(Mockito.any())).thenReturn(listUserWrite);
     assertNotNull(contributorServiceImpl.findContributorsByResourceId(1L, 1L, "REPORTER"));
   }
@@ -323,5 +257,61 @@ public class ContributorServiceImplTest {
       assertEquals("Role LEAD_REPORTER doesn't exist", ex.getReason());
       throw ex;
     }
+  }
+
+  /**
+   * Insert document exception 1 test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createAssociatedPermissionsEmpty() throws EEAException {
+    List<UserRepresentationVO> usersEmpty = new ArrayList();
+    when(userManagementControllerZull
+        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_EDITOR_READ.getGroupName(1L)))
+            .thenReturn(usersEmpty);
+    when(userManagementControllerZull
+        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(1L)))
+            .thenReturn(usersEmpty);
+    when(userManagementControllerZull
+        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(1L)))
+            .thenReturn(usersEmpty);
+    contributorServiceImpl.createAssociatedPermissions(1L, 1L);
+    Mockito.verify(userManagementControllerZull, times(3)).getUsersByGroup((Mockito.any()));
+  }
+
+
+
+  /**
+   * Creates the associated permissions filled.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createAssociatedPermissionsFilled() throws EEAException {
+    List<UserRepresentationVO> usersEditorRead = new ArrayList<>();
+    UserRepresentationVO userRepresentationVORead = new UserRepresentationVO();
+    userRepresentationVORead.setEmail("reportnet@reportnet.net");
+    usersEditorRead.add(userRepresentationVORead);
+    List<UserRepresentationVO> usersEditorWrite = new ArrayList<>();
+    UserRepresentationVO userRepresentationVOWrite = new UserRepresentationVO();
+    userRepresentationVOWrite.setEmail("reportnet@reportnet.net");
+    usersEditorWrite.add(userRepresentationVOWrite);
+    List<UserRepresentationVO> usersCustodian = new ArrayList<>();
+    UserRepresentationVO userRepresentationVOCustodian = new UserRepresentationVO();
+    userRepresentationVOCustodian.setEmail("reportnet@reportnet.net");
+    usersCustodian.add(userRepresentationVOWrite);
+    when(userManagementControllerZull
+        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_EDITOR_READ.getGroupName(1L)))
+            .thenReturn(usersEditorRead);
+    when(userManagementControllerZull
+        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(1L)))
+            .thenReturn(usersEditorWrite);
+    when(userManagementControllerZull
+        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(1L)))
+            .thenReturn(usersCustodian);
+    contributorServiceImpl.createAssociatedPermissions(1L, 1L);
+    Mockito.verify(userManagementControllerZull, times(1))
+        .addContributorsToResources(Mockito.any());
   }
 }
