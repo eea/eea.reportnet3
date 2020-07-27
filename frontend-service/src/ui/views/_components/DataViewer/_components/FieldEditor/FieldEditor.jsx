@@ -269,8 +269,8 @@ const FieldEditor = ({
           // />
           <Calendar
             onChange={e => {
-              onEditorValueChange(cells, formatDate(e.target.value, isNil(e.target.value)));
-              onEditorSubmitValue(cells, formatDate(e.target.value, isNil(e.target.value)));
+              onEditorValueChange(cells, formatDate(e.target.value, isNil(e.target.value)), record);
+              onEditorSubmitValue(cells, formatDate(e.target.value, isNil(e.target.value)), record);
             }}
             onFocus={e => onEditorValueFocus(cells, formatDate(e.target.value, isNil(e.target.value)))}
             appendTo={document.body}
