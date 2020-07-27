@@ -1,5 +1,4 @@
 export const dataflowDataReducer = (state, { type, payload }) => {
-  // console.log('type', type, 'payload', payload);
   switch (type) {
     case 'INITIAL_LOAD':
       return { ...state, ...payload };

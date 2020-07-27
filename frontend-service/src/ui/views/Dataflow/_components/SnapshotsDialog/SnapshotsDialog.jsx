@@ -38,9 +38,6 @@ export const SnapshotsDialog = ({
   const [snapshotDescription, setSnapshotDescription] = useState();
   const [snapshotsListData, setSnapshotsListData] = useState([]);
 
-  console.log('datasetId', datasetId);
-  console.log('datasetName', datasetName);
-
   useCheckNotifications(
     [
       'ADD_DATASET_SNAPSHOT_FAILED_EVENT',
