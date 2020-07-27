@@ -33,7 +33,14 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { getExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getExpressionString';
 
 const TabsValidations = withRouter(
-  ({ dataset, datasetSchemaAllTables, datasetSchemaId, onHideValidationsDialog, reporting = false }) => {
+  ({
+    dataset,
+    datasetSchemaAllTables,
+    datasetSchemaId,
+    onHideValidationsDialog,
+    reporting = false,
+    setHasValidations
+  }) => {
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
     const validationContext = useContext(ValidationContext);
@@ -46,6 +53,10 @@ const TabsValidations = withRouter(
       validationId: '',
       validationList: {}
     });
+
+    useEffect(() => {
+      setHasValidations(!checkIsEmptyValidations());
+    }, [tabsValidationsState.validationList]);
 
     useEffect(() => {
       onLoadValidationsList(datasetSchemaId);
@@ -338,11 +349,14 @@ const TabsValidations = withRouter(
 
     const validationId = value => tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_ID', payload: { value } });
 
+    const checkIsEmptyValidations = () =>
+      isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList);
+
     const validationList = () => {
-      if (isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList)) {
+      if (checkIsEmptyValidations()) {
         return (
           <div>
-            <h3>{resources.messages['emptyValidations']}</h3>
+            <div className={styles.noValidations}>{resources.messages['emptyValidations']}</div>
           </div>
         );
       }
@@ -404,7 +418,7 @@ const TabsValidations = withRouter(
     if (tabsValidationsState.isLoading) return <Spinner className={styles.positioning} />;
 
     return (
-      <div className={styles.validations}>
+      <div className={checkIsEmptyValidations() ? styles.noValidations : styles.validations}>
         {validationList()}
         {tabsValidationsState.isDeleteDialogVisible && deleteValidationDialog()}
       </div>
