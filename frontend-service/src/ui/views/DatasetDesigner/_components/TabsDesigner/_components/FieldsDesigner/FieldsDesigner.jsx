@@ -66,7 +66,7 @@ export const FieldsDesigner = ({
       setTableDescriptionValue(table.description || '');
       setIsReadOnlyTable(table.readOnly || false);
       setToPrefill(table.toPrefill || false);
-      setNotEmpty(table.notEmpty || true);
+      table.notEmpty === false ? setNotEmpty(false) : setNotEmpty(true);
     }
   }, []);
 
@@ -534,7 +534,6 @@ export const FieldsDesigner = ({
               {resources.messages['readOnlyTable']}
             </label>
           </div>
-          {console.log({ table })}
           <div>
             <span className={styles.switchTextInput}>{resources.messages['prefilled']}</span>
             <Checkbox

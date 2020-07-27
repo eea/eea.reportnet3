@@ -123,10 +123,6 @@ const MainLayout = ({ children }) => {
     setMainContentStyle(newMainContentStyle);
   };
 
-  useEffect(() => {
-    console.log('leftSideBarStyle', leftSideBarStyle);
-  }, [leftSideBarStyle]);
-
   useSocket();
   return (
     <div id={styles.mainLayoutContainer}>
