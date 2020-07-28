@@ -163,7 +163,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         history.push(getUrl(routes.SETTINGS));
       }}>
       <img
-        alt="User avatar"
+        alt="User image"
         className={styles.userAvatar}
         icon={
           <FontAwesomeIcon aria-hidden={false} icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />

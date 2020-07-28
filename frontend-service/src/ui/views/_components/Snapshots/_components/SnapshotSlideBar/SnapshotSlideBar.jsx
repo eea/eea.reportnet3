@@ -35,7 +35,20 @@ const SnapshotSlideBar = ({
 
   useEffect(() => {
     showScrollingBar();
-  }, [isVisible, isSnapshotDialogVisible]);
+  }, [slideBarStyle]);
+
+  useEffect(() => {
+    window.addEventListener('resize', resetSlideBarPositionAndSize);
+    return () => {
+      window.removeEventListener('resize', resetSlideBarPositionAndSize);
+    };
+  });
+
+  const showScrollingBar = () => {
+    const bodySelector = document.querySelector('body');
+
+    isVisible ? (bodySelector.style.overflow = 'hidden') : (bodySelector.style.overflow = 'hidden auto');
+  };
 
   const resetSlideBarPositionAndSize = () => {
     const documentElement = document.compatMode === 'CSS1Compat' ? document.documentElement : document.body;
@@ -46,12 +59,6 @@ const SnapshotSlideBar = ({
       height: `${documentElement.clientHeight - headerHeight}px`,
       top: `${headerHeight}px`
     });
-  };
-
-  const showScrollingBar = () => {
-    const bodySelector = document.querySelector('body');
-
-    isVisible ? (bodySelector.style.overflow = 'hidden') : (bodySelector.style.overflow = 'hidden auto');
   };
 
   const snapshotValidationSchema = Yup.object().shape({
@@ -107,7 +114,7 @@ const SnapshotSlideBar = ({
                   </label>
                   <div className={styles.createButtonWrapper}>
                     <Button
-                      className={styles.createSnapshotButton}
+                      className={`${styles.createSnapshotButton} rp-btn secondary`}
                       tooltip={resources.messages.createSnapshotTooltip}
                       type="submit"
                       icon="plus"

@@ -18,7 +18,6 @@ export const parseDataValidationRulesDTO = validations => {
       let newExpressionsThen = [];
       let newAllExpressionsThen = [];
       let newRelations = {};
-
       entityTypes.push(validationDTO.type);
 
       if (validationDTO.type === 'FIELD') {

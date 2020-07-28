@@ -301,6 +301,7 @@ const schemaById = async datasetId => {
       tableSchemaId: datasetTableDTO.idTableSchema,
       tableSchemaDescription: datasetTableDTO.description,
       tableSchemaName: datasetTableDTO.nameTableSchema,
+      tableSchemaNotEmpty: isNull(datasetTableDTO.notEmpty) ? false : datasetTableDTO.notEmpty,
       tableSchemaReadOnly: isNull(datasetTableDTO.readOnly) ? false : datasetTableDTO.readOnly,
       records: records,
       recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null
@@ -434,14 +435,16 @@ const updateTableDescriptionDesign = async (
   tableSchemaId,
   tableSchemaDescription,
   tableSchemaIsReadOnly,
-  datasetId
+  datasetId,
+  tableSchemaNotEmpty
 ) => {
   const tableSchemaUpdated = await apiDataset.updateTableDescriptionDesign(
     tableSchemaToPrefill,
     tableSchemaId,
     tableSchemaDescription,
     tableSchemaIsReadOnly,
-    datasetId
+    datasetId,
+    tableSchemaNotEmpty
   );
   return tableSchemaUpdated;
 };
