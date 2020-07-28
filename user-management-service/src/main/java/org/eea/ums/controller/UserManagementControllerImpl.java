@@ -69,6 +69,10 @@ public class UserManagementControllerImpl implements UserManagementController {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant ERROR_ADDING_CONTRIBUTOR. */
+  private static final String ERROR_ADDING_CONTRIBUTOR =
+      "Error adding contributor to resource. Message: {}";
+
   /**
    * Generate token.
    *
@@ -119,6 +123,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/checkAccess")
   public Boolean checkResourceAccessPermission(@RequestParam("resource") String resource,
       @RequestParam("scopes") AccessScopeEnum[] scopes) {
@@ -132,6 +137,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/resources")
   public List<ResourceAccessVO> getResourcesByUser() {
     // Recover user id from Security context
@@ -152,6 +158,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/resources_by_type")
   public List<ResourceAccessVO> getResourcesByUser(
       @RequestParam("resourceType") ResourceTypeEnum resourceType) {
@@ -168,6 +175,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/resources_by_role")
   public List<ResourceAccessVO> getResourcesByUser(
       @RequestParam("securityRole") SecurityRoleEnum securityRole) {
@@ -184,6 +192,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/resources_by_type_role")
   public List<ResourceAccessVO> getResourcesByUser(
       @RequestParam("resourceType") ResourceTypeEnum resourceType,
@@ -210,6 +219,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param resourceGroupEnum the resource group enum
    */
   @Override
+  @PreAuthorize("isAuthenticated()")
   @PutMapping("/add_user_to_resource")
   public void addUserToResource(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum) {
@@ -248,6 +258,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @PostMapping("/createUsers")
   public void createUsers(@RequestBody MultipartFile file) {
     try {
@@ -281,6 +292,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/getUserByEmail")
   public UserRepresentationVO getUserByEmail(@RequestParam("email") String email) {
     UserRepresentationVO user = null;
@@ -299,6 +311,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/getUserByUserId")
   public UserRepresentationVO getUserByUserId(@RequestParam("userId") String userId) {
     UserRepresentationVO userVO = null;
@@ -366,6 +379,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param userMail the user mail
    */
   @Override
+  @PreAuthorize("isAuthenticated()")
   @PutMapping("/add_contributor_to_resource")
   public void addContributorToResource(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum,
@@ -374,7 +388,7 @@ public class UserManagementControllerImpl implements UserManagementController {
       securityProviderInterfaceService.addContributorToUserGroup(null, userMail,
           resourceGroupEnum.getGroupName(idResource));
     } catch (EEAException e) {
-      LOG_ERROR.error("Error adding contributor to resource. Message: {}", e.getMessage(), e);
+      LOG_ERROR.error(ERROR_ADDING_CONTRIBUTOR, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
     }
@@ -388,6 +402,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param userMail the user mail
    */
   @Override
+  @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/remove_contributor_from_resource")
   public void removeContributorFromResource(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum,
@@ -396,7 +411,7 @@ public class UserManagementControllerImpl implements UserManagementController {
       securityProviderInterfaceService.removeContributorFromUserGroup(null, userMail,
           resourceGroupEnum.getGroupName(idResource));
     } catch (EEAException e) {
-      LOG_ERROR.error("Error adding contributor to resource. Message: {}", e.getMessage(), e);
+      LOG_ERROR.error(ERROR_ADDING_CONTRIBUTOR, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
     }
@@ -408,12 +423,13 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param resources the resources
    */
   @Override
+  @PreAuthorize("isAuthenticated()")
   @PutMapping("/add_contributors_to_resources")
   public void addContributorsToResources(@RequestBody List<ResourceAssignationVO> resources) {
     try {
       securityProviderInterfaceService.addContributorsToUserGroup(resources);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error adding contributor to resource. Message: {}", e.getMessage(), e);
+      LOG_ERROR.error(ERROR_ADDING_CONTRIBUTOR, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
     }
@@ -425,6 +441,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param resources the resources
    */
   @Override
+  @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/remove_contributors_from_resources")
   public void removeContributorsFromResources(@RequestBody List<ResourceAssignationVO> resources) {
     try {
@@ -442,6 +459,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param resources the resources
    */
   @Override
+  @PreAuthorize("isAuthenticated()")
   @PutMapping("/add_user_to_resources")
   public void addUserToResources(@RequestBody List<ResourceAssignationVO> resources) {
     String userId =
@@ -465,6 +483,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param resources the resources
    */
   @Override
+  @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/remove_user_from_resources")
   public void removeUserFromResources(@RequestBody List<ResourceAssignationVO> resources) {
     String userId =
@@ -491,7 +510,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_STEWARD') OR secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE')")
   @PostMapping("/createApiKey")
   public String createApiKey(@RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "dataProvider", required = false) Long dataProvider) {
@@ -518,7 +537,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_STEWARD') OR secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE')")
   @GetMapping("/getApiKey")
   public String getApiKey(@RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "dataProvider", required = false) Long dataProvider) {
@@ -538,6 +557,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/{userId}/getApiKey")
   public String getApiKey(@PathVariable("userId") String userId,
       @RequestParam("dataflowId") Long dataflowId,
@@ -596,5 +616,25 @@ public class UserManagementControllerImpl implements UserManagementController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED, e);
     }
+  }
+
+  /**
+   * Gets the resources by user email.
+   *
+   * @param email the email
+   * @return the resources by user email
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/private/resourcesByMail")
+  public List<ResourceAccessVO> getResourcesByUserEmail(String email) {
+    // Recover user id from email
+    String userId = "";
+    UserRepresentation[] users = keycloakConnectorService.getUsersByEmail(email);
+    if (users != null && users.length == 1) {
+      userId = users[0].getId();
+    }
+    return securityProviderInterfaceService.getResourcesByUser(userId);
   }
 }

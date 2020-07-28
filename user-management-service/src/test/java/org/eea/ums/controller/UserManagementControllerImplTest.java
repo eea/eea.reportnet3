@@ -661,4 +661,19 @@ public class UserManagementControllerImplTest {
       throw e;
     }
   }
+
+  @Test
+  public void getResourcesByUserEmailTest() {
+    UserRepresentation[] userList = new UserRepresentation[1];
+    UserRepresentation user = new UserRepresentation();
+    user.setId("idGroupInfo");
+    user.setUsername("Dataflow-1-DATA_CUSTODIAN");
+    userList[0] = user;
+    Mockito.when(keycloakConnectorService.getUsersByEmail(Mockito.any())).thenReturn(userList);
+    List<ResourceAccessVO> resourceList = new ArrayList<>();
+    Mockito.when(securityProviderInterfaceService.getResourcesByUser(Mockito.any()))
+        .thenReturn(resourceList);
+    assertEquals("assertion error", resourceList,
+        userManagementController.getResourcesByUserEmail("email"));
+  }
 }

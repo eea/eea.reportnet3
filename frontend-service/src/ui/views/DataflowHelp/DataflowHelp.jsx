@@ -8,7 +8,8 @@ import isUndefined from 'lodash/isUndefined';
 import sortBy from 'lodash/sortBy';
 
 import { config } from 'conf';
-import { DataflowHelpHelpConfig } from 'conf/help/dataflowHelp';
+import { DataflowHelpReporterHelpConfig } from 'conf/help/dataflowHelp/reporter';
+import { DataflowHelpRequesterHelpConfig } from 'conf/help/dataflowHelp/requester';
 import { routes } from 'ui/routes';
 
 import { DatasetSchemas } from './_components/DatasetSchemas';
@@ -53,6 +54,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isToolbarVisible, setIsToolbarVisible] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [sortFieldDocuments, setSortFieldDocuments] = useState();
   const [sortFieldWeblinks, setSortFieldWeblinks] = useState();
@@ -63,12 +65,16 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
-      console.log({ userRoles });
       setIsCustodian(
         userRoles.includes(config.permissions['DATA_CUSTODIAN']) ||
           userRoles.includes(config.permissions['DATA_STEWARD']) ||
           userRoles.includes(config.permissions['EDITOR_WRITE']) ||
           userRoles.includes(config.permissions['EDITOR_READ'])
+      );
+
+      setIsToolbarVisible(
+        userRoles.includes(config.permissions['DATA_CUSTODIAN']) ||
+          userRoles.includes(config.permissions['DATA_STEWARD'])
       );
     }
   }, [userContext]);
@@ -76,6 +82,11 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   //Bread Crumbs settings
   useEffect(() => {
     breadCrumbContext.add([
+      {
+        label: resources.messages['homeBreadcrumb'],
+        href: getUrl(routes.DATAFLOWS),
+        command: () => history.push(getUrl(routes.DATAFLOWS))
+      },
       {
         label: resources.messages['dataflows'],
         icon: 'home',
@@ -110,14 +121,11 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    leftSideBarContext.addHelpSteps(DataflowHelpHelpConfig, 'dataflowHelpHelp');
+    leftSideBarContext.addHelpSteps(
+      isCustodian ? DataflowHelpRequesterHelpConfig : DataflowHelpReporterHelpConfig,
+      'dataflowHelpHelp'
+    );
   }, [documents, webLinks, datasetsSchemas, selectedIndex]);
-
-  // useEffect(() => {
-  //   if (!isEmpty(steps)) {
-  //     leftSideBarContext.addHelpSteps('dataflowHelpHelp', steps);
-  //   }
-  // }, [steps]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -161,9 +169,8 @@ export const DataflowHelp = withRouter(({ match, history }) => {
 
   const onLoadDatasetSchema = async datasetId => {
     try {
-      console.log({ datasetId });
       const datasetSchema = await DatasetService.schemaById(datasetId);
-      console.log({ datasetSchema });
+
       if (!isEmpty(datasetSchema)) {
         if (isCustodian) {
           const datasetMetaData = await DatasetService.getMetaData(datasetId);
@@ -178,7 +185,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       //   history.push(getUrl(routes.DATAFLOWS));
       // }
       notificationContext.add({
-        type: 'LOAD_SCHEMA_FAILED_EVENT',
+        type: 'IMPORT_DESIGN_FAILED_EVENT',
         content: {
           datasetId
         }
@@ -190,7 +197,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const onLoadDatasetsSchemas = async () => {
     try {
       const dataflow = await DataflowService.reporting(dataflowId);
-      console.log({ isCustodian });
+
       if (!isCustodian) {
         if (!isEmpty(dataflow.datasets)) {
           const uniqueDatasetSchemas = dataflow.datasets.filter((dataset, pos, arr) => {
@@ -284,6 +291,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
               documents={documents}
               isCustodian={isCustodian}
               isDeletingDocument={isDeletingDocument}
+              isToolbarVisible={isToolbarVisible}
               onLoadDocuments={onLoadDocuments}
               setIsDeletingDocument={setIsDeletingDocument}
               setSortFieldDocuments={setSortFieldDocuments}
@@ -296,6 +304,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
             <WebLinks
               dataflowId={dataflowId}
               isCustodian={isCustodian}
+              isToolbarVisible={isToolbarVisible}
               onLoadWebLinks={onLoadWebLinks}
               setSortFieldWeblinks={setSortFieldWeblinks}
               setSortOrderWeblinks={setSortOrderWeblinks}

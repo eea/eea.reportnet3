@@ -40,6 +40,7 @@ import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.data.repository.TableValidationRepository;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
@@ -59,6 +60,7 @@ import org.eea.dataset.service.file.FileParseContextImpl;
 import org.eea.dataset.service.file.FileParserFactory;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
+import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -345,6 +347,10 @@ public class DatasetServiceTest {
   /** The integration controller. */
   @Mock
   private IntegrationControllerZuul integrationController;
+
+  /** The update record helper. */
+  @Mock
+  private UpdateRecordHelper updateRecordHelper;
 
   /**
    * The field value.
@@ -1298,8 +1304,9 @@ public class DatasetServiceTest {
     // Mockito.any())).thenReturn(Optional.of(partition));
     // when(reportingDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
-    when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(expectedResult);
+    when(
+        contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+            .thenReturn(expectedResult);
     assertEquals("not equals", expectedResult, datasetService.exportFile(1L, "csv", ""));
   }
 
@@ -1444,8 +1451,12 @@ public class DatasetServiceTest {
   public void testSaveStats() throws EEAException {
     DataSetSchema schema = new DataSetSchema();
     schema.setTableSchemas(new ArrayList<>());
+    DataSetMetabase dsMetabase = new DataSetMetabase();
+    dsMetabase.setDataSetName("prueba");
+    dsMetabase.setId(1L);
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    when(dataSetMetabaseRepository.findById(Mockito.any())).thenReturn(Optional.of(dsMetabase));
 
     datasetService.saveStatistics(1L);
     Mockito.verify(statisticsRepository, times(1)).saveAll(Mockito.any());
@@ -2099,7 +2110,7 @@ public class DatasetServiceTest {
     Mockito.when(designDatasetRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new DesignDataset()));
     Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
-    Mockito.when(dataflowControllerZull.findById(Mockito.any())).thenReturn(dataflow);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     assertTrue(datasetService.isDatasetReportable(1L));
   }
 
@@ -2110,7 +2121,7 @@ public class DatasetServiceTest {
     Mockito.when(designDatasetRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new DesignDataset()));
     Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
-    Mockito.when(dataflowControllerZull.findById(Mockito.any())).thenReturn(dataflow);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     assertFalse(datasetService.isDatasetReportable(1L));
   }
 
@@ -2126,7 +2137,7 @@ public class DatasetServiceTest {
     Mockito.when(reportingDatasetRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new ReportingDataset()));
     Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
-    Mockito.when(dataflowControllerZull.findById(Mockito.any())).thenReturn(dataflow);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     assertTrue(datasetService.isDatasetReportable(1L));
   }
 
@@ -2137,7 +2148,7 @@ public class DatasetServiceTest {
     Mockito.when(reportingDatasetRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new ReportingDataset()));
     Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
-    Mockito.when(dataflowControllerZull.findById(Mockito.any())).thenReturn(dataflow);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     assertFalse(datasetService.isDatasetReportable(1L));
   }
 
@@ -2175,6 +2186,7 @@ public class DatasetServiceTest {
     when(fieldRepository.findByRecord(Mockito.any())).thenReturn(fieldValues);
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(Mockito.any()))
         .thenReturn(Optional.of(new PartitionDataSetMetabase()));
+
 
     datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());

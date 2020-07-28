@@ -20,6 +20,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 export const SnapshotsDialog = ({
   dataflowId,
   datasetId,
+  datasetName,
   hideSnapshotDialog,
   isSnapshotDialogVisible,
   manageDialogs
@@ -28,6 +29,7 @@ export const SnapshotsDialog = ({
   const resources = useContext(ResourcesContext);
 
   const [isActiveReleaseSnapshotConfirmDialog, setIsActiveReleaseSnapshotConfirmDialog] = useState(false);
+  const [isCopyAndRelease, setIsCopyAndRelease] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isReleased, setIsReleased] = useState(false);
@@ -68,10 +70,12 @@ export const SnapshotsDialog = ({
     if (event.key === 'Enter' && !isEmpty(snapshotDescription)) {
       event.preventDefault();
       onShowReleaseDialog({ isReleased: true });
+      setIsCopyAndRelease(true);
     }
     if (event.key === 'Escape') {
       event.preventDefault();
       setIsSnapshotInputActive(false);
+      setIsCopyAndRelease(false);
     }
   };
 
@@ -80,6 +84,7 @@ export const SnapshotsDialog = ({
     setIsReleased(false);
     manageDialogs('isSnapshotDialogVisible', true);
     setSnapshotDescription('');
+    setIsCopyAndRelease(false);
   };
 
   const onLoadSnapshotList = async datasetId => {
@@ -113,7 +118,7 @@ export const SnapshotsDialog = ({
       <Dialog
         className={styles.releaseSnapshotsDialog}
         footer={snapshotDialogFooter}
-        header={`${resources.messages['snapshots']}`}
+        header={`${resources.messages['release']} ${datasetName}`}
         onHide={() => {
           manageDialogs('isSnapshotDialogVisible', false);
           setIsSnapshotInputActive(false);
@@ -130,7 +135,9 @@ export const SnapshotsDialog = ({
                     <Button
                       className={styles.createButton}
                       icon="plus"
-                      onClick={() => setIsSnapshotInputActive(true)}
+                      onClick={() => {
+                        setIsSnapshotInputActive(true);
+                      }}
                     />
                   </>
                 ) : (
@@ -142,6 +149,7 @@ export const SnapshotsDialog = ({
                           event.preventDefault();
                           event.isDefaultPrevented();
                           setIsSnapshotInputActive(false);
+                          setIsCopyAndRelease(false);
                         }}
                         onChange={event => setSnapshotDescription(event.target.value)}
                         onKeyDown={event => onEditorKeyChange(event)}
@@ -152,7 +160,10 @@ export const SnapshotsDialog = ({
                           className={styles.createSnapshotButton}
                           disabled={isEmpty(snapshotDescription)}
                           icon="cloudUpload"
-                          onMouseDown={() => onShowReleaseDialog({ isReleased: true })}
+                          onMouseDown={() => {
+                            setIsCopyAndRelease(true);
+                            onShowReleaseDialog({ isReleased: true });
+                          }}
                           type="submit"
                         />
                       </div>
@@ -175,6 +186,7 @@ export const SnapshotsDialog = ({
         dataflowId={dataflowId}
         datasetId={datasetId}
         hideReleaseDialog={onHideReleaseDialog}
+        isCopyAndReleaseBody={isCopyAndRelease}
         isReleased={isReleased}
         isReleasedDialogVisible={isActiveReleaseSnapshotConfirmDialog}
         onLoadSnapshotList={onLoadSnapshotList}

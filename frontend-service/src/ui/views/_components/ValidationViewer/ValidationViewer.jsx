@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { Fragment, useState, useEffect, useContext, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import capitalize from 'lodash/capitalize';
@@ -8,15 +8,15 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './ValidationViewer.module.css';
 
-import { DataTable } from 'ui/views/_components/DataTable';
-import { Column } from 'primereact/column';
-
 import { Button } from 'ui/views/_components/Button';
+import { Column } from 'primereact/column';
+import { DataTable } from 'ui/views/_components/DataTable';
 import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DatasetService } from 'core/services/Dataset';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const ValidationViewer = React.memo(
   ({
@@ -30,9 +30,10 @@ const ValidationViewer = React.memo(
     visible
   }) => {
     const resources = useContext(ResourcesContext);
+
     const [allLevelErrorsFilter, setAllLevelErrorsFilter] = useState([]);
-    const [allTypeEntitiesFilter, setAllTypeEntitiesFilter] = useState([]);
     const [allOriginsFilter, setAllOriginsFilter] = useState([]);
+    const [allTypeEntitiesFilter, setAllTypeEntitiesFilter] = useState([]);
     const [areActiveFilters, setAreActiveFilters] = useState(false);
     const [columns, setColumns] = useState([]);
     const [fetchedData, setFetchedData] = useState([]);
@@ -40,14 +41,14 @@ const ValidationViewer = React.memo(
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
     const [isFilteredTypeEntities, setIsFilteredTypeEntities] = useState(false);
-    const [levelErrorsFilter, setLevelErrorsFilter] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [levelErrorsFilter, setLevelErrorsFilter] = useState([]);
     const [numberRows, setNumberRows] = useState(10);
     const [originsFilter, setOriginsFilter] = useState([]);
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState(0);
-    const [totalRecords, setTotalRecords] = useState(0);
     const [totalFilteredRecords, setTotalFilteredRecords] = useState();
+    const [totalRecords, setTotalRecords] = useState(0);
     const [typeEntitiesFilter, setTypeEntitiesFilter] = useState([]);
 
     let dropdownLevelErrorsFilterRef = useRef();
@@ -76,12 +77,29 @@ const ValidationViewer = React.memo(
 
       let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={col.header} />);
 
-      columnsArr.push(<Column key="recordId" field="recordId" header="" className={styles.invisibleHeader} />);
       columnsArr.push(
-        <Column key="datasetPartitionId" field="datasetPartitionId" header="" className={styles.invisibleHeader} />
+        <Column
+          key="recordId"
+          field="recordId"
+          header={resources.messages['recordId']}
+          className={styles.invisibleHeader}
+        />
       );
       columnsArr.push(
-        <Column key="tableSchemaId" field="tableSchemaId" header="" className={styles.invisibleHeader} />
+        <Column
+          key="datasetPartitionId"
+          field="datasetPartitionId"
+          header={resources.messages['datasetPartitionId']}
+          className={styles.invisibleHeader}
+        />
+      );
+      columnsArr.push(
+        <Column
+          key="tableSchemaId"
+          field="tableSchemaId"
+          className={styles.invisibleHeader}
+          header={resources.messages['tableSchemaId']}
+        />
       );
 
       setColumns(columnsArr);
@@ -436,20 +454,20 @@ const ValidationViewer = React.memo(
             first={firstRow}
             lazy={true}
             loading={isLoading}
-            onRowSelect={onRowSelect}
             onPage={onChangePage}
+            onRowSelect={onRowSelect}
             onSort={onSort}
             paginator={true}
             paginatorRight={getPaginatorRecordsCount()}
-            resizableColumns={true}
             reorderableColumns={true}
+            resizableColumns={true}
             rows={numberRows}
             rowsPerPageOptions={[5, 10, 15]}
+            selectionMode="single"
             sortable={true}
             sortField={sortField}
             sortOrder={sortOrder}
             totalRecords={totalFilteredRecords}
-            selectionMode="single"
             value={fetchedData}>
             {columns}
           </DataTable>

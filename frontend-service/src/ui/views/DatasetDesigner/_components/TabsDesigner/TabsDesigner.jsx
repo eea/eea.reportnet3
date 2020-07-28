@@ -111,12 +111,13 @@ export const TabsDesigner = withRouter(
       }
     };
 
-    const onChangeTableProperties = (tableSchemaId, tableSchemaDescription, readOnly, toPrefill) => {
+    const onChangeTableProperties = (tableSchemaId, tableSchemaDescription, readOnly, toPrefill, notEmpty) => {
       const inmTabs = [...tabs];
       const tabIdx = getIndexByTableSchemaId(tableSchemaId, inmTabs);
       inmTabs[tabIdx].description = tableSchemaDescription;
       inmTabs[tabIdx].readOnly = readOnly;
       inmTabs[tabIdx].toPrefill = toPrefill;
+      inmTabs[tabIdx].notEmpty = notEmpty;
       setTabs(inmTabs);
     };
 
@@ -127,6 +128,7 @@ export const TabsDesigner = withRouter(
         inmDatasetSchema.tables.forEach((table, idx) => {
           table.addTab = false;
           table.toPrefill = table.tableSchemaToPrefill;
+          table.notEmpty = table.tableSchemaNotEmpty;
           table.description = table.tableSchemaDescription;
           table.editable = editable;
           table.hasErrors =
@@ -290,7 +292,9 @@ export const TabsDesigner = withRouter(
       if (tableDeleted) {
         const inmTabs = [...tabs];
         inmTabs.splice(deletedTabIndx, 1);
-        inmTabs.forEach((tab, i) => (tab.index = !tab.addTab ? i : -1));
+        inmTabs.forEach(tab => {
+          if (tab.addTab) tab.index = -1;
+        });
         if (activeIndex === deletedTabIndx) {
           setActiveIndex(0);
         } else {

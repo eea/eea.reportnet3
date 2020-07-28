@@ -30,8 +30,17 @@ import { tabsValidationsReducer } from './Reducers/tabsValidationsReducer';
 
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
+import { getExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getExpressionString';
+
 const TabsValidations = withRouter(
-  ({ dataset, datasetSchemaAllTables, datasetSchemaId, onHideValidationsDialog, reporting = false }) => {
+  ({
+    dataset,
+    datasetSchemaAllTables,
+    datasetSchemaId,
+    onHideValidationsDialog,
+    reporting = false,
+    setHasValidations
+  }) => {
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
     const validationContext = useContext(ValidationContext);
@@ -44,6 +53,10 @@ const TabsValidations = withRouter(
       validationId: '',
       validationList: {}
     });
+
+    useEffect(() => {
+      setHasValidations(!checkIsEmptyValidations());
+    }, [tabsValidationsState.validationList]);
 
     useEffect(() => {
       onLoadValidationsList(datasetSchemaId);
@@ -92,6 +105,7 @@ const TabsValidations = withRouter(
             );
             validation.table = additionalInfo.tableName || '';
             validation.field = additionalInfo.fieldName || '';
+            validation.fieldName = additionalInfo.fieldName || '';
           });
         }
 
@@ -134,11 +148,16 @@ const TabsValidations = withRouter(
       </div>
     );
 
+    const expressionsTemplate = rowData => getExpressionString(rowData, datasetSchemaAllTables);
+
     const getAdditionalValidationInfo = (referenceId, entityType, relations) => {
       const additionalInfo = {};
       datasetSchemaAllTables.forEach(table => {
         if (!isUndefined(table.records)) {
-          if (entityType.toUpperCase() === 'TABLE' || entityType.toUpperCase() === 'RECORD') {
+          if (entityType.toUpperCase() === 'TABLE') {
+            if (table.tableSchemaId === referenceId)
+              additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
+          } else if (entityType.toUpperCase() === 'RECORD') {
             additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
           } else if (entityType.toUpperCase() === 'FIELD' || entityType.toUpperCase() === 'DATASET') {
             table.records.forEach(record =>
@@ -202,15 +221,16 @@ const TabsValidations = withRouter(
         { id: 'name', index: 4 },
         { id: 'description', index: 5 },
         { id: 'message', index: 6 },
-        { id: 'entityType', index: 7 },
-        { id: 'levelError', index: 8 },
-        { id: 'automatic', index: 9 },
-        { id: 'enabled', index: 10 },
-        { id: 'referenceId', index: 11 },
-        { id: 'activationGroup', index: 12 },
-        { id: 'date', index: 13 },
-        { id: 'actionButtons', index: 14 },
-        { id: 'isCorrect', index: 15 }
+        { id: 'expressions', index: 7 },
+        { id: 'entityType', index: 8 },
+        { id: 'levelError', index: 9 },
+        { id: 'automatic', index: 10 },
+        { id: 'enabled', index: 11 },
+        { id: 'referenceId', index: 12 },
+        { id: 'activationGroup', index: 13 },
+        { id: 'date', index: 14 },
+        { id: 'actionButtons', index: 15 },
+        { id: 'isCorrect', index: 16 }
       ];
 
       return validations
@@ -311,6 +331,7 @@ const TabsValidations = withRouter(
         if (field === 'enabled') template = enabledTemplate;
         if (field === 'isCorrect') template = correctTemplate;
         if (field === 'levelError') template = levelErrorTemplate;
+        if (field === 'expressions') template = expressionsTemplate;
         return (
           <Column
             body={template}
@@ -331,11 +352,14 @@ const TabsValidations = withRouter(
 
     const validationId = value => tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_ID', payload: { value } });
 
+    const checkIsEmptyValidations = () =>
+      isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList);
+
     const validationList = () => {
-      if (isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList)) {
+      if (checkIsEmptyValidations()) {
         return (
           <div>
-            <h3>{resources.messages['emptyValidations']}</h3>
+            <div className={styles.noValidations}>{resources.messages['emptyValidations']}</div>
           </div>
         );
       }
@@ -397,7 +421,7 @@ const TabsValidations = withRouter(
     if (tabsValidationsState.isLoading) return <Spinner className={styles.positioning} />;
 
     return (
-      <div className={styles.validations}>
+      <div className={checkIsEmptyValidations() ? styles.noValidations : styles.validations}>
         {validationList()}
         {tabsValidationsState.isDeleteDialogVisible && deleteValidationDialog()}
       </div>

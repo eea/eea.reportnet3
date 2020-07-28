@@ -48,6 +48,43 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
+   * Gets the by id.
+   *
+   * @param idSnapshot the id snapshot
+   * @return the by id
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/{idSnapshot}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("isAuthenticated()")
+  public SnapshotVO getById(@PathVariable("idSnapshot") Long idSnapshot) {
+    SnapshotVO snapshot = null;
+    try {
+      snapshot = datasetSnapshotService.getById(idSnapshot);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error getting the snapshot. Error message: {}", e.getMessage(), e);
+    }
+    return snapshot;
+  }
+
+
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/schemaSnapshot/{idSnapshot}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("isAuthenticated()")
+  public SnapshotVO getSchemaById(@PathVariable("idSnapshot") Long idSnapshot) {
+    SnapshotVO snapshot = null;
+    try {
+      snapshot = datasetSnapshotService.getSchemaById(idSnapshot);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error getting the snapshot schema. ", e.getMessage(), e);
+    }
+    return snapshot;
+  }
+
+
+  /**
    * Gets the snapshots by id dataset.
    *
    * @param datasetId the dataset id
@@ -69,7 +106,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       snapshots = datasetSnapshotService.getSnapshotsByIdDataset(datasetId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error getting the list of snapshots. ", e.getMessage(), e);
+      LOG_ERROR.error("Error getting the list of snapshots. Error Message: {}", e.getMessage(), e);
     }
     return snapshots;
   }
@@ -87,14 +124,15 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE')")
   public void createSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
-      @RequestBody CreateSnapshotVO createSnapshot) {
+      @LockCriteria(name = "released",
+          path = "released") @RequestBody CreateSnapshotVO createSnapshot) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     // This method will release the lock
     datasetSnapshotService.addSnapshot(datasetId, createSnapshot.getDescription(),
-        createSnapshot.getReleased());
+        createSnapshot.getReleased(), null);
   }
 
   /**
@@ -106,7 +144,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{idSnapshot}/dataset/{idDataset}/delete")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE') AND checkPermission('Dataset','MANAGE_DATA')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATACOLLECTION_CUSTODIAN')")
   public void deleteSnapshot(@PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
 
@@ -117,7 +155,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       datasetSnapshotService.removeSnapshot(datasetId, idSnapshot);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error deleting a snapshot. ", e.getMessage(), e);
+      LOG_ERROR.error("Error deleting a snapshot. Error Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.USER_REQUEST_NOTFOUND, e);
     }
@@ -134,7 +172,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @LockMethod(removeWhenFinish = false)
   @PostMapping(value = "/{idSnapshot}/dataset/{idDataset}/restore",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE') AND checkPermission('Dataset','MANAGE_DATA')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE')")
   public void restoreSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
@@ -150,7 +188,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       // This method will release the lock
       datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot, true);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error restoring a snapshot. ", e.getMessage(), e);
+      LOG_ERROR.error("Error restoring a snapshot. Error Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID, e);
     }
@@ -168,8 +206,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER')")
   @LockMethod(removeWhenFinish = false)
-  public void releaseSnapshot(@PathVariable("idDataset") Long datasetId,
-      @LockCriteria(name = "snapshotId") @PathVariable("idSnapshot") Long idSnapshot) {
+  public void releaseSnapshot(
+      @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
+      @PathVariable("idSnapshot") Long idSnapshot) {
 
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
@@ -179,7 +218,12 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    datasetSnapshotService.releaseSnapshot(datasetId, idSnapshot);
+    try {
+      datasetSnapshotService.releaseSnapshot(datasetId, idSnapshot);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error releasing a snapshot. Error Message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
+    }
   }
 
   /**
@@ -204,7 +248,8 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       snapshots = datasetSnapshotService.getSchemaSnapshotsByIdDataset(datasetId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error getting the list of schema snapshots. ", e.getMessage(), e);
+      LOG_ERROR.error("Error getting the list of schema snapshots. Error message: {}",
+          e.getMessage(), e);
     }
     return snapshots;
   }
@@ -261,7 +306,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       // This method will release the lock
       datasetSnapshotService.restoreSchemaSnapshot(datasetId, idSnapshot);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error("Error restoring a schema snapshot. ", e.getMessage(), e);
+      LOG_ERROR.error("Error restoring a schema snapshot. Error Message {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID, e);
     }
@@ -291,7 +336,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       datasetSnapshotService.removeSchemaSnapshot(datasetId, idSnapshot);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error("Error deleting a schema snapshot", e.getMessage(), e);
+      LOG_ERROR.error("Error deleting a schema snapshot. Error message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.USER_REQUEST_NOTFOUND, e);
     }
@@ -321,4 +366,5 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
 
     return new ResponseEntity<>(stream, HttpStatus.OK);
   }
+
 }

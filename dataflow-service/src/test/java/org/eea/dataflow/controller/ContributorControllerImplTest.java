@@ -135,8 +135,6 @@ public class ContributorControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteThrow() throws EEAException {
-    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
-        .thenReturn(new UserRepresentationVO());
     Mockito.doThrow(EEAException.class).when(contributorService)
         .deleteContributor(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any());
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
@@ -151,24 +149,40 @@ public class ContributorControllerImplTest {
   }
 
   /**
-   * Email null test.
+   * Delete editor email null test.
    *
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void emailNullTest() throws EEAException {
+  public void deleteEditorEmailNullTest() throws EEAException {
 
-    userRepresentationVO.setEmail("write@reportnet.net");
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any())).thenReturn(null);
     try {
       contributorControllerImpl.deleteEditor(1L, contributorVOWrite);
     } catch (ResponseStatusException ex) {
-      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+      assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
       assertEquals("The email write@reportnet.net doesn't exist in repornet", ex.getReason());
       throw ex;
     }
   }
 
+  /**
+   * Delete reporter email null test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void deleteReporterEmailNullTest() throws EEAException {
+
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any())).thenReturn(null);
+    try {
+      contributorControllerImpl.deleteReporter(1L, 1L, contributorVOWrite);
+    } catch (ResponseStatusException ex) {
+      assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
+      assertEquals("The email write@reportnet.net doesn't exist in repornet", ex.getReason());
+      throw ex;
+    }
+  }
 
   /**
    * Creates the associated permissions.
@@ -208,9 +222,12 @@ public class ContributorControllerImplTest {
    */
   @Test()
   public void deleteReporter() throws EEAException {
+    userRepresentationVO.setEmail("read@reportnet.net");
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(userRepresentationVO);
     contributorControllerImpl.deleteReporter(1L, 1L, contributorVORead);
+    Mockito.verify(contributorService, times(1)).deleteContributor(1L, "read@reportnet.net",
+        "REPORTER", 1L);
   }
 
   /**
@@ -220,6 +237,7 @@ public class ContributorControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteReporterThrow() throws EEAException {
+    userRepresentationVO.setEmail("read@reportnet.net");
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(userRepresentationVO);
     Mockito.doThrow(EEAException.class).when(contributorService).deleteContributor(1L,
@@ -252,8 +270,10 @@ public class ContributorControllerImplTest {
    */
   @Test()
   public void updateReporter() throws EEAException {
+    userRepresentationVO.setEmail("read@reportnet.net");
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(userRepresentationVO);
+    contributorVORead.setRole("REPORTER");
     contributorControllerImpl.updateReporter(1L, 1L, contributorVORead);
     Mockito.verify(contributorService, times(1)).updateContributor(1L, contributorVORead,
         "REPORTER", 1L);
@@ -267,13 +287,56 @@ public class ContributorControllerImplTest {
    */
   @Test()
   public void updateReporterThrow() throws EEAException {
+    userRepresentationVO.setEmail("read@reportnet.net");
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(userRepresentationVO);
     Mockito.doThrow(EEAException.class).when(contributorService).updateContributor(1L,
         contributorVORead, "REPORTER", 1L);
+    contributorVORead.setRole("REPORTER");
     ResponseEntity<?> value = contributorControllerImpl.updateReporter(1L, 1L, contributorVORead);
     assertEquals(null, value.getBody());
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, value.getStatusCode());
 
   }
+
+  /**
+   * Update editor email null test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateEditorEmailNullTest() throws EEAException {
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any())).thenReturn(null);
+    ResponseEntity<?> value = contributorControllerImpl.updateEditor(1L, contributorVOWrite);
+    assertEquals("The email write@reportnet.net doesn't exist in repornet", value.getBody());
+    assertEquals(HttpStatus.NOT_FOUND, value.getStatusCode());
+  }
+
+  /**
+   * Update reporter email null test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateReporterEmailNullTest() throws EEAException {
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any())).thenReturn(null);
+    ResponseEntity<?> value = contributorControllerImpl.updateReporter(1L, 1L, contributorVOWrite);
+    assertEquals("The email write@reportnet.net doesn't exist in repornet", value.getBody());
+    assertEquals(HttpStatus.NOT_FOUND, value.getStatusCode());
+  }
+
+  /**
+   * Update reporter email not correct test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateReporterEmailNotCorrectTest() throws EEAException {
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
+        .thenReturn(userRepresentationVO);
+    ResponseEntity<?> value = contributorControllerImpl.updateReporter(1L, 1L, contributorVORead);
+    assertEquals("The email read@reportnet.net doesn't exist in repornet", value.getBody());
+    assertEquals(HttpStatus.NOT_FOUND, value.getStatusCode());
+  }
+
 }

@@ -16,6 +16,7 @@ import { Dataset } from 'core/domain/model/Dataset/Dataset';
 import { DatasetTable } from 'core/domain/model/Dataset/DatasetTable/DatasetTable';
 import { DatasetTableField } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableField/DatasetTableField';
 import { DatasetTableRecord } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableRecord';
+import { EuDataset } from 'core/domain/model/EuDataset/EuDataset';
 import { LegalInstrument } from 'core/domain/model/Obligation/LegalInstrument/LegalInstrument';
 import { Obligation } from 'core/domain/model/Obligation/Obligation';
 import { Representative } from 'core/domain/model/Representative/Representative';
@@ -292,6 +293,7 @@ const getAllSchemas = async dataflowId => {
         tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaDescription: datasetTableDTO.description,
         tableSchemaName: datasetTableDTO.nameTableSchema,
+        tableSchemaNotEmpty: datasetTableDTO.notEmpty,
         tableSchemaReadOnly: datasetTableDTO.readOnly,
         records: records,
         recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null
@@ -343,6 +345,7 @@ const parseDataflowDTO = dataflowDTO =>
     description: dataflowDTO.description,
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: parseDocumentListDTO(dataflowDTO.documents),
+    euDatasets: parseEuDatasetListDTO(dataflowDTO.euDatasets),
     expirationDate: dataflowDTO.deadlineDate > 0 ? moment.unix(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
     id: dataflowDTO.id,
     name: dataflowDTO.name,
@@ -375,6 +378,29 @@ const parseDataCollectionDTO = dataCollectionDTO => {
     datasetSchemaId: dataCollectionDTO.datasetSchema,
     expirationDate: dataCollectionDTO.dueDate,
     status: dataCollectionDTO.status
+  });
+};
+
+const parseEuDatasetListDTO = euDatasetsDTO => {
+  if (!isNull(euDatasetsDTO) && !isUndefined(euDatasetsDTO)) {
+    const euDatasets = [];
+    euDatasetsDTO.forEach(euDatasetDTO => {
+      euDatasets.push(parseEuDatasetDTO(euDatasetDTO));
+    });
+    return euDatasets;
+  }
+  return;
+};
+
+const parseEuDatasetDTO = euDatasetDTO => {
+  return new EuDataset({
+    creationDate: euDatasetDTO.creationDate,
+    euDatasetId: euDatasetDTO.id,
+    euDatasetName: euDatasetDTO.dataSetName,
+    dataflowId: euDatasetDTO.idDataflow,
+    datasetSchemaId: euDatasetDTO.datasetSchema,
+    expirationDate: euDatasetDTO.dueDate,
+    status: euDatasetDTO.status
   });
 };
 

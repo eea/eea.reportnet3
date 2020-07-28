@@ -25,7 +25,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 
 export const FieldsDesigner = ({
-  activeIndex,
+  //activeIndex,
   datasetId,
   datasetSchemas,
   isPreviewModeOn,
@@ -54,6 +54,7 @@ export const FieldsDesigner = ({
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [notEmpty, setNotEmpty] = useState(true);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
   const [tableDescriptionValue, setTableDescriptionValue] = useState('');
 
@@ -65,6 +66,7 @@ export const FieldsDesigner = ({
       setTableDescriptionValue(table.description || '');
       setIsReadOnlyTable(table.readOnly || false);
       setToPrefill(table.toPrefill || false);
+      table.notEmpty === false ? setNotEmpty(false) : setNotEmpty(true);
     }
   }, []);
 
@@ -126,7 +128,7 @@ export const FieldsDesigner = ({
     });
     onChangeFields(inmFields, type.toUpperCase() === 'LINK', table.tableSchemaId);
     setFields(inmFields);
-    window.scrollTo(0, document.body.scrollHeight);
+    // window.scrollTo(0, document.body.scrollHeight);
   };
 
   const onFieldDelete = (deletedFieldIndex, deletedFieldType) => {
@@ -171,12 +173,21 @@ export const FieldsDesigner = ({
     if (checked) {
       setToPrefill(checked);
     }
-    updateTableDesign({ readOnly: checked, toPrefill: checked === false ? toPrefill : checked });
+    updateTableDesign({
+      readOnly: checked,
+      toPrefill: checked === false ? toPrefill : checked,
+      notEmpty: checked === false ? notEmpty : checked
+    });
   };
 
   const onChangeToPrefill = checked => {
     setToPrefill(checked);
     updateTableDesign({ readOnly: isReadOnlyTable, toPrefill: checked });
+  };
+
+  const onChangeNotEmpty = checked => {
+    setNotEmpty(checked);
+    updateTableDesign({ readOnly: isReadOnlyTable, notEmpty: checked });
   };
 
   const onFieldDragAndDrop = (draggedFieldIdx, droppedFieldName) => {
@@ -278,7 +289,6 @@ export const FieldsDesigner = ({
           hasWritePermissions={true}
           isPreviewModeOn={isPreviewModeOn}
           isValidationSelected={isValidationSelected}
-          isWebFormMMR={false}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
           onLoadTableData={onLoadTableData}
@@ -443,7 +453,7 @@ export const FieldsDesigner = ({
     </div>
   );
 
-  const updateTableDesign = async ({ readOnly, toPrefill }) => {
+  const updateTableDesign = async ({ notEmpty, readOnly, toPrefill }) => {
     // if (isUndefined(tableDescriptionValue)) {
     //   return;
     // }
@@ -453,12 +463,13 @@ export const FieldsDesigner = ({
         table.tableSchemaId,
         tableDescriptionValue,
         readOnly,
-        datasetId
+        datasetId,
+        notEmpty
       );
       if (!tableUpdated) {
         console.error('Error during table description update');
       } else {
-        onChangeTableProperties(table.tableSchemaId, tableDescriptionValue, readOnly, toPrefill);
+        onChangeTableProperties(table.tableSchemaId, tableDescriptionValue, readOnly, toPrefill, notEmpty);
       }
     } catch (error) {
       console.error(`Error during table description update: ${error}`);
@@ -476,7 +487,7 @@ export const FieldsDesigner = ({
           id="tableDescription"
           key="tableDescription"
           onChange={e => setTableDescriptionValue(e.target.value)}
-          onBlur={() => updateTableDesign({ readOnly: isReadOnlyTable, toPrefill })}
+          onBlur={() => updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, notEmpty })}
           onFocus={e => {
             setInitialTableDescription(e.target.value);
           }}
@@ -487,7 +498,7 @@ export const FieldsDesigner = ({
         />
         <div className={styles.constraintsButtons}>
           <Button
-            className={`p-button-secondary p-button-animated-blink`}
+            className={`p-button-secondary p-button-animated-blink datasetSchema-uniques-help-step`}
             icon={'key'}
             label={resources.messages['addUniqueConstraint']}
             onClick={() => {
@@ -501,25 +512,25 @@ export const FieldsDesigner = ({
           />
 
           <Button
-            className="p-button-secondary p-button-animated-blink"
+            className="p-button-secondary p-button-animated-blink datasetSchema-rowConstraint-help-step"
             icon={'horizontalSliders'}
             label={resources.messages['addRowConstraint']}
             onClick={() => validationContext.onOpenModalFromRow(table.recordSchemaId)}
           />
         </div>
-        <div className={styles.switchDiv}>
+        <div className={`${styles.switchDiv} datasetSchema-readOnlyAndPrefill-help-step`}>
           <div>
             <span className={styles.switchTextInput}>{resources.messages['readOnlyTable']}</span>
             <Checkbox
               checked={isReadOnlyTable}
               // className={styles.checkRequired}
-              id={`${table.tableId}_check_readOnly`}
-              inputId={`${table.tableId}_check_readOnly`}
+              id={`${table.tableSchemaId}_check_readOnly`}
+              inputId={`${table.tableSchemaId}_check_readOnly`}
               label="Default"
               onChange={e => onChangeIsReadOnly(e.checked)}
               style={{ width: '70px' }}
             />
-            <label for={`${table.tableId}_check_readOnly`} className="srOnly">
+            <label htmlFor={`${table.tableSchemaId}_check_readOnly`} className="srOnly">
               {resources.messages['readOnlyTable']}
             </label>
           </div>
@@ -529,14 +540,29 @@ export const FieldsDesigner = ({
               checked={toPrefill}
               disabled={isReadOnlyTable}
               // className={styles.checkRequired}
-              id={`${table.tableId}_check_to_prefill`}
-              inputId={`${table.tableId}_check_to_prefill`}
+              id={`${table.tableSchemaId}_check_to_prefill`}
+              inputId={`${table.tableSchemaId}_check_to_prefill`}
               label="Default"
               onChange={e => onChangeToPrefill(e.checked)}
               style={{ width: '70px' }}
             />
-            <label for={`${table.tableId}_check_to_prefill`} className="srOnly">
+            <label htmlFor={`${table.tableSchemaId}_check_to_prefill`} className="srOnly">
               {resources.messages['prefilled']}
+            </label>
+          </div>
+          <div>
+            <span className={styles.switchTextInput}>{resources.messages['notEmpty']}</span>
+            <Checkbox
+              checked={notEmpty}
+              // className={styles.checkRequired}
+              id={`${table.tableSchemaId}_check_not_empty`}
+              inputId={`${table.tableSchemaId}_check_not_empty`}
+              label="Default"
+              onChange={e => onChangeNotEmpty(e.checked)}
+              style={{ width: '70px' }}
+            />
+            <label htmlFor={`${table.tableSchemaId}_check_not_empty`} className="srOnly">
+              {resources.messages['notEmpty']}
             </label>
           </div>
         </div>

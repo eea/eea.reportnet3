@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
-import org.springframework.scheduling.annotation.Async;
 
 /**
  * The interface Record store service.
@@ -76,9 +76,10 @@ public interface RecordStoreService {
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws RecordStoreAccessException the record store access exception
+   * @throws EEAException
    */
   void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset)
-      throws SQLException, IOException, RecordStoreAccessException;
+      throws SQLException, IOException, RecordStoreAccessException, EEAException;
 
 
   /**
@@ -98,11 +99,6 @@ public interface RecordStoreService {
   void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
       DatasetTypeEnum typeDataset, Boolean isSchemaSnapshot, Boolean deleteData)
       throws SQLException, IOException, RecordStoreAccessException;
-
-  @Async
-  void restoreDataSnapshotPoc(Long idReportingDataset, Long idSnapshot, Long partitionId,
-      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
-      throws SQLException, IOException;
 
   /**
    * Delete data snapshot.
@@ -132,4 +128,5 @@ public interface RecordStoreService {
    * @param isCreation the is creation
    */
   void createSchemas(Map<Long, String> datasetIdAndSchemaId, Long dataflowId, boolean isCreation);
+
 }

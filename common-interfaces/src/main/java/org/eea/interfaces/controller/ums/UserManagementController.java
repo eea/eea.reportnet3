@@ -287,5 +287,14 @@ public interface UserManagementController {
    * @param resources the resources
    */
   @DeleteMapping("/remove_user_from_resources")
-  public void removeUserFromResources(@RequestBody List<ResourceAssignationVO> resources);
+  void removeUserFromResources(@RequestBody List<ResourceAssignationVO> resources);
+
+  /**
+   * Gets the resources by user email.
+   *
+   * @param email the email
+   * @return the resources by user email
+   */
+  @GetMapping("/private/resourcesByMail")
+  List<ResourceAccessVO> getResourcesByUserEmail(@RequestParam("email") String email);
 }

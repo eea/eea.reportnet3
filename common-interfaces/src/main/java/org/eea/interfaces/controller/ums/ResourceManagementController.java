@@ -86,6 +86,11 @@ public interface ResourceManagementController {
   @RequestMapping(value = "/createList", method = RequestMethod.POST)
   void createResources(@RequestBody List<ResourceInfoVO> resourceInfoVOs);
 
+  /**
+   * Delete resource by dataset id.
+   *
+   * @param datasetIds the dataset ids
+   */
   @DeleteMapping("/delete_by_dataset_id")
   void deleteResourceByDatasetId(@RequestParam("datasetIds") List<Long> datasetIds);
 }

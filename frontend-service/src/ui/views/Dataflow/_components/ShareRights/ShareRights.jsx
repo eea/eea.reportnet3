@@ -1,14 +1,16 @@
-import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useState, useReducer } from 'react';
 
+import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uuid from 'uuid';
+
+import styles from './ShareRights.module.scss';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
-import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { Contributor } from 'core/domain/model/Contributor/Contributor';
@@ -19,23 +21,22 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { shareRightsReducer } from './_functions/Reducers/shareRightsReducer';
 
-import { useInputTextFocus } from 'ui/views/_functions/Hooks/useInputTextFocus';
-
-export const ShareRights = ({ dataflowId, dataflowState }) => {
-  const { dataProviderId, isCustodian, isShareRightsDialogVisible } = dataflowState;
-
+export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, representativeId }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
-  const inputRef = useRef(null);
-
   const [shareRightsState, shareRightsDispatch] = useReducer(shareRightsReducer, {
     accountHasError: false,
+    accountNotFound: false,
     contributorAccountToDelete: '',
     contributors: [],
+    clonedContributors: [],
+    isContributorDeleting: false,
     isDataUpdated: false,
     isDeleteDialogVisible: false
   });
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const deleteConfirmMessage =
     resources.messages[`${isCustodian ? 'editors' : 'reporters'}RightsDialogConfirmDeleteQuestion`];
@@ -44,20 +45,22 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
     ? resources.messages['editorsRightsDialogConfirmDeleteHeader']
     : resources.messages['reportersRightsDialogConfirmDeleteHeader'];
 
-  useInputTextFocus(isShareRightsDialogVisible, inputRef);
-
   useEffect(() => {
     getAllContributors();
   }, [shareRightsState.isDataUpdated]);
 
   const getAllContributors = async () => {
+    const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
+
     try {
-      const contributors = await ContributorService.all(dataflowId, dataProviderId);
+      const contributors = await ContributorService.all(dataflowId, dataProvider);
       const emptyContributor = new Contributor({ account: '', dataProviderId: '', isNew: true, writePermission: '' });
+      const contributorsWithNew = [...contributors, emptyContributor];
+      const clonedContributors = cloneDeep(contributorsWithNew);
 
       shareRightsDispatch({
         type: 'GET_ALL_CONTRIBUTORS',
-        payload: { contributors: [...contributors, emptyContributor] }
+        payload: { contributors: contributorsWithNew, clonedContributors }
       });
     } catch (error) {}
   };
@@ -72,21 +75,48 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
     return email.match(expression);
   };
 
+  const isRepeatedAccount = account => {
+    const sameAccounts = shareRightsState.contributors.filter(contributor => contributor.account === account);
+
+    return sameAccounts.length > 1;
+  };
+
+  const isPermissionChanged = contributor => {
+    const [initialContributor] = shareRightsState.clonedContributors.filter(
+      fContributor => fContributor.id === contributor.id
+    );
+
+    return JSON.stringify(initialContributor.writePermission) !== JSON.stringify(contributor.writePermission);
+  };
+
   const updateContributor = contributor => {
-    if (!isValidEmail(contributor.account)) {
-      return;
-    }
-    if (contributor.writePermission !== '') {
-      onUpdateContributor(contributor);
+    shareRightsDispatch({
+      type: 'SET_ACCOUNT_HAS_ERROR',
+      payload: {
+        accountHasError:
+          !isValidEmail(contributor.account) ||
+          isRepeatedAccount(contributor.account) ||
+          shareRightsState.accountNotFound
+      }
+    });
+
+    if (!contributor.isNew) {
+      isPermissionChanged(contributor) && onUpdateContributor(contributor);
+    } else {
+      if (isValidEmail(contributor.account) && !shareRightsState.accountHasError) {
+        onUpdateContributor(contributor);
+      }
     }
   };
 
   const onDeleteContributor = async () => {
+    onToggleDeletingContributor(true);
+    const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
     try {
       const response = await ContributorService.deleteContributor(
         shareRightsState.contributorAccountToDelete,
         dataflowId,
-        dataProviderId
+        dataProvider
       );
       if (response.status >= 200 && response.status <= 299) {
         onDataChange();
@@ -96,6 +126,7 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
 
       notificationContext.add({ type: notificationKey });
     } finally {
+      onToggleDeletingContributor(false);
       shareRightsDispatch({ type: 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG', payload: { isDeleteDialogVisible: false } });
     }
   };
@@ -104,32 +135,40 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
     shareRightsDispatch({ type: 'ON_DATA_CHANGE', payload: { isDataUpdated: !shareRightsState.isDataUpdated } });
   };
 
+  const onEnterKey = (key, contributor) => {
+    if (key === 'Enter') {
+      isValidEmail(contributor.account) && isPermissionChanged(contributor) && onUpdateContributor(contributor);
+    }
+  };
+
   const onUpdateContributor = async contributor => {
     if (contributor.writePermission !== '') {
+      const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
+      setIsLoading(true);
       try {
-        const response = await ContributorService.update(contributor, dataflowId, dataProviderId);
+        const response = await ContributorService.update(contributor, dataflowId, dataProvider);
         if (response.status >= 200 && response.status <= 299) {
           onDataChange();
         }
       } catch (error) {
-        notificationContext.add({ type: 'UPDATE_CONTRIBUTOR_ERROR' });
-        if (error.status >= 400 && error.status <= 404) {
-          shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError: true } });
+        if (error.response.status === 404) {
+          shareRightsDispatch({
+            type: 'SET_ACCOUNT_NOT_FOUND',
+            payload: { accountNotFound: true, accountHasError: true }
+          });
         }
+      } finally {
+        setIsLoading(false);
       }
     }
   };
 
   const onWritePermissionChange = async (contributor, newWritePermission) => {
     const { contributors } = shareRightsState;
-    const [thisContributor] = contributors.filter(thisContributor => thisContributor.account === contributor.account);
+    const [thisContributor] = contributors.filter(thisContributor => thisContributor.id === contributor.id);
     thisContributor.writePermission = newWritePermission;
 
     shareRightsDispatch({ type: 'ON_WRITE_PERMISSION_CHANGE', payload: { contributors } });
-
-    if (isValidEmail(contributor.account)) {
-      onUpdateContributor(thisContributor);
-    }
   };
 
   const onSetAccount = inputValue => {
@@ -139,8 +178,16 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
 
     shareRightsDispatch({
       type: 'ON_SET_ACCOUNT',
-      payload: { contributors, accountHasError: !isValidEmail(inputValue) }
+      payload: {
+        contributors,
+        accountHasError: !isValidEmail(inputValue) || isRepeatedAccount(inputValue),
+        accountNotFound: false
+      }
     });
+  };
+
+  const onToggleDeletingContributor = value => {
+    shareRightsDispatch({ type: 'TOGGLE_DELETING_CONTRIBUTOR', payload: { isDeleting: value } });
   };
 
   const renderDeleteColumnTemplate = contributor =>
@@ -170,37 +217,47 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
         ];
 
     return (
-      <select
-        // onKeyDown={event => onKeyDown(event, formDispatcher, formState, contributor, dataflowId)}
-        onBlur={() => updateContributor(contributor)}
-        onChange={event => onWritePermissionChange(contributor, event.target.value)}
-        value={contributor.writePermission}>
-        {writePermissionsOptions.map(option => {
-          return (
-            <option key={uuid.v4()} className="p-dropdown-item" value={option.writePermission}>
-              {option.label}
-            </option>
-          );
-        })}
-      </select>
+      <>
+        <select
+          id="dataProvider"
+          onKeyDown={event => onEnterKey(event.key, contributor)}
+          onBlur={() => updateContributor(contributor)}
+          onChange={event => onWritePermissionChange(contributor, event.target.value)}
+          value={contributor.writePermission}>
+          {writePermissionsOptions.map(option => {
+            return (
+              <option key={uuid.v4()} className="p-dropdown-item" value={option.writePermission}>
+                {option.label}
+              </option>
+            );
+          })}
+        </select>
+        <label for="dataProvider" className="srOnly">
+          {resources.messages['manageRolesDialogInputPlaceholder']}
+        </label>
+      </>
     );
   };
 
   const renderAccountTemplate = contributor => {
+    const hasError = !isEmpty(contributor.account) && contributor.isNew && shareRightsState.accountHasError;
+
     return (
-      <div
-        className={`formField ${contributor.isNew && shareRightsState.accountHasError && 'error'}`}
-        style={{ marginBottom: '0rem' }}>
-        <InputText
+      <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
+        <input
           autoFocus={contributor.isNew}
           disabled={!contributor.isNew}
+          className={!contributor.isNew ? styles.disabledInput : ''}
           id={isEmpty(contributor.account) ? 'emptyInput' : contributor.account}
+          inputId={'contributorAccount'}
           onBlur={() => updateContributor(contributor)}
           onChange={event => onSetAccount(event.target.value)}
           placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
-          ref={inputRef}
           value={contributor.account}
         />
+        <label for="emptyInput" className="srOnly">
+          {resources.messages['manageRolesDialogInputPlaceholder']}
+        </label>
       </div>
     );
   };
@@ -209,27 +266,40 @@ export const ShareRights = ({ dataflowId, dataflowState }) => {
     <Fragment>
       <div>
         {isEmpty(shareRightsState.contributors) ? (
-          <div>{resources.messages['noData']}</div>
+          <Spinner style={{ top: 0 }} />
         ) : (
-          <DataTable value={shareRightsState.contributors}>
-            <Column
-              body={renderAccountTemplate}
-              header={
-                dataflowState.isCustodian
-                  ? resources.messages['editorsAccountColumn']
-                  : resources.messages['reportersAccountColumn']
-              }
-            />
-            <Column body={renderWritePermissionsColumnTemplate} header={resources.messages['writePermissionsColumn']} />
-            <Column body={renderDeleteColumnTemplate} style={{ width: '60px' }} />
-          </DataTable>
+          <div className={styles.table}>
+            {isLoading && <Spinner className={styles.spinner} style={{ top: 0, left: 0, zIndex: 6000 }} />}
+            <DataTable value={shareRightsState.contributors}>
+              <Column
+                body={renderAccountTemplate}
+                header={
+                  isCustodian
+                    ? resources.messages['editorsAccountColumn']
+                    : resources.messages['reportersAccountColumn']
+                }
+              />
+              <Column
+                body={renderWritePermissionsColumnTemplate}
+                header={resources.messages['writePermissionsColumn']}
+              />
+              <Column
+                body={renderDeleteColumnTemplate}
+                className={styles.emptyTableHeader}
+                header={resources.messages['deleteContributorButtonTableHeader']}
+                style={{ width: '60px' }}
+              />
+            </DataTable>
+          </div>
         )}
       </div>
 
       {shareRightsState.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={shareRightsState.isContributorDeleting}
           header={deleteConfirmHeader}
+          iconConfirm={shareRightsState.isContributorDeleting ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteContributor()}

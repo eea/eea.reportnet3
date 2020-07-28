@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.eea.dataflow.service.ContributorService;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.contributor.ContributorVO;
-import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
@@ -48,10 +48,6 @@ public class ContributorServiceImpl implements ContributorService {
   /** The Constant REPORTER: {@value}. */
   private static final String REPORTER = "REPORTER";
 
-  /** The dataflow controlle zuul. */
-  @Autowired
-  private DataFlowControllerZuul dataflowControlleZuul;
-
   /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
@@ -59,6 +55,10 @@ public class ContributorServiceImpl implements ContributorService {
   /** The resource management controller zull. */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
+
+  /** The data set metabase controller zuul. */
+  @Autowired
+  private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /**
    * Find contributors by id dataflow.
@@ -74,9 +74,8 @@ public class ContributorServiceImpl implements ContributorService {
     List<ContributorVO> contributorVOList = new ArrayList<>();
 
     if (EDITOR.equals(role) || REPORTER.equals(role)) {
-      DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
       Long referenceId = EDITOR.equals(role) ? dataflowId
-          : dataflow.getReportingDatasets().stream()
+          : dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId).stream()
               .filter(
                   reportingDatasetVO -> reportingDatasetVO.getDataProviderId().equals(providerId))
               .map(ReportingDatasetVO::getId).findFirst().orElse(null);
@@ -125,7 +124,6 @@ public class ContributorServiceImpl implements ContributorService {
   @Override
   public void deleteContributor(Long dataflowId, String account, String role, Long dataProviderId)
       throws EEAException {
-    DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
 
     ResourceGroupEnum resourceGroupEnumWrite = null;
     ResourceGroupEnum resourceGroupEnumRead = null;
@@ -157,10 +155,11 @@ public class ContributorServiceImpl implements ContributorService {
       resourcesProviders
           .add(fillResourceAssignation(dataflowId, account, resourceGroupEnumDataflowRead));
       List<Long> ids = EDITOR.equals(role)
-          ? dataflow.getDesignDatasets().stream().map(DesignDatasetVO::getId)
-              .collect(Collectors.toList())
-          : dataflow.getReportingDatasets().stream().filter(
-              reportingDatasetVO -> reportingDatasetVO.getDataProviderId().equals(dataProviderId))
+          ? dataSetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(dataflowId).stream()
+              .map(DesignDatasetVO::getId).collect(Collectors.toList())
+          : dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId).stream()
+              .filter(reportingDatasetVO -> reportingDatasetVO.getDataProviderId()
+                  .equals(dataProviderId))
               .map(ReportingDatasetVO::getId).collect(Collectors.toList());
       for (Long id : ids) {
         // remove resources
@@ -178,12 +177,12 @@ public class ContributorServiceImpl implements ContributorService {
    * @param dataflowId the dataflow id
    * @param contributorVO the contributor VO
    * @param role the role
+   * @param dataProviderId the data provider id
    * @throws EEAException the EEA exception
    */
   @Override
-  public void createContributor(Long dataflowId, ContributorVO contributorVO, String role)
-      throws EEAException {
-    DataFlowVO dataflow = dataflowControlleZuul.findById(dataflowId);
+  public void createContributor(Long dataflowId, ContributorVO contributorVO, String role,
+      Long dataProviderId) throws EEAException {
     SecurityRoleEnum securityRoleEnum = null;
     ResourceGroupEnum resourceGroupEnum = null;
     ResourceGroupEnum resourceGroupEnumDataflow = null;
@@ -215,54 +214,71 @@ public class ContributorServiceImpl implements ContributorService {
         break;
     }
     final List<ResourceAssignationVO> resourceAssignationVOList = new ArrayList<>();
+    List<ResourceInfoVO> resourceInfoVOs = new ArrayList<>();
     if (EDITOR.equals(role)) {
-
-      ResourceInfoVO resourceDataflow =
-          resourceManagementControllerZull.getResourceDetail(dataflowId, resourceGroupEnumDataflow);
-      if (null == resourceDataflow.getName()) {
-        resourceManagementControllerZull
-            .createResource(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, securityRoleEnum));
-      }
       resourceAssignationVOList.add(fillResourceAssignation(dataflowId, contributorVO.getAccount(),
           resourceGroupEnumDataflow));
-      for (DesignDatasetVO designDatasetVO : dataflow.getDesignDatasets()) {
-        ResourceInfoVO resourceDataSchema = resourceManagementControllerZull
-            .getResourceDetail(designDatasetVO.getId(), resourceGroupEnum);
-        if (null == resourceDataSchema.getName()) {
-          resourceManagementControllerZull.createResource(
-              createGroup(designDatasetVO.getId(), ResourceTypeEnum.DATA_SCHEMA, securityRoleEnum));
-        }
+      for (DesignDatasetVO designDatasetVO : dataSetMetabaseControllerZuul
+          .findDesignDataSetIdByDataflowId(dataflowId)) {
+
         resourceAssignationVOList.add(fillResourceAssignation(designDatasetVO.getId(),
             contributorVO.getAccount(), resourceGroupEnum));
       }
     } else if (REPORTER.equals(role)) {
-      ResourceInfoVO resourceDataflow =
-          resourceManagementControllerZull.getResourceDetail(dataflowId, resourceGroupEnumDataflow);
-      if (null == resourceDataflow.getName()) {
-        resourceManagementControllerZull.createResource(
-            createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.REPORTER_READ));
-      }
-      resourceAssignationVOList.add(fillResourceAssignation(dataflowId, contributorVO.getAccount(),
-          resourceGroupEnumDataflow));
-
-      for (ReportingDatasetVO reportingDatasetVO : dataflow.getReportingDatasets()) {
-        ResourceInfoVO resourceDataSchema = resourceManagementControllerZull
-            .getResourceDetail(reportingDatasetVO.getId(), resourceGroupEnum);
-        if (null == resourceDataSchema.getName()) {
-          resourceManagementControllerZull.createResource(
-              createGroup(reportingDatasetVO.getId(), ResourceTypeEnum.DATASET, securityRoleEnum));
-          resourceManagementControllerZull.createResource(createGroup(dataflowId,
-              ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.REPORTER_READ));
-        }
-        resourceAssignationVOList.add(fillResourceAssignation(reportingDatasetVO.getId(),
-            contributorVO.getAccount(), resourceGroupEnum));
-        resourceAssignationVOList.add(fillResourceAssignation(reportingDatasetVO.getId(),
-            contributorVO.getAccount(), resourceGroupEnumDataset));
-      }
+      createReporterGroupsResources(dataflowId, contributorVO, dataProviderId, securityRoleEnum,
+          resourceGroupEnum, resourceGroupEnumDataflow, resourceGroupEnumDataset,
+          resourceAssignationVOList, resourceInfoVOs);
 
     }
+
     // we add data to contributor
     userManagementControllerZull.addContributorsToResources(resourceAssignationVOList);
+  }
+
+  /**
+   * Creates the reporter groups resources.
+   *
+   * @param dataflowId the dataflow id
+   * @param contributorVO the contributor VO
+   * @param dataProviderId the data provider id
+   * @param securityRoleEnum the security role enum
+   * @param resourceGroupEnum the resource group enum
+   * @param resourceGroupEnumDataflow the resource group enum dataflow
+   * @param resourceGroupEnumDataset the resource group enum dataset
+   * @param resourceAssignationVOList the resource assignation VO list
+   * @param resourceInfoVOs the resource info V os
+   */
+  private void createReporterGroupsResources(Long dataflowId, ContributorVO contributorVO,
+      Long dataProviderId, SecurityRoleEnum securityRoleEnum, ResourceGroupEnum resourceGroupEnum,
+      ResourceGroupEnum resourceGroupEnumDataflow, ResourceGroupEnum resourceGroupEnumDataset,
+      final List<ResourceAssignationVO> resourceAssignationVOList,
+      List<ResourceInfoVO> resourceInfoVOs) {
+    ResourceInfoVO resourceDataflow =
+        resourceManagementControllerZull.getResourceDetail(dataflowId, resourceGroupEnumDataflow);
+    if (null == resourceDataflow.getName()) {
+      resourceInfoVOs
+          .add(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.REPORTER_READ));
+    }
+    resourceAssignationVOList.add(
+        fillResourceAssignation(dataflowId, contributorVO.getAccount(), resourceGroupEnumDataflow));
+
+    for (Long reportingDatasetId : dataSetMetabaseControllerZuul
+        .findReportingDataSetIdByDataflowId(dataflowId).stream()
+        .filter(reportingDatasetVO -> reportingDatasetVO.getDataProviderId().equals(dataProviderId))
+        .map(ReportingDatasetVO::getId).collect(Collectors.toList())) {
+      ResourceInfoVO resourceDataSchema =
+          resourceManagementControllerZull.getResourceDetail(reportingDatasetId, resourceGroupEnum);
+      if (null == resourceDataSchema.getName()) {
+        resourceInfoVOs
+            .add(createGroup(reportingDatasetId, ResourceTypeEnum.DATASET, securityRoleEnum));
+      }
+      resourceAssignationVOList.add(fillResourceAssignation(reportingDatasetId,
+          contributorVO.getAccount(), resourceGroupEnum));
+      resourceAssignationVOList.add(fillResourceAssignation(reportingDatasetId,
+          contributorVO.getAccount(), resourceGroupEnumDataset));
+    }
+    // Resources creation
+    resourceManagementControllerZull.createResources(resourceInfoVOs);
   }
 
 
@@ -316,19 +332,26 @@ public class ContributorServiceImpl implements ContributorService {
 
     // we delete the contributor and after that we create it to update
     if (EDITOR.equals(role) || REPORTER.equals(role)) {
-      try {
-        deleteContributor(dataflowId, contributorVO.getAccount(), role, dataProviderId);
-      } catch (EEAException e) {
-        LOG_ERROR.error("Error deleting contributor with the account: {} in the dataflow {} ",
-            contributorVO.getAccount(), dataflowId);
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      // avoid delete if it's a new contributor
+      List<ResourceAccessVO> resourceAccessVOs =
+          userManagementControllerZull.getResourcesByUserEmail(contributorVO.getAccount());
+      if (resourceAccessVOs != null && !resourceAccessVOs.isEmpty()
+          && resourceAccessVOs.stream().anyMatch(resource -> resource.getId().equals(dataflowId)
+              && resource.getResource().equals(ResourceTypeEnum.DATAFLOW))) {
+        try {
+          deleteContributor(dataflowId, contributorVO.getAccount(), role, dataProviderId);
+        } catch (EEAException e) {
+          LOG_ERROR.error("Error deleting contributor with the account: {} in the dataflow {} ",
+              contributorVO.getAccount(), dataflowId);
+          throw new EEAException(e);
+        }
       }
       try {
-        createContributor(dataflowId, contributorVO, role);
+        createContributor(dataflowId, contributorVO, role, dataProviderId);
       } catch (EEAException e) {
         LOG_ERROR.error("Error creating contributor with the account: {} in the dataflow {} ",
             contributorVO.getAccount(), dataflowId);
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+        throw new EEAException(e);
       }
     } else {
       LOG_ERROR.error(
@@ -350,6 +373,8 @@ public class ContributorServiceImpl implements ContributorService {
   @Override
   public void createAssociatedPermissions(Long dataflowId, Long datasetId) throws EEAException {
 
+    List<ResourceAssignationVO> resources = new ArrayList<>();
+
     // It finds all users that have dataflow-xx-editor-read
     List<UserRepresentationVO> usersEditorRead = userManagementControllerZull
         .getUsersByGroup(ResourceGroupEnum.DATAFLOW_EDITOR_READ.getGroupName(dataflowId));
@@ -358,17 +383,17 @@ public class ContributorServiceImpl implements ContributorService {
     List<UserRepresentationVO> usersEditorWrite = userManagementControllerZull
         .getUsersByGroup(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(dataflowId));
 
+    // It finds all users that have dataflow-xx-data-custodian
+    List<UserRepresentationVO> usersCustodian = userManagementControllerZull
+        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(dataflowId));
 
-    List<ResourceAssignationVO> resources = new ArrayList<>();
-
+    // find custodian and add custodian if we create since a editor
+    createCustodian(datasetId, resources, usersCustodian);
     // we create resources for any users to add the new resource associated with the new
     // datasetSchema
     if (!CollectionUtils.isEmpty(usersEditorRead) || !CollectionUtils.isEmpty(usersEditorWrite)) {
-
       if (!CollectionUtils.isEmpty(usersEditorRead)) {
         for (UserRepresentationVO userEditorRead : usersEditorRead) {
-          resourceManagementControllerZull.createResource(
-              createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.EDITOR_READ));
           resources.add(fillResourceAssignation(datasetId, userEditorRead.getEmail(),
               ResourceGroupEnum.DATASCHEMA_EDITOR_READ));
 
@@ -376,19 +401,40 @@ public class ContributorServiceImpl implements ContributorService {
       }
       if (!CollectionUtils.isEmpty(usersEditorWrite)) {
         for (UserRepresentationVO userEditorWrite : usersEditorWrite) {
-          resourceManagementControllerZull.createResource(
-              createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.EDITOR_WRITE));
           resources.add(fillResourceAssignation(datasetId, userEditorWrite.getEmail(),
               ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE));
         }
       }
-      userManagementControllerZull.addContributorsToResources(resources);
-
       LOG.info("Create role editor for dataflow {} with the dataset id {}", dataflowId, datasetId);
     } else {
       LOG.info(
           "Didn't create role editor for dataflow {} with the dataset id {}, because it hasn't editors associated",
           dataflowId, datasetId);
+    }
+    // we add all contributors to all users
+    userManagementControllerZull.addContributorsToResources(resources);
+  }
+
+  /**
+   * Creates the custodian.
+   *
+   * @param datasetId the dataset id
+   * @param resources the resources
+   * @param usersCustodian the users custodian
+   */
+  private void createCustodian(Long datasetId, List<ResourceAssignationVO> resources,
+      List<UserRepresentationVO> usersCustodian) {
+    if (!CollectionUtils.isEmpty(usersCustodian)) {
+      for (UserRepresentationVO userRepresentationVO : usersCustodian) {
+        List<ResourceAccessVO> resourceAccessVOs =
+            userManagementControllerZull.getResourcesByUserEmail(userRepresentationVO.getEmail());
+        if (null != resourceAccessVOs
+            && !resourceAccessVOs.stream().anyMatch(resource -> resource.getId().equals(datasetId)
+                && resource.getResource().equals(ResourceTypeEnum.DATA_SCHEMA))) {
+          resources.add(fillResourceAssignation(datasetId, userRepresentationVO.getEmail(),
+              ResourceGroupEnum.DATASCHEMA_CUSTODIAN));
+        }
+      }
     }
   }
 

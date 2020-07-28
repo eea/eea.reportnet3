@@ -1,11 +1,9 @@
 import { apiConfirmationReceipt } from 'core/infrastructure/api/domain/model/ConfirmationReceipt/ApiConfirmationReceipt';
 
-const get = async (dataflowId, dataProviderId) => {
-  const confirmationReceipt = await apiConfirmationReceipt.get(dataflowId, dataProviderId);
-
-  return confirmationReceipt;
+const download = async (dataflowId, dataProviderId) => {
+  return await apiConfirmationReceipt.download(dataflowId, dataProviderId);
 };
 
 export const ApiConfirmationReceiptRepository = {
-  get
+  download
 };

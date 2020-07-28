@@ -80,6 +80,7 @@ export class CustomFileUpload extends Component {
     super(props);
     this.state = {
       files: [],
+      isUploading: false,
       isValid: true,
       msgs: []
     };
@@ -228,7 +229,7 @@ export class CustomFileUpload extends Component {
   }
 
   upload() {
-    this.setState({ msgs: [] });
+    this.setState({ msgs: [], isUploading: true });
     let xhr = new XMLHttpRequest();
     let formData = new FormData();
 
@@ -291,7 +292,7 @@ export class CustomFileUpload extends Component {
   }
 
   clear() {
-    this.setState({ files: [] });
+    this.setState({ files: [], isUploading: false });
     if (this.props.onClear) {
       this.props.onClear();
     }
@@ -417,10 +418,10 @@ export class CustomFileUpload extends Component {
         <Fragment>
           <span data-tip data-for="inValidExtension">
             <Button
+              disabled={this.props.disabled || !this.hasFiles() || this.checkValidExtension() || this.state.isUploading}
+              icon={this.state.isUploading ? "spinnerAnimate" : "upload"}
               label={this.props.uploadLabel}
-              icon="upload"
               onClick={this.upload}
-              disabled={this.props.disabled || !this.hasFiles() || (this.props.accept && this.checkValidExtension())}
             />
           </span>
 

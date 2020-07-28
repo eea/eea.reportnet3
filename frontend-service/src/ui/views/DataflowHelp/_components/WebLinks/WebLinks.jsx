@@ -23,6 +23,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 export const WebLinks = ({
   dataflowId,
   isCustodian,
+  isToolbarVisible,
   onLoadWebLinks,
   setSortFieldWeblinks,
   setSortOrderWeblinks,
@@ -66,7 +67,7 @@ export const WebLinks = ({
         />
       ));
 
-    if (isCustodian) webLinkColArray = [...webLinkColArray, webLinkEditionColumn];
+    if (isToolbarVisible) webLinkColArray = [...webLinkColArray, webLinkEditionColumn];
 
     setWebLinksColumns(webLinkColArray);
   }, [webLinks]);
@@ -185,7 +186,7 @@ export const WebLinks = ({
 
   return (
     <Fragment>
-      {isCustodian ? (
+      {isToolbarVisible ? (
         <Toolbar className={styles.weblinksToolbar}>
           <div className="p-toolbar-group-left">
             <Button
@@ -263,15 +264,28 @@ export const WebLinks = ({
                   <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
                     <Field
                       autoFocus={true}
+                      id={`descriptionWebLinks`}
                       innerRef={inputRef}
                       name="description"
                       type="text"
                       placeholder={resources.messages['description']}
                       value={values.description}
                     />
+                    <label for="descriptionWebLinks" className="srOnly">
+                      {resources.messages['description']}
+                    </label>
                   </div>
                   <div className={`formField${!isEmpty(errors.url) && touched.url ? ' error' : ''}`}>
-                    <Field name="url" type="text" placeholder={resources.messages['url']} value={values.url} />
+                    <Field
+                      id={`urlWebLinks`}
+                      name="url"
+                      type="text"
+                      placeholder={resources.messages['url']}
+                      value={values.url}
+                    />
+                    <label for="urlWebLinks" className="srOnly">
+                      {resources.messages['url']}
+                    </label>
                     <ErrorMessage name="url" component="div" />
                   </div>
                 </fieldset>

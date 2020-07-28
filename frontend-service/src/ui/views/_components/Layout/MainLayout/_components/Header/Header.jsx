@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import isEmpty from 'lodash/isEmpty';
 
@@ -12,6 +12,7 @@ import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { EuHeader } from 'ui/views/_components/Layout/MainLayout/_components/EuHeader';
 
 import { UserService } from 'core/services/User';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
@@ -23,7 +24,7 @@ import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-const Header = withRouter(({ history }) => {
+const Header = withRouter(({ history, onMainContentStyleChange }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -32,6 +33,59 @@ const Header = withRouter(({ history }) => {
   const avatarImage = useRef();
 
   const [confirmvisible, setConfirmVisible] = useState(false);
+
+  const [globanElementStyle, setGlobanElementStyle] = useState({
+    marginTop: 0,
+    transition: '0.5s'
+  });
+  const [euHeaderElementStyle, setEuHeaderElementStyle] = useState({
+    marginTop: 0,
+    transition: '0.5s'
+  });
+  const [headerElementStyle, setHeaderElementStyle] = useState({});
+  useEffect(() => {
+    let prevScrollPos = window.pageYOffset;
+    window.onscroll = () => {
+      const currentScrollPos = window.pageYOffset;
+
+      if (prevScrollPos > currentScrollPos) {
+        setGlobanElementStyle({
+          marginTop: '0',
+          transition: '0.5s'
+        });
+        setEuHeaderElementStyle({
+          marginTop: '0',
+          transition: '0.5s'
+        });
+        setHeaderElementStyle({
+          height: '180px',
+          transition: '0.5s'
+        });
+        onMainContentStyleChange({
+          marginTop: '180px',
+          transition: '0.5s'
+        });
+      } else {
+        setGlobanElementStyle({
+          marginTop: '-100px',
+          transition: '0.5s'
+        });
+        setEuHeaderElementStyle({
+          marginTop: '-20px',
+          transition: '0.5s'
+        });
+        setHeaderElementStyle({
+          height: '70px',
+          transition: '0.5s'
+        });
+        onMainContentStyleChange({
+          marginTop: '70px',
+          transition: '0.5s'
+        });
+      }
+      prevScrollPos = currentScrollPos;
+    };
+  }, []);
 
   useEffect(() => {
     if (!isEmpty(userContext.userProps.userImage) && userContext.userProps.userImage.join('') !== '') {
@@ -49,7 +103,7 @@ const Header = withRouter(({ history }) => {
         history.push(getUrl(routes.DATAFLOWS));
       }}>
       <img height="50px" src={logo} alt="Reportnet 3.0" className={styles.appLogo} />
-      <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>
+      {/* <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1> */}
     </a>
   );
 
@@ -108,7 +162,7 @@ const Header = withRouter(({ history }) => {
         history.push(getUrl(routes.SETTINGS));
       }}>
       <img
-        alt="User avatar"
+        alt="User image"
         className={styles.userAvatar}
         icon={
           <FontAwesomeIcon aria-hidden={false} icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />
@@ -155,24 +209,29 @@ const Header = withRouter(({ history }) => {
   };
 
   return (
-    <div id="header" className={styles.header}>
-      {loadTitle()}
-      <BreadCrumb />
-      {loadUser()}
-      {userContext.userProps.showLogoutConfirmation && (
-        <ConfirmDialog
-          onConfirm={() => {
-            userLogout();
-          }}
-          onHide={() => setConfirmVisible(false)}
-          visible={confirmvisible}
-          header={resources.messages['logout']}
-          labelConfirm={resources.messages['yes']}
-          labelCancel={resources.messages['no']}>
-          {resources.messages['userLogout']}
-        </ConfirmDialog>
-      )}
-    </div>
+    <Fragment>
+      <div id="header" style={headerElementStyle} className={styles.header}>
+        <EuHeader globanElementStyle={globanElementStyle} euHeaderElementStyle={euHeaderElementStyle} />
+        <div className={styles.customHeader}>
+          {loadTitle()}
+          <BreadCrumb />
+          {loadUser()}
+          {userContext.userProps.showLogoutConfirmation && (
+            <ConfirmDialog
+              onConfirm={() => {
+                userLogout();
+              }}
+              onHide={() => setConfirmVisible(false)}
+              visible={confirmvisible}
+              header={resources.messages['logout']}
+              labelConfirm={resources.messages['yes']}
+              labelCancel={resources.messages['no']}>
+              {resources.messages['userLogout']}
+            </ConfirmDialog>
+          )}
+        </div>
+      </div>
+    </Fragment>
   );
 });
 export { Header };

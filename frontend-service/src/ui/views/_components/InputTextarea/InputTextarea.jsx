@@ -227,7 +227,7 @@ export class InputTextarea extends Component {
           onBlur={this.onBlur}
           onKeyUp={this.onKeyUp}
           onInput={this.onInput}></textarea>
-        <label for={this.props.id} className="srOnly">
+        <label htmlFor={this.props.id} className="srOnly">
           {this.props.placeholder}
         </label>
       </>

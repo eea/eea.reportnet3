@@ -19,7 +19,7 @@ public class ReleaseDatasetSnapshotFailedEvent implements NotificableEventHandle
 
   /** The dataset metabase controller zuul. */
   @Autowired
-  private DataSetMetabaseControllerZuul datasetMetabaseController;
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
 
   /**
@@ -43,7 +43,7 @@ public class ReleaseDatasetSnapshotFailedEvent implements NotificableEventHandle
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
     Long snapshotId = notificationVO.getDatasetId();
     String datasetName = notificationVO.getDatasetName() != null ? notificationVO.getDatasetName()
-        : datasetMetabaseController.findDatasetMetabaseById(snapshotId).getDataSetName();
+        : datasetMetabaseControllerZuul.findDatasetMetabaseById(snapshotId).getDataSetName();
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());

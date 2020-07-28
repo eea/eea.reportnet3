@@ -26,7 +26,7 @@ const Snapshots = ({
     <>
       <SnapshotSlideBar
         isLoadingSnapshotListData={isLoadingSnapshotListData}
-        setIsSnapshotDialogVisible={setIsSnapshotDialogVisible}
+        isSnapshotDialogVisible={isSnapshotDialogVisible}
         snapshotListData={snapshotListData}
         isReleaseVisible={isReleaseVisible}
       />
@@ -42,6 +42,8 @@ const Snapshots = ({
         onHide={() => setIsSnapshotDialogVisible(false)}
         showHeader={false}
         visible={isSnapshotDialogVisible}>
+        <p className={styles.dialogQuestion}>{snapshotContext.snapshotState.dialogConfirmQuestion}</p>
+        <p>{snapshotContext.snapshotState.dialogConfirmMessage}</p>
         <ul>
           <li>
             <strong>{resources.messages.creationDate}: </strong>

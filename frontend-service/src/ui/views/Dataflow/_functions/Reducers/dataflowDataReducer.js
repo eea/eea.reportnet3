@@ -40,16 +40,22 @@ export const dataflowDataReducer = (state, { type, payload }) => {
       return { ...state, dataProviderId: payload.id };
 
     case 'SET_DATASET_ID_TO_SNAPSHOT_PROPS':
-      return { ...state, datasetIdToSnapshotProps: payload.id };
+      return { ...state, datasetIdToSnapshotProps: payload.id, datasetNameToSnapshotProps: payload.name };
 
     case 'SET_DESIGN_DATASET_SCHEMAS':
       return { ...state, designDatasetSchemas: payload.designDatasets };
+
+    case 'SET_IS_COPY_DATA_COLLECTION_TO_EU_DATASET_LOADING':
+      return { ...state, isCopyDataCollectionToEuDatasetLoading: payload.isLoading };
 
     case 'SET_IS_DATA_SCHEMA_CORRECT':
       return { ...state, isDataSchemaCorrect: payload.validationResult };
 
     case 'SET_IS_DATA_UPDATED':
       return { ...state, isDataUpdated: !state.isDataUpdated };
+
+    case 'SET_IS_EXPORT_EU_DATASET':
+      return { ...state, isExportEuDatasetLoading: payload.isExportEuDatasetLoading };
 
     case 'SET_IS_PAGE_LOADING':
       return { ...state, isPageLoading: payload.isPageLoading };

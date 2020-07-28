@@ -37,7 +37,7 @@ const ReportnetLogin = ({ history }) => {
           <div className={styles.logo}>
             <img src={logo} alt="Reportnet" />
             <h1>{resources.messages.appName}</h1>
-            {!isEmpty(loginError) && <div class={styles.error}>{loginError}</div>}
+            {!isEmpty(loginError) && <div className={styles.error}>{loginError}</div>}
             {/* <Link to={routes.DATAFLOWS}>cast</Link> */}
           </div>
           <Formik
@@ -70,6 +70,7 @@ const ReportnetLogin = ({ history }) => {
                 <fieldset>
                   <label htmlFor="userName">{resources.messages.loginUserName}</label>
                   <Field
+                    id={'userName'}
                     name="userName"
                     type="text"
                     placeholder={resources.messages.loginUserName}
@@ -83,6 +84,7 @@ const ReportnetLogin = ({ history }) => {
                 <fieldset>
                   <label htmlFor="password">{resources.messages.loginPassword}</label>
                   <Field
+                    id={'password'}
                     name="password"
                     type="password"
                     placeholder={resources.messages.loginPassword}

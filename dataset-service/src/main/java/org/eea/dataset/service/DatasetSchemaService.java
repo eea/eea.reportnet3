@@ -59,13 +59,6 @@ public interface DatasetSchemaService {
   void deleteDatasetSchema(String schemaId, Long datasetId);
 
   /**
-   * Creates the group and add user.
-   *
-   * @param datasetId the dataset id
-   */
-  void createGroupAndAddUser(Long datasetId);
-
-  /**
    * Delete group and remove user.
    *
    * @param datasetId the dataset id

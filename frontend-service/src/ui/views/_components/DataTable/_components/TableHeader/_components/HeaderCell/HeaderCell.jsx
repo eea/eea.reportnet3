@@ -147,7 +147,7 @@ export class HeaderCell extends Component {
             placeholder={this.props.filterPlaceholder}
             maxLength={this.props.filterMaxLength}
           />
-          <label for={`${this.props.field}_${id}_filter`} className="srOnly">
+          <label htmlFor={`${this.props.field}_${id}_filter`} className="srOnly">
             {`${this.props.field}_filter`}
           </label>
         </>

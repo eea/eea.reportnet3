@@ -1,12 +1,14 @@
 package org.eea.dataset.multitenancy;
 
 import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import org.eea.dataset.service.DatasetService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -16,9 +18,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionalProxyConfigurationTest {
 
-  /** The transactional proxy configuration. */
+  /**
+   * The transactional proxy configuration.
+   */
   @InjectMocks
   private TransactionalProxyConfiguration transactionalProxyConfiguration;
+
+  @Mock
+  private DatasetService datasetService;
 
   /**
    * Inits the mocks.
@@ -35,7 +42,7 @@ public class TransactionalProxyConfigurationTest {
    */
   @Test
   public void testProxyDatasetService() {
-    DatasetService result = transactionalProxyConfiguration.proxyDatasetService();
+    DatasetService result = transactionalProxyConfiguration.proxyDatasetService(datasetService);
     assertNotNull("null?", result);
   }
 

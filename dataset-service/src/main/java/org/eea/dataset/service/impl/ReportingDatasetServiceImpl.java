@@ -3,6 +3,7 @@ package org.eea.dataset.service.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.eea.dataset.mapper.ReportingDatasetMapper;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
@@ -92,7 +93,7 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
       List<Snapshot> resultSnapshots =
           snapshotRepository.findByReportingDatasetAndRelease(collection, true);
       List<Long> result = resultSnapshots.stream().map(Snapshot::getReportingDataset)
-          .map(ReportingDataset::getId).collect(Collectors.toList());
+          .map(DataSetMetabase::getId).collect(Collectors.toList());
       for (ReportingDatasetVO dataset : datasetsVO) {
         if (result != null && !result.isEmpty() && dataset != null && dataset.getId() != null) {
 

@@ -119,6 +119,7 @@ public class CreateConnectionEventTest {
     data.put("dataset_id", "dataset_1");
     data.put("idDatasetSchema", "5ce524fad31fc52540abae73");
     eeaEventVO.setData(data);
+    Mockito.when(datasetService.isReportingDataset(Mockito.any())).thenReturn(true);
     createConnectionCommand.execute(eeaEventVO);
     Mockito.verify(datasetService, times(1)).saveStatistics(Mockito.any());
   }

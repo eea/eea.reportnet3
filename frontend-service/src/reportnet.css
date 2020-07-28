@@ -70,7 +70,7 @@
   --c-purple-100: #dd7fd3;
   /* lilac */
   --c-lilac-400: #6f5091;
-  --c-lilac-300: #7474c1;
+  --c-lilac-300: #6d6dc0;
   --c-lilac-200: #b4b5df;
   --c-lilac-100: #dbe2e9;
   /* black-rose */
@@ -105,7 +105,7 @@
   --statusBox-blocker-bg: 194, 200, 207;
   --statusBox-blocker-color: 0, 0, 0;
   --statusBox-error-bg: #ffcdd2;
-  --statusBox-error-color: #c63737;
+  --statusBox-error-color: #a6093d;
   --statusBox-info-bg: #b3e5fc;
   --statusBox-info-color: #23547b;
   --statusBox-warning-bg: #ffd8b2;
@@ -120,7 +120,7 @@
   --statusBox-draft-color: #694382;
   --statusBox-designer-bg: #c2c8cf;
 
-  --header-height: 4rem;
+  --header-height: 180px;
 
   /* Theme switcher */
   --bg: var(--white);
@@ -479,6 +479,10 @@
 
   /* Map */
   --map-marker-color: var(--c-corporate-blue-lighter);
+
+  /*Eu header footer*/
+  --eu-footer-bottom-bg: #d9d9d9;
+  --eu-footer-bottom-font: #016394;
 }
 body {
   margin: 0px;
@@ -2309,8 +2313,4 @@ body .p-dialog.edit-table.calendar-table .p-dialog-content {
 
 .p-growl.p-growl-topright {
   top: 75px !important;
-}
-
-.p-sidebar-right {
-  top: var(--header-height);
 }

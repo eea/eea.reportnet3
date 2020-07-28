@@ -301,6 +301,7 @@ const schemaById = async datasetId => {
       tableSchemaId: datasetTableDTO.idTableSchema,
       tableSchemaDescription: datasetTableDTO.description,
       tableSchemaName: datasetTableDTO.nameTableSchema,
+      tableSchemaNotEmpty: isNull(datasetTableDTO.notEmpty) ? false : datasetTableDTO.notEmpty,
       tableSchemaReadOnly: isNull(datasetTableDTO.readOnly) ? false : datasetTableDTO.readOnly,
       records: records,
       recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null
@@ -374,95 +375,6 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
   return table;
 };
 
-const webFormDataById = async (datasetId, tableSchemaId) => {
-  const webFormDataDTO = await apiDataset.webFormDataById(datasetId, tableSchemaId);
-  const webForm = new DatasetTable({});
-
-  const headerFieldSchemaId = '5d666d53460a1e0001b16717';
-  const valueFieldSchemaId = '5d666d53460a1e0001b16728';
-  const descriptionFieldSchemaId = '5d666d53460a1e0001b1671b';
-  const letterFieldSchemaId = '5d666d53460a1e0001b16721';
-  const numberFieldSchemaId = '5d666d53460a1e0001b16723';
-
-  const formData = {};
-  const columnHeaders = [];
-  const rows = [];
-  const letters = [];
-  const rowHeaders = [];
-  columnHeaders.unshift('GREENHOUSE GAS SOURCE');
-
-  if (webFormDataDTO.totalRecords > 0) {
-    webForm.tableSchemaId = webFormDataDTO.idTableSchema;
-    webForm.totalRecords = webFormDataDTO.totalRecords;
-
-    let field;
-
-    const records = webFormDataDTO.records.map(webFormRecordDTO => {
-      let row = {};
-      webFormRecordDTO.fields.forEach(webFormFieldDTO => {
-        field = new DatasetTableField({
-          fieldId: webFormFieldDTO.id,
-          fieldSchemaId: webFormFieldDTO.idFieldSchema,
-          name: webFormFieldDTO.name,
-          recordId: webFormRecordDTO.idRecordSchema,
-          type: webFormFieldDTO.type,
-          value: webFormFieldDTO.value
-        });
-
-        row.type = field.type;
-        row.fieldSchemaId = field.fieldSchemaId;
-
-        if (field.fieldSchemaId === letterFieldSchemaId) {
-          row.columnPosition = field.value;
-        } else if (field.fieldSchemaId === numberFieldSchemaId) {
-          row.rowPosition = field.value;
-        } else if (field.fieldSchemaId === valueFieldSchemaId) {
-          row.fieldId = webFormFieldDTO.id;
-          row.value = field.value;
-        } else if (field.fieldSchemaId === headerFieldSchemaId) {
-          row.columnHeader = field.value;
-          if (!columnHeaders.includes(field.value)) {
-            columnHeaders.push(field.value);
-          }
-        } else if (field.fieldSchemaId === descriptionFieldSchemaId) {
-          row.description = field.value;
-          if (!rowHeaders.includes(field.value)) {
-            rowHeaders.push(field.value);
-          }
-        }
-
-        return field;
-      });
-      rows.push(row);
-
-      row.recordId = field.recordId;
-
-      if (!letters.includes(row.columnPosition)) {
-        letters.push(row.columnPosition);
-      }
-    });
-    webForm.records = records;
-    webForm.rows = rows;
-  }
-  letters.sort();
-  let dataColumns = createDataColumns(rows, letters);
-
-  formData.columnHeaders = columnHeaders;
-  formData.dataColumns = dataColumns;
-  formData.rowHeaders = rowHeaders;
-
-  return formData;
-};
-
-const createDataColumns = (rowsData, letters) => {
-  let columns = [];
-  letters.forEach(function (value, i) {
-    let columnLetter = rowsData.filter(row => row.columnPosition === value);
-    columns.push(columnLetter);
-  });
-  return columns;
-};
-
 const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fieldValue) => {
   const datasetTableField = new DatasetTableField({});
   datasetTableField.id = fieldId;
@@ -523,14 +435,16 @@ const updateTableDescriptionDesign = async (
   tableSchemaId,
   tableSchemaDescription,
   tableSchemaIsReadOnly,
-  datasetId
+  datasetId,
+  tableSchemaNotEmpty
 ) => {
   const tableSchemaUpdated = await apiDataset.updateTableDescriptionDesign(
     tableSchemaToPrefill,
     tableSchemaId,
     tableSchemaDescription,
     tableSchemaIsReadOnly,
-    datasetId
+    datasetId,
+    tableSchemaNotEmpty
   );
   return tableSchemaUpdated;
 };
@@ -583,6 +497,5 @@ export const ApiDatasetRepository = {
   updateSchemaNameById,
   updateTableDescriptionDesign,
   updateTableNameDesign,
-  validateDataById,
-  webFormDataById
+  validateDataById
 };

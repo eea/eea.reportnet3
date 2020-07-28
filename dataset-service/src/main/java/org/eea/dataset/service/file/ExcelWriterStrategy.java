@@ -79,12 +79,13 @@ public class ExcelWriterStrategy implements WriterStrategy {
    * @param dataflowId the dataflow id
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
+   * @param includeCountryCode the include country code
    * @return the byte[]
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
-  public byte[] writeFile(Long dataflowId, Long datasetId, String idTableSchema)
-      throws EEAException {
+  public byte[] writeFile(Long dataflowId, Long datasetId, String idTableSchema,
+      boolean includeCountryCode) throws EEAException {
 
     DataSetSchemaVO dataset = fileCommon.getDataSetSchema(dataflowId, datasetId);
     ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -106,7 +107,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
       // Add one sheet per table
       for (TableSchemaVO tableSchema : tables) {
-        writeSheet(workbook, tableSchema, datasetId);
+        writeSheet(workbook, tableSchema, datasetId, includeCountryCode);
       }
 
       workbook.write(out);
@@ -144,8 +145,10 @@ public class ExcelWriterStrategy implements WriterStrategy {
    * @param workbook the workbook
    * @param table the table
    * @param datasetId the DataSet id
+   * @param includeCountryCode the include country code
    */
-  private void writeSheet(Workbook workbook, TableSchemaVO table, Long datasetId) {
+  private void writeSheet(Workbook workbook, TableSchemaVO table, Long datasetId,
+      boolean includeCountryCode) {
 
     Sheet sheet = workbook.createSheet(table.getNameTableSchema());
     List<FieldSchemaVO> fieldSchemas = table.getRecordSchema().getFieldSchema();
@@ -156,6 +159,12 @@ public class ExcelWriterStrategy implements WriterStrategy {
     // Set headers
     int nHeaders = 0;
     Row rowhead = sheet.createRow(0);
+
+    if (includeCountryCode) {
+      rowhead.createCell(nHeaders).setCellValue("Country code");
+      nHeaders++;
+    }
+
     for (FieldSchemaVO fieldSchema : fieldSchemas) {
       rowhead.createCell(nHeaders).setCellValue(fieldSchema.getName());
       indexMap.put(fieldSchema.getId(), nHeaders++);
@@ -168,6 +177,10 @@ public class ExcelWriterStrategy implements WriterStrategy {
       Row row = sheet.createRow(nRow++);
       List<FieldValue> fields = record.getFields();
       int nextUnknownCellNumber = nHeaders;
+
+      if (includeCountryCode) {
+        row.createCell(0).setCellValue(record.getDataProviderCode());
+      }
 
       for (int i = 0; i < fields.size(); i++) {
         FieldValue field = fields.get(i);

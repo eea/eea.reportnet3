@@ -1,69 +1,26 @@
-import React, { useReducer, useContext } from 'react';
+import React, { useContext, useReducer } from 'react';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';
 
-import { camelCase } from 'lodash';
+import camelCase from 'lodash/camelCase';
+
+import { NotificationService } from 'core/services/Notification';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext.js';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-import { NotificationService } from 'core/services/Notification';
-
-const notificationReducer = (state, { type, payload }) => {
-  switch (type) {
-    case 'ADD':
-      return {
-        ...state,
-        toShow: [...state.toShow, payload],
-        all: [...state.all, payload],
-        newNotification: true
-      };
-    case 'READ':
-      return {
-        ...state,
-        toShow: [...state.toShow, payload],
-        all: [...state.all, payload],
-        newNotification: false
-      };
-    case 'REMOVE':
-      return {
-        toShow: [...state.toShow, payload],
-        all: [...state.all, payload]
-      };
-    case 'CLEAR_TO_SHOW':
-      return {
-        ...state,
-        toShow: []
-      };
-    case 'DESTROY':
-      return {
-        ...state,
-        toShow: [],
-        all: []
-      };
-    case 'NEW_NOTIFICATION_ADDED':
-      return {
-        ...state,
-        newNotification: false
-      };
-
-    case 'HIDE':
-      return { ...state, hidden: [...state.hidden, payload.hidden] };
-
-    default:
-      return state;
-  }
-};
+import { notificationReducer } from 'ui/views/_functions/Reducers/notificationReducer';
 
 const NotificationProvider = ({ children }) => {
+  const resourcesContext = useContext(ResourcesContext);
+
   const [state, dispatch] = useReducer(notificationReducer, {
     all: [],
     hidden: [],
     newNotification: false,
     toShow: []
   });
-  const resourcesContext = useContext(ResourcesContext);
 
   return (
     <NotificationContext.Provider

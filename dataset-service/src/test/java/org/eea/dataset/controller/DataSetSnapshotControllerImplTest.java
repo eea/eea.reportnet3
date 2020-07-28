@@ -1,5 +1,7 @@
 package org.eea.dataset.controller;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -8,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
+import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +45,9 @@ public class DataSetSnapshotControllerImplTest {
   /** The authentication. */
   Authentication authentication;
 
+  /** The snapshot VO. */
+  SnapshotVO snapshotVO;
+
   /**
    * Inits the mocks.
    */
@@ -51,6 +57,8 @@ public class DataSetSnapshotControllerImplTest {
     securityContext = Mockito.mock(SecurityContext.class);
     securityContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(securityContext);
+    snapshotVO = new SnapshotVO();
+    snapshotVO.setId(1L);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -78,7 +86,7 @@ public class DataSetSnapshotControllerImplTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     dataSetSnapshotControllerImpl.createSnapshot(1L, new CreateSnapshotVO());
     Mockito.verify(datasetSnapshotService, times(1)).addSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any());
+        Mockito.any(), Mockito.any());
   }
 
   /**
@@ -312,5 +320,27 @@ public class DataSetSnapshotControllerImplTest {
 
     dataSetSnapshotControllerImpl.createReceiptPDF(response, 1L, 1L);
     Mockito.verify(response, times(1)).setContentType(Mockito.anyString());
+  }
+
+  /**
+   * Test get snapshot exception.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testGetSnapshotException() throws Exception {
+    doThrow(new EEAException("error")).when(datasetSnapshotService).getById(Mockito.anyLong());
+    assertNull("not null", dataSetSnapshotControllerImpl.getById(1L));
+  }
+
+  /**
+   * Test get snapshot.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testGetSnapshot() throws Exception {
+    when(datasetSnapshotService.getById(Mockito.anyLong())).thenReturn(snapshotVO);
+    assertEquals("not equals", dataSetSnapshotControllerImpl.getById(1L), snapshotVO);
   }
 }

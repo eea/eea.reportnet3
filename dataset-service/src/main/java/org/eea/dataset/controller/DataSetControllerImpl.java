@@ -100,7 +100,9 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   private DesignDatasetService designDatasetService;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
@@ -185,7 +187,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PostMapping("{id}/loadTableData/{idTableSchema}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN')")
   public void loadTableData(
       @LockCriteria(name = "datasetId") @PathVariable("id") final Long datasetId,
       @RequestParam("file") final MultipartFile file, @LockCriteria(
@@ -209,7 +211,8 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-        && datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE)) {
+        && Boolean.TRUE.equals(
+            datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE))) {
       datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
       LOG_ERROR.error(
           "Error importing a file into a table of the dataset {}. The table is read only",
@@ -231,6 +234,45 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+  /**
+   * Load dataset data.
+   *
+   * @param datasetId the dataset id
+   * @param file the file
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping("{id}/loadDatasetData")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ')")
+  public void loadDatasetData(@PathVariable("id") final Long datasetId,
+      @RequestParam("file") final MultipartFile file) {
+
+    // check if dataset is reportable
+    if (!datasetService.isDatasetReportable(datasetId)) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, datasetId));
+    }
+
+    // filter if the file is empty
+    if (file == null || file.isEmpty()) {
+      LOG_ERROR.error(
+          "Error importing a file into a table of the datasetId {}. The file is null or empty",
+          datasetId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
+    }
+    // extract the filename
+    String fileName = file.getOriginalFilename();
+
+    // extract the file content
+    try {
+      fileTreatmentHelper.executeExternalIntegrationFileProcess(datasetId, fileName,
+          file.getInputStream());
+    } catch (IOException | EEAException e) {
+      LOG_ERROR.error("Error importing a file into dataset {}. Message: {}", datasetId,
+          e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
 
   /**
    * Delete import data.
@@ -241,7 +283,7 @@ public class DataSetControllerImpl implements DatasetController {
   @LockMethod(removeWhenFinish = false)
   @HystrixCommand
   @DeleteMapping(value = "{id}/deleteImportData")
-  @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_EDITOR_WRITE') AND checkPermission('Dataset','MANAGE_DATA')")
+  @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void deleteImportData(
       @LockCriteria(name = "id") @PathVariable("id") final Long dataSetId) {
     if (dataSetId == null || dataSetId < 1) {
@@ -304,7 +346,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "{id}", method = RequestMethod.GET)
+  @GetMapping(value = "{id}")
   @Deprecated
   public DataSetVO getById(Long datasetId) {
     if (datasetId == null) {
@@ -344,7 +386,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PutMapping(value = "/{id}/updateRecord", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void updateRecords(@PathVariable("id") final Long datasetId,
       @RequestBody final List<RecordVO> records) {
     if (datasetId == null || records == null || records.isEmpty()) {
@@ -353,8 +395,8 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-        && datasetService.getTableReadOnly(datasetId, records.get(0).getIdRecordSchema(),
-            EntityTypeEnum.RECORD)) {
+        && Boolean.TRUE.equals(datasetService.getTableReadOnly(datasetId,
+            records.get(0).getIdRecordSchema(), EntityTypeEnum.RECORD))) {
       LOG_ERROR.error("Error updating records in the datasetId {}. The table is read only",
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
@@ -379,11 +421,12 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @RequestMapping(value = "/{id}/record/{recordId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void deleteRecord(@PathVariable("id") final Long datasetId,
       @PathVariable("recordId") final String recordId) {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-        && datasetService.getTableReadOnly(datasetId, recordId, EntityTypeEnum.RECORD)) {
+        && Boolean.TRUE
+            .equals(datasetService.getTableReadOnly(datasetId, recordId, EntityTypeEnum.RECORD))) {
       LOG_ERROR.error("Error deleting record in the datasetId {}. The table is read only",
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
@@ -407,9 +450,9 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/{id}/table/{idTableSchema}/record", method = RequestMethod.POST,
+  @PostMapping(value = "/{id}/table/{idTableSchema}/record",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void insertRecords(@PathVariable("id") final Long datasetId,
       @PathVariable("idTableSchema") final String idTableSchema,
       @RequestBody final List<RecordVO> records) {
@@ -443,7 +486,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @DeleteMapping(value = "{datasetId}/deleteImportTable/{tableSchemaId}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void deleteImportTable(
       @LockCriteria(name = "datasetId") @PathVariable("datasetId") final Long datasetId,
       @LockCriteria(
@@ -489,7 +532,7 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @GetMapping("/exportFile")
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public ResponseEntity exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "idTableSchema", required = false) String idTableSchema,
       @RequestParam("mimeType") String mimeType) {
@@ -547,7 +590,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PutMapping(value = "/{id}/updateField", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void updateField(@PathVariable("id") final Long datasetId,
       @RequestBody final FieldVO field) {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
@@ -619,11 +662,12 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   *
    * @return the ETL dataset VO
    */
   @Override
   @GetMapping("/{datasetId}/etlExport")
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public ETLDatasetVO etlExportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId) {
@@ -653,7 +697,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param providerId the provider id
    */
   @Override
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   @PostMapping("/{datasetId}/etlImport")
   public void etlImportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,

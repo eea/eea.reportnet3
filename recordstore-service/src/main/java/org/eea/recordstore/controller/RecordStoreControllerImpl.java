@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -77,7 +79,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @RequestMapping(value = "/dataset/create/{datasetName}", method = RequestMethod.POST)
   public void createEmptyDataset(@PathVariable("datasetName") final String datasetName,
       @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema) {
-    // TODO neeed to create standar
+    // TODO need to create standard
     try {
       recordStoreService.createEmptyDataSet(datasetName, idDatasetSchema);
     } catch (final RecordStoreAccessException e) {
@@ -86,17 +88,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     }
   }
 
-  @RequestMapping(value = "/dataset/create/{datasetName}/poc", method = RequestMethod.POST)
-  public void createEmptyDatasetPoc(@PathVariable("datasetName") final String datasetName,
-      @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema) {
-    // TODO neeed to create standar
-    try {
-      recordStoreService.createEmptyDataSet(datasetName, idDatasetSchema);
-    } catch (final RecordStoreAccessException e) {
-      LOG_ERROR.error(e.getMessage(), e);
-      // TODO Error control
-    }
-  }
+
 
   /**
    * Gets the connection to dataset.
@@ -147,14 +139,17 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @RequestMapping(value = "/dataset/{datasetId}/snapshot/create", method = RequestMethod.POST)
   public void createSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
       @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset) {
     try {
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
       recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset);
       LOG.info("Snapshot created");
-    } catch (SQLException | IOException | RecordStoreAccessException e) {
+    } catch (SQLException | IOException | RecordStoreAccessException | EEAException e) {
       LOG_ERROR.error(e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
@@ -190,47 +185,6 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
-  }
-
-  /**
-   * Restore snapshot data.
-   *
-   * @param datasetId the dataset id
-   * @param idSnapshot the id snapshot
-   * @param idPartition the id partition
-   * @param datasetType the dataset type
-   */
-  @PostMapping("/dataset/{datasetId}/snapshot/restore/poc")
-  public void restoreSnapshotDataPOC(@PathVariable("datasetId") Long datasetId,
-      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
-      @RequestParam(value = "partitionId", required = true) Long idPartition,
-      @RequestParam(value = "typeDataset", required = true) DatasetTypeEnum datasetType,
-      @RequestParam(value = "user", required = true) String user,
-      @RequestParam(value = "isSchemaSnapshot", required = true) Boolean isSchemaSnapshot,
-      @RequestParam(value = "deleteData", defaultValue = "true") Boolean deleteData) {
-
-    try {
-      ThreadPropertiesManager.setVariable("user", user);
-      recordStoreService.restoreDataSnapshotPoc(datasetId, idSnapshot, idPartition, datasetType,
-          isSchemaSnapshot, deleteData);
-    } catch (SQLException | IOException e) {
-      LOG_ERROR.error(e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-    }
-
-  }
-
-  @RequestMapping(value = "/dataset/{datasetId}/snapshot/create/poc", method = RequestMethod.POST)
-  public void createSnapshotDataPoc(@PathVariable("datasetId") Long datasetId,
-      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
-      @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset) {
-    try {
-      recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset);
-      LOG.info("Snapshot created");
-    } catch (SQLException | IOException | RecordStoreAccessException e) {
-      LOG_ERROR.error(e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-    }
   }
 
   /**

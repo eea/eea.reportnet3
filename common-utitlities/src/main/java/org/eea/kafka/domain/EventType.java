@@ -8,23 +8,47 @@ public enum EventType {
   /** The connection created event. */
   CONNECTION_CREATED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "connection_key", true),
 
+  /** The spread data event. */
   SPREAD_DATA_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "connection_key", true),
 
   /** The validation finished event. */
   VALIDATION_FINISHED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_finished_key", true),
 
-  /** The load data completed event. */
-  LOAD_DATA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "load_data_completed_key", true),
+  /** The import reporting completed event. */
+  IMPORT_REPORTING_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_reporting_completed_event", true),
 
-  /** The load data completed event. */
-  LOAD_DATA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "load_data_failed_key", true),
+  /** The import reporting failed event. */
+  IMPORT_REPORTING_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_reporting_failed_event", true),
 
-  /** The load schema completed event. */
-  LOAD_SCHEMA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "load_schema_completed_key",
+  /** The import design completed event. */
+  IMPORT_DESIGN_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_design_completed_event", true),
+
+  /** The import design failed event. */
+  IMPORT_DESIGN_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "import_design_failed_event",
       true),
 
-  /** The load schema failed event. */
-  LOAD_SCHEMA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "load_schema_failed_key", true),
+  /** The external import reporting completed event. */
+  EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "external_import_reporting_completed_event", true),
+
+  /** The external import design completed event. */
+  EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "external_import_design_completed_event", true),
+
+  /** The external export reporting completed event. */
+  EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "external_export_reporting_completed_event", true),
+
+  /** The external export design completed event. */
+  EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "external_export_design_completed_event", true),
+
+  /** The external export eudataset completed event. */
+  EXTERNAL_EXPORT_EUDATASET_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "external_export_eudataset_completed_event", true),
 
   /** The load record completed event. */
   RECORD_UPDATED_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
@@ -58,6 +82,10 @@ public enum EventType {
   RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "dataset_snapshot_restored_completed_key", true),
 
+  /** The restore datacollection snapshot completed event. */
+  RESTORE_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "dataCollection_snapshot_restored_completed_key", true),
+
   /** The restore dataset snapshot failed event. */
   RESTORE_DATASET_SNAPSHOT_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "dataset_snapshot_restored_failed_key", true),
@@ -74,6 +102,10 @@ public enum EventType {
   ADD_DATASET_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "add_dataset_snapshot_completed_event", true),
 
+  /** The add datacollection snapshot completed event. */
+  ADD_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "add_dataCollection_snapshot_completed_event", true),
+
   /** The add dataset snapshot failed event. */
   ADD_DATASET_SNAPSHOT_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "add_dataset_snapshot_failed_event", true),
@@ -85,6 +117,14 @@ public enum EventType {
   /** The add dataset schema snapshot failed event. */
   ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "add_dataset_schema_snapshot_failed_event", true),
+
+  /** The copy data to eudataset completed event. */
+  COPY_DATA_TO_EUDATASET_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "copy_data_to_eudataset_completed_event", true),
+
+  /** The copy data to eudataset failed event. */
+  COPY_DATA_TO_EUDATASET_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "copy_data_to_eudataset_failed_event", true),
 
   /** The command execute validation. */
   COMMAND_EXECUTE_VALIDATION(LiteralConstants.COMMAND_TOPIC, "execute_validations_key", false),

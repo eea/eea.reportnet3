@@ -20,6 +20,7 @@ import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
 import { DataCollectionService } from 'core/services/DataCollection';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
+import { EuDatasetService } from 'core/services/EuDataset';
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -40,6 +41,8 @@ export const BigButtonList = ({
   onShowManageReportersDialog,
   onShowSnapshotDialog,
   onUpdateData,
+  setIsCopyDataCollectionToEuDatasetLoading,
+  setIsExportEuDatasetLoading,
   setIsReceiptLoading,
   setUpdatedDatasetSchema,
   updatedDatasetSchema
@@ -71,6 +74,16 @@ export const BigButtonList = ({
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
   useCheckNotifications(['UPDATE_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
+  useCheckNotifications(
+    ['COPY_DATA_TO_EUDATASET_COMPLETED_EVENT', 'COPY_DATA_TO_EUDATASET_FAILED_EVENT'],
+    setIsCopyDataCollectionToEuDatasetLoading,
+    false
+  );
+  useCheckNotifications(
+    ['EXTERNAL_EXPORT_EUDATASET_COMPLETED_EVENT', 'EXTERNAL_EXPORT_EUDATASET_FAILED_EVENT'],
+    setIsExportEuDatasetLoading,
+    false
+  );
 
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
@@ -95,7 +108,7 @@ export const BigButtonList = ({
     try {
       await DataflowService.cloneDatasetSchemas(cloneDataflow.id, dataflowId);
     } catch (error) {
-      console.log('error', error);
+      console.error(error);
     }
   };
 
@@ -273,10 +286,48 @@ export const BigButtonList = ({
     setIsDuplicated(false);
   };
 
+  const onCopyDataCollectionToEuDataset = async () => {
+    setIsCopyDataCollectionToEuDatasetLoading(true);
+
+    try {
+      const response = await EuDatasetService.copyDataCollection(dataflowId);
+      if (response.status >= 200 && response.status <= 299) {
+        notificationContext.add({ type: 'COPY_TO_EU_DATASET_INIT' });
+      }
+    } catch (error) {
+      setIsCopyDataCollectionToEuDatasetLoading(false);
+
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });
+      } else {
+        notificationContext.add({ type: 'COPY_DATA_COLLECTION_EU_DATASET_ERROR' });
+      }
+    }
+  };
+
+  const onExportEuDataset = async () => {
+    setIsExportEuDatasetLoading(true);
+
+    try {
+      const response = await EuDatasetService.exportEuDataset(dataflowId);
+      if (response.status >= 200 && response.status <= 299) {
+        notificationContext.add({ type: 'EXPORT_EU_DATASET_INIT' });
+      }
+    } catch (error) {
+      setIsExportEuDatasetLoading(false);
+
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });
+      } else {
+        notificationContext.add({ type: 'EXPORT_EU_DATASET_ERROR' });
+      }
+    }
+  };
+
   const onLoadReceiptData = async () => {
     try {
       setIsReceiptLoading(true);
-      const response = await ConfirmationReceiptService.get(dataflowId, dataflowState.dataProviderId);
+      const response = await ConfirmationReceiptService.download(dataflowId, dataflowState.dataProviderId);
 
       downloadPdf(response);
       onCleanUpReceipt();
@@ -326,13 +377,14 @@ export const BigButtonList = ({
     useBigButtonList({
       dataflowId,
       dataflowState,
-      // exportDatatableSchema,
       getDeleteSchemaIndex,
       handleRedirect,
       isActiveButton,
       onCloneDataflow,
+      onCopyDataCollectionToEuDataset,
       onDatasetSchemaNameError,
       onDuplicateName,
+      onExportEuDataset,
       onLoadReceiptData,
       onSaveName,
       onShowDataCollectionModal,
@@ -350,7 +402,7 @@ export const BigButtonList = ({
   return (
     <>
       <div className={styles.buttonsWrapper}>
-        <div className={styles.splitButtonWrapper}>
+        <div className={`${styles.splitButtonWrapper} dataflow-big-buttons-help-step`}>
           <div className={styles.datasetItem}>{bigButtonList}</div>
         </div>
       </div>
@@ -474,7 +526,10 @@ export const BigButtonList = ({
         </ConfirmDialog>
       )}
 
-      <button ref={receiptBtnRef} style={{ display: 'none' }}>
+      <button
+        className="dataflow-big-buttons-confirmation-receipt-help-step"
+        ref={receiptBtnRef}
+        style={{ display: 'none' }}>
         <span className="srOnly">{resources.messages['confirmationReceipt']}</span>
       </button>
     </>

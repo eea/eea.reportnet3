@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -28,16 +28,27 @@ const ValidationExpression = ({
   position,
   showRequiredFields
 }) => {
-  const resourcesContext = useContext(ResourcesContext);
   const { expressionId } = expressionValues;
+  const {
+    validations: { operatorTypes: operatorTypesConf, operatorByType }
+  } = config;
+  const inputStringMatchRef = useRef(null);
+  const resourcesContext = useContext(ResourcesContext);
   const [clickedFields, setClickedFields] = useState([]);
+  const [isActiveStringMatchInput, setIsActiveStringMatchInput] = useState(false);
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [operatorValues, setOperatorValues] = useState([]);
   const [valueInputProps, setValueInputProps] = useState();
   const [valueKeyFilter, setValueKeyFilter] = useState();
-  const {
-    validations: { operatorTypes: operatorTypesConf, operatorByType }
-  } = config;
+
+  useEffect(() => {
+    if (inputStringMatchRef.current && isActiveStringMatchInput) {
+      inputStringMatchRef.current.element.focus();
+    }
+    return () => {
+      setIsActiveStringMatchInput(false);
+    };
+  }, [inputStringMatchRef.current, isActiveStringMatchInput]);
 
   useEffect(() => {
     if (expressionValues.operatorType) {
@@ -146,6 +157,7 @@ const ValidationExpression = ({
       }
     }, 250);
   };
+
   const onDeleteFromClickedFields = field => {
     const cClickedFields = [...clickedFields];
     if (cClickedFields.includes(field)) {
@@ -153,6 +165,12 @@ const ValidationExpression = ({
       setClickedFields(cClickedFields);
     }
   };
+
+  const onCCButtonClick = ccButtonValue => {
+    onUpdateExpressionField('expressionValue', ccButtonValue);
+    setIsActiveStringMatchInput(true);
+  };
+
   const checkField = (field, fieldValue) => {
     if (field === 'year') {
       const yearInt = parseInt(fieldValue);
@@ -200,6 +218,29 @@ const ValidationExpression = ({
           value={expressionValues.expressionValue}
         />
       );
+    }
+    if (operatorType === 'string') {
+      if (operatorValue === 'MATCH') {
+        const ccButtonValue = `${expressionValues.expressionValue}{%R3_COUNTRY_CODE%}`;
+        return (
+          <span className={styles.inputStringMatch}>
+            <InputText
+              disabled={isDisabled}
+              onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
+              placeholder={resourcesContext.messages.value}
+              value={expressionValues.expressionValue}
+              ref={inputStringMatchRef}
+            />
+            <Button
+              className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
+              label="CC"
+              tooltip={resourcesContext.messages['matchStringTooltip']}
+              tooltipOptions={{ position: 'top' }}
+              onClick={() => onCCButtonClick(ccButtonValue)}
+            />
+          </span>
+        );
+      }
     }
 
     if (operatorType === 'number') {
