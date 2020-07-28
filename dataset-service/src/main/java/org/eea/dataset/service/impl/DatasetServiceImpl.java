@@ -32,6 +32,7 @@ import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValidation;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.data.repository.AttachmentRepository;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.FieldValidationRepository;
@@ -304,6 +305,9 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private DatasetSchemaService datasetSchemaService;
+
+  @Autowired
+  private AttachmentRepository attachmentRepository;
 
 
   /**
@@ -1326,14 +1330,16 @@ public class DatasetServiceImpl implements DatasetService {
     // PHONE TYPE TO STORE AN ATTACHMENT - PROVISIONAL
     if (DataType.PHONE.equals(field.getType())) {
       AttachmentValue attachment = new AttachmentValue();
-      attachment.setFileName("prueba");
+      attachment.setFileName("prueba.txt");
       attachment.setFieldValue(field);
       byte byteArray[] = new byte[10000000];
       for (int i = 0; i < byteArray.length; i++) {
         byteArray[i] = '1';
       }
       attachment.setContent(byteArray);
-      field.setAttachment(attachment);
+      // field.setAttachment(attachment);
+      field.setValue(attachment.getFileName());
+      attachmentRepository.save(attachment);
     }
   }
 
@@ -2313,6 +2319,14 @@ public class DatasetServiceImpl implements DatasetService {
     Long dataflowId = getDataFlowIdById(idDataset);
     // get de dataflow
     return dataflowControllerZull.getMetabaseById(dataflowId);
+  }
+
+  @Override
+  @Transactional
+  public AttachmentValue getAttachment(Long datasetId, String idField)
+      throws EEAException, IOException {
+
+    return attachmentRepository.findByFieldValueId(idField);
   }
 
 }

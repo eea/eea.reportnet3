@@ -133,18 +133,21 @@ public interface DatasetController {
   @GetMapping("{id}/dataflow")
   Long getDataFlowIdById(@PathVariable("id") Long datasetId);
 
+
   /**
    * Insert records.
    *
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param records the records
+   * @param file the file
    */
   @PostMapping(value = "/{id}/table/{idTableSchema}/record",
       produces = MediaType.APPLICATION_JSON_VALUE)
   void insertRecords(@PathVariable("id") final Long datasetId,
       @PathVariable("idTableSchema") final String idTableSchema,
-      @RequestBody List<RecordVO> records);
+      @RequestBody List<RecordVO> records,
+      @RequestParam(value = "file", required = false) final MultipartFile file);
 
   /**
    * Update record.
@@ -274,5 +277,10 @@ public interface DatasetController {
   void etlImportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
+
+  @GetMapping("/{datasetId}/field/{fieldId}/attachment")
+  @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+  ResponseEntity getAttachment(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("fieldId") String fieldId) throws Exception;
 
 }

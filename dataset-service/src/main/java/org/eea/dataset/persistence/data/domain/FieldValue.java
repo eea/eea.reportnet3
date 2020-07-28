@@ -7,14 +7,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -82,9 +80,10 @@ public class FieldValue {
   @Transient
   private ErrorTypeEnum levelError;
 
-  @OneToOne(mappedBy = "fieldValue", fetch = FetchType.LAZY, cascade = CascadeType.ALL,
-      orphanRemoval = false)
-  private AttachmentValue attachment;
+  /*
+   * @OneToOne(mappedBy = "fieldValue", fetch = FetchType.LAZY, cascade = CascadeType.ALL,
+   * orphanRemoval = false) private AttachmentValue attachment;
+   */
 
   /**
    * Hash code.

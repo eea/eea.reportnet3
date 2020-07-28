@@ -679,7 +679,7 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testinsertRecordsNullEntry() throws Exception {
-    dataSetControllerImpl.insertRecords(null, "id", new ArrayList<>());
+    dataSetControllerImpl.insertRecords(null, "id", new ArrayList<>(), null);
   }
 
   /**
@@ -689,7 +689,7 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testinsertRecordsNull() throws Exception {
-    dataSetControllerImpl.insertRecords(-2L, "id", null);
+    dataSetControllerImpl.insertRecords(-2L, "id", null, null);
   }
 
   /**
@@ -699,7 +699,7 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testinsertRecordsEmpty() throws Exception {
-    dataSetControllerImpl.insertRecords(1L, "id", new ArrayList<>());
+    dataSetControllerImpl.insertRecords(1L, "id", new ArrayList<>(), null);
   }
 
   /**
@@ -711,7 +711,7 @@ public class DataSetControllerImplTest {
   public void testinsertRecordsSuccess() throws Exception {
     doNothing().when(updateRecordHelper).executeCreateProcess(Mockito.any(), Mockito.any(),
         Mockito.any());
-    dataSetControllerImpl.insertRecords(1L, "id", records);
+    dataSetControllerImpl.insertRecords(1L, "id", records, null);
     Mockito.verify(updateRecordHelper, times(1)).executeCreateProcess(Mockito.any(), Mockito.any(),
         Mockito.any());
   }
@@ -725,7 +725,7 @@ public class DataSetControllerImplTest {
   public void testinsertRecordsNotFoundException() throws Exception {
     doThrow(new EEAException()).when(updateRecordHelper).executeCreateProcess(Mockito.any(),
         Mockito.any(), Mockito.any());
-    dataSetControllerImpl.insertRecords(1L, "id", records);
+    dataSetControllerImpl.insertRecords(1L, "id", records, null);
   }
 
 
@@ -742,7 +742,7 @@ public class DataSetControllerImplTest {
       Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
           .thenReturn(true);
 
-      dataSetControllerImpl.insertRecords(1L, "id", records);
+      dataSetControllerImpl.insertRecords(1L, "id", records, null);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
       throw e;

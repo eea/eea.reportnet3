@@ -10,7 +10,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
-import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
@@ -44,9 +43,8 @@ public class AttachmentValue {
   @Basic(fetch = FetchType.LAZY)
   private byte content[];
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @OneToOne
   @JoinColumn(name = "FIELD_VALUE_ID")
-  @MapsId
   private FieldValue fieldValue;
 
   /**

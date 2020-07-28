@@ -144,7 +144,10 @@ public enum DataType {
    *
    * Cast in JPA: java.lang.String
    */
-  EMAIL("EMAIL", JavaType.STRING);
+  EMAIL("EMAIL", JavaType.STRING),
+
+  /** The attachment. */
+  ATTACHMENT("ATTACHMENT", JavaType.UNSUPPORTED);
 
 
   /**

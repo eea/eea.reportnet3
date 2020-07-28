@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import javax.ws.rs.Produces;
+import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DesignDatasetService;
@@ -455,7 +456,8 @@ public class DataSetControllerImpl implements DatasetController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void insertRecords(@PathVariable("id") final Long datasetId,
       @PathVariable("idTableSchema") final String idTableSchema,
-      @RequestBody final List<RecordVO> records) {
+      @RequestBody final List<RecordVO> records,
+      @RequestParam(value = "file", required = false) final MultipartFile file) {
     if (datasetId == null || records == null || records.isEmpty()) {
       LOG_ERROR.error("Error inserting records. The datasetId or the records are empty or null");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
@@ -721,5 +723,32 @@ public class DataSetControllerImpl implements DatasetController {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
+  }
+
+  @Override
+  @HystrixCommand
+  @GetMapping("/{datasetId}/field/{fieldId}/attachment")
+  @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+  public ResponseEntity getAttachment(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("fieldId") String idField) throws Exception {
+
+    LOG.info("Init the get attachment controller");
+    byte[] file;
+    try {
+      AttachmentValue attachment = datasetService.getAttachment(datasetId, idField);
+
+      String filename = attachment.getFileName();
+      file = attachment.getContent();
+
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
+
+      return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
+
+    } catch (EEAException | IOException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+
+
   }
 }

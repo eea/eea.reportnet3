@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.exception.EEAException;
@@ -430,4 +431,7 @@ public interface DatasetService {
    */
   void copyData(Map<Long, Long> dictionaryOriginTargetDatasetsId,
       Map<String, String> dictionaryOriginTargetObjectId);
+
+  AttachmentValue getAttachment(@DatasetId Long datasetId, String idField)
+      throws EEAException, IOException;
 }
