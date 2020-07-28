@@ -381,7 +381,8 @@ const useBigButtonList = ({
         buttonIcon: 'released',
         buttonIconClass: 'released',
         caption: resources.messages['releaseDataCollection'],
-        handleRedirect: datasets.length > 1 ? () => {} : () => onShowSnapshotDialog(datasets[0].datasetId),
+        handleRedirect:
+          datasets.length > 1 ? () => {} : () => onShowSnapshotDialog(datasets[0].datasetId, datasets[0].name),
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: datasets.length > 1 ? 'menuBigButton' : 'defaultBigButton',
         visibility:
@@ -397,7 +398,7 @@ const useBigButtonList = ({
         return {
           label: dataset.name,
           icon: 'cloudUpload',
-          command: () => onShowSnapshotDialog(dataset.datasetId),
+          command: () => onShowSnapshotDialog(dataset.datasetId, dataset.name),
           disabled: false
         };
       });

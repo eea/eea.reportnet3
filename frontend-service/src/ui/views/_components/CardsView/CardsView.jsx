@@ -5,7 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 
 import styles from './CardsView.module.scss';
 
-import { Card } from './_components/Card';
+import { Card } from 'ui/views/_components/Card';
 
 import { Paginator } from 'ui/views/_components/DataTable/_components/Paginator';
 

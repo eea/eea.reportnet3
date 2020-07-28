@@ -8,6 +8,7 @@
     height: 28px;
     line-height: 22px;
     font-weight: normal;
+    font-size: 0.87rem;
     &::before {
       content: '\00a0' !important;
       display: inline-block;
@@ -53,6 +54,9 @@
         }
       }
     }
+  }
+  @media (max-width: 768px) {
+    display: none;
   }
 }
 .euHeader {

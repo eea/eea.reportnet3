@@ -108,7 +108,7 @@ export const BigButtonList = ({
     try {
       await DataflowService.cloneDatasetSchemas(cloneDataflow.id, dataflowId);
     } catch (error) {
-      console.log('error', error);
+      console.error(error);
     }
   };
 
