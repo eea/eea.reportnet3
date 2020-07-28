@@ -37,6 +37,13 @@ const SnapshotSlideBar = ({
     showScrollingBar();
   }, [slideBarStyle]);
 
+  useEffect(() => {
+    window.addEventListener('resize', resetSlideBarPositionAndSize);
+    return () => {
+      window.removeEventListener('resize', resetSlideBarPositionAndSize);
+    };
+  });
+
   const showScrollingBar = () => {
     const bodySelector = document.querySelector('body');
 
