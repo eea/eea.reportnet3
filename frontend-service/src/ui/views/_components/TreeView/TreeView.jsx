@@ -249,7 +249,7 @@ const getFieldTypeValue = value => {
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
     { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
     { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' },
-    { fieldType: 'Attachement', value: 'Attachement', fieldTypeIcon: 'clip' }
+    { fieldType: 'Attachment', value: 'Attachment', fieldTypeIcon: 'clip' }
   ];
 
   // if (value.toUpperCase() === 'COORDINATE_LONG') {

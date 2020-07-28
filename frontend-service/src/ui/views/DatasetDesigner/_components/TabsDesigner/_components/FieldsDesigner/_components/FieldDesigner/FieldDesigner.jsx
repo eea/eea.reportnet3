@@ -80,7 +80,7 @@ export const FieldDesigner = ({
     // { fieldType: 'Formula', value: 'Formula', fieldTypeIcon: 'formula' },
     // { fieldType: 'Fixed', value: 'Fixed select list', fieldTypeIcon: 'list' },
     // { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
-    { fieldType: 'Attachement', value: 'Attachement', fieldTypeIcon: 'clip' }
+    { fieldType: 'Attachment', value: 'Attachment', fieldTypeIcon: 'clip' }
   ];
 
   const getFieldTypeValue = value => {

@@ -805,8 +805,8 @@
     "datasetSchemaRequesterEmptyHelpConfig": "Here you have the tools to design your schema. Open me again when you have created your first table.",
     "release": "Release ",
     "notEmpty": "Mandatory table",
-    "uploadAttachement": "Attach file",
-    "supportedFileAttachementsTooltip": "Supported file attachements: ",
+    "uploadAttachment": "Attach file",
+    "supportedFileAttachmentsTooltip": "Supported file attachments: ",
     "deleteAttachmentHeader": "Delete attachment",
     "deleteAttachmentConfirm": "Are you sure you want to delete the attached file?"
   }

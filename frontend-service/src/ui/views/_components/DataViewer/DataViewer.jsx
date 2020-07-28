@@ -919,7 +919,7 @@ const DataViewer = withRouter(
       .map(file => `.${file.fileExtension}`)
       .join(', ');
 
-    const infoAttachTooltip = `${resources.messages['supportedFileAttachementsTooltip']} ${getAttachExtensions}`;
+    const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions}`;
 
     return (
       <SnapshotContext.Provider>
@@ -1079,11 +1079,12 @@ const DataViewer = withRouter(
             className={styles.Dialog}
             dismissableMask={false}
             footer={renderCustomFileAttachFooter}
-            header={`${resources.messages['uploadAttachement']}`}
+            header={`${resources.messages['uploadAttachment']}`}
             onHide={() => setIsAttachFileVisible(false)}
             visible={isAttachFileVisible}>
             <CustomFileUpload
               // accept={getAttachExtensions}
+              accept=".txt"
               chooseLabel={resources.messages['selectFile']}
               className={styles.FileUpload}
               fileLimit={1}

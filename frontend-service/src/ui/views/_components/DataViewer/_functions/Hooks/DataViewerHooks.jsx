@@ -115,7 +115,7 @@ export const useSetColumns = (
       { fieldType: 'Codelist', value: 'Single select' },
       { fieldType: 'Multiselect_Codelist', value: 'Multiple select' },
       { fieldType: 'Link', value: 'Link' },
-      { fieldType: 'Attachement', value: 'Attachement' }
+      { fieldType: 'Attachment', value: 'Attachment' }
     ];
 
     if (!isUndefined(fieldType)) {
@@ -126,7 +126,7 @@ export const useSetColumns = (
     }
   };
 
-  const renderAttachement = (value = '') => (
+  const renderAttachment = (value = '') => (
     <div style={{ display: 'flex', justifyContent: 'center' }}>
       {value !== '' && (
         <Button
@@ -205,7 +205,7 @@ export const useSetColumns = (
                   !Array.isArray(field.fieldData[column.field]))
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData.type === 'PHONE'
-              ? renderAttachement(field.fieldData[column.field])
+              ? renderAttachment(field.fieldData[column.field])
               : field.fieldData[column.field]
             : null}
           <IconTooltip levelError={levelError} message={message} />
@@ -230,7 +230,7 @@ export const useSetColumns = (
                   !Array.isArray(field.fieldData[column.field]))
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData.type === 'PHONE'
-              ? renderAttachement(field.fieldData[column.field])
+              ? renderAttachment(field.fieldData[column.field])
               : field.fieldData[column.field]
             : null}
         </div>
