@@ -579,7 +579,7 @@ public class ValidationHelper implements DisposableBean {
   private boolean checkStartedProcess(String processId) {
     boolean isProcessStarted = processesMap.containsKey(processId);
     if (!isProcessStarted) {
-      LOG.warn("Error, proces {} has not been initialized or it has been already finished",
+      LOG.warn("Warning, proces {} has not been initialized or it has been already finished",
           processId);
     }
     return isProcessStarted;
