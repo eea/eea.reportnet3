@@ -26,8 +26,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   public List<String> queryExecution(String generatedQuery) {
 
     Query query = entityManager.createNativeQuery(generatedQuery);
-    List<String> resultList = query.getResultList();
-    return resultList;
+    return query.getResultList();
 
   }
 

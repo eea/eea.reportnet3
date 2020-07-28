@@ -2,7 +2,6 @@ package org.eea.security.jwt.utils;
 
 import static org.keycloak.TokenVerifier.IS_ACTIVE;
 import static org.keycloak.TokenVerifier.SUBJECT_EXISTS_CHECK;
-
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -10,7 +9,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import javax.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
 import org.eea.security.jwt.data.CacheTokenVO;
 import org.eea.security.jwt.data.TokenDataVO;
 import org.keycloak.TokenVerifier;
@@ -24,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * The type Jwt token provider.

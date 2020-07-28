@@ -27,6 +27,6 @@ public abstract class KafkaReceiver {
    * @throws EEAException the EEA exception
    */
 
-  public abstract void listenMessage(final Message<EEAEventVO> message) throws EEAException;
+  public abstract void listenMessage(Message<EEAEventVO> message) throws EEAException;
 
 }
