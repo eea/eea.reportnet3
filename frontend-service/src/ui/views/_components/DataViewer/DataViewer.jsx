@@ -919,6 +919,8 @@ const DataViewer = withRouter(
       .map(file => `.${file.fileExtension}`)
       .join(', ');
 
+    const infoAttachTooltip = `${resources.messages['supportedFileAttachementsTooltip']} ${getAttachExtensions}`;
+
     return (
       <SnapshotContext.Provider>
         <ActionsToolbar
@@ -1091,7 +1093,7 @@ const DataViewer = withRouter(
               invalidExtensionMessage={resources.messages['invalidExtensionFile']}
               name="file"
               onUpload={onAttach}
-              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.loadDataTable, {
+              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableData, {
                 datasetId: datasetId,
                 tableId: tableId
               })}`}

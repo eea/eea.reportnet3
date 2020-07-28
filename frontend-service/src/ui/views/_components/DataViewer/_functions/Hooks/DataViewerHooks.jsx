@@ -268,9 +268,7 @@ export const useSetColumns = (
           body={dataTemplate}
           className={invisibleColumn}
           editor={
-            hasWritePermissions && !isWebFormMMR && column.type !== 'PHONE'
-              ? row => cellDataEditor(row, records.selectedRecord)
-              : null
+            hasWritePermissions && column.type !== 'PHONE' ? row => cellDataEditor(row, records.selectedRecord) : null
           }
           field={column.field}
           header={
