@@ -91,6 +91,7 @@ import {
   faCircle,
   faClone,
   faComments,
+  faEnvelope,
   faEyeSlash,
   faMinusSquare,
   faPlusSquare,
@@ -187,6 +188,8 @@ export const AwesomeIcons = icon => {
       return faPen;
     case 'email':
       return faAt;
+    case 'envelope':
+      return faEnvelope;
     case 'euDataset':
       return faCube;
     case 'expanded':
