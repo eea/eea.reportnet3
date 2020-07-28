@@ -72,7 +72,8 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
 
       canAccess = !roles.stream().filter(authorities::contains).findFirst()
           .orElse(LiteralConstants.NOT_FOUND).equals(LiteralConstants.NOT_FOUND);
-      if (!canAccess) {// No authority found in the current token. Check against keycloak to finde
+      // No authority found in the current token. Check against keycloak to find it
+      if (!canAccess) {
         // if there were some change at User rights that wasn't be propagated to the
         // token yet
         List<ResourceAccessVO> resourceAccessVOS = null;

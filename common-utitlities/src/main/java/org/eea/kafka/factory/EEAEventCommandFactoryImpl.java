@@ -46,9 +46,8 @@ public class EEAEventCommandFactoryImpl implements EEAEventCommandFactory {
   private void init() {
     eventHandleCommands = new HashMap<>();
     if (null != commands) {
-      commands.stream().forEach(command -> {
-        eventHandleCommands.put(command.getEventType(), command);
-      });
+      commands.stream()
+          .forEach(command -> eventHandleCommands.put(command.getEventType(), command));
     }
   }
 

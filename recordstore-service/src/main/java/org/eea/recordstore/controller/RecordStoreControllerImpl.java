@@ -19,12 +19,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -58,7 +58,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/reset", method = RequestMethod.POST)
+  @PostMapping(value = "/reset")
   public void resteDataSetDataBase() {
     try {
       recordStoreService.resetDatasetDatabase();
@@ -76,7 +76,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/dataset/create/{datasetName}", method = RequestMethod.POST)
+  @PostMapping(value = "/dataset/create/{datasetName}")
   public void createEmptyDataset(@PathVariable("datasetName") final String datasetName,
       @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema) {
     // TODO need to create standard
@@ -99,7 +99,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/connection/{datasetName}", method = RequestMethod.GET)
+  @GetMapping(value = "/connection/{datasetName}")
   public ConnectionDataVO getConnectionToDataset(
       @PathVariable("datasetName") final String datasetName) {
     ConnectionDataVO vo = null;
@@ -118,7 +118,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/connections", method = RequestMethod.GET)
+  @GetMapping(value = "/connections")
   public List<ConnectionDataVO> getDataSetConnections() {
     List<ConnectionDataVO> vo = null;
     try {
@@ -140,7 +140,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
-  @RequestMapping(value = "/dataset/{datasetId}/snapshot/create", method = RequestMethod.POST)
+  @PostMapping(value = "/dataset/{datasetId}/snapshot/create")
   public void createSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
       @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset) {
@@ -164,6 +164,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * @param idSnapshot the id snapshot
    * @param idPartition the id partition
    * @param datasetType the dataset type
+   * @param user the user
+   * @param isSchemaSnapshot the is schema snapshot
+   * @param deleteData the delete data
    */
   @Override
   @HystrixCommand
@@ -195,7 +198,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/dataset/{datasetId}/snapshot/delete", method = RequestMethod.POST)
+  @PostMapping(value = "/dataset/{datasetId}/snapshot/delete")
   public void deleteSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot) {
 
