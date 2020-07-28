@@ -14,5 +14,5 @@ public interface NotificableEventFactory {
    * @param eventType the event type
    * @return the notificable event handler
    */
-  public NotificableEventHandler getNotificableEventHandler(EventType eventType);
+  NotificableEventHandler getNotificableEventHandler(EventType eventType);
 }

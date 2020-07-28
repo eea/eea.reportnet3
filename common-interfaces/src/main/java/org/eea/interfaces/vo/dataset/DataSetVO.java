@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -48,7 +48,7 @@ public class DataSetVO implements Serializable {
   /**
    * The validations.
    */
-  private List<DatasetValidationVO> datasetValidations = new ArrayList<DatasetValidationVO>();
+  private List<DatasetValidationVO> datasetValidations = new ArrayList<>();
 
   /**
    * Hash code.

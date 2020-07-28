@@ -9,10 +9,9 @@ import org.eea.transaction.action.model.UndoActionVO;
 public interface DoAction {
 
   /**
-   * Do action based on incoming args
+   * Do action based on incoming args.
    *
    * @param args the args
-   *
    * @return the undo action vo
    */
   UndoActionVO doAction(Object... args);

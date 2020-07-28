@@ -3,9 +3,6 @@ package org.eea.transaction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.eea.exception.EEAException;
 import org.eea.transaction.action.DoAction;
 import org.eea.transaction.action.UndoAction;
@@ -13,6 +10,9 @@ import org.eea.transaction.action.model.UndoActionVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * The type Distributed transacion.
@@ -22,12 +22,22 @@ import org.springframework.util.Assert;
 @Slf4j
 public class DistributedTransacion {
 
+  /** The transaction id. */
   private UUID transactionId;
+
+  /** The do actions. */
   private List<DoAction> doActions;
+
+  /** The undo actions. */
   private List<UndoAction> undoActions;
+
+  /** The action args. */
   private List<Object[]> actionArgs;
+
+  /** The undo action VOS. */
   private List<UndoActionVO> undoActionVOS;
 
+  /** The Constant ERROR_LOG. */
   private static final Logger ERROR_LOG = LoggerFactory.getLogger("error_logger");
 
   /**
@@ -69,12 +79,12 @@ public class DistributedTransacion {
     Assert.isTrue(doActions.size() == actionArgs.size(),
         "Error, actions list size is different than acction args list size");
 
-    //Set up the saga pipeline execution
+    // Set up the saga pipeline execution
     int stepsNumber = doActions.size();
     int curentStep = 0;
     List<UndoActionVO> undoActionVOS = new ArrayList<>();
     boolean rollback = false;
-    //Running saga pipeline execution
+    // Running saga pipeline execution
     for (; curentStep < stepsNumber; curentStep++) {
       try {
         undoActionVOS.add(doActions.get(curentStep).doAction(actionArgs.get(curentStep)));
@@ -86,10 +96,11 @@ public class DistributedTransacion {
       }
     }
 
-    //checking whether to perform rollback or not
+    // checking whether to perform rollback or not
     if (rollback) {
       log.warn("Rolling back transaction {}", this.transactionId);
-      curentStep--;//last step was not performed/committed, so starting rollback from previous one
+      // last step was not performed/committed, so starting rollback from previous one
+      curentStep--;
       for (; curentStep > 0; curentStep--) {
         undoActions.get(curentStep).undoAction(undoActionVOS.get(curentStep));
       }
