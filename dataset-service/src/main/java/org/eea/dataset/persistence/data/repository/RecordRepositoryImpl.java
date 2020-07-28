@@ -153,33 +153,31 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     List<ErrorTypeEnum> errorList = new ArrayList<>();
 
     // Compose the query filtering by level ERROR
-    if (!levelErrorList.isEmpty()) {
-      if (levelErrorList.size() == 1) {
-        if (levelErrorList.contains(ErrorTypeEnum.CORRECT)) {
-          filter = CORRECT_APPEND_QUERY;
-          containsCorrect = true;
-        } else {
-          filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
-          errorList.add(levelErrorList.get(0));
-        }
+    if (!levelErrorList.isEmpty() && levelErrorList.size() == 1) {
+
+      if (levelErrorList.contains(ErrorTypeEnum.CORRECT)) {
+        filter = CORRECT_APPEND_QUERY;
+        containsCorrect = true;
       } else {
-        if (levelErrorList.contains(ErrorTypeEnum.CORRECT)) {
-          filter = WARNING_ERROR_INFO_BLOCKER_CORRECT_APPEND_QUERY;
-          containsCorrect = true;
-        } else {
-          filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
-        }
-        for (int i = 0; i < levelErrorList.size(); i++) {
-          if (!levelErrorList.get(i).equals(ErrorTypeEnum.CORRECT)) {
-            errorList.add(levelErrorList.get(i));
-          }
-        }
+        filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
+        errorList.add(levelErrorList.get(0));
       }
+    } else if (!levelErrorList.isEmpty() && levelErrorList.size() != 1) {
+      if (levelErrorList.contains(ErrorTypeEnum.CORRECT)) {
+        filter = WARNING_ERROR_INFO_BLOCKER_CORRECT_APPEND_QUERY;
+        containsCorrect = true;
+      } else {
+        filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
+      }
+      levelErrorList.stream().filter(errorType -> ErrorTypeEnum.CORRECT.equals(errorType))
+          .forEach(errorType -> errorList.add(errorType));
     }
     result.setTotalFilteredRecords(0L);
     // we put that condition because we wont to do any query if the filter is empty and return a new
     // result object
-    if (!levelErrorList.isEmpty()) {
+    if (!levelErrorList.isEmpty())
+
+    {
       // Total records calc.
       recordsCalc(idTableSchema, result, filter, containsCorrect, errorList);
 
