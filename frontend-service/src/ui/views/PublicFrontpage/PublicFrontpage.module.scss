@@ -6,24 +6,65 @@
   .pageContent {
     display: flex;
     margin: 2rem 0 4rem 0;
-    .frontText {
-      width: 100%;
-      padding: 2rem;
-      -webkit-box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
-      -moz-box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
-      box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
-      border-radius: 5px;
-      table {
-        border: 1px solid #ccc;
-        th {
-          text-align: left;
-          padding: 1rem;
+    .mainTextWrapper {
+      display: flex;
+      justify-content: space-between;
+      .frontText {
+        width: 75%;
+        padding: 2rem;
+        -webkit-box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
+        -moz-box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
+        box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
+        border-radius: 5px;
+        table {
+          border: 1px solid #ccc;
+          th {
+            text-align: left;
+            padding: 1rem;
+          }
+          td {
+            padding: 1rem;
+          }
         }
-        td {
-          padding: 1rem;
+      }
+      .contactBox {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 22%;
+        border-radius: 5px;
+        padding: 1rem;
+        box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
+        margin-right: 1rem;
+        background-color: #000;
+        color: white;
+        cursor: pointer;
+        .iconWrapper {
+          width: 75px;
+          height: 75px;
+          border: 2px solid #fff;
+          border-radius: 50px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          .emailIcon {
+            width: 25px;
+            height: 25px;
+          }
+        }
+        p {
+          text-align: center;
+          margin: 0px;
+        }
+        &:hover {
+          box-shadow: var(--card-item-box-shadow-hover);
+          transform: scale(1.02, 1.02);
+          transition: transform 0.2s ease;
         }
       }
     }
+
     .currentDataflows {
       margin-top: 4rem;
       .dataflowsList {
@@ -53,41 +94,6 @@
           cursor: pointer;
           p {
             text-align: center;
-          }
-          &:hover {
-            box-shadow: var(--card-item-box-shadow-hover);
-            transform: scale(1.02, 1.02);
-            transition: transform 0.2s ease;
-          }
-        }
-        .contactBox {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          width: 20%;
-          border-radius: 5px;
-          padding: 1rem;
-          box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
-          margin-right: 1rem;
-          background-color: #000;
-          color: white;
-          cursor: pointer;
-          .iconWrapper {
-            width: 75px;
-            height: 75px;
-            border: 2px solid #fff;
-            border-radius: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            .emailIcon {
-              width: 25px;
-              height: 25px;
-            }
-          }
-          p {
-            text-align: center;
-            margin: 0px;
           }
           &:hover {
             box-shadow: var(--card-item-box-shadow-hover);
