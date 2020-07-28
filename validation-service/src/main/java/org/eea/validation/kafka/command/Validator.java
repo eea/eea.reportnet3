@@ -7,7 +7,6 @@ import org.kie.api.KieBase;
 /**
  * The interface Validator. Functional Interface to perform validations commands coming from Kafka
  */
-
 @FunctionalInterface
 public interface Validator {
 
@@ -17,6 +16,7 @@ public interface Validator {
    * @param eeaEventVO the eea event vo
    * @param datasetId the dataset id
    * @param kieBase the kie base
+   * @throws EEAException the EEA exception
    */
   void performValidation(EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase)
       throws EEAException;

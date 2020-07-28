@@ -156,9 +156,9 @@ public class FileCommonUtils {
    * Gets the data set schema.
    *
    * @param dataflowId the dataflow id
-   *
+   * @param datasetId the dataset id
    * @return the data set schema
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   public DataSetSchemaVO getDataSetSchema(Long dataflowId, Long datasetId) throws EEAException {
     LOG.info("Getting DataSchema from Mongo DB");

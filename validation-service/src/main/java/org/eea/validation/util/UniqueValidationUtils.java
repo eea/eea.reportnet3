@@ -32,6 +32,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Class UniqueValidationUtils.
+ */
 @Component
 public class UniqueValidationUtils {
 
@@ -102,7 +105,7 @@ public class UniqueValidationUtils {
   /**
    * Sets the dataset repository.
    *
-   * @param fieldRepository the new dataset repository
+   * @param recordRepository the new record repository
    */
   @Autowired
   private void setRecordRepository(RecordRepository recordRepository) {
@@ -131,6 +134,11 @@ public class UniqueValidationUtils {
     UniqueValidationUtils.tableRepository = tableRepository;
   }
 
+  /**
+   * Sets the rules service.
+   *
+   * @param rulesService the new rules service
+   */
   @Autowired
   private void setRulesService(RulesService rulesService) {
     UniqueValidationUtils.rulesService = rulesService;
@@ -155,7 +163,8 @@ public class UniqueValidationUtils {
    *
    * @param idRule the id rule
    * @param idDatasetSchema the id dataset schema
-   *
+   * @param origname the origname
+   * @param typeEnum the type enum
    * @return the validation
    */
   private static Validation createValidation(String idRule, String idDatasetSchema, String origname,
@@ -194,13 +203,18 @@ public class UniqueValidationUtils {
   /**
    * Creates the field validations.
    *
-   * @param fieldValues the field values
+   * @param recordValues the record values
    */
   @Transactional
   private static void saveRecordValidations(List<RecordValue> recordValues) {
     recordRepository.saveAll(recordValues);
   }
 
+  /**
+   * Save table validations.
+   *
+   * @param tableValue the table value
+   */
   @Transactional
   private static void saveTableValidations(TableValue tableValue) {
     tableRepository.save(tableValue);
@@ -210,8 +224,7 @@ public class UniqueValidationUtils {
    * Gets the table schema from id field schema.
    *
    * @param schema the schema
-   * @param idFieldSchema the id field schema
-   *
+   * @param idTableSchema the id table schema
    * @return the table schema from id field schema
    */
   private static String getTableSchemaFromIdTableSchema(DataSetSchema schema,
@@ -227,6 +240,13 @@ public class UniqueValidationUtils {
     return tableSchemaName;
   }
 
+  /**
+   * Gets the table schema from id field schema.
+   *
+   * @param datasetSchema the dataset schema
+   * @param idFieldSchema the id field schema
+   * @return the table schema from id field schema
+   */
   private static TableSchema getTableSchemaFromIdFieldSchema(DataSetSchema datasetSchema,
       String idFieldSchema) {
     for (TableSchema table : datasetSchema.getTableSchemas()) {
@@ -335,10 +355,8 @@ public class UniqueValidationUtils {
   /**
    * Checks if is unique field.
    *
-   * @param datasetId the dataset id
-   * @param idFieldSchema the id field schema
+   * @param uniqueIdConstraint the unique id constraint
    * @param idRule the id rule
-   *
    * @return the boolean
    */
   public static Boolean uniqueConstraint(String uniqueIdConstraint, String idRule) {
