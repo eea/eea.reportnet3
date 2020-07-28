@@ -53,9 +53,6 @@ public class IntegrationServiceImpl implements IntegrationService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant FILE_EXTENSION: {@value}. */
   private static final String FILE_EXTENSION = "fileExtension";
 
