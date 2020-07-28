@@ -114,7 +114,7 @@ const SnapshotSlideBar = ({
                   </label>
                   <div className={styles.createButtonWrapper}>
                     <Button
-                      className={`rp-btn secondary`}
+                      className={`${styles.createSnapshotButton} rp-btn secondary`}
                       tooltip={resources.messages.createSnapshotTooltip}
                       type="submit"
                       icon="plus"

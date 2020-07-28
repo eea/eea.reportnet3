@@ -63,6 +63,7 @@ const Dataflow = withRouter(({ history, match }) => {
     data: {},
     dataProviderId: [],
     datasetIdToSnapshotProps: undefined,
+    datasetNameToSnapshotProps: undefined,
     deleteInput: '',
     description: '',
     designDatasetSchemas: [],
@@ -532,8 +533,8 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onShowManageReportersDialog = () => manageDialogs('isManageRolesDialogVisible', true);
 
-  const onShowSnapshotDialog = async datasetId => {
-    dataflowDispatch({ type: 'SET_DATASET_ID_TO_SNAPSHOT_PROPS', payload: { id: datasetId } });
+  const onShowSnapshotDialog = async (datasetId, datasetName) => {
+    dataflowDispatch({ type: 'SET_DATASET_ID_TO_SNAPSHOT_PROPS', payload: { id: datasetId, name: datasetName } });
     manageDialogs('isSnapshotDialogVisible', true);
   };
 
@@ -589,6 +590,7 @@ const Dataflow = withRouter(({ history, match }) => {
         <SnapshotsDialog
           dataflowId={dataflowId}
           datasetId={dataflowState.datasetIdToSnapshotProps}
+          datasetName={dataflowState.datasetNameToSnapshotProps}
           isSnapshotDialogVisible={dataflowState.isSnapshotDialogVisible}
           manageDialogs={manageDialogs}
         />
