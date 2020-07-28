@@ -6,14 +6,12 @@ import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 import uniq from 'lodash/uniq';
 
-import styles from './Dataset.module.css';
+import styles from './Dataset.module.scss';
 
 import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
+import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/reporter';
 import { routes } from 'ui/routes';
-
-import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/datasetSchema.reporter';
-import { DatasetSchemaRequesterHelpConfig } from 'conf/help/datasetSchema/datasetSchema.requester';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -79,9 +77,11 @@ export const Dataset = withRouter(({ match, history }) => {
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
   const [extensionsOperationsList, setExtensionsOperationsList] = useState({ export: [], import: [] });
   const [externalExportExtensions, setExternalExportExtensions] = useState([]);
+  const [hasValidations, setHasValidations] = useState();
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importDatasetDialogVisible, setImportDatasetDialogVisible] = useState(false);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
   const [isValidationSelected, setIsValidationSelected] = useState(false);
@@ -173,13 +173,15 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   }, [userContext]);
 
-  // useEffect(() => {
-  //   leftSideBarContext.addHelpSteps(DatasetSchemaReporterHelpConfig, 'datasetSchemaHelpConfig');
-  // }, [userContext]);
-
   useEffect(() => {
     onLoadDatasetSchema();
   }, [isDataDeleted]);
+
+  useEffect(() => {
+    if (!isUndefined(userContext.contextRoles)) {
+      leftSideBarContext.addHelpSteps(DatasetSchemaReporterHelpConfig, 'datasetSchemaReporterHelpConfig');
+    }
+  }, [userContext, isDataLoaded, tableSchemaColumns]);
 
   useEffect(() => {
     if (isEmpty(externalExportExtensions)) {
@@ -504,6 +506,7 @@ export const Dataset = withRouter(({ match, history }) => {
       }
     } finally {
       setLoading(false);
+      setIsDataLoaded(true);
     }
   };
 
@@ -619,7 +622,7 @@ export const Dataset = withRouter(({ match, history }) => {
             )}
             <Button
               id="buttonExportDataset"
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step`}
               icon={loadingFile ? 'spinnerAnimate' : 'export'}
               label={resources.messages['exportDataset']}
               onClick={event => exportMenuRef.current.show(event)}
@@ -635,7 +638,7 @@ export const Dataset = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
-                !hasWritePermissions ? null : 'p-button-animated-blink'
+                !hasWritePermissions ? null : 'p-button-animated-blink dataset-deleteDataset-help-step'
               }`}
               icon={'trash'}
               label={resources.messages['deleteDatasetData']}
@@ -645,7 +648,7 @@ export const Dataset = withRouter(({ match, history }) => {
           </div>
           <div className="p-toolbar-group-right">
             <Button
-              className={`p-button-rounded p-button-secondary-transparent ${
+              className={`p-button-rounded p-button-secondary-transparent dataset-validate-help-step ${
                 !hasWritePermissions || !datasetHasData ? null : 'p-button-animated-blink'
               }`}
               disabled={!hasWritePermissions || !datasetHasData}
@@ -656,7 +659,7 @@ export const Dataset = withRouter(({ match, history }) => {
               iconClasses={null}
             />
             <Button
-              className={`p-button-rounded p-button-secondary-transparent ${
+              className={`p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step ${
                 !datasetHasErrors ? null : 'p-button-animated-blink'
               }`}
               disabled={!datasetHasErrors}
@@ -667,14 +670,16 @@ export const Dataset = withRouter(({ match, history }) => {
               iconClasses={datasetHasErrors ? 'warning' : ''}
             />
             <Button
-              className={'p-button-rounded p-button-secondary-transparent p-button-animated-blink'}
+              className={
+                'p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-qcRules-help-step'
+              }
               icon={'horizontalSliders'}
               label={resources.messages['qcRules']}
               onClick={() => onSetVisible(setValidationListDialogVisible, true)}
               ownButtonClasses={null}
             />
             <Button
-              className={`p-button-rounded p-button-secondary-transparent ${
+              className={`p-button-rounded p-button-secondary-transparent dataset-dashboards-help-step ${
                 !datasetHasData ? null : 'p-button-animated-blink'
               }`}
               disabled={!datasetHasData}
@@ -683,7 +688,7 @@ export const Dataset = withRouter(({ match, history }) => {
               onClick={() => onSetVisible(setDashDialogVisible, true)}
             />
             <Button
-              className={`p-button-rounded p-button-secondary-transparent ${
+              className={`p-button-rounded p-button-secondary-transparent datasetSchema-manageCopies-help-step ${
                 !hasWritePermissions ? null : 'p-button-animated-blink'
               }`}
               disabled={!hasWritePermissions}
@@ -694,7 +699,7 @@ export const Dataset = withRouter(({ match, history }) => {
             <Button
               className={`p-button-rounded p-button-${
                 isRefreshHighlighted ? 'primary' : 'secondary-transparent'
-              } p-button-animated-blink`}
+              } p-button-animated-blink dataset-refresh-help-step`}
               icon={'refresh'}
               label={resources.messages['refresh']}
               onClick={() => onLoadDatasetSchema()}
@@ -743,7 +748,7 @@ export const Dataset = withRouter(({ match, history }) => {
       </Dialog>
       {validationListDialogVisible && (
         <Dialog
-          className={styles.qcRulesDialog}
+          className={hasValidations ? styles.qcRulesDialog : styles.qcRulesDialogEmpty}
           dismissableMask={true}
           footer={validationListFooter}
           header={resources.messages['qcRules']}
@@ -755,6 +760,7 @@ export const Dataset = withRouter(({ match, history }) => {
             datasetSchemaId={datasetSchemaId}
             onHideValidationsDialog={() => onSetVisible(setValidationListDialogVisible, false)}
             reporting={true}
+            setHasValidations={setHasValidations}
           />
         </Dialog>
       )}

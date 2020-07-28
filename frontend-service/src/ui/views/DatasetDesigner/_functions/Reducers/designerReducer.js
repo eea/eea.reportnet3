@@ -14,8 +14,7 @@ export const designerReducer = (state, { type, payload }) => {
         datasetSchemaId: payload.schemaId,
         datasetStatistics: payload.datasetStatistics,
         levelErrorTypes: payload.levelErrorTypes,
-        tableSchemaNames: payload.tableSchemaNames,
-        isLoadedSchema: true
+        tableSchemaNames: payload.tableSchemaNames
       };
 
     case 'GET_METADATA':
@@ -54,7 +53,7 @@ export const designerReducer = (state, { type, payload }) => {
       };
 
     case 'LOAD_DATASET_SCHEMAS':
-      return { ...state, datasetSchemas: payload.schemas };
+      return { ...state, datasetSchemas: payload.schemas, areLoadedSchemas: true };
 
     case 'MANAGE_DIALOGS':
       return { ...state, [payload.dialog]: payload.value, [payload.secondDialog]: payload.secondValue };
@@ -72,7 +71,7 @@ export const designerReducer = (state, { type, payload }) => {
       return { ...state, datasetDescription: payload.value };
 
     case 'ON_UPDATE_TABLES':
-      return { ...state, datasetSchemaAllTables: payload.tables };
+      return { ...state, datasetSchemaAllTables: payload.tables, areUpdatingTables: true };
 
     case 'SET_DATASET_HAS_DATA':
       return { ...state, datasetHasData: payload.hasData };

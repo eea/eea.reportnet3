@@ -626,7 +626,7 @@ export const FieldDesigner = ({
       )}
       <Checkbox
         checked={fieldDesignerState.fieldRequiredValue}
-        className={styles.checkRequired}
+        className={`${styles.checkRequired} datasetSchema-required-help-step`}
         disabled={Boolean(fieldDesignerState.fieldPKValue)}
         id={`${fieldId}_check_required`}
         inputId={`${fieldId}_check_required`}
@@ -641,7 +641,7 @@ export const FieldDesigner = ({
       </label>
       <Checkbox
         checked={fieldDesignerState.fieldPKValue}
-        className={styles.checkPK}
+        className={`${styles.checkPK} datasetSchema-pk-help-step`}
         disabled={hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)}
         id={`${fieldId}_check_pk`}
         inputId={`${fieldId}_check_pk`}
@@ -802,7 +802,7 @@ export const FieldDesigner = ({
     <React.Fragment>
       <div
         draggable={!addField}
-        className={`${styles.draggableFieldDiv} fieldRow`}
+        className={`${styles.draggableFieldDiv} fieldRow datasetSchema-fieldDesigner-help-step`}
         onDragEnd={e => {
           onFieldDragEnd(e);
         }}

@@ -81,7 +81,6 @@ public class RulesServiceImplTest {
   @Mock
   private RulesSequenceRepository rulesSequenceRepository;
 
-
   /** The kie base manager. */
   @Mock
   private KieBaseManager kieBaseManager;
@@ -1363,4 +1362,19 @@ public class RulesServiceImplTest {
         Mockito.anyBoolean());
   }
 
+  @Test
+  public void deleteNotEmptyRuleTest() {
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(rulesRepository.deleteNotEmptyRule(Mockito.any(), Mockito.any())).thenReturn(true);
+    rulesServiceImpl.deleteNotEmptyRule("5e44110d6a9e3a270ce13fac", 1L);
+    Mockito.verify(rulesRepository, times(1)).deleteNotEmptyRule(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void updateSequenceTest() {
+    Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+    Assert.assertEquals(1L,
+        rulesServiceImpl.updateSequence("5e44110d6a9e3a270ce13fac").longValue());
+  }
 }

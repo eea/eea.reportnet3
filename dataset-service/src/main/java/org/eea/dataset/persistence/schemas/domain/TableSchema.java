@@ -32,7 +32,6 @@ public class TableSchema {
   @Field(value = "idDataSet")
   private ObjectId idDataSet;
 
-
   /** The read only. */
   @Field(value = "readOnly")
   private Boolean readOnly;
@@ -41,6 +40,9 @@ public class TableSchema {
   @Field(value = "toPrefill")
   private Boolean toPrefill;
 
+  /** The not empty. */
+  @Field(value = "notEmpty")
+  private Boolean notEmpty;
 
   /** The record schema. */
   @Field(value = "recordSchema")
@@ -53,7 +55,8 @@ public class TableSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataSet, idTableSchema, nameTableSchema, recordSchema, description);
+    return Objects.hash(idDataSet, idTableSchema, nameTableSchema, recordSchema, description,
+        notEmpty);
   }
 
   /**
@@ -75,8 +78,7 @@ public class TableSchema {
         && Objects.equals(idTableSchema, other.idTableSchema)
         && Objects.equals(nameTableSchema, other.nameTableSchema)
         && Objects.equals(recordSchema, other.recordSchema)
-        && Objects.equals(description, other.description);
+        && Objects.equals(description, other.description)
+        && Objects.equals(notEmpty, other.notEmpty);
   }
-
-
 }

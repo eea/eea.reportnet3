@@ -35,14 +35,16 @@ export const Dialog = ({
     alignItems: 'center',
     zIndex
   };
+
   const dialogStyle = {
     top: 'auto',
     left: 'auto',
     zIndex
   };
+
   useEffect(() => {
     const body = document.querySelector('body');
-    visible ? (body.style.overflow = 'hidden') : (body.style.overflow = 'hidden auto');
+    visible && (body.style.overflow = 'hidden');
 
     return () => {
       body.style.overflow = 'hidden auto';

@@ -45,6 +45,7 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
@@ -344,43 +345,57 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public TableSchemaVO createTableSchema(String id, TableSchemaVO tableSchemaVO, Long datasetId) {
+
     ObjectId tableSchemaId = new ObjectId();
-    tableSchemaVO.setIdTableSchema(tableSchemaId.toString());
-    tableSchemaVO.setToPrefill(false);
-    RecordSchema recordSchema = new RecordSchema();
     ObjectId recordSchemaId = new ObjectId();
+
+    RecordSchemaVO recordSchemaVO = new RecordSchemaVO();
+    recordSchemaVO.setIdRecordSchema(recordSchemaId.toString());
+
+    tableSchemaVO.setRecordSchema(recordSchemaVO);
+    tableSchemaVO.setIdTableSchema(tableSchemaId.toString());
+    if (null == tableSchemaVO.getToPrefill()) {
+      tableSchemaVO.setToPrefill(false);
+    }
+    if (null == tableSchemaVO.getNotEmpty()) {
+      tableSchemaVO.setNotEmpty(false);
+    }
+
+    RecordSchema recordSchema = new RecordSchema();
     recordSchema.setIdRecordSchema(recordSchemaId);
     recordSchema.setIdTableSchema(tableSchemaId);
     recordSchema.setFieldSchema(new ArrayList<>());
+
     TableSchema table = tableSchemaMapper.classToEntity(tableSchemaVO);
     table.setRecordSchema(recordSchema);
-    LOG.info("Creating table schema with id {}", tableSchemaId);
+
     schemasRepository.insertTableSchema(table, id);
-    // prepare ids to return to the frontend
-    RecordSchemaVO recordSchemaVO = new RecordSchemaVO();
-    recordSchemaVO.setIdRecordSchema(recordSchemaId.toString());
-    tableSchemaVO.setRecordSchema(recordSchemaVO);
-    return (tableSchemaVO);
+    LOG.info("Created TableSchema {}: {}", tableSchemaId, table);
+
+    if (Boolean.TRUE.equals(tableSchemaVO.getNotEmpty())) {
+      createNotEmptyRule(tableSchemaId.toString(), datasetId);
+    }
+
+    return tableSchemaVO;
   }
 
   /**
    * Update table schema.
    *
-   * @param datasetSchemaId the dataset schemaid
+   * @param datasetId the dataset id
    * @param tableSchemaVO the table schema VO
-   *
    * @throws EEAException the EEA exception
    */
   @Override
-  public void updateTableSchema(String datasetSchemaId, TableSchemaVO tableSchemaVO)
-      throws EEAException {
+  public void updateTableSchema(Long datasetId, TableSchemaVO tableSchemaVO) throws EEAException {
+
+    String datasetSchemaId = getDatasetSchemaId(datasetId);
+
     try {
-      // Recuperar el TableSchema de MongoDB
       Document tableSchema =
           schemasRepository.findTableSchema(datasetSchemaId, tableSchemaVO.getIdTableSchema());
 
       if (tableSchema != null) {
-        // Modificarlo en función de lo que contiene el TableSchemaVO recibido
         if (tableSchemaVO.getDescription() != null) {
           tableSchema.put("description", tableSchemaVO.getDescription());
         }
@@ -393,8 +408,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (tableSchemaVO.getToPrefill() != null) {
           tableSchema.put("toPrefill", tableSchemaVO.getToPrefill());
         }
+        if (tableSchemaVO.getNotEmpty() != null) {
+          Boolean oldValue = tableSchema.getBoolean("notEmpty");
+          Boolean newValue = tableSchemaVO.getNotEmpty();
+          tableSchema.put("notEmpty", newValue);
+          updateNotEmptyRule(oldValue, newValue, tableSchemaVO.getIdTableSchema(), datasetId);
+        }
 
-        // Guardar el TableSchema modificado en MongoDB
         if (schemasRepository.updateTableSchema(datasetSchemaId, tableSchema)
             .getModifiedCount() == 1) {
           return;
@@ -411,25 +431,25 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Delete table schema.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the id table schema
    * @param datasetId the dataset id
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void deleteTableSchema(String datasetSchemaId, String idTableSchema, Long datasetId)
+  public void deleteTableSchema(String datasetSchemaId, String tableSchemaId, Long datasetId)
       throws EEAException {
     DataSetSchema datasetSchema =
         schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
-    TableSchema table = getTableSchema(idTableSchema, datasetSchema);
-    if (table == null) {
+    TableSchema tableSchema = getTableSchema(tableSchemaId, datasetSchema);
+    if (tableSchema == null) {
       LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
       throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
     }
     // when we delete a table we need to delete all rules of this table, we mean, rules of the
     // records fields, etc
     Document recordSchemadocument =
-        schemasRepository.findRecordSchema(datasetSchemaId, idTableSchema);
+        schemasRepository.findRecordSchema(datasetSchemaId, tableSchemaId);
     // if the table havent got any record he hasnt any document too
     if (null != recordSchemadocument) {
       List<?> fieldSchemasList = (ArrayList<?>) recordSchemadocument.get("fieldSchemas");
@@ -445,7 +465,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           recordSchemadocument.get("_id").toString());
     }
 
-    schemasRepository.deleteTableSchemaById(idTableSchema);
+    schemasRepository.deleteTableSchemaById(tableSchemaId);
+
+    // Delete the notEmpty rule if exists
+    if (Boolean.TRUE.equals(tableSchema.getNotEmpty())) {
+      deleteNotEmptyRule(tableSchemaId, datasetId);
+    }
   }
 
   /**
@@ -657,7 +682,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private void updateUniqueConstraints(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
       Document fieldSchema) throws EEAException {
     if (fieldSchemaVO.getPk() != fieldSchema.get(LiteralConstants.PK)) {
-      if (fieldSchemaVO.getPk()) {
+      if (Boolean.TRUE.equals(fieldSchemaVO.getPk())) {
         if (null == fieldSchemaVO.getIdRecord()) {
           fieldSchemaVO.setIdRecord(fieldSchema.get("idRecord").toString());
         }
@@ -1584,6 +1609,61 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
       }
     }
+  }
 
+  /**
+   * Creates the not empty rule.
+   *
+   * @param tableSchemaId the table schema id
+   * @param datasetId the dataset id
+   */
+  private void createNotEmptyRule(String tableSchemaId, Long datasetId) {
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setReferenceId(tableSchemaId);
+    ruleVO.setRuleName(LiteralConstants.RULE_TABLE_MANDATORY);
+    ruleVO.setEnabled(true);
+    ruleVO.setType(EntityTypeEnum.TABLE);
+    ruleVO.setThenCondition(Arrays.asList("Mandatory table has no records", "ERROR"));
+    ruleVO
+        .setDescription("When a table is marked as mandatory, checks at least one record is added");
+
+    Long shortcode = rulesControllerZuul
+        .updateSequence(datasetMetabaseService.findDatasetSchemaIdById(datasetId).toString());
+    ruleVO.setShortCode("TB" + shortcode);
+
+    rulesControllerZuul.createNewRule(datasetId, ruleVO);
+    LOG.info("Created notEmpty rule for TableSchema {}", tableSchemaId);
+  }
+
+  /**
+   * Delete not empty rule.
+   *
+   * @param tableSchemaId the table schema id
+   * @param datasetId the dataset id
+   */
+  private void deleteNotEmptyRule(String tableSchemaId, Long datasetId) {
+    rulesControllerZuul.deleteNotEmptyRule(tableSchemaId, datasetId);
+    LOG.info("Deleted notEmpty rule for TableSchema {}", tableSchemaId);
+  }
+
+  /**
+   * Update not empty rule.
+   *
+   * @param oldValue the old value
+   * @param newValue the new value
+   * @param tableSchemaId the table schema id
+   * @param datasetId the dataset id
+   */
+  private void updateNotEmptyRule(Boolean oldValue, Boolean newValue, String tableSchemaId,
+      Long datasetId) {
+    if (Boolean.TRUE.equals(oldValue)) {
+      if (Boolean.FALSE.equals(newValue)) {
+        deleteNotEmptyRule(tableSchemaId, datasetId);
+      }
+    } else {
+      if (Boolean.TRUE.equals(newValue)) {
+        createNotEmptyRule(tableSchemaId, datasetId);
+      }
+    }
   }
 }

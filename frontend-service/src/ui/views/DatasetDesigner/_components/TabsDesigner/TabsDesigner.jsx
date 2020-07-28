@@ -111,12 +111,13 @@ export const TabsDesigner = withRouter(
       }
     };
 
-    const onChangeTableProperties = (tableSchemaId, tableSchemaDescription, readOnly, toPrefill) => {
+    const onChangeTableProperties = (tableSchemaId, tableSchemaDescription, readOnly, toPrefill, notEmpty) => {
       const inmTabs = [...tabs];
       const tabIdx = getIndexByTableSchemaId(tableSchemaId, inmTabs);
       inmTabs[tabIdx].description = tableSchemaDescription;
       inmTabs[tabIdx].readOnly = readOnly;
       inmTabs[tabIdx].toPrefill = toPrefill;
+      inmTabs[tabIdx].notEmpty = notEmpty;
       setTabs(inmTabs);
     };
 
@@ -127,6 +128,7 @@ export const TabsDesigner = withRouter(
         inmDatasetSchema.tables.forEach((table, idx) => {
           table.addTab = false;
           table.toPrefill = table.tableSchemaToPrefill;
+          table.notEmpty = table.tableSchemaNotEmpty;
           table.description = table.tableSchemaDescription;
           table.editable = editable;
           table.hasErrors =
@@ -290,7 +292,6 @@ export const TabsDesigner = withRouter(
       if (tableDeleted) {
         const inmTabs = [...tabs];
         inmTabs.splice(deletedTabIndx, 1);
-        console.log({ activeIndex, deletedTabIndx });
         inmTabs.forEach(tab => {
           if (tab.addTab) tab.index = -1;
         });
@@ -391,7 +392,6 @@ export const TabsDesigner = withRouter(
                 return (
                   <TabPanel
                     addTab={tab.addTab}
-                    className="datasetSchema-new-table-help-step"
                     editable={tab.editable}
                     hasPKReferenced={tab.hasPKReferenced}
                     header={tab.header}

@@ -1,7 +1,8 @@
+import isNil from 'lodash/isNil';
 import isObject from 'lodash/isObject';
 
 const ellipsis = (rawText = '', limit) => {
-  if (rawText.length > limit - 3) {
+  if (!isNil(rawText) && rawText.length > limit - 3) {
     return `${rawText.substr(0, limit - 3)}...`;
   }
   return rawText;

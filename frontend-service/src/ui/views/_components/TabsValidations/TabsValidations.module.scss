@@ -1,6 +1,11 @@
 .validations {
   min-height: 75vh;
 }
+.noValidations {
+  display: flex;
+  align-items: center;
+  min-height: 10vh;
+}
 
 .positioning {
   position: sticky !important;

@@ -59,6 +59,9 @@
     a {
       color: var(--eu-link-footer-bottom) !important;
       margin-right: 3rem;
+      &:hover {
+        color: var(--eu-link-hover-footer-bottom) !important;
+      }
     }
   }
 }

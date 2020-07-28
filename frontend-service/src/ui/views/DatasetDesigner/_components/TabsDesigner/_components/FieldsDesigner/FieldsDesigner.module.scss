@@ -52,7 +52,6 @@
       background-color: var(--white) !important;
       border-radius: 50% !important;
       color: var(--datatable-header-info-button-color) !important;
-      height: 8.5pt !important;
       font-size: 12pt !important;
       height: 0.7em !important;
       width: 0.7em !important;
@@ -60,10 +59,19 @@
       margin-right: 0.9rem !important;
       margin-top: -1rem !important;
 
+      :global .pi-info-circle {
+        padding: 0 !important;
+        top: 40%;
+      }
+
       > span {
         left: 46% !important;
         margin-left: -0.48em !important;
         margin-top: -0.5em !important;
+      }
+
+      &:focus {
+        box-shadow: none !important;
       }
     }
   }
@@ -82,8 +90,8 @@
   flex-direction: column;
 }
 
-.switchDiv div:nth-child(1) {
-  margin-bottom: 0.5rem;
+.switchDiv div:nth-child(-n + 3) {
+  margin-bottom: 0.3rem;
 }
 .switchDivInput {
   display: flex;
