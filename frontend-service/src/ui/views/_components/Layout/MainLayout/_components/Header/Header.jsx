@@ -11,6 +11,7 @@ import styles from './Header.module.scss';
 import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
+import { Button } from 'ui/views/_components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EuHeader } from 'ui/views/_components/Layout/MainLayout/_components/EuHeader';
 
@@ -24,7 +25,7 @@ import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-const Header = withRouter(({ history, onMainContentStyleChange }) => {
+const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPublic = false }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -48,7 +49,7 @@ const Header = withRouter(({ history, onMainContentStyleChange }) => {
     window.onscroll = () => {
       const currentScrollPos = window.pageYOffset;
 
-      if (prevScrollPos > currentScrollPos) {
+      if (currentScrollPos === 0) {
         setGlobanElementStyle({
           marginTop: '0',
           transition: '0.5s'
@@ -121,7 +122,7 @@ const Header = withRouter(({ history, onMainContentStyleChange }) => {
     </div>
   );
 
-  const themeSwitcher = isLocalEnvironment() && (
+  const themeSwitcher = isLocalEnvironment() && !isPublic && (
     <InputSwitch
       checked={themeContext.currentTheme === 'dark'}
       onChange={e => {
@@ -198,6 +199,19 @@ const Header = withRouter(({ history, onMainContentStyleChange }) => {
     </>
   );
 
+  const loadLogin = () => (
+    <div className={styles.loginWrapper}>
+      <Button
+        className="p-button-primary"
+        label={resources.messages.login}
+        style={{ padding: '0.25rem 2rem', borderRadius: '25px', fontWeight: 'bold' }}
+        onClick={e => {
+          e.preventDefault();
+          history.push(getUrl(routes.LOGIN));
+        }}></Button>
+    </div>
+  );
+
   const onLoadImage = () => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -215,7 +229,8 @@ const Header = withRouter(({ history, onMainContentStyleChange }) => {
         <div className={styles.customHeader}>
           {loadTitle()}
           <BreadCrumb />
-          {loadUser()}
+          {!isPublic && loadUser()}
+          {isPublic && loadLogin()}
           {userContext.userProps.showLogoutConfirmation && (
             <ConfirmDialog
               onConfirm={() => {
