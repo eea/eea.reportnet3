@@ -127,6 +127,9 @@ public class KieBaseManager {
             schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
             typeValidation = TypeValidation.FIELD;
             originName = fillFieldOriginName(dataSetSchema, rule, originName);
+            break;
+          default:
+            break;
         }
         ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
             rule.getRuleId().toString(), typeValidation, schemasDrools,
