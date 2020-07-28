@@ -622,6 +622,7 @@ public class ValidationHelper implements DisposableBean {
    */
   private class ValidationTasksExecutorThread implements Runnable {
 
+    private static final double MILISECONDS = 1000.0;
     /**
      * The validation task.
      */
@@ -674,7 +675,7 @@ public class ValidationHelper implements DisposableBean {
           kafkaSenderUtils.releaseKafkaEvent(validationTask.notificationEventType,
               validationTask.eeaEventVO.getData());
         }
-        Double totalTime = (System.currentTimeMillis() - currentTime) / 1000.0;
+        Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
         LOG.info("Validation task {} finished, it has taken taken {} seconds",
             validationTask.eeaEventVO, totalTime);
       }
