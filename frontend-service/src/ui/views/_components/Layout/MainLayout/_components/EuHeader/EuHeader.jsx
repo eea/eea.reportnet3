@@ -10,7 +10,7 @@ import { InputText } from 'primereact/inputtext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-export const EuHeader = ({ globanElementStyle, euHeaderElementStyle }) => {
+export const EuHeader = ({ euHeaderElementStyle, globanElementStyle }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
