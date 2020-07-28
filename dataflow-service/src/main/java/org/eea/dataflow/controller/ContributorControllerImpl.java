@@ -51,6 +51,7 @@ public class ContributorControllerImpl implements ContributorController {
   @Autowired
   private ContributorService contributorService;
 
+  /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
@@ -69,6 +70,7 @@ public class ContributorControllerImpl implements ContributorController {
     try {
       checkAccount(dataflowId, contributorVO.getAccount());
       contributorService.deleteContributor(dataflowId, contributorVO.getAccount(), EDITOR, null);
+      LOG.info("Editor {} Deleted", contributorVO.getAccount());
     } catch (EEAException e) {
       if (HttpStatus.NOT_FOUND.toString().equals(e.getMessage())) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -98,6 +100,7 @@ public class ContributorControllerImpl implements ContributorController {
       checkAccount(dataflowId, contributorVO.getAccount());
       contributorService.deleteContributor(dataflowId, contributorVO.getAccount(), REPORTER,
           dataProviderId);
+      LOG.info("Reporter {} Deleted", contributorVO.getAccount());
     } catch (EEAException e) {
       if (HttpStatus.NOT_FOUND.toString().equals(e.getMessage())) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -160,6 +163,7 @@ public class ContributorControllerImpl implements ContributorController {
     try {
       checkAccount(dataflowId, contributorVO.getAccount());
       contributorService.updateContributor(dataflowId, contributorVO, EDITOR, null);
+      LOG.info("Editor {} Updated", contributorVO.getAccount());
     } catch (EEAException e) {
       if (HttpStatus.NOT_FOUND.toString().equals(e.getMessage())) {
         message = String.format(THE_EMAIL_NOT_EXISTS, contributorVO.getAccount());
@@ -197,6 +201,7 @@ public class ContributorControllerImpl implements ContributorController {
     try {
       checkAccount(dataflowId, contributorVO.getAccount());
       contributorService.updateContributor(dataflowId, contributorVO, REPORTER, dataProviderId);
+      LOG.info("Reporter {} Updated", contributorVO.getAccount());
     } catch (EEAException e) {
       if (HttpStatus.NOT_FOUND.toString().equals(e.getMessage())) {
         message = String.format(THE_EMAIL_NOT_EXISTS, contributorVO.getAccount());

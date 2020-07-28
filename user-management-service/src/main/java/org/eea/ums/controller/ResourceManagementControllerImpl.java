@@ -15,9 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +31,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping(value = "/resource")
 public class ResourceManagementControllerImpl implements ResourceManagementController {
 
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
@@ -47,7 +48,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
-  @RequestMapping(value = "/create", method = RequestMethod.POST)
+  @PostMapping(value = "/create")
   @ResponseStatus(HttpStatus.CREATED)
   public void createResource(@RequestBody ResourceInfoVO resourceInfoVO) {
     try {
@@ -68,7 +69,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
-  @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
+  @DeleteMapping(value = "/delete")
   @ResponseStatus(HttpStatus.OK)
   public void deleteResource(@RequestBody List<ResourceInfoVO> resourceInfoVO) {
     securityProviderInterfaceService.deleteResourceInstances(resourceInfoVO);
@@ -82,7 +83,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
-  @RequestMapping(value = "/delete_by_name", method = RequestMethod.DELETE)
+  @DeleteMapping(value = "/delete_by_name")
   @ResponseStatus(HttpStatus.OK)
   public void deleteResourceByName(@RequestParam("resourceNames") List<String> resourceName) {
     securityProviderInterfaceService.deleteResourceInstancesByName(resourceName);
@@ -146,7 +147,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
-  @RequestMapping(value = "/createList", method = RequestMethod.POST)
+  @PostMapping(value = "/createList")
   @ResponseStatus(HttpStatus.CREATED)
   public void createResources(@RequestBody List<ResourceInfoVO> resourceInfoVOs) {
     try {

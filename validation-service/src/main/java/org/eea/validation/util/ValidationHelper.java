@@ -283,7 +283,7 @@ public class ValidationHelper implements DisposableBean {
     int tasksToBeSent = this.taskReleasedTax;
     int sentTasks = 0;
     while (tasksToBeSent > 0) {
-      if (processesMap.get(processId).getPendingValidations().size() >= 1) {
+      if (!processesMap.get(processId).getPendingValidations().isEmpty()) {
         this.kafkaSenderUtils
             .releaseKafkaEvent(processesMap.get(processId).getPendingValidations().poll());
         sentTasks++;
@@ -669,7 +669,8 @@ public class ValidationHelper implements DisposableBean {
           } catch (EEAException e) {
             LOG_ERROR.error("Error trying to reduce pending tasks due to {}", e.getMessage(), e);
           }
-        } else {// send the message to coordinator validation instance
+        } else {
+          // send the message to coordinator validation instance
           kafkaSenderUtils.releaseKafkaEvent(validationTask.notificationEventType,
               validationTask.eeaEventVO.getData());
         }
