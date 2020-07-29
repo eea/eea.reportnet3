@@ -27,7 +27,7 @@ export const EuHeader = ({ euHeaderElementStyle, globanElementStyle }) => {
     <Fragment>
       <div id="globan" style={globanElementStyle} className={styles.globan}>
         <div className={styles.globanContent}>
-          {resources.messages['anOfficialWebsite']}
+          <span>{resources.messages['anOfficialWebsite']}</span>
           <a
             href="#globan-dropdown-186d0fazrpn"
             aria-controls="globan-dropdown-186d0fazrpn"

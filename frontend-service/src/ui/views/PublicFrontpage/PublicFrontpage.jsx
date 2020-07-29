@@ -31,9 +31,7 @@ export const PublicFrontpage = () => {
                 data to the EEA, and will also host several reporting tasks of DG for Environment and DG for Climate
                 Action. Reportnet 3.0 is a centralized e-Reporting platform, aiming at simplifying and streamlining the
                 data flow steps across all environmental domains. The system acts as a one-stop-shop for all involved
-                stakeholders. It effectively addresses the issues previously faced by the reporters and employ modern
-                approaches in software development (i.e. with regards to security, scalability, architecture,
-                interoperability, etc.).
+                stakeholders.
               </p>
               <p>
                 The vision of Reportnet 3.0 is designed to deliver the ambition and the strategic goals as set out by

@@ -55,8 +55,18 @@
       }
     }
   }
-  @media (max-width: 768px) {
-    display: none;
+  @media (max-width: 414px) {
+    .globanContent {
+      &::before {
+        display: none;
+      }
+      span {
+        display: none;
+      }
+      a {
+        display: none;
+      }
+    }
   }
 }
 .euHeader {
