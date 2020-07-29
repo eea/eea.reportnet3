@@ -64,9 +64,7 @@ public class IntegrationControllerImpl implements IntegrationController {
       @RequestBody IntegrationVO integrationVO) {
 
     try {
-      List<IntegrationVO> integrations =
-          integrationService.getAllIntegrationsByCriteria(integrationVO);
-      return integrations;
+      return integrationService.getAllIntegrationsByCriteria(integrationVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Error finding integrations: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);

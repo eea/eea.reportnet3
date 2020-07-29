@@ -6,6 +6,7 @@ import notifications from './notifications';
 import permissions from './permissions';
 import primeIcons from './prime.icons';
 import validations from './validation.config.json';
+import publicFrontpage from './publicFrontpage.json';
 
 const config = {};
 const { images } = avatarImages;
@@ -23,5 +24,6 @@ config.MAX_FILE_SIZE = 100000000;
 config.notifications = notifications;
 config.permissions = permissions;
 config.validations = validations;
+config.publicFrontpage = publicFrontpage;
 
 export { config };

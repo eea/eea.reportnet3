@@ -5,6 +5,9 @@ import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
 import org.eea.mapper.IMapper;
 import org.mapstruct.Mapper;
 
+/**
+ * The Interface FMECollectionMapper.
+ */
 @Mapper(componentModel = "spring")
 public interface FMECollectionMapper extends IMapper<FMECollection, FMECollectionVO> {
 

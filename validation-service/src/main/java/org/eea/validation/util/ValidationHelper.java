@@ -283,7 +283,7 @@ public class ValidationHelper implements DisposableBean {
     int tasksToBeSent = this.taskReleasedTax;
     int sentTasks = 0;
     while (tasksToBeSent > 0) {
-      if (processesMap.get(processId).getPendingValidations().size() >= 1) {
+      if (!processesMap.get(processId).getPendingValidations().isEmpty()) {
         this.kafkaSenderUtils
             .releaseKafkaEvent(processesMap.get(processId).getPendingValidations().poll());
         sentTasks++;
@@ -579,7 +579,7 @@ public class ValidationHelper implements DisposableBean {
   private boolean checkStartedProcess(String processId) {
     boolean isProcessStarted = processesMap.containsKey(processId);
     if (!isProcessStarted) {
-      LOG.warn("Error, proces {} has not been initialized or it has been already finished",
+      LOG.warn("Warning, proces {} has not been initialized or it has been already finished",
           processId);
     }
     return isProcessStarted;
@@ -622,6 +622,7 @@ public class ValidationHelper implements DisposableBean {
    */
   private class ValidationTasksExecutorThread implements Runnable {
 
+    private static final double MILISECONDS = 1000.0;
     /**
      * The validation task.
      */
@@ -669,11 +670,12 @@ public class ValidationHelper implements DisposableBean {
           } catch (EEAException e) {
             LOG_ERROR.error("Error trying to reduce pending tasks due to {}", e.getMessage(), e);
           }
-        } else {// send the message to coordinator validation instance
+        } else {
+          // send the message to coordinator validation instance
           kafkaSenderUtils.releaseKafkaEvent(validationTask.notificationEventType,
               validationTask.eeaEventVO.getData());
         }
-        Double totalTime = (System.currentTimeMillis() - currentTime) / 1000.0;
+        Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
         LOG.info("Validation task {} finished, it has taken taken {} seconds",
             validationTask.eeaEventVO, totalTime);
       }

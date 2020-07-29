@@ -91,6 +91,14 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
 
 
 
+  /**
+   * Find by id field schema and value containing.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param searchValueText the search value text
+   * @param pageable the pageable
+   * @return the list
+   */
   List<FieldValue> findByIdFieldSchemaAndValueContaining(
       @Param("fieldSchemaId") String fieldSchemaId, @Param("searchText") String searchValueText,
       Pageable pageable);

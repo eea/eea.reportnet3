@@ -26,19 +26,34 @@ public class TokenMonitor {
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
+  /** The keycloak connector service. */
   @Autowired
   private KeycloakConnectorService keycloakConnectorService;
+
+  /** The admin user. */
   @Value("${eea.keycloak.admin.user}")
   private String adminUser;
+
+  /** The admin pass. */
   @Value("${eea.keycloak.admin.password}")
   private String adminPass;
+
+  /** The token expiration time. */
   @Value("${eea.keycloak.admin.token.expiration}")
   private Long tokenExpirationTime;
 
+  /** The last update time. */
   private Long lastUpdateTime = 0l;
+
+  /** The admin token. */
   private String adminToken;
+
+  /** The refresh token. */
   private String refreshToken;
 
+  /**
+   * Inits the.
+   */
   @PostConstruct
   private void init() {
     manageTokenInfo(keycloakConnectorService.generateAdminToken(adminUser, adminPass));
@@ -50,7 +65,7 @@ public class TokenMonitor {
    *
    * @return the token
    */
-  synchronized public String getToken() {
+  public synchronized String getToken() {
     Long currentTime = System.currentTimeMillis();
     Long difference = currentTime - lastUpdateTime;
     if ((difference) > tokenExpirationTime) {
@@ -72,6 +87,11 @@ public class TokenMonitor {
     return adminToken;
   }
 
+  /**
+   * Manage token info.
+   *
+   * @param tokenInfo the token info
+   */
   private void manageTokenInfo(TokenInfo tokenInfo) {
     if (null != tokenInfo) {
       this.adminToken = Optional.ofNullable(tokenInfo.getAccessToken()).orElse("");

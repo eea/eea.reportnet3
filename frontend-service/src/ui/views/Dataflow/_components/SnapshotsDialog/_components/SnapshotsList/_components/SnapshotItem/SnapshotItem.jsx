@@ -44,8 +44,8 @@ export const SnapshotItem = ({ getSnapshotData, isLoading, itemData, showRelease
               }}
               tooltip={
                 itemData.isReleased
-                  ? resources.messages.releasedSnapshotTooltip
-                  : resources.messages.releaseSnapshotTooltip
+                  ? resources.messages['releasedSnapshotTooltip']
+                  : resources.messages['releaseSnapshotTooltip']
               }
               tooltipOptions={{ position: 'right' }}
             />

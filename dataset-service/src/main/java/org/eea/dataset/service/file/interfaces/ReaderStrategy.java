@@ -22,7 +22,7 @@ public interface ReaderStrategy {
    * @param idTableSchema the id table schema
    * @return the data set VO
    * @throws InvalidFileException the invalid file exception
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   DataSetVO parseFile(InputStream inputStream, Long dataflowId, Long partitionId,
       String idTableSchema) throws InvalidFileException, EEAException;

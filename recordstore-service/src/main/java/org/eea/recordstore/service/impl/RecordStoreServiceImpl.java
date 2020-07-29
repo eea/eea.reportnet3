@@ -178,7 +178,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
 
     final List<String> commands = new ArrayList<>();
     // read file into stream, try-with-resources
-    try (final Stream<String> stream = Files.lines(fileInitCommands.toPath())) {
+    try (Stream<String> stream = Files.lines(fileInitCommands.toPath())) {
 
       stream.forEach(commands::add);
 

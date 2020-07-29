@@ -87,7 +87,7 @@ public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter
     }
 
     List<Pair<String[], String>> roleProtectedRequest = getRoleProtectedRequest();
-    if (null != roleProtectedRequest && roleProtectedRequest.size() > 0) {
+    if (null != roleProtectedRequest && !roleProtectedRequest.isEmpty()) {
       roleProtectedRequest.stream().forEach(pair -> {
         try {
           http.authorizeRequests().antMatchers(pair.getLeft()).hasRole(pair.getRight());
