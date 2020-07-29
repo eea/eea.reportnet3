@@ -74,6 +74,74 @@ import org.springframework.stereotype.Service;
 @Service("dataCollectionService")
 public class DataCollectionServiceImpl implements DataCollectionService {
 
+  /** The Constant CHUNK_SIZE. */
+  private static final int CHUNK_SIZE = 10;
+
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(DataCollectionServiceImpl.class);
+
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /**
+   * The Constant NAME_DC.
+   */
+  private static final String NAME_DC = "Data Collection - %s";
+
+  /** The Constant NAME_EU. */
+  private static final String NAME_EU = "EU Dataset - %s";
+
+  /**
+   * The Constant UPDATE_DATAFLOW_STATUS.
+   */
+  private static final String UPDATE_DATAFLOW_STATUS =
+      "update dataflow set status = '%s', deadline_date = '%s' where id = %d";
+
+  /** The Constant UPDATE_REPRESENTATIVE_HAS_DATASETS. */
+  private static final String UPDATE_REPRESENTATIVE_HAS_DATASETS =
+      "update representative set has_datasets = %b where id = %d;";
+
+  /**
+   * The Constant INSERT_DC_INTO_DATASET.
+   */
+  private static final String INSERT_DC_INTO_DATASET =
+      "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema) values ('%s', %d, '%s', '%s') returning id";
+
+  /** The Constant INSERT_EU_INTO_DATASET. */
+  private static final String INSERT_EU_INTO_DATASET =
+      "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema) values ('%s', %d, '%s', '%s') returning id";
+
+  /**
+   * The Constant INSERT_DC_INTO_DATA_COLLECTION.
+   */
+  private static final String INSERT_DC_INTO_DATA_COLLECTION =
+      "insert into data_collection (id, due_date) values (%d, '%s')";
+
+  /** The Constant INSERT_EU_INTO_EU_DATASET. */
+  private static final String INSERT_EU_INTO_EU_DATASET = "insert into eu_dataset (id) values (%d)";
+
+  /**
+   * The Constant INSERT_RD_INTO_DATASET.
+   */
+  private static final String INSERT_RD_INTO_DATASET =
+      "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema, data_provider_id) values ('%s', %d, '%s', '%s', %d) returning id";
+
+  /**
+   * The Constant INSERT_RD_INTO_REPORTING_DATASET.
+   */
+  private static final String INSERT_RD_INTO_REPORTING_DATASET =
+      "insert into reporting_dataset (id) values (%d)";
+
+  /**
+   * The Constant INSERT_INTO_PARTITION_DATASET.
+   */
+  private static final String INSERT_INTO_PARTITION_DATASET =
+      "insert into partition_dataset (user_name, id_dataset) values ('root', %d)";
+
   /**
    * The metabase data source.
    */
@@ -179,71 +247,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
 
   /**
-   * The Constant LOG.
-   */
-  private static final Logger LOG = LoggerFactory.getLogger(DataCollectionServiceImpl.class);
-
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-  /**
-   * The Constant NAME_DC.
-   */
-  private static final String NAME_DC = "Data Collection - %s";
-
-  /** The Constant NAME_EU. */
-  private static final String NAME_EU = "EU Dataset - %s";
-
-  /**
-   * The Constant UPDATE_DATAFLOW_STATUS.
-   */
-  private static final String UPDATE_DATAFLOW_STATUS =
-      "update dataflow set status = '%s', deadline_date = '%s' where id = %d";
-
-  /** The Constant UPDATE_REPRESENTATIVE_HAS_DATASETS. */
-  private static final String UPDATE_REPRESENTATIVE_HAS_DATASETS =
-      "update representative set has_datasets = %b where id = %d;";
-
-  /**
-   * The Constant INSERT_DC_INTO_DATASET.
-   */
-  private static final String INSERT_DC_INTO_DATASET =
-      "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema) values ('%s', %d, '%s', '%s') returning id";
-
-  /** The Constant INSERT_EU_INTO_DATASET. */
-  private static final String INSERT_EU_INTO_DATASET =
-      "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema) values ('%s', %d, '%s', '%s') returning id";
-
-  /**
-   * The Constant INSERT_DC_INTO_DATA_COLLECTION.
-   */
-  private static final String INSERT_DC_INTO_DATA_COLLECTION =
-      "insert into data_collection (id, due_date) values (%d, '%s')";
-
-  /** The Constant INSERT_EU_INTO_EU_DATASET. */
-  private static final String INSERT_EU_INTO_EU_DATASET = "insert into eu_dataset (id) values (%d)";
-
-  /**
-   * The Constant INSERT_RD_INTO_DATASET.
-   */
-  private static final String INSERT_RD_INTO_DATASET =
-      "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema, data_provider_id) values ('%s', %d, '%s', '%s', %d) returning id";
-
-  /**
-   * The Constant INSERT_RD_INTO_REPORTING_DATASET.
-   */
-  private static final String INSERT_RD_INTO_REPORTING_DATASET =
-      "insert into reporting_dataset (id) values (%d)";
-
-  /**
-   * The Constant INSERT_INTO_PARTITION_DATASET.
-   */
-  private static final String INSERT_INTO_PARTITION_DATASET =
-      "insert into partition_dataset (user_name, id_dataset) values ('root', %d)";
-
-  /**
    * Gets the dataflow status.
    *
    * @param dataflowId the dataflow id
@@ -288,7 +291,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     releaseLockAndNotification(dataflowId, "Error creating schemas", isCreation);
 
     int size = datasetIds.size();
-    for (int i = 0; i < size; i += 10) {
+    for (int i = 0; i < size; i += CHUNK_SIZE) {
       resourceManagementControllerZuul
           .deleteResourceByDatasetId(datasetIds.subList(i, i + 10 > size ? size : i + 10));
     }

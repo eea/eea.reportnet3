@@ -82,6 +82,11 @@ public interface DataflowRepository
   @Query(nativeQuery = true, value = "delete from  dataflow  where id = :idDataflow ")
   void deleteNativeDataflow(@Param("idDataflow") Long idDataflow);
 
+  /**
+   * Delete by id.
+   *
+   * @param idDataflow the id dataflow
+   */
   @Transactional
   @Modifying
   @Query("DELETE FROM Dataflow d where d.id = :idDataflow")

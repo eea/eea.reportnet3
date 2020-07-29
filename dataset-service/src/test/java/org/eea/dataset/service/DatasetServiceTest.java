@@ -2056,6 +2056,7 @@ public class DatasetServiceTest {
     DataSetSchema datasetSchema = new DataSetSchema();
     List<TableSchema> tableSchemas = new ArrayList<>();
     TableSchema tableSchema = new TableSchema();
+    tableSchema.setReadOnly(Boolean.FALSE);
     RecordSchema recordSchema = new RecordSchema();
     recordSchema.setIdRecordSchema(new ObjectId());
     List<FieldSchema> fieldSchemas = new ArrayList<>();

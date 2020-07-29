@@ -83,7 +83,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
   public Container createContainer(final String containerName, final String imageName,
       final String portBinding) {
 
-    try (final CreateContainerCmd command = dockerClient.dockerClient()
+    try (CreateContainerCmd command = dockerClient.dockerClient()
         .createContainerCmd("crunchydata/crunchy-postgres-gis:centos7-11.2-2.3.1").withEnv(envs)
         .withName(containerName)) {
       // Bind bind = new Bind("c:/opt/dump", new Volume("/pgwal"));// NO MAPEA... INVESTIGAR
@@ -135,7 +135,8 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
     final ExecCreateCmdResponse execCreateCmdResponse =
         dockerClient.dockerClient().execCreateCmd(container.getId()).withAttachStdout(true)
             .withCmd(command).withTty(true).exec();
-    ExecStartResultCallback result = null;// Esto sirve para gestión de eventos. Interesante
+    // This works for event management. Interesting
+    ExecStartResultCallback result = null;
     result =
         dockerClient.dockerClient().execStartCmd(execCreateCmdResponse.getId()).withDetach(false)
 
@@ -174,7 +175,8 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
             "psql", "-h", "localhost", "-U", "root", "-p", "5432", "-d", "datasets", "-c",
             "select * from pg_namespace where nspname like 'dataset%'")
         .withTty(true).exec();
-    ExecStartResultCallback execResult = null;// Esto sirve para gestión de eventos. Interesante
+    // This works for event management. Interesting
+    ExecStartResultCallback execResult = null;
     execResult = dockerClient.dockerClient().execStartCmd(execCreateCmdResponse.getId())
         .withDetach(false).exec(new ExecStartResultCallback(output, errorOutput));
 

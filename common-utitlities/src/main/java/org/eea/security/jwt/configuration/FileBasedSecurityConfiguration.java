@@ -24,17 +24,22 @@ import org.springframework.core.env.PropertySource;
 public class FileBasedSecurityConfiguration extends SecurityConfiguration {
 
 
+  /** The env. */
   @Autowired
   private Environment env;
 
+  /** The permitted request. */
   @Value("${eea.security.permittedRequest:@null}")
   private String[] permittedRequest;
 
+  /** The authenticated request. */
   @Value("${eea.security.authenticatedRequest:@null}")
   private String[] authenticatedRequest;
 
+  /** The Constant PROTECTED_REQUEST_PREFIX: {@value}. */
   private static final String PROTECTED_REQUEST_PREFIX = "eea.security.roleProtectedRequest";
 
+  /** The role protected request. */
   private List<Pair<String[], String>> roleProtectedRequest;
 
 
@@ -44,8 +49,7 @@ public class FileBasedSecurityConfiguration extends SecurityConfiguration {
   @PostConstruct
   private void fillRoleProtectedRequest() {
     Map<String, Object> map = new HashMap<>();
-    for (Iterator it = ((AbstractEnvironment) env).getPropertySources().iterator();
-        it.hasNext(); ) {
+    for (Iterator it = ((AbstractEnvironment) env).getPropertySources().iterator(); it.hasNext();) {
       PropertySource propertySource = (PropertySource) it.next();
       if (propertySource instanceof MapPropertySource) {
         map.putAll(((MapPropertySource) propertySource).getSource());
@@ -53,29 +57,41 @@ public class FileBasedSecurityConfiguration extends SecurityConfiguration {
     }
     List<String> propertyKeys = map.keySet().stream()
         .filter(key -> key.startsWith(PROTECTED_REQUEST_PREFIX)).collect(Collectors.toList());
-    if (null != propertyKeys && propertyKeys.size() > 0) {
-      roleProtectedRequest = propertyKeys.stream()
-          .map(key -> {
-            String[] splittedKey = key.split("\\.");
-            String role = splittedKey[splittedKey.length - 1];
-            Pair<String[], String> pair = new ImmutablePair(map.get(key).toString().split(","),
-                role);
-            return pair;
-          })
-          .collect(Collectors.toList());
+    if (null != propertyKeys && !propertyKeys.isEmpty()) {
+      roleProtectedRequest = propertyKeys.stream().map(key -> {
+        String[] splittedKey = key.split("\\.");
+        String role = splittedKey[splittedKey.length - 1];
+        Pair<String[], String> pair = new ImmutablePair(map.get(key).toString().split(","), role);
+        return pair;
+      }).collect(Collectors.toList());
     }
   }
 
+  /**
+   * Gets the authenticated request.
+   *
+   * @return the authenticated request
+   */
   @Override
   protected String[] getAuthenticatedRequest() {
     return Arrays.copyOf(authenticatedRequest, authenticatedRequest.length);
   }
 
+  /**
+   * Gets the permitted request.
+   *
+   * @return the permitted request
+   */
   @Override
   protected String[] getPermittedRequest() {
     return Arrays.copyOf(permittedRequest, permittedRequest.length);
   }
 
+  /**
+   * Gets the role protected request.
+   *
+   * @return the role protected request
+   */
   @Override
   protected List<Pair<String[], String>> getRoleProtectedRequest() {
     return roleProtectedRequest;
