@@ -121,6 +121,7 @@ public class EUDatasetServiceImpl implements EUDatasetService {
       datasetSnapshotService.addSnapshot(dataCollection.getId(), dataCollection.getDatasetSchema(),
           false, obtainPartition(relatedDatasetsByIds.get(dataCollection.getId()), "root").getId());
     }
+    LOG.info("EU dataset populated with dataflowId {}", dataflowId);
 
   }
 

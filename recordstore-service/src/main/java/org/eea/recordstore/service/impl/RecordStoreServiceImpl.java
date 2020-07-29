@@ -137,12 +137,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     dockerInterfaceService.copyFileFromHostToContainer(containerName, fileInitSql.getPath(),
         "/pgwal");
 
-    /*
-     * dockerInterfaceService //TODO need to determine where to find the init.sql file and where to
-     * store inside the container .copyFileFromHostToContainer(CONTAINER_NAME,
-     * "C:\\opt\\dump\\init.sql", "/pgwal");
-     */
-    // "psql -h localhost -U root -p 5432 -d datasets -f /pgwal/init.sql "
     try {
       dockerInterfaceService.executeCommandInsideContainer(container, "/bin/bash", "-c", "psql -h "
           + ipPostgreDb + " -U " + userPostgreDb + " -p 5432 -d datasets -f /pgwal/init.sql ");
@@ -164,12 +158,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   @Override
   public void createEmptyDataSet(final String datasetName, final String idDatasetSchema)
       throws RecordStoreAccessException {
-    // line to run a crunchy container
-    // docker run -d -e PG_DATABASE=datasets -e PG_PRIMARY_PORT=5432 -e PG_MODE=primary -e
-    // PG_USER=root -e PG_PASSWORD=root -e PGPASSWORD=root -e PG_PRIMARY_USER=root -e
-    // PG_PRIMARY_PASSWORD=root
-    // -e PG_ROOT_PASSWORD=root -e PGBACKREST=true -p 5432:5432 --name crunchy-postgres
-    // crunchydata/crunchy-postgres-gis:centos7-11.2-2.3.1
     final Container container = dockerInterfaceService.getContainer(containerName);
 
     final ClassLoader classLoader = this.getClass().getClassLoader();
