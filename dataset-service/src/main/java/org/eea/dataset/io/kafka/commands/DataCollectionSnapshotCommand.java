@@ -12,8 +12,6 @@ import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.thread.ThreadPropertiesManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,17 +22,16 @@ import org.springframework.stereotype.Component;
 public class DataCollectionSnapshotCommand extends AbstractEEAEventHandlerCommand {
 
 
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The eu dataset repository. */
   @Autowired
   private EUDatasetRepository euDatasetRepository;
 
+  /** The data collection repository. */
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
 
+  /** The dataset snapshot service. */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
@@ -52,7 +49,7 @@ public class DataCollectionSnapshotCommand extends AbstractEEAEventHandlerComman
    * Execute.
    *
    * @param eeaEventVO the eea event VO
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {

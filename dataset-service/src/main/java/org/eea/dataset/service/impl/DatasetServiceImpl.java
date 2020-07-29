@@ -1387,8 +1387,6 @@ public class DatasetServiceImpl implements DatasetService {
           IntegrationOperationTypeEnum.EXPORT, null, datasetId, integrationAux.get(0));
       return null;
     } else {
-      // Get the partition
-      // final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
 
       // Get the dataFlowId from the metabase
       Long idDataflow = getDataFlowIdById(datasetId);

@@ -10,8 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.ums.TokenVO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,10 +33,6 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Do filter internal.
@@ -71,7 +65,8 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
         }
         UserDetails userDetails = EeaUserDetails.create(username, roles);
 
-        //Adding again the toke type so it can be used in EeaFeignSecurityInterceptor regardless the token type
+        // Adding again the toke type so it can be used in EeaFeignSecurityInterceptor regardless
+        // the token type
         UsernamePasswordAuthenticationToken authentication =
             new UsernamePasswordAuthenticationToken(userDetails, APIKEY_TOKEN + apiKey,
                 userDetails.getAuthorities());

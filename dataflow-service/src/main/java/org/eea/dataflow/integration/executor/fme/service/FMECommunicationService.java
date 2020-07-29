@@ -122,18 +122,21 @@ public class FMECommunicationService {
     headerInfo.put(CONTENT_TYPE, APPLICATION_JSON);
 
     ResponseEntity<SubmitResult> checkResult = null;
+    Integer result = 0;
     try {
       HttpEntity<FMEAsyncJob> request = createHttpRequest(fmeAsyncJob, uriParams, headerInfo);
       checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
           .path("fmerest/v3/transformations/submit/{repository}/{workspace}")
           .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, SubmitResult.class);
       LOG.info("FME called successfully: HTTP:{}", checkResult.getStatusCode());
+      result = checkResult != null && checkResult.getBody() != null
+          && checkResult.getBody().getId() != null ? checkResult.getBody().getId() : 0;
     } catch (HttpStatusCodeException exception) {
       LOG_ERROR.error("Status code: {} message: {}", exception.getStatusCode().value(),
           exception.getMessage());
     }
 
-    return checkResult != null && checkResult.getBody() != null ? checkResult.getBody().getId() : 0;
+    return result;
   }
 
   /**
