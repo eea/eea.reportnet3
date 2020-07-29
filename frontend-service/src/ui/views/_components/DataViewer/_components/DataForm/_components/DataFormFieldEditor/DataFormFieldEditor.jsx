@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
@@ -7,6 +8,7 @@ import { DatasetConfig } from 'conf/domain/model/Dataset';
 
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
+import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
@@ -232,6 +234,24 @@ const DataFormFieldEditor = ({
   const onAttach = async value => {
     setIsAttachFileVisible(false);
     console.log('ON ATTACH', { value });
+
+    const toBase64 = file =>
+      new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+
+    const result = await toBase64(value.files[0]).catch(e => Error(e));
+    if (result instanceof Error) {
+      console.log('Error: ', result.message);
+      return;
+    } else {
+      onChangeForm(field, [value.files[0].name, result]);
+    }
+
+    console.log(result);
     // const {
     //   dataflow: { name: dataflowName },
     //   dataset: { name: datasetName }
@@ -246,6 +266,12 @@ const DataFormFieldEditor = ({
     //     datasetName
     //   }
     // });
+  };
+
+  const onConfirmDeleteAttachment = () => {
+    console.log('DELETE ATTACHMENT');
+    onChangeForm(field, []);
+    setIsDeleteAttachmentVisible(false);
   };
 
   const renderFieldEditor = () =>
@@ -276,31 +302,37 @@ const DataFormFieldEditor = ({
       />
     );
 
-  const renderAttachment = (field, fieldValue = '') => {
+  const renderAttachment = (field, fieldValue = []) => {
     console.log({ field, fieldValue });
     return (
       <div style={{ display: 'flex' }}>
-        {fieldValue !== '' && (
+        {!isEmpty(fieldValue) && (
           <Button
-            className={`p-button-secondary-transparent`}
+            className={`${isEmpty(fieldValue[0]) && 'p-button-animated-blink'} p-button-secondary-transparent`}
             icon="export"
             iconPos="right"
-            label={fieldValue}
+            label={fieldValue[0]}
             onClick={() => {
               console.log('Download');
+              const a = document.createElement('a');
+              a.href = fieldValue[1];
+              a.download = fieldValue[0];
+              a.click();
             }}
+            style={{ width: 'fit-content' }}
           />
         )}
+
         <Button
-          className={`p-button-secondary-transparent`}
+          className={`p-button-animated-blink p-button-secondary-transparent`}
           icon="import"
           onClick={() => {
             setIsAttachFileVisible(true);
           }}
         />
-        {fieldValue !== '' && (
+        {!isEmpty(fieldValue) && (
           <Button
-            className={`p-button-secondary-transparent`}
+            className={`p-button-animated-blink p-button-secondary-transparent`}
             icon="trash"
             onClick={() => setIsDeleteAttachmentVisible(true)}
           />
@@ -431,6 +463,18 @@ const DataFormFieldEditor = ({
             })}`}
           />
         </Dialog>
+      )}
+      {isDeleteAttachmentVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={`${resources.messages['deleteAttachmentHeader']}`}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={onConfirmDeleteAttachment}
+          onHide={() => setIsDeleteAttachmentVisible(false)}
+          visible={isDeleteAttachmentVisible}>
+          {resources.messages['deleteAttachmentConfirm']}
+        </ConfirmDialog>
       )}
 
       {isMapOpen && (

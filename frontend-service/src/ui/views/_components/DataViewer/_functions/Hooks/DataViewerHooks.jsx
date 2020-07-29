@@ -130,7 +130,7 @@ export const useSetColumns = (
     <div style={{ display: 'flex', justifyContent: 'center' }}>
       {value !== '' && (
         <Button
-          className={`p-button-secondary-transparent`}
+          className={`${value === '' && 'p-button-animated-blink'} p-button-secondary-transparent`}
           icon="export"
           iconPos="right"
           label={value}
@@ -140,7 +140,7 @@ export const useSetColumns = (
         />
       )}
       <Button
-        className={`p-button-secondary-transparent`}
+        className={`p-button-animated-blink p-button-secondary-transparent`}
         icon="import"
         onClick={() => {
           setIsAttachFileVisible(true);
@@ -148,7 +148,7 @@ export const useSetColumns = (
       />
       {value !== '' && (
         <Button
-          className={`p-button-secondary-transparent`}
+          className={`p-button-animated-blink p-button-secondary-transparent`}
           icon="trash"
           onClick={() => setIsDeleteAttachmentVisible(true)}
         />
