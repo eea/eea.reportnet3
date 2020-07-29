@@ -1859,6 +1859,8 @@ public class DatasetServiceImpl implements DatasetService {
           String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, datasetSchemaId));
     }
 
+
+
     // Obtain the data provider code to insert into the record
     DataProviderVO provider =
         providerId != null ? representativeControllerZuul.findDataProviderById(providerId) : null;
@@ -1880,10 +1882,16 @@ public class DatasetServiceImpl implements DatasetService {
     // Construct object to be save
     DatasetValue dataset = new DatasetValue();
     List<TableValue> tables = new ArrayList<>();
+    List<String> readOnlyTables = new ArrayList<>();
 
     // Loops to build the entity
     for (ETLTableVO etlTable : etlDatasetVO.getTables()) {
       etlBuildEntity(provider, partition, tableMap, fieldMap, dataset, tables, etlTable);
+      // Check if table is read Only and save into a list
+      TableSchema tableSchema = tableMap.get(etlTable.getTableName().toLowerCase());
+      if (tableSchema != null && tableSchema.getReadOnly()) {
+        readOnlyTables.add(tableSchema.getIdTableSchema().toString());
+      }
     }
     dataset.setTableValues(tables);
     dataset.setIdDatasetSchema(datasetSchemaId);
@@ -1895,7 +1903,9 @@ public class DatasetServiceImpl implements DatasetService {
       // Check if the table with idTableSchema has been populated already
       Long oldTableId = findTableIdByTableSchema(datasetId, tableValue.getIdTableSchema());
       fillTableId(tableValue.getIdTableSchema(), dataset.getTableValues(), oldTableId);
-      allRecords.addAll(tableValue.getRecords());
+      if (!readOnlyTables.contains(tableValue.getIdTableSchema())) {
+        allRecords.addAll(tableValue.getRecords());
+      }
       if (null == oldTableId) {
         tableRepository.saveAndFlush(tableValue);
       }

@@ -61,7 +61,6 @@ public class ExternalExportEUDatasetCompletedEvent implements NotificableEventHa
     notification.put("datasetId", notificationVO.getDatasetId());
     notification.put("datasetName", datasetName);
     notification.put("dataflowName", dataflowName);
-    notification.put("fileName", notificationVO.getFileName());
 
     return notification;
   }

@@ -46,7 +46,7 @@ public class ExternalExportEUDatasetCompletedEventTest {
     Mockito.when(dataSetMetabaseVO.getDataSetName()).thenReturn("datasetName");
     Mockito.when(dataflowService.getById(Mockito.anyLong())).thenReturn(dataFlowVO);
     Mockito.when(dataFlowVO.getName()).thenReturn("dataflowName");
-    Assert.assertEquals(6, externalExportEUDatasetCompletedEvent.getMap(NotificationVO.builder()
-        .user("user").datasetId(1L).dataflowId(1L).fileName("fileName").build()).size());
+    Assert.assertEquals(5, externalExportEUDatasetCompletedEvent
+        .getMap(NotificationVO.builder().user("user").datasetId(1L).dataflowId(1L).build()).size());
   }
 }

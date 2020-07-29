@@ -53,7 +53,7 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
   /**
    * The Constant LOG.
    */
-  private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceWebLinkImpl.class);
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
