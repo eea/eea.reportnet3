@@ -37,6 +37,13 @@ const SnapshotSlideBar = ({
     showScrollingBar();
   }, [slideBarStyle]);
 
+  useEffect(() => {
+    window.addEventListener('resize', resetSlideBarPositionAndSize);
+    return () => {
+      window.removeEventListener('resize', resetSlideBarPositionAndSize);
+    };
+  });
+
   const showScrollingBar = () => {
     const bodySelector = document.querySelector('body');
 
@@ -107,7 +114,7 @@ const SnapshotSlideBar = ({
                   </label>
                   <div className={styles.createButtonWrapper}>
                     <Button
-                      className={`rp-btn secondary`}
+                      className={`${styles.createSnapshotButton} rp-btn secondary`}
                       tooltip={resources.messages.createSnapshotTooltip}
                       type="submit"
                       icon="plus"

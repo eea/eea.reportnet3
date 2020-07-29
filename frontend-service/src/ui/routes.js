@@ -11,7 +11,7 @@ export const routes = {
   DOCUMENTS: '/dataflow/:dataflowId/documents',
   EU_DATASET: '/dataflow/:dataflowId/euDataset/:datasetId',
   EULOGIN: '/eulogin',
-  LOGIN: '/',
+  LOGIN: '/login',
   PRIVACY_STATEMENT: '/privacyPolicy',
   REPRESENTATIVE: '/dataflow/:dataflowId/representative/:representative',
   SETTINGS: '/settings'

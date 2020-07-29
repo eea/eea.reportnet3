@@ -7,7 +7,6 @@
   width: 100%;
   height: var(--header-height);
   overflow: hidden;
-  background-color: var(--bg);
   background-color: var(--header-footer-bg);
   transition: 0.5s;
   box-shadow: var(--header-box-shadow);
@@ -35,6 +34,15 @@
       display: flex;
       align-items: center;
       color: var(--main-font-color);
+    }
+    .loginWrapper {
+      display: flex;
+      align-items: center;
+      margin-right: 1rem;
+      a {
+        cursor: pointer;
+        user-select: none;
+      }
     }
     .userWrapper {
       display: flex;
@@ -87,6 +95,15 @@
     .themeSwitcherInputSwitch:before {
       background-color: var(--black);
       box-shadow: var(--inputswitch-dark-theme-checked);
+    }
+  }
+  @media (max-width: 768px) {
+    height: 134px;
+    background-color: var(--c-corporate-blue);
+    .customHeader {
+      .title {
+        display: none;
+      }
     }
   }
 }

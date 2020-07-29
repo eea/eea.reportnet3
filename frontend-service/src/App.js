@@ -45,10 +45,10 @@ const App = () => {
                       <Notifications />
                       <Router>
                         <Switch>
-                          {/* <Route exact path="/" component={PublicFrontpage} /> */}
+                          <Route exact path={routes.ACCESS_POINT} component={PublicFrontpage} />
                           <Route
                             exact
-                            path="/"
+                            path={routes.LOGIN}
                             component={window.env.REACT_APP_EULOGIN == 'true' ? AccessPoint : ReportnetLogin}
                           />
                           <Route exact path={routes.EULOGIN} component={EULogin} />

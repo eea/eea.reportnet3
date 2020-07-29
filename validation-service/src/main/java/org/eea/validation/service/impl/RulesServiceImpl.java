@@ -442,17 +442,17 @@ public class RulesServiceImpl implements RulesService {
   private FieldSchema getPKFieldSchemaFromSchema(DataSetSchema schema, String idFieldSchema) {
 
     FieldSchema field = null;
-    Boolean locatedPK = false;
+    boolean locatedPK = false;
 
     for (TableSchema table : schema.getTableSchemas()) {
       for (FieldSchema fieldAux : table.getRecordSchema().getFieldSchema()) {
         if (fieldAux.getIdFieldSchema().toString().equals(idFieldSchema)) {
           field = fieldAux;
-          locatedPK = Boolean.TRUE;
+          locatedPK = true;
           break;
         }
       }
-      if (locatedPK.equals(Boolean.TRUE)) {
+      if (locatedPK) {
         break;
       }
     }
