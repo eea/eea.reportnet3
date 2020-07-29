@@ -34,9 +34,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UniqueValidationUtils {
-
-
-
   /**
    * The rules repository.
    */
@@ -57,95 +54,33 @@ public class UniqueValidationUtils {
   /**
    * The record repository.
    */
+  @Autowired
   private static RecordRepository recordRepository;
 
   /**
    * The data set schema controller zuul.
    */
+  @Autowired
   private static DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
   /**
    * The table repository.
    */
+  @Autowired
   private static TableRepository tableRepository;
 
   /**
    * The rules service.
    */
+  @Autowired
   private static RulesService rulesService;
 
   /**
    * The data set metabase controller zuul.
    */
+  @Autowired
   private static DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
-  /**
-   * Sets the rules repository.
-   *
-   * @param rulesRepository the new rules repository
-   */
-  @Autowired
-  private void setRulesRepository(RulesRepository rulesRepository) {
-    UniqueValidationUtils.rulesRepository = rulesRepository;
-  }
-
-  /**
-   * Sets the schemas repository.
-   *
-   * @param schemasRepository the new schemas repository
-   */
-  @Autowired
-  private void setSchemasRepository(SchemasRepository schemasRepository) {
-    UniqueValidationUtils.schemasRepository = schemasRepository;
-  }
-
-  /**
-   * Sets the dataset repository.
-   *
-   * @param fieldRepository the new dataset repository
-   */
-  @Autowired
-  private void setRecordRepository(RecordRepository recordRepository) {
-    UniqueValidationUtils.recordRepository = recordRepository;
-  }
-
-  /**
-   * Sets the data set schema controller zuul.
-   *
-   * @param dataSetSchemaControllerZuul the new data set schema controller zuul
-   */
-  @Autowired
-  private void setDataSetSchemaControllerZuul(
-      DataSetSchemaControllerZuul dataSetSchemaControllerZuul) {
-    UniqueValidationUtils.dataSetSchemaControllerZuul = dataSetSchemaControllerZuul;
-  }
-
-
-  /**
-   * Sets the table repository.
-   *
-   * @param tableRepository the new table repository
-   */
-  @Autowired
-  private void setTableRepository(TableRepository tableRepository) {
-    UniqueValidationUtils.tableRepository = tableRepository;
-  }
-
-  @Autowired
-  private void setRulesService(RulesService rulesService) {
-    UniqueValidationUtils.rulesService = rulesService;
-  }
-
-  /**
-   * Sets the data set metabase controller zuul.
-   *
-   * @param dataSetMetabaseControllerZuul the new data set metabase controller zuul
-   */
-  @Autowired
-  private void setDataSetMetabaseControllerZuul(
-      DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul) {
-    UniqueValidationUtils.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
-  }
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(UniqueValidationUtils.class);

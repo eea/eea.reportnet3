@@ -37,80 +37,32 @@ public class FKValidationUtils {
   /**
    * The data set controller zuul.
    */
+  @Autowired
   private static DataSetControllerZuul dataSetControllerZuul;
 
   /**
    * The rules repository.
    */
+  @Autowired
   private static RulesRepository rulesRepository;
 
   /**
    * The dataset metabase controller zuul.
    */
+  @Autowired
   private static DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
   /**
    * The schemas repository.
    */
+  @Autowired
   private static SchemasRepository schemasRepository;
 
   /**
    * The field repository.
    */
+  @Autowired
   private static FieldRepository fieldRepository;
-
-
-  /**
-   * Sets the dataset controller.
-   *
-   * @param dataSetControllerZuul the new dataset controller
-   */
-  @Autowired
-  private void setDatasetController(DataSetControllerZuul dataSetControllerZuul) {
-    FKValidationUtils.dataSetControllerZuul = dataSetControllerZuul;
-  }
-
-
-  /**
-   * Sets the rules repository.
-   *
-   * @param rulesRepository the new rules repository
-   */
-  @Autowired
-  private void setRulesRepository(RulesRepository rulesRepository) {
-    FKValidationUtils.rulesRepository = rulesRepository;
-  }
-
-  /**
-   * Sets the data set metabase controller zuul.
-   *
-   * @param datasetMetabaseControllerZuul the new data set metabase controller zuul
-   */
-  @Autowired
-  private void setDataSetMetabaseControllerZuul(
-      DataSetMetabaseControllerZuul datasetMetabaseControllerZuul) {
-    FKValidationUtils.datasetMetabaseControllerZuul = datasetMetabaseControllerZuul;
-  }
-
-  /**
-   * Sets the schemas repository.
-   *
-   * @param schemasRepository the new schemas repository
-   */
-  @Autowired
-  private void setSchemasRepository(SchemasRepository schemasRepository) {
-    FKValidationUtils.schemasRepository = schemasRepository;
-  }
-
-  /**
-   * Sets the dataset repository.
-   *
-   * @param fieldRepository the new dataset repository
-   */
-  @Autowired
-  private void setFieldRepository(FieldRepository fieldRepository) {
-    FKValidationUtils.fieldRepository = fieldRepository;
-  }
 
   /**
    * The Constant PK_VALUE_LIST.
