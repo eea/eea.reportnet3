@@ -140,7 +140,9 @@ const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, on
         buttonIconClass: 'released',
         caption: resources.messages['releaseDataCollection'],
         handleRedirect:
-          filteredDatasets.length > 1 ? () => {} : () => onShowSnapshotDialog(filteredDatasets[0].datasetId),
+          filteredDatasets.length > 1
+            ? () => {}
+            : () => onShowSnapshotDialog(filteredDatasets[0].datasetId, filteredDatasets[0].name),
         layout: filteredDatasets.length > 1 ? 'menuBigButton' : 'defaultBigButton',
         visibility:
           buttonsVisibility.release && dataflowState.status !== 'DESIGN' && !isEmpty(dataflowState.data.datasets)
@@ -152,7 +154,7 @@ const useBigButtonList = ({ handleRedirect, onLoadReceiptData, dataflowState, on
         return {
           label: dataset.name,
           icon: 'cloudUpload',
-          command: () => onShowSnapshotDialog(dataset.datasetId),
+          command: () => onShowSnapshotDialog(dataset.datasetId, dataset.name),
           disabled: false
         };
       });
