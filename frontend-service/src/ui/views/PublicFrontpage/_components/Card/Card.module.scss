@@ -6,8 +6,8 @@
   padding: 1rem;
   position: relative;
   display: block;
-  width: calc(100% / 3.2);
-  height: 200px;
+  width: calc(100% / 3.15);
+  height: auto;
   &::after {
     content: '';
     background-image: url('/assets/img/logo.png') !important;

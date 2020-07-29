@@ -43,12 +43,19 @@ export const Card = card => {
           </h4>
         </div>
         <div className={styles.pilotScenarioAmbition}>
-          <p>{card.pilotScenarioAmbition}</p>
+          <p>
+            <strong>Pilot scenario ambition: </strong>
+            {card.pilotScenarioAmbition}
+          </p>
         </div>
 
         <div className={`${styles.footer}`}>
-          <span>{card.reportingFrequency}</span>
-          <span>{card.targetDate}</span>
+          <span>
+            <strong>Frequency:</strong> {card.reportingFrequency}
+          </span>
+          <span>
+            <strong>Target data:</strong> {card.targetDate}
+          </span>
         </div>
       </div>
     </div>

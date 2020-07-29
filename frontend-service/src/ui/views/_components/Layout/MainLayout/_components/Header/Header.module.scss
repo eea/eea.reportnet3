@@ -18,7 +18,7 @@
     justify-content: space-between;
     &.public {
       @media (max-width: 768px) {
-        justify-content: flex-end;
+        justify-content: space-between;
       }
     }
     .title {
@@ -104,12 +104,6 @@
     }
   }
   @media (max-width: 768px) {
-    height: 134px;
-    .customHeader {
-      .title {
-        display: none;
-      }
-    }
   }
 }
 
