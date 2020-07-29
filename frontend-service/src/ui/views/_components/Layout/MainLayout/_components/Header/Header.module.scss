@@ -15,6 +15,12 @@
   .customHeader {
     display: flex;
     padding: 0.5rem;
+    justify-content: space-between;
+    &.public {
+      @media (max-width: 768px) {
+        justify-content: flex-end;
+      }
+    }
     .title {
       display: flex;
       flex-direction: row;

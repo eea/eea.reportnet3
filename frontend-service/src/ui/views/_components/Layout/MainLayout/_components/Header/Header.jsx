@@ -231,12 +231,12 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
     <Fragment>
       <div id="header" style={headerElementStyle} className={styles.header}>
         <EuHeader globanElementStyle={globanElementStyle} euHeaderElementStyle={euHeaderElementStyle} />
-        <div className={styles.customHeader}>
+        <div className={`${styles.customHeader} ${isPublic ? styles.public : ''}`}>
           {loadTitle()}
-          <BreadCrumb />
+          {!isPublic && <BreadCrumb />}
           {!isPublic && loadUser()}
           {isPublic && loadLogin()}
-          {userContext.userProps.showLogoutConfirmation && (
+          {!isPublic && userContext.userProps.showLogoutConfirmation && (
             <ConfirmDialog
               onConfirm={() => {
                 userLogout();
