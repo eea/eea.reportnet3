@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -38,8 +36,8 @@ public interface DatasetSchemaController {
    * @param datasetSchemaName the dataset schema name
    */
   @PostMapping(value = "/createEmptyDatasetSchema")
-  void createEmptyDatasetSchema(@RequestParam("dataflowId") final Long dataflowId,
-      @RequestParam("datasetSchemaName") final String datasetSchemaName);
+  void createEmptyDatasetSchema(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("datasetSchemaName") String datasetSchemaName);
 
   /**
    * Find data schema by id.
@@ -65,8 +63,7 @@ public interface DatasetSchemaController {
    * @param datasetId the dataset id
    * @return the dataset schema id
    */
-  @RequestMapping(value = "/getDataSchema/{datasetId}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/getDataSchema/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   String getDatasetSchemaId(@PathVariable("datasetId") Long datasetId);
 
   /**
@@ -275,7 +272,7 @@ public interface DatasetSchemaController {
    *        an async call. It sends a notification when all the process it's done
    */
   @PostMapping(value = "/copy", produces = MediaType.APPLICATION_JSON_VALUE)
-  void copyDesignsFromDataflow(@RequestParam("sourceDataflow") final Long dataflowIdOrigin,
-      @RequestParam("targetDataflow") final Long dataflowIdDestination);
+  void copyDesignsFromDataflow(@RequestParam("sourceDataflow") Long dataflowIdOrigin,
+      @RequestParam("targetDataflow") Long dataflowIdDestination);
 
 }
