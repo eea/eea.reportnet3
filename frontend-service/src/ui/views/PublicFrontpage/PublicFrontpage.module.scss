@@ -16,22 +16,11 @@
         -moz-box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
         box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
         border-radius: 5px;
-        table {
-          border: 1px solid #ccc;
-          th {
-            text-align: left;
-            padding: 1rem;
-          }
-          td {
-            padding: 1rem;
-          }
+        @media (max-width: 320px) {
+          padding: 1rem;
         }
       }
       .contactBox {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
         width: 22%;
         border-radius: 5px;
         padding: 1rem;
@@ -40,27 +29,46 @@
         background-color: #000;
         color: white;
         cursor: pointer;
-        .iconWrapper {
-          width: 75px;
-          height: 75px;
-          border: 2px solid #fff;
-          border-radius: 50px;
+        a {
           display: flex;
+          flex-direction: column;
           justify-content: center;
           align-items: center;
-          .emailIcon {
-            width: 25px;
-            height: 25px;
+          color: var(--white);
+          height: 100%;
+          .iconWrapper {
+            width: 75px;
+            height: 75px;
+            border: 2px solid #fff;
+            border-radius: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            .emailIcon {
+              width: 25px;
+              height: 25px;
+            }
           }
-        }
-        p {
-          text-align: center;
-          margin: 0px;
+          p {
+            text-align: center;
+            margin: 0px;
+          }
         }
         &:hover {
           box-shadow: var(--card-item-box-shadow-hover);
           transform: scale(1.02, 1.02);
           transition: transform 0.2s ease;
+        }
+      }
+      @media (max-width: 768px) {
+        flex-direction: column;
+        justify-content: flex-start;
+        .frontText {
+          width: 100%;
+        }
+        .contactBox {
+          margin-top: 1rem;
+          width: 100%;
         }
       }
     }
@@ -76,8 +84,6 @@
     }
     .otherPortals {
       width: 100%;
-      .title {
-      }
       .portalList {
         display: flex;
         justify-content: flex-start;
@@ -102,6 +108,27 @@
           }
         }
       }
+      @media (max-width: 768px) {
+        .portalList {
+          .portalBox {
+            width: 47%;
+          }
+        }
+      }
+      @media (max-width: 414px) {
+        .portalList {
+          flex-direction: column;
+          .portalBox {
+            width: 100%;
+            &:first-of-type {
+              margin-bottom: 1rem;
+            }
+          }
+        }
+      }
+    }
+    @media (max-width: 414px) {
+      margin: 0 0 2rem 0;
     }
   }
 }

@@ -47,43 +47,48 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
   useEffect(() => {
     let prevScrollPos = window.pageYOffset;
     window.onscroll = () => {
+      const innerWidth = window.innerWidth;
       const currentScrollPos = window.pageYOffset;
+      console.log('innerWidth', innerWidth);
 
-      if (currentScrollPos === 0) {
-        setGlobanElementStyle({
-          marginTop: '0',
-          transition: '0.5s'
-        });
-        setEuHeaderElementStyle({
-          marginTop: '0',
-          transition: '0.5s'
-        });
-        setHeaderElementStyle({
-          height: '180px',
-          transition: '0.5s'
-        });
-        onMainContentStyleChange({
-          marginTop: '180px',
-          transition: '0.5s'
-        });
-      } else {
-        setGlobanElementStyle({
-          marginTop: '-100px',
-          transition: '0.5s'
-        });
-        setEuHeaderElementStyle({
-          marginTop: '-20px',
-          transition: '0.5s'
-        });
-        setHeaderElementStyle({
-          height: '70px',
-          transition: '0.5s'
-        });
-        onMainContentStyleChange({
-          marginTop: '70px',
-          transition: '0.5s'
-        });
+      if (innerWidth > 768) {
+        if (currentScrollPos === 0) {
+          setGlobanElementStyle({
+            marginTop: '0',
+            transition: '0.5s'
+          });
+          setEuHeaderElementStyle({
+            marginTop: '0',
+            transition: '0.5s'
+          });
+          setHeaderElementStyle({
+            height: '180px',
+            transition: '0.5s'
+          });
+          onMainContentStyleChange({
+            marginTop: '180px',
+            transition: '0.5s'
+          });
+        } else {
+          setGlobanElementStyle({
+            marginTop: '-100px',
+            transition: '0.5s'
+          });
+          setEuHeaderElementStyle({
+            marginTop: '-15px',
+            transition: '0.5s'
+          });
+          setHeaderElementStyle({
+            height: '70px',
+            transition: '0.5s'
+          });
+          onMainContentStyleChange({
+            marginTop: '70px',
+            transition: '0.5s'
+          });
+        }
       }
+
       prevScrollPos = currentScrollPos;
     };
   }, []);

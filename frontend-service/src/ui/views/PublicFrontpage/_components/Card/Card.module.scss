@@ -42,6 +42,14 @@
         -webkit-line-clamp: 2;
         a {
           cursor: pointer;
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          svg {
+            height: 0.8rem;
+            width: auto;
+            margin-top: -3px;
+          }
         }
       }
       h4 {
@@ -56,6 +64,11 @@
         a {
           color: var(--main-font-color);
           cursor: pointer;
+          svg {
+            height: 0.8rem;
+            width: auto;
+            margin-top: -3px;
+          }
         }
       }
     }
@@ -67,5 +80,8 @@
       justify-content: space-between;
       font-size: 0.9rem;
     }
+  }
+  @media (max-width: 768px) {
+    width: 100%;
   }
 }
