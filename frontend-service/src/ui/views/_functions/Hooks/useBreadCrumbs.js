@@ -57,6 +57,17 @@ export const useBreadCrumbs = (
   };
 
   const setBreadCrumbs = () => {
+    if (currentPage === CurrentPage.DATAFLOWS) {
+      breadCrumbContext.add([
+        {
+          label: resources.messages['homeBreadcrumb'],
+          href: getUrl(routes.DATAFLOWS),
+          command: () => history.push(getUrl(routes.DATAFLOWS))
+        },
+        { label: resources.messages['dataflows'], icon: 'home' }
+      ]);
+    }
+
     if (currentPage === CurrentPage.DATAFLOW) {
       if (!isEmpty(dataflowStateData)) {
         let representatives = dataflowStateData.datasets.map(dataset => {
