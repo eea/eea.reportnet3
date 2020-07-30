@@ -13,8 +13,6 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,11 +22,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class RestoreDataCollectionSnapshotCommand extends AbstractEEAEventHandlerCommand {
 
-
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The dataset snapshot service. */
   @Autowired
