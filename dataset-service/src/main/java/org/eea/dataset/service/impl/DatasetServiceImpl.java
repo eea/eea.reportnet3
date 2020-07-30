@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -1329,6 +1330,14 @@ public class DatasetServiceImpl implements DatasetService {
 
     // PHONE TYPE TO STORE AN ATTACHMENT - PROVISIONAL
     if (DataType.PHONE.equals(field.getType())) {
+      /*
+       * MultipartFile file = null; String nameFile = file.getOriginalFilename(); try { InputStream
+       * is = file.getInputStream(); byte[] content; content = IOUtils.toByteArray(is); is.close();
+       * AttachmentValue attachment = new AttachmentValue(); attachment.setContent(content);
+       * attachment.setFileName(nameFile); } catch (IOException e) { // TODO Auto-generated catch
+       * block e.printStackTrace(); }
+       */
+
       AttachmentValue attachment = new AttachmentValue();
       attachment.setFileName("prueba.txt");
       attachment.setFieldValue(field);
@@ -1337,7 +1346,6 @@ public class DatasetServiceImpl implements DatasetService {
         byteArray[i] = '1';
       }
       attachment.setContent(byteArray);
-      // field.setAttachment(attachment);
       field.setValue(attachment.getFileName());
       attachmentRepository.save(attachment);
     }
@@ -2323,10 +2331,38 @@ public class DatasetServiceImpl implements DatasetService {
 
   @Override
   @Transactional
-  public AttachmentValue getAttachment(Long datasetId, String idField)
-      throws EEAException, IOException {
+  public AttachmentValue getAttachment(Long datasetId, String idField) throws EEAException {
 
     return attachmentRepository.findByFieldValueId(idField);
+  }
+
+  @Override
+  @Transactional
+  public void deleteAttachment(Long datasetId, String fieldId) throws EEAException {
+    // Delete attachment from the table attachment_value
+    attachmentRepository.deleteByFieldValueId(fieldId);
+    // Put the field value name to null
+    FieldValue field = fieldRepository.findById(fieldId);
+    field.setValue("");
+    fieldRepository.save(field);
+  }
+
+  public void updateAttachment(@DatasetId Long datasetId, String fieldId, String fileName,
+      InputStream is) throws EEAException, IOException {
+
+    // Attachment table
+    AttachmentValue attachment = attachmentRepository.findByFieldValueId(fieldId);
+    attachment.setFileName(fileName);
+    byte[] content;
+    content = IOUtils.toByteArray(is);
+    is.close();
+    attachment.setContent(content);
+    attachmentRepository.save(attachment);
+
+    // Field table
+    FieldValue field = fieldRepository.findById(fieldId);
+    field.setValue(fileName);
+    fieldRepository.save(field);
   }
 
 }

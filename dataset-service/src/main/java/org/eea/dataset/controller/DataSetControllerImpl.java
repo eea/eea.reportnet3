@@ -451,8 +451,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @PostMapping(value = "/{id}/table/{idTableSchema}/record",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/{id}/table/{idTableSchema}/record")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void insertRecords(@PathVariable("id") final Long datasetId,
       @PathVariable("idTableSchema") final String idTableSchema,
@@ -751,4 +750,40 @@ public class DataSetControllerImpl implements DatasetController {
 
 
   }
+
+
+  @Override
+  @HystrixCommand
+  @PutMapping(value = "/{datasetId}/field/{fieldId}/attachment",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public void updateAttachment(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("fieldId") String idField, @RequestParam("file") final MultipartFile file)
+      throws Exception {
+
+    try {
+      String fileName = file.getOriginalFilename();
+      InputStream is = file.getInputStream();
+      datasetService.updateAttachment(datasetId, idField, fileName, is);
+    } catch (EEAException | IOException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+
+
+  }
+
+  @Override
+  @HystrixCommand
+  @DeleteMapping(value = "/{datasetId}/field/{fieldId}/attachment",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public void deleteAttachment(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("fieldId") String idField) throws Exception {
+
+    try {
+      datasetService.deleteAttachment(datasetId, idField);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+
+  }
+
 }

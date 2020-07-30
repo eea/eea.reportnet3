@@ -434,4 +434,9 @@ public interface DatasetService {
 
   AttachmentValue getAttachment(@DatasetId Long datasetId, String idField)
       throws EEAException, IOException;
+
+  void deleteAttachment(@DatasetId Long datasetId, String idField) throws EEAException;
+
+  void updateAttachment(@DatasetId Long datasetId, String idField, String fileName, InputStream is)
+      throws EEAException, IOException;
 }

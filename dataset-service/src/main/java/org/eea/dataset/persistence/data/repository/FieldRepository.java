@@ -95,4 +95,7 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
       @Param("fieldSchemaId") String fieldSchemaId, @Param("searchText") String searchValueText,
       Pageable pageable);
 
+
+  FieldValue findById(String fieldId);
+
 }

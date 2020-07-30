@@ -142,8 +142,7 @@ public interface DatasetController {
    * @param records the records
    * @param file the file
    */
-  @PostMapping(value = "/{id}/table/{idTableSchema}/record",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/{id}/table/{idTableSchema}/record")
   void insertRecords(@PathVariable("id") final Long datasetId,
       @PathVariable("idTableSchema") final String idTableSchema,
       @RequestBody List<RecordVO> records,
@@ -282,5 +281,15 @@ public interface DatasetController {
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   ResponseEntity getAttachment(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldId") String fieldId) throws Exception;
+
+
+  @PutMapping("/{datasetId}/field/{fieldId}/attachment")
+  public void updateAttachment(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("fieldId") String idField, @RequestParam("file") final MultipartFile file)
+      throws Exception;
+
+  @DeleteMapping("/{datasetId}/field/{fieldId}/attachment")
+  public void deleteAttachment(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("fieldId") String idField) throws Exception;
 
 }
