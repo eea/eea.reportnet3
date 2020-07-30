@@ -28,7 +28,7 @@ const Settings = withRouter(({ history }) => {
         command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
-        label: '',
+        label: resources.messages['dataflows'],
         icon: 'home',
         href: getUrl(routes.DATAFLOWS),
         command: () => history.push(getUrl(routes.DATAFLOWS))
