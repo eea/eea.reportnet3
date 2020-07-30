@@ -1887,7 +1887,7 @@ public class DatasetServiceImpl implements DatasetService {
       etlBuildEntity(provider, partition, tableMap, fieldMap, dataset, tables, etlTable);
       // Check if table is read Only and save into a list
       TableSchema tableSchema = tableMap.get(etlTable.getTableName().toLowerCase());
-      if (tableSchema != null && tableSchema.getReadOnly()) {
+      if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getReadOnly())) {
         readOnlyTables.add(tableSchema.getIdTableSchema().toString());
       }
     }
