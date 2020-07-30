@@ -41,15 +41,26 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
+/**
+ * The Class DataFlowControllerImpl.
+ */
 @RestController
 @RequestMapping(value = "/dataflow")
 public class DataFlowControllerImpl implements DataFlowController {
 
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The dataflow service. */
   @Autowired
   private DataflowService dataflowService;
 
+  /**
+   * Find by id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the data flow VO
+   */
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ')")
@@ -73,6 +84,12 @@ public class DataFlowControllerImpl implements DataFlowController {
     return result;
   }
 
+  /**
+   * Find by status.
+   *
+   * @param status the status
+   * @return the list
+   */
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
@@ -87,6 +104,11 @@ public class DataFlowControllerImpl implements DataFlowController {
     return dataflows;
   }
 
+  /**
+   * Find pending accepted.
+   *
+   * @return the list
+   */
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
@@ -104,6 +126,13 @@ public class DataFlowControllerImpl implements DataFlowController {
     return dataflows;
   }
 
+  /**
+   * Find completed.
+   *
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @return the list
+   */
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
@@ -124,6 +153,12 @@ public class DataFlowControllerImpl implements DataFlowController {
     return dataflows;
   }
 
+  /**
+   * Find user dataflows by status.
+   *
+   * @param type the type
+   * @return the list
+   */
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
@@ -141,6 +176,12 @@ public class DataFlowControllerImpl implements DataFlowController {
     return dataflows;
   }
 
+  /**
+   * Update user request.
+   *
+   * @param idUserRequest the id user request
+   * @param type the type
+   */
   @Override
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
@@ -155,6 +196,12 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
   }
 
+  /**
+   * Adds the contributor.
+   *
+   * @param dataflowId the dataflow id
+   * @param idContributor the id contributor
+   */
   @Override
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
@@ -169,6 +216,12 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
   }
 
+  /**
+   * Removes the contributor.
+   *
+   * @param dataflowId the dataflow id
+   * @param idContributor the id contributor
+   */
   @Override
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
@@ -183,6 +236,12 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
   }
 
+  /**
+   * Creates the data flow.
+   *
+   * @param dataFlowVO the data flow VO
+   * @return the response entity
+   */
   @Override
   @HystrixCommand
   @LockMethod
@@ -227,6 +286,12 @@ public class DataFlowControllerImpl implements DataFlowController {
     return new ResponseEntity<>(message, status);
   }
 
+  /**
+   * Update data flow.
+   *
+   * @param dataFlowVO the data flow VO
+   * @return the response entity
+   */
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataFlowVO.id,'DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE')")
@@ -267,6 +332,12 @@ public class DataFlowControllerImpl implements DataFlowController {
     return new ResponseEntity<>(message, status);
   }
 
+  /**
+   * Gets the metabase by id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the metabase by id
+   */
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ')")
@@ -304,6 +375,13 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
   }
 
+  /**
+   * Update data flow status.
+   *
+   * @param dataflowId the dataflow id
+   * @param status the status
+   * @param deadlineDate the deadline date
+   */
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   @PutMapping("/{dataflowId}/updateStatus")
@@ -317,6 +395,11 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
   }
 
+  /**
+   * Checks if is user data custodian.
+   *
+   * @return true, if is user data custodian
+   */
   private boolean isUserDataCustodian() {
     String dataCustodianRole = "ROLE_" + SecurityRoleEnum.DATA_CUSTODIAN;
     for (GrantedAuthority role : SecurityContextHolder.getContext().getAuthentication()

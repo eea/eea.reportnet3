@@ -22,12 +22,12 @@ public @interface LockCriteria {
    *
    * @return the string
    */
-  public String name();
+  String name();
 
   /**
    * Path.
    *
    * @return the string
    */
-  public String path() default "";
+  String path() default "";
 }

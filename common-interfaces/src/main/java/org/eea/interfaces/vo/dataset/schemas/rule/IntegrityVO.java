@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The Class IntegrityVO.
+ */
 @Getter
 @Setter
 @ToString
@@ -31,6 +34,11 @@ public class IntegrityVO {
   private String referencedDatasetSchemaId;
 
 
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
   @Override
   public int hashCode() {
     return Objects.hash(id, originFields, referencedFields, isDoubleReferenced,

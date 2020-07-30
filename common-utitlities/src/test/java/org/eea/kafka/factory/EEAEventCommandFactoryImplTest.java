@@ -24,14 +24,12 @@ public class EEAEventCommandFactoryImplTest {
   @InjectMocks
   private EEAEventCommandFactoryImpl eeaEventCommandFactory;
 
-
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
-
   }
 
   /**
@@ -45,8 +43,8 @@ public class EEAEventCommandFactoryImplTest {
     Mockito.when(command.getEventType()).thenReturn(EventType.CONNECTION_CREATED_EVENT);
     eventHandleCommands.put(EventType.CONNECTION_CREATED_EVENT, command);
 
-    ReflectionTestUtils
-        .setField(eeaEventCommandFactory, "eventHandleCommands", eventHandleCommands);
+    ReflectionTestUtils.setField(eeaEventCommandFactory, "eventHandleCommands",
+        eventHandleCommands);
 
     EEAEventVO vo = new EEAEventVO();
     vo.setEventType(EventType.CONNECTION_CREATED_EVENT);
@@ -56,8 +54,8 @@ public class EEAEventCommandFactoryImplTest {
     Assert.assertNotNull("Retrieved event handler is null", result);
     Assert.assertEquals(
         "Event handler is not the one to treat the event type CONNECTION_CREATED_EVENT",
-        ((AbstractEEAEventHandlerCommand) result).getEventType(),
-        EventType.CONNECTION_CREATED_EVENT);
+        EventType.CONNECTION_CREATED_EVENT,
+        ((AbstractEEAEventHandlerCommand) result).getEventType());
 
   }
 }

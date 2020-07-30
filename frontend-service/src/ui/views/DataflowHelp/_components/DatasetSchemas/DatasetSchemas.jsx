@@ -63,7 +63,10 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
       if (!isUndefined(dataset[0].tables)) {
         dataset[0].tables.forEach(table => {
           if (!isUndefined(table.records)) {
-            if (entityType.toUpperCase() === 'TABLE' || entityType.toUpperCase() === 'RECORD') {
+            if (entityType.toUpperCase() === 'TABLE') {
+              if (table.tableSchemaId === referenceId)
+                additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
+            } else if (entityType.toUpperCase() === 'RECORD') {
               additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
             } else if (entityType.toUpperCase() === 'FIELD' || entityType.toUpperCase() === 'DATASET') {
               table.records.forEach(record =>

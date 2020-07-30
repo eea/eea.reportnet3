@@ -72,11 +72,10 @@ public interface RecordStoreService {
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
    * @param idPartitionDataset the id partition dataset
-   *
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws RecordStoreAccessException the record store access exception
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset)
       throws SQLException, IOException, RecordStoreAccessException, EEAException;

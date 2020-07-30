@@ -173,7 +173,6 @@ public class RulesControllerImpl implements RulesController {
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
 
-
       rulesService.createNewRule(datasetId, ruleVO);
     } catch (EEAException e) {
       LOG_ERROR.error(
@@ -390,7 +389,6 @@ public class RulesControllerImpl implements RulesController {
 
   }
 
-
   /**
    * Copy rules schema.
    *
@@ -410,5 +408,30 @@ public class RulesControllerImpl implements RulesController {
       LOG_ERROR.error("Error copying rule: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
+  }
+
+  /**
+   * Delete not empty rule.
+   *
+   * @param tableSchemaId the table schema id
+   * @param datasetId the dataset id
+   */
+  @Override
+  @GetMapping("/private/deleteNotEmptyRule")
+  public void deleteNotEmptyRule(@RequestParam("tableSchemaId") String tableSchemaId,
+      @RequestParam("datasetId") Long datasetId) {
+    rulesService.deleteNotEmptyRule(tableSchemaId, datasetId);
+  }
+
+  /**
+   * Update sequence.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the long
+   */
+  @Override
+  @GetMapping("/private/updateSequence")
+  public Long updateSequence(@RequestParam("datasetSchemaId") String datasetSchemaId) {
+    return rulesService.updateSequence(datasetSchemaId);
   }
 }

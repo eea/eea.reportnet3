@@ -15,18 +15,36 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface RuleMapper extends IMapper<Rule, RuleVO> {
 
+  /**
+   * Class to entity.
+   *
+   * @param ruleVO the rule VO
+   * @return the rule
+   */
   @Override
   @Mapping(source = "ruleId", target = "ruleId", ignore = true)
   @Mapping(source = "referenceId", target = "referenceId", ignore = true)
   @Mapping(source = "whenCondition", target = "whenCondition", ignore = true)
   Rule classToEntity(RuleVO ruleVO);
 
+  /**
+   * Entity to class.
+   *
+   * @param rule the rule
+   * @return the rule VO
+   */
   @Override
   @Mapping(source = "ruleId", target = "ruleId", ignore = true)
   @Mapping(source = "referenceId", target = "referenceId", ignore = true)
   @Mapping(source = "whenCondition", target = "whenCondition", ignore = true)
   RuleVO entityToClass(Rule rule);
 
+  /**
+   * After mapping.
+   *
+   * @param ruleVO the rule VO
+   * @param rule the rule
+   */
   @AfterMapping
   default void afterMapping(RuleVO ruleVO, @MappingTarget Rule rule) {
     String ruleId = ruleVO.getRuleId();
@@ -39,6 +57,12 @@ public interface RuleMapper extends IMapper<Rule, RuleVO> {
     }
   }
 
+  /**
+   * After mapping.
+   *
+   * @param rule the rule
+   * @param ruleVO the rule VO
+   */
   @AfterMapping
   default void afterMapping(Rule rule, @MappingTarget RuleVO ruleVO) {
     ruleVO.setRuleId(rule.getRuleId().toString());

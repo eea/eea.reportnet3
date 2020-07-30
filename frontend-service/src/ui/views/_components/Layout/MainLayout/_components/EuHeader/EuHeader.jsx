@@ -10,7 +10,7 @@ import { InputText } from 'primereact/inputtext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-export const EuHeader = ({ globanElementStyle, euHeaderElementStyle }) => {
+export const EuHeader = ({ euHeaderElementStyle, globanElementStyle }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -27,7 +27,7 @@ export const EuHeader = ({ globanElementStyle, euHeaderElementStyle }) => {
     <Fragment>
       <div id="globan" style={globanElementStyle} className={styles.globan}>
         <div className={styles.globanContent}>
-          {resources.messages['anOfficialWebsite']}
+          <span>{resources.messages['anOfficialWebsite']}</span>
           <a
             href="#globan-dropdown-186d0fazrpn"
             aria-controls="globan-dropdown-186d0fazrpn"

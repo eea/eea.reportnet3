@@ -30,11 +30,6 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
    */
   private static final Logger LOG = LoggerFactory.getLogger(UpdateRecordHelper.class);
 
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The dataset service. */
   @Autowired
   @Qualifier("proxyDatasetService")

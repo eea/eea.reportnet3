@@ -43,8 +43,8 @@ public class TokenMonitorTest {
     String result = tokenMonitor.getToken();
     Assert.assertNotNull(result);
     Assert.assertEquals("accessToken", result);
-    Assert.assertEquals(ReflectionTestUtils.getField(tokenMonitor, "refreshToken").toString(),
-        "refreshToken2");
+    Assert.assertEquals("refreshToken2",
+        ReflectionTestUtils.getField(tokenMonitor, "refreshToken").toString());
   }
 
   @Test
@@ -61,8 +61,8 @@ public class TokenMonitorTest {
     String result = tokenMonitor.getToken();
     Assert.assertNotNull(result);
     Assert.assertEquals("accessToken", result);
-    Assert.assertEquals(ReflectionTestUtils.getField(tokenMonitor, "refreshToken").toString(),
-        "refreshToken");
+    Assert.assertEquals("refreshToken",
+        ReflectionTestUtils.getField(tokenMonitor, "refreshToken").toString());
     Mockito.verify(keycloakConnectorService, Mockito.times(0)).refreshToken(Mockito.anyString());
   }
 
@@ -76,18 +76,16 @@ public class TokenMonitorTest {
     ReflectionTestUtils.setField(tokenMonitor, "refreshToken", "refreshToken");
     ReflectionTestUtils.setField(tokenMonitor, "tokenExpirationTime", 300000l);
 
-    Mockito.doThrow(new RestClientException("Error"))
-        .when(keycloakConnectorService).refreshToken(Mockito.eq("refreshToken"));
-    Mockito.when(
-        keycloakConnectorService
-            .generateAdminToken(Mockito.eq("adminUser"), Mockito.eq("adminPass")))
-        .thenReturn(tokenInfo);
+    Mockito.doThrow(new RestClientException("Error")).when(keycloakConnectorService)
+        .refreshToken(Mockito.eq("refreshToken"));
+    Mockito.when(keycloakConnectorService.generateAdminToken(Mockito.eq("adminUser"),
+        Mockito.eq("adminPass"))).thenReturn(tokenInfo);
 
     String result = tokenMonitor.getToken();
     Assert.assertNotNull(result);
     Assert.assertEquals("accessToken", result);
-    Assert.assertEquals(ReflectionTestUtils.getField(tokenMonitor, "refreshToken").toString(),
-        "refreshToken2");
+    Assert.assertEquals("refreshToken2",
+        ReflectionTestUtils.getField(tokenMonitor, "refreshToken").toString());
     Mockito.verify(keycloakConnectorService, Mockito.times(1))
         .refreshToken(Mockito.eq("refreshToken"));
     Mockito.verify(keycloakConnectorService, Mockito.times(1))

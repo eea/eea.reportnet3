@@ -4,8 +4,7 @@ import java.util.List;
 import org.eea.rod.persistence.domain.Country;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 
 
 /**
@@ -21,7 +20,7 @@ public interface CountryFeignRepository {
    * @return the list
    */
   @Cacheable("rod_country_cache")
-  @RequestMapping(value = "/findAll", method = RequestMethod.GET)
+  @GetMapping(value = "/findAll")
   List<Country> findAll();
 
 

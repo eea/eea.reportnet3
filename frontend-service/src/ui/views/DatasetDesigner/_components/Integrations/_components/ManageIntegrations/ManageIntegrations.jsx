@@ -114,7 +114,7 @@ export const ManageIntegrations = ({
     } catch (error) {
       notificationContext.add({ type: 'ERROR_LOADING_REPOSITORIES' });
     } finally {
-      isLoading(false)
+      isLoading(false);
     }
   };
 
@@ -135,7 +135,7 @@ export const ManageIntegrations = ({
 
   const getUpdatedData = () => manageIntegrationsDispatch({ type: 'GET_UPDATED_DATA', payload: updatedData });
 
-  const isLoading = value => manageIntegrationsDispatch({ type: 'IS_LOADING', payload: { value } })
+  const isLoading = value => manageIntegrationsDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onAddParameter = () => {
     manageIntegrationsDispatch({
@@ -434,7 +434,7 @@ export const ManageIntegrations = ({
     return <ul className={styles.list}>{data}</ul>;
   };
 
-  if (manageIntegrationsState.isLoading) return renderDialogLayout(<Spinner style={{ top: 0 }} />)
+  if (manageIntegrationsState.isLoading) return renderDialogLayout(<Spinner style={{ top: 0 }} />);
 
   return renderDialogLayout(
     <Fragment>

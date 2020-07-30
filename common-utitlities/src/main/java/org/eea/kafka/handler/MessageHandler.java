@@ -20,7 +20,7 @@ public interface MessageHandler<T> {
    * Process message.
    *
    * @param message the message
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   void processMessage(T message) throws EEAException;
 
