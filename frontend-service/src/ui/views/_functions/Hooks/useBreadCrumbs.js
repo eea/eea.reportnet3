@@ -105,9 +105,18 @@ export const useBreadCrumbs = (
         }
       }
     }
+
+    if (currentPage === CurrentPage.USER_SETTINGS) {
+      breadCrumbContext.add([homeCrumb, dataflowsCrumb, settingsCrumb]);
+    }
   };
 
-  useEffect(() => {
-    setBreadCrumbs();
-  }, [matchParams, dataflowStateData]);
+  useEffect(
+    () => {
+      setBreadCrumbs();
+    },
+    [
+      /* dataflowStateData, matchParams */
+    ]
+  );
 };

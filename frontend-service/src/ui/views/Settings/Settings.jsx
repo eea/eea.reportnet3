@@ -14,32 +14,16 @@ import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContex
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const Settings = withRouter(({ history }) => {
-  const breadCrumbContext = useContext(BreadCrumbContext);
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
+import { CurrentPage } from 'ui/views/_functions/Utils';
 
+const Settings = withRouter(({ history }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
 
+  useBreadCrumbs(history, CurrentPage.USER_SETTINGS);
+
   useEffect(() => {
-    breadCrumbContext.add([
-      {
-        label: resources.messages['homeBreadcrumb'],
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOWS))
-      },
-      {
-        label: resources.messages['dataflows'],
-        icon: 'home',
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOWS))
-      },
-      {
-        label: resources.messages['userSettingsBreadcrumbs'],
-        icon: 'user-profile',
-        href: getUrl(routes.SETTINGS),
-        command: () => history.push(getUrl(routes.SETTINGS))
-      }
-    ]);
     leftSideBarContext.addModels([]);
   }, []);
 
