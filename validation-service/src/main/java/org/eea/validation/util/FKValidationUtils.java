@@ -37,32 +37,84 @@ public class FKValidationUtils {
   /**
    * The data set controller zuul.
    */
-  @Autowired
   private static DataSetControllerZuul dataSetControllerZuul;
 
   /**
    * The rules repository.
    */
-  @Autowired
   private static RulesRepository rulesRepository;
 
   /**
    * The dataset metabase controller zuul.
    */
-  @Autowired
   private static DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
   /**
    * The schemas repository.
    */
-  @Autowired
   private static SchemasRepository schemasRepository;
 
   /**
    * The field repository.
    */
-  @Autowired
   private static FieldRepository fieldRepository;
+
+  /*
+   * we need to put synchronized void because drools need a static method to call in a java file, so
+   * we should create a static and put this synchronized to put @autowired to convert the Object in
+   * a bean
+   */
+  /**
+   * Sets the dataset controller.
+   *
+   * @param dataSetControllerZuul the new dataset controller
+   */
+  @Autowired
+  synchronized void setDatasetController(DataSetControllerZuul dataSetControllerZuul) {
+    FKValidationUtils.dataSetControllerZuul = dataSetControllerZuul;
+  }
+
+
+  /**
+   * Sets the rules repository.
+   *
+   * @param rulesRepository the new rules repository
+   */
+  @Autowired
+  synchronized void setRulesRepository(RulesRepository rulesRepository) {
+    FKValidationUtils.rulesRepository = rulesRepository;
+  }
+
+  /**
+   * Sets the data set metabase controller zuul.
+   *
+   * @param datasetMetabaseControllerZuul the new data set metabase controller zuul
+   */
+  @Autowired
+  synchronized void setDataSetMetabaseControllerZuul(
+      DataSetMetabaseControllerZuul datasetMetabaseControllerZuul) {
+    FKValidationUtils.datasetMetabaseControllerZuul = datasetMetabaseControllerZuul;
+  }
+
+  /**
+   * Sets the schemas repository.
+   *
+   * @param schemasRepository the new schemas repository
+   */
+  @Autowired
+  synchronized void setSchemasRepository(SchemasRepository schemasRepository) {
+    FKValidationUtils.schemasRepository = schemasRepository;
+  }
+
+  /**
+   * Sets the dataset repository.
+   *
+   * @param fieldRepository the new dataset repository
+   */
+  @Autowired
+  synchronized void setFieldRepository(FieldRepository fieldRepository) {
+    FKValidationUtils.fieldRepository = fieldRepository;
+  }
 
   /**
    * The Constant PK_VALUE_LIST.

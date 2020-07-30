@@ -32,8 +32,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Class UniqueValidationUtils.
+ */
 @Component
 public class UniqueValidationUtils {
+
+
+
   /**
    * The rules repository.
    */
@@ -54,33 +60,105 @@ public class UniqueValidationUtils {
   /**
    * The record repository.
    */
-  @Autowired
   private static RecordRepository recordRepository;
 
   /**
    * The data set schema controller zuul.
    */
-  @Autowired
   private static DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
   /**
    * The table repository.
    */
-  @Autowired
   private static TableRepository tableRepository;
 
   /**
    * The rules service.
    */
-  @Autowired
   private static RulesService rulesService;
 
   /**
    * The data set metabase controller zuul.
    */
-  @Autowired
   private static DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
+  /*
+   * we need to put synchronized void because drools need a static method to call in a java file, so
+   * we should create a static and put this synchronized to put @autowired to convert the Object in
+   * a bean
+   */
+  /**
+   * Sets the rules repository.
+   *
+   * @param rulesRepository the new rules repository
+   */
+  @Autowired
+  synchronized void setRulesRepository(RulesRepository rulesRepository) {
+    UniqueValidationUtils.rulesRepository = rulesRepository;
+  }
+
+  /**
+   * Sets the schemas repository.
+   *
+   * @param schemasRepository the new schemas repository
+   */
+  @Autowired
+  synchronized void setSchemasRepository(SchemasRepository schemasRepository) {
+    UniqueValidationUtils.schemasRepository = schemasRepository;
+  }
+
+  /**
+   * Sets the dataset repository.
+   *
+   * @param recordRepository the new record repository
+   */
+  @Autowired
+  synchronized void setRecordRepository(RecordRepository recordRepository) {
+    UniqueValidationUtils.recordRepository = recordRepository;
+  }
+
+  /**
+   * Sets the data set schema controller zuul.
+   *
+   * @param dataSetSchemaControllerZuul the new data set schema controller zuul
+   */
+  @Autowired
+  synchronized void setDataSetSchemaControllerZuul(
+      DataSetSchemaControllerZuul dataSetSchemaControllerZuul) {
+    UniqueValidationUtils.dataSetSchemaControllerZuul = dataSetSchemaControllerZuul;
+  }
+
+
+  /**
+   * Sets the table repository.
+   *
+   * @param tableRepository the new table repository
+   */
+  @Autowired
+  synchronized void setTableRepository(TableRepository tableRepository) {
+    UniqueValidationUtils.tableRepository = tableRepository;
+  }
+
+  /**
+   * Sets the rules service.
+   *
+   * @param rulesService the new rules service
+   */
+  @Autowired
+  synchronized void setRulesService(RulesService rulesService) {
+    UniqueValidationUtils.rulesService = rulesService;
+  }
+
+  /**
+   * Sets the data set metabase controller zuul.
+   *
+   * @param dataSetMetabaseControllerZuul the new data set metabase controller zuul
+   */
+  @Autowired
+  synchronized void setDataSetMetabaseControllerZuul(
+      DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul) {
+    UniqueValidationUtils.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
+  }
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(UniqueValidationUtils.class);
@@ -90,7 +168,8 @@ public class UniqueValidationUtils {
    *
    * @param idRule the id rule
    * @param idDatasetSchema the id dataset schema
-   *
+   * @param origname the origname
+   * @param typeEnum the type enum
    * @return the validation
    */
   private static Validation createValidation(String idRule, String idDatasetSchema, String origname,
@@ -129,13 +208,18 @@ public class UniqueValidationUtils {
   /**
    * Creates the field validations.
    *
-   * @param fieldValues the field values
+   * @param recordValues the record values
    */
   @Transactional
   private static void saveRecordValidations(List<RecordValue> recordValues) {
     recordRepository.saveAll(recordValues);
   }
 
+  /**
+   * Save table validations.
+   *
+   * @param tableValue the table value
+   */
   @Transactional
   private static void saveTableValidations(TableValue tableValue) {
     tableRepository.save(tableValue);
@@ -145,8 +229,7 @@ public class UniqueValidationUtils {
    * Gets the table schema from id field schema.
    *
    * @param schema the schema
-   * @param idFieldSchema the id field schema
-   *
+   * @param idTableSchema the id table schema
    * @return the table schema from id field schema
    */
   private static String getTableSchemaFromIdTableSchema(DataSetSchema schema,
@@ -162,6 +245,13 @@ public class UniqueValidationUtils {
     return tableSchemaName;
   }
 
+  /**
+   * Gets the table schema from id field schema.
+   *
+   * @param datasetSchema the dataset schema
+   * @param idFieldSchema the id field schema
+   * @return the table schema from id field schema
+   */
   private static TableSchema getTableSchemaFromIdFieldSchema(DataSetSchema datasetSchema,
       String idFieldSchema) {
     for (TableSchema table : datasetSchema.getTableSchemas()) {
@@ -270,10 +360,8 @@ public class UniqueValidationUtils {
   /**
    * Checks if is unique field.
    *
-   * @param datasetId the dataset id
-   * @param idFieldSchema the id field schema
+   * @param uniqueIdConstraint the unique id constraint
    * @param idRule the id rule
-   *
    * @return the boolean
    */
   public static Boolean uniqueConstraint(String uniqueIdConstraint, String idRule) {
