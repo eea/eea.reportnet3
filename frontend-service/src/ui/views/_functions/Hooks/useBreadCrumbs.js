@@ -54,6 +54,10 @@ export const useBreadCrumbs = (history, currentPage, dataflowId, matchParams, da
       breadCrumbContext.add([homeCrumb, dataflowsCrumb, dataflowCrumb, dataflowDashboardsCrumb]);
     }
 
+    if (currentPage === CurrentPage.DATAFLOW_HELP) {
+      breadCrumbContext.add([homeCrumb, dataflowsCrumb, dataflowCrumb, dataflowHelpCrumb]);
+    }
+
     if (currentPage === CurrentPage.DATAFLOWS) {
       breadCrumbContext.add([
         {
