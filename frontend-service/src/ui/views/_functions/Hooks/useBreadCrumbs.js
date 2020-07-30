@@ -9,14 +9,7 @@ import { CurrentPage } from 'ui/views/_functions/Utils';
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const useBreadCrumbs = (
-  history,
-  currentPage,
-  dataflowId = null,
-  matchParams = null,
-  dataflowStateData = [],
-  representativeId = null
-) => {
+export const useBreadCrumbs = (history, currentPage, dataflowId, matchParams, dataflowStateData, representativeId) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const resources = useContext(ResourcesContext);
 
@@ -111,12 +104,7 @@ export const useBreadCrumbs = (
     }
   };
 
-  useEffect(
-    () => {
-      setBreadCrumbs();
-    },
-    [
-      /* dataflowStateData, matchParams */
-    ]
-  );
+  useEffect(() => {
+    setBreadCrumbs();
+  }, [dataflowStateData, matchParams]);
 };
