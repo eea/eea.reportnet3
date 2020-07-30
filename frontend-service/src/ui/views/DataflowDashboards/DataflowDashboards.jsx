@@ -16,10 +16,10 @@ import { DatasetValidationDashboard } from './_components/DatasetValidationDashb
 
 import { DataflowService } from 'core/services/Dataflow';
 
-import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
-import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const DataflowDashboards = withRouter(
@@ -29,55 +29,14 @@ export const DataflowDashboards = withRouter(
     },
     history
   }) => {
-    const breadCrumbContext = useContext(BreadCrumbContext);
-    const leftSideBarContext = useContext(LeftSideBarContext);
+
     const resources = useContext(ResourcesContext);
 
     const [dashboardInitialValues, setDashboardInitialValues] = useState({});
     const [dataflowName, setDataflowName] = useState('');
     const [dataSchema, setDataSchema] = useState();
 
-    useEffect(() => {
-      breadCrumbContext.add([
-        {
-          label: resources.messages['homeBreadcrumb'],
-          href: getUrl(routes.DATAFLOWS),
-          command: () => history.push(getUrl(routes.DATAFLOWS))
-        },
-        {
-          label: resources.messages['dataflows'],
-          icon: 'home',
-          href: routes.DATAFLOWS,
-          command: () => history.push(getUrl(routes.DATAFLOWS))
-        },
-        {
-          label: resources.messages['dataflow'],
-          icon: 'clone',
-          href: getUrl(
-            routes.DATAFLOW,
-            {
-              dataflowId
-            },
-            true
-          ),
-          command: () =>
-            history.push(
-              getUrl(
-                routes.DATAFLOW,
-                {
-                  dataflowId
-                },
-                true
-              )
-            )
-        },
-        {
-          label: resources.messages['dashboards'],
-          icon: 'barChart'
-        }
-      ]);
-      leftSideBarContext.removeModels();
-    }, []);
+    useBreadCrumbs(history, CurrentPage.DATAFLOW_DASHBOARDS, dataflowId);
 
     useEffect(() => {
       try {
