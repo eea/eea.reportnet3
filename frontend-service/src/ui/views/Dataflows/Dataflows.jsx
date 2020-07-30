@@ -18,8 +18,7 @@ import { TabMenu } from 'primereact/tabmenu';
 import { DataflowService } from 'core/services/Dataflow';
 import { UserService } from 'core/services/User';
 
-import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
-// import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -27,12 +26,9 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 
-// import { CurrentPage } from 'ui/views/_functions/Utils';
-import { getUrl } from 'core/infrastructure/CoreUtils';
-import { routes } from 'ui/routes';
+import { CurrentPage } from 'ui/views/_functions/Utils';
 
 const Dataflows = withRouter(({ match, history }) => {
-  const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -71,18 +67,7 @@ const Dataflows = withRouter(({ match, history }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resources.messages, tabMenuActiveItem, userContext.contextRoles]);
 
-  // useBreadCrumbs(history, CurrentPage.DATAFLOWS);
-  //Bread Crumbs settings
-  useEffect(() => {
-    breadCrumbContext.add([
-      {
-        label: resources.messages['homeBreadcrumb'],
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOWS))
-      },
-      { label: resources.messages['dataflows'], icon: 'home' }
-    ]);
-  }, []);
+  useBreadCrumbs(history, CurrentPage.DATAFLOWS);
 
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) onLoadPermissions();
