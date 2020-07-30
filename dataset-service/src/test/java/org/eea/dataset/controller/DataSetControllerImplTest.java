@@ -56,7 +56,7 @@ public class DataSetControllerImplTest {
    * The data set controller impl.
    */
   @InjectMocks
-  DataSetControllerImpl dataSetControllerImpl;
+  private DataSetControllerImpl dataSetControllerImpl;
 
   /**
    * The dataset service.
@@ -64,6 +64,7 @@ public class DataSetControllerImplTest {
   @Mock
   private DatasetServiceImpl datasetService;
 
+  /** The dataset metabase service. */
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
 
@@ -71,23 +72,23 @@ public class DataSetControllerImplTest {
    * The design dataset service.
    */
   @Mock
-  DesignDatasetServiceImpl designDatasetService;
+  private DesignDatasetServiceImpl designDatasetService;
 
   /**
    * The records.
    */
-  List<RecordVO> records;
+  private List<RecordVO> records;
 
   /**
    * The record ids.
    */
-  String recordId;
+  private String recordId;
 
   /**
    * The update record helper.
    */
   @Mock
-  UpdateRecordHelper updateRecordHelper;
+  private UpdateRecordHelper updateRecordHelper;
 
   /**
    * The file treatment helper.
@@ -98,12 +99,12 @@ public class DataSetControllerImplTest {
   /**
    * The security context.
    */
-  SecurityContext securityContext;
+  private SecurityContext securityContext;
 
   /**
    * The authentication.
    */
-  Authentication authentication;
+  private Authentication authentication;
 
   /**
    * Inits the mocks.
@@ -1018,6 +1019,11 @@ public class DataSetControllerImplTest {
     }
   }
 
+  /**
+   * Load dataset data test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void loadDatasetDataTest() throws EEAException {
     MultipartFile file = Mockito.mock(MultipartFile.class);
@@ -1031,6 +1037,11 @@ public class DataSetControllerImplTest {
         .executeExternalIntegrationFileProcess(Mockito.anyLong(), Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Load dataset data test integration exception.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void loadDatasetDataTestIntegrationException() throws EEAException {
     MultipartFile file = Mockito.mock(MultipartFile.class);
@@ -1051,6 +1062,9 @@ public class DataSetControllerImplTest {
     }
   }
 
+  /**
+   * Load dataset data empty file.
+   */
   @Test(expected = ResponseStatusException.class)
   public void loadDatasetDataEmptyFile() {
     MultipartFile file = Mockito.mock(MultipartFile.class);
@@ -1059,11 +1073,14 @@ public class DataSetControllerImplTest {
     try {
       dataSetControllerImpl.loadDatasetData(1L, file);
     } catch (ResponseStatusException e) {
-      Assert.assertEquals(e.getReason(), EEAErrorMessage.FILE_FORMAT);
+      Assert.assertEquals(EEAErrorMessage.FILE_FORMAT, e.getReason());
       throw e;
     }
   }
 
+  /**
+   * Load dataset data dataset not reportable.
+   */
   @Test(expected = ResponseStatusException.class)
   public void loadDatasetDataDatasetNotReportable() {
     MultipartFile file = Mockito.mock(MultipartFile.class);

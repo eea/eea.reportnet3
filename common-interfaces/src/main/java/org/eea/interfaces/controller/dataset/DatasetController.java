@@ -143,10 +143,10 @@ public interface DatasetController {
    * @param file the file
    */
   @PostMapping(value = "/{id}/table/{idTableSchema}/record")
-  void insertRecords(@PathVariable("id") final Long datasetId,
-      @PathVariable("idTableSchema") final String idTableSchema,
-      @RequestBody List<RecordVO> records,
+  void insertRecords(@PathVariable("id") Long datasetId,
+      @PathVariable("idTableSchema") String idTableSchema, @RequestBody List<RecordVO> records,
       @RequestParam(value = "file", required = false) final MultipartFile file);
+
 
   /**
    * Update record.
@@ -173,8 +173,8 @@ public interface DatasetController {
    * @param tableSchemaId the table schema id
    */
   @DeleteMapping(value = "{datasetId}/deleteImportTable/{tableSchemaId}")
-  void deleteImportTable(@PathVariable("datasetId") final Long datasetId,
-      @PathVariable("tableSchemaId") final String tableSchemaId);
+  void deleteImportTable(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("tableSchemaId") String tableSchemaId);
 
 
   /**

@@ -8,6 +8,7 @@
     height: 28px;
     line-height: 22px;
     font-weight: normal;
+    font-size: 0.87rem;
     &::before {
       content: '\00a0' !important;
       display: inline-block;
@@ -54,6 +55,19 @@
       }
     }
   }
+  @media (max-width: 414px) {
+    .globanContent {
+      &::before {
+        display: none;
+      }
+      span {
+        display: none;
+      }
+      a {
+        display: none;
+      }
+    }
+  }
 }
 .euHeader {
   display: flex;
@@ -65,19 +79,31 @@
   .europeanUnionLogo {
     a {
       height: 56px;
-      width: 325px;
+      width: calc(320px - 32px);
       display: block;
       span {
         display: none;
       }
     }
     .europeanUnionBlackLogo {
+      background-repeat: no-repeat;
       background-image: url('/assets/img/logo--en.svg');
     }
 
     .europeanUnionWhiteLogo {
       background-repeat: no-repeat;
       background-image: url('/assets/img/logo--white--en.svg');
+    }
+    @media (max-width: 768px) {
+      .europeanUnionBlackLogo {
+        background-repeat: no-repeat;
+        background-image: url('/assets/img/eu_condensed.svg');
+      }
+
+      .europeanUnionWhiteLogo {
+        background-repeat: no-repeat;
+        background-image: url('/assets/img/logo--white--en.svg');
+      }
     }
   }
 

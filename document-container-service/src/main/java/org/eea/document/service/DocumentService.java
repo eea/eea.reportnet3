@@ -22,9 +22,8 @@ public interface DocumentService {
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  void uploadDocument(final InputStream inputStream, final String contentType,
-      final String fileName, DocumentVO documentVO, final Long size)
-      throws EEAException, IOException;
+  void uploadDocument(InputStream inputStream, String contentType, String fileName,
+      DocumentVO documentVO, Long size) throws EEAException, IOException;
 
   /**
    * Gets the document.
@@ -34,7 +33,7 @@ public interface DocumentService {
    * @return the document
    * @throws EEAException the EEA exception
    */
-  FileResponse getDocument(final Long documentId, final Long dataFlowId) throws EEAException;
+  FileResponse getDocument(Long documentId, Long dataFlowId) throws EEAException;
 
 
   /**
@@ -42,10 +41,10 @@ public interface DocumentService {
    *
    * @param documentId the document id
    * @param dataFlowId the data flow id
+   * @param deleteMetabase the delete metabase
    * @throws EEAException the EEA exception
    */
-  void deleteDocument(final Long documentId, final Long dataFlowId, final Boolean deleteMetabase)
-      throws EEAException;
+  void deleteDocument(Long documentId, Long dataFlowId, Boolean deleteMetabase) throws EEAException;
 
   /**
    * Upload schema snapshot.
@@ -57,8 +56,8 @@ public interface DocumentService {
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  void uploadSchemaSnapshot(final InputStream inputStream, final String contentType,
-      final String filename, final Long designDataset) throws EEAException, IOException;
+  void uploadSchemaSnapshot(InputStream inputStream, String contentType, String filename,
+      Long designDataset) throws EEAException, IOException;
 
   /**
    * Gets the snapshot document.
@@ -68,8 +67,7 @@ public interface DocumentService {
    * @return the snapshot document
    * @throws EEAException the EEA exception
    */
-  FileResponse getSnapshotDocument(final String documentName, final Long idDesignDataset)
-      throws EEAException;
+  FileResponse getSnapshotDocument(String documentName, Long idDesignDataset) throws EEAException;
 
   /**
    * Delete snapshot document.
@@ -78,8 +76,7 @@ public interface DocumentService {
    * @param idDesignDataset the id design dataset
    * @throws EEAException the EEA exception
    */
-  void deleteSnapshotDocument(final String documentName, final Long idDesignDataset)
-      throws EEAException;
+  void deleteSnapshotDocument(String documentName, Long idDesignDataset) throws EEAException;
 
   /**
    * Update document.

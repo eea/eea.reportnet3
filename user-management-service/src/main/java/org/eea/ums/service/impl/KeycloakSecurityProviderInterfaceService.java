@@ -454,7 +454,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
                 user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
             .findFirst();
         if (!contributor.isPresent()) {
-          users.removeAll(Arrays.asList(users)); // just in case the user was not found in
+          // just in case the user was not found in
+          users.clear();
           users.addAll(Arrays.asList(keycloakConnectorService.getUsers()));
           contributor = users.stream().filter(
               user -> StringUtils.isNotBlank(user.getEmail()) && user.getEmail().equals(userMail))
@@ -525,19 +526,17 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     for (ResourceAssignationVO resourceAssignationVO : resources) {
       Optional<UserRepresentation> contributor = Optional.empty();
       synchronized (users) {
-        contributor =
-            users.stream().filter(user -> StringUtils.isNotBlank(user.getEmail())
-                && user.getEmail().equals(resourceAssignationVO.getEmail())).findFirst();
+        contributor = users.stream().filter(user -> StringUtils.isNotBlank(user.getEmail())
+            && user.getEmail().equals(resourceAssignationVO.getEmail())).findFirst();
         if (contributor.isPresent()) {
           contributors.add(contributor.get());
         } else {
-          users.removeAll(Arrays.asList(users)); // just in case the user was not found in
+          users.clear(); // just in case the user was not found in
           users.addAll(Arrays.asList(keycloakConnectorService.getUsers()));
 
           // first try because it was a new user
-          contributor =
-              users.stream().filter(user -> StringUtils.isNotBlank(user.getEmail())
-                  && user.getEmail().equals(resourceAssignationVO.getEmail())).findFirst();
+          contributor = users.stream().filter(user -> StringUtils.isNotBlank(user.getEmail())
+              && user.getEmail().equals(resourceAssignationVO.getEmail())).findFirst();
           if (contributor.isPresent()) {
             contributors.add(contributor.get());
           }
@@ -574,9 +573,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     for (ResourceAssignationVO resourceAssignationVO : resources) {
       Optional<UserRepresentation> contributor = Optional.empty();
       synchronized (users) {
-        contributor =
-            users.stream().filter(user -> StringUtils.isNotBlank(user.getEmail())
-                && user.getEmail().equals(resourceAssignationVO.getEmail())).findFirst();
+        contributor = users.stream().filter(user -> StringUtils.isNotBlank(user.getEmail())
+            && user.getEmail().equals(resourceAssignationVO.getEmail())).findFirst();
       }
       if (contributor.isPresent()) {
         contributors.add(contributor.get());
@@ -669,9 +667,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         if (groupInfo.getName()
             .equals(ResourceGroupEnum.DATAFLOW_LEAD_REPORTER.getGroupName(dataflowId))
             || groupInfo.getName()
-            .equals(ResourceGroupEnum.DATAFLOW_REPORTER_READ.getGroupName(dataflowId))
+                .equals(ResourceGroupEnum.DATAFLOW_REPORTER_READ.getGroupName(dataflowId))
             || groupInfo.getName()
-            .equals(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(dataflowId))) {
+                .equals(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(dataflowId))) {
           userGroups.add(groupInfo.getName());
         }
       }
@@ -788,14 +786,12 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       Set<String> eeaGroups = new HashSet<>();
       Optional.ofNullable(token.getOtherClaims())
           .map(claims -> (List<String>) claims.get("user_groups"))
-          .filter(groups -> groups.size() > 0).ifPresent(groups -> {
-        groups.stream().map(group -> {
-          if (group.startsWith("/")) {
-            group = group.substring(1);
-          }
-          return group.toUpperCase();
-        }).forEach(eeaGroups::add);
-      });
+          .filter(groups -> !groups.isEmpty()).ifPresent(groups -> groups.stream().map(group -> {
+            if (group.startsWith("/")) {
+              group = group.substring(1);
+            }
+            return group.toUpperCase();
+          }).forEach(eeaGroups::add));
 
       tokenVO.setRoles(token.getRoles());
       tokenVO.setRefreshToken(tokenInfo.getRefreshToken());

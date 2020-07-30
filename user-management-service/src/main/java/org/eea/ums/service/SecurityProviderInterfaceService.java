@@ -99,7 +99,7 @@ public interface SecurityProviderInterfaceService {
    *
    * @param userId the user id
    * @param groupId the group id
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   void removeUserFromUserGroup(String userId, String groupId) throws EEAException;
 
@@ -221,8 +221,8 @@ public interface SecurityProviderInterfaceService {
    * @param userId the user id
    * @param dataflowId the dataflow id
    * @param dataProvider the data provider
-   *
    * @return the api key
+   * @throws EEAException the EEA exception
    */
   String getApiKey(String userId, Long dataflowId, Long dataProvider) throws EEAException;
 

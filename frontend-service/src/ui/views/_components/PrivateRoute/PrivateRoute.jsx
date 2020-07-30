@@ -20,7 +20,7 @@ export const PrivateRoute = ({ component: Component, path }) => {
         ) : (
           <Redirect
             to={{
-              pathname: routes.LOGIN,
+              pathname: routes.ACCESS_POINT,
               state: { from: props.location }
             }}
           />

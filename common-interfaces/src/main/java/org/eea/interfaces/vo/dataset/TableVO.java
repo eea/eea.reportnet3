@@ -55,7 +55,7 @@ public class TableVO implements Serializable {
   /**
    * The validations.
    */
-  private List<TableValidationVO> tableValidations = new ArrayList<TableValidationVO>();
+  private List<TableValidationVO> tableValidations = new ArrayList<>();
 
 
   /**

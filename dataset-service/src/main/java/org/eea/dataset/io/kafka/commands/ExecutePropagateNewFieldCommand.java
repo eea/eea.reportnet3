@@ -87,7 +87,7 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
       TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
       datasetService.saveNewFieldPropagation(datasetId, idTableSchema, pageable, idFieldSchema,
           typeField);
-
+      LOG.info("field {} propagated", idFieldSchema);
     } catch (Exception e) {
       LOG_ERROR.error(
           "Error processing propagations for new field column in dataset {} due to exception {}",

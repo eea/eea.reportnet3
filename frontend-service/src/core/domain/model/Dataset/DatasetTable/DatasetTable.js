@@ -10,6 +10,7 @@ export class DatasetTable {
     tableSchemaDescription,
     tableSchemaId,
     tableSchemaName,
+    tableSchemaNotEmpty,
     tableSchemaReadOnly,
     tableSchemaToPrefill,
     totalRecords
@@ -25,6 +26,7 @@ export class DatasetTable {
     this.tableSchemaToPrefill = tableSchemaToPrefill;
     this.tableSchemaId = tableSchemaId;
     this.tableSchemaName = tableSchemaName;
+    this.tableSchemaNotEmpty = tableSchemaNotEmpty;
     this.tableSchemaReadOnly = tableSchemaReadOnly;
     this.totalRecords = totalRecords;
   }

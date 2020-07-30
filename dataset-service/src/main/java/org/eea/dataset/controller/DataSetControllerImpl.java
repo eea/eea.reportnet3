@@ -46,7 +46,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -420,8 +419,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/{id}/record/{recordId}", method = RequestMethod.DELETE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @DeleteMapping(value = "/{id}/record/{recordId}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void deleteRecord(@PathVariable("id") final Long datasetId,
       @PathVariable("recordId") final String recordId) {
@@ -453,9 +451,8 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @PostMapping(value = "/{id}/table/{idTableSchema}/record")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void insertRecords(@PathVariable("id") final Long datasetId,
-      @PathVariable("idTableSchema") final String idTableSchema,
-      @RequestBody final List<RecordVO> records,
+  public void insertRecords(@PathVariable("id") Long datasetId,
+      @PathVariable("idTableSchema") String idTableSchema, @RequestBody List<RecordVO> records,
       @RequestParam(value = "file", required = false) final MultipartFile file) {
     if (datasetId == null || records == null || records.isEmpty()) {
       LOG_ERROR.error("Error inserting records. The datasetId or the records are empty or null");
@@ -511,8 +508,8 @@ public class DataSetControllerImpl implements DatasetController {
       // This method will release the lock
       deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error deleting the table values from the datasetId {}. Message: ", datasetId,
-          e.getMessage());
+      LOG_ERROR.error("Error deleting the table values from the datasetId {}. Message: {}",
+          datasetId, e.getMessage());
       datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
           datasetId);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);

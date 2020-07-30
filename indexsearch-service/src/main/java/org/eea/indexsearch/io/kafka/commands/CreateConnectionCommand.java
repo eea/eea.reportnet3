@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * The Class EventHandlerCommand. Event Handler Command where we are encapsulating both
  * Object[EventHandlerReceiver] and the operation[Close] together as command.
- * 
+ *
  */
 @Component
 public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
@@ -87,10 +87,10 @@ public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
 
 
     // Start Save Procces.
-    Map<String, Object> ElasticSearchDataMapper = objectMapper.convertValue(data, Map.class);
+    Map<String, Object> elasticSearchDataMapper = objectMapper.convertValue(data, Map.class);
 
     IndexRequest indexRequest =
-        new IndexRequest(INDEX, TYPE, data.getId()).source(ElasticSearchDataMapper);
+        new IndexRequest(INDEX, TYPE, data.getId()).source(elasticSearchDataMapper);
 
     IndexResponse indexResponse;
     try {
@@ -98,7 +98,7 @@ public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
       new ResponseEntity(indexResponse.getResult().name(), HttpStatus.CREATED);
     } catch (IOException e) {
       LOG_ERROR.error("Exception saving new data into indexsearch. Message: {}", e.getMessage(), e);
-    } ;
+    }
 
 
   }

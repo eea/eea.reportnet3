@@ -16,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,6 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
-import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -50,7 +50,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -62,6 +61,24 @@ import org.springframework.stereotype.Service;
  */
 @Service("jdbcRecordStoreServiceImpl")
 public class JdbcRecordStoreServiceImpl implements RecordStoreService {
+
+  /** The Constant DELETE_FROM_DATASET: {@value}. */
+  private static final String DELETE_FROM_DATASET = "DELETE FROM dataset_";
+
+  /** The Constant COPY_DATASET: {@value}. */
+  private static final String COPY_DATASET = "COPY dataset_";
+
+  /** The Constant SNAPSHOT_: {@value}. */
+  private static final String SNAPSHOT_QUERY = "snapshot_";
+
+  /** The Constant COLLECTION: {@value}. */
+  private static final String COLLECTION = "collection";
+
+  /** The Constant SCHEMA: {@value}. */
+  private static final String SCHEMA = "schema";
+
+  /** The Constant SNAPSHOT: {@value}. */
+  private static final String SNAPSHOT = "snapshot";
 
   /**
    * The Constant FILE_PATTERN_NAME.
@@ -189,6 +206,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Autowired
   private DataSetControllerZuul datasetControllerZuul;
 
+  /** The data set metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
@@ -239,15 +257,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       statement.executeBatch();
       LOG.info("{} Schemas created as part of DataCollection creation",
           datasetIdsAndSchemaIds.size());
-      try {
-        // waiting X seconds before releasing notifications, so database is able to write the
-        // creation of all datasets
-        Thread.sleep(timeToWaitBeforeReleasingNotification);
-      } catch (InterruptedException e) {
-        LOG_ERROR.error("Error sleeping thread before releasing notification kafka events", e);
-        Thread.currentThread().interrupt();
-      }
-
+      // waiting X seconds before releasing notifications, so database is able to write the
+      // creation of all datasets
+      Thread.sleep(timeToWaitBeforeReleasingNotification);
       LOG.info("Releasing notifications via Kafka");
       // Release events to initialize databases content
       releaseConnectionCreatedEvents(datasetIdsAndSchemaIds);
@@ -260,6 +272,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       // This method will release the lock
       dataCollectionControllerZuul.undoDataCollectionCreation(
           new ArrayList<>(datasetIdsAndSchemaIds.keySet()), dataflowId, isCreation);
+    } catch (InterruptedException e) {
+      LOG_ERROR.error("Error sleeping thread before releasing notification kafka events", e);
+      Thread.currentThread().interrupt();
     }
   }
 
@@ -359,7 +374,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param idPartitionDataset the id partition dataset
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   @Async
@@ -368,7 +383,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     ConnectionDataVO connectionDataVO =
         getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idDataset);
-    String type = null;
+    String type = SNAPSHOT;
     try (Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
         connectionDataVO.getUser(), connectionDataVO.getPassword())) {
       type = checkType(idDataset, idSnapshot);
@@ -426,34 +441,24 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       printToFile(nameFileFieldValue, copyQueryField, cm);
 
-
-      // Copy attachment_value
-      String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
-      String copyQueryAttachment =
-          "COPY (SELECT at.id, at.file_name, at.content, at.field_value_id from dataset_"
-              + idDataset + ".attachment_value at) to STDOUT";
-      printToFile(nameFileAttachmentValue, copyQueryAttachment, cm);
-
       LOG.info("Snapshot {} data files created", idSnapshot);
 
-      notificationAndCheckRelease(idDataset, idSnapshot, type);
+      notificationCreateAndCheckRelease(idDataset, idSnapshot, type);
 
       // release snapshot when the user press create+release
     } catch (Exception e) {
-      EventType event = null;
+      EventType eventType = null;
       switch (type) {
-        case "dataset":
-          event = EventType.ADD_DATASET_SNAPSHOT_FAILED_EVENT;
+        case SNAPSHOT:
+          eventType = EventType.ADD_DATASET_SNAPSHOT_FAILED_EVENT;
           break;
-        case "collection":
+        case COLLECTION:
           removeLocksRelatedToPopulateEU(
-              dataSetMetabaseControllerZuul.findDatasetMetabaseById(idDataset).getDataflowId(),
-              idDataset);
-          event = EventType.COPY_DATA_TO_EUDATASET_FAILED_EVENT;
+              dataSetMetabaseControllerZuul.findDatasetMetabaseById(idDataset).getDataflowId());
+          eventType = EventType.COPY_DATA_TO_EUDATASET_FAILED_EVENT;
           break;
-        case "schema":
-          event = EventType.ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT;
+        case SCHEMA:
+          eventType = EventType.ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT;
           break;
         default:
           break;
@@ -461,49 +466,46 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG_ERROR.error("Error creating snapshot for dataset {}", idDataset, e);
       Map<String, Object> value = new HashMap<>();
       value.put(LiteralConstants.DATASET_ID, idDataset);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(event, value,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .datasetId(idDataset).error(e.getMessage()).build());
+      releaseNotificableKafkaEvent(eventType, value, idDataset, e.getMessage());
 
     } finally {
       // Release the lock manually
-      List<Object> criteria = new ArrayList<>();
-      if ("dataset".equals(type)) {
-        criteria.add(LockSignature.CREATE_SNAPSHOT.getValue());
-        criteria.add(idDataset);
+      if (SNAPSHOT.equals(type)) {
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
-        criteria.add(snapshot.getRelease());
-        lockService.removeLockByCriteria(criteria);
+        removeLockByCriteria(LockSignature.CREATE_SNAPSHOT.getValue(), idDataset,
+            snapshot.getRelease());
       }
-      if ("schema".equals(type)) {
-        List<Object> criteria2 = new ArrayList<>();
-        criteria2.add(LockSignature.CREATE_SCHEMA_SNAPSHOT.getValue());
-        criteria2.add(idDataset);
-        lockService.removeLockByCriteria(criteria2);
+      if (SCHEMA.equals(type)) {
+        removeLockByCriteria(LockSignature.CREATE_SCHEMA_SNAPSHOT.getValue(), idDataset);
       }
     }
+  }
+
+  /**
+   * Removes the lock by criteria.
+   *
+   * @param arguments the arguments
+   */
+  private void removeLockByCriteria(Object... arguments) {
+    List<Object> criteria = new ArrayList<>();
+    for (Object object : Arrays.asList(arguments)) {
+      criteria.add(object);
+    }
+    lockService.removeLockByCriteria(criteria);
   }
 
   /**
    * Removes the locks related to populate EU.
    *
    * @param dataflowId the dataflow id
-   * @param datasetId the dataset id
    */
-  private void removeLocksRelatedToPopulateEU(Long dataflowId, Long datasetId) {
+  private void removeLocksRelatedToPopulateEU(Long dataflowId) {
     List<ReportingDatasetVO> reportings =
         dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId);
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.POPULATE_EU_DATASET.getValue());
-    criteria.add(dataflowId);
-    lockService.removeLockByCriteria(criteria);
+    removeLockByCriteria(LockSignature.POPULATE_EU_DATASET.getValue(), dataflowId);
 
     for (ReportingDatasetVO reporting : reportings) {
-      List<Object> criteriaReporting = new ArrayList<>();
-      criteriaReporting.add(LockSignature.RELEASE_SNAPSHOT.getValue());
-      criteriaReporting.add(reporting.getId());
-
-      lockService.removeLockByCriteria(criteriaReporting);
+      removeLockByCriteria(LockSignature.RELEASE_SNAPSHOT.getValue(), reporting.getId());
     }
   }
 
@@ -513,17 +515,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
    * @return the string
-   * @throws EEAException the EEA exception
    */
-  private String checkType(Long idDataset, Long idSnapshot) throws EEAException {
-    String type = "dataset";
+  private String checkType(Long idDataset, Long idSnapshot) {
+    String type = SNAPSHOT;
     SnapshotVO snapshot = null;
     snapshot = dataSetSnapshotControllerZuul.getSchemaById(idSnapshot);
     if (snapshot != null) {
-      type = "schema";
+      type = SCHEMA;
     } else {
       if (DatasetTypeEnum.COLLECTION.equals(dataSetMetabaseControllerZuul.getType(idDataset))) {
-        type = "collection";
+        type = COLLECTION;
       }
     }
     return type;
@@ -534,26 +535,23 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
+   * @param type the type
    * @return the event type
-   * @throws EEAException
    */
-  private void notificationAndCheckRelease(Long idDataset, Long idSnapshot, String type)
-      throws EEAException {
+  private void notificationCreateAndCheckRelease(Long idDataset, Long idSnapshot, String type) {
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, idDataset);
 
     switch (type) {
-      case "dataset":
+      case SNAPSHOT:
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
         if (Boolean.TRUE.equals(snapshot.getRelease())) {
           dataSetSnapshotControllerZuul.releaseSnapshot(idDataset, idSnapshot);
         }
-        kafkaSenderUtils.releaseNotificableKafkaEvent(
-            EventType.ADD_DATASET_SNAPSHOT_COMPLETED_EVENT, value,
-            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-                .datasetId(idDataset).build());
+        releaseNotificableKafkaEvent(EventType.ADD_DATASET_SNAPSHOT_COMPLETED_EVENT, value,
+            idDataset, null);
         break;
-      case "collection":
+      case COLLECTION:
         Map<String, Object> valueEU = new HashMap<>();
         valueEU.put("user", ThreadPropertiesManager.getVariable("user"));
         valueEU.put("dataset_id", idDataset);
@@ -561,11 +559,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         kafkaSenderUtils.releaseKafkaEvent(EventType.ADD_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT,
             valueEU);
         break;
-      case "schema":
-        kafkaSenderUtils.releaseNotificableKafkaEvent(
-            EventType.ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT, value,
-            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-                .datasetId(idDataset).build());
+      case SCHEMA:
+        releaseNotificableKafkaEvent(EventType.ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT, value,
+            idDataset, null);
         break;
       default:
         break;
@@ -591,12 +587,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
       throws SQLException, IOException {
 
-    EventType successEventType = deleteData
-        ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
+    EventType successEventType = Boolean.TRUE.equals(deleteData)
+        ? Boolean.TRUE.equals(isSchemaSnapshot)
+            ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
             : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_COMPLETED_EVENT;
-    EventType failEventType = deleteData
-        ? isSchemaSnapshot ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
+    EventType failEventType = Boolean.TRUE.equals(deleteData)
+        ? Boolean.TRUE.equals(isSchemaSnapshot)
+            ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
             : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
         : EventType.RELEASE_DATASET_SNAPSHOT_FAILED_EVENT;
 
@@ -620,13 +618,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {
 
     String nameFileDatasetValue =
-        "snapshot_" + idSnapshot + LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX;
+        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX;
     String nameFileTableValue =
-        "snapshot_" + idSnapshot + LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX;
+        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX;
     String nameFileRecordValue =
-        "snapshot_" + idSnapshot + LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX;
+        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX;
     String nameFileFieldValue =
-        "snapshot_" + idSnapshot + LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX;
+        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX;
 
     Path path1 = Paths.get(pathSnapshot + nameFileDatasetValue);
     Files.deleteIfExists(path1);
@@ -671,12 +669,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
   }
 
-
-
   /**
    * Restore snapshot.
    *
-   * @param idDataset the id dataset
+   * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
    * @param partitionId the partition id
    * @param datasetType the dataset type
@@ -686,7 +682,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param failEventType the fail event type
    * @param launchEvent the launch event
    */
-  private void restoreSnapshot(Long idDataset, Long idSnapshot, Long partitionId,
+  private void restoreSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
       DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
       EventType successEventType, EventType failEventType, Boolean launchEvent) {
 
@@ -695,16 +691,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             : LockSignature.RESTORE_SNAPSHOT.getValue()
         : LockSignature.RELEASE_SNAPSHOT.getValue();
     Map<String, Object> value = new HashMap<>();
-    value.put(LiteralConstants.DATASET_ID, idDataset);
+    value.put(LiteralConstants.DATASET_ID, idReportingDataset);
     ConnectionDataVO conexion =
-        getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idDataset);
+        getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idReportingDataset);
     // We get the datasetId from the snapshot
-    SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
-    if (snapshot == null) {
-      snapshot = dataSetSnapshotControllerZuul.getSchemaById(idSnapshot);
-    }
-    Long datasetIdFromSnapshot = snapshot.getDatasetId();
-
+    Long datasetIdFromSnapshot = Boolean.TRUE.equals(isSchemaSnapshot)
+        ? dataSetSnapshotControllerZuul.getSchemaById(idSnapshot).getDatasetId()
+        : dataSetSnapshotControllerZuul.getById(idSnapshot).getDatasetId();
 
     try (
         Connection con = DriverManager.getConnection(conexion.getConnectionString(),
@@ -713,46 +706,28 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       con.setAutoCommit(true);
 
       if (Boolean.TRUE.equals(deleteData)) {
-        String sql = "";
-        switch (datasetType) {
-          case EUDATASET:
-            sql = "DELETE FROM dataset_" + idDataset + ".record_value";
-            break;
-          case REPORTING:
-            sql = "DELETE FROM dataset_" + idDataset + ".record_value WHERE dataset_partition_id="
-                + partitionId;
-            break;
-          case DESIGN:
-            sql = "DELETE FROM dataset_" + idDataset + ".table_value";
-            break;
-          default:
-            break;
-        }
+        String sql = composeDeleteSql(idReportingDataset, partitionId, datasetType);
         LOG.info("Deleting previous data");
         stmt.executeUpdate(sql);
       }
 
       CopyManager cm = new CopyManager((BaseConnection) con);
       LOG.info("Init restoring the snapshot files from Snapshot {}", idSnapshot);
-      switch (datasetType) {
-        case DESIGN:
-          // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
-          // not neccesary
-          String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-              LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
+      if (DatasetTypeEnum.DESIGN.equals(datasetType)) {
+        // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
+        // not neccesary
+        String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+            LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
 
-          String copyQueryTable = "COPY dataset_" + idDataset
-              + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
-          copyFromFile(copyQueryTable, nameFileTableValue, cm);
-          break;
-        default:
-          break;
+        String copyQueryTable = COPY_DATASET + idReportingDataset
+            + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
+        copyFromFile(copyQueryTable, nameFileTableValue, cm);
       }
       // Record value
       String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
           LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
 
-      String copyQueryRecord = "COPY dataset_" + idDataset
+      String copyQueryRecord = COPY_DATASET + idReportingDataset
           + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
       copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
 
@@ -760,71 +735,70 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
           LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
 
-      String copyQueryField = "COPY dataset_" + idDataset
+      String copyQueryField = COPY_DATASET + idReportingDataset
           + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
       copyFromFile(copyQueryField, nameFileFieldValue, cm);
 
-      // Attachment value
-      String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
-
-      String copyQueryAttachment = "COPY dataset_" + idDataset
-          + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
-      copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
-
-      if (Boolean.TRUE.equals(launchEvent)) {
+      if (Boolean.TRUE.equals(launchEvent) && !DatasetTypeEnum.EUDATASET.equals(datasetType)) {
         // Send kafka event to launch Validation
-        final EEAEventVO event = new EEAEventVO();
-        event.setEventType(successEventType);
-        if (!DatasetTypeEnum.EUDATASET.equals(datasetType)) {
-          kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION,
-              idDataset);
-        } else {
-          dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
-        }
-        if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
-          Map<String, Object> valueEU = new HashMap<>();
-          valueEU.put("user", ThreadPropertiesManager.getVariable("user"));
-          valueEU.put("dataset_id", idDataset);
-          valueEU.put("snapshot_id", idSnapshot);
-          kafkaSenderUtils.releaseKafkaEvent(
-              EventType.RESTORE_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT, valueEU);
-        } else {
-          kafkaSenderUtils.releaseNotificableKafkaEvent(successEventType, value,
-              NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-                  .datasetId(idDataset).build());
-        }
+        kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION,
+            idReportingDataset);
+        releaseNotificableKafkaEvent(successEventType, value, idReportingDataset, null);
+      }
+      if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
+        dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
+        Map<String, Object> valueEU = new HashMap<>();
+        valueEU.put("user", ThreadPropertiesManager.getVariable("user"));
+        valueEU.put(LiteralConstants.DATASET_ID, idReportingDataset);
+        valueEU.put("snapshot_id", idSnapshot);
+        kafkaSenderUtils
+            .releaseKafkaEvent(EventType.RESTORE_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT, valueEU);
       }
       LOG.info("Snapshot {} restored", idSnapshot);
-    } catch (EEAException e) {
-      LOG.error("Error realeasing event {}: ", successEventType, e);
     } catch (Exception e) {
       if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
-        value.put(LiteralConstants.DATASET_ID, idDataset);
         failEventType = EventType.COPY_DATA_TO_EUDATASET_FAILED_EVENT;
-        removeLocksRelatedToPopulateEU(
-            dataSetMetabaseControllerZuul.findDatasetMetabaseById(idDataset).getDataflowId(),
-            idDataset);
+        removeLocksRelatedToPopulateEU(dataSetMetabaseControllerZuul
+            .findDatasetMetabaseById(idReportingDataset).getDataflowId());
       }
       LOG_ERROR.error("Error restoring the snapshot data due to error {}.", e.getMessage(), e);
       if (Boolean.TRUE.equals(launchEvent)) {
-        try {
-          kafkaSenderUtils.releaseNotificableKafkaEvent(failEventType, value,
-              NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-                  .datasetId(idDataset).error("Error restoring the snapshot data").build());
-        } catch (EEAException ex) {
-          LOG.error("Error realeasing event {} due to error {}", failEventType, ex.getMessage(),
-              ex);
-        }
+        releaseNotificableKafkaEvent(failEventType, value, idReportingDataset,
+            "Error restoring the snapshot data");
       }
     } finally {
       // Release the lock manually
-      List<Object> criteria = new ArrayList<>();
-      criteria.add(signature);
-      criteria.add(datasetIdFromSnapshot);
-      lockService.removeLockByCriteria(criteria);
+      removeLockByCriteria(signature, datasetIdFromSnapshot);
     }
 
+  }
+
+  /**
+   * Compose delete sql.
+   *
+   * @param idReportingDataset the id reporting dataset
+   * @param partitionId the partition id
+   * @param datasetType the dataset type
+   * @return the string
+   */
+  private String composeDeleteSql(Long idReportingDataset, Long partitionId,
+      DatasetTypeEnum datasetType) {
+    String sql = "";
+    switch (datasetType) {
+      case EUDATASET:
+        sql = DELETE_FROM_DATASET + idReportingDataset + ".record_value";
+        break;
+      case REPORTING:
+        sql = DELETE_FROM_DATASET + idReportingDataset + ".record_value WHERE dataset_partition_id="
+            + partitionId;
+        break;
+      case DESIGN:
+        sql = DELETE_FROM_DATASET + idReportingDataset + ".table_value";
+        break;
+      default:
+        break;
+    }
+    return sql;
   }
 
 
@@ -842,10 +816,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         : EventType.UPDATE_DATACOLLECTION_COMPLETED_EVENT;
 
     // Release the lock
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(methodSignature);
-    criteria.add(dataflowId);
-    lockService.removeLockByCriteria(criteria);
+    removeLockByCriteria(methodSignature, dataflowId);
 
     // Release the notification
     try {
@@ -875,6 +846,24 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
+  /**
+   * Release notificable kafka event.
+   *
+   * @param event the event
+   * @param value the value
+   * @param datasetId the dataset id
+   * @param error the error
+   */
+  void releaseNotificableKafkaEvent(EventType event, Map<String, Object> value, Long datasetId,
+      String error) {
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(event, value,
+          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .datasetId(datasetId).error(error).build());
+    } catch (EEAException ex) {
+      LOG.error("Error realeasing event {} due to error {}", event, ex.getMessage(), ex);
+    }
+  }
 
   /**
    * Creates the connection data VO.
@@ -909,8 +898,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
     }, new ResultSetExtractor<List<String>>() {
       @Override
-      public List<String> extractData(ResultSet resultSet)
-          throws SQLException, DataAccessException {
+      public List<String> extractData(ResultSet resultSet) throws SQLException {
         List<String> datasets = new ArrayList<>();
         while (resultSet.next()) {
           datasets.add(resultSet.getString(1));
@@ -964,11 +952,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     // bufferFile it's a size in bytes defined in consul variable. It can be 65536
     char[] cbuf = new char[bufferFile];
     int len = 0;
-    FileReader from = null;
     CopyIn cp = copyManager.copyIn(query);
     // Copy the data from the file by chunks
-    try {
-      from = new FileReader(path.toString());
+    try (FileReader from = new FileReader(path.toString())) {
       while ((len = from.read(cbuf)) > 0) {
         byte[] buf = new String(cbuf, 0, len).getBytes();
         cp.writeToCopy(buf, 0, buf.length);
@@ -978,9 +964,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           "Error restoring the file {} executing query {}. Restoring snapshot continues", fileName,
           query, e);
     } finally {
-      if (null != from) {
-        from.close();
-      }
       cp.endCopy();
       if (cp.isActive()) {
         cp.cancelCopy();

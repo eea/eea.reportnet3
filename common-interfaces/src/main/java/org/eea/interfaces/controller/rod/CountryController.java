@@ -3,8 +3,7 @@ package org.eea.interfaces.controller.rod;
 import java.util.List;
 import org.eea.interfaces.vo.rod.CountryVO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 
 
 /**
@@ -20,13 +19,12 @@ public interface CountryController {
 
   }
 
-
   /**
    * Find all countries.
    *
    * @return the list
    */
-  @RequestMapping(value = "/", method = RequestMethod.GET)
+  @GetMapping(value = "/")
   List<CountryVO> findAll();
 
 }
