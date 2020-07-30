@@ -15,6 +15,12 @@
   .customHeader {
     display: flex;
     padding: 0.5rem;
+    justify-content: space-between;
+    &.public {
+      @media (max-width: 768px) {
+        justify-content: space-between;
+      }
+    }
     .title {
       display: flex;
       flex-direction: row;
@@ -98,13 +104,6 @@
     }
   }
   @media (max-width: 768px) {
-    height: 134px;
-    background-color: var(--c-corporate-blue);
-    .customHeader {
-      .title {
-        display: none;
-      }
-    }
   }
 }
 

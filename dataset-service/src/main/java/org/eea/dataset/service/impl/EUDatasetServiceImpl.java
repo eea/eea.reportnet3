@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class EUDatasetServiceImpl implements EUDatasetService {
 
+
   /** The eu dataset repository. */
   @Autowired
   private EUDatasetRepository euDatasetRepository;
@@ -65,6 +66,8 @@ public class EUDatasetServiceImpl implements EUDatasetService {
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
 
+  /** The Constant SIGNATURE: {@value}. */
+  private static final String SIGNATURE = "signature";
 
   /**
    * The Constant LOG.
@@ -118,6 +121,7 @@ public class EUDatasetServiceImpl implements EUDatasetService {
       datasetSnapshotService.addSnapshot(dataCollection.getId(), dataCollection.getDatasetSchema(),
           false, obtainPartition(relatedDatasetsByIds.get(dataCollection.getId()), "root").getId());
     }
+    LOG.info("EU dataset populated with dataflowId {}", dataflowId);
 
   }
 
@@ -160,7 +164,7 @@ public class EUDatasetServiceImpl implements EUDatasetService {
     for (ReportingDatasetVO reporting : reportings) {
       // Locks to avoid a provider can release a snapshot
       Map<String, Object> mapCriteria = new HashMap<>();
-      mapCriteria.put("signature", LockSignature.RELEASE_SNAPSHOT.getValue());
+      mapCriteria.put(SIGNATURE, LockSignature.RELEASE_SNAPSHOT.getValue());
       mapCriteria.put("datasetId", reporting.getId());
       lockService.createLock(new Timestamp(System.currentTimeMillis()),
           SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
@@ -168,7 +172,7 @@ public class EUDatasetServiceImpl implements EUDatasetService {
 
       // Lock to avoid a provider can create+release a snapshot
       Map<String, Object> mapCreateRelease = new HashMap<>();
-      mapCreateRelease.put("signature", LockSignature.CREATE_SNAPSHOT.getValue());
+      mapCreateRelease.put(SIGNATURE, LockSignature.CREATE_SNAPSHOT.getValue());
       mapCreateRelease.put("datasetId", reporting.getId());
       mapCreateRelease.put("released", true);
       lockService.createLock(new Timestamp(System.currentTimeMillis()),
@@ -179,7 +183,7 @@ public class EUDatasetServiceImpl implements EUDatasetService {
 
     // Lock to avoid export EUDataset while is copying data
     Map<String, Object> mapCriteriaExport = new HashMap<>();
-    mapCriteriaExport.put("signature", LockSignature.EXPORT_EU_DATASET.getValue());
+    mapCriteriaExport.put(SIGNATURE, LockSignature.EXPORT_EU_DATASET.getValue());
     mapCriteriaExport.put("dataflowId", dataflowId);
     lockService.createLock(new Timestamp(System.currentTimeMillis()),
         SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,

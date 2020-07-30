@@ -4,8 +4,7 @@ import java.util.List;
 import org.eea.rod.persistence.domain.Client;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 
 /**
  * The interface Client feign repository.
@@ -13,14 +12,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @FeignClient(name = "rodClientInterface", url = "${rod.url}", path = "/rest/client")
 public interface ClientFeignRepository {
 
-
   /**
    * Find all list.
    *
    * @return the list
    */
   @Cacheable("rod_client_cache")
-  @RequestMapping(value = "/findAll", method = RequestMethod.GET)
+  @GetMapping(value = "/findAll")
   List<Client> findAll();
 
 

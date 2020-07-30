@@ -632,6 +632,13 @@ public class DataflowServiceImpl implements DataflowService {
     }
   }
 
+  /**
+   * Delete documents.
+   *
+   * @param idDataflow the id dataflow
+   * @param dataflowVO the dataflow VO
+   * @throws Exception the exception
+   */
   private void deleteDocuments(Long idDataflow, DataFlowVO dataflowVO) throws Exception {
     for (DocumentVO document : dataflowVO.getDocuments()) {
       try {
@@ -645,6 +652,13 @@ public class DataflowServiceImpl implements DataflowService {
     LOG.info("Documents deleted to dataflow with id: {}", idDataflow);
   }
 
+  /**
+   * Delete dataset schemas.
+   *
+   * @param idDataflow the id dataflow
+   * @param dataflowVO the dataflow VO
+   * @throws EEAException the EEA exception
+   */
   private void deleteDatasetSchemas(Long idDataflow, DataFlowVO dataflowVO) throws EEAException {
     for (DesignDatasetVO designDatasetVO : dataflowVO.getDesignDatasets()) {
       try {
@@ -659,6 +673,12 @@ public class DataflowServiceImpl implements DataflowService {
     LOG.info("Delete full datasetSchemas with dataflow id: {}", idDataflow);
   }
 
+  /**
+   * Delete representatives.
+   *
+   * @param dataflowVO the dataflow VO
+   * @throws EEAException the EEA exception
+   */
   private void deleteRepresentatives(DataFlowVO dataflowVO) throws EEAException {
     for (RepresentativeVO representative : dataflowVO.getRepresentatives()) {
       try {

@@ -201,4 +201,20 @@ public interface RulesService {
    * @throws EEAException the EEA exception
    */
   Map<String, String> copyRulesSchema(CopySchemaVO rules) throws EEAException;
+
+  /**
+   * Delete not empty rule.
+   *
+   * @param tableSchemaId the table schema id
+   * @param datasetId the dataset id
+   */
+  void deleteNotEmptyRule(String tableSchemaId, Long datasetId);
+
+  /**
+   * Update sequence.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the long
+   */
+  Long updateSequence(String datasetSchemaId);
 }

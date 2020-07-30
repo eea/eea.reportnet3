@@ -2,6 +2,9 @@ import React, { useContext, Fragment } from 'react';
 
 import styles from './Card.module.scss';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const Card = card => {
@@ -11,25 +14,28 @@ export const Card = card => {
       <div className={styles.content}>
         <div className={styles.text}>
           <h3 className={styles.title} title={card.dataflow}>
-            <a
-              href={card.dataFlowUrl}
-              onClick={e => {
-                e.preventDefault();
-                window.location.href = card.dataFlowUrl;
-              }}
-              title={card.dataflow}>
-              {card.dataflow}
+            <a href={card.dataFlowUrl} target="_blank" title={card.dataflow}>
+              <span>
+                {card.dataflow}{' '}
+                <FontAwesomeIcon
+                  aria-hidden={false}
+                  className="p-breadcrumb-home"
+                  icon={AwesomeIcons('externalLink')}
+                />
+              </span>
             </a>
           </h3>
           <h4 className={styles.subtitle} title={card.legalInstrument}>
             {card.legalInstrumentUrl ? (
-              <a
-                href={card.legalInstrumentUrl}
-                onClick={e => {
-                  e.preventDefault();
-                  window.location.href = card.legalInstrumentUrl;
-                }}>
-                {card.legalInstrument}
+              <a href={card.legalInstrumentUrl} target="_blank">
+                <span>
+                  {card.legalInstrument}{' '}
+                  <FontAwesomeIcon
+                    aria-hidden={false}
+                    className="p-breadcrumb-home"
+                    icon={AwesomeIcons('externalLink')}
+                  />
+                </span>
               </a>
             ) : (
               <Fragment>{card.legalInstrument}</Fragment>
@@ -37,12 +43,19 @@ export const Card = card => {
           </h4>
         </div>
         <div className={styles.pilotScenarioAmbition}>
-          <p>{card.pilotScenarioAmbition}</p>
+          <p>
+            <strong>Pilot scenario ambition: </strong>
+            {card.pilotScenarioAmbition}
+          </p>
         </div>
 
         <div className={`${styles.footer}`}>
-          <span>{card.reportingFrequency}</span>
-          <span>{card.targetDate}</span>
+          <span>
+            <strong>Frequency:</strong> {card.reportingFrequency}
+          </span>
+          <span>
+            <strong>Delivery date:</strong> {card.targetDate}
+          </span>
         </div>
       </div>
     </div>

@@ -12,19 +12,21 @@ import org.springframework.security.config.annotation.method.configuration.Globa
  * The type Eea expression configuration.
  */
 @Configuration
-@EnableGlobalMethodSecurity(
-    prePostEnabled = true
-)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class EeaExpressionConfiguration extends GlobalMethodSecurityConfiguration {
 
+  /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
+  /**
+   * Creates the expression handler.
+   *
+   * @return the method security expression handler
+   */
   @Override
   protected MethodSecurityExpressionHandler createExpressionHandler() {
-    EeaMethodSecurityExpressionHandler expressionHandler =
-        new EeaMethodSecurityExpressionHandler(userManagementControllerZull);
-    return expressionHandler;
+    return new EeaMethodSecurityExpressionHandler(userManagementControllerZull);
   }
 
 }

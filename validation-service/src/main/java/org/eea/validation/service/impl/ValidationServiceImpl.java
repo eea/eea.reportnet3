@@ -143,6 +143,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private DatasetSchemaController datasetSchemaController;
 
+  /** The rules error utils. */
   @Autowired
   private RulesErrorUtils rulesErrorUtils;
 
@@ -349,7 +350,7 @@ public class ValidationServiceImpl implements ValidationService {
         TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
         recordValidations.addAll(validations);
       });
-      if (recordValidations.size() > 0) {
+      if (!recordValidations.isEmpty()) {
         recordValidationRepository.saveAll(recordValidations);
       }
     } finally {
@@ -377,14 +378,13 @@ public class ValidationServiceImpl implements ValidationService {
         List<FieldValidation> resultFields = runFieldValidations(field, session);
 
         if (null != field.getFieldValidations()) {
-          field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldVal -> {
-            fieldVal.setFieldValue(field);
-          });
+          field.getFieldValidations().stream().filter(Objects::nonNull)
+              .forEach(fieldVal -> fieldVal.setFieldValue(field));
         }
         TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
         fieldValidations.addAll(resultFields);
       });
-      if (fieldValidations.size() > 0) {
+      if (!fieldValidations.isEmpty()) {
         validationFieldRepository.saveAll(fieldValidations);
       }
     } finally {

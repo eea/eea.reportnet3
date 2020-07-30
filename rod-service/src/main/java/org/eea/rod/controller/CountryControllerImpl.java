@@ -5,8 +5,8 @@ import org.eea.interfaces.controller.rod.CountryController;
 import org.eea.interfaces.vo.rod.CountryVO;
 import org.eea.rod.service.CountryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -16,12 +16,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/obligation_country")
 public class CountryControllerImpl implements CountryController {
 
+  /** The country service. */
   @Autowired
   private CountryService countryService;
 
-
+  /**
+   * Find all.
+   *
+   * @return the list
+   */
   @Override
-  @RequestMapping(value = "/", method = RequestMethod.GET)
+  @GetMapping(value = "/")
   public List<CountryVO> findAll() {
     return countryService.findAll();
   }

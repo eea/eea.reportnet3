@@ -47,43 +47,47 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
   useEffect(() => {
     let prevScrollPos = window.pageYOffset;
     window.onscroll = () => {
+      const innerWidth = window.innerWidth;
       const currentScrollPos = window.pageYOffset;
 
-      if (currentScrollPos === 0) {
-        setGlobanElementStyle({
-          marginTop: '0',
-          transition: '0.5s'
-        });
-        setEuHeaderElementStyle({
-          marginTop: '0',
-          transition: '0.5s'
-        });
-        setHeaderElementStyle({
-          height: '180px',
-          transition: '0.5s'
-        });
-        onMainContentStyleChange({
-          marginTop: '180px',
-          transition: '0.5s'
-        });
-      } else {
-        setGlobanElementStyle({
-          marginTop: '-100px',
-          transition: '0.5s'
-        });
-        setEuHeaderElementStyle({
-          marginTop: '-20px',
-          transition: '0.5s'
-        });
-        setHeaderElementStyle({
-          height: '70px',
-          transition: '0.5s'
-        });
-        onMainContentStyleChange({
-          marginTop: '70px',
-          transition: '0.5s'
-        });
+      if (innerWidth > 768) {
+        if (currentScrollPos === 0) {
+          setGlobanElementStyle({
+            marginTop: '0',
+            transition: '0.5s'
+          });
+          setEuHeaderElementStyle({
+            marginTop: '0',
+            transition: '0.5s'
+          });
+          setHeaderElementStyle({
+            height: '180px',
+            transition: '0.5s'
+          });
+          onMainContentStyleChange({
+            marginTop: '180px',
+            transition: '0.5s'
+          });
+        } else {
+          setGlobanElementStyle({
+            marginTop: '-100px',
+            transition: '0.5s'
+          });
+          setEuHeaderElementStyle({
+            marginTop: '-15px',
+            transition: '0.5s'
+          });
+          setHeaderElementStyle({
+            height: '70px',
+            transition: '0.5s'
+          });
+          onMainContentStyleChange({
+            marginTop: '70px',
+            transition: '0.5s'
+          });
+        }
       }
+
       prevScrollPos = currentScrollPos;
     };
   }, []);
@@ -226,12 +230,12 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
     <Fragment>
       <div id="header" style={headerElementStyle} className={styles.header}>
         <EuHeader globanElementStyle={globanElementStyle} euHeaderElementStyle={euHeaderElementStyle} />
-        <div className={styles.customHeader}>
+        <div className={`${styles.customHeader} ${isPublic ? styles.public : ''}`}>
           {loadTitle()}
-          <BreadCrumb />
+          {!isPublic && <BreadCrumb />}
           {!isPublic && loadUser()}
           {isPublic && loadLogin()}
-          {userContext.userProps.showLogoutConfirmation && (
+          {!isPublic && userContext.userProps.showLogoutConfirmation && (
             <ConfirmDialog
               onConfirm={() => {
                 userLogout();

@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.annotation.PostConstruct;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,11 +14,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CrudManagerFactoryImpl implements CrudManagerFactory {
-
-  /**
-   * The Constant LOG.
-   */
-  private static final Logger LOG = LoggerFactory.getLogger(CrudManagerFactoryImpl.class);
 
 
   /** The crud managers. */

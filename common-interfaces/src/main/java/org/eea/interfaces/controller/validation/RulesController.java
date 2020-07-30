@@ -229,8 +229,6 @@ public interface RulesController {
       @RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("datasetId") Long datasetId);
 
-
-
   /**
    * Copy rules schema.
    *
@@ -240,4 +238,22 @@ public interface RulesController {
   @PostMapping("/private/copyRulesSchema")
   Map<String, String> copyRulesSchema(@RequestBody CopySchemaVO copy);
 
+  /**
+   * Delete not empty rule.
+   *
+   * @param tableSchemaId the table schema id
+   * @param datasetId the dataset id
+   */
+  @GetMapping("/private/deleteNotEmptyRule")
+  void deleteNotEmptyRule(@RequestParam("tableSchemaId") String tableSchemaId,
+      @RequestParam("datasetId") Long datasetId);
+
+  /**
+   * Update sequence.
+   *
+   * @param tableSchemaId the table schema id
+   * @return the long
+   */
+  @GetMapping("/private/updateSequence")
+  Long updateSequence(@RequestParam("datasetSchemaId") String datasetSchemaId);
 }

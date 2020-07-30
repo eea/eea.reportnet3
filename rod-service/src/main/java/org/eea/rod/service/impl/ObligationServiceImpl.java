@@ -32,35 +32,53 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class ObligationServiceImpl implements ObligationService {
 
+  /** The obligation feign repository. */
   @Autowired
   private ObligationFeignRepository obligationFeignRepository;
 
+  /** The client feign repository. */
   @Autowired
   private ClientFeignRepository clientFeignRepository;
 
+  /** The country feign repository. */
   @Autowired
   private CountryFeignRepository countryFeignRepository;
 
+  /** The issue feign repository. */
   @Autowired
   private IssueFeignRepository issueFeignRepository;
 
+  /** The obligation mapper. */
   @Autowired
   private ObligationMapper obligationMapper;
 
+  /** The client mapper. */
   @Autowired
   private ClientMapper clientMapper;
 
+  /** The country mapper. */
   @Autowired
   private CountryMapper countryMapper;
 
+  /** The issue mapper. */
   @Autowired
   private IssueMapper issueMapper;
 
+  /**
+   * Find opened obligation.
+   *
+   * @param clientId the client id
+   * @param spatialId the spatial id
+   * @param issueId the issue id
+   * @param deadlineDateFrom the deadline date from
+   * @param deadlineDateTo the deadline date to
+   * @return the list
+   */
   @Override
   public List<ObligationVO> findOpenedObligation(Integer clientId, Integer spatialId,
       Integer issueId, Date deadlineDateFrom, Date deadlineDateTo) {
-    Long dateFrom = Optional.ofNullable(deadlineDateFrom).map(date -> date.getTime()).orElse(null);
-    Long dateTo = Optional.ofNullable(deadlineDateTo).map(date -> date.getTime()).orElse(null);
+    Long dateFrom = Optional.ofNullable(deadlineDateFrom).map(Date::getTime).orElse(null);
+    Long dateTo = Optional.ofNullable(deadlineDateTo).map(Date::getTime).orElse(null);
     List<Obligation> obligations = obligationFeignRepository.findOpenedObligations(clientId,
         issueId, spatialId, dateFrom, dateTo);
     List<ObligationVO> obligationVOS = obligationMapper.entityListToClass(obligations);
@@ -77,6 +95,12 @@ public class ObligationServiceImpl implements ObligationService {
     return obligationVOS;
   }
 
+  /**
+   * Find obligation by id.
+   *
+   * @param obligationId the obligation id
+   * @return the obligation VO
+   */
   @Override
   public ObligationVO findObligationById(Integer obligationId) {
     List<Client> clients = this.clientFeignRepository.findAll();
@@ -89,6 +113,15 @@ public class ObligationServiceImpl implements ObligationService {
     return obligationVO;
   }
 
+  /**
+   * Fill obligation subentity fields.
+   *
+   * @param obligationVO the obligation VO
+   * @param obligation the obligation
+   * @param clients the clients
+   * @param countries the countries
+   * @param issues the issues
+   */
   private void fillObligationSubentityFields(ObligationVO obligationVO, Obligation obligation,
       final List<Client> clients, final List<Country> countries, final List<Issue> issues) {
 

@@ -47,8 +47,7 @@ public interface DataCollectionController {
    * @return the list
    */
   @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataCollectionVO> findDataCollectionIdByDataflowId(
-      @PathVariable("id") final Long idDataflow);
+  List<DataCollectionVO> findDataCollectionIdByDataflowId(@PathVariable("id") Long idDataflow);
 
   /**
    * Update data collection.
