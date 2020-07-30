@@ -1,6 +1,7 @@
 import { useContext, useEffect } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
 
 import { routes } from 'ui/routes';
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -9,7 +10,7 @@ import { CurrentPage } from 'ui/views/_functions/Utils';
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const useBreadCrumbs = (history, currentPage, dataflowId, matchParams, dataflowStateData, representativeId) => {
+export const useBreadCrumbs = (history, currentPage, dataflowId, metaData, matchParams, dataflowStateData, representativeId) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const resources = useContext(ResourcesContext);
 
@@ -42,6 +43,8 @@ export const useBreadCrumbs = (history, currentPage, dataflowId, matchParams, da
 
   const dataflowHelpCrumb = { label: resources.messages['dataflowHelp'], icon: 'info' };
 
+  const datasetCrumb = { label: resources.messages['dataset'], icon: 'dataset' };
+
   const datasetDesignerCrumb = { label: resources.messages['datasetDesigner'], icon: 'pencilRuler' };
 
   const dataflowDashboardsCrumb = {
@@ -59,14 +62,7 @@ export const useBreadCrumbs = (history, currentPage, dataflowId, matchParams, da
     }
 
     if (currentPage === CurrentPage.DATAFLOWS) {
-      breadCrumbContext.add([
-        {
-          label: resources.messages['homeBreadcrumb'],
-          href: getUrl(routes.DATAFLOWS),
-          command: () => history.push(getUrl(routes.DATAFLOWS))
-        },
-        { label: resources.messages['dataflows'], icon: 'home' }
-      ]);
+      breadCrumbContext.add([homeCrumb, { label: resources.messages['dataflows'], icon: 'home' }]);
     }
 
     if (currentPage === CurrentPage.DATAFLOW) {
@@ -111,6 +107,36 @@ export const useBreadCrumbs = (history, currentPage, dataflowId, matchParams, da
       breadCrumbContext.add([homeCrumb, dataflowsCrumb, dataflowCrumb, datasetDesignerCrumb]);
     }
 
+    if (currentPage === CurrentPage.DATASET) {
+      if (!isUndefined(metaData.dataset)) {
+        const datasetBreadCrumbs = [
+          homeCrumb,
+          dataflowsCrumb,
+          {
+            className: 'datasetSchema-breadcrumb-back-help-step',
+            label: resources.messages['dataflow'],
+            icon: 'clone',
+            href: getUrl(routes.DATAFLOW, { dataflowId }, true),
+            command: () => {
+              history.goBack();
+            }
+          }
+        ];
+
+        if (breadCrumbContext.model.find(model => model.icon === 'representative')) {
+          datasetBreadCrumbs.push({
+            label: !isUndefined(metaData.dataset) ? metaData.dataset.name : resources.messages['representative'],
+            icon: 'representative',
+            href: getUrl(routes.REPRESENTATIVE, { dataflowId, representative: metaData.dataset.name }, true),
+            command: () =>
+              history.push(getUrl(routes.REPRESENTATIVE, { dataflowId, representative: metaData.dataset.name }, true))
+          });
+        }
+
+        breadCrumbContext.add([...datasetBreadCrumbs, datasetCrumb]);
+      }
+    }
+
     if (currentPage === CurrentPage.USER_SETTINGS) {
       breadCrumbContext.add([homeCrumb, dataflowsCrumb, settingsCrumb]);
     }
@@ -118,5 +144,5 @@ export const useBreadCrumbs = (history, currentPage, dataflowId, matchParams, da
 
   useEffect(() => {
     setBreadCrumbs();
-  }, [dataflowStateData, matchParams]);
+  }, [dataflowStateData, matchParams, metaData]);
 };

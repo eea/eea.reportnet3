@@ -35,23 +35,22 @@ import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { IntegrationService } from 'core/services/Integration';
 
-import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useReporterDataset';
 
 import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
-import { ExtensionUtils, MetadataUtils } from 'ui/views/_functions/Utils';
+import { CurrentPage, ExtensionUtils, MetadataUtils } from 'ui/views/_functions/Utils';
 
 export const Dataset = withRouter(({ match, history }) => {
   const {
     params: { dataflowId, datasetId }
   } = match;
 
-  const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -103,66 +102,7 @@ export const Dataset = withRouter(({ match, history }) => {
     setMetaData(await getMetadata({ datasetId, dataflowId }));
   };
 
-  useEffect(() => {
-    if (!isUndefined(metaData.dataset)) {
-      const breadCrumbs = [
-        {
-          label: resources.messages['homeBreadcrumb'],
-          href: getUrl(routes.DATAFLOWS),
-          command: () => history.push(getUrl(routes.DATAFLOWS))
-        },
-        {
-          label: resources.messages['dataflows'],
-          icon: 'home',
-          href: getUrl(routes.DATAFLOWS),
-          command: () => history.push(getUrl(routes.DATAFLOWS))
-        },
-        {
-          className: 'datasetSchema-breadcrumb-back-help-step',
-          label: resources.messages['dataflow'],
-          icon: 'clone',
-          href: getUrl(
-            routes.DATAFLOW,
-            {
-              dataflowId
-            },
-            true
-          ),
-          command: () => {
-            history.goBack();
-          }
-        }
-      ];
-      if (breadCrumbContext.model.find(model => model.icon === 'representative')) {
-        breadCrumbs.push({
-          label: !isUndefined(metaData.dataset) ? metaData.dataset.name : resources.messages['representative'],
-          icon: 'representative',
-          href: getUrl(
-            routes.REPRESENTATIVE,
-            {
-              dataflowId,
-              representative: metaData.dataset.name
-            },
-            true
-          ),
-          command: () =>
-            history.push(
-              getUrl(
-                routes.REPRESENTATIVE,
-                {
-                  dataflowId,
-                  representative: metaData.dataset.name
-                },
-                true
-              )
-            )
-        });
-      }
-      breadCrumbs.push({ label: resources.messages['dataset'], icon: 'dataset' });
-      breadCrumbContext.add(breadCrumbs);
-      leftSideBarContext.removeModels();
-    }
-  }, [metaData]);
+  useBreadCrumbs(history, CurrentPage.DATASET, dataflowId, metaData);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
