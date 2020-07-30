@@ -108,7 +108,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         history.push(getUrl(routes.DATAFLOWS));
       }}>
       <img height="50px" src={logo} alt="Reportnet 3.0" className={styles.appLogo} />
-      {/* <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1> */}
+      {isPublic && <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>}
     </a>
   );
 
