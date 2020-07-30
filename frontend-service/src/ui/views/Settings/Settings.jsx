@@ -1,16 +1,13 @@
 import React, { useContext, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
-import { getUrl } from 'core/infrastructure/CoreUtils';
 
 import styles from './Settings.module.scss';
-import { routes } from 'ui/routes';
 
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Title } from '../_components/Title/Title';
 import { UserCard } from './_components/UserCard';
 import { UserConfiguration } from './_components/UserConfiguration';
 
-import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
