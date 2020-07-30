@@ -49,7 +49,6 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
     window.onscroll = () => {
       const innerWidth = window.innerWidth;
       const currentScrollPos = window.pageYOffset;
-      console.log('innerWidth', innerWidth);
 
       if (innerWidth > 768) {
         if (currentScrollPos === 0) {

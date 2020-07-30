@@ -54,7 +54,7 @@ export const Card = card => {
             <strong>Frequency:</strong> {card.reportingFrequency}
           </span>
           <span>
-            <strong>Target data:</strong> {card.targetDate}
+            <strong>Delivery date:</strong> {card.targetDate}
           </span>
         </div>
       </div>
