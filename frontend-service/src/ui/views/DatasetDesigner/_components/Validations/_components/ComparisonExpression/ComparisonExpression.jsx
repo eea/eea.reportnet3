@@ -368,7 +368,7 @@ const ComparisonExpression = ({
       if (fieldType === 'NUMBER_DECIMAL') {
         return (
           <InputText
-            keyfilter={valueKeyFilter}
+            keyfilter="num"
             disabled={isDisabled}
             format={false}
             onBlur={e => checkField('number', e.target.value)}
