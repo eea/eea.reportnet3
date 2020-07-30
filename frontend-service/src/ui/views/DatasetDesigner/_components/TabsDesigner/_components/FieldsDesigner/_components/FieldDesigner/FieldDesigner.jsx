@@ -37,6 +37,7 @@ export const FieldDesigner = ({
   fieldLink,
   fieldHasMultipleValues,
   fieldMustBeUsed,
+  fieldReadOnly,
   fieldRequired,
   fieldType,
   hasPK,
@@ -101,6 +102,7 @@ export const FieldDesigner = ({
     fieldPKReferencedValue: fieldPKReferenced || false,
     fieldPKValue: fieldPK,
     fieldPreviousTypeValue: getFieldTypeValue(fieldType) || '',
+    fieldReadOnlyValue: fieldReadOnly,
     fieldRequiredValue: fieldRequired,
     fieldTypeValue: getFieldTypeValue(fieldType),
     fieldValue: fieldName,
@@ -319,6 +321,7 @@ export const FieldDesigner = ({
     pkHasMultipleValues = fieldDesignerState.pkHasMultipleValues,
     pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
     name = fieldDesignerState.fieldValue,
+    readOnly = fieldDesignerState.fieldReadOnlyValue,
     recordId = recordSchemaId,
     referencedField = fieldDesignerState.fieldLinkValue,
     required = fieldDesignerState.fieldRequiredValue,
@@ -332,6 +335,7 @@ export const FieldDesigner = ({
         pkHasMultipleValues,
         pkMustBeUsed,
         name,
+        readOnly,
         recordId,
         referencedField: !isNil(referencedField)
           ? parseReferenceField(referencedField)
@@ -456,6 +460,24 @@ export const FieldDesigner = ({
     dispatchFieldDesigner({ type: 'SET_PK', payload: checked });
   };
 
+  const onReadOnlyChange = checked => {
+    if (!fieldDesignerState.isDragging) {
+      if (fieldId === '-1') {
+        if (
+          !isNil(fieldDesignerState.fieldTypeValue) &&
+          fieldDesignerState.fieldTypeValue !== '' &&
+          !isNil(fieldDesignerState.fieldValue) &&
+          fieldDesignerState.fieldValue !== ''
+        ) {
+          onFieldAdd({ readOnly: checked });
+        }
+      } else {
+        fieldUpdate({ readOnly: checked });
+      }
+    }
+    dispatchFieldDesigner({ type: 'SET_READONLY', payload: checked });
+  };
+
   const onRequiredChange = checked => {
     if (!fieldDesignerState.isDragging) {
       if (fieldId === '-1') {
@@ -554,6 +576,7 @@ export const FieldDesigner = ({
     pkHasMultipleValues = fieldDesignerState.pkHasMultipleValues,
     pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
     name = fieldDesignerState.fieldValue,
+    readOnly = fieldDesignerState.fieldReadOnlyValue,
     recordId = recordSchemaId,
     referencedField = fieldDesignerState.fieldLinkValue,
     required = fieldDesignerState.fieldRequiredValue,
@@ -568,6 +591,7 @@ export const FieldDesigner = ({
         pkHasMultipleValues,
         pkMustBeUsed,
         name,
+        readOnly,
         recordId,
         referencedField: !isNil(referencedField)
           ? parseReferenceField(referencedField)
@@ -624,6 +648,20 @@ export const FieldDesigner = ({
       ) : (
         <div style={{ marginLeft: '32px', display: 'inline-block' }}></div>
       )}
+      <Checkbox
+        checked={fieldDesignerState.fieldReadOnlyValue}
+        className={`${styles.checkReadOnly} datasetSchema-readOnly-help-step`}
+        id={`${fieldId}_check_readOnly`}
+        inputId={`${fieldId}_check_readOnly`}
+        label="Default"
+        onChange={e => {
+          onReadOnlyChange(e.checked);
+        }}
+        style={{ width: '70px' }}
+      />
+      <label htmlFor={`${fieldId}_check_required`} className="srOnly">
+        {resources.messages['readOnly']}
+      </label>
       <Checkbox
         checked={fieldDesignerState.fieldRequiredValue}
         className={`${styles.checkRequired} datasetSchema-required-help-step`}

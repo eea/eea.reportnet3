@@ -804,6 +804,8 @@
     "dataflowRequesterDesignHelp": "Here you have the tools to manage your schema. You can create schemas, edit the dataflow, assign editors and create the data collections",
     "datasetSchemaRequesterEmptyHelpConfig": "Here you have the tools to design your schema. Open me again when you have created your first table.",
     "release": "Release ",
-    "notEmpty": "Mandatory table"
+    "notEmpty": "Mandatory table",
+    "fixedNumber": "Fixed number of records",
+    "readOnly": "Read only"
   }
 }

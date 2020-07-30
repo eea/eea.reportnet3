@@ -111,13 +111,21 @@ export const TabsDesigner = withRouter(
       }
     };
 
-    const onChangeTableProperties = (tableSchemaId, tableSchemaDescription, readOnly, toPrefill, notEmpty) => {
+    const onChangeTableProperties = (
+      tableSchemaId,
+      tableSchemaDescription,
+      readOnly,
+      toPrefill,
+      notEmpty,
+      fixedNumber
+    ) => {
       const inmTabs = [...tabs];
       const tabIdx = getIndexByTableSchemaId(tableSchemaId, inmTabs);
       inmTabs[tabIdx].description = tableSchemaDescription;
+      inmTabs[tabIdx].fixedNumber = fixedNumber;
+      inmTabs[tabIdx].notEmpty = notEmpty;
       inmTabs[tabIdx].readOnly = readOnly;
       inmTabs[tabIdx].toPrefill = toPrefill;
-      inmTabs[tabIdx].notEmpty = notEmpty;
       setTabs(inmTabs);
     };
 
@@ -127,10 +135,9 @@ export const TabsDesigner = withRouter(
 
         inmDatasetSchema.tables.forEach((table, idx) => {
           table.addTab = false;
-          table.toPrefill = table.tableSchemaToPrefill;
-          table.notEmpty = table.tableSchemaNotEmpty;
           table.description = table.tableSchemaDescription;
           table.editable = editable;
+          table.fixedNumber = table.tableSchemaFixedNumber;
           table.hasErrors =
             !isNil(datasetStatistics) && !isEmpty(datasetStatistics)
               ? {
@@ -141,8 +148,10 @@ export const TabsDesigner = withRouter(
           table.index = idx;
           table.levelErrorTypes = inmDatasetSchema.levelErrorTypes;
           table.newTab = false;
+          table.notEmpty = table.tableSchemaNotEmpty;
           table.readOnly = table.tableSchemaReadOnly;
           table.showContextMenu = false;
+          table.toPrefill = table.tableSchemaToPrefill;
         });
         //Add tab Button/Tab
         inmDatasetSchema.tables.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });

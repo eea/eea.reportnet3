@@ -300,6 +300,7 @@ const schemaById = async datasetId => {
       tableSchemaToPrefill: isNull(datasetTableDTO.toPrefill) ? false : datasetTableDTO.toPrefill,
       tableSchemaId: datasetTableDTO.idTableSchema,
       tableSchemaDescription: datasetTableDTO.description,
+      tableSchemaFixedNumber: isNull(datasetTableDTO.fixedNumber) ? false : datasetTableDTO.fixedNumber,
       tableSchemaName: datasetTableDTO.nameTableSchema,
       tableSchemaNotEmpty: isNull(datasetTableDTO.notEmpty) ? false : datasetTableDTO.notEmpty,
       tableSchemaReadOnly: isNull(datasetTableDTO.readOnly) ? false : datasetTableDTO.readOnly,
@@ -394,6 +395,7 @@ const updateRecordFieldDesign = async (datasetId, record) => {
   datasetTableFieldDesign.description = record.description;
   datasetTableFieldDesign.codelistItems = record.codelistItems;
   datasetTableFieldDesign.idRecord = record.recordId;
+  datasetTableFieldDesign.readOnly = record.readOnly;
   datasetTableFieldDesign.referencedField = record.referencedField;
   datasetTableFieldDesign.required = record.required;
   datasetTableFieldDesign.pk = record.pk;
@@ -436,7 +438,8 @@ const updateTableDescriptionDesign = async (
   tableSchemaDescription,
   tableSchemaIsReadOnly,
   datasetId,
-  tableSchemaNotEmpty
+  tableSchemaNotEmpty,
+  tableSchemaFixedNumber
 ) => {
   const tableSchemaUpdated = await apiDataset.updateTableDescriptionDesign(
     tableSchemaToPrefill,
@@ -444,7 +447,8 @@ const updateTableDescriptionDesign = async (
     tableSchemaDescription,
     tableSchemaIsReadOnly,
     datasetId,
-    tableSchemaNotEmpty
+    tableSchemaNotEmpty,
+    tableSchemaFixedNumber
   );
   return tableSchemaUpdated;
 };

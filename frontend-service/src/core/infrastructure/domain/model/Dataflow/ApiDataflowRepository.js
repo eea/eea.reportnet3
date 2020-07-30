@@ -292,6 +292,7 @@ const getAllSchemas = async dataflowId => {
         tableSchemaToPrefill: datasetTableDTO.toPrefill,
         tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaDescription: datasetTableDTO.description,
+        tableSchemaFixedNumber: datasetTableDTO.fixedNumber,
         tableSchemaName: datasetTableDTO.nameTableSchema,
         tableSchemaNotEmpty: datasetTableDTO.notEmpty,
         tableSchemaReadOnly: datasetTableDTO.readOnly,
