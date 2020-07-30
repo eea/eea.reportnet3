@@ -81,7 +81,8 @@ import {
   faUserCog,
   faUsersCog,
   faUserShield,
-  faVectorSquare
+  faVectorSquare,
+  faBookOpen
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -362,6 +363,8 @@ export const AwesomeIcons = icon => {
       return faFileCode;
     case 'zip':
       return faFileArchive;
+    case 'howTo':
+      return faBookOpen;
     default:
       return faFileAlt;
   }

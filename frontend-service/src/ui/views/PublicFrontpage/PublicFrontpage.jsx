@@ -13,11 +13,7 @@ import { Footer } from 'ui/views/_components/Layout/MainLayout/_components/Foote
 import { Header } from 'ui/views/_components/Layout/MainLayout/_components/Header';
 import logo from 'assets/images/logo.png';
 
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-
 export const PublicFrontpage = () => {
-  const resourcesContext = useContext(ResourcesContext);
-
   return (
     <div className={styles.mainContainer}>
       <Header isPublic={true} />
@@ -25,7 +21,7 @@ export const PublicFrontpage = () => {
         <div className={`${styles.pageContent} rep-row`}>
           <div className={styles.mainTextWrapper}>
             <div className={styles.frontText}>
-              <h2>{resourcesContext.messages['appName']}</h2>
+              <h2>Reportnet 3.0</h2>
               <p>
                 Operational in July 2020, Reportnet 3.0 is the next generation of platform for reporting environmental
                 data to the EEA, and will also host several reporting tasks of DG for Environment and DG for Climate
@@ -51,16 +47,58 @@ export const PublicFrontpage = () => {
                 programmes.
               </p>
             </div>
-
-            <div className={styles.contactBox}>
-              <a href="mailto:helpdesk@eionet.europa.eu">
-                <div className={styles.iconWrapper}>
-                  <FontAwesomeIcon aria-hidden={false} className={styles.emailIcon} icon={AwesomeIcons('envelope')} />
-                </div>
-                <h4>Need any help?</h4>
-                <p>Please contact us at</p>
-                <p>helpdesk@eionet.europa.eu</p>
-              </a>
+            <div className={styles.sideBar}>
+              <div className={`${styles.contactBox} ${styles.sideBarItem}`}>
+                <a href="mailto:helpdesk@eionet.europa.eu">
+                  <div className={styles.iconWrapper}>
+                    <FontAwesomeIcon aria-hidden={false} className={styles.emailIcon} icon={AwesomeIcons('envelope')} />
+                  </div>
+                  <h4>Need any help?</h4>
+                  <p>Please contact us at</p>
+                  <p>helpdesk@eionet.europa.eu</p>
+                </a>
+              </div>
+              <div className={`${styles.linkBox} ${styles.sideBarItem}`}>
+                <h3>Support documents:</h3>
+                <ul>
+                  <li>
+                    <a
+                      href="https://www.eionet.europa.eu/reportnet/docs/howto_login-reportnet3-0-v1-0.pdf"
+                      target="_blank">
+                      Login
+                      <FontAwesomeIcon
+                        aria-hidden={false}
+                        className="p-breadcrumb-home"
+                        icon={AwesomeIcons('externalLink')}
+                      />
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://www.eionet.europa.eu/reportnet/docs/howto_reporter-reportnet3-0-v1-0.pdf"
+                      target="_blank">
+                      Reporter
+                      <FontAwesomeIcon
+                        aria-hidden={false}
+                        className="p-breadcrumb-home"
+                        icon={AwesomeIcons('externalLink')}
+                      />
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://www.eionet.europa.eu/reportnet/docs/howto_requester-reportnet3-0-v1-0.pdf"
+                      target="_blank">
+                      Requester
+                      <FontAwesomeIcon
+                        aria-hidden={false}
+                        className="p-breadcrumb-home"
+                        icon={AwesomeIcons('externalLink')}
+                      />
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
           <div className={styles.currentDataflows}>
