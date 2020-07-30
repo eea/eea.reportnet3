@@ -107,6 +107,10 @@ export const useBreadCrumbs = (history, currentPage, dataflowId, matchParams, da
       }
     }
 
+    if (currentPage === CurrentPage.DATASET_DESIGNER) {
+      breadCrumbContext.add([homeCrumb, dataflowsCrumb, dataflowCrumb, datasetDesignerCrumb]);
+    }
+
     if (currentPage === CurrentPage.USER_SETTINGS) {
       breadCrumbContext.add([homeCrumb, dataflowsCrumb, settingsCrumb]);
     }
