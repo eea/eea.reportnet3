@@ -45,6 +45,7 @@ const getCellId = (tableData, field) => {
 };
 
 const getCellInfo = (colSchemaData, field) => {
+  console.log({ colSchemaData });
   const completeField = colSchemaData.filter(data => data.field === field)[0];
   return !isUndefined(completeField) ? completeField : undefined;
 };

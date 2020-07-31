@@ -23,6 +23,7 @@ const DataFormFieldEditor = ({
   datasetId,
   field,
   fieldValue = '',
+  hasWritePermissions,
   isVisible,
   onChangeForm,
   type
@@ -153,23 +154,28 @@ const DataFormFieldEditor = ({
     });
     return codelistItems;
   };
-
-  const renderCodelistDropdown = (field, fieldValue) => (
-    <Dropdown
-      appendTo={document.body}
-      onChange={e => {
-        onChangeForm(field, e.target.value.value);
-      }}
-      optionLabel="itemType"
-      options={getCodelistItemsWithEmptyOption()}
-      value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
-    />
-  );
+  //TODO: Change pk to readOnly
+  const renderCodelistDropdown = (field, fieldValue) => {
+    return (
+      <Dropdown
+        appendTo={document.body}
+        disabled={column.pk && !hasWritePermissions}
+        onChange={e => {
+          onChangeForm(field, e.target.value.value);
+        }}
+        optionLabel="itemType"
+        options={getCodelistItemsWithEmptyOption()}
+        value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
+      />
+    );
+  };
 
   const renderMultiselectCodelist = (field, fieldValue) => {
+    console.log({ field });
     return (
       <MultiSelect
         appendTo={document.body}
+        disabled={column.pk && !hasWritePermissions}
         maxSelectedLabels={10}
         onChange={e => onChangeForm(field, e.value)}
         options={column.codelistItems.sort().map(codelistItem => {
@@ -232,6 +238,7 @@ const DataFormFieldEditor = ({
       renderMapType(field, fieldValue)
     ) : (
       <InputText
+        disabled={column.pk && !hasWritePermissions}
         id={field}
         keyfilter={getFilter(type)}
         maxLength={getMaxCharactersByType(type)}
@@ -252,6 +259,7 @@ const DataFormFieldEditor = ({
         appendTo={document.body}
         baseZIndex={9999}
         dateFormat="yy-mm-dd"
+        disabled={column.pk}
         monthNavigator={true}
         style={{ width: '60px' }}
         value={new Date(formatDate(fieldValue, isNil(fieldValue)))}
@@ -267,6 +275,7 @@ const DataFormFieldEditor = ({
         <MultiSelect
           appendTo={document.body}
           clearButton={false}
+          disabled={column.pk && !hasWritePermissions}
           filter={true}
           filterPlaceholder={resources.messages['linkFilterPlaceholder']}
           maxSelectedLabels={10}
@@ -285,6 +294,7 @@ const DataFormFieldEditor = ({
         <Dropdown
           appendTo={document.body}
           currentValue={fieldValue}
+          disabled={column.pk && !hasWritePermissions}
           filter={true}
           filterPlaceholder={resources.messages['linkFilterPlaceholder']}
           filterBy="itemType,value"
@@ -306,6 +316,7 @@ const DataFormFieldEditor = ({
   const renderMapType = (field, fieldValue) => (
     <div style={{ display: 'flex', alignItems: 'center' }}>
       <InputText
+        disabled={column.pk && !hasWritePermissions}
         keyfilter={getFilter(type)}
         // onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
         onChange={e => onChangeForm(field, e.target.value)}

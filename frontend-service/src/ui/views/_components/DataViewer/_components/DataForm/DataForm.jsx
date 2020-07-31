@@ -53,6 +53,7 @@ const DataForm = ({
                       ? '30%'
                       : ''
                 }}>
+                {console.log({ column })}
                 <DataFormFieldEditor
                   autoFocus={i === 0}
                   column={column}
@@ -105,6 +106,7 @@ const DataForm = ({
                       ? '30%'
                       : ''
                 }}>
+                {console.log({ column })}
                 <DataFormFieldEditor
                   autoFocus={i === 0}
                   column={column}

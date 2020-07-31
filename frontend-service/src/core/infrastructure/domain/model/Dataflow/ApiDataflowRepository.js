@@ -271,6 +271,7 @@ const getAllSchemas = async dataflowId => {
                     pkMustBeUsed: !isNull(DataTableFieldDTO.pkMustBeUsed) ? DataTableFieldDTO.pkMustBeUsed : false,
                     pkReferenced: !isNull(DataTableFieldDTO.pkReferenced) ? DataTableFieldDTO.pkReferenced : false,
                     name: DataTableFieldDTO.name,
+                    readOnly: DataTableFieldDTO.readOnly,
                     recordId: DataTableFieldDTO.idRecord,
                     referencedField: DataTableFieldDTO.referencedField,
                     required: DataTableFieldDTO.required,

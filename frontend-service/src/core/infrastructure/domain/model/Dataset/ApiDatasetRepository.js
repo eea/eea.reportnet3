@@ -279,6 +279,7 @@ const schemaById = async datasetId => {
                   pkMustBeUsed: !isNull(dataTableFieldDTO.pkMustBeUsed) ? dataTableFieldDTO.pkMustBeUsed : false,
                   pkReferenced: !isNull(dataTableFieldDTO.pkReferenced) ? dataTableFieldDTO.pkReferenced : false,
                   name: dataTableFieldDTO.name,
+                  readOnly: dataTableFieldDTO.readOnly,
                   recordId: dataTableFieldDTO.idRecord,
                   referencedField: dataTableFieldDTO.referencedField,
                   required: dataTableFieldDTO.required,
@@ -308,7 +309,6 @@ const schemaById = async datasetId => {
       recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null
     });
   });
-
   dataset.tables = tables;
 
   return dataset;

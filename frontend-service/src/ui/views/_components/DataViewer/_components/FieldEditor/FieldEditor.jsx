@@ -21,6 +21,7 @@ const FieldEditor = ({
   cells,
   colsSchema,
   datasetId,
+  hasWritePermissions,
   onEditorKeyChange,
   onEditorSubmitValue,
   onEditorValueChange,
@@ -45,8 +46,13 @@ const FieldEditor = ({
   }, []);
 
   let fieldType = {};
+  let isReadOnlyField = RecordUtils.getCellInfo(colsSchema, cells.field).pk;
   if (!isEmpty(record)) {
-    fieldType = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cells.field)[0].fieldData.type;
+    console.log(
+      record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cells.field)[0],
+      RecordUtils.getCellInfo(colsSchema, cells.field)
+    );
+    fieldType = RecordUtils.getCellInfo(colsSchema, cells.field).type;
   }
 
   const onFilter = async filter => {
@@ -443,8 +449,12 @@ const FieldEditor = ({
         );
     }
   };
-
-  return !isEmpty(fieldType) ? renderField(fieldType) : null;
+  console.log({ hasWritePermissions });
+  return !isEmpty(fieldType) && !isReadOnlyField
+    ? hasWritePermissions
+      ? renderField(fieldType)
+      : null
+    : renderField(fieldType);
 };
 
 export { FieldEditor };
