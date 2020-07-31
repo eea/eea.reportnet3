@@ -173,7 +173,6 @@ public class RulesControllerImpl implements RulesController {
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
 
-
       rulesService.createNewRule(datasetId, ruleVO);
     } catch (EEAException e) {
       LOG_ERROR.error(
@@ -430,6 +429,7 @@ public class RulesControllerImpl implements RulesController {
    * @param datasetSchemaId the dataset schema id
    * @return the long
    */
+  @Override
   @GetMapping("/private/updateSequence")
   public Long updateSequence(@RequestParam("datasetSchemaId") String datasetSchemaId) {
     return rulesService.updateSequence(datasetSchemaId);
