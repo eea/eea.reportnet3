@@ -1,10 +1,8 @@
-String cron_working_branch = BRANCH_NAME != "develop" && BRANCH_NAME != "sandbox" ? "@daily" : ""
+
 
 pipeline {
 
-    triggers {
-        cron(cron_working_branch)
-    }
+
 
     agent {
         label 'java8'
