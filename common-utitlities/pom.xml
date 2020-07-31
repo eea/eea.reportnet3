@@ -7,13 +7,13 @@
   <parent>
     <artifactId>library-pom</artifactId>
     <groupId>org.eea</groupId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.0.0</version>
     <relativePath>../parent-poms/lib</relativePath>
   </parent>
 
   <groupId>org.eea.utils</groupId>
   <artifactId>common-utitlities</artifactId>
-  <version>3.0-SNAPSHOT</version>
+  <version>${common-utitlities.version}</version>
   <properties>
     <spring.security.version>5.1.4.RELEASE</spring.security.version>
     <aspectj.version>1.9.2</aspectj.version>
@@ -138,7 +138,7 @@
     <dependency>
       <groupId>org.eea.interfaces</groupId>
       <artifactId>common-interfaces</artifactId>
-      <version>3.0-SNAPSHOT</version>
+      <version>${common-interfaces.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

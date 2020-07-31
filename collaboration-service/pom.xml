@@ -5,7 +5,7 @@
   <parent>
     <artifactId>microservice-pom</artifactId>
     <groupId>org.eea</groupId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.0.0</version>
     <relativePath>../parent-poms/microservice</relativePath>
 
   </parent>
@@ -13,9 +13,10 @@
 
   <groupId>org.eea.collaboration</groupId>
   <artifactId>collaboration-service</artifactId>
-  <version>3.0-SNAPSHOT</version>
+  <version>${collaboration.version}</version>
   <properties>
-    <sonar.moduleKey>org.eea:reportnet:collaboration-service:${sonar.jenkins.branch}</sonar.moduleKey>
+    <sonar.moduleKey>org.eea:reportnet:collaboration-service:${sonar.jenkins.branch}
+    </sonar.moduleKey>
   </properties>
   <dependencies>
     <!--<dependency>-->

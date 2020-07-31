@@ -5,7 +5,7 @@
   <parent>
     <artifactId>microservice-pom</artifactId>
     <groupId>org.eea</groupId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.0.0</version>
     <relativePath>../parent-poms/microservice</relativePath>
   </parent>
   <properties>
@@ -14,7 +14,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.eea.recordstore</groupId>
   <artifactId>recordstore-service</artifactId>
-  <version>3.0-SNAPSHOT</version>
+  <version>${recordstore.version}</version>
   <dependencies>
     <!-- https://mvnrepository.com/artifact/com.github.docker-java/docker-java -->
     <dependency>
