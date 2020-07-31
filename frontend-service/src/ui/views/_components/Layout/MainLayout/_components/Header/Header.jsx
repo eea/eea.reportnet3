@@ -211,8 +211,8 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         className="p-button-primary"
         label={resources.messages.login}
         style={{ padding: '0.25rem 2rem', borderRadius: '25px', fontWeight: 'bold' }}
-        onClick={e => {
-          if (window.env.REACT_APP_EULOGIN) {
+        onClick={() => {
+          if (window.env.REACT_APP_EULOGIN == 'true') {
             window.location.href = AccessPointWebConfig.euloginUrl;
           } else {
             history.push(getUrl(routes.LOGIN));
