@@ -360,6 +360,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (null == tableSchemaVO.getNotEmpty()) {
       tableSchemaVO.setNotEmpty(false);
     }
+    if (null == tableSchemaVO.getReadOnly()) {
+      tableSchemaVO.setReadOnly(false);
+    }
 
     RecordSchema recordSchema = new RecordSchema();
     recordSchema.setIdRecordSchema(recordSchemaId);
@@ -1628,7 +1631,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         .setDescription("When a table is marked as mandatory, checks at least one record is added");
 
     Long shortcode = rulesControllerZuul
-        .updateSequence(datasetMetabaseService.findDatasetSchemaIdById(datasetId).toString());
+        .updateSequence(datasetMetabaseService.findDatasetSchemaIdById(datasetId));
     ruleVO.setShortCode("TB" + shortcode);
 
     rulesControllerZuul.createNewRule(datasetId, ruleVO);

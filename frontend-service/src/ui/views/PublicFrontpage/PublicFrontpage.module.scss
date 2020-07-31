@@ -73,6 +73,7 @@
           color: var(--main-font-color);
           display: flex;
           flex-direction: column;
+          flex: 1 auto;
           h3 {
             margin-bottom: 0;
           }
