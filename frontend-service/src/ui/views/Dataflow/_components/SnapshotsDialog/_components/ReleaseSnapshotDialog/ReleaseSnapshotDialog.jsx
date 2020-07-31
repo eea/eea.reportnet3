@@ -50,6 +50,12 @@ export const ReleaseSnapshotDialog = ({
     }
   };
 
+  const onKeyPress = event => {
+    if (event.key === 'Enter') {
+      !isReleased ? onReleaseSnapshot(snapshotDataToRelease.id) : onBuildSnapshot();
+    }
+  };
+
   const onReleaseSnapshot = async snapshotId => {
     setIsLoading(true);
     try {
@@ -136,12 +142,16 @@ export const ReleaseSnapshotDialog = ({
   );
 
   return (
-    <Dialog
-      footer={releaseModalFooter}
-      header={`${resources.messages['releaseSnapshotMessage']}`}
-      onHide={() => hideReleaseDialog()}
-      visible={isReleasedDialogVisible}>
-      <div>{isCopyAndReleaseBody ? copyAndReleaseBody : releaseBody}</div>
-    </Dialog>
+    <div onKeyPress={event => onKeyPress(event)}>
+      {isReleasedDialogVisible && (
+        <Dialog
+          footer={releaseModalFooter}
+          header={`${resources.messages['releaseSnapshotMessage']}`}
+          onHide={() => hideReleaseDialog()}
+          visible={isReleasedDialogVisible}>
+          <div>{isCopyAndReleaseBody ? copyAndReleaseBody : releaseBody}</div>
+        </Dialog>
+      )}
+    </div>
   );
 };

@@ -6,12 +6,11 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -34,7 +33,7 @@ public interface RecordStoreController {
    * @deprecated (reset db)
    */
   @Deprecated
-  @RequestMapping(value = "/reset", method = RequestMethod.POST)
+  @PostMapping(value = "/reset")
   void resteDataSetDataBase();
 
 
@@ -44,7 +43,7 @@ public interface RecordStoreController {
    * @param datasetName the dataset name
    * @param idDatasetSchema the id dataset schema
    */
-  @RequestMapping(value = "/dataset/create/{datasetName}", method = RequestMethod.POST)
+  @PostMapping(value = "/dataset/create/{datasetName}")
   void createEmptyDataset(@PathVariable("datasetName") String datasetName,
       @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema);
 
@@ -55,7 +54,7 @@ public interface RecordStoreController {
    *
    * @return connection to dataset
    */
-  @RequestMapping(value = "/connections/{datasetName}", method = RequestMethod.GET)
+  @GetMapping(value = "/connections/{datasetName}")
   ConnectionDataVO getConnectionToDataset(@PathVariable("datasetName") String datasetName);
 
   /**
@@ -63,7 +62,7 @@ public interface RecordStoreController {
    *
    * @return the connection to dataset
    */
-  @RequestMapping(value = "/connections", method = RequestMethod.GET)
+  @GetMapping(value = "/connections")
   List<ConnectionDataVO> getDataSetConnections();
 
   /**

@@ -18,6 +18,7 @@ import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.utils.LiteralConstants;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
@@ -81,7 +82,6 @@ public class RulesServiceImpl implements RulesService {
   /** The kie base manager. */
   @Autowired
   private KieBaseManager kieBaseManager;
-
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
@@ -300,6 +300,12 @@ public class RulesServiceImpl implements RulesService {
           .getDesignDatasetIdByDatasetSchemaId(integrityVO.getReferencedDatasetSchemaId());
       dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetId, datasetReferencedId,
           integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
+    } else if (EntityTypeEnum.TABLE.equals(ruleVO.getType())
+        && ruleVO.getRuleName().equalsIgnoreCase(LiteralConstants.RULE_TABLE_MANDATORY)) {
+      rule.setAutomatic(true);
+      rule.setVerified(true);
+      rule.setEnabled(true);
+      rule.setWhenCondition("isTableEmpty(this)");
     }
     validateRule(rule);
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
@@ -436,17 +442,17 @@ public class RulesServiceImpl implements RulesService {
   private FieldSchema getPKFieldSchemaFromSchema(DataSetSchema schema, String idFieldSchema) {
 
     FieldSchema field = null;
-    Boolean locatedPK = false;
+    boolean locatedPK = false;
 
     for (TableSchema table : schema.getTableSchemas()) {
       for (FieldSchema fieldAux : table.getRecordSchema().getFieldSchema()) {
         if (fieldAux.getIdFieldSchema().toString().equals(idFieldSchema)) {
           field = fieldAux;
-          locatedPK = Boolean.TRUE;
+          locatedPK = true;
           break;
         }
       }
-      if (locatedPK.equals(Boolean.TRUE)) {
+      if (locatedPK) {
         break;
       }
     }
@@ -807,7 +813,6 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
-
   /**
    * Copy rules schema.
    *
@@ -838,6 +843,18 @@ public class RulesServiceImpl implements RulesService {
       }
     }
     return dictionaryOriginTargetObjectId;
+  }
+
+  /**
+   * Delete not empty rule.
+   *
+   * @param tableSchemaId the table schema id
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void deleteNotEmptyRule(String tableSchemaId, Long datasetId) {
+    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+    rulesRepository.deleteNotEmptyRule(new ObjectId(tableSchemaId), new ObjectId(datasetSchemaId));
   }
 
   /**
@@ -884,8 +901,6 @@ public class RulesServiceImpl implements RulesService {
     }
     return dictionaryOriginTargetObjectId;
   }
-
-
 
   /**
    * Fill rule copied.
@@ -935,11 +950,8 @@ public class RulesServiceImpl implements RulesService {
         }
       });
     }
-
-
     return dictionaryOriginTargetObjectId;
   }
-
 
   /**
    * Copy integrity.
@@ -979,7 +991,16 @@ public class RulesServiceImpl implements RulesService {
           datasetReferencedId, integrity.getOriginDatasetSchemaId().toString(),
           integrity.getReferencedDatasetSchemaId().toString());
     }
-
   }
 
+  /**
+   * Return update sequence.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the long
+   */
+  @Override
+  public Long updateSequence(String datasetSchemaId) {
+    return rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
+  }
 }

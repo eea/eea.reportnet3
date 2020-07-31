@@ -32,7 +32,6 @@ public class CrudManagerFactoryImplTest {
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
-
   }
 
 
@@ -53,8 +52,8 @@ public class CrudManagerFactoryImplTest {
     CrudManager result = managerFactory.getManager(IntegrationToolTypeEnum.FME);
 
     Assert.assertNotNull("Retrieved event handler is null", result);
-    Assert.assertEquals("The manager is one of the FME kind",
-        ((AbstractCrudManager) result).getToolType(), IntegrationToolTypeEnum.FME);
+    Assert.assertEquals("The manager is one of the FME kind", IntegrationToolTypeEnum.FME,
+        ((AbstractCrudManager) result).getToolType());
 
   }
 }

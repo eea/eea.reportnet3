@@ -35,10 +35,9 @@ public interface DocumentController {
    * @param isPublic the is public
    */
   @PostMapping(value = "/upload/{dataflowId}")
-  void uploadDocument(final MultipartFile file, @PathVariable("dataflowId") final Long dataflowId,
-      @RequestParam("description") final String description,
-      @RequestParam("language") final String language,
-      @RequestParam("isPublic") final Boolean isPublic);
+  void uploadDocument(MultipartFile file, @PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("description") String description, @RequestParam("language") String language,
+      @RequestParam("isPublic") Boolean isPublic);
 
   /**
    * Download document .
@@ -47,7 +46,7 @@ public interface DocumentController {
    * @return the document
    */
   @GetMapping(value = "/{documentId}")
-  Resource getDocument(@PathVariable("documentId") final Long documentId);
+  Resource getDocument(@PathVariable("documentId") Long documentId);
 
   /**
    * Delete document. You can delete metabase if you want , the boolean is to delete metabase by
@@ -58,8 +57,8 @@ public interface DocumentController {
    * @throws Exception the exception
    */
   @DeleteMapping(value = "/{documentId}")
-  void deleteDocument(@PathVariable("documentId") final Long documentId,
-      @RequestParam("deleteMetabase") final Boolean deleteMetabase) throws Exception;
+  void deleteDocument(@PathVariable("documentId") Long documentId,
+      @RequestParam("deleteMetabase") Boolean deleteMetabase) throws Exception;
 
 
   /**
@@ -73,12 +72,11 @@ public interface DocumentController {
    * @param isPublic the is public
    */
   @PutMapping(value = "/update/{idDocument}/dataflow/{dataFlowId}")
-  void updateDocument(@RequestPart(name = "file", required = false) final MultipartFile file,
-      @PathVariable("dataFlowId") final Long dataFlowId,
-      @RequestParam(name = "description", required = false) final String description,
-      @RequestParam(name = "language", required = false) final String language,
-      @PathVariable("idDocument") final Long idDocument,
-      @RequestParam("isPublic") final Boolean isPublic);
+  void updateDocument(@RequestPart(name = "file", required = false) MultipartFile file,
+      @PathVariable("dataFlowId") Long dataFlowId,
+      @RequestParam(name = "description", required = false) String description,
+      @RequestParam(name = "language", required = false) String language,
+      @PathVariable("idDocument") Long idDocument, @RequestParam("isPublic") Boolean isPublic);
 
   /**
    * Upload schema snapshot document.
@@ -88,9 +86,9 @@ public interface DocumentController {
    * @param fileName the file name
    */
   @PostMapping(value = "/upload/{designDatasetId}/snapshot")
-  void uploadSchemaSnapshotDocument(@RequestBody final byte[] file,
-      @PathVariable("designDatasetId") final Long designDatasetId,
-      @RequestParam("fileName") final String fileName);
+  void uploadSchemaSnapshotDocument(@RequestBody byte[] file,
+      @PathVariable("designDatasetId") Long designDatasetId,
+      @RequestParam("fileName") String fileName);
 
   /**
    * Gets the snapshot document.
@@ -100,8 +98,8 @@ public interface DocumentController {
    * @return the snapshot document
    */
   @GetMapping(value = "/{idDesignDataset}/snapshot")
-  byte[] getSnapshotDocument(@PathVariable("idDesignDataset") final Long idDesignDataset,
-      @RequestParam("fileName") final String fileName);
+  byte[] getSnapshotDocument(@PathVariable("idDesignDataset") Long idDesignDataset,
+      @RequestParam("fileName") String fileName);
 
 
   /**
@@ -112,7 +110,7 @@ public interface DocumentController {
    * @throws Exception the exception
    */
   @DeleteMapping(value = "/{idDesignDataset}/snapshot")
-  void deleteSnapshotSchemaDocument(@PathVariable("idDesignDataset") final Long idDesignDataset,
-      @RequestParam("fileName") final String fileName) throws Exception;
+  void deleteSnapshotSchemaDocument(@PathVariable("idDesignDataset") Long idDesignDataset,
+      @RequestParam("fileName") String fileName) throws Exception;
 
 }

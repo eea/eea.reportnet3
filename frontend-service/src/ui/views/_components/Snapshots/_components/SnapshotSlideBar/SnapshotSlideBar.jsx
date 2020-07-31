@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Field, Form } from 'formik';
@@ -15,7 +15,13 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 
-const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isReleaseVisible }) => {
+const SnapshotSlideBar = ({
+  isLoadingSnapshotListData,
+  isReleaseVisible,
+  isSnapshotDialogVisible,
+  snapshotListData
+}) => {
+  const [slideBarStyle, setSlideBarStyle] = useState({});
   const snapshotContext = useContext(SnapshotContext);
   const resources = useContext(ResourcesContext);
   const form = useRef(null);
@@ -24,12 +30,35 @@ const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isRelea
   const setIsVisible = snapshotContext.setIsSnapshotsBarVisible;
 
   useEffect(() => {
-    showScrollingBar(isVisible);
-  }, [isVisible]);
+    resetSlideBarPositionAndSize();
+  }, [isVisible, isSnapshotDialogVisible]);
 
-  const showScrollingBar = isVisible => {
+  useEffect(() => {
+    showScrollingBar();
+  }, [slideBarStyle]);
+
+  useEffect(() => {
+    window.addEventListener('resize', resetSlideBarPositionAndSize);
+    return () => {
+      window.removeEventListener('resize', resetSlideBarPositionAndSize);
+    };
+  });
+
+  const showScrollingBar = () => {
     const bodySelector = document.querySelector('body');
+
     isVisible ? (bodySelector.style.overflow = 'hidden') : (bodySelector.style.overflow = 'hidden auto');
+  };
+
+  const resetSlideBarPositionAndSize = () => {
+    const documentElement = document.compatMode === 'CSS1Compat' ? document.documentElement : document.body;
+
+    const headerHeight = document.getElementById('header').clientHeight;
+
+    setSlideBarStyle({
+      height: `${documentElement.clientHeight - headerHeight}px`,
+      top: `${headerHeight}px`
+    });
   };
 
   const snapshotValidationSchema = Yup.object().shape({
@@ -44,9 +73,10 @@ const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isRelea
     <Sidebar
       blockScroll={true}
       className={styles.sidebar}
-      onHide={e => setIsVisible()}
+      onHide={() => setIsVisible()}
       position="right"
-      visible={isVisible}>
+      visible={isVisible}
+      style={slideBarStyle}>
       <div className={styles.content}>
         <div className={styles.title}>
           <h3>{resources.messages.createSnapshotTitle}</h3>
@@ -65,7 +95,7 @@ const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isRelea
               });
               values.createSnapshotDescription = '';
             }}
-            render={({ errors, touched, isSubmitting }) => (
+            render={({ errors, touched }) => (
               <Form className={styles.createForm}>
                 <div
                   className={`${styles.snapshotForm} formField ${styles.createInputAndButtonWrapper} ${
@@ -84,7 +114,7 @@ const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isRelea
                   </label>
                   <div className={styles.createButtonWrapper}>
                     <Button
-                      className={styles.createSnapshotButton}
+                      className={`${styles.createSnapshotButton} rp-btn secondary`}
                       tooltip={resources.messages.createSnapshotTooltip}
                       type="submit"
                       icon="plus"
@@ -100,7 +130,7 @@ const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isRelea
         ) : snapshotListData.length > 0 ? (
           <SnapshotsList snapshotListData={snapshotListData} isReleaseVisible={isReleaseVisible} />
         ) : (
-          <h3>{resources.messages.snapshotsDontExist}</h3>
+          <h3>{resources.messages.snapshotsDoNotExist}</h3>
         )}
       </div>
     </Sidebar>

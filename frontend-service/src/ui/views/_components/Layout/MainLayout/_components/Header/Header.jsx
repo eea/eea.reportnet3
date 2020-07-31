@@ -11,6 +11,7 @@ import styles from './Header.module.scss';
 import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
+import { Button } from 'ui/views/_components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EuHeader } from 'ui/views/_components/Layout/MainLayout/_components/EuHeader';
 
@@ -24,7 +25,7 @@ import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-const Header = withRouter(({ history, onLeftSideBarStyleChange }) => {
+const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPublic = false }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -44,45 +45,50 @@ const Header = withRouter(({ history, onLeftSideBarStyleChange }) => {
   });
   const [headerElementStyle, setHeaderElementStyle] = useState({});
   useEffect(() => {
-    var prevScrollpos = window.pageYOffset;
-    window.onscroll = function () {
-      var currentScrollPos = window.pageYOffset;
-      if (prevScrollpos > currentScrollPos) {
-        setGlobanElementStyle({
-          marginTop: '0',
-          transition: '0.5s'
-        });
-        setEuHeaderElementStyle({
-          marginTop: '0',
-          transition: '0.5s'
-        });
-        setHeaderElementStyle({
-          height: '180px',
-          transition: '0.5s'
-        });
-        onLeftSideBarStyleChange({
-          top: '180px',
-          transition: '0.5s'
-        });
-      } else {
-        setGlobanElementStyle({
-          marginTop: '-100px',
-          transition: '0.5s'
-        });
-        setEuHeaderElementStyle({
-          marginTop: '-20px',
-          transition: '0.5s'
-        });
-        setHeaderElementStyle({
-          height: '70px',
-          transition: '0.5s'
-        });
-        onLeftSideBarStyleChange({
-          top: '70px',
-          transition: '0.5s'
-        });
+    let prevScrollPos = window.pageYOffset;
+    window.onscroll = () => {
+      const innerWidth = window.innerWidth;
+      const currentScrollPos = window.pageYOffset;
+
+      if (innerWidth > 768) {
+        if (currentScrollPos === 0) {
+          setGlobanElementStyle({
+            marginTop: '0',
+            transition: '0.5s'
+          });
+          setEuHeaderElementStyle({
+            marginTop: '0',
+            transition: '0.5s'
+          });
+          setHeaderElementStyle({
+            height: '180px',
+            transition: '0.5s'
+          });
+          onMainContentStyleChange({
+            marginTop: '180px',
+            transition: '0.5s'
+          });
+        } else {
+          setGlobanElementStyle({
+            marginTop: '-100px',
+            transition: '0.5s'
+          });
+          setEuHeaderElementStyle({
+            marginTop: '-15px',
+            transition: '0.5s'
+          });
+          setHeaderElementStyle({
+            height: '70px',
+            transition: '0.5s'
+          });
+          onMainContentStyleChange({
+            marginTop: '70px',
+            transition: '0.5s'
+          });
+        }
       }
-      prevScrollpos = currentScrollPos;
+
+      prevScrollPos = currentScrollPos;
     };
   }, []);
 
@@ -102,7 +108,7 @@ const Header = withRouter(({ history, onLeftSideBarStyleChange }) => {
         history.push(getUrl(routes.DATAFLOWS));
       }}>
       <img height="50px" src={logo} alt="Reportnet 3.0" className={styles.appLogo} />
-      {/* <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1> */}
+      {isPublic && <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>}
     </a>
   );
 
@@ -120,7 +126,7 @@ const Header = withRouter(({ history, onLeftSideBarStyleChange }) => {
     </div>
   );
 
-  const themeSwitcher = isLocalEnvironment() && (
+  const themeSwitcher = isLocalEnvironment() && !isPublic && (
     <InputSwitch
       checked={themeContext.currentTheme === 'dark'}
       onChange={e => {
@@ -161,7 +167,7 @@ const Header = withRouter(({ history, onLeftSideBarStyleChange }) => {
         history.push(getUrl(routes.SETTINGS));
       }}>
       <img
-        alt="User avatar"
+        alt="User image"
         className={styles.userAvatar}
         icon={
           <FontAwesomeIcon aria-hidden={false} icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />
@@ -197,6 +203,19 @@ const Header = withRouter(({ history, onLeftSideBarStyleChange }) => {
     </>
   );
 
+  const loadLogin = () => (
+    <div className={styles.loginWrapper}>
+      <Button
+        className="p-button-primary"
+        label={resources.messages.login}
+        style={{ padding: '0.25rem 2rem', borderRadius: '25px', fontWeight: 'bold' }}
+        onClick={e => {
+          e.preventDefault();
+          history.push(getUrl(routes.LOGIN));
+        }}></Button>
+    </div>
+  );
+
   const onLoadImage = () => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -211,11 +230,12 @@ const Header = withRouter(({ history, onLeftSideBarStyleChange }) => {
     <Fragment>
       <div id="header" style={headerElementStyle} className={styles.header}>
         <EuHeader globanElementStyle={globanElementStyle} euHeaderElementStyle={euHeaderElementStyle} />
-        <div className={styles.customHeader}>
+        <div className={`${styles.customHeader} ${isPublic ? styles.public : ''}`}>
           {loadTitle()}
-          <BreadCrumb />
-          {loadUser()}
-          {userContext.userProps.showLogoutConfirmation && (
+          {!isPublic && <BreadCrumb />}
+          {!isPublic && loadUser()}
+          {isPublic && loadLogin()}
+          {!isPublic && userContext.userProps.showLogoutConfirmation && (
             <ConfirmDialog
               onConfirm={() => {
                 userLogout();

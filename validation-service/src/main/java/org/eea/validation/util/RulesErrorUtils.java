@@ -38,6 +38,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class RulesErrorUtils {
 
+  private static final int THIRTYFOUR = 34;
+
+  private static final int TEN = 10;
+
   /**
    * The schemas repository.
    */
@@ -101,8 +105,8 @@ public class RulesErrorUtils {
 
     // with that part we extract the id rule who fail
     String idRuleException = e.getMessage();
-    String idRule = idRuleException.substring(idRuleException.indexOf("in [Rule \"") + 10,
-        idRuleException.indexOf("in [Rule \"") + 34);
+    String idRule = idRuleException.substring(idRuleException.indexOf("in [Rule \"") + TEN,
+        idRuleException.indexOf("in [Rule \"") + THIRTYFOUR);
     ruleValidation.setIdRule(idRule);
 
     // put more datas to create validation

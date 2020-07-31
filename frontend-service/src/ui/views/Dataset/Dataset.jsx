@@ -6,7 +6,7 @@ import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 import uniq from 'lodash/uniq';
 
-import styles from './Dataset.module.css';
+import styles from './Dataset.module.scss';
 
 import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
@@ -77,15 +77,16 @@ export const Dataset = withRouter(({ match, history }) => {
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
   const [extensionsOperationsList, setExtensionsOperationsList] = useState({ export: [], import: [] });
   const [externalExportExtensions, setExternalExportExtensions] = useState([]);
+  const [hasValidations, setHasValidations] = useState();
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importDatasetDialogVisible, setImportDatasetDialogVisible] = useState(false);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
   const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [loadingFile, setLoadingFile] = useState(false);
   const [metaData, setMetaData] = useState({});
   const [tableSchema, setTableSchema] = useState();
@@ -747,7 +748,7 @@ export const Dataset = withRouter(({ match, history }) => {
       </Dialog>
       {validationListDialogVisible && (
         <Dialog
-          className={styles.qcRulesDialog}
+          className={hasValidations ? styles.qcRulesDialog : styles.qcRulesDialogEmpty}
           dismissableMask={true}
           footer={validationListFooter}
           header={resources.messages['qcRules']}
@@ -759,6 +760,7 @@ export const Dataset = withRouter(({ match, history }) => {
             datasetSchemaId={datasetSchemaId}
             onHideValidationsDialog={() => onSetVisible(setValidationListDialogVisible, false)}
             reporting={true}
+            setHasValidations={setHasValidations}
           />
         </Dialog>
       )}

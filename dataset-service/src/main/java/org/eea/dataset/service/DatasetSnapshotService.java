@@ -18,6 +18,7 @@ public interface DatasetSnapshotService {
    *
    * @param idSnapshot the id snapshot
    * @return the by id
+   * @throws EEAException the EEA exception
    */
   SnapshotVO getById(Long idSnapshot) throws EEAException;
 
@@ -90,6 +91,7 @@ public interface DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
+   * @throws EEAException the EEA exception
    */
   void releaseSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
 

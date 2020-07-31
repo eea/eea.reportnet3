@@ -567,7 +567,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
       // Also, we need to create a rules file from the schema in Mongo
       RulesSchema rules = rulesRepository.findByIdDatasetSchema(new ObjectId(idDatasetSchema));
-      // RulesSchema rules = rulesControllerZuul.findRuleSchemaByDatasetId(idDatasetSchema);
       ObjectMapper objectMapperRules = new ObjectMapper();
       String nameFileRules = String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset)
           + LiteralConstants.SNAPSHOT_EXTENSION;

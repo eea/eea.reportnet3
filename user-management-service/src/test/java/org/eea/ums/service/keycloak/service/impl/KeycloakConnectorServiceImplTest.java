@@ -1,6 +1,8 @@
 package org.eea.ums.service.keycloak.service.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,18 +39,28 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * The Class KeycloakConnectorServiceImplTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class KeycloakConnectorServiceImplTest {
 
+  /** The keycloak connector service. */
   @InjectMocks
   private KeycloakConnectorServiceImpl keycloakConnectorService;
+
+  /** The rest template. */
   @Mock
   private RestTemplate restTemplate;
 
+  /** The token monitor. */
   @Mock
   private TokenMonitor tokenMonitor;
 
 
+  /**
+   * Inits the.
+   */
   @Before
   public void init() {
     Map<String, String> resourceTypes = new HashMap<>();
@@ -60,6 +72,9 @@ public class KeycloakConnectorServiceImplTest {
     MockitoAnnotations.initMocks(this);
   }
 
+  /**
+   * Check user permision.
+   */
   @Test
   public void checkUserPermision() {
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -79,6 +94,9 @@ public class KeycloakConnectorServiceImplTest {
     Assert.assertEquals("PERMIT", result);
   }
 
+  /**
+   * Generate token.
+   */
   @Test
   public void generateToken() {
     TokenInfo body = new TokenInfo();
@@ -93,6 +111,9 @@ public class KeycloakConnectorServiceImplTest {
 
   }
 
+  /**
+   * Generate admin token.
+   */
   @Test
   public void generateAdminToken() {
     TokenInfo body = new TokenInfo();
@@ -107,6 +128,9 @@ public class KeycloakConnectorServiceImplTest {
 
   }
 
+  /**
+   * Generate token by code.
+   */
   @Test
   public void generateTokenByCode() {
     TokenInfo body = new TokenInfo();
@@ -121,6 +145,9 @@ public class KeycloakConnectorServiceImplTest {
 
   }
 
+  /**
+   * Refresh token.
+   */
   @Test
   public void refreshToken() {
     TokenInfo body = new TokenInfo();
@@ -135,6 +162,11 @@ public class KeycloakConnectorServiceImplTest {
 
   }
 
+  /**
+   * Gets the reportnet client info.
+   *
+   * @return the reportnet client info
+   */
   @Test
   public void getReportnetClientInfo() {
     ClientInfo info = new ClientInfo();
@@ -150,6 +182,11 @@ public class KeycloakConnectorServiceImplTest {
 
   }
 
+  /**
+   * Gets the resource info.
+   *
+   * @return the resource info
+   */
   @Test
   public void getResourceInfo() {
 
@@ -161,31 +198,35 @@ public class KeycloakConnectorServiceImplTest {
     bodyResourceInfo.setName("Dataflow");
     ResponseEntity<ResourceInfo> resourceInfo =
         new ResponseEntity<>(bodyResourceInfo, HttpStatus.OK);
-    Mockito
-        .when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
-            Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
-        .then(new Answer<ResponseEntity>() {
-          @Override
-          public ResponseEntity answer(InvocationOnMock invocation) throws Throwable {
-            String url = invocation.getArgument(0);
-            if (url.endsWith("resource1")) {
-              return resourceInfo;
-            } else {
-              return resourceSetInfo;
-            }
+    when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
+        Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
+            .then(new Answer<ResponseEntity>() {
+              @Override
+              public ResponseEntity answer(InvocationOnMock invocation) throws Throwable {
+                String url = invocation.getArgument(0);
+                if (url.endsWith("resource1")) {
+                  return resourceInfo;
+                } else {
+                  return resourceSetInfo;
+                }
 
-          }
-        });
+              }
+            });
 
     List<ResourceInfo> result =
         ReflectionTestUtils.invokeMethod(keycloakConnectorService, "getResourceInfo", "token");
     Assert.assertNotNull(result);
     Assert.assertTrue(!result.isEmpty());
-    Assert.assertEquals(result.get(0).getName(), "Dataflow");
+    Assert.assertEquals("Dataflow", result.get(0).getName());
 
   }
 
 
+  /**
+   * Gets the groups by user.
+   *
+   * @return the groups by user
+   */
   @Test
   public void getGroupsByUser() {
 
@@ -198,23 +239,25 @@ public class KeycloakConnectorServiceImplTest {
     ResponseEntity<GroupInfo[]> responseGroupInfos =
         new ResponseEntity<>(groupInfos, HttpStatus.OK);
 
-    Mockito
-        .when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
-            Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
-        .thenReturn(responseGroupInfos);
+    when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
+        Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(responseGroupInfos);
 
     GroupInfo[] result = keycloakConnectorService.getGroupsByUser("user1");
     Assert.assertNotNull(result);
     Assert.assertTrue(result.length > 0);
-    Assert.assertEquals(result[0].getName(), "Dataflow-1-LEAD_REPORTER");
+    Assert.assertEquals("Dataflow-1-LEAD_REPORTER", result[0].getName());
 
   }
 
+  /**
+   * Gets the groups by user error.
+   *
+   * @return the groups by user error
+   */
   @Test(expected = RestClientException.class)
   public void getGroupsByUserError() {
-    Mockito.doThrow(new RestClientException("error test")).when(restTemplate).exchange(
-        Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
-        Mockito.any(Class.class));
+    doThrow(new RestClientException("error test")).when(restTemplate).exchange(Mockito.anyString(),
+        Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class), Mockito.any(Class.class));
 
     try {
       keycloakConnectorService.getGroupsByUser("user1");
@@ -226,6 +269,9 @@ public class KeycloakConnectorServiceImplTest {
 
   }
 
+  /**
+   * Logout.
+   */
   @Test
   public void logout() {
     keycloakConnectorService.logout("refreshToken");
@@ -233,6 +279,9 @@ public class KeycloakConnectorServiceImplTest {
         Mockito.any(HttpEntity.class), Mockito.any(Class.class));
   }
 
+  /**
+   * Logout exception.
+   */
   @Test(expected = RestClientException.class)
   public void logoutException() {
 
@@ -247,6 +296,11 @@ public class KeycloakConnectorServiceImplTest {
 
   }
 
+  /**
+   * Gets the groups.
+   *
+   * @return the groups
+   */
   @Test
   public void getGroups() {
     GroupInfo[] groupInfos = new GroupInfo[1];
@@ -259,11 +313,16 @@ public class KeycloakConnectorServiceImplTest {
         Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(responseGroupInfo);
     GroupInfo[] result = keycloakConnectorService.getGroups();
     Assert.assertNotNull(result);
-    Assert.assertEquals(result.length, 1);
-    Assert.assertEquals(result[0].getName(), "Dataflow-1-DATA_CUSTODIAN");
-    Assert.assertEquals(result[0].getId(), "idGroupInfo");
+    Assert.assertEquals(1, result.length);
+    Assert.assertEquals("Dataflow-1-DATA_CUSTODIAN", result[0].getName());
+    Assert.assertEquals("idGroupInfo", result[0].getId());
   }
 
+  /**
+   * Gets the groups error.
+   *
+   * @return the groups error
+   */
   @Test(expected = RestClientException.class)
   public void getGroupsError() {
 
@@ -278,6 +337,11 @@ public class KeycloakConnectorServiceImplTest {
     }
   }
 
+  /**
+   * Adds the user to group.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void addUserToGroup() throws EEAException {
     ResponseEntity<Void> responseAddUserToGroup = new ResponseEntity<>(null, HttpStatus.OK);
@@ -291,6 +355,11 @@ public class KeycloakConnectorServiceImplTest {
 
   }
 
+  /**
+   * Adds the user to group error.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void addUserToGroupError() throws EEAException {
     Mockito.doThrow(new RestClientException("error test")).when(restTemplate).exchange(
@@ -304,6 +373,11 @@ public class KeycloakConnectorServiceImplTest {
     }
   }
 
+  /**
+   * Gets the group detail.
+   *
+   * @return the group detail
+   */
   @Test
   public void getGroupDetail() {
     GroupInfo groupInfo = new GroupInfo();
@@ -314,10 +388,15 @@ public class KeycloakConnectorServiceImplTest {
         Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(responseGroupInfo);
     GroupInfo result = keycloakConnectorService.getGroupDetail("group1");
     Assert.assertNotNull(result);
-    Assert.assertEquals(result.getName(), "Dataflow-1-DATA_CUSTODIAN");
-    Assert.assertEquals(result.getId(), "idGroupInfo");
+    Assert.assertEquals("Dataflow-1-DATA_CUSTODIAN", result.getName());
+    Assert.assertEquals("idGroupInfo", result.getId());
   }
 
+  /**
+   * Gets the group detail error.
+   *
+   * @return the group detail error
+   */
   @Test(expected = RestClientException.class)
   public void getGroupDetailError() {
     Mockito.doThrow(new RestClientException("error test")).when(restTemplate).exchange(
@@ -331,6 +410,11 @@ public class KeycloakConnectorServiceImplTest {
     }
   }
 
+  /**
+   * Creates the group detail.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createGroupDetail() throws EEAException {
     GroupInfo groupInfo = new GroupInfo();
@@ -347,6 +431,9 @@ public class KeycloakConnectorServiceImplTest {
 
   }
 
+  /**
+   * Delete group detail.
+   */
   @Test
   public void deleteGroupDetail() {
     ResponseEntity<Void> result = new ResponseEntity<>(null, HttpStatus.OK);
@@ -360,6 +447,9 @@ public class KeycloakConnectorServiceImplTest {
         Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class), Mockito.any(Class.class));
   }
 
+  /**
+   * Adds the user test.
+   */
   @Test
   public void addUserTest() {
     ResponseEntity<Void> result = new ResponseEntity<>(null, HttpStatus.OK);
@@ -373,6 +463,9 @@ public class KeycloakConnectorServiceImplTest {
         Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class), Mockito.any(Class.class));
   }
 
+  /**
+   * Adds the role test.
+   */
   @Test
   public void addRoleTest() {
     ResponseEntity<Void> result = new ResponseEntity<>(null, HttpStatus.OK);
@@ -386,6 +479,11 @@ public class KeycloakConnectorServiceImplTest {
         Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class), Mockito.any(Class.class));
   }
 
+  /**
+   * Gets the users test.
+   *
+   * @return the users test
+   */
   @Test
   public void getUsersTest() {
     UserRepresentation[] users = new UserRepresentation[1];
@@ -404,6 +502,11 @@ public class KeycloakConnectorServiceImplTest {
     Assert.assertNotNull(result);
   }
 
+  /**
+   * Gets the roles test.
+   *
+   * @return the roles test
+   */
   @Test
   public void getRolesTest() {
     RoleRepresentation[] roles = new RoleRepresentation[1];
@@ -439,6 +542,9 @@ public class KeycloakConnectorServiceImplTest {
     Assert.assertEquals(1, keycloakConnectorService.getUsersByEmail("sample@email.net").length);
   }
 
+  /**
+   * Update user test.
+   */
   @Test
   public void updateUserTest() {
     UserRepresentation user = new UserRepresentation();
@@ -448,6 +554,11 @@ public class KeycloakConnectorServiceImplTest {
         Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class), Mockito.any(Class.class));
   }
 
+  /**
+   * Gets the user.
+   *
+   * @return the user
+   */
   @Test
   public void getUser() {
     UserRepresentation user = new UserRepresentation();
@@ -462,6 +573,11 @@ public class KeycloakConnectorServiceImplTest {
   }
 
 
+  /**
+   * Gets the user roles.
+   *
+   * @return the user roles
+   */
   @Test
   public void getUserRoles() {
     RoleRepresentation[] roles = new RoleRepresentation[1];
@@ -480,6 +596,11 @@ public class KeycloakConnectorServiceImplTest {
     Assert.assertNotNull(result);
   }
 
+  /**
+   * Gets the user roles no roles.
+   *
+   * @return the user roles no roles
+   */
   @Test
   public void getUserRolesNoRoles() {
     RoleRepresentation[] roles = new RoleRepresentation[0];
@@ -494,6 +615,11 @@ public class KeycloakConnectorServiceImplTest {
     Assert.assertNotNull(result);
   }
 
+  /**
+   * Gets the groups with search test.
+   *
+   * @return the groups with search test
+   */
   @Test
   public void getGroupsWithSearchTest() {
     GroupInfo[] groupInfo = new GroupInfo[0];
@@ -505,6 +631,11 @@ public class KeycloakConnectorServiceImplTest {
     Assert.assertNotNull(keycloakConnectorService.getGroupsWithSearch("value"));
   }
 
+  /**
+   * Gets the users by group id test.
+   *
+   * @return the users by group id test
+   */
   @Test
   public void getUsersByGroupIdTest() {
     UserRepresentation[] userRepresentation = new UserRepresentation[0];
@@ -520,6 +651,11 @@ public class KeycloakConnectorServiceImplTest {
   }
 
 
+  /**
+   * Removes the user from group.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void removeUserFromGroup() throws EEAException {
     ResponseEntity<Void> responseRemoveUserFromGroup = new ResponseEntity<>(null, HttpStatus.OK);
@@ -533,6 +669,11 @@ public class KeycloakConnectorServiceImplTest {
 
   }
 
+  /**
+   * Removes the user from group error.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void removeUserFromGroupError() throws EEAException {
     Mockito.doThrow(new RestClientException("error test")).when(restTemplate).exchange(

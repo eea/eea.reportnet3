@@ -26,7 +26,7 @@ const Snapshots = ({
     <>
       <SnapshotSlideBar
         isLoadingSnapshotListData={isLoadingSnapshotListData}
-        setIsSnapshotDialogVisible={setIsSnapshotDialogVisible}
+        isSnapshotDialogVisible={isSnapshotDialogVisible}
         snapshotListData={snapshotListData}
         isReleaseVisible={isReleaseVisible}
       />

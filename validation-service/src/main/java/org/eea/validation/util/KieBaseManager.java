@@ -127,6 +127,9 @@ public class KieBaseManager {
             schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
             typeValidation = TypeValidation.FIELD;
             originName = fillFieldOriginName(dataSetSchema, rule, originName);
+            break;
+          default:
+            break;
         }
         ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
             rule.getRuleId().toString(), typeValidation, schemasDrools,
@@ -266,7 +269,7 @@ public class KieBaseManager {
       List<Map<String, String>> ruleAttribute = new ArrayList<>();
 
       ruleAttribute.add(passDataToMap(rule.getReferenceId().toString(), rule.getRuleId().toString(),
-          TypeValidation.TABLE, SchemasDrools.ID_TABLE_SCHEMA.toString(), rule.getWhenCondition(),
+          TypeValidation.TABLE, SchemasDrools.ID_TABLE_SCHEMA.getValue(), rule.getWhenCondition(),
           rule.getThenCondition().get(0), rule.getThenCondition().get(1), ""));
 
       // We create the same text like in kiebase and with that part we check if the rule is correct

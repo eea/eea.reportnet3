@@ -83,5 +83,6 @@ public class KafkaSenderUtils {
     value.put("notification",
         notificableEventFactory.getNotificableEventHandler(eventType).getMap(notificationVO));
     releaseKafkaEvent(eventType, value);
+    LOG.info("released kafaka event {}", eventType);
   }
 }

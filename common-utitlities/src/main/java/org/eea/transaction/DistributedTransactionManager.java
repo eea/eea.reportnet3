@@ -9,7 +9,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DistributedTransactionManager {
 
+  /** The local thread. */
   private static ThreadLocal<UUID> localThread = new ThreadLocal<>();
+
+  /** The transacion map. */
   private static Map<UUID, DistributedTransacion> transacionMap = new ConcurrentHashMap<>();
 
   /**

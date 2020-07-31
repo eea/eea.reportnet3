@@ -31,23 +31,25 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
-/* The Class RepresentativeControllerImpl. */
+/**
+ * The Class RepresentativeControllerImpl.
+ */
 @RestController
 @RequestMapping(value = "/representative")
 public class RepresentativeControllerImpl implements RepresentativeController {
 
-  /* The representative service. */
+  /** The representative service. */
   @Autowired
   private RepresentativeService representativeService;
 
-  /* The user management controller zull. */
+  /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
-  /* The Constant LOG_ERROR. */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /* The Constant EMAIL_REGEX: {@value}. */
+  /** The Constant EMAIL_REGEX: {@value}. */
   private static final String EMAIL_REGEX =
       "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$";
 

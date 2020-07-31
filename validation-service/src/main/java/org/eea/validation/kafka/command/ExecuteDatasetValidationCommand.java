@@ -30,9 +30,8 @@ public class ExecuteDatasetValidationCommand extends ExecuteValidationCommand {
 
   @Override
   public Validator getValidationAction() {
-    return (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase) -> {
-      validationService.validateDataSet(datasetId, kieBase);
-    };
+    return (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase) -> validationService
+        .validateDataSet(datasetId, kieBase);
   }
 
 
