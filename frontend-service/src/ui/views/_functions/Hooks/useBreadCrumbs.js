@@ -3,29 +3,26 @@ import { useContext, useEffect } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 
-import { routes } from 'ui/routes';
-import { getUrl } from 'core/infrastructure/CoreUtils';
-import { CurrentPage } from 'ui/views/_functions/Utils';
-
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const useBreadCrumbs = (history, currentPage, dataflowId, metaData, matchParams, dataflowStateData, representativeId) => {
+import { CurrentPage } from 'ui/views/_functions/Utils';
+import { getUrl } from 'core/infrastructure/CoreUtils';
+import { routes } from 'ui/routes';
+
+export const useBreadCrumbs = (
+  history,
+  currentPage,
+  dataflowId,
+  metaData,
+  matchParams,
+  dataflowStateData,
+  representativeId
+) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const resources = useContext(ResourcesContext);
 
-  const homeCrumb = {
-    label: resources.messages['homeBreadcrumb'],
-    href: getUrl(routes.DATAFLOWS),
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
-
-  const dataflowsCrumb = {
-    label: resources.messages['dataflows'],
-    icon: 'home',
-    href: getUrl(routes.DATAFLOWS),
-    command: () => history.push(getUrl(routes.DATAFLOWS))
-  };
+  const dataCollectionCrumb = { label: resources.messages['dataCollection'], icon: 'dataCollection' };
 
   const dataflowCrumb = {
     command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true)),
@@ -34,12 +31,14 @@ export const useBreadCrumbs = (history, currentPage, dataflowId, metaData, match
     label: resources.messages['dataflow']
   };
 
-  const settingsCrumb = {
-    label: resources.messages['userSettingsBreadcrumbs'],
-    icon: 'user-profile',
-    href: getUrl(routes.SETTINGS),
-    command: () => history.push(getUrl(routes.SETTINGS))
+  const dataflowsCrumb = {
+    command: () => history.push(getUrl(routes.DATAFLOWS)),
+    href: getUrl(routes.DATAFLOWS),
+    icon: 'home',
+    label: resources.messages['dataflows']
   };
+
+  const dataflowDashboardsCrumb = { label: resources.messages['dashboards'], icon: 'barChart' };
 
   const dataflowHelpCrumb = { label: resources.messages['dataflowHelp'], icon: 'info' };
 
@@ -47,12 +46,24 @@ export const useBreadCrumbs = (history, currentPage, dataflowId, metaData, match
 
   const datasetDesignerCrumb = { label: resources.messages['datasetDesigner'], icon: 'pencilRuler' };
 
-  const dataflowDashboardsCrumb = {
-    label: resources.messages['dashboards'],
-    icon: 'barChart'
+  const homeCrumb = {
+    command: () => history.push(getUrl(routes.DATAFLOWS)),
+    href: getUrl(routes.DATAFLOWS),
+    label: resources.messages['homeBreadcrumb']
+  };
+
+  const settingsCrumb = {
+    command: () => history.push(getUrl(routes.SETTINGS)),
+    href: getUrl(routes.SETTINGS),
+    icon: 'user-profile',
+    label: resources.messages['userSettingsBreadcrumbs']
   };
 
   const setBreadCrumbs = () => {
+    if (currentPage === CurrentPage.DATA_COLLECTION) {
+      breadCrumbContext.add([homeCrumb, dataflowsCrumb, dataflowCrumb, dataCollectionCrumb]);
+    }
+
     if (currentPage === CurrentPage.DATAFLOW_DASHBOARDS) {
       breadCrumbContext.add([homeCrumb, dataflowsCrumb, dataflowCrumb, dataflowDashboardsCrumb]);
     }
@@ -80,10 +91,10 @@ export const useBreadCrumbs = (history, currentPage, dataflowId, metaData, match
             homeCrumb,
             dataflowsCrumb,
             {
-              label: resources.messages['dataflow'],
-              icon: 'clone',
+              command: () => history.goBack(),
               href: getUrl(routes.DATAFLOW),
-              command: () => history.goBack()
+              icon: 'clone',
+              label: resources.messages['dataflow']
             },
             {
               label: currentRepresentative[0],
@@ -95,8 +106,8 @@ export const useBreadCrumbs = (history, currentPage, dataflowId, metaData, match
             homeCrumb,
             dataflowsCrumb,
             {
-              label: resources.messages['dataflow'],
-              icon: 'clone'
+              icon: 'clone',
+              label: resources.messages['dataflow']
             }
           ]);
         }
@@ -114,22 +125,22 @@ export const useBreadCrumbs = (history, currentPage, dataflowId, metaData, match
           dataflowsCrumb,
           {
             className: 'datasetSchema-breadcrumb-back-help-step',
-            label: resources.messages['dataflow'],
-            icon: 'clone',
-            href: getUrl(routes.DATAFLOW, { dataflowId }, true),
             command: () => {
               history.goBack();
-            }
+            },
+            href: getUrl(routes.DATAFLOW, { dataflowId }, true),
+            icon: 'clone',
+            label: resources.messages['dataflow']
           }
         ];
 
         if (breadCrumbContext.model.find(model => model.icon === 'representative')) {
           datasetBreadCrumbs.push({
-            label: !isUndefined(metaData.dataset) ? metaData.dataset.name : resources.messages['representative'],
-            icon: 'representative',
-            href: getUrl(routes.REPRESENTATIVE, { dataflowId, representative: metaData.dataset.name }, true),
             command: () =>
-              history.push(getUrl(routes.REPRESENTATIVE, { dataflowId, representative: metaData.dataset.name }, true))
+              history.push(getUrl(routes.REPRESENTATIVE, { dataflowId, representative: metaData.dataset.name }, true)),
+            href: getUrl(routes.REPRESENTATIVE, { dataflowId, representative: metaData.dataset.name }, true),
+            icon: 'representative',
+            label: !isUndefined(metaData.dataset) ? metaData.dataset.name : resources.messages['representative']
           });
         }
 
