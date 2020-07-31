@@ -1,1 +1,0 @@
-export { AccessPoint } from './AccessPoint';
