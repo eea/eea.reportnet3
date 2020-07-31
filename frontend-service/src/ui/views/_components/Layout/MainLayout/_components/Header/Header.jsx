@@ -212,7 +212,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         label={resources.messages.login}
         style={{ padding: '0.25rem 2rem', borderRadius: '25px', fontWeight: 'bold' }}
         onClick={() => {
-          if (window.env.REACT_APP_EULOGIN == 'true') {
+          if (window.env.REACT_APP_EULOGIN.toString() == 'true') {
             window.location.href = AccessPointWebConfig.euloginUrl;
           } else {
             history.push(getUrl(routes.LOGIN));
