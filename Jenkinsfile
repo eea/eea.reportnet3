@@ -1,10 +1,8 @@
-String cron_working_branch = BRANCH_NAME != "develop" && BRANCH_NAME != "sandbox" ? "@daily" : ""
+
 
 pipeline {
 
-    triggers {
-        cron(cron_working_branch)
-    }
+
 
     agent {
         label 'java8'
@@ -149,7 +147,7 @@ pipeline {
         stage('Push to EEA GitHub') {
             when {
                 expression {
-                   return BRANCH_NAME == "develop" || BRANCH_NAME == "release/3.0.0-RC.1.1" || BRANCH_NAME == "release/3.0.0-RC.2.0" || BRANCH_NAME == "release/3.0.0-RC.2.1" || BRANCH_NAME == "release/3.0.0-RC.2.2" || BRANCH_NAME == "release/3.0.0-RC2.3-SNAPSHOT" || BRANCH_NAME == "release/3.0.0-RC.2.4" || BRANCH_NAME == "release/3.0.0-RC.3.0" || BRANCH_NAME == "release/3.0.0-RC.4.0"
+                   BRANCH_NAME == "release/3.0.0-OP"
                 }
             }
             steps {
@@ -189,7 +187,7 @@ pipeline {
         stage('Build Docker Images') {
             when {
                 expression {
-                   return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox" ||  BRANCH_NAME == "release/3.0.0-RC.1.1" || BRANCH_NAME == "release/3.0.0-RC.2.0" || BRANCH_NAME == "release/3.0.0-RC.2.1" || BRANCH_NAME == "release/3.0.0-RC.2.2" || BRANCH_NAME == "release/3.0.0-RC2.3-SNAPSHOT" || BRANCH_NAME == "release/3.0.0-RC.2.4" || BRANCH_NAME == "release/3.0.0-RC.3.0" || BRANCH_NAME == "release/3.0.0-RC.4.0"
+                   BRANCH_NAME == "release/3.0.0-OP"
                 }
             }
             parallel {
