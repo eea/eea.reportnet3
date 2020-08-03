@@ -156,7 +156,6 @@ public class IntegrationControllerImpl implements IntegrationController {
     }
   }
 
-
   /**
    * Execute integration process.
    *
@@ -176,7 +175,6 @@ public class IntegrationControllerImpl implements IntegrationController {
     return integrationExecutorFactory.getExecutor(integrationToolTypeEnum)
         .execute(integrationOperationTypeEnum, file, datasetId, integration);
   }
-
 
   /**
    * Execute EU dataset export.
@@ -199,7 +197,6 @@ public class IntegrationControllerImpl implements IntegrationController {
     }
   }
 
-
   /**
    * Copy integrations.
    *
@@ -218,6 +215,21 @@ public class IntegrationControllerImpl implements IntegrationController {
     }
   }
 
-
-
+  /**
+   * Creates the default integration.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetId the dataset id
+   */
+  @Override
+  @PostMapping("/private/createDefault")
+  public void createDefaultIntegration(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("datasetId") Long datasetId) {
+    try {
+      integrationService.createDefaultIntegration(dataflowId, datasetId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error creating default integration. Message: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
 }

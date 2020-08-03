@@ -15,12 +15,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
 /**
  * The Interface IntegrationController.
  */
 public interface IntegrationController {
-
 
   /**
    * The Interface IntegrationControllerZuul.
@@ -29,7 +27,6 @@ public interface IntegrationController {
   interface IntegrationControllerZuul extends IntegrationController {
 
   }
-
 
   /**
    * Find all integrations by criteria.
@@ -40,8 +37,6 @@ public interface IntegrationController {
   @PutMapping(value = "/listIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
   List<IntegrationVO> findAllIntegrationsByCriteria(@RequestBody IntegrationVO integration);
 
-
-
   /**
    * Creates the integration.
    *
@@ -49,8 +44,6 @@ public interface IntegrationController {
    */
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
   void createIntegration(@RequestBody IntegrationVO integration);
-
-
 
   /**
    * Delete integration.
@@ -71,8 +64,6 @@ public interface IntegrationController {
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
   void updateIntegration(@RequestBody IntegrationVO integration);
 
-
-
   /**
    * Find extensions and operations.
    *
@@ -81,8 +72,6 @@ public interface IntegrationController {
    */
   @PutMapping(value = "/listExtensionsOperations", produces = MediaType.APPLICATION_JSON_VALUE)
   List<IntegrationVO> findExtensionsAndOperations(IntegrationVO integrationVO);
-
-
 
   /**
    * Execute integration process.
@@ -99,7 +88,6 @@ public interface IntegrationController {
       @RequestParam("operation") IntegrationOperationTypeEnum integrationOperationTypeEnum,
       @RequestParam("file") final String file, @RequestParam("datasetId") Long datasetId,
       @RequestBody IntegrationVO integration);
-
 
   /**
    * Execute EU dataset export.
@@ -118,6 +106,13 @@ public interface IntegrationController {
   @PostMapping(value = "/private/copyIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
   void copyIntegrations(@RequestBody CopySchemaVO copyVO);
 
-
-
+  /**
+   * Creates the integration.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetId the dataset id
+   */
+  @PostMapping("/private/createDeafult")
+  void createDefaultIntegration(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("datasetId") Long datasetId);
 }
