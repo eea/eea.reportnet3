@@ -182,9 +182,7 @@ export const useBreadCrumbs = ({
     }
 
     if (currentPage === CurrentPage.EU_DATASET) {
-      if (!isUndefined(metaData.dataset)) {
-        breadCrumbContext.add(getDataflowsCrumb(), getDataflowCrumb(), getEuDatasetCrumb());
-      }
+      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getEuDatasetCrumb()]);
     }
 
     if (currentPage === CurrentPage.USER_SETTINGS) {
