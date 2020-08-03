@@ -22,60 +22,80 @@ export const useBreadCrumbs = (
   const breadCrumbContext = useContext(BreadCrumbContext);
   const resources = useContext(ResourcesContext);
 
-  const dataCollectionCrumb = { label: resources.messages['dataCollection'], icon: 'dataCollection' };
-
-  const dataflowCrumb = {
-    command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true)),
-    href: getUrl(routes.DATAFLOW, { dataflowId }, true),
-    icon: 'clone',
-    label: resources.messages['dataflow']
+  const getDataCollectionCrumb = () => {
+    return { label: resources.messages['dataCollection'], icon: 'dataCollection' };
   };
 
-  const dataflowsCrumb = {
-    command: () => history.push(getUrl(routes.DATAFLOWS)),
-    href: getUrl(routes.DATAFLOWS),
-    icon: 'home',
-    label: resources.messages['dataflows']
+  const getDataflowCrumb = () => {
+    return {
+      command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true)),
+      href: getUrl(routes.DATAFLOW, { dataflowId }, true),
+      icon: 'clone',
+      label: resources.messages['dataflow']
+    };
   };
 
-  const dataflowDashboardsCrumb = { label: resources.messages['dashboards'], icon: 'barChart' };
-
-  const dataflowHelpCrumb = { label: resources.messages['dataflowHelp'], icon: 'info' };
-
-  const datasetCrumb = { label: resources.messages['dataset'], icon: 'dataset' };
-
-  const datasetDesignerCrumb = { label: resources.messages['datasetDesigner'], icon: 'pencilRuler' };
-
-  const euDatasetCrumb = { label: resources.messages['euDataset'], icon: 'euDataset' };
-
-  const homeCrumb = {
-    command: () => history.push(getUrl(routes.DATAFLOWS)),
-    href: getUrl(routes.DATAFLOWS),
-    label: resources.messages['homeBreadcrumb']
+  const getDataflowsCrumb = () => {
+    return {
+      command: () => history.push(getUrl(routes.DATAFLOWS)),
+      href: getUrl(routes.DATAFLOWS),
+      icon: 'home',
+      label: resources.messages['dataflows']
+    };
   };
 
-  const settingsCrumb = {
-    command: () => history.push(getUrl(routes.SETTINGS)),
-    href: getUrl(routes.SETTINGS),
-    icon: 'user-profile',
-    label: resources.messages['userSettingsBreadcrumbs']
+  const getDataflowDashboardsCrumb = () => {
+    return { label: resources.messages['dashboards'], icon: 'barChart' };
+  };
+
+  const getDataflowHelpCrumb = () => {
+    return { label: resources.messages['dataflowHelp'], icon: 'info' };
+  };
+
+  const getDatasetCrumb = () => {
+    return { label: resources.messages['dataset'], icon: 'dataset' };
+  };
+
+  const getDatasetDesignerCrumb = () => {
+    return { label: resources.messages['datasetDesigner'], icon: 'pencilRuler' };
+  };
+
+  const getEuDatasetCrumb = () => {
+    return { label: resources.messages['euDataset'], icon: 'euDataset' };
+  };
+
+  const getHomeCrumb = () => {
+    return {
+      command: () => history.push(getUrl(routes.DATAFLOWS)),
+      href: getUrl(routes.DATAFLOWS),
+      label: resources.messages['homeBreadcrumb']
+    };
+  };
+
+  const getSettingsCrumb = () => {
+    return {
+      command: () => history.push(getUrl(routes.SETTINGS)),
+      href: getUrl(routes.SETTINGS),
+      icon: 'user-profile',
+      label: resources.messages['userSettingsBreadcrumbs']
+    };
   };
 
   const setBreadCrumbs = () => {
     if (currentPage === CurrentPage.DATA_COLLECTION) {
-      breadCrumbContext.add([homeCrumb, dataflowsCrumb, dataflowCrumb, dataCollectionCrumb]);
+      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getDataCollectionCrumb()]);
     }
 
     if (currentPage === CurrentPage.DATAFLOW_DASHBOARDS) {
-      breadCrumbContext.add([homeCrumb, dataflowsCrumb, dataflowCrumb, dataflowDashboardsCrumb]);
+      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getDataflowDashboardsCrumb()]);
     }
 
     if (currentPage === CurrentPage.DATAFLOW_HELP) {
-      breadCrumbContext.add([homeCrumb, dataflowsCrumb, dataflowCrumb, dataflowHelpCrumb]);
+      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getDataflowHelpCrumb()]);
     }
 
     if (currentPage === CurrentPage.DATAFLOWS) {
-      breadCrumbContext.add([homeCrumb, { label: resources.messages['dataflows'], icon: 'home' }]);
+      breadCrumbContext.add([getHomeCrumb(), { label: resources.messages['dataflows'], icon: 'home' }]);
     }
 
     if (currentPage === CurrentPage.DATAFLOW) {
@@ -90,8 +110,8 @@ export const useBreadCrumbs = (
             .map(representative => representative.name);
 
           breadCrumbContext.add([
-            homeCrumb,
-            dataflowsCrumb,
+            getHomeCrumb(),
+            getDataflowsCrumb(),
             {
               command: () => history.goBack(),
               href: getUrl(routes.DATAFLOW),
@@ -105,8 +125,8 @@ export const useBreadCrumbs = (
           ]);
         } else {
           breadCrumbContext.add([
-            homeCrumb,
-            dataflowsCrumb,
+            getHomeCrumb(),
+            getDataflowsCrumb(),
             {
               icon: 'clone',
               label: resources.messages['dataflow']
@@ -117,14 +137,14 @@ export const useBreadCrumbs = (
     }
 
     if (currentPage === CurrentPage.DATASET_DESIGNER) {
-      breadCrumbContext.add([homeCrumb, dataflowsCrumb, dataflowCrumb, datasetDesignerCrumb]);
+      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getDatasetDesignerCrumb()]);
     }
 
     if (currentPage === CurrentPage.DATASET) {
       if (!isUndefined(metaData.dataset)) {
         const datasetBreadCrumbs = [
-          homeCrumb,
-          dataflowsCrumb,
+          getHomeCrumb(),
+          getDataflowsCrumb(),
           {
             className: 'datasetSchema-breadcrumb-back-help-step',
             command: () => {
@@ -146,27 +166,27 @@ export const useBreadCrumbs = (
           });
         }
 
-        breadCrumbContext.add([...datasetBreadCrumbs, datasetCrumb]);
+        breadCrumbContext.add([...datasetBreadCrumbs, getDatasetCrumb()]);
       }
     }
 
     if (currentPage === CurrentPage.EU_DATASET) {
       if (!isUndefined(metaData.dataset)) {
         breadCrumbContext.add(
-          dataflowsCrumb,
+          getDataflowsCrumb(),
           {
             command: () => history.goBack(),
             href: getUrl(routes.DATAFLOW, { dataflowId }, true),
             icon: 'clone',
             label: resources.messages['dataflow']
           },
-          euDatasetCrumb
+          getEuDatasetCrumb()
         );
       }
     }
 
     if (currentPage === CurrentPage.USER_SETTINGS) {
-      breadCrumbContext.add([homeCrumb, dataflowsCrumb, settingsCrumb]);
+      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getSettingsCrumb()]);
     }
   };
 
