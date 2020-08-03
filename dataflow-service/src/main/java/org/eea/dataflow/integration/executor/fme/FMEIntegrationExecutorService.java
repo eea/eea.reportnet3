@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -238,6 +239,15 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
             integrationOperationParams.get(DATASET_ID) + "/" + paramDataProvider));
 
         fmeAsyncJob.setPublishedParameters(parameters);
+
+        LOG.info("Creating Export FS in FME");
+        if (fmeCommunicationService
+            .createDirectory(integrationOperationParams.get(DATASET_ID), paramDataProvider)
+            .equals(HttpStatus.CONFLICT)) {
+          LOG.info("Directory already exist");
+        } else {
+          LOG.info("Directory created successful");
+        }
         LOG.info("Executing FME Export");
         idFMEJob = executeSubmit(fmeParams.get(REPOSITORY), fmeParams.get(WORKSPACE), fmeAsyncJob);
         break;
@@ -255,7 +265,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         byte[] decodedBytes =
             Base64.getDecoder().decode(integration.getExternalParameters().get("fileIS"));
 
-        LOG.info("Upload file to FME");
+        LOG.info("Upload {} to FME", fileName);
         fmeCommunicationService.sendFile(decodedBytes, integrationOperationParams.get(DATASET_ID),
             paramDataProvider, fileName);
         LOG.info("File uploaded");
@@ -353,18 +363,6 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
       LOG_ERROR.error("Error invoking FME due to reason {}", e.getMessage());
     }
     return idFMEJob;
-  }
-
-  private Boolean checkTopic(String topicName) {
-    return null;
-  }
-
-  private Boolean createTopic(String topicName) {
-    return null;
-  }
-
-  private void createSubscription() {
-
   }
 
 }
