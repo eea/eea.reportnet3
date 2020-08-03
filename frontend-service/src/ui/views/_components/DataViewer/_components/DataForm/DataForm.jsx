@@ -14,8 +14,10 @@ const DataForm = ({
   editDialogVisible,
   formType,
   getTooltipMessage,
+  hasWritePermissions,
   onChangeForm,
   records,
+  reporting,
   onShowFieldInfo
 }) => {
   const editRecordForm = colsSchema.map((column, i) => {
@@ -53,7 +55,6 @@ const DataForm = ({
                       ? '30%'
                       : ''
                 }}>
-                {console.log({ column })}
                 <DataFormFieldEditor
                   autoFocus={i === 0}
                   column={column}
@@ -64,8 +65,10 @@ const DataForm = ({
                       ? ''
                       : field.fieldData[column.field]
                   }
+                  hasWritePermissions={hasWritePermissions}
                   isVisible={editDialogVisible}
                   onChangeForm={onChangeForm}
+                  reporting={reporting}
                   type={column.type}></DataFormFieldEditor>
               </div>
             </React.Fragment>
@@ -106,7 +109,6 @@ const DataForm = ({
                       ? '30%'
                       : ''
                 }}>
-                {console.log({ column })}
                 <DataFormFieldEditor
                   autoFocus={i === 0}
                   column={column}
@@ -117,8 +119,10 @@ const DataForm = ({
                       ? ''
                       : field.fieldData[column.field]
                   }
+                  hasWritePermissions={hasWritePermissions}
                   isVisible={addDialogVisible}
                   onChangeForm={onChangeForm}
+                  reporting={reporting}
                   type={column.type}></DataFormFieldEditor>
               </div>
             </React.Fragment>

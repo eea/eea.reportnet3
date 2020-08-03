@@ -475,7 +475,9 @@ export const Dataset = withRouter(({ match, history }) => {
               description: field['description'],
               field: field['fieldId'],
               header: field['name'],
+              pk: field['pk'],
               pkHasMultipleValues: field['pkHasMultipleValues'],
+              readOnly: field['readOnly'],
               recordId: field['recordId'],
               referencedField: field['referencedField'],
               table: table['tableSchemaName'],
@@ -724,6 +726,7 @@ export const Dataset = withRouter(({ match, history }) => {
         onLoadTableData={onLoadTableData}
         onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
         recordPositionId={dataViewerOptions.recordPositionId}
+        reporting={true}
         selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
         setIsValidationSelected={setIsValidationSelected}
         tables={tableSchema}

@@ -45,7 +45,6 @@ const getCellId = (tableData, field) => {
 };
 
 const getCellInfo = (colSchemaData, field) => {
-  console.log({ colSchemaData });
   const completeField = colSchemaData.filter(data => data.field === field)[0];
   return !isUndefined(completeField) ? completeField : undefined;
 };
@@ -60,7 +59,7 @@ const getCellValue = (tableData, field) => {
   return value.length > 0 ? value[0].fieldData[field] : '';
 };
 
-const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirstRow) => {
+const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirstRow, reporting) => {
   //Delete double quotes from strings
   const copiedClipboardRecords = pastedData
     .split('\r\n')
@@ -68,11 +67,26 @@ const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirs
     .map(d => d.replace(/["]+/g, '').replace('\n', ' '));
   //Maximum number of records to paste should be 500
   const copiedBulkRecords = !isUndefined(pastedRecords) ? [...pastedRecords].slice(0, 500) : [];
+
+  //TODO: Change Pk to readOnly
+  const readOnlyFieldsIndex = [];
+  colsSchema.forEach((col, i) => {
+    if (col.pk) {
+      readOnlyFieldsIndex.push(i);
+    }
+  });
+
   copiedClipboardRecords.forEach(row => {
     let emptyRecord = RecordUtils.createEmptyObject(colsSchema, fetchedDataFirstRow);
     const copiedCols = row.split('\t');
+    // emptyRecord.dataRow.forEach((record, i) => {}
+
     emptyRecord.dataRow.forEach((record, i) => {
-      emptyRecord = RecordUtils.changeRecordValue(emptyRecord, record.fieldData.fieldSchemaId, copiedCols[i]);
+      emptyRecord = RecordUtils.changeRecordValue(
+        emptyRecord,
+        record.fieldData.fieldSchemaId,
+        readOnlyFieldsIndex.indexOf(i) > -1 && reporting ? '' : copiedCols[i]
+      );
     });
 
     emptyRecord.dataRow = emptyRecord.dataRow.filter(

@@ -27,7 +27,8 @@ const FieldEditor = ({
   onEditorValueChange,
   onEditorValueFocus,
   onMapOpen,
-  record
+  record,
+  reporting
 }) => {
   const resources = useContext(ResourcesContext);
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
@@ -46,12 +47,9 @@ const FieldEditor = ({
   }, []);
 
   let fieldType = {};
+
   let isReadOnlyField = RecordUtils.getCellInfo(colsSchema, cells.field).pk;
   if (!isEmpty(record)) {
-    console.log(
-      record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cells.field)[0],
-      RecordUtils.getCellInfo(colsSchema, cells.field)
-    );
     fieldType = RecordUtils.getCellInfo(colsSchema, cells.field).type;
   }
 
@@ -449,12 +447,12 @@ const FieldEditor = ({
         );
     }
   };
-  console.log({ hasWritePermissions });
+
   return !isEmpty(fieldType) && !isReadOnlyField
-    ? hasWritePermissions
-      ? renderField(fieldType)
-      : null
-    : renderField(fieldType);
+    ? renderField(fieldType)
+    : !reporting
+    ? renderField(fieldType)
+    : RecordUtils.getCellValue(cells, cells.field);
 };
 
 export { FieldEditor };

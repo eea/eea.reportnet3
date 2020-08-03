@@ -56,8 +56,8 @@ import {
 const DataViewer = withRouter(
   ({
     hasWritePermissions,
-    isDatasetDeleted = false,
     isDataCollection,
+    isDatasetDeleted = false,
     isValidationSelected,
     //levelErrorTypes,
     match: {
@@ -65,6 +65,7 @@ const DataViewer = withRouter(
     },
     onLoadTableData,
     recordPositionId,
+    reporting,
     selectedRecordErrorId,
     setIsValidationSelected,
     showWriteButtons,
@@ -155,6 +156,7 @@ const DataViewer = withRouter(
           onEditorValueFocus={onEditorValueFocus}
           onMapOpen={onMapOpen}
           record={record}
+          reporting={reporting}
         />
       );
     };
@@ -576,13 +578,13 @@ const DataViewer = withRouter(
       if (event) {
         const clipboardData = event.clipboardData;
         const pastedData = clipboardData.getData('Text');
-        dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
+        dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema, reporting } });
       }
     };
 
     const onPasteAsync = async () => {
       const pastedData = await navigator.clipboard.readText();
-      dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
+      dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema, reporting } });
     };
 
     const onPasteAccept = async () => {
@@ -1052,9 +1054,11 @@ const DataViewer = withRouter(
                   datasetId={datasetId}
                   formType="NEW"
                   getTooltipMessage={getTooltipMessage}
+                  hasWritePermissions={hasWritePermissions}
                   onChangeForm={onEditAddFormInput}
                   onShowFieldInfo={onShowFieldInfo}
                   records={records}
+                  reporting={reporting}
                 />
               </div>
             </Dialog>
@@ -1080,9 +1084,11 @@ const DataViewer = withRouter(
                 editDialogVisible={editDialogVisible}
                 formType="EDIT"
                 getTooltipMessage={getTooltipMessage}
+                hasWritePermissions={hasWritePermissions}
                 onChangeForm={onEditAddFormInput}
                 onShowFieldInfo={onShowFieldInfo}
                 records={records}
+                reporting={reporting}
               />
             </div>
           </Dialog>

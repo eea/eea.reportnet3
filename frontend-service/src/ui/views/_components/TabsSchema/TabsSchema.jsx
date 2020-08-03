@@ -21,6 +21,7 @@ export const TabsSchema = ({
   onLoadTableData,
   onTabChange,
   recordPositionId,
+  reporting,
   selectedRecordErrorId,
   setIsValidationSelected,
   showWriteButtons = true,
@@ -46,6 +47,7 @@ export const TabsSchema = ({
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
                   onLoadTableData={onLoadTableData}
+                  reporting={reporting}
                   showWriteButtons={showWriteButtons}
                   tableHasErrors={tableHasErrors}
                   tableId={table.id}

@@ -303,6 +303,7 @@ export const FieldsDesigner = ({
           onLoadTableData={onLoadTableData}
           recordPositionId={-1}
           recordPositionId={recordPositionId}
+          reporting={false}
           selectedRecordErrorId={selectedRecordErrorId}
           setIsValidationSelected={setIsValidationSelected}
           tableHasErrors={table.hasErrors}

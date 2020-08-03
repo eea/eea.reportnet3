@@ -19,7 +19,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
   const [columnOptions, setColumnOptions] = useState([{}]);
-  console.log({ tableSchemaColumns });
+
   const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
 
   const resources = useContext(ResourcesContext);

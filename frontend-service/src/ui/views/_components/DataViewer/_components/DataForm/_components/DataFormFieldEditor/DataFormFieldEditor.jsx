@@ -26,6 +26,7 @@ const DataFormFieldEditor = ({
   hasWritePermissions,
   isVisible,
   onChangeForm,
+  reporting,
   type
 }) => {
   const resources = useContext(ResourcesContext);
@@ -159,7 +160,7 @@ const DataFormFieldEditor = ({
     return (
       <Dropdown
         appendTo={document.body}
-        disabled={column.pk && !hasWritePermissions}
+        disabled={column.pk && reporting}
         onChange={e => {
           onChangeForm(field, e.target.value.value);
         }}
@@ -171,11 +172,10 @@ const DataFormFieldEditor = ({
   };
 
   const renderMultiselectCodelist = (field, fieldValue) => {
-    console.log({ field });
     return (
       <MultiSelect
         appendTo={document.body}
-        disabled={column.pk && !hasWritePermissions}
+        disabled={column.pk && reporting}
         maxSelectedLabels={10}
         onChange={e => onChangeForm(field, e.value)}
         options={column.codelistItems.sort().map(codelistItem => {
@@ -238,7 +238,7 @@ const DataFormFieldEditor = ({
       renderMapType(field, fieldValue)
     ) : (
       <InputText
-        disabled={column.pk && !hasWritePermissions}
+        disabled={column.pk && reporting}
         id={field}
         keyfilter={getFilter(type)}
         maxLength={getMaxCharactersByType(type)}
@@ -275,7 +275,7 @@ const DataFormFieldEditor = ({
         <MultiSelect
           appendTo={document.body}
           clearButton={false}
-          disabled={column.pk && !hasWritePermissions}
+          disabled={column.pk && reporting}
           filter={true}
           filterPlaceholder={resources.messages['linkFilterPlaceholder']}
           maxSelectedLabels={10}
@@ -316,7 +316,7 @@ const DataFormFieldEditor = ({
   const renderMapType = (field, fieldValue) => (
     <div style={{ display: 'flex', alignItems: 'center' }}>
       <InputText
-        disabled={column.pk && !hasWritePermissions}
+        disabled={column.pk && reporting}
         keyfilter={getFilter(type)}
         // onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
         onChange={e => onChangeForm(field, e.target.value)}
