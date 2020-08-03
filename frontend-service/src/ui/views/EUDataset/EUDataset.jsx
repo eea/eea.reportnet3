@@ -374,9 +374,9 @@ export const EUDataset = withRouter(({ history, match }) => {
   const renderTabsSchema = () => (
     <TabsSchema
       activeIndex={dataViewerOptions.activeIndex}
-      hasWritePermissions={hasWritePermissions}
-      isDataCollection={true}
+      hasWritePermissions={false}
       isDatasetDeleted={isDataDeleted}
+      isEUDataset={true}
       isValidationSelected={isValidationSelected}
       levelErrorTypes={levelErrorTypes}
       onLoadTableData={onLoadTableData}

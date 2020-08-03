@@ -16,6 +16,7 @@ export const TabsSchema = ({
   hasWritePermissions = false,
   isDataCollection,
   isDatasetDeleted,
+  isEUDataset,
   isValidationSelected,
   levelErrorTypes,
   onLoadTableData,
@@ -42,6 +43,7 @@ export const TabsSchema = ({
                   hasWritePermissions={hasWritePermissions}
                   isDataCollection={isDataCollection}
                   isDatasetDeleted={isDatasetDeleted}
+                  isEUDataset={isEUDataset}
                   isValidationSelected={isValidationSelected}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}

@@ -58,6 +58,7 @@ const DataViewer = withRouter(
     hasWritePermissions,
     isDatasetDeleted = false,
     isDataCollection,
+    isEUDataset = false,
     isValidationSelected,
     //levelErrorTypes,
     match: {
@@ -185,6 +186,7 @@ const DataViewer = withRouter(
       hasWritePermissions && !tableReadOnly,
       initialCellValue,
       isDataCollection,
+      isEUDataset,
       records,
       resources,
       setIsColumnInfoVisible,
@@ -890,6 +892,7 @@ const DataViewer = withRouter(
           hideValidationFilter={hideValidationFilter}
           fileExtensions={extensionsOperationsList.export}
           isDataCollection={isDataCollection}
+          isEUDataset={isEUDataset}
           isFilterValidationsActive={isFilterValidationsActive}
           isTableDeleted={isTableDeleted}
           isLoading={isLoading}

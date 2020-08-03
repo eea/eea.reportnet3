@@ -20,22 +20,24 @@ export const EUDatasetToolbar = ({
     <div className={styles.toolbar}>
       <Toolbar>
         <div className="p-toolbar-group-left">
-          <Button
-            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+          {/* <Button
+            className={`p-button-rounded p-button-secondary-transparent`}
+            disabled={true}
             icon={'trash'}
             label={resources.messages['deleteDatasetData']}
             onClick={() => handleDialogs('deleteData', true)}
-          />
+          /> */}
         </div>
         <div className="p-toolbar-group-right">
           <Button
-            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+            className={`p-button-rounded p-button-secondary-transparent`}
             icon={'validate'}
+            disabled={true}
             label={resources.messages['validate']}
             onClick={() => handleDialogs('validate', true)}
           />
           <Button
-            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+            className={`p-button-rounded p-button-secondary-transparent`}
             disabled={!datasetHasErrors}
             icon={'warning'}
             iconClasses={datasetHasErrors ? 'warning' : ''}
@@ -49,8 +51,8 @@ export const EUDatasetToolbar = ({
             onClick={() => handleDialogs('qcRules', true)}
           />
           <Button
-            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-            disabled={!datasetHasData}
+            className={`p-button-rounded p-button-secondary-transparent`}
+            disabled={true}
             icon={'dashboard'}
             label={resources.messages['dashboards']}
             onClick={() => handleDialogs('dashboard', true)}
