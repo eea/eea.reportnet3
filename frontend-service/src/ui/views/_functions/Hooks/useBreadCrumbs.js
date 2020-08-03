@@ -27,6 +27,15 @@ export const useBreadCrumbs = ({
   };
 
   const getDataflowCrumb = () => {
+    if (currentPage === CurrentPage.EU_DATASET) {
+      return {
+        command: () => history.goBack(),
+        href: getUrl(routes.DATAFLOW, { dataflowId }, true),
+        icon: 'clone',
+        label: resources.messages['dataflow']
+      };
+    }
+
     return {
       command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true)),
       href: getUrl(routes.DATAFLOW, { dataflowId }, true),
@@ -36,6 +45,10 @@ export const useBreadCrumbs = ({
   };
 
   const getDataflowsCrumb = () => {
+    if (currentPage === CurrentPage.DATAFLOWS) {
+      return { label: resources.messages['dataflows'], icon: 'home' };
+    }
+
     return {
       command: () => history.push(getUrl(routes.DATAFLOWS)),
       href: getUrl(routes.DATAFLOWS),
@@ -95,7 +108,7 @@ export const useBreadCrumbs = ({
     }
 
     if (currentPage === CurrentPage.DATAFLOWS) {
-      breadCrumbContext.add([getHomeCrumb(), { label: resources.messages['dataflows'], icon: 'home' }]);
+      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb()]);
     }
 
     if (currentPage === CurrentPage.DATAFLOW) {
@@ -172,16 +185,7 @@ export const useBreadCrumbs = ({
 
     if (currentPage === CurrentPage.EU_DATASET) {
       if (!isUndefined(metaData.dataset)) {
-        breadCrumbContext.add(
-          getDataflowsCrumb(),
-          {
-            command: () => history.goBack(),
-            href: getUrl(routes.DATAFLOW, { dataflowId }, true),
-            icon: 'clone',
-            label: resources.messages['dataflow']
-          },
-          getEuDatasetCrumb()
-        );
+        breadCrumbContext.add(getDataflowsCrumb(), getDataflowCrumb(), getEuDatasetCrumb());
       }
     }
 
