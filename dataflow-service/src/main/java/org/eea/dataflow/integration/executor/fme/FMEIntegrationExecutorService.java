@@ -7,11 +7,14 @@ import java.util.List;
 import java.util.Map;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.PublishedParameter;
+import org.eea.dataflow.integration.executor.fme.persistance.domain.FMEJob;
+import org.eea.dataflow.integration.executor.fme.persistance.repository.FMEJobRepository;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.integration.executor.service.AbstractIntegrationExecutorService;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController;
+import org.eea.interfaces.vo.dataflow.enums.FMEJobstatus;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
@@ -22,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -43,6 +47,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
   /** The EU job. */
   @Value("${integration.fme.eu.job}")
   private String euDatasetJob;
+
 
   /**
    * The Constant LOG_ERROR.
@@ -96,6 +101,11 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
    */
   @Autowired
   private UserManagementController userManagementController;
+
+
+  /** The FME job repository. */
+  @Autowired
+  FMEJobRepository fmeJobRepository;
 
   /**
    * The Constant LOG.
@@ -218,6 +228,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     // base URL
     parameters.add(saveParameter(BASE_URL, r3base));
 
+    Integer idFMEJob = null;
     switch (integrationOperationTypeEnum) {
       case EXPORT:
         // providerId
@@ -228,8 +239,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
         fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Export");
-        return executeSubmit(fmeParams.get(REPOSITORY), fmeParams.get(WORKSPACE), fmeAsyncJob);
-
+        idFMEJob = executeSubmit(fmeParams.get(REPOSITORY), fmeParams.get(WORKSPACE), fmeAsyncJob);
+        break;
       case IMPORT:
         // providerId
         parameters.add(saveParameter(PROVIDER_ID, paramDataProvider));
@@ -249,8 +260,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
             paramDataProvider, fileName);
         LOG.info("File uploaded");
         LOG.info("Executing FME Import");
-        return executeSubmit(fmeParams.get(REPOSITORY), fmeParams.get(WORKSPACE), fmeAsyncJob);
-
+        idFMEJob = executeSubmit(fmeParams.get(REPOSITORY), fmeParams.get(WORKSPACE), fmeAsyncJob);
+        break;
       case EXPORT_EU_DATASET:
 
         // DataBaseConnectionPublic
@@ -260,12 +271,29 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
         fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Export EU Dataset");
-        return executeSubmit(defaultRepository, euDatasetJob, fmeAsyncJob);
-
+        idFMEJob = executeSubmit(defaultRepository, euDatasetJob, fmeAsyncJob);
+        break;
       default:
-        return null;
-
+        idFMEJob = null;
+        break;
     }
+    ExecutionResultVO executionResultVO = new ExecutionResultVO();
+    Map<String, Object> executionResultParams = new HashMap<>();
+    executionResultParams.put("id", idFMEJob);
+    executionResultVO.setExecutionResultParams(executionResultParams);
+
+    // add save execution id
+    if (null != idFMEJob) {
+      FMEJob job = new FMEJob();
+      job.setIdJob(new Long(idFMEJob));
+      job.setDatasetId(integrationOperationParams.get(DATASET_ID));
+      job.setOperation(integrationOperationTypeEnum);
+      String user = SecurityContextHolder.getContext().getAuthentication().getName();
+      job.setUser(user);
+      job.setStatus(FMEJobstatus.QUEUED);
+      fmeJobRepository.save(job);
+    }
+    return executionResultVO;
   }
 
   /**
@@ -317,22 +345,26 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
    *
    * @return the execution result VO
    */
-  private ExecutionResultVO executeSubmit(String repository, String workspace,
-      FMEAsyncJob fmeAsyncJob) {
-    Map<String, Object> executionResultParams = new HashMap<>();
-    ExecutionResultVO executionResultVO = new ExecutionResultVO();
-
-    Integer executionResult = null;
+  private Integer executeSubmit(String repository, String workspace, FMEAsyncJob fmeAsyncJob) {
+    Integer idFMEJob = null;
     try {
-      executionResult = fmeCommunicationService.submitAsyncJob(repository, workspace, fmeAsyncJob);
+      idFMEJob = fmeCommunicationService.submitAsyncJob(repository, workspace, fmeAsyncJob);
     } catch (Exception e) {
       LOG_ERROR.error("Error invoking FME due to reason {}", e.getMessage());
     }
-    executionResultParams.put("id", executionResult);
-    executionResultVO.setExecutionResultParams(executionResultParams);
-
-    return executionResultVO;
+    return idFMEJob;
   }
 
+  private Boolean checkTopic(String topicName) {
+    return null;
+  }
+
+  private Boolean createTopic(String topicName) {
+    return null;
+  }
+
+  private void createSubscription() {
+
+  }
 
 }
