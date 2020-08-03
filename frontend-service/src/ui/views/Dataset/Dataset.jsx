@@ -102,11 +102,11 @@ export const Dataset = withRouter(({ match, history }) => {
     setMetaData(await getMetadata({ datasetId, dataflowId }));
   };
 
-  useBreadCrumbs(history, CurrentPage.DATASET, dataflowId, metaData);
+  useBreadCrumbs({ currentPage:CurrentPage.DATASET, dataflowId, history, metaData });
 
   useEffect(() => {
     leftSideBarContext.removeModels();
-  },[])
+  }, []);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {

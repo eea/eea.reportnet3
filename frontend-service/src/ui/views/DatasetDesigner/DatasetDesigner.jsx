@@ -129,7 +129,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     snapshotState
   } = useDatasetDesigner(dataflowId, datasetId, designerState.datasetSchemaId);
 
-  useBreadCrumbs(history, CurrentPage.DATASET_DESIGNER, dataflowId);
+  useBreadCrumbs({ currentPage: CurrentPage.DATASET_DESIGNER, dataflowId, history });
 
   useEffect(() => {
     leftSideBarContext.removeModels();

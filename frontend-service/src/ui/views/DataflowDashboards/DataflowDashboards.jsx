@@ -37,7 +37,7 @@ export const DataflowDashboards = withRouter(
     const [dataflowName, setDataflowName] = useState('');
     const [dataSchema, setDataSchema] = useState();
 
-    useBreadCrumbs(history, CurrentPage.DATAFLOW_DASHBOARDS, dataflowId);
+    useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_DASHBOARDS, dataflowId, history });
 
     useEffect(() => {
       leftSideBarContext.removeModels();

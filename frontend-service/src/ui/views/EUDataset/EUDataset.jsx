@@ -107,7 +107,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     getWritePermissions();
   }, [userContext]);
 
-  useBreadCrumbs(history, CurrentPage.EU_DATASET, dataflowId, metaData);
+  useBreadCrumbs({currentPage:CurrentPage.EU_DATASET, dataflowId, history, metaData});
 
   const callSetMetaData = async () => {
     euDatasetDispatch({ type: 'GET_METADATA', payload: { metadata: await getMetadata({ dataflowId, datasetId }) } });

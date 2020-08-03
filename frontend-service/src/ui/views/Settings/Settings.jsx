@@ -18,7 +18,7 @@ const Settings = withRouter(({ history }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resources = useContext(ResourcesContext);
 
-  useBreadCrumbs(history, CurrentPage.USER_SETTINGS);
+  useBreadCrumbs({ currentPage: CurrentPage.USER_SETTINGS, history });
 
   useEffect(() => {
     leftSideBarContext.addModels([]);

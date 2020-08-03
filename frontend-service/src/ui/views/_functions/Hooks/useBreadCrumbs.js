@@ -10,15 +10,15 @@ import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
-export const useBreadCrumbs = (
-  history,
+export const useBreadCrumbs = ({
   currentPage,
   dataflowId,
-  metaData,
-  matchParams,
   dataflowStateData,
+  history,
+  matchParams,
+  metaData,
   representativeId
-) => {
+}) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const resources = useContext(ResourcesContext);
 

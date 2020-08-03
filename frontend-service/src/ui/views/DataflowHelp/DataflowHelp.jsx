@@ -82,7 +82,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     }
   }, [userContext]);
 
-  useBreadCrumbs(history, CurrentPage.DATAFLOW_HELP, dataflowId);
+  useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_HELP, dataflowId, history });
 
   useEffect(() => {
     leftSideBarContext.addHelpSteps(

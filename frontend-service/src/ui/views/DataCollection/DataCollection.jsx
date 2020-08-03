@@ -60,7 +60,7 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   let growlRef = useRef();
 
-  useBreadCrumbs(history, CurrentPage.DATA_COLLECTION, dataflowId);
+  useBreadCrumbs({ currentPage: CurrentPage.DATA_COLLECTION, dataflowId, history });
 
   useEffect(() => {
     leftSideBarContext.removeModels();

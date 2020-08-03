@@ -67,7 +67,7 @@ const Dataflows = withRouter(({ match, history }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resources.messages, tabMenuActiveItem, userContext.contextRoles]);
 
-  useBreadCrumbs(history, CurrentPage.DATAFLOWS);
+  useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS, history });
 
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) onLoadPermissions();

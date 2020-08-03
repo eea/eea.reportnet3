@@ -97,15 +97,14 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
-  useBreadCrumbs(
-    history,
-    CurrentPage.DATAFLOW,
+  useBreadCrumbs({
+    currentPage: CurrentPage.DATAFLOW,
     dataflowId,
-    undefined,
-    match.params,
-    dataflowState.data,
+    dataflowStateData: dataflowState.data,
+    history,
+    matchParams: match.params,
     representativeId
-  );
+  });
 
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) onLoadPermission();
