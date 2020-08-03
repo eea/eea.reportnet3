@@ -39,6 +39,9 @@
             }
           }
         }
+        @media (max-width: 1160px) {
+          height: auto;
+        }
         @media (max-width: 768px) {
           width: 100%;
           height: auto;
@@ -71,7 +74,7 @@
             width: 33%;
           }
         }
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
           width: 100%;
           height: auto;
           overflow: hidden;
