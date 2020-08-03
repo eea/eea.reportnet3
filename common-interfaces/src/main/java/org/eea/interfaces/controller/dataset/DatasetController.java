@@ -144,8 +144,7 @@ public interface DatasetController {
    */
   @PostMapping(value = "/{id}/table/{idTableSchema}/record")
   void insertRecords(@PathVariable("id") Long datasetId,
-      @PathVariable("idTableSchema") String idTableSchema, @RequestBody List<RecordVO> records,
-      @RequestParam(value = "file", required = false) final MultipartFile file);
+      @PathVariable("idTableSchema") String idTableSchema, @RequestBody List<RecordVO> records);
 
 
   /**

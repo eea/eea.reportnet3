@@ -2,6 +2,7 @@ package org.eea.dataset.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Base64;
 import java.util.List;
 import javax.ws.rs.Produces;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
@@ -452,8 +453,7 @@ public class DataSetControllerImpl implements DatasetController {
   @PostMapping(value = "/{id}/table/{idTableSchema}/record")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public void insertRecords(@PathVariable("id") Long datasetId,
-      @PathVariable("idTableSchema") String idTableSchema, @RequestBody List<RecordVO> records,
-      @RequestParam(value = "file", required = false) final MultipartFile file) {
+      @PathVariable("idTableSchema") String idTableSchema, @RequestBody List<RecordVO> records) {
     if (datasetId == null || records == null || records.isEmpty()) {
       LOG_ERROR.error("Error inserting records. The datasetId or the records are empty or null");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
@@ -735,11 +735,12 @@ public class DataSetControllerImpl implements DatasetController {
 
       String filename = attachment.getFileName();
       file = attachment.getContent();
-
+      byte[] decodedString = Base64.getDecoder().decode(new String(file).getBytes());
+      // LOG.info("fichero es: {}", new String(decodedString));
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
 
-      return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
+      return new ResponseEntity(decodedString, httpHeaders, HttpStatus.OK);
 
     } catch (EEAException | IOException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);

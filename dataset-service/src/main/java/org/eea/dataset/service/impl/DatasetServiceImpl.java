@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -1338,14 +1339,18 @@ public class DatasetServiceImpl implements DatasetService {
        * block e.printStackTrace(); }
        */
 
+      String[] auxFile = field.getValue().split("|content|");
+      String nameFile = auxFile[0];
+      String content = auxFile[1];
       AttachmentValue attachment = new AttachmentValue();
       attachment.setFileName("prueba.txt");
       attachment.setFieldValue(field);
-      byte byteArray[] = new byte[10000000];
-      for (int i = 0; i < byteArray.length; i++) {
-        byteArray[i] = '1';
-      }
-      attachment.setContent(byteArray);
+      /*
+       * byte byteArray[] = new byte[10000000]; for (int i = 0; i < byteArray.length; i++) {
+       * byteArray[i] = '1'; }
+       */
+      // byte[] content = Base64.getEncoder().encode(field.getValue().getBytes());
+      attachment.setContent(field.getValue().getBytes());
       field.setValue(attachment.getFileName());
       attachmentRepository.save(attachment);
     }
@@ -2354,7 +2359,8 @@ public class DatasetServiceImpl implements DatasetService {
     byte[] content;
     content = IOUtils.toByteArray(is);
     is.close();
-    attachment.setContent(content);
+    byte[] transformado = Base64.getEncoder().encode(content);
+    attachment.setContent(transformado);
     attachmentRepository.save(attachment);
 
     // Field table
