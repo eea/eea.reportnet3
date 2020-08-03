@@ -194,7 +194,9 @@ export const BigButtonList = ({
   };
 
   const handleExportEuDataset = () => {
-    return <ManageIntegrations />;
+    const exportState = { datasetSchemaId: null, isIntegrationManageDialogVisible: false };
+
+    return <ManageIntegrations state={exportState} />;
   };
 
   const onCloneDataflow = async () => {

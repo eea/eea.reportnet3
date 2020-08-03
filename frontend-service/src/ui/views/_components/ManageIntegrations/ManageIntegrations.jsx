@@ -29,13 +29,13 @@ export const ManageIntegrations = ({
   dataflowId,
   datasetId,
   datasetType,
-  designerState,
   integrationsList,
   manageDialogs,
   onUpdateData,
+  state,
   updatedData
 }) => {
-  const { datasetSchemaId, isIntegrationManageDialogVisible } = designerState;
+  const { datasetSchemaId, isIntegrationManageDialogVisible } = state;
   const componentName = 'integration';
 
   const notificationContext = useContext(NotificationContext);
@@ -450,10 +450,12 @@ export const ManageIntegrations = ({
       <div className={styles.content}>
         <div className={styles.group}>{renderInputLayout(['name', 'description'])}</div>
         <div className={styles.group}>{renderDropdownLayout(['repository', 'processName'])}</div>
-        <div className={styles.group}>
-          {renderDropdownLayout(['operation'])}
-          {renderInputLayout(['fileExtension'])}
-        </div>
+        {(isEmpty(updatedData) || manageIntegrationsState.operation.value !== 'EXPORT_EU_DATASET') && (
+          <div className={styles.group}>
+            {renderDropdownLayout(['operation'])}
+            {renderInputLayout(['fileExtension'])}
+          </div>
+        )}
         <div className={styles.group}>
           {renderInputLayout(['parameterKey', 'parameterValue'])}
           <span className={styles.buttonWrapper}>

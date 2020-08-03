@@ -65,10 +65,10 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
         <ManageIntegrations
           dataflowId={dataflowId}
           datasetId={datasetId}
-          designerState={designerState}
           integrationsList={integrationsList}
           manageDialogs={manageDialogs}
           onUpdateData={onUpdateData}
+          state={designerState}
           updatedData={updatedData}
         />
       )}
