@@ -13,7 +13,6 @@ import { DatasetSchemaRequesterEmptyHelpConfig } from 'conf/help/datasetSchema/r
 import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchema/requester/withTabs';
 import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/reporter';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
-import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -133,8 +132,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   useBreadCrumbs(history, CurrentPage.DATASET_DESIGNER, dataflowId);
 
   useEffect(() => {
-    onLoadSchema();
     leftSideBarContext.removeModels();
+    onLoadSchema();
     callSetMetaData();
   }, []);
 

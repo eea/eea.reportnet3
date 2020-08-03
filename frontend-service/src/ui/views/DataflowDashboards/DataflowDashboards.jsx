@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState, Fragment } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { isUndefined } from 'lodash';
@@ -8,16 +8,17 @@ import styles from './DataflowDashboards.module.css';
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
+import { DatasetValidationDashboard } from './_components/DatasetValidationDashboard';
 import { MainLayout } from 'ui/views/_components/Layout';
+import { ReleasedDatasetsDashboard } from './_components/ReleasedDatasetsDashboard';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
-import { ReleasedDatasetsDashboard } from './_components/ReleasedDatasetsDashboard';
-import { DatasetValidationDashboard } from './_components/DatasetValidationDashboard';
 
 import { DataflowService } from 'core/services/Dataflow';
 
-import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
+import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -29,7 +30,7 @@ export const DataflowDashboards = withRouter(
     },
     history
   }) => {
-
+    const leftSideBarContext = useContext(LeftSideBarContext);
     const resources = useContext(ResourcesContext);
 
     const [dashboardInitialValues, setDashboardInitialValues] = useState({});
@@ -39,6 +40,7 @@ export const DataflowDashboards = withRouter(
     useBreadCrumbs(history, CurrentPage.DATAFLOW_DASHBOARDS, dataflowId);
 
     useEffect(() => {
+      leftSideBarContext.removeModels();
       try {
         getDataflowName();
         onLoadDataSchemas();

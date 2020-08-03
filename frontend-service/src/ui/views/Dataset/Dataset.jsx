@@ -105,6 +105,10 @@ export const Dataset = withRouter(({ match, history }) => {
   useBreadCrumbs(history, CurrentPage.DATASET, dataflowId, metaData);
 
   useEffect(() => {
+    leftSideBarContext.removeModels();
+  },[])
+
+  useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       setHasWritePermissions(
         userContext.hasPermission([config.permissions.LEAD_REPORTER], `${config.permissions.DATASET}${datasetId}`) ||

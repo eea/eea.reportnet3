@@ -63,8 +63,8 @@ export const DataCollection = withRouter(({ match, history }) => {
   useBreadCrumbs(history, CurrentPage.DATA_COLLECTION, dataflowId);
 
   useEffect(() => {
-    onLoadDatasetSchema();
     leftSideBarContext.removeModels();
+    onLoadDatasetSchema();
   }, []);
 
   useEffect(() => {

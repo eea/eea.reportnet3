@@ -62,6 +62,10 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const [webLinks, setWebLinks] = useState([]);
 
   useEffect(() => {
+    leftSideBarContext.removeModels();
+  }, []);
+
+  useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
       setIsCustodian(
@@ -79,7 +83,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   }, [userContext]);
 
   useBreadCrumbs(history, CurrentPage.DATAFLOW_HELP, dataflowId);
- 
+
   useEffect(() => {
     leftSideBarContext.addHelpSteps(
       isCustodian ? DataflowHelpRequesterHelpConfig : DataflowHelpReporterHelpConfig,
