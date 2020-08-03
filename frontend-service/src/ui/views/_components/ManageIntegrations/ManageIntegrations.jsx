@@ -28,6 +28,7 @@ import { TextUtils } from 'ui/views/_functions/Utils';
 export const ManageIntegrations = ({
   dataflowId,
   datasetId,
+  datasetType,
   designerState,
   integrationsList,
   manageDialogs,
@@ -159,11 +160,19 @@ export const ManageIntegrations = ({
     });
   };
 
+  const onCloseModal = () => {
+    if (datasetType === 'designDataset') {
+      manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
+    } else {
+      return null;
+    }
+  };
+
   const onCreateIntegration = async () => {
     try {
       const response = await IntegrationService.create(manageIntegrationsState);
       if (response.status >= 200 && response.status <= 299) {
-        manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
+        onCloseModal();
         onUpdateData();
       }
     } catch (error) {
@@ -258,7 +267,7 @@ export const ManageIntegrations = ({
     try {
       const response = await IntegrationService.update(manageIntegrationsState);
       if (response.status >= 200 && response.status <= 299) {
-        manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
+        onCloseModal();
         onUpdateData();
       }
     } catch (error) {
@@ -300,7 +309,7 @@ export const ManageIntegrations = ({
         className="p-button-secondary p-button-rounded  p-button-animated-blink"
         icon="cancel"
         label={resources.messages['cancel']}
-        onClick={() => manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true)}
+        onClick={() => onCloseModal()}
       />
 
       {(isEmptyForm || isIntegrationNameDuplicated) && (
@@ -322,7 +331,7 @@ export const ManageIntegrations = ({
           ? resources.messages['editExternalIntegration']
           : resources.messages['createExternalIntegration']
       }
-      onHide={() => manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true)}
+      onHide={() => onCloseModal()}
       style={{ width: '975px' }}
       visible={isIntegrationManageDialogVisible}>
       {children}
@@ -491,4 +500,10 @@ export const ManageIntegrations = ({
       </Dialog>
     </Fragment>
   );
+};
+
+ManageIntegrations.defaultProps = {
+  dataflowId: null,
+  datasetId: null,
+  datasetType: 'designDataset'
 };

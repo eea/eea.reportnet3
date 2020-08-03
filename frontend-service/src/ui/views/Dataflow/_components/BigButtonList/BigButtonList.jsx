@@ -32,6 +32,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
+import { ManageIntegrations } from 'ui/views/_components/ManageIntegrations/ManageIntegrations';
 
 export const BigButtonList = ({
   dataflowState,
@@ -168,9 +169,7 @@ export const BigButtonList = ({
   // }
   // };
 
-  const getCloneDataflow = value => {
-    setCloneDataflow(value);
-  };
+  const getCloneDataflow = value => setCloneDataflow(value);
 
   const getDeleteSchemaIndex = index => {
     setDeleteSchemaIndex(index);
@@ -190,31 +189,25 @@ export const BigButtonList = ({
     try {
       return await MetadataUtils.getMetadata(ids);
     } catch (error) {
-      notificationContext.add({
-        type: 'GET_METADATA_ERROR',
-        content: {
-          dataflowId
-        }
-      });
+      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId } });
     }
+  };
+
+  const handleExportEuDataset = () => {
+    return <ManageIntegrations />;
   };
 
   const onCloneDataflow = async () => {
     setCloneDialogVisible(true);
   };
 
-  const onCreateDatasetSchema = () => {
-    setNewDatasetDialog(false);
-  };
+  const onCreateDatasetSchema = () => setNewDatasetDialog(false);
 
   const onCreateDataCollection = async date => {
     setIsConfirmCollectionDialog(false);
     setDataCollectionDialog(false);
 
-    notificationContext.add({
-      type: 'CREATE_DATA_COLLECTION_INIT',
-      content: {}
-    });
+    notificationContext.add({ type: 'CREATE_DATA_COLLECTION_INIT', content: {} });
 
     setIsActiveButton(false);
 
@@ -244,16 +237,13 @@ export const BigButtonList = ({
     setIsActiveButton(false);
 
     try {
-      const result = await DataCollectionService.update(dataflowId);
-      return result;
+      return await DataCollectionService.update(dataflowId);
     } catch (error) {
       console.error(error);
     }
   };
 
-  const onDatasetSchemaNameError = () => {
-    setErrorDialogVisible(true);
-  };
+  const onDatasetSchemaNameError = () => setErrorDialogVisible(true);
 
   const onDeleteDatasetSchema = async index => {
     setDeleteDialogVisible(false);
@@ -268,18 +258,14 @@ export const BigButtonList = ({
     } catch (error) {
       console.error(error.response);
       if (error.response.status === 401) {
-        notificationContext.add({
-          type: 'DELETE_DATASET_SCHEMA_LINK_ERROR'
-        });
+        notificationContext.add({ type: 'DELETE_DATASET_SCHEMA_LINK_ERROR' });
       }
     } finally {
       hideLoading();
     }
   };
 
-  const onDuplicateName = () => {
-    setIsDuplicated(true);
-  };
+  const onDuplicateName = () => setIsDuplicated(true);
 
   const onHideErrorDialog = () => {
     setErrorDialogVisible(false);
@@ -341,28 +327,20 @@ export const BigButtonList = ({
     }
   };
 
-  const onShowNewSchemaDialog = () => {
-    setNewDatasetDialog(true);
-  };
+  const onShowNewSchemaDialog = () => setNewDatasetDialog(true);
 
-  const onShowDataCollectionModal = () => {
-    setDataCollectionDialog(true);
-  };
+  const onShowDataCollectionModal = () => setDataCollectionDialog(true);
 
-  const onShowUpdateDataCollectionModal = () => {
-    setIsUpdateDataCollectionDialogVisible(true);
-  };
+  const onShowUpdateDataCollectionModal = () => setIsUpdateDataCollectionDialogVisible(true);
 
   const renderDialogFooter = (
     <Fragment>
       <Button
         className="p-button-primary p-button-animated-blink"
-        icon={'plus'}
         disabled={isNil(cloneDataflow.id)}
+        icon={'plus'}
         label={resources.messages['cloneSelectedDataflow']}
-        onClick={() => {
-          cloneDatasetSchemas();
-        }}
+        onClick={() => cloneDatasetSchemas()}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
@@ -378,6 +356,7 @@ export const BigButtonList = ({
       dataflowId,
       dataflowState,
       getDeleteSchemaIndex,
+      handleExportEuDataset,
       handleRedirect,
       isActiveButton,
       onCloneDataflow,
@@ -400,7 +379,7 @@ export const BigButtonList = ({
     .map((button, i) => <BigButton key={i} {...button} />);
 
   return (
-    <>
+    <Fragment>
       <div className={styles.buttonsWrapper}>
         <div className={`${styles.splitButtonWrapper} dataflow-big-buttons-help-step`}>
           <div className={styles.datasetItem}>{bigButtonList}</div>
@@ -532,6 +511,6 @@ export const BigButtonList = ({
         style={{ display: 'none' }}>
         <span className="srOnly">{resources.messages['confirmationReceipt']}</span>
       </button>
-    </>
+    </Fragment>
   );
 };
