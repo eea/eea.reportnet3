@@ -191,7 +191,7 @@ const DataFormFieldEditor = ({
     );
   };
 
-  const getAttachExtensions = [{ fileExtension: '.*' }].map(file => `.${file.fileExtension}`).join(', ');
+  const getAttachExtensions = [{ fileExtension: '.csv, .txt, .pdf' }].map(file => `.${file.fileExtension}`).join(', ');
 
   const getMaxCharactersByType = type => {
     const longCharacters = 20;
@@ -248,7 +248,8 @@ const DataFormFieldEditor = ({
       console.log('Error: ', result.message);
       return;
     } else {
-      onChangeForm(field, `${value.files[0].name}|content|${result}`);
+      console.log({ result });
+      onChangeForm(field, `${value.files[0].name}|content|${result.split(',')[1]}`);
     }
 
     console.log(result);
@@ -316,7 +317,7 @@ const DataFormFieldEditor = ({
             onClick={() => {
               console.log('Download');
               const a = document.createElement('a');
-              a.href = splittedFieldValue[2];
+              a.href = `data:text/plain;base64,${splittedFieldValue[2]}`;
               a.download = splittedFieldValue[0];
               a.click();
             }}
@@ -448,8 +449,8 @@ const DataFormFieldEditor = ({
           onHide={() => setIsAttachFileVisible(false)}
           visible={isAttachFileVisible}>
           <CustomFileUpload
-            // accept={getAttachExtensions}
-            accept=".txt"
+            accept={getAttachExtensions}
+            // accept=".*"
             chooseLabel={resources.messages['selectFile']}
             // className={styles.FileUpload}
             fileLimit={1}
