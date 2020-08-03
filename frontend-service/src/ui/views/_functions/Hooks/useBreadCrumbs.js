@@ -160,9 +160,7 @@ export const useBreadCrumbs = ({
           getDataflowsCrumb(),
           {
             className: 'datasetSchema-breadcrumb-back-help-step',
-            command: () => {
-              history.goBack();
-            },
+            command: () => history.goBack(),
             href: getUrl(routes.DATAFLOW, { dataflowId }, true),
             icon: 'clone',
             label: resources.messages['dataflow']
