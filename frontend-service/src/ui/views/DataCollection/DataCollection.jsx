@@ -1,7 +1,8 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import { withRouter } from 'react-router-dom';
-import { isEmpty, isUndefined } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './DataCollection.module.css';
 
@@ -26,6 +27,9 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
+
+import { CurrentPage } from 'ui/views/_functions/Utils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 
 export const DataCollection = withRouter(({ match, history }) => {
@@ -56,46 +60,10 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   let growlRef = useRef();
 
-  useEffect(() => {
-    breadCrumbContext.add([
-      {
-        label: resources.messages['homeBreadcrumb'],
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOWS))
-      },
-      {
-        label: resources.messages['dataflows'],
-        icon: 'home',
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOWS))
-      },
-      {
-        label: resources.messages['dataflow'],
-        icon: 'clone',
-        href: getUrl(
-          routes.DATAFLOW,
-          {
-            dataflowId: match.params.dataflowId
-          },
-          true
-        ),
-        command: () =>
-          history.push(
-            getUrl(
-              routes.DATAFLOW,
-              {
-                dataflowId: match.params.dataflowId
-              },
-              true
-            )
-          )
-      },
-      { label: resources.messages['dataCollection'], icon: 'dataCollection' }
-    ]);
-    leftSideBarContext.removeModels();
-  }, []);
+  useBreadCrumbs({ currentPage: CurrentPage.DATA_COLLECTION, dataflowId, history });
 
   useEffect(() => {
+    leftSideBarContext.removeModels();
     onLoadDatasetSchema();
   }, []);
 

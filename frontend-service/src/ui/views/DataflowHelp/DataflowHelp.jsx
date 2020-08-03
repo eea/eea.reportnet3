@@ -2,7 +2,6 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 import sortBy from 'lodash/sortBy';
@@ -26,14 +25,15 @@ import { DatasetService } from 'core/services/Dataset';
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
 
-import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
+import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const DataflowHelp = withRouter(({ match, history }) => {
@@ -41,7 +41,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     params: { dataflowId }
   } = match;
 
-  const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -63,6 +62,10 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const [webLinks, setWebLinks] = useState([]);
 
   useEffect(() => {
+    leftSideBarContext.removeModels();
+  }, []);
+
+  useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
       setIsCustodian(
@@ -79,46 +82,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     }
   }, [userContext]);
 
-  //Bread Crumbs settings
-  useEffect(() => {
-    breadCrumbContext.add([
-      {
-        label: resources.messages['homeBreadcrumb'],
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOWS))
-      },
-      {
-        label: resources.messages['dataflows'],
-        icon: 'home',
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOWS))
-      },
-      {
-        label: resources.messages['dataflow'],
-        icon: 'clone',
-        href: getUrl(
-          routes.DATAFLOW,
-          {
-            dataflowId
-          },
-          true
-        ),
-        command: () =>
-          history.push(
-            getUrl(
-              routes.DATAFLOW,
-              {
-                dataflowId
-              },
-              true
-            )
-          )
-      },
-      { label: resources.messages['dataflowHelp'], icon: 'info' }
-    ]);
-    leftSideBarContext.removeModels();
-    // filterHelpSteps('initial');
-  }, []);
+  useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_HELP, dataflowId, history });
 
   useEffect(() => {
     leftSideBarContext.addHelpSteps(

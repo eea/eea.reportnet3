@@ -30,8 +30,10 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { euDatasetReducer } from './_functions/Reducers/euDatasetReducer';
 
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
+import { CurrentPage } from 'ui/views/_functions/Utils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 
 export const EUDataset = withRouter(({ history, match }) => {
@@ -92,6 +94,7 @@ export const EUDataset = withRouter(({ history, match }) => {
   } = euDatasetState;
 
   useEffect(() => {
+    leftSideBarContext.removeModels();
     callSetMetaData();
     getDataflowName();
   }, []);
@@ -104,29 +107,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     getWritePermissions();
   }, [userContext]);
 
-  useEffect(() => {
-    if (!isUndefined(metaData.dataset)) {
-      const breadCrumbs = [
-        {
-          command: () => history.push(getUrl(routes.DATAFLOWS)),
-          href: getUrl(routes.DATAFLOWS),
-          icon: 'home',
-          label: resources.messages['dataflows']
-        },
-        {
-          command: () => history.goBack(),
-          href: getUrl(routes.DATAFLOW, { dataflowId }, true),
-          icon: 'clone',
-          label: resources.messages['dataflow']
-        }
-      ];
-
-      breadCrumbs.push({ label: resources.messages['euDataset'], icon: 'euDataset' });
-
-      breadCrumbContext.add(breadCrumbs);
-      leftSideBarContext.removeModels();
-    }
-  }, [metaData]);
+  useBreadCrumbs({ currentPage: CurrentPage.EU_DATASET, dataflowId, history, metaData });
 
   const callSetMetaData = async () => {
     euDatasetDispatch({ type: 'GET_METADATA', payload: { metadata: await getMetadata({ dataflowId, datasetId }) } });
@@ -374,9 +355,9 @@ export const EUDataset = withRouter(({ history, match }) => {
   const renderTabsSchema = () => (
     <TabsSchema
       activeIndex={dataViewerOptions.activeIndex}
-      hasWritePermissions={hasWritePermissions}
-      isDataCollection={true}
+      hasWritePermissions={false}
       isDatasetDeleted={isDataDeleted}
+      isEUDataset={true}
       isValidationSelected={isValidationSelected}
       levelErrorTypes={levelErrorTypes}
       onLoadTableData={onLoadTableData}

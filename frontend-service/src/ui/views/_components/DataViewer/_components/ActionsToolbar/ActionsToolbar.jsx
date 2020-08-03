@@ -32,6 +32,7 @@ const ActionsToolbar = ({
   hasWritePermissions,
   hideValidationFilter,
   isDataCollection = false,
+  isEUDataset = false,
   isFilterValidationsActive,
   isLoading,
   isTableDeleted,
@@ -183,7 +184,7 @@ const ActionsToolbar = ({
             className={`p-button-rounded p-button-secondary datasetSchema-import-table-help-step ${
               !hasWritePermissions || tableReadOnly ? null : 'p-button-animated-blink'
             }`}
-            disabled={!hasWritePermissions || tableReadOnly || isDataCollection}
+            disabled={!hasWritePermissions || tableReadOnly || isDataCollection || isEUDataset}
             icon={'import'}
             label={resources.messages['importTable']}
             onClick={() => setImportTableDialogVisible(true)}
@@ -192,9 +193,9 @@ const ActionsToolbar = ({
         <Button
           id="buttonExportTable"
           className={`p-button-rounded p-button-secondary-transparent datasetSchema-export-table-help-step ${
-            isDataCollection ? null : 'p-button-animated-blink'
+            isDataCollection || isEUDataset ? null : 'p-button-animated-blink'
           }`}
-          disabled={isDataCollection}
+          disabled={isDataCollection || isEUDataset}
           icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
           label={resources.messages['exportTable']}
           onClick={event => {
