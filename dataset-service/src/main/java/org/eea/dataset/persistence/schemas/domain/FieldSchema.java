@@ -76,6 +76,10 @@ public class FieldSchema {
   @Field(value = "pkHasMultipleValues")
   private Boolean pkHasMultipleValues;
 
+  /** The read only. */
+  @Field(value = "readOnly")
+  private Boolean readOnly;
+
   /**
    * Hash code.
    *

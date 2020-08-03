@@ -520,6 +520,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         updateIsPkReferencedInFieldSchema(fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
             fieldSchemaVO.getReferencedField().getIdPk(), true);
       }
+      if (null == fieldSchemaVO.getReadOnly()) {
+        fieldSchemaVO.setReadOnly(false);
+      }
       // we create this if to clean blank space at begining and end of any codelistItem
       // n codelist and multiselect
       if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0

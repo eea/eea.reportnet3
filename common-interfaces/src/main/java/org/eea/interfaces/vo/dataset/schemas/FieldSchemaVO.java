@@ -50,6 +50,9 @@ public class FieldSchemaVO {
   /** The pk has multiple values. */
   private Boolean pkHasMultipleValues;
 
+  /** The read only. */
+  private Boolean readOnly;
+
   /**
    * Hash code.
    *

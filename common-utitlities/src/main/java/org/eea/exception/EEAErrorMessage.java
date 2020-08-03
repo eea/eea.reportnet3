@@ -209,6 +209,9 @@ public final class EEAErrorMessage {
   /** The Constant TABLE_READ_ONLY: {@value}. */
   public static final String TABLE_READ_ONLY = "The table is marked as read only";
 
+  /** The Constant FIELD_READ_ONLY: {@value}. */
+  public static final String FIELD_READ_ONLY = "The field is marked as read only";
+
   /** The Constant RULE_NOT_FOUND: {@value}. */
   public static final String RULE_NOT_FOUND = "Rule not found for datasetSchemaId %s and ruleId %s";
 

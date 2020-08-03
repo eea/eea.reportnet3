@@ -1473,13 +1473,17 @@ public class DatasetServiceImpl implements DatasetService {
 
     }
     Boolean isLinkMultiselect = Boolean.FALSE;
+    String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
+    Document fieldSchema =
+        schemasRepository.findFieldSchema(datasetSchemaId, field.getIdFieldSchema());
     if (DataType.LINK.equals(field.getType())) {
-      String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
-      Document fieldSchema =
-          schemasRepository.findFieldSchema(datasetSchemaId, field.getIdFieldSchema());
       isLinkMultiselect = fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES) != null
           ? (Boolean) fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES)
           : Boolean.FALSE;
+    }
+    if (fieldSchema.get(LiteralConstants.READ_ONLY) != null
+        && (Boolean) fieldSchema.get(LiteralConstants.READ_ONLY)) {
+      throw new EEAException(EEAErrorMessage.FIELD_READ_ONLY);
     }
     // if the type is multiselect codelist or Link multiselect we sort the values in lexicographic
     // order

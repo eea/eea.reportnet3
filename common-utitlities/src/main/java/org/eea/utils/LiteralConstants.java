@@ -98,6 +98,9 @@ public final class LiteralConstants {
   /** The Constant RULE_TABLE_MANDATORY: {@value}. */
   public static final String RULE_TABLE_MANDATORY = "Mandatory table records check";
 
+  /** The Constant READ_ONLY: {@value}. */
+  public static final String READ_ONLY = "readOnly";
+
 
   /**
    * Instantiates a new literal constants.
