@@ -134,6 +134,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   useEffect(() => {
     onLoadSchema();
+    leftSideBarContext.removeModels();
+    callSetMetaData();
   }, []);
 
   useEffect(() => {
