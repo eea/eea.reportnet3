@@ -27,15 +27,6 @@ export const useBreadCrumbs = ({
   };
 
   const getDataflowCrumb = () => {
-    if (currentPage === CurrentPage.EU_DATASET) {
-      return {
-        command: () => history.goBack(),
-        href: getUrl(routes.DATAFLOW, { dataflowId }, true),
-        icon: 'clone',
-        label: resources.messages['dataflow']
-      };
-    }
-
     return {
       command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true)),
       href: getUrl(routes.DATAFLOW, { dataflowId }, true),
@@ -45,10 +36,6 @@ export const useBreadCrumbs = ({
   };
 
   const getDataflowsCrumb = () => {
-    if (currentPage === CurrentPage.DATAFLOWS) {
-      return { label: resources.messages['dataflows'], icon: 'home' };
-    }
-
     return {
       command: () => history.push(getUrl(routes.DATAFLOWS)),
       href: getUrl(routes.DATAFLOWS),
@@ -85,6 +72,33 @@ export const useBreadCrumbs = ({
     };
   };
 
+  const getRepresentativeCrumb = () => {
+    if (representativeId) {
+      const representatives = dataflowStateData.datasets.map(dataset => {
+        return { name: dataset.datasetSchemaName, dataProviderId: dataset.dataProviderId };
+      });
+
+      const currentRepresentative = representatives
+        .filter(representative => representative.dataProviderId === parseInt(representativeId))
+        .map(representative => representative.name);
+
+      return {
+        command: () => history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { representativeId }, true)),
+        href: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true),
+        label: currentRepresentative[0],
+        icon: 'clone'
+      };
+    }
+
+    representativeId = parseInt(breadCrumbContext.prevModel[3].href.split('/').slice(-1)[0]);
+    return {
+      command: () => history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true)),
+      href: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true),
+      icon: 'representative',
+      label: breadCrumbContext.prevModel[3].label
+    };
+  };
+
   const getSettingsCrumb = () => {
     return {
       command: () => history.push(getUrl(routes.SETTINGS)),
@@ -112,41 +126,13 @@ export const useBreadCrumbs = ({
     }
 
     if (currentPage === CurrentPage.DATAFLOW) {
+      const breadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
       if (!isEmpty(dataflowStateData)) {
-        let representatives = dataflowStateData.datasets.map(dataset => {
-          return { name: dataset.datasetSchemaName, dataProviderId: dataset.dataProviderId };
-        });
-
         if (representativeId) {
-          const currentRepresentative = representatives
-            .filter(representative => representative.dataProviderId === parseInt(representativeId))
-            .map(representative => representative.name);
-
-          breadCrumbContext.add([
-            getHomeCrumb(),
-            getDataflowsCrumb(),
-            {
-              command: () => history.goBack(),
-              href: getUrl(routes.DATAFLOW),
-              icon: 'clone',
-              label: resources.messages['dataflow']
-            },
-            {
-              label: currentRepresentative[0],
-              icon: 'clone'
-            }
-          ]);
-        } else {
-          breadCrumbContext.add([
-            getHomeCrumb(),
-            getDataflowsCrumb(),
-            {
-              icon: 'clone',
-              label: resources.messages['dataflow']
-            }
-          ]);
+          breadCrumbs.push(getRepresentativeCrumb());
         }
       }
+      breadCrumbContext.add([...breadCrumbs]);
     }
 
     if (currentPage === CurrentPage.DATASET_DESIGNER) {
@@ -154,31 +140,13 @@ export const useBreadCrumbs = ({
     }
 
     if (currentPage === CurrentPage.DATASET) {
-      if (!isUndefined(metaData.dataset)) {
-        const datasetBreadCrumbs = [
-          getHomeCrumb(),
-          getDataflowsCrumb(),
-          {
-            className: 'datasetSchema-breadcrumb-back-help-step',
-            command: () => history.goBack(),
-            href: getUrl(routes.DATAFLOW, { dataflowId }, true),
-            icon: 'clone',
-            label: resources.messages['dataflow']
-          }
-        ];
+      const datasetBreadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
 
-        if (breadCrumbContext.model.find(model => model.icon === 'representative')) {
-          datasetBreadCrumbs.push({
-            command: () =>
-              history.push(getUrl(routes.REPRESENTATIVE, { dataflowId, representative: metaData.dataset.name }, true)),
-            href: getUrl(routes.REPRESENTATIVE, { dataflowId, representative: metaData.dataset.name }, true),
-            icon: 'representative',
-            label: !isUndefined(metaData.dataset) ? metaData.dataset.name : resources.messages['representative']
-          });
-        }
-
-        breadCrumbContext.add([...datasetBreadCrumbs, getDatasetCrumb()]);
+      if (breadCrumbContext.prevModel.length === 4) {
+        datasetBreadCrumbs.push(getRepresentativeCrumb());
       }
+
+      breadCrumbContext.add([...datasetBreadCrumbs, getDatasetCrumb()]);
     }
 
     if (currentPage === CurrentPage.EU_DATASET) {
