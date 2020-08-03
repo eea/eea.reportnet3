@@ -139,12 +139,13 @@
       .portalList {
         display: flex;
         justify-content: flex-start;
+        flex-wrap: wrap;
         width: 100%;
         .portalBox {
           display: flex;
           flex-direction: column;
           align-items: center;
-          width: 20%;
+          width: 280px;
           border-radius: 5px;
           padding: 1rem;
           box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
@@ -160,14 +161,7 @@
           }
         }
       }
-      @media (max-width: 768px) {
-        .portalList {
-          .portalBox {
-            width: 47%;
-          }
-        }
-      }
-      @media (max-width: 414px) {
+      @media (max-width: 624px) {
         .portalList {
           flex-direction: column;
           .portalBox {
