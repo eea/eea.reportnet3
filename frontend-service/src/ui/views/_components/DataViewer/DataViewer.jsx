@@ -1105,8 +1105,8 @@ const DataViewer = withRouter(
         {addDialogVisible && (
           <div onKeyPress={onKeyPress}>
             <Dialog
-              className={'edit-table calendar-table'}
               blockScroll={false}
+              className={'edit-table calendar-table'}
               footer={addRowDialogFooter}
               header={resources.messages['addRecord']}
               modal={true}

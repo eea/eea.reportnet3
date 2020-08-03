@@ -248,7 +248,7 @@ const DataFormFieldEditor = ({
       console.log('Error: ', result.message);
       return;
     } else {
-      onChangeForm(field, [value.files[0].name, result]);
+      onChangeForm(field, `${value.files[0].name}|content|${result}`);
     }
 
     console.log(result);
@@ -303,20 +303,21 @@ const DataFormFieldEditor = ({
     );
 
   const renderAttachment = (field, fieldValue = []) => {
-    console.log({ field, fieldValue });
+    console.log({ field, fieldValue }, fieldValue.split('|'));
+    const splittedFieldValue = fieldValue.split('|');
     return (
       <div style={{ display: 'flex' }}>
         {!isEmpty(fieldValue) && (
           <Button
-            className={`${isEmpty(fieldValue[0]) && 'p-button-animated-blink'} p-button-secondary-transparent`}
+            className={`${isEmpty(splittedFieldValue[0]) && 'p-button-animated-blink'} p-button-secondary-transparent`}
             icon="export"
             iconPos="right"
-            label={fieldValue[0]}
+            label={splittedFieldValue[0]}
             onClick={() => {
               console.log('Download');
               const a = document.createElement('a');
-              a.href = fieldValue[1];
-              a.download = fieldValue[0];
+              a.href = splittedFieldValue[2];
+              a.download = splittedFieldValue[0];
               a.click();
             }}
             style={{ width: 'fit-content' }}
