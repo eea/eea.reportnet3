@@ -80,7 +80,7 @@ export const FieldDesigner = ({
     // { fieldType: 'Formula', value: 'Formula', fieldTypeIcon: 'formula' },
     // { fieldType: 'Fixed', value: 'Fixed select list', fieldTypeIcon: 'list' },
     // { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
-    { fieldType: 'Attachment', value: 'Attachment', fieldTypeIcon: 'clip' }
+    { fieldType: 'Attachement', value: 'Attachement', fieldTypeIcon: 'clip' }
   ];
 
   const getFieldTypeValue = value => {
@@ -178,7 +178,12 @@ export const FieldDesigner = ({
 
   const onChangeFieldType = type => {
     dispatchFieldDesigner({ type: 'SET_TYPE', payload: { type, previousType: fieldDesignerState.fieldTypeValue } });
-    if (type.fieldType.toLowerCase() === 'codelist' || type.fieldType.toLowerCase() === 'multiselect_codelist') {
+    //TODO: Cambiar phone por attachment
+    if (
+      type.fieldType.toLowerCase() === 'codelist' ||
+      type.fieldType.toLowerCase() === 'multiselect_codelist' ||
+      type.fieldType.toLowerCase() === 'phone'
+    ) {
       onCodelistDropdownSelected(type);
     } else if (type.fieldType.toLowerCase() === 'link') {
       onLinkDropdownSelected(type);
@@ -724,6 +729,27 @@ export const FieldDesigner = ({
       </a>
     ) : null;
 
+  const renderFileExtensionsAndSizeButtons = () =>
+    !isUndefined(fieldDesignerState.fieldTypeValue) &&
+    fieldDesignerState.fieldTypeValue.fieldType === 'Phone' && (
+      <Button
+        className={`${styles.codelistButton} p-button-secondary-transparent`}
+        label={
+          !isUndefined(fieldDesignerState.validExtensions) && !isEmpty(fieldDesignerState.validExtensions)
+            ? `${fieldDesignerState.validExtensions.join(', ')}`
+            : resources.messages['fileExtensionsSelection']
+        }
+        onClick={() => onCodelistDropdownSelected()}
+        style={{ pointerEvents: 'auto' }}
+        tooltip={
+          !isUndefined(fieldDesignerState.validExtensions) && !isEmpty(fieldDesignerState.validExtensions)
+            ? `${fieldDesignerState.validExtensions.join(', ')}`
+            : resources.messages['fileExtensionsSelection']
+        }
+        tooltipOptions={{ position: 'top' }}
+      />
+    );
+
   const renderInputs = () => (
     <React.Fragment>
       <InputText
@@ -825,6 +851,7 @@ export const FieldDesigner = ({
         {renderCheckboxes()}
         {renderInputs()}
         {renderCodelistAndLinkButtons()}
+        {renderFileExtensionsAndSizeButtons()}
         {!addField ? (
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton}`}

@@ -808,6 +808,7 @@
     "uploadAttachment": "Attach file",
     "supportedFileAttachmentsTooltip": "Supported file attachments: ",
     "deleteAttachmentHeader": "Delete attachment",
-    "deleteAttachmentConfirm": "Are you sure you want to delete the attached file?"
+    "deleteAttachmentConfirm": "Are you sure you want to delete the attached file?",
+    "fileExtensionsSelection": "No valid file extensions selected"
   }
 }
