@@ -726,20 +726,20 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+
   /**
    * Gets the attachment.
    *
    * @param datasetId the dataset id
    * @param idField the id field
    * @return the attachment
-   * @throws Exception the exception
    */
   @Override
   @HystrixCommand
   @GetMapping("/{datasetId}/field/{fieldId}/attachment")
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   public ResponseEntity getAttachment(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("fieldId") String idField) throws Exception {
+      @PathVariable("fieldId") String idField) {
 
     LOG.info("Init the get attachment controller");
     byte[] file;
@@ -762,21 +762,20 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
 
+
   /**
    * Update attachment.
    *
    * @param datasetId the dataset id
    * @param idField the id field
    * @param file the file
-   * @throws Exception the exception
    */
   @Override
   @HystrixCommand
   @PutMapping(value = "/{datasetId}/field/{fieldId}/attachment",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public void updateAttachment(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("fieldId") String idField, @RequestParam("file") final MultipartFile file)
-      throws Exception {
+      @PathVariable("fieldId") String idField, @RequestParam("file") final MultipartFile file) {
 
     try {
       String fileName = file.getOriginalFilename();
@@ -823,19 +822,19 @@ public class DataSetControllerImpl implements DatasetController {
     return result;
   }
 
+
   /**
    * Delete attachment.
    *
    * @param datasetId the dataset id
    * @param idField the id field
-   * @throws Exception the exception
    */
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{datasetId}/field/{fieldId}/attachment",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public void deleteAttachment(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("fieldId") String idField) throws Exception {
+      @PathVariable("fieldId") String idField) {
 
     try {
       datasetService.deleteAttachment(datasetId, idField);
