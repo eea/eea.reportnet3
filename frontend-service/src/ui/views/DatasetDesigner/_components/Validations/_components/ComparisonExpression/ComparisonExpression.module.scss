@@ -43,7 +43,10 @@
     }
   }
   .expressionValue {
-    width: calc(100% - (var(--operatorsWidth) * 2) - var(--unionWidth) - (var(--fieldsGap) * 6));
+    flex: 1 auto;
+    :global .p-dropdown {
+      width: 100%;
+    }
   }
   > span {
     margin-right: var(--fieldsGap);
