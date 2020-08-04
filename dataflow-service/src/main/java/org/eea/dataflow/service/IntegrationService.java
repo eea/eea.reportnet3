@@ -6,12 +6,10 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 
-
 /**
  * The Interface IntegrationService.
  */
 public interface IntegrationService {
-
 
   /**
    * Creates the integration.
@@ -21,8 +19,6 @@ public interface IntegrationService {
    */
   void createIntegration(final IntegrationVO integrationVO) throws EEAException;
 
-
-
   /**
    * Delete integration.
    *
@@ -30,7 +26,6 @@ public interface IntegrationService {
    * @throws EEAException the EEA exception
    */
   void deleteIntegration(final Long integrationId) throws EEAException;
-
 
   /**
    * Update integration.
@@ -50,16 +45,13 @@ public interface IntegrationService {
   List<IntegrationVO> getAllIntegrationsByCriteria(final IntegrationVO integrationVO)
       throws EEAException;
 
-
   /**
    * Gets only extensions and operations.
    *
    * @param integrationVOList the integration VO list
    * @return the only extensions and operations
-   * @throws EEAException the EEA exception
    */
   List<IntegrationVO> getOnlyExtensionsAndOperations(List<IntegrationVO> integrationVOList);
-
 
   /**
    * Copy integrations.
@@ -72,8 +64,6 @@ public interface IntegrationService {
   void copyIntegrations(Long dataflowIdDestination, List<String> originDatasetSchemaIds,
       Map<String, String> dictionaryOriginTargetObjectId) throws EEAException;
 
-
-
   /**
    * Execute EU dataset export.
    *
@@ -81,6 +71,14 @@ public interface IntegrationService {
    * @return the list
    * @throws EEAException the EEA exception
    */
-  public List<ExecutionResultVO> executeEUDatasetExport(Long dataflowId) throws EEAException;
+  List<ExecutionResultVO> executeEUDatasetExport(Long dataflowId) throws EEAException;
 
+  /**
+   * Creates the default integration.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   */
+  void createDefaultIntegration(Long dataflowId, Long datasetId, String datasetSchemaId);
 }

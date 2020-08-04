@@ -29,14 +29,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
-
 /**
  * The Class IntegrationControllerImpl.
  */
 @RestController
 @RequestMapping("/integration")
 public class IntegrationControllerImpl implements IntegrationController {
-
 
   /** The integration service. */
   @Autowired
@@ -48,7 +46,6 @@ public class IntegrationControllerImpl implements IntegrationController {
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
 
   /**
    * Find all integrations by criteria.
@@ -71,8 +68,6 @@ public class IntegrationControllerImpl implements IntegrationController {
     }
   }
 
-
-
   /**
    * Creates the integration.
    *
@@ -83,22 +78,19 @@ public class IntegrationControllerImpl implements IntegrationController {
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#integration.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
   public void createIntegration(@RequestBody IntegrationVO integration) {
-
     try {
       integrationService.createIntegration(integration);
     } catch (EEAException e) {
       LOG_ERROR.error("Error creating integration. Message: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
-
   }
-
-
 
   /**
    * Delete integration.
    *
    * @param integrationId the integration id
+   * @param dataflowId the dataflow id
    */
   @Override
   @HystrixCommand
@@ -113,7 +105,6 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error("Error deleting an integration. Message: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
-
   }
 
   /**
@@ -156,7 +147,6 @@ public class IntegrationControllerImpl implements IntegrationController {
     }
   }
 
-
   /**
    * Execute integration process.
    *
@@ -176,7 +166,6 @@ public class IntegrationControllerImpl implements IntegrationController {
     return integrationExecutorFactory.getExecutor(integrationToolTypeEnum)
         .execute(integrationOperationTypeEnum, file, datasetId, integration);
   }
-
 
   /**
    * Execute EU dataset export.
@@ -199,7 +188,6 @@ public class IntegrationControllerImpl implements IntegrationController {
     }
   }
 
-
   /**
    * Copy integrations.
    *
@@ -218,6 +206,18 @@ public class IntegrationControllerImpl implements IntegrationController {
     }
   }
 
-
-
+  /**
+   * Creates the default integration.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   */
+  @Override
+  @PostMapping("/private/createDefaultIntegration")
+  public void createDefaultIntegration(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("datasetId") Long datasetId,
+      @RequestParam("datasetSchemaId") String datasetSchemaId) {
+    integrationService.createDefaultIntegration(dataflowId, datasetId, datasetSchemaId);
+  }
 }
