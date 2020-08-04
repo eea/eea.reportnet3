@@ -3,7 +3,6 @@ package org.eea.dataflow.controller;
 import java.util.List;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
 import org.eea.dataflow.service.IntegrationService;
-import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
@@ -79,12 +78,6 @@ public class IntegrationControllerImpl implements IntegrationController {
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#integration.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
   public void createIntegration(@RequestBody IntegrationVO integration) {
-
-    if (IntegrationOperationTypeEnum.EXPORT_EU_DATASET.equals(integration.getOperation())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_CREATION);
-    }
-
     try {
       integrationService.createIntegration(integration);
     } catch (EEAException e) {
@@ -225,11 +218,6 @@ public class IntegrationControllerImpl implements IntegrationController {
   public void createDefaultIntegration(@RequestParam("dataflowId") Long dataflowId,
       @RequestParam("datasetId") Long datasetId,
       @RequestParam("datasetSchemaId") String datasetSchemaId) {
-    try {
-      integrationService.createDefaultIntegration(dataflowId, datasetId, datasetSchemaId);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error creating default integration. Message: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-    }
+    integrationService.createDefaultIntegration(dataflowId, datasetId, datasetSchemaId);
   }
 }

@@ -79,8 +79,6 @@ public interface IntegrationService {
    * @param dataflowId the dataflow id
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
-   * @throws EEAException the EEA exception
    */
-  void createDefaultIntegration(Long dataflowId, Long datasetId, String datasetSchemaId)
-      throws EEAException;
+  void createDefaultIntegration(Long dataflowId, Long datasetId, String datasetSchemaId);
 }

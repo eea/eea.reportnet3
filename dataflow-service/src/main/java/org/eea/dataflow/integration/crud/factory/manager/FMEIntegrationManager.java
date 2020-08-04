@@ -147,10 +147,14 @@ public class FMEIntegrationManager extends AbstractCrudManager {
    * Creates the.
    *
    * @param integrationVO the integration VO
-   * @throws EEAException the EEA exception
    */
   @Override
-  public void create(IntegrationVO integrationVO) throws EEAException {
+  public void create(IntegrationVO integrationVO) {
+
+    if (IntegrationOperationTypeEnum.EXPORT_EU_DATASET.equals(integrationVO.getOperation())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_CREATION);
+    }
 
     if (integrationVO.getInternalParameters() == null
         || integrationVO.getInternalParameters().size() == 0

@@ -218,8 +218,7 @@ public class IntegrationServiceImpl implements IntegrationService {
    */
   @Transactional
   @Override
-  public void createDefaultIntegration(Long dataflowId, Long datasetId, String datasetSchemaId)
-      throws EEAException {
+  public void createDefaultIntegration(Long dataflowId, Long datasetId, String datasetSchemaId) {
     Map<String, String> internalParameters = new HashMap<>();
     internalParameters.put(DATAFLOW_ID, dataflowId.toString());
     internalParameters.put(DATASET_ID, datasetId.toString());
