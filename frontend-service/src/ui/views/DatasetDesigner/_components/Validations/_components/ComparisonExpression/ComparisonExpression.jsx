@@ -516,7 +516,9 @@ const ComparisonExpression = ({
           value={expressionValues.valueTypeSelector}
         />
       </span>
-      <span onBlur={() => onAddToClickedFields('field2')} className={`formField ${printRequiredFieldError('field2')}`}>
+      <span
+        onBlur={() => onAddToClickedFields('field2')}
+        className={`formField ${styles.expressionValue} ${printRequiredFieldError('field2')}`}>
         {getValueField()}
       </span>
 

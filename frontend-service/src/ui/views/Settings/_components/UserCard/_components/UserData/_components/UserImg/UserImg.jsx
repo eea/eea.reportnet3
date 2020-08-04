@@ -118,7 +118,7 @@ const UserImg = () => {
           }}
           type="file"
         />
-        <label for="userIcon" className="srOnly">
+        <label htmlFor="userIcon" className="srOnly">
           {resources.messages['selectImage']}
         </label>
         <img
