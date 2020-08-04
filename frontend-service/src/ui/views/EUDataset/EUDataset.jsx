@@ -172,7 +172,6 @@ export const EUDataset = withRouter(({ history, match }) => {
         }));
       });
 
-      console.log('datasetStatistics', datasetStatistics)
       euDatasetDispatch({
         type: 'ON_LOAD_DATASET_SCHEMA',
         payload: {

@@ -164,7 +164,7 @@ export const ManageIntegrations = ({
     if (datasetType === 'designDataset') {
       manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
     } else {
-      return null;
+      manageDialogs(false);
     }
   };
 
@@ -266,6 +266,7 @@ export const ManageIntegrations = ({
   const onUpdateIntegration = async () => {
     try {
       const response = await IntegrationService.update(manageIntegrationsState);
+
       if (response.status >= 200 && response.status <= 299) {
         onCloseModal();
         onUpdateData();
@@ -507,5 +508,6 @@ export const ManageIntegrations = ({
 ManageIntegrations.defaultProps = {
   dataflowId: null,
   datasetId: null,
-  datasetType: 'designDataset'
+  datasetType: 'designDataset',
+  onUpdateData: () => {}
 };
