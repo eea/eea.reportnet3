@@ -137,7 +137,7 @@ export const useSetColumns = (
           iconPos="right"
           label={value}
           onClick={() => {
-            onFileDownload();
+            onFileDownload(fieldId);
           }}
         />
       )}
@@ -190,7 +190,7 @@ export const useSetColumns = (
       const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
       const message = DataViewerUtils.formatValidations(validations);
       const levelError = DataViewerUtils.getLevelError(validations);
-      // console.log({ field, rowData }, records.selectedRecord);
+      // console.log({ field, rowData });
       return (
         <div
           style={{
@@ -209,7 +209,7 @@ export const useSetColumns = (
                   !Array.isArray(field.fieldData[column.field]))
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData.type === 'PHONE'
-              ? renderAttachment(field.fieldData[column.field], column.field)
+              ? renderAttachment(field.fieldData[column.field], field.fieldData['id'])
               : field.fieldData[column.field]
             : null}
           <IconTooltip levelError={levelError} message={message} />
@@ -234,7 +234,7 @@ export const useSetColumns = (
                   !Array.isArray(field.fieldData[column.field]))
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData.type === 'PHONE'
-              ? renderAttachment(field.fieldData[column.field], column.field)
+              ? renderAttachment(field.fieldData[column.field], field.fieldData['id'])
               : field.fieldData[column.field]
             : null}
         </div>
