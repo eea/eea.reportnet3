@@ -26,6 +26,7 @@ const useBigButtonList = ({
   onDatasetSchemaNameError,
   onDuplicateName,
   onExportEuDataset,
+  onLoadIntegrations,
   onLoadReceiptData,
   onSaveName,
   onShowDataCollectionModal,
@@ -425,7 +426,10 @@ const useBigButtonList = ({
 
   const exportEuDatasetModel = !isNil(dataflowState.data.euDatasets)
     ? dataflowState.data.euDatasets.map(dataset => ({
-        command: () => handleExportEuDataset(),
+        command: () => {
+          handleExportEuDataset(true);
+          onLoadIntegrations(dataset.datasetSchemaId, dataset.euDatasetId);
+        },
         icon: 'export',
         label: dataset.euDatasetName
       }))

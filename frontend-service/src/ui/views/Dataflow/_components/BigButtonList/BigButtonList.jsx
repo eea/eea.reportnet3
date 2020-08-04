@@ -21,6 +21,8 @@ import { DataCollectionService } from 'core/services/DataCollection';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { EuDatasetService } from 'core/services/EuDataset';
+import { IntegrationService } from 'core/services/Integration';
+import { ManageIntegrations } from 'ui/views/_components/ManageIntegrations/ManageIntegrations';
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -30,9 +32,9 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
+import { IntegrationsUtils } from 'ui/views/DatasetDesigner/_components/Integrations/_functions/Utils/IntegrationsUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
-import { ManageIntegrations } from 'ui/views/_components/ManageIntegrations/ManageIntegrations';
 
 export const BigButtonList = ({
   dataflowState,
@@ -63,8 +65,10 @@ export const BigButtonList = ({
   const [isActiveButton, setIsActiveButton] = useState(true);
   const [isConfirmCollectionDialog, setIsConfirmCollectionDialog] = useState(false);
   const [isDuplicated, setIsDuplicated] = useState(false);
+  const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
   const [isUpdateDataCollectionDialogVisible, setIsUpdateDataCollectionDialogVisible] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
+  const [euDatasetExportIntegration, setEuDatasetExportIntegration] = useState({ datasetId: null, data: {} });
 
   const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
   const receiptBtnRef = useRef(null);
@@ -193,11 +197,7 @@ export const BigButtonList = ({
     }
   };
 
-  const handleExportEuDataset = () => {
-    const exportState = { datasetSchemaId: null, isIntegrationManageDialogVisible: false };
-
-    return <ManageIntegrations state={exportState} />;
-  };
+  const handleExportEuDataset = value => setIsIntegrationManageDialogVisible(value);
 
   const onCloneDataflow = async () => {
     setCloneDialogVisible(true);
@@ -353,6 +353,19 @@ export const BigButtonList = ({
     </Fragment>
   );
 
+  const onLoadIntegrations = async (datasetSchemaId, datasetId) => {
+    try {
+      const response = await IntegrationService.all(dataflowId, datasetSchemaId);
+      console.log('response', response);
+
+      const data = IntegrationsUtils.parseIntegrationsList(response);
+
+      setEuDatasetExportIntegration({ data, datasetId });
+    } catch (error) {
+      notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
+    }
+  };
+
   const bigButtonList = uniqBy(
     useBigButtonList({
       dataflowId,
@@ -366,6 +379,7 @@ export const BigButtonList = ({
       onDatasetSchemaNameError,
       onDuplicateName,
       onExportEuDataset,
+      onLoadIntegrations,
       onLoadReceiptData,
       onSaveName,
       onShowDataCollectionModal,
@@ -387,6 +401,17 @@ export const BigButtonList = ({
           <div className={styles.datasetItem}>{bigButtonList}</div>
         </div>
       </div>
+
+      {isIntegrationManageDialogVisible && (
+        <ManageIntegrations
+          dataflowId={dataflowId}
+          datasetId={euDatasetExportIntegration.datasetId}
+          datasetType={'dataflow'}
+          manageDialogs={handleExportEuDataset}
+          state={{ isIntegrationManageDialogVisible }}
+          updatedData={euDatasetExportIntegration.data}
+        />
+      )}
 
       {newDatasetDialog && (
         <Dialog

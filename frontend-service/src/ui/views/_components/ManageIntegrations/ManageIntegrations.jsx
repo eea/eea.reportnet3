@@ -93,8 +93,10 @@ export const ManageIntegrations = ({
   }, [updatedData]);
 
   useEffect(() => {
-    getRepositories();
-  }, []);
+    if (datasetId) {
+      getRepositories();
+    }
+  }, [datasetId]);
 
   useEffect(() => {
     getProcesses();
@@ -164,7 +166,7 @@ export const ManageIntegrations = ({
     if (datasetType === 'designDataset') {
       manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
     } else {
-      return null;
+      manageDialogs(false);
     }
   };
 
