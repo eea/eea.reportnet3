@@ -76,6 +76,7 @@ public class IntegrationServiceImpl implements IntegrationService {
   @Autowired
   private IntegrationRepository integrationRepository;
 
+  /** The integration mapper. */
   @Autowired
   private IntegrationMapper integrationMapper;
 
@@ -224,7 +225,6 @@ public class IntegrationServiceImpl implements IntegrationService {
    * @param dataflowId the dataflow id
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
-   * @throws EEAException the EEA exception
    */
   @Transactional
   @Override
