@@ -129,6 +129,18 @@ export const apiDataset = {
       return false;
     }
   },
+
+  downloadExportFile: async (datasetSchemaId, providerId) => {
+    const response = await HTTPRequester.download({
+      url: getUrl(DatasetConfig.downloadExportFile, {
+        datasetSchemaId,
+        providerId
+      })
+    });
+
+    return response.data;
+  },
+
   deleteTableDesign: async (datasetId, tableSchemaId) => {
     try {
       const response = await HTTPRequester.delete({

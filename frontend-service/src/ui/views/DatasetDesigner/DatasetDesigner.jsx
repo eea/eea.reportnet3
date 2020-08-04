@@ -218,7 +218,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, [designerState.datasetSchemaName, designerState.extensionsOperationsList]);
 
   useEffect(() => {
-
     if (!isNil(designerState.exportDatasetData)) {
       DownloadFile(designerState.exportDatasetData, designerState.exportDatasetDataName);
     }
@@ -247,6 +246,17 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const createFileName = (fileName, fileType) => `${fileName}.${fileType}`;
+
+  const downloadFile = async () => {
+    try {
+      const response = await DatasetService.downloadExportFile(designerState.datasetSchemaId, null);
+      console.log('response', response);
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
+
+  useCheckNotifications(['EXPORT_DATA_BY_ID_ERROR'], downloadFile, true);
 
   const filterActiveIndex = index => {
     if (!isNil(index) && isNaN(index)) {
