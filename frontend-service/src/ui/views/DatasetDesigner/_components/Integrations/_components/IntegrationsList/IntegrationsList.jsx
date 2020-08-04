@@ -46,11 +46,11 @@ export const IntegrationsList = ({
     <ActionsColumn
       onDeleteClick={row.operation === 'EXPORT_EU_DATASET' ? null : () => isDeleteDialogVisible(true)}
       onEditClick={() => {
-        const updatedData = integrationListState.data.filter(
+        const filteredData = integrationListState.data.filter(
           integration => integration.integrationId === row.integrationId
         );
         manageDialogs('isIntegrationManageDialogVisible', true, 'isIntegrationListDialogVisible', false);
-        getUpdatedData(updatedData);
+        if (!isEmpty(filteredData)) getUpdatedData(filteredData[0]);
       }}
     />
   );
