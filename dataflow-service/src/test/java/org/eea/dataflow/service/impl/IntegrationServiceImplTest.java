@@ -7,8 +7,12 @@ import java.util.Arrays;
 import java.util.List;
 import org.eea.dataflow.integration.crud.factory.CrudManager;
 import org.eea.dataflow.integration.crud.factory.CrudManagerFactory;
+import org.eea.dataflow.mapper.IntegrationMapper;
+import org.eea.dataflow.persistence.domain.Integration;
+import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +39,14 @@ public class IntegrationServiceImplTest {
   /** The crud manager factory. */
   @Mock
   private CrudManagerFactory crudManagerFactory;
+
+  /** The integration repository. */
+  @Mock
+  private IntegrationRepository integrationRepository;
+
+  /** The integration mapper. */
+  @Mock
+  private IntegrationMapper integrationMapper;
 
   /**
    * Inits the mocks.
@@ -130,5 +142,21 @@ public class IntegrationServiceImplTest {
     Mockito.doNothing().when(crudManager).create(Mockito.any());
     integrationService.createDefaultIntegration(1L, 1L, "5ce524fad31fc52540abae73");
     Mockito.verify(crudManager, times(1)).create(Mockito.any());
+  }
+
+  /**
+   * Gets the expor EU dataset integration by dataset id test.
+   *
+   * @return the expor EU dataset integration by dataset id test
+   */
+  @Test
+  public void getExporEUDatasetIntegrationByDatasetIdTest() {
+    IntegrationVO expected = new IntegrationVO();
+    Mockito
+        .when(integrationRepository.findFirstByDatasetIdAndOperation(Mockito.any(), Mockito.any()))
+        .thenReturn(new Integration());
+    Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(expected);
+    IntegrationVO response = integrationService.getExporEUDatasetIntegrationByDatasetId(1L);
+    Assert.assertEquals(expected, response);
   }
 }
