@@ -1,3 +1,4 @@
+export { CurrentPage } from './CurrentPage';
 export { ErrorUtils } from './ErrorUtils';
 export { ExtensionUtils } from './ExtensionUtils';
 export { MetadataUtils } from './MetadataUtils';

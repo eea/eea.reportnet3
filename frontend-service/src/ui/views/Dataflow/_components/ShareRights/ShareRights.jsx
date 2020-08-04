@@ -232,7 +232,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
             );
           })}
         </select>
-        <label for="dataProvider" className="srOnly">
+        <label htmlFor="dataProvider" className="srOnly">
           {resources.messages['manageRolesDialogInputPlaceholder']}
         </label>
       </>
@@ -255,7 +255,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
           placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
           value={contributor.account}
         />
-        <label for="emptyInput" className="srOnly">
+        <label htmlFor="emptyInput" className="srOnly">
           {resources.messages['manageRolesDialogInputPlaceholder']}
         </label>
       </div>

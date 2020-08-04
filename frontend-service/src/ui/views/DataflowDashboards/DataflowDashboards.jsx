@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState, Fragment } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { isUndefined } from 'lodash';
@@ -8,18 +8,19 @@ import styles from './DataflowDashboards.module.css';
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
+import { DatasetValidationDashboard } from './_components/DatasetValidationDashboard';
 import { MainLayout } from 'ui/views/_components/Layout';
+import { ReleasedDatasetsDashboard } from './_components/ReleasedDatasetsDashboard';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
-import { ReleasedDatasetsDashboard } from './_components/ReleasedDatasetsDashboard';
-import { DatasetValidationDashboard } from './_components/DatasetValidationDashboard';
 
 import { DataflowService } from 'core/services/Dataflow';
 
-import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 
+import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const DataflowDashboards = withRouter(
@@ -29,7 +30,6 @@ export const DataflowDashboards = withRouter(
     },
     history
   }) => {
-    const breadCrumbContext = useContext(BreadCrumbContext);
     const leftSideBarContext = useContext(LeftSideBarContext);
     const resources = useContext(ResourcesContext);
 
@@ -37,49 +37,10 @@ export const DataflowDashboards = withRouter(
     const [dataflowName, setDataflowName] = useState('');
     const [dataSchema, setDataSchema] = useState();
 
-    useEffect(() => {
-      breadCrumbContext.add([
-        {
-          label: resources.messages['homeBreadcrumb'],
-          href: getUrl(routes.DATAFLOWS),
-          command: () => history.push(getUrl(routes.DATAFLOWS))
-        },
-        {
-          label: resources.messages['dataflows'],
-          icon: 'home',
-          href: routes.DATAFLOWS,
-          command: () => history.push(getUrl(routes.DATAFLOWS))
-        },
-        {
-          label: resources.messages['dataflow'],
-          icon: 'clone',
-          href: getUrl(
-            routes.DATAFLOW,
-            {
-              dataflowId
-            },
-            true
-          ),
-          command: () =>
-            history.push(
-              getUrl(
-                routes.DATAFLOW,
-                {
-                  dataflowId
-                },
-                true
-              )
-            )
-        },
-        {
-          label: resources.messages['dashboards'],
-          icon: 'barChart'
-        }
-      ]);
-      leftSideBarContext.removeModels();
-    }, []);
+    useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_DASHBOARDS, dataflowId, history });
 
     useEffect(() => {
+      leftSideBarContext.removeModels();
       try {
         getDataflowName();
         onLoadDataSchemas();
