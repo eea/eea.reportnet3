@@ -58,7 +58,7 @@ export const TableViewSchemas = ({
           onChange={() => onSelectDataflow(row)}
           role="checkbox"
         />
-        <label for={`${row.id}_checkbox`} className="srOnly">
+        <label htmlFor={`${row.id}_checkbox`} className="srOnly">
           {resources.messages['selectedDataflow']}
         </label>
       </div>

@@ -78,8 +78,7 @@ export const useSetColumns = (
   columnOptions,
   hasWritePermissions,
   initialCellValue,
-  isDataCollection,
-  isEUDataset,
+  hasCountryCode,
   records,
   resources,
   setIsColumnInfoVisible,
@@ -286,11 +285,11 @@ export const useSetColumns = (
       />
     );
 
-    if (!isDataCollection && !isEUDataset) {
+    if (!hasCountryCode) {
       hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
     }
 
-    if (isDataCollection || isEUDataset) {
+    if (hasCountryCode) {
       columnsArr.unshift(providerCode);
     }
 
