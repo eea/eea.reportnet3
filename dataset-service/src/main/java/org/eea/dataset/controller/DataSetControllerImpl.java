@@ -2,11 +2,13 @@ package org.eea.dataset.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import javax.ws.rs.Produces;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.helper.DeleteHelper;
@@ -24,6 +26,7 @@ import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -106,6 +109,9 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
+
+  @Autowired
+  private DatasetSchemaService datasetSchemaService;
 
   /**
    * Gets the data tables values.
@@ -760,6 +766,9 @@ public class DataSetControllerImpl implements DatasetController {
 
     try {
       String fileName = file.getOriginalFilename();
+      if (!validateAttachment(datasetId, idField, fileName, file.getSize())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
+      }
       InputStream is = file.getInputStream();
       datasetService.updateAttachment(datasetId, idField, fileName, is);
     } catch (EEAException | IOException e) {
@@ -767,6 +776,37 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
 
+  }
+
+  /**
+   * Validate attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @param originalFilename the original filename
+   * @param size the size
+   * @return the boolean
+   * @throws EEAException the EEA exception
+   */
+  private boolean validateAttachment(Long datasetId, String idField, String originalFilename,
+      Long size) throws EEAException {
+
+    Boolean result = true;
+    String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+    if (datasetSchemaId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND);
+    }
+    FieldSchemaVO fieldSchema = datasetSchemaService.getFieldSchema(datasetSchemaId, idField);
+    if (fieldSchema == null || fieldSchema.getId() == null) {
+      throw new EEAException(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND);
+    }
+    if ((fieldSchema.getMaxSize() != null && fieldSchema.getMaxSize() < size)
+        || (fieldSchema.getValidExtensions() != null
+            && !Arrays.asList(fieldSchema.getValidExtensions())
+                .contains(datasetService.getMimetype(originalFilename)))) {
+      result = false;
+    }
+    return result;
   }
 
   @Override
