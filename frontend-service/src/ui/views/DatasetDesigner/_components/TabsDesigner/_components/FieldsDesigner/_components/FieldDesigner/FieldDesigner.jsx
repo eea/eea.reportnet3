@@ -7,6 +7,7 @@ import styles from './FieldDesigner.module.scss';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import { AttachmentEditor } from './_components/AttachmentEditor';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'primereact/checkbox';
@@ -29,6 +30,7 @@ export const FieldDesigner = ({
   checkDuplicates,
   codelistItems,
   datasetId,
+  fieldFileProperties,
   fieldId,
   fieldDescription,
   fieldName,
@@ -106,11 +108,13 @@ export const FieldDesigner = ({
     fieldValue: fieldName,
     initialDescriptionValue: undefined,
     initialFieldValue: undefined,
+    isAttachmentEditorVisible: false,
     isCodelistEditorVisible: false,
     isDragging: false,
     isEditing: false,
     isLinkSelectorVisible: false,
-    isQCManagerVisible: false
+    isQCManagerVisible: false,
+    fieldFileProperties: { maxSize: '', validExtensions: [] }
   };
 
   const [fieldDesignerState, dispatchFieldDesigner] = useReducer(fieldDesignerReducer, initialFieldDesignerState);
@@ -175,6 +179,13 @@ export const FieldDesigner = ({
       }
     }
   }, [fieldDesignerState.isDragging]);
+
+  const onAttachmentDropdownSelected = fieldType => {
+    if (!isUndefined(fieldType)) {
+      onCodelistAndLinkShow(fieldId, fieldType);
+    }
+    dispatchFieldDesigner({ type: 'TOGGLE_ATTACHMENT_EDITOR_VISIBLE', payload: true });
+  };
 
   const onChangeFieldType = type => {
     dispatchFieldDesigner({ type: 'SET_TYPE', payload: { type, previousType: fieldDesignerState.fieldTypeValue } });
@@ -274,6 +285,15 @@ export const FieldDesigner = ({
         }
       }
     }
+  };
+
+  const onCancelSaveAttachment = () => {
+    if (!isUndefined(fieldId)) {
+      if (fieldId.toString() === '-1') {
+        onFieldAdd({ validExtensions: fieldFileProperties.validExtensions, maxSize: fieldFileProperties.maxSize });
+      }
+    }
+    dispatchFieldDesigner({ type: 'CANCEL_SELECT_CODELIST' });
   };
 
   const onCancelSaveLink = (link, pkMustBeUsed, pkHasMultipleValues) => {
@@ -479,6 +499,25 @@ export const FieldDesigner = ({
     dispatchFieldDesigner({ type: 'SET_REQUIRED', payload: checked });
   };
 
+  const onSaveAttachment = fileProperties => {
+    dispatchFieldDesigner({
+      type: 'SET_ATTACHMENT_PROPERTIES',
+      payload: { validExtensions: fileProperties.validExtensions, maxSize: fileProperties.maxSize }
+    });
+    if (fieldDesignerState.fieldValue === '') {
+      onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
+    } else {
+      if (!isUndefined(fieldId)) {
+        if (fieldId.toString() === '-1') {
+          onFieldAdd({ validExtensions: fieldFileProperties.validExtensions, maxSize: fieldFileProperties.maxSize });
+        } else {
+          fieldUpdate({ validExtensions: fieldFileProperties.validExtensions, maxSize: fieldFileProperties.maxSize });
+        }
+      }
+    }
+    dispatchFieldDesigner({ type: 'TOGGLE_ATTACHMENT_EDITOR_VISIBLE', payload: false });
+  };
+
   const onSaveCodelist = codelistItems => {
     dispatchFieldDesigner({ type: 'SET_CODELIST_ITEMS', payload: codelistItems });
     if (fieldDesignerState.fieldValue === '') {
@@ -664,7 +703,7 @@ export const FieldDesigner = ({
     </div>
   );
 
-  const renderCodelistAndLinkButtons = () => {
+  const renderCodelistFileAndLinkButtons = () => {
     return !isUndefined(fieldDesignerState.fieldTypeValue) &&
       (fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ||
         fieldDesignerState.fieldTypeValue.fieldType === 'Multiselect_Codelist') ? (
@@ -705,6 +744,23 @@ export const FieldDesigner = ({
         }
         tooltipOptions={{ position: 'top' }}
       />
+    ) : !isUndefined(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue.fieldType === 'Phone' ? (
+      <Button
+        className={`${styles.codelistButton} p-button-secondary-transparent`}
+        label={
+          !isUndefined(fieldDesignerState.validExtensions) && !isEmpty(fieldDesignerState.validExtensions)
+            ? `${fieldDesignerState.validExtensions.join(', ')}`
+            : resources.messages['fileExtensionsSelection']
+        }
+        onClick={() => onAttachmentDropdownSelected()}
+        style={{ pointerEvents: 'auto' }}
+        tooltip={
+          !isUndefined(fieldDesignerState.validExtensions) && !isEmpty(fieldDesignerState.validExtensions)
+            ? `${fieldDesignerState.validExtensions.join(', ')}`
+            : resources.messages['fileExtensionsSelection']
+        }
+        tooltipOptions={{ position: 'top' }}
+      />
     ) : isCodelistOrLink ? (
       <span style={{ width: '4rem', marginRight: '0.4rem' }}></span>
     ) : null;
@@ -728,27 +784,6 @@ export const FieldDesigner = ({
         <span className="srOnly">{resources.messages['deleteFieldLabel']}</span>
       </a>
     ) : null;
-
-  const renderFileExtensionsAndSizeButtons = () =>
-    !isUndefined(fieldDesignerState.fieldTypeValue) &&
-    fieldDesignerState.fieldTypeValue.fieldType === 'Phone' && (
-      <Button
-        className={`${styles.codelistButton} p-button-secondary-transparent`}
-        label={
-          !isUndefined(fieldDesignerState.validExtensions) && !isEmpty(fieldDesignerState.validExtensions)
-            ? `${fieldDesignerState.validExtensions.join(', ')}`
-            : resources.messages['fileExtensionsSelection']
-        }
-        onClick={() => onCodelistDropdownSelected()}
-        style={{ pointerEvents: 'auto' }}
-        tooltip={
-          !isUndefined(fieldDesignerState.validExtensions) && !isEmpty(fieldDesignerState.validExtensions)
-            ? `${fieldDesignerState.validExtensions.join(', ')}`
-            : resources.messages['fileExtensionsSelection']
-        }
-        tooltipOptions={{ position: 'top' }}
-      />
-    );
 
   const renderInputs = () => (
     <React.Fragment>
@@ -850,8 +885,7 @@ export const FieldDesigner = ({
 
         {renderCheckboxes()}
         {renderInputs()}
-        {renderCodelistAndLinkButtons()}
-        {renderFileExtensionsAndSizeButtons()}
+        {renderCodelistFileAndLinkButtons()}
         {!addField ? (
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton}`}
@@ -869,6 +903,15 @@ export const FieldDesigner = ({
           onCancelSaveCodelist={onCancelSaveCodelist}
           onSaveCodelist={onSaveCodelist}
           selectedCodelist={fieldDesignerState.codelistItems}
+          type={fieldDesignerState.fieldTypeValue.value}
+        />
+      ) : null}
+      {fieldDesignerState.isAttachmentEditorVisible ? (
+        <AttachmentEditor
+          isAttachmentEditorVisible={fieldDesignerState.isAttachmentEditorVisible}
+          onCancelSaveAttachment={onCancelSaveAttachment}
+          onSaveAttachment={onSaveAttachment}
+          selectedAttachment={fieldDesignerState.fieldFileProperties}
           type={fieldDesignerState.fieldTypeValue.value}
         />
       ) : null}

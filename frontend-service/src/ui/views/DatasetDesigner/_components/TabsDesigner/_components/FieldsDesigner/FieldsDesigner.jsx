@@ -77,25 +77,29 @@ export const FieldsDesigner = ({
           field =>
             field.type.toUpperCase() === 'CODELIST' ||
             field.type.toUpperCase() === 'MULTISELECT_CODELIST' ||
-            field.type.toUpperCase() === 'LINK'
+            field.type.toUpperCase() === 'LINK' ||
+            field.type.toUpperCase() === 'PHONE'
         ).length > 0
       );
     }
   }, [fields]);
 
   const onCodelistAndLinkShow = (fieldId, selectedField) => {
+    console.log(selectedField.fieldType);
     setIsCodelistOrLink(
       fields.filter(field => {
         return (
           (field.type.toUpperCase() === 'CODELIST' ||
             field.type.toUpperCase() === 'MULTISELECT_CODELIST' ||
-            field.type.toUpperCase() === 'LINK') &&
+            field.type.toUpperCase() === 'LINK' ||
+            field.type.toUpperCase() === 'PHONE') &&
           field.fieldId !== fieldId
         );
       }).length > 0 ||
         selectedField.fieldType.toUpperCase() === 'CODELIST' ||
         selectedField.fieldType.toUpperCase() === 'MULTISELECT_CODELIST' ||
-        selectedField.fieldType.toUpperCase() === 'LINK'
+        selectedField.fieldType.toUpperCase() === 'LINK' ||
+        selectedField.fieldType.toUpperCase() === 'PHONE'
     );
   };
 
@@ -357,6 +361,7 @@ export const FieldsDesigner = ({
           checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
           codelistItems={[]}
           datasetId={datasetId}
+          fieldFileProperties={{}}
           fieldId="-1"
           fieldName=""
           fieldLink={null}
@@ -393,6 +398,7 @@ export const FieldsDesigner = ({
                 codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
                 datasetId={datasetId}
                 fieldDescription={field.description}
+                fieldFileProperties={{ validExtensions: field.validExtensions, maxSize: field.maxSize }}
                 fieldId={field.fieldId}
                 fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
                 fieldName={field.name}
