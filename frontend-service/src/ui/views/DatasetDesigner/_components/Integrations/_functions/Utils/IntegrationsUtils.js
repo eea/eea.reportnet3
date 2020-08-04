@@ -9,20 +9,12 @@ const parseIntegration = data => ({
   name: data.integrationName,
   operation: { label: data.operation, value: data.operation },
   processName: !isNil(data.internalParameters.processName)
-    ? {
-        label: data.internalParameters.processName,
-        value: data.internalParameters.processName
-      }
+    ? { label: data.internalParameters.processName, value: data.internalParameters.processName }
     : {},
   repository: !isNil(data.internalParameters.repository)
-    ? {
-        label: data.internalParameters.repository,
-        value: data.internalParameters.repository
-      }
+    ? { label: data.internalParameters.repository, value: data.internalParameters.repository }
     : {}
 });
-
-const parseIntegrationsList = (data = []) => data.map(integration => parseIntegration(integration))[0];
 
 const parseIntegrationParameters = parameters => {
   return Object.keys(parameters).map((item, index) => ({
@@ -34,4 +26,4 @@ const parseIntegrationParameters = parameters => {
   }));
 };
 
-export const IntegrationsUtils = { parseIntegrationsList };
+export const IntegrationsUtils = { parseIntegration };
