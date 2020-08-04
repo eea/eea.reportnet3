@@ -27,6 +27,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
@@ -811,6 +812,21 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       designDatasetService.copyDesignDatasets(dataflowIdOrigin, dataflowIdDestination);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+  }
+
+  @Override
+  @GetMapping(value = "/getSimpleSchema/dataset/{datasetId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public SimpleDatasetSchemaVO getSimpleSchema(@PathVariable("datasetId") Long datasetId) {
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    try {
+      return dataschemaService.getSimpleSchema(datasetId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
   }
 

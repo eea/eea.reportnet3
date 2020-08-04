@@ -4,6 +4,7 @@ import java.util.List;
 import org.eea.interfaces.vo.dataset.OrderVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -274,5 +275,15 @@ public interface DatasetSchemaController {
   @PostMapping(value = "/copy", produces = MediaType.APPLICATION_JSON_VALUE)
   void copyDesignsFromDataflow(@RequestParam("sourceDataflow") Long dataflowIdOrigin,
       @RequestParam("targetDataflow") Long dataflowIdDestination);
+
+  /**
+   * Gets the simple schema.
+   *
+   * @param datasetId the dataset id
+   * @return the simple schema
+   */
+  @GetMapping(value = "/getSimpleSchema/dataset/{datasetId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  SimpleDatasetSchemaVO getSimpleSchema(@PathVariable("datasetId") Long datasetId);
 
 }
