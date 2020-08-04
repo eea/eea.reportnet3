@@ -79,8 +79,6 @@ public class IntegrationControllerImpl implements IntegrationController {
     }
   }
 
-
-
   /**
    * Find expor EU dataset integration by dataset id.
    *
@@ -88,7 +86,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    * @return the integration VO
    */
   @Override
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   @GetMapping("/findExportEUDatasetIntegration")
   public IntegrationVO findExporEUDatasetIntegrationByDatasetId(
       @RequestParam("datasetId") Long datasetId) {
@@ -108,14 +106,12 @@ public class IntegrationControllerImpl implements IntegrationController {
   @ApiResponse(code = 500, message = "Internal Server Error")
   public void createIntegration(@ApiParam(type = "Object",
       value = "IntegrationVO Object") @RequestBody IntegrationVO integration) {
-
     try {
       integrationService.createIntegration(integration);
     } catch (EEAException e) {
       LOG_ERROR.error("Error creating integration. Message: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
-
   }
 
   /**
@@ -134,7 +130,6 @@ public class IntegrationControllerImpl implements IntegrationController {
       @ApiParam(value = "Integration id",
           example = "0") @PathVariable("integrationId") Long integrationId,
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
-
     try {
       integrationService.deleteIntegration(integrationId);
     } catch (EEAException e) {
@@ -157,7 +152,6 @@ public class IntegrationControllerImpl implements IntegrationController {
   @ApiResponse(code = 500, message = "Internal Server Error")
   public void updateIntegration(@ApiParam(type = "Object",
       value = "IntegrationVO Object") @RequestBody IntegrationVO integration) {
-
     try {
       integrationService.updateIntegration(integration);
     } catch (EEAException e) {
@@ -216,7 +210,6 @@ public class IntegrationControllerImpl implements IntegrationController {
     return integrationExecutorFactory.getExecutor(integrationToolTypeEnum)
         .execute(integrationOperationTypeEnum, file, datasetId, integration);
   }
-
 
   /**
    * Execute EU dataset export.
