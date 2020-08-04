@@ -37,10 +37,10 @@ const isDuplicatedParameter = (id, parameters, value) => {
 };
 
 const isFormEmpty = state => {
-  const requiredKeys = ['fileExtension', 'name', 'operation', 'repository', 'processName'];
+  const requiredFields = requiredKeys(state);
   const isEmptyForm = [];
-  for (let index = 0; index < requiredKeys.length; index++) {
-    const key = requiredKeys[index];
+  for (let index = 0; index < requiredFields.length; index++) {
+    const key = requiredFields[index];
     isEmptyForm.push(isEmpty(state[key]));
   }
 
@@ -92,9 +92,19 @@ const onUpdateCompleteParameter = (id, state) => {
 };
 
 const printError = (field, state) => {
-  const requiredFields = ['fileExtension', 'name', 'operation', 'repository', 'processName'];
+  const requiredFields = requiredKeys(state);
 
   return state.displayErrors && requiredFields.includes(field) && isEmpty(state[field]) ? 'error' : undefined;
+};
+
+const requiredKeys = state => {
+  const requiredFields = ['name', 'operation', 'repository', 'processName'];
+
+  if (!isEmpty(state.operation) && (state.operation.value === 'EXPORT' || state.operation.value === 'IMPORT')) {
+    requiredFields.push('fileExtension');
+  }
+
+  return requiredFields;
 };
 
 const toggleParameterEditorView = (id, option, parameters) => {

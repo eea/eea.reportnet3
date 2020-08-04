@@ -7,6 +7,7 @@ const breadCrumbReducer = (state, { type, payload }) => {
     case 'ADD_MODEL':
       return {
         ...state,
+        prevModel: state.model,
         model: payload
       };
     default:
@@ -15,7 +16,7 @@ const breadCrumbReducer = (state, { type, payload }) => {
 };
 
 const BreadCrumbProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(breadCrumbReducer, { model: [], isLeftSideBarOpened: false });
+  const [state, dispatch] = useReducer(breadCrumbReducer, { model: [], prevModel: [], isLeftSideBarOpened: false });
 
   return (
     <BreadCrumbContext.Provider

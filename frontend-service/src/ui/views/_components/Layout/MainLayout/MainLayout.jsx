@@ -4,13 +4,14 @@ import { isUndefined } from 'lodash';
 
 import styles from './MainLayout.module.css';
 
+import { EuFooter } from './_components/EuFooter';
 import { Footer } from './_components';
 import { Header } from './_components/Header';
-import { EuFooter } from './_components/EuFooter';
 import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { NotificationsList } from './_components/NotificationsList';
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
@@ -25,8 +26,9 @@ const MainLayout = ({ children }) => {
   const themeContext = useContext(ThemeContext);
   const userContext = useContext(UserContext);
 
-  const [margin, setMargin] = useState('50px');
+  const [isNotificationVisible, setIsNotificationVisible] = useState(false);
   const [leftSideBarStyle, setLeftSideBarStyle] = useState({});
+  const [margin, setMargin] = useState('50px');
   const [mainContentStyle, setMainContentStyle] = useState({
     height: `auto`,
     minHeight: `${window.innerHeight - 180}px`,
@@ -126,9 +128,19 @@ const MainLayout = ({ children }) => {
   useSocket();
   return (
     <div id={styles.mainLayoutContainer}>
+      {isNotificationVisible && (
+        <NotificationsList
+          isNotificationVisible={isNotificationVisible}
+          setIsNotificationVisible={setIsNotificationVisible}
+        />
+      )}
       <Header onMainContentStyleChange={onMainContentStyleChange} />
       <div id="mainContent" className={styles.mainContent} style={mainContentStyle}>
-        <LeftSideBar onToggleSideBar={onToggleSideBar} style={leftSideBarStyle} />
+        <LeftSideBar
+          onToggleSideBar={onToggleSideBar}
+          style={leftSideBarStyle}
+          setIsNotificationVisible={setIsNotificationVisible}
+        />
         <div id="pageContent" className={styles.pageContent} style={pageContentStyle}>
           {children}
         </div>

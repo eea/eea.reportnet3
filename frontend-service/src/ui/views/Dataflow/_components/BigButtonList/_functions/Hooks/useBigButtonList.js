@@ -18,6 +18,7 @@ const useBigButtonList = ({
   dataflowId,
   dataflowState,
   getDeleteSchemaIndex,
+  handleExportEuDataset,
   handleRedirect,
   isActiveButton,
   onCloneDataflow,
@@ -422,6 +423,14 @@ const useBigButtonList = ({
     }
   ];
 
+  const exportEuDatasetModel = !isNil(dataflowState.data.euDatasets)
+    ? dataflowState.data.euDatasets.map(dataset => ({
+        command: () => handleExportEuDataset(),
+        icon: 'export',
+        label: dataset.euDatasetName
+      }))
+    : [];
+
   const exportEuDatasetBigButton = [
     {
       buttonClass: 'schemaDataset',
@@ -430,6 +439,7 @@ const useBigButtonList = ({
       caption: 'Export EU Datasets',
       handleRedirect: dataflowState.isExportEuDatasetLoading ? () => {} : () => onExportEuDataset(),
       layout: 'defaultBigButton',
+      model: exportEuDatasetModel,
       visibility:
         buttonsVisibility.copyDataCollectionToEuDataset && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']
     }

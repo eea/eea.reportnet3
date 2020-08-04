@@ -80,6 +80,7 @@ export const useSetColumns = (
   columnOptions,
   hasWritePermissions,
   initialCellValue,
+  hasCountryCode,
   isDataCollection,
   onFileDownload,
   onFileUploadVisible,
@@ -335,11 +336,11 @@ export const useSetColumns = (
       />
     );
 
-    if (!isDataCollection) {
+    if (!hasCountryCode) {
       hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
     }
 
-    if (isDataCollection) {
+    if (hasCountryCode) {
       columnsArr.unshift(providerCode);
     }
 

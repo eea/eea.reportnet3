@@ -56,11 +56,11 @@ import {
 
 const DataViewer = withRouter(
   ({
+    hasCountryCode,
     hasWritePermissions,
     isDatasetDeleted = false,
-    isDataCollection,
+    isExportable,
     isValidationSelected,
-    //levelErrorTypes,
     match: {
       params: { datasetId, dataflowId }
     },
@@ -208,6 +208,7 @@ const DataViewer = withRouter(
       columnOptions,
       hasWritePermissions && !tableReadOnly,
       initialCellValue,
+      hasCountryCode,
       isDataCollection,
       onFileDownload,
       onFileUploadVisible,
@@ -963,7 +964,8 @@ const DataViewer = withRouter(
           showWriteButtons={showWriteButtons}
           hideValidationFilter={hideValidationFilter}
           fileExtensions={extensionsOperationsList.export}
-          isDataCollection={isDataCollection}
+          hasCountryCode={hasCountryCode}
+          isExportable={isExportable}
           isFilterValidationsActive={isFilterValidationsActive}
           isTableDeleted={isTableDeleted}
           isLoading={isLoading}
@@ -993,7 +995,7 @@ const DataViewer = withRouter(
             id={tableId}
             first={records.firstPageRecord}
             footer={
-              hasWritePermissions && !tableReadOnly && !isDataCollection ? (
+              hasWritePermissions && !tableReadOnly ? (
                 <Footer
                   hasWritePermissions={hasWritePermissions && !tableReadOnly}
                   onAddClick={() => {

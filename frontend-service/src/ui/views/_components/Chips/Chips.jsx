@@ -230,7 +230,7 @@ const Chips = ({
           ref={inputElement}
           type="text"
         />
-        <label for={name} className="srOnly">
+        <label htmlFor={name} className="srOnly">
           {name}
         </label>
       </li>

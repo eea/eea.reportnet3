@@ -39,7 +39,7 @@ const TabsValidations = withRouter(
     datasetSchemaId,
     onHideValidationsDialog,
     reporting = false,
-    setHasValidations
+    setHasValidations = () => {}
   }) => {
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);

@@ -271,7 +271,7 @@ export const WebLinks = ({
                       placeholder={resources.messages['description']}
                       value={values.description}
                     />
-                    <label for="descriptionWebLinks" className="srOnly">
+                    <label htmlFor="descriptionWebLinks" className="srOnly">
                       {resources.messages['description']}
                     </label>
                   </div>
@@ -283,7 +283,7 @@ export const WebLinks = ({
                       placeholder={resources.messages['url']}
                       value={values.url}
                     />
-                    <label for="urlWebLinks" className="srOnly">
+                    <label htmlFor="urlWebLinks" className="srOnly">
                       {resources.messages['url']}
                     </label>
                     <ErrorMessage name="url" component="div" />
