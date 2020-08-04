@@ -148,10 +148,11 @@ export const apiDataset = {
     }
   },
 
-  downloadExportFile: async (datasetId, providerId) => {
+  downloadExportFile: async (datasetId, fileName, providerId = null) => {
     const response = await HTTPRequester.download({
       url: getUrl(DatasetConfig.downloadExportFile, {
         datasetId,
+        fileName,
         providerId
       })
     });

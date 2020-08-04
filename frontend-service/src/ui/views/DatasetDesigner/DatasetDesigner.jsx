@@ -224,16 +224,17 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const createFileName = (fileName, fileType) => `${fileName}.${fileType}`;
 
-  const downloadFile = async () => {
+  const downloadExportFMEFile = async () => {
     try {
-      const response = await DatasetService.downloadExportFile(designerState.datasetSchemaId, null);
+      // const response = await DatasetService.downloadExportFile(datasetId, fileName);
+      const response = await DatasetService.downloadExportFile(datasetId);
       console.log('response', response);
     } catch (error) {
       console.error('error', error);
     }
   };
 
-  useCheckNotifications(['EXPORT_DATA_BY_ID_ERROR'], downloadFile, true);
+  useCheckNotifications(['EXPORT_DATA_BY_ID_ERROR'], downloadExportFMEFile, true);
 
   const filterActiveIndex = index => {
     if (!isNil(index) && isNaN(index)) {
@@ -259,7 +260,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       {
         label: resources.messages['externalExtensions'],
         items: extensionsOperationsList.export.map(type => ({
-          command: () => onExportData(type.fileExtension.toUpperCase()),
+          command: () => onExportData(type.fileExtension),
           icon: config.icons['archive'],
           label: `${type.fileExtension.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
         }))

@@ -308,6 +308,18 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
 
+  const downloadExportFMEFile = async () => {
+    try {
+      const response = await DatasetService.downloadExportFile(datasetId);
+      // const response = await DatasetService.downloadExportFile(datasetId, fileName, dataProviderId);
+      console.log('response', response);
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
+
+  useCheckNotifications(['EXPORT_DATA_BY_ID_ERROR'], downloadExportFMEFile, true);
+
   const onLoadTableData = hasData => {
     setDatasetHasData(hasData);
   };

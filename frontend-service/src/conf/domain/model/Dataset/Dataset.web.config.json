@@ -11,7 +11,7 @@
   "deleteRecord": "/dataset/{:datasetId}/record/{:recordId}",
   "deleteRecordFieldDesign": "/dataschema/{:datasetId}/fieldSchema/{:fieldSchemaId}",
   "deleteTableDesign": "/dataschema/{:datasetId}/tableSchema/{:tableSchemaId}",
-  "downloadExportFile": "/dataset/exportFile?datasetId={:datasetId}&providerId={:providerId}",
+  "downloadExportFile": "/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}&providerId={:providerId}",
   "exportDatasetData": "/dataset/exportFile?datasetId={:datasetId}&mimeType={:fileType}",
   "exportDatasetTableData": "/dataset/exportFile?datasetId={:datasetId}&idTableSchema={:tableSchemaId}&mimeType={:fileType}",
   "importDatasetData": "/dataset/{:datasetId}/loadDatasetData",
