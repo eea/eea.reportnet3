@@ -93,10 +93,8 @@ export const ManageIntegrations = ({
   }, [updatedData]);
 
   useEffect(() => {
-    if (datasetId) {
-      getRepositories();
-    }
-  }, [datasetId]);
+    getRepositories();
+  }, []);
 
   useEffect(() => {
     getProcesses();

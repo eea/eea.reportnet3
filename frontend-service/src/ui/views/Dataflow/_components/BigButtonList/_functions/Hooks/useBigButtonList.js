@@ -17,6 +17,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 const useBigButtonList = ({
   dataflowId,
   dataflowState,
+  getDatasetId,
   getDeleteSchemaIndex,
   handleExportEuDataset,
   handleRedirect,
@@ -427,8 +428,9 @@ const useBigButtonList = ({
   const exportEuDatasetModel = !isNil(dataflowState.data.euDatasets)
     ? dataflowState.data.euDatasets.map(dataset => ({
         command: () => {
+          getDatasetId(dataset.euDatasetId);
           handleExportEuDataset(true);
-          onLoadIntegrations(dataset.datasetSchemaId, dataset.euDatasetId);
+          onLoadIntegrations(dataset.datasetSchemaId);
         },
         icon: 'export',
         label: dataset.euDatasetName

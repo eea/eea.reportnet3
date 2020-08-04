@@ -16,8 +16,6 @@ const parseIntegration = data => ({
     : {}
 });
 
-const parseIntegrationsList = (data = []) => data.map(integration => parseIntegration(integration))[0];
-
 const parseIntegrationParameters = parameters => {
   return Object.keys(parameters).map((item, index) => ({
     id: index,
@@ -28,4 +26,4 @@ const parseIntegrationParameters = parameters => {
   }));
 };
 
-export const IntegrationsUtils = { parseIntegrationsList };
+export const IntegrationsUtils = { parseIntegration };
