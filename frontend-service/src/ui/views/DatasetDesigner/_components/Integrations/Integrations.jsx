@@ -19,7 +19,7 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
 
   const getIntegrationsList = data => setIntegrationsList(data);
 
-  const getUpdatedData = data => setUpdatedData(IntegrationsUtils.parseIntegrationsList(data));
+  const getUpdatedData = data => setUpdatedData(IntegrationsUtils.parseIntegration(data));
 
   const renderIntegrationFooter = (
     <Fragment>

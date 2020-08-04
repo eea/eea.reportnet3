@@ -34,6 +34,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 
 
+
 /**
  * The Class IntegrationControllerImpl.
  */
@@ -41,7 +42,6 @@ import io.swagger.annotations.ApiResponse;
 @RequestMapping("/integration")
 @Api(tags = "Integrations : Integrations Manager")
 public class IntegrationControllerImpl implements IntegrationController {
-
 
   /** The integration service. */
   @Autowired
@@ -53,7 +53,6 @@ public class IntegrationControllerImpl implements IntegrationController {
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
 
   /**
    * Find all integrations by criteria.
@@ -105,12 +104,11 @@ public class IntegrationControllerImpl implements IntegrationController {
 
   }
 
-
-
   /**
    * Delete integration.
    *
    * @param integrationId the integration id
+   * @param dataflowId the dataflow id
    */
   @Override
   @HystrixCommand
@@ -129,7 +127,6 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error("Error deleting an integration. Message: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
-
   }
 
   /**
@@ -179,7 +176,6 @@ public class IntegrationControllerImpl implements IntegrationController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
-
 
   /**
    * Execute integration process.
@@ -254,6 +250,21 @@ public class IntegrationControllerImpl implements IntegrationController {
     }
   }
 
-
-
+  /**
+   * Creates the default integration.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   */
+  @Override
+  @PostMapping("/private/createDefaultIntegration")
+  @ApiOperation(value = "Create a Default Integration")
+  public void createDefaultIntegration(
+      @ApiParam(value = "Dataflow id", example = "0") @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(value = "Dataset id", example = "0") @RequestParam("datasetId") Long datasetId,
+      @ApiParam(value = "Dataset Schema id",
+          example = "0") @RequestParam("datasetSchemaId") String datasetSchemaId) {
+    integrationService.createDefaultIntegration(dataflowId, datasetId, datasetSchemaId);
+  }
 }

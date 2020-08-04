@@ -80,6 +80,7 @@ public class FieldValue {
   @Transient
   private ErrorTypeEnum levelError;
 
+
   /**
    * Hash code.
    *

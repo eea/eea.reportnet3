@@ -648,6 +648,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
           fieldSchemaVO.getReferencedField().getIdPk(), true);
     }
+    if (fieldSchemaVO.getMaxSize() != null) {
+      fieldSchema.put("maxSize", fieldSchemaVO.getMaxSize());
+    }
+    if (fieldSchemaVO.getValidExtensions() != null) {
+      fieldSchema.put("validExtensions", fieldSchemaVO.getValidExtensions());
+    }
     return typeModified;
   }
 

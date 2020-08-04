@@ -1,6 +1,5 @@
 package org.eea.dataflow.service.impl;
 
-
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import java.util.ArrayList;
@@ -19,13 +18,11 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
-
 /**
  * The Class IntegrationServiceImplTest.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class IntegrationServiceImplTest {
-
 
   /** The integration service. */
   @InjectMocks
@@ -39,7 +36,6 @@ public class IntegrationServiceImplTest {
   @Mock
   private CrudManagerFactory crudManagerFactory;
 
-
   /**
    * Inits the mocks.
    */
@@ -48,14 +44,14 @@ public class IntegrationServiceImplTest {
     MockitoAnnotations.initMocks(this);
   }
 
-
   /**
-   * Test get integration.
+   * Gets the all integrations by criteria test.
    *
+   * @return the all integrations by criteria test
    * @throws EEAException the EEA exception
    */
   @Test
-  public void testGetIntegration() throws EEAException {
+  public void getAllIntegrationsByCriteriaTest() throws EEAException {
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.setId(1L);
     Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
@@ -65,12 +61,12 @@ public class IntegrationServiceImplTest {
   }
 
   /**
-   * Test create integration.
+   * Creates the integration test.
    *
    * @throws EEAException the EEA exception
    */
   @Test
-  public void testCreateIntegration() throws EEAException {
+  public void createIntegrationTest() throws EEAException {
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.getInternalParameters().put("datasetSchemaId", "test1");
     integrationVO.getInternalParameters().put("dataflowId", "1");
@@ -81,12 +77,12 @@ public class IntegrationServiceImplTest {
   }
 
   /**
-   * Test update integration.
+   * Update integration test.
    *
    * @throws EEAException the EEA exception
    */
   @Test
-  public void testUpdateIntegration() throws EEAException {
+  public void updateIntegrationTest() throws EEAException {
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.setId(1L);
     integrationVO.getInternalParameters().put("datasetSchemaId", "test1");
@@ -98,12 +94,12 @@ public class IntegrationServiceImplTest {
   }
 
   /**
-   * Test delete integration.
+   * Delete integration test.
    *
    * @throws EEAException the EEA exception
    */
   @Test
-  public void testDeleteIntegration() throws EEAException {
+  public void deleteIntegrationTest() throws EEAException {
     Mockito.doNothing().when(crudManager).delete(Mockito.anyLong());
     Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
     integrationService.deleteIntegration(1L);
@@ -114,7 +110,6 @@ public class IntegrationServiceImplTest {
    * Gets the only extensions and operations test.
    *
    * @return the only extensions and operations test
-   * @throws EEAException the EEA exception
    */
   @Test
   public void getOnlyExtensionsAndOperationsTest() {
@@ -126,5 +121,14 @@ public class IntegrationServiceImplTest {
         integrationService.getOnlyExtensionsAndOperations(integrationVOList).get(0).getName());
   }
 
-
+  /**
+   * Creates the default integration test.
+   */
+  @Test
+  public void createDefaultIntegrationTest() {
+    Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
+    Mockito.doNothing().when(crudManager).create(Mockito.any());
+    integrationService.createDefaultIntegration(1L, 1L, "5ce524fad31fc52540abae73");
+    Mockito.verify(crudManager, times(1)).create(Mockito.any());
+  }
 }
