@@ -16,6 +16,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The Class AttachmentValue.
+ */
 @Entity
 @Getter
 @Setter
@@ -24,7 +27,7 @@ import lombok.ToString;
 public class AttachmentValue {
 
 
-
+  /** The id. */
   @Id
   @GenericGenerator(name = "attachment_sequence_generator",
       strategy = "org.eea.dataset.persistence.data.sequence.AttachmentValueIdGenerator")
@@ -32,14 +35,17 @@ public class AttachmentValue {
   @Column(name = "ID", columnDefinition = "serial")
   private String id;
 
+  /** The file name. */
   @Column(name = "FILE_NAME")
   private String fileName;
 
+  /** The content. */
   @Lob
   @Column(name = "CONTENT")
   @Type(type = "org.hibernate.type.BinaryType")
   private byte content[];
 
+  /** The field value. */
   @OneToOne
   @JoinColumn(name = "FIELD_VALUE_ID")
   private FieldValue fieldValue;

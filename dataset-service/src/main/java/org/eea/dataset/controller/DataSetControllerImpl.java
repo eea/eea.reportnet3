@@ -3,7 +3,6 @@ package org.eea.dataset.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 import javax.ws.rs.Produces;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
@@ -727,6 +726,14 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+  /**
+   * Gets the attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @return the attachment
+   * @throws Exception the exception
+   */
   @Override
   @HystrixCommand
   @GetMapping("/{datasetId}/field/{fieldId}/attachment")
@@ -741,12 +748,11 @@ public class DataSetControllerImpl implements DatasetController {
 
       String filename = attachment.getFileName();
       file = attachment.getContent();
-      byte[] decodedString = Base64.getDecoder().decode(new String(file).getBytes());
-      // LOG.info("fichero es: {}", new String(decodedString));
+      // byte[] decodedString = Base64.getDecoder().decode(new String(file).getBytes());
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
 
-      return new ResponseEntity(decodedString, httpHeaders, HttpStatus.OK);
+      return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
 
     } catch (EEAException | IOException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
@@ -756,6 +762,14 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
 
+  /**
+   * Update attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @param file the file
+   * @throws Exception the exception
+   */
   @Override
   @HystrixCommand
   @PutMapping(value = "/{datasetId}/field/{fieldId}/attachment",
@@ -809,6 +823,13 @@ public class DataSetControllerImpl implements DatasetController {
     return result;
   }
 
+  /**
+   * Delete attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @throws Exception the exception
+   */
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{datasetId}/field/{fieldId}/attachment",

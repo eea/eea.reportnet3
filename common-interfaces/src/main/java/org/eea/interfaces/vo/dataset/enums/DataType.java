@@ -147,7 +147,7 @@ public enum DataType {
   EMAIL("EMAIL", JavaType.STRING),
 
   /** The attachment. */
-  ATTACHMENT("ATTACHMENT", JavaType.UNSUPPORTED);
+  ATTACHMENT("ATTACHMENT", JavaType.STRING);
 
 
   /**

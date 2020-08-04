@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
@@ -106,6 +107,9 @@ public class DataSetControllerImplTest {
    */
   private Authentication authentication;
 
+  /** The file mock. */
+  private MockMultipartFile fileMock;
+
   /**
    * Inits the mocks.
    */
@@ -118,6 +122,7 @@ public class DataSetControllerImplTest {
     securityContext = Mockito.mock(SecurityContext.class);
     securityContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(securityContext);
+    fileMock = new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
     MockitoAnnotations.initMocks(this);
   }
 
@@ -1092,4 +1097,73 @@ public class DataSetControllerImplTest {
       throw e;
     }
   }
+
+  @Test
+  public void testGetAttachment() throws Exception {
+
+    AttachmentValue attachment = new AttachmentValue();
+    attachment.setFileName("test.txt");
+    attachment.setContent(fileMock.getBytes());
+    when(datasetService.getAttachment(Mockito.any(), Mockito.any())).thenReturn(attachment);
+    dataSetControllerImpl.getAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F");
+    Mockito.verify(datasetService, times(1)).getAttachment(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testGetAttachmentException() throws Exception {
+
+    doThrow(new EEAException()).when(datasetService).getAttachment(Mockito.any(), Mockito.any());
+    try {
+      dataSetControllerImpl.getAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F");
+    } catch (EEAException e) {
+      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test
+  public void testUpdateAttachment() throws Exception {
+
+    MultipartFile file = Mockito.mock(MultipartFile.class);
+    Mockito.doNothing().when(datasetService).updateAttachment(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
+    dataSetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
+    Mockito.verify(datasetService, times(1)).updateAttachment(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testUpdateAttachmentException() throws Exception {
+
+    MultipartFile file = Mockito.mock(MultipartFile.class);
+    Mockito.doThrow(new EEAException()).when(datasetService).updateAttachment(Mockito.anyLong(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+    try {
+      dataSetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
+    } catch (EEAException e) {
+      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test
+  public void testDeleteAttachment() throws Exception {
+
+    dataSetControllerImpl.deleteAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F");
+    Mockito.verify(datasetService, times(1)).deleteAttachment(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteAttachmentException() throws Exception {
+    Mockito.doThrow(new EEAException()).when(datasetService).deleteAttachment(Mockito.anyLong(),
+        Mockito.any());
+    try {
+      dataSetControllerImpl.deleteAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F");
+    } catch (EEAException e) {
+      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getMessage());
+      throw e;
+    }
+  }
+
+
 }

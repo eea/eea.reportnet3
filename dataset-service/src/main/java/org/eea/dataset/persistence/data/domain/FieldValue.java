@@ -80,10 +80,6 @@ public class FieldValue {
   @Transient
   private ErrorTypeEnum levelError;
 
-  /*
-   * @OneToOne(mappedBy = "fieldValue", fetch = FetchType.LAZY, cascade = CascadeType.ALL,
-   * orphanRemoval = false) private AttachmentValue attachment;
-   */
 
   /**
    * Hash code.

@@ -104,6 +104,12 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
       Pageable pageable);
 
 
+  /**
+   * Find by id.
+   *
+   * @param fieldId the field id
+   * @return the field value
+   */
   FieldValue findById(String fieldId);
 
 }

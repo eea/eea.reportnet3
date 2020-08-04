@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -1329,31 +1328,17 @@ public class DatasetServiceImpl implements DatasetService {
       field.setValue(values.toString().substring(1, values.toString().length() - 1));
     }
 
-    // PHONE TYPE TO STORE AN ATTACHMENT - PROVISIONAL
-    if (DataType.PHONE.equals(field.getType())) {
-      /*
-       * MultipartFile file = null; String nameFile = file.getOriginalFilename(); try { InputStream
-       * is = file.getInputStream(); byte[] content; content = IOUtils.toByteArray(is); is.close();
-       * AttachmentValue attachment = new AttachmentValue(); attachment.setContent(content);
-       * attachment.setFileName(nameFile); } catch (IOException e) { // TODO Auto-generated catch
-       * block e.printStackTrace(); }
-       */
+    // Attatchment field. Initialize it
+    if (DataType.ATTACHMENT.equals(field.getType())) {
 
-      String[] auxFile = field.getValue().split("|content|");
-      String nameFile = auxFile[0];
-      String content = auxFile[1];
       AttachmentValue attachment = new AttachmentValue();
-      attachment.setFileName("prueba.txt");
+      attachment.setFileName("");
       attachment.setFieldValue(field);
-      /*
-       * byte byteArray[] = new byte[10000000]; for (int i = 0; i < byteArray.length; i++) {
-       * byteArray[i] = '1'; }
-       */
-      // byte[] content = Base64.getEncoder().encode(field.getValue().getBytes());
-      attachment.setContent(field.getValue().getBytes());
-      field.setValue(attachment.getFileName());
+
+      field.setValue("");
       attachmentRepository.save(attachment);
     }
+
   }
 
 
@@ -2332,6 +2317,14 @@ public class DatasetServiceImpl implements DatasetService {
     return dataflowControllerZull.getMetabaseById(dataflowId);
   }
 
+  /**
+   * Gets the attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @return the attachment
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Transactional
   public AttachmentValue getAttachment(Long datasetId, String idField) throws EEAException {
@@ -2339,6 +2332,13 @@ public class DatasetServiceImpl implements DatasetService {
     return attachmentRepository.findByFieldValueId(idField);
   }
 
+  /**
+   * Delete attachment.
+   *
+   * @param datasetId the dataset id
+   * @param fieldId the field id
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Transactional
   public void deleteAttachment(Long datasetId, String fieldId) throws EEAException {
@@ -2350,6 +2350,18 @@ public class DatasetServiceImpl implements DatasetService {
     fieldRepository.save(field);
   }
 
+  /**
+   * Update attachment.
+   *
+   * @param datasetId the dataset id
+   * @param fieldId the field id
+   * @param fileName the file name
+   * @param is the is
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  @Transactional
   public void updateAttachment(@DatasetId Long datasetId, String fieldId, String fileName,
       InputStream is) throws EEAException, IOException {
 
@@ -2359,8 +2371,9 @@ public class DatasetServiceImpl implements DatasetService {
     byte[] content;
     content = IOUtils.toByteArray(is);
     is.close();
-    byte[] transformado = Base64.getEncoder().encode(content);
-    attachment.setContent(transformado);
+    // String contentBase64 = Base64.getEncoder().encodeToString(content);
+    // attachment.setContent(contentBase64.getBytes());
+    attachment.setContent(content);
     attachmentRepository.save(attachment);
 
     // Field table
