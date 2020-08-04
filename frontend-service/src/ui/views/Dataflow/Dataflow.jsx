@@ -34,7 +34,6 @@ import { Title } from '../_components/Title/Title';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 
-import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -42,8 +41,10 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';
 
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
+import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
@@ -52,7 +53,6 @@ const Dataflow = withRouter(({ history, match }) => {
     params: { dataflowId, representativeId }
   } = match;
 
-  const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -97,6 +97,15 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
+  useBreadCrumbs({
+    currentPage: CurrentPage.DATAFLOW,
+    dataflowId,
+    dataflowStateData: dataflowState.data,
+    history,
+    matchParams: match.params,
+    representativeId
+  });
+
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) onLoadPermission();
   }, [userContext, dataflowState.data]);
@@ -112,99 +121,6 @@ const Dataflow = withRouter(({ history, match }) => {
       leftSideBarContext.addHelpSteps(DataflowReporterHelpConfig, 'dataflowReporterHelp');
     }
   }, [userContext, dataflowState]);
-
-  //Bread Crumbs settings
-  useEffect(() => {
-    if (!isEmpty(dataflowState.data)) {
-      let representatives = dataflowState.data.datasets.map(dataset => {
-        return { name: dataset.datasetSchemaName, dataProviderId: dataset.dataProviderId };
-      });
-
-      if (representatives.length === 1) {
-        breadCrumbContext.add([
-          {
-            label: resources.messages['homeBreadcrumb'],
-            href: getUrl(routes.DATAFLOWS),
-            command: () => history.push(getUrl(routes.DATAFLOWS))
-          },
-          {
-            label: resources.messages['dataflows'],
-            icon: 'home',
-            href: getUrl(routes.DATAFLOWS),
-            command: () => history.push(getUrl(routes.DATAFLOWS))
-          },
-          {
-            label: resources.messages['dataflow'],
-            icon: 'clone'
-          }
-        ]);
-      } else if (representatives.length > 1 && isUndefined(representativeId)) {
-        breadCrumbContext.add([
-          {
-            label: resources.messages['homeBreadcrumb'],
-            href: getUrl(routes.DATAFLOWS),
-            command: () => history.push(getUrl(routes.DATAFLOWS))
-          },
-          {
-            label: resources.messages['dataflows'],
-            icon: 'home',
-            href: getUrl(routes.DATAFLOWS),
-            command: () => history.push(getUrl(routes.DATAFLOWS))
-          },
-          {
-            label: resources.messages['dataflow'],
-            icon: 'clone'
-          }
-        ]);
-      } else if (representativeId) {
-        const currentRepresentative = representatives
-          .filter(representative => representative.dataProviderId === parseInt(representativeId))
-          .map(representative => representative.name);
-
-        breadCrumbContext.add([
-          {
-            label: resources.messages['homeBreadcrumb'],
-            href: getUrl(routes.DATAFLOWS),
-            command: () => history.push(getUrl(routes.DATAFLOWS))
-          },
-          {
-            label: resources.messages['dataflows'],
-            icon: 'home',
-            href: getUrl(routes.DATAFLOWS),
-            command: () => history.push(getUrl(routes.DATAFLOWS))
-          },
-          {
-            label: resources.messages['dataflow'],
-            icon: 'clone',
-            href: getUrl(routes.DATAFLOW),
-            command: () => history.goBack()
-          },
-          {
-            label: currentRepresentative[0],
-            icon: 'clone'
-          }
-        ]);
-      } else if (dataflowState.status === 'DESIGN') {
-        breadCrumbContext.add([
-          {
-            label: resources.messages['homeBreadcrumb'],
-            href: getUrl(routes.DATAFLOWS),
-            command: () => history.push(getUrl(routes.DATAFLOWS))
-          },
-          {
-            label: resources.messages['dataflows'],
-            icon: 'home',
-            href: getUrl(routes.DATAFLOWS),
-            command: () => history.push(getUrl(routes.DATAFLOWS))
-          },
-          {
-            label: resources.messages['dataflow'],
-            icon: 'clone'
-          }
-        ]);
-      }
-    }
-  }, [match.params, dataflowState.data]);
 
   useEffect(() => {
     if (!isEmpty(dataflowState.userRoles)) {

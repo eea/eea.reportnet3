@@ -121,7 +121,7 @@ const ApiKeyDialog = ({
                     rows={1}
                     value={apiKey}
                   />
-                  <label for="apiKey" className="srOnly">
+                  <label htmlFor="apiKey" className="srOnly">
                     {apiKey}
                   </label>
                   <Button
