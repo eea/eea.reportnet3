@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -59,13 +60,26 @@ public class IntegrationControllerImpl implements IntegrationController {
   @PutMapping(value = "/listIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<IntegrationVO> findAllIntegrationsByCriteria(
       @RequestBody IntegrationVO integrationVO) {
-
     try {
       return integrationService.getAllIntegrationsByCriteria(integrationVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Error finding integrations: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
+  }
+
+  /**
+   * Find expor EU dataset integration by dataset id.
+   *
+   * @param datasetId the dataset id
+   * @return the integration VO
+   */
+  @Override
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ')")
+  @GetMapping("/findExportEUDatasetIntegration")
+  public IntegrationVO findExporEUDatasetIntegrationByDatasetId(
+      @RequestParam("datasetId") Long datasetId) {
+    return integrationService.getExporEUDatasetIntegrationByDatasetId(datasetId);
   }
 
   /**
