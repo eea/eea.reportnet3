@@ -185,7 +185,7 @@ const DataViewer = withRouter(
 
     const onFileDownload = async fieldId => {
       console.log({ datasetId, fieldId });
-      const file = await DatasetService.downloadFileData({ datasetId, fieldId });
+      const file = await DatasetService.downloadFileData(datasetId, fieldId);
       console.log({ file });
 
       DownloadFile(file, records.downloadedFileName);

@@ -5,7 +5,7 @@ import styles from './AttachmentEditor.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { Chips } from 'ui/views/_components/Chips';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { InputText } from 'ui/views/_components/InputText';
+import { InputNumber } from 'primereact/inputnumber';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -13,8 +13,7 @@ const AttachmentEditor = ({
   isAttachmentEditorVisible,
   onCancelSaveAttachment,
   onSaveAttachment,
-  selectedAttachment,
-  type
+  selectedAttachment
 }) => {
   const resources = useContext(ResourcesContext);
   const [validExtensions, setValidExtensionsItems] = useState(selectedAttachment.validExtensions);
@@ -101,10 +100,21 @@ const AttachmentEditor = ({
       {
         <span
           dangerouslySetInnerHTML={{
-            __html: resources.messages['codelistEditorItemsMessage']
+            __html: resources.messages['attachmentEditorSizeMessage']
           }}></span>
       }
-      <InputText id="fileMaxSize" onChange={event => setMaxSize(event.target.value)} value={maxSize} />
+      <InputNumber
+        buttonLayout="horizontal"
+        step={0.25}
+        // placeholder={resourcesContext.messages.value}
+        format={false}
+        max={20}
+        min={0}
+        mode="decimal"
+        onChange={e => setMaxSize(e.target.value)}
+        showButtons
+        value={maxSize}
+      />
       <span>{resources.messages['Mb']}</span>
     </Dialog>
   );
