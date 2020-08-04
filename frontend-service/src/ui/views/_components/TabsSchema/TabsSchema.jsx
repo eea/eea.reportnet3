@@ -14,9 +14,9 @@ export const TabsSchema = ({
   activeIndex = 0,
   buttonsList = undefined,
   hasWritePermissions = false,
-  isDataCollection,
+  hasCountryCode,
   isDatasetDeleted,
-  isEUDataset,
+  isExportable = true,
   isValidationSelected,
   levelErrorTypes,
   onLoadTableData,
@@ -41,9 +41,9 @@ export const TabsSchema = ({
                 <DataViewer
                   buttonsList={buttonsList}
                   hasWritePermissions={hasWritePermissions}
-                  isDataCollection={isDataCollection}
+                  hasCountryCode={hasCountryCode}
                   isDatasetDeleted={isDatasetDeleted}
-                  isEUDataset={isEUDataset}
+                  isExportable={isExportable}
                   isValidationSelected={isValidationSelected}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
