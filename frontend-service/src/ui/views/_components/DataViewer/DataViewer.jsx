@@ -24,6 +24,7 @@ import { ContextMenu } from 'ui/views/_components/ContextMenu';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataForm } from './_components/DataForm';
 import { DataTable } from 'ui/views/_components/DataTable';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldEditor } from './_components/FieldEditor';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -110,6 +111,7 @@ const DataViewer = withRouter(
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
+      downloadedFileName: '',
       editedRecord: {},
       fetchedDataFirstRecord: [],
       firstPageRecord: 0,
@@ -123,6 +125,7 @@ const DataViewer = withRouter(
       numCopiedRecords: undefined,
       pastedRecords: undefined,
       recordsPerPage: userContext.userProps.rowsPerPage,
+      selectedFieldId: '',
       selectedMapCells: {},
       selectedRecord: {},
       totalFilteredRecords: 0,
@@ -154,6 +157,7 @@ const DataViewer = withRouter(
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
           onEditorValueFocus={onEditorValueFocus}
+          // onFileUploadOpen={onFileUploadOpen}
           onMapOpen={onMapOpen}
           record={record}
         />
@@ -179,6 +183,24 @@ const DataViewer = withRouter(
       return getIconsValidationsErrors(validationsGroup);
     };
 
+    const onFileDownload = async fieldId => {
+      console.log({ datasetId, fieldId });
+      const file = await DatasetService.downloadFile({ datasetId, fieldId });
+      console.log({ file });
+
+      DownloadFile(file, records.downloadedFileName);
+
+      // const a = document.createElement('a');
+      //   a.href = `data:text/plain;base64,${splittedFieldValue[2]}`;
+      //   a.download = splittedFieldValue[0];
+      //   a.click();
+    };
+
+    const onFileUploadVisible = fieldId => {
+      console.log({ fieldId });
+      dispatchRecords({ type: 'SET_FIELD_ID', payload: fieldId });
+    };
+
     const { columns, getTooltipMessage, onShowFieldInfo, originalColumns, selectedHeader, setColumns } = useSetColumns(
       actionTemplate,
       cellDataEditor,
@@ -187,6 +209,8 @@ const DataViewer = withRouter(
       hasWritePermissions && !tableReadOnly,
       initialCellValue,
       isDataCollection,
+      onFileDownload,
+      onFileUploadVisible,
       records,
       resources,
       setIsAttachFileVisible,
@@ -420,23 +444,31 @@ const DataViewer = withRouter(
       setIsValidationShown(true);
     };
 
-    const onAttach = async () => {
+    const onAttach = async value => {
+      dispatchRecords({ type: 'SET_FILE_NAME', payload: value.files[0].name });
       setIsAttachFileVisible(false);
-      console.log('ON ATTACH');
-      // const {
-      //   dataflow: { name: dataflowName },
-      //   dataset: { name: datasetName }
-      // } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-      // notificationContext.add({
-      //   type: 'DATASET_DATA_LOADING_INIT',
-      //   content: {
-      //     datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
-      //     title: TextUtils.ellipsis(tableName, config.notifications.STRING_LENGTH_MAX),
-      //     datasetLoading: resources.messages['datasetLoading'],
-      //     dataflowName,
-      //     datasetName
-      //   }
-      // });
+
+      // const toBase64 = file =>
+      //   new Promise((resolve, reject) => {
+      //     const reader = new FileReader();
+      //     reader.readAsDataURL(file);
+      //     reader.onload = () => resolve(reader.result);
+      //     reader.onerror = error => reject(error);
+      //   });
+
+      // const result = await toBase64(value.files[0]).catch(e => Error(e));
+      // if (result instanceof Error) {
+      //   console.log('Error: ', result.message);
+      //   return;
+      // } else {
+      //   console.log({ result });
+      //   // onChangeForm(field, `${value.files[0].name}|content|${result.split(',')[1]}`);
+      //   RecordUtils.changeRecordValue(
+      //     records.selectedRecord,
+      //     records.selectedFieldId,
+      //     `${value.files[0].name}|content|${result.split(',')[1]}`
+      //   );
+      // }
     };
 
     const onCancelRowEdit = () => {
@@ -1094,9 +1126,10 @@ const DataViewer = withRouter(
               invalidExtensionMessage={resources.messages['invalidExtensionFile']}
               name="file"
               onUpload={onAttach}
-              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableData, {
-                datasetId: datasetId,
-                tableId: tableId
+              operation="PUT"
+              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileData, {
+                datasetId,
+                fieldId: records.selectedFieldId
               })}`}
             />
           </Dialog>

@@ -26,21 +26,23 @@ const DataForm = ({
           const field = records.editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
           return (
             <React.Fragment key={column.field}>
-              <div className="p-col-4" style={{ padding: '.75em' }}>
-                <label htmlFor={column.field}>{`${column.header}${
-                  column.type.toUpperCase() === 'DATE' ? ' (YYYY-MM-DD)' : ''
-                }`}</label>
-                <Button
-                  className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
-                  icon="infoCircle"
-                  onClick={() => {
-                    onShowFieldInfo(column.header, true);
-                  }}
-                  tabIndex="-1"
-                  tooltip={getTooltipMessage(column)}
-                  tooltipOptions={{ position: 'top' }}
-                />
-              </div>
+              {column.type.toUpperCase() !== 'PHONE' && (
+                <div className="p-col-4" style={{ padding: '.75em' }}>
+                  <label htmlFor={column.field}>{`${column.header}${
+                    column.type.toUpperCase() === 'DATE' ? ' (YYYY-MM-DD)' : ''
+                  }`}</label>
+                  <Button
+                    className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
+                    icon="infoCircle"
+                    onClick={() => {
+                      onShowFieldInfo(column.header, true);
+                    }}
+                    tabIndex="-1"
+                    tooltip={getTooltipMessage(column)}
+                    tooltipOptions={{ position: 'top' }}
+                  />
+                </div>
+              )}
               <div
                 className="p-col-8"
                 style={{
@@ -81,21 +83,23 @@ const DataForm = ({
           const field = records.newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
           return (
             <React.Fragment key={column.field}>
-              <div className="p-col-4" style={{ padding: '.75em' }}>
-                <label htmlFor={column.field}>{`${column.header}${
-                  column.type.toUpperCase() === 'DATE' ? ' (YYYY-MM-DD)' : ''
-                }`}</label>
-                <Button
-                  className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
-                  icon="infoCircle"
-                  onClick={() => {
-                    onShowFieldInfo(column.header, true);
-                  }}
-                  tabIndex="-1"
-                  tooltip={getTooltipMessage(column)}
-                  tooltipOptions={{ position: 'top' }}
-                />
-              </div>
+              {column.type.toUpperCase() !== 'PHONE' && (
+                <div className="p-col-4" style={{ padding: '.75em' }}>
+                  <label htmlFor={column.field}>{`${column.header}${
+                    column.type.toUpperCase() === 'DATE' ? ' (YYYY-MM-DD)' : ''
+                  }`}</label>
+                  <Button
+                    className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
+                    icon="infoCircle"
+                    onClick={() => {
+                      onShowFieldInfo(column.header, true);
+                    }}
+                    tabIndex="-1"
+                    tooltip={getTooltipMessage(column)}
+                    tooltipOptions={{ position: 'top' }}
+                  />
+                </div>
+              )}
               <div
                 className="p-col-8"
                 style={{

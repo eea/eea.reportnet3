@@ -146,6 +146,21 @@ export const apiDataset = {
       return false;
     }
   },
+  downloadFileData: async (datasetId, fieldId) => {
+    try {
+      const response = await HTTPRequester.get({
+        url: getUrl(DatasetConfig.downloadFileData, {
+          datasetId,
+          fieldId
+        })
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error getting file data: ${error}`);
+      return false;
+    }
+  },
   errorPositionByObjectId: async (objectId, datasetId, entityType) => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON

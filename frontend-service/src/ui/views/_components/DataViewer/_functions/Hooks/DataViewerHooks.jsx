@@ -81,6 +81,8 @@ export const useSetColumns = (
   hasWritePermissions,
   initialCellValue,
   isDataCollection,
+  onFileDownload,
+  onFileUploadVisible,
   records,
   resources,
   setIsAttachFileVisible,
@@ -126,16 +128,16 @@ export const useSetColumns = (
     }
   };
 
-  const renderAttachment = (value = '') => (
+  const renderAttachment = (value = '', fieldId) => (
     <div style={{ display: 'flex', justifyContent: 'center' }}>
-      {value !== '' && (
+      {!isNil(value) && value !== '' && (
         <Button
           className={`${value === '' && 'p-button-animated-blink'} p-button-secondary-transparent`}
           icon="export"
           iconPos="right"
           label={value}
           onClick={() => {
-            console.log('Download');
+            onFileDownload();
           }}
         />
       )}
@@ -144,9 +146,10 @@ export const useSetColumns = (
         icon="import"
         onClick={() => {
           setIsAttachFileVisible(true);
+          onFileUploadVisible(fieldId);
         }}
       />
-      {value !== '' && (
+      {!isNil(value) && value !== '' && (
         <Button
           className={`p-button-animated-blink p-button-secondary-transparent`}
           icon="trash"
@@ -187,6 +190,7 @@ export const useSetColumns = (
       const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
       const message = DataViewerUtils.formatValidations(validations);
       const levelError = DataViewerUtils.getLevelError(validations);
+      // console.log({ field, rowData }, records.selectedRecord);
       return (
         <div
           style={{
@@ -205,7 +209,7 @@ export const useSetColumns = (
                   !Array.isArray(field.fieldData[column.field]))
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData.type === 'PHONE'
-              ? renderAttachment(field.fieldData[column.field])
+              ? renderAttachment(field.fieldData[column.field], column.field)
               : field.fieldData[column.field]
             : null}
           <IconTooltip levelError={levelError} message={message} />
@@ -230,7 +234,7 @@ export const useSetColumns = (
                   !Array.isArray(field.fieldData[column.field]))
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData.type === 'PHONE'
-              ? renderAttachment(field.fieldData[column.field])
+              ? renderAttachment(field.fieldData[column.field], column.field)
               : field.fieldData[column.field]
             : null}
         </div>

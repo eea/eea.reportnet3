@@ -229,45 +229,31 @@ const DataFormFieldEditor = ({
     }
   };
 
-  const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions}`;
+  // const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions}`;
 
-  const onAttach = async value => {
-    setIsAttachFileVisible(false);
-    console.log('ON ATTACH', { value });
+  // const onAttach = async value => {
+  //   setIsAttachFileVisible(false);
+  //   console.log('ON ATTACH', { value });
 
-    const toBase64 = file =>
-      new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-      });
+  //   const toBase64 = file =>
+  //     new Promise((resolve, reject) => {
+  //       const reader = new FileReader();
+  //       reader.readAsDataURL(file);
+  //       reader.onload = () => resolve(reader.result);
+  //       reader.onerror = error => reject(error);
+  //     });
 
-    const result = await toBase64(value.files[0]).catch(e => Error(e));
-    if (result instanceof Error) {
-      console.log('Error: ', result.message);
-      return;
-    } else {
-      console.log({ result });
-      onChangeForm(field, `${value.files[0].name}|content|${result.split(',')[1]}`);
-    }
+  //   const result = await toBase64(value.files[0]).catch(e => Error(e));
+  //   if (result instanceof Error) {
+  //     console.log('Error: ', result.message);
+  //     return;
+  //   } else {
+  //     console.log({ result });
+  //     onChangeForm(field, `${value.files[0].name}|content|${result.split(',')[1]}`);
+  //   }
 
-    console.log(result);
-    // const {
-    //   dataflow: { name: dataflowName },
-    //   dataset: { name: datasetName }
-    // } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-    // notificationContext.add({
-    //   type: 'DATASET_DATA_LOADING_INIT',
-    //   content: {
-    //     datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
-    //     title: TextUtils.ellipsis(tableName, config.notifications.STRING_LENGTH_MAX),
-    //     datasetLoading: resources.messages['datasetLoading'],
-    //     dataflowName,
-    //     datasetName
-    //   }
-    // });
-  };
+  //   console.log(result);
+  // };
 
   const onConfirmDeleteAttachment = () => {
     console.log('DELETE ATTACHMENT');
@@ -304,43 +290,44 @@ const DataFormFieldEditor = ({
     );
 
   const renderAttachment = (field, fieldValue = []) => {
-    console.log({ field, fieldValue }, fieldValue.split('|'));
-    const splittedFieldValue = fieldValue.split('|');
-    return (
-      <div style={{ display: 'flex' }}>
-        {!isEmpty(fieldValue) && (
-          <Button
-            className={`${isEmpty(splittedFieldValue[0]) && 'p-button-animated-blink'} p-button-secondary-transparent`}
-            icon="export"
-            iconPos="right"
-            label={splittedFieldValue[0]}
-            onClick={() => {
-              console.log('Download');
-              const a = document.createElement('a');
-              a.href = `data:text/plain;base64,${splittedFieldValue[2]}`;
-              a.download = splittedFieldValue[0];
-              a.click();
-            }}
-            style={{ width: 'fit-content' }}
-          />
-        )}
+    return false;
+    // console.log({ field, fieldValue }, fieldValue.split('|'));
+    // const splittedFieldValue = fieldValue.split('|');
+    // return (
+    //   <div style={{ display: 'flex' }}>
+    //     {!isEmpty(fieldValue) && (
+    //       <Button
+    //         className={`${isEmpty(splittedFieldValue[0]) && 'p-button-animated-blink'} p-button-secondary-transparent`}
+    //         icon="export"
+    //         iconPos="right"
+    //         label={splittedFieldValue[0]}
+    //         onClick={() => {
+    //           console.log('Download');
+    //           const a = document.createElement('a');
+    //           a.href = `data:text/plain;base64,${splittedFieldValue[2]}`;
+    //           a.download = splittedFieldValue[0];
+    //           a.click();
+    //         }}
+    //         style={{ width: 'fit-content' }}
+    //       />
+    //     )}
 
-        <Button
-          className={`p-button-animated-blink p-button-secondary-transparent`}
-          icon="import"
-          onClick={() => {
-            setIsAttachFileVisible(true);
-          }}
-        />
-        {!isEmpty(fieldValue) && (
-          <Button
-            className={`p-button-animated-blink p-button-secondary-transparent`}
-            icon="trash"
-            onClick={() => setIsDeleteAttachmentVisible(true)}
-          />
-        )}
-      </div>
-    );
+    //     <Button
+    //       className={`p-button-animated-blink p-button-secondary-transparent`}
+    //       icon="import"
+    //       onClick={() => {
+    //         setIsAttachFileVisible(true);
+    //       }}
+    //     />
+    //     {!isEmpty(fieldValue) && (
+    //       <Button
+    //         className={`p-button-animated-blink p-button-secondary-transparent`}
+    //         icon="trash"
+    //         onClick={() => setIsDeleteAttachmentVisible(true)}
+    //       />
+    //     )}
+    //   </div>
+    // );
   };
 
   const renderCalendar = (field, fieldValue) => {
@@ -359,14 +346,14 @@ const DataFormFieldEditor = ({
     );
   };
 
-  const renderCustomFileAttachFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => setIsAttachFileVisible(false)}
-    />
-  );
+  // const renderCustomFileAttachFooter = (
+  //   <Button
+  //     className="p-button-secondary p-button-animated-blink"
+  //     icon={'cancel'}
+  //     label={resources.messages['close']}
+  //     onClick={() => setIsAttachFileVisible(false)}
+  //   />
+  // );
 
   const renderLinkDropdown = (field, fieldValue) => {
     if (column.pkHasMultipleValues) {
@@ -440,7 +427,7 @@ const DataFormFieldEditor = ({
   return (
     <React.Fragment>
       {renderFieldEditor()}
-      {isAttachFileVisible && (
+      {/* {isAttachFileVisible && (
         <Dialog
           // className={styles.Dialog}
           dismissableMask={false}
@@ -465,8 +452,8 @@ const DataFormFieldEditor = ({
             })}`}
           />
         </Dialog>
-      )}
-      {isDeleteAttachmentVisible && (
+      )} */}
+      {/* {isDeleteAttachmentVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           header={`${resources.messages['deleteAttachmentHeader']}`}
@@ -477,7 +464,7 @@ const DataFormFieldEditor = ({
           visible={isDeleteAttachmentVisible}>
           {resources.messages['deleteAttachmentConfirm']}
         </ConfirmDialog>
-      )}
+      )} */}
 
       {isMapOpen && (
         <Dialog

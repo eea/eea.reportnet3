@@ -74,6 +74,8 @@ const deleteTableDataById = async (datasetId, tableId) => await apiDataset.delet
 const deleteTableDesign = async (datasetId, tableSchemaId) =>
   await apiDataset.deleteTableDesign(datasetId, tableSchemaId);
 
+const downloadFileData = async (datasetId, fieldId) => await apiDataset.downloadFileData(datasetId, fieldId);
+
 const errorsById = async (
   datasetId,
   pageNum,
@@ -479,6 +481,7 @@ export const ApiDatasetRepository = {
   deleteSchemaById,
   deleteTableDataById,
   deleteTableDesign,
+  downloadFileData,
   errorPositionByObjectId,
   errorsById,
   errorStatisticsById,

@@ -38,6 +38,7 @@ export class CustomFileUpload extends Component {
     onProgress: null,
     onSelect: null,
     onUpload: null,
+    operation: 'POST',
     previewWidth: 50,
     style: null,
     uploadLabel: 'Upload',
@@ -69,6 +70,7 @@ export class CustomFileUpload extends Component {
     onProgress: PropTypes.func,
     onSelect: PropTypes.func,
     onUpload: PropTypes.func,
+    operation: PropTypes.string,
     previewWidth: PropTypes.number,
     style: PropTypes.object,
     uploadLabel: PropTypes.string,
@@ -275,7 +277,7 @@ export class CustomFileUpload extends Component {
       }
     };
 
-    xhr.open('POST', this.props.url, true);
+    xhr.open(this.props.operation, this.props.url, true);
     const tokens = userStorage.get();
     xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
 
@@ -419,7 +421,7 @@ export class CustomFileUpload extends Component {
           <span data-tip data-for="inValidExtension">
             <Button
               disabled={this.props.disabled || !this.hasFiles() || this.checkValidExtension() || this.state.isUploading}
-              icon={this.state.isUploading ? "spinnerAnimate" : "upload"}
+              icon={this.state.isUploading ? 'spinnerAnimate' : 'upload'}
               label={this.props.uploadLabel}
               onClick={this.upload}
             />
