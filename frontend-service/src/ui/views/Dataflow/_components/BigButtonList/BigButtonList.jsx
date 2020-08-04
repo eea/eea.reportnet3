@@ -149,33 +149,12 @@ export const BigButtonList = ({
     </div>
   );
 
-  // const exportDatatableSchema = async (datasetId, datasetName) => {
-  //   const schema = await DatasetService.schemaById(datasetId);
-  // console.log(datasetId, datasetName, schema);
-
-  // let blob = new Blob([csv], {
-  //   type: 'text/csv;charset=utf-8;'
-  // });
-
-  // if (window.navigator.msSaveOrOpenBlob) {
-  //   navigator.msSaveOrOpenBlob(blob, this.props.exportFilename + '.csv');
-  // } else {
-  //   let link = document.createElement('a');
-  //   link.style.display = 'none';
-  //   document.body.appendChild(link);
-  //   if (link.download !== undefined) {
-  //     link.setAttribute('href', URL.createObjectURL(blob));
-  //     link.setAttribute('download', this.props.exportFilename + '.csv');
-  //     link.click();
-  //   } else {
-  //     csv = 'data:text/csv;charset=utf-8,' + csv;
-  //     window.open(encodeURI(csv));
-  //   }
-  //   document.body.removeChild(link);
-  // }
-  // };
-
   const getCloneDataflow = value => setCloneDataflow(value);
+
+  const getDatasetData = (datasetId, datasetSchemaId) => {
+    setDatasetSchemaId(datasetSchemaId);
+    setDatasetId(datasetId);
+  };
 
   const getDeleteSchemaIndex = index => {
     setDeleteSchemaIndex(index);
@@ -223,15 +202,19 @@ export const BigButtonList = ({
         dataflow: { name: dataflowName }
       } = await getMetadata({ dataflowId });
 
-      notificationContext.add({
-        type: 'CREATE_DATA_COLLECTION_ERROR',
-        content: {
-          dataflowId,
-          dataflowName
-        }
-      });
+      notificationContext.add({ type: 'CREATE_DATA_COLLECTION_ERROR', content: { dataflowId, dataflowName } });
 
       setIsActiveButton(true);
+    }
+  };
+
+  const onLoadIntegrations = async datasetSchemaId => {
+    try {
+      const euDatasetExportIntegration = await IntegrationService.all(dataflowId, datasetSchemaId);
+
+      setEuDatasetExportIntegration(IntegrationsUtils.parseIntegration(euDatasetExportIntegration[0]));
+    } catch (error) {
+      notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
     }
   };
 
@@ -354,21 +337,6 @@ export const BigButtonList = ({
       />
     </Fragment>
   );
-
-  const onLoadIntegrations = async datasetSchemaId => {
-    try {
-      const euDatasetExportIntegration = await IntegrationService.all(dataflowId, datasetSchemaId);
-
-      setEuDatasetExportIntegration(IntegrationsUtils.parseIntegration(euDatasetExportIntegration[0]));
-    } catch (error) {
-      notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
-    }
-  };
-
-  const getDatasetData = (datasetId, datasetSchemaId) => {
-    setDatasetSchemaId(datasetSchemaId);
-    setDatasetId(datasetId);
-  };
 
   const bigButtonList = uniqBy(
     useBigButtonList({
