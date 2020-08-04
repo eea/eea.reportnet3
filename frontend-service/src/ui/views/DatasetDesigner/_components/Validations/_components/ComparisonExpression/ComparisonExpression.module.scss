@@ -4,18 +4,21 @@
   --operatorsWidth: 130px;
   --fieldsGap: 0.5rem;
   list-style: none !important;
+  :global .p-dropdown {
+    padding-bottom: 2px;
+  }
   .group {
     display: flex;
     align-self: baseline;
     align-items: center;
     margin-right: 1rem;
     :global .p-checkbox {
-      width: 29px !important;
-      height: 29px !important;
+      width: 33px !important;
+      height: 33px !important;
     }
     :global .p-checkbox-box {
-      width: 29px !important;
-      height: 29px !important;
+      width: 33px !important;
+      height: 33px !important;
       :global .p-checkbox-icon {
         font-size: 27px;
       }
