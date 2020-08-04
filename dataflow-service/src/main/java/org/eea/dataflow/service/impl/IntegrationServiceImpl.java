@@ -47,6 +47,12 @@ public class IntegrationServiceImpl implements IntegrationService {
   /** The Constant DATASET_ID: {@value}. */
   private static final String DATASET_ID = "datasetId";
 
+  /** The Constant PROCESS_NAME: {@value}. */
+  private static final String PROCESS_NAME = "processName";
+
+  /** The Constant REPOSITORY: {@value}. */
+  private static final String REPOSITORY = "repository";
+
   /** The crud manager factory. */
   @Autowired
   private CrudManagerFactory crudManagerFactory;
@@ -207,14 +213,19 @@ public class IntegrationServiceImpl implements IntegrationService {
    *
    * @param dataflowId the dataflow id
    * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
    * @throws EEAException the EEA exception
    */
   @Transactional
   @Override
-  public void createDefaultIntegration(Long dataflowId, Long datasetId) throws EEAException {
+  public void createDefaultIntegration(Long dataflowId, Long datasetId, String datasetSchemaId)
+      throws EEAException {
     Map<String, String> internalParameters = new HashMap<>();
     internalParameters.put(DATAFLOW_ID, dataflowId.toString());
     internalParameters.put(DATASET_ID, datasetId.toString());
+    internalParameters.put(DATASETSCHEMAID, datasetSchemaId);
+    internalParameters.put(REPOSITORY, "ReportNetTesting");
+    internalParameters.put(PROCESS_NAME, "Export_EU_dataset.fmw");
 
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.setDescription("Export EU Dataset");

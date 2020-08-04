@@ -3,6 +3,7 @@ package org.eea.dataflow.controller;
 import java.util.List;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
 import org.eea.dataflow.service.IntegrationService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
@@ -29,14 +30,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
-
 /**
  * The Class IntegrationControllerImpl.
  */
 @RestController
 @RequestMapping("/integration")
 public class IntegrationControllerImpl implements IntegrationController {
-
 
   /** The integration service. */
   @Autowired
@@ -48,7 +47,6 @@ public class IntegrationControllerImpl implements IntegrationController {
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
 
   /**
    * Find all integrations by criteria.
@@ -71,8 +69,6 @@ public class IntegrationControllerImpl implements IntegrationController {
     }
   }
 
-
-
   /**
    * Creates the integration.
    *
@@ -84,21 +80,24 @@ public class IntegrationControllerImpl implements IntegrationController {
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
   public void createIntegration(@RequestBody IntegrationVO integration) {
 
+    if (IntegrationOperationTypeEnum.EXPORT_EU_DATASET.equals(integration.getOperation())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_CREATION);
+    }
+
     try {
       integrationService.createIntegration(integration);
     } catch (EEAException e) {
       LOG_ERROR.error("Error creating integration. Message: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
-
   }
-
-
 
   /**
    * Delete integration.
    *
    * @param integrationId the integration id
+   * @param dataflowId the dataflow id
    */
   @Override
   @HystrixCommand
@@ -113,7 +112,6 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error("Error deleting an integration. Message: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
-
   }
 
   /**
@@ -220,13 +218,15 @@ public class IntegrationControllerImpl implements IntegrationController {
    *
    * @param dataflowId the dataflow id
    * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
    */
   @Override
-  @PostMapping("/private/createDefault")
+  @PostMapping("/private/createDefaultIntegration")
   public void createDefaultIntegration(@RequestParam("dataflowId") Long dataflowId,
-      @RequestParam("datasetId") Long datasetId) {
+      @RequestParam("datasetId") Long datasetId,
+      @RequestParam("datasetSchemaId") String datasetSchemaId) {
     try {
-      integrationService.createDefaultIntegration(dataflowId, datasetId);
+      integrationService.createDefaultIntegration(dataflowId, datasetId, datasetSchemaId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error creating default integration. Message: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);

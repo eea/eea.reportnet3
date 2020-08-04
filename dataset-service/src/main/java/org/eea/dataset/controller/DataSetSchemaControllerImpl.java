@@ -122,16 +122,15 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       @RequestParam("datasetSchemaName") final String datasetSchemaName) {
 
     try {
-      Future<Long> futureDatasetId =
-          datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN, datasetSchemaName,
-              dataschemaService.createEmptyDataSetSchema(dataflowId).toString(), dataflowId, null,
-              null, 0);
+      String datasetSchemaId = dataschemaService.createEmptyDataSetSchema(dataflowId).toString();
+      Future<Long> futureDatasetId = datasetMetabaseService.createEmptyDataset(
+          DatasetTypeEnum.DESIGN, datasetSchemaName, datasetSchemaId, dataflowId, null, null, 0);
       Long datasetId = futureDatasetId.get();
 
       // we find if the dataflow has any permission to give the permission to this new datasetschema
       contributorControllerZuul.createAssociatedPermissions(dataflowId, datasetId);
 
-      integrationControllerZuul.createDefaultIntegration(dataflowId, datasetId);
+      integrationControllerZuul.createDefaultIntegration(dataflowId, datasetId, datasetSchemaId);
     } catch (InterruptedException | ExecutionException | EEAException e) {
       LOG.error("Aborted DataSetSchema creation: {}", e.getMessage());
       if (e instanceof InterruptedException) {
@@ -212,7 +211,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     }
   }
 
-
   /**
    * Delete dataset schema.
    *
@@ -276,8 +274,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       LOG_ERROR.error("Error deleting a design dataset. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
     }
-
-
   }
 
   /**
@@ -429,13 +425,11 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       // Add UniqueConstraint if needed
       dataschemaService.createUniqueConstraintPK(datasetSchemaId, fieldSchemaVO);
 
-
       return (response);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
           e);
     }
-
   }
 
   /**
@@ -569,8 +563,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void updateDatasetSchemaDescription(@PathVariable("datasetId") Long datasetId,
       @RequestBody(required = false) DataSetSchemaVO datasetSchemaVO) {
     try {
-      if (!dataschemaService.updateDatasetSchemaDescription(
-          dataschemaService.getDatasetSchemaId(datasetId), datasetSchemaVO.getDescription())) {
+      String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
+      if (Boolean.FALSE.equals(dataschemaService.updateDatasetSchemaDescription(datasetSchemaId,
+          datasetSchemaVO.getDescription()))) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR);
       }
     } catch (EEAException e) {
@@ -578,7 +573,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
           e);
     }
   }
-
 
   /**
    * Validate schema.
@@ -592,7 +586,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public Boolean validateSchema(@PathVariable("schemaId") String datasetSchemaId) {
     return dataschemaService.validateSchema(datasetSchemaId);
   }
-
 
   /**
    * Validate schemas.
@@ -616,7 +609,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     }
     return isValid;
   }
-
 
   /**
    * Find data schemas by id dataflow.
@@ -647,7 +639,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     return schemas;
   }
 
-
   /**
    * Gets the unique constraints.
    *
@@ -666,7 +657,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
     }
-
     return dataschemaService.getUniqueConstraints(datasetSchemaId);
   }
 
@@ -686,7 +676,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
-
 
   /**
    * Creates the unique constraint.
@@ -714,7 +703,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     }
     dataschemaService.createUniqueConstraint(uniqueConstraint);
   }
-
 
   /**
    * Delete unique constraint.
@@ -771,8 +759,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     dataschemaService.updateUniqueConstraint(uniqueConstraint);
   }
 
-
-
   /**
    * Copy designs from dataflow.
    *
@@ -801,5 +787,4 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
-
 }

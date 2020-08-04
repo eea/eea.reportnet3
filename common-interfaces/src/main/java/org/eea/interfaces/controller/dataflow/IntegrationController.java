@@ -111,8 +111,10 @@ public interface IntegrationController {
    *
    * @param dataflowId the dataflow id
    * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
    */
-  @PostMapping("/private/createDeafult")
+  @PostMapping("/private/createDefaultIntegration")
   void createDefaultIntegration(@RequestParam("dataflowId") Long dataflowId,
-      @RequestParam("datasetId") Long datasetId);
+      @RequestParam("datasetId") Long datasetId,
+      @RequestParam("datasetSchemaId") String datasetSchemaId);
 }
