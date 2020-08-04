@@ -130,17 +130,6 @@ export const apiDataset = {
     }
   },
 
-  downloadExportFile: async (datasetSchemaId, providerId) => {
-    const response = await HTTPRequester.download({
-      url: getUrl(DatasetConfig.downloadExportFile, {
-        datasetSchemaId,
-        providerId
-      })
-    });
-
-    return response.data;
-  },
-
   deleteTableDesign: async (datasetId, tableSchemaId) => {
     try {
       const response = await HTTPRequester.delete({
@@ -158,6 +147,18 @@ export const apiDataset = {
       return false;
     }
   },
+
+  downloadExportFile: async (datasetId, providerId) => {
+    const response = await HTTPRequester.download({
+      url: getUrl(DatasetConfig.downloadExportFile, {
+        datasetId,
+        providerId
+      })
+    });
+
+    return response.data;
+  },
+
   errorPositionByObjectId: async (objectId, datasetId, entityType) => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON

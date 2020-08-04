@@ -252,7 +252,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       const response = await DatasetService.downloadExportFile(designerState.datasetSchemaId, null);
       console.log('response', response);
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     }
   };
 

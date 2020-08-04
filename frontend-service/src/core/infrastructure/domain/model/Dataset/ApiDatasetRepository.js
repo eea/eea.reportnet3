@@ -74,8 +74,8 @@ const deleteTableDataById = async (datasetId, tableId) => await apiDataset.delet
 const deleteTableDesign = async (datasetId, tableSchemaId) =>
   await apiDataset.deleteTableDesign(datasetId, tableSchemaId);
 
-const downloadExportFile = async (datasetSchemaId, providerId) => {
-  return await apiDataset.downloadExportFile(datasetSchemaId, providerId);
+const downloadExportFile = async (datasetId, providerId) => {
+  return await apiDataset.downloadExportFile(datasetId, providerId);
 };
 
 const errorsById = async (
