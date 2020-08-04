@@ -780,9 +780,9 @@ public class DataSetControllerImpl implements DatasetController {
 
     try {
       String fileName = file.getOriginalFilename();
-      if (!validateAttachment(datasetId, idField, fileName, file.getSize())) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
-      }
+      // if (!validateAttachment(datasetId, idField, fileName, file.getSize())) {
+      // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
+      // }
       InputStream is = file.getInputStream();
       datasetService.updateAttachment(datasetId, idField, fileName, is);
     } catch (EEAException | IOException e) {
