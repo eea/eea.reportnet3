@@ -60,6 +60,7 @@ export const BigButtonList = ({
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
   const [dataCollectionDueDate, setDataCollectionDueDate] = useState(null);
   const [datasetId, setDatasetId] = useState(null);
+  const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
@@ -364,12 +365,16 @@ export const BigButtonList = ({
     }
   };
 
-  const getDatasetId = datasetId => setDatasetId(datasetId);
+  const getDatasetData = (datasetId, datasetSchemaId) => {
+    setDatasetSchemaId(datasetSchemaId);
+    setDatasetId(datasetId);
+  };
 
   const bigButtonList = uniqBy(
     useBigButtonList({
       dataflowId,
       dataflowState,
+      getDatasetData,
       getDeleteSchemaIndex,
       handleExportEuDataset,
       handleRedirect,
@@ -387,8 +392,7 @@ export const BigButtonList = ({
       onShowNewSchemaDialog,
       onShowSnapshotDialog,
       onShowUpdateDataCollectionModal,
-      updatedDatasetSchema,
-      getDatasetId
+      updatedDatasetSchema
     }),
     'caption'
   )
@@ -409,7 +413,7 @@ export const BigButtonList = ({
           datasetId={datasetId}
           datasetType={'dataflow'}
           manageDialogs={handleExportEuDataset}
-          state={{ isIntegrationManageDialogVisible }}
+          state={{ datasetSchemaId, isIntegrationManageDialogVisible }}
           updatedData={euDatasetExportIntegration}
         />
       )}
