@@ -222,7 +222,7 @@ export const DataflowManagement = ({
               ref={deleteInputRef}
               value={state.deleteInput}
             />
-            <label for="deleteDataflow" className="srOnly">
+            <label htmlFor="deleteDataflow" className="srOnly">
               {resources.messages['deleteDataflowButton']}
             </label>
           </p>

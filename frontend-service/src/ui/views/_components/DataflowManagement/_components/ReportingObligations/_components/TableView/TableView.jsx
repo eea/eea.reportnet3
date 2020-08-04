@@ -32,7 +32,7 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
         onChange={() => onSelectObl(row)}
         role="checkbox"
       />
-      <label for={`${row.id}_checkbox`} className="srOnly">
+      <label htmlFor={`${row.id}_checkbox`} className="srOnly">
         {resources.messages['selectedObligation']}
       </label>
     </div>

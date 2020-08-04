@@ -144,7 +144,7 @@ const UserConfiguration = () => {
         placeholder="select"
         value={userContext.userProps.rowsPerPage}
       />
-      <label for="rowsPage" className="srOnly">
+      <label htmlFor="rowsPage" className="srOnly">
         {resources.messages['defaultRowsPage']}
       </label>
     </React.Fragment>
