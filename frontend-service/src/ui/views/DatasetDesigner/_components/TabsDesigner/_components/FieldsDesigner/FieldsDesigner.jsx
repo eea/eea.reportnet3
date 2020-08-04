@@ -288,6 +288,7 @@ export const FieldsDesigner = ({
         <DataViewer
           hasWritePermissions={true}
           isPreviewModeOn={isPreviewModeOn}
+          isExportable={true}
           isValidationSelected={isValidationSelected}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
