@@ -9,10 +9,18 @@
 .inputTitleWrapper {
   margin-bottom: 1rem;
 }
-// .subIndex {
-//   font-style: italic;
-// }
+
+.maxSizeWrapper {
+  margin-top: 0.5rem;
+}
+.mbSpan {
+  font-weight: bold;
+  margin-left: 0.5rem;
+}
 .pasteDiv {
   padding: 1rem;
   border: 2px dashed var(--gray-25);
+}
+.validExtensionsWrapper {
+  margin-bottom: 1rem;
 }

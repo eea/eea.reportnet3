@@ -57,7 +57,7 @@ const AttachmentEditor = ({
 
   const renderChips = () => {
     return (
-      <div onPaste={onPasteChips}>
+      <div onPaste={onPasteChips} className={styles.validExtensionsWrapper}>
         <div className={styles.inputTitleWrapper}>
           <span
             dangerouslySetInnerHTML={{
@@ -103,19 +103,24 @@ const AttachmentEditor = ({
             __html: resources.messages['attachmentEditorSizeMessage']
           }}></span>
       }
-      <InputNumber
-        buttonLayout="horizontal"
-        step={0.25}
-        // placeholder={resourcesContext.messages.value}
-        format={false}
-        max={20}
-        min={0}
-        mode="decimal"
-        onChange={e => setMaxSize(e.target.value)}
-        showButtons
-        value={maxSize}
-      />
-      <span>{resources.messages['Mb']}</span>
+      <div className={styles.maxSizeWrapper}>
+        {console.log(maxSize)}
+        <InputNumber
+          // placeholder={resourcesContext.messages.value}
+          buttonLayout="horizontal"
+          decrementButtonIcon="pi pi-minus"
+          format={false}
+          incrementButtonIcon="pi pi-plus"
+          max={100}
+          min={0}
+          // mode="decimal"
+          onChange={e => setMaxSize(e.target.value)}
+          showButtons
+          step={0.25}
+          value={maxSize}
+        />
+        <span className={styles.mbSpan}>{resources.messages['Mb']}</span>
+      </div>
     </Dialog>
   );
 };
