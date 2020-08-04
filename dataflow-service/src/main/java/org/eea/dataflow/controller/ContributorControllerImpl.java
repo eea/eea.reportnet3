@@ -24,11 +24,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 /**
  * The Class ContributorControllerImpl.
  */
 @RestController
+@Api(tags = "Contributors : Contributors Manager")
 @RequestMapping("/contributor")
 public class ContributorControllerImpl implements ContributorController {
 
@@ -64,8 +70,17 @@ public class ContributorControllerImpl implements ContributorController {
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   @DeleteMapping(value = "/editor/dataflow/{dataflowId}")
-  public void deleteEditor(@PathVariable("dataflowId") Long dataflowId,
-      @RequestBody ContributorVO contributorVO) {
+  @ApiOperation(value = "Delete one Editor for One Dataflow")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted editor"),
+      @ApiResponse(code = 204, message = "Successfully deleted editor"),
+      @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+      @ApiResponse(code = 404, message = "The email doesn't exist in Repornet"),
+      @ApiResponse(code = 500, message = "Internal Server Error")})
+  @ApiParam()
+  public void deleteEditor(
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(type = "Object",
+          value = "Contributors Properties") @RequestBody ContributorVO contributorVO) {
     // we can only remove role of editor, reporter or reporter partition type
     try {
       checkAccount(dataflowId, contributorVO.getAccount());
@@ -92,9 +107,19 @@ public class ContributorControllerImpl implements ContributorController {
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
   @DeleteMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}")
-  public void deleteReporter(@PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("dataProviderId") Long dataProviderId,
-      @RequestBody ContributorVO contributorVO) {
+  @ApiOperation(value = "Delete one Reporter for One Dataflow")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted reporter"),
+      @ApiResponse(code = 204, message = "Successfully deleted reporter"),
+      @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+      @ApiResponse(code = 404, message = "The email doesn't exist in Repornet"),
+      @ApiResponse(code = 500, message = "Internal Server Error")})
+  public void deleteReporter(
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "DataProvider Id",
+          example = "0") @PathVariable("dataProviderId") Long dataProviderId,
+      @ApiParam(type = "Object",
+          value = "Contributors Properties") @RequestBody ContributorVO contributorVO) {
     // we can only remove role of editor, reporter or reporter partition type
     try {
       checkAccount(dataflowId, contributorVO.getAccount());
@@ -121,7 +146,11 @@ public class ContributorControllerImpl implements ContributorController {
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   @GetMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<ContributorVO> findEditorsByGroup(@PathVariable("dataflowId") Long dataflowId) {
+  @ApiOperation(value = "Find all Editors in the Dataflow",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = ContributorVO.class,
+      responseContainer = "List")
+  public List<ContributorVO> findEditorsByGroup(@ApiParam(type = "Long", value = "Dataflow Id",
+      example = "0") @PathVariable("dataflowId") Long dataflowId) {
     // we can find editors,
     return contributorService.findContributorsByResourceId(dataflowId, null, EDITOR);
   }
@@ -137,8 +166,14 @@ public class ContributorControllerImpl implements ContributorController {
   @GetMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataproviderId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
-  public List<ContributorVO> findReportersByGroup(@PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("dataproviderId") Long dataproviderId) {
+  @ApiOperation(value = "Find all Reporters in the Dataflow",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = ContributorVO.class,
+      responseContainer = "List")
+  public List<ContributorVO> findReportersByGroup(
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Dataprovider Id",
+          example = "0") @PathVariable("dataproviderId") Long dataproviderId) {
     // find reporters or reporter partition roles based on the dataflow state
     return contributorService.findContributorsByResourceId(dataflowId, dataproviderId, REPORTER);
   }
@@ -154,8 +189,18 @@ public class ContributorControllerImpl implements ContributorController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   @PutMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity updateEditor(@PathVariable("dataflowId") Long dataflowId,
-      @RequestBody ContributorVO contributorVO) {
+  @ApiOperation(value = "Update one Editor in the Dataflow",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = ResponseEntity.class)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully update editor"),
+      @ApiResponse(code = 204, message = "Successfully update editor"),
+      @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+      @ApiResponse(code = 404, message = "The email doesn't exist in Repornet"),
+      @ApiResponse(code = 500, message = "Internal Server Error")})
+  public ResponseEntity updateEditor(
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(type = "Object",
+          value = "Contributors Properties") @RequestBody ContributorVO contributorVO) {
     // we can only update an editor, reporter or reporter partition role
     // mock
     String message = "";
@@ -192,9 +237,20 @@ public class ContributorControllerImpl implements ContributorController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
   @PutMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity updateReporter(@PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("dataProviderId") Long dataProviderId,
-      @RequestBody ContributorVO contributorVO) {
+  @ApiOperation(value = "Update one Reporter in the Dataflow",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = ResponseEntity.class)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully update reporter"),
+      @ApiResponse(code = 204, message = "Successfully update reporter"),
+      @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+      @ApiResponse(code = 404, message = "The email doesn't exist in Repornet"),
+      @ApiResponse(code = 500, message = "Internal Server Error")})
+  public ResponseEntity updateReporter(
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Dataprovider Id",
+          example = "0") @PathVariable("dataProviderId") Long dataProviderId,
+      @ApiParam(type = "Object",
+          value = "Contributors Properties") @RequestBody ContributorVO contributorVO) {
     // we can only update an editor, reporter or reporter partition role
     String message = "";
     HttpStatus status = HttpStatus.OK;
@@ -224,8 +280,15 @@ public class ContributorControllerImpl implements ContributorController {
    */
   @Override
   @PostMapping("/private/dataflow/{dataflowId}/createAssociatedPermissions/{datasetId}")
-  public void createAssociatedPermissions(@PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("datasetId") Long datasetId) {
+  @ApiOperation(value = "Create permissions for all datasetSchema in the  Dataflow")
+  @ApiResponses(
+      value = {@ApiResponse(code = 200, message = "Successfully update reporter"), @ApiResponse(
+          code = 500, message = "Error creating  the associated permissions for editor role")})
+  public void createAssociatedPermissions(
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId) {
 
     try {
       contributorService.createAssociatedPermissions(dataflowId, datasetId);
