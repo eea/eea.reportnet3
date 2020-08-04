@@ -158,7 +158,7 @@ const DocumentFileUpload = ({
                 type="text"
                 value={values.description}
               />
-              <label for="descriptionDocumentFileUpload" className="srOnly">
+              <label htmlFor="descriptionDocumentFileUpload" className="srOnly">
                 {resources.messages['description']}
               </label>
             </div>
@@ -171,7 +171,7 @@ const DocumentFileUpload = ({
                   </option>
                 ))}
               </Field>
-              <label for="selectLanguage" className="srOnly">
+              <label htmlFor="selectLanguage" className="srOnly">
                 {resources.messages['selectLang']}
               </label>
             </div>
@@ -191,7 +191,7 @@ const DocumentFileUpload = ({
                       placeholder="file upload"
                       type="file"
                     />
-                    <label for="uploadDocument" className="srOnly">
+                    <label htmlFor="uploadDocument" className="srOnly">
                       {resources.messages['uploadDocument']}
                     </label>
                   </span>

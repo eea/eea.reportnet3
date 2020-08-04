@@ -660,6 +660,7 @@
     "createExternalIntegration": "Create external integration",
     "integrationName": "Integration name",
     "operation": "Operation",
+    "operationName": "Operation",
     "deleteIntegrationHeader": "Delete integration",
     "deleteIntegrationConfirm": "Are you sure you want to delete this integration?",
     "processName": "Process Name",
