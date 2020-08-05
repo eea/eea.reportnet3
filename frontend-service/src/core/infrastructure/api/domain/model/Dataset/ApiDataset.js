@@ -70,6 +70,21 @@ export const apiDataset = {
       return false;
     }
   },
+  deleteFileData: async (datasetId, fieldId) => {
+    try {
+      const response = await HTTPRequester.delete({
+        url: getUrl(DatasetConfig.deleteFileData, {
+          datasetId,
+          fieldId
+        })
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error deleting file data: ${error}`);
+      return false;
+    }
+  },
   deleteRecordById: async (datasetId, recordId) => {
     try {
       const response = await HTTPRequester.delete({
@@ -160,6 +175,21 @@ export const apiDataset = {
     return response.data;
   },
 
+  downloadFileData: async (datasetId, fieldId) => {
+    try {
+      const response = await HTTPRequester.get({
+        url: getUrl(DatasetConfig.downloadFileData, {
+          datasetId,
+          fieldId
+        })
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error(`Error getting file data: ${error}`);
+      return false;
+    }
+  },
   errorPositionByObjectId: async (objectId, datasetId, entityType) => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON

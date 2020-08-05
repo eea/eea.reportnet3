@@ -4,6 +4,7 @@ export class DatasetTableField {
     description,
     fieldId,
     fieldSchemaId,
+    maxSize,
     name,
     pk,
     pkHasMultipleValues,
@@ -15,12 +16,14 @@ export class DatasetTableField {
     type,
     unique,
     validations,
+    validExtensions,
     value
   } = {}) {
     this.codelistItems = codelistItems;
     this.description = description;
     this.fieldId = fieldId;
     this.fieldSchemaId = fieldSchemaId;
+    this.maxSize = maxSize;
     this.name = name;
     this.pk = pk;
     this.pkHasMultipleValues = pkHasMultipleValues;
@@ -32,6 +35,7 @@ export class DatasetTableField {
     this.type = type;
     this.unique = unique;
     this.validations = validations;
+    this.validExtensions = validExtensions;
     this.value = value;
   }
 }
