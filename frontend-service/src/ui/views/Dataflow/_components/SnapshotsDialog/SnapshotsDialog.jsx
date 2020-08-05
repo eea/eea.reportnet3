@@ -17,14 +17,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
-export const SnapshotsDialog = ({
-  dataflowId,
-  datasetId,
-  datasetName,
-  hideSnapshotDialog,
-  isSnapshotDialogVisible,
-  manageDialogs
-}) => {
+export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshotDialogVisible, manageDialogs }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
