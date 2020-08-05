@@ -262,8 +262,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
       job.setIdJob(new Long(idFMEJob));
       job.setDatasetId(integrationOperationParams.get(IntegrationParams.DATASET_ID));
       job.setOperation(integrationOperationTypeEnum);
-      String user = SecurityContextHolder.getContext().getAuthentication().getName();
-      job.setUser(user);
+      job.setUser(SecurityContextHolder.getContext().getAuthentication().getName().toString());
       job.setStatus(FMEJobstatus.QUEUED);
       fmeJobRepository.save(job);
     }

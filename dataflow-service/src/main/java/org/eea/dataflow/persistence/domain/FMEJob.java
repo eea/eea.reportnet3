@@ -20,7 +20,7 @@ import lombok.ToString;
 public class FMEJob {
 
   @Id
-  @Column(name = "ID_JOB", columnDefinition = "serial")
+  @Column(name = "IDJOB")
   private Long idJob;
 
   /** The name. */
@@ -28,7 +28,7 @@ public class FMEJob {
   private Long datasetId;
 
   /** The description. */
-  @Column(name = "USER")
+  @Column(name = "R3USER")
   private String user;
 
   /** The status. */

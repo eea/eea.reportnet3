@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS public.fme_jobs (
 	idjob int8 NULL,
 	dataset_id int8 NULL,
-	"user" varchar NULL,
+	"r3user" varchar NULL,
 	"operation" varchar NULL,
 	status varchar NULL
 );
