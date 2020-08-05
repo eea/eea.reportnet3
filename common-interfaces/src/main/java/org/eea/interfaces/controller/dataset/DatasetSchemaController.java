@@ -284,6 +284,9 @@ public interface DatasetSchemaController {
    */
   @GetMapping(value = "/getSimpleSchema/dataset/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  SimpleDatasetSchemaVO getSimpleSchema(@PathVariable("datasetId") Long datasetId);
+  SimpleDatasetSchemaVO getSimpleSchema(@PathVariable("datasetId") Long datasetId,
+      @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
+
 
 }

@@ -816,9 +816,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   }
 
   @Override
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   @GetMapping(value = "/getSimpleSchema/dataset/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public SimpleDatasetSchemaVO getSimpleSchema(@PathVariable("datasetId") Long datasetId) {
+  public SimpleDatasetSchemaVO getSimpleSchema(@PathVariable("datasetId") Long datasetId,
+      @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
