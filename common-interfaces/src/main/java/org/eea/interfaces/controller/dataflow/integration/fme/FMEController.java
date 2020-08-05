@@ -4,10 +4,12 @@ import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
 import org.eea.interfaces.vo.integration.fme.FMEOperationInfoVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 /** The Interface FMEController. */
 public interface FMEController {
@@ -47,4 +49,18 @@ public interface FMEController {
    */
   @PostMapping("/operationFinished")
   void operationFinished(@RequestBody FMEOperationInfoVO fmeOperationInfoVO);
+
+  /**
+   * Download export file.
+   *
+   * @param datasetId the dataset id
+   * @param providerId the provider id
+   * @return
+   */
+  @GetMapping(value = "/downloadExportFile")
+  ResponseEntity<StreamingResponseBody> downloadExportFile(
+      @RequestParam("datasetId") Long datasetId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam("fileName") String fileName);
+
 }

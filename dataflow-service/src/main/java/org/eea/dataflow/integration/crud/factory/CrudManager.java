@@ -31,10 +31,8 @@ public interface CrudManager {
    * Creates the.
    *
    * @param integration the integration
-   * @throws EEAException the EEA exception
    */
-  void create(IntegrationVO integration) throws EEAException;
-
+  void create(IntegrationVO integration);
 
   /**
    * Delete.

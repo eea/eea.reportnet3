@@ -25,12 +25,14 @@ import org.eea.dataset.mapper.RecordValidationMapper;
 import org.eea.dataset.mapper.TableNoRecordMapper;
 import org.eea.dataset.mapper.TableValidationMapper;
 import org.eea.dataset.mapper.TableValueMapper;
+import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValidation;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValidation;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.data.repository.AttachmentRepository;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.DatasetValidationRepository;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
@@ -352,6 +354,9 @@ public class DatasetServiceTest {
   @Mock
   private UpdateRecordHelper updateRecordHelper;
 
+  @Mock
+  private AttachmentRepository attachmentRepository;
+
   /**
    * The field value.
    */
@@ -411,6 +416,8 @@ public class DatasetServiceTest {
    * The field.
    */
   private FieldValue field;
+
+
 
   /**
    * Inits the mocks.
@@ -2192,4 +2199,33 @@ public class DatasetServiceTest {
     datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
+
+
+  @Test
+  public void testGetAttachment() throws EEAException {
+    datasetService.getAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F");
+    Mockito.verify(attachmentRepository, times(1)).findByFieldValueId(Mockito.any());
+  }
+
+  @Test
+  public void testDeleteAttachment() throws EEAException {
+    when(attachmentRepository.findByFieldValueId(Mockito.anyString()))
+        .thenReturn(new AttachmentValue());
+    when(fieldRepository.findById(Mockito.anyString())).thenReturn(new FieldValue());
+    datasetService.deleteAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F");
+    Mockito.verify(attachmentRepository, times(1)).save(Mockito.any());
+  }
+
+  @Test
+  public void testUpdateAttachment() throws EEAException, IOException {
+    final MockMultipartFile file =
+        new MockMultipartFile("file", "fileOriginal.csv", "csv", "content".getBytes());
+    when(fieldRepository.findById(Mockito.anyString())).thenReturn(new FieldValue());
+    when(attachmentRepository.findByFieldValueId(Mockito.anyString()))
+        .thenReturn(new AttachmentValue());
+    datasetService.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file.getName(),
+        file.getInputStream());
+    Mockito.verify(fieldRepository, times(1)).save(Mockito.any());
+  }
+
 }
