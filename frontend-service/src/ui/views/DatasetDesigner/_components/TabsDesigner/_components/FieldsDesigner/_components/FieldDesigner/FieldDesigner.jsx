@@ -82,7 +82,7 @@ export const FieldDesigner = ({
     // { fieldType: 'Formula', value: 'Formula', fieldTypeIcon: 'formula' },
     // { fieldType: 'Fixed', value: 'Fixed select list', fieldTypeIcon: 'list' },
     // { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
-    { fieldType: 'Attachement', value: 'Attachement', fieldTypeIcon: 'clip' }
+    { fieldType: 'Attachment', value: 'Attachment', fieldTypeIcon: 'clip' }
   ];
 
   const getFieldTypeValue = value => {
@@ -189,15 +189,12 @@ export const FieldDesigner = ({
 
   const onChangeFieldType = type => {
     dispatchFieldDesigner({ type: 'SET_TYPE', payload: { type, previousType: fieldDesignerState.fieldTypeValue } });
-    //TODO: Cambiar phone por attachment
-    if (
-      type.fieldType.toLowerCase() === 'codelist' ||
-      type.fieldType.toLowerCase() === 'multiselect_codelist' ||
-      type.fieldType.toLowerCase() === 'phone'
-    ) {
+    if (type.fieldType.toLowerCase() === 'codelist' || type.fieldType.toLowerCase() === 'multiselect_codelist') {
       onCodelistDropdownSelected(type);
     } else if (type.fieldType.toLowerCase() === 'link') {
       onLinkDropdownSelected(type);
+    } else if (type.fieldType.toLowerCase() === 'attachment') {
+      onAttachmentDropdownSelected(type);
     } else {
       if (fieldId === '-1') {
         if (type !== '') {
@@ -340,6 +337,7 @@ export const FieldDesigner = ({
   const onFieldAdd = async ({
     codelistItems = fieldDesignerState.codelistItems,
     description = fieldDesignerState.fieldDescriptionValue,
+    maxSize = fieldDesignerState.fieldFileProperties.maxSize,
     pk = fieldDesignerState.fieldPKValue,
     pkHasMultipleValues = fieldDesignerState.pkHasMultipleValues,
     pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
@@ -347,12 +345,14 @@ export const FieldDesigner = ({
     recordId = recordSchemaId,
     referencedField = fieldDesignerState.fieldLinkValue,
     required = fieldDesignerState.fieldRequiredValue,
-    type = parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType)
+    type = parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
+    validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
   }) => {
     try {
       const response = await DatasetService.addRecordFieldDesign(datasetId, {
         codelistItems,
         description,
+        maxSize,
         pk,
         pkHasMultipleValues,
         pkMustBeUsed,
@@ -362,7 +362,8 @@ export const FieldDesigner = ({
           ? parseReferenceField(referencedField)
           : fieldDesignerState.fieldLinkValue,
         required,
-        type
+        type,
+        validExtensions
       });
       if (response.status < 200 || response.status > 299) {
         console.error('Error during field Add');
@@ -373,6 +374,7 @@ export const FieldDesigner = ({
           description,
           fieldId: response.data,
           fieldLinkValue: null,
+          maxSize,
           pk,
           pkHasMultipleValues,
           pkMustBeUsed,
@@ -380,7 +382,8 @@ export const FieldDesigner = ({
           recordId,
           referencedField,
           required,
-          type
+          type,
+          validExtensions
         });
       }
     } catch (error) {
@@ -500,6 +503,7 @@ export const FieldDesigner = ({
   };
 
   const onSaveAttachment = fileProperties => {
+    console.log({ fileProperties });
     dispatchFieldDesigner({
       type: 'SET_ATTACHMENT_PROPERTIES',
       payload: { validExtensions: fileProperties.validExtensions, maxSize: fileProperties.maxSize }
@@ -509,9 +513,9 @@ export const FieldDesigner = ({
     } else {
       if (!isUndefined(fieldId)) {
         if (fieldId.toString() === '-1') {
-          onFieldAdd({ validExtensions: fieldFileProperties.validExtensions, maxSize: fieldFileProperties.maxSize });
+          onFieldAdd({ validExtensions: fileProperties.validExtensions, maxSize: fileProperties.maxSize });
         } else {
-          fieldUpdate({ validExtensions: fieldFileProperties.validExtensions, maxSize: fieldFileProperties.maxSize });
+          fieldUpdate({ validExtensions: fileProperties.validExtensions, maxSize: fileProperties.maxSize });
         }
       }
     }
@@ -594,6 +598,7 @@ export const FieldDesigner = ({
     description = fieldDesignerState.fieldDescriptionValue,
     fieldSchemaId = fieldId,
     isLinkChange = false,
+    maxSize = fieldDesignerState.fieldFileProperties.maxSize,
     pk = fieldDesignerState.fieldPKValue,
     pkHasMultipleValues = fieldDesignerState.pkHasMultipleValues,
     pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
@@ -601,13 +606,15 @@ export const FieldDesigner = ({
     recordId = recordSchemaId,
     referencedField = fieldDesignerState.fieldLinkValue,
     required = fieldDesignerState.fieldRequiredValue,
-    type = parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType)
+    type = parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
+    validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
   }) => {
     try {
       const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
         codelistItems,
         description,
         fieldSchemaId,
+        maxSize,
         pk,
         pkHasMultipleValues,
         pkMustBeUsed,
@@ -617,7 +624,8 @@ export const FieldDesigner = ({
           ? parseReferenceField(referencedField)
           : fieldDesignerState.fieldLinkValue,
         required,
-        type
+        type,
+        validExtensions
       });
       if (!fieldUpdated) {
         console.error('Error during field Update');
@@ -628,6 +636,7 @@ export const FieldDesigner = ({
           description,
           id: fieldId,
           isLinkChange,
+          maxSize,
           pk,
           pkHasMultipleValues,
           pkMustBeUsed,
@@ -635,7 +644,8 @@ export const FieldDesigner = ({
           recordId,
           referencedField,
           required,
-          type
+          type,
+          validExtensions
         });
       }
     } catch (error) {
@@ -744,19 +754,30 @@ export const FieldDesigner = ({
         }
         tooltipOptions={{ position: 'top' }}
       />
-    ) : !isUndefined(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue.fieldType === 'Phone' ? (
+    ) : !isUndefined(fieldDesignerState.fieldTypeValue) &&
+      fieldDesignerState.fieldTypeValue.fieldType === 'Attachment' ? (
       <Button
         className={`${styles.codelistButton} p-button-secondary-transparent`}
         label={
-          !isUndefined(fieldDesignerState.validExtensions) && !isEmpty(fieldDesignerState.validExtensions)
-            ? `${fieldDesignerState.validExtensions.join(', ')}`
+          !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
+          !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
+            ? `${resources.messages['validExtensions']} ${fieldDesignerState.fieldFileProperties.validExtensions.join(
+                ', '
+              )} - ${resources.messages['maxFileSize']} ${fieldDesignerState.fieldFileProperties.maxSize} ${
+                resources.messages['Mb']
+              }`
             : resources.messages['fileExtensionsSelection']
         }
         onClick={() => onAttachmentDropdownSelected()}
         style={{ pointerEvents: 'auto' }}
         tooltip={
-          !isUndefined(fieldDesignerState.validExtensions) && !isEmpty(fieldDesignerState.validExtensions)
-            ? `${fieldDesignerState.validExtensions.join(', ')}`
+          !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
+          !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
+            ? `${resources.messages['validExtensions']} ${fieldDesignerState.fieldFileProperties.validExtensions.join(
+                ', '
+              )} - ${resources.messages['maxFileSize']} ${fieldDesignerState.fieldFileProperties.maxSize} ${
+                resources.messages['Mb']
+              }`
             : resources.messages['fileExtensionsSelection']
         }
         tooltipOptions={{ position: 'top' }}

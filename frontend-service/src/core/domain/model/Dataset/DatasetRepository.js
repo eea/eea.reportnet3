@@ -5,6 +5,7 @@ export const DatasetRepository = {
   addTableDesign: () => Promise.reject('[DatasetRepository#addTableDesign] must be implemented'),
   createValidation: () => Promise.reject('[DatasetRepository#createValidation] must be implemented'),
   deleteDataById: () => Promise.reject('[DatasetRepository#deleteDataById] must be implemented'),
+  deleteFileData: () => Promise.reject('[DatasetRepository#deleteFileData] must be implemented'),
   deleteRecordById: () => Promise.reject('[DatasetRepository#deleteRecordById] must be implemented'),
   deleteSchemaById: () => Promise.reject('[DatasetRepository#deleteSchemaById] must be implemented'),
   deleteTableDataById: () => Promise.reject('[DatasetRepository#deleteTableDataById] must be implemented'),

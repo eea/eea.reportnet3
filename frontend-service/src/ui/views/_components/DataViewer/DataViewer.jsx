@@ -126,6 +126,7 @@ const DataViewer = withRouter(
       pastedRecords: undefined,
       recordsPerPage: userContext.userProps.rowsPerPage,
       selectedFieldId: '',
+      selectedFieldSchemaId: '',
       selectedMapCells: {},
       selectedRecord: {},
       totalFilteredRecords: 0,
@@ -184,7 +185,7 @@ const DataViewer = withRouter(
     };
 
     const onFileDownload = async fieldId => {
-      console.log({ datasetId, fieldId });
+      console.log({ datasetId, fieldId, records }, records.downloadedFileName);
       const file = await DatasetService.downloadFileData(datasetId, fieldId);
       console.log({ file });
 
@@ -196,9 +197,15 @@ const DataViewer = withRouter(
       //   a.click();
     };
 
-    const onFileUploadVisible = fieldId => {
+    const onFileUploadVisible = (fieldId, fieldSchemaId) => {
       console.log({ fieldId });
-      dispatchRecords({ type: 'SET_FIELD_ID', payload: fieldId });
+      dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId } });
+    };
+
+    const onFileDeleteVisible = (fieldId, fieldSchemaId) => {
+      console.log({ fieldId });
+      dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId } });
+      setIsDeleteAttachmentVisible(true);
     };
 
     const { columns, getTooltipMessage, onShowFieldInfo, originalColumns, selectedHeader, setColumns } = useSetColumns(
@@ -209,13 +216,13 @@ const DataViewer = withRouter(
       hasCountryCode,
       hasWritePermissions && !tableReadOnly,
       initialCellValue,
+      onFileDeleteVisible,
       onFileDownload,
       onFileUploadVisible,
       records,
       resources,
       setIsAttachFileVisible,
       setIsColumnInfoVisible,
-      setIsDeleteAttachmentVisible,
       validationsTemplate
     );
 
@@ -224,6 +231,10 @@ const DataViewer = withRouter(
     //   inmLevelErrorTypesWithCorrects = inmLevelErrorTypesWithCorrects.concat(levelErrorTypes);
     //   setLevelErrorTypesWithCorrects(inmLevelErrorTypesWithCorrects);
     // }, [levelErrorTypes]);
+
+    useEffect(() => {
+      if (records.downloadedFileName !== '') setIsAttachFileVisible(false);
+    }, [records.downloadedFileName]);
 
     useEffect(() => {
       if (!addDialogVisible) setAddAnotherOne(false);
@@ -446,7 +457,6 @@ const DataViewer = withRouter(
 
     const onAttach = async value => {
       dispatchRecords({ type: 'SET_FILE_NAME', payload: value.files[0].name });
-      setIsAttachFileVisible(false);
 
       // const toBase64 = file =>
       //   new Promise((resolve, reject) => {
@@ -463,12 +473,7 @@ const DataViewer = withRouter(
       // } else {
       //   console.log({ result });
       //   // onChangeForm(field, `${value.files[0].name}|content|${result.split(',')[1]}`);
-      //   RecordUtils.changeRecordValue(
-      //     records.selectedRecord,
-      //     records.selectedFieldId,
-      //     `${value.files[0].name}|content|${result.split(',')[1]}`
-      //   );
-      // }
+      RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, `${value.files[0].name}`);
     };
 
     const onCancelRowEdit = () => {
@@ -517,9 +522,14 @@ const DataViewer = withRouter(
       }
     };
 
-    const onConfirmDeleteAttachment = () => {
+    const onConfirmDeleteAttachment = async () => {
       console.log('DELETE ATTACHMENT');
-      setIsDeleteAttachmentVisible(false);
+      const fileDeleted = await DatasetService.deleteFileData(datasetId, records.selectedFieldId);
+      console.log({ fileDeleted });
+      if (fileDeleted) {
+        RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, '');
+        setIsDeleteAttachmentVisible(false);
+      }
     };
 
     const onConfirmDeleteRow = async () => {

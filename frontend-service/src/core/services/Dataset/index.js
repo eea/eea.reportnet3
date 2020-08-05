@@ -5,6 +5,7 @@ import { AddRecordFieldDesign } from './AddRecordFieldDesign';
 import { AddTableDesign } from './AddTableDesign';
 import { CreateValidation } from './CreateValidation';
 import { DeleteData } from './DeleteData';
+import { DeleteFileData } from './DeleteFileData';
 import { DeleteRecord } from './DeleteRecord';
 import { DeleteRecordFieldDesign } from './DeleteRecordFieldDesign';
 import { DeleteSchema } from './DeleteSchema';
@@ -37,6 +38,7 @@ export const DatasetService = {
   addTableDesign: AddTableDesign({ datasetRepository }),
   createValidation: CreateValidation({ datasetRepository }),
   deleteDataById: DeleteData({ datasetRepository }),
+  deleteFileData: DeleteFileData({ datasetRepository }),
   deleteRecordById: DeleteRecord({ datasetRepository }),
   deleteRecordFieldDesign: DeleteRecordFieldDesign({ datasetRepository }),
   deleteSchemaById: DeleteSchema({ datasetRepository }),

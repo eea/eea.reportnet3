@@ -38,7 +38,7 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
         fieldPKValue: ''
       };
     case 'SET_ATTACHMENT_PROPERTIES':
-      return { ...state, validExtensions: payload.validExtensions, maxSize: payload.maxSize };
+      return { ...state, fieldFileProperties: { validExtensions: payload.validExtensions, maxSize: payload.maxSize } };
     case 'SET_CODELIST_ITEMS':
       return { ...state, codelistItems: payload };
     case 'SET_DESCRIPTION':
@@ -72,10 +72,11 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
           payload.type.fieldType.toUpperCase() !== 'CODELIST'
             ? []
             : state.codelistItems,
-        validExtensions: payload.type.fieldType.toUpperCase() !== 'PHONE' ? [] : state.validExtensions,
+        validExtensions: payload.type.fieldType.toUpperCase() !== 'ATTACHMENT' ? [] : state.validExtensions,
         fieldPreviousTypeValue: payload.previousType
       };
     case 'TOGGLE_ATTACHMENT_EDITOR_VISIBLE':
+      console.log('TOGGLE_ATTACHMENT_EDITOR_VISIBLE');
       return {
         ...state,
         isAttachmentEditorVisible: payload,
@@ -83,6 +84,7 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
         isLinkSelectorVisible: false
       };
     case 'TOGGLE_CODELIST_EDITOR_VISIBLE':
+      console.log('TOGGLE_CODELIST_EDITOR_VISIBLE');
       return {
         ...state,
         isCodelistEditorVisible: payload,

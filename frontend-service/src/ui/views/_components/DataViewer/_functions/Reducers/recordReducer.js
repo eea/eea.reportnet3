@@ -72,8 +72,8 @@ export const recordReducer = (state, { type, payload }) => {
 
     case 'SET_TOTAL':
       return { ...state, totalRecords: payload };
-    case 'SET_FIELD_ID':
-      return { ...state, selectedFieldId: payload };
+    case 'SET_FIELD_IDS':
+      return { ...state, selectedFieldId: payload.fieldId, selectedFieldSchemaId: payload.fieldSchemaId };
     case 'SET_FILE_NAME':
       return { ...state, downloadedFileName: payload };
     case 'OPEN_MAP':

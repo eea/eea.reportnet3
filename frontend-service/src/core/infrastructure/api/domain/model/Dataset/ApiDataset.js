@@ -70,6 +70,21 @@ export const apiDataset = {
       return false;
     }
   },
+  deleteFileData: async (datasetId, fieldId) => {
+    try {
+      const response = await HTTPRequester.delete({
+        url: getUrl(DatasetConfig.deleteFileData, {
+          datasetId,
+          fieldId
+        })
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error deleting file data: ${error}`);
+      return false;
+    }
+  },
   deleteRecordById: async (datasetId, recordId) => {
     try {
       const response = await HTTPRequester.delete({

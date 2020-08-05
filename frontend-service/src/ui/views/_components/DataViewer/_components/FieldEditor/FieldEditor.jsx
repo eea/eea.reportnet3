@@ -312,7 +312,7 @@ const FieldEditor = ({
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
-      case 'PHONE':
+      case 'ATTACHMENT':
         return false;
       // (
       //   <InputText

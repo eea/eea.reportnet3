@@ -81,13 +81,13 @@ export const useSetColumns = (
   hasCountryCode,
   hasWritePermissions,
   initialCellValue,
+  onFileDeleteVisible,
   onFileDownload,
   onFileUploadVisible,
   records,
   resources,
   setIsAttachFileVisible,
   setIsColumnInfoVisible,
-  setIsDeleteAttachmentVisible,
   validationsTemplate
 ) => {
   const [columns, setColumns] = useState([]);
@@ -121,6 +121,7 @@ export const useSetColumns = (
     ];
 
     if (!isUndefined(fieldType)) {
+      console.log({ fieldType });
       const filteredTypes = fieldTypes.filter(field => field.fieldType.toUpperCase() === fieldType.toUpperCase())[0];
       return filteredTypes.value;
     } else {
@@ -128,36 +129,38 @@ export const useSetColumns = (
     }
   };
 
-  const renderAttachment = (value = '', fieldId) => (
-    <div style={{ display: 'flex', justifyContent: 'center' }}>
-      {!isNil(value) && value !== '' && (
-        <Button
-          className={`${value === '' && 'p-button-animated-blink'} p-button-secondary-transparent`}
-          icon="export"
-          iconPos="right"
-          label={value}
-          onClick={() => {
-            onFileDownload(fieldId);
-          }}
-        />
-      )}
-      <Button
-        className={`p-button-animated-blink p-button-secondary-transparent`}
-        icon="import"
-        onClick={() => {
-          setIsAttachFileVisible(true);
-          onFileUploadVisible(fieldId);
-        }}
-      />
-      {!isNil(value) && value !== '' && (
+  const renderAttachment = (value = '', fieldId, fieldSchemaId) => {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        {!isNil(value) && value !== '' && (
+          <Button
+            className={`${value === '' && 'p-button-animated-blink'} p-button-secondary-transparent`}
+            icon="export"
+            iconPos="right"
+            label={value}
+            onClick={() => {
+              onFileDownload(fieldId);
+            }}
+          />
+        )}
         <Button
           className={`p-button-animated-blink p-button-secondary-transparent`}
-          icon="trash"
-          onClick={() => setIsDeleteAttachmentVisible(true)}
+          icon="import"
+          onClick={() => {
+            setIsAttachFileVisible(true);
+            onFileUploadVisible(fieldId, fieldSchemaId);
+          }}
         />
-      )}
-    </div>
-  );
+        {!isNil(value) && value !== '' && (
+          <Button
+            className={`p-button-animated-blink p-button-secondary-transparent`}
+            icon="trash"
+            onClick={() => onFileDeleteVisible(fieldId, fieldSchemaId)}
+          />
+        )}
+      </div>
+    );
+  };
 
   const getTooltipMessage = column => {
     return !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
@@ -196,7 +199,7 @@ export const useSetColumns = (
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: field.fieldData.type === 'PHONE' ? 'flex-end' : 'space-between'
+            justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
           }}>
           {field
             ? Array.isArray(field.fieldData[column.field])
@@ -208,8 +211,8 @@ export const useSetColumns = (
                   field.fieldData.type === 'LINK' &&
                   !Array.isArray(field.fieldData[column.field]))
               ? field.fieldData[column.field].split(',').join(', ')
-              : field.fieldData.type === 'PHONE'
-              ? renderAttachment(field.fieldData[column.field], field.fieldData['id'])
+              : field.fieldData.type === 'ATTACHMENT'
+              ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData[column.field]
             : null}
           <IconTooltip levelError={levelError} message={message} />
@@ -221,7 +224,7 @@ export const useSetColumns = (
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: field.fieldData.type === 'PHONE' ? 'flex-end' : 'space-between'
+            justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
           }}>
           {field
             ? Array.isArray(field.fieldData[column.field])
@@ -233,8 +236,8 @@ export const useSetColumns = (
                   field.fieldData.type === 'LINK' &&
                   !Array.isArray(field.fieldData[column.field]))
               ? field.fieldData[column.field].split(',').join(', ')
-              : field.fieldData.type === 'PHONE'
-              ? renderAttachment(field.fieldData[column.field], field.fieldData['id'])
+              : field.fieldData.type === 'ATTACHMENT'
+              ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData[column.field]
             : null}
         </div>
@@ -272,7 +275,9 @@ export const useSetColumns = (
           body={dataTemplate}
           className={invisibleColumn}
           editor={
-            hasWritePermissions && column.type !== 'PHONE' ? row => cellDataEditor(row, records.selectedRecord) : null
+            hasWritePermissions && column.type !== 'ATTACHMENT'
+              ? row => cellDataEditor(row, records.selectedRecord)
+              : null
           }
           field={column.field}
           header={

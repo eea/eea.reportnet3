@@ -272,7 +272,7 @@ const DataFormFieldEditor = ({
       renderCalendar(field, fieldValue)
     ) : type === 'POINT' ? (
       renderMapType(field, fieldValue)
-    ) : type === 'PHONE' ? (
+    ) : type === 'ATTACHMENT' ? (
       renderAttachment(field, fieldValue)
     ) : (
       <InputText

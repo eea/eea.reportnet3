@@ -26,7 +26,7 @@ const DataForm = ({
           const field = records.editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
           return (
             <React.Fragment key={column.field}>
-              {column.type.toUpperCase() !== 'PHONE' && (
+              {column.type.toUpperCase() !== 'ATTACHMENT' && (
                 <div className="p-col-4" style={{ padding: '.75em' }}>
                   <label htmlFor={column.field}>{`${column.header}${
                     column.type.toUpperCase() === 'DATE' ? ' (YYYY-MM-DD)' : ''
@@ -83,7 +83,7 @@ const DataForm = ({
           const field = records.newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
           return (
             <React.Fragment key={column.field}>
-              {column.type.toUpperCase() !== 'PHONE' && (
+              {column.type.toUpperCase() !== 'ATTACHMENT' && (
                 <div className="p-col-4" style={{ padding: '.75em' }}>
                   <label htmlFor={column.field}>{`${column.header}${
                     column.type.toUpperCase() === 'DATE' ? ' (YYYY-MM-DD)' : ''

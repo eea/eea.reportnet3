@@ -78,7 +78,7 @@ export const FieldsDesigner = ({
             field.type.toUpperCase() === 'CODELIST' ||
             field.type.toUpperCase() === 'MULTISELECT_CODELIST' ||
             field.type.toUpperCase() === 'LINK' ||
-            field.type.toUpperCase() === 'PHONE'
+            field.type.toUpperCase() === 'ATTACHMENT'
         ).length > 0
       );
     }
@@ -92,14 +92,14 @@ export const FieldsDesigner = ({
           (field.type.toUpperCase() === 'CODELIST' ||
             field.type.toUpperCase() === 'MULTISELECT_CODELIST' ||
             field.type.toUpperCase() === 'LINK' ||
-            field.type.toUpperCase() === 'PHONE') &&
+            field.type.toUpperCase() === 'ATTACHMENT') &&
           field.fieldId !== fieldId
         );
       }).length > 0 ||
         selectedField.fieldType.toUpperCase() === 'CODELIST' ||
         selectedField.fieldType.toUpperCase() === 'MULTISELECT_CODELIST' ||
         selectedField.fieldType.toUpperCase() === 'LINK' ||
-        selectedField.fieldType.toUpperCase() === 'PHONE'
+        selectedField.fieldType.toUpperCase() === 'ATTACHMENT'
     );
   };
 
@@ -107,6 +107,7 @@ export const FieldsDesigner = ({
     codelistItems,
     description,
     fieldId,
+    maxSize,
     pk,
     pkHasMultipleValues,
     pkMustBeUsed,
@@ -114,13 +115,15 @@ export const FieldsDesigner = ({
     recordId,
     referencedField,
     required,
-    type
+    type,
+    validExtensions
   }) => {
     const inmFields = [...fields];
     inmFields.splice(inmFields.length, 0, {
       codelistItems,
       description,
       fieldId,
+      maxSize,
       pk,
       pkHasMultipleValues,
       pkMustBeUsed,
@@ -128,7 +131,8 @@ export const FieldsDesigner = ({
       recordId,
       referencedField,
       required,
-      type
+      type,
+      validExtensions
     });
     onChangeFields(inmFields, type.toUpperCase() === 'LINK', table.tableSchemaId);
     setFields(inmFields);
@@ -146,27 +150,31 @@ export const FieldsDesigner = ({
     description,
     id,
     isLinkChange,
+    maxSize,
     pk,
     pkHasMultipleValues,
     pkMustBeUsed,
     name,
     referencedField,
     required,
-    type
+    type,
+    validExtensions
   }) => {
     const inmFields = [...fields];
     const fieldIndex = FieldsDesignerUtils.getIndexByFieldId(id, inmFields);
 
     if (fieldIndex > -1) {
-      inmFields[fieldIndex].name = name;
-      inmFields[fieldIndex].type = type;
-      inmFields[fieldIndex].description = description;
       inmFields[fieldIndex].codelistItems = codelistItems;
-      inmFields[fieldIndex].referencedField = referencedField;
-      inmFields[fieldIndex].required = required;
+      inmFields[fieldIndex].description = description;
+      inmFields[fieldIndex].maxSize = maxSize;
+      inmFields[fieldIndex].name = name;
       inmFields[fieldIndex].pk = pk;
       inmFields[fieldIndex].pkHasMultipleValues = pkHasMultipleValues;
       inmFields[fieldIndex].pkMustBeUsed = pkMustBeUsed;
+      inmFields[fieldIndex].referencedField = referencedField;
+      inmFields[fieldIndex].required = required;
+      inmFields[fieldIndex].type = type;
+      inmFields[fieldIndex].validExtensions = validExtensions;
       onChangeFields(inmFields, isLinkChange, table.tableSchemaId);
       setFields(inmFields);
     }

@@ -37,7 +37,7 @@ const AttachmentEditor = ({
         label={resources.messages['save']}
         icon="check"
         onClick={() => {
-          onSaveAttachment(validExtensions);
+          onSaveAttachment({ validExtensions, maxSize });
           setValidExtensionsItems([]);
           setIsVisible(false);
         }}
@@ -104,14 +104,13 @@ const AttachmentEditor = ({
           }}></span>
       }
       <div className={styles.maxSizeWrapper}>
-        {console.log(maxSize)}
         <InputNumber
           // placeholder={resourcesContext.messages.value}
           buttonLayout="horizontal"
           decrementButtonIcon="pi pi-minus"
           format={false}
           incrementButtonIcon="pi pi-plus"
-          max={100}
+          max={20}
           min={0}
           // mode="decimal"
           onChange={e => setMaxSize(e.target.value)}
@@ -119,7 +118,9 @@ const AttachmentEditor = ({
           step={0.25}
           value={maxSize}
         />
-        <span className={styles.mbSpan}>{resources.messages['Mb']}</span>
+        <span className={styles.mbSpan}>{`${resources.messages['Mb']} (${Number(maxSize) * 1024} ${
+          resources.messages['Kb']
+        })`}</span>
       </div>
     </Dialog>
   );
