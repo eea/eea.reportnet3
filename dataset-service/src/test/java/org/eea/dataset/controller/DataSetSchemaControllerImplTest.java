@@ -2,6 +2,7 @@ package org.eea.dataset.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -120,6 +121,7 @@ public class DataSetSchemaControllerImplTest {
   @Mock
   private DesignDatasetService designDatasetService;
 
+  /** The contributor controller zuul. */
   @Mock
   private ContributorControllerZuul contributorControllerZuul;
 
@@ -1234,6 +1236,11 @@ public class DataSetSchemaControllerImplTest {
     }
   }
 
+  /**
+   * Test copy designs from dataflow.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testCopyDesignsFromDataflow() throws EEAException {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -1243,6 +1250,11 @@ public class DataSetSchemaControllerImplTest {
   }
 
 
+  /**
+   * Test copy designs from dataflow exception.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testCopyDesignsFromDataflowException() throws EEAException {
     try {
@@ -1257,7 +1269,48 @@ public class DataSetSchemaControllerImplTest {
     }
   }
 
+  /**
+   * Gets the simple schema test.
+   *
+   * @return the simple schema test
+   */
+  @Test
+  public void getSimpleSchemaTest() {
+    assertNull(dataSchemaControllerImpl.getSimpleSchema(1L, 1L, 1L));
+  }
 
+  /**
+   * Gets the simple schema null test.
+   *
+   * @return the simple schema null test
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void getSimpleSchemaNullTest() {
+    try {
+      dataSchemaControllerImpl.getSimpleSchema(null, 1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, e.getReason());
+      throw e;
+    }
+  }
+
+  /**
+   * Gets the simple schema error test.
+   *
+   * @return the simple schema error test
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void getSimpleSchemaErrorTest() throws EEAException {
+    doThrow(EEAException.class).when(dataschemaService).getSimpleSchema(Mockito.anyLong());
+    try {
+      dataSchemaControllerImpl.getSimpleSchema(1l, 1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
 }
 
 

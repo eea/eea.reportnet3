@@ -815,6 +815,14 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     }
   }
 
+  /**
+   * Gets the simple schema.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @return the simple schema
+   */
   @Override
   @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   @GetMapping(value = "/getSimpleSchema/dataset/{datasetId}",

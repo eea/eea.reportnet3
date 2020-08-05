@@ -1630,14 +1630,24 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public SimpleDatasetSchemaVO getSimpleSchema(Long datasetId) throws EEAException {
     String schemaId = getDatasetSchemaId(datasetId);
-    Optional<DesignDataset> designDataset =
-        designDatasetRepository.findFirstByDatasetSchema(schemaId);
-    DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
-    SimpleDatasetSchemaVO simpleDatasetSchema = simpleDataSchemaMapper.entityToClass(datasetSchema);
-    if (designDataset.isPresent()) {
-      simpleDatasetSchema.setDatasetName(designDataset.get().getDataSetName());
+    if (schemaId != null) {
+      LOG.info("Getting schema from id {}", schemaId);
+      Optional<DesignDataset> designDataset =
+          designDatasetRepository.findFirstByDatasetSchema(schemaId);
+      DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
+      if (datasetSchema != null) {
+        SimpleDatasetSchemaVO simpleDatasetSchema =
+            simpleDataSchemaMapper.entityToClass(datasetSchema);
+        if (designDataset.isPresent()) {
+          simpleDatasetSchema.setDatasetName(designDataset.get().getDataSetName());
+        }
+        return simpleDatasetSchema;
+      } else {
+        throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, schemaId));
+      }
+    } else {
+      throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, datasetId));
     }
-    return simpleDatasetSchema;
   }
 
   /**

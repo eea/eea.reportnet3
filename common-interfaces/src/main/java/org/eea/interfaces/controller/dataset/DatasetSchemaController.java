@@ -280,6 +280,8 @@ public interface DatasetSchemaController {
    * Gets the simple schema.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @return the simple schema
    */
   @GetMapping(value = "/getSimpleSchema/dataset/{datasetId}",
