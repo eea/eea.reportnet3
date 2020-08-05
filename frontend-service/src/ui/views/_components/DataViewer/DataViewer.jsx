@@ -184,9 +184,7 @@ const DataViewer = withRouter(
     };
 
     const onFileDownload = async (fileName, fieldId) => {
-      console.log({ datasetId, fieldId, records });
       const fileContent = await DatasetService.downloadFileData(datasetId, fieldId);
-      console.log({ fileContent });
 
       DownloadFile(fileContent, fileName);
 
@@ -197,12 +195,10 @@ const DataViewer = withRouter(
     };
 
     const onFileUploadVisible = (fieldId, fieldSchemaId) => {
-      console.log({ fieldId });
       dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId } });
     };
 
     const onFileDeleteVisible = (fieldId, fieldSchemaId) => {
-      console.log({ fieldId });
       dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId } });
       setIsDeleteAttachmentVisible(true);
     };
@@ -451,7 +447,6 @@ const DataViewer = withRouter(
     };
 
     const onAttach = async value => {
-      console.log(value.files[0].name);
       RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, `${value.files[0].name}`);
       setIsAttachFileVisible(false);
     };
@@ -503,9 +498,7 @@ const DataViewer = withRouter(
     };
 
     const onConfirmDeleteAttachment = async () => {
-      console.log('DELETE ATTACHMENT');
       const fileDeleted = await DatasetService.deleteFileData(datasetId, records.selectedFieldId);
-      console.log({ fileDeleted });
       if (fileDeleted) {
         RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, '');
         setIsDeleteAttachmentVisible(false);

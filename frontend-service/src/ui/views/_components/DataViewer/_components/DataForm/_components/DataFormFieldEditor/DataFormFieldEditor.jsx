@@ -256,7 +256,6 @@ const DataFormFieldEditor = ({
   // };
 
   const onConfirmDeleteAttachment = () => {
-    console.log('DELETE ATTACHMENT');
     onChangeForm(field, []);
     setIsDeleteAttachmentVisible(false);
   };

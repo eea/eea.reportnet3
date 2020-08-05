@@ -395,7 +395,6 @@ const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fie
 };
 
 const updateRecordFieldDesign = async (datasetId, record) => {
-  console.log({ record });
   const datasetTableFieldDesign = new DatasetTableField({});
   datasetTableFieldDesign.codelistItems = record.codelistItems;
   datasetTableFieldDesign.description = record.description;

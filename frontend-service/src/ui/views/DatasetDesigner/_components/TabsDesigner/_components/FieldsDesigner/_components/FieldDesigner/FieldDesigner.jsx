@@ -503,7 +503,6 @@ export const FieldDesigner = ({
   };
 
   const onSaveAttachment = fileProperties => {
-    console.log({ fileProperties });
     dispatchFieldDesigner({
       type: 'SET_ATTACHMENT_PROPERTIES',
       payload: { validExtensions: fileProperties.validExtensions, maxSize: fileProperties.maxSize }

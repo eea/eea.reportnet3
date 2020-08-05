@@ -121,7 +121,6 @@ export const useSetColumns = (
     ];
 
     if (!isUndefined(fieldType)) {
-      console.log({ fieldType });
       const filteredTypes = fieldTypes.filter(field => field.fieldType.toUpperCase() === fieldType.toUpperCase())[0];
       return filteredTypes.value;
     } else {

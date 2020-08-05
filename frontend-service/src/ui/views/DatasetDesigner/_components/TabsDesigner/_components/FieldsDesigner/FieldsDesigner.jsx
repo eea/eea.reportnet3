@@ -85,7 +85,6 @@ export const FieldsDesigner = ({
   }, [fields]);
 
   const onCodelistAndLinkShow = (fieldId, selectedField) => {
-    console.log(selectedField.fieldType);
     setIsCodelistOrLink(
       fields.filter(field => {
         return (

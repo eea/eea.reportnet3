@@ -76,7 +76,6 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
         fieldPreviousTypeValue: payload.previousType
       };
     case 'TOGGLE_ATTACHMENT_EDITOR_VISIBLE':
-      console.log('TOGGLE_ATTACHMENT_EDITOR_VISIBLE');
       return {
         ...state,
         isAttachmentEditorVisible: payload,
@@ -84,7 +83,6 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
         isLinkSelectorVisible: false
       };
     case 'TOGGLE_CODELIST_EDITOR_VISIBLE':
-      console.log('TOGGLE_CODELIST_EDITOR_VISIBLE');
       return {
         ...state,
         isCodelistEditorVisible: payload,
