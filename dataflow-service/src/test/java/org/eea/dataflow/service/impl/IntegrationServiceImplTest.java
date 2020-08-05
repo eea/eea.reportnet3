@@ -10,7 +10,9 @@ import org.eea.dataflow.integration.crud.factory.CrudManagerFactory;
 import org.eea.dataflow.mapper.IntegrationMapper;
 import org.eea.dataflow.persistence.domain.Integration;
 import org.eea.dataflow.persistence.repository.IntegrationRepository;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.junit.Assert;
 import org.junit.Before;
@@ -21,6 +23,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class IntegrationServiceImplTest.
@@ -152,11 +156,30 @@ public class IntegrationServiceImplTest {
   @Test
   public void getExporEUDatasetIntegrationByDatasetIdTest() {
     IntegrationVO expected = new IntegrationVO();
-    Mockito
-        .when(integrationRepository.findFirstByDatasetIdAndOperation(Mockito.any(), Mockito.any()))
-        .thenReturn(new Integration());
+    Mockito.when(integrationRepository.findFirstByOperationAndParameterAndValue(Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(new Integration());
     Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(expected);
     IntegrationVO response = integrationService.getExporEUDatasetIntegrationByDatasetId(1L);
     Assert.assertEquals(expected, response);
+  }
+
+  /**
+   * Creates the integration exception test.
+   * 
+   * @throws EEAException
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createIntegrationExceptionTest() throws EEAException {
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
+
+    try {
+      integrationService.createIntegration(integrationVO);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_CREATION,
+          e.getReason());
+      throw e;
+    }
   }
 }
