@@ -71,6 +71,7 @@ const SnapshotSlideBar = ({
 
   return (
     <Sidebar
+      baseZIndex={1900}
       blockScroll={true}
       className={styles.sidebar}
       onHide={() => setIsVisible()}
