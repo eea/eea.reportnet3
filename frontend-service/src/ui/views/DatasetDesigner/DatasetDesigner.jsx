@@ -230,7 +230,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       const response = await DatasetService.downloadExportFile(datasetId);
       console.log('response', response);
     } catch (error) {
-      console.error('error', error);
+      console.error(error);
+      notificationContext.add({
+        type: 'DOWNLOAD_FME_FILE_ERROR'
+      });
     }
   };
 
@@ -400,6 +403,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onExportData = async fileType => {
     isLoadingFile(true);
+
     try {
       const datasetName = createFileName(designerState.datasetSchemaName, fileType);
       const datasetData = await DatasetService.exportDataById(datasetId, fileType);

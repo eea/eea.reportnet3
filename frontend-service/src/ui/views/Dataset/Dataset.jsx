@@ -314,7 +314,10 @@ export const Dataset = withRouter(({ match, history }) => {
       // const response = await DatasetService.downloadExportFile(datasetId, fileName, dataProviderId);
       console.log('response', response);
     } catch (error) {
-      console.log('error', error);
+      console.error(error);
+      notificationContext.add({
+        type: 'DOWNLOAD_FME_FILE_ERROR'
+      });
     }
   };
 
