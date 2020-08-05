@@ -537,7 +537,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
         fieldSchemaVO.setCodelistItems(codelistItems);
       }
-
+      if (fieldSchemaVO.getValidExtensions() != null
+          && fieldSchemaVO.getValidExtensions().length != 0) {
+        String[] validExtensions = fieldSchemaVO.getValidExtensions();
+        for (int i = 0; i < validExtensions.length; i++) {
+          validExtensions[i] = validExtensions[i].trim();
+        }
+        fieldSchemaVO.setValidExtensions(validExtensions);
+      }
 
       return schemasRepository
           .createFieldSchema(datasetSchemaId, fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO))
@@ -642,6 +649,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (fieldSchemaVO.getPkHasMultipleValues() != null) {
       fieldSchema.put("pkHasMultipleValues", fieldSchemaVO.getPkHasMultipleValues());
     }
+    if (fieldSchemaVO.getMaxSize() != null) {
+      fieldSchema.put("maxSize", fieldSchemaVO.getMaxSize());
+    }
+    if (fieldSchemaVO.getValidExtensions() != null) {
+      String[] validExtensions = fieldSchemaVO.getValidExtensions();
+      for (int i = 0; i < validExtensions.length; i++) {
+        validExtensions[i] = validExtensions[i].trim();
+      }
+      fieldSchema.put("validExtensions", Arrays.asList(validExtensions));
+    }
     if (fieldSchemaVO.getReferencedField() != null) {
       Document referenced = new Document();
       referenced.put(LiteralConstants.ID_DATASET_SCHEMA,
@@ -653,12 +670,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       this.updateIsPkReferencedInFieldSchema(
           fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
           fieldSchemaVO.getReferencedField().getIdPk(), true);
-    }
-    if (fieldSchemaVO.getMaxSize() != null) {
-      fieldSchema.put("maxSize", fieldSchemaVO.getMaxSize());
-    }
-    if (fieldSchemaVO.getValidExtensions() != null) {
-      fieldSchema.put("validExtensions", fieldSchemaVO.getValidExtensions());
     }
     return typeModified;
   }

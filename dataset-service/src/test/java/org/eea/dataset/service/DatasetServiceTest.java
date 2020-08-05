@@ -2209,9 +2209,11 @@ public class DatasetServiceTest {
 
   @Test
   public void testDeleteAttachment() throws EEAException {
+    when(attachmentRepository.findByFieldValueId(Mockito.anyString()))
+        .thenReturn(new AttachmentValue());
     when(fieldRepository.findById(Mockito.anyString())).thenReturn(new FieldValue());
     datasetService.deleteAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F");
-    Mockito.verify(attachmentRepository, times(1)).deleteByFieldValueId(Mockito.any());
+    Mockito.verify(attachmentRepository, times(1)).save(Mockito.any());
   }
 
   @Test
