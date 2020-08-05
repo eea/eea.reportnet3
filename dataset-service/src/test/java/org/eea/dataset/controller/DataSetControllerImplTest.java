@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
@@ -30,6 +31,7 @@ import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -74,6 +76,10 @@ public class DataSetControllerImplTest {
    */
   @Mock
   private DesignDatasetServiceImpl designDatasetService;
+
+  /** The dataset schema service. */
+  @Mock
+  private DatasetSchemaService datasetSchemaService;
 
   /**
    * The records.
@@ -1123,19 +1129,93 @@ public class DataSetControllerImplTest {
 
   @Test
   public void testUpdateAttachment() throws Exception {
-
-    MultipartFile file = Mockito.mock(MultipartFile.class);
-    Mockito.doNothing().when(datasetService).updateAttachment(Mockito.any(), Mockito.any(),
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setName("test");
+    fieldSchemaVO.setId("id");
+    MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
+    Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
+    Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(fieldSchemaVO);
+    dataSetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
+    Mockito.verify(datasetService, times(1)).updateAttachment(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void testUpdateAttachmentWithLimits() throws Exception {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setName("test");
+    fieldSchemaVO.setId("id");
+    fieldSchemaVO.setMaxSize(100000.1f);
+    MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
+    Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
+    Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(fieldSchemaVO);
+    // Mockito.when(datasetService.getMimetype(Mockito.any())).thenReturn("csv");
     dataSetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     Mockito.verify(datasetService, times(1)).updateAttachment(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
   }
 
   @Test(expected = ResponseStatusException.class)
+  public void testUpdateAttachmentExceptionDatasetNotFound() throws Exception {
+    MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
+    Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn(null);
+    try {
+      dataSetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, e.getReason());
+      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testUpdateAttachmentExceptionFieldNotFound() throws Exception {
+    MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
+    Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
+    Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(null);
+    try {
+      dataSetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND, e.getReason());
+      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testUpdateAttachmentExceptionInvalidAttachment() throws Exception {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setName("test");
+    fieldSchemaVO.setId("id");
+    fieldSchemaVO.setMaxSize(100000.1f);
+    fieldSchemaVO.setValidExtensions(new String[1]);
+    MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
+    Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
+    Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(fieldSchemaVO);
+    Mockito.when(datasetService.getMimetype(Mockito.any())).thenReturn("csv");
+    try {
+      dataSetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.FILE_FORMAT, e.getReason());
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
   public void testUpdateAttachmentException() throws Exception {
 
-    MultipartFile file = Mockito.mock(MultipartFile.class);
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setName("test");
+    fieldSchemaVO.setId("id");
+    MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
+    Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
+    Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(fieldSchemaVO);
     Mockito.doThrow(new EEAException()).when(datasetService).updateAttachment(Mockito.anyLong(),
         Mockito.any(), Mockito.any(), Mockito.any());
     try {

@@ -779,10 +779,10 @@ public class DataSetControllerImpl implements DatasetController {
       throws Exception {
 
     try {
-      String fileName = file.getOriginalFilename();
-      // if (!validateAttachment(datasetId, idField, fileName, file.getSize())) {
-      // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
-      // }
+      String fileName = file.getName();
+      if (!validateAttachment(datasetId, idField, fileName, file.getSize())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
+      }
       InputStream is = file.getInputStream();
       datasetService.updateAttachment(datasetId, idField, fileName, is);
     } catch (EEAException | IOException e) {
@@ -814,7 +814,7 @@ public class DataSetControllerImpl implements DatasetController {
     if (fieldSchema == null || fieldSchema.getId() == null) {
       throw new EEAException(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND);
     }
-    if ((fieldSchema.getMaxSize() != null && fieldSchema.getMaxSize() < size)
+    if ((fieldSchema.getMaxSize() != null && fieldSchema.getMaxSize() * 1000000 < size)
         || (fieldSchema.getValidExtensions() != null
             && !Arrays.asList(fieldSchema.getValidExtensions())
                 .contains(datasetService.getMimetype(originalFilename)))) {

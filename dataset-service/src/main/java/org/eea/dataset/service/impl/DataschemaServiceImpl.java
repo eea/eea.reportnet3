@@ -531,7 +531,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
         fieldSchemaVO.setCodelistItems(codelistItems);
       }
-
+      if (fieldSchemaVO.getValidExtensions() != null
+          && fieldSchemaVO.getValidExtensions().length != 0) {
+        String[] validExtensions = fieldSchemaVO.getValidExtensions();
+        for (int i = 0; i < validExtensions.length; i++) {
+          validExtensions[i] = validExtensions[i].trim();
+        }
+        fieldSchemaVO.setValidExtensions(validExtensions);
+      }
 
       return schemasRepository
           .createFieldSchema(datasetSchemaId, fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO))
@@ -652,7 +659,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       fieldSchema.put("maxSize", fieldSchemaVO.getMaxSize());
     }
     if (fieldSchemaVO.getValidExtensions() != null) {
-      fieldSchema.put("validExtensions", fieldSchemaVO.getValidExtensions());
+      String[] validExtensions = fieldSchemaVO.getValidExtensions();
+      for (int i = 0; i < validExtensions.length; i++) {
+        validExtensions[i] = validExtensions[i].trim();
+      }
+      fieldSchema.put("validExtensions", Arrays.asList(validExtensions));
     }
     return typeModified;
   }

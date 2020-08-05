@@ -82,7 +82,7 @@ public class FieldSchema {
 
   /** The max attachment size. */
   @Field(value = "maxSize")
-  private Long maxSize;
+  private Float maxSize;
 
   /**
    * Hash code.
@@ -116,7 +116,6 @@ public class FieldSchema {
         && Objects.equals(idRecord, other.idRecord) && Objects.equals(required, other.required)
         && Objects.equals(pk, other.pk) && Objects.equals(description, other.description)
         && Objects.equals(pkMustBeUsed, other.pkMustBeUsed)
-        && Objects.equals(validExtensions, other.validExtensions)
         && Objects.equals(maxSize, other.maxSize);
   }
 

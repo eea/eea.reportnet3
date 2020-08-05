@@ -54,7 +54,7 @@ public class FieldSchemaVO {
   private String[] validExtensions;
 
   /** The max attachment size. */
-  private Long maxSize;
+  private Float maxSize;
 
   /**
    * Hash code.
@@ -88,7 +88,6 @@ public class FieldSchemaVO {
         && Objects.equals(description, other.description) && Objects.equals(name, other.name)
         && Objects.equals(type, other.type) && Objects.equals(required, other.required)
         && Objects.equals(pk, other.pk) && Objects.equals(pkMustBeUsed, other.pkMustBeUsed)
-        && Objects.equals(validExtensions, other.validExtensions)
         && Objects.equals(maxSize, other.maxSize);
   }
 }
