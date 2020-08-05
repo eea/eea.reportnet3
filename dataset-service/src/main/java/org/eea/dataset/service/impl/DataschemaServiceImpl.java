@@ -12,6 +12,7 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
+import org.eea.dataset.mapper.SimpleDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.mapper.UniqueConstraintMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -44,6 +45,7 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
@@ -140,6 +142,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The unique constraint mapper. */
   @Autowired
   private UniqueConstraintMapper uniqueConstraintMapper;
+
+  /** The simple data schema mapper. */
+  @Autowired
+  private SimpleDataSchemaMapper simpleDataSchemaMapper;
 
   /**
    * Creates the empty data set schema.
@@ -1617,6 +1623,36 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         LOG.info("A unique constraint is going to be created during the copy process");
         uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
       }
+    }
+  }
+
+  /**
+   * Gets the simple schema.
+   *
+   * @param datasetId the dataset id
+   * @return the simple schema
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public SimpleDatasetSchemaVO getSimpleSchema(Long datasetId) throws EEAException {
+    String schemaId = getDatasetSchemaId(datasetId);
+    if (schemaId != null) {
+      LOG.info("Getting schema from id {}", schemaId);
+      Optional<DesignDataset> designDataset =
+          designDatasetRepository.findFirstByDatasetSchema(schemaId);
+      DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
+      if (datasetSchema != null) {
+        SimpleDatasetSchemaVO simpleDatasetSchema =
+            simpleDataSchemaMapper.entityToClass(datasetSchema);
+        if (designDataset.isPresent()) {
+          simpleDatasetSchema.setDatasetName(designDataset.get().getDataSetName());
+        }
+        return simpleDatasetSchema;
+      } else {
+        throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, schemaId));
+      }
+    } else {
+      throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, datasetId));
     }
   }
 
