@@ -24,13 +24,15 @@ public interface IntegrationRepository extends CrudRepository<Integration, Long>
       @Param("paramValue") String paramValue);
 
   /**
-   * Find first by dataset id and operation.
+   * Find first by operation and parameter and value.
    *
-   * @param datasetId the dataset id
    * @param operation the operation
+   * @param parameter the parameter
+   * @param value the value
    * @return the integration
    */
-  @Query("SELECT i FROM Integration i JOIN i.internalParameters p WHERE i.operation=:operation AND p.parameter='datasetId' AND p.value=:datasetId")
-  Integration findFirstByDatasetIdAndOperation(@Param("datasetId") String datasetId,
-      @Param("operation") IntegrationOperationTypeEnum operation);
+  @Query("SELECT i FROM Integration i JOIN i.internalParameters p WHERE i.operation=:operation AND p.parameter=:parameter AND p.value=:value")
+  Integration findFirstByOperationAndParameterAndValue(
+      @Param("operation") IntegrationOperationTypeEnum operation,
+      @Param("parameter") String parameter, @Param("value") String value);
 }

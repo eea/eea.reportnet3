@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.eea.dataflow.integration.crud.factory.AbstractCrudManager;
+import org.eea.dataflow.integration.utils.IntegrationParams;
 import org.eea.dataflow.mapper.IntegrationMapper;
 import org.eea.dataflow.persistence.domain.Integration;
 import org.eea.dataflow.persistence.repository.IntegrationRepository;
@@ -32,21 +33,6 @@ public class FMEIntegrationManager extends AbstractCrudManager {
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(FMEIntegrationManager.class);
-
-  /** The Constant DATASETSCHEMAID: {@value}. */
-  private static final String DATASET_SCHEMA_ID = "datasetSchemaId";
-
-  /** The Constant DATAFLOW_ID: {@value}. */
-  private static final String DATAFLOW_ID = "dataflowId";
-
-  /** The Constant DATASET_ID: {@value}. */
-  private static final String DATASET_ID = "datasetId";
-
-  /** The Constant PROCESS_NAME: {@value}. */
-  private static final String PROCESS_NAME = "processName";
-
-  /** The Constant REPOSITORY: {@value}. */
-  private static final String REPOSITORY = "repository";
 
   /** The integration repository. */
   @Autowired
@@ -88,8 +74,8 @@ public class FMEIntegrationManager extends AbstractCrudManager {
       results.add(integrationMapper.entityToClass(integration));
     } else if (integrationVO.getInternalParameters() != null
         && integrationVO.getInternalParameters().size() > 0) {
-      if (integrationVO.getInternalParameters().containsKey(DATAFLOW_ID)) {
-        integrationVO.getInternalParameters().remove(DATAFLOW_ID);
+      if (integrationVO.getInternalParameters().containsKey(IntegrationParams.DATAFLOW_ID)) {
+        integrationVO.getInternalParameters().remove(IntegrationParams.DATAFLOW_ID);
       }
       List<String> parameters = new ArrayList<>(integrationVO.getInternalParameters().keySet());
       String parameter = parameters.get(0);
@@ -128,8 +114,9 @@ public class FMEIntegrationManager extends AbstractCrudManager {
 
     if (integrationVO.getInternalParameters() == null
         || integrationVO.getInternalParameters().size() == 0
-        || !integrationVO.getInternalParameters().containsKey(DATAFLOW_ID)
-        || !integrationVO.getInternalParameters().containsKey(DATASET_SCHEMA_ID)) {
+        || !integrationVO.getInternalParameters().containsKey(IntegrationParams.DATAFLOW_ID)
+        || !integrationVO.getInternalParameters()
+            .containsKey(IntegrationParams.DATASET_SCHEMA_ID)) {
       LOG_ERROR.error(
           "Error updating an integration: Internal parameters don't have dataflowId or datasetSchemaId");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -151,15 +138,11 @@ public class FMEIntegrationManager extends AbstractCrudManager {
   @Override
   public void create(IntegrationVO integrationVO) {
 
-    if (IntegrationOperationTypeEnum.EXPORT_EU_DATASET.equals(integrationVO.getOperation())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_CREATION);
-    }
-
     if (integrationVO.getInternalParameters() == null
         || integrationVO.getInternalParameters().size() == 0
-        || !integrationVO.getInternalParameters().containsKey(DATAFLOW_ID)
-        || !integrationVO.getInternalParameters().containsKey(DATASET_SCHEMA_ID)) {
+        || !integrationVO.getInternalParameters().containsKey(IntegrationParams.DATAFLOW_ID)
+        || !integrationVO.getInternalParameters()
+            .containsKey(IntegrationParams.DATASET_SCHEMA_ID)) {
       LOG_ERROR.error(
           "Error creating an integration: Internal parameters don't have dataflowId or datasetSchemaId");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -241,30 +224,37 @@ public class FMEIntegrationManager extends AbstractCrudManager {
       Map<String, String> newInternalParameters) {
 
     Map<String, String> oldInternalParametersMap = integrationVO.getInternalParameters();
-    String dataflowId = newInternalParameters.get(DATAFLOW_ID);
-    String datasetId = newInternalParameters.get(DATASET_ID);
-    String datasetSchemaId = newInternalParameters.get(DATASET_SCHEMA_ID);
-    String repository = newInternalParameters.get(REPOSITORY);
-    String processName = newInternalParameters.get(PROCESS_NAME);
+    String dataflowId = newInternalParameters.get(IntegrationParams.DATAFLOW_ID);
+    String datasetId = newInternalParameters.get(IntegrationParams.DATASET_ID);
+    String datasetSchemaId = newInternalParameters.get(IntegrationParams.DATASET_SCHEMA_ID);
+    String repository = newInternalParameters.get(IntegrationParams.REPOSITORY);
+    String processName = newInternalParameters.get(IntegrationParams.PROCESS_NAME);
+    String databaseConnection =
+        newInternalParameters.get(IntegrationParams.DATABASE_CONNECTION_PUBLIC);
 
     if (null != dataflowId && !dataflowId.isEmpty()) {
-      oldInternalParametersMap.put(DATAFLOW_ID, dataflowId);
+      oldInternalParametersMap.put(IntegrationParams.DATAFLOW_ID, dataflowId);
     }
 
     if (null != datasetId && !datasetId.isEmpty()) {
-      oldInternalParametersMap.put(DATASET_ID, datasetId);
+      oldInternalParametersMap.put(IntegrationParams.DATASET_ID, datasetId);
     }
 
     if (null != datasetSchemaId && !datasetSchemaId.isEmpty()) {
-      oldInternalParametersMap.put(DATASET_SCHEMA_ID, datasetSchemaId);
+      oldInternalParametersMap.put(IntegrationParams.DATASET_SCHEMA_ID, datasetSchemaId);
     }
 
     if (null != repository && !repository.isEmpty()) {
-      oldInternalParametersMap.put(REPOSITORY, repository);
+      oldInternalParametersMap.put(IntegrationParams.REPOSITORY, repository);
     }
 
     if (null != processName && !processName.isEmpty()) {
-      oldInternalParametersMap.put(PROCESS_NAME, processName);
+      oldInternalParametersMap.put(IntegrationParams.PROCESS_NAME, processName);
+    }
+
+    if (null != databaseConnection) {
+      oldInternalParametersMap.put(IntegrationParams.DATABASE_CONNECTION_PUBLIC,
+          databaseConnection);
     }
   }
 }
