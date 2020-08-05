@@ -813,7 +813,9 @@ const DataViewer = withRouter(
               onChange={() => setAddAnotherOne(!addAnotherOne)}
               role="checkbox"
             />
-            <span className={styles.addAnotherOne}>{resources.messages['addAnotherOne']}</span>
+            <span className={styles.addAnotherOne} onClick={() => setAddAnotherOne(!addAnotherOne)}>
+              {resources.messages['addAnotherOne']}
+            </span>
           </div>
         )}
         <Button
