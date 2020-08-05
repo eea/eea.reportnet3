@@ -18,6 +18,7 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   datasetTableFieldDesign.codelistItems = datasetTableRecordField.codelistItems;
   datasetTableFieldDesign.description = datasetTableRecordField.description;
   datasetTableFieldDesign.idRecord = datasetTableRecordField.recordId;
+  datasetTableFieldDesign.maxSize = datasetTableRecordField.maxSize.toString();
   datasetTableFieldDesign.pk = datasetTableRecordField.pk;
   datasetTableFieldDesign.pkHasMultipleValues = datasetTableRecordField.pkHasMultipleValues;
   datasetTableFieldDesign.pkMustBeUsed = datasetTableRecordField.pkMustBeUsed;
@@ -25,6 +26,7 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   datasetTableFieldDesign.referencedField = datasetTableRecordField.referencedField;
   datasetTableFieldDesign.required = datasetTableRecordField.required;
   datasetTableFieldDesign.type = datasetTableRecordField.type;
+  datasetTableFieldDesign.validExtensions = datasetTableRecordField.validExtensions;
 
   return await apiDataset.addRecordFieldDesign(datasetId, datasetTableFieldDesign);
 };
@@ -62,6 +64,8 @@ const createValidation = (entityType, id, levelError, message) =>
 
 const deleteDataById = async datasetId => await apiDataset.deleteDataById(datasetId);
 
+const deleteFileData = async (datasetId, fieldId) => await apiDataset.deleteFileData(datasetId, fieldId);
+
 const deleteRecordFieldDesign = async (datasetId, recordId) =>
   await apiDataset.deleteRecordFieldDesign(datasetId, recordId);
 
@@ -73,6 +77,8 @@ const deleteTableDataById = async (datasetId, tableId) => await apiDataset.delet
 
 const deleteTableDesign = async (datasetId, tableSchemaId) =>
   await apiDataset.deleteTableDesign(datasetId, tableSchemaId);
+
+const downloadFileData = async (datasetId, fieldId) => await apiDataset.downloadFileData(datasetId, fieldId);
 
 const errorsById = async (
   datasetId,
@@ -272,6 +278,7 @@ const schemaById = async datasetId => {
                   codelistItems: dataTableFieldDTO.codelistItems,
                   description: dataTableFieldDTO.description,
                   fieldId: dataTableFieldDTO.id,
+                  maxSize: dataTableFieldDTO.maxSize,
                   pk: !isNull(dataTableFieldDTO.pk) ? dataTableFieldDTO.pk : false,
                   pkHasMultipleValues: !isNull(dataTableFieldDTO.pkHasMultipleValues)
                     ? dataTableFieldDTO.pkHasMultipleValues
@@ -282,7 +289,8 @@ const schemaById = async datasetId => {
                   recordId: dataTableFieldDTO.idRecord,
                   referencedField: dataTableFieldDTO.referencedField,
                   required: dataTableFieldDTO.required,
-                  type: dataTableFieldDTO.type
+                  type: dataTableFieldDTO.type,
+                  validExtensions: !isNull(dataTableFieldDTO.validExtensions) ? dataTableFieldDTO.validExtensions : []
                 });
               })
             : null;
@@ -388,17 +396,19 @@ const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fie
 
 const updateRecordFieldDesign = async (datasetId, record) => {
   const datasetTableFieldDesign = new DatasetTableField({});
-  datasetTableFieldDesign.id = record.fieldSchemaId;
-  datasetTableFieldDesign.name = record.name;
-  datasetTableFieldDesign.type = record.type;
-  datasetTableFieldDesign.description = record.description;
   datasetTableFieldDesign.codelistItems = record.codelistItems;
+  datasetTableFieldDesign.description = record.description;
+  datasetTableFieldDesign.id = record.fieldSchemaId;
   datasetTableFieldDesign.idRecord = record.recordId;
-  datasetTableFieldDesign.referencedField = record.referencedField;
-  datasetTableFieldDesign.required = record.required;
+  datasetTableFieldDesign.maxSize = record.maxSize.toString();
+  datasetTableFieldDesign.name = record.name;
   datasetTableFieldDesign.pk = record.pk;
   datasetTableFieldDesign.pkHasMultipleValues = record.pkHasMultipleValues;
   datasetTableFieldDesign.pkMustBeUsed = record.pkMustBeUsed;
+  datasetTableFieldDesign.referencedField = record.referencedField;
+  datasetTableFieldDesign.required = record.required;
+  datasetTableFieldDesign.type = record.type;
+  datasetTableFieldDesign.validExtensions = record.validExtensions;
   const recordUpdated = await apiDataset.updateRecordFieldDesign(datasetId, datasetTableFieldDesign);
   return recordUpdated;
 };
@@ -474,11 +484,13 @@ export const ApiDatasetRepository = {
   addTableDesign,
   createValidation,
   deleteDataById,
+  deleteFileData,
   deleteRecordById,
   deleteRecordFieldDesign,
   deleteSchemaById,
   deleteTableDataById,
   deleteTableDesign,
+  downloadFileData,
   errorPositionByObjectId,
   errorsById,
   errorStatisticsById,
