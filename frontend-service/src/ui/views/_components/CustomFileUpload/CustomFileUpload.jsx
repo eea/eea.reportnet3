@@ -15,7 +15,7 @@ import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 
 export class CustomFileUpload extends Component {
   static defaultProps = {
-    accept: null,
+    accept: undefined,
     auto: false,
     cancelLabel: 'Reset',
     chooseLabel: 'Choose',
@@ -38,6 +38,7 @@ export class CustomFileUpload extends Component {
     onProgress: null,
     onSelect: null,
     onUpload: null,
+    operation: 'POST',
     previewWidth: 50,
     style: null,
     uploadLabel: 'Upload',
@@ -69,6 +70,7 @@ export class CustomFileUpload extends Component {
     onProgress: PropTypes.func,
     onSelect: PropTypes.func,
     onUpload: PropTypes.func,
+    operation: PropTypes.string,
     previewWidth: PropTypes.number,
     style: PropTypes.object,
     uploadLabel: PropTypes.string,
@@ -104,7 +106,6 @@ export class CustomFileUpload extends Component {
       const extension = file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name;
       return acceptedExtensions.includes(`.${extension.toLowerCase()}`);
     }
-
     if (this.hasFiles()) {
       const selectedExtension = this.state.files.map(
         file => file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name
@@ -216,10 +217,11 @@ export class CustomFileUpload extends Component {
 
       return false;
     }
-
-    if (!this.checkValidExtension(file)) {
-      this.setState({ isValid: false });
-      return false;
+    if (this.props.accept) {
+      if (!this.checkValidExtension(file)) {
+        this.setState({ isValid: false });
+        return false;
+      }
     }
 
     this.setState({ isValid: true });
@@ -273,7 +275,7 @@ export class CustomFileUpload extends Component {
       }
     };
 
-    xhr.open('POST', this.props.url, true);
+    xhr.open(this.props.operation, this.props.url, true);
     const tokens = userStorage.get();
     xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
 
@@ -410,20 +412,19 @@ export class CustomFileUpload extends Component {
     let className = classNames('p-fileupload p-component', this.props.className);
     let uploadButton, cancelButton, filesList, progressBar;
     let chooseButton = this.renderChooseButton();
-
     if (!this.props.auto) {
       uploadButton = (
         <Fragment>
           <span data-tip data-for="inValidExtension">
             <Button
               disabled={this.props.disabled || !this.hasFiles() || this.checkValidExtension() || this.state.isUploading}
-              icon={this.state.isUploading ? "spinnerAnimate" : "upload"}
+              icon={this.state.isUploading ? 'spinnerAnimate' : 'upload'}
               label={this.props.uploadLabel}
               onClick={this.upload}
             />
           </span>
 
-          {this.checkValidExtension() && (
+          {this.props.accept && this.checkValidExtension() && (
             <ReactTooltip effect="solid" id="inValidExtension" place="top">
               {this.props.invalidExtensionMessage}
             </ReactTooltip>

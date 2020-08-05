@@ -248,7 +248,8 @@ const getFieldTypeValue = value => {
     // { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
     { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
-    { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' }
+    { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' },
+    { fieldType: 'Attachment', value: 'Attachment', fieldTypeIcon: 'clip' }
   ];
 
   // if (value.toUpperCase() === 'COORDINATE_LONG') {
