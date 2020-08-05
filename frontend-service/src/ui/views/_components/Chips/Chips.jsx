@@ -202,7 +202,7 @@ const Chips = ({
   };
 
   const focusInput = () => {
-    inputElement.current.element.focus();
+    !isNil(inputElement.current) && inputElement.current.element.focus();
   };
 
   const renderErrorMessage = () => {

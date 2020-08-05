@@ -1,0 +1,26 @@
+.validExtensionsChips {
+  margin-top: 5px;
+  width: 100%;
+}
+.validExtensionsChips li span {
+  white-space: normal;
+  word-wrap: break-word;
+}
+.inputTitleWrapper {
+  margin-bottom: 1rem;
+}
+
+.maxSizeWrapper {
+  margin-top: 0.5rem;
+}
+.mbSpan {
+  font-weight: bold;
+  margin-left: 0.5rem;
+}
+.pasteDiv {
+  padding: 1rem;
+  border: 2px dashed var(--gray-25);
+}
+.validExtensionsWrapper {
+  margin-bottom: 1rem;
+}

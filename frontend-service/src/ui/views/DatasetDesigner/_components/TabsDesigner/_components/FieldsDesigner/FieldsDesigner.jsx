@@ -77,7 +77,8 @@ export const FieldsDesigner = ({
           field =>
             field.type.toUpperCase() === 'CODELIST' ||
             field.type.toUpperCase() === 'MULTISELECT_CODELIST' ||
-            field.type.toUpperCase() === 'LINK'
+            field.type.toUpperCase() === 'LINK' ||
+            field.type.toUpperCase() === 'ATTACHMENT'
         ).length > 0
       );
     }
@@ -89,13 +90,15 @@ export const FieldsDesigner = ({
         return (
           (field.type.toUpperCase() === 'CODELIST' ||
             field.type.toUpperCase() === 'MULTISELECT_CODELIST' ||
-            field.type.toUpperCase() === 'LINK') &&
+            field.type.toUpperCase() === 'LINK' ||
+            field.type.toUpperCase() === 'ATTACHMENT') &&
           field.fieldId !== fieldId
         );
       }).length > 0 ||
         selectedField.fieldType.toUpperCase() === 'CODELIST' ||
         selectedField.fieldType.toUpperCase() === 'MULTISELECT_CODELIST' ||
-        selectedField.fieldType.toUpperCase() === 'LINK'
+        selectedField.fieldType.toUpperCase() === 'LINK' ||
+        selectedField.fieldType.toUpperCase() === 'ATTACHMENT'
     );
   };
 
@@ -103,6 +106,7 @@ export const FieldsDesigner = ({
     codelistItems,
     description,
     fieldId,
+    maxSize,
     pk,
     pkHasMultipleValues,
     pkMustBeUsed,
@@ -110,13 +114,15 @@ export const FieldsDesigner = ({
     recordId,
     referencedField,
     required,
-    type
+    type,
+    validExtensions
   }) => {
     const inmFields = [...fields];
     inmFields.splice(inmFields.length, 0, {
       codelistItems,
       description,
       fieldId,
+      maxSize,
       pk,
       pkHasMultipleValues,
       pkMustBeUsed,
@@ -124,7 +130,8 @@ export const FieldsDesigner = ({
       recordId,
       referencedField,
       required,
-      type
+      type,
+      validExtensions
     });
     onChangeFields(inmFields, type.toUpperCase() === 'LINK', table.tableSchemaId);
     setFields(inmFields);
@@ -142,27 +149,31 @@ export const FieldsDesigner = ({
     description,
     id,
     isLinkChange,
+    maxSize,
     pk,
     pkHasMultipleValues,
     pkMustBeUsed,
     name,
     referencedField,
     required,
-    type
+    type,
+    validExtensions
   }) => {
     const inmFields = [...fields];
     const fieldIndex = FieldsDesignerUtils.getIndexByFieldId(id, inmFields);
 
     if (fieldIndex > -1) {
-      inmFields[fieldIndex].name = name;
-      inmFields[fieldIndex].type = type;
-      inmFields[fieldIndex].description = description;
       inmFields[fieldIndex].codelistItems = codelistItems;
-      inmFields[fieldIndex].referencedField = referencedField;
-      inmFields[fieldIndex].required = required;
+      inmFields[fieldIndex].description = description;
+      inmFields[fieldIndex].maxSize = maxSize;
+      inmFields[fieldIndex].name = name;
       inmFields[fieldIndex].pk = pk;
       inmFields[fieldIndex].pkHasMultipleValues = pkHasMultipleValues;
       inmFields[fieldIndex].pkMustBeUsed = pkMustBeUsed;
+      inmFields[fieldIndex].referencedField = referencedField;
+      inmFields[fieldIndex].required = required;
+      inmFields[fieldIndex].type = type;
+      inmFields[fieldIndex].validExtensions = validExtensions;
       onChangeFields(inmFields, isLinkChange, table.tableSchemaId);
       setFields(inmFields);
     }
@@ -357,6 +368,7 @@ export const FieldsDesigner = ({
           checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
           codelistItems={[]}
           datasetId={datasetId}
+          fieldFileProperties={{}}
           fieldId="-1"
           fieldName=""
           fieldLink={null}
@@ -393,6 +405,7 @@ export const FieldsDesigner = ({
                 codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
                 datasetId={datasetId}
                 fieldDescription={field.description}
+                fieldFileProperties={{ validExtensions: field.validExtensions, maxSize: field.maxSize }}
                 fieldId={field.fieldId}
                 fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
                 fieldName={field.name}
