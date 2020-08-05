@@ -226,6 +226,8 @@ public class JdbcRecordStoreServiceImplTest {
     file.delete();
     file = new File("./nullsnapshot_1_table_TableValue.snap");
     file.delete();
+    file = new File("./nullsnapshot_1_table_AttachmentValue.snap");
+    file.delete();
   }
 
   @Test
