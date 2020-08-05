@@ -14,6 +14,7 @@ import org.eea.dataflow.mapper.IntegrationMapper;
 import org.eea.dataflow.persistence.domain.Integration;
 import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.dataflow.service.IntegrationService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
@@ -27,8 +28,10 @@ import org.eea.lock.service.LockService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class IntegrationServiceImpl.
@@ -72,6 +75,12 @@ public class IntegrationServiceImpl implements IntegrationService {
   @Transactional
   @Override
   public void createIntegration(IntegrationVO integrationVO) throws EEAException {
+
+    if (IntegrationOperationTypeEnum.EXPORT_EU_DATASET.equals(integrationVO.getOperation())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_CREATION);
+    }
+
     CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
     crudManager.create(integrationVO);
   }

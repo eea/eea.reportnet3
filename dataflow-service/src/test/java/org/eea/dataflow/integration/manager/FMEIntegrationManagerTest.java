@@ -155,22 +155,6 @@ public class FMEIntegrationManagerTest {
   }
 
   /**
-   * Creates the forbidden exception test.
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void createForbiddenExceptionTest() {
-    try {
-      IntegrationVO integrationVO = new IntegrationVO();
-      integrationVO.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
-      integrationManager.create(integrationVO);
-    } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      assertEquals(EEAErrorMessage.FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_CREATION, e.getReason());
-      throw e;
-    }
-  }
-
-  /**
    * Test update integration.
    *
    * @throws EEAException the EEA exception
