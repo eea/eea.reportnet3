@@ -10,9 +10,12 @@ import org.eea.dataflow.integration.executor.fme.domain.PublishedParameter;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.integration.executor.service.AbstractIntegrationExecutorService;
 import org.eea.dataflow.integration.utils.IntegrationParams;
+import org.eea.dataflow.persistence.domain.FMEJob;
+import org.eea.dataflow.persistence.repository.FMEJobRepository;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController;
+import org.eea.interfaces.vo.dataflow.enums.FMEJobstatus;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
@@ -22,7 +25,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -64,6 +69,11 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
   /** The user management controller. */
   @Autowired
   private UserManagementController userManagementController;
+
+
+  /** The FME job repository. */
+  @Autowired
+  FMEJobRepository fmeJobRepository;
 
   /**
    * Gets the executor type.
@@ -179,6 +189,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     // base URL
     parameters.add(saveParameter(IntegrationParams.BASE_URL, r3base));
 
+    Integer idFMEJob = null;
     switch (integrationOperationTypeEnum) {
       case EXPORT:
         // providerId
@@ -189,10 +200,20 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
                 + paramDataProvider));
 
         fmeAsyncJob.setPublishedParameters(parameters);
-        LOG.info("Executing FME Export");
-        return executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
-            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
 
+        LOG.info("Creating Export FS in FME");
+        if (fmeCommunicationService
+            .createDirectory(integrationOperationParams.get(IntegrationParams.DATASET_ID),
+                paramDataProvider)
+            .equals(HttpStatus.CONFLICT)) {
+          LOG.info("Directory already exist");
+        } else {
+          LOG.info("Directory created successful");
+        }
+        LOG.info("Executing FME Export");
+        idFMEJob = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
+            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
+        break;
       case IMPORT:
         // providerId
         parameters.add(saveParameter(IntegrationParams.PROVIDER_ID, paramDataProvider));
@@ -208,15 +229,15 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         byte[] decodedBytes = Base64.getDecoder()
             .decode(integration.getExternalParameters().get(IntegrationParams.FILE_IS));
 
-        LOG.info("Upload file to FME");
+        LOG.info("Upload {} to FME", fileName);
         fmeCommunicationService.sendFile(decodedBytes,
             integrationOperationParams.get(IntegrationParams.DATASET_ID), paramDataProvider,
             fileName);
         LOG.info("File uploaded");
         LOG.info("Executing FME Import");
-        return executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
+        idFMEJob = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
-
+        break;
       case EXPORT_EU_DATASET:
         // DataBaseConnectionPublic
         parameters.add(saveParameter(IntegrationParams.DATABASE_CONNECTION_PUBLIC, ""));
@@ -225,11 +246,27 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
         fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Export EU Dataset");
-        return executeSubmit(defaultRepository, euDatasetJob, fmeAsyncJob);
-
+        idFMEJob = executeSubmit(defaultRepository, euDatasetJob, fmeAsyncJob);
+        break;
       default:
-        return null;
+        idFMEJob = null;
+        break;
     }
+    ExecutionResultVO executionResultVO = new ExecutionResultVO();
+    Map<String, Object> executionResultParams = new HashMap<>();
+    executionResultParams.put("id", idFMEJob);
+    executionResultVO.setExecutionResultParams(executionResultParams);
+    // add save execution id
+    if (null != idFMEJob) {
+      FMEJob job = new FMEJob();
+      job.setIdJob(new Long(idFMEJob));
+      job.setDatasetId(integrationOperationParams.get(IntegrationParams.DATASET_ID));
+      job.setOperation(integrationOperationTypeEnum);
+      job.setUser(SecurityContextHolder.getContext().getAuthentication().getName().toString());
+      job.setStatus(FMEJobstatus.QUEUED);
+      fmeJobRepository.save(job);
+    }
+    return executionResultVO;
   }
 
   /**
@@ -280,20 +317,13 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
    *
    * @return the execution result VO
    */
-  private ExecutionResultVO executeSubmit(String repository, String workspace,
-      FMEAsyncJob fmeAsyncJob) {
-    Map<String, Object> executionResultParams = new HashMap<>();
-    ExecutionResultVO executionResultVO = new ExecutionResultVO();
-
-    Integer executionResult = null;
+  private Integer executeSubmit(String repository, String workspace, FMEAsyncJob fmeAsyncJob) {
+    Integer idFMEJob = null;
     try {
-      executionResult = fmeCommunicationService.submitAsyncJob(repository, workspace, fmeAsyncJob);
+      idFMEJob = fmeCommunicationService.submitAsyncJob(repository, workspace, fmeAsyncJob);
     } catch (Exception e) {
       LOG_ERROR.error("Error invoking FME due to reason {}", e.getMessage());
     }
-    executionResultParams.put("id", executionResult);
-    executionResultVO.setExecutionResultParams(executionResultParams);
-
-    return executionResultVO;
+    return idFMEJob;
   }
 }
