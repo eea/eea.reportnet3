@@ -1,8 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 
 import styles from './Dialog.module.scss';
 
 import { Dialog as PrimeDialog } from 'primereact/dialog';
+
+import { DialogContext } from 'ui/views/_functions/Contexts/DialogContext';
 
 export const Dialog = ({
   appendTo,
@@ -28,6 +30,8 @@ export const Dialog = ({
   visible,
   zIndex
 }) => {
+  const dialogContext = useContext(DialogContext);
+
   const maskStyle = {
     display: visible ? 'flex' : 'none',
     flexDirection: 'column',
@@ -47,7 +51,10 @@ export const Dialog = ({
     visible && (body.style.overflow = 'hidden');
 
     return () => {
-      body.style.overflow = 'hidden auto';
+      if (dialogContext.open === 1) {
+        body.style.overflow = 'hidden auto';
+      }
+      dialogContext.remove();
     };
   }, [visible]);
   return (
