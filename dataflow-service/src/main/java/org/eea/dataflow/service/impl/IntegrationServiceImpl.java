@@ -290,8 +290,8 @@ public class IntegrationServiceImpl implements IntegrationService {
    */
   @Override
   public IntegrationVO getExporEUDatasetIntegrationByDatasetId(Long datasetId) {
-    Integration integration = integrationRepository.findFirstByDatasetIdAndOperation(
-        datasetId.toString(), IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
+    Integration integration = integrationRepository.findFirstByOperationAndParameterAndValue(
+        IntegrationOperationTypeEnum.EXPORT_EU_DATASET, DATASET_ID, datasetId.toString());
     return integrationMapper.entityToClass(integration);
   }
 }

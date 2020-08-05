@@ -152,9 +152,8 @@ public class IntegrationServiceImplTest {
   @Test
   public void getExporEUDatasetIntegrationByDatasetIdTest() {
     IntegrationVO expected = new IntegrationVO();
-    Mockito
-        .when(integrationRepository.findFirstByDatasetIdAndOperation(Mockito.any(), Mockito.any()))
-        .thenReturn(new Integration());
+    Mockito.when(integrationRepository.findFirstByOperationAndParameterAndValue(Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(new Integration());
     Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(expected);
     IntegrationVO response = integrationService.getExporEUDatasetIntegrationByDatasetId(1L);
     Assert.assertEquals(expected, response);
