@@ -1,10 +1,15 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
+import { DatasetConfig } from 'conf/domain/model/Dataset';
+
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
+import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
@@ -15,6 +20,7 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { getUrl } from 'core/infrastructure/CoreUtils';
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
 const DataFormFieldEditor = ({
@@ -32,6 +38,8 @@ const DataFormFieldEditor = ({
   const inputRef = useRef(null);
 
   const [columnWithLinks, setColumnWithLinks] = useState([]);
+  const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
+  const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [mapCoordinates, setMapCoordinates] = useState();
 
@@ -183,6 +191,8 @@ const DataFormFieldEditor = ({
     );
   };
 
+  const getAttachExtensions = [{ fileExtension: '.csv, .txt, .pdf' }].map(file => `.${file.fileExtension}`).join(', ');
+
   const getMaxCharactersByType = type => {
     const longCharacters = 20;
     const decimalCharacters = 40;
@@ -219,6 +229,37 @@ const DataFormFieldEditor = ({
     }
   };
 
+  // const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions}`;
+
+  // const onAttach = async value => {
+  //   setIsAttachFileVisible(false);
+  //   console.log('ON ATTACH', { value });
+
+  //   const toBase64 = file =>
+  //     new Promise((resolve, reject) => {
+  //       const reader = new FileReader();
+  //       reader.readAsDataURL(file);
+  //       reader.onload = () => resolve(reader.result);
+  //       reader.onerror = error => reject(error);
+  //     });
+
+  //   const result = await toBase64(value.files[0]).catch(e => Error(e));
+  //   if (result instanceof Error) {
+  //     console.log('Error: ', result.message);
+  //     return;
+  //   } else {
+  //     console.log({ result });
+  //     onChangeForm(field, `${value.files[0].name}|content|${result.split(',')[1]}`);
+  //   }
+
+  //   console.log(result);
+  // };
+
+  const onConfirmDeleteAttachment = () => {
+    onChangeForm(field, []);
+    setIsDeleteAttachmentVisible(false);
+  };
+
   const renderFieldEditor = () =>
     type === 'CODELIST' ? (
       renderCodelistDropdown(field, fieldValue)
@@ -230,6 +271,8 @@ const DataFormFieldEditor = ({
       renderCalendar(field, fieldValue)
     ) : type === 'POINT' ? (
       renderMapType(field, fieldValue)
+    ) : type === 'ATTACHMENT' ? (
+      renderAttachment(field, fieldValue)
     ) : (
       <InputText
         id={field}
@@ -244,6 +287,47 @@ const DataFormFieldEditor = ({
         value={fieldValue}
       />
     );
+
+  const renderAttachment = (field, fieldValue = []) => {
+    return false;
+    // console.log({ field, fieldValue }, fieldValue.split('|'));
+    // const splittedFieldValue = fieldValue.split('|');
+    // return (
+    //   <div style={{ display: 'flex' }}>
+    //     {!isEmpty(fieldValue) && (
+    //       <Button
+    //         className={`${isEmpty(splittedFieldValue[0]) && 'p-button-animated-blink'} p-button-secondary-transparent`}
+    //         icon="export"
+    //         iconPos="right"
+    //         label={splittedFieldValue[0]}
+    //         onClick={() => {
+    //           console.log('Download');
+    //           const a = document.createElement('a');
+    //           a.href = `data:text/plain;base64,${splittedFieldValue[2]}`;
+    //           a.download = splittedFieldValue[0];
+    //           a.click();
+    //         }}
+    //         style={{ width: 'fit-content' }}
+    //       />
+    //     )}
+
+    //     <Button
+    //       className={`p-button-animated-blink p-button-secondary-transparent`}
+    //       icon="import"
+    //       onClick={() => {
+    //         setIsAttachFileVisible(true);
+    //       }}
+    //     />
+    //     {!isEmpty(fieldValue) && (
+    //       <Button
+    //         className={`p-button-animated-blink p-button-secondary-transparent`}
+    //         icon="trash"
+    //         onClick={() => setIsDeleteAttachmentVisible(true)}
+    //       />
+    //     )}
+    //   </div>
+    // );
+  };
 
   const renderCalendar = (field, fieldValue) => {
     return (
@@ -260,6 +344,15 @@ const DataFormFieldEditor = ({
       />
     );
   };
+
+  // const renderCustomFileAttachFooter = (
+  //   <Button
+  //     className="p-button-secondary p-button-animated-blink"
+  //     icon={'cancel'}
+  //     label={resources.messages['close']}
+  //     onClick={() => setIsAttachFileVisible(false)}
+  //   />
+  // );
 
   const renderLinkDropdown = (field, fieldValue) => {
     if (column.pkHasMultipleValues) {
@@ -333,6 +426,45 @@ const DataFormFieldEditor = ({
   return (
     <React.Fragment>
       {renderFieldEditor()}
+      {/* {isAttachFileVisible && (
+        <Dialog
+          // className={styles.Dialog}
+          dismissableMask={false}
+          footer={renderCustomFileAttachFooter}
+          header={`${resources.messages['uploadAttachment']}`}
+          onHide={() => setIsAttachFileVisible(false)}
+          visible={isAttachFileVisible}>
+          <CustomFileUpload
+            accept={getAttachExtensions}
+            // accept=".*"
+            chooseLabel={resources.messages['selectFile']}
+            // className={styles.FileUpload}
+            fileLimit={1}
+            infoTooltip={infoAttachTooltip}
+            mode="advanced"
+            multiple={false}
+            invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+            name="file"
+            onUpload={e => onAttach(e)}
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableData, {
+              datasetId: datasetId
+            })}`}
+          />
+        </Dialog>
+      )} */}
+      {/* {isDeleteAttachmentVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={`${resources.messages['deleteAttachmentHeader']}`}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={onConfirmDeleteAttachment}
+          onHide={() => setIsDeleteAttachmentVisible(false)}
+          visible={isDeleteAttachmentVisible}>
+          {resources.messages['deleteAttachmentConfirm']}
+        </ConfirmDialog>
+      )} */}
+
       {isMapOpen && (
         <Dialog
           className={'map-data'}
