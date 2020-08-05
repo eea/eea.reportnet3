@@ -240,16 +240,20 @@ public final class EEAErrorMessage {
   /** The Constant NOT_EMAIL: {@value}. */
   public static final String NOT_EMAIL = "%s is not an email";
 
+  /** The Constant FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_CREATION: {@value}. */
+  public static final String FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_CREATION =
+      "Aditional EXPORT_EU_DATASET integrations cannot be created";
 
-  /** The Constant NO_DESIGNS_TO_COPY: {@value} */
+  /** The Constant NO_DESIGNS_TO_COPY: {@value}. */
   public static final String NO_DESIGNS_TO_COPY =
       "No designs datasets found to copy in the dataflow %s";
 
-  /** The Constant ERROR COPYING SCHEMAS: {@value} */
+  /** The Constant ERROR COPYING SCHEMAS: {@value}. */
   public static final String ERROR_COPYING_SCHEMAS =
       "Error copying schemas from the dataflow %s to the dataflow %s";
 
-
+  /** The Constant OPERATION_TYPE_NOT_EDITABLE: {@value}. */
+  public static final String OPERATION_TYPE_NOT_EDITABLE = "The operation type is not editable";
 
   /**
    * Instantiates a new EEA error message.

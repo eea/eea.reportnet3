@@ -2,9 +2,12 @@ package org.eea.dataset.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import javax.ws.rs.Produces;
+import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.helper.DeleteHelper;
@@ -22,6 +25,7 @@ import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -104,6 +108,9 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
+
+  @Autowired
+  private DatasetSchemaService datasetSchemaService;
 
   /**
    * Gets the data tables values.
@@ -448,12 +455,10 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @PostMapping(value = "/{id}/table/{idTableSchema}/record",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/{id}/table/{idTableSchema}/record")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void insertRecords(@PathVariable("id") final Long datasetId,
-      @PathVariable("idTableSchema") final String idTableSchema,
-      @RequestBody final List<RecordVO> records) {
+  public void insertRecords(@PathVariable("id") Long datasetId,
+      @PathVariable("idTableSchema") String idTableSchema, @RequestBody List<RecordVO> records) {
     if (datasetId == null || records == null || records.isEmpty()) {
       LOG_ERROR.error("Error inserting records. The datasetId or the records are empty or null");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
@@ -720,4 +725,123 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
+
+
+  /**
+   * Gets the attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @return the attachment
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping("/{datasetId}/field/{fieldId}/attachment")
+  @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+  public ResponseEntity getAttachment(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("fieldId") String idField) {
+
+    LOG.info("Init the get attachment controller");
+    byte[] file;
+    try {
+      AttachmentValue attachment = datasetService.getAttachment(datasetId, idField);
+
+      String filename = attachment.getFileName();
+      file = attachment.getContent();
+      // byte[] decodedString = Base64.getDecoder().decode(new String(file).getBytes());
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
+
+      return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
+
+    } catch (EEAException | IOException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+
+
+  }
+
+
+
+  /**
+   * Update attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @param file the file
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping(value = "/{datasetId}/field/{fieldId}/attachment",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public void updateAttachment(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("fieldId") String idField, @RequestParam("file") final MultipartFile file) {
+
+    try {
+      String fileName = file.getOriginalFilename();
+      // if (!validateAttachment(datasetId, idField, fileName, file.getSize())) {
+      // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
+      // }
+      InputStream is = file.getInputStream();
+      datasetService.updateAttachment(datasetId, idField, fileName, is);
+    } catch (EEAException | IOException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+
+
+  }
+
+  /**
+   * Validate attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @param originalFilename the original filename
+   * @param size the size
+   * @return the boolean
+   * @throws EEAException the EEA exception
+   */
+  private boolean validateAttachment(Long datasetId, String idField, String originalFilename,
+      Long size) throws EEAException {
+
+    Boolean result = true;
+    String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+    if (datasetSchemaId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND);
+    }
+    FieldSchemaVO fieldSchema = datasetSchemaService.getFieldSchema(datasetSchemaId, idField);
+    if (fieldSchema == null || fieldSchema.getId() == null) {
+      throw new EEAException(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND);
+    }
+    if ((fieldSchema.getMaxSize() != null && fieldSchema.getMaxSize() < size)
+        || (fieldSchema.getValidExtensions() != null
+            && !Arrays.asList(fieldSchema.getValidExtensions())
+                .contains(datasetService.getMimetype(originalFilename)))) {
+      result = false;
+    }
+    return result;
+  }
+
+
+  /**
+   * Delete attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   */
+  @Override
+  @HystrixCommand
+  @DeleteMapping(value = "/{datasetId}/field/{fieldId}/attachment",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public void deleteAttachment(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("fieldId") String idField) {
+
+    try {
+      datasetService.deleteAttachment(datasetId, idField);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+
+  }
+
 }

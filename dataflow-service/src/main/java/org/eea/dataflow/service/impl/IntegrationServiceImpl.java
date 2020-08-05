@@ -9,6 +9,9 @@ import javax.transaction.Transactional;
 import org.eea.dataflow.integration.crud.factory.CrudManager;
 import org.eea.dataflow.integration.crud.factory.CrudManagerFactory;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
+import org.eea.dataflow.mapper.IntegrationMapper;
+import org.eea.dataflow.persistence.domain.Integration;
+import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
@@ -26,12 +29,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-
 /**
  * The Class IntegrationServiceImpl.
  */
 @Service("integrationService")
 public class IntegrationServiceImpl implements IntegrationService {
+
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(IntegrationServiceImpl.class);
+
+  /** The Constant FILE_EXTENSION: {@value}. */
+  private static final String FILE_EXTENSION = "fileExtension";
+
+  /** The Constant DATASETSCHEMAID: {@value}. */
+  private static final String DATASETSCHEMAID = "datasetSchemaId";
+
+  /** The Constant DATAFLOW_ID: {@value}. */
+  private static final String DATAFLOW_ID = "dataflowId";
+
+  /** The Constant DATASET_ID: {@value}. */
+  private static final String DATASET_ID = "datasetId";
+
+  /** The Constant PROCESS_NAME: {@value}. */
+  private static final String PROCESS_NAME = "processName";
+
+  /** The Constant REPOSITORY: {@value}. */
+  private static final String REPOSITORY = "repository";
 
   /** The crud manager factory. */
   @Autowired
@@ -49,15 +72,13 @@ public class IntegrationServiceImpl implements IntegrationService {
   @Autowired
   private LockService lockService;
 
+  /** The integration repository. */
+  @Autowired
+  private IntegrationRepository integrationRepository;
 
-  /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(IntegrationServiceImpl.class);
-
-  /** The Constant FILE_EXTENSION: {@value}. */
-  private static final String FILE_EXTENSION = "fileExtension";
-
-  /** The Constant DATASETSCHEMAID: {@value}. */
-  private static final String DATASETSCHEMAID = "datasetSchemaId";
+  /** The integration mapper. */
+  @Autowired
+  private IntegrationMapper integrationMapper;
 
   /**
    * Creates the integration.
@@ -68,13 +89,9 @@ public class IntegrationServiceImpl implements IntegrationService {
   @Transactional
   @Override
   public void createIntegration(IntegrationVO integrationVO) throws EEAException {
-
-
     CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
     crudManager.create(integrationVO);
-
   }
-
 
   /**
    * Delete integration.
@@ -87,7 +104,6 @@ public class IntegrationServiceImpl implements IntegrationService {
   public void deleteIntegration(Long integrationId) throws EEAException {
     CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
     crudManager.delete(integrationId);
-
   }
 
   /**
@@ -99,12 +115,9 @@ public class IntegrationServiceImpl implements IntegrationService {
   @Transactional
   @Override
   public void updateIntegration(IntegrationVO integrationVO) throws EEAException {
-
     CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
     crudManager.update(integrationVO);
-
   }
-
 
   /**
    * Gets the all integrations by criteria.
@@ -126,7 +139,6 @@ public class IntegrationServiceImpl implements IntegrationService {
    *
    * @param integrationVOList the integration VO list
    * @return the only extensions and operations
-   * @throws EEAException the EEA exception
    */
   @Override
   public List<IntegrationVO> getOnlyExtensionsAndOperations(List<IntegrationVO> integrationVOList) {
@@ -145,7 +157,6 @@ public class IntegrationServiceImpl implements IntegrationService {
     });
     return newIntegrationVOList;
   }
-
 
   /**
    * Copy integrations.
@@ -178,8 +189,6 @@ public class IntegrationServiceImpl implements IntegrationService {
     }
   }
 
-
-
   /**
    * Execute EU dataset export.
    *
@@ -211,6 +220,34 @@ public class IntegrationServiceImpl implements IntegrationService {
   }
 
   /**
+   * Creates the default integration.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   */
+  @Transactional
+  @Override
+  public void createDefaultIntegration(Long dataflowId, Long datasetId, String datasetSchemaId) {
+    Map<String, String> internalParameters = new HashMap<>();
+    internalParameters.put(DATAFLOW_ID, dataflowId.toString());
+    internalParameters.put(DATASET_ID, datasetId.toString());
+    internalParameters.put(DATASETSCHEMAID, datasetSchemaId);
+    internalParameters.put(REPOSITORY, "ReportNetTesting");
+    internalParameters.put(PROCESS_NAME, "Export_EU_dataset.fmw");
+
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setDescription("Export EU Dataset");
+    integrationVO.setInternalParameters(internalParameters);
+    integrationVO.setName("Export EU Dataset");
+    integrationVO.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
+    integrationVO.setTool(IntegrationToolTypeEnum.FME);
+
+    CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
+    crudManager.create(integrationVO);
+  }
+
+  /**
    * Release lock.
    *
    * @param dataflowId the dataflow id
@@ -229,7 +266,6 @@ public class IntegrationServiceImpl implements IntegrationService {
     lockService.removeLockByCriteria(criteriaCopy);
   }
 
-
   /**
    * Adds the lock.
    *
@@ -246,4 +282,16 @@ public class IntegrationServiceImpl implements IntegrationService {
         mapCriteriaExport);
   }
 
+  /**
+   * Gets the expor EU dataset integration by dataset id.
+   *
+   * @param datasetId the dataset id
+   * @return the expor EU dataset integration by dataset id
+   */
+  @Override
+  public IntegrationVO getExporEUDatasetIntegrationByDatasetId(Long datasetId) {
+    Integration integration = integrationRepository.findFirstByDatasetIdAndOperation(
+        datasetId.toString(), IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
+    return integrationMapper.entityToClass(integration);
+  }
 }

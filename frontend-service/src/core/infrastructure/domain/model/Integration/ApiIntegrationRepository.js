@@ -51,6 +51,7 @@ const parseIntegration = integrationDTO => {
   integration.integrationName = integrationDTO.name;
   integration.internalParameters = integrationDTO.internalParameters;
   integration.operation = integrationDTO.operation;
+  integration.operationName = integrationDTO.operation.split('_').join(' ');
   integration.tool = integrationDTO.tool;
 
   return integration;

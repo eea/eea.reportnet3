@@ -26,12 +26,17 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 
 /**
  * The Class FMEControllerImpl.
  */
 @RestController
 @RequestMapping("/fme")
+@Api(tags = "FME : FME Manager")
 public class FMEControllerImpl implements FMEController {
 
   /** The FME communication service. */
@@ -55,7 +60,10 @@ public class FMEControllerImpl implements FMEController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE') OR (hasRole('DATA_CUSTODIAN')) OR (hasRole('DATA_STEWARD'))")
   @GetMapping(value = "/findRepositories", produces = MediaType.APPLICATION_JSON_VALUE)
-  public FMECollectionVO findRepositories(@RequestParam("datasetId") Long datasetId) {
+  @ApiOperation(value = "Find FME repositories", produces = MediaType.APPLICATION_JSON_VALUE,
+      response = FMECollectionVO.class)
+  public FMECollectionVO findRepositories(
+      @ApiParam(value = "Dataset id", example = "0") @RequestParam("datasetId") Long datasetId) {
     return fmeCommunicationService.findRepository();
   }
 
@@ -70,8 +78,11 @@ public class FMEControllerImpl implements FMEController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE') OR (hasRole('DATA_CUSTODIAN')) OR (hasRole('DATA_STEWARD'))")
   @GetMapping(value = "/findItems", produces = MediaType.APPLICATION_JSON_VALUE)
-  public FMECollectionVO findItems(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("repository") String repository) {
+  @ApiOperation(value = "Find FME items", produces = MediaType.APPLICATION_JSON_VALUE,
+      response = FMECollectionVO.class)
+  public FMECollectionVO findItems(
+      @ApiParam(value = "Dataset id", example = "0") @RequestParam("datasetId") Long datasetId,
+      @ApiParam(value = "Repository name") @RequestParam("repository") String repository) {
     return fmeCommunicationService.findItems(repository);
   }
 
@@ -83,7 +94,10 @@ public class FMEControllerImpl implements FMEController {
   @Override
   @PostMapping("/operationFinished")
   @PreAuthorize("checkApiKey(#fmeOperationInfoVO.dataflowId, #fmeOperationInfoVO.providerId)")
-  public void operationFinished(@RequestBody FMEOperationInfoVO fmeOperationInfoVO) {
+  @ApiOperation(value = "FME Operation finished")
+  @ApiResponse(code = 400, message = "Internal Server Error")
+  public void operationFinished(@ApiParam(value = "FME Operation info",
+      type = "Object") @RequestBody FMEOperationInfoVO fmeOperationInfoVO) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());

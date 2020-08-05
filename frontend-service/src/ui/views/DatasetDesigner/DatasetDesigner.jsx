@@ -13,7 +13,6 @@ import { DatasetSchemaRequesterEmptyHelpConfig } from 'conf/help/datasetSchema/r
 import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchema/requester/withTabs';
 import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/reporter';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
-import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -41,7 +40,6 @@ import { DatasetService } from 'core/services/Dataset';
 import { IntegrationService } from 'core/services/Integration';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -50,11 +48,12 @@ import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContex
 
 import { designerReducer } from './_functions/Reducers/designerReducer';
 
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
 
 import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
-import { ExtensionUtils, MetadataUtils } from 'ui/views/_functions/Utils';
+import { CurrentPage, ExtensionUtils, MetadataUtils } from 'ui/views/_functions/Utils';
 import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
 
 export const DatasetDesigner = withRouter(({ history, match }) => {
@@ -62,7 +61,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     params: { dataflowId, datasetId }
   } = match;
 
-  const breadCrumbContext = useContext(BreadCrumbContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -131,8 +129,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     snapshotState
   } = useDatasetDesigner(dataflowId, datasetId, designerState.datasetSchemaId);
 
+  useBreadCrumbs({ currentPage: CurrentPage.DATASET_DESIGNER, dataflowId, history });
+
   useEffect(() => {
+    leftSideBarContext.removeModels();
     onLoadSchema();
+    callSetMetaData();
   }, []);
 
   useEffect(() => {
@@ -148,31 +150,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       });
     }
   }, [userContext]);
-
-  useEffect(() => {
-    breadCrumbContext.add([
-      {
-        label: resources.messages['homeBreadcrumb'],
-        href: getUrl(routes.DATAFLOWS),
-        command: () => history.push(getUrl(routes.DATAFLOWS))
-      },
-      {
-        command: () => history.push(getUrl(routes.DATAFLOWS)),
-        href: getUrl(routes.DATAFLOWS),
-        icon: 'home',
-        label: resources.messages['dataflows']
-      },
-      {
-        command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true)),
-        href: getUrl(routes.DATAFLOW, { dataflowId }, true),
-        icon: 'clone',
-        label: resources.messages['dataflow']
-      },
-      { label: resources.messages['datasetDesigner'], icon: 'pencilRuler' }
-    ]);
-    leftSideBarContext.removeModels();
-    callSetMetaData();
-  }, []);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
@@ -218,7 +195,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, [designerState.datasetSchemaName, designerState.extensionsOperationsList]);
 
   useEffect(() => {
-
     if (!isNil(designerState.exportDatasetData)) {
       DownloadFile(designerState.exportDatasetData, designerState.exportDatasetDataName);
     }

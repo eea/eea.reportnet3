@@ -31,16 +31,15 @@ const ActionsToolbar = ({
   datasetId,
   hasWritePermissions,
   hideValidationFilter,
-  isDataCollection = false,
+  isExportable,
   isFilterValidationsActive,
   isLoading,
   isTableDeleted,
   isValidationSelected,
   levelErrorTypesWithCorrects,
-  //onRefresh,
   onSetVisible,
-  originalColumns,
   onUpdateData,
+  originalColumns,
   records,
   setColumns,
   setDeleteDialogVisible,
@@ -183,25 +182,22 @@ const ActionsToolbar = ({
             className={`p-button-rounded p-button-secondary datasetSchema-import-table-help-step ${
               !hasWritePermissions || tableReadOnly ? null : 'p-button-animated-blink'
             }`}
-            disabled={!hasWritePermissions || tableReadOnly || isDataCollection}
+            disabled={!hasWritePermissions || tableReadOnly }
             icon={'import'}
             label={resources.messages['importTable']}
             onClick={() => setImportTableDialogVisible(true)}
           />
         )}
-        <Button
+        {isExportable && <Button
           id="buttonExportTable"
-          className={`p-button-rounded p-button-secondary-transparent datasetSchema-export-table-help-step ${
-            isDataCollection ? null : 'p-button-animated-blink'
-          }`}
-          disabled={isDataCollection}
+          className='p-button-rounded p-button-secondary-transparent datasetSchema-export-table-help-step p-button-animated-blink'
           icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
           label={resources.messages['exportTable']}
           onClick={event => {
             onUpdateData();
             exportMenuRef.current.show(event);
           }}
-        />
+        />}
         <Menu
           className={styles.menu}
           id="exportTableMenu"
