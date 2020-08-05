@@ -25,6 +25,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -59,59 +60,41 @@ import org.springframework.web.server.ResponseStatusException;
 @RunWith(MockitoJUnitRunner.class)
 public class DataSetSchemaControllerImplTest {
 
-
-  /**
-   * The data schema controller impl.
-   */
+  /** The data schema controller impl. */
   @InjectMocks
   private DataSetSchemaControllerImpl dataSchemaControllerImpl;
 
-  /**
-   * The expected ex.
-   */
+  /** The expected ex. */
   @Rule
   public ExpectedException expectedEx = ExpectedException.none();
 
-  /**
-   * The dataschema service.
-   */
+  /** The dataschema service. */
   @Mock
   private DataschemaServiceImpl dataschemaService;
 
-  /**
-   * The dataset service.
-   */
+  /** The dataset service. */
   @Mock
   private DatasetService datasetService;
 
-  /**
-   * The dataset metabase service.
-   */
+  /** The dataset metabase service. */
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
 
-  /**
-   * The record store controller zull.
-   */
+  /** The record store controller zull. */
   @Mock
   private RecordStoreControllerZull recordStoreControllerZull;
 
-  /**
-   * The dataset snapshot service.
-   */
+  /** The dataset snapshot service. */
   @Mock
   private DatasetSnapshotService datasetSnapshotService;
 
-  /**
-   * The dataflow controller zuul.
-   */
+  /** The contributor controller zuul. */
   @Mock
-  private DataFlowControllerZuul dataflowControllerZuul;
+  private ContributorControllerZuul contributorControllerZuul;
 
-  /**
-   * The dataset schema VO.
-   */
-  private DataSetSchemaVO datasetSchemaVO;
+  /** The integration controller zuul. */
+  @Mock
+  private IntegrationControllerZuul integrationControllerZuul;
 
   /** The rules controller zuul. */
   @Mock
@@ -121,19 +104,18 @@ public class DataSetSchemaControllerImplTest {
   @Mock
   private DesignDatasetService designDatasetService;
 
-  /** The contributor controller zuul. */
+  /** The dataflow controller zuul. */
   @Mock
-  private ContributorControllerZuul contributorControllerZuul;
+  private DataFlowControllerZuul dataflowControllerZuul;
 
-  /**
-   * The security context.
-   */
-  SecurityContext securityContext;
+  /** The dataset schema VO. */
+  private DataSetSchemaVO datasetSchemaVO;
 
-  /**
-   * The authentication.
-   */
-  Authentication authentication;
+  /** The security context. */
+  private SecurityContext securityContext;
+
+  /** The authentication. */
+  private Authentication authentication;
 
   /**
    * Inits the mocks.
@@ -155,9 +137,7 @@ public class DataSetSchemaControllerImplTest {
   @Test
   public void testFindDataSchemaById() {
     when(dataschemaService.getDataSchemaById(Mockito.any())).thenReturn(new DataSetSchemaVO());
-
     assertNotNull("failed", dataSchemaControllerImpl.findDataSchemaById("id"));
-
   }
 
   /**
@@ -229,7 +209,6 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test
   public void findDataSchemaWithNoRulesByDatasetIdTest() throws EEAException {
-
     when(dataschemaService.getDataSchemaByDatasetId(Mockito.eq(Boolean.FALSE), Mockito.any()))
         .thenReturn(new DataSetSchemaVO());
     Assert.assertNotNull(dataSchemaControllerImpl.findDataSchemaWithNoRulesByDatasetId(1L));
@@ -316,6 +295,8 @@ public class DataSetSchemaControllerImplTest {
         .when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(CompletableFuture.completedFuture(1L));
+    Mockito.doNothing().when(integrationControllerZuul).createDefaultIntegration(Mockito.anyLong(),
+        Mockito.anyLong(), Mockito.any());
     dataSchemaControllerImpl.createEmptyDatasetSchema(1L, "datasetSchemaName");
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
@@ -371,7 +352,6 @@ public class DataSetSchemaControllerImplTest {
       throw ex;
     }
   }
-
 
   /**
    * Delete dataset schema success.
@@ -443,7 +423,6 @@ public class DataSetSchemaControllerImplTest {
       assertEquals("Not the same status", HttpStatus.BAD_REQUEST, ex.getStatus());
       throw ex;
     }
-
   }
 
   /**
@@ -462,7 +441,6 @@ public class DataSetSchemaControllerImplTest {
       assertEquals("Not the same status", HttpStatus.UNAUTHORIZED, e.getStatus());
       throw e;
     }
-
   }
 
   /**
@@ -575,7 +553,6 @@ public class DataSetSchemaControllerImplTest {
       assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
     }
   }
-
 
   /**
    * Creates the field schema test 2.
@@ -909,7 +886,6 @@ public class DataSetSchemaControllerImplTest {
     }
   }
 
-
   /**
    * Test validate schema.
    *
@@ -917,9 +893,7 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test
   public void testValidateSchema() throws EEAException {
-
     Assert.assertFalse(dataSchemaControllerImpl.validateSchema(new ObjectId().toString()));
-
   }
 
   /**
@@ -935,11 +909,8 @@ public class DataSetSchemaControllerImplTest {
     df.setDesignDatasets(new ArrayList<>());
     df.getDesignDatasets().add(ds);
     when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(df);
-
     Assert.assertFalse(dataSchemaControllerImpl.validateSchemas(1L));
-
   }
-
 
   /**
    * Test find data schemas by id dataflow.
@@ -1004,7 +975,6 @@ public class DataSetSchemaControllerImplTest {
       throw e;
     }
   }
-
 
   /**
    * Creates the unique constraint table schema id error test.
@@ -1093,7 +1063,6 @@ public class DataSetSchemaControllerImplTest {
     Mockito.verify(dataschemaService, times(1)).updateUniqueConstraint(Mockito.any());
   }
 
-
   /**
    * Update unique constraint schema id error test.
    */
@@ -1161,7 +1130,6 @@ public class DataSetSchemaControllerImplTest {
       throw e;
     }
   }
-
 
   /**
    * Update unique constraint unreported data error test.
@@ -1249,7 +1217,6 @@ public class DataSetSchemaControllerImplTest {
     Mockito.verify(designDatasetService, times(1)).copyDesignDatasets(Mockito.any(), Mockito.any());
   }
 
-
   /**
    * Test copy designs from dataflow exception.
    *
@@ -1312,5 +1279,3 @@ public class DataSetSchemaControllerImplTest {
     }
   }
 }
-
-

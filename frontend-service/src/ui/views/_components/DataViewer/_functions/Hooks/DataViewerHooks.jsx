@@ -9,10 +9,12 @@ import styles from '../../DataViewer.module.css';
 
 import { config } from 'conf';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { DataViewerUtils } from '../Utils/DataViewerUtils';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -76,12 +78,15 @@ export const useSetColumns = (
   cellDataEditor,
   colsSchema,
   columnOptions,
+  hasCountryCode,
   hasWritePermissions,
   initialCellValue,
-  isDataCollection,
-  isEUDataset,
+  onFileDeleteVisible,
+  onFileDownload,
+  onFileUploadVisible,
   records,
   resources,
+  setIsAttachFileVisible,
   setIsColumnInfoVisible,
   validationsTemplate
 ) => {
@@ -111,7 +116,8 @@ export const useSetColumns = (
       { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
       { fieldType: 'Codelist', value: 'Single select' },
       { fieldType: 'Multiselect_Codelist', value: 'Multiple select' },
-      { fieldType: 'Link', value: 'Link' }
+      { fieldType: 'Link', value: 'Link' },
+      { fieldType: 'Attachment', value: 'Attachment' }
     ];
 
     if (!isUndefined(fieldType)) {
@@ -120,6 +126,39 @@ export const useSetColumns = (
     } else {
       return '';
     }
+  };
+
+  const renderAttachment = (value = '', fieldId, fieldSchemaId) => {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        {!isNil(value) && value !== '' && (
+          <Button
+            className={`${value === '' && 'p-button-animated-blink'} p-button-secondary-transparent`}
+            icon="export"
+            iconPos="right"
+            label={value}
+            onClick={() => {
+              onFileDownload(value, fieldId);
+            }}
+          />
+        )}
+        <Button
+          className={`p-button-animated-blink p-button-secondary-transparent`}
+          icon="import"
+          onClick={() => {
+            setIsAttachFileVisible(true);
+            onFileUploadVisible(fieldId, fieldSchemaId);
+          }}
+        />
+        {!isNil(value) && value !== '' && (
+          <Button
+            className={`p-button-animated-blink p-button-secondary-transparent`}
+            icon="trash"
+            onClick={() => onFileDeleteVisible(fieldId, fieldSchemaId)}
+          />
+        )}
+      </div>
+    );
   };
 
   const getTooltipMessage = column => {
@@ -153,12 +192,13 @@ export const useSetColumns = (
       const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
       const message = DataViewerUtils.formatValidations(validations);
       const levelError = DataViewerUtils.getLevelError(validations);
+      // console.log({ field, rowData });
       return (
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between'
+            justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
           }}>
           {field
             ? Array.isArray(field.fieldData[column.field])
@@ -170,6 +210,8 @@ export const useSetColumns = (
                   field.fieldData.type === 'LINK' &&
                   !Array.isArray(field.fieldData[column.field]))
               ? field.fieldData[column.field].split(',').join(', ')
+              : field.fieldData.type === 'ATTACHMENT'
+              ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData[column.field]
             : null}
           <IconTooltip levelError={levelError} message={message} />
@@ -177,7 +219,12 @@ export const useSetColumns = (
       );
     } else {
       return (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between'
+          }}>
           {field
             ? Array.isArray(field.fieldData[column.field])
               ? field.fieldData[column.field].sort().join(', ')
@@ -188,6 +235,8 @@ export const useSetColumns = (
                   field.fieldData.type === 'LINK' &&
                   !Array.isArray(field.fieldData[column.field]))
               ? field.fieldData[column.field].split(',').join(', ')
+              : field.fieldData.type === 'ATTACHMENT'
+              ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData[column.field]
             : null}
         </div>
@@ -224,7 +273,11 @@ export const useSetColumns = (
         <Column
           body={dataTemplate}
           className={invisibleColumn}
-          editor={hasWritePermissions ? row => cellDataEditor(row, records.selectedRecord) : null}
+          editor={
+            hasWritePermissions && column.type !== 'ATTACHMENT'
+              ? row => cellDataEditor(row, records.selectedRecord)
+              : null
+          }
           field={column.field}
           header={
             <React.Fragment>
@@ -286,11 +339,11 @@ export const useSetColumns = (
       />
     );
 
-    if (!isDataCollection && !isEUDataset) {
+    if (!hasCountryCode) {
       hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
     }
 
-    if (isDataCollection || isEUDataset) {
+    if (hasCountryCode) {
       columnsArr.unshift(providerCode);
     }
 

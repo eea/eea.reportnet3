@@ -134,7 +134,7 @@ const LinkSelector = withRouter(
               onChange={e => setPkMustBeUsed(e.checked)}
               style={{ width: '70px', marginLeft: '0.5rem' }}
             />
-            <label for={'pkMustBeUsed_check'} className="srOnly">
+            <label htmlFor={'pkMustBeUsed_check'} className="srOnly">
               {resources.messages['pkValuesMustBeUsed']}
             </label>
             <span className={styles.switchTextInput}>{resources.messages['pkHasMultipleValues']}</span>
@@ -146,7 +146,7 @@ const LinkSelector = withRouter(
               onChange={e => setPkHasMultipleValues(e.checked)}
               style={{ width: '70px', marginLeft: '0.5rem' }}
             />
-            <label for={'pkHasMultipleValues_check'} className="srOnly">
+            <label htmlFor={'pkHasMultipleValues_check'} className="srOnly">
               {resources.messages['pkHasMultipleValues']}
             </label>
           </div>

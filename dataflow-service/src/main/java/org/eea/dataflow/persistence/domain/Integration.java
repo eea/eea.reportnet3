@@ -20,8 +20,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-
-
 /**
  * The Class Integration.
  */
@@ -70,8 +68,6 @@ public class Integration {
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "integration")
   private List<ExternalOperationParameters> externalParameters;
 
-
-
   /**
    * Equals.
    *
@@ -88,7 +84,6 @@ public class Integration {
     }
     final Integration integration = (Integration) o;
     return id.equals(integration.id);
-
   }
 
   /**
@@ -100,5 +95,4 @@ public class Integration {
   public int hashCode() {
     return Objects.hash(id);
   }
-
 }

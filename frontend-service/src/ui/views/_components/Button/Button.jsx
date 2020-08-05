@@ -70,7 +70,7 @@ export const Button = ({
           value={value}
         />
         {/* {!title && (
-          <label for={id} className="srOnly">
+          <label htmlFor={id} className="srOnly">
             {tooltip}
           </label>
         )} */}
