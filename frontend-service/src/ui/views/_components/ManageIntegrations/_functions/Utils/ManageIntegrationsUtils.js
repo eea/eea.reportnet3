@@ -22,7 +22,7 @@ const isDuplicatedIntegration = (integration, incomingIntegration) => {
   return isEqual([currentIntegration].sort(), [incomingIntegration].sort());
 };
 
-const isDuplicatedIntegrationName = (currentName, integrationsList, id) => {
+const isDuplicatedIntegrationName = (currentName, integrationsList = [], id) => {
   const names = integrationsList
     .filter(integration => integration.integrationId !== id)
     .map(integration => integration.integrationName.toLowerCase());
