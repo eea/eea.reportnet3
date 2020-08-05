@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -70,7 +71,6 @@ public class IntegrationControllerImpl implements IntegrationController {
   @ApiResponse(code = 500, message = "Internal Server Error")
   public List<IntegrationVO> findAllIntegrationsByCriteria(@ApiParam(type = "Object",
       value = "IntegrationVO Object") @RequestBody IntegrationVO integrationVO) {
-
     try {
       return integrationService.getAllIntegrationsByCriteria(integrationVO);
     } catch (EEAException e) {
@@ -79,7 +79,19 @@ public class IntegrationControllerImpl implements IntegrationController {
     }
   }
 
-
+  /**
+   * Find expor EU dataset integration by dataset id.
+   *
+   * @param datasetId the dataset id
+   * @return the integration VO
+   */
+  @Override
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
+  @GetMapping("/findExportEUDatasetIntegration")
+  public IntegrationVO findExporEUDatasetIntegrationByDatasetId(
+      @RequestParam("datasetId") Long datasetId) {
+    return integrationService.getExporEUDatasetIntegrationByDatasetId(datasetId);
+  }
 
   /**
    * Creates the integration.
@@ -94,14 +106,12 @@ public class IntegrationControllerImpl implements IntegrationController {
   @ApiResponse(code = 500, message = "Internal Server Error")
   public void createIntegration(@ApiParam(type = "Object",
       value = "IntegrationVO Object") @RequestBody IntegrationVO integration) {
-
     try {
       integrationService.createIntegration(integration);
     } catch (EEAException e) {
       LOG_ERROR.error("Error creating integration. Message: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
-
   }
 
   /**
@@ -120,7 +130,6 @@ public class IntegrationControllerImpl implements IntegrationController {
       @ApiParam(value = "Integration id",
           example = "0") @PathVariable("integrationId") Long integrationId,
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
-
     try {
       integrationService.deleteIntegration(integrationId);
     } catch (EEAException e) {
@@ -143,7 +152,6 @@ public class IntegrationControllerImpl implements IntegrationController {
   @ApiResponse(code = 500, message = "Internal Server Error")
   public void updateIntegration(@ApiParam(type = "Object",
       value = "IntegrationVO Object") @RequestBody IntegrationVO integration) {
-
     try {
       integrationService.updateIntegration(integration);
     } catch (EEAException e) {
@@ -202,7 +210,6 @@ public class IntegrationControllerImpl implements IntegrationController {
     return integrationExecutorFactory.getExecutor(integrationToolTypeEnum)
         .execute(integrationOperationTypeEnum, file, datasetId, integration);
   }
-
 
   /**
    * Execute EU dataset export.

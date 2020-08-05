@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -117,4 +118,13 @@ public interface IntegrationController {
   void createDefaultIntegration(@RequestParam("dataflowId") Long dataflowId,
       @RequestParam("datasetId") Long datasetId,
       @RequestParam("datasetSchemaId") String datasetSchemaId);
+
+  /**
+   * Find expor EU dataset integration by dataset id.
+   *
+   * @param datasetId the dataset id
+   * @return the integration VO
+   */
+  @GetMapping("/findExportEUDatasetIntegration")
+  IntegrationVO findExporEUDatasetIntegrationByDatasetId(@RequestParam("datasetId") Long datasetId);
 }

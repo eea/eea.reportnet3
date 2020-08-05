@@ -9,6 +9,9 @@ import javax.transaction.Transactional;
 import org.eea.dataflow.integration.crud.factory.CrudManager;
 import org.eea.dataflow.integration.crud.factory.CrudManagerFactory;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
+import org.eea.dataflow.mapper.IntegrationMapper;
+import org.eea.dataflow.persistence.domain.Integration;
+import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
@@ -68,6 +71,14 @@ public class IntegrationServiceImpl implements IntegrationService {
   /** The lock service. */
   @Autowired
   private LockService lockService;
+
+  /** The integration repository. */
+  @Autowired
+  private IntegrationRepository integrationRepository;
+
+  /** The integration mapper. */
+  @Autowired
+  private IntegrationMapper integrationMapper;
 
   /**
    * Creates the integration.
@@ -214,7 +225,6 @@ public class IntegrationServiceImpl implements IntegrationService {
    * @param dataflowId the dataflow id
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
-   * @throws EEAException the EEA exception
    */
   @Transactional
   @Override
@@ -270,5 +280,18 @@ public class IntegrationServiceImpl implements IntegrationService {
     lockService.createLock(new Timestamp(System.currentTimeMillis()),
         SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
         mapCriteriaExport);
+  }
+
+  /**
+   * Gets the expor EU dataset integration by dataset id.
+   *
+   * @param datasetId the dataset id
+   * @return the expor EU dataset integration by dataset id
+   */
+  @Override
+  public IntegrationVO getExporEUDatasetIntegrationByDatasetId(Long datasetId) {
+    Integration integration = integrationRepository.findFirstByDatasetIdAndOperation(
+        datasetId.toString(), IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
+    return integrationMapper.entityToClass(integration);
   }
 }

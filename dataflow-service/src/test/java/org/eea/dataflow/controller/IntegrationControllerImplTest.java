@@ -9,6 +9,7 @@ import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -247,5 +248,15 @@ public class IntegrationControllerImplTest {
     integrationControllerImpl.createDefaultIntegration(1L, 1L, "5ce524fad31fc52540abae73");
     Mockito.verify(integrationService, times(1)).createDefaultIntegration(Mockito.any(),
         Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Find expor EU dataset integration by dataset id test.
+   */
+  @Test
+  public void findExporEUDatasetIntegrationByDatasetIdTest() {
+    Mockito.when(integrationService.getExporEUDatasetIntegrationByDatasetId(Mockito.anyLong()))
+        .thenReturn(null);
+    Assert.assertNull(integrationControllerImpl.findExporEUDatasetIntegrationByDatasetId(1L));
   }
 }
