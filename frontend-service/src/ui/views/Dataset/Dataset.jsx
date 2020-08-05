@@ -327,8 +327,25 @@ export const Dataset = withRouter(({ match, history }) => {
     setDatasetHasData(hasData);
   };
 
-  const onExportData = async fileType => {
-    setLoadingFile(true);
+  const exportFileExternalExtension = async (datasetId, fileType) => {
+    try {
+      await DatasetService.exportDataById(datasetId, fileType);
+      console.log('external');
+    } catch (error) {
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await getMetadata({ dataflowId, datasetId });
+      notificationContext.add({
+        type: 'EXPORT_DATA_BY_ID_ERROR',
+        content: { dataflowId, datasetId, dataflowName, datasetName }
+      });
+    } finally {
+      setLoadingFile(false);
+    }
+  };
+
+  const exportFileInternalExtension = async (datasetId, fileType) => {
     try {
       setExportDatasetDataName(createFileName(datasetName, fileType));
       setExportDatasetData(await DatasetService.exportDataById(datasetId, fileType));
@@ -339,16 +356,41 @@ export const Dataset = withRouter(({ match, history }) => {
       } = await getMetadata({ dataflowId, datasetId });
       notificationContext.add({
         type: 'EXPORT_DATA_BY_ID_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
+        content: { dataflowId, datasetId, dataflowName, datasetName }
       });
     } finally {
       setLoadingFile(false);
     }
+  };
+
+  const onExportData = async fileType => {
+    setLoadingFile(true);
+    extensionsOperationsList.export.forEach(exportFileExtension => {
+      exportFileExtension.fileExtension === fileType
+        ? exportFileExternalExtension(datasetId, fileType)
+        : exportFileInternalExtension(datasetId, fileType);
+    });
+
+    // try {
+    //   setExportDatasetDataName(createFileName(datasetName, fileType));
+    //   setExportDatasetData(DatasetService.exportDataById(datasetId, fileType));
+    // } catch (error) {
+    //   const {
+    //     dataflow: { name: dataflowName },
+    //     dataset: { name: datasetName }
+    //   } = await getMetadata({ dataflowId, datasetId });
+    //   notificationContext.add({
+    //     type: 'EXPORT_DATA_BY_ID_ERROR',
+    //     content: {
+    //       dataflowId,
+    //       datasetId,
+    //       dataflowName,
+    //       datasetName
+    //     }
+    //   });
+    // } finally {
+    //   setLoadingFile(false);
+    // }
   };
 
   const onLoadDataflow = async () => {

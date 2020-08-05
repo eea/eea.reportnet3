@@ -401,9 +401,25 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const onExportData = async fileType => {
-    isLoadingFile(true);
+  const exportFileExternalExtension = async (datasetId, fileType) => {
+    try {
+      await DatasetService.exportDataById(datasetId, fileType);
+      console.log('external');
+    } catch (error) {
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await getMetadata({ dataflowId, datasetId });
+      notificationContext.add({
+        type: 'EXPORT_DATA_BY_ID_ERROR',
+        content: { dataflowId, datasetId, dataflowName, datasetName }
+      });
+    } finally {
+      isLoadingFile(false);
+    }
+  };
 
+  const exportFileInternalExtension = async (datasetId, fileType) => {
     try {
       const datasetName = createFileName(designerState.datasetSchemaName, fileType);
       const datasetData = await DatasetService.exportDataById(datasetId, fileType);
@@ -421,6 +437,34 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     } finally {
       isLoadingFile(false);
     }
+  };
+
+  const onExportData = async fileType => {
+    isLoadingFile(true);
+    designerState.extensionsOperationsList.export.forEach(exportFileExtension => {
+      exportFileExtension.fileExtension === fileType
+        ? exportFileExternalExtension(datasetId, fileType)
+        : exportFileInternalExtension(datasetId, fileType);
+    });
+
+    // isLoadingFile(true);
+    // try{
+    //   const datasetName = createFileName(designerState.datasetSchemaName, fileType);
+    //   const datasetData = await DatasetService.exportDataById(datasetId, fileType);
+
+    //   designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData, name: datasetName } });
+    // } catch (error) {
+    //   const {
+    //     dataflow: { name: dataflowName },
+    //     dataset: { name: datasetName }
+    //   } = await getMetadata({ dataflowId, datasetId });
+    //   notificationContext.add({
+    //     type: 'EXPORT_DATA_BY_ID_ERROR',
+    //     content: { dataflowId, datasetId, dataflowName, datasetName }
+    //   });
+    // } finally {
+    //   isLoadingFile(false);
+    // }
   };
 
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
