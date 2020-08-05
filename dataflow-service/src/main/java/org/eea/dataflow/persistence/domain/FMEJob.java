@@ -1,4 +1,4 @@
-package org.eea.dataflow.integration.executor.fme.persistance.domain;
+package org.eea.dataflow.persistence.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

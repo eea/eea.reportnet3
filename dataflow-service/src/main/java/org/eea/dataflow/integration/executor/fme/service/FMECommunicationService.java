@@ -215,23 +215,23 @@ public class FMECommunicationService {
    *
    * @param file the file
    * @param idDataset the id dataset
+   * @param providerId
    * @param idProvider the id provider
    * @param fileName the file name
    *
    * @return the file submit result
    */
-  public FileSubmitResult receiveFile(byte[] file, Long idDataset, String idProvider,
-      String fileName) {
+  public FileSubmitResult receiveFile(Long idDataset, Long providerId, String fileName) {
     MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 
-    body.add("file", file);
+
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("datasetId", String.valueOf(idDataset));
     String auxURL =
         "fmerest/v3/resources/connections/Reportnet3/download/{datasetId}/desing/{fileName}";
-    if (null != idProvider) {
-      uriParams.put("providerId", idProvider);
+    if (null != providerId) {
+      uriParams.put("providerId", providerId.toString());
       auxURL =
           "fmerest/v3/resources/connections/Reportnet3/download/{datasetId}/{providerId}/{fileName}";
     }
