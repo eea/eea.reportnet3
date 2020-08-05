@@ -111,7 +111,6 @@ const DataViewer = withRouter(
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
-      downloadedFileName: '',
       editedRecord: {},
       fetchedDataFirstRecord: [],
       firstPageRecord: 0,
@@ -184,12 +183,12 @@ const DataViewer = withRouter(
       return getIconsValidationsErrors(validationsGroup);
     };
 
-    const onFileDownload = async fieldId => {
-      console.log({ datasetId, fieldId, records }, records.downloadedFileName);
-      const file = await DatasetService.downloadFileData(datasetId, fieldId);
-      console.log({ file });
+    const onFileDownload = async (fileName, fieldId) => {
+      console.log({ datasetId, fieldId, records });
+      const fileContent = await DatasetService.downloadFileData(datasetId, fieldId);
+      console.log({ fileContent });
 
-      DownloadFile(file, records.downloadedFileName);
+      DownloadFile(fileContent, fileName);
 
       // const a = document.createElement('a');
       //   a.href = `data:text/plain;base64,${splittedFieldValue[2]}`;
@@ -231,10 +230,6 @@ const DataViewer = withRouter(
     //   inmLevelErrorTypesWithCorrects = inmLevelErrorTypesWithCorrects.concat(levelErrorTypes);
     //   setLevelErrorTypesWithCorrects(inmLevelErrorTypesWithCorrects);
     // }, [levelErrorTypes]);
-
-    useEffect(() => {
-      if (records.downloadedFileName !== '') setIsAttachFileVisible(false);
-    }, [records.downloadedFileName]);
 
     useEffect(() => {
       if (!addDialogVisible) setAddAnotherOne(false);
@@ -456,24 +451,9 @@ const DataViewer = withRouter(
     };
 
     const onAttach = async value => {
-      dispatchRecords({ type: 'SET_FILE_NAME', payload: value.files[0].name });
-
-      // const toBase64 = file =>
-      //   new Promise((resolve, reject) => {
-      //     const reader = new FileReader();
-      //     reader.readAsDataURL(file);
-      //     reader.onload = () => resolve(reader.result);
-      //     reader.onerror = error => reject(error);
-      //   });
-
-      // const result = await toBase64(value.files[0]).catch(e => Error(e));
-      // if (result instanceof Error) {
-      //   console.log('Error: ', result.message);
-      //   return;
-      // } else {
-      //   console.log({ result });
-      //   // onChangeForm(field, `${value.files[0].name}|content|${result.split(',')[1]}`);
+      console.log(value.files[0].name);
       RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, `${value.files[0].name}`);
+      setIsAttachFileVisible(false);
     };
 
     const onCancelRowEdit = () => {

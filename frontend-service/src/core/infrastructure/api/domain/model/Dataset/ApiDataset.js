@@ -170,7 +170,7 @@ export const apiDataset = {
         })
       });
 
-      return response.status >= 200 && response.status <= 299;
+      return response.data;
     } catch (error) {
       console.error(`Error getting file data: ${error}`);
       return false;

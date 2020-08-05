@@ -139,7 +139,7 @@ export const useSetColumns = (
             iconPos="right"
             label={value}
             onClick={() => {
-              onFileDownload(fieldId);
+              onFileDownload(value, fieldId);
             }}
           />
         )}
