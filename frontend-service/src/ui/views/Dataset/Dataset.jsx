@@ -327,19 +327,23 @@ export const Dataset = withRouter(({ match, history }) => {
     setDatasetHasData(hasData);
   };
 
+  const onExportError = async () => {
+    const {
+      dataflow: { name: dataflowName },
+      dataset: { name: datasetName }
+    } = await getMetadata({ dataflowId, datasetId });
+
+    notificationContext.add({
+      type: 'EXPORT_DATA_BY_ID_ERROR',
+      content: { dataflowId, datasetId, dataflowName, datasetName }
+    });
+  };
+
   const exportFileExternalExtension = async (datasetId, fileType) => {
     try {
       await DatasetService.exportDataById(datasetId, fileType);
-      console.log('external');
     } catch (error) {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'EXPORT_DATA_BY_ID_ERROR',
-        content: { dataflowId, datasetId, dataflowName, datasetName }
-      });
+      onExportError();
     } finally {
       setLoadingFile(false);
     }
@@ -350,14 +354,7 @@ export const Dataset = withRouter(({ match, history }) => {
       setExportDatasetDataName(createFileName(datasetName, fileType));
       setExportDatasetData(await DatasetService.exportDataById(datasetId, fileType));
     } catch (error) {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'EXPORT_DATA_BY_ID_ERROR',
-        content: { dataflowId, datasetId, dataflowName, datasetName }
-      });
+      onExportError();
     } finally {
       setLoadingFile(false);
     }
