@@ -9,8 +9,8 @@ import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.PublishedParameter;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.integration.executor.service.AbstractIntegrationExecutorService;
-import org.eea.dataflow.persistence.domain.FMEJob;
 import org.eea.dataflow.integration.utils.IntegrationParams;
+import org.eea.dataflow.persistence.domain.FMEJob;
 import org.eea.dataflow.persistence.repository.FMEJobRepository;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -200,18 +200,19 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
                 + paramDataProvider));
 
         fmeAsyncJob.setPublishedParameters(parameters);
-            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
 
         LOG.info("Creating Export FS in FME");
         if (fmeCommunicationService
-            .createDirectory(integrationOperationParams.get(DATASET_ID), paramDataProvider)
+            .createDirectory(integrationOperationParams.get(IntegrationParams.DATASET_ID),
+                paramDataProvider)
             .equals(HttpStatus.CONFLICT)) {
           LOG.info("Directory already exist");
         } else {
           LOG.info("Directory created successful");
         }
         LOG.info("Executing FME Export");
-        idFMEJob = executeSubmit(fmeParams.get(REPOSITORY), fmeParams.get(WORKSPACE), fmeAsyncJob);
+        idFMEJob = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
+            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
       case IMPORT:
         // providerId
@@ -234,7 +235,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
             fileName);
         LOG.info("File uploaded");
         LOG.info("Executing FME Import");
-        idFMEJob = executeSubmit(fmeParams.get(REPOSITORY), fmeParams.get(WORKSPACE), fmeAsyncJob);
+        idFMEJob = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
+            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
       case EXPORT_EU_DATASET:
         // DataBaseConnectionPublic
@@ -258,7 +260,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     if (null != idFMEJob) {
       FMEJob job = new FMEJob();
       job.setIdJob(new Long(idFMEJob));
-      job.setDatasetId(integrationOperationParams.get(DATASET_ID));
+      job.setDatasetId(integrationOperationParams.get(IntegrationParams.DATASET_ID));
       job.setOperation(integrationOperationTypeEnum);
       String user = SecurityContextHolder.getContext().getAuthentication().getName();
       job.setUser(user);
