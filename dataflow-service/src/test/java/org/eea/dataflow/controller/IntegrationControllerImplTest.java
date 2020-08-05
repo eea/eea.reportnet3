@@ -9,6 +9,7 @@ import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +38,6 @@ public class IntegrationControllerImplTest {
   @Mock
   private IntegrationService integrationService;
 
-
   /**
    * Inits the mocks.
    */
@@ -46,28 +46,26 @@ public class IntegrationControllerImplTest {
     MockitoAnnotations.initMocks(this);
   }
 
-
   /**
-   * Test get integration.
+   * Find all integrations by criteria test.
    *
    * @throws EEAException the EEA exception
    */
   @Test
-  public void testGetIntegration() throws EEAException {
+  public void findAllIntegrationsByCriteriaTest() throws EEAException {
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.setId(1L);
     integrationControllerImpl.findAllIntegrationsByCriteria(integrationVO);
     Mockito.verify(integrationService, times(1)).getAllIntegrationsByCriteria(Mockito.any());
   }
 
-
   /**
-   * Test get integration exception.
+   * Find all integrations by criteria exception test.
    *
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void testGetIntegrationException() throws EEAException {
+  public void findAllIntegrationsByCriteriaExceptionTest() throws EEAException {
     try {
       Mockito.doThrow(EEAException.class).when(integrationService)
           .getAllIntegrationsByCriteria(Mockito.any());
@@ -79,12 +77,12 @@ public class IntegrationControllerImplTest {
   }
 
   /**
-   * Test create integration.
+   * Creates the integration test.
    *
    * @throws EEAException the EEA exception
    */
   @Test
-  public void testCreateIntegration() throws EEAException {
+  public void createIntegrationTest() throws EEAException {
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.getInternalParameters().put("datasetSchemaId", "test1");
     integrationVO.getInternalParameters().put("dataflowId", "1");
@@ -92,15 +90,13 @@ public class IntegrationControllerImplTest {
     Mockito.verify(integrationService, times(1)).createIntegration(Mockito.any());
   }
 
-
-
   /**
-   * Test create integration exception.
+   * Creates the integration exception test.
    *
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void testCreateIntegrationException() throws EEAException {
+  public void createIntegrationExceptionTest() throws EEAException {
     try {
       Mockito.doThrow(EEAException.class).when(integrationService).createIntegration(Mockito.any());
       integrationControllerImpl.createIntegration(new IntegrationVO());
@@ -111,12 +107,12 @@ public class IntegrationControllerImplTest {
   }
 
   /**
-   * Test update integration.
+   * Update integration test.
    *
    * @throws EEAException the EEA exception
    */
   @Test
-  public void testUpdateIntegration() throws EEAException {
+  public void updateIntegrationTest() throws EEAException {
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.setId(1L);
     integrationVO.getInternalParameters().put("datasetSchemaId", "test1");
@@ -126,12 +122,12 @@ public class IntegrationControllerImplTest {
   }
 
   /**
-   * Test update integration exception.
+   * Update integration exception test.
    *
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void testUpdateIntegrationException() throws EEAException {
+  public void updateIntegrationExceptionTest() throws EEAException {
     try {
       Mockito.doThrow(EEAException.class).when(integrationService).updateIntegration(Mockito.any());
       integrationControllerImpl.updateIntegration(new IntegrationVO());
@@ -142,25 +138,23 @@ public class IntegrationControllerImplTest {
   }
 
   /**
-   * Test delete integration.
+   * Delete integration test.
    *
    * @throws EEAException the EEA exception
    */
   @Test
-  public void testDeleteIntegration() throws EEAException {
-
+  public void deleteIntegrationTest() throws EEAException {
     integrationControllerImpl.deleteIntegration(1L, 1L);
     Mockito.verify(integrationService, times(1)).deleteIntegration(Mockito.any());
   }
 
-
   /**
-   * Test delete integration exception.
+   * Delete integration exception test.
    *
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void testDeleteIntegrationException() throws EEAException {
+  public void deleteIntegrationExceptionTest() throws EEAException {
     try {
       Mockito.doThrow(EEAException.class).when(integrationService).deleteIntegration(Mockito.any());
       integrationControllerImpl.deleteIntegration(null, null);
@@ -184,14 +178,13 @@ public class IntegrationControllerImplTest {
     Mockito.verify(integrationService, times(1)).getOnlyExtensionsAndOperations(Mockito.any());
   }
 
-
   /**
-   * Find extensions and operations test exception.
+   * Find extensions and operations exception test.
    *
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void findExtensionsAndOperationsTestException() throws EEAException {
+  public void findExtensionsAndOperationsExceptionTest() throws EEAException {
     try {
       Mockito.doThrow(EEAException.class).when(integrationService)
           .getAllIntegrationsByCriteria(Mockito.any());
@@ -203,12 +196,12 @@ public class IntegrationControllerImplTest {
   }
 
   /**
-   * Test copy integrations.
+   * Copy integrations test.
    *
    * @throws EEAException the EEA exception
    */
   @Test
-  public void testCopyIntegrations() throws EEAException {
+  public void copyIntegrationsTest() throws EEAException {
     Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
     dictionaryOriginTargetObjectId.put("5ce524fad31fc52540abae73", "5ce524fad31fc52540abae73");
     CopySchemaVO copy = new CopySchemaVO();
@@ -221,12 +214,12 @@ public class IntegrationControllerImplTest {
   }
 
   /**
-   * Test copy integrations exception.
+   * Copy integrations exception test.
    *
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void testCopyIntegrationsException() throws EEAException {
+  public void copyIntegrationsExceptionTest() throws EEAException {
     try {
       Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
       dictionaryOriginTargetObjectId.put("5ce524fad31fc52540abae73", "5ce524fad31fc52540abae73");
@@ -243,4 +236,27 @@ public class IntegrationControllerImplTest {
     }
   }
 
+  /**
+   * Creates the default integration test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createDefaultIntegrationTest() throws EEAException {
+    Mockito.doNothing().when(integrationService).createDefaultIntegration(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    integrationControllerImpl.createDefaultIntegration(1L, 1L, "5ce524fad31fc52540abae73");
+    Mockito.verify(integrationService, times(1)).createDefaultIntegration(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Find expor EU dataset integration by dataset id test.
+   */
+  @Test
+  public void findExporEUDatasetIntegrationByDatasetIdTest() {
+    Mockito.when(integrationService.getExporEUDatasetIntegrationByDatasetId(Mockito.anyLong()))
+        .thenReturn(null);
+    Assert.assertNull(integrationControllerImpl.findExporEUDatasetIntegrationByDatasetId(1L));
+  }
 }

@@ -40,12 +40,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 /**
  * The Class DataFlowControllerImpl.
  */
 @RestController
 @RequestMapping(value = "/dataflow")
+@Api(tags = "Dataflows : Dataflows Manager")
 public class DataFlowControllerImpl implements DataFlowController {
 
   /** The Constant LOG_ERROR. */
@@ -65,7 +71,11 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ')")
   @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public DataFlowVO findById(@PathVariable("dataflowId") Long dataflowId) {
+  @ApiOperation(value = "Find one Dataflow by its id", produces = MediaType.APPLICATION_JSON_VALUE,
+      response = DataFlowVO.class)
+  @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
+  public DataFlowVO findById(
+      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
 
     if (dataflowId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -94,7 +104,11 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @GetMapping(value = "/status/{status}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<DataFlowVO> findByStatus(@PathVariable("status") TypeStatusEnum status) {
+  @ApiOperation(value = "Find Dataflows by one type Status",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
+      responseContainer = "List")
+  public List<DataFlowVO> findByStatus(@ApiParam(type = "Object",
+      value = "Dataflow status") @PathVariable("status") TypeStatusEnum status) {
     List<DataFlowVO> dataflows = new ArrayList<>();
     try {
       dataflows = dataflowService.getByStatus(status);
@@ -113,6 +127,9 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @GetMapping(value = "/pendingaccepted", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find Dataflows pendings or accepted for user logged",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
+      responseContainer = "List")
   public List<DataFlowVO> findPendingAccepted() {
     List<DataFlowVO> dataflows = new ArrayList<>();
     String userId =
@@ -137,9 +154,14 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @GetMapping(value = "/completed", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find list of Dataflows completed",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
+      responseContainer = "List")
   public List<DataFlowVO> findCompleted(
-      @RequestParam(value = "pageNum", defaultValue = "0") Integer pageNum,
-      @RequestParam(value = "pageSize", defaultValue = "20") Integer pageSize) {
+      @ApiParam(value = "PageNum: told the page when we start the information",
+          example = "0") @RequestParam(value = "pageNum", defaultValue = "0") Integer pageNum,
+      @ApiParam(value = "PageSize: Specifies the maximum number of results to return",
+          example = "20") @RequestParam(value = "pageSize", defaultValue = "20") Integer pageSize) {
     List<DataFlowVO> dataflows = new ArrayList<>();
     Pageable pageable = PageRequest.of(pageNum, pageSize);
     String userId =
@@ -163,7 +185,11 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @GetMapping(value = "/request/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<DataFlowVO> findUserDataflowsByStatus(@PathVariable("type") TypeRequestEnum type) {
+  @ApiOperation(value = "Find list of Dataflows for one user by status",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
+      responseContainer = "List")
+  public List<DataFlowVO> findUserDataflowsByStatus(@ApiParam(type = "Object",
+      value = "Dataflow status") @PathVariable("type") TypeRequestEnum type) {
     List<DataFlowVO> dataflows = new ArrayList<>();
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
@@ -186,8 +212,13 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @PutMapping("/updateStatusRequest/{idUserRequest}")
-  public void updateUserRequest(@PathVariable("idUserRequest") Long idUserRequest,
-      @RequestParam("type") TypeRequestEnum type) {
+  @ApiOperation(value = "Update one User request for one dataflow")
+  @ApiResponse(code = 400, message = EEAErrorMessage.USER_REQUEST_NOTFOUND)
+  public void updateUserRequest(
+      @ApiParam(value = "User request id",
+          example = "0") @PathVariable("idUserRequest") Long idUserRequest,
+      @ApiParam(type = "Object",
+          value = "Dataflow status") @RequestParam("type") TypeRequestEnum type) {
     try {
       dataflowService.updateUserRequestStatus(idUserRequest, type);
     } catch (EEAException e) {
@@ -206,8 +237,12 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @PostMapping("/{dataflowId}/contributor/add")
-  public void addContributor(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("idContributor") String idContributor) {
+  @ApiOperation(value = "Add one Contributor to one Dataflow")
+  @ApiResponse(code = 400, message = EEAErrorMessage.USER_REQUEST_NOTFOUND)
+  public void addContributor(
+      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(value = "Contributor id",
+          example = "0") @RequestParam("idContributor") String idContributor) {
     try {
       dataflowService.addContributorToDataflow(dataflowId, idContributor);
     } catch (EEAException e) {
@@ -226,8 +261,12 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   @DeleteMapping("{dataflowId}/contributor/remove")
-  public void removeContributor(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("idContributor") String idContributor) {
+  @ApiOperation(value = "Remove one Contributor to one Dataflow")
+  @ApiResponse(code = 400, message = EEAErrorMessage.USER_REQUEST_NOTFOUND)
+  public void removeContributor(
+      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(value = "Contributor id",
+          example = "0") @RequestParam("idContributor") String idContributor) {
     try {
       dataflowService.removeContributorFromDataflow(dataflowId, idContributor);
     } catch (EEAException e) {
@@ -247,8 +286,15 @@ public class DataFlowControllerImpl implements DataFlowController {
   @LockMethod
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_REQUESTER')")
   @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Create one Dataflow", produces = MediaType.APPLICATION_JSON_VALUE,
+      response = ResponseEntity.class)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully Dataflow creation"),
+      @ApiResponse(code = 400,
+          message = "1-The date has to be later than today's date \n2-Dataflow Description or Name empty \n3-Dataflow Obligation empty"),
+      @ApiResponse(code = 500, message = " Internal Server Error")})
   public ResponseEntity createDataFlow(
-      @RequestBody @LockCriteria(name = "name", path = "name") DataFlowVO dataFlowVO) {
+      @ApiParam(value = "Dataflow Object") @RequestBody @LockCriteria(name = "name",
+          path = "name") DataFlowVO dataFlowVO) {
 
     String message = "";
     HttpStatus status = HttpStatus.OK;
@@ -296,7 +342,14 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataFlowVO.id,'DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE')")
   @PutMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity updateDataFlow(@RequestBody DataFlowVO dataFlowVO) {
+  @ApiOperation(value = "Update one Dataflow", produces = MediaType.APPLICATION_JSON_VALUE,
+      response = ResponseEntity.class)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully Dataflow creation"),
+      @ApiResponse(code = 400,
+          message = "1-The date has to be later than today's date\n2-Dataflow Description or Name empty\n3-Dataflow Obligation empty"),
+      @ApiResponse(code = 500, message = "Internal Server Error ")})
+  public ResponseEntity updateDataFlow(
+      @ApiParam(value = "Dataflow Object") @RequestBody DataFlowVO dataFlowVO) {
     final Timestamp dateToday = java.sql.Timestamp.valueOf(LocalDateTime.now());
 
     String message = "";
@@ -342,7 +395,11 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ')")
   @GetMapping(value = "/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
-  public DataFlowVO getMetabaseById(@PathVariable("dataflowId") Long dataflowId) {
+  @ApiOperation(value = "Get one Dataflow by Metabase information by one Dataflow id",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class)
+  @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
+  public DataFlowVO getMetabaseById(
+      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     if (dataflowId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATAFLOW_INCORRECT_ID);
@@ -365,7 +422,10 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   @DeleteMapping("/{dataflowId}")
-  public void deleteDataFlow(@PathVariable("dataflowId") Long dataflowId) {
+  @ApiOperation(value = "Delete one Dataflow by id")
+  @ApiResponse(code = 500, message = "Internal Server Error")
+  public void deleteDataFlow(
+      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     try {
       dataflowService.deleteDataFlow(dataflowId);
     } catch (Exception e) {
@@ -385,9 +445,13 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   @PutMapping("/{dataflowId}/updateStatus")
-  public void updateDataFlowStatus(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("status") TypeStatusEnum status,
-      @RequestParam(value = "deadLineDate", required = false) Date deadlineDate) {
+  @ApiOperation(value = "Update one Dataflow Status")
+  @ApiResponse(code = 500, message = "Internal Server Error")
+  public void updateDataFlowStatus(
+      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(value = "Status") @RequestParam("status") TypeStatusEnum status,
+      @ApiParam(value = "Date ending of Dataflow") @RequestParam(value = "deadLineDate",
+          required = false) Date deadlineDate) {
     try {
       dataflowService.updateDataFlowStatus(dataflowId, status, deadlineDate);
     } catch (Exception e) {

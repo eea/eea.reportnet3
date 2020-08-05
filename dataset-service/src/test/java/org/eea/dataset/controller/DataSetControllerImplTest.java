@@ -1121,8 +1121,8 @@ public class DataSetControllerImplTest {
     doThrow(new EEAException()).when(datasetService).getAttachment(Mockito.any(), Mockito.any());
     try {
       dataSetControllerImpl.getAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F");
-    } catch (EEAException e) {
-      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       throw e;
     }
   }
@@ -1220,8 +1220,8 @@ public class DataSetControllerImplTest {
         Mockito.any(), Mockito.any(), Mockito.any());
     try {
       dataSetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
-    } catch (EEAException e) {
-      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       throw e;
     }
   }
@@ -1239,8 +1239,8 @@ public class DataSetControllerImplTest {
         Mockito.any());
     try {
       dataSetControllerImpl.deleteAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F");
-    } catch (EEAException e) {
-      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       throw e;
     }
   }

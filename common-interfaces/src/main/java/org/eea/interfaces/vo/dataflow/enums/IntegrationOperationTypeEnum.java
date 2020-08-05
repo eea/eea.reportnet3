@@ -1,7 +1,5 @@
 package org.eea.interfaces.vo.dataflow.enums;
 
-
-
 /**
  * The Enum IntegrationOperationTypeEnum.
  */
@@ -18,7 +16,6 @@ public enum IntegrationOperationTypeEnum {
 
   /** The value. */
   private final String value;
-
 
   /**
    * Instantiates a new integration operation type enum.
@@ -37,5 +34,4 @@ public enum IntegrationOperationTypeEnum {
   public String getValue() {
     return value;
   }
-
 }

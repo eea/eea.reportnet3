@@ -1,9 +1,10 @@
 package org.eea.dataflow.integration.manager;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import org.eea.dataflow.integration.crud.factory.manager.FMEIntegrationManager;
 import org.eea.dataflow.mapper.IntegrationMapper;
@@ -12,7 +13,9 @@ import org.eea.dataflow.persistence.domain.Integration;
 import org.eea.dataflow.persistence.domain.InternalOperationParameters;
 import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.dataflow.persistence.repository.OperationParametersRepository;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.junit.Assert;
@@ -27,14 +30,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-
-
 /**
  * The Class FMEIntegrationManagerTest.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class FMEIntegrationManagerTest {
-
 
   /** The integration manager. */
   @InjectMocks
@@ -52,7 +52,20 @@ public class FMEIntegrationManagerTest {
   @Mock
   private IntegrationMapper integrationMapper;
 
+  /** The Constant DATASETSCHEMAID: {@value}. */
+  private static final String DATASET_SCHEMA_ID = "datasetSchemaId";
 
+  /** The Constant DATAFLOW_ID: {@value}. */
+  private static final String DATAFLOW_ID = "dataflowId";
+
+  /** The Constant DATASET_ID: {@value}. */
+  private static final String DATASET_ID = "datasetId";
+
+  /** The Constant PROCESS_NAME: {@value}. */
+  private static final String PROCESS_NAME = "processName";
+
+  /** The Constant REPOSITORY: {@value}. */
+  private static final String REPOSITORY = "repository";
 
   /**
    * Inits the mocks.
@@ -61,7 +74,6 @@ public class FMEIntegrationManagerTest {
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
   }
-
 
   /**
    * Test get integration by id.
@@ -79,7 +91,6 @@ public class FMEIntegrationManagerTest {
     integrationManager.get(integrationVO);
     Mockito.verify(integrationRepository, times(1)).findById(Mockito.any());
   }
-
 
   /**
    * Test get integration by id dataset schema.
@@ -131,11 +142,9 @@ public class FMEIntegrationManagerTest {
 
   /**
    * Test create exception.
-   *
-   * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void testCreateException() throws EEAException {
+  public void testCreateException() {
     try {
       IntegrationVO integrationVO = new IntegrationVO();
       integrationManager.create(integrationVO);
@@ -246,8 +255,55 @@ public class FMEIntegrationManagerTest {
   public void testGetToolType() {
     Assert.assertEquals("tool equals", IntegrationToolTypeEnum.FME,
         integrationManager.getToolType());
-
   }
 
+  @Test
+  public void updateExportEUDatasetTest() throws EEAException {
+    Map<String, String> internalParameters = new HashMap<>();
+    internalParameters.put(DATAFLOW_ID, "1");
+    internalParameters.put(DATASET_ID, "1");
+    internalParameters.put(DATASET_SCHEMA_ID, "5eb426a506390651aced7c95");
+    internalParameters.put(REPOSITORY, "ReportNetTesting");
+    internalParameters.put(PROCESS_NAME, "Export_EU_dataset.fmw");
 
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
+    integrationVO.setId(1L);
+    integrationVO.setName("name");
+    integrationVO.setDescription("description");
+    integrationVO.setInternalParameters(internalParameters);
+
+    Integration integration = new Integration();
+    integration.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
+    integration.setId(1L);
+
+    Mockito.when(integrationRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(integration));
+    Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(integrationVO);
+    Mockito.when(integrationMapper.classToEntity(Mockito.any())).thenReturn(integration);
+    Mockito.when(integrationRepository.save(Mockito.any())).thenReturn(null);
+    integrationManager.update(integrationVO);
+    Mockito.verify(integrationRepository, times(1)).save(Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateExportEUDatasetExceptionTest() throws EEAException {
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
+    integrationVO.setId(1L);
+
+    Integration integration = new Integration();
+    integration.setOperation(IntegrationOperationTypeEnum.EXPORT);
+
+    Mockito.when(integrationRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(integration));
+
+    try {
+      integrationManager.update(integrationVO);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.OPERATION_TYPE_NOT_EDITABLE, e.getReason());
+      throw e;
+    }
+  }
 }

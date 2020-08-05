@@ -2342,8 +2342,11 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void deleteAttachment(Long datasetId, String fieldId) throws EEAException {
-    // Delete attachment from the table attachment_value
-    attachmentRepository.deleteByFieldValueId(fieldId);
+    // Clear the attachment value
+    AttachmentValue attachment = attachmentRepository.findByFieldValueId(fieldId);
+    attachment.setContent(null);
+    attachment.setFileName("");
+    attachmentRepository.save(attachment);
     // Put the field value name to null
     FieldValue field = fieldRepository.findById(fieldId);
     field.setValue("");
@@ -2362,8 +2365,8 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void updateAttachment(@DatasetId Long datasetId, String fieldId, String fileName,
-      InputStream is) throws EEAException, IOException {
+  public void updateAttachment(Long datasetId, String fieldId, String fileName, InputStream is)
+      throws EEAException, IOException {
 
     // Attachment table
     AttachmentValue attachment = attachmentRepository.findByFieldValueId(fieldId);

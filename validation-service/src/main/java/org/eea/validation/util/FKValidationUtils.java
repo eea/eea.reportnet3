@@ -59,14 +59,18 @@ public class FKValidationUtils {
    */
   private static FieldRepository fieldRepository;
 
-
+  /*
+   * we need to put synchronized void because drools need a static method to call in a java file, so
+   * we should create a static and put this synchronized to put @autowired to convert the Object in
+   * a bean
+   */
   /**
    * Sets the dataset controller.
    *
    * @param dataSetControllerZuul the new dataset controller
    */
   @Autowired
-  private void setDatasetController(DataSetControllerZuul dataSetControllerZuul) {
+  synchronized void setDatasetController(DataSetControllerZuul dataSetControllerZuul) {
     FKValidationUtils.dataSetControllerZuul = dataSetControllerZuul;
   }
 
@@ -77,7 +81,7 @@ public class FKValidationUtils {
    * @param rulesRepository the new rules repository
    */
   @Autowired
-  private void setRulesRepository(RulesRepository rulesRepository) {
+  synchronized void setRulesRepository(RulesRepository rulesRepository) {
     FKValidationUtils.rulesRepository = rulesRepository;
   }
 
@@ -87,7 +91,7 @@ public class FKValidationUtils {
    * @param datasetMetabaseControllerZuul the new data set metabase controller zuul
    */
   @Autowired
-  private void setDataSetMetabaseControllerZuul(
+  synchronized void setDataSetMetabaseControllerZuul(
       DataSetMetabaseControllerZuul datasetMetabaseControllerZuul) {
     FKValidationUtils.datasetMetabaseControllerZuul = datasetMetabaseControllerZuul;
   }
@@ -98,7 +102,7 @@ public class FKValidationUtils {
    * @param schemasRepository the new schemas repository
    */
   @Autowired
-  private void setSchemasRepository(SchemasRepository schemasRepository) {
+  synchronized void setSchemasRepository(SchemasRepository schemasRepository) {
     FKValidationUtils.schemasRepository = schemasRepository;
   }
 
@@ -108,7 +112,7 @@ public class FKValidationUtils {
    * @param fieldRepository the new dataset repository
    */
   @Autowired
-  private void setFieldRepository(FieldRepository fieldRepository) {
+  synchronized void setFieldRepository(FieldRepository fieldRepository) {
     FKValidationUtils.fieldRepository = fieldRepository;
   }
 
