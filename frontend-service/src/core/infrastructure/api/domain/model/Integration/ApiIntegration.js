@@ -36,6 +36,11 @@ export const apiIntegration = {
     return response;
   },
 
+  findEUDatasetIntegration: async datasetId => {
+    const response = await HTTPRequester.get({ url: getUrl(IntegrationConfig.euDatasetIntegration, { datasetId }) });
+    return response.data;
+  },
+
   getProcesses: async (repositoryName, datasetId) => {
     const response = await HTTPRequester.get({
       url: getUrl(IntegrationConfig.getProcesses, { datasetId, repositoryName })
