@@ -133,17 +133,19 @@ public interface DatasetController {
   @GetMapping("{id}/dataflow")
   Long getDataFlowIdById(@PathVariable("id") Long datasetId);
 
+
   /**
    * Insert records.
    *
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param records the records
+   * @param file the file
    */
-  @PostMapping(value = "/{id}/table/{idTableSchema}/record",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/{id}/table/{idTableSchema}/record")
   void insertRecords(@PathVariable("id") Long datasetId,
       @PathVariable("idTableSchema") String idTableSchema, @RequestBody List<RecordVO> records);
+
 
   /**
    * Update record.
@@ -273,5 +275,41 @@ public interface DatasetController {
   void etlImportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
+
+
+
+  /**
+   * Gets the attachment.
+   *
+   * @param datasetId the dataset id
+   * @param fieldId the field id
+   * @return the attachment
+   */
+  @GetMapping(value = "/{datasetId}/field/{fieldId}/attachment",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  ResponseEntity getAttachment(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("fieldId") String fieldId);
+
+
+  /**
+   * Update attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @param file the file
+   */
+  @PutMapping("/{datasetId}/field/{fieldId}/attachment")
+  public void updateAttachment(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("fieldId") String idField, @RequestParam("file") final MultipartFile file);
+
+  /**
+   * Delete attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   */
+  @DeleteMapping("/{datasetId}/field/{fieldId}/attachment")
+  public void deleteAttachment(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("fieldId") String idField);
 
 }

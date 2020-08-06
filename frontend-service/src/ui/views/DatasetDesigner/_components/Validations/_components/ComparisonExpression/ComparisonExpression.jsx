@@ -368,7 +368,7 @@ const ComparisonExpression = ({
       if (fieldType === 'NUMBER_DECIMAL') {
         return (
           <InputText
-            keyfilter={valueKeyFilter}
+            keyfilter="num"
             disabled={isDisabled}
             format={false}
             onBlur={e => checkField('number', e.target.value)}
@@ -516,7 +516,9 @@ const ComparisonExpression = ({
           value={expressionValues.valueTypeSelector}
         />
       </span>
-      <span onBlur={() => onAddToClickedFields('field2')} className={`formField ${printRequiredFieldError('field2')}`}>
+      <span
+        onBlur={() => onAddToClickedFields('field2')}
+        className={`formField ${styles.expressionValue} ${printRequiredFieldError('field2')}`}>
         {getValueField()}
       </span>
 

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.eea.dataset.persistence.schemas.domain;
 
@@ -76,6 +76,14 @@ public class FieldSchema {
   @Field(value = "pkHasMultipleValues")
   private Boolean pkHasMultipleValues;
 
+  /** The valid file extensions for the attachment. */
+  @Field(value = "validExtensions")
+  private String[] validExtensions;
+
+  /** The max attachment size. */
+  @Field(value = "maxSize")
+  private Float maxSize;
+
   /** The read only. */
   @Field(value = "readOnly")
   private Boolean readOnly;
@@ -88,7 +96,7 @@ public class FieldSchema {
   @Override
   public int hashCode() {
     return Objects.hash(headerName, idFieldSchema, idRecord, type, codelistItems, required,
-        description, pk, pkMustBeUsed);
+        description, pk, pkMustBeUsed, validExtensions, maxSize);
   }
 
 
@@ -111,7 +119,8 @@ public class FieldSchema {
         && Objects.equals(idFieldSchema, other.idFieldSchema)
         && Objects.equals(idRecord, other.idRecord) && Objects.equals(required, other.required)
         && Objects.equals(pk, other.pk) && Objects.equals(description, other.description)
-        && Objects.equals(pkMustBeUsed, other.pkMustBeUsed);
+        && Objects.equals(pkMustBeUsed, other.pkMustBeUsed)
+        && Objects.equals(maxSize, other.maxSize);
   }
 
 

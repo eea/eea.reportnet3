@@ -8,6 +8,8 @@ import defaultAvatar from 'assets/images/avatars/defaultAvatar.png';
 import logo from 'assets/images/logo.png';
 import styles from './Header.module.scss';
 
+import { AccessPointWebConfig } from 'conf/domain/model/AccessPoint/AccessPoint.web.config';
+
 import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
@@ -108,7 +110,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         history.push(getUrl(routes.DATAFLOWS));
       }}>
       <img height="50px" src={logo} alt="Reportnet 3.0" className={styles.appLogo} />
-      {/* <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1> */}
+      {isPublic && <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>}
     </a>
   );
 
@@ -209,9 +211,12 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         className="p-button-primary"
         label={resources.messages.login}
         style={{ padding: '0.25rem 2rem', borderRadius: '25px', fontWeight: 'bold' }}
-        onClick={e => {
-          e.preventDefault();
-          history.push(getUrl(routes.LOGIN));
+        onClick={() => {
+          if (window.env.REACT_APP_EULOGIN.toString() == 'true') {
+            window.location.href = AccessPointWebConfig.euloginUrl;
+          } else {
+            history.push(getUrl(routes.LOGIN));
+          }
         }}></Button>
     </div>
   );

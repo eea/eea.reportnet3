@@ -17,7 +17,9 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 const useBigButtonList = ({
   dataflowId,
   dataflowState,
+  getDatasetData,
   getDeleteSchemaIndex,
+  handleExportEuDataset,
   handleRedirect,
   isActiveButton,
   onCloneDataflow,
@@ -25,6 +27,7 @@ const useBigButtonList = ({
   onDatasetSchemaNameError,
   onDuplicateName,
   onExportEuDataset,
+  onLoadEuDatasetIntegration,
   onLoadReceiptData,
   onSaveName,
   onShowDataCollectionModal,
@@ -422,6 +425,18 @@ const useBigButtonList = ({
     }
   ];
 
+  const exportEuDatasetModel = !isNil(dataflowState.data.euDatasets)
+    ? dataflowState.data.euDatasets.map(dataset => ({
+        command: () => {
+          getDatasetData(dataset.euDatasetId, dataset.datasetSchemaId);
+          handleExportEuDataset(true);
+          onLoadEuDatasetIntegration(dataset.euDatasetId);
+        },
+        icon: 'export',
+        label: dataset.euDatasetName
+      }))
+    : [];
+
   const exportEuDatasetBigButton = [
     {
       buttonClass: 'schemaDataset',
@@ -430,6 +445,7 @@ const useBigButtonList = ({
       caption: 'Export EU Datasets',
       handleRedirect: dataflowState.isExportEuDatasetLoading ? () => {} : () => onExportEuDataset(),
       layout: 'defaultBigButton',
+      model: exportEuDatasetModel,
       visibility:
         buttonsVisibility.copyDataCollectionToEuDataset && dataflowState.status === DataflowConf.dataflowStatus['DRAFT']
     }

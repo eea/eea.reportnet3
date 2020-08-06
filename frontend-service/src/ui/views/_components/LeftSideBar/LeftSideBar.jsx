@@ -6,7 +6,6 @@ import Joyride, { ACTIONS, EVENTS, LIFECYCLE, STATUS } from 'react-joyride';
 import styles from './LeftSideBar.module.scss';
 
 import { LeftSideBarButton } from './_components/LeftSideBarButton';
-import { NotificationsList } from './_components/NotificationsList';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 import { UserService } from 'core/services/User';
@@ -18,13 +17,12 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { isEmpty } from 'lodash';
 
-const LeftSideBar = withRouter(({ history, style }) => {
+const LeftSideBar = withRouter(({ history, style, setIsNotificationVisible }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const [isNotificationVisible, setIsNotificationVisible] = useState(false);
   const [logoutConfirmVisible, setLogoutConfirmVisible] = useState(undefined);
   const [run, setRun] = useState(false);
   const [helpIndex, setHelpIndex] = useState();
@@ -192,11 +190,7 @@ const LeftSideBar = withRouter(({ history, style }) => {
             <div className={styles.barSection}>
               {renderLogout()}
               <div className={styles.leftSideBarElementWrapper}>{renderOpenClose()}</div>
-            </div>
-            <NotificationsList
-              isNotificationVisible={isNotificationVisible}
-              setIsNotificationVisible={setIsNotificationVisible}
-            />
+            </div>          
 
             {userContext.userProps.showLogoutConfirmation && (
               <ConfirmDialog

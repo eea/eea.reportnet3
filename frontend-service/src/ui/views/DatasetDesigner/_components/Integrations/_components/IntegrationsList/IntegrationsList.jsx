@@ -44,13 +44,13 @@ export const IntegrationsList = ({
 
   const actionsTemplate = row => (
     <ActionsColumn
-      onDeleteClick={() => isDeleteDialogVisible(true)}
+      onDeleteClick={row.operation === 'EXPORT_EU_DATASET' ? null : () => isDeleteDialogVisible(true)}
       onEditClick={() => {
-        const updatedData = integrationListState.data.filter(
+        const filteredData = integrationListState.data.filter(
           integration => integration.integrationId === row.integrationId
         );
         manageDialogs('isIntegrationManageDialogVisible', true, 'isIntegrationListDialogVisible', false);
-        getUpdatedData(updatedData);
+        if (!isEmpty(filteredData)) getUpdatedData(filteredData[0]);
       }}
     />
   );
@@ -108,7 +108,7 @@ export const IntegrationsList = ({
 
   const renderColumns = integrations => {
     const fieldColumns = Object.keys(integrations[0])
-      .filter(key => key.includes('integrationName') || key.includes('operation'))
+      .filter(key => key.includes('integrationName') || key.includes('operationName'))
       .map(field => <Column field={field} header={resources.messages[field]} key={field} sortable={true} />);
 
     fieldColumns.push(renderActionButtonsColumn);
@@ -125,7 +125,7 @@ export const IntegrationsList = ({
         data={integrationListState.data}
         getFilteredData={onLoadFilteredData}
         inputOptions={['integrationName']}
-        selectOptions={['operation']}
+        selectOptions={['operationName']}
       />
 
       {!isEmpty(integrationListState.filteredData) ? (
