@@ -183,7 +183,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => ({
     label: type.text,
     icon: config.icons['archive'],
-    command: () => onExportData(type.code)
+    command: () => onExportDataInternalExtension(type.code)
   }));
 
   const externalExtensions = [
@@ -192,7 +192,7 @@ export const Dataset = withRouter(({ match, history }) => {
       items: externalExportExtensions.map(type => ({
         label: type.text,
         icon: config.icons['archive'],
-        command: () => onExportData(type.code)
+        command: () => onExportDataExternalExtension(type.code)
       }))
     }
   ];
@@ -343,7 +343,10 @@ export const Dataset = withRouter(({ match, history }) => {
     });
   };
 
-  const exportFileExternalExtension = async (datasetId, fileType) => {
+  const onExportDataExternalExtension = async fileType => {
+    console.log('provider external with different command');
+    setLoadingFile(true);
+    setExportDatasetFileType(fileType);
     try {
       await DatasetService.exportDataById(datasetId, fileType);
     } catch (error) {
@@ -353,7 +356,10 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
-  const exportFileInternalExtension = async (datasetId, fileType) => {
+  const onExportDataInternalExtension = async fileType => {
+    console.log('provider internal with different command');
+    setLoadingFile(true);
+    setExportDatasetFileType(fileType);
     try {
       setExportDatasetDataName(createFileName(datasetName, fileType));
       setExportDatasetData(await DatasetService.exportDataById(datasetId, fileType));
@@ -362,37 +368,6 @@ export const Dataset = withRouter(({ match, history }) => {
     } finally {
       setLoadingFile(false);
     }
-  };
-
-  const onExportData = async fileType => {
-    setLoadingFile(true);
-    setExportDatasetFileType(fileType);
-    extensionsOperationsList.export.forEach(exportFileExtension => {
-      exportFileExtension.fileExtension === fileType
-        ? exportFileExternalExtension(datasetId, fileType)
-        : exportFileInternalExtension(datasetId, fileType);
-    });
-
-    // try {
-    //   setExportDatasetDataName(createFileName(datasetName, fileType));
-    //   setExportDatasetData(DatasetService.exportDataById(datasetId, fileType));
-    // } catch (error) {
-    //   const {
-    //     dataflow: { name: dataflowName },
-    //     dataset: { name: datasetName }
-    //   } = await getMetadata({ dataflowId, datasetId });
-    //   notificationContext.add({
-    //     type: 'EXPORT_DATA_BY_ID_ERROR',
-    //     content: {
-    //       dataflowId,
-    //       datasetId,
-    //       dataflowName,
-    //       datasetName
-    //     }
-    //   });
-    // } finally {
-    //   setLoadingFile(false);
-    // }
   };
 
   const onLoadDataflow = async () => {

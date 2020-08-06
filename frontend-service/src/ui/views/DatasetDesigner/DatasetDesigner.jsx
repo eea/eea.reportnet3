@@ -227,7 +227,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const downloadExportFMEFile = async () => {
     try {
-      const fakeExportDatasetFileName = '1.txt'; // from notification
+      const fakeExportDatasetFileName = '1.txt'; // from notification. compare with datasetName
       const providerId = ''; // from notification
 
       const datasetName = createFileName(designerState.datasetSchemaName, designerState.exportDatasetFileType);
@@ -259,7 +259,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     const { extensionsOperationsList } = designerState;
 
     const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => ({
-      command: () => onExportData(type.code),
+      command: () => onExportDataInternalExtension(type.code),
       icon: config.icons['archive'],
       label: type.text
     }));
@@ -268,7 +268,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       {
         label: resources.messages['externalExtensions'],
         items: extensionsOperationsList.export.map(type => ({
-          command: () => onExportData(type.fileExtension),
+          command: () => onExportDataExternalExtension(type.fileExtension),
           icon: config.icons['archive'],
           label: `${type.fileExtension.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
         }))
@@ -418,7 +418,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     });
   };
 
-  const exportFileExternalExtension = async (datasetId, fileType) => {
+  const setFileType = fileType => designerDispatch({ type: 'SET_EXPORT_DATASET_FILE_TYPE', payload: { fileType } });
+
+  const onExportDataExternalExtension = async fileType => {
+    console.log('custodian external with different command');
+    isLoadingFile(true);
+    setFileType(fileType);
     try {
       await DatasetService.exportDataById(datasetId, fileType);
     } catch (error) {
@@ -428,9 +433,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const setFileType = fileType => designerDispatch({ type: 'SET_EXPORT_DATASET_FILE_TYPE', payload: { fileType } });
-
-  const exportFileInternalExtension = async (datasetId, fileType) => {
+  const onExportDataInternalExtension = async fileType => {
+    console.log('custodian internal with different command');
+    isLoadingFile(true);
+    setFileType(fileType);
     try {
       const datasetName = createFileName(designerState.datasetSchemaName, fileType);
       const datasetData = await DatasetService.exportDataById(datasetId, fileType);
@@ -441,16 +447,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     } finally {
       isLoadingFile(false);
     }
-  };
-
-  const onExportData = async fileType => {
-    isLoadingFile(true);
-    setFileType(fileType);
-    designerState.extensionsOperationsList.export.forEach(exportFileExtension => {
-      exportFileExtension.fileExtension === fileType
-        ? exportFileExternalExtension(datasetId, fileType)
-        : exportFileInternalExtension(datasetId, fileType);
-    });
   };
 
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
