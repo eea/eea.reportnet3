@@ -778,7 +778,7 @@ public class DataSetControllerImpl implements DatasetController {
       @PathVariable("fieldId") String idField, @RequestParam("file") final MultipartFile file) {
 
     try {
-      String fileName = file.getName();
+      String fileName = file.getOriginalFilename();
       if (!validateAttachment(datasetId, idField, fileName, file.getSize())) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
       }
@@ -809,7 +809,9 @@ public class DataSetControllerImpl implements DatasetController {
     if (datasetSchemaId == null) {
       throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND);
     }
-    FieldSchemaVO fieldSchema = datasetSchemaService.getFieldSchema(datasetSchemaId, idField);
+    FieldVO fieldVO = datasetService.getFieldById(idField);
+    FieldSchemaVO fieldSchema =
+        datasetSchemaService.getFieldSchema(datasetSchemaId, fieldVO.getIdFieldSchema());
     if (fieldSchema == null || fieldSchema.getId() == null) {
       throw new EEAException(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND);
     }
