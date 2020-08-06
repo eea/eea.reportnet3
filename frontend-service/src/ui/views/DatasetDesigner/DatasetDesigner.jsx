@@ -85,6 +85,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     exportButtonsList: [],
     exportDatasetData: null,
     exportDatasetDataName: '',
+    exportDatasetFileType: '',
     extensionsOperationsList: { export: [], import: [] },
     hasWritePermissions: false,
     initialDatasetDescription: '',
@@ -226,9 +227,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const downloadExportFMEFile = async () => {
     try {
-      // const response = await DatasetService.downloadExportFile(datasetId, fileName);
-      const response = await DatasetService.downloadExportFile(datasetId);
-      console.log('response', response);
+      const fakeExportDatasetFileName = '1.txt'; // from notification
+      const providerId = ''; // from notification
+
+      const datasetName = createFileName(designerState.datasetSchemaName, designerState.exportDatasetFileType);
+      const datasetData = await DatasetService.downloadExportFile(datasetId, fakeExportDatasetFileName, providerId);
+
+      designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData, name: datasetName } });
     } catch (error) {
       console.error(error);
       notificationContext.add({
@@ -423,6 +428,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
+  const setFileType = fileType => designerDispatch({ type: 'SET_EXPORT_DATASET_FILE_TYPE', payload: { fileType } });
+
   const exportFileInternalExtension = async (datasetId, fileType) => {
     try {
       const datasetName = createFileName(designerState.datasetSchemaName, fileType);
@@ -438,6 +445,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onExportData = async fileType => {
     isLoadingFile(true);
+    setFileType(fileType);
     designerState.extensionsOperationsList.export.forEach(exportFileExtension => {
       exportFileExtension.fileExtension === fileType
         ? exportFileExternalExtension(datasetId, fileType)

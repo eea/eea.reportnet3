@@ -74,6 +74,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
+  const [exportDatasetFileType, setExportDatasetFileType] = useState('');
   const [extensionsOperationsList, setExtensionsOperationsList] = useState({ export: [], import: [] });
   const [externalExportExtensions, setExternalExportExtensions] = useState([]);
   const [hasValidations, setHasValidations] = useState();
@@ -310,9 +311,12 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const downloadExportFMEFile = async () => {
     try {
-      const response = await DatasetService.downloadExportFile(datasetId);
-      // const response = await DatasetService.downloadExportFile(datasetId, fileName, dataProviderId);
-      console.log('response', response);
+      const fakeExportDatasetFileName = '1.txt'; // from notification
+      const providerId = 1; // from notification
+
+      setExportDatasetDataName(createFileName(datasetName, exportDatasetFileType));
+
+      setExportDatasetData(await DatasetService.downloadExportFile(datasetId, fakeExportDatasetFileName, providerId));
     } catch (error) {
       console.error(error);
       notificationContext.add({
@@ -362,6 +366,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const onExportData = async fileType => {
     setLoadingFile(true);
+    setExportDatasetFileType(fileType);
     extensionsOperationsList.export.forEach(exportFileExtension => {
       exportFileExtension.fileExtension === fileType
         ? exportFileExternalExtension(datasetId, fileType)
