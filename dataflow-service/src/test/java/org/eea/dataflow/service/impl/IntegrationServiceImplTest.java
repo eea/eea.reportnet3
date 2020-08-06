@@ -144,7 +144,7 @@ public class IntegrationServiceImplTest {
   public void createDefaultIntegrationTest() {
     Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
     Mockito.doNothing().when(crudManager).create(Mockito.any());
-    integrationService.createDefaultIntegration(1L, 1L, "5ce524fad31fc52540abae73");
+    integrationService.createDefaultIntegration(1L, "5ce524fad31fc52540abae73");
     Mockito.verify(crudManager, times(1)).create(Mockito.any());
   }
 
@@ -159,7 +159,8 @@ public class IntegrationServiceImplTest {
     Mockito.when(integrationRepository.findFirstByOperationAndParameterAndValue(Mockito.any(),
         Mockito.any(), Mockito.any())).thenReturn(new Integration());
     Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(expected);
-    IntegrationVO response = integrationService.getExporEUDatasetIntegrationByDatasetId(1L);
+    IntegrationVO response =
+        integrationService.getExporEUDatasetIntegrationByDatasetId("5ce524fad31fc52540abae73");
     Assert.assertEquals(expected, response);
   }
 

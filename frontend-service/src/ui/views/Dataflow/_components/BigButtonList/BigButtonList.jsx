@@ -208,9 +208,9 @@ export const BigButtonList = ({
     }
   };
 
-  const onLoadEuDatasetIntegration = async datasetId => {
+  const onLoadEuDatasetIntegration = async datasetSchemaId => {
     try {
-      const euDatasetExportIntegration = await IntegrationService.findEUDatasetIntegration(datasetId);
+      const euDatasetExportIntegration = await IntegrationService.findEUDatasetIntegration(datasetSchemaId);
 
       setEuDatasetExportIntegration(IntegrationsUtils.parseIntegration(euDatasetExportIntegration));
     } catch (error) {

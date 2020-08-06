@@ -77,16 +77,15 @@ public interface IntegrationService {
    * Creates the default integration.
    *
    * @param dataflowId the dataflow id
-   * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    */
-  void createDefaultIntegration(Long dataflowId, Long datasetId, String datasetSchemaId);
+  void createDefaultIntegration(Long dataflowId, String datasetSchemaId);
 
   /**
    * Gets the expor EU dataset integration by dataset id.
    *
-   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
    * @return the expor EU dataset integration by dataset id
    */
-  IntegrationVO getExporEUDatasetIntegrationByDatasetId(Long datasetId);
+  IntegrationVO getExporEUDatasetIntegrationByDatasetId(String datasetSchemaId);
 }

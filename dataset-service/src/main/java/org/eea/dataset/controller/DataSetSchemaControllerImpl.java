@@ -126,12 +126,11 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       String datasetSchemaId = dataschemaService.createEmptyDataSetSchema(dataflowId).toString();
       Future<Long> futureDatasetId = datasetMetabaseService.createEmptyDataset(
           DatasetTypeEnum.DESIGN, datasetSchemaName, datasetSchemaId, dataflowId, null, null, 0);
-      Long datasetId = futureDatasetId.get();
 
       // we find if the dataflow has any permission to give the permission to this new datasetschema
-      contributorControllerZuul.createAssociatedPermissions(dataflowId, datasetId);
+      contributorControllerZuul.createAssociatedPermissions(dataflowId, futureDatasetId.get());
 
-      integrationControllerZuul.createDefaultIntegration(dataflowId, datasetId, datasetSchemaId);
+      integrationControllerZuul.createDefaultIntegration(dataflowId, datasetSchemaId);
     } catch (InterruptedException | ExecutionException | EEAException e) {
       LOG.error("Aborted DataSetSchema creation: {}", e.getMessage());
       if (e instanceof InterruptedException) {

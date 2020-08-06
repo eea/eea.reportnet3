@@ -296,7 +296,7 @@ public class DataSetSchemaControllerImplTest {
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(CompletableFuture.completedFuture(1L));
     Mockito.doNothing().when(integrationControllerZuul).createDefaultIntegration(Mockito.anyLong(),
-        Mockito.anyLong(), Mockito.any());
+        Mockito.any());
     dataSchemaControllerImpl.createEmptyDatasetSchema(1L, "datasetSchemaName");
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());

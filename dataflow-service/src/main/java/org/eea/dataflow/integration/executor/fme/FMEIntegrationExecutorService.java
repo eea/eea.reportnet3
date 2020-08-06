@@ -240,7 +240,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         break;
       case EXPORT_EU_DATASET:
         // DataBaseConnectionPublic
-        parameters.add(saveParameter(IntegrationParams.DATABASE_CONNECTION_PUBLIC, ""));
+        parameters.add(saveParameter(IntegrationParams.DATABASE_CONNECTION_PUBLIC,
+            integration.getExternalParameters().get(IntegrationParams.DATABASE_CONNECTION_PUBLIC)));
         // mode
         parameters.add(saveParameter(IntegrationParams.MODE, ""));
 
