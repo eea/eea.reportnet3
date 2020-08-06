@@ -1,5 +1,5 @@
 import React, { useContext, useReducer } from 'react';
-import { isNull } from 'lodash';
+
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
