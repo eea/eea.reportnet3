@@ -225,7 +225,7 @@ export const Filters = ({
             onChange={() => onToggleMatchMode()}
             role="checkbox"
           />
-          <label for={`matchMode_checkbox`} className="srOnly">
+          <label htmlFor={`matchMode_checkbox`} className="srOnly">
             {resources.messages['strictModeCheckboxFilter']}
           </label>
         </span>

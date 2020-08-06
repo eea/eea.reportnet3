@@ -3,7 +3,7 @@ import React, { Fragment, useContext, useState } from 'react';
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { IntegrationsList } from './_components/IntegrationsList';
-import { ManageIntegrations } from './_components/ManageIntegrations';
+import { ManageIntegrations } from 'ui/views/_components/ManageIntegrations';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -17,9 +17,9 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
   const [integrationsList, setIntegrationsList] = useState([]);
   const [updatedData, setUpdatedData] = useState({});
 
-  const getUpdatedData = data => setUpdatedData(IntegrationsUtils.parseIntegrationsList(data));
-
   const getIntegrationsList = data => setIntegrationsList(data);
+
+  const getUpdatedData = data => setUpdatedData(IntegrationsUtils.parseIntegration(data));
 
   const renderIntegrationFooter = (
     <Fragment>
@@ -65,10 +65,10 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
         <ManageIntegrations
           dataflowId={dataflowId}
           datasetId={datasetId}
-          designerState={designerState}
           integrationsList={integrationsList}
           manageDialogs={manageDialogs}
           onUpdateData={onUpdateData}
+          state={designerState}
           updatedData={updatedData}
         />
       )}

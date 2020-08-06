@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -154,15 +155,20 @@ public class FMECommunicationService {
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("datasetId", String.valueOf(idDataset));
-    uriParams.put("providerId", idProvider);
+    String auxURL =
+        "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}?createDirectories=true&overwrite=true";
+    if (null != idProvider) {
+      uriParams.put("providerId", idProvider);
+      auxURL =
+          "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/desing?createDirectories=true&overwrite=true";
+    }
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
     headerInfo.put("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
     headerInfo.put(CONTENT_TYPE, "application/octet-stream");
     headerInfo.put(ACCEPT, APPLICATION_JSON);
     HttpEntity<byte[]> request = createHttpRequest(file, uriParams, headerInfo);
-    String url = uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(
-        "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}?createDirectories=true&overwrite=true")
+    String url = uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
         .buildAndExpand(uriParams).toString();
     ResponseEntity<FileSubmitResult> checkResult =
         this.restTemplate.exchange(url, HttpMethod.POST, request, FileSubmitResult.class);
@@ -175,26 +181,60 @@ public class FMECommunicationService {
 
   }
 
+  public HttpStatus createDirectory(Long idDataset, String idProvider) {
+
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put("datasetId", String.valueOf(idDataset));
+    String auxURL =
+        "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/desing?createDirectories=true&overwrite=true";
+    if (null != idProvider) {
+      uriParams.put("providerId", idProvider);
+      auxURL =
+          "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}?createDirectories=true&overwrite=true";
+    }
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    Map<String, String> headerInfo = new HashMap<>();
+    headerInfo.put(CONTENT_TYPE, "application/x-www-form-urlencoded");
+    headerInfo.put(ACCEPT, APPLICATION_JSON);
+
+    String body = "ExportFiles";
+
+    HttpEntity<byte[]> request = createHttpRequest(body.getBytes(), uriParams, headerInfo);
+    String url = uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
+        .buildAndExpand(uriParams).toString();
+    ResponseEntity<FileSubmitResult> checkResult =
+        this.restTemplate.exchange(url, HttpMethod.POST, request, FileSubmitResult.class);
+
+    return checkResult.getStatusCode();
+
+  }
+
 
   /**
    * Receive file.
    *
    * @param file the file
    * @param idDataset the id dataset
+   * @param providerId
    * @param idProvider the id provider
    * @param fileName the file name
    *
    * @return the file submit result
    */
-  public FileSubmitResult receiveFile(byte[] file, Long idDataset, String idProvider,
-      String fileName) {
+  public FileSubmitResult receiveFile(Long idDataset, Long providerId, String fileName) {
     MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 
-    body.add("file", file);
+
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("datasetId", String.valueOf(idDataset));
-    uriParams.put("providerId", idProvider);
+    String auxURL =
+        "fmerest/v3/resources/connections/Reportnet3/download/{datasetId}/desing/{fileName}";
+    if (null != providerId) {
+      uriParams.put("providerId", providerId.toString());
+      auxURL =
+          "fmerest/v3/resources/connections/Reportnet3/download/{datasetId}/{providerId}/{fileName}";
+    }
     uriParams.put("fileName", fileName);
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
@@ -211,11 +251,11 @@ public class FMECommunicationService {
 
     this.restTemplate.getMessageConverters().add(mappingJackson2HttpMessageConverter);
 
-    ResponseEntity<FileSubmitResult> checkResult = this.restTemplate.exchange(uriComponentsBuilder
-        .scheme(fmeScheme).host(fmeHost)
-        .path(
-            "fmerest/v3/resources/connections/Reportnet3/download/{datasetId}/{providerId}/{fileName}")
-        .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, FileSubmitResult.class);
+    ResponseEntity<FileSubmitResult> checkResult =
+        this.restTemplate.exchange(
+            uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
+                .buildAndExpand(uriParams).toString(),
+            HttpMethod.POST, request, FileSubmitResult.class);
 
     FileSubmitResult result = new FileSubmitResult();
     if (null != checkResult.getBody()) {
@@ -359,6 +399,5 @@ public class FMECommunicationService {
     }
     return headers;
   }
-
 
 }

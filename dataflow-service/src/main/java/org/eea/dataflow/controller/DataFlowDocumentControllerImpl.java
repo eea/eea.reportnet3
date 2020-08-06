@@ -20,6 +20,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 
 /**
@@ -27,6 +32,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
  */
 @RestController
 @RequestMapping(value = "/dataflowDocument")
+@Api(tags = "Documents : Documents Manager")
 public class DataFlowDocumentControllerImpl implements DataFlowDocumentController {
 
   /**
@@ -50,7 +56,12 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   @Override
   @HystrixCommand
   @GetMapping(value = "/document/{documentId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public DocumentVO getDocumentInfoById(Long documentId) {
+  @ApiOperation(value = "Get one document by Document id",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DocumentVO.class)
+  @ApiResponses(value = {@ApiResponse(code = 400, message = EEAErrorMessage.DOCUMENT_NOT_FOUND),
+      @ApiResponse(code = 404, message = EEAErrorMessage.DOCUMENT_NOT_FOUND)})
+  public DocumentVO getDocumentInfoById(
+      @ApiParam(value = "Document id", example = "0") Long documentId) {
     if (documentId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND);
     }
@@ -72,7 +83,10 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   @Override
   @HystrixCommand
   @PutMapping(value = "/update")
-  public void updateDocument(@RequestBody DocumentVO document) {
+  @ApiOperation(value = "Update one document")
+  @ApiResponse(code = 400, message = EEAErrorMessage.DOCUMENT_NOT_FOUND)
+  public void updateDocument(
+      @ApiParam(type = "Object", value = "Document") @RequestBody DocumentVO document) {
     LOG.info("updating document in controller");
     try {
       dataflowService.updateDocument(document);
@@ -91,7 +105,10 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   @Override
   @HystrixCommand
   @PostMapping
-  public Long insertDocument(@RequestBody DocumentVO document) {
+  @ApiOperation(value = "Insert one document")
+  @ApiResponse(code = 400, message = EEAErrorMessage.DOCUMENT_NOT_FOUND)
+  public Long insertDocument(
+      @ApiParam(type = "Object", value = "Document") @RequestBody DocumentVO document) {
     LOG.info("inserting document in controller");
     try {
       return dataflowService.insertDocument(document);
@@ -109,7 +126,10 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{documentId}")
-  public void deleteDocument(@PathVariable("documentId") Long documentId) {
+  @ApiOperation(value = "Delete one document")
+  @ApiResponse(code = 400, message = EEAErrorMessage.DOCUMENT_NOT_FOUND)
+  public void deleteDocument(
+      @ApiParam(value = "Document id", example = "0") @PathVariable("documentId") Long documentId) {
     try {
       dataflowService.deleteDocument(documentId);
     } catch (EEAException e) {

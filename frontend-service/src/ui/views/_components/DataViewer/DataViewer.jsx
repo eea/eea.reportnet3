@@ -24,6 +24,7 @@ import { ContextMenu } from 'ui/views/_components/ContextMenu';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataForm } from './_components/DataForm';
 import { DataTable } from 'ui/views/_components/DataTable';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldEditor } from './_components/FieldEditor';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -55,11 +56,11 @@ import {
 
 const DataViewer = withRouter(
   ({
+    hasCountryCode,
     hasWritePermissions,
-    isDataCollection,
     isDatasetDeleted = false,
+    isExportable,
     isValidationSelected,
-    //levelErrorTypes,
     match: {
       params: { datasetId, dataflowId }
     },
@@ -79,6 +80,8 @@ const DataViewer = withRouter(
 
     const [addAnotherOne, setAddAnotherOne] = useState(false);
     const [addDialogVisible, setAddDialogVisible] = useState(false);
+    const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
+    const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
     const [datasetSchemaId, setDatasetSchemaId] = useState(null);
@@ -122,6 +125,8 @@ const DataViewer = withRouter(
       numCopiedRecords: undefined,
       pastedRecords: undefined,
       recordsPerPage: userContext.userProps.rowsPerPage,
+      selectedFieldId: '',
+      selectedFieldSchemaId: '',
       selectedMapCells: {},
       selectedRecord: {},
       totalFilteredRecords: 0,
@@ -154,6 +159,7 @@ const DataViewer = withRouter(
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
           onEditorValueFocus={onEditorValueFocus}
+          // onFileUploadOpen={onFileUploadOpen}
           onMapOpen={onMapOpen}
           record={record}
           reporting={reporting}
@@ -180,16 +186,40 @@ const DataViewer = withRouter(
       return getIconsValidationsErrors(validationsGroup);
     };
 
+    const onFileDownload = async (fileName, fieldId) => {
+      const fileContent = await DatasetService.downloadFileData(datasetId, fieldId);
+
+      DownloadFile(fileContent, fileName);
+
+      // const a = document.createElement('a');
+      //   a.href = `data:text/plain;base64,${splittedFieldValue[2]}`;
+      //   a.download = splittedFieldValue[0];
+      //   a.click();
+    };
+
+    const onFileUploadVisible = (fieldId, fieldSchemaId) => {
+      dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId } });
+    };
+
+    const onFileDeleteVisible = (fieldId, fieldSchemaId) => {
+      dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId } });
+      setIsDeleteAttachmentVisible(true);
+    };
+
     const { columns, getTooltipMessage, onShowFieldInfo, originalColumns, selectedHeader, setColumns } = useSetColumns(
       actionTemplate,
       cellDataEditor,
       colsSchema,
       columnOptions,
+      hasCountryCode,
       hasWritePermissions && !tableReadOnly,
       initialCellValue,
-      isDataCollection,
+      onFileDeleteVisible,
+      onFileDownload,
+      onFileUploadVisible,
       records,
       resources,
+      setIsAttachFileVisible,
       setIsColumnInfoVisible,
       validationsTemplate
     );
@@ -419,6 +449,11 @@ const DataViewer = withRouter(
       setIsValidationShown(true);
     };
 
+    const onAttach = async value => {
+      RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, `${value.files[0].name}`);
+      setIsAttachFileVisible(false);
+    };
+
     const onCancelRowEdit = () => {
       let updatedValue = RecordUtils.changeRecordInTable(
         fetchedData,
@@ -462,6 +497,14 @@ const DataViewer = withRouter(
         });
       } finally {
         setDeleteDialogVisible(false);
+      }
+    };
+
+    const onConfirmDeleteAttachment = async () => {
+      const fileDeleted = await DatasetService.deleteFileData(datasetId, records.selectedFieldId);
+      if (fileDeleted) {
+        RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, '');
+        setIsDeleteAttachmentVisible(false);
       }
     };
 
@@ -746,7 +789,9 @@ const DataViewer = withRouter(
               onChange={() => setAddAnotherOne(!addAnotherOne)}
               role="checkbox"
             />
-            <span className={styles.addAnotherOne}>{resources.messages['addAnotherOne']}</span>
+            <span className={styles.addAnotherOne} onClick={() => setAddAnotherOne(!addAnotherOne)}>
+              {resources.messages['addAnotherOne']}
+            </span>
           </div>
         )}
         <Button
@@ -854,6 +899,15 @@ const DataViewer = withRouter(
       );
     };
 
+    const renderCustomFileAttachFooter = (
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => setIsAttachFileVisible(false)}
+      />
+    );
+
     const renderCustomFileUploadFooter = (
       <Button
         className="p-button-secondary p-button-animated-blink"
@@ -881,6 +935,11 @@ const DataViewer = withRouter(
         onSaveRecord(records.newRecord);
       }
     };
+    const getAttachExtensions = [{ datasetSchemaId, fileExtension: '.*' }]
+      .map(file => `.${file.fileExtension}`)
+      .join(', ');
+
+    const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions}`;
 
     return (
       <SnapshotContext.Provider>
@@ -892,7 +951,8 @@ const DataViewer = withRouter(
           showWriteButtons={showWriteButtons}
           hideValidationFilter={hideValidationFilter}
           fileExtensions={extensionsOperationsList.export}
-          isDataCollection={isDataCollection}
+          hasCountryCode={hasCountryCode}
+          isExportable={isExportable}
           isFilterValidationsActive={isFilterValidationsActive}
           isTableDeleted={isTableDeleted}
           isLoading={isLoading}
@@ -922,7 +982,7 @@ const DataViewer = withRouter(
             id={tableId}
             first={records.firstPageRecord}
             footer={
-              hasWritePermissions && !tableReadOnly && !isDataCollection ? (
+              hasWritePermissions && !tableReadOnly ? (
                 <Footer
                   hasWritePermissions={hasWritePermissions && !tableReadOnly}
                   onAddClick={() => {
@@ -1035,11 +1095,40 @@ const DataViewer = withRouter(
           </Dialog>
         )}
 
+        {isAttachFileVisible && (
+          <Dialog
+            className={styles.Dialog}
+            dismissableMask={false}
+            footer={renderCustomFileAttachFooter}
+            header={`${resources.messages['uploadAttachment']}`}
+            onHide={() => setIsAttachFileVisible(false)}
+            visible={isAttachFileVisible}>
+            <CustomFileUpload
+              // accept={getAttachExtensions}
+              accept=".txt"
+              chooseLabel={resources.messages['selectFile']}
+              className={styles.FileUpload}
+              fileLimit={1}
+              infoTooltip={infoAttachTooltip}
+              mode="advanced"
+              multiple={false}
+              invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+              name="file"
+              onUpload={onAttach}
+              operation="PUT"
+              url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileData, {
+                datasetId,
+                fieldId: records.selectedFieldId
+              })}`}
+            />
+          </Dialog>
+        )}
+
         {addDialogVisible && (
           <div onKeyPress={onKeyPress}>
             <Dialog
-              className={'edit-table calendar-table'}
               blockScroll={false}
+              className={'edit-table calendar-table'}
               footer={addRowDialogFooter}
               header={resources.messages['addRecord']}
               modal={true}
@@ -1104,6 +1193,19 @@ const DataViewer = withRouter(
             onHide={() => onSetVisible(setDeleteDialogVisible, false)}
             visible={deleteDialogVisible}>
             {resources.messages['deleteDatasetTableConfirm']}
+          </ConfirmDialog>
+        )}
+
+        {isDeleteAttachmentVisible && (
+          <ConfirmDialog
+            classNameConfirm={'p-button-danger'}
+            header={`${resources.messages['deleteAttachmentHeader']}`}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            onConfirm={onConfirmDeleteAttachment}
+            onHide={() => setIsDeleteAttachmentVisible(false)}
+            visible={isDeleteAttachmentVisible}>
+            {resources.messages['deleteAttachmentConfirm']}
           </ConfirmDialog>
         )}
 
