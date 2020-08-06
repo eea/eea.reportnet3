@@ -1,2 +1,2 @@
-export const FindEUDatasetIntegration = ({ integrationRepository }) => async datasetId =>
-  integrationRepository.findEUDatasetIntegration(datasetId);
+export const FindEUDatasetIntegration = ({ integrationRepository }) => async datasetSchemaId =>
+  integrationRepository.findEUDatasetIntegration(datasetSchemaId);
