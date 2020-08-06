@@ -230,11 +230,14 @@ public class IntegrationServiceImpl implements IntegrationService {
     internalParameters.put(IntegrationParams.DATASET_SCHEMA_ID, datasetSchemaId);
     internalParameters.put(IntegrationParams.REPOSITORY, "ReportNetTesting");
     internalParameters.put(IntegrationParams.PROCESS_NAME, "Export_EU_dataset.fmw");
-    internalParameters.put(IntegrationParams.DATABASE_CONNECTION_PUBLIC, "");
+
+    Map<String, String> externalParameters = new HashMap<>();
+    externalParameters.put(IntegrationParams.DATABASE_CONNECTION_PUBLIC, "");
 
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.setDescription("Export EU Dataset");
     integrationVO.setInternalParameters(internalParameters);
+    integrationVO.setExternalParameters(externalParameters);
     integrationVO.setName("Export EU Dataset");
     integrationVO.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
     integrationVO.setTool(IntegrationToolTypeEnum.FME);
