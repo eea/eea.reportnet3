@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -25,12 +26,14 @@ import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.mapper.RecordValidationMapper;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
+import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValidation;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValidation;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.data.repository.AttachmentRepository;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.FieldValidationRepository;
@@ -303,6 +306,9 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private DatasetSchemaService datasetSchemaService;
+
+  @Autowired
+  private AttachmentRepository attachmentRepository;
 
 
   /**
@@ -1321,6 +1327,18 @@ public class DatasetServiceImpl implements DatasetService {
       Collections.sort(values);
       field.setValue(values.toString().substring(1, values.toString().length() - 1));
     }
+
+    // Attatchment field. Initialize it
+    if (DataType.ATTACHMENT.equals(field.getType())) {
+
+      AttachmentValue attachment = new AttachmentValue();
+      attachment.setFileName("");
+      attachment.setFieldValue(field);
+
+      field.setValue("");
+      attachmentRepository.save(attachment);
+    }
+
   }
 
 
@@ -2297,6 +2315,74 @@ public class DatasetServiceImpl implements DatasetService {
     Long dataflowId = getDataFlowIdById(idDataset);
     // get de dataflow
     return dataflowControllerZull.getMetabaseById(dataflowId);
+  }
+
+  /**
+   * Gets the attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @return the attachment
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public AttachmentValue getAttachment(Long datasetId, String idField) throws EEAException {
+
+    return attachmentRepository.findByFieldValueId(idField);
+  }
+
+  /**
+   * Delete attachment.
+   *
+   * @param datasetId the dataset id
+   * @param fieldId the field id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void deleteAttachment(Long datasetId, String fieldId) throws EEAException {
+    // Clear the attachment value
+    AttachmentValue attachment = attachmentRepository.findByFieldValueId(fieldId);
+    attachment.setContent(null);
+    attachment.setFileName("");
+    attachmentRepository.save(attachment);
+    // Put the field value name to null
+    FieldValue field = fieldRepository.findById(fieldId);
+    field.setValue("");
+    fieldRepository.save(field);
+  }
+
+  /**
+   * Update attachment.
+   *
+   * @param datasetId the dataset id
+   * @param fieldId the field id
+   * @param fileName the file name
+   * @param is the is
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  @Transactional
+  public void updateAttachment(Long datasetId, String fieldId, String fileName, InputStream is)
+      throws EEAException, IOException {
+
+    // Attachment table
+    AttachmentValue attachment = attachmentRepository.findByFieldValueId(fieldId);
+    attachment.setFileName(fileName);
+    byte[] content;
+    content = IOUtils.toByteArray(is);
+    is.close();
+    // String contentBase64 = Base64.getEncoder().encodeToString(content);
+    // attachment.setContent(contentBase64.getBytes());
+    attachment.setContent(content);
+    attachmentRepository.save(attachment);
+
+    // Field table
+    FieldValue field = fieldRepository.findById(fieldId);
+    field.setValue(fileName);
+    fieldRepository.save(field);
   }
 
 }
