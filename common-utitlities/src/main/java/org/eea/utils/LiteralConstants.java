@@ -99,6 +99,10 @@ public final class LiteralConstants {
   public static final String RULE_TABLE_MANDATORY = "Mandatory table records check";
 
 
+  /** The Constant SNAPSHOT_FILE_ATTACHMENT_SUFFIX. */
+  public static final String SNAPSHOT_FILE_ATTACHMENT_SUFFIX = "_table_AttachmentValue.snap";
+
+
   /**
    * Instantiates a new literal constants.
    */
