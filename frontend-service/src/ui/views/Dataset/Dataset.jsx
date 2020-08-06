@@ -651,14 +651,20 @@ export const Dataset = withRouter(({ match, history }) => {
           </div>
         </Toolbar>
       </div>
-      <Dialog
-        dismissableMask={true}
-        header={resources.messages['titleDashboard']}
-        onHide={() => onSetVisible(setDashDialogVisible, false)}
-        style={{ width: '70vw' }}
-        visible={dashDialogVisible}>
-        <Dashboard refresh={dashDialogVisible} levelErrorTypes={levelErrorTypes} tableSchemaNames={tableSchemaNames} />
-      </Dialog>
+      {dashDialogVisible && (
+        <Dialog
+          dismissableMask={true}
+          header={resources.messages['titleDashboard']}
+          onHide={() => onSetVisible(setDashDialogVisible, false)}
+          style={{ width: '70vw' }}
+          visible={dashDialogVisible}>
+          <Dashboard
+            refresh={dashDialogVisible}
+            levelErrorTypes={levelErrorTypes}
+            tableSchemaNames={tableSchemaNames}
+          />
+        </Dialog>
+      )}
       <TabsSchema
         activeIndex={dataViewerOptions.activeIndex}
         hasWritePermissions={hasWritePermissions}
@@ -673,23 +679,25 @@ export const Dataset = withRouter(({ match, history }) => {
         tables={tableSchema}
         tableSchemaColumns={tableSchemaColumns}
       />
-      <Dialog
-        className={styles.paginatorValidationViewer}
-        dismissableMask={true}
-        header={resources.messages['titleValidations']}
-        onHide={() => onSetVisible(setValidationsVisible, false)}
-        style={{ width: '80%' }}
-        visible={validationsVisible}>
-        <ValidationViewer
-          datasetId={datasetId}
-          datasetName={datasetName}
-          hasWritePermissions={hasWritePermissions}
-          levelErrorTypes={levelErrorTypes}
-          onSelectValidation={onSelectValidation}
-          tableSchemaNames={tableSchemaNames}
-          visible={validationsVisible}
-        />
-      </Dialog>
+      {validationsVisible && (
+        <Dialog
+          className={styles.paginatorValidationViewer}
+          dismissableMask={true}
+          header={resources.messages['titleValidations']}
+          onHide={() => onSetVisible(setValidationsVisible, false)}
+          style={{ width: '80%' }}
+          visible={validationsVisible}>
+          <ValidationViewer
+            datasetId={datasetId}
+            datasetName={datasetName}
+            hasWritePermissions={hasWritePermissions}
+            levelErrorTypes={levelErrorTypes}
+            onSelectValidation={onSelectValidation}
+            tableSchemaNames={tableSchemaNames}
+            visible={validationsVisible}
+          />
+        </Dialog>
+      )}
       {validationListDialogVisible && (
         <Dialog
           className={hasValidations ? styles.qcRulesDialog : styles.qcRulesDialogEmpty}

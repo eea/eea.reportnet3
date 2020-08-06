@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useContext, useState } from 'react';
+import React, { useEffect, useReducer, useContext, useState, Fragment } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -518,18 +518,22 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   };
 
   const dialogLayout = children => (
-    <Dialog
-      className={styles.dialog}
-      header={
-        validationContext.ruleEdit
-          ? resourcesContext.messages.editDatasetConstraint
-          : resourcesContext.messages.createDatasetConstraint
-      }
-      visible={validationContext.isVisible}
-      style={{ width: '975px' }}
-      onHide={() => onHide()}>
-      {children}
-    </Dialog>
+    <Fragment>
+      {validationContext.isVisible && (
+        <Dialog
+          className={styles.dialog}
+          header={
+            validationContext.ruleEdit
+              ? resourcesContext.messages.editDatasetConstraint
+              : resourcesContext.messages.createDatasetConstraint
+          }
+          visible={validationContext.isVisible}
+          style={{ width: '975px' }}
+          onHide={() => onHide()}>
+          {children}
+        </Dialog>
+      )}
+    </Fragment>
   );
 
   return dialogLayout(

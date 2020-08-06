@@ -511,7 +511,7 @@ const Dataflow = withRouter(({ history, match }) => {
           manageDialogs={manageDialogs}
         />
 
-        {dataflowState.isCustodian && (
+        {dataflowState.isCustodian && dataflowState.isManageRolesDialogVisible && (
           <Dialog
             contentStyle={{ maxHeight: '60vh' }}
             footer={manageRoleDialogFooter}
@@ -530,42 +530,46 @@ const Dataflow = withRouter(({ history, match }) => {
           </Dialog>
         )}
 
-        <Dialog
-          contentStyle={{ maxHeight: '60vh' }}
-          footer={manageRightsDialogFooter}
-          header={
-            dataflowState.isCustodian
-              ? resources.messages['manageEditorsRights']
-              : resources.messages['manageReportersRights']
-          }
-          onHide={() => manageDialogs('isManageRightsDialogVisible', false)}
-          visible={dataflowState.isManageRightsDialogVisible}>
-          <div className={styles.dialog}>
-            <ManageRights
-              dataflowId={dataflowId}
-              dataflowState={dataflowState}
-              dataProviderId={dataflowState.dataProviderId}
-              isActiveManageRightsDialog={dataflowState.isManageRightsDialogVisible}
-            />
-          </div>
-        </Dialog>
+        {dataflowState.isManageRightsDialogVisible && (
+          <Dialog
+            contentStyle={{ maxHeight: '60vh' }}
+            footer={manageRightsDialogFooter}
+            header={
+              dataflowState.isCustodian
+                ? resources.messages['manageEditorsRights']
+                : resources.messages['manageReportersRights']
+            }
+            onHide={() => manageDialogs('isManageRightsDialogVisible', false)}
+            visible={dataflowState.isManageRightsDialogVisible}>
+            <div className={styles.dialog}>
+              <ManageRights
+                dataflowId={dataflowId}
+                dataflowState={dataflowState}
+                dataProviderId={dataflowState.dataProviderId}
+                isActiveManageRightsDialog={dataflowState.isManageRightsDialogVisible}
+              />
+            </div>
+          </Dialog>
+        )}
 
-        <Dialog
-          footer={manageRightsDialogFooter}
-          header={
-            dataflowState.isCustodian
-              ? resources.messages['manageEditorsRights']
-              : resources.messages['manageReportersRights']
-          }
-          onHide={() => manageDialogs('isShareRightsDialogVisible', false)}
-          visible={dataflowState.isShareRightsDialogVisible}>
-          <ShareRights
-            dataflowId={dataflowId}
-            dataProviderId={dataflowState.dataProviderId}
-            isCustodian={dataflowState.isCustodian}
-            representativeId={representativeId}
-          />
-        </Dialog>
+        {dataflowState.isShareRightsDialogVisible && (
+          <Dialog
+            footer={manageRightsDialogFooter}
+            header={
+              dataflowState.isCustodian
+                ? resources.messages['manageEditorsRights']
+                : resources.messages['manageReportersRights']
+            }
+            onHide={() => manageDialogs('isShareRightsDialogVisible', false)}
+            visible={dataflowState.isShareRightsDialogVisible}>
+            <ShareRights
+              dataflowId={dataflowId}
+              dataProviderId={dataflowState.dataProviderId}
+              isCustodian={dataflowState.isCustodian}
+              representativeId={representativeId}
+            />
+          </Dialog>
+        )}
 
         <PropertiesDialog dataflowState={dataflowState} manageDialogs={manageDialogs} />
 

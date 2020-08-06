@@ -190,9 +190,9 @@ const LeftSideBar = withRouter(({ history, style, setIsNotificationVisible }) =>
             <div className={styles.barSection}>
               {renderLogout()}
               <div className={styles.leftSideBarElementWrapper}>{renderOpenClose()}</div>
-            </div>          
+            </div>
 
-            {userContext.userProps.showLogoutConfirmation && (
+            {userContext.userProps.showLogoutConfirmation && logoutConfirmVisible && (
               <ConfirmDialog
                 onConfirm={() => {
                   userLogout();
