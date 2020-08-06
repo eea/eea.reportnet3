@@ -28,7 +28,7 @@ export const Dialog = ({
   showHeader,
   style,
   visible,
-  zIndex
+  zIndex = 5000
 }) => {
   const dialogContext = useContext(DialogContext);
 
@@ -37,24 +37,31 @@ export const Dialog = ({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex
+    zIndex: zIndex + dialogContext.open
   };
 
   const dialogStyle = {
     top: 'auto',
     left: 'auto',
-    zIndex
+    zIndex: zIndex + dialogContext.open
   };
+
+  useEffect(() => {
+    dialogContext.add();
+    return () => {
+      dialogContext.remove();
+    };
+  }, []);
 
   useEffect(() => {
     const body = document.querySelector('body');
     visible && (body.style.overflow = 'hidden');
+    dialogContext.add();
 
     return () => {
       if (dialogContext.open === 1) {
         body.style.overflow = 'hidden auto';
       }
-      dialogContext.remove();
     };
   }, [visible]);
   return (
