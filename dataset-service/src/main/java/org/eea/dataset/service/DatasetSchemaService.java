@@ -9,6 +9,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
@@ -440,5 +441,14 @@ public interface DatasetSchemaService {
    */
   void copyUniqueConstraintsCatalogue(List<String> originDatasetSchemaIds,
       Map<String, String> dictionaryOriginTargetObjectId);
+
+  /**
+   * Gets the simple schema.
+   *
+   * @param datasetId the dataset id
+   * @return the simple schema
+   * @throws EEAException the EEA exception
+   */
+  SimpleDatasetSchemaVO getSimpleSchema(Long datasetId) throws EEAException;
 
 }

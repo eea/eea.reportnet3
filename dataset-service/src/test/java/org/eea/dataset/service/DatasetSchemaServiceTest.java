@@ -16,6 +16,7 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
+import org.eea.dataset.mapper.SimpleDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.mapper.UniqueConstraintMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -49,6 +50,7 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ReferencedFieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
@@ -209,6 +211,9 @@ public class DatasetSchemaServiceTest {
   /** The unique constraint mapper. */
   @Mock
   private UniqueConstraintMapper uniqueConstraintMapper;
+
+  @Mock
+  private SimpleDataSchemaMapper simpleDataSchemaMapper;
 
   /**
    * Inits the mocks.
@@ -1765,5 +1770,73 @@ public class DatasetSchemaServiceTest {
     Mockito.when(referenced.getIdPk()).thenReturn("5ce524fad31fc52540abae73");
     Assert.assertEquals(DataType.NUMBER_DECIMAL,
         dataSchemaServiceImpl.updateFieldSchema("5ce524fad31fc52540abae73", fieldSchemaVO));
+  }
+
+  /**
+   * Gets the simple schema test.
+   *
+   * @return the simple schema test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getSimpleSchemaTest() throws EEAException {
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+    DataSetSchema datasetSchema = new DataSetSchema();
+    DesignDataset design = new DesignDataset();
+    SimpleDatasetSchemaVO simpleDatasetSchemaVO = new SimpleDatasetSchemaVO();
+    datasetMetabase.setDatasetSchema(new ObjectId().toString());
+    when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(datasetMetabase));
+    when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.of(design));
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
+    when(simpleDataSchemaMapper.entityToClass(Mockito.any(DataSetSchema.class)))
+        .thenReturn(simpleDatasetSchemaVO);
+    assertEquals(simpleDatasetSchemaVO, dataSchemaServiceImpl.getSimpleSchema(1L));
+  }
+
+  /**
+   * Gets the simple schema id null test.
+   *
+   * @return the simple schema id null test
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void getSimpleSchemaIdNullTest() throws EEAException {
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+    when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(datasetMetabase));
+    try {
+      dataSchemaServiceImpl.getSimpleSchema(1L);
+    } catch (EEAException e) {
+      assertEquals(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, 1L), e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Gets the simple schema null test.
+   *
+   * @return the simple schema null test
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void getSimpleSchemaNullTest() throws EEAException {
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+    ObjectId id = new ObjectId();
+    DesignDataset design = new DesignDataset();
+    SimpleDatasetSchemaVO simpleDatasetSchemaVO = new SimpleDatasetSchemaVO();
+    datasetMetabase.setDatasetSchema(id.toString());
+    when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(datasetMetabase));
+    when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.of(design));
+
+    try {
+      dataSchemaServiceImpl.getSimpleSchema(1L);
+    } catch (EEAException e) {
+      assertEquals(String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, id), e.getMessage());
+      throw e;
+    }
   }
 }

@@ -19,6 +19,8 @@ const create = async integration => apiIntegration.create(parseManageIntegration
 
 const deleteById = async (dataflowId, integrationId) => await apiIntegration.deleteById(dataflowId, integrationId);
 
+const findEUDatasetIntegration = async datasetId => await apiIntegration.findEUDatasetIntegration(datasetId);
+
 const getProcesses = async (repositoryName, datasetId) =>
   parseProcessList(await apiIntegration.getProcesses(repositoryName, datasetId));
 
@@ -116,6 +118,7 @@ export const ApiIntegrationRepository = {
   allExtensionsOperations,
   create,
   deleteById,
+  findEUDatasetIntegration,
   getProcesses,
   getRepositories,
   update
