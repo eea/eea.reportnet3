@@ -1,4 +1,5 @@
 import isNil from 'lodash/isNil';
+import moment from 'moment';
 
 import { config } from 'conf';
 
@@ -33,6 +34,13 @@ export const getComparisonExpression = expression => {
       return {
         operator: getOperatorEquivalence(valueTypeSelector, `${operatorType}Number`, operatorValue),
         params: [field1, transField2]
+      };
+    }
+
+    if (operatorType === 'date' && valueTypeSelector === 'value') {
+      return {
+        operator: getOperatorEquivalence(valueTypeSelector, operatorType, operatorValue),
+        params: [field1, moment.unix(transField2 / 1000).format('YYYY-MM-DD')]
       };
     }
 
