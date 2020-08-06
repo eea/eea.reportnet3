@@ -5,11 +5,13 @@ import { AddRecordFieldDesign } from './AddRecordFieldDesign';
 import { AddTableDesign } from './AddTableDesign';
 import { CreateValidation } from './CreateValidation';
 import { DeleteData } from './DeleteData';
+import { DeleteFileData } from './DeleteFileData';
 import { DeleteRecord } from './DeleteRecord';
 import { DeleteRecordFieldDesign } from './DeleteRecordFieldDesign';
 import { DeleteSchema } from './DeleteSchema';
 import { DeleteTableData } from './DeleteTableData';
 import { DeleteTableDesign } from './DeleteTableDesign';
+import { DownloadFileData } from './DownloadFileData';
 import { ExportData } from './ExportData';
 import { ExportTableData } from './ExportTableData';
 import { GetData } from './GetData';
@@ -36,11 +38,13 @@ export const DatasetService = {
   addTableDesign: AddTableDesign({ datasetRepository }),
   createValidation: CreateValidation({ datasetRepository }),
   deleteDataById: DeleteData({ datasetRepository }),
+  deleteFileData: DeleteFileData({ datasetRepository }),
   deleteRecordById: DeleteRecord({ datasetRepository }),
   deleteRecordFieldDesign: DeleteRecordFieldDesign({ datasetRepository }),
   deleteSchemaById: DeleteSchema({ datasetRepository }),
   deleteTableDataById: DeleteTableData({ datasetRepository }),
   deleteTableDesign: DeleteTableDesign({ datasetRepository }),
+  downloadFileData: DownloadFileData({ datasetRepository }),
   errorsById: GetErrors({ datasetRepository }),
   errorPositionByObjectId: GetErrorPosition({ datasetRepository }),
   errorStatisticsById: GetStatistics({ datasetRepository }),

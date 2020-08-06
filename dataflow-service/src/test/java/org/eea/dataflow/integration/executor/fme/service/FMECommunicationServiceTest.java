@@ -187,7 +187,7 @@ public class FMECommunicationServiceTest {
     Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
         Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(checkResult);
 
-    FileSubmitResult result = fmeCommunicationService.receiveFile(file, 1L, "1", "test");
+    FileSubmitResult result = fmeCommunicationService.receiveFile(1L, 1L, "test");
     Assert.assertEquals(fileSubmitResult.getName(), result.getName());
   }
 
