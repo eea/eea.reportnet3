@@ -859,45 +859,51 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           resetUniques={manageUniqueConstraint}
         />
 
-        <ConfirmDialog
-          header={resources.messages['validateDataset']}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
-          maximizable={false}
-          onConfirm={onConfirmValidate}
-          onHide={() => manageDialogs('validateDialogVisible', false)}
-          visible={designerState.validateDialogVisible}>
-          {resources.messages['validateDatasetConfirm']}
-        </ConfirmDialog>
-        <Dialog
-          dismissableMask={true}
-          header={resources.messages['titleDashboard']}
-          onHide={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
-          style={{ width: '70vw' }}
-          visible={designerState.dashDialogVisible}>
-          <Dashboard
-            refresh={designerState.dashDialogVisible}
-            levelErrorTypes={designerState.levelErrorTypes}
-            tableSchemaNames={designerState.tableSchemaNames}
-          />
-        </Dialog>
-        <Dialog
-          className={styles.paginatorValidationViewer}
-          dismissableMask={true}
-          header={resources.messages['titleValidations']}
-          onHide={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: false })}
-          style={{ width: '80%' }}
-          visible={designerState.isValidationViewerVisible}>
-          <ValidationViewer
-            datasetId={datasetId}
-            datasetName={designerState.datasetSchemaName}
-            hasWritePermissions={designerState.hasWritePermissions}
-            levelErrorTypes={designerState.datasetSchema.levelErrorTypes}
-            onSelectValidation={onSelectValidation}
-            tableSchemaNames={designerState.tableSchemaNames}
-            visible={designerState.isValidationViewerVisible}
-          />
-        </Dialog>
+        {designerState.validateDialogVisible && (
+          <ConfirmDialog
+            header={resources.messages['validateDataset']}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            maximizable={false}
+            onConfirm={onConfirmValidate}
+            onHide={() => manageDialogs('validateDialogVisible', false)}
+            visible={designerState.validateDialogVisible}>
+            {resources.messages['validateDatasetConfirm']}
+          </ConfirmDialog>
+        )}
+        {designerState.dashDialogVisible && (
+          <Dialog
+            dismissableMask={true}
+            header={resources.messages['titleDashboard']}
+            onHide={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
+            style={{ width: '70vw' }}
+            visible={designerState.dashDialogVisible}>
+            <Dashboard
+              refresh={designerState.dashDialogVisible}
+              levelErrorTypes={designerState.levelErrorTypes}
+              tableSchemaNames={designerState.tableSchemaNames}
+            />
+          </Dialog>
+        )}
+        {designerState.isValidationViewerVisible && (
+          <Dialog
+            className={styles.paginatorValidationViewer}
+            dismissableMask={true}
+            header={resources.messages['titleValidations']}
+            onHide={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: false })}
+            style={{ width: '80%' }}
+            visible={designerState.isValidationViewerVisible}>
+            <ValidationViewer
+              datasetId={datasetId}
+              datasetName={designerState.datasetSchemaName}
+              hasWritePermissions={designerState.hasWritePermissions}
+              levelErrorTypes={designerState.datasetSchema.levelErrorTypes}
+              onSelectValidation={onSelectValidation}
+              tableSchemaNames={designerState.tableSchemaNames}
+              visible={designerState.isValidationViewerVisible}
+            />
+          </Dialog>
+        )}
 
         {designerState.isImportDatasetDialogVisible && (
           <Dialog
