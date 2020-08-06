@@ -2385,4 +2385,20 @@ public class DatasetServiceImpl implements DatasetService {
     fieldRepository.save(field);
   }
 
+  /**
+   * Gets the field by id.
+   *
+   * @param idField the id field
+   * @return the field by id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public FieldVO getFieldById(String idField) throws EEAException {
+    FieldValue fieldValue = fieldRepository.findById(idField);
+    if (fieldValue == null) {
+      throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
+    }
+    return fieldNoValidationMapper.entityToClass(fieldValue);
+  }
+
 }
