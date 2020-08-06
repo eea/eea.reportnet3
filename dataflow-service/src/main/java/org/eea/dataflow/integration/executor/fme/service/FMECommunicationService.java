@@ -33,6 +33,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -185,26 +186,30 @@ public class FMECommunicationService {
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("datasetId", String.valueOf(idDataset));
-    String auxURL =
-        "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/desing?createDirectories=true&overwrite=true";
+    String auxURL = "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/desing";
     if (null != idProvider) {
       uriParams.put("providerId", idProvider);
-      auxURL =
-          "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}?createDirectories=true&overwrite=true";
+      auxURL = "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}";
     }
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
     headerInfo.put(CONTENT_TYPE, "application/x-www-form-urlencoded");
     headerInfo.put(ACCEPT, APPLICATION_JSON);
 
-    String body = "ExportFiles";
+    String body = "directoryname=ExportFiles";
 
     HttpEntity<byte[]> request = createHttpRequest(body.getBytes(), uriParams, headerInfo);
     String url = uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
         .buildAndExpand(uriParams).toString();
-    ResponseEntity<FileSubmitResult> checkResult =
-        this.restTemplate.exchange(url, HttpMethod.POST, request, FileSubmitResult.class);
 
+    ResponseEntity<FileSubmitResult> checkResult = null;
+    try {
+      checkResult =
+          this.restTemplate.exchange(url, HttpMethod.POST, request, FileSubmitResult.class);
+    } catch (HttpClientErrorException e) {
+      LOG.info("FME called successfully but directory already exist");
+      return e.getStatusCode();
+    }
     return checkResult.getStatusCode();
 
   }
