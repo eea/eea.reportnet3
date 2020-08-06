@@ -114,7 +114,7 @@ export const FieldDesigner = ({
     isEditing: false,
     isLinkSelectorVisible: false,
     isQCManagerVisible: false,
-    fieldFileProperties: { maxSize: '', validExtensions: [] }
+    fieldFileProperties: fieldFileProperties
   };
 
   const [fieldDesignerState, dispatchFieldDesigner] = useReducer(fieldDesignerReducer, initialFieldDesignerState);
@@ -214,6 +214,7 @@ export const FieldDesigner = ({
       dispatchFieldDesigner({ type: 'SET_CODELIST_ITEMS', payload: [] });
       dispatchFieldDesigner({ type: 'SET_LINK', payload: null });
       dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: false });
+      dispatchFieldDesigner({ type: 'SET_ATTACHMENT_PROPERTIES', payload: { validExtensions: [], maxSize: '' } });
     }
     onCodelistAndLinkShow(fieldId, type);
   };
@@ -712,10 +713,10 @@ export const FieldDesigner = ({
     </div>
   );
 
-  const renderCodelistFileAndLinkButtons = () => {
-    return !isUndefined(fieldDesignerState.fieldTypeValue) &&
-      (fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ||
-        fieldDesignerState.fieldTypeValue.fieldType === 'Multiselect_Codelist') ? (
+  const renderCodelistFileAndLinkButtons = () =>
+    !isUndefined(fieldDesignerState.fieldTypeValue) &&
+    (fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ||
+      fieldDesignerState.fieldTypeValue.fieldType === 'Multiselect_Codelist') ? (
       <Button
         className={`${styles.codelistButton} p-button-secondary-transparent`}
         label={
@@ -763,7 +764,7 @@ export const FieldDesigner = ({
             ? `${resources.messages['validExtensions']} ${fieldDesignerState.fieldFileProperties.validExtensions.join(
                 ', '
               )} - ${resources.messages['maxFileSize']} ${fieldDesignerState.fieldFileProperties.maxSize} ${
-                resources.messages['Mb']
+                resources.messages['MB']
               }`
             : resources.messages['fileExtensionsSelection']
         }
@@ -775,7 +776,7 @@ export const FieldDesigner = ({
             ? `${resources.messages['validExtensions']} ${fieldDesignerState.fieldFileProperties.validExtensions.join(
                 ', '
               )} - ${resources.messages['maxFileSize']} ${fieldDesignerState.fieldFileProperties.maxSize} ${
-                resources.messages['Mb']
+                resources.messages['MB']
               }`
             : resources.messages['fileExtensionsSelection']
         }
@@ -784,7 +785,6 @@ export const FieldDesigner = ({
     ) : isCodelistOrLink ? (
       <span style={{ width: '4rem', marginRight: '0.4rem' }}></span>
     ) : null;
-  };
 
   const renderDeleteButton = () =>
     !addField ? (

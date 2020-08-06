@@ -5,6 +5,11 @@ import isNull from 'lodash/isNull';
 import isString from 'lodash/isString';
 import isUndefined from 'lodash/isUndefined';
 
+const allAttachments = colsSchema => {
+  const notAttachment = colsSchema.filter(col => col.type && col.type.toUpperCase() !== 'ATTACHMENT');
+  return notAttachment.length === 0;
+};
+
 const changeCellValue = (tableData, rowIndex, field, value) => {
   tableData[rowIndex].dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[field] = value;
   return tableData;
@@ -196,6 +201,7 @@ const createEmptyObject = (columnsSchema, data) => {
 };
 
 export const RecordUtils = {
+  allAttachments,
   changeCellValue,
   changeRecordInTable,
   changeRecordValue,

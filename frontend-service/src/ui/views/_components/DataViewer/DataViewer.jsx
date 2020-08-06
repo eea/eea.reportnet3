@@ -127,7 +127,9 @@ const DataViewer = withRouter(
       selectedFieldId: '',
       selectedFieldSchemaId: '',
       selectedMapCells: {},
+      selectedMaxSize: '',
       selectedRecord: {},
+      selectedValidExtensions: [],
       totalFilteredRecords: 0,
       totalRecords: 0
     });
@@ -145,7 +147,13 @@ const DataViewer = withRouter(
     let divRef = useRef();
 
     const { colsSchema, columnOptions } = useLoadColsSchemasAndColumnOptions(tableSchemaColumns);
-    const { menu } = useContextMenu(resources, records, setEditDialogVisible, setConfirmDeleteVisible);
+    const { menu } = useContextMenu(
+      resources,
+      records,
+      RecordUtils.allAttachments(colsSchema),
+      setEditDialogVisible,
+      setConfirmDeleteVisible
+    );
 
     const cellDataEditor = (cells, record) => {
       return (
@@ -166,6 +174,7 @@ const DataViewer = withRouter(
 
     const actionTemplate = () => (
       <ActionsColumn
+        hideEdition={RecordUtils.allAttachments(colsSchema)}
         onDeleteClick={() => setConfirmDeleteVisible(true)}
         onEditClick={() => setEditDialogVisible(true)}
       />
@@ -194,8 +203,9 @@ const DataViewer = withRouter(
       //   a.click();
     };
 
-    const onFileUploadVisible = (fieldId, fieldSchemaId) => {
-      dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId } });
+    const onFileUploadVisible = (fieldId, fieldSchemaId, validExtensions, maxSize) => {
+      console.log(validExtensions, maxSize);
+      dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId, validExtensions, maxSize } });
     };
 
     const onFileDeleteVisible = (fieldId, fieldSchemaId) => {
@@ -932,11 +942,13 @@ const DataViewer = withRouter(
         onSaveRecord(records.newRecord);
       }
     };
-    const getAttachExtensions = [{ datasetSchemaId, fileExtension: '.*' }]
-      .map(file => `.${file.fileExtension}`)
+    const getAttachExtensions = [{ datasetSchemaId, fileExtension: records.selectedValidExtensions }]
+      .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
+      .flat()
       .join(', ');
 
-    const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions}`;
+    const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions}
+    ${resources.messages['supportedFileAttachmentsMaxSizeTooltip']} ${records.selectedMaxSize} ${resources.messages['MB']}`;
 
     return (
       <SnapshotContext.Provider>
@@ -1101,8 +1113,8 @@ const DataViewer = withRouter(
             onHide={() => setIsAttachFileVisible(false)}
             visible={isAttachFileVisible}>
             <CustomFileUpload
-              // accept={getAttachExtensions}
-              accept=".txt"
+              accept={getAttachExtensions}
+              // accept=".txt"
               chooseLabel={resources.messages['selectFile']}
               className={styles.FileUpload}
               fileLimit={1}
@@ -1110,6 +1122,7 @@ const DataViewer = withRouter(
               mode="advanced"
               multiple={false}
               invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+              maxFileSize={records.selectedMaxSize * 1000 * 1024}
               name="file"
               onUpload={onAttach}
               operation="PUT"

@@ -73,7 +73,13 @@ export const recordReducer = (state, { type, payload }) => {
     case 'SET_TOTAL':
       return { ...state, totalRecords: payload };
     case 'SET_FIELD_IDS':
-      return { ...state, selectedFieldId: payload.fieldId, selectedFieldSchemaId: payload.fieldSchemaId };
+      return {
+        ...state,
+        selectedFieldId: payload.fieldId,
+        selectedFieldSchemaId: payload.fieldSchemaId,
+        selectedValidExtensions: payload.validExtensions,
+        selectedMaxSize: payload.maxSize
+      };
     case 'OPEN_MAP':
       return { ...state, isMapOpen: true, mapCoordinates: payload.coordinates, selectedMapCells: payload.mapCells };
     case 'TOGGLE_MAP_VISIBILITY':

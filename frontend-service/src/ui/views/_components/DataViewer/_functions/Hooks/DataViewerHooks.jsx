@@ -51,24 +51,26 @@ export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
   };
 };
 
-export const useContextMenu = (resources, records, setEditDialogVisible, setConfirmDeleteVisible) => {
+export const useContextMenu = (resources, records, hideEdition, setEditDialogVisible, setConfirmDeleteVisible) => {
   const [menu, setMenu] = useState();
 
   useEffect(() => {
-    setMenu([
-      {
+    const menuItems = [];
+    if (!hideEdition) {
+      menuItems.push({
         label: resources.messages['edit'],
         icon: config.icons['edit'],
         command: () => {
           setEditDialogVisible(true);
         }
-      },
-      {
-        label: resources.messages['delete'],
-        icon: config.icons['trash'],
-        command: () => setConfirmDeleteVisible(true)
-      }
-    ]);
+      });
+    }
+    menuItems.push({
+      label: resources.messages['delete'],
+      icon: config.icons['trash'],
+      command: () => setConfirmDeleteVisible(true)
+    });
+    setMenu(menuItems);
   }, [records.selectedRecord]);
   return { menu };
 };
@@ -129,6 +131,7 @@ export const useSetColumns = (
   };
 
   const renderAttachment = (value = '', fieldId, fieldSchemaId) => {
+    const colSchema = colsSchema.filter(colSchema => colSchema.field === fieldSchemaId)[0];
     return (
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         {!isNil(value) && value !== '' && (
@@ -147,7 +150,12 @@ export const useSetColumns = (
           icon="import"
           onClick={() => {
             setIsAttachFileVisible(true);
-            onFileUploadVisible(fieldId, fieldSchemaId);
+            onFileUploadVisible(
+              fieldId,
+              fieldSchemaId,
+              !isNil(colSchema) ? colSchema.validExtensions : [],
+              colSchema.maxSize
+            );
           }}
         />
         {!isNil(value) && value !== '' && (
@@ -192,7 +200,6 @@ export const useSetColumns = (
       const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
       const message = DataViewerUtils.formatValidations(validations);
       const levelError = DataViewerUtils.getLevelError(validations);
-      // console.log({ field, rowData });
       return (
         <div
           style={{
@@ -211,7 +218,8 @@ export const useSetColumns = (
                   !Array.isArray(field.fieldData[column.field]))
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData.type === 'ATTACHMENT'
-              ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
+              ? hasWritePermissions &&
+                renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData[column.field]
             : null}
           <IconTooltip levelError={levelError} message={message} />
@@ -236,7 +244,8 @@ export const useSetColumns = (
                   !Array.isArray(field.fieldData[column.field]))
               ? field.fieldData[column.field].split(',').join(', ')
               : field.fieldData.type === 'ATTACHMENT'
-              ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
+              ? hasWritePermissions &&
+                renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData[column.field]
             : null}
         </div>

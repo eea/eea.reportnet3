@@ -16,8 +16,8 @@ const AttachmentEditor = ({
   selectedAttachment
 }) => {
   const resources = useContext(ResourcesContext);
-  const [validExtensions, setValidExtensionsItems] = useState(selectedAttachment.validExtensions);
-  const [maxSize, setMaxSize] = useState(selectedAttachment.maxSize);
+  const [validExtensions, setValidExtensionsItems] = useState(selectedAttachment.validExtensions || []);
+  const [maxSize, setMaxSize] = useState(selectedAttachment.maxSize || 0);
 
   const [isVisible, setIsVisible] = useState(isAttachmentEditorVisible);
 
@@ -56,6 +56,7 @@ const AttachmentEditor = ({
   );
 
   const renderChips = () => {
+    console.log({ validExtensions });
     return (
       <div onPaste={onPasteChips} className={styles.validExtensionsWrapper}>
         <div className={styles.inputTitleWrapper}>
@@ -118,8 +119,8 @@ const AttachmentEditor = ({
           step={0.25}
           value={maxSize}
         />
-        <span className={styles.mbSpan}>{`${resources.messages['Mb']} (${Number(maxSize) * 1024} ${
-          resources.messages['Kb']
+        <span className={styles.mbSpan}>{`${resources.messages['MB']} (${Number(maxSize) * 1024} ${
+          resources.messages['KB']
         })`}</span>
       </div>
     </Dialog>
