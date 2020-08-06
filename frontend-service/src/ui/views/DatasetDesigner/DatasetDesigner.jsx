@@ -594,21 +594,25 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   );
 
   const renderUniqueConstraintsDialog = () => (
-    <Dialog
-      footer={renderUniqueConstraintsFooter}
-      header={resources.messages['uniqueConstraints']}
-      onHide={() => manageDialogs('isUniqueConstraintsListDialogVisible', false)}
-      style={{ width: '70%' }}
-      visible={designerState.isUniqueConstraintsListDialogVisible}>
-      <UniqueConstraints
-        dataflowId={dataflowId}
-        designerState={designerState}
-        getManageUniqueConstraint={manageUniqueConstraint}
-        getUniques={getUniqueConstraintsList}
-        setIsDuplicatedToManageUnique={setIsDuplicatedToManageUnique}
-        manageDialogs={manageDialogs}
-      />
-    </Dialog>
+    <Fragment>
+      {designerState.isUniqueConstraintsListDialogVisible && (
+        <Dialog
+          footer={renderUniqueConstraintsFooter}
+          header={resources.messages['uniqueConstraints']}
+          onHide={() => manageDialogs('isUniqueConstraintsListDialogVisible', false)}
+          style={{ width: '70%' }}
+          visible={designerState.isUniqueConstraintsListDialogVisible}>
+          <UniqueConstraints
+            dataflowId={dataflowId}
+            designerState={designerState}
+            getManageUniqueConstraint={manageUniqueConstraint}
+            getUniques={getUniqueConstraintsList}
+            setIsDuplicatedToManageUnique={setIsDuplicatedToManageUnique}
+            manageDialogs={manageDialogs}
+          />
+        </Dialog>
+      )}
+    </Fragment>
   );
 
   const renderUniqueConstraintsFooter = (
