@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -13,7 +13,15 @@ import { Footer } from 'ui/views/_components/Layout/MainLayout/_components/Foote
 import { Header } from 'ui/views/_components/Layout/MainLayout/_components/Header';
 import logo from 'assets/images/logo.png';
 
+import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
+
 export const PublicFrontpage = () => {
+  const themeContext = useContext(ThemeContext);
+
+  useEffect(() => {
+    themeContext.onToggleTheme('light');
+  }, []);
+
   return (
     <div className={styles.mainContainer}>
       <Header isPublic={true} />
