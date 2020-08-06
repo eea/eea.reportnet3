@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.exception.EEAException;
@@ -430,4 +431,38 @@ public interface DatasetService {
    */
   void copyData(Map<Long, Long> dictionaryOriginTargetDatasetsId,
       Map<String, String> dictionaryOriginTargetObjectId);
+
+  /**
+   * Gets the attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @return the attachment
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  AttachmentValue getAttachment(@DatasetId Long datasetId, String idField)
+      throws EEAException, IOException;
+
+  /**
+   * Delete attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @throws EEAException the EEA exception
+   */
+  void deleteAttachment(@DatasetId Long datasetId, String idField) throws EEAException;
+
+  /**
+   * Update attachment.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @param fileName the file name
+   * @param is the is
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  void updateAttachment(@DatasetId Long datasetId, String idField, String fileName, InputStream is)
+      throws EEAException, IOException;
 }

@@ -23,12 +23,17 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 
 /**
  * The type Resource management controller implementation.
  */
 @RestController
 @RequestMapping(value = "/resource")
+@Api(tags = "Resources : Resources Manager")
 public class ResourceManagementControllerImpl implements ResourceManagementController {
 
   /** The Constant LOG_ERROR. */
@@ -50,7 +55,10 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @PreAuthorize("isAuthenticated()")
   @PostMapping(value = "/create")
   @ResponseStatus(HttpStatus.CREATED)
-  public void createResource(@RequestBody ResourceInfoVO resourceInfoVO) {
+  @ApiOperation(value = "Create one resource")
+  @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)
+  public void createResource(@ApiParam(type = "Object",
+      value = "ResourceInfoVO Object") @RequestBody ResourceInfoVO resourceInfoVO) {
     try {
       securityProviderInterfaceService.createResourceInstance(resourceInfoVO);
     } catch (EEAException e) {
@@ -71,7 +79,9 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @PreAuthorize("isAuthenticated()")
   @DeleteMapping(value = "/delete")
   @ResponseStatus(HttpStatus.OK)
-  public void deleteResource(@RequestBody List<ResourceInfoVO> resourceInfoVO) {
+  @ApiOperation(value = "Delete one or more resource")
+  public void deleteResource(@ApiParam(type = "List<Object>",
+      value = "ResourceInfoVO Object List") @RequestBody List<ResourceInfoVO> resourceInfoVO) {
     securityProviderInterfaceService.deleteResourceInstances(resourceInfoVO);
   }
 
@@ -85,7 +95,9 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @PreAuthorize("isAuthenticated()")
   @DeleteMapping(value = "/delete_by_name")
   @ResponseStatus(HttpStatus.OK)
-  public void deleteResourceByName(@RequestParam("resourceNames") List<String> resourceName) {
+  @ApiOperation(value = "Delete one or more by its name")
+  public void deleteResourceByName(@ApiParam(type = "List<String>",
+      value = "Resource name String List ") @RequestParam("resourceNames") List<String> resourceName) {
     securityProviderInterfaceService.deleteResourceInstancesByName(resourceName);
   }
 
@@ -98,7 +110,9 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/delete_by_dataset_id")
-  public void deleteResourceByDatasetId(@RequestParam("datasetIds") List<Long> datasetIds) {
+  @ApiOperation(value = "Delete one by its dataset id")
+  public void deleteResourceByDatasetId(@ApiParam(type = "Object",
+      value = "Dataset ids Long list") @RequestParam("datasetIds") List<Long> datasetIds) {
     securityProviderInterfaceService.deleteResourceInstancesByDatasetId(datasetIds);
   }
 
@@ -114,8 +128,11 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/details")
-  public ResourceInfoVO getResourceDetail(@RequestParam("idResource") Long idResource,
-      @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum) {
+  @ApiOperation(value = "Get one resource Detail")
+  public ResourceInfoVO getResourceDetail(
+      @ApiParam(value = "Resource id", example = "0") @RequestParam("idResource") Long idResource,
+      @ApiParam(type = "Object",
+          value = "Resource group enum") @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum) {
     return securityProviderInterfaceService
         .getResourceDetails(resourceGroupEnum.getGroupName(idResource));
   }
@@ -133,8 +150,12 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/getResourceInfoVOByResource")
-  public List<ResourceInfoVO> getGroupsByIdResourceType(@RequestParam("idResource") Long idResource,
-      @RequestParam("resourceType") ResourceTypeEnum resourceType) {
+  @ApiOperation(value = "Get groups by resource type", response = ResourceInfoVO.class,
+      responseContainer = "List")
+  public List<ResourceInfoVO> getGroupsByIdResourceType(
+      @ApiParam(value = "Resource id", example = "0") @RequestParam("idResource") Long idResource,
+      @ApiParam(type = "Object",
+          value = "Resource type enum") @RequestParam("resourceType") ResourceTypeEnum resourceType) {
     return securityProviderInterfaceService.getGroupsByIdResourceType(idResource, resourceType);
   }
 
@@ -149,7 +170,10 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @PreAuthorize("isAuthenticated()")
   @PostMapping(value = "/createList")
   @ResponseStatus(HttpStatus.CREATED)
-  public void createResources(@RequestBody List<ResourceInfoVO> resourceInfoVOs) {
+  @ApiOperation(value = "Create one o more resources at same time")
+  @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)
+  public void createResources(@ApiParam(type = "List<Objects>",
+      value = "ResourceInfoVOs List objects") @RequestBody List<ResourceInfoVO> resourceInfoVOs) {
     try {
       securityProviderInterfaceService.createResourceInstance(resourceInfoVOs);
     } catch (EEAException e) {

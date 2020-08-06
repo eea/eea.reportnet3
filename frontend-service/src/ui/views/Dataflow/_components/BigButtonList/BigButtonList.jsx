@@ -208,11 +208,11 @@ export const BigButtonList = ({
     }
   };
 
-  const onLoadIntegrations = async datasetSchemaId => {
+  const onLoadEuDatasetIntegration = async datasetSchemaId => {
     try {
-      const euDatasetExportIntegration = await IntegrationService.all(dataflowId, datasetSchemaId);
+      const euDatasetExportIntegration = await IntegrationService.findEUDatasetIntegration(datasetSchemaId);
 
-      setEuDatasetExportIntegration(IntegrationsUtils.parseIntegration(euDatasetExportIntegration[0]));
+      setEuDatasetExportIntegration(IntegrationsUtils.parseIntegration(euDatasetExportIntegration));
     } catch (error) {
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
     }
@@ -352,7 +352,7 @@ export const BigButtonList = ({
       onDatasetSchemaNameError,
       onDuplicateName,
       onExportEuDataset,
-      onLoadIntegrations,
+      onLoadEuDatasetIntegration,
       onLoadReceiptData,
       onSaveName,
       onShowDataCollectionModal,

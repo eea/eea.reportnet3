@@ -27,7 +27,7 @@ const useBigButtonList = ({
   onDatasetSchemaNameError,
   onDuplicateName,
   onExportEuDataset,
-  onLoadIntegrations,
+  onLoadEuDatasetIntegration,
   onLoadReceiptData,
   onSaveName,
   onShowDataCollectionModal,
@@ -430,7 +430,7 @@ const useBigButtonList = ({
         command: () => {
           getDatasetData(dataset.euDatasetId, dataset.datasetSchemaId);
           handleExportEuDataset(true);
-          onLoadIntegrations(dataset.datasetSchemaId);
+          onLoadEuDatasetIntegration(dataset.datasetSchemaId);
         },
         icon: 'export',
         label: dataset.euDatasetName

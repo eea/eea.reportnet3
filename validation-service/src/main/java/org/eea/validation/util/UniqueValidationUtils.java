@@ -82,13 +82,18 @@ public class UniqueValidationUtils {
    */
   private static DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
+  /*
+   * we need to put synchronized void because drools need a static method to call in a java file, so
+   * we should create a static and put this synchronized to put @autowired to convert the Object in
+   * a bean
+   */
   /**
    * Sets the rules repository.
    *
    * @param rulesRepository the new rules repository
    */
   @Autowired
-  private void setRulesRepository(RulesRepository rulesRepository) {
+  synchronized void setRulesRepository(RulesRepository rulesRepository) {
     UniqueValidationUtils.rulesRepository = rulesRepository;
   }
 
@@ -98,7 +103,7 @@ public class UniqueValidationUtils {
    * @param schemasRepository the new schemas repository
    */
   @Autowired
-  private void setSchemasRepository(SchemasRepository schemasRepository) {
+  synchronized void setSchemasRepository(SchemasRepository schemasRepository) {
     UniqueValidationUtils.schemasRepository = schemasRepository;
   }
 
@@ -108,7 +113,7 @@ public class UniqueValidationUtils {
    * @param recordRepository the new record repository
    */
   @Autowired
-  private void setRecordRepository(RecordRepository recordRepository) {
+  synchronized void setRecordRepository(RecordRepository recordRepository) {
     UniqueValidationUtils.recordRepository = recordRepository;
   }
 
@@ -118,7 +123,7 @@ public class UniqueValidationUtils {
    * @param dataSetSchemaControllerZuul the new data set schema controller zuul
    */
   @Autowired
-  private void setDataSetSchemaControllerZuul(
+  synchronized void setDataSetSchemaControllerZuul(
       DataSetSchemaControllerZuul dataSetSchemaControllerZuul) {
     UniqueValidationUtils.dataSetSchemaControllerZuul = dataSetSchemaControllerZuul;
   }
@@ -130,7 +135,7 @@ public class UniqueValidationUtils {
    * @param tableRepository the new table repository
    */
   @Autowired
-  private void setTableRepository(TableRepository tableRepository) {
+  synchronized void setTableRepository(TableRepository tableRepository) {
     UniqueValidationUtils.tableRepository = tableRepository;
   }
 
@@ -140,7 +145,7 @@ public class UniqueValidationUtils {
    * @param rulesService the new rules service
    */
   @Autowired
-  private void setRulesService(RulesService rulesService) {
+  synchronized void setRulesService(RulesService rulesService) {
     UniqueValidationUtils.rulesService = rulesService;
   }
 
@@ -150,7 +155,7 @@ public class UniqueValidationUtils {
    * @param dataSetMetabaseControllerZuul the new data set metabase controller zuul
    */
   @Autowired
-  private void setDataSetMetabaseControllerZuul(
+  synchronized void setDataSetMetabaseControllerZuul(
       DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul) {
     UniqueValidationUtils.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
   }
