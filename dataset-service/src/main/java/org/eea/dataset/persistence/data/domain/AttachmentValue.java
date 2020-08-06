@@ -57,9 +57,28 @@ public class AttachmentValue {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, fileName);
+    return Objects.hash(id, fileName, fieldValue);
   }
 
 
+  /**
+   * Equals.
+   *
+   * @param obj the o
+   *
+   * @return true, if successful
+   */
+  @Override
+  public boolean equals(final Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    final AttachmentValue attachment = (AttachmentValue) obj;
+    return id.equals(attachment.id) && fileName.equals(attachment.fileName)
+        && fieldValue.equals(attachment.fieldValue);
+  }
 
 }
