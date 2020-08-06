@@ -430,7 +430,7 @@ const useBigButtonList = ({
         command: () => {
           getDatasetData(dataset.euDatasetId, dataset.datasetSchemaId);
           handleExportEuDataset(true);
-          onLoadEuDatasetIntegration(dataset.euDatasetId);
+          onLoadEuDatasetIntegration(dataset.datasetSchemaId);
         },
         icon: 'export',
         label: dataset.euDatasetName

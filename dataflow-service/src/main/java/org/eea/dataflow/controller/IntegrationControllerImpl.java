@@ -82,15 +82,15 @@ public class IntegrationControllerImpl implements IntegrationController {
   /**
    * Find expor EU dataset integration by dataset id.
    *
-   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
    * @return the integration VO
    */
   @Override
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
+  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
   @GetMapping("/findExportEUDatasetIntegration")
   public IntegrationVO findExporEUDatasetIntegrationByDatasetId(
-      @RequestParam("datasetId") Long datasetId) {
-    return integrationService.getExporEUDatasetIntegrationByDatasetId(datasetId);
+      @RequestParam("datasetSchemaId") String datasetSchemaId) {
+    return integrationService.getExporEUDatasetIntegrationByDatasetId(datasetSchemaId);
   }
 
   /**
@@ -188,8 +188,10 @@ public class IntegrationControllerImpl implements IntegrationController {
   /**
    * Execute integration process.
    *
+   * @param integrationToolTypeEnum the integration tool type enum
    * @param integrationOperationTypeEnum the integration operation type enum
    * @param file the file
+   * @param datasetId the dataset id
    * @param integration the integration
    * @return the execution result VO
    */
@@ -261,7 +263,6 @@ public class IntegrationControllerImpl implements IntegrationController {
    * Creates the default integration.
    *
    * @param dataflowId the dataflow id
-   * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    */
   @Override
@@ -269,9 +270,8 @@ public class IntegrationControllerImpl implements IntegrationController {
   @ApiOperation(value = "Create a Default Integration")
   public void createDefaultIntegration(
       @ApiParam(value = "Dataflow id", example = "0") @RequestParam("dataflowId") Long dataflowId,
-      @ApiParam(value = "Dataset id", example = "0") @RequestParam("datasetId") Long datasetId,
       @ApiParam(value = "Dataset Schema id",
           example = "0") @RequestParam("datasetSchemaId") String datasetSchemaId) {
-    integrationService.createDefaultIntegration(dataflowId, datasetId, datasetSchemaId);
+    integrationService.createDefaultIntegration(dataflowId, datasetSchemaId);
   }
 }
