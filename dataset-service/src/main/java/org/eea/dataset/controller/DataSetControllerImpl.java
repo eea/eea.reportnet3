@@ -778,7 +778,7 @@ public class DataSetControllerImpl implements DatasetController {
       @PathVariable("fieldId") String idField, @RequestParam("file") final MultipartFile file) {
 
     try {
-      String fileName = file.getName();
+      String fileName = file.getOriginalFilename();
       if (!validateAttachment(datasetId, idField, fileName, file.getSize())) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
       }
