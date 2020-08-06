@@ -40,7 +40,7 @@ export const getComparisonExpression = expression => {
     if (operatorType === 'date' && valueTypeSelector === 'value') {
       return {
         operator: getOperatorEquivalence(valueTypeSelector, operatorType, operatorValue),
-        params: [field1, moment.unix(transField2 / 1000).format('YYYY-MM-DD')]
+        params: [field1, moment(transField2).format('YYYY-MM-DD')]
       };
     }
 
