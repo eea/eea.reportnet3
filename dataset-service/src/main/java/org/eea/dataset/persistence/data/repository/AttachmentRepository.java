@@ -27,4 +27,11 @@ public interface AttachmentRepository extends PagingAndSortingRepository<Attachm
   void deleteByFieldValueId(String idField);
 
 
+  /**
+   * Delete by field value id field schema.
+   *
+   * @param idFieldSchema the id field schema
+   */
+  void deleteByFieldValueIdFieldSchema(String idFieldSchema);
+
 }

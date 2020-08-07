@@ -45,6 +45,7 @@ public class AttachmentValue {
   @Type(type = "org.hibernate.type.BinaryType")
   private byte content[];
 
+
   /** The field value. */
   @OneToOne
   @JoinColumn(name = "FIELD_VALUE_ID")
