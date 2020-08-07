@@ -94,6 +94,12 @@ public class IntegrationServiceImpl implements IntegrationService {
   @Transactional
   @Override
   public void deleteIntegration(Long integrationId) throws EEAException {
+
+    IntegrationOperationTypeEnum operation = integrationRepository.findOperationById(integrationId);
+    if (IntegrationOperationTypeEnum.EXPORT_EU_DATASET.equals(operation)) {
+      throw new EEAException(EEAErrorMessage.FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_DELETION);
+    }
+
     CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
     crudManager.delete(integrationId);
   }
@@ -290,6 +296,8 @@ public class IntegrationServiceImpl implements IntegrationService {
     Integration integration = integrationRepository.findFirstByOperationAndParameterAndValue(
         IntegrationOperationTypeEnum.EXPORT_EU_DATASET, IntegrationParams.DATASET_SCHEMA_ID,
         datasetSchemaId);
-    return integrationMapper.entityToClass(integration);
+    IntegrationVO integrationVO = integrationMapper.entityToClass(integration);
+    LOG.debug("Found EXPORT_EU_DATASET integration: {}", integrationVO);
+    return integrationVO;
   }
 }
