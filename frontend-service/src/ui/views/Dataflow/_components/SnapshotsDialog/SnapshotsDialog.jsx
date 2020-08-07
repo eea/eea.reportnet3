@@ -137,6 +137,7 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
                   <div className={`${styles.snapshotForm} formField ${styles.createInputAndButtonWrapper}`}>
                     <div className="p-inputgroup" style={{ width: '100%' }}>
                       <InputText
+                        maxlength="255"
                         name="createSnapshotDescription"
                         onBlur={event => {
                           event.preventDefault();
