@@ -127,7 +127,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
     integration = integrationMapper.classToEntity(integrationVO);
 
     integrationRepository.save(integration);
-    LOG.info("Integration updated: {}", integration);
+    LOG.info("Integration updated: {}", integrationVO);
   }
 
   /**
