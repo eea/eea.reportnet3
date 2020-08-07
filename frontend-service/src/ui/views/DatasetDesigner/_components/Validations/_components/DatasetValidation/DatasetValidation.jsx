@@ -496,7 +496,6 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
         referencedTable
       }
     });
-    // onInfoFieldChange('referencedTable',referencedDatasetSchema)
   };
 
   const onRelationsErrors = (expression, value) => {
