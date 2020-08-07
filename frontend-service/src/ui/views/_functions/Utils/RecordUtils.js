@@ -115,6 +115,31 @@ const getCodelistValue = (codelistItemsOptions, value) => {
   }
 };
 
+const getFieldTypeValue = fieldType => {
+  const fieldTypes = [
+    { fieldType: 'Number_Integer', value: 'Number - Integer' },
+    { fieldType: 'Number_Decimal', value: 'Number - Decimal' },
+    { fieldType: 'Date', value: 'Date' },
+    { fieldType: 'Text', value: 'Text' },
+    { fieldType: 'Rich_Text', value: 'Rich text' },
+    { fieldType: 'Email', value: 'Email' },
+    { fieldType: 'URL', value: 'URL' },
+    { fieldType: 'Phone', value: 'Phone number' },
+    { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
+    { fieldType: 'Codelist', value: 'Single select' },
+    { fieldType: 'Multiselect_Codelist', value: 'Multiple select' },
+    { fieldType: 'Link', value: 'Link' },
+    { fieldType: 'Attachment', value: 'Attachment' }
+  ];
+
+  if (!isUndefined(fieldType)) {
+    const filteredTypes = fieldTypes.filter(field => field.fieldType.toUpperCase() === fieldType.toUpperCase())[0];
+    return filteredTypes.value;
+  } else {
+    return '';
+  }
+};
+
 const getInitialRecordValues = (record, colsSchema) => {
   const initialValues = [];
   const filteredColumns = colsSchema.filter(
@@ -215,6 +240,7 @@ export const RecordUtils = {
   getCodelistItems,
   getCodelistItemsInSingleColumn,
   getCodelistValue,
+  getFieldTypeValue,
   getInitialRecordValues,
   getLinkValue,
   getMultiselectValues,

@@ -758,28 +758,27 @@ export const FieldDesigner = ({
       fieldDesignerState.fieldTypeValue.fieldType === 'Attachment' ? (
       <Button
         className={`${styles.codelistButton} p-button-secondary-transparent`}
-        label={
+        label={`${resources.messages['validExtensions']} ${
           !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
           !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
-            ? `${resources.messages['validExtensions']} ${fieldDesignerState.fieldFileProperties.validExtensions.join(
-                ', '
-              )} - ${resources.messages['maxFileSize']} ${fieldDesignerState.fieldFileProperties.maxSize} ${
-                resources.messages['MB']
-              }`
-            : resources.messages['fileExtensionsSelection']
-        }
+            ? fieldDesignerState.fieldFileProperties.validExtensions.join(', ')
+            : '*'
+        } - ${resources.messages['maxFileSize']} ${fieldDesignerState.fieldFileProperties.maxSize} ${
+          resources.messages['MB']
+        }`}
         onClick={() => onAttachmentDropdownSelected()}
         style={{ pointerEvents: 'auto' }}
-        tooltip={
+        tooltip={`${resources.messages['validExtensions']} ${
           !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
           !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
-            ? `${resources.messages['validExtensions']} ${fieldDesignerState.fieldFileProperties.validExtensions.join(
-                ', '
-              )} - ${resources.messages['maxFileSize']} ${fieldDesignerState.fieldFileProperties.maxSize} ${
-                resources.messages['MB']
-              }`
-            : resources.messages['fileExtensionsSelection']
-        }
+            ? fieldDesignerState.fieldFileProperties.validExtensions.join(', ')
+            : '*'
+        } - ${resources.messages['maxFileSize']} ${
+          !isNil(fieldDesignerState.fieldFileProperties.maxSize) &&
+          fieldDesignerState.fieldFileProperties.maxSize.toString() !== '0'
+            ? `${fieldDesignerState.fieldFileProperties.maxSize} ${resources.messages['MB']}`
+            : resources.messages['maxSizeNotDefined']
+        }`}
         tooltipOptions={{ position: 'top' }}
       />
     ) : isCodelistOrLink ? (
@@ -909,6 +908,7 @@ export const FieldDesigner = ({
         {!addField ? (
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton}`}
+            disabled={fieldDesignerState.fieldTypeValue.fieldType === 'Attachment'}
             icon="horizontalSliders"
             label={resources.messages['createFieldQC']}
             onClick={() => validationContext.onOpenModalFromField(fieldId, tableSchemaId)}

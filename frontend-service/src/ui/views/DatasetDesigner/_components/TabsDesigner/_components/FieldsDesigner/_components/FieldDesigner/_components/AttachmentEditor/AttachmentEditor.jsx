@@ -62,7 +62,7 @@ const AttachmentEditor = ({
         <div className={styles.inputTitleWrapper}>
           <span
             dangerouslySetInnerHTML={{
-              __html: resources.messages['codelistEditorItemsMessage']
+              __html: resources.messages['attachmentEditorItemsMessage']
             }}></span>
         </div>
         <Chips

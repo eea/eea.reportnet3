@@ -628,12 +628,14 @@ const DataViewer = withRouter(
       if (event) {
         const clipboardData = event.clipboardData;
         const pastedData = clipboardData.getData('Text');
+        console.log({ pastedData });
         dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
       }
     };
 
     const onPasteAsync = async () => {
       const pastedData = await navigator.clipboard.readText();
+      console.log('PASTE ASYNC');
       dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
     };
 
@@ -649,6 +651,7 @@ const DataViewer = withRouter(
           setIsTableDeleted(false);
         }
       } catch (error) {
+        console.log({ error });
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
@@ -942,13 +945,17 @@ const DataViewer = withRouter(
         onSaveRecord(records.newRecord);
       }
     };
-    const getAttachExtensions = [{ datasetSchemaId, fileExtension: records.selectedValidExtensions }]
+    const getAttachExtensions = [{ datasetSchemaId, fileExtension: records.selectedValidExtensions || [] }]
       .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
       .flat()
       .join(', ');
 
-    const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions}
-    ${resources.messages['supportedFileAttachmentsMaxSizeTooltip']} ${records.selectedMaxSize} ${resources.messages['MB']}`;
+    const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions || '*'}
+    ${resources.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
+      !isNil(records.selectedMaxSize) && records.selectedMaxSize.toString() !== '0'
+        ? `${records.selectedMaxSize} ${resources.messages['MB']}`
+        : resources.messages['maxSizeNotDefined']
+    }`;
 
     return (
       <SnapshotContext.Provider>
@@ -1113,7 +1120,7 @@ const DataViewer = withRouter(
             onHide={() => setIsAttachFileVisible(false)}
             visible={isAttachFileVisible}>
             <CustomFileUpload
-              accept={getAttachExtensions}
+              accept={getAttachExtensions || '*'}
               // accept=".txt"
               chooseLabel={resources.messages['selectFile']}
               className={styles.FileUpload}
@@ -1122,7 +1129,11 @@ const DataViewer = withRouter(
               mode="advanced"
               multiple={false}
               invalidExtensionMessage={resources.messages['invalidExtensionFile']}
-              maxFileSize={records.selectedMaxSize * 1000 * 1024}
+              maxFileSize={
+                !isNil(records.selectedMaxSize) && records.selectedMaxSize.toString() !== '0'
+                  ? records.selectedMaxSize * 1000 * 1024
+                  : 20 * 1000 * 1024
+              }
               name="file"
               onUpload={onAttach}
               operation="PUT"
@@ -1227,7 +1238,6 @@ const DataViewer = withRouter(
             {resources.messages['confirmDeleteRow']}
           </ConfirmDialog>
         )}
-
         {confirmPasteVisible && (
           <ConfirmDialog
             className="edit-table"

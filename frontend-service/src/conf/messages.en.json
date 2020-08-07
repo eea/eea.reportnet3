@@ -814,10 +814,15 @@
     "validExtensionEditor": "Valid file extension and size selector",
     "KB": "KB",
     "MB": "MB",
-    "attachmentEditorSizeMessage": "Enter the maximum file size <strong>in megabytes</strong> (with decimals). <strong>Remember</strong>, <u><strong>the overall maximum value is 20 MB</strong></u>.",
+    "attachmentEditorSizeMessage": "Enter the maximum file size <strong>in megabytes</strong> (with decimals). <strong>Remember</strong>, <u><strong>the overall maximum value is 20 MB</strong></u> (value 0 is considered as default limit).",
     "maxFileSize": "Max file size:",
     "validExtensions": "Valid file extensions:",
     "supportedFileAttachmentsMaxSizeTooltip": "Maximum file size: ",
-    "allAttachment": "All fields are attachment. Press 'Save' to add a record with empty attachments. You can upload them afterwards."
+    "allAttachment": "All fields are attachment. Press 'Save' to add a record with empty attachments. You can upload them afterwards.",
+    "createQCDisabled": "Can't create field QC on Attachment field",
+    "createQC": "Create a QC over this field",
+    "attachmentPaste": "Attachment fields will not be pasted",
+    "attachmentEditorItemsMessage": "Press <strong>enter</strong>, <strong>tab</strong> or <strong>paste your list</strong> (separated by commas) <u><strong>to add</strong></u> valid file extensions. Leave <strong>empty</strong> to allow any file extension.",
+    "maxSizeNotDefined": "20 MB"
   }
 }
