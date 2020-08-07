@@ -815,7 +815,8 @@ public class DataSetControllerImpl implements DatasetController {
     if (fieldSchema == null || fieldSchema.getId() == null) {
       throw new EEAException(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND);
     }
-    if ((fieldSchema.getMaxSize() != null && fieldSchema.getMaxSize() * 1000000 < size)
+    if ((fieldSchema.getMaxSize() != null && fieldSchema.getMaxSize() != 0
+        && fieldSchema.getMaxSize() * 1000000 < size)
         || (fieldSchema.getValidExtensions() != null
             && !Arrays.asList(fieldSchema.getValidExtensions())
                 .contains(datasetService.getMimetype(originalFilename)))) {
