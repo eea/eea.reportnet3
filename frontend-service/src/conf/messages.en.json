@@ -816,6 +816,10 @@
     "Mb": "Mb",
     "attachmentEditorSizeMessage": "Enter the maximum file size <strong>in megabytes</strong> (with decimals). <strong>Remember</strong>, <u><strong>the overall maximum value is 20 Mb</strong></u>.",
     "maxFileSize": "Max file size:",
-    "validExtensions": "Valid file extensions:"
+    "validExtensions": "Valid file extensions:",
+    "copyDataCollectionToEuDatasetHeader": "Copy Data Collections to EU Datasets",
+    "copyDataCollectionToEuDatasetMessage": "Are you sure you want to copy Data Collections to EU Datasets?",
+    "exportEuDatasetHeader": "Export EU Datasets",
+    "exportEuDatasetMessage": "Are you sure you want to export EU Datasets?"
   }
 }
