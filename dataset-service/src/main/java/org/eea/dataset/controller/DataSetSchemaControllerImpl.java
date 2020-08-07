@@ -452,6 +452,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         // Modify the register into the metabase fieldRelations
         dataschemaService.updateForeignRelation(datasetId, fieldSchemaVO, datasetSchema);
 
+        // Clear the attachments if necessary
+        if (Boolean.TRUE.equals(
+            dataschemaService.checkClearAttachments(datasetId, datasetSchema, fieldSchemaVO))) {
+          datasetService.deleteAttachmentByFieldSchemaId(datasetId, fieldSchemaVO.getId());
+        }
+
         DataType type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
 
         // After the update, we create the rules needed and change the type of the field if

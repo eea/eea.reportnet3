@@ -1328,17 +1328,6 @@ public class DatasetServiceImpl implements DatasetService {
       field.setValue(values.toString().substring(1, values.toString().length() - 1));
     }
 
-    // Attatchment field. Initialize it
-    if (DataType.ATTACHMENT.equals(field.getType())) {
-
-      AttachmentValue attachment = new AttachmentValue();
-      attachment.setFileName("");
-      attachment.setFieldValue(field);
-
-      field.setValue("");
-      attachmentRepository.save(attachment);
-    }
-
   }
 
 
@@ -2386,20 +2375,40 @@ public class DatasetServiceImpl implements DatasetService {
     fieldRepository.save(field);
   }
 
+
   /**
    * Gets the field by id.
    *
+   * @param datasetId the dataset id
    * @param idField the id field
    * @return the field by id
    * @throws EEAException the EEA exception
    */
   @Override
-  public FieldVO getFieldById(String idField) throws EEAException {
+  public FieldVO getFieldById(Long datasetId, String idField) throws EEAException {
     FieldValue fieldValue = fieldRepository.findById(idField);
     if (fieldValue == null) {
       throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
     }
     return fieldNoValidationMapper.entityToClass(fieldValue);
+  }
+
+
+  /**
+   * Delete attachment by field schema id.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaId the field schema id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void deleteAttachmentByFieldSchemaId(Long datasetId, String fieldSchemaId)
+      throws EEAException {
+    // Delete the attachment
+    attachmentRepository.deleteByFieldValueIdFieldSchema(fieldSchemaId);
+    // Put the field value name to null
+    fieldRepository.clearFieldValue(fieldSchemaId);
   }
 
 }

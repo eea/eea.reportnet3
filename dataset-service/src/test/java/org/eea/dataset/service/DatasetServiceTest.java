@@ -2234,13 +2234,13 @@ public class DatasetServiceTest {
     fieldValue.setIdFieldSchema("600B66C6483EA7C8B55891DA171A3E7F");
     when(fieldRepository.findById(Mockito.anyString())).thenReturn(fieldValue);
     when(fieldNoValidationMapper.entityToClass(Mockito.any())).thenReturn(fieldVO);
-    assertEquals(fieldVO, datasetService.getFieldById("idField"));
+    assertEquals(fieldVO, datasetService.getFieldById(1L, "idField"));
   }
 
   @Test(expected = EEAException.class)
   public void getFieldByIdExceptionTest() throws EEAException {
     try {
-      datasetService.getFieldById("idField");
+      datasetService.getFieldById(1L, "idField");
     } catch (EEAException e) {
       assertEquals(
           String.format(EEAErrorMessage.FIELD_NOT_FOUND, new ObjectId("5cf0e9b3b793310e9ceca190")),
@@ -2249,4 +2249,12 @@ public class DatasetServiceTest {
     }
 
   }
+
+  @Test
+  public void testDeleteAttachmentByIdFieldSchema() throws EEAException {
+
+    datasetService.deleteAttachmentByFieldSchemaId(1L, "5cf0e9b3b793310e9ceca190");
+    Mockito.verify(fieldRepository, times(1)).clearFieldValue(Mockito.any());
+  }
+
 }
