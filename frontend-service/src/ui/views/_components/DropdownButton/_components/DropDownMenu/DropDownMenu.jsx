@@ -103,7 +103,7 @@ class DropDownMenu extends Component {
                       });
                   }}>
                   <a className={item.disabled ? style.menuItemDisabled : null} disabled={item.disabled}>
-                    <Icon icon={item.icon} />
+                    <Icon icon={item.icon} style={item.iconStyle ?? item.style} />
                     {item.label}
                   </a>
                 </li>
