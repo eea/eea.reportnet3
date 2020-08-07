@@ -7,17 +7,29 @@ import { dialogReducer } from 'ui/views/_functions/Reducers/dialogReducer';
 export const DialogProvider = ({ children }) => {
   const dialogContext = useContext(DialogContext);
 
-  const [state, dispatch] = useReducer(dialogReducer, { open: 0 });
+  const [state, dispatch] = useReducer(dialogReducer, { open: [] });
 
   return (
     <DialogContext.Provider
       value={{
         ...state,
-        add: () => {
-          dispatch({ type: 'UPDATE_OPEN', payload: state.open + 1 });
+        add: dialogId => {
+          console.log(state);
+          console.log('dialogId: ', dialogId);
+          const dialogs = [...state.open];
+          console.log('dialogs ', dialogs);
+          if (!dialogs.includes(dialogId)) {
+            dialogs.push(dialogId);
+          }
+          console.log('dialogs ', dialogs);
+          dispatch({ type: 'UPDATE_OPEN', payload: dialogs });
         },
-        remove: () => {
-          dispatch({ type: 'UPDATE_OPEN', payload: state.open - 1 });
+        remove: dialogId => {
+          const dialogs = state.open;
+          if (dialogs.includes(dialogId)) {
+            dialogs.splice(dialogs.indexOf(dialogId), 1);
+          }
+          dispatch({ type: 'UPDATE_OPEN', payload: dialogs });
         }
       }}>
       {children}

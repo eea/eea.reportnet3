@@ -1,4 +1,5 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import uuid from 'uuid';
 
 import styles from './Dialog.module.scss';
 
@@ -31,41 +32,47 @@ export const Dialog = ({
   zIndex = 5000
 }) => {
   const dialogContext = useContext(DialogContext);
-
-  const maskStyle = {
+  const [dialogId, setDialogId] = useState('');
+  const [maskStyle, setMaskStyle] = useState({
     display: visible ? 'flex' : 'none',
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: zIndex + dialogContext.open
-  };
+    zIndex: zIndex
+  });
 
   const dialogStyle = {
     top: 'auto',
     left: 'auto',
-    zIndex: zIndex + dialogContext.open
+    zIndex: zIndex
   };
 
   useEffect(() => {
-    dialogContext.add();
+    const newDialogId = uuid.v4();
+    setDialogId(newDialogId);
+    dialogContext.add(newDialogId);
     return () => {
-      dialogContext.remove();
+      dialogContext.remove(dialogId);
     };
   }, []);
 
   useEffect(() => {
     const body = document.querySelector('body');
     visible && (body.style.overflow = 'hidden');
-    dialogContext.add();
+    setMaskStyle({
+      ...maskStyle,
+      zIndex: zIndex + dialogContext.open.indexOf(dialogId)
+    });
 
     return () => {
-      if (dialogContext.open === 1) {
+      if (dialogContext.open.length === 0) {
         body.style.overflow = 'hidden auto';
       }
     };
   }, [visible]);
   return (
     <div className={styles.dialog_mask_wrapper} style={maskStyle}>
+      {console.log('dialogContext.open: ', dialogContext.open)}
       <PrimeDialog
         blockScroll={blockScroll}
         className={className}
