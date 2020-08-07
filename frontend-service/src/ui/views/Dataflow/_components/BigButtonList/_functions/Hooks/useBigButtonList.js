@@ -433,6 +433,7 @@ const useBigButtonList = ({
           onLoadEuDatasetIntegration(dataset.datasetSchemaId);
         },
         icon: 'export',
+        iconStyle: { transform: 'rotate(-90deg)' },
         label: dataset.euDatasetName
       }))
     : [];

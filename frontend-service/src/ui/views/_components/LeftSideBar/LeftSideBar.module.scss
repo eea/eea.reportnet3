@@ -23,15 +23,9 @@
   overflow: hidden;
 
   .barSection {
-    --top-height: 160px;
-    // --bottom-height: 100px;
     --middle-height: calc(100% - var(--top-height) - var(--bottom-height) - (1rem * 3));
-    padding: 1rem 0;
+    margin: 1rem 0;
     height: var(--middle-height);
-
-    &:first-of-type {
-      height: var(--top-height);
-    }
 
     &:last-of-type {
       height: var(--bottom-height);
@@ -66,10 +60,6 @@
       i {
         margin-right: 12px;
       }
-
-      // &:hover {
-      //   color: var(--gray-15);
-      // }
     }
 
     img {
@@ -77,31 +67,13 @@
         margin-right: 12px;
       }
     }
-
-    .notificationCounter {
-      position: absolute;
-      top: 8px;
-      background-color: var(--errors);
-      color: var(--white);
-      border-radius: 3px;
-      padding: 1px 3px;
-      font: 8px Verdana;
-    }
-
-    .notificationIconWrapper {
-      width: 2.5rem;
-      height: 2.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      margin-right: 3px;
-    }
   }
 
   hr {
     width: 80%;
     border-color: var(--gray-15);
+    margin-top: 0;
+    margin-bottom: 0;
   }
 
   &.open {
@@ -148,37 +120,9 @@
   animation: blink 0.3s;
 }
 
-.notificationList {
-  position: fixed;
-  background-color: var(--white);
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  left: 3rem;
-  border: 2px solid var(--gray-50);
-  z-index: 3003;
-  max-height: 200px;
-  min-height: auto;
-}
-
-.notificationList li {
-  font-size: 12pt;
-  color: var(--black);
-  list-style: none;
-}
-
-.notificationList li:hover {
-  background-color: var(--gray-50);
-}
-
 .arrowToggleBtn {
   cursor: pointer !important;
 }
-
-/* .notificationCounter:hover {
-  transition: 0.3s ease-in;
-  animation: blink 0.3s;
-} */
 
 @keyframes blink {
   0% {
