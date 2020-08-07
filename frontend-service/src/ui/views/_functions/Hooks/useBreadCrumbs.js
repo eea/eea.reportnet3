@@ -1,7 +1,6 @@
 import { useContext, useEffect } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
-import isUndefined from 'lodash/isUndefined';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -83,7 +82,7 @@ export const useBreadCrumbs = ({
         .map(representative => representative.name);
 
       return {
-        command: () => history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { representativeId }, true)),
+        command: () => history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true)),
         href: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true),
         label: currentRepresentative[0],
         icon: 'clone'
@@ -126,13 +125,13 @@ export const useBreadCrumbs = ({
     }
 
     if (currentPage === CurrentPage.DATAFLOW) {
-      const breadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
       if (!isEmpty(dataflowStateData)) {
+        const breadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
         if (representativeId) {
           breadCrumbs.push(getRepresentativeCrumb());
         }
+        breadCrumbContext.add([...breadCrumbs]);
       }
-      breadCrumbContext.add([...breadCrumbs]);
     }
 
     if (currentPage === CurrentPage.DATASET_DESIGNER) {
