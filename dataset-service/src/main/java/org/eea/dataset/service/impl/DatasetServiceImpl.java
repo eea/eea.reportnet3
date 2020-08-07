@@ -1965,7 +1965,7 @@ public class DatasetServiceImpl implements DatasetService {
           FieldValue field = new FieldValue();
           FieldSchema fieldSchema =
               fieldMap.get(etlField.getFieldName().toLowerCase() + tableSchema.getIdTableSchema());
-          if (fieldSchema != null) {
+          if (fieldSchema != null && Boolean.FALSE.equals(fieldSchema.getReadOnly())) {
             field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
             field.setType(fieldSchema.getType());
             field.setValue(etlField.getValue());
@@ -2016,7 +2016,8 @@ public class DatasetServiceImpl implements DatasetService {
   private void setMissingField(List<FieldSchema> headersSchema, final List<FieldValue> fields,
       List<String> idSchema, RecordValue recordValue) {
     headersSchema.stream().forEach(header -> {
-      if (!idSchema.contains(header.getIdFieldSchema().toString())) {
+      if (!idSchema.contains(header.getIdFieldSchema().toString())
+          && Boolean.FALSE.equals(header.getReadOnly())) {
         final FieldValue field = new FieldValue();
         field.setIdFieldSchema(header.getIdFieldSchema().toString());
         field.setType(header.getType());
