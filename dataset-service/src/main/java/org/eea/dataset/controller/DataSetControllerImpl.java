@@ -809,7 +809,7 @@ public class DataSetControllerImpl implements DatasetController {
     if (datasetSchemaId == null) {
       throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND);
     }
-    FieldVO fieldVO = datasetService.getFieldById(idField);
+    FieldVO fieldVO = datasetService.getFieldById(datasetId, idField);
     FieldSchemaVO fieldSchema =
         datasetSchemaService.getFieldSchema(datasetSchemaId, fieldVO.getIdFieldSchema());
     if (fieldSchema == null || fieldSchema.getId() == null) {
