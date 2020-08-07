@@ -24,6 +24,7 @@ import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContex
 import { fieldDesignerReducer } from './_functions/Reducers/fieldDesignerReducer';
 
 import { DatasetService } from 'core/services/Dataset';
+import { config } from 'conf';
 
 export const FieldDesigner = ({
   addField = false,
@@ -909,6 +910,10 @@ export const FieldDesigner = ({
         {!addField ? (
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton}`}
+            disabled={
+              !isUndefined(fieldDesignerState.fieldValue) &&
+              config.validations.bannedFields.includes(fieldDesignerState.fieldValue)
+            }
             icon="horizontalSliders"
             label={resources.messages['createFieldQC']}
             onClick={() => validationContext.onOpenModalFromField(fieldId, tableSchemaId)}
