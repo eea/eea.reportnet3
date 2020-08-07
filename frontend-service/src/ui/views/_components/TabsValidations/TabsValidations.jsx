@@ -292,15 +292,18 @@ const TabsValidations = withRouter(
     const columnStyles = field => {
       const style = {};
       const invisibleFields = ['id', 'referenceId', 'activationGroup', 'condition', 'date'];
+      const fieldUppercase = field.toUpperCase();
       if (reporting) {
         invisibleFields.push('enabled', 'automatic', 'isCorrect');
       }
-      if (field.toUpperCase() === 'DESCRIPTION') {
+      if (fieldUppercase === 'DESCRIPTION') {
         style.width = '23%';
       }
-      // else {
-      //   style.width = '20%';
-      // }
+
+      if (fieldUppercase === 'ENTITYTYPE' || fieldUppercase === 'LEVELERROR') {
+        style.minWidth = '6rem';
+      }
+
       if (invisibleFields.includes(field)) {
         style.display = 'none';
       } else {

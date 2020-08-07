@@ -17,14 +17,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
-export const SnapshotsDialog = ({
-  dataflowId,
-  datasetId,
-  datasetName,
-  hideSnapshotDialog,
-  isSnapshotDialogVisible,
-  manageDialogs
-}) => {
+export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshotDialogVisible, manageDialogs }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -144,6 +137,7 @@ export const SnapshotsDialog = ({
                   <div className={`${styles.snapshotForm} formField ${styles.createInputAndButtonWrapper}`}>
                     <div className="p-inputgroup" style={{ width: '100%' }}>
                       <InputText
+                        maxlength="255"
                         name="createSnapshotDescription"
                         onBlur={event => {
                           event.preventDefault();
