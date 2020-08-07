@@ -62,7 +62,7 @@ const SnapshotSlideBar = ({
   };
 
   const snapshotValidationSchema = Yup.object().shape({
-    createSnapshotDescription: Yup.string().required()
+    createSnapshotDescription: Yup.string().max(255, resources.messages['snapshotDescriptionValidationMax']).required()
   });
 
   if (isVisible) {
@@ -71,6 +71,7 @@ const SnapshotSlideBar = ({
 
   return (
     <Sidebar
+      baseZIndex={1900}
       blockScroll={true}
       className={styles.sidebar}
       onHide={() => setIsVisible()}
