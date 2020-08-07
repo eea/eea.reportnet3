@@ -741,27 +741,31 @@ export const Dataset = withRouter(({ match, history }) => {
           />
         </Dialog>
       )}
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        header={resources.messages['deleteDatasetHeader']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        maximizable={false}
-        onConfirm={onConfirmDelete}
-        onHide={() => onSetVisible(setDeleteDialogVisible, false)}
-        visible={deleteDialogVisible}>
-        {resources.messages['deleteDatasetConfirm']}
-      </ConfirmDialog>
-      <ConfirmDialog
-        header={resources.messages['validateDataset']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        maximizable={false}
-        onConfirm={onConfirmValidate}
-        onHide={() => onSetVisible(setValidateDialogVisible, false)}
-        visible={validateDialogVisible}>
-        {resources.messages['validateDatasetConfirm']}
-      </ConfirmDialog>
+      {deleteDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={resources.messages['deleteDatasetHeader']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          maximizable={false}
+          onConfirm={onConfirmDelete}
+          onHide={() => onSetVisible(setDeleteDialogVisible, false)}
+          visible={deleteDialogVisible}>
+          {resources.messages['deleteDatasetConfirm']}
+        </ConfirmDialog>
+      )}
+      {validateDialogVisible && (
+        <ConfirmDialog
+          header={resources.messages['validateDataset']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          maximizable={false}
+          onConfirm={onConfirmValidate}
+          onHide={() => onSetVisible(setValidateDialogVisible, false)}
+          visible={validateDialogVisible}>
+          {resources.messages['validateDatasetConfirm']}
+        </ConfirmDialog>
+      )}
       <Snapshots
         snapshotListData={snapshotListData}
         isLoadingSnapshotListData={isLoadingSnapshotListData}

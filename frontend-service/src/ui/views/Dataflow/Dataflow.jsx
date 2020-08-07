@@ -503,13 +503,15 @@ const Dataflow = withRouter(({ history, match }) => {
           />
         )}
 
-        <SnapshotsDialog
-          dataflowId={dataflowId}
-          datasetId={dataflowState.datasetIdToSnapshotProps}
-          datasetName={dataflowState.datasetNameToSnapshotProps}
-          isSnapshotDialogVisible={dataflowState.isSnapshotDialogVisible}
-          manageDialogs={manageDialogs}
-        />
+        {dataflowState.isSnapshotDialogVisible && (
+          <SnapshotsDialog
+            dataflowId={dataflowId}
+            datasetId={dataflowState.datasetIdToSnapshotProps}
+            datasetName={dataflowState.datasetNameToSnapshotProps}
+            isSnapshotDialogVisible={dataflowState.isSnapshotDialogVisible}
+            manageDialogs={manageDialogs}
+          />
+        )}
 
         {dataflowState.isCustodian && dataflowState.isManageRolesDialogVisible && (
           <Dialog

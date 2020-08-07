@@ -182,18 +182,20 @@ export const SnapshotsDialog = ({
           snapshotsListData={snapshotsListData}
         />
       </Dialog>
-      <ReleaseSnapshotDialog
-        dataflowId={dataflowId}
-        datasetId={datasetId}
-        hideReleaseDialog={onHideReleaseDialog}
-        isCopyAndReleaseBody={isCopyAndRelease}
-        isReleased={isReleased}
-        isReleasedDialogVisible={isActiveReleaseSnapshotConfirmDialog}
-        onLoadSnapshotList={onLoadSnapshotList}
-        setIsLoading={setIsLoading}
-        snapshotDataToRelease={snapshotDataToRelease}
-        snapshotDescription={snapshotDescription}
-      />
+      {isActiveReleaseSnapshotConfirmDialog && (
+        <ReleaseSnapshotDialog
+          dataflowId={dataflowId}
+          datasetId={datasetId}
+          hideReleaseDialog={onHideReleaseDialog}
+          isCopyAndReleaseBody={isCopyAndRelease}
+          isReleased={isReleased}
+          isReleasedDialogVisible={isActiveReleaseSnapshotConfirmDialog}
+          onLoadSnapshotList={onLoadSnapshotList}
+          setIsLoading={setIsLoading}
+          snapshotDataToRelease={snapshotDataToRelease}
+          snapshotDescription={snapshotDescription}
+        />
+      )}
     </>
   );
 };
