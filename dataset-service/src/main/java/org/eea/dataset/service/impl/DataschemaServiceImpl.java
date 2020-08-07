@@ -576,7 +576,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       if (fieldSchemaVO != null) {
         Document fieldSchema =
             schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
-
         if (fieldSchema != null) {
           // First of all, we update the previous data in the catalog
           updatePreviousDataInCatalog(fieldSchema);
@@ -1668,6 +1667,31 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     } else {
       throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, datasetId));
     }
+  }
+
+
+  /**
+   * Check clear attachments.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @return the boolean
+   */
+  @Override
+  public Boolean checkClearAttachments(Long datasetId, String datasetSchemaId,
+      FieldSchemaVO fieldSchemaVO) {
+    Boolean hasToClean = false;
+    if (fieldSchemaVO != null) {
+      Document fieldSchema =
+          schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
+      if (fieldSchema != null
+          && (DataType.ATTACHMENT.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
+              || DataType.ATTACHMENT.equals(fieldSchemaVO.getType()))) {
+        hasToClean = true;
+      }
+    }
+    return hasToClean;
   }
 
   /**

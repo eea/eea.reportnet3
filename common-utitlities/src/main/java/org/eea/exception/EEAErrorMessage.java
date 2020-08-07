@@ -247,6 +247,10 @@ public final class EEAErrorMessage {
   public static final String FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_CREATION =
       "Aditional EXPORT_EU_DATASET integrations cannot be created";
 
+  /** The Constant FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_DELETION: {@value}. */
+  public static final String FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_DELETION =
+      "EXPORT_EU_DATASET integrations cannot be deleted";
+
   /** The Constant NO_DESIGNS_TO_COPY: {@value}. */
   public static final String NO_DESIGNS_TO_COPY =
       "No designs datasets found to copy in the dataflow %s";

@@ -407,7 +407,7 @@ public interface DatasetService {
   /**
    * Checks if is dataset reportable. Dataset is reportable when is designDataset in dataflow with
    * status design or reportingDataset in state Draft.
-   * 
+   *
    * @param idDataset the id dataset
    * @return the boolean
    */
@@ -465,4 +465,26 @@ public interface DatasetService {
    */
   void updateAttachment(@DatasetId Long datasetId, String idField, String fileName, InputStream is)
       throws EEAException, IOException;
+
+
+  /**
+   * Gets the field by id.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @return the field by id
+   * @throws EEAException the EEA exception
+   */
+  FieldVO getFieldById(@DatasetId Long datasetId, String idField) throws EEAException;
+
+
+  /**
+   * Delete attachment by field schema id.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaId the field schema id
+   * @throws EEAException the EEA exception
+   */
+  void deleteAttachmentByFieldSchemaId(@DatasetId Long datasetId, String fieldSchemaId)
+      throws EEAException;
 }

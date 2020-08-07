@@ -1839,4 +1839,16 @@ public class DatasetSchemaServiceTest {
       throw e;
     }
   }
+
+  @Test
+  public void testCheckDeleteAttachments() {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setId("5eb4269d06390651aced7c93");
+    Document doc = new Document();
+    doc.put("typeData", "ATTACHMENT");
+    when(schemasRepository.findFieldSchema(Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(doc);
+    dataSchemaServiceImpl.checkClearAttachments(1L, "5eb4269d06390651aced7c93", fieldSchemaVO);
+    Mockito.verify(schemasRepository, times(1)).findFieldSchema(Mockito.any(), Mockito.any());
+  }
 }

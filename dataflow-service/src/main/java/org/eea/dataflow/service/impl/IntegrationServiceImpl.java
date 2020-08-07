@@ -94,6 +94,12 @@ public class IntegrationServiceImpl implements IntegrationService {
   @Transactional
   @Override
   public void deleteIntegration(Long integrationId) throws EEAException {
+
+    IntegrationOperationTypeEnum operation = integrationRepository.findOperationById(integrationId);
+    if (IntegrationOperationTypeEnum.EXPORT_EU_DATASET.equals(operation)) {
+      throw new EEAException(EEAErrorMessage.FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_DELETION);
+    }
+
     CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
     crudManager.delete(integrationId);
   }
@@ -218,15 +224,13 @@ public class IntegrationServiceImpl implements IntegrationService {
    * Creates the default integration.
    *
    * @param dataflowId the dataflow id
-   * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    */
   @Transactional
   @Override
-  public void createDefaultIntegration(Long dataflowId, Long datasetId, String datasetSchemaId) {
+  public void createDefaultIntegration(Long dataflowId, String datasetSchemaId) {
     Map<String, String> internalParameters = new HashMap<>();
     internalParameters.put(IntegrationParams.DATAFLOW_ID, dataflowId.toString());
-    internalParameters.put(IntegrationParams.DATASET_ID, datasetId.toString());
     internalParameters.put(IntegrationParams.DATASET_SCHEMA_ID, datasetSchemaId);
     internalParameters.put(IntegrationParams.REPOSITORY, "ReportNetTesting");
     internalParameters.put(IntegrationParams.PROCESS_NAME, "Export_EU_dataset.fmw");
@@ -284,14 +288,16 @@ public class IntegrationServiceImpl implements IntegrationService {
   /**
    * Gets the expor EU dataset integration by dataset id.
    *
-   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
    * @return the expor EU dataset integration by dataset id
    */
   @Override
-  public IntegrationVO getExporEUDatasetIntegrationByDatasetId(Long datasetId) {
+  public IntegrationVO getExporEUDatasetIntegrationByDatasetId(String datasetSchemaId) {
     Integration integration = integrationRepository.findFirstByOperationAndParameterAndValue(
-        IntegrationOperationTypeEnum.EXPORT_EU_DATASET, IntegrationParams.DATASET_ID,
-        datasetId.toString());
-    return integrationMapper.entityToClass(integration);
+        IntegrationOperationTypeEnum.EXPORT_EU_DATASET, IntegrationParams.DATASET_SCHEMA_ID,
+        datasetSchemaId);
+    IntegrationVO integrationVO = integrationMapper.entityToClass(integration);
+    LOG.debug("Found EXPORT_EU_DATASET integration: {}", integrationVO);
+    return integrationVO;
   }
 }

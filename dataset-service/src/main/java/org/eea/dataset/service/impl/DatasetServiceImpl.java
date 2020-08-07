@@ -1328,17 +1328,6 @@ public class DatasetServiceImpl implements DatasetService {
       field.setValue(values.toString().substring(1, values.toString().length() - 1));
     }
 
-    // Attatchment field. Initialize it
-    if (DataType.ATTACHMENT.equals(field.getType())) {
-
-      AttachmentValue attachment = new AttachmentValue();
-      attachment.setFileName("");
-      attachment.setFieldValue(field);
-
-      field.setValue("");
-      attachmentRepository.save(attachment);
-    }
-
   }
 
 
@@ -2347,11 +2336,8 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void deleteAttachment(Long datasetId, String fieldId) throws EEAException {
-    // Clear the attachment value
-    AttachmentValue attachment = attachmentRepository.findByFieldValueId(fieldId);
-    attachment.setContent(null);
-    attachment.setFileName("");
-    attachmentRepository.save(attachment);
+    // Delete the attachment
+    attachmentRepository.deleteByFieldValueId(fieldId);
     // Put the field value name to null
     FieldValue field = fieldRepository.findById(fieldId);
     field.setValue("");
@@ -2373,8 +2359,13 @@ public class DatasetServiceImpl implements DatasetService {
   public void updateAttachment(Long datasetId, String fieldId, String fileName, InputStream is)
       throws EEAException, IOException {
 
+    FieldValue field = fieldRepository.findById(fieldId);
     // Attachment table
     AttachmentValue attachment = attachmentRepository.findByFieldValueId(fieldId);
+    if (null == attachment) {
+      attachment = new AttachmentValue();
+      attachment.setFieldValue(field);
+    }
     attachment.setFileName(fileName);
     byte[] content;
     content = IOUtils.toByteArray(is);
@@ -2385,9 +2376,44 @@ public class DatasetServiceImpl implements DatasetService {
     attachmentRepository.save(attachment);
 
     // Field table
-    FieldValue field = fieldRepository.findById(fieldId);
     field.setValue(fileName);
     fieldRepository.save(field);
+  }
+
+
+  /**
+   * Gets the field by id.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @return the field by id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public FieldVO getFieldById(Long datasetId, String idField) throws EEAException {
+    FieldValue fieldValue = fieldRepository.findById(idField);
+    if (fieldValue == null) {
+      throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
+    }
+    return fieldNoValidationMapper.entityToClass(fieldValue);
+  }
+
+
+  /**
+   * Delete attachment by field schema id.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaId the field schema id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void deleteAttachmentByFieldSchemaId(Long datasetId, String fieldSchemaId)
+      throws EEAException {
+    // Delete the attachment
+    attachmentRepository.deleteByFieldValueIdFieldSchema(fieldSchemaId);
+    // Put the field value name to null
+    fieldRepository.clearFieldValue(fieldSchemaId);
   }
 
 }

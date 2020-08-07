@@ -244,10 +244,10 @@ public class IntegrationControllerImplTest {
   @Test
   public void createDefaultIntegrationTest() throws EEAException {
     Mockito.doNothing().when(integrationService).createDefaultIntegration(Mockito.any(),
-        Mockito.any(), Mockito.any());
-    integrationControllerImpl.createDefaultIntegration(1L, 1L, "5ce524fad31fc52540abae73");
+        Mockito.any());
+    integrationControllerImpl.createDefaultIntegration(1L, "5ce524fad31fc52540abae73");
     Mockito.verify(integrationService, times(1)).createDefaultIntegration(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any());
   }
 
   /**
@@ -255,8 +255,9 @@ public class IntegrationControllerImplTest {
    */
   @Test
   public void findExporEUDatasetIntegrationByDatasetIdTest() {
-    Mockito.when(integrationService.getExporEUDatasetIntegrationByDatasetId(Mockito.anyLong()))
+    Mockito.when(integrationService.getExporEUDatasetIntegrationByDatasetId(Mockito.anyString()))
         .thenReturn(null);
-    Assert.assertNull(integrationControllerImpl.findExporEUDatasetIntegrationByDatasetId(1L));
+    Assert.assertNull(integrationControllerImpl
+        .findExporEUDatasetIntegrationByDatasetId("5ce524fad31fc52540abae73"));
   }
 }
