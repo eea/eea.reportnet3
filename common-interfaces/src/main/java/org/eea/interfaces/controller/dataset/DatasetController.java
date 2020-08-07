@@ -191,7 +191,8 @@ public interface DatasetController {
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   ResponseEntity exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "idTableSchema", required = false) String idTableSchema,
-      @RequestParam("mimeType") String mimeType) throws Exception;
+      @RequestParam("mimeType") String mimeType,
+      @RequestParam("isIntegration") Boolean isIntegration) throws Exception;
 
   /**
    * Insert id data schema.
@@ -311,5 +312,7 @@ public interface DatasetController {
   @DeleteMapping("/{datasetId}/field/{fieldId}/attachment")
   public void deleteAttachment(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldId") String idField);
+
+
 
 }

@@ -2,6 +2,7 @@ package org.eea.dataflow.integration.executor.fme.service;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.io.InputStream;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.FMECollection;
 import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
@@ -187,8 +188,8 @@ public class FMECommunicationServiceTest {
     Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
         Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(checkResult);
 
-    FileSubmitResult result = fmeCommunicationService.receiveFile(1L, 1L, "test");
-    Assert.assertEquals(fileSubmitResult.getName(), result.getName());
+    InputStream result = fmeCommunicationService.receiveFile(1L, 1L, "test");
+    Assert.assertEquals(fileSubmitResult.getName(), result);
   }
 
   @Test

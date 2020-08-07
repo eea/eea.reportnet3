@@ -538,7 +538,8 @@ public class DataSetControllerImpl implements DatasetController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public ResponseEntity exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "idTableSchema", required = false) String idTableSchema,
-      @RequestParam("mimeType") String mimeType) {
+      @RequestParam("mimeType") String mimeType,
+      @RequestParam("isIntegration") Boolean isIntegration) {
     LOG.info("Init the export controller");
     byte[] file;
     try {
@@ -557,8 +558,11 @@ public class DataSetControllerImpl implements DatasetController {
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
 
-      return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
-
+      if (!isIntegration) {
+        return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
+      } else {
+        return new ResponseEntity(null, null, HttpStatus.OK);
+      }
     } catch (EEAException | IOException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }

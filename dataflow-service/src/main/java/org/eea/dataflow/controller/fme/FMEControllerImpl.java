@@ -1,7 +1,5 @@
 package org.eea.dataflow.controller.fme;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.integration.utils.StreamingUtil;
 import org.eea.interfaces.controller.dataflow.integration.fme.FMEController;
@@ -127,17 +125,14 @@ public class FMEControllerImpl implements FMEController {
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam("fileName") String fileName) {
     // devolver inputstream
-    // fmeCommunicationService.receiveFile(datasetId, providerId, fileName);
-
     StreamingResponseBody stream = out -> {
       // InputStream is = new FileInputStream("");
       String initialString =
           " Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id consectetur felis. Donec nisi neque, pellentesque non felis non, vestibulum scelerisque lacus. Nam quis lobortis neque. Sed aliquam vehicula diam, pulvinar varius ex imperdiet ut. Maecenas vitae facilisis ex. Mauris non neque accumsan, ultrices arcu nec, vehicula ex. Curabitur ullamcorper justo sit amet eros sollicitudin, eu venenatis elit tincidunt. Mauris venenatis tellus et ipsum semper lobortis. Nulla facilisi. Donec eget augue neque."
               + "Pellentesque semper, velit id ultrices euismod, nisl nisi posuere felis, vel porttitor est nisl vitae velit. Sed fringilla orci a orci varius vulputate. Integer vitae nisl nulla. Proin pulvinar est sit amet neque eleifend lacinia. Duis sit amet accumsan neque. Aliquam ex nunc, maximus nec nisl sed, lacinia tempus odio. Suspendisse potenti. Proin mattis auctor nisi sed efficitur. ";
-      InputStream is = new ByteArrayInputStream(initialString.getBytes());
-      streamingUtil.copy(is, out);
+      // InputStream is = new ByteArrayInputStream();
+      streamingUtil.copy(fmeCommunicationService.receiveFile(datasetId, providerId, fileName), out);
     };
-
 
     HttpHeaders httpHeaders = new HttpHeaders();
     httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
