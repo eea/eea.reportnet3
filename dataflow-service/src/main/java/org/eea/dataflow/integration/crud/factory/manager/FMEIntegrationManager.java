@@ -127,7 +127,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
     integration = integrationMapper.classToEntity(integrationVO);
 
     integrationRepository.save(integration);
-    LOG.info("Integration with id {} updated", integration.getId());
+    LOG.info("Integration updated: {}", integration);
   }
 
   /**
@@ -151,7 +151,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
 
     Integration integration = integrationMapper.classToEntity(integrationVO);
     integrationRepository.save(integration);
-    LOG.info("New Integration created");
+    LOG.info("Integration created: {}", integrationVO);
   }
 
   /**
@@ -225,7 +225,6 @@ public class FMEIntegrationManager extends AbstractCrudManager {
 
     Map<String, String> oldInternalParametersMap = integrationVO.getInternalParameters();
     String dataflowId = newInternalParameters.get(IntegrationParams.DATAFLOW_ID);
-    String datasetId = newInternalParameters.get(IntegrationParams.DATASET_ID);
     String datasetSchemaId = newInternalParameters.get(IntegrationParams.DATASET_SCHEMA_ID);
     String repository = newInternalParameters.get(IntegrationParams.REPOSITORY);
     String processName = newInternalParameters.get(IntegrationParams.PROCESS_NAME);
@@ -234,10 +233,6 @@ public class FMEIntegrationManager extends AbstractCrudManager {
 
     if (null != dataflowId && !dataflowId.isEmpty()) {
       oldInternalParametersMap.put(IntegrationParams.DATAFLOW_ID, dataflowId);
-    }
-
-    if (null != datasetId && !datasetId.isEmpty()) {
-      oldInternalParametersMap.put(IntegrationParams.DATASET_ID, datasetId);
     }
 
     if (null != datasetSchemaId && !datasetSchemaId.isEmpty()) {
