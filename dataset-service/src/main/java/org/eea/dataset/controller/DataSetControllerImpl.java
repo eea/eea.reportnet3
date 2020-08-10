@@ -557,6 +557,7 @@ public class DataSetControllerImpl implements DatasetController {
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
 
+
       return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
 
     } catch (EEAException | IOException e) {
