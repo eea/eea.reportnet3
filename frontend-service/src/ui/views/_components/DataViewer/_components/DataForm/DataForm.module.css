@@ -1,6 +1,11 @@
+.allAttachmentMessage {
+  font-weight: bold;
+}
+
 .dialogDropdown {
   z-index: 1060 !important;
 }
+
 .columnInfoButton {
   border-radius: 50% !important;
   width: 0.7em !important;

@@ -29,7 +29,7 @@
 }
 .notificationCounter {
   position: absolute;
-  top: 8px;
+  top: -3px;
   background-color: var(--errors);
   color: var(--white);
   border-radius: 3px;
@@ -37,14 +37,11 @@
   font: 8px Verdana;
 }
 .notificationIconWrapper {
-  width: 2.5rem;
-  height: 2.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  // margin-right: 3px;
-  margin: -10px 3px 0 2px;
+
 }
 
 .tooltipClass {
