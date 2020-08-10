@@ -59,10 +59,6 @@ export const Dialog = ({
   useEffect(() => {
     const body = document.querySelector('body');
     visible && (body.style.overflow = 'hidden');
-    setMaskStyle({
-      ...maskStyle,
-      zIndex: zIndex + dialogContext.open.indexOf(dialogId)
-    });
 
     return () => {
       if (dialogContext.open.length === 0) {
@@ -70,9 +66,17 @@ export const Dialog = ({
       }
     };
   }, [visible]);
+
+  useEffect(() => {
+    if (dialogContext.open.indexOf(dialogId) >= 0) {
+      setMaskStyle({
+        ...maskStyle,
+        zIndex: zIndex + dialogContext.open.indexOf(dialogId)
+      });
+    }
+  }, [dialogContext.open]);
   return (
     <div className={styles.dialog_mask_wrapper} style={maskStyle}>
-      {console.log('dialogContext.open: ', dialogContext.open)}
       <PrimeDialog
         blockScroll={blockScroll}
         className={className}
