@@ -2,11 +2,14 @@ package org.eea.dataflow.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.junit.Assert;
@@ -259,5 +262,39 @@ public class IntegrationControllerImplTest {
         .thenReturn(null);
     Assert.assertNull(integrationControllerImpl
         .findExporEUDatasetIntegrationByDatasetId("5ce524fad31fc52540abae73"));
+  }
+
+  /**
+   * Execute EU dataset export test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void executeEUDatasetExportTest() throws EEAException {
+    Mockito.doNothing().when(integrationService).addLock(Mockito.anyLong());
+    Mockito.when(integrationService.executeEUDatasetExport(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    Mockito.doNothing().when(integrationService).releaseLock(Mockito.anyLong());
+    List<ExecutionResultVO> response = integrationControllerImpl.executeEUDatasetExport(1L);
+    Assert.assertEquals(0, response.size());
+  }
+
+  /**
+   * Execute EU dataset export exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void executeEUDatasetExportExceptionTest() throws EEAException {
+    Mockito.doNothing().when(integrationService).addLock(Mockito.anyLong());
+    Mockito.when(integrationService.executeEUDatasetExport(Mockito.anyLong()))
+        .thenThrow(EEAException.class);
+    Mockito.doNothing().when(integrationService).releaseLock(Mockito.anyLong());
+    try {
+      integrationControllerImpl.executeEUDatasetExport(1L);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
   }
 }

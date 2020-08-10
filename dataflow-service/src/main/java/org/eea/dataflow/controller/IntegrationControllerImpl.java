@@ -227,14 +227,18 @@ public class IntegrationControllerImpl implements IntegrationController {
   @ApiResponse(code = 500, message = "Internal Server Error")
   public List<ExecutionResultVO> executeEUDatasetExport(
       @LockCriteria(name = "dataflowId") @RequestParam("dataflowId") Long dataflowId) {
+    List<ExecutionResultVO> results = null;
     try {
-      return integrationService.executeEUDatasetExport(dataflowId);
+      integrationService.addLock(dataflowId);
+      results = integrationService.executeEUDatasetExport(dataflowId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error executing the export from EUDataset with message: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    } finally {
+      integrationService.releaseLock(dataflowId);
     }
+    return results;
   }
-
 
   /**
    * Copy integrations.

@@ -1306,5 +1306,9 @@
   {
     "key": "config/apiGateway/zuul.routes.eudataset.stripPrefix",
     "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/dataflow.ribbon.ReadTimeout",
+    "value": "JHtSSUJCT05fUkVBRF9USU1FT1VUOjMwMDB9"
   }
 ]
