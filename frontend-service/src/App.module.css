@@ -1,5 +1,9 @@
 /* ICONS https://ec-europa.github.io/europa-component-library/ec/components/preview/ec-style-icon*/
 
+*:focus {
+  outline: none;
+}
+
 html,
 body {
   font-family: 'open sans', sans-serif;
