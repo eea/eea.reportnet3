@@ -426,7 +426,10 @@ const useBigButtonList = ({
   ];
 
   const exportEuDatasetModel = !isNil(dataflowState.data.euDatasets)
-    ? dataflowState.data.euDatasets.map(dataset => ({
+    ? [{
+      label: resources.messages['updateConfigurations'],
+      title: true
+    }].concat(dataflowState.data.euDatasets.map(dataset => ({
         command: () => {
           getDatasetData(dataset.euDatasetId, dataset.datasetSchemaId);
           handleExportEuDataset(true);
@@ -435,7 +438,7 @@ const useBigButtonList = ({
         icon: 'export',
         iconStyle: { transform: 'rotate(-90deg)' },
         label: dataset.euDatasetName
-      }))
+      })))
     : [];
 
   const exportEuDatasetBigButton = [

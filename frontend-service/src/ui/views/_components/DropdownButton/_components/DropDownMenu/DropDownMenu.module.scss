@@ -1,12 +1,12 @@
 .dropDownMenu {
   position: absolute;
   bottom: 0px;
-  right: -52px;
+  right: -80px;
   cursor: pointer;
   font-size: 0.8rem;
   border: 1px solid var(--c-black-200);
   background-color: var(--white);
-  width: 170px;
+  width: 200px;
   border-radius: 2%;
   z-index: 1000;
   padding: 0 0.8rem;
@@ -47,4 +47,11 @@
 }
 .menuItemDisabled:hover {
   color: var(--c-black-300);
+}
+
+.listItemTitle {
+  cursor: default;
+  background: var(--gray-10);
+  font-weight: bold;
+  font-size: 0.9em;
 }

@@ -820,6 +820,7 @@
     "copyDataCollectionToEuDatasetHeader": "Copy Data Collections to EU Datasets",
     "copyDataCollectionToEuDatasetMessage": "Are you sure you want to copy Data Collections to EU Datasets?",
     "exportEuDatasetHeader": "Export EU Datasets",
-    "exportEuDatasetMessage": "Are you sure you want to export EU Datasets?"
+    "exportEuDatasetMessage": "Are you sure you want to export EU Datasets?",
+    "updateConfigurations": "Update configurations"
   }
 }
