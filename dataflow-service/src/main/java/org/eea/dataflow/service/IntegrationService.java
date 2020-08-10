@@ -90,17 +90,17 @@ public interface IntegrationService {
   IntegrationVO getExporEUDatasetIntegrationByDatasetId(String datasetSchemaId);
 
   /**
-   * Adds the lock.
+   * Adds the populate EU dataset lock.
    *
    * @param dataflowId the dataflow id
    * @throws EEAException the EEA exception
    */
-  void addLock(Long dataflowId) throws EEAException;
+  void addPopulateEUDatasetLock(Long dataflowId) throws EEAException;
 
   /**
-   * Release lock.
+   * Release populate EU dataset lock.
    *
    * @param dataflowId the dataflow id
    */
-  void releaseLock(Long dataflowId);
+  void releasePopulateEUDatasetLock(Long dataflowId);
 }

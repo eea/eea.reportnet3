@@ -271,10 +271,10 @@ public class IntegrationControllerImplTest {
    */
   @Test
   public void executeEUDatasetExportTest() throws EEAException {
-    Mockito.doNothing().when(integrationService).addLock(Mockito.anyLong());
+    Mockito.doNothing().when(integrationService).addPopulateEUDatasetLock(Mockito.anyLong());
     Mockito.when(integrationService.executeEUDatasetExport(Mockito.anyLong()))
         .thenReturn(new ArrayList<>());
-    Mockito.doNothing().when(integrationService).releaseLock(Mockito.anyLong());
+    Mockito.doNothing().when(integrationService).releasePopulateEUDatasetLock(Mockito.anyLong());
     List<ExecutionResultVO> response = integrationControllerImpl.executeEUDatasetExport(1L);
     Assert.assertEquals(0, response.size());
   }
@@ -286,10 +286,10 @@ public class IntegrationControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void executeEUDatasetExportExceptionTest() throws EEAException {
-    Mockito.doNothing().when(integrationService).addLock(Mockito.anyLong());
+    Mockito.doNothing().when(integrationService).addPopulateEUDatasetLock(Mockito.anyLong());
     Mockito.when(integrationService.executeEUDatasetExport(Mockito.anyLong()))
         .thenThrow(EEAException.class);
-    Mockito.doNothing().when(integrationService).releaseLock(Mockito.anyLong());
+    Mockito.doNothing().when(integrationService).releasePopulateEUDatasetLock(Mockito.anyLong());
     try {
       integrationControllerImpl.executeEUDatasetExport(1L);
     } catch (ResponseStatusException e) {

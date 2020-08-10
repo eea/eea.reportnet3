@@ -274,18 +274,12 @@ public class IntegrationServiceImpl implements IntegrationService {
   }
 
   /**
-   * Release lock.
+   * Release populate EU dataset lock.
    *
    * @param dataflowId the dataflow id
    */
   @Override
-  public void releaseLock(Long dataflowId) {
-    // Remove lock to the operation export from EU dataset
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.EXPORT_EU_DATASET.getValue());
-    criteria.add(dataflowId);
-    lockService.removeLockByCriteria(criteria);
-
+  public void releasePopulateEUDatasetLock(Long dataflowId) {
     // Remove lock to the operation copy data to EU dataset
     List<Object> criteriaCopy = new ArrayList<>();
     criteriaCopy.add(LockSignature.POPULATE_EU_DATASET.getValue());
@@ -300,7 +294,7 @@ public class IntegrationServiceImpl implements IntegrationService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public void addLock(Long dataflowId) throws EEAException {
+  public void addPopulateEUDatasetLock(Long dataflowId) throws EEAException {
     // Lock to avoid export EUDataset while is copying data
     Map<String, Object> mapCriteriaExport = new HashMap<>();
     mapCriteriaExport.put("signature", LockSignature.POPULATE_EU_DATASET.getValue());
