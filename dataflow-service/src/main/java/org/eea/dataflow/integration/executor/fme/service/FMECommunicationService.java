@@ -248,9 +248,16 @@ public class FMECommunicationService {
     HttpEntity<MultiValueMap<String, Object>> request =
         createHttpRequest(null, uriParams, headerInfo);
 
-    ResponseEntity<byte[]> checkResult =
-        this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
-            .buildAndExpand(uriParams).toString(), HttpMethod.GET, request, byte[].class);
+
+    ResponseEntity<byte[]> checkResult = null;
+    try {
+      checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
+          .path(auxURL).buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
+          byte[].class);
+    } catch (HttpClientErrorException e) {
+      LOG_ERROR.info("Error downloading file: {}  from FME", fileName);
+    }
+
 
     InputStream initialStream = new ByteArrayInputStream(checkResult.getBody());
     return initialStream;

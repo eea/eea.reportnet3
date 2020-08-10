@@ -29,12 +29,17 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+/**
+ * The Class FMEIntegrationExecutorServiceTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class FMEIntegrationExecutorServiceTest {
 
+  /** The fme integration executor service. */
   @InjectMocks
   private FMEIntegrationExecutorService fmeIntegrationExecutorService;
 
+  /** The fme communication service. */
   @Mock
   private FMECommunicationService fmeCommunicationService;
 
@@ -54,6 +59,7 @@ public class FMEIntegrationExecutorServiceTest {
   @Mock
   FMEJobRepository fmeJobRepository;
 
+  /** The integration. */
   IntegrationVO integration = new IntegrationVO();
 
   /** The security context. */
@@ -62,6 +68,9 @@ public class FMEIntegrationExecutorServiceTest {
   /** The authentication. */
   private Authentication authentication;
 
+  /**
+   * Inits the mocks.
+   */
   @Before
   public void initMocks() {
     ThreadPropertiesManager.setVariable("user", "user");
@@ -78,10 +87,13 @@ public class FMEIntegrationExecutorServiceTest {
     securityContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(securityContext);
     MockitoAnnotations.initMocks(this);
-
   }
 
-
+  /**
+   * Fme execution export test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void fmeExecutionExportTest() throws EEAException {
     integration.setOperation(IntegrationOperationTypeEnum.EXPORT);
@@ -97,6 +109,11 @@ public class FMEIntegrationExecutorServiceTest {
     Mockito.verify(fmeJobRepository, times(1)).save(Mockito.any());
   }
 
+  /**
+   * Fme execution import test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void fmeExecutionImportTest() throws EEAException {
     integration.setOperation(IntegrationOperationTypeEnum.IMPORT);
@@ -110,6 +127,11 @@ public class FMEIntegrationExecutorServiceTest {
     Mockito.verify(fmeJobRepository, times(1)).save(Mockito.any());
   }
 
+  /**
+   * Fme execution export EU dataset test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void fmeExecutionExportEUDatasetTest() throws EEAException {
     integration.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
