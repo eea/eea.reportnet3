@@ -741,7 +741,7 @@ public class DataSetControllerImpl implements DatasetController {
   public ResponseEntity getAttachment(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldId") String idField) {
 
-    LOG.info("Init the get attachment controller");
+    LOG.info("Downloading attachment from the datasetId {}", datasetId);
     byte[] file;
     try {
       AttachmentValue attachment = datasetService.getAttachment(datasetId, idField);
@@ -755,6 +755,8 @@ public class DataSetControllerImpl implements DatasetController {
       return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
 
     } catch (EEAException | IOException e) {
+      LOG_ERROR.error("Error downloading attachment from the datasetId {}, with message: {}",
+          datasetId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
 
@@ -785,6 +787,8 @@ public class DataSetControllerImpl implements DatasetController {
       InputStream is = file.getInputStream();
       datasetService.updateAttachment(datasetId, idField, fileName, is);
     } catch (EEAException | IOException e) {
+      LOG_ERROR.error("Error updating attachment from the datasetId {}, with message: {}",
+          datasetId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
 
@@ -842,6 +846,8 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       datasetService.deleteAttachment(datasetId, idField);
     } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting attachment from the datasetId {}, with message: {}",
+          datasetId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
 

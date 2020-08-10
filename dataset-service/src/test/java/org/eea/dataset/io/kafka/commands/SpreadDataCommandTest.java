@@ -11,6 +11,7 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.data.repository.AttachmentRepository;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
@@ -82,6 +83,9 @@ public class SpreadDataCommandTest {
 
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
+
+  @Mock
+  private AttachmentRepository attachmentRepository;
 
   /** The eea event VO. */
   private EEAEventVO eeaEventVO;
