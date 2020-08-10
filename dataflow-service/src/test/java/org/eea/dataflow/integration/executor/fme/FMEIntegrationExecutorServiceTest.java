@@ -86,57 +86,40 @@ public class FMEIntegrationExecutorServiceTest {
   public void fmeExecutionExportTest() throws EEAException {
     integration.setOperation(IntegrationOperationTypeEnum.EXPORT);
     DataSetMetabaseVO dataset = new DataSetMetabaseVO();
-
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-
     when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
-
     when(fmeCommunicationService.createDirectory(Mockito.any(), Mockito.any()))
         .thenReturn(HttpStatus.OK);
-
     fmeIntegrationExecutorService.execute(IntegrationOperationTypeEnum.EXPORT, "test", 1L,
         integration);
-
     Mockito.verify(fmeJobRepository, times(1)).save(Mockito.any());
   }
 
   @Test
   public void fmeExecutionImportTest() throws EEAException {
     integration.setOperation(IntegrationOperationTypeEnum.IMPORT);
-
     DataSetMetabaseVO dataset = new DataSetMetabaseVO();
-
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-
     when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
-
-
     fmeIntegrationExecutorService.execute(IntegrationOperationTypeEnum.IMPORT, "test", 1L,
         integration);
-
     Mockito.verify(fmeJobRepository, times(1)).save(Mockito.any());
   }
 
   @Test
   public void fmeExecutionExportEUDatasetTest() throws EEAException {
     integration.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
-
     DataSetMetabaseVO dataset = new DataSetMetabaseVO();
-
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-
     when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
-
-
     fmeIntegrationExecutorService.execute(IntegrationOperationTypeEnum.EXPORT_EU_DATASET, "test",
         1L, integration);
-
     Mockito.verify(fmeJobRepository, times(1)).save(Mockito.any());
   }
 }
