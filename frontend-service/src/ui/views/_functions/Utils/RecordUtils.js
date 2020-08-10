@@ -5,6 +5,11 @@ import isNull from 'lodash/isNull';
 import isString from 'lodash/isString';
 import isUndefined from 'lodash/isUndefined';
 
+const allAttachments = colsSchema => {
+  const notAttachment = colsSchema.filter(col => col.type && col.type.toUpperCase() !== 'ATTACHMENT');
+  return notAttachment.length === 0;
+};
+
 const changeCellValue = (tableData, rowIndex, field, value) => {
   tableData[rowIndex].dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[field] = value;
   return tableData;
@@ -110,6 +115,31 @@ const getCodelistValue = (codelistItemsOptions, value) => {
   }
 };
 
+const getFieldTypeValue = fieldType => {
+  const fieldTypes = [
+    { fieldType: 'Number_Integer', value: 'Number - Integer' },
+    { fieldType: 'Number_Decimal', value: 'Number - Decimal' },
+    { fieldType: 'Date', value: 'Date' },
+    { fieldType: 'Text', value: 'Text' },
+    { fieldType: 'Rich_Text', value: 'Rich text' },
+    { fieldType: 'Email', value: 'Email' },
+    { fieldType: 'URL', value: 'URL' },
+    { fieldType: 'Phone', value: 'Phone number' },
+    { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
+    { fieldType: 'Codelist', value: 'Single select' },
+    { fieldType: 'Multiselect_Codelist', value: 'Multiple select' },
+    { fieldType: 'Link', value: 'Link' },
+    { fieldType: 'Attachment', value: 'Attachment' }
+  ];
+
+  if (!isUndefined(fieldType)) {
+    const filteredTypes = fieldTypes.filter(field => field.fieldType.toUpperCase() === fieldType.toUpperCase())[0];
+    return filteredTypes.value;
+  } else {
+    return '';
+  }
+};
+
 const getInitialRecordValues = (record, colsSchema) => {
   const initialValues = [];
   const filteredColumns = colsSchema.filter(
@@ -196,6 +226,7 @@ const createEmptyObject = (columnsSchema, data) => {
 };
 
 export const RecordUtils = {
+  allAttachments,
   changeCellValue,
   changeRecordInTable,
   changeRecordValue,
@@ -209,6 +240,7 @@ export const RecordUtils = {
   getCodelistItems,
   getCodelistItemsInSingleColumn,
   getCodelistValue,
+  getFieldTypeValue,
   getInitialRecordValues,
   getLinkValue,
   getMultiselectValues,

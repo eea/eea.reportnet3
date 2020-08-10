@@ -43,9 +43,10 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
           className={`${styles.leftSideBarUserIcon} ${animate ? styles.leftSideBarElementNotification : ''}`}
           icon={AwesomeIcons(icon)}
         />
-        {notificationContext.all.length > 0 ? (
+
+        {notificationContext.all.length > 0 && (
           <span className={styles.notificationCounter}>{notificationContext.all.length || 0}</span>
-        ) : null}
+        )}
       </div>
       <span className={styles.leftSideBarUserText}>{resourcesContext.messages[label]}</span>
     </>

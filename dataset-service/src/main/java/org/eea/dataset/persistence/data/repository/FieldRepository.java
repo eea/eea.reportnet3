@@ -112,4 +112,15 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    */
   FieldValue findById(String fieldId);
 
+
+  /**
+   * Clear field value.
+   *
+   * @param fieldSchemaId the field schema id
+   */
+  @Modifying
+  @Query(nativeQuery = true,
+      value = "update field_value set value = '' where id_field_schema = :fieldSchemaId")
+  void clearFieldValue(@Param("fieldSchemaId") String fieldSchemaId);
+
 }

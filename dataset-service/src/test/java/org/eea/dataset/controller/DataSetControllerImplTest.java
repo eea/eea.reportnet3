@@ -1136,7 +1136,7 @@ public class DataSetControllerImplTest {
     fieldVO.setIdFieldSchema("600B66C6483EA7C8B55891DA171A3E7F");
     MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
     Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
-    Mockito.when(datasetService.getFieldById(Mockito.any())).thenReturn(fieldVO);
+    Mockito.when(datasetService.getFieldById(Mockito.anyLong(), Mockito.any())).thenReturn(fieldVO);
     Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchemaVO);
     dataSetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
@@ -1154,7 +1154,7 @@ public class DataSetControllerImplTest {
     Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
     FieldVO fieldVO = new FieldVO();
     fieldVO.setIdFieldSchema("600B66C6483EA7C8B55891DA171A3E7F");
-    Mockito.when(datasetService.getFieldById(Mockito.any())).thenReturn(fieldVO);
+    Mockito.when(datasetService.getFieldById(Mockito.anyLong(), Mockito.any())).thenReturn(fieldVO);
     Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchemaVO);
     // Mockito.when(datasetService.getMimetype(Mockito.any())).thenReturn("csv");
@@ -1182,7 +1182,7 @@ public class DataSetControllerImplTest {
     Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
     FieldVO fieldVO = new FieldVO();
     fieldVO.setIdFieldSchema("600B66C6483EA7C8B55891DA171A3E7F");
-    Mockito.when(datasetService.getFieldById(Mockito.any())).thenReturn(fieldVO);
+    Mockito.when(datasetService.getFieldById(Mockito.anyLong(), Mockito.any())).thenReturn(fieldVO);
     Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(null);
     try {
@@ -1205,7 +1205,7 @@ public class DataSetControllerImplTest {
     Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
     FieldVO fieldVO = new FieldVO();
     fieldVO.setIdFieldSchema("600B66C6483EA7C8B55891DA171A3E7F");
-    Mockito.when(datasetService.getFieldById(Mockito.any())).thenReturn(fieldVO);
+    Mockito.when(datasetService.getFieldById(Mockito.anyLong(), Mockito.any())).thenReturn(fieldVO);
     Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchemaVO);
     Mockito.when(datasetService.getMimetype(Mockito.any())).thenReturn("csv");
@@ -1228,7 +1228,7 @@ public class DataSetControllerImplTest {
     Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
     FieldVO fieldVO = new FieldVO();
     fieldVO.setIdFieldSchema("600B66C6483EA7C8B55891DA171A3E7F");
-    Mockito.when(datasetService.getFieldById(Mockito.any())).thenReturn(fieldVO);
+    Mockito.when(datasetService.getFieldById(Mockito.anyLong(), Mockito.any())).thenReturn(fieldVO);
     Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchemaVO);
     Mockito.doThrow(new EEAException()).when(datasetService).updateAttachment(Mockito.anyLong(),

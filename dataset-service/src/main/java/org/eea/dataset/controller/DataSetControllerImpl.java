@@ -742,7 +742,7 @@ public class DataSetControllerImpl implements DatasetController {
   public ResponseEntity getAttachment(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldId") String idField) {
 
-    LOG.info("Init the get attachment controller");
+    LOG.info("Downloading attachment from the datasetId {}", datasetId);
     byte[] file;
     try {
       AttachmentValue attachment = datasetService.getAttachment(datasetId, idField);
@@ -756,6 +756,8 @@ public class DataSetControllerImpl implements DatasetController {
       return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
 
     } catch (EEAException | IOException e) {
+      LOG_ERROR.error("Error downloading attachment from the datasetId {}, with message: {}",
+          datasetId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
 
@@ -786,6 +788,8 @@ public class DataSetControllerImpl implements DatasetController {
       InputStream is = file.getInputStream();
       datasetService.updateAttachment(datasetId, idField, fileName, is);
     } catch (EEAException | IOException e) {
+      LOG_ERROR.error("Error updating attachment from the datasetId {}, with message: {}",
+          datasetId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
 
@@ -810,13 +814,14 @@ public class DataSetControllerImpl implements DatasetController {
     if (datasetSchemaId == null) {
       throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND);
     }
-    FieldVO fieldVO = datasetService.getFieldById(idField);
+    FieldVO fieldVO = datasetService.getFieldById(datasetId, idField);
     FieldSchemaVO fieldSchema =
         datasetSchemaService.getFieldSchema(datasetSchemaId, fieldVO.getIdFieldSchema());
     if (fieldSchema == null || fieldSchema.getId() == null) {
       throw new EEAException(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND);
     }
-    if ((fieldSchema.getMaxSize() != null && fieldSchema.getMaxSize() * 1000000 < size)
+    if ((fieldSchema.getMaxSize() != null && fieldSchema.getMaxSize() != 0
+        && fieldSchema.getMaxSize() * 1000000 < size)
         || (fieldSchema.getValidExtensions() != null
             && !Arrays.asList(fieldSchema.getValidExtensions())
                 .contains(datasetService.getMimetype(originalFilename)))) {
@@ -842,6 +847,8 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       datasetService.deleteAttachment(datasetId, idField);
     } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting attachment from the datasetId {}, with message: {}",
+          datasetId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
 

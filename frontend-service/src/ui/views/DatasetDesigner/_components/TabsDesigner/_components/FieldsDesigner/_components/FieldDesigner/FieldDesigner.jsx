@@ -24,6 +24,7 @@ import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContex
 import { fieldDesignerReducer } from './_functions/Reducers/fieldDesignerReducer';
 
 import { DatasetService } from 'core/services/Dataset';
+import { config } from 'conf';
 
 export const FieldDesigner = ({
   addField = false,
@@ -114,7 +115,7 @@ export const FieldDesigner = ({
     isEditing: false,
     isLinkSelectorVisible: false,
     isQCManagerVisible: false,
-    fieldFileProperties: { maxSize: '', validExtensions: [] }
+    fieldFileProperties: fieldFileProperties
   };
 
   const [fieldDesignerState, dispatchFieldDesigner] = useReducer(fieldDesignerReducer, initialFieldDesignerState);
@@ -214,6 +215,7 @@ export const FieldDesigner = ({
       dispatchFieldDesigner({ type: 'SET_CODELIST_ITEMS', payload: [] });
       dispatchFieldDesigner({ type: 'SET_LINK', payload: null });
       dispatchFieldDesigner({ type: 'SET_PK_MUST_BE_USED', payload: false });
+      dispatchFieldDesigner({ type: 'SET_ATTACHMENT_PROPERTIES', payload: { validExtensions: [], maxSize: '' } });
     }
     onCodelistAndLinkShow(fieldId, type);
   };
@@ -712,10 +714,10 @@ export const FieldDesigner = ({
     </div>
   );
 
-  const renderCodelistFileAndLinkButtons = () => {
-    return !isUndefined(fieldDesignerState.fieldTypeValue) &&
-      (fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ||
-        fieldDesignerState.fieldTypeValue.fieldType === 'Multiselect_Codelist') ? (
+  const renderCodelistFileAndLinkButtons = () =>
+    !isUndefined(fieldDesignerState.fieldTypeValue) &&
+    (fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ||
+      fieldDesignerState.fieldTypeValue.fieldType === 'Multiselect_Codelist') ? (
       <Button
         className={`${styles.codelistButton} p-button-secondary-transparent`}
         label={
@@ -757,34 +759,32 @@ export const FieldDesigner = ({
       fieldDesignerState.fieldTypeValue.fieldType === 'Attachment' ? (
       <Button
         className={`${styles.codelistButton} p-button-secondary-transparent`}
-        label={
+        label={`${resources.messages['validExtensions']} ${
           !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
           !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
-            ? `${resources.messages['validExtensions']} ${fieldDesignerState.fieldFileProperties.validExtensions.join(
-                ', '
-              )} - ${resources.messages['maxFileSize']} ${fieldDesignerState.fieldFileProperties.maxSize} ${
-                resources.messages['Mb']
-              }`
-            : resources.messages['fileExtensionsSelection']
-        }
+            ? fieldDesignerState.fieldFileProperties.validExtensions.join(', ')
+            : '*'
+        } - ${resources.messages['maxFileSize']} ${fieldDesignerState.fieldFileProperties.maxSize} ${
+          resources.messages['MB']
+        }`}
         onClick={() => onAttachmentDropdownSelected()}
         style={{ pointerEvents: 'auto' }}
-        tooltip={
+        tooltip={`${resources.messages['validExtensions']} ${
           !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
           !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
-            ? `${resources.messages['validExtensions']} ${fieldDesignerState.fieldFileProperties.validExtensions.join(
-                ', '
-              )} - ${resources.messages['maxFileSize']} ${fieldDesignerState.fieldFileProperties.maxSize} ${
-                resources.messages['Mb']
-              }`
-            : resources.messages['fileExtensionsSelection']
-        }
+            ? fieldDesignerState.fieldFileProperties.validExtensions.join(', ')
+            : '*'
+        } - ${resources.messages['maxFileSize']} ${
+          !isNil(fieldDesignerState.fieldFileProperties.maxSize) &&
+          fieldDesignerState.fieldFileProperties.maxSize.toString() !== '0'
+            ? `${fieldDesignerState.fieldFileProperties.maxSize} ${resources.messages['MB']}`
+            : resources.messages['maxSizeNotDefined']
+        }`}
         tooltipOptions={{ position: 'top' }}
       />
     ) : isCodelistOrLink ? (
       <span style={{ width: '4rem', marginRight: '0.4rem' }}></span>
     ) : null;
-  };
 
   const renderDeleteButton = () =>
     !addField ? (
@@ -909,6 +909,10 @@ export const FieldDesigner = ({
         {!addField ? (
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton}`}
+            disabled={
+              !isUndefined(fieldDesignerState.fieldTypeValue) &&
+              config.validations.bannedFields.includes(fieldDesignerState.fieldTypeValue.value.toLowerCase())
+            }
             icon="horizontalSliders"
             label={resources.messages['createFieldQC']}
             onClick={() => validationContext.onOpenModalFromField(fieldId, tableSchemaId)}
