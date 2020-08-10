@@ -101,17 +101,20 @@ export class CustomFileUpload extends Component {
 
   checkValidExtension(file) {
     const acceptedExtensions = this.props.accept.toLowerCase().split(', ');
-
     if (file) {
       const extension = file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name;
-      return acceptedExtensions.includes(`.${extension.toLowerCase()}`);
+      return acceptedExtensions.includes('*') || acceptedExtensions.includes(`.${extension.toLowerCase()}`);
     }
+
     if (this.hasFiles()) {
       const selectedExtension = this.state.files.map(
         file => file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name
       );
 
-      return !selectedExtension.some(ext => acceptedExtensions.includes(`.${ext.toLowerCase()}`));
+      return (
+        !acceptedExtensions.includes('*') &&
+        !selectedExtension.some(ext => acceptedExtensions.includes(`.${ext.toLowerCase()}`))
+      );
     }
     return false;
   }
@@ -412,6 +415,7 @@ export class CustomFileUpload extends Component {
     let className = classNames('p-fileupload p-component', this.props.className);
     let uploadButton, cancelButton, filesList, progressBar;
     let chooseButton = this.renderChooseButton();
+
     if (!this.props.auto) {
       uploadButton = (
         <Fragment>

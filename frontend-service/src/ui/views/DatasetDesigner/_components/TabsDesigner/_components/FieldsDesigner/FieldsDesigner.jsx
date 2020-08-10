@@ -284,12 +284,14 @@ export const FieldsDesigner = ({
             description: field.description,
             field: field['fieldId'],
             header: field['name'],
+            maxSize: field['maxSize'],
             pkHasMultipleValues: field['pkHasMultipleValues'],
             recordId: field['recordId'],
             referencedField: field['referencedField'],
             required: field.required,
             table: table['tableSchemaName'],
-            type: field['type']
+            type: field['type'],
+            validExtensions: field['validExtensions']
           };
         })
       : [];

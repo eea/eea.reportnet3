@@ -47,7 +47,7 @@ const DocumentFileUpload = ({
   }, [isUploadDialogVisible]);
 
   const validationSchema = Yup.object().shape({
-    description: Yup.string().required(),
+    description: Yup.string().required(' ').max(255, resources.messages['documentDescriptionValidationMax']),
     lang: Yup.string().required(),
     uploadFile: isEditForm
       ? Yup.mixed()
@@ -161,6 +161,7 @@ const DocumentFileUpload = ({
               <label htmlFor="descriptionDocumentFileUpload" className="srOnly">
                 {resources.messages['description']}
               </label>
+              <ErrorMessage className="error" name="description" component="div" />
             </div>
             <div className={`formField${!isEmpty(errors.lang) && touched.lang ? ' error' : ''}`}>
               <Field id={'selectLanguage'} name="lang" component="select" value={values.lang}>
