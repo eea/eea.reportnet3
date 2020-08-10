@@ -47,26 +47,25 @@ public class FMECommunicationService {
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(FMECommunicationService.class);
 
   /**
    * The fme host.
    */
-  // fme.discomap.eea.europa.eu
   @Value("${integration.fme.host}")
   private String fmeHost;
 
   /**
    * The fme scheme.
    */
-  // https
   @Value("${integration.fme.scheme}")
   private String fmeScheme;
 
   /**
    * The fme token.
    */
-  // Basic UmVwb3J0bmV0MzpSZXBvcnRuZXQzXzIwMjAh
   @Value("${integration.fme.token}")
   private String fmeToken;
 
@@ -181,6 +180,13 @@ public class FMECommunicationService {
 
   }
 
+  /**
+   * Creates the directory.
+   *
+   * @param idDataset the id dataset
+   * @param idProvider the id provider
+   * @return the http status
+   */
   public HttpStatus createDirectory(Long idDataset, String idProvider) {
 
     Map<String, String> uriParams = new HashMap<>();
@@ -217,16 +223,12 @@ public class FMECommunicationService {
   /**
    * Receive file.
    *
-   * @param file the file
    * @param idDataset the id dataset
-   * @param providerId
-   * @param idProvider the id provider
+   * @param providerId the provider id
    * @param fileName the file name
-   *
    * @return the file submit result
    */
   public InputStream receiveFile(Long idDataset, Long providerId, String fileName) {
-    // https://fme.discomap.eea.europa.eu/fmerest/v3/resources/connections/MyTest/filesys/foo/bar/filename.txt
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("datasetId", String.valueOf(idDataset));
@@ -240,27 +242,17 @@ public class FMECommunicationService {
     uriParams.put("fileName", fileName);
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put(ACCEPT, "application/octet-stream");
 
-    // MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter =
-    // new MappingJackson2HttpMessageConverter();
-    // mappingJackson2HttpMessageConverter.setSupportedMediaTypes(
-    // Arrays.asList(MediaType.APPLICATION_JSON, MediaType.APPLICATION_OCTET_STREAM));
+    headerInfo.put(ACCEPT, "application/octet-stream");
 
     HttpEntity<MultiValueMap<String, Object>> request =
         createHttpRequest(null, uriParams, headerInfo);
 
-    // this.restTemplate.getMessageConverters().add(mappingJackson2HttpMessageConverter);
+    ResponseEntity<byte[]> checkResult =
+        this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
+            .buildAndExpand(uriParams).toString(), HttpMethod.GET, request, byte[].class);
 
-    ResponseEntity<ByteArrayInputStream> checkResult =
-        this.restTemplate.exchange(
-            uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
-                .buildAndExpand(uriParams).toString(),
-            HttpMethod.GET, request, ByteArrayInputStream.class);
-
-    InputStream initialStream = checkResult.getBody();
-
-
+    InputStream initialStream = new ByteArrayInputStream(checkResult.getBody());
     return initialStream;
 
   }

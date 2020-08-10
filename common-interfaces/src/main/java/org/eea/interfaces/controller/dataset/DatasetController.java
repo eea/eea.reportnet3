@@ -191,8 +191,7 @@ public interface DatasetController {
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   ResponseEntity exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "idTableSchema", required = false) String idTableSchema,
-      @RequestParam("mimeType") String mimeType,
-      @RequestParam("isIntegration") Boolean isIntegration) throws Exception;
+      @RequestParam("mimeType") String mimeType) throws Exception;
 
   /**
    * Insert id data schema.
