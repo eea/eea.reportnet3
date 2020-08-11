@@ -43,6 +43,8 @@ public class ApiGatewaySwaggerResourcesProvider implements SwaggerResourcesProvi
     List<Route> routes = routeLocator.getRoutes();
     //Given that it is possible that a microservice has several Rest interfaces exposed under the same endpoint it's necessary to avoid duplicated configurations
     Set<String> registeredResources = new HashSet<>();
+    registeredResources.add(
+        "consul"); //avoid showing configuration for consul. It should not do it but routeLocator retrieves it as well
     routes.forEach(route -> {
       //if the microservice (route) has not been already added to the Swagger resources
       if (!registeredResources.contains(route.getLocation())) {
