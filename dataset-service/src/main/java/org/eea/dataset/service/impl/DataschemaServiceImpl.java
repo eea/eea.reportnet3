@@ -1679,12 +1679,33 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public Boolean checkClearAttachments(Long datasetId, String datasetSchemaId,
       FieldSchemaVO fieldSchemaVO) {
     Boolean hasToClean = false;
-    if (fieldSchemaVO != null) {
-      Document fieldSchema =
-          schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
-      if (fieldSchema != null
-          && (DataType.ATTACHMENT.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
-              || DataType.ATTACHMENT.equals(fieldSchemaVO.getType()))) {
+    Document fieldSchema =
+        schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
+    if (fieldSchema != null) {
+      Double previousMaxSize = (Double) fieldSchema.get("maxSize");
+      List<String> previousExtensions = (List<String>) fieldSchema.get("validExtensions");
+      List<String> differentExtensions = new ArrayList<>();
+      if (previousExtensions != null) {
+        List<String> similarExtensions = new ArrayList<>(previousExtensions);
+        differentExtensions.addAll(similarExtensions);
+        differentExtensions.addAll(Arrays.asList(fieldSchemaVO.getValidExtensions()));
+        similarExtensions.retainAll(Arrays.asList(fieldSchemaVO.getValidExtensions()));
+        differentExtensions.removeAll(similarExtensions);
+      }
+      // Clean if the data type was or is going to be an Attachment type
+      if ((DataType.ATTACHMENT.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
+          || DataType.ATTACHMENT.equals(fieldSchemaVO.getType()))
+          && !fieldSchema.get(LiteralConstants.TYPE_DATA)
+              .equals(fieldSchemaVO.getType().getValue())) {
+        hasToClean = true;
+      }
+      // Clean if the type is still ATTACHMENT, but the maxSize or the list of file formats have
+      // changed
+      if (DataType.ATTACHMENT.equals(fieldSchemaVO.getType())
+          && fieldSchemaVO.getType().getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
+          && previousMaxSize != null && previousExtensions != null
+          && ((previousMaxSize.doubleValue() != fieldSchemaVO.getMaxSize().doubleValue())
+              || !differentExtensions.isEmpty())) {
         hasToClean = true;
       }
     }

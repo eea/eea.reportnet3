@@ -1844,6 +1844,7 @@ public class DatasetSchemaServiceTest {
   public void testCheckDeleteAttachments() {
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setId("5eb4269d06390651aced7c93");
+    fieldSchemaVO.setType(DataType.ATTACHMENT);
     Document doc = new Document();
     doc.put("typeData", "ATTACHMENT");
     when(schemasRepository.findFieldSchema(Mockito.anyString(), Mockito.anyString()))
