@@ -6,10 +6,10 @@ import styles from './ActionsColumn.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 
-const ActionsColumn = ({ disabledButtons, isDeletingDocument, onDeleteClick, onEditClick }) => {
+const ActionsColumn = ({ disabledButtons, hideEdition = false, isDeletingDocument, onDeleteClick, onEditClick }) => {
   return (
     <div className={styles.actionTemplate}>
-      {!isNil(onEditClick) && (
+      {!isNil(onEditClick) && !hideEdition && (
         <Button
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
           disabled={isDeletingDocument || disabledButtons}

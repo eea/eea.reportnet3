@@ -307,6 +307,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
+  /** The attachment repository. */
   @Autowired
   private AttachmentRepository attachmentRepository;
 
@@ -2189,15 +2190,19 @@ public class DatasetServiceImpl implements DatasetService {
           LOG.info("There is data to copy. Copy data from datasetId {} to datasetId {}",
               originDataset, targetDataset);
           List<RecordValue> recordDesignValuesList = new ArrayList<>();
-
+          List<AttachmentValue> attachments = new ArrayList<>();
           recordDesignValuesList = replaceData(originDataset, targetDataset, listOfTablesFiltered,
-              dictionaryOriginTargetObjectId);
+              dictionaryOriginTargetObjectId, attachments);
 
           if (!recordDesignValuesList.isEmpty()) {
             // save values
             TenantResolver
                 .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset));
             recordRepository.saveAll(recordDesignValuesList);
+            // copy attachments too
+            if (!attachments.isEmpty()) {
+              attachmentRepository.saveAll(attachments);
+            }
           }
         }
       }
@@ -2227,6 +2232,7 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+
   /**
    * Replace data.
    *
@@ -2234,11 +2240,12 @@ public class DatasetServiceImpl implements DatasetService {
    * @param targetDataset the target dataset
    * @param listOfTablesFiltered the list of tables filtered
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
-   *
+   * @param attachments the attachments
    * @return the list
    */
   private List<RecordValue> replaceData(Long originDataset, Long targetDataset,
-      List<TableSchema> listOfTablesFiltered, Map<String, String> dictionaryOriginTargetObjectId) {
+      List<TableSchema> listOfTablesFiltered, Map<String, String> dictionaryOriginTargetObjectId,
+      List<AttachmentValue> attachments) {
 
     TenantResolver.setTenantName(
         String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
@@ -2249,6 +2256,10 @@ public class DatasetServiceImpl implements DatasetService {
           recordRepository.findByTableValueAllRecords(desingTable.getIdTableSchema().toString()));
     }
     List<RecordValue> recordDesignValuesList = new ArrayList<>();
+
+    // attachment values
+    Iterable<AttachmentValue> iterableAttachments = attachmentRepository.findAll();
+    iterableAttachments.forEach(attachments::add);
 
     // fill the data
     DatasetValue ds = new DatasetValue();
@@ -2277,6 +2288,8 @@ public class DatasetServiceImpl implements DatasetService {
           String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
       List<FieldValue> fieldValues = fieldRepository.findByRecord(record);
       List<FieldValue> fieldValuesOnlyValues = new ArrayList<>();
+
+
       for (FieldValue field : fieldValues) {
         FieldValue auxField = new FieldValue();
         auxField.setValue(field.getValue());
@@ -2284,6 +2297,17 @@ public class DatasetServiceImpl implements DatasetService {
         auxField.setType(field.getType());
         auxField.setRecord(recordAux);
         fieldValuesOnlyValues.add(auxField);
+        if (DataType.ATTACHMENT.equals(field.getType())) {
+          for (AttachmentValue attach : attachments) {
+            if (attach.getFieldValue().getIdFieldSchema().equals(field.getIdFieldSchema())
+                && attach.getFileName().equals(field.getValue())
+                && attach.getFieldValue().getId().equals(field.getId())) {
+              attach.setFieldValue(auxField);
+              attach.setId(null);
+              break;
+            }
+          }
+        }
       }
       recordAux.setFields(fieldValuesOnlyValues);
       recordDesignValuesList.add(recordAux);

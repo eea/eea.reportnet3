@@ -419,11 +419,13 @@ export const Dataset = withRouter(({ match, history }) => {
               description: field['description'],
               field: field['fieldId'],
               header: field['name'],
+              maxSize: field['maxSize'],
               pkHasMultipleValues: field['pkHasMultipleValues'],
               recordId: field['recordId'],
               referencedField: field['referencedField'],
               table: table['tableSchemaName'],
-              type: field['type']
+              type: field['type'],
+              validExtensions: field['validExtensions']
             };
           });
         })
