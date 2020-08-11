@@ -619,9 +619,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           className="p-button-secondary p-button-animated-blink"
           icon={'plus'}
           label={resources.messages['addUniqueConstraint']}
-          onClick={() =>
-            manageDialogs('isUniqueConstraintsListDialogVisible', false, 'isManageUniqueConstraintDialogVisible', true)
-          }
+          onClick={() => manageDialogs('isManageUniqueConstraintDialogVisible', true)}
         />
       </div>
       <Button

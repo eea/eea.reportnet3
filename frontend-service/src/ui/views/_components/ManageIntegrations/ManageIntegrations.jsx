@@ -162,7 +162,7 @@ export const ManageIntegrations = ({
 
   const onCloseModal = () => {
     if (datasetType === 'designDataset') {
-      manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
+      manageDialogs('isIntegrationManageDialogVisible', false);
     } else {
       manageDialogs(false);
     }

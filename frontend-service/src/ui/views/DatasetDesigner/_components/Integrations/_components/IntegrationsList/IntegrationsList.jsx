@@ -49,7 +49,7 @@ export const IntegrationsList = ({
         const filteredData = integrationListState.data.filter(
           integration => integration.integrationId === row.integrationId
         );
-        manageDialogs('isIntegrationManageDialogVisible', true, 'isIntegrationListDialogVisible', false);
+        manageDialogs('isIntegrationManageDialogVisible', true);
         if (!isEmpty(filteredData)) getUpdatedData(filteredData[0]);
       }}
     />

@@ -29,7 +29,7 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
           icon={'plus'}
           label={resources.messages['createExternalIntegration']}
           onClick={() => {
-            manageDialogs('isIntegrationListDialogVisible', false, 'isIntegrationManageDialogVisible', true);
+            manageDialogs('isIntegrationManageDialogVisible', true);
             setUpdatedData({});
           }}
         />
