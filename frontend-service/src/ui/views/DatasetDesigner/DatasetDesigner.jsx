@@ -231,7 +231,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       const providerId = ''; // from notification
 
       const datasetName = createFileName(designerState.datasetSchemaName, designerState.exportDatasetFileType);
-      const datasetData = await DatasetService.downloadExportFile(datasetId, fakeExportDatasetFileName, providerId);
+      const datasetData = await DatasetService.downloadExportFile(datasetId, fakeExportDatasetFileName);
 
       designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData, name: datasetName } });
     } catch (error) {
@@ -269,6 +269,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         label: resources.messages['externalExtensions'],
         items: extensionsOperationsList.export.map(type => ({
           command: () => onExportDataExternalExtension(type.fileExtension),
+          // command: () => downloadExportFMEFile(),
           icon: config.icons['archive'],
           label: `${type.fileExtension.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
         }))
@@ -420,12 +421,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const setFileType = fileType => designerDispatch({ type: 'SET_EXPORT_DATASET_FILE_TYPE', payload: { fileType } });
 
-  const onExportDataExternalExtension = async fileType => {
-    console.log('custodian external with different command');
+  const onExportDataExternalExtension = async fileExtension => {
     isLoadingFile(true);
-    setFileType(fileType);
+    setFileType(fileExtension);
     try {
-      await DatasetService.exportDataById(datasetId, fileType);
+      await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
     } catch (error) {
       onExportError();
     } finally {
@@ -434,7 +434,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const onExportDataInternalExtension = async fileType => {
-    console.log('custodian internal with different command');
     isLoadingFile(true);
     setFileType(fileType);
     try {

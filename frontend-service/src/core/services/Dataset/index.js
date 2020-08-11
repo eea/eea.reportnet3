@@ -14,6 +14,7 @@ import { DeleteTableDesign } from './DeleteTableDesign';
 import { DownloadExportFile } from './DownloadExportFile';
 import { DownloadFileData } from './DownloadFileData';
 import { ExportData } from './ExportData';
+import { ExportDatasetDataExternal } from './ExportDatasetDataExternal';
 import { ExportTableData } from './ExportTableData';
 import { GetData } from './GetData';
 import { GetErrorPosition } from './GetErrorPosition';
@@ -51,6 +52,7 @@ export const DatasetService = {
   errorPositionByObjectId: GetErrorPosition({ datasetRepository }),
   errorStatisticsById: GetStatistics({ datasetRepository }),
   exportDataById: ExportData({ datasetRepository }),
+  exportDatasetDataExternal: ExportDatasetDataExternal({ datasetRepository }),
   exportTableDataById: ExportTableData({ datasetRepository }),
   getMetaData: GetMetaData({ datasetRepository }),
   getReferencedFieldValues: GetReferencedFieldValues({ datasetRepository }),

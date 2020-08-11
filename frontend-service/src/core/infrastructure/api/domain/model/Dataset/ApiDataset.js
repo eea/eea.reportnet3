@@ -232,11 +232,25 @@ export const apiDataset = {
     });
     return response.data;
   },
+
   exportDataById: async (datasetId, fileType) => {
     const response = await HTTPRequester.download({
       url: getUrl(DatasetConfig.exportDatasetData, {
         datasetId: datasetId,
         fileType: fileType
+      }),
+      headers: {
+        'Content-Type': 'application/octet-stream'
+      }
+    });
+    return response.data;
+  },
+
+  exportDatasetDataExternal: async (datasetId, fileExtension) => {
+    const response = await HTTPRequester.download({
+      url: getUrl(DatasetConfig.exportDatasetDataExternal, {
+        datasetId: datasetId,
+        fileExtension: fileExtension
       }),
       headers: {
         'Content-Type': 'application/octet-stream'

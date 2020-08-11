@@ -218,6 +218,11 @@ const exportDataById = async (datasetId, fileType) => {
   return datasetData;
 };
 
+const exportDatasetDataExternal = async (datasetId, fileExtension) => {
+  const datasetData = await apiDataset.exportDatasetDataExternal(datasetId, fileExtension);
+  return datasetData;
+};
+
 const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
   const datasetTableData = await apiDataset.exportTableDataById(datasetId, tableSchemaId, fileType);
   return datasetTableData;
@@ -499,6 +504,7 @@ export const ApiDatasetRepository = {
   errorsById,
   errorStatisticsById,
   exportDataById,
+  exportDatasetDataExternal,
   exportTableDataById,
   getMetaData,
   getReferencedFieldValues,

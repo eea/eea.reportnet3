@@ -343,12 +343,11 @@ export const Dataset = withRouter(({ match, history }) => {
     });
   };
 
-  const onExportDataExternalExtension = async fileType => {
-    console.log('provider external with different command');
+  const onExportDataExternalExtension = async fileExtension => {
     setLoadingFile(true);
-    setExportDatasetFileType(fileType);
+    setExportDatasetFileType(fileExtension);
     try {
-      await DatasetService.exportDataById(datasetId, fileType);
+      await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
     } catch (error) {
       onExportError();
     } finally {
@@ -357,7 +356,6 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const onExportDataInternalExtension = async fileType => {
-    console.log('provider internal with different command');
     setLoadingFile(true);
     setExportDatasetFileType(fileType);
     try {
