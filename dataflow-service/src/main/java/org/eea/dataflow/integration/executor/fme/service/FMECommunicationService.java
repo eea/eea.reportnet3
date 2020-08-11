@@ -333,7 +333,7 @@ public class FMECommunicationService {
     String user = (String) ThreadPropertiesManager.getVariable("user");
     NotificationVO notificationVO = NotificationVO.builder().user(user).datasetId(datasetId)
         .dataflowId(fmeOperationInfoVO.getDataflowId()).fileName(fmeOperationInfoVO.getFileName())
-        .build();
+        .providerId(fmeOperationInfoVO.getProviderId()).build();
 
     LOG.info("Setting operation {} coming from FME as finished", fmeOperationInfoVO);
     switch (fmeOperationInfoVO.getFmeOperation()) {
