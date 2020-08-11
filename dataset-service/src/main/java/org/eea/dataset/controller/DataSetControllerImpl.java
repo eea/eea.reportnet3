@@ -820,12 +820,18 @@ public class DataSetControllerImpl implements DatasetController {
     if (fieldSchema == null || fieldSchema.getId() == null) {
       throw new EEAException(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND);
     }
-    if ((fieldSchema.getMaxSize() != null && fieldSchema.getMaxSize() != 0
-        && fieldSchema.getMaxSize() * 1000000 < size)
-        || (fieldSchema.getValidExtensions() != null
-            && !Arrays.asList(fieldSchema.getValidExtensions())
-                .contains(datasetService.getMimetype(originalFilename)))) {
+    // Validate property maxSize of the file. If the size is 0, it's ok, continue
+    if (fieldSchema.getMaxSize() != null && fieldSchema.getMaxSize() != 0
+        && fieldSchema.getMaxSize() * 1000000 < size) {
       result = false;
+    }
+    // Validate property extensions of the file. If no extensions provided, it's ok, continue
+    if (fieldSchema.getValidExtensions() != null) {
+      List<String> extensions = Arrays.asList(fieldSchema.getValidExtensions());
+      if (!extensions.isEmpty()
+          && !extensions.contains(datasetService.getMimetype(originalFilename))) {
+        result = false;
+      }
     }
     return result;
   }
