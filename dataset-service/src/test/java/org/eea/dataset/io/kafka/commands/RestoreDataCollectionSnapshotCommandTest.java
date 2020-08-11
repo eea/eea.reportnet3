@@ -22,9 +22,13 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
+/**
+ * The Class RestoreDataCollectionSnapshotCommandTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class RestoreDataCollectionSnapshotCommandTest {
 
+  /** The restore data collection snapshot command. */
   @InjectMocks
   private RestoreDataCollectionSnapshotCommand restoreDataCollectionSnapshotCommand;
 
