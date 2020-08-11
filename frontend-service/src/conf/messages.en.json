@@ -823,6 +823,12 @@
     "createQC": "Create a QC over this field",
     "attachmentPaste": "Attachment fields will not be pasted",
     "attachmentEditorItemsMessage": "Press <strong>enter</strong>, <strong>tab</strong> or <strong>paste your list</strong> (separated by commas) <u><strong>to add</strong></u> valid file extensions. Leave <strong>empty</strong> to allow any file extension.",
-    "maxSizeNotDefined": "20 MB"
+    "maxSizeNotDefined": "20 MB",
+    "documentDescriptionValidationMax": "Document description is too long",
+    "copyDataCollectionToEuDatasetHeader": "Copy Data Collections to EU Datasets",
+    "copyDataCollectionToEuDatasetMessage": "Are you sure you want to copy Data Collections to EU Datasets?",
+    "exportEuDatasetHeader": "Export EU Datasets",
+    "exportEuDatasetMessage": "Are you sure you want to export EU Datasets?",
+    "updateConfigurations": "Update configurations"
   }
 }

@@ -67,7 +67,11 @@ export const BigButtonList = ({
   const [euDatasetExportIntegration, setEuDatasetExportIntegration] = useState({});
   const [isActiveButton, setIsActiveButton] = useState(true);
   const [isConfirmCollectionDialog, setIsConfirmCollectionDialog] = useState(false);
+  const [isCopyDataCollectionToEuDatasetDialogVisible, setIsCopyDataCollectionToEuDatasetDialogVisible] = useState(
+    false
+  );
   const [isDuplicated, setIsDuplicated] = useState(false);
+  const [isExportEuDatasetDialogVisible, setIsExportEuDatasetDialogVisible] = useState(false);
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
   const [isUpdateDataCollectionDialogVisible, setIsUpdateDataCollectionDialogVisible] = useState(false);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
@@ -260,6 +264,7 @@ export const BigButtonList = ({
   };
 
   const onCopyDataCollectionToEuDataset = async () => {
+    setIsCopyDataCollectionToEuDatasetDialogVisible(false);
     setIsCopyDataCollectionToEuDatasetLoading(true);
 
     try {
@@ -279,6 +284,7 @@ export const BigButtonList = ({
   };
 
   const onExportEuDataset = async () => {
+    setIsExportEuDatasetDialogVisible(false);
     setIsExportEuDatasetLoading(true);
 
     try {
@@ -314,9 +320,13 @@ export const BigButtonList = ({
     }
   };
 
-  const onShowNewSchemaDialog = () => setNewDatasetDialog(true);
+  const onShowCopyDataCollectionToEuDatasetModal = () => setIsCopyDataCollectionToEuDatasetDialogVisible(true);
 
   const onShowDataCollectionModal = () => setDataCollectionDialog(true);
+
+  const onShowExportEuDatasetModal = () => setIsExportEuDatasetDialogVisible(true);
+
+  const onShowNewSchemaDialog = () => setNewDatasetDialog(true);
 
   const onShowUpdateDataCollectionModal = () => setIsUpdateDataCollectionDialogVisible(true);
 
@@ -348,14 +358,14 @@ export const BigButtonList = ({
       handleRedirect,
       isActiveButton,
       onCloneDataflow,
-      onCopyDataCollectionToEuDataset,
       onDatasetSchemaNameError,
       onDuplicateName,
-      onExportEuDataset,
       onLoadEuDatasetIntegration,
       onLoadReceiptData,
       onSaveName,
+      onShowCopyDataCollectionToEuDatasetModal,
       onShowDataCollectionModal,
+      onShowExportEuDatasetModal,
       onShowManageReportersDialog,
       onShowNewSchemaDialog,
       onShowSnapshotDialog,
@@ -497,6 +507,30 @@ export const BigButtonList = ({
             yearNavigator={true}
             yearRange="2020:2030"
           />
+        </ConfirmDialog>
+      )}
+
+      {isCopyDataCollectionToEuDatasetDialogVisible && (
+        <ConfirmDialog
+          header={resources.messages['copyDataCollectionToEuDatasetHeader']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={() => onCopyDataCollectionToEuDataset()}
+          onHide={() => setIsCopyDataCollectionToEuDatasetDialogVisible(false)}
+          visible={isCopyDataCollectionToEuDatasetDialogVisible}>
+          <p>{resources.messages['copyDataCollectionToEuDatasetMessage']}</p>
+        </ConfirmDialog>
+      )}
+
+      {isExportEuDatasetDialogVisible && (
+        <ConfirmDialog
+          header={resources.messages['exportEuDatasetHeader']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={() => onExportEuDataset()}
+          onHide={() => setIsExportEuDatasetDialogVisible(false)}
+          visible={isExportEuDatasetDialogVisible}>
+          <p>{resources.messages['exportEuDatasetMessage']}</p>
         </ConfirmDialog>
       )}
 
