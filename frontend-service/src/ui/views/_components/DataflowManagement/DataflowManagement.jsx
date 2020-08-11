@@ -73,7 +73,7 @@ export const DataflowManagement = ({
   const onSubmit = value => dataflowManagementDispatch({ type: 'ON_SUBMIT', payload: { submit: value } });
 
   const onDeleteDataflow = async () => {
-    manageDialogs('isDeleteDialogVisible', false, secondaryDialog, true);
+    manageDialogs('isDeleteDialogVisible', false);
     showLoading();
     try {
       const response = await DataflowService.deleteById(dataflowId);

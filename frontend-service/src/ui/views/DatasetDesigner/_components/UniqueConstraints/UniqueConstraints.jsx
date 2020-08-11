@@ -57,7 +57,7 @@ export const UniqueConstraints = ({
     <ActionsColumn
       onDeleteClick={() => isDeleteDialogVisible(true)}
       onEditClick={() => {
-        manageDialogs('isUniqueConstraintsListDialogVisible', false, 'isManageUniqueConstraintDialogVisible', true);
+        manageDialogs('isManageUniqueConstraintDialogVisible', true);
       }}
     />
   );
