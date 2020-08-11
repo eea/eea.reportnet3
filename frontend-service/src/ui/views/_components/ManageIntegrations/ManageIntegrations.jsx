@@ -226,7 +226,7 @@ export const ManageIntegrations = ({
   };
 
   const onSaveKeyDown = event => {
-    if (event.key === 'Enter' && !isEmpty(parameterKey.trim()) && !isEmpty(parameterValue.trim()) && !isKeyDuplicated) {
+    if (event.key === 'Enter' && !isEmpty(parameterKey.trim()) && !isKeyDuplicated) {
       onSaveParameter();
     }
   };
@@ -402,6 +402,7 @@ export const ManageIntegrations = ({
           ref={inputRefs[option]}
           type="search"
           value={manageIntegrationsState[option]}
+          maxLength={255}
         />
       </div>
     ));
@@ -463,7 +464,7 @@ export const ManageIntegrations = ({
             <span data-tip data-for="addParameterTooltip">
               <Button
                 className="p-button-rounded p-button-animated-blink"
-                disabled={isEmpty(parameterKey.trim()) || isEmpty(parameterValue.trim()) || isKeyDuplicated}
+                disabled={isEmpty(parameterKey.trim()) || isKeyDuplicated}
                 icon="add"
                 label={editorView.isEditing ? resources.messages['update'] : resources.messages['add']}
                 onClick={() => onSaveParameter()}

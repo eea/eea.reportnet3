@@ -62,7 +62,7 @@ const SnapshotSlideBar = ({
   };
 
   const snapshotValidationSchema = Yup.object().shape({
-    createSnapshotDescription: Yup.string().required()
+    createSnapshotDescription: Yup.string().max(255, resources.messages['snapshotDescriptionValidationMax']).required()
   });
 
   if (isVisible) {
