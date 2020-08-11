@@ -1,6 +1,7 @@
 package org.eea.dataflow.integration.executor.fme.service;
 
-import java.util.Arrays;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,9 +30,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -48,26 +47,25 @@ public class FMECommunicationService {
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(FMECommunicationService.class);
 
   /**
    * The fme host.
    */
-  // fme.discomap.eea.europa.eu
   @Value("${integration.fme.host}")
   private String fmeHost;
 
   /**
    * The fme scheme.
    */
-  // https
   @Value("${integration.fme.scheme}")
   private String fmeScheme;
 
   /**
    * The fme token.
    */
-  // Basic UmVwb3J0bmV0MzpSZXBvcnRuZXQzXzIwMjAh
   @Value("${integration.fme.token}")
   private String fmeToken;
 
@@ -182,6 +180,13 @@ public class FMECommunicationService {
 
   }
 
+  /**
+   * Creates the directory.
+   *
+   * @param idDataset the id dataset
+   * @param idProvider the id provider
+   * @return the http status
+   */
   public HttpStatus createDirectory(Long idDataset, String idProvider) {
 
     Map<String, String> uriParams = new HashMap<>();
@@ -218,58 +223,46 @@ public class FMECommunicationService {
   /**
    * Receive file.
    *
-   * @param file the file
    * @param idDataset the id dataset
-   * @param providerId
-   * @param idProvider the id provider
+   * @param providerId the provider id
    * @param fileName the file name
-   *
    * @return the file submit result
    */
-  public FileSubmitResult receiveFile(Long idDataset, Long providerId, String fileName) {
-    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-
-
+  public InputStream receiveFile(Long idDataset, Long providerId, String fileName) {
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("datasetId", String.valueOf(idDataset));
     String auxURL =
-        "fmerest/v3/resources/connections/Reportnet3/download/{datasetId}/design/{fileName}";
+        "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/design/{fileName}?accept=contents&disposition=attachment";
     if (null != providerId) {
       uriParams.put("providerId", providerId.toString());
       auxURL =
-          "fmerest/v3/resources/connections/Reportnet3/download/{datasetId}/{providerId}/{fileName}";
+          "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}/{fileName}?accept=contents&disposition=attachment";
     }
     uriParams.put("fileName", fileName);
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-    headerInfo.put(CONTENT_TYPE, "application/octet-stream");
 
-    MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter =
-        new MappingJackson2HttpMessageConverter();
-    mappingJackson2HttpMessageConverter.setSupportedMediaTypes(
-        Arrays.asList(MediaType.APPLICATION_JSON, MediaType.APPLICATION_OCTET_STREAM));
+    headerInfo.put(ACCEPT, "application/octet-stream");
 
     HttpEntity<MultiValueMap<String, Object>> request =
-        createHttpRequest(body, uriParams, headerInfo);
+        createHttpRequest(null, uriParams, headerInfo);
 
-    this.restTemplate.getMessageConverters().add(mappingJackson2HttpMessageConverter);
 
-    ResponseEntity<FileSubmitResult> checkResult =
-        this.restTemplate.exchange(
-            uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
-                .buildAndExpand(uriParams).toString(),
-            HttpMethod.POST, request, FileSubmitResult.class);
-
-    FileSubmitResult result = new FileSubmitResult();
-    if (null != checkResult.getBody()) {
-      result = checkResult.getBody();
+    ResponseEntity<byte[]> checkResult = null;
+    try {
+      checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
+          .path(auxURL).buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
+          byte[].class);
+    } catch (HttpClientErrorException e) {
+      LOG_ERROR.info("Error downloading file: {}  from FME", fileName);
     }
-    return result;
+
+
+    InputStream initialStream = new ByteArrayInputStream(checkResult.getBody());
+    return initialStream;
 
   }
-
 
   /**
    * Find repository.

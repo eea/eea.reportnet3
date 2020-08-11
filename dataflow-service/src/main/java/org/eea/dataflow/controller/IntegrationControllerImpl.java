@@ -220,21 +220,25 @@ public class IntegrationControllerImpl implements IntegrationController {
   @Override
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_STEWARD')")
-  @LockMethod(removeWhenFinish = false)
+  @LockMethod
   @PostMapping(value = "/executeEUDatasetExport")
   @ApiOperation(value = "Execute EUDataset Export", response = ExecutionResultVO.class,
       responseContainer = "List")
   @ApiResponse(code = 500, message = "Internal Server Error")
   public List<ExecutionResultVO> executeEUDatasetExport(
       @LockCriteria(name = "dataflowId") @RequestParam("dataflowId") Long dataflowId) {
+    List<ExecutionResultVO> results = null;
     try {
-      return integrationService.executeEUDatasetExport(dataflowId);
+      integrationService.addPopulateEUDatasetLock(dataflowId);
+      results = integrationService.executeEUDatasetExport(dataflowId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error executing the export from EUDataset with message: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    } finally {
+      integrationService.releasePopulateEUDatasetLock(dataflowId);
     }
+    return results;
   }
-
 
   /**
    * Copy integrations.
