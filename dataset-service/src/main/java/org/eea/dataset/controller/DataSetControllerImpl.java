@@ -822,6 +822,7 @@ public class DataSetControllerImpl implements DatasetController {
     if ((fieldSchema.getMaxSize() != null && fieldSchema.getMaxSize() != 0
         && fieldSchema.getMaxSize() * 1000000 < size)
         || (fieldSchema.getValidExtensions() != null
+            && !Arrays.asList(fieldSchema.getValidExtensions()).isEmpty()
             && !Arrays.asList(fieldSchema.getValidExtensions())
                 .contains(datasetService.getMimetype(originalFilename)))) {
       result = false;
