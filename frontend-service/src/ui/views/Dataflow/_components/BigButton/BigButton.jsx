@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
+import uuid from 'uuid';
 
 import styles from './BigButton.module.scss';
 
@@ -46,6 +47,7 @@ export const BigButton = ({
   const [isEditEnabled, setIsEditEnabled] = useState(false);
 
   const menuBigButtonRef = useRef();
+  const tooltipId = uuid.v4();
 
   useEffect(() => {
     setButtonsTitle(caption);
@@ -189,13 +191,20 @@ export const BigButton = ({
           value={!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         />
       ) : (
-        <p
-          className={styles.caption}
-          onDoubleClick={
-            dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] && canEditName ? onEnableSchemaNameEdit : null
-          }>
-          {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
-        </p>
+        <>
+          <p
+            data-tip
+            data-for={tooltipId}
+            className={styles.caption}
+            onDoubleClick={
+              dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] && canEditName ? onEnableSchemaNameEdit : null
+            }>
+            {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
+          </p>
+          <ReactTooltip effect="solid" id={tooltipId} place="top" className={styles.tooltip}>
+            {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
+          </ReactTooltip>
+        </>
       )}
     </>
   );
