@@ -56,74 +56,108 @@ import org.springframework.stereotype.Service;
 @Service("dataflowService")
 public class DataflowServiceImpl implements DataflowService {
 
-  /** The representative repository. */
+  /**
+   * The representative repository.
+   */
   @Autowired
   private RepresentativeRepository representativeRepository;
 
-  /** The dataflow repository. */
+  /**
+   * The dataflow repository.
+   */
   @Autowired
   private DataflowRepository dataflowRepository;
 
-  /** The user request repository. */
+  /**
+   * The user request repository.
+   */
   @Autowired
   private UserRequestRepository userRequestRepository;
 
-  /** The contributor repository. */
+  /**
+   * The contributor repository.
+   */
   @Autowired
   private ContributorRepository contributorRepository;
 
-  /** The dataflow mapper. */
+  /**
+   * The dataflow mapper.
+   */
   @Autowired
   private DataflowMapper dataflowMapper;
 
-  /** The dataflow no content mapper. */
+  /**
+   * The dataflow no content mapper.
+   */
   @Autowired
   private DataflowNoContentMapper dataflowNoContentMapper;
 
-  /** The dataset metabase controller. */
+  /**
+   * The dataset metabase controller.
+   */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
-  /** The user management controller zull. */
+  /**
+   * The user management controller zull.
+   */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
-  /** The resource management controller zull. */
+  /**
+   * The resource management controller zull.
+   */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
-  /** The data set schema controller zuul. */
+  /**
+   * The data set schema controller zuul.
+   */
   @Autowired
   private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
 
-  /** The document controller zuul. */
+  /**
+   * The document controller zuul.
+   */
   @Autowired
   private DocumentControllerZuul documentControllerZuul;
 
-  /** The data collection controller zuul. */
+  /**
+   * The data collection controller zuul.
+   */
   @Autowired
   private DataCollectionControllerZuul dataCollectionControllerZuul;
 
-  /** The representative service. */
+  /**
+   * The representative service.
+   */
   @Autowired
   private RepresentativeService representativeService;
 
-  /** The obligation controller. */
+  /**
+   * The obligation controller.
+   */
   @Autowired
   private ObligationController obligationController;
 
-  /** The eu dataset controller zuul. */
+  /**
+   * The eu dataset controller zuul.
+   */
   @Autowired
   private EUDatasetControllerZuul euDatasetControllerZuul;
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
 
   /**
    * Gets the by id.
    *
    * @param id the id
+   *
    * @return the by id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -136,7 +170,9 @@ public class DataflowServiceImpl implements DataflowService {
    * Get the dataflow by its id filtering representatives by the user email.
    *
    * @param id the id
+   *
    * @return the by id no representatives
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -150,7 +186,9 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param id the id
    * @param includeAllRepresentatives the include representatives
+   *
    * @return the by id
+   *
    * @throws EEAException the EEA exception
    */
   private DataFlowVO getByIdWithCondition(Long id, boolean includeAllRepresentatives)
@@ -275,6 +313,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the opened obligations.
    *
    * @param dataflowVOs the dataflow V os
+   *
    * @return the opened obligations
    */
   private void getOpenedObligations(List<DataFlowVO> dataflowVOs) {
@@ -299,6 +338,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the obligation.
    *
    * @param dataflow the dataflow
+   *
    * @return the obligation
    */
   private void getObligation(DataFlowVO dataflow) {
@@ -456,7 +496,6 @@ public class DataflowServiceImpl implements DataflowService {
     resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
         ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.EDITOR_WRITE));
 
-
     userManagementControllerZull.addUserToResource(dataFlowSaved.getId(),
         ResourceGroupEnum.DATAFLOW_CUSTODIAN);
   }
@@ -550,7 +589,7 @@ public class DataflowServiceImpl implements DataflowService {
     Dataflow result = dataflowRepository.findById(id).orElse(null);
     DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(result);
 
-    LOG.info("Get the dataflow metabaser with id {}", id);
+    LOG.info("Get the dataflow metabase with id {}", id);
 
     return dataflowVO;
   }
@@ -569,7 +608,7 @@ public class DataflowServiceImpl implements DataflowService {
     DataFlowVO dataflowVO = getById(idDataflow);
     // use it to take all datasets Desing
 
-    LOG.info("Get the dataflow metabaser with id {}", idDataflow);
+    LOG.info("Get the dataflow metabase with id {}", idDataflow);
 
     // // PART DELETE DOCUMENTS
     if (null != dataflowVO.getDocuments() && !dataflowVO.getDocuments().isEmpty()) {
@@ -615,6 +654,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @param id the id
    * @param status the status
    * @param deadlineDate the deadline date
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -637,6 +677,7 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param idDataflow the id dataflow
    * @param dataflowVO the dataflow VO
+   *
    * @throws Exception the exception
    */
   private void deleteDocuments(Long idDataflow, DataFlowVO dataflowVO) throws Exception {
@@ -657,6 +698,7 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param idDataflow the id dataflow
    * @param dataflowVO the dataflow VO
+   *
    * @throws EEAException the EEA exception
    */
   private void deleteDatasetSchemas(Long idDataflow, DataFlowVO dataflowVO) throws EEAException {
@@ -677,6 +719,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Delete representatives.
    *
    * @param dataflowVO the dataflow VO
+   *
    * @throws EEAException the EEA exception
    */
   private void deleteRepresentatives(DataFlowVO dataflowVO) throws EEAException {
