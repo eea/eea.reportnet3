@@ -124,17 +124,6 @@ export const BigButtonList = ({
   const downloadPdf = response => {
     if (!isNil(response)) {
       DownloadFile(response, `${dataflowState.data.name}_${Date.now()}.pdf`);
-
-      const url = window.URL.createObjectURL(new Blob([response]));
-
-      const link = document.createElement('a');
-
-      document.body.appendChild(link);
-
-      link.click();
-
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
     }
   };
 

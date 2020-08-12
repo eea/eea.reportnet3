@@ -56,7 +56,6 @@ const AttachmentEditor = ({
   );
 
   const renderChips = () => {
-    console.log({ validExtensions });
     return (
       <div onPaste={onPasteChips} className={styles.validExtensionsWrapper}>
         <div className={styles.inputTitleWrapper}>

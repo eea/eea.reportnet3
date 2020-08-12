@@ -1,6 +1,6 @@
 import React, { Fragment, useContext, useEffect, useRef } from 'react';
 
-import isUndefined from 'lodash/isUndefined';
+import isNil from 'lodash/isNil';
 
 import styles from '../BigButtonList/BigButtonList.module.css';
 
@@ -33,20 +33,8 @@ export const BigButtonListRepresentative = ({
   }, [notificationContext]);
 
   const downloadPdf = response => {
-    if (!isUndefined(response)) {
+    if (!isNil(response)) {
       DownloadFile(response, `${dataflowState.data.name}_${Date.now()}.pdf`);
-
-      const url = window.URL.createObjectURL(new Blob([response]));
-
-      const link = document.createElement('a');
-
-      document.body.appendChild(link);
-
-      link.click();
-
-      document.body.removeChild(link);
-
-      window.URL.revokeObjectURL(url);
     }
   };
 

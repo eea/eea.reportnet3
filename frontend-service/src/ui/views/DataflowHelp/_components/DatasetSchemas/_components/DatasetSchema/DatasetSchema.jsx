@@ -188,14 +188,4 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
   return renderDatasetSchema();
 };
 
-// const getMultiselectValues = (validations, field) => {
-//   if (!isUndefined(validations)) {
-//     console.log(
-//       [...new Set(validations.map(validation => validation[field]))].map(fieldValue => {
-//         return { label: fieldValue, value: fieldValue };
-//       })
-//     );
-//   }
-// };
-
 export { DatasetSchema };
