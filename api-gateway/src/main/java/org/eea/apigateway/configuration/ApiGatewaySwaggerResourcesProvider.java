@@ -29,8 +29,8 @@ public class ApiGatewaySwaggerResourcesProvider implements SwaggerResourcesProvi
   @Autowired
   private DiscoveryClient discoveryClient;
 
-  @Value("${spring.profiles.active:local}")
-  private String activeProfile;
+  @Value("${backend:localhost}") //set default value
+  private String backend;
 
   @Override
   public List<SwaggerResource> get() {
@@ -56,8 +56,7 @@ public class ApiGatewaySwaggerResourcesProvider implements SwaggerResourcesProvi
           //finally adding the Swagger Resource as pair "Name","Origin of JSON Swagger Rest Document".
           // In this case, the microservices rest api swagger documentation will come from the rest of the microservices
           URI location = uri.get();
-          StringBuilder endpoint = new StringBuilder(location.getScheme()).append("://")
-              .append(getServiceHost(route.getLocation(), location))
+          StringBuilder endpoint = new StringBuilder(getServiceHost(route.getLocation(), location))
               .append("/v2/api-docs");
           resources
               .add(swaggerResource(route.getLocation(),
@@ -73,8 +72,8 @@ public class ApiGatewaySwaggerResourcesProvider implements SwaggerResourcesProvi
 
   private String getServiceHost(String service, URI uri) {
 
-    //if no profile has been set it is assume that it's running in local, otherwise it is assume it is running in kubernetes and it will be used its name translation (k8s dns)
-    return "local".equals(activeProfile) ? "localhost:" + uri.getPort() : service;
+    //if no backend has been set it is assumed that it's running in local, otherwise it is assume it is running in kubernetes and it will be used its name translation (k8s dns)
+    return "localhost".equals(backend) ? "http://localhost:" + uri.getPort() : service;
   }
 
 
