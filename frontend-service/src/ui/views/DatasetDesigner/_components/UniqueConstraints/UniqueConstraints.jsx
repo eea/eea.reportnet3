@@ -50,6 +50,12 @@ export const UniqueConstraints = ({
   }, [constraintsState.isDataUpdated]);
 
   useEffect(() => {
+    if (!designerState.isManageUniqueConstraintDialogVisible) {
+      onUpdateData();
+    }
+  }, [designerState.isManageUniqueConstraintDialogVisible]);
+
+  useEffect(() => {
     if (getUniques) getUniques(constraintsState.data);
   }, [constraintsState.data]);
 
