@@ -402,6 +402,7 @@ export const ManageIntegrations = ({
           ref={inputRefs[option]}
           type="search"
           value={manageIntegrationsState[option]}
+          maxLength={255}
         />
       </div>
     ));
