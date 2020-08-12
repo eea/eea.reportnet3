@@ -29,7 +29,7 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
           icon={'plus'}
           label={resources.messages['createExternalIntegration']}
           onClick={() => {
-            manageDialogs('isIntegrationListDialogVisible', false, 'isIntegrationManageDialogVisible', true);
+            manageDialogs('isIntegrationManageDialogVisible', true);
             setUpdatedData({});
           }}
         />
@@ -45,21 +45,23 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
 
   return (
     <Fragment>
-      <Dialog
-        footer={renderIntegrationFooter}
-        header={resources.messages['externalIntegrations']}
-        onHide={() => manageDialogs('isIntegrationListDialogVisible', false)}
-        style={{ width: '70%' }}
-        visible={isIntegrationListDialogVisible}>
-        <IntegrationsList
-          dataflowId={dataflowId}
-          designerState={designerState}
-          getUpdatedData={getUpdatedData}
-          integrationsList={getIntegrationsList}
-          manageDialogs={manageDialogs}
-          onUpdateDesignData={onUpdateData}
-        />
-      </Dialog>
+      {isIntegrationListDialogVisible && (
+        <Dialog
+          footer={renderIntegrationFooter}
+          header={resources.messages['externalIntegrations']}
+          onHide={() => manageDialogs('isIntegrationListDialogVisible', false)}
+          style={{ width: '70%' }}
+          visible={isIntegrationListDialogVisible}>
+          <IntegrationsList
+            dataflowId={dataflowId}
+            designerState={designerState}
+            getUpdatedData={getUpdatedData}
+            integrationsList={getIntegrationsList}
+            manageDialogs={manageDialogs}
+            onUpdateDesignData={onUpdateData}
+          />
+        </Dialog>
+      )}
 
       {isIntegrationManageDialogVisible && (
         <ManageIntegrations

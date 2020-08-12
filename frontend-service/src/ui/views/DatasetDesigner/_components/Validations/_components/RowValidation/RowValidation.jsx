@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useContext, useState } from 'react';
+import React, { useEffect, useReducer, useContext, useState, Fragment } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -691,19 +691,23 @@ export const RowValidation = ({ datasetId, tabs }) => {
   );
 
   const dialogLayout = children => (
-    <Dialog
-      className={styles.dialog}
-      footer={renderRowQCsFooter}
-      header={
-        validationContext.ruleEdit
-          ? resourcesContext.messages.editRowConstraint
-          : resourcesContext.messages.createRowConstraint
-      }
-      visible={validationContext.isVisible}
-      style={{ width: '975px' }}
-      onHide={() => onHide()}>
-      {children}
-    </Dialog>
+    <Fragment>
+      {validationContext.isVisible && (
+        <Dialog
+          className={styles.dialog}
+          footer={renderRowQCsFooter}
+          header={
+            validationContext.ruleEdit
+              ? resourcesContext.messages.editRowConstraint
+              : resourcesContext.messages.createRowConstraint
+          }
+          visible={validationContext.isVisible}
+          style={{ width: '975px' }}
+          onHide={() => onHide()}>
+          {children}
+        </Dialog>
+      )}
+    </Fragment>
   );
 
   return dialogLayout(
