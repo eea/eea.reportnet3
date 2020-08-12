@@ -177,7 +177,7 @@ export const apiDataset = {
 
   downloadFileData: async (datasetId, fieldId) => {
     try {
-      const response = await HTTPRequester.get({
+      const response = await HTTPRequester.download({
         url: getUrl(DatasetConfig.downloadFileData, {
           datasetId,
           fieldId

@@ -63,13 +63,15 @@ public class RestoreDataCollectionSnapshotCommand extends AbstractEEAEventHandle
     if (datasetSnapshotService.getSnapshotsByIdDataset(datasetId).isEmpty()) {
       Map<String, Object> value = new HashMap<>();
       value.put(LiteralConstants.DATASET_ID, datasetId);
-      euDatasetService.removeLocksRelatedToPopulateEU(
+      Boolean removed = euDatasetService.removeLocksRelatedToPopulateEU(
           datasetMetabaseService.findDatasetMetabase(datasetId).getDataflowId());
 
-      kafkaSenderUtils.releaseNotificableKafkaEvent(
-          EventType.COPY_DATA_TO_EUDATASET_COMPLETED_EVENT, value,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .datasetId(datasetId).build());
+      if (Boolean.TRUE.equals(removed)) {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(
+            EventType.COPY_DATA_TO_EUDATASET_COMPLETED_EVENT, value,
+            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+                .datasetId(datasetId).build());
+      }
     }
 
   }

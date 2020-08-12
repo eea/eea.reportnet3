@@ -126,12 +126,11 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       String datasetSchemaId = dataschemaService.createEmptyDataSetSchema(dataflowId).toString();
       Future<Long> futureDatasetId = datasetMetabaseService.createEmptyDataset(
           DatasetTypeEnum.DESIGN, datasetSchemaName, datasetSchemaId, dataflowId, null, null, 0);
-      Long datasetId = futureDatasetId.get();
 
       // we find if the dataflow has any permission to give the permission to this new datasetschema
-      contributorControllerZuul.createAssociatedPermissions(dataflowId, datasetId);
+      contributorControllerZuul.createAssociatedPermissions(dataflowId, futureDatasetId.get());
 
-      integrationControllerZuul.createDefaultIntegration(dataflowId, datasetId, datasetSchemaId);
+      integrationControllerZuul.createDefaultIntegration(dataflowId, datasetSchemaId);
     } catch (InterruptedException | ExecutionException | EEAException e) {
       LOG.error("Aborted DataSetSchema creation: {}", e.getMessage());
       if (e instanceof InterruptedException) {
@@ -452,6 +451,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
         // Modify the register into the metabase fieldRelations
         dataschemaService.updateForeignRelation(datasetId, fieldSchemaVO, datasetSchema);
+
+        // Clear the attachments if necessary
+        if (Boolean.TRUE.equals(
+            dataschemaService.checkClearAttachments(datasetId, datasetSchema, fieldSchemaVO))) {
+          datasetService.deleteAttachmentByFieldSchemaId(datasetId, fieldSchemaVO.getId());
+        }
 
         DataType type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
 
