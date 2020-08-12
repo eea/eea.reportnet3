@@ -709,14 +709,14 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param mimeType the mime type
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the table schema id
    * @return the byte[]
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   @Transactional
-  public byte[] exportFile(Long datasetId, String mimeType, final String idTableSchema)
+  public byte[] exportFile(Long datasetId, String mimeType, final String tableSchemaId)
       throws EEAException, IOException {
     // Get the dataFlowId from the metabase
     Long idDataflow = getDataFlowIdById(datasetId);
@@ -727,9 +727,16 @@ public class DatasetServiceImpl implements DatasetService {
 
     final IFileExportContext context = fileExportFactory.createContext(mimeType);
     LOG.info("End of exportFile");
-    return context.fileWriter(idDataflow, datasetId, idTableSchema, includeCountryCode);
+    return context.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode);
   }
 
+  /**
+   * Export file through integration.
+   *
+   * @param datasetId the dataset id
+   * @param fileExtension the file extension
+   * @throws EEAException the EEA exception
+   */
   @Override
   public void exportFileThroughIntegration(Long datasetId, String fileExtension)
       throws EEAException {

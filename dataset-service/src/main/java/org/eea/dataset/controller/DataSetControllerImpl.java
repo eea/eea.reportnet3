@@ -494,7 +494,7 @@ public class DataSetControllerImpl implements DatasetController {
    * Export file.
    *
    * @param datasetId the dataset id
-   * @param tableSchemaId the id table schema
+   * @param tableSchemaId the table schema id
    * @param mimeType the mime type
    * @return the response entity
    */
@@ -503,10 +503,12 @@ public class DataSetControllerImpl implements DatasetController {
   @GetMapping(value = "/exportFile", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
   public ResponseEntity<byte[]> exportFile(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("tableSchemaId") String tableSchemaId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("mimeType") String mimeType) {
 
-    String tableName = datasetSchemaService.getTableSchemaName(null, tableSchemaId);
+    String tableName =
+        null != tableSchemaId ? datasetSchemaService.getTableSchemaName(null, tableSchemaId)
+            : datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
     if (null == tableName) {
       LOG_ERROR.error("tableSchemaId not found: {}", tableSchemaId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -540,7 +542,7 @@ public class DataSetControllerImpl implements DatasetController {
       datasetService.exportFileThroughIntegration(datasetId, fileExtension);
     } catch (EEAException e) {
       LOG_ERROR.error("Error exporting file through integration: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 

@@ -26,14 +26,10 @@ import org.slf4j.LoggerFactory;
  */
 public class ExcelWriterStrategy implements WriterStrategy {
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(CSVWriterStrategy.class);
 
   /** The parse common. */
@@ -72,19 +68,18 @@ public class ExcelWriterStrategy implements WriterStrategy {
     this.mimeType = String.valueOf(mimeType);
   }
 
-
   /**
    * Write file.
    *
    * @param dataflowId the dataflow id
    * @param datasetId the dataset id
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the table schema id
    * @param includeCountryCode the include country code
    * @return the byte[]
    * @throws EEAException the EEA exception
    */
   @Override
-  public byte[] writeFile(Long dataflowId, Long datasetId, String idTableSchema,
+  public byte[] writeFile(Long dataflowId, Long datasetId, String tableSchemaId,
       boolean includeCountryCode) throws EEAException {
 
     DataSetSchemaVO dataset = fileCommon.getDataSetSchema(dataflowId, datasetId);
@@ -93,7 +88,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
     // Get all tablesSchemas for the case the given idTableSchema doesn't exist
     List<TableSchemaVO> tables =
         dataset.getTableSchemas() != null ? dataset.getTableSchemas() : new ArrayList<>();
-    TableSchemaVO table = fileCommon.findTableSchema(idTableSchema, dataset);
+    TableSchemaVO table = fileCommon.findTableSchema(tableSchemaId, dataset);
 
     // If the given idTableSchema exists, replace all tables with it
     if (null != table) {

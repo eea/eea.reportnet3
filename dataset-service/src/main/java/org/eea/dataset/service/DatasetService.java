@@ -152,14 +152,12 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param mimeType the mime type
-   * @param idTableSchema the id table schema
-   *
+   * @param tableSchemaId the table schema id
    * @return the byte[]
-   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  byte[] exportFile(@DatasetId Long datasetId, String mimeType, String idTableSchema)
+  byte[] exportFile(@DatasetId Long datasetId, String mimeType, String tableSchemaId)
       throws EEAException, IOException;
 
   /**
