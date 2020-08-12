@@ -70,7 +70,7 @@ export const ManageIntegrations = ({
     tool: 'FME'
   });
 
-  const { editorView, externalParameters, parameterKey, parameterValue, parametersErrors } = manageIntegrationsState;
+  const { editorView, externalParameters, parameterKey, parametersErrors } = manageIntegrationsState;
   const {
     isDuplicatedIntegrationName,
     isDuplicatedParameter,

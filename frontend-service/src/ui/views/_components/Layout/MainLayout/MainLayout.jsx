@@ -27,7 +27,6 @@ const MainLayout = ({ children }) => {
   const userContext = useContext(UserContext);
 
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
-  const [leftSideBarStyle, setLeftSideBarStyle] = useState({});
   const [margin, setMargin] = useState('50px');
   const [mainContentStyle, setMainContentStyle] = useState({
     height: `auto`,
@@ -138,7 +137,6 @@ const MainLayout = ({ children }) => {
       <div id="mainContent" className={styles.mainContent} style={mainContentStyle}>
         <LeftSideBar
           onToggleSideBar={onToggleSideBar}
-          style={leftSideBarStyle}
           setIsNotificationVisible={setIsNotificationVisible}
         />
         <div id="pageContent" className={styles.pageContent} style={pageContentStyle}>

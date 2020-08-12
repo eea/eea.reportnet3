@@ -47,7 +47,6 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
   });
   const [headerElementStyle, setHeaderElementStyle] = useState({});
   useEffect(() => {
-    let prevScrollPos = window.pageYOffset;
     window.onscroll = () => {
       const innerWidth = window.innerWidth;
       const currentScrollPos = window.pageYOffset;
@@ -89,8 +88,6 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
           });
         }
       }
-
-      prevScrollPos = currentScrollPos;
     };
   }, []);
 
@@ -169,7 +166,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         history.push(getUrl(routes.SETTINGS));
       }}>
       <img
-        alt="User image"
+        alt="User avatar"
         className={styles.userAvatar}
         icon={
           <FontAwesomeIcon aria-hidden={false} icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />
