@@ -830,6 +830,6 @@
     "exportEuDatasetHeader": "Export EU Datasets",
     "exportEuDatasetMessage": "Are you sure you want to export EU Datasets?",
     "updateConfigurations": "Update configurations",
-    "toLongSchemaNameError": "Schema name should not be longer than 250 characters"
+    "toLongSchemaNameError": "Schema name is too long"
   }
 }
