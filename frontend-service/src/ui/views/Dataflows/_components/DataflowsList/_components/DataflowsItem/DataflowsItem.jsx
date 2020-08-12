@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import ReactTooltip from 'react-tooltip';
 import { Link } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -19,9 +20,11 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-const DataflowsItem = ({ dataFetch, itemContent, type }) => {
+const DataflowsItem = ({ dataFetch, infoTooltip, itemContent, type }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
+
+  console.log('infoTooltip', infoTooltip);
 
   const onAccept = async () => {
     try {
@@ -96,10 +99,24 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
         </p>
       </div>
 
-      <div className={`${styles.text} dataflowList-name-description-help-step`}>
+      {/* Origin */}
+      {/* <div className={`${styles.text} dataflowList-name-description-help-step`}>
         <h3 className={`${styles.title}`}>{itemContent.name}</h3>
         <p>{itemContent.description}</p>
+      </div> */}
+
+      <div className={`${styles.text} dataflowList-name-description-help-step`}>
+        <h3 className={`${styles.title}`} data-tip data-for="createTooltip">
+          {itemContent.name}
+        </h3>
+        <p>{itemContent.description}</p>
+        {infoTooltip && (
+          <ReactTooltip effect="solid" id="createTooltip" place="top">
+            {itemContent.name}
+          </ReactTooltip>
+        )}
       </div>
+
       <div className={`${styles.status}  dataflowList-status-help-step`}>
         <p>
           <span>{`${resources.messages['status']}:`}</span> {itemContent.status}
