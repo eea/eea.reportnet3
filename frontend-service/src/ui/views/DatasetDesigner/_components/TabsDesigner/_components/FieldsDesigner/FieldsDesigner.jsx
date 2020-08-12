@@ -351,14 +351,16 @@ export const FieldsDesigner = ({
 
   const renderErrors = (errorTitle, error) => {
     return (
-      <Dialog
-        footer={errorDialogFooter}
-        header={errorTitle}
-        modal={true}
-        onHide={() => setIsErrorDialogVisible(false)}
-        visible={isErrorDialogVisible}>
-        <div className="p-grid p-fluid">{error}</div>
-      </Dialog>
+      isErrorDialogVisible && (
+        <Dialog
+          footer={errorDialogFooter}
+          header={errorTitle}
+          modal={true}
+          onHide={() => setIsErrorDialogVisible(false)}
+          visible={isErrorDialogVisible}>
+          <div className="p-grid p-fluid">{error}</div>
+        </Dialog>
+      )
     );
   };
 
