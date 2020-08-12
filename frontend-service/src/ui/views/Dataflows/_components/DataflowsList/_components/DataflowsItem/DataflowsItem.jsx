@@ -2,6 +2,8 @@ import React, { useContext } from 'react';
 import ReactTooltip from 'react-tooltip';
 import { Link } from 'react-router-dom';
 
+import uuid from 'uuid';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isNil from 'lodash/isNil';
 import moment from 'moment';
@@ -80,6 +82,8 @@ const DataflowsItem = ({ dataFetch, infoTooltip, itemContent, type }) => {
     );
   };
 
+  const idTooltip = uuid.v4();
+
   return layout(
     <>
       <div className={`${styles.icon}`}>
@@ -99,22 +103,14 @@ const DataflowsItem = ({ dataFetch, infoTooltip, itemContent, type }) => {
         </p>
       </div>
 
-      {/* Origin */}
-      {/* <div className={`${styles.text} dataflowList-name-description-help-step`}>
-        <h3 className={`${styles.title}`}>{itemContent.name}</h3>
-        <p>{itemContent.description}</p>
-      </div> */}
-
       <div className={`${styles.text} dataflowList-name-description-help-step`}>
-        <h3 className={`${styles.title}`} data-tip data-for="createTooltip">
+        <h3 className={`${styles.title}`} data-tip data-for={idTooltip}>
           {itemContent.name}
         </h3>
         <p>{itemContent.description}</p>
-        {infoTooltip && (
-          <ReactTooltip effect="solid" id="createTooltip" place="top">
-            {itemContent.name}
-          </ReactTooltip>
-        )}
+        <ReactTooltip effect="solid" id={idTooltip} place="top">
+          {itemContent.name}
+        </ReactTooltip>
       </div>
 
       <div className={`${styles.status}  dataflowList-status-help-step`}>
