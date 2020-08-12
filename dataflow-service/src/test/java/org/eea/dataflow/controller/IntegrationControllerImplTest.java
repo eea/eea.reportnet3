@@ -307,4 +307,14 @@ public class IntegrationControllerImplTest {
     Assert.assertEquals(integrationVO,
         integrationControllerImpl.findExportIntegration("5ce524fad31fc52540abae73", "csv"));
   }
+
+  /**
+   * Delete schema integrations test.
+   */
+  @Test
+  public void deleteSchemaIntegrationsTest() {
+    Mockito.doNothing().when(integrationService).deleteSchemaIntegrations(Mockito.anyString());
+    integrationControllerImpl.deleteSchemaIntegrations("5ce524fad31fc52540abae73");
+    Mockito.verify(integrationService, times(1)).deleteSchemaIntegrations(Mockito.anyString());
+  }
 }

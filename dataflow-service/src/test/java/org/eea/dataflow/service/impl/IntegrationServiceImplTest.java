@@ -258,6 +258,11 @@ public class IntegrationServiceImplTest {
     }
   }
 
+  /**
+   * Gets the export integration test.
+   *
+   * @return the export integration test
+   */
   @Test
   public void getExportIntegrationTest() {
     IntegrationVO integrationVO = new IntegrationVO();
@@ -276,10 +281,27 @@ public class IntegrationServiceImplTest {
         integrationService.getExportIntegration("5ce524fad31fc52540abae73", "csv"));
   }
 
+  /**
+   * Gets the export integration null test.
+   *
+   * @return the export integration null test
+   */
   @Test
   public void getExportIntegrationNullTest() {
     Mockito.when(integrationRepository.findByOperationAndParameterAndValue(Mockito.any(),
         Mockito.any(), Mockito.any())).thenReturn(null);
     Assert.assertNull(integrationService.getExportIntegration("5ce524fad31fc52540abae73", "csv"));
+  }
+
+  /**
+   * Delete schema integrations test.
+   */
+  @Test
+  public void deleteSchemaIntegrationsTest() {
+    Mockito.doNothing().when(integrationRepository).deleteByParameterAndValue(Mockito.anyString(),
+        Mockito.anyString());
+    integrationService.deleteSchemaIntegrations("5ce524fad31fc52540abae73");
+    Mockito.verify(integrationRepository, times(1)).deleteByParameterAndValue(Mockito.anyString(),
+        Mockito.anyString());
   }
 }
