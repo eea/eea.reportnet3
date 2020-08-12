@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Properties;
 import javax.sql.DataSource;
 import org.eea.dataset.configuration.util.EeaDataSource;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,9 +25,8 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-
 /**
- * The type Dataset configuration.
+ * The Class DatasetConfiguration.
  */
 @Configuration
 @EnableTransactionManagement
@@ -38,87 +37,57 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableWebMvc
 public class DatasetConfiguration implements WebMvcConfigurer {
 
-
-  /**
-   * The dll.
-   */
+  /** The dll. */
   @Value("${spring.jpa.hibernate.ddl-auto}")
   private String dll;
 
-  /**
-   * The dialect.
-   */
+  /** The dialect. */
   @Value("${spring.jpa.properties.hibernate.dialect}")
   private String dialect;
 
-  /**
-   * The create clob propertie.
-   */
+  /** The create clob propertie. */
   @Value("${spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation}")
   private String createClobPropertie;
 
-  /**
-   * The batch size.
-   */
+  /** The batch size. */
   @Value("${spring.jpa.properties.hibernate.jdbc.batch_size}")
   private String batchSize;
 
-  /**
-   * The show sql propertie
-   */
+  /** The flush mode. */
   @Value("${spring.jpa.hibernate.flushMode}")
   private String flushMode;
 
-
-  /**
-   * The show sql propertie
-   */
+  /** The show sql. */
   @Value("${spring.jpa.hibernate.show-sql}")
   private String showSql;
 
-  /**
-   * The stats.
-   */
+  /** The order updates. */
   @Value("${spring.jpa.properties.hibernate.order_updates}")
   private String orderUpdates;
 
-  /**
-   * The order.
-   */
+  /** The order inserts. */
   @Value("${spring.jpa.properties.hibernate.order_inserts}")
   private String orderInserts;
 
-
-  /**
-   * The max file size.
-   */
+  /** The max file size. */
   @Value("${spring.servlet.multipart.max-file-size}")
   private Long maxFileSize;
 
-
-  /**
-   * The max request size.
-   */
+  /** The max request size. */
   @Value("${spring.servlet.multipart.max-request-size}")
   private Long maxRequestSize;
 
-  /**
-   * The username.
-   */
+  /** The username. */
   @Value("${spring.datasource.dataset.username}")
   private String username;
 
-  /**
-   * The password.
-   */
+  /** The password. */
   @Value("${spring.datasource.dataset.password}")
   private String password;
 
-  /**
-   * The record store controller zull.
-   */
+  /** The record store controller zuul. */
   @Autowired
-  private RecordStoreControllerZull recordStoreControllerZull;
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
 
   /**
@@ -129,7 +98,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Bean
   @Qualifier("datasetDataSource")
   public DataSource datasetDataSource() {
-    final List<ConnectionDataVO> connections = recordStoreControllerZull.getDataSetConnections();
+    final List<ConnectionDataVO> connections = recordStoreControllerZuul.getDataSetConnections();
     DataSource dataSource = null;
     if (null != connections && !connections.isEmpty()) {
       dataSource = dataSetsDataSource(connections.get(0));
@@ -138,31 +107,22 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   }
 
   /**
-   * Target data sources.
-   *
-   * @return the map
-   */
-
-
-  /**
    * Data sets data source.
    *
    * @param connectionDataVO the connection data VO
-   *
    * @return the data source
    */
   private DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
 
     EeaDataSource ds = new EeaDataSource();
     ds.setUrl(connectionDataVO.getConnectionString());
-    //set validation microservice credentials
+    // set validation microservice credentials
     ds.setUsername(this.username);
     ds.setPassword(this.password);
     ds.setDriverClassName("org.postgresql.Driver");
 
     return ds;
   }
-
 
   /**
    * Data sets entity manager factory.
@@ -216,7 +176,6 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     return schemastransactionManager;
   }
 
-
   /**
    * Multipart resolver.
    *
@@ -229,6 +188,4 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     multipartResolver.setMaxUploadSizePerFile(maxRequestSize);
     return multipartResolver;
   }
-
-
 }

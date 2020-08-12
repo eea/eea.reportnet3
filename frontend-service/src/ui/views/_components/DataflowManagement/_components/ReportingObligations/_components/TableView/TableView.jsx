@@ -39,7 +39,7 @@ export const TableView = ({ checkedObligation, data, onSelectObl, onChangePagina
   );
 
   const onLoadTitleTemplate = row => (
-    <div className={styles.titleColum}>
+    <div className={styles.titleColumn}>
       {row.title}
       <FontAwesomeIcon
         aria-hidden={false}

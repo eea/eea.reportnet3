@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import moment from 'moment';
 
 import isNil from 'lodash/isNil';
@@ -117,29 +117,33 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   };
 
   return (
-    <Dialog
-      className="edit-table"
-      blockScroll={false}
-      contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
-      closeOnEscape={false}
-      header={resources.messages['notifications']}
-      modal={true}
-      onHide={() => setIsNotificationVisible(false)}
-      style={{ width: '60%' }}
-      visible={isNotificationVisible}
-      zIndex={3100}>
-      <DataTable
-        autoLayout={true}
-        loading={false}
-        paginator={true}
-        paginatorRight={<span>{`${resources.messages['totalRecords']}  ${notifications.length}`}</span>}
-        rows={10}
-        rowsPerPageOptions={[5, 10, 15]}
-        totalRecords={notifications.length}
-        value={notifications}>
-        {columns}
-      </DataTable>
-    </Dialog>
+    <Fragment>
+      {isNotificationVisible && (
+        <Dialog
+          className="edit-table"
+          blockScroll={false}
+          contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
+          closeOnEscape={false}
+          header={resources.messages['notifications']}
+          modal={true}
+          onHide={() => setIsNotificationVisible(false)}
+          style={{ width: '60%' }}
+          visible={isNotificationVisible}
+          zIndex={3100}>
+          <DataTable
+            autoLayout={true}
+            loading={false}
+            paginator={true}
+            paginatorRight={<span>{`${resources.messages['totalRecords']}  ${notifications.length}`}</span>}
+            rows={10}
+            rowsPerPageOptions={[5, 10, 15]}
+            totalRecords={notifications.length}
+            value={notifications}>
+            {columns}
+          </DataTable>
+        </Dialog>
+      )}
+    </Fragment>
   );
 };
 

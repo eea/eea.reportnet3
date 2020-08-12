@@ -419,11 +419,13 @@ export const Dataset = withRouter(({ match, history }) => {
               description: field['description'],
               field: field['fieldId'],
               header: field['name'],
+              maxSize: field['maxSize'],
               pkHasMultipleValues: field['pkHasMultipleValues'],
               recordId: field['recordId'],
               referencedField: field['referencedField'],
               table: table['tableSchemaName'],
-              type: field['type']
+              type: field['type'],
+              validExtensions: field['validExtensions']
             };
           });
         })
@@ -651,14 +653,20 @@ export const Dataset = withRouter(({ match, history }) => {
           </div>
         </Toolbar>
       </div>
-      <Dialog
-        dismissableMask={true}
-        header={resources.messages['titleDashboard']}
-        onHide={() => onSetVisible(setDashDialogVisible, false)}
-        style={{ width: '70vw' }}
-        visible={dashDialogVisible}>
-        <Dashboard refresh={dashDialogVisible} levelErrorTypes={levelErrorTypes} tableSchemaNames={tableSchemaNames} />
-      </Dialog>
+      {dashDialogVisible && (
+        <Dialog
+          dismissableMask={true}
+          header={resources.messages['titleDashboard']}
+          onHide={() => onSetVisible(setDashDialogVisible, false)}
+          style={{ width: '70vw' }}
+          visible={dashDialogVisible}>
+          <Dashboard
+            refresh={dashDialogVisible}
+            levelErrorTypes={levelErrorTypes}
+            tableSchemaNames={tableSchemaNames}
+          />
+        </Dialog>
+      )}
       <TabsSchema
         activeIndex={dataViewerOptions.activeIndex}
         hasWritePermissions={hasWritePermissions}
@@ -673,23 +681,25 @@ export const Dataset = withRouter(({ match, history }) => {
         tables={tableSchema}
         tableSchemaColumns={tableSchemaColumns}
       />
-      <Dialog
-        className={styles.paginatorValidationViewer}
-        dismissableMask={true}
-        header={resources.messages['titleValidations']}
-        onHide={() => onSetVisible(setValidationsVisible, false)}
-        style={{ width: '80%' }}
-        visible={validationsVisible}>
-        <ValidationViewer
-          datasetId={datasetId}
-          datasetName={datasetName}
-          hasWritePermissions={hasWritePermissions}
-          levelErrorTypes={levelErrorTypes}
-          onSelectValidation={onSelectValidation}
-          tableSchemaNames={tableSchemaNames}
-          visible={validationsVisible}
-        />
-      </Dialog>
+      {validationsVisible && (
+        <Dialog
+          className={styles.paginatorValidationViewer}
+          dismissableMask={true}
+          header={resources.messages['titleValidations']}
+          onHide={() => onSetVisible(setValidationsVisible, false)}
+          style={{ width: '80%' }}
+          visible={validationsVisible}>
+          <ValidationViewer
+            datasetId={datasetId}
+            datasetName={datasetName}
+            hasWritePermissions={hasWritePermissions}
+            levelErrorTypes={levelErrorTypes}
+            onSelectValidation={onSelectValidation}
+            tableSchemaNames={tableSchemaNames}
+            visible={validationsVisible}
+          />
+        </Dialog>
+      )}
       {validationListDialogVisible && (
         <Dialog
           className={hasValidations ? styles.qcRulesDialog : styles.qcRulesDialogEmpty}
@@ -733,27 +743,31 @@ export const Dataset = withRouter(({ match, history }) => {
           />
         </Dialog>
       )}
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        header={resources.messages['deleteDatasetHeader']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        maximizable={false}
-        onConfirm={onConfirmDelete}
-        onHide={() => onSetVisible(setDeleteDialogVisible, false)}
-        visible={deleteDialogVisible}>
-        {resources.messages['deleteDatasetConfirm']}
-      </ConfirmDialog>
-      <ConfirmDialog
-        header={resources.messages['validateDataset']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        maximizable={false}
-        onConfirm={onConfirmValidate}
-        onHide={() => onSetVisible(setValidateDialogVisible, false)}
-        visible={validateDialogVisible}>
-        {resources.messages['validateDatasetConfirm']}
-      </ConfirmDialog>
+      {deleteDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={resources.messages['deleteDatasetHeader']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          maximizable={false}
+          onConfirm={onConfirmDelete}
+          onHide={() => onSetVisible(setDeleteDialogVisible, false)}
+          visible={deleteDialogVisible}>
+          {resources.messages['deleteDatasetConfirm']}
+        </ConfirmDialog>
+      )}
+      {validateDialogVisible && (
+        <ConfirmDialog
+          header={resources.messages['validateDataset']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          maximizable={false}
+          onConfirm={onConfirmValidate}
+          onHide={() => onSetVisible(setValidateDialogVisible, false)}
+          visible={validateDialogVisible}>
+          {resources.messages['validateDatasetConfirm']}
+        </ConfirmDialog>
+      )}
       <Snapshots
         snapshotListData={snapshotListData}
         isLoadingSnapshotListData={isLoadingSnapshotListData}

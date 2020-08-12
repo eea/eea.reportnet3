@@ -4,6 +4,9 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -84,4 +87,22 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
         .addResourceLocations("classpath:/META-INF/resources/webjars/");
   }
 
+  /**
+   * Cors filter cors filter for Swagger
+   *
+   * @return the cors filter
+   */
+  @Bean
+  public CorsFilter corsFilter() {
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+
+    CorsConfiguration config = new CorsConfiguration();
+    config.setAllowCredentials(true);
+    config.addAllowedOrigin("*");
+    config.addAllowedHeader("*");
+    config.addAllowedMethod("*");
+
+    source.registerCorsConfiguration("/v2/api-docs", config);
+    return new CorsFilter(source);
+  }
 }

@@ -1,8 +1,10 @@
 package org.eea.dataflow.persistence.repository;
 
 import java.util.List;
+import javax.transaction.Transactional;
 import org.eea.dataflow.persistence.domain.Integration;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -37,6 +39,19 @@ public interface IntegrationRepository extends CrudRepository<Integration, Long>
       @Param("parameter") String parameter, @Param("value") String value);
 
   /**
+   * Find by operation and parameter and value.
+   *
+   * @param operation the operation
+   * @param parameter the parameter
+   * @param value the value
+   * @return the list
+   */
+  @Query("SELECT i FROM Integration i JOIN i.internalParameters p WHERE i.operation=:operation AND p.parameter=:parameter AND p.value=:value")
+  List<Integration> findByOperationAndParameterAndValue(
+      @Param("operation") IntegrationOperationTypeEnum operation,
+      @Param("parameter") String parameter, @Param("value") String value);
+
+  /**
    * Find operation by id.
    *
    * @param id the id
@@ -44,4 +59,17 @@ public interface IntegrationRepository extends CrudRepository<Integration, Long>
    */
   @Query("SELECT i.operation FROM Integration i WHERE i.id=:id")
   IntegrationOperationTypeEnum findOperationById(@Param("id") Long id);
+
+  /**
+   * Delete by parameter and value.
+   *
+   * @param parameter the parameter
+   * @param value the value
+   */
+  @Transactional
+  @Modifying
+  @Query(nativeQuery = true,
+      value = "DELETE FROM integration i USING integration_operation_parameters p WHERE i.id=p.integration_id and  p.parameter=:parameter AND p.value=:value")
+  void deleteByParameterAndValue(@Param("parameter") String parameter,
+      @Param("value") String value);
 }

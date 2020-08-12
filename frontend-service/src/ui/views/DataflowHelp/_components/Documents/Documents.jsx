@@ -109,7 +109,7 @@ const Documents = ({
   };
 
   const isPublicColumnTemplate = rowData => (
-    <span>{rowData.isPublic ? resources.messages['yes'] : resources.messages['no']}</span>
+    <span>{rowData.isPublic ? <FontAwesomeIcon icon={AwesomeIcons('check')} /> : ''}</span>
   );
 
   const onCancelDialog = () => {
@@ -237,6 +237,7 @@ const Documents = ({
         />
         <Column
           body={isPublicColumnTemplate}
+          className={styles.iconStyle}
           field="isPublic"
           filter={false}
           filterMatchMode="contains"
@@ -302,20 +303,22 @@ const Documents = ({
         </Dialog>
       )}
 
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        header={resources.messages['delete']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        maximizable={false}
-        onConfirm={() => {
-          setIsDeletingDocument(true);
-          onDeleteDocument(rowDataState);
-        }}
-        onHide={onHideDeleteDialog}
-        visible={deleteDialogVisible}>
-        {resources.messages['deleteDocument']}
-      </ConfirmDialog>
+      {deleteDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={resources.messages['delete']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          maximizable={false}
+          onConfirm={() => {
+            setIsDeletingDocument(true);
+            onDeleteDocument(rowDataState);
+          }}
+          onHide={onHideDeleteDialog}
+          visible={deleteDialogVisible}>
+          {resources.messages['deleteDocument']}
+        </ConfirmDialog>
+      )}
     </Fragment>
   );
 };

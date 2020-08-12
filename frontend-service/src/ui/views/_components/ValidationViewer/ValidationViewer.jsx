@@ -75,7 +75,9 @@ const ValidationViewer = React.memo(
         }
       ];
 
-      let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={col.header} />);
+      let columnsArr = headers.map(col => (
+        <Column sortable={true} key={col.id} field={col.id} header={col.header} style={columnStyles(col.id)} />
+      ));
 
       columnsArr.push(
         <Column
@@ -117,6 +119,14 @@ const ValidationViewer = React.memo(
         }
       }
     }, [visible]);
+
+    const columnStyles = columnId => {
+      const style = {};
+      if (columnId === 'levelError') {
+        style.minWidth = '6rem';
+      }
+      return style;
+    };
 
     const onChangePage = event => {
       setNumberRows(event.rows);

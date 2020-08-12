@@ -152,29 +152,13 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param mimeType the mime type
-   * @param idTableSchema the id table schema
-   *
+   * @param tableSchemaId the table schema id
    * @return the byte[]
-   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  byte[] exportFile(@DatasetId Long datasetId, String mimeType, String idTableSchema)
+  byte[] exportFile(@DatasetId Long datasetId, String mimeType, String tableSchemaId)
       throws EEAException, IOException;
-
-  /**
-   * Gets the file name.
-   *
-   * @param mimeType the mime type
-   * @param idTableSchema the id table schema
-   * @param datasetId the dataset id
-   *
-   * @return the file name
-   *
-   * @throws EEAException the EEA exception
-   */
-  String getFileName(String mimeType, String idTableSchema, @DatasetId Long datasetId)
-      throws EEAException;
 
   /**
    * Creates the records.
@@ -487,6 +471,15 @@ public interface DatasetService {
    */
   void deleteAttachmentByFieldSchemaId(@DatasetId Long datasetId, String fieldSchemaId)
       throws EEAException;
+
+  /**
+   * Export file through integration.
+   *
+   * @param datasetId the dataset id
+   * @param fileExtension the file extension
+   * @throws EEAException the EEA exception
+   */
+  void exportFileThroughIntegration(Long datasetId, String fileExtension) throws EEAException;
 
   /**
    * Checks if is design dataset.

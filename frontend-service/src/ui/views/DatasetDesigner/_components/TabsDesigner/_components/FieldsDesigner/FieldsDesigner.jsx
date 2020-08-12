@@ -284,12 +284,14 @@ export const FieldsDesigner = ({
             description: field.description,
             field: field['fieldId'],
             header: field['name'],
+            maxSize: field['maxSize'],
             pkHasMultipleValues: field['pkHasMultipleValues'],
             recordId: field['recordId'],
             referencedField: field['referencedField'],
             required: field.required,
             table: table['tableSchemaName'],
-            type: field['type']
+            type: field['type'],
+            validExtensions: field['validExtensions']
           };
         })
       : [];
@@ -349,14 +351,16 @@ export const FieldsDesigner = ({
 
   const renderErrors = (errorTitle, error) => {
     return (
-      <Dialog
-        footer={errorDialogFooter}
-        header={errorTitle}
-        modal={true}
-        onHide={() => setIsErrorDialogVisible(false)}
-        visible={isErrorDialogVisible}>
-        <div className="p-grid p-fluid">{error}</div>
-      </Dialog>
+      isErrorDialogVisible && (
+        <Dialog
+          footer={errorDialogFooter}
+          header={errorTitle}
+          modal={true}
+          onHide={() => setIsErrorDialogVisible(false)}
+          visible={isErrorDialogVisible}>
+          <div className="p-grid p-fluid">{error}</div>
+        </Dialog>
+      )
     );
   };
 

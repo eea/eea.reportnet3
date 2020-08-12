@@ -42,15 +42,14 @@ public enum LockSignature {
   /** DataCollectionControllerImpl.updateDataCollection(..) */
   UPDATE_DATA_COLLECTION("DataCollectionControllerImpl.updateDataCollection(..)"),
 
-  /** The copy dataset schema. */
+  /** DataSetSchemaControllerImpl.copyDesignsFromDataflow(..) */
   COPY_DATASET_SCHEMA("DataSetSchemaControllerImpl.copyDesignsFromDataflow(..)"),
 
-  /** The populate eu dataset. */
+  /** EUDatasetControllerImpl.populateDataFromDataCollection(..) */
   POPULATE_EU_DATASET("EUDatasetControllerImpl.populateDataFromDataCollection(..)"),
 
-  /** The export eu dataset. */
+  /** IntegrationControllerImpl.executeEUDatasetExport(..) */
   EXPORT_EU_DATASET("IntegrationControllerImpl.executeEUDatasetExport(..)");
-
 
   /** The value. */
   private final String value;
