@@ -1,6 +1,7 @@
 package org.eea.dataset.service.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -206,7 +207,8 @@ public class EUDatasetServiceImplTest {
   @Test
   public void removeLocksRelatedToPopulateEUTest() {
     when(reportingDatasetService.getDataSetIdByDataflowId(Mockito.any())).thenReturn(reportings);
-    euDatasetService.removeLocksRelatedToPopulateEU(1L);
+    when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(Boolean.TRUE);
+    assertTrue(euDatasetService.removeLocksRelatedToPopulateEU(1L));
     Mockito.verify(lockService, times(4)).removeLockByCriteria(Mockito.any());
   }
 
