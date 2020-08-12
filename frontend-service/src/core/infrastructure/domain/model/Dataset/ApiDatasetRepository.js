@@ -18,7 +18,7 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   datasetTableFieldDesign.codelistItems = datasetTableRecordField.codelistItems;
   datasetTableFieldDesign.description = datasetTableRecordField.description;
   datasetTableFieldDesign.idRecord = datasetTableRecordField.recordId;
-  datasetTableFieldDesign.maxSize = datasetTableRecordField.maxSize.toString();
+  datasetTableFieldDesign.maxSize = datasetTableRecordField.maxSize ? datasetTableRecordField.maxSize.toString() : null;
   datasetTableFieldDesign.pk = datasetTableRecordField.pk;
   datasetTableFieldDesign.pkHasMultipleValues = datasetTableRecordField.pkHasMultipleValues;
   datasetTableFieldDesign.pkMustBeUsed = datasetTableRecordField.pkMustBeUsed;
