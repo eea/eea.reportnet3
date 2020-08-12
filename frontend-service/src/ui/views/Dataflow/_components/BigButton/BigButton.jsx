@@ -33,11 +33,10 @@ export const BigButton = ({
   infoStatusIcon,
   layout,
   model,
-  onDuplicateName,
-  onSaveError,
   onSaveName,
   onWheel,
   placeholder,
+  setErrorDialogData,
   tooltip
 }) => {
   const resources = useContext(ResourcesContext);
@@ -67,10 +66,8 @@ export const BigButton = ({
       if (buttonsTitle !== '') {
         onInputSave(event.target.value, index);
       } else {
-        if (!isUndefined(onSaveError)) {
-          onSaveError();
-          document.getElementsByClassName('p-inputtext p-component')[0].focus();
-        }
+        setErrorDialogData({ isVisible: true, message: resources.messages['emptyDatasetSchema'] });
+        document.getElementsByClassName('p-inputtext p-component')[0].focus();
       }
     }
     if (event.key === 'Escape') {
@@ -112,8 +109,14 @@ export const BigButton = ({
   const onUpdateName = (title, index) => {
     if (!isEmpty(buttonsTitle)) {
       if (initialValue !== title) {
-        if (checkDuplicates(title, index)) {
-          onDuplicateName();
+        if (checkDuplicates(title, index) || title.length > 250) {
+          setErrorDialogData({
+            isVisible: true,
+            message:
+              title.length > 250
+                ? resources.messages['toLongSchemaNameError']
+                : resources.messages['duplicateSchemaError']
+          });
           document.getElementsByClassName('p-inputtext p-component')[0].focus();
           return { correct: false, originalSchemaName: initialValue, wrongName: title };
         } else {
@@ -123,10 +126,8 @@ export const BigButton = ({
         setIsEditEnabled(false);
       }
     } else {
-      if (!isUndefined(onSaveError)) {
-        onSaveError();
-        document.getElementsByClassName('p-inputtext p-component')[0].focus();
-      }
+      setErrorDialogData({ isVisible: true, message: resources.messages['emptyDatasetSchema'] });
+      document.getElementsByClassName('p-inputtext p-component')[0].focus();
     }
   };
 
