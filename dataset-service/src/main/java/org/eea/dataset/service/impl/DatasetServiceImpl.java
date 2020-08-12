@@ -697,74 +697,6 @@ public class DatasetServiceImpl implements DatasetService {
     recordRepository.saveAll(recordValue);
   }
 
-  /**
-   * Throws methods.
-   *
-   * @param datasetId the dataset id
-   * @param records the records
-   * @param idTableSchema the id table schema
-   *
-   * @return the long
-   *
-   * @throws EEAException the EEA exception
-   */
-  private Long throwsMethods(final Long datasetId, final List<RecordVO> records,
-      final String idTableSchema) throws EEAException {
-    if (datasetId == null || records == null || idTableSchema == null) {
-      throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
-    }
-    Long tableId = tableRepository.findIdByIdTableSchema(idTableSchema);
-    if (null == tableId || tableId == 0) {
-      throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
-    }
-    return tableId;
-  }
-
-  /**
-   * For field filled.
-   *
-   * @param metabase the metabase
-   * @param field the field
-   */
-  private void forFieldFilled(DataSetMetabaseVO metabase, FieldValue field) {
-    if (null == field.getValue()) {
-      field.setValue("");
-    } else {
-      if (field.getValue().length() >= fieldMaxLength) {
-        field.setValue(field.getValue().substring(0, fieldMaxLength));
-      }
-    }
-
-    Document fieldSchema =
-        schemasRepository.findFieldSchema(metabase.getDatasetSchema(), field.getIdFieldSchema());
-
-    // if the type is link multiselect we check if is multiple
-    Boolean isLinkMultiselect = false;
-
-    if (DataType.LINK.equals(field.getType())) {
-      isLinkMultiselect = fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES) != null
-          ? (Boolean) fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES)
-          : Boolean.FALSE;
-    }
-    // if the type is multiselect codelist or Link multiple we sort the values in lexicographic
-    // order
-    if ((DataType.MULTISELECT_CODELIST.equals(field.getType()) || isLinkMultiselect)
-        && null != field.getValue()) {
-      List<String> values = new ArrayList<>();
-      Arrays.asList(field.getValue().split(",")).stream()
-          .forEach(value -> values.add(value.trim()));
-      Collections.sort(values);
-      field.setValue(values.toString().substring(1, values.toString().length() - 1));
-    }
-
-    // If the field is readOnly and is not a design dataset the value is empty
-    if (fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
-        && (Boolean) fieldSchema.get(LiteralConstants.READ_ONLY)
-        && !isDesignDataset(metabase.getId())) {
-      field.setValue("");
-    }
-
-  }
 
 
   /**
@@ -1965,6 +1897,7 @@ public class DatasetServiceImpl implements DatasetService {
     return tableId;
   }
 
+
   /**
    * For field filled.
    *
@@ -1979,14 +1912,16 @@ public class DatasetServiceImpl implements DatasetService {
         field.setValue(field.getValue().substring(0, fieldMaxLength));
       }
     }
+
+    Document fieldSchema =
+        schemasRepository.findFieldSchema(metabase.getDatasetSchema(), field.getIdFieldSchema());
+
     // if the type is link multiselect we check if is multiple
-    Boolean isLinkMultiselect = false;
+    boolean isLinkMultiselect = false;
+
     if (DataType.LINK.equals(field.getType())) {
-      Document fieldSchema =
-          schemasRepository.findFieldSchema(metabase.getDatasetSchema(), field.getIdFieldSchema());
-      isLinkMultiselect = fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES) != null
-          ? (Boolean) fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES)
-          : Boolean.FALSE;
+      isLinkMultiselect =
+          Boolean.TRUE.equals(fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES));
     }
     // if the type is multiselect codelist or Link multiple we sort the values in lexicographic
     // order
@@ -1998,6 +1933,14 @@ public class DatasetServiceImpl implements DatasetService {
       Collections.sort(values);
       field.setValue(values.toString().substring(1, values.toString().length() - 1));
     }
+
+    // If the field is readOnly and is not a design dataset the value is empty
+    if (fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
+        && (boolean) fieldSchema.get(LiteralConstants.READ_ONLY)
+        && !isDesignDataset(metabase.getId())) {
+      field.setValue("");
+    }
+
   }
 
   /**
