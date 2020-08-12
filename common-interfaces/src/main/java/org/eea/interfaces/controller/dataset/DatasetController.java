@@ -1,10 +1,6 @@
-/*
- *
- */
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
-import javax.ws.rs.Produces;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -27,18 +23,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * The interface Dataset controller.
+ * The Interface DatasetController.
  */
 public interface DatasetController {
 
   /**
-   * The interface Data set controller zuul.
+   * The Interface DataSetControllerZuul.
    */
   @FeignClient(value = "dataset", path = "/dataset")
   interface DataSetControllerZuul extends DatasetController {
-
   }
-
 
   /**
    * Gets the data tables values.
@@ -49,10 +43,9 @@ public interface DatasetController {
    * @param pageSize the page size
    * @param fields the fields
    * @param levelError the level error
-   *
    * @return the data tables values
    */
-  @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping("TableValueDataset/{id}")
   TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
       @RequestParam("idTableSchema") String idTableSchema,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
@@ -60,15 +53,13 @@ public interface DatasetController {
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "levelError", required = false) ErrorTypeEnum[] levelError);
 
-
   /**
    * Update dataset.
    *
    * @param dataset the dataset
    */
-  @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping("/update")
   void updateDataset(@RequestBody DataSetVO dataset);
-
 
   /**
    * Load table data.
@@ -79,10 +70,10 @@ public interface DatasetController {
    */
   @PostMapping("{id}/loadTableData/{idTableSchema}")
   void loadTableData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
-      @PathVariable(value = "idTableSchema") String idTableSchema);
+      @PathVariable("idTableSchema") String idTableSchema);
 
   /**
-   * Load table data.
+   * Load dataset data.
    *
    * @param datasetId the dataset id
    * @param file the file
@@ -94,45 +85,40 @@ public interface DatasetController {
   /**
    * Delete import data.
    *
-   * @param datasetId the id of dataset
+   * @param datasetId the dataset id
    */
-  @DeleteMapping(value = "{id}/deleteImportData")
+  @DeleteMapping("{id}/deleteImportData")
   void deleteImportData(@PathVariable("id") Long datasetId);
 
   /**
-   * Gets the table from any object id.
+   * Gets the position from any object id.
    *
    * @param id the id
    * @param idDataset the id dataset
    * @param type the type
-   *
-   * @return the table from any object id
+   * @return the position from any object id
    */
-  @GetMapping(value = "findPositionFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping("findPositionFromAnyObject/{id}")
   ValidationLinkVO getPositionFromAnyObjectId(@PathVariable("id") String id,
-      @RequestParam(value = "datasetId", required = true) Long idDataset,
-      @RequestParam(value = "type", required = true) EntityTypeEnum type);
+      @RequestParam("datasetId") Long idDataset, @RequestParam("type") EntityTypeEnum type);
 
   /**
    * Gets the by id.
    *
    * @param datasetId the dataset id
-   *
    * @return the by id
    */
-  @GetMapping(value = "{id}")
+  @GetMapping("{id}")
   DataSetVO getById(@PathVariable("id") Long datasetId);
 
   /**
    * Gets the data flow id by id.
    *
    * @param datasetId the dataset id
-   *
    * @return the data flow id by id
    */
   @GetMapping("{id}/dataflow")
   Long getDataFlowIdById(@PathVariable("id") Long datasetId);
-
 
   /**
    * Insert records.
@@ -140,20 +126,18 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param records the records
-   * @param file the file
    */
-  @PostMapping(value = "/{id}/table/{idTableSchema}/record")
+  @PostMapping("/{id}/table/{idTableSchema}/record")
   void insertRecords(@PathVariable("id") Long datasetId,
       @PathVariable("idTableSchema") String idTableSchema, @RequestBody List<RecordVO> records);
 
-
   /**
-   * Update record.
+   * Update records.
    *
    * @param datasetId the dataset id
    * @param records the records
    */
-  @PutMapping(value = "/{id}/updateRecord", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping("/{id}/updateRecord")
   void updateRecords(@PathVariable("id") Long datasetId, @RequestBody List<RecordVO> records);
 
   /**
@@ -162,7 +146,7 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param recordId the record id
    */
-  @DeleteMapping(value = "/{id}/record/{recordId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @DeleteMapping("/{id}/record/{recordId}")
   void deleteRecord(@PathVariable("id") Long datasetId, @PathVariable("recordId") String recordId);
 
   /**
@@ -171,27 +155,32 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    */
-  @DeleteMapping(value = "{datasetId}/deleteImportTable/{tableSchemaId}")
+  @DeleteMapping("{datasetId}/deleteImportTable/{tableSchemaId}")
   void deleteImportTable(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId);
-
 
   /**
    * Export file.
    *
    * @param datasetId the dataset id
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the table schema id
    * @param mimeType the mime type
-   *
    * @return the response entity
-   *
-   * @throws Exception the exception
    */
-  @GetMapping("/exportFile")
-  @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-  ResponseEntity exportFile(@RequestParam("datasetId") Long datasetId,
-      @RequestParam(value = "idTableSchema", required = false) String idTableSchema,
-      @RequestParam("mimeType") String mimeType) throws Exception;
+  @GetMapping(value = "/exportFile", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  ResponseEntity<byte[]> exportFile(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("tableSchemaId") String tableSchemaId,
+      @RequestParam("mimeType") String mimeType);
+
+  /**
+   * Export file through integration.
+   *
+   * @param datasetId the dataset id
+   * @param fileExtension the file extension
+   */
+  @GetMapping("/exportFileThroughIntegration")
+  void exportFileThroughIntegration(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("fileExtension") String fileExtension);
 
   /**
    * Insert id data schema.
@@ -199,9 +188,9 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param idDatasetSchema the id dataset schema
    */
-  @PostMapping(value = "/{id}/insertIdSchema", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping("/{id}/insertIdSchema")
   void insertIdDataSchema(@PathVariable("id") Long datasetId,
-      @RequestParam(value = "idDatasetSchema", required = true) String idDatasetSchema);
+      @RequestParam("idDatasetSchema") String idDatasetSchema);
 
   /**
    * Update field.
@@ -209,7 +198,7 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param field the field
    */
-  @PutMapping(value = "/{id}/updateField", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping("/{id}/updateField")
   void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field);
 
   /**
@@ -218,13 +207,11 @@ public interface DatasetController {
    * @param datasetIdOrigin the dataset id origin
    * @param idFieldSchema the id field schema
    * @param searchValue the search value
-   *
    * @return the field values referenced
    */
   @GetMapping("/{id}/getFieldsValuesReferenced")
-  @Produces(value = {MediaType.APPLICATION_JSON_VALUE})
   List<FieldVO> getFieldValuesReferenced(@PathVariable("id") Long datasetIdOrigin,
-      @RequestParam(value = "idFieldSchema") String idFieldSchema,
+      @RequestParam("idFieldSchema") String idFieldSchema,
       @RequestParam("searchValue") String searchValue);
 
   /**
@@ -232,18 +219,16 @@ public interface DatasetController {
    *
    * @param datasetIdOrigin the dataset id origin
    * @param idFieldSchema the id field schema
-   *
    * @return the referenced dataset id
    */
   @GetMapping("/private/getReferencedDatasetId")
   Long getReferencedDatasetId(@RequestParam("id") Long datasetIdOrigin,
-      @RequestParam(value = "idFieldSchema") String idFieldSchema);
+      @RequestParam("idFieldSchema") String idFieldSchema);
 
   /**
    * Gets the dataset type.
    *
    * @param datasetId the dataset id
-   *
    * @return the dataset type
    */
   @GetMapping("/private/datasetType/{datasetId}")
@@ -255,7 +240,6 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
-   *
    * @return the ETL dataset VO
    */
   @GetMapping("/{datasetId}/etlExport")
@@ -276,8 +260,6 @@ public interface DatasetController {
       @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
 
-
-
   /**
    * Gets the attachment.
    *
@@ -287,9 +269,8 @@ public interface DatasetController {
    */
   @GetMapping(value = "/{datasetId}/field/{fieldId}/attachment",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  ResponseEntity getAttachment(@PathVariable("datasetId") Long datasetId,
+  ResponseEntity<byte[]> getAttachment(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldId") String fieldId);
-
 
   /**
    * Update attachment.
@@ -300,7 +281,7 @@ public interface DatasetController {
    */
   @PutMapping("/{datasetId}/field/{fieldId}/attachment")
   public void updateAttachment(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("fieldId") String idField, @RequestParam("file") final MultipartFile file);
+      @PathVariable("fieldId") String idField, @RequestParam("file") MultipartFile file);
 
   /**
    * Delete attachment.
@@ -311,7 +292,4 @@ public interface DatasetController {
   @DeleteMapping("/{datasetId}/field/{fieldId}/attachment")
   public void deleteAttachment(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldId") String idField);
-
-
-
 }

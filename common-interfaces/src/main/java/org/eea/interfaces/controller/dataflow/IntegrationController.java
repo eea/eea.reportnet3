@@ -120,12 +120,23 @@ public interface IntegrationController {
       @RequestParam("datasetSchemaId") String datasetSchemaId);
 
   /**
-   * Find expor EU dataset integration by dataset id.
+   * Find export EU dataset integration.
    *
    * @param datasetSchemaId the dataset schema id
    * @return the integration VO
    */
   @GetMapping("/findExportEUDatasetIntegration")
-  IntegrationVO findExporEUDatasetIntegrationByDatasetId(
+  IntegrationVO findExportEUDatasetIntegration(
       @RequestParam("datasetSchemaId") String datasetSchemaId);
+
+  /**
+   * Find export integration.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fileExtension the file extension
+   * @return the integration VO
+   */
+  @GetMapping("/private/findExportIntegration")
+  IntegrationVO findExportIntegration(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("fileExtension") String fileExtension);
 }

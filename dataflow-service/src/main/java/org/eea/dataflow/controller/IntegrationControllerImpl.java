@@ -86,9 +86,9 @@ public class IntegrationControllerImpl implements IntegrationController {
   @Override
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
   @GetMapping("/findExportEUDatasetIntegration")
-  public IntegrationVO findExporEUDatasetIntegrationByDatasetId(
+  public IntegrationVO findExportEUDatasetIntegration(
       @RequestParam("datasetSchemaId") String datasetSchemaId) {
-    return integrationService.getExporEUDatasetIntegrationByDatasetId(datasetSchemaId);
+    return integrationService.getExportEUDatasetIntegration(datasetSchemaId);
   }
 
   /**
@@ -275,5 +275,20 @@ public class IntegrationControllerImpl implements IntegrationController {
       @ApiParam(value = "Dataset Schema id",
           example = "0") @RequestParam("datasetSchemaId") String datasetSchemaId) {
     integrationService.createDefaultIntegration(dataflowId, datasetSchemaId);
+  }
+
+  /**
+   * Find export integration.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fileExtension the file extension
+   * @return the integration VO
+   */
+  @Override
+  @GetMapping("/private/findExportIntegration")
+  public IntegrationVO findExportIntegration(
+      @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("fileExtension") String fileExtension) {
+    return integrationService.getExportIntegration(datasetSchemaId, fileExtension);
   }
 }
