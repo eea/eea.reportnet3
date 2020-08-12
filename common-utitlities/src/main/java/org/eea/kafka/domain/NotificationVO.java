@@ -58,4 +58,7 @@ public class NotificationVO implements Serializable {
 
   /** The short code. */
   private String shortCode;
+
+  /** The provider id. */
+  private Long providerId;
 }

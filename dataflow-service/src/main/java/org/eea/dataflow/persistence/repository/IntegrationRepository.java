@@ -35,4 +35,26 @@ public interface IntegrationRepository extends CrudRepository<Integration, Long>
   Integration findFirstByOperationAndParameterAndValue(
       @Param("operation") IntegrationOperationTypeEnum operation,
       @Param("parameter") String parameter, @Param("value") String value);
+
+  /**
+   * Find by operation and parameter and value.
+   *
+   * @param operation the operation
+   * @param parameter the parameter
+   * @param value the value
+   * @return the list
+   */
+  @Query("SELECT i FROM Integration i JOIN i.internalParameters p WHERE i.operation=:operation AND p.parameter=:parameter AND p.value=:value")
+  List<Integration> findByOperationAndParameterAndValue(
+      @Param("operation") IntegrationOperationTypeEnum operation,
+      @Param("parameter") String parameter, @Param("value") String value);
+
+  /**
+   * Find operation by id.
+   *
+   * @param id the id
+   * @return the integration operation type enum
+   */
+  @Query("SELECT i.operation FROM Integration i WHERE i.id=:id")
+  IntegrationOperationTypeEnum findOperationById(@Param("id") Long id);
 }

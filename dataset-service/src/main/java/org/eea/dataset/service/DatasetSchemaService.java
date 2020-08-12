@@ -451,4 +451,16 @@ public interface DatasetSchemaService {
    */
   SimpleDatasetSchemaVO getSimpleSchema(Long datasetId) throws EEAException;
 
+
+  /**
+   * Check clear attachments.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @return the boolean
+   */
+  Boolean checkClearAttachments(Long datasetId, String datasetSchemaId,
+      FieldSchemaVO fieldSchemaVO);
+
 }
