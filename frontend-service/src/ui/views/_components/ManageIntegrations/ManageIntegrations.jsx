@@ -381,7 +381,7 @@ export const ManageIntegrations = ({
       <InputText
         onBlur={event => onBlurParameter(id, option, event)}
         onChange={event => onChangeParameter(event.target.value, option, id)}
-        onKeyDown={event => onEditKeyDown(event, id, option)}
+        onKeyPress={event => onEditKeyDown(event, id, option)}
         ref={parameterRef}
         value={parameter[option]}
       />
