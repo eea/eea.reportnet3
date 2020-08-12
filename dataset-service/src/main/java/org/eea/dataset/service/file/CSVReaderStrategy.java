@@ -204,7 +204,8 @@ public class CSVReaderStrategy implements ReaderStrategy {
         if (null != fieldSchema) {
           header.setId(fieldSchema.getId());
           header.setType(fieldSchema.getType());
-          header.setReadOnly(fieldSchema.getReadOnly());
+          header.setReadOnly(
+              fieldSchema.getReadOnly() == null ? Boolean.FALSE : fieldSchema.getReadOnly());
         }
       }
       header.setName(value);

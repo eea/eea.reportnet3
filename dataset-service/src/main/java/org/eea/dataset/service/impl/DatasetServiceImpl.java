@@ -1982,7 +1982,8 @@ public class DatasetServiceImpl implements DatasetService {
               fieldMap.get(etlField.getFieldName().toLowerCase() + tableSchema.getIdTableSchema());
           if (fieldSchema != null && Boolean.FALSE.equals(fieldSchema.getReadOnly())
               && !isDesignDataset(dataset.getId())
-              || fieldSchema != null && isDesignDataset(dataset.getId())) {
+              || fieldSchema != null && isDesignDataset(dataset.getId())
+              || fieldSchema != null && fieldSchema.getReadOnly() == null) {
             field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
             field.setType(fieldSchema.getType());
             field.setValue(etlField.getValue());
