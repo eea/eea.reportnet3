@@ -291,4 +291,15 @@ public class IntegrationControllerImpl implements IntegrationController {
       @RequestParam("fileExtension") String fileExtension) {
     return integrationService.getExportIntegration(datasetSchemaId, fileExtension);
   }
+
+  /**
+   * Delete schema integrations.
+   *
+   * @param datasetSchemaId the dataset schema id
+   */
+  @Override
+  @DeleteMapping("/private/deleteSchemaIntegrations")
+  public void deleteSchemaIntegrations(@RequestParam("datasetSchemaId") String datasetSchemaId) {
+    integrationService.deleteSchemaIntegrations(datasetSchemaId);
+  }
 }

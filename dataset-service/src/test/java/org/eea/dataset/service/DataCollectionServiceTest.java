@@ -22,7 +22,7 @@ import org.eea.dataset.service.model.FKDataCollection;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
@@ -89,9 +89,9 @@ public class DataCollectionServiceTest {
   @Mock
   private UserManagementControllerZull userManagementControllerZuul;
 
-  /** The record store controller zull. */
+  /** The record store controller zuul. */
   @Mock
-  private RecordStoreControllerZull recordStoreControllerZull;
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
   /** The metabase data source. */
   @Mock
@@ -320,12 +320,12 @@ public class DataCollectionServiceTest {
         .thenReturn(new ResourceInfoVO());
     Mockito.when(rulesControllerZuul.findRuleSchemaByDatasetId(Mockito.any()))
         .thenReturn(new RulesSchemaVO());
-    Mockito.doNothing().when(recordStoreControllerZull).createSchemas(Mockito.any(), Mockito.any(),
+    Mockito.doNothing().when(recordStoreControllerZuul).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean());
     Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(Mockito.any()))
         .thenReturn(new ArrayList<>());
     dataCollectionService.createEmptyDataCollection(1L, new Date());
-    Mockito.verify(recordStoreControllerZull, times(1)).createSchemas(Mockito.any(), Mockito.any(),
+    Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean());
   }
 

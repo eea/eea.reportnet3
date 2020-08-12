@@ -333,19 +333,35 @@ public class IntegrationServiceImpl implements IntegrationService {
     List<Integration> integrations = integrationRepository.findByOperationAndParameterAndValue(
         IntegrationOperationTypeEnum.EXPORT, IntegrationParams.DATASET_SCHEMA_ID, datasetSchemaId);
 
+    IntegrationVO integrationVO = null;
     if (null != integrations) {
-      for (Integration integration : integrations) {
+      mainloop: for (Integration integration : integrations) {
         for (InternalOperationParameters parameter : integration.getInternalParameters()) {
           if (IntegrationParams.FILE_EXTENSION.equals(parameter.getParameter())
               && parameter.getValue().equals(fileExtension)) {
-            return integrationMapper.entityToClass(integration);
+            integrationVO = integrationMapper.entityToClass(integration);
+            break mainloop;
           }
         }
       }
     }
 
-    LOG_ERROR.error("No EXPORT integration: datasetSchemaId={}, fileExtension={}", datasetSchemaId,
-        fileExtension);
-    return null;
+    if (null == integrationVO) {
+      LOG_ERROR.error("No EXPORT integration: datasetSchemaId={}, fileExtension={}",
+          datasetSchemaId, fileExtension);
+    }
+    return integrationVO;
+  }
+
+  /**
+   * Delete schema integrations.
+   *
+   * @param datasetSchemaId the dataset schema id
+   */
+  @Override
+  @Transactional
+  public void deleteSchemaIntegrations(String datasetSchemaId) {
+    integrationRepository.deleteByParameterAndValue(IntegrationParams.DATASET_SCHEMA_ID,
+        datasetSchemaId);
   }
 }

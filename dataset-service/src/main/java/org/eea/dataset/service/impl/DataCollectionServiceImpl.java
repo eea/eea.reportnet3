@@ -35,7 +35,7 @@ import org.eea.dataset.service.model.IntegrityDataCollection;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
@@ -77,160 +77,113 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   /** The Constant CHUNK_SIZE. */
   private static final int CHUNK_SIZE = 10;
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataCollectionServiceImpl.class);
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The Constant NAME_DC.
-   */
+  /** The Constant NAME_DC: {@value}. */
   private static final String NAME_DC = "Data Collection - %s";
 
-  /** The Constant NAME_EU. */
+  /** The Constant NAME_EU: {@value}. */
   private static final String NAME_EU = "EU Dataset - %s";
 
-  /**
-   * The Constant UPDATE_DATAFLOW_STATUS.
-   */
+  /** The Constant UPDATE_DATAFLOW_STATUS: {@value}. */
   private static final String UPDATE_DATAFLOW_STATUS =
       "update dataflow set status = '%s', deadline_date = '%s' where id = %d";
 
-  /** The Constant UPDATE_REPRESENTATIVE_HAS_DATASETS. */
+  /** The Constant UPDATE_REPRESENTATIVE_HAS_DATASETS: {@value}. */
   private static final String UPDATE_REPRESENTATIVE_HAS_DATASETS =
       "update representative set has_datasets = %b where id = %d;";
 
-  /**
-   * The Constant INSERT_DC_INTO_DATASET.
-   */
+  /** The Constant INSERT_DC_INTO_DATASET: {@value}. */
   private static final String INSERT_DC_INTO_DATASET =
       "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema) values ('%s', %d, '%s', '%s') returning id";
 
-  /** The Constant INSERT_EU_INTO_DATASET. */
+  /** The Constant INSERT_EU_INTO_DATASET: {@value}. */
   private static final String INSERT_EU_INTO_DATASET =
       "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema) values ('%s', %d, '%s', '%s') returning id";
 
-  /**
-   * The Constant INSERT_DC_INTO_DATA_COLLECTION.
-   */
+  /** The Constant INSERT_DC_INTO_DATA_COLLECTION: {@value}. */
   private static final String INSERT_DC_INTO_DATA_COLLECTION =
       "insert into data_collection (id, due_date) values (%d, '%s')";
 
-  /** The Constant INSERT_EU_INTO_EU_DATASET. */
+  /** The Constant INSERT_EU_INTO_EU_DATASET: {@value}. */
   private static final String INSERT_EU_INTO_EU_DATASET = "insert into eu_dataset (id) values (%d)";
 
-  /**
-   * The Constant INSERT_RD_INTO_DATASET.
-   */
+  /** The Constant INSERT_RD_INTO_DATASET: {@value}. */
   private static final String INSERT_RD_INTO_DATASET =
       "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema, data_provider_id) values ('%s', %d, '%s', '%s', %d) returning id";
 
-  /**
-   * The Constant INSERT_RD_INTO_REPORTING_DATASET.
-   */
+  /** The Constant INSERT_RD_INTO_REPORTING_DATASET: {@value}. */
   private static final String INSERT_RD_INTO_REPORTING_DATASET =
       "insert into reporting_dataset (id) values (%d)";
 
-  /**
-   * The Constant INSERT_INTO_PARTITION_DATASET.
-   */
+  /** The Constant INSERT_INTO_PARTITION_DATASET: {@value}. */
   private static final String INSERT_INTO_PARTITION_DATASET =
       "insert into partition_dataset (user_name, id_dataset) values ('root', %d)";
 
-  /**
-   * The metabase data source.
-   */
+  /** The metabase data source. */
   @Autowired
   @Qualifier("metabaseDatasource")
   private DataSource metabaseDataSource;
 
-  /**
-   * The data collection repository.
-   */
+  /** The data collection repository. */
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
 
-  /**
-   * The data collection mapper.
-   */
+  /** The data collection mapper. */
   @Autowired
   private DataCollectionMapper dataCollectionMapper;
 
-  /**
-   * The design dataset service.
-   */
+  /** The design dataset service. */
   @Autowired
   private DesignDatasetService designDatasetService;
 
-  /**
-   * The representative controller zuul.
-   */
+  /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /**
-   * The record store controller zull.
-   */
+  /** The record store controller zuul. */
   @Autowired
-  private RecordStoreControllerZull recordStoreControllerZull;
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
-  /**
-   * The dataflow controller zuul.
-   */
+  /** The dataflow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
-  /**
-   * The resource management controller zuul.
-   */
+  /** The resource management controller zuul. */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZuul;
 
-  /**
-   * The user management controller zuul.
-   */
+  /** The user management controller zuul. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZuul;
 
-  /**
-   * The lock service.
-   */
+  /** The lock service. */
   @Autowired
   private LockService lockService;
 
-  /**
-   * The kafka sender utils.
-   */
+  /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /**
-   * The dataset schema service.
-   */
+  /** The dataset schema service. */
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
-  /**
-   * The foreign relations repository.
-   */
+  /** The foreign relations repository. */
   @Autowired
   private ForeignRelationsRepository foreignRelationsRepository;
-
 
   /** The rules controller zuul. */
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
 
-
   /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
-
 
   /** The design dataset repository. */
   @Autowired
@@ -244,13 +197,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private EUDatasetRepository euDatasetRepository;
 
-
-
   /**
    * Gets the dataflow status.
    *
    * @param dataflowId the dataflow id
-   *
    * @return the dataflow status
    */
   @Override
@@ -460,7 +410,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
         // 10. Create schemas for each dataset
         // This method will release the lock
-        recordStoreControllerZull.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation);
+        recordStoreControllerZuul.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation);
       } catch (SQLException e) {
         LOG_ERROR.error("Error persisting changes. Rolling back...", e);
         releaseLockAndRollback(connection, dataflowId, isCreation);

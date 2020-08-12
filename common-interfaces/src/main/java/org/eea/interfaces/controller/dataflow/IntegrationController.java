@@ -139,4 +139,12 @@ public interface IntegrationController {
   @GetMapping("/private/findExportIntegration")
   IntegrationVO findExportIntegration(@RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam("fileExtension") String fileExtension);
+
+  /**
+   * Delete schema integrations.
+   *
+   * @param datasetSchemaId the dataset schema id
+   */
+  @DeleteMapping("/private/deleteSchemaIntegrations")
+  void deleteSchemaIntegrations(@RequestParam("datasetSchemaId") String datasetSchemaId);
 }

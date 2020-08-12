@@ -112,4 +112,11 @@ public interface IntegrationService {
    * @return the export integration
    */
   IntegrationVO getExportIntegration(String datasetSchemaId, String fileExtension);
+
+  /**
+   * Delete schema integrations.
+   *
+   * @param datasetSchemaId the dataset schema id
+   */
+  void deleteSchemaIntegrations(String datasetSchemaId);
 }

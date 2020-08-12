@@ -23,7 +23,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.rod.ObligationController;
@@ -56,100 +56,68 @@ import org.springframework.stereotype.Service;
 @Service("dataflowService")
 public class DataflowServiceImpl implements DataflowService {
 
-  /**
-   * The representative repository.
-   */
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
+
+  /** The representative repository. */
   @Autowired
   private RepresentativeRepository representativeRepository;
 
-  /**
-   * The dataflow repository.
-   */
+  /** The dataflow repository. */
   @Autowired
   private DataflowRepository dataflowRepository;
 
-  /**
-   * The user request repository.
-   */
+  /** The user request repository. */
   @Autowired
   private UserRequestRepository userRequestRepository;
 
-  /**
-   * The contributor repository.
-   */
+  /** The contributor repository. */
   @Autowired
   private ContributorRepository contributorRepository;
 
-  /**
-   * The dataflow mapper.
-   */
+  /** The dataflow mapper. */
   @Autowired
   private DataflowMapper dataflowMapper;
 
-  /**
-   * The dataflow no content mapper.
-   */
+  /** The dataflow no content mapper. */
   @Autowired
   private DataflowNoContentMapper dataflowNoContentMapper;
 
-  /**
-   * The dataset metabase controller.
-   */
+  /** The dataset metabase controller. */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
-  /**
-   * The user management controller zull.
-   */
+  /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
-  /**
-   * The resource management controller zull.
-   */
+  /** The resource management controller zull. */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
-  /**
-   * The data set schema controller zuul.
-   */
+  /** The dataset schema controller zuul. */
   @Autowired
-  private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
+  private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
 
-  /**
-   * The document controller zuul.
-   */
+  /** The document controller zuul. */
   @Autowired
   private DocumentControllerZuul documentControllerZuul;
 
-  /**
-   * The data collection controller zuul.
-   */
+  /** The data collection controller zuul. */
   @Autowired
   private DataCollectionControllerZuul dataCollectionControllerZuul;
 
-  /**
-   * The representative service.
-   */
+  /** The representative service. */
   @Autowired
   private RepresentativeService representativeService;
 
-  /**
-   * The obligation controller.
-   */
+  /** The obligation controller. */
   @Autowired
   private ObligationController obligationController;
 
-  /**
-   * The eu dataset controller zuul.
-   */
+  /** The eu dataset controller zuul. */
   @Autowired
   private EUDatasetControllerZuul euDatasetControllerZuul;
-
-  /**
-   * The Constant LOG.
-   */
-  private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
 
   /**
    * Gets the by id.
@@ -704,7 +672,7 @@ public class DataflowServiceImpl implements DataflowService {
   private void deleteDatasetSchemas(Long idDataflow, DataFlowVO dataflowVO) throws EEAException {
     for (DesignDatasetVO designDatasetVO : dataflowVO.getDesignDatasets()) {
       try {
-        dataSetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId(), true);
+        datasetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId(), true);
       } catch (Exception e) {
         LOG.error("Error deleting DesignDataset with id {}", designDatasetVO.getId(), e);
         throw new EEAException(new StringBuilder().append("Error Deleting dataset ")
