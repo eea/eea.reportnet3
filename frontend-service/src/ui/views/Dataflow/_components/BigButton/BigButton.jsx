@@ -116,7 +116,7 @@ export const BigButton = ({
             isVisible: true,
             message:
               title.length > 250
-                ? resources.messages['toLongSchemaNameError']
+                ? resources.messages['tooLongSchemaNameError']
                 : resources.messages['duplicateSchemaError']
           });
           document.getElementsByClassName('p-inputtext p-component')[0].focus();
