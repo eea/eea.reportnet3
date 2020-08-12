@@ -29,8 +29,10 @@ public class ApiGatewaySwaggerResourcesProvider implements SwaggerResourcesProvi
   @Autowired
   private DiscoveryClient discoveryClient;
 
-  @Value("${backend:localhost}") //set default value
-  private String backend;
+
+  @Value("${spring.profiles.active:local}")
+  private String activeProfile;
+
 
   @Override
   public List<SwaggerResource> get() {
@@ -72,8 +74,8 @@ public class ApiGatewaySwaggerResourcesProvider implements SwaggerResourcesProvi
 
   private String getServiceHost(String service, URI uri) {
 
-    //if no backend has been set it is assumed that it's running in local, otherwise it is assume it is running in kubernetes and it will be used its name translation (k8s dns)
-    return "localhost".equals(backend) ? "http://localhost:" + uri.getPort() : service;
+    //if no profile has been set it is assumed that it's running in local, otherwise it is assume it is running in kubernetes and it will be used its name translation (k8s dns)
+    return "local".equals(activeProfile) ? "http://localhost:" + uri.getPort() : "/" + service;
   }
 
 
