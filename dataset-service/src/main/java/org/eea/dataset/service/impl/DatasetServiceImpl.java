@@ -1208,6 +1208,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
     List<RecordValue> recordValues = recordMapper.classListToEntity(records);
     List<FieldValue> fieldValues = new ArrayList<>();
+    String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
     for (RecordValue recordValue : recordValues) {
       for (FieldValue fieldValue : recordValue.getFields()) {
         if (null == fieldValue.getValue()) {
@@ -1217,7 +1218,15 @@ public class DatasetServiceImpl implements DatasetService {
             fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
           }
         }
-        fieldValues.add(fieldValue);
+        Document fieldSchema =
+            schemasRepository.findFieldSchema(datasetSchemaId, fieldValue.getIdFieldSchema());
+        Boolean readOnly =
+            fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
+                ? (Boolean) fieldSchema.get(LiteralConstants.READ_ONLY)
+                : Boolean.FALSE;
+        if (!readOnly && !isDesignDataset(datasetId) || isDesignDataset(datasetId)) {
+          fieldValues.add(fieldValue);
+        }
       }
     }
     fieldRepository.saveAll(fieldValues);
@@ -1308,11 +1317,14 @@ public class DatasetServiceImpl implements DatasetService {
         field.setValue(field.getValue().substring(0, fieldMaxLength));
       }
     }
+
+    Document fieldSchema =
+        schemasRepository.findFieldSchema(metabase.getDatasetSchema(), field.getIdFieldSchema());
+
     // if the type is link multiselect we check if is multiple
     Boolean isLinkMultiselect = false;
+
     if (DataType.LINK.equals(field.getType())) {
-      Document fieldSchema =
-          schemasRepository.findFieldSchema(metabase.getDatasetSchema(), field.getIdFieldSchema());
       isLinkMultiselect = fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES) != null
           ? (Boolean) fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES)
           : Boolean.FALSE;
@@ -1326,6 +1338,13 @@ public class DatasetServiceImpl implements DatasetService {
           .forEach(value -> values.add(value.trim()));
       Collections.sort(values);
       field.setValue(values.toString().substring(1, values.toString().length() - 1));
+    }
+
+    // If the field is readOnly and is not a design dataset the value is empty
+    if (fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
+        && (Boolean) fieldSchema.get(LiteralConstants.READ_ONLY)
+        && !isDesignDataset(metabase.getId())) {
+      field.setValue("");
     }
 
   }
@@ -1488,8 +1507,8 @@ public class DatasetServiceImpl implements DatasetService {
           ? (Boolean) fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES)
           : Boolean.FALSE;
     }
-    if (fieldSchema.get(LiteralConstants.READ_ONLY) != null
-        && (Boolean) fieldSchema.get(LiteralConstants.READ_ONLY)) {
+    if (fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
+        && (Boolean) fieldSchema.get(LiteralConstants.READ_ONLY) && !isDesignDataset(datasetId)) {
       throw new EEAException(EEAErrorMessage.FIELD_READ_ONLY);
     }
     // if the type is multiselect codelist or Link multiselect we sort the values in lexicographic
@@ -1619,6 +1638,11 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   public boolean isReportingDataset(Long datasetId) {
     return reportingDatasetRepository.existsById(datasetId);
+  }
+
+  @Override
+  public boolean isDesignDataset(Long datasetId) {
+    return designDatasetRepository.existsById(datasetId);
   }
 
   /**
@@ -1893,7 +1917,10 @@ public class DatasetServiceImpl implements DatasetService {
     List<TableValue> tables = new ArrayList<>();
     List<String> readOnlyTables = new ArrayList<>();
 
+
     // Loops to build the entity
+    dataset.setId(datasetId);
+
     for (ETLTableVO etlTable : etlDatasetVO.getTables()) {
       etlBuildEntity(provider, partition, tableMap, fieldMap, dataset, tables, etlTable);
       // Check if table is read Only and save into a list
@@ -1904,7 +1931,6 @@ public class DatasetServiceImpl implements DatasetService {
     }
     dataset.setTableValues(tables);
     dataset.setIdDatasetSchema(datasetSchemaId);
-    dataset.setId(datasetId);
 
     List<RecordValue> allRecords = new ArrayList<>();
 
@@ -1954,7 +1980,9 @@ public class DatasetServiceImpl implements DatasetService {
           FieldValue field = new FieldValue();
           FieldSchema fieldSchema =
               fieldMap.get(etlField.getFieldName().toLowerCase() + tableSchema.getIdTableSchema());
-          if (fieldSchema != null && Boolean.FALSE.equals(fieldSchema.getReadOnly())) {
+          if (fieldSchema != null && Boolean.FALSE.equals(fieldSchema.getReadOnly())
+              && !isDesignDataset(dataset.getId())
+              || fieldSchema != null && isDesignDataset(dataset.getId())) {
             field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
             field.setType(fieldSchema.getType());
             field.setValue(etlField.getValue());
@@ -2005,8 +2033,7 @@ public class DatasetServiceImpl implements DatasetService {
   private void setMissingField(List<FieldSchema> headersSchema, final List<FieldValue> fields,
       List<String> idSchema, RecordValue recordValue) {
     headersSchema.stream().forEach(header -> {
-      if (!idSchema.contains(header.getIdFieldSchema().toString())
-          && Boolean.FALSE.equals(header.getReadOnly())) {
+      if (!idSchema.contains(header.getIdFieldSchema().toString())) {
         final FieldValue field = new FieldValue();
         field.setIdFieldSchema(header.getIdFieldSchema().toString());
         field.setType(header.getType());

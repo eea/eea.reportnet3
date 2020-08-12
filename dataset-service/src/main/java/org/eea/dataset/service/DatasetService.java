@@ -487,4 +487,12 @@ public interface DatasetService {
    */
   void deleteAttachmentByFieldSchemaId(@DatasetId Long datasetId, String fieldSchemaId)
       throws EEAException;
+
+  /**
+   * Checks if is design dataset.
+   *
+   * @param datasetId the dataset id
+   * @return true, if is design dataset
+   */
+  boolean isDesignDataset(Long datasetId);
 }

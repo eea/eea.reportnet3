@@ -1232,6 +1232,7 @@ public class DatasetServiceTest {
     recordsList.add(record);
     Document fieldSchema = new Document();
     fieldSchema.put(LiteralConstants.PK_HAS_MULTIPLE_VALUES, Boolean.TRUE);
+    fieldSchema.put(LiteralConstants.READ_ONLY, Boolean.FALSE);
     when(recordMapper.classListToEntity(records)).thenReturn(recordsList);
     when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
@@ -1239,6 +1240,44 @@ public class DatasetServiceTest {
         .thenReturn(new DataProviderVO());
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchema);
+    datasetService.createRecords(1L, records, "");
+    Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
+  }
+
+  @Test
+  public void createRecordsTestReadOnlyField() throws EEAException {
+    List<RecordValue> myRecords = new ArrayList<>();
+    myRecords.add(new RecordValue());
+    Mockito.when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(1L);
+    Mockito.when(partitionDataSetMetabaseRepository
+        .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
+        .thenReturn(Optional.of(new PartitionDataSetMetabase()));
+    List<RecordVO> records = new ArrayList<>();
+
+    List<RecordValue> recordsList = new ArrayList<>();
+    RecordValue record = new RecordValue();
+
+    List<FieldValue> fields = new ArrayList<>();
+    FieldValue field = new FieldValue();
+    field.setType(DataType.LINK);
+    field.setValue("");
+
+    fields.add(field);
+    field.setValue(null);
+    fields.add(field);
+    record.setFields(fields);
+    recordsList.add(record);
+    Document fieldSchema = new Document();
+    fieldSchema.put(LiteralConstants.PK_HAS_MULTIPLE_VALUES, Boolean.TRUE);
+    fieldSchema.put(LiteralConstants.READ_ONLY, Boolean.TRUE);
+    when(recordMapper.classListToEntity(records)).thenReturn(recordsList);
+    when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+    when(representativeControllerZuul.findDataProviderById(Mockito.any()))
+        .thenReturn(new DataProviderVO());
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(fieldSchema);
+    Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(Boolean.FALSE);
     datasetService.createRecords(1L, records, "");
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
@@ -1352,9 +1391,33 @@ public class DatasetServiceTest {
    */
   @Test
   public void updateFieldTest() throws EEAException {
+    Document fieldSchema = new Document();
+    fieldSchema.put(LiteralConstants.READ_ONLY, Boolean.FALSE);
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(fieldSchema);
     datasetService.updateField(1L, new FieldVO());
     Mockito.verify(fieldRepository, times(1)).saveValue(Mockito.any(), Mockito.any());
   }
+
+  /**
+   * Update field test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void updateFieldReadOnlyTest() throws EEAException {
+    Document fieldSchema = new Document();
+    fieldSchema.put(LiteralConstants.READ_ONLY, Boolean.TRUE);
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(fieldSchema);
+    try {
+      datasetService.updateField(1L, new FieldVO());
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.FIELD_READ_ONLY, e.getMessage());
+      throw e;
+    }
+  }
+
 
   /**
    * Update field test.
