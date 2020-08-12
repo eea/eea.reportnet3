@@ -4,15 +4,23 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.eea.dataflow.integration.crud.factory.CrudManager;
 import org.eea.dataflow.integration.crud.factory.CrudManagerFactory;
+import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
+import org.eea.dataflow.integration.executor.service.IntegrationExecutorService;
+import org.eea.dataflow.integration.utils.IntegrationParams;
 import org.eea.dataflow.mapper.IntegrationMapper;
 import org.eea.dataflow.persistence.domain.Integration;
 import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
+import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
+import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.junit.Assert;
 import org.junit.Before;
@@ -51,6 +59,14 @@ public class IntegrationServiceImplTest {
   /** The integration mapper. */
   @Mock
   private IntegrationMapper integrationMapper;
+
+  /** The eu dataset controller zuul. */
+  @Mock
+  private EUDatasetControllerZuul euDatasetControllerZuul;
+
+  /** The integration executor factory. */
+  @Mock
+  private IntegrationExecutorFactory integrationExecutorFactory;
 
   /**
    * Inits the mocks.
@@ -144,7 +160,7 @@ public class IntegrationServiceImplTest {
   public void createDefaultIntegrationTest() {
     Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
     Mockito.doNothing().when(crudManager).create(Mockito.any());
-    integrationService.createDefaultIntegration(1L, 1L, "5ce524fad31fc52540abae73");
+    integrationService.createDefaultIntegration(1L, "5ce524fad31fc52540abae73");
     Mockito.verify(crudManager, times(1)).create(Mockito.any());
   }
 
@@ -159,14 +175,15 @@ public class IntegrationServiceImplTest {
     Mockito.when(integrationRepository.findFirstByOperationAndParameterAndValue(Mockito.any(),
         Mockito.any(), Mockito.any())).thenReturn(new Integration());
     Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(expected);
-    IntegrationVO response = integrationService.getExporEUDatasetIntegrationByDatasetId(1L);
+    IntegrationVO response =
+        integrationService.getExporEUDatasetIntegrationByDatasetId("5ce524fad31fc52540abae73");
     Assert.assertEquals(expected, response);
   }
 
   /**
    * Creates the integration exception test.
-   * 
-   * @throws EEAException
+   *
+   * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
   public void createIntegrationExceptionTest() throws EEAException {
@@ -179,6 +196,63 @@ public class IntegrationServiceImplTest {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       Assert.assertEquals(EEAErrorMessage.FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_CREATION,
           e.getReason());
+      throw e;
+    }
+  }
+
+  /**
+   * Execute EU dataset export test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void executeEUDatasetExportTest() throws EEAException {
+    IntegrationExecutorService executor = Mockito.mock(IntegrationExecutorService.class);
+    Map<String, String> internalParameters = new HashMap<>();
+    internalParameters.put(IntegrationParams.DATASET_SCHEMA_ID, "5ce524fad31fc52540abae73");
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setInternalParameters(internalParameters);
+    EUDatasetVO euDatasetVO = new EUDatasetVO();
+    euDatasetVO.setId(1L);
+    euDatasetVO.setDatasetSchema("5ce524fad31fc52540abae73");
+    List<EUDatasetVO> euDatasetVOs = new ArrayList<>();
+    List<IntegrationVO> integrationVOs = new ArrayList<>();
+    euDatasetVOs.add(euDatasetVO);
+    integrationVOs.add(integrationVO);
+    Mockito.when(euDatasetControllerZuul.findEUDatasetByDataflowId(Mockito.anyLong()))
+        .thenReturn(euDatasetVOs);
+    Mockito.when(integrationRepository.findByOperationAndParameterAndValue(Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(new ArrayList<>());
+    Mockito.when(integrationMapper.entityListToClass(Mockito.any())).thenReturn(integrationVOs);
+    Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any())).thenReturn(executor);
+    Mockito.when(executor.execute(Mockito.any(), Mockito.any()))
+        .thenReturn(new ExecutionResultVO());
+    List<ExecutionResultVO> result = integrationService.executeEUDatasetExport(1L);
+    Assert.assertEquals(1, result.size());
+  }
+
+  /**
+   * Execute EU dataset expor exceptiont test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void executeEUDatasetExportExceptionTest() throws EEAException {
+    EUDatasetVO euDatasetVO = new EUDatasetVO();
+    euDatasetVO.setId(1L);
+    euDatasetVO.setDatasetSchema("5ce524fad31fc52540abae73");
+    List<EUDatasetVO> euDatasetVOs = new ArrayList<>();
+    List<IntegrationVO> integrationVOs = new ArrayList<>();
+    euDatasetVOs.add(euDatasetVO);
+    Mockito.when(euDatasetControllerZuul.findEUDatasetByDataflowId(Mockito.anyLong()))
+        .thenReturn(euDatasetVOs);
+    Mockito.when(integrationRepository.findByOperationAndParameterAndValue(Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(new ArrayList<>());
+    Mockito.when(integrationMapper.entityListToClass(Mockito.any())).thenReturn(integrationVOs);
+    try {
+      integrationService.executeEUDatasetExport(1L);
+    } catch (EEAException e) {
+      Assert.assertEquals("Mismatching number of IntegrationVOs and EUDatasetVOs", e.getMessage());
       throw e;
     }
   }
