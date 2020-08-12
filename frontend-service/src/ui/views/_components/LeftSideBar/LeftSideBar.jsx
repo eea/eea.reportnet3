@@ -192,7 +192,7 @@ const LeftSideBar = withRouter(({ history, style, setIsNotificationVisible }) =>
               <div className={styles.leftSideBarElementWrapper}>{renderOpenClose()}</div>
             </div>
 
-            {userContext.userProps.showLogoutConfirmation && (
+            {userContext.userProps.showLogoutConfirmation && logoutConfirmVisible && (
               <ConfirmDialog
                 onConfirm={() => {
                   userLogout();

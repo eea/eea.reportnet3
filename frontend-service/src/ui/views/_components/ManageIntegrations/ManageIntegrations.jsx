@@ -162,7 +162,7 @@ export const ManageIntegrations = ({
 
   const onCloseModal = () => {
     if (datasetType === 'designDataset') {
-      manageDialogs('isIntegrationManageDialogVisible', false, 'isIntegrationListDialogVisible', true);
+      manageDialogs('isIntegrationManageDialogVisible', false);
     } else {
       manageDialogs(false);
     }
@@ -324,19 +324,23 @@ export const ManageIntegrations = ({
   );
 
   const renderDialogLayout = children => (
-    <Dialog
-      closeOnEscape={false}
-      footer={renderDialogFooter}
-      header={
-        !isEmpty(updatedData)
-          ? resources.messages['editExternalIntegration']
-          : resources.messages['createExternalIntegration']
-      }
-      onHide={() => onCloseModal()}
-      style={{ width: '975px' }}
-      visible={isIntegrationManageDialogVisible}>
-      {children}
-    </Dialog>
+    <Fragment>
+      {isIntegrationManageDialogVisible && (
+        <Dialog
+          closeOnEscape={false}
+          footer={renderDialogFooter}
+          header={
+            !isEmpty(updatedData)
+              ? resources.messages['editExternalIntegration']
+              : resources.messages['createExternalIntegration']
+          }
+          onHide={() => onCloseModal()}
+          style={{ width: '975px' }}
+          visible={isIntegrationManageDialogVisible}>
+          {children}
+        </Dialog>
+      )}
+    </Fragment>
   );
 
   const renderDropdownLayout = (options = []) => {
@@ -377,7 +381,7 @@ export const ManageIntegrations = ({
       <InputText
         onBlur={event => onBlurParameter(id, option, event)}
         onChange={event => onChangeParameter(event.target.value, option, id)}
-        onKeyDown={event => onEditKeyDown(event, id, option)}
+        onKeyPress={event => onEditKeyDown(event, id, option)}
         ref={parameterRef}
         value={parameter[option]}
       />
@@ -491,17 +495,19 @@ export const ManageIntegrations = ({
         </div>
       </div>
 
-      <Dialog
-        footer={renderErrorDialogFooter}
-        header={parametersErrors.header}
-        onHide={() => onToggleDialogError('', '', false)}
-        visible={parametersErrors.isDialogVisible}>
-        <span
-          dangerouslySetInnerHTML={{
-            __html: TextUtils.parseText(parametersErrors.content, { option: parametersErrors.option })
-          }}
-        />
-      </Dialog>
+      {parametersErrors.isDialogVisible && (
+        <Dialog
+          footer={renderErrorDialogFooter}
+          header={parametersErrors.header}
+          onHide={() => onToggleDialogError('', '', false)}
+          visible={parametersErrors.isDialogVisible}>
+          <span
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(parametersErrors.content, { option: parametersErrors.option })
+            }}
+          />
+        </Dialog>
+      )}
     </Fragment>
   );
 };

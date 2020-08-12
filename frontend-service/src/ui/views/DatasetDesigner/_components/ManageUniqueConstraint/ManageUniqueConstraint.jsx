@@ -126,7 +126,7 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
         selectedTable.value
       );
       if (response.status >= 200 && response.status <= 299) {
-        manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
+        manageDialogs('isManageUniqueConstraintDialogVisible', false);
         onResetValues();
       }
     } catch (error) {
@@ -149,7 +149,7 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
     const noChangedConstraint = isEqual(fieldsInUniqueConstraint.sort(), selectedFieldsInUniqueConstraint.sort());
 
     if (noChangedConstraint) {
-      manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
+      manageDialogs('isManageUniqueConstraintDialogVisible', false);
       onResetValues();
     } else {
       try {
@@ -161,7 +161,7 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
           uniqueId
         );
         if (response.status >= 200 && response.status <= 299) {
-          manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
+          manageDialogs('isManageUniqueConstraintDialogVisible', false);
           onResetValues();
         }
       } catch (error) {
@@ -188,7 +188,7 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
         header={
           !isNil(uniqueId) ? resources.messages['editUniqueConstraint'] : resources.messages['createUniqueConstraint']
         }
-        onHide={() => manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true)}
+        onHide={() => manageDialogs('isManageUniqueConstraintDialogVisible', false)}
         style={{ width: '975px' }}
         visible={isManageUniqueConstraintDialogVisible}>
         {children}
@@ -211,7 +211,7 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => {
-          manageDialogs('isManageUniqueConstraintDialogVisible', false, uniqueListDialog, true);
+          manageDialogs('isManageUniqueConstraintDialogVisible', false);
           onResetValues();
         }}
       />

@@ -50,6 +50,12 @@ export const UniqueConstraints = ({
   }, [constraintsState.isDataUpdated]);
 
   useEffect(() => {
+    if (!designerState.isManageUniqueConstraintDialogVisible) {
+      onUpdateData();
+    }
+  }, [designerState.isManageUniqueConstraintDialogVisible]);
+
+  useEffect(() => {
     if (getUniques) getUniques(constraintsState.data);
   }, [constraintsState.data]);
 
@@ -57,7 +63,7 @@ export const UniqueConstraints = ({
     <ActionsColumn
       onDeleteClick={() => isDeleteDialogVisible(true)}
       onEditClick={() => {
-        manageDialogs('isUniqueConstraintsListDialogVisible', false, 'isManageUniqueConstraintDialogVisible', true);
+        manageDialogs('isManageUniqueConstraintDialogVisible', true);
       }}
     />
   );
