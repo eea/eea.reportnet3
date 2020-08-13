@@ -23,7 +23,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.rod.ObligationController;
@@ -55,6 +55,9 @@ import org.springframework.stereotype.Service;
  */
 @Service("dataflowService")
 public class DataflowServiceImpl implements DataflowService {
+
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
 
   /** The representative repository. */
   @Autowired
@@ -92,9 +95,9 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
-  /** The data set schema controller zuul. */
+  /** The dataset schema controller zuul. */
   @Autowired
-  private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
+  private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
 
   /** The document controller zuul. */
   @Autowired
@@ -116,14 +119,13 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private EUDatasetControllerZuul euDatasetControllerZuul;
 
-  /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
-
   /**
    * Gets the by id.
    *
    * @param id the id
+   *
    * @return the by id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -136,7 +138,9 @@ public class DataflowServiceImpl implements DataflowService {
    * Get the dataflow by its id filtering representatives by the user email.
    *
    * @param id the id
+   *
    * @return the by id no representatives
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -150,7 +154,9 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param id the id
    * @param includeAllRepresentatives the include representatives
+   *
    * @return the by id
+   *
    * @throws EEAException the EEA exception
    */
   private DataFlowVO getByIdWithCondition(Long id, boolean includeAllRepresentatives)
@@ -275,6 +281,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the opened obligations.
    *
    * @param dataflowVOs the dataflow V os
+   *
    * @return the opened obligations
    */
   private void getOpenedObligations(List<DataFlowVO> dataflowVOs) {
@@ -299,6 +306,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the obligation.
    *
    * @param dataflow the dataflow
+   *
    * @return the obligation
    */
   private void getObligation(DataFlowVO dataflow) {
@@ -456,7 +464,6 @@ public class DataflowServiceImpl implements DataflowService {
     resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
         ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.EDITOR_WRITE));
 
-
     userManagementControllerZull.addUserToResource(dataFlowSaved.getId(),
         ResourceGroupEnum.DATAFLOW_CUSTODIAN);
   }
@@ -550,7 +557,7 @@ public class DataflowServiceImpl implements DataflowService {
     Dataflow result = dataflowRepository.findById(id).orElse(null);
     DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(result);
 
-    LOG.info("Get the dataflow metabaser with id {}", id);
+    LOG.info("Get the dataflow metabase with id {}", id);
 
     return dataflowVO;
   }
@@ -569,7 +576,7 @@ public class DataflowServiceImpl implements DataflowService {
     DataFlowVO dataflowVO = getById(idDataflow);
     // use it to take all datasets Desing
 
-    LOG.info("Get the dataflow metabaser with id {}", idDataflow);
+    LOG.info("Get the dataflow metabase with id {}", idDataflow);
 
     // // PART DELETE DOCUMENTS
     if (null != dataflowVO.getDocuments() && !dataflowVO.getDocuments().isEmpty()) {
@@ -615,6 +622,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @param id the id
    * @param status the status
    * @param deadlineDate the deadline date
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -637,6 +645,7 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param idDataflow the id dataflow
    * @param dataflowVO the dataflow VO
+   *
    * @throws Exception the exception
    */
   private void deleteDocuments(Long idDataflow, DataFlowVO dataflowVO) throws Exception {
@@ -657,12 +666,13 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param idDataflow the id dataflow
    * @param dataflowVO the dataflow VO
+   *
    * @throws EEAException the EEA exception
    */
   private void deleteDatasetSchemas(Long idDataflow, DataFlowVO dataflowVO) throws EEAException {
     for (DesignDatasetVO designDatasetVO : dataflowVO.getDesignDatasets()) {
       try {
-        dataSetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId(), true);
+        datasetSchemaControllerZuul.deleteDatasetSchema(designDatasetVO.getId(), true);
       } catch (Exception e) {
         LOG.error("Error deleting DesignDataset with id {}", designDatasetVO.getId(), e);
         throw new EEAException(new StringBuilder().append("Error Deleting dataset ")
@@ -677,6 +687,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Delete representatives.
    *
    * @param dataflowVO the dataflow VO
+   *
    * @throws EEAException the EEA exception
    */
   private void deleteRepresentatives(DataFlowVO dataflowVO) throws EEAException {

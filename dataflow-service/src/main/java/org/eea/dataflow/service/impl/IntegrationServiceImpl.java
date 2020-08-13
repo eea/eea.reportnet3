@@ -13,6 +13,7 @@ import org.eea.dataflow.integration.executor.service.IntegrationExecutorService;
 import org.eea.dataflow.integration.utils.IntegrationParams;
 import org.eea.dataflow.mapper.IntegrationMapper;
 import org.eea.dataflow.persistence.domain.Integration;
+import org.eea.dataflow.persistence.domain.InternalOperationParameters;
 import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAErrorMessage;
@@ -305,18 +306,62 @@ public class IntegrationServiceImpl implements IntegrationService {
   }
 
   /**
-   * Gets the expor EU dataset integration by dataset id.
+   * Gets the export EU dataset integration.
    *
    * @param datasetSchemaId the dataset schema id
-   * @return the expor EU dataset integration by dataset id
+   * @return the export EU dataset integration
    */
   @Override
-  public IntegrationVO getExporEUDatasetIntegrationByDatasetId(String datasetSchemaId) {
+  public IntegrationVO getExportEUDatasetIntegration(String datasetSchemaId) {
     Integration integration = integrationRepository.findFirstByOperationAndParameterAndValue(
         IntegrationOperationTypeEnum.EXPORT_EU_DATASET, IntegrationParams.DATASET_SCHEMA_ID,
         datasetSchemaId);
     IntegrationVO integrationVO = integrationMapper.entityToClass(integration);
     LOG.debug("Found EXPORT_EU_DATASET integration: {}", integrationVO);
     return integrationVO;
+  }
+
+  /**
+   * Gets the export integration.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fileExtension the file extension
+   * @return the export integration
+   */
+  @Override
+  public IntegrationVO getExportIntegration(String datasetSchemaId, String fileExtension) {
+    List<Integration> integrations = integrationRepository.findByOperationAndParameterAndValue(
+        IntegrationOperationTypeEnum.EXPORT, IntegrationParams.DATASET_SCHEMA_ID, datasetSchemaId);
+
+    IntegrationVO integrationVO = null;
+    if (null != integrations) {
+      mainloop: for (Integration integration : integrations) {
+        for (InternalOperationParameters parameter : integration.getInternalParameters()) {
+          if (IntegrationParams.FILE_EXTENSION.equals(parameter.getParameter())
+              && parameter.getValue().equals(fileExtension)) {
+            integrationVO = integrationMapper.entityToClass(integration);
+            break mainloop;
+          }
+        }
+      }
+    }
+
+    if (null == integrationVO) {
+      LOG_ERROR.error("No EXPORT integration: datasetSchemaId={}, fileExtension={}",
+          datasetSchemaId, fileExtension);
+    }
+    return integrationVO;
+  }
+
+  /**
+   * Delete schema integrations.
+   *
+   * @param datasetSchemaId the dataset schema id
+   */
+  @Override
+  @Transactional
+  public void deleteSchemaIntegrations(String datasetSchemaId) {
+    integrationRepository.deleteByParameterAndValue(IntegrationParams.DATASET_SCHEMA_ID,
+        datasetSchemaId);
   }
 }

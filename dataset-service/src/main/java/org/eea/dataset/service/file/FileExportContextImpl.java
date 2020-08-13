@@ -6,11 +6,11 @@ import org.eea.dataset.service.file.interfaces.WriterStrategy;
 import org.eea.exception.EEAException;
 
 /**
- * The Class FileParseContextImpl.
+ * The Class FileExportContextImpl.
  */
 public class FileExportContextImpl implements IFileExportContext {
 
-  /** The reader strategy. */
+  /** The writer strategy. */
   private WriterStrategy writerStrategy;
 
   /**
@@ -22,21 +22,20 @@ public class FileExportContextImpl implements IFileExportContext {
     this.writerStrategy = writerStrategy;
   }
 
-
   /**
    * File writer.
    *
    * @param dataflowId the dataflow id
    * @param partitionId the partition id
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the table schema id
    * @param includeCountryCode the include country code
    * @return the byte[]
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    */
   @Override
-  public byte[] fileWriter(Long dataflowId, Long partitionId, String idTableSchema,
+  public byte[] fileWriter(Long dataflowId, Long partitionId, String tableSchemaId,
       boolean includeCountryCode) throws IOException, EEAException {
-    return writerStrategy.writeFile(dataflowId, partitionId, idTableSchema, includeCountryCode);
+    return writerStrategy.writeFile(dataflowId, partitionId, tableSchemaId, includeCountryCode);
   }
 }
