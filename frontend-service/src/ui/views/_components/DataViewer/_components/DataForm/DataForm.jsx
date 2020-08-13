@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { Fragment, useContext } from 'react';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
@@ -36,7 +36,7 @@ const DataForm = ({
         if (!isUndefined(records.editedRecord.dataRow)) {
           const field = records.editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
           return (
-            <React.Fragment key={column.field}>
+            <Fragment key={column.field}>
               {column.type.toUpperCase() !== 'ATTACHMENT' && (
                 <div className="p-col-4" style={{ padding: '.75em' }}>
                   <label htmlFor={column.field}>{`${column.header}${
@@ -80,9 +80,9 @@ const DataForm = ({
                   isVisible={editDialogVisible}
                   onChangeForm={onChangeForm}
                   reporting={reporting}
-                  type={column.type}></DataFormFieldEditor>
+                  type={column.type} />
               </div>
-            </React.Fragment>
+            </Fragment>
           );
         }
       }
@@ -95,7 +95,7 @@ const DataForm = ({
         if (!isUndefined(records.newRecord.dataRow)) {
           const field = records.newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
           return (
-            <React.Fragment key={column.field}>
+            <Fragment key={column.field}>
               {!allAttachments() ? (
                 column.type.toUpperCase() !== 'ATTACHMENT' && (
                   <div className="p-col-4" style={{ padding: '.75em' }}>
@@ -140,9 +140,9 @@ const DataForm = ({
                   isVisible={addDialogVisible}
                   onChangeForm={onChangeForm}
                   reporting={reporting}
-                  type={column.type}></DataFormFieldEditor>
+                  type={column.type} />
               </div>
-            </React.Fragment>
+            </Fragment>
           );
         }
       }

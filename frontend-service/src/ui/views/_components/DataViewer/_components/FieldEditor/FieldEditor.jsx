@@ -48,7 +48,7 @@ const FieldEditor = ({
 
   let fieldType = {};
 
-  let isReadOnlyField = RecordUtils.getCellInfo(colsSchema, cells.field).pk;
+  let isReadOnlyField = RecordUtils.getCellInfo(colsSchema, cells.field).readOnly;
   if (!isEmpty(record)) {
     fieldType = RecordUtils.getCellInfo(colsSchema, cells.field).type;
   }
@@ -140,11 +140,11 @@ const FieldEditor = ({
   const renderField = type => {
     const longCharacters = 20;
     const decimalCharacters = 40;
-    const dateCharacters = 10;
+    // const dateCharacters = 10;
     const textCharacters = 10000;
     const richTextCharacters = 10000;
     const emailCharacters = 256;
-    const phoneCharacters = 256;
+    // const phoneCharacters = 256;
     const urlCharacters = 5000;
 
     switch (type) {
