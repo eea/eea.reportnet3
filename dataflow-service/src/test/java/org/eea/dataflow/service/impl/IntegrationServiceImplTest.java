@@ -14,6 +14,7 @@ import org.eea.dataflow.integration.executor.service.IntegrationExecutorService;
 import org.eea.dataflow.integration.utils.IntegrationParams;
 import org.eea.dataflow.mapper.IntegrationMapper;
 import org.eea.dataflow.persistence.domain.Integration;
+import org.eea.dataflow.persistence.domain.InternalOperationParameters;
 import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -176,7 +177,7 @@ public class IntegrationServiceImplTest {
         Mockito.any(), Mockito.any())).thenReturn(new Integration());
     Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(expected);
     IntegrationVO response =
-        integrationService.getExporEUDatasetIntegrationByDatasetId("5ce524fad31fc52540abae73");
+        integrationService.getExportEUDatasetIntegration("5ce524fad31fc52540abae73");
     Assert.assertEquals(expected, response);
   }
 
@@ -255,5 +256,52 @@ public class IntegrationServiceImplTest {
       Assert.assertEquals("Mismatching number of IntegrationVOs and EUDatasetVOs", e.getMessage());
       throw e;
     }
+  }
+
+  /**
+   * Gets the export integration test.
+   *
+   * @return the export integration test
+   */
+  @Test
+  public void getExportIntegrationTest() {
+    IntegrationVO integrationVO = new IntegrationVO();
+    InternalOperationParameters parameter = new InternalOperationParameters();
+    parameter.setParameter(IntegrationParams.FILE_EXTENSION);
+    parameter.setValue("csv");
+    Integration integration = new Integration();
+    integration.setInternalParameters(Arrays.asList(parameter));
+    List<Integration> integrations = new ArrayList<>();
+    integrations.add(integration);
+
+    Mockito.when(integrationRepository.findByOperationAndParameterAndValue(Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(integrations);
+    Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(integrationVO);
+    Assert.assertEquals(integrationVO,
+        integrationService.getExportIntegration("5ce524fad31fc52540abae73", "csv"));
+  }
+
+  /**
+   * Gets the export integration null test.
+   *
+   * @return the export integration null test
+   */
+  @Test
+  public void getExportIntegrationNullTest() {
+    Mockito.when(integrationRepository.findByOperationAndParameterAndValue(Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(null);
+    Assert.assertNull(integrationService.getExportIntegration("5ce524fad31fc52540abae73", "csv"));
+  }
+
+  /**
+   * Delete schema integrations test.
+   */
+  @Test
+  public void deleteSchemaIntegrationsTest() {
+    Mockito.doNothing().when(integrationRepository).deleteByParameterAndValue(Mockito.anyString(),
+        Mockito.anyString());
+    integrationService.deleteSchemaIntegrations("5ce524fad31fc52540abae73");
+    Mockito.verify(integrationRepository, times(1)).deleteByParameterAndValue(Mockito.anyString(),
+        Mockito.anyString());
   }
 }

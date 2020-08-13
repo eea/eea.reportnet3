@@ -408,7 +408,7 @@ const updateRecordFieldDesign = async (datasetId, record) => {
   datasetTableFieldDesign.description = record.description;
   datasetTableFieldDesign.id = record.fieldSchemaId;
   datasetTableFieldDesign.idRecord = record.recordId;
-  datasetTableFieldDesign.maxSize = record.maxSize.toString();
+  datasetTableFieldDesign.maxSize = record.maxSize ? record.maxSize.toString() : null;
   datasetTableFieldDesign.name = record.name;
   datasetTableFieldDesign.pk = record.pk;
   datasetTableFieldDesign.pkHasMultipleValues = record.pkHasMultipleValues;

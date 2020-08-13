@@ -26,7 +26,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -58,11 +58,11 @@ import org.springframework.web.server.ResponseStatusException;
  * The Class DataSetSchemaControllerImplTest.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class DataSetSchemaControllerImplTest {
+public class DatasetSchemaControllerImplTest {
 
   /** The data schema controller impl. */
   @InjectMocks
-  private DataSetSchemaControllerImpl dataSchemaControllerImpl;
+  private DatasetSchemaControllerImpl dataSchemaControllerImpl;
 
   /** The expected ex. */
   @Rule
@@ -80,9 +80,9 @@ public class DataSetSchemaControllerImplTest {
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
 
-  /** The record store controller zull. */
+  /** The record store controller zuul. */
   @Mock
-  private RecordStoreControllerZull recordStoreControllerZull;
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
   /** The dataset snapshot service. */
   @Mock
@@ -373,7 +373,7 @@ public class DataSetSchemaControllerImplTest {
     when(dataschemaService.isSchemaAllowedForDeletion(Mockito.any())).thenReturn(true);
     dataSchemaControllerImpl.deleteDatasetSchema(1L, false);
 
-    Mockito.verify(recordStoreControllerZull, times(1)).deleteDataset(Mockito.any());
+    Mockito.verify(recordStoreControllerZuul, times(1)).deleteDataset(Mockito.any());
   }
 
   /**

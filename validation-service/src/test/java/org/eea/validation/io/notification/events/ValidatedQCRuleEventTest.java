@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -27,7 +27,7 @@ public class ValidatedQCRuleEventTest {
 
   /** The dataset schema controller. */
   @Mock
-  private DataSetSchemaControllerZuul datasetSchemaController;
+  private DatasetSchemaControllerZuul datasetSchemaController;
 
   /**
    * Inits the mocks.

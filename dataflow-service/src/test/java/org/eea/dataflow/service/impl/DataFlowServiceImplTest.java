@@ -30,7 +30,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.rod.ObligationController;
@@ -134,10 +134,10 @@ public class DataFlowServiceImplTest {
   private DocumentMapper documentMapper;
 
   /**
-   * The data set schema controller zuul.
+   * The dataset schema controller zuul.
    */
   @Mock
-  private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
+  private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
 
   /**
    * The document controller zuul.
@@ -598,7 +598,7 @@ public class DataFlowServiceImplTest {
     resource.setId(1L);
     resourceList.add(resource);
 
-    doNothing().when(dataSetSchemaControllerZuul).deleteDatasetSchema(1L, true);
+    doNothing().when(datasetSchemaControllerZuul).deleteDatasetSchema(1L, true);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(resourceList);
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
@@ -717,7 +717,7 @@ public class DataFlowServiceImplTest {
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(designDatasetVOs);
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
-    doThrow(MockitoException.class).when(dataSetSchemaControllerZuul).deleteDatasetSchema(1L, true);
+    doThrow(MockitoException.class).when(datasetSchemaControllerZuul).deleteDatasetSchema(1L, true);
     try {
       dataflowServiceImpl.deleteDataFlow(1L);
     } catch (EEAException ex) {

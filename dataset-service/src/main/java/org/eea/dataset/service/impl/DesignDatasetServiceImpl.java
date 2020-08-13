@@ -141,32 +141,6 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
     return designDatasetMapper.entityListToClass(datasets);
   }
 
-
-  /**
-   * Gets the file name design.
-   *
-   * @param mimeType the mime type
-   * @param idTableSchema the id table schema
-   * @param datasetId the dataset id
-   * @return the file name design
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public String getFileNameDesign(String mimeType, String idTableSchema, Long datasetId)
-      throws EEAException {
-
-    final DesignDataset designDataset =
-        designDatasetRepository.findById(datasetId).orElse(new DesignDataset());
-
-    DataSetSchemaVO dataSetSchema =
-        fileCommon.getDataSetSchema(designDataset.getDataflowId(), datasetId);
-    return null == fileCommon.getFieldSchemas(idTableSchema, dataSetSchema)
-        ? designDataset.getDataSetName() + "." + mimeType
-        : fileCommon.getTableName(idTableSchema, dataSetSchema) + "." + mimeType;
-  }
-
-
-
   /**
    * Copy design datasets.
    *

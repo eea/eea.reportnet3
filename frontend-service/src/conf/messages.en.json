@@ -830,6 +830,7 @@
     "copyDataCollectionToEuDatasetMessage": "Are you sure you want to copy Data Collections to EU Datasets?",
     "exportEuDatasetHeader": "Export EU Datasets",
     "exportEuDatasetMessage": "Are you sure you want to export EU Datasets?",
-    "updateConfigurations": "Update configurations"
+    "updateConfigurations": "Update configurations",
+    "tooLongSchemaNameError": "Schema name is too long"
   }
 }

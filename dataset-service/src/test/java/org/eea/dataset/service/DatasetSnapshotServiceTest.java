@@ -42,7 +42,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -104,9 +104,9 @@ public class DatasetSnapshotServiceTest {
   @Mock
   private SnapshotSchemaMapper snapshotSchemaMapper;
 
-  /** The record store controller zull. */
+  /** The record store controller zuul. */
   @Mock
-  private RecordStoreControllerZull recordStoreControllerZull;
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
   /** The partition data set metabase repository. */
   @Mock
@@ -236,7 +236,7 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(validations);
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    doNothing().when(recordStoreControllerZull).createSnapshotData(Mockito.any(), Mockito.any(),
+    doNothing().when(recordStoreControllerZuul).createSnapshotData(Mockito.any(), Mockito.any(),
         Mockito.any());
     datasetSnapshotService.addSnapshot(1L, "test", false, 1L);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
@@ -300,7 +300,7 @@ public class DatasetSnapshotServiceTest {
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     datasetSnapshotService.restoreSnapshotToCloneData(1L, 1L, 1L, true, DatasetTypeEnum.EUDATASET,
         "user");
-    Mockito.verify(recordStoreControllerZull, times(1)).restoreSnapshotData(Mockito.any(),
+    Mockito.verify(recordStoreControllerZuul, times(1)).restoreSnapshotData(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
@@ -477,7 +477,7 @@ public class DatasetSnapshotServiceTest {
 
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    doNothing().when(recordStoreControllerZull).createSnapshotData(Mockito.any(), Mockito.any(),
+    doNothing().when(recordStoreControllerZuul).createSnapshotData(Mockito.any(), Mockito.any(),
         Mockito.any());
     doNothing().when(documentControllerZuul).uploadSchemaSnapshotDocument(Mockito.any(),
         Mockito.any(), Mockito.any());

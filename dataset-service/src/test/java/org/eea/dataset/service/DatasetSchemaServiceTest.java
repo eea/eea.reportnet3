@@ -39,7 +39,7 @@ import org.eea.dataset.validate.commands.ValidationSchemaIntegrityCommand;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController;
@@ -135,10 +135,10 @@ public class DatasetSchemaServiceTest {
   private UserManagementControllerZull userManagementControllerZull;
 
   /**
-   * The record store controller zull.
+   * The record store controller zuul.
    */
   @Mock
-  private RecordStoreControllerZull recordStoreControllerZull;
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
   /**
    * The design dataset repository.
@@ -401,7 +401,7 @@ public class DatasetSchemaServiceTest {
     DataSetSchema schema = new DataSetSchema();
     Mockito.doNothing().when(schemasRepository).deleteDatasetSchemaById(Mockito.any());
     when(schemasRepository.save(Mockito.any())).thenReturn(schema);
-    doNothing().when(recordStoreControllerZull).restoreSnapshotData(Mockito.any(), Mockito.any(),
+    doNothing().when(recordStoreControllerZuul).restoreSnapshotData(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 
     dataSchemaServiceImpl.replaceSchema("1L", schema, 1L, 1L);
