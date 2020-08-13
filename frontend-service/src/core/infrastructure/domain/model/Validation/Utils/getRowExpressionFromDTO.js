@@ -5,7 +5,6 @@ import uuid from 'uuid';
 import { config } from 'conf';
 
 import { getExpressionOperatorType } from './getExpressionOperatorType';
-import { slice } from 'lodash';
 
 const getValueTypeSelector = operator => {
   const [lastChunk] = operator.split('_').reverse();

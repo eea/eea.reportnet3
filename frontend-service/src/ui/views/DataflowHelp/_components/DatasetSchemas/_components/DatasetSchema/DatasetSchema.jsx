@@ -151,6 +151,7 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
         table.tableSchemaReadOnly = tableDTO.tableSchemaReadOnly;
         table.tableSchemaToPrefill = !isNil(tableDTO.tableSchemaToPrefill) ? tableDTO.tableSchemaToPrefill : false;
         table.tableSchemaNotEmpty = tableDTO.tableSchemaNotEmpty;
+        table.tableSchemaFixedNumber = tableDTO.tableSchemaFixedNumber;
         if (!isNull(tableDTO.records) && !isNil(tableDTO.records[0].fields) && tableDTO.records[0].fields.length > 0) {
           const containsCodelists = !isEmpty(
             tableDTO.records[0].fields.filter(

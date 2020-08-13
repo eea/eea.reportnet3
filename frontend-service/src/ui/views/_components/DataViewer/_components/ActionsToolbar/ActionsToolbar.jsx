@@ -1,10 +1,8 @@
 import React, { useContext, useEffect, useRef, useState, useReducer } from 'react';
 
 import capitalize from 'lodash/capitalize';
-import isEmpty from 'lodash/isEmpty';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
-import uniq from 'lodash/uniq';
 
 import { config } from 'conf';
 

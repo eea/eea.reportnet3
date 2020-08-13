@@ -32,6 +32,7 @@ export const ManageIntegrations = ({
   integrationsList,
   manageDialogs,
   onUpdateData,
+  refreshList,
   state,
   updatedData
 }) => {
@@ -174,6 +175,7 @@ export const ManageIntegrations = ({
       if (response.status >= 200 && response.status <= 299) {
         onCloseModal();
         onUpdateData();
+        refreshList(true);
       }
     } catch (error) {
       notificationContext.add({ type: 'CREATE_INTEGRATION_ERROR' });
@@ -270,6 +272,7 @@ export const ManageIntegrations = ({
       if (response.status >= 200 && response.status <= 299) {
         onCloseModal();
         onUpdateData();
+        refreshList(true);
       }
     } catch (error) {
       notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' });
@@ -516,5 +519,6 @@ ManageIntegrations.defaultProps = {
   dataflowId: null,
   datasetId: null,
   datasetType: 'designDataset',
-  onUpdateData: () => {}
+  onUpdateData: () => {},
+  refreshList: () => {}
 };

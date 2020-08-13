@@ -2,8 +2,6 @@ import React, { useContext, Fragment } from 'react';
 
 import { uniqBy } from 'lodash';
 
-import styles from './FilterList.module.scss';
-
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import { ReporterList } from './_components/ReporterList';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';

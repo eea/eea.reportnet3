@@ -61,6 +61,8 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
       return { ...state, fieldPKReferencedValue: payload };
     case 'SET_PREVIOUS_TYPE_VALUE':
       return { ...state, fieldPreviousTypeValue: payload };
+    case 'SET_READONLY':
+      return { ...state, fieldReadOnlyValue: payload };
     case 'SET_REQUIRED':
       return { ...state, fieldRequiredValue: payload };
     case 'SET_TYPE':

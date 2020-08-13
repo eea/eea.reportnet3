@@ -29,7 +29,8 @@ export const recordReducer = (state, { type, payload }) => {
           payload.colsSchema,
           {
             ...state.fetchedDataFirstRecord
-          }
+          },
+          payload.reporting
         )
       };
 

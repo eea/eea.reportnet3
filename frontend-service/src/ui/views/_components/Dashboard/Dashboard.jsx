@@ -54,7 +54,6 @@ const Dashboard = withRouter(
       const { updatedState, statusDispatcher } = useStatusFilter(dashboardData);
 
       const resources = useContext(ResourcesContext);
-      const themeContext = useContext(ThemeContext);
 
       const chartRef = useRef();
 
@@ -156,39 +155,6 @@ const Dashboard = withRouter(
               // gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#707070' }
             }
           ]
-        }
-      };
-
-      const renderColorPicker = () => {
-        if (
-          !isUndefined(dashboardData.datasets) &&
-          dashboardData.datasets.length > 0 &&
-          ![].concat.apply([], dashboardData.datasets[0].totalData).every(total => total === 0)
-        ) {
-          return (
-            <div className={styles.dashboardWraper}>
-              <fieldset className={styles.colorPickerWrap}>
-                <legend>{resources.messages['chooseChartColor']}</legend>
-                <div className={styles.fieldsetContent}>
-                  {Object.keys(SEVERITY_CODE).map((type, i) => {
-                    return (
-                      <div className={styles.colorPickerItem} key={i}>
-                        <span key={`label_${type}`}>{`  ${capitalize(type)}`}</span>
-                        <ColorPicker
-                          className={styles.colorPicker}
-                          onChange={e => {
-                            e.preventDefault();
-                            onChangeColor(e.value, SEVERITY_CODE[type]);
-                          }}
-                          value={!isUndefined(dashboardColors) ? dashboardColors[type] : colors.dashboardCorrect}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              </fieldset>
-            </div>
-          );
         }
       };
 
