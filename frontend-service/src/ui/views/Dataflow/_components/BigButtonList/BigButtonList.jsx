@@ -55,6 +55,8 @@ export const BigButtonList = ({
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
+  const [errorDialogData, setErrorDialogData] = useState({ isVisible: false, message: '' });
+
   const [cloneDataflow, setCloneDataflow] = useState({});
   const [cloneDialogVisible, setCloneDialogVisible] = useState(false);
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
@@ -63,14 +65,12 @@ export const BigButtonList = ({
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
-  const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [euDatasetExportIntegration, setEuDatasetExportIntegration] = useState({});
   const [isActiveButton, setIsActiveButton] = useState(true);
   const [isConfirmCollectionDialog, setIsConfirmCollectionDialog] = useState(false);
   const [isCopyDataCollectionToEuDatasetDialogVisible, setIsCopyDataCollectionToEuDatasetDialogVisible] = useState(
     false
   );
-  const [isDuplicated, setIsDuplicated] = useState(false);
   const [isExportEuDatasetDialogVisible, setIsExportEuDatasetDialogVisible] = useState(false);
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
   const [isUpdateDataCollectionDialogVisible, setIsUpdateDataCollectionDialogVisible] = useState(false);
@@ -142,14 +142,7 @@ export const BigButtonList = ({
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button
-        label={resources.messages['ok']}
-        icon="check"
-        onClick={() => {
-          setErrorDialogVisible(false);
-          setIsDuplicated(false);
-        }}
-      />
+      <Button label={resources.messages['ok']} icon="check" onClick={() => onHideErrorDialog()} />
     </div>
   );
 
@@ -234,8 +227,6 @@ export const BigButtonList = ({
     }
   };
 
-  const onDatasetSchemaNameError = () => setErrorDialogVisible(true);
-
   const onDeleteDatasetSchema = async index => {
     setDeleteDialogVisible(false);
 
@@ -256,11 +247,8 @@ export const BigButtonList = ({
     }
   };
 
-  const onDuplicateName = () => setIsDuplicated(true);
-
   const onHideErrorDialog = () => {
-    setErrorDialogVisible(false);
-    setIsDuplicated(false);
+    setErrorDialogData({ isVisible: false, message: '' });
   };
 
   const onCopyDataCollectionToEuDataset = async () => {
@@ -358,8 +346,6 @@ export const BigButtonList = ({
       handleRedirect,
       isActiveButton,
       onCloneDataflow,
-      onDatasetSchemaNameError,
-      onDuplicateName,
       onLoadEuDatasetIntegration,
       onLoadReceiptData,
       onSaveName,
@@ -370,6 +356,7 @@ export const BigButtonList = ({
       onShowNewSchemaDialog,
       onShowSnapshotDialog,
       onShowUpdateDataCollectionModal,
+      setErrorDialogData,
       updatedDatasetSchema
     }),
     'caption'
@@ -425,25 +412,15 @@ export const BigButtonList = ({
         </Dialog>
       )}
 
-      {isDuplicated && (
+      {errorDialogData.isVisible && (
         <Dialog
           footer={errorDialogFooter}
           header={resources.messages['error'].toUpperCase()}
           onHide={onHideErrorDialog}
-          visible={isDuplicated}>
-          <div className="p-grid p-fluid">{resources.messages['duplicateSchemaError']}</div>
+          visible={errorDialogData.isVisible}>
+          <div className="p-grid p-fluid">{errorDialogData.message}</div>
         </Dialog>
-      )}
-
-      {errorDialogVisible && (
-        <Dialog
-          footer={errorDialogFooter}
-          header={resources.messages['error'].toUpperCase()}
-          onHide={onHideErrorDialog}
-          visible={errorDialogVisible}>
-          <div className="p-grid p-fluid">{resources.messages['emptyDatasetSchema']}</div>
-        </Dialog>
-      )}
+      )}   
 
       {deleteDialogVisible && (
         <ConfirmDialog

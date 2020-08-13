@@ -23,8 +23,6 @@ const useBigButtonList = ({
   handleRedirect,
   isActiveButton,
   onCloneDataflow,
-  onDatasetSchemaNameError,
-  onDuplicateName,
   onLoadEuDatasetIntegration,
   onLoadReceiptData,
   onSaveName,
@@ -34,7 +32,8 @@ const useBigButtonList = ({
   onShowManageReportersDialog,
   onShowNewSchemaDialog,
   onShowSnapshotDialog,
-  onShowUpdateDataCollectionModal
+  onShowUpdateDataCollectionModal,
+  setErrorDialogData
 }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -196,11 +195,10 @@ const useBigButtonList = ({
           // }
         ]
       : [],
-    onDuplicateName: onDuplicateName,
-    onSaveError: onDatasetSchemaNameError,
     onSaveName: onSaveName,
     onWheel: getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true),
     placeholder: resources.messages['datasetSchemaNamePlaceholder'],
+    setErrorDialogData: setErrorDialogData,
     tooltip: !buttonsVisibility.designDatasetsActions ? resources.messages['accessDenied'] : '',
     visibility:
       !isUndefined(dataflowState.data.designDatasets) &&
@@ -426,19 +424,23 @@ const useBigButtonList = ({
   ];
 
   const exportEuDatasetModel = !isNil(dataflowState.data.euDatasets)
-    ? [{
-      label: resources.messages['updateConfigurations'],
-      title: true
-    }].concat(dataflowState.data.euDatasets.map(dataset => ({
-        command: () => {
-          getDatasetData(dataset.euDatasetId, dataset.datasetSchemaId);
-          handleExportEuDataset(true);
-          onLoadEuDatasetIntegration(dataset.datasetSchemaId);
-        },
-        icon: 'export',
-        iconStyle: { transform: 'rotate(-90deg)' },
-        label: dataset.euDatasetName
-      })))
+    ? [
+        {
+          label: resources.messages['updateConfigurations'],
+          title: true
+        }
+      ].concat(
+        dataflowState.data.euDatasets.map(dataset => ({
+          command: () => {
+            getDatasetData(dataset.euDatasetId, dataset.datasetSchemaId);
+            handleExportEuDataset(true);
+            onLoadEuDatasetIntegration(dataset.datasetSchemaId);
+          },
+          icon: 'export',
+          iconStyle: { transform: 'rotate(-90deg)' },
+          label: dataset.euDatasetName
+        }))
+      )
     : [];
 
   const exportEuDatasetBigButton = [
