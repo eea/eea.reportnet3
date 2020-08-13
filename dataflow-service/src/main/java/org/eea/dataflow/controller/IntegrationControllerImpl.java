@@ -208,7 +208,7 @@ public class IntegrationControllerImpl implements IntegrationController {
   @HystrixCommand
   @PostMapping(value = "/private/executeIntegration")
   @ApiOperation(value = "Find integrations and Operations by integration Criteria",
-      response = ExecutionResultVO.class)
+      response = ExecutionResultVO.class, hidden = true)
   public ExecutionResultVO executeIntegrationProcess(@ApiParam(type = "Object",
       value = "IntegrationEnum Object") @RequestParam("integrationTool") IntegrationToolTypeEnum integrationToolTypeEnum,
       @ApiParam(type = "Object",
@@ -260,7 +260,7 @@ public class IntegrationControllerImpl implements IntegrationController {
   @Override
   @HystrixCommand
   @PostMapping(value = "/private/copyIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Copy Integrations", response = ExecutionResultVO.class)
+  @ApiOperation(value = "Copy Integrations", response = ExecutionResultVO.class, hidden = true)
   @ApiResponse(code = 500, message = "Internal Server Error")
   public void copyIntegrations(
       @ApiParam(type = "Object", value = "CopySchemaVO Object") @RequestBody CopySchemaVO copyVO) {
@@ -281,7 +281,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @PostMapping("/private/createDefaultIntegration")
-  @ApiOperation(value = "Create a Default Integration")
+  @ApiOperation(value = "Create a Default Integration", hidden = true)
   public void createDefaultIntegration(
       @ApiParam(value = "Dataflow id", example = "0") @RequestParam("dataflowId") Long dataflowId,
       @ApiParam(value = "Dataset Schema id",
@@ -299,7 +299,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @GetMapping("/private/findExportIntegration")
-  @ApiOperation(value = "Find Integration for data export processes based on their Schema and file extension")
+  @ApiOperation(value = "Find Integration for data export processes based on their Schema and file extension", hidden = true)
   public IntegrationVO findExportIntegration(
       @ApiParam(value = "Dataschema Id", example = "0") @RequestParam("datasetSchemaId") String datasetSchemaId,
       @ApiParam(value = "File extension", example = "csv") @RequestParam("fileExtension") String fileExtension) {
@@ -313,6 +313,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @DeleteMapping("/private/deleteSchemaIntegrations")
+  @ApiOperation(value = "Delete an Integration from its Schema", hidden = true)
   public void deleteSchemaIntegrations(@RequestParam("datasetSchemaId") String datasetSchemaId) {
     integrationService.deleteSchemaIntegrations(datasetSchemaId);
   }

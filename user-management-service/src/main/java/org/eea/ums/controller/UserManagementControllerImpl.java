@@ -739,7 +739,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/private/resourcesByMail")
   @ApiOperation(value = "Get all Resources by User Email", response = ResourceAccessVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<ResourceAccessVO> getResourcesByUserEmail(
       @ApiParam(value = "Email User") String email) {
     // Recover user id from email

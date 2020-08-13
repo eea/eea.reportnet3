@@ -298,7 +298,7 @@ public class ContributorControllerImpl implements ContributorController {
    */
   @Override
   @PostMapping("/private/dataflow/{dataflowId}/createAssociatedPermissions/{datasetId}")
-  @ApiOperation(value = "Create permissions for all Datasetschemas in a Dataflow")
+  @ApiOperation(value = "Create permissions for all Datasetschemas in a Dataflow", hidden = true)
   @ApiResponses(
       value = {@ApiResponse(code = 200, message = "Successfully updated reporter"), @ApiResponse(
           code = 500, message = "Error creating  the associated permissions for editor role")})

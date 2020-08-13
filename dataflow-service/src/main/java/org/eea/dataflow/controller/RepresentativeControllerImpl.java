@@ -290,7 +290,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @GetMapping("/private/dataProvider")
   @ApiOperation(value = "Find DataProviders based on a list of Id's", response = DataProviderVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<DataProviderVO> findDataProvidersByIds(@ApiParam(value = "Dataproviders List",
       type = "Long List") @RequestParam("id") List<Long> dataProviderIds) {
     return representativeService.findDataProvidersByIds(dataProviderIds);
