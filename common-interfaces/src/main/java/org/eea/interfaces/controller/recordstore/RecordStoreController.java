@@ -14,16 +14,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * The interface Record store controller.
+ * The Interface RecordStoreController.
  */
 public interface RecordStoreController {
 
-
   /**
-   * The interface Record store controller zull.
+   * The Interface RecordStoreControllerZuul.
    */
   @FeignClient(value = "recordstore", path = "/recordstore")
-  interface RecordStoreControllerZull extends RecordStoreController {
+  interface RecordStoreControllerZuul extends RecordStoreController {
 
   }
 

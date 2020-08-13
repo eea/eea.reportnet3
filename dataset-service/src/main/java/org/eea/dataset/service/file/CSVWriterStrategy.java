@@ -47,17 +47,17 @@ public class CSVWriterStrategy implements WriterStrategy {
   }
 
   /**
-   * Parses the file.
+   * Write file.
    *
    * @param dataflowId the dataflow id
    * @param datasetId the dataset id
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the table schema id
    * @param includeCountryCode the include country code
-   * @return the data set VO
+   * @return the byte[]
    * @throws EEAException the EEA exception
    */
   @Override
-  public byte[] writeFile(final Long dataflowId, final Long datasetId, final String idTableSchema,
+  public byte[] writeFile(final Long dataflowId, final Long datasetId, final String tableSchemaId,
       boolean includeCountryCode) throws EEAException {
     LOG.info("starting csv file writter");
 
@@ -68,7 +68,7 @@ public class CSVWriterStrategy implements WriterStrategy {
     CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
 
-    setLines(idTableSchema, dataSetSchema, csvWriter, datasetId, includeCountryCode);
+    setLines(tableSchemaId, dataSetSchema, csvWriter, datasetId, includeCountryCode);
 
     // Once read we convert it to string
     String csv = writer.getBuffer().toString();

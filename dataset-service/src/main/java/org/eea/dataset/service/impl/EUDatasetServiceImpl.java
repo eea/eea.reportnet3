@@ -195,16 +195,18 @@ public class EUDatasetServiceImpl implements EUDatasetService {
    * Removes the locks related to populate EU.
    *
    * @param dataflowId the dataflow id
+   * @return the boolean if successful lock removed
    */
   @Override
-  public void removeLocksRelatedToPopulateEU(Long dataflowId) {
+  public Boolean removeLocksRelatedToPopulateEU(Long dataflowId) {
+    Boolean result;
     List<ReportingDatasetVO> reportings =
         reportingDatasetService.getDataSetIdByDataflowId(dataflowId);
     // Release lock to the copy data to EU
     List<Object> criteria = new ArrayList<>();
     criteria.add(LockSignature.POPULATE_EU_DATASET.getValue());
     criteria.add(dataflowId);
-    lockService.removeLockByCriteria(criteria);
+    result = lockService.removeLockByCriteria(criteria);
 
     // Release lock to the export EU
     List<Object> criteriaExport = new ArrayList<>();
@@ -225,6 +227,7 @@ public class EUDatasetServiceImpl implements EUDatasetService {
       criteriaCreateRelease.add(true);
       lockService.removeLockByCriteria(criteriaCreateRelease);
     }
+    return result;
   }
 
 

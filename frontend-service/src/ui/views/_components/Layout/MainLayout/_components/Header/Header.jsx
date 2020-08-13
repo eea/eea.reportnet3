@@ -240,7 +240,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
           {!isPublic && <BreadCrumb />}
           {!isPublic && loadUser()}
           {isPublic && loadLogin()}
-          {!isPublic && userContext.userProps.showLogoutConfirmation && (
+          {!isPublic && userContext.userProps.showLogoutConfirmation && confirmvisible && (
             <ConfirmDialog
               onConfirm={() => {
                 userLogout();

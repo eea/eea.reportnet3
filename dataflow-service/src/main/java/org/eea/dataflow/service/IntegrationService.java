@@ -82,12 +82,12 @@ public interface IntegrationService {
   void createDefaultIntegration(Long dataflowId, String datasetSchemaId);
 
   /**
-   * Gets the expor EU dataset integration by dataset id.
+   * Gets the export EU dataset integration.
    *
    * @param datasetSchemaId the dataset schema id
-   * @return the expor EU dataset integration by dataset id
+   * @return the export EU dataset integration
    */
-  IntegrationVO getExporEUDatasetIntegrationByDatasetId(String datasetSchemaId);
+  IntegrationVO getExportEUDatasetIntegration(String datasetSchemaId);
 
   /**
    * Adds the populate EU dataset lock.
@@ -103,4 +103,20 @@ public interface IntegrationService {
    * @param dataflowId the dataflow id
    */
   void releasePopulateEUDatasetLock(Long dataflowId);
+
+  /**
+   * Gets the export integration.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fileExtension the file extension
+   * @return the export integration
+   */
+  IntegrationVO getExportIntegration(String datasetSchemaId, String fileExtension);
+
+  /**
+   * Delete schema integrations.
+   *
+   * @param datasetSchemaId the dataset schema id
+   */
+  void deleteSchemaIntegrations(String datasetSchemaId);
 }

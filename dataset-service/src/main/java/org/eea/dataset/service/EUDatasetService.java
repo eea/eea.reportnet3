@@ -31,7 +31,8 @@ public interface EUDatasetService {
    * Removes the locks related to populate EU.
    *
    * @param dataflowId the dataflow id
+   * @return the boolean if successful lock removed
    */
-  void removeLocksRelatedToPopulateEU(Long dataflowId);
+  Boolean removeLocksRelatedToPopulateEU(Long dataflowId);
 
 }
