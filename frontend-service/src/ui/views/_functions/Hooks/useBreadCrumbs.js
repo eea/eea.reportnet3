@@ -1,6 +1,7 @@
 import { useContext, useEffect } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -141,7 +142,7 @@ export const useBreadCrumbs = ({
     if (currentPage === CurrentPage.DATASET) {
       const datasetBreadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
 
-      if (breadCrumbContext.prevModel.length === 4) {
+      if (breadCrumbContext.prevModel.length === 4 && !isNil(breadCrumbContext.prevModel[3].href)) {
         datasetBreadCrumbs.push(getRepresentativeCrumb());
       }
 
