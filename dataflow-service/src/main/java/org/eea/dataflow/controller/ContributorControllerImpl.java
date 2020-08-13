@@ -130,7 +130,7 @@ public class ContributorControllerImpl implements ContributorController {
   public void deleteReporter(
       @ApiParam(type = "Long", value = "Dataflow Id",
           example = "0") @PathVariable("dataflowId") Long dataflowId,
-      @ApiParam(type = "Long", value = "DataProvider Id",
+      @ApiParam(type = "Long", value = "Dataprovider Id",
           example = "0") @PathVariable("dataProviderId") Long dataProviderId,
       @ApiParam(type = "Object",
           value = "Contributors Properties") @RequestBody ContributorVO contributorVO) {
