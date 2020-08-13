@@ -7,7 +7,7 @@ import java.util.List;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
@@ -38,48 +38,31 @@ import org.springframework.stereotype.Component;
 @Component
 public class UniqueValidationUtils {
 
-
-
-  /**
-   * The rules repository.
-   */
+  /** The rules repository. */
   private static RulesRepository rulesRepository;
 
-  /**
-   * The schemas repository.
-   */
+  /** The schemas repository. */
   private static SchemasRepository schemasRepository;
 
-
-  /** The Constant COLUMN. */
+  /** The Constant COLUMN: {@value}. */
   private static final String COLUMN = "column_";
 
-  /** The Constant AS. */
+  /** The Constant AS: {@value}. */
   private static final String AS = "') AS ";
 
-  /**
-   * The record repository.
-   */
+  /** The record repository. */
   private static RecordRepository recordRepository;
 
-  /**
-   * The data set schema controller zuul.
-   */
-  private static DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
+  /** The dataset schema controller zuul. */
+  private static DatasetSchemaControllerZuul datasetSchemaControllerZuul;
 
-  /**
-   * The table repository.
-   */
+  /** The table repository. */
   private static TableRepository tableRepository;
 
-  /**
-   * The rules service.
-   */
+  /** The rules service. */
   private static RulesService rulesService;
 
-  /**
-   * The data set metabase controller zuul.
-   */
+  /** The data set metabase controller zuul. */
   private static DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /*
@@ -124,8 +107,8 @@ public class UniqueValidationUtils {
    */
   @Autowired
   synchronized void setDataSetSchemaControllerZuul(
-      DataSetSchemaControllerZuul dataSetSchemaControllerZuul) {
-    UniqueValidationUtils.dataSetSchemaControllerZuul = dataSetSchemaControllerZuul;
+      DatasetSchemaControllerZuul dataSetSchemaControllerZuul) {
+    UniqueValidationUtils.datasetSchemaControllerZuul = dataSetSchemaControllerZuul;
   }
 
 
@@ -367,7 +350,7 @@ public class UniqueValidationUtils {
   public static Boolean uniqueConstraint(String uniqueIdConstraint, String idRule) {
 
     UniqueConstraintVO uniqueConstraint =
-        dataSetSchemaControllerZuul.getUniqueConstraint(uniqueIdConstraint);
+        datasetSchemaControllerZuul.getUniqueConstraint(uniqueIdConstraint);
 
     // Get Schema
     String schemaId = uniqueConstraint.getDatasetSchemaId();

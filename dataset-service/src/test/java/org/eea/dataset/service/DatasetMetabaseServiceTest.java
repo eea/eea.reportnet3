@@ -31,7 +31,7 @@ import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.impl.DatasetMetabaseServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -55,102 +55,77 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-
 /**
  * The Class DatasetMetabaseServiceTest.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class DatasetMetabaseServiceTest {
 
-
-  /**
-   * The dataset metabase service.
-   */
+  /** The dataset metabase service. */
   @InjectMocks
   private DatasetMetabaseServiceImpl datasetMetabaseService;
 
-  /**
-   * The data set metabase repository.
-   */
+  /** The data set metabase repository. */
   @Mock
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-
-  /**
-   * The data set metabase mapper.
-   */
+  /** The data set metabase mapper. */
   @Mock
   private DataSetMetabaseMapper dataSetMetabaseMapper;
 
-  /**
-   * The record store controller zull.
-   */
+  /** The record store controller zuul. */
   @Mock
-  private RecordStoreControllerZull recordStoreControllerZull;
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
-  /**
-   * The reporting dataset repository.
-   */
+  /** The reporting dataset repository. */
   @Mock
   private ReportingDatasetRepository reportingDatasetRepository;
 
-  /**
-   * The design dataset repository.
-   */
+  /** The design dataset repository. */
   @Mock
   private DesignDatasetRepository designDatasetRepository;
 
-  /**
-   * The statistics repository.
-   */
+  /** The statistics repository. */
   @Mock
   private StatisticsRepository statisticsRepository;
 
-  /**
-   * The user management controller zuul.
-   */
+  /** The user management controller zuul. */
   @Mock
   private UserManagementControllerZull userManagementControllerZuul;
 
-  /**
-   * The resource management controller zuul.
-   */
+  /** The resource management controller zuul. */
   @Mock
   private ResourceManagementControllerZull resourceManagementControllerZuul;
 
-  /**
-   * The representative controller zuul.
-   */
+  /** The representative controller zuul. */
   @Mock
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /**
-   * The data collection repository.
-   */
+  /** The data collection repository. */
   @Mock
   private DataCollectionRepository dataCollectionRepository;
 
-  /**
-   * The kafka sender utils.
-   */
+  /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The foreign relations repository. */
   @Mock
   private ForeignRelationsRepository foreignRelationsRepository;
 
+  /** The dataset service. */
   @Mock
   private DatasetService datasetService;
 
-
+  /** The eu dataset repository. */
   @Mock
   private EUDatasetRepository euDatasetRepository;
 
-  ForeignRelations foreignRelations;
+  /** The foreign relations. */
+  private ForeignRelations foreignRelations;
 
-  DataSetMetabase dataSetMetabase;
-
-
+  /** The data set metabase. */
+  private DataSetMetabase dataSetMetabase;
 
   /**
    * Inits the mocks.
@@ -192,7 +167,7 @@ public class DatasetMetabaseServiceTest {
     DataProviderVO dataprovider = new DataProviderVO();
     dataprovider.setLabel("test");
 
-    doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any(), Mockito.any());
+    doNothing().when(recordStoreControllerZuul).createEmptyDataset(Mockito.any(), Mockito.any());
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(dataprovider);
     ReportingDataset reporting = new ReportingDataset();
@@ -204,7 +179,7 @@ public class DatasetMetabaseServiceTest {
     datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.REPORTING, "",
         "5d0c822ae1ccd34cfcd97e20", 1L, null, Arrays.asList(representative), 0);
 
-    Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
+    Mockito.verify(recordStoreControllerZuul, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any());
 
   }
@@ -272,8 +247,8 @@ public class DatasetMetabaseServiceTest {
    * Creates the empty dataset test.
    *
    * @throws EEAException the EEA exception
-   * @throws ExecutionException
-   * @throws InterruptedException
+   * @throws InterruptedException the interrupted exception
+   * @throws ExecutionException the execution exception
    */
   @Test
   public void createEmptyDatasetTest()
@@ -438,13 +413,16 @@ public class DatasetMetabaseServiceTest {
     DataProviderVO dataprovider = new DataProviderVO();
     dataprovider.setLabel("test");
 
-    doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any(), Mockito.any());
+    doNothing().when(recordStoreControllerZuul).createEmptyDataset(Mockito.any(), Mockito.any());
     datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.COLLECTION, "testName",
         "5d0c822ae1ccd34cfcd97e20", 1L, new Date(), new ArrayList<>(), 0);
-    Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
+    Mockito.verify(recordStoreControllerZuul, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any());
   }
 
+  /**
+   * Find dataset schema id by id test.
+   */
   @Test
   public void findDatasetSchemaIdByIdTest() {
     Mockito.when(dataSetMetabaseRepository.findDatasetSchemaIdById(Mockito.anyLong()))
@@ -453,6 +431,9 @@ public class DatasetMetabaseServiceTest {
         datasetMetabaseService.findDatasetSchemaIdById(1L));
   }
 
+  /**
+   * Test add foreign relation.
+   */
   @Test
   public void testAddForeignRelation() {
     Mockito.when(foreignRelationsRepository.save(Mockito.any())).thenReturn(new ForeignRelations());
@@ -461,6 +442,9 @@ public class DatasetMetabaseServiceTest {
     Mockito.verify(foreignRelationsRepository, times(1)).save(Mockito.any());
   }
 
+  /**
+   * Test delete foreign relation.
+   */
   @Test
   public void testDeleteForeignRelation() {
     Mockito.doNothing().when(foreignRelationsRepository)
@@ -473,6 +457,9 @@ public class DatasetMetabaseServiceTest {
             Mockito.any());
   }
 
+  /**
+   * Test get dataset destination foreign relation.
+   */
   @Test
   public void testGetDatasetDestinationForeignRelation() {
     datasetMetabaseService.getDatasetDestinationForeignRelation(1L, "5ce524fad31fc52540abae73");
@@ -529,6 +516,11 @@ public class DatasetMetabaseServiceTest {
     Assert.assertNull(datasetMetabaseService.getDatasetType(1L));
   }
 
+  /**
+   * Gets the integrity dataset id null test.
+   *
+   * @return the integrity dataset id null test
+   */
   @Test
   public void getIntegrityDatasetIdNullTest() {
     Mockito.when(foreignRelationsRepository.findFirstByIdDatasetOrigin_idAndIdPkAndIdFkOrigin(
@@ -536,6 +528,11 @@ public class DatasetMetabaseServiceTest {
     Assert.assertNull(datasetMetabaseService.getIntegrityDatasetId(1L, "1", "1"));
   }
 
+  /**
+   * Gets the integrity dataset id test.
+   *
+   * @return the integrity dataset id test
+   */
   @Test
   public void getIntegrityDatasetIdTest() {
 
@@ -544,6 +541,9 @@ public class DatasetMetabaseServiceTest {
     Assert.assertEquals((Long) 1L, datasetMetabaseService.getIntegrityDatasetId(1L, "1", "1"));
   }
 
+  /**
+   * Creates the foreign relationship test.
+   */
   @Test
   public void createForeignRelationshipTest() {
     datasetMetabaseService.createForeignRelationship(1L, 1L, "5ce524fad31fc52540abae73",
@@ -551,6 +551,9 @@ public class DatasetMetabaseServiceTest {
     Mockito.verify(foreignRelationsRepository, times(1)).save(Mockito.any());
   }
 
+  /**
+   * Update foreign relationship found older test.
+   */
   @Test
   public void updateForeignRelationshipFoundOlderTest() {
     Mockito
@@ -563,6 +566,9 @@ public class DatasetMetabaseServiceTest {
     Mockito.verify(foreignRelationsRepository, times(1)).save(Mockito.any());
   }
 
+  /**
+   * Update foreign relationship test.
+   */
   @Test
   public void updateForeignRelationshipTest() {
     datasetMetabaseService.updateForeignRelationship(1L, 1L, "5ce524fad31fc52540abae73",
@@ -570,6 +576,11 @@ public class DatasetMetabaseServiceTest {
     Mockito.verify(foreignRelationsRepository, times(1)).save(Mockito.any());
   }
 
+  /**
+   * Gets the dataset id by dataset schema id and data provider id null test.
+   *
+   * @return the dataset id by dataset schema id and data provider id null test
+   */
   @Test
   public void getDatasetIdByDatasetSchemaIdAndDataProviderIdNullTest() {
     Mockito.when(dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderId(Mockito.any(),
@@ -578,6 +589,11 @@ public class DatasetMetabaseServiceTest {
         .assertNull(datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId("1", 1L));
   }
 
+  /**
+   * Gets the dataset id by dataset schema id and data provider id test.
+   *
+   * @return the dataset id by dataset schema id and data provider id test
+   */
   @Test
   public void getDatasetIdByDatasetSchemaIdAndDataProviderIdTest() {
     Mockito.when(dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderId(Mockito.any(),

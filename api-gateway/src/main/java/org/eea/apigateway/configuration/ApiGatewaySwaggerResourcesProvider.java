@@ -26,11 +26,11 @@ public class ApiGatewaySwaggerResourcesProvider implements SwaggerResourcesProvi
 
   @Autowired
   private RouteLocator routeLocator;
-  @Autowired
-  private DiscoveryClient discoveryClient;
 
-  @Value("${backend:localhost}") //set default value
-  private String backend;
+
+  @Value("${spring.profiles.active:local}")
+  private String activeProfile;
+
 
   @Override
   public List<SwaggerResource> get() {
@@ -48,43 +48,22 @@ public class ApiGatewaySwaggerResourcesProvider implements SwaggerResourcesProvi
     routes.forEach(route -> {
       //if the microservice (route) has not been already added to the Swagger resources
       if (!registeredResources.contains(route.getLocation())) {
-        //Get information from consul for that service: Schema, Port, Ip...
-        Optional<URI> uri = getServiceUrl(route.getLocation());
-        if (uri
-            .isPresent()) {//it could happen that there is a route without a deployed microservice, this could happen for brand new microservices
 
-          //finally adding the Swagger Resource as pair "Name","Origin of JSON Swagger Rest Document".
-          // In this case, the microservices rest api swagger documentation will come from the rest of the microservices
-          URI location = uri.get();
-          StringBuilder endpoint = new StringBuilder(getServiceHost(route.getLocation(), location))
-              .append("/v2/api-docs");
-          resources
-              .add(swaggerResource(route.getLocation(),
-                  endpoint.toString()));
-          registeredResources.add(route.getLocation());
-        }
+        //finally adding the Swagger Resource as pair "Name","Origin of JSON Swagger Rest Document".
+        // In this case, the microservices rest api swagger documentation will come from the rest of the microservices
+        StringBuilder endpoint = new StringBuilder("/" + route.getLocation())
+            .append("/v2/api-docs");
+        resources
+            .add(swaggerResource(route.getLocation(),
+                endpoint.toString()));
+        registeredResources.add(route.getLocation());
       }
+
     });
 
     return resources;
   }
 
-
-  private String getServiceHost(String service, URI uri) {
-
-    //if no backend has been set it is assumed that it's running in local, otherwise it is assume it is running in kubernetes and it will be used its name translation (k8s dns)
-    return "localhost".equals(backend) ? "http://localhost:" + uri.getPort() : service;
-  }
-
-
-  private Optional<URI> getServiceUrl(String service) {
-    Optional<URI> uri = discoveryClient.getInstances(service)
-        .stream()
-        .findFirst()
-        .map(si -> si.getUri());
-
-    return uri;
-  }
 
   private SwaggerResource swaggerResource(String name, String location) {
     SwaggerResource swaggerResource = new SwaggerResource();
