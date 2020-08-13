@@ -480,4 +480,12 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   void exportFileThroughIntegration(Long datasetId, String fileExtension) throws EEAException;
+
+  /**
+   * Checks if is design dataset.
+   *
+   * @param datasetId the dataset id
+   * @return true, if is design dataset
+   */
+  boolean isDesignDataset(Long datasetId);
 }

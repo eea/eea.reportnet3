@@ -57,6 +57,7 @@ public class ExternalExportReportingCompletedEvent implements NotificableEventHa
     notification.put("dataflowId", dataflowId);
     notification.put("datasetName", datasetName);
     notification.put("dataflowName", dataflowName);
+    notification.put("providerId", notificationVO.getProviderId());
     notification.put("fileName", notificationVO.getFileName());
     return notification;
   }
