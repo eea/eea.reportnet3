@@ -146,11 +146,8 @@ export const DataCollection = withRouter(({ match, history }) => {
               description: field['description'],
               field: field['fieldId'],
               header: field['name'],
-<<<<<<< HEAD
               pk: field['pk'],
-=======
               maxSize: field['maxSize'],
->>>>>>> remotes/origin/feature/SPRINT_20_FE_Integration
               pkHasMultipleValues: field['pkHasMultipleValues'],
               readOnly: field['readOnly'],
               recordId: field['recordId'],
