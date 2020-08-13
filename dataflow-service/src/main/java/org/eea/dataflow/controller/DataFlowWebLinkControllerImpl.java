@@ -132,7 +132,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
       @ApiResponse(code = 403, message = "Forbidden"),
       @ApiResponse(code = 500, message = "Internal Server Error")})
   public void removeLink(
-      @ApiParam(value = "Link Id", example = "0") @PathVariable(value = "idLink") Long idLink) {
+      @ApiParam(value = "Weblink Id", example = "0") @PathVariable(value = "idLink") Long idLink) {
 
     try {
       dataflowWebLinkService.removeWebLink(idLink);
