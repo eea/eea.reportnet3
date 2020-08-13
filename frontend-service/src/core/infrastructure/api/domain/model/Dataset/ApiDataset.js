@@ -404,7 +404,8 @@ export const apiDataset = {
     tableSchemaDescription,
     tableSchemaIsReadOnly,
     datasetId,
-    tableSchemaNotEmpty
+    tableSchemaNotEmpty,
+    tableSchemaFixedNumber
   ) => {
     try {
       const response = await HTTPRequester.update({
@@ -416,9 +417,10 @@ export const apiDataset = {
         data: {
           idTableSchema: tableSchemaId,
           description: tableSchemaDescription,
+          fixedNumber: tableSchemaFixedNumber,
+          notEmpty: tableSchemaNotEmpty,
           readOnly: tableSchemaIsReadOnly,
-          toPrefill: tableSchemaToPrefill,
-          notEmpty: tableSchemaNotEmpty
+          toPrefill: tableSchemaToPrefill
         }
       });
 

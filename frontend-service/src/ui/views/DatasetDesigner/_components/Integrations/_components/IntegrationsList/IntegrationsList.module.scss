@@ -1,10 +1,24 @@
-.emptyFilteredData,
-.noIntegrations {
-  align-items: center;
-  display: flex;
-  min-height: 10vh;
+.integrations {
+  height: 60vh;
 }
 
-.integrations {
-  min-height: 50vh;
+.integrationsWithoutTable {
+  height: 63.5vh;
+}
+
+.emptyFilteredData,
+.noIntegrations {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.spinnerIntegrations {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

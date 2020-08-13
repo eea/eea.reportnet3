@@ -4,7 +4,8 @@ export const UpdateTableDescriptionDesign = ({ datasetRepository }) => async (
   tableSchemaDescription,
   tableSchemaIsReadOnly,
   datasetId,
-  tableSchemaNotEmpty
+  tableSchemaNotEmpty,
+  tableSchemaFixedNumber
 ) =>
   datasetRepository.updateTableDescriptionDesign(
     tableSchemaToPrefill,
@@ -12,5 +13,6 @@ export const UpdateTableDescriptionDesign = ({ datasetRepository }) => async (
     tableSchemaDescription,
     tableSchemaIsReadOnly,
     datasetId,
-    tableSchemaNotEmpty
+    tableSchemaNotEmpty,
+    tableSchemaFixedNumber
   );

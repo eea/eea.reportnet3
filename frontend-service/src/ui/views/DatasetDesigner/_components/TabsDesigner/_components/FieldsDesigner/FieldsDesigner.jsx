@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -55,6 +54,7 @@ export const FieldsDesigner = ({
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [notEmpty, setNotEmpty] = useState(true);
+  const [fixedNumber, setFixedNumber] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
   const [tableDescriptionValue, setTableDescriptionValue] = useState('');
 
@@ -67,6 +67,7 @@ export const FieldsDesigner = ({
       setIsReadOnlyTable(table.readOnly || false);
       setToPrefill(table.toPrefill || false);
       table.notEmpty === false ? setNotEmpty(false) : setNotEmpty(true);
+      setFixedNumber(table.fixedNumber || false);
     }
   }, []);
 
@@ -193,7 +194,12 @@ export const FieldsDesigner = ({
 
   const onChangeToPrefill = checked => {
     setToPrefill(checked);
-    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill: checked });
+    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill: checked, fixedNumber: checked });
+  };
+
+  const onChangeFixedNumber = checked => {
+    setFixedNumber(checked);
+    updateTableDesign({ toPrefill: checked, fixedNumber: checked });
   };
 
   const onChangeNotEmpty = checked => {
@@ -284,8 +290,10 @@ export const FieldsDesigner = ({
             description: field.description,
             field: field['fieldId'],
             header: field['name'],
+            pk: field['pk'],
             maxSize: field['maxSize'],
             pkHasMultipleValues: field['pkHasMultipleValues'],
+            readOnly: field['readOnly'],
             recordId: field['recordId'],
             referencedField: field['referencedField'],
             required: field.required,
@@ -308,6 +316,7 @@ export const FieldsDesigner = ({
           onLoadTableData={onLoadTableData}
           recordPositionId={-1}
           recordPositionId={recordPositionId}
+          reporting={false}
           selectedRecordErrorId={selectedRecordErrorId}
           setIsValidationSelected={setIsValidationSelected}
           tableHasErrors={table.hasErrors}
@@ -378,6 +387,7 @@ export const FieldsDesigner = ({
           fieldLink={null}
           fieldHasMultipleValues={false}
           fieldMustBeUsed={false}
+          fieldReadOnly={false}
           fieldRequired={false}
           fieldType=""
           fieldValue=""
@@ -417,6 +427,7 @@ export const FieldsDesigner = ({
                 fieldMustBeUsed={field.pkMustBeUsed}
                 fieldPK={field.pk}
                 fieldPKReferenced={field.pkReferenced}
+                fieldReadOnly={Boolean(field.readOnly)}
                 fieldRequired={Boolean(field.required)}
                 fieldType={field.type}
                 fieldValue={field.value}
@@ -471,7 +482,7 @@ export const FieldsDesigner = ({
     </div>
   );
 
-  const updateTableDesign = async ({ notEmpty, readOnly, toPrefill }) => {
+  const updateTableDesign = async ({ fixedNumber, notEmpty, readOnly, toPrefill }) => {
     // if (isUndefined(tableDescriptionValue)) {
     //   return;
     // }
@@ -482,12 +493,13 @@ export const FieldsDesigner = ({
         tableDescriptionValue,
         readOnly,
         datasetId,
-        notEmpty
+        notEmpty,
+        fixedNumber
       );
       if (!tableUpdated) {
         console.error('Error during table description update');
       } else {
-        onChangeTableProperties(table.tableSchemaId, tableDescriptionValue, readOnly, toPrefill, notEmpty);
+        onChangeTableProperties(table.tableSchemaId, tableDescriptionValue, readOnly, toPrefill, notEmpty, fixedNumber);
       }
     } catch (error) {
       console.error(`Error during table description update: ${error}`);
@@ -505,7 +517,7 @@ export const FieldsDesigner = ({
           id="tableDescription"
           key="tableDescription"
           onChange={e => setTableDescriptionValue(e.target.value)}
-          onBlur={() => updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, notEmpty })}
+          onBlur={() => updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, notEmpty, fixedNumber })}
           onFocus={e => {
             setInitialTableDescription(e.target.value);
           }}
@@ -555,8 +567,8 @@ export const FieldsDesigner = ({
           <div>
             <span className={styles.switchTextInput}>{resources.messages['prefilled']}</span>
             <Checkbox
-              checked={toPrefill}
-              disabled={isReadOnlyTable}
+              checked={toPrefill || fixedNumber}
+              disabled={isReadOnlyTable || fixedNumber}
               // className={styles.checkRequired}
               id={`${table.tableSchemaId}_check_to_prefill`}
               inputId={`${table.tableSchemaId}_check_to_prefill`}
@@ -566,6 +578,21 @@ export const FieldsDesigner = ({
             />
             <label htmlFor={`${table.tableSchemaId}_check_to_prefill`} className="srOnly">
               {resources.messages['prefilled']}
+            </label>
+          </div>
+          <div>
+            <span className={styles.switchTextInput}>{resources.messages['fixedNumber']}</span>
+            <Checkbox
+              checked={fixedNumber}
+              // className={styles.checkRequired}
+              id={`${table.tableSchemaId}_check_fixed_number`}
+              inputId={`${table.tableSchemaId}_check_fixed_number`}
+              label="Default"
+              onChange={e => onChangeFixedNumber(e.checked)}
+              style={{ width: '70px' }}
+            />
+            <label htmlFor={`${table.tableSchemaId}_check_fixed_number`} className="srOnly">
+              {resources.messages['fixedNumber']}
             </label>
           </div>
           <div>
@@ -587,6 +614,7 @@ export const FieldsDesigner = ({
       </div>
       {!isPreviewModeOn && (
         <div className={styles.fieldsHeader}>
+          <label className={styles.readOnlyWrap}>{resources.messages['readOnly']}</label>
           <label className={styles.requiredWrap}>{resources.messages['required']}</label>
           <span className={styles.PKWrap}>
             <label>{resources.messages['pk']}</label>
