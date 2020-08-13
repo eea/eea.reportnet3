@@ -196,15 +196,9 @@ const DataViewer = withRouter(
       const fileContent = await DatasetService.downloadFileData(datasetId, fieldId);
 
       DownloadFile(fileContent, fileName);
-
-      // const a = document.createElement('a');
-      //   a.href = `data:text/plain;base64,${splittedFieldValue[2]}`;
-      //   a.download = splittedFieldValue[0];
-      //   a.click();
     };
 
     const onFileUploadVisible = (fieldId, fieldSchemaId, validExtensions, maxSize) => {
-      console.log(validExtensions, maxSize);
       dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId, validExtensions, maxSize } });
     };
 
@@ -628,14 +622,12 @@ const DataViewer = withRouter(
       if (event) {
         const clipboardData = event.clipboardData;
         const pastedData = clipboardData.getData('Text');
-        console.log({ pastedData });
         dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
       }
     };
 
     const onPasteAsync = async () => {
       const pastedData = await navigator.clipboard.readText();
-      console.log('PASTE ASYNC');
       dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
     };
 
@@ -651,7 +643,6 @@ const DataViewer = withRouter(
           setIsTableDeleted(false);
         }
       } catch (error) {
-        console.log({ error });
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }

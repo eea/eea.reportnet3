@@ -39,8 +39,10 @@ export const IntegrationsList = ({
   });
 
   useEffect(() => {
-    onLoadIntegrations();
-  }, [integrationListState.isDataUpdated]);
+    if (!designerState.isIntegrationManageDialogVisible) {
+      onLoadIntegrations();
+    }
+  }, [integrationListState.isDataUpdated, designerState.isIntegrationManageDialogVisible]);
 
   const actionsTemplate = row => (
     <ActionsColumn
@@ -62,7 +64,7 @@ export const IntegrationsList = ({
   const isDeleteDialogVisible = value =>
     integrationListDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
 
-  const isLoading = value => integrationListDispatch({ type: 'IS_LOADING', payload: value });
+  const isLoading = value => integrationListDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onDeleteIntegration = async () => {
     try {
@@ -82,6 +84,7 @@ export const IntegrationsList = ({
 
   const onLoadIntegrations = async () => {
     try {
+      isLoading(true);
       const response = await IntegrationService.all(dataflowId, designerState.datasetSchemaId);
       integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response } });
       integrationsList(response);

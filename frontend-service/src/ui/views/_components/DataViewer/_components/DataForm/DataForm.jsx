@@ -23,9 +23,7 @@ const DataForm = ({
   const resources = useContext(ResourcesContext);
 
   const allAttachments = () => {
-    console.log({ colsSchema });
     const notAttachment = colsSchema.filter(col => col.type && col.type.toUpperCase() !== 'ATTACHMENT');
-    console.log({ notAttachment });
     return notAttachment.length === 0;
   };
 

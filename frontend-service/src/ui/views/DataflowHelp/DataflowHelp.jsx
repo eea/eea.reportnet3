@@ -253,7 +253,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
             <Documents
               dataflowId={dataflowId}
               documents={documents}
-              isCustodian={isCustodian}
               isDeletingDocument={isDeletingDocument}
               isToolbarVisible={isToolbarVisible}
               onLoadDocuments={onLoadDocuments}
