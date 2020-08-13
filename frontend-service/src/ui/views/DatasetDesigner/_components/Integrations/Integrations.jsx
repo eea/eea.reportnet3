@@ -22,6 +22,11 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
 
   const getUpdatedData = data => setUpdatedData(IntegrationsUtils.parseIntegration(data));
 
+  const onCloseListModal = () => {
+    manageDialogs('isIntegrationListDialogVisible', false);
+    refreshList(true)
+  }
+
   const refreshList = value => setNeedsRefresh(value);
 
   const renderIntegrationFooter = (
@@ -41,7 +46,7 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
         label={resources.messages['close']}
-        onClick={() => manageDialogs('isIntegrationListDialogVisible', false)}
+        onClick={() => onCloseListModal()}
       />
     </Fragment>
   );
@@ -52,7 +57,7 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
         <Dialog
           footer={renderIntegrationFooter}
           header={resources.messages['externalIntegrations']}
-          onHide={() => manageDialogs('isIntegrationListDialogVisible', false)}
+          onHide={() => onCloseListModal()}
           style={{ width: '70%' }}
           visible={isIntegrationListDialogVisible}>
           <IntegrationsList

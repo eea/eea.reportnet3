@@ -17,7 +17,6 @@ const UserData = () => {
         <UserImg />
       </div>
       <div className={styles.userName}>{userContext.preferredUsername}</div>
-      <div className={styles.userMail}>{userContext.preferredUsername}@reportnet.net</div>
       <div>
         <a
           type="button"

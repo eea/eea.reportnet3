@@ -121,10 +121,19 @@ export const IntegrationsList = ({
     return fieldColumns;
   };
 
-  if (integrationListState.isLoading) return <Spinner style={{ top: 0 }} />;
+  if (integrationListState.isLoading) {
+    return (
+    <div className={styles.integrationsWithoutTable}>
+      <div className={styles.spinnerIntegrations}><Spinner style={{ top: 0, left: 0 }} /></div>
+    </div>);
+  }
 
-  return isEmpty(integrationListState.data) ? (
-    <div className={styles.noIntegrations}>{resources.messages['noIntegrations']}</div>
+  return isEmpty(false) ? (
+    <div className={styles.integrationsWithoutTable}>
+      <div className={styles.noIntegrations}>
+        {resources.messages['noIntegrations']}
+      </div>
+    </div>
   ) : (
     <div className={styles.integrations}>
       <Filters
