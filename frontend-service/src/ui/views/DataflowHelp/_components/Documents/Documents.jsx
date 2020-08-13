@@ -300,20 +300,22 @@ const Documents = ({
         </Dialog>
       )}
 
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        header={resources.messages['delete']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        maximizable={false}
-        onConfirm={() => {
-          setIsDeletingDocument(true);
-          onDeleteDocument(rowDataState);
-        }}
-        onHide={onHideDeleteDialog}
-        visible={deleteDialogVisible}>
-        {resources.messages['deleteDocument']}
-      </ConfirmDialog>
+      {deleteDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={resources.messages['delete']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          maximizable={false}
+          onConfirm={() => {
+            setIsDeletingDocument(true);
+            onDeleteDocument(rowDataState);
+          }}
+          onHide={onHideDeleteDialog}
+          visible={deleteDialogVisible}>
+          {resources.messages['deleteDocument']}
+        </ConfirmDialog>
+      )}
     </Fragment>
   );
 };

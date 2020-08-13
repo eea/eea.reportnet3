@@ -16,7 +16,6 @@ const validationReducer = (state, { type, payload }) => {
       return {
         ...state,
         isVisible: true,
-        opener: payload.opener,
         level: payload.level
       };
     case 'ON_OPEN_QC_CREATION_MODAL_FROM_FIELD':
@@ -86,7 +85,7 @@ export const ValidationProvider = ({ children }) => {
     <ValidationContext.Provider
       value={{
         ...state,
-        onOpenModal: () => {
+        onOpenModal: level => {
           dispatch({
             type: 'ON_OPEN_QC_CREATION_MODAL'
           });
@@ -95,7 +94,6 @@ export const ValidationProvider = ({ children }) => {
           dispatch({
             type: 'ON_OPEN_QC_CREATION_MODAL_FROM_OPENER',
             payload: {
-              opener,
               level
             }
           });

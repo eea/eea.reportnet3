@@ -557,6 +557,7 @@ public class DataSetControllerImpl implements DatasetController {
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
 
+
       return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
 
     } catch (EEAException | IOException e) {
@@ -741,7 +742,7 @@ public class DataSetControllerImpl implements DatasetController {
   public ResponseEntity getAttachment(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldId") String idField) {
 
-    LOG.info("Init the get attachment controller");
+    LOG.info("Downloading attachment from the datasetId {}", datasetId);
     byte[] file;
     try {
       AttachmentValue attachment = datasetService.getAttachment(datasetId, idField);
@@ -755,6 +756,8 @@ public class DataSetControllerImpl implements DatasetController {
       return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
 
     } catch (EEAException | IOException e) {
+      LOG_ERROR.error("Error downloading attachment from the datasetId {}, with message: {}",
+          datasetId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
 
@@ -778,13 +781,15 @@ public class DataSetControllerImpl implements DatasetController {
       @PathVariable("fieldId") String idField, @RequestParam("file") final MultipartFile file) {
 
     try {
-      String fileName = file.getName();
+      String fileName = file.getOriginalFilename();
       if (!validateAttachment(datasetId, idField, fileName, file.getSize())) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
       }
       InputStream is = file.getInputStream();
       datasetService.updateAttachment(datasetId, idField, fileName, is);
     } catch (EEAException | IOException e) {
+      LOG_ERROR.error("Error updating attachment from the datasetId {}, with message: {}",
+          datasetId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
 
@@ -809,15 +814,24 @@ public class DataSetControllerImpl implements DatasetController {
     if (datasetSchemaId == null) {
       throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND);
     }
-    FieldSchemaVO fieldSchema = datasetSchemaService.getFieldSchema(datasetSchemaId, idField);
+    FieldVO fieldVO = datasetService.getFieldById(datasetId, idField);
+    FieldSchemaVO fieldSchema =
+        datasetSchemaService.getFieldSchema(datasetSchemaId, fieldVO.getIdFieldSchema());
     if (fieldSchema == null || fieldSchema.getId() == null) {
       throw new EEAException(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND);
     }
-    if ((fieldSchema.getMaxSize() != null && fieldSchema.getMaxSize() * 1000000 < size)
-        || (fieldSchema.getValidExtensions() != null
-            && !Arrays.asList(fieldSchema.getValidExtensions())
-                .contains(datasetService.getMimetype(originalFilename)))) {
+    // Validate property maxSize of the file. If the size is 0, it's ok, continue
+    if (fieldSchema.getMaxSize() != null && fieldSchema.getMaxSize() != 0
+        && fieldSchema.getMaxSize() * 1000000 < size) {
       result = false;
+    }
+    // Validate property extensions of the file. If no extensions provided, it's ok, continue
+    if (fieldSchema.getValidExtensions() != null) {
+      List<String> extensions = Arrays.asList(fieldSchema.getValidExtensions());
+      if (!extensions.isEmpty()
+          && !extensions.contains(datasetService.getMimetype(originalFilename))) {
+        result = false;
+      }
     }
     return result;
   }
@@ -839,6 +853,8 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       datasetService.deleteAttachment(datasetId, idField);
     } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting attachment from the datasetId {}, with message: {}",
+          datasetId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
 

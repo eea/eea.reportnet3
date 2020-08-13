@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -94,7 +93,6 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
    * @return the execution result VO
    */
   @Override
-  @Async
   public ExecutionResultVO execute(IntegrationOperationTypeEnum integrationOperationTypeEnum,
       Object... executionParams) {
 
@@ -240,12 +238,13 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         break;
       case EXPORT_EU_DATASET:
         // DataBaseConnectionPublic
-        parameters.add(saveParameter(IntegrationParams.DATABASE_CONNECTION_PUBLIC, ""));
+        parameters.add(saveParameter(IntegrationParams.DATABASE_CONNECTION_PUBLIC,
+            integration.getExternalParameters().get(IntegrationParams.DATABASE_CONNECTION_PUBLIC)));
         // mode
         parameters.add(saveParameter(IntegrationParams.MODE, ""));
 
         fmeAsyncJob.setPublishedParameters(parameters);
-        LOG.info("Executing FME Export EU Dataset");
+        LOG.info("Executing FME Export EU Dataset: fmeAsyncJob={}", fmeAsyncJob);
         idFMEJob = executeSubmit(defaultRepository, euDatasetJob, fmeAsyncJob);
         break;
       default:
