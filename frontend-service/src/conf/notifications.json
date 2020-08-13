@@ -616,6 +616,9 @@
         },
         {
           "key": "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT"
+        },
+        {
+          "key": "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT"
         }
       ]
     },

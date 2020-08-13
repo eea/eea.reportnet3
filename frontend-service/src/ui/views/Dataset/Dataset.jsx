@@ -311,21 +311,30 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const downloadExportFMEFile = async () => {
     try {
-      const fakeExportDatasetFileName = '1.txt'; // from notification
-      const providerId = 1; // from notification
+      const [notification] = notificationContext.all.filter(
+        notification => notification.key === 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
+      );
 
       setExportDatasetDataName(createFileName(datasetName, exportDatasetFileType));
 
-      setExportDatasetData(await DatasetService.downloadExportFile(datasetId, fakeExportDatasetFileName, providerId));
+      setExportDatasetData(
+        await DatasetService.downloadExportFile(
+          datasetId,
+          notification.content.fileName,
+          notification.content.providerId
+        )
+      );
     } catch (error) {
       console.error(error);
       notificationContext.add({
         type: 'DOWNLOAD_FME_FILE_ERROR'
       });
+    } finally {
+      setLoadingFile(false);
     }
   };
 
-  useCheckNotifications(['EXPORT_DATA_BY_ID_ERROR'], downloadExportFMEFile, true);
+  useCheckNotifications(['EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'], downloadExportFMEFile);
 
   const onLoadTableData = hasData => {
     setDatasetHasData(hasData);
@@ -350,8 +359,6 @@ export const Dataset = withRouter(({ match, history }) => {
       await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
     } catch (error) {
       onExportError();
-    } finally {
-      setLoadingFile(false);
     }
   };
 
