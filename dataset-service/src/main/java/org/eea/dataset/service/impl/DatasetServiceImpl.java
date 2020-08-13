@@ -626,6 +626,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
     List<RecordValue> recordValues = recordMapper.classListToEntity(records);
     List<FieldValue> fieldValues = new ArrayList<>();
+    String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
     for (RecordValue recordValue : recordValues) {
       for (FieldValue fieldValue : recordValue.getFields()) {
         if (null == fieldValue.getValue()) {
@@ -635,7 +636,15 @@ public class DatasetServiceImpl implements DatasetService {
             fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
           }
         }
-        fieldValues.add(fieldValue);
+        Document fieldSchema =
+            schemasRepository.findFieldSchema(datasetSchemaId, fieldValue.getIdFieldSchema());
+        Boolean readOnly =
+            fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
+                ? (Boolean) fieldSchema.get(LiteralConstants.READ_ONLY)
+                : Boolean.FALSE;
+        if (!readOnly && !isDesignDataset(datasetId) || isDesignDataset(datasetId)) {
+          fieldValues.add(fieldValue);
+        }
       }
     }
     fieldRepository.saveAll(fieldValues);
@@ -687,6 +696,8 @@ public class DatasetServiceImpl implements DatasetService {
     });
     recordRepository.saveAll(recordValue);
   }
+
+
 
   /**
    * Delete record.
@@ -791,13 +802,17 @@ public class DatasetServiceImpl implements DatasetService {
 
     }
     Boolean isLinkMultiselect = Boolean.FALSE;
+    String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
+    Document fieldSchema =
+        schemasRepository.findFieldSchema(datasetSchemaId, field.getIdFieldSchema());
     if (DataType.LINK.equals(field.getType())) {
-      String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
-      Document fieldSchema =
-          schemasRepository.findFieldSchema(datasetSchemaId, field.getIdFieldSchema());
       isLinkMultiselect = fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES) != null
           ? (Boolean) fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES)
           : Boolean.FALSE;
+    }
+    if (fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
+        && (Boolean) fieldSchema.get(LiteralConstants.READ_ONLY) && !isDesignDataset(datasetId)) {
+      throw new EEAException(EEAErrorMessage.FIELD_READ_ONLY);
     }
     // if the type is multiselect codelist or Link multiselect we sort the values in lexicographic
     // order
@@ -919,6 +934,11 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   public boolean isReportingDataset(Long datasetId) {
     return reportingDatasetRepository.existsById(datasetId);
+  }
+
+  @Override
+  public boolean isDesignDataset(Long datasetId) {
+    return designDatasetRepository.existsById(datasetId);
   }
 
   /**
@@ -1179,7 +1199,10 @@ public class DatasetServiceImpl implements DatasetService {
     List<TableValue> tables = new ArrayList<>();
     List<String> readOnlyTables = new ArrayList<>();
 
+
     // Loops to build the entity
+    dataset.setId(datasetId);
+
     for (ETLTableVO etlTable : etlDatasetVO.getTables()) {
       etlBuildEntity(provider, partition, tableMap, fieldMap, dataset, tables, etlTable);
       // Check if table is read Only and save into a list
@@ -1190,7 +1213,6 @@ public class DatasetServiceImpl implements DatasetService {
     }
     dataset.setTableValues(tables);
     dataset.setIdDatasetSchema(datasetSchemaId);
-    dataset.setId(datasetId);
 
     List<RecordValue> allRecords = new ArrayList<>();
 
@@ -1875,6 +1897,7 @@ public class DatasetServiceImpl implements DatasetService {
     return tableId;
   }
 
+
   /**
    * For field filled.
    *
@@ -1889,14 +1912,16 @@ public class DatasetServiceImpl implements DatasetService {
         field.setValue(field.getValue().substring(0, fieldMaxLength));
       }
     }
+
+    Document fieldSchema =
+        schemasRepository.findFieldSchema(metabase.getDatasetSchema(), field.getIdFieldSchema());
+
     // if the type is link multiselect we check if is multiple
-    Boolean isLinkMultiselect = false;
+    boolean isLinkMultiselect = false;
+
     if (DataType.LINK.equals(field.getType())) {
-      Document fieldSchema =
-          schemasRepository.findFieldSchema(metabase.getDatasetSchema(), field.getIdFieldSchema());
-      isLinkMultiselect = fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES) != null
-          ? (Boolean) fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES)
-          : Boolean.FALSE;
+      isLinkMultiselect =
+          Boolean.TRUE.equals(fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES));
     }
     // if the type is multiselect codelist or Link multiple we sort the values in lexicographic
     // order
@@ -1908,6 +1933,14 @@ public class DatasetServiceImpl implements DatasetService {
       Collections.sort(values);
       field.setValue(values.toString().substring(1, values.toString().length() - 1));
     }
+
+    // If the field is readOnly and is not a design dataset the value is empty
+    if (fieldSchema != null && fieldSchema.get(LiteralConstants.READ_ONLY) != null
+        && (boolean) fieldSchema.get(LiteralConstants.READ_ONLY)
+        && !isDesignDataset(metabase.getId())) {
+      field.setValue("");
+    }
+
   }
 
   /**
@@ -1940,7 +1973,10 @@ public class DatasetServiceImpl implements DatasetService {
           FieldValue field = new FieldValue();
           FieldSchema fieldSchema =
               fieldMap.get(etlField.getFieldName().toLowerCase() + tableSchema.getIdTableSchema());
-          if (fieldSchema != null) {
+          if (fieldSchema != null && Boolean.FALSE.equals(fieldSchema.getReadOnly())
+              && !isDesignDataset(dataset.getId())
+              || fieldSchema != null && isDesignDataset(dataset.getId())
+              || fieldSchema != null && fieldSchema.getReadOnly() == null) {
             field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
             field.setType(fieldSchema.getType());
             field.setValue(etlField.getValue());
