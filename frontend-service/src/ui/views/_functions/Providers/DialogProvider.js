@@ -1,12 +1,10 @@
-import React, { useContext, useReducer } from 'react';
+import React, { useReducer } from 'react';
 
 import { DialogContext } from 'ui/views/_functions/Contexts/DialogContext';
 
 import { dialogReducer } from 'ui/views/_functions/Reducers/dialogReducer';
 
 export const DialogProvider = ({ children }) => {
-  const dialogContext = useContext(DialogContext);
-
   const [state, dispatch] = useReducer(dialogReducer, { open: [] });
 
   return (
@@ -14,14 +12,10 @@ export const DialogProvider = ({ children }) => {
       value={{
         ...state,
         add: dialogId => {
-          console.log(state);
-          console.log('dialogId: ', dialogId);
           const dialogs = [...state.open];
-          console.log('dialogs ', dialogs);
           if (!dialogs.includes(dialogId)) {
             dialogs.push(dialogId);
           }
-          console.log('dialogs ', dialogs);
           dispatch({ type: 'UPDATE_OPEN', payload: dialogs });
         },
         remove: dialogId => {

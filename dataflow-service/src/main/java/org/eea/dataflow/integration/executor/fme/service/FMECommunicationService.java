@@ -233,11 +233,11 @@ public class FMECommunicationService {
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("datasetId", String.valueOf(idDataset));
     String auxURL =
-        "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/design/{fileName}?accept=contents&disposition=attachment";
+        "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/design/ExportFiles/{fileName}?accept=contents&disposition=attachment";
     if (null != providerId) {
       uriParams.put("providerId", providerId.toString());
       auxURL =
-          "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}/{fileName}?accept=contents&disposition=attachment";
+          "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}/ExportFiles/{fileName}?accept=contents&disposition=attachment";
     }
     uriParams.put("fileName", fileName);
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();

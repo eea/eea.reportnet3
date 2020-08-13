@@ -46,14 +46,10 @@ export const UniqueConstraints = ({
   });
 
   useEffect(() => {
-    onLoadConstraints();
-  }, [constraintsState.isDataUpdated]);
-
-  useEffect(() => {
     if (!designerState.isManageUniqueConstraintDialogVisible) {
-      onUpdateData();
+      onLoadConstraints();
     }
-  }, [designerState.isManageUniqueConstraintDialogVisible]);
+  }, [constraintsState.isDataUpdated, designerState.isManageUniqueConstraintDialogVisible]);
 
   useEffect(() => {
     if (getUniques) getUniques(constraintsState.data);
@@ -72,7 +68,7 @@ export const UniqueConstraints = ({
 
   const isDeleteDialogVisible = value => constraintsDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
 
-  const isLoading = value => constraintsDispatch({ type: 'IS_LOADING', payload: value });
+  const isLoading = value => constraintsDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onDeleteConstraint = async () => {
     try {
@@ -88,6 +84,7 @@ export const UniqueConstraints = ({
 
   const onLoadConstraints = async () => {
     try {
+      isLoading(true);
       const response = await UniqueConstraintsService.all(dataflowId, datasetSchemaId);
       constraintsDispatch({
         type: 'INITIAL_LOAD',

@@ -3,8 +3,6 @@ import isNil from 'lodash/isNil';
 
 import moment from 'moment';
 
-import { config } from 'conf';
-
 const printExpression = (expression, field) => {
   if (!isNil(expression.operatorValue) && !isEmpty(expression.operatorValue)) {
     if (expression.operatorType === 'LEN') {
@@ -49,7 +47,6 @@ const printSelector = (expression, index, expressions, field) => {
 export const getFieldExpressionString = (expressions, field) => {
   let expressionString = '';
   if (!isNil(field) && expressions.length > 0) {
-    const { label: fieldLabel } = field;
     expressionString = printSelector(expressions[0], 0, expressions, field.label);
   }
   return expressionString;

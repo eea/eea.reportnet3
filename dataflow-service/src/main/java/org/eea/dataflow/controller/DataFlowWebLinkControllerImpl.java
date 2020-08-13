@@ -54,17 +54,18 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    * Gets the link.
    *
    * @param idLink the id link
+   *
    * @return the link
    */
   @Override
   @HystrixCommand
   @GetMapping(value = "{idLink}")
-  @ApiOperation(value = "Get one Weblink", response = WeblinkVO.class)
+  @ApiOperation(value = "Find a Weblink", response = WeblinkVO.class)
   @ApiResponses(value = {@ApiResponse(code = 404, message = "Not Found"),
       @ApiResponse(code = 403, message = "Forbidden"),
       @ApiResponse(code = 500, message = "Internal Server Error")})
   public WeblinkVO getLink(
-      @ApiParam(value = "Link Id", example = "0") @PathVariable("idLink") Long idLink) {
+      @ApiParam(value = "Weblink Id", example = "0") @PathVariable("idLink") Long idLink) {
 
     try {
       return dataflowWebLinkService.getWebLink(idLink);
@@ -80,7 +81,6 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
     }
 
 
-
   }
 
   /**
@@ -93,8 +93,10 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @HystrixCommand
   @PostMapping
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE')")
-  @ApiOperation(value = "Save one Weblink", response = WeblinkVO.class)
-  @ApiResponses(value = {@ApiResponse(code = 404, message = "Not Found"),
+  @ApiOperation(value = "Create a Weblink", response = WeblinkVO.class)
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Successfully created Weblink"),
+      @ApiResponse(code = 404, message = "Dataflow Not Found"),
       @ApiResponse(code = 403, message = "Forbidden"),
       @ApiResponse(code = 500, message = "Internal Server Error")})
   public void saveLink(
@@ -125,7 +127,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{idLink}")
-  @ApiOperation(value = "Remove one Weblink", response = WeblinkVO.class)
+  @ApiOperation(value = "Remove a Weblink", response = WeblinkVO.class)
   @ApiResponses(value = {@ApiResponse(code = 404, message = "Not Found"),
       @ApiResponse(code = 403, message = "Forbidden"),
       @ApiResponse(code = 500, message = "Internal Server Error")})
@@ -154,7 +156,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Override
   @HystrixCommand
   @PutMapping
-  @ApiOperation(value = "Update one Weblink", response = WeblinkVO.class)
+  @ApiOperation(value = "Update a Weblink", response = WeblinkVO.class)
   @ApiResponses(value = {@ApiResponse(code = 404, message = "Not Found"),
       @ApiResponse(code = 403, message = "Forbidden"),
       @ApiResponse(code = 404, message = "Not Found"),

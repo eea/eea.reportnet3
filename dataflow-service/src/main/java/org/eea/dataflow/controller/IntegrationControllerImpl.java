@@ -42,28 +42,35 @@ import io.swagger.annotations.ApiResponse;
 @Api(tags = "Integrations : Integrations Manager")
 public class IntegrationControllerImpl implements IntegrationController {
 
-  /** The integration service. */
+  /**
+   * The integration service.
+   */
   @Autowired
   private IntegrationService integrationService;
 
-  /** The FME integration executor factory. */
+  /**
+   * The FME integration executor factory.
+   */
   @Autowired
   private IntegrationExecutorFactory integrationExecutorFactory;
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Find all integrations by criteria.
    *
    * @param integrationVO the integration VO
+   *
    * @return the list
    */
   @Override
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ')")
   @PutMapping(value = "/listIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Find All integrations by integration Criteria",
+  @ApiOperation(value = "Find all Integrations by integration criteria",
       produces = MediaType.APPLICATION_JSON_VALUE, response = IntegrationVO.class,
       responseContainer = "List")
   @ApiResponse(code = 500, message = "Internal Server Error")
@@ -81,6 +88,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    * Find expor EU dataset integration by dataset id.
    *
    * @param datasetSchemaId the dataset schema id
+   *
    * @return the integration VO
    */
   @Override
@@ -140,6 +148,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    * Update integration.
    *
    * @param integration the integration
+   *
    * @return the response entity
    */
   @Override
@@ -162,6 +171,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    * Find extensions and operations.
    *
    * @param integrationVO the integration VO
+   *
    * @return the list
    */
   @Override
@@ -191,6 +201,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    * @param file the file
    * @param datasetId the dataset id
    * @param integration the integration
+   *
    * @return the execution result VO
    */
   @Override
@@ -215,6 +226,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    * Execute EU dataset export.
    *
    * @param dataflowId the dataflow id
+   *
    * @return the list
    */
   @Override
@@ -282,13 +294,15 @@ public class IntegrationControllerImpl implements IntegrationController {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fileExtension the file extension
+   *
    * @return the integration VO
    */
   @Override
   @GetMapping("/private/findExportIntegration")
+  @ApiOperation(value = "Find Integration for data export processes based on their Schema and file extension")
   public IntegrationVO findExportIntegration(
-      @RequestParam("datasetSchemaId") String datasetSchemaId,
-      @RequestParam("fileExtension") String fileExtension) {
+      @ApiParam(value = "Dataschema Id", example = "0") @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @ApiParam(value = "File extension", example = "csv") @RequestParam("fileExtension") String fileExtension) {
     return integrationService.getExportIntegration(datasetSchemaId, fileExtension);
   }
 

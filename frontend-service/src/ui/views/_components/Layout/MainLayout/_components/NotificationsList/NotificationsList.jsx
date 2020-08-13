@@ -6,8 +6,6 @@ import isUndefined from 'lodash/isUndefined';
 
 import sanitizeHtml from 'sanitize-html';
 
-import styles from './NotificationsList.module.scss';
-
 import { Column } from 'primereact/column';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DataTable } from 'ui/views/_components/DataTable';
@@ -23,10 +21,10 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
 
   const [columns, setColumns] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [numberRows, setNumberRows] = useState(0);
-  const [firstRow, setFirstRow] = useState(0);
-  const [sortField, setSortField] = useState('');
-  const [sortOrder, setSortOrder] = useState(0);
+  // const [numberRows, setNumberRows] = useState(0);
+  // const [firstRow, setFirstRow] = useState(0);
+  // const [sortField, setSortField] = useState('');
+  // const [sortOrder, setSortOrder] = useState(0);
 
   useEffect(() => {
     const headers = [
@@ -111,10 +109,10 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     );
   };
 
-  const onChangePage = event => {
-    setNumberRows(event.rows);
-    setFirstRow(event.first);
-  };
+  // const onChangePage = event => {
+  //   setNumberRows(event.rows);
+  //   setFirstRow(event.first);
+  // };
 
   return (
     <Fragment>
