@@ -15,11 +15,14 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
   const resources = useContext(ResourcesContext);
 
   const [integrationsList, setIntegrationsList] = useState([]);
+  const [needsRefresh, setNeedsRefresh] = useState(true);
   const [updatedData, setUpdatedData] = useState({});
 
   const getIntegrationsList = data => setIntegrationsList(data);
 
   const getUpdatedData = data => setUpdatedData(IntegrationsUtils.parseIntegration(data));
+
+  const refreshList = value => setNeedsRefresh(value);
 
   const renderIntegrationFooter = (
     <Fragment>
@@ -58,7 +61,9 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
             getUpdatedData={getUpdatedData}
             integrationsList={getIntegrationsList}
             manageDialogs={manageDialogs}
+            needsRefresh={needsRefresh}
             onUpdateDesignData={onUpdateData}
+            refreshList={refreshList}
           />
         </Dialog>
       )}
@@ -70,6 +75,7 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
           integrationsList={integrationsList}
           manageDialogs={manageDialogs}
           onUpdateData={onUpdateData}
+          refreshList={refreshList}
           state={designerState}
           updatedData={updatedData}
         />

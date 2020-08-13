@@ -24,7 +24,9 @@ export const IntegrationsList = ({
   getUpdatedData,
   integrationsList,
   manageDialogs,
-  onUpdateDesignData
+  needsRefresh,
+  onUpdateDesignData,
+  refreshList,
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -39,10 +41,10 @@ export const IntegrationsList = ({
   });
 
   useEffect(() => {
-    if (!designerState.isIntegrationManageDialogVisible) {
+    if (!designerState.isIntegrationManageDialogVisible && needsRefresh) {
       onLoadIntegrations();
     }
-  }, [integrationListState.isDataUpdated, designerState.isIntegrationManageDialogVisible]);
+  }, [integrationListState.isDataUpdated, designerState.isIntegrationManageDialogVisible, needsRefresh]);
 
   const actionsTemplate = row => (
     <ActionsColumn
@@ -88,6 +90,7 @@ export const IntegrationsList = ({
       const response = await IntegrationService.all(dataflowId, designerState.datasetSchemaId);
       integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response } });
       integrationsList(response);
+      refreshList(false);
     } catch (error) {
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
     } finally {
