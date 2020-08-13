@@ -106,8 +106,8 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
     }
   };
 
-  const getFieldFormat = fieldType => {
-    switch (fieldType.toUpperCase()) {
+  const getFieldFormat = field => {
+    switch (field.type.toUpperCase()) {
       case 'DATE':
         return resources.messages['dateFieldFormatRestriction'];
       case 'TEXT':
@@ -124,6 +124,13 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
         return resources.messages['phoneNumberFieldFormatRestriction'];
       case 'URL':
         return resources.messages['urlFieldFormatRestriction'];
+      case 'ATTACHMENT':
+        return `${resources.messages['validExtensions']} ${field.validExtensions.join(', ')}
+        - ${resources.messages['maxFileSize']} ${
+          field.maxSize.toString() !== '0'
+            ? `${field.maxSize} ${resources.messages['MB']}`
+            : resources.messages['maxSizeNotDefined']
+        }`;
       default:
         return '';
     }
@@ -165,7 +172,7 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
                 field.codelistItems = [];
               }
             }
-            field.format = getFieldFormat(fieldDTO.type);
+            field.format = getFieldFormat(fieldDTO);
             return field;
           });
           table.fields = fields;
@@ -181,15 +188,5 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
 
   return renderDatasetSchema();
 };
-
-// const getMultiselectValues = (validations, field) => {
-//   if (!isUndefined(validations)) {
-//     console.log(
-//       [...new Set(validations.map(validation => validation[field]))].map(fieldValue => {
-//         return { label: fieldValue, value: fieldValue };
-//       })
-//     );
-//   }
-// };
 
 export { DatasetSchema };

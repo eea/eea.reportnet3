@@ -72,6 +72,7 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController.Represent
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
@@ -87,9 +88,9 @@ import org.eea.interfaces.vo.dataset.ValidationVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
-import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -1318,34 +1319,6 @@ public class DatasetServiceTest {
   }
 
   /**
-   * Gets the file name test.
-   *
-   * @return the file name test
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void getFileNameTest() throws EEAException {
-    ReportingDataset dataset = new ReportingDataset();
-    when(reportingDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
-    when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(new DataSetSchemaVO());
-    when(fileCommon.getTableName(Mockito.any(), Mockito.any())).thenReturn("test");
-    assertEquals("not equals", "test.csv", datasetService.getFileName("csv", "test", 1L));
-  }
-
-  /**
-   * Test get file name exception.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void testGetFileNameException() throws EEAException {
-    thrown.expectMessage(EEAErrorMessage.DATASET_NOTFOUND);
-    datasetService.getFileName("csv", "test", null);
-  }
-
-  /**
    * Update field test.
    *
    * @throws EEAException the EEA exception
@@ -2209,11 +2182,9 @@ public class DatasetServiceTest {
 
   @Test
   public void testDeleteAttachment() throws EEAException {
-    when(attachmentRepository.findByFieldValueId(Mockito.anyString()))
-        .thenReturn(new AttachmentValue());
     when(fieldRepository.findById(Mockito.anyString())).thenReturn(new FieldValue());
     datasetService.deleteAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F");
-    Mockito.verify(attachmentRepository, times(1)).save(Mockito.any());
+    Mockito.verify(attachmentRepository, times(1)).deleteByFieldValueId(Mockito.any());
   }
 
   @Test
@@ -2228,4 +2199,46 @@ public class DatasetServiceTest {
     Mockito.verify(fieldRepository, times(1)).save(Mockito.any());
   }
 
+  @Test
+  public void getFieldByIdTest() throws EEAException {
+    FieldVO fieldVO = new FieldVO();
+    fieldVO.setIdFieldSchema("600B66C6483EA7C8B55891DA171A3E7F");
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setIdFieldSchema("600B66C6483EA7C8B55891DA171A3E7F");
+    when(fieldRepository.findById(Mockito.anyString())).thenReturn(fieldValue);
+    when(fieldNoValidationMapper.entityToClass(Mockito.any())).thenReturn(fieldVO);
+    assertEquals(fieldVO, datasetService.getFieldById(1L, "idField"));
+  }
+
+  @Test(expected = EEAException.class)
+  public void getFieldByIdExceptionTest() throws EEAException {
+    try {
+      datasetService.getFieldById(1L, "idField");
+    } catch (EEAException e) {
+      assertEquals(
+          String.format(EEAErrorMessage.FIELD_NOT_FOUND, new ObjectId("5cf0e9b3b793310e9ceca190")),
+          e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test
+  public void testDeleteAttachmentByIdFieldSchema() throws EEAException {
+    datasetService.deleteAttachmentByFieldSchemaId(1L, "5cf0e9b3b793310e9ceca190");
+    Mockito.verify(fieldRepository, times(1)).clearFieldValue(Mockito.any());
+  }
+
+  @Test
+  public void exportFileThroughIntegrationTest() throws EEAException {
+    Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.anyLong()))
+        .thenReturn("5cf0e9b3b793310e9ceca190");
+    Mockito
+        .when(integrationController.findExportIntegration(Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(new IntegrationVO());
+    Mockito.when(integrationController.executeIntegrationProcess(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(new ExecutionResultVO());
+    datasetService.exportFileThroughIntegration(1L, "csv");
+    Mockito.verify(integrationController, times(1)).executeIntegrationProcess(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+  }
 }

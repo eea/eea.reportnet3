@@ -159,22 +159,24 @@ const LinkSelector = withRouter(
     };
 
     return (
-      <Dialog
-        blockScroll={false}
-        contentStyle={{ overflow: 'auto' }}
-        closeOnEscape={false}
-        footer={linkSelectorDialogFooter}
-        header={resources.messages['linkSelector']}
-        modal={true}
-        onHide={() => {
-          onCancelSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
-          setIsVisible(false);
-        }}
-        style={{ minWidth: '55%' }}
-        visible={isVisible}
-        zIndex={3003}>
-        {isLoading ? <Spinner className={styles.positioning} /> : renderLinkSelector()}
-      </Dialog>
+      isVisible && (
+        <Dialog
+          blockScroll={false}
+          contentStyle={{ overflow: 'auto' }}
+          closeOnEscape={false}
+          footer={linkSelectorDialogFooter}
+          header={resources.messages['linkSelector']}
+          modal={true}
+          onHide={() => {
+            onCancelSaveLink(link, pkMustBeUsed, pkHasMultipleValues);
+            setIsVisible(false);
+          }}
+          style={{ minWidth: '55%' }}
+          visible={isVisible}
+          zIndex={3003}>
+          {isLoading ? <Spinner className={styles.positioning} /> : renderLinkSelector()}
+        </Dialog>
+      )
     );
   }
 );

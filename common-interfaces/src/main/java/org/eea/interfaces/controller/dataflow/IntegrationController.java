@@ -50,6 +50,7 @@ public interface IntegrationController {
    * Delete integration.
    *
    * @param integrationId the integration id
+   * @param dataflowId the dataflow id
    */
   @DeleteMapping(value = "/{integrationId}/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
@@ -77,9 +78,10 @@ public interface IntegrationController {
   /**
    * Execute integration process.
    *
+   * @param integrationToolTypeEnum the integration tool type enum
    * @param integrationOperationTypeEnum the integration operation type enum
    * @param file the file
-   * @param datasetId
+   * @param datasetId the dataset id
    * @param integration the integration
    * @return the execution result VO
    */
@@ -108,23 +110,41 @@ public interface IntegrationController {
   void copyIntegrations(@RequestBody CopySchemaVO copyVO);
 
   /**
-   * Creates the integration.
+   * Creates the default integration.
    *
    * @param dataflowId the dataflow id
-   * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    */
   @PostMapping("/private/createDefaultIntegration")
   void createDefaultIntegration(@RequestParam("dataflowId") Long dataflowId,
-      @RequestParam("datasetId") Long datasetId,
       @RequestParam("datasetSchemaId") String datasetSchemaId);
 
   /**
-   * Find expor EU dataset integration by dataset id.
+   * Find export EU dataset integration.
    *
-   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
    * @return the integration VO
    */
   @GetMapping("/findExportEUDatasetIntegration")
-  IntegrationVO findExporEUDatasetIntegrationByDatasetId(@RequestParam("datasetId") Long datasetId);
+  IntegrationVO findExportEUDatasetIntegration(
+      @RequestParam("datasetSchemaId") String datasetSchemaId);
+
+  /**
+   * Find export integration.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fileExtension the file extension
+   * @return the integration VO
+   */
+  @GetMapping("/private/findExportIntegration")
+  IntegrationVO findExportIntegration(@RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("fileExtension") String fileExtension);
+
+  /**
+   * Delete schema integrations.
+   *
+   * @param datasetSchemaId the dataset schema id
+   */
+  @DeleteMapping("/private/deleteSchemaIntegrations")
+  void deleteSchemaIntegrations(@RequestParam("datasetSchemaId") String datasetSchemaId);
 }

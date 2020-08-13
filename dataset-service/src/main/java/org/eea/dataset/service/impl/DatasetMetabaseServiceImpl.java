@@ -33,7 +33,7 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -63,76 +63,53 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-
 /**
  * The Class DatasetMetabaseServiceImpl.
  */
 @Service("datasetMetabaseService")
 public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
-  /**
-   * The data set metabase repository.
-   */
+  /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  /**
-   * The data set metabase mapper.
-   */
+  /** The data set metabase mapper. */
   @Autowired
   private DataSetMetabaseMapper dataSetMetabaseMapper;
 
-  /**
-   * The reporting dataset repository.
-   */
+  /** The reporting dataset repository. */
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
 
-  /**
-   * The design dataset repository.
-   */
+  /** The design dataset repository. */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
 
-  /**
-   * The record store controller zull.
-   */
+  /** The record store controller zuul. */
   @Autowired
-  private RecordStoreControllerZull recordStoreControllerZull;
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
-  /**
-   * The statistics repository.
-   */
+  /** The statistics repository. */
   @Autowired
   private StatisticsRepository statisticsRepository;
 
-  /**
-   * The data collection repository.
-   */
+  /** The data collection repository. */
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
 
-  /**
-   * The user management controller zuul.
-   */
+  /** The user management controller zuul. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZuul;
 
-  /**
-   * The resource management controller zuul.
-   */
+  /** The resource management controller zuul. */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZuul;
 
-  /**
-   * The representative controller zuul.
-   */
+  /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /**
-   * The kafka sender utils.
-   */
+  /** The kafka sender utils. */
   @Autowired
   @Lazy
   private KafkaSenderUtils kafkaSenderUtils;
@@ -540,7 +517,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
             dataset = new DesignDataset();
             fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
             designDatasetRepository.save((DesignDataset) dataset);
-            recordStoreControllerZull.createEmptyDataset(
+            recordStoreControllerZuul.createEmptyDataset(
                 LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
             this.createSchemaGroup(dataset.getId());
             idDesignDataset = dataset.getId();
@@ -550,7 +527,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
             fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
             ((DataCollection) dataset).setDueDate(dueDate);
             dataCollectionRepository.save((DataCollection) dataset);
-            recordStoreControllerZull.createEmptyDataset(
+            recordStoreControllerZuul.createEmptyDataset(
                 LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
             LOG.info("New Data Collection created into the dataflow {}. DatasetId {} with name {}",
                 dataflowId, dataset.getId(), datasetName);
@@ -621,7 +598,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     dataset.setDataProviderId(representative.getDataProviderId());
     Long idDataset = reportingDatasetRepository.save(dataset).getId();
     datasetIdsEmail.put(idDataset, representative.getProviderAccount());
-    recordStoreControllerZull.createEmptyDataset(LiteralConstants.DATASET_PREFIX + idDataset,
+    recordStoreControllerZuul.createEmptyDataset(LiteralConstants.DATASET_PREFIX + idDataset,
         datasetSchemaId);
     LOG.info("New Reporting Dataset into the dataflow {}. DatasetId {} with name {}", dataflowId,
         idDataset, provider.getLabel());

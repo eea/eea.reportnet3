@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
+import uuid from 'uuid';
 
 import styles from './BigButton.module.scss';
 
@@ -33,11 +34,10 @@ export const BigButton = ({
   infoStatusIcon,
   layout,
   model,
-  onDuplicateName,
-  onSaveError,
   onSaveName,
   onWheel,
   placeholder,
+  setErrorDialogData,
   tooltip
 }) => {
   const resources = useContext(ResourcesContext);
@@ -47,6 +47,7 @@ export const BigButton = ({
   const [isEditEnabled, setIsEditEnabled] = useState(false);
 
   const menuBigButtonRef = useRef();
+  const tooltipId = uuid.v4();
 
   useEffect(() => {
     setButtonsTitle(caption);
@@ -67,10 +68,8 @@ export const BigButton = ({
       if (buttonsTitle !== '') {
         onInputSave(event.target.value, index);
       } else {
-        if (!isUndefined(onSaveError)) {
-          onSaveError();
-          document.getElementsByClassName('p-inputtext p-component')[0].focus();
-        }
+        setErrorDialogData({ isVisible: true, message: resources.messages['emptyDatasetSchema'] });
+        document.getElementsByClassName('p-inputtext p-component')[0].focus();
       }
     }
     if (event.key === 'Escape') {
@@ -112,8 +111,14 @@ export const BigButton = ({
   const onUpdateName = (title, index) => {
     if (!isEmpty(buttonsTitle)) {
       if (initialValue !== title) {
-        if (checkDuplicates(title, index)) {
-          onDuplicateName();
+        if (checkDuplicates(title, index) || title.length > 250) {
+          setErrorDialogData({
+            isVisible: true,
+            message:
+              title.length > 250
+                ? resources.messages['tooLongSchemaNameError']
+                : resources.messages['duplicateSchemaError']
+          });
           document.getElementsByClassName('p-inputtext p-component')[0].focus();
           return { correct: false, originalSchemaName: initialValue, wrongName: title };
         } else {
@@ -123,10 +128,8 @@ export const BigButton = ({
         setIsEditEnabled(false);
       }
     } else {
-      if (!isUndefined(onSaveError)) {
-        onSaveError();
-        document.getElementsByClassName('p-inputtext p-component')[0].focus();
-      }
+      setErrorDialogData({ isVisible: true, message: resources.messages['emptyDatasetSchema'] });
+      document.getElementsByClassName('p-inputtext p-component')[0].focus();
     }
   };
 
@@ -188,13 +191,20 @@ export const BigButton = ({
           value={!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         />
       ) : (
-        <p
-          className={styles.caption}
-          onDoubleClick={
-            dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] && canEditName ? onEnableSchemaNameEdit : null
-          }>
-          {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
-        </p>
+        <>
+          <p
+            data-tip
+            data-for={tooltipId}
+            className={styles.caption}
+            onDoubleClick={
+              dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] && canEditName ? onEnableSchemaNameEdit : null
+            }>
+            {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
+          </p>
+          <ReactTooltip effect="solid" id={tooltipId} place="top" className={styles.tooltip}>
+            {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
+          </ReactTooltip>
+        </>
       )}
     </>
   );

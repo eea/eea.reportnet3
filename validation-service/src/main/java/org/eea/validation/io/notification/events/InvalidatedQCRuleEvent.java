@@ -3,7 +3,7 @@ package org.eea.validation.io.notification.events;
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
@@ -18,7 +18,7 @@ public class InvalidatedQCRuleEvent implements NotificableEventHandler {
 
   /** The dataset schema controller. */
   @Autowired
-  private DataSetSchemaControllerZuul datasetSchemaController;
+  private DatasetSchemaControllerZuul datasetSchemaController;
 
   /**
    * Gets the event type.

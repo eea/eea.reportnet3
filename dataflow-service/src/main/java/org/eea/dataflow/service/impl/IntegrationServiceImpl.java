@@ -9,9 +9,11 @@ import javax.transaction.Transactional;
 import org.eea.dataflow.integration.crud.factory.CrudManager;
 import org.eea.dataflow.integration.crud.factory.CrudManagerFactory;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
+import org.eea.dataflow.integration.executor.service.IntegrationExecutorService;
 import org.eea.dataflow.integration.utils.IntegrationParams;
 import org.eea.dataflow.mapper.IntegrationMapper;
 import org.eea.dataflow.persistence.domain.Integration;
+import org.eea.dataflow.persistence.domain.InternalOperationParameters;
 import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAErrorMessage;
@@ -41,6 +43,9 @@ public class IntegrationServiceImpl implements IntegrationService {
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationServiceImpl.class);
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The crud manager factory. */
   @Autowired
@@ -94,6 +99,12 @@ public class IntegrationServiceImpl implements IntegrationService {
   @Transactional
   @Override
   public void deleteIntegration(Long integrationId) throws EEAException {
+
+    IntegrationOperationTypeEnum operation = integrationRepository.findOperationById(integrationId);
+    if (IntegrationOperationTypeEnum.EXPORT_EU_DATASET.equals(operation)) {
+      throw new EEAException(EEAErrorMessage.FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_DELETION);
+    }
+
     CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
     crudManager.delete(integrationId);
   }
@@ -192,49 +203,69 @@ public class IntegrationServiceImpl implements IntegrationService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Transactional
   public List<ExecutionResultVO> executeEUDatasetExport(Long dataflowId) throws EEAException {
 
-    addLock(dataflowId);
-    IntegrationToolTypeEnum integrationToolTypeEnum = IntegrationToolTypeEnum.FME;
-    IntegrationOperationTypeEnum integrationOperationTypeEnum =
-        IntegrationOperationTypeEnum.EXPORT_EU_DATASET;
-    IntegrationVO integration = new IntegrationVO();
-    integration.setTool(integrationToolTypeEnum);
-    integration.setOperation(integrationOperationTypeEnum);
-
-    List<EUDatasetVO> euDatasets = euDatasetControllerZuul.findEUDatasetByDataflowId(dataflowId);
-
+    // Get IntegrationVOs and EUDatasetVOs
+    Map<Long, IntegrationVO> map = new HashMap<>();
     List<ExecutionResultVO> resultList = new ArrayList<>();
+    List<EUDatasetVO> euDatasetVOs = euDatasetControllerZuul.findEUDatasetByDataflowId(dataflowId);
+    List<Integration> integrations = integrationRepository.findByOperationAndParameterAndValue(
+        IntegrationOperationTypeEnum.EXPORT_EU_DATASET, IntegrationParams.DATAFLOW_ID,
+        dataflowId.toString());
+    List<IntegrationVO> integrationVOs = integrationMapper.entityListToClass(integrations);
 
-    euDatasets.stream().forEach(
-        dataset -> resultList.add(integrationExecutorFactory.getExecutor(integrationToolTypeEnum)
-            .execute(integrationOperationTypeEnum, null, dataset.getId(), integration)));
+    // Match each IntegrationVO with its EUDatasetVO
+    for (IntegrationVO integrationVO : integrationVOs) {
+      String datasetSchemaId =
+          integrationVO.getInternalParameters().get(IntegrationParams.DATASET_SCHEMA_ID);
+      for (EUDatasetVO euDatasetVO : euDatasetVOs) {
+        if (datasetSchemaId.equals(euDatasetVO.getDatasetSchema())) {
+          map.put(euDatasetVO.getId(), integrationVO);
+          break;
+        }
+      }
+    }
 
-    releaseLock(dataflowId);
-    return resultList;
+    // Execute integrations
+    if (euDatasetVOs.size() == integrationVOs.size() && euDatasetVOs.size() == map.size()) {
+      IntegrationExecutorService executor =
+          integrationExecutorFactory.getExecutor(IntegrationToolTypeEnum.FME);
+      for (Map.Entry<Long, IntegrationVO> entry : map.entrySet()) {
+        resultList.add(executor.execute(IntegrationOperationTypeEnum.EXPORT_EU_DATASET, null,
+            entry.getKey(), entry.getValue()));
+      }
+      return resultList;
+    } else {
+      LOG_ERROR.error(
+          "Mismatching number of IntegrationVOs and EUDatasetVOs: integrationVOs={}, euDatasetVOs={}, map={}",
+          integrationVOs, euDatasetVOs, map);
+      throw new EEAException("Mismatching number of IntegrationVOs and EUDatasetVOs");
+    }
   }
 
   /**
    * Creates the default integration.
    *
    * @param dataflowId the dataflow id
-   * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    */
   @Transactional
   @Override
-  public void createDefaultIntegration(Long dataflowId, Long datasetId, String datasetSchemaId) {
+  public void createDefaultIntegration(Long dataflowId, String datasetSchemaId) {
     Map<String, String> internalParameters = new HashMap<>();
     internalParameters.put(IntegrationParams.DATAFLOW_ID, dataflowId.toString());
-    internalParameters.put(IntegrationParams.DATASET_ID, datasetId.toString());
     internalParameters.put(IntegrationParams.DATASET_SCHEMA_ID, datasetSchemaId);
     internalParameters.put(IntegrationParams.REPOSITORY, "ReportNetTesting");
     internalParameters.put(IntegrationParams.PROCESS_NAME, "Export_EU_dataset.fmw");
-    internalParameters.put(IntegrationParams.DATABASE_CONNECTION_PUBLIC, "");
+
+    Map<String, String> externalParameters = new HashMap<>();
+    externalParameters.put(IntegrationParams.DATABASE_CONNECTION_PUBLIC, "");
 
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.setDescription("Export EU Dataset");
     integrationVO.setInternalParameters(internalParameters);
+    integrationVO.setExternalParameters(externalParameters);
     integrationVO.setName("Export EU Dataset");
     integrationVO.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
     integrationVO.setTool(IntegrationToolTypeEnum.FME);
@@ -244,17 +275,12 @@ public class IntegrationServiceImpl implements IntegrationService {
   }
 
   /**
-   * Release lock.
+   * Release populate EU dataset lock.
    *
    * @param dataflowId the dataflow id
    */
-  private void releaseLock(Long dataflowId) {
-    // Remove lock to the operation export from EU dataset
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.EXPORT_EU_DATASET.getValue());
-    criteria.add(dataflowId);
-    lockService.removeLockByCriteria(criteria);
-
+  @Override
+  public void releasePopulateEUDatasetLock(Long dataflowId) {
     // Remove lock to the operation copy data to EU dataset
     List<Object> criteriaCopy = new ArrayList<>();
     criteriaCopy.add(LockSignature.POPULATE_EU_DATASET.getValue());
@@ -268,7 +294,8 @@ public class IntegrationServiceImpl implements IntegrationService {
    * @param dataflowId the dataflow id
    * @throws EEAException the EEA exception
    */
-  private void addLock(Long dataflowId) throws EEAException {
+  @Override
+  public void addPopulateEUDatasetLock(Long dataflowId) throws EEAException {
     // Lock to avoid export EUDataset while is copying data
     Map<String, Object> mapCriteriaExport = new HashMap<>();
     mapCriteriaExport.put("signature", LockSignature.POPULATE_EU_DATASET.getValue());
@@ -279,16 +306,62 @@ public class IntegrationServiceImpl implements IntegrationService {
   }
 
   /**
-   * Gets the expor EU dataset integration by dataset id.
+   * Gets the export EU dataset integration.
    *
-   * @param datasetId the dataset id
-   * @return the expor EU dataset integration by dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @return the export EU dataset integration
    */
   @Override
-  public IntegrationVO getExporEUDatasetIntegrationByDatasetId(Long datasetId) {
+  public IntegrationVO getExportEUDatasetIntegration(String datasetSchemaId) {
     Integration integration = integrationRepository.findFirstByOperationAndParameterAndValue(
-        IntegrationOperationTypeEnum.EXPORT_EU_DATASET, IntegrationParams.DATASET_ID,
-        datasetId.toString());
-    return integrationMapper.entityToClass(integration);
+        IntegrationOperationTypeEnum.EXPORT_EU_DATASET, IntegrationParams.DATASET_SCHEMA_ID,
+        datasetSchemaId);
+    IntegrationVO integrationVO = integrationMapper.entityToClass(integration);
+    LOG.debug("Found EXPORT_EU_DATASET integration: {}", integrationVO);
+    return integrationVO;
+  }
+
+  /**
+   * Gets the export integration.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fileExtension the file extension
+   * @return the export integration
+   */
+  @Override
+  public IntegrationVO getExportIntegration(String datasetSchemaId, String fileExtension) {
+    List<Integration> integrations = integrationRepository.findByOperationAndParameterAndValue(
+        IntegrationOperationTypeEnum.EXPORT, IntegrationParams.DATASET_SCHEMA_ID, datasetSchemaId);
+
+    IntegrationVO integrationVO = null;
+    if (null != integrations) {
+      mainloop: for (Integration integration : integrations) {
+        for (InternalOperationParameters parameter : integration.getInternalParameters()) {
+          if (IntegrationParams.FILE_EXTENSION.equals(parameter.getParameter())
+              && parameter.getValue().equals(fileExtension)) {
+            integrationVO = integrationMapper.entityToClass(integration);
+            break mainloop;
+          }
+        }
+      }
+    }
+
+    if (null == integrationVO) {
+      LOG_ERROR.error("No EXPORT integration: datasetSchemaId={}, fileExtension={}",
+          datasetSchemaId, fileExtension);
+    }
+    return integrationVO;
+  }
+
+  /**
+   * Delete schema integrations.
+   *
+   * @param datasetSchemaId the dataset schema id
+   */
+  @Override
+  @Transactional
+  public void deleteSchemaIntegrations(String datasetSchemaId) {
+    integrationRepository.deleteByParameterAndValue(IntegrationParams.DATASET_SCHEMA_ID,
+        datasetSchemaId);
   }
 }

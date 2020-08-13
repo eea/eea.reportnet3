@@ -16,7 +16,7 @@ import org.eea.interfaces.controller.dataflow.ContributorController.ContributorC
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -56,14 +56,14 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.netty.util.internal.StringUtil;
 
 /**
- * The Class DataSetSchemaControllerImpl.
+ * The Class DatasetSchemaControllerImpl.
  */
 @RestController
 @RequestMapping("/dataschema")
-public class DataSetSchemaControllerImpl implements DatasetSchemaController {
+public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
   /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(DataSetSchemaControllerImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DatasetSchemaControllerImpl.class);
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -85,9 +85,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
-  /** The record store controller zull. */
+  /** The record store controller zuul. */
   @Autowired
-  private RecordStoreControllerZull recordStoreControllerZull;
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
   /** The dataflow controller zuul. */
   @Autowired
@@ -126,12 +126,11 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       String datasetSchemaId = dataschemaService.createEmptyDataSetSchema(dataflowId).toString();
       Future<Long> futureDatasetId = datasetMetabaseService.createEmptyDataset(
           DatasetTypeEnum.DESIGN, datasetSchemaName, datasetSchemaId, dataflowId, null, null, 0);
-      Long datasetId = futureDatasetId.get();
 
       // we find if the dataflow has any permission to give the permission to this new datasetschema
-      contributorControllerZuul.createAssociatedPermissions(dataflowId, datasetId);
+      contributorControllerZuul.createAssociatedPermissions(dataflowId, futureDatasetId.get());
 
-      integrationControllerZuul.createDefaultIntegration(dataflowId, datasetId, datasetSchemaId);
+      integrationControllerZuul.createDefaultIntegration(dataflowId, datasetSchemaId);
     } catch (InterruptedException | ExecutionException | EEAException e) {
       LOG.error("Aborted DataSetSchema creation: {}", e.getMessage());
       if (e instanceof InterruptedException) {
@@ -227,14 +226,14 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    String schemaId = getDatasetSchemaId(datasetId);
-    if (schemaId.isEmpty()) {
+    String datasetSchemaId = getDatasetSchemaId(datasetId);
+    if (datasetSchemaId.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
     }
     // Check if the dataflow has any PK being referenced by an FK. If so, denies the delete
     // If forceDelete = true, skip this check. Made specially for deleting an entire dataflow
     if ((forceDelete == null || !forceDelete)
-        && !dataschemaService.isSchemaAllowedForDeletion(schemaId)) {
+        && !dataschemaService.isSchemaAllowedForDeletion(datasetSchemaId)) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, EEAErrorMessage.PK_REFERENCED);
     }
 
@@ -248,22 +247,23 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         datasetSnapshotService.deleteAllSchemaSnapshots(datasetId);
 
         // delete from the CataloguePK the entries if the schema has FK
-        dataschemaService.updatePkCatalogueDeletingSchema(schemaId);
+        dataschemaService.updatePkCatalogueDeletingSchema(datasetSchemaId);
 
         // delete the schema in Mongo
-        dataschemaService.deleteDatasetSchema(schemaId, datasetId);
+        dataschemaService.deleteDatasetSchema(datasetSchemaId, datasetId);
 
         // delete from the UniqueConstraint catalog
-        dataschemaService.deleteUniquesConstraintFromDataset(schemaId);
+        dataschemaService.deleteUniquesConstraintFromDataset(datasetSchemaId);
+
+        // delete integrations related to this datasetSchema
+        integrationControllerZuul.deleteSchemaIntegrations(datasetSchemaId);
 
         // delete the schema to dataset
-        rulesControllerZuul.deleteRulesSchema(schemaId);
+        rulesControllerZuul.deleteRulesSchema(datasetSchemaId);
         // delete the metabase
         datasetMetabaseService.deleteDesignDataset(datasetId);
         // delete the schema in database
-        recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
-
-        // delete the group in keycloak
+        recordStoreControllerZuul.deleteDataset("dataset_" + datasetId);
 
         dataschemaService.deleteGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA);
         LOG.info("The Design Dataset {} has been deleted", datasetId);
@@ -452,6 +452,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
         // Modify the register into the metabase fieldRelations
         dataschemaService.updateForeignRelation(datasetId, fieldSchemaVO, datasetSchema);
+
+        // Clear the attachments if necessary
+        if (Boolean.TRUE.equals(
+            dataschemaService.checkClearAttachments(datasetId, datasetSchema, fieldSchemaVO))) {
+          datasetService.deleteAttachmentByFieldSchemaId(datasetId, fieldSchemaVO.getId());
+        }
 
         DataType type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
 
@@ -814,5 +820,4 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
   }
-
 }

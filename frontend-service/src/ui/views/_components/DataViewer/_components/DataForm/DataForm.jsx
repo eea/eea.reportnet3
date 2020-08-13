@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
@@ -6,6 +6,8 @@ import styles from './DataForm.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 import { DataFormFieldEditor } from './_components/DataFormFieldEditor';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const DataForm = ({
   addDialogVisible,
@@ -20,6 +22,13 @@ const DataForm = ({
   reporting,
   onShowFieldInfo
 }) => {
+  const resources = useContext(ResourcesContext);
+
+  const allAttachments = () => {
+    const notAttachment = colsSchema.filter(col => col.type && col.type.toUpperCase() !== 'ATTACHMENT');
+    return notAttachment.length === 0;
+  };
+
   const editRecordForm = colsSchema.map((column, i) => {
     //Avoid row id Field and dataSetPartitionId
     if (editDialogVisible) {
@@ -87,22 +96,26 @@ const DataForm = ({
           const field = records.newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
           return (
             <React.Fragment key={column.field}>
-              {column.type.toUpperCase() !== 'ATTACHMENT' && (
-                <div className="p-col-4" style={{ padding: '.75em' }}>
-                  <label htmlFor={column.field}>{`${column.header}${
-                    column.type.toUpperCase() === 'DATE' ? ' (YYYY-MM-DD)' : ''
-                  }`}</label>
-                  <Button
-                    className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
-                    icon="infoCircle"
-                    onClick={() => {
-                      onShowFieldInfo(column.header, true);
-                    }}
-                    tabIndex="-1"
-                    tooltip={getTooltipMessage(column)}
-                    tooltipOptions={{ position: 'top' }}
-                  />
-                </div>
+              {!allAttachments() ? (
+                column.type.toUpperCase() !== 'ATTACHMENT' && (
+                  <div className="p-col-4" style={{ padding: '.75em' }}>
+                    <label htmlFor={column.field}>{`${column.header}${
+                      column.type.toUpperCase() === 'DATE' ? ' (YYYY-MM-DD)' : ''
+                    }`}</label>
+                    <Button
+                      className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
+                      icon="infoCircle"
+                      onClick={() => {
+                        onShowFieldInfo(column.header, true);
+                      }}
+                      tabIndex="-1"
+                      tooltip={getTooltipMessage(column)}
+                      tooltipOptions={{ position: 'top' }}
+                    />
+                  </div>
+                )
+              ) : (
+                <span className={styles.allAttachmentMessage}>{resources.messages['allAttachment']}</span>
               )}
               <div
                 className="p-col-8"

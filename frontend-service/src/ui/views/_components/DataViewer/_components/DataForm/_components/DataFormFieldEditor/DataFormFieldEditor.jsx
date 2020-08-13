@@ -197,7 +197,7 @@ const DataFormFieldEditor = ({
     );
   };
 
-  const getAttachExtensions = [{ fileExtension: '.csv, .txt, .pdf' }].map(file => `.${file.fileExtension}`).join(', ');
+  // const getAttachExtensions = [{ fileExtension: '.csv, .txt, .pdf' }].map(file => `.${file.fileExtension}`).join(', ');
 
   const getMaxCharactersByType = type => {
     const longCharacters = 20;

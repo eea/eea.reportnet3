@@ -44,7 +44,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -108,9 +108,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private SchemasRepository schemaRepository;
 
-  /** The record store controller zull. */
+  /** The record store controller zuul. */
   @Autowired
-  private RecordStoreControllerZull recordStoreControllerZull;
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
   /** The document controller zuul. */
   @Autowired
@@ -278,7 +278,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       if (partitionIdDestination != null) {
         idPartition = partitionIdDestination;
       }
-      recordStoreControllerZull.createSnapshotData(idDataset, snap.getId(), idPartition);
+      recordStoreControllerZuul.createSnapshotData(idDataset, snap.getId(), idPartition);
 
     } catch (Exception e) {
       LOG_ERROR.error("Error creating snapshot for dataset {}", idDataset, e);
@@ -329,7 +329,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // Remove from the metabase
     snapshotRepository.deleteById(idSnapshot);
     // Delete the file
-    recordStoreControllerZull.deleteSnapshotData(idDataset, idSnapshot);
+    recordStoreControllerZuul.deleteSnapshotData(idDataset, idSnapshot);
 
     LOG.info("Snapshot {} removed", idSnapshot);
   }
@@ -350,7 +350,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // 1. Delete the dataset values implied
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(idDataset, "root").getId();
-    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, idPartition,
+    recordStoreControllerZuul.restoreSnapshotData(idDataset, idSnapshot, idPartition,
         DatasetTypeEnum.REPORTING, (String) ThreadPropertiesManager.getVariable("user"), false,
         deleteData);
   }
@@ -375,7 +375,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // 1. Delete the dataset values implied
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(datasetOrigin, "root").getId();
-    recordStoreControllerZull.restoreSnapshotData(idDatasetDestination, idSnapshot, idPartition,
+    recordStoreControllerZuul.restoreSnapshotData(idDatasetDestination, idSnapshot, idPartition,
         datasetType, user, false, deleteData);
   }
 
@@ -589,7 +589,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // 3. Create the data file of the snapshot, calling to recordstore-service
       // we need the partitionId. By now only consider the user root
       Long idPartition = obtainPartition(idDataset, "root").getId();
-      recordStoreControllerZull.createSnapshotData(idDataset, idSnapshot, idPartition);
+      recordStoreControllerZuul.createSnapshotData(idDataset, idSnapshot, idPartition);
       LOG.info("Snapshot schema {} data files created", idSnapshot);
     } catch (Exception e) {
       LOG_ERROR.error("Error creating snapshot for dataset schema {}", idDataset, e);
@@ -701,7 +701,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     documentControllerZuul.deleteSnapshotSchemaDocument(idDataset, nameRulesFile);
 
     // Delete the file values
-    recordStoreControllerZull.deleteSnapshotData(idDataset, idSnapshot);
+    recordStoreControllerZuul.deleteSnapshotData(idDataset, idSnapshot);
 
     LOG.info("Schema Snapshot {} removed", idSnapshot);
   }

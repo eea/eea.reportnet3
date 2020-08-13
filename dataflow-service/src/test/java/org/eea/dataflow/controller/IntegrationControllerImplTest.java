@@ -2,11 +2,14 @@ package org.eea.dataflow.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.junit.Assert;
@@ -21,13 +24,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-
 /**
  * The Class IntegrationControllerImplTest.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class IntegrationControllerImplTest {
-
 
   /** The integration controller impl. */
   @InjectMocks
@@ -244,10 +245,10 @@ public class IntegrationControllerImplTest {
   @Test
   public void createDefaultIntegrationTest() throws EEAException {
     Mockito.doNothing().when(integrationService).createDefaultIntegration(Mockito.any(),
-        Mockito.any(), Mockito.any());
-    integrationControllerImpl.createDefaultIntegration(1L, 1L, "5ce524fad31fc52540abae73");
+        Mockito.any());
+    integrationControllerImpl.createDefaultIntegration(1L, "5ce524fad31fc52540abae73");
     Mockito.verify(integrationService, times(1)).createDefaultIntegration(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any());
   }
 
   /**
@@ -255,8 +256,65 @@ public class IntegrationControllerImplTest {
    */
   @Test
   public void findExporEUDatasetIntegrationByDatasetIdTest() {
-    Mockito.when(integrationService.getExporEUDatasetIntegrationByDatasetId(Mockito.anyLong()))
+    Mockito.when(integrationService.getExportEUDatasetIntegration(Mockito.anyString()))
         .thenReturn(null);
-    Assert.assertNull(integrationControllerImpl.findExporEUDatasetIntegrationByDatasetId(1L));
+    Assert.assertNull(
+        integrationControllerImpl.findExportEUDatasetIntegration("5ce524fad31fc52540abae73"));
+  }
+
+  /**
+   * Execute EU dataset export test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void executeEUDatasetExportTest() throws EEAException {
+    Mockito.doNothing().when(integrationService).addPopulateEUDatasetLock(Mockito.anyLong());
+    Mockito.when(integrationService.executeEUDatasetExport(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    Mockito.doNothing().when(integrationService).releasePopulateEUDatasetLock(Mockito.anyLong());
+    List<ExecutionResultVO> response = integrationControllerImpl.executeEUDatasetExport(1L);
+    Assert.assertEquals(0, response.size());
+  }
+
+  /**
+   * Execute EU dataset export exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void executeEUDatasetExportExceptionTest() throws EEAException {
+    Mockito.doNothing().when(integrationService).addPopulateEUDatasetLock(Mockito.anyLong());
+    Mockito.when(integrationService.executeEUDatasetExport(Mockito.anyLong()))
+        .thenThrow(EEAException.class);
+    Mockito.doNothing().when(integrationService).releasePopulateEUDatasetLock(Mockito.anyLong());
+    try {
+      integrationControllerImpl.executeEUDatasetExport(1L);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
+  /**
+   * Find export integration test.
+   */
+  @Test
+  public void findExportIntegrationTest() {
+    IntegrationVO integrationVO = new IntegrationVO();
+    Mockito.when(integrationService.getExportIntegration(Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(integrationVO);
+    Assert.assertEquals(integrationVO,
+        integrationControllerImpl.findExportIntegration("5ce524fad31fc52540abae73", "csv"));
+  }
+
+  /**
+   * Delete schema integrations test.
+   */
+  @Test
+  public void deleteSchemaIntegrationsTest() {
+    Mockito.doNothing().when(integrationService).deleteSchemaIntegrations(Mockito.anyString());
+    integrationControllerImpl.deleteSchemaIntegrations("5ce524fad31fc52540abae73");
+    Mockito.verify(integrationService, times(1)).deleteSchemaIntegrations(Mockito.anyString());
   }
 }

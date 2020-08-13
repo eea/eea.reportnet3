@@ -77,16 +77,46 @@ public interface IntegrationService {
    * Creates the default integration.
    *
    * @param dataflowId the dataflow id
-   * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    */
-  void createDefaultIntegration(Long dataflowId, Long datasetId, String datasetSchemaId);
+  void createDefaultIntegration(Long dataflowId, String datasetSchemaId);
 
   /**
-   * Gets the expor EU dataset integration by dataset id.
+   * Gets the export EU dataset integration.
    *
-   * @param datasetId the dataset id
-   * @return the expor EU dataset integration by dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @return the export EU dataset integration
    */
-  IntegrationVO getExporEUDatasetIntegrationByDatasetId(Long datasetId);
+  IntegrationVO getExportEUDatasetIntegration(String datasetSchemaId);
+
+  /**
+   * Adds the populate EU dataset lock.
+   *
+   * @param dataflowId the dataflow id
+   * @throws EEAException the EEA exception
+   */
+  void addPopulateEUDatasetLock(Long dataflowId) throws EEAException;
+
+  /**
+   * Release populate EU dataset lock.
+   *
+   * @param dataflowId the dataflow id
+   */
+  void releasePopulateEUDatasetLock(Long dataflowId);
+
+  /**
+   * Gets the export integration.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fileExtension the file extension
+   * @return the export integration
+   */
+  IntegrationVO getExportIntegration(String datasetSchemaId, String fileExtension);
+
+  /**
+   * Delete schema integrations.
+   *
+   * @param datasetSchemaId the dataset schema id
+   */
+  void deleteSchemaIntegrations(String datasetSchemaId);
 }

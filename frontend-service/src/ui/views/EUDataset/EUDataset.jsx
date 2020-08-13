@@ -3,7 +3,6 @@ import { withRouter } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
 
-import { config } from 'conf';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
@@ -164,11 +163,13 @@ export const EUDataset = withRouter(({ history, match }) => {
           description: field['description'],
           field: field['fieldId'],
           header: field['name'],
+          maxSize: field['maxSize'],
           pkHasMultipleValues: field['pkHasMultipleValues'],
           recordId: field['recordId'],
           referencedField: field['referencedField'],
           table: table['tableSchemaName'],
-          type: field['type']
+          type: field['type'],
+          validExtensions: field['validExtensions']
         }));
       });
 
@@ -184,10 +185,6 @@ export const EUDataset = withRouter(({ history, match }) => {
         }
       });
     } catch (error) {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
       notificationContext.add({ type: 'ERROR_LOADING_EU_DATASET_SCHEMA' });
 
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
