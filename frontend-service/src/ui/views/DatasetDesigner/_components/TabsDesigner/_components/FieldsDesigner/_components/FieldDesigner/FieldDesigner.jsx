@@ -1,9 +1,12 @@
 import React, { useContext, useEffect, useReducer, useRef } from 'react';
+
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './FieldDesigner.module.scss';
+
+import { config } from 'conf';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -14,32 +17,31 @@ import { Checkbox } from 'primereact/checkbox';
 import { CodelistEditor } from './_components/CodelistEditor';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
-import { LinkSelector } from './_components/LinkSelector';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
+import { LinkSelector } from './_components/LinkSelector';
+
+import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 import { fieldDesignerReducer } from './_functions/Reducers/fieldDesignerReducer';
 
-import { DatasetService } from 'core/services/Dataset';
-import { config } from 'conf';
-
 export const FieldDesigner = ({
   addField = false,
   checkDuplicates,
   codelistItems,
   datasetId,
-  fieldFileProperties,
-  fieldId,
   fieldDescription,
+  fieldFileProperties,
+  fieldHasMultipleValues,
+  fieldId,
+  fieldLink,
+  fieldMustBeUsed,
   fieldName,
   fieldPK,
   fieldPKReferenced,
-  fieldLink,
-  fieldHasMultipleValues,
-  fieldMustBeUsed,
   fieldReadOnly,
   fieldRequired,
   fieldType,
@@ -709,9 +711,7 @@ export const FieldDesigner = ({
         id={`${fieldId}_check_readOnly`}
         inputId={`${fieldId}_check_readOnly`}
         label="Default"
-        onChange={e => {
-          onReadOnlyChange(e.checked);
-        }}
+        onChange={e => onReadOnlyChange(e.checked)}
         style={{ width: '70px' }}
       />
       <label htmlFor={`${fieldId}_check_required`} className="srOnly">

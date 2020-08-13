@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
