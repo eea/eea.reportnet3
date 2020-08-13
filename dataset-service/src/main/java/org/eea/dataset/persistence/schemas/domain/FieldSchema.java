@@ -96,7 +96,7 @@ public class FieldSchema {
   @Override
   public int hashCode() {
     return Objects.hash(headerName, idFieldSchema, idRecord, type, codelistItems, required,
-        description, pk, pkMustBeUsed, validExtensions, maxSize);
+        description, pk, pkMustBeUsed, validExtensions, maxSize, readOnly);
   }
 
 
@@ -120,7 +120,7 @@ public class FieldSchema {
         && Objects.equals(idRecord, other.idRecord) && Objects.equals(required, other.required)
         && Objects.equals(pk, other.pk) && Objects.equals(description, other.description)
         && Objects.equals(pkMustBeUsed, other.pkMustBeUsed)
-        && Objects.equals(maxSize, other.maxSize);
+        && Objects.equals(maxSize, other.maxSize) && Objects.equals(readOnly, other.readOnly);
   }
 
 

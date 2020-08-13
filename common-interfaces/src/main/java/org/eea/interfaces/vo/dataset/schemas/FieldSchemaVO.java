@@ -91,6 +91,6 @@ public class FieldSchemaVO {
         && Objects.equals(description, other.description) && Objects.equals(name, other.name)
         && Objects.equals(type, other.type) && Objects.equals(required, other.required)
         && Objects.equals(pk, other.pk) && Objects.equals(pkMustBeUsed, other.pkMustBeUsed)
-        && Objects.equals(maxSize, other.maxSize,&& Objects.equals(readOnly, other.readOnly);
+        && Objects.equals(maxSize, other.maxSize) && Objects.equals(readOnly, other.readOnly);
   }
 }
