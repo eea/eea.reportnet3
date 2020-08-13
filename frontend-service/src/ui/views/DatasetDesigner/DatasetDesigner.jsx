@@ -227,11 +227,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const downloadExportFMEFile = async () => {
     try {
-      const fakeExportDatasetFileName = '1.txt'; // from notification. compare with datasetName
-      const providerId = ''; // from notification
+      const [notification] = notificationContext.all.filter(
+        notification => notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT'
+      );
 
       const datasetName = createFileName(designerState.datasetSchemaName, designerState.exportDatasetFileType);
-      const datasetData = await DatasetService.downloadExportFile(datasetId, fakeExportDatasetFileName);
+      const datasetData = await DatasetService.downloadExportFile(datasetId, notification.content.fileName);
 
       designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData, name: datasetName } });
     } catch (error) {
@@ -239,10 +240,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       notificationContext.add({
         type: 'DOWNLOAD_FME_FILE_ERROR'
       });
+    } finally {
+      isLoadingFile(false);
     }
   };
 
-  useCheckNotifications(['EXPORT_DATA_BY_ID_ERROR'], downloadExportFMEFile, true);
+  useCheckNotifications(['EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT'], downloadExportFMEFile);
 
   const filterActiveIndex = index => {
     if (!isNil(index) && isNaN(index)) {
@@ -269,7 +272,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         label: resources.messages['externalExtensions'],
         items: extensionsOperationsList.export.map(type => ({
           command: () => onExportDataExternalExtension(type.fileExtension),
-          // command: () => downloadExportFMEFile(),
           icon: config.icons['archive'],
           label: `${type.fileExtension.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
         }))
@@ -428,8 +430,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
     } catch (error) {
       onExportError();
-    } finally {
-      isLoadingFile(false);
     }
   };
 

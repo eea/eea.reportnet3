@@ -613,6 +613,9 @@
         },
         {
           "key": "COPY_DATASET_SCHEMA_COMPLETED_EVENT"
+        },
+        {
+          "key": "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT"
         }
       ]
     },

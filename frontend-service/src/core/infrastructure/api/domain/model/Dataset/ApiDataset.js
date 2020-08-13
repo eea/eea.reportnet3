@@ -164,12 +164,19 @@ export const apiDataset = {
   },
 
   downloadExportFile: async (datasetId, fileName, providerId = null) => {
+    const url = providerId
+      ? getUrl(DatasetConfig.downloadExportFile, {
+          datasetId,
+          fileName,
+          providerId
+        })
+      : getUrl(DatasetConfig.downloadExportFileNoProviderId, {
+          datasetId,
+          fileName
+        });
+
     const response = await HTTPRequester.download({
-      url: getUrl(DatasetConfig.downloadExportFile, {
-        datasetId,
-        fileName,
-        providerId
-      })
+      url
     });
 
     return response.data;
