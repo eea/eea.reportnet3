@@ -57,4 +57,8 @@
     font-weight: 450;
     margin: 3rem 1.5rem;
   }
+
+  :global .p-datatable-row {
+    cursor: pointer;
+  }
 }

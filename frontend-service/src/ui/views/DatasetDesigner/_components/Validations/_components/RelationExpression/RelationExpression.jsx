@@ -4,8 +4,6 @@ import isEmpty from 'lodash/isEmpty';
 
 import styles from './RelationExpression.module.scss';
 
-import { config } from 'conf/';
-
 import { Button } from 'ui/views/_components/Button';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 
@@ -15,12 +13,10 @@ import isNil from 'lodash/isNil';
 const RelationExpression = ({
   expressionValues,
   isDisabled,
-  layout,
   onRelationDelete,
   onRelationFieldUpdate,
   onRelationsErrors,
   originFields,
-  position,
   referencedFields,
   showRequiredFields
 }) => {
