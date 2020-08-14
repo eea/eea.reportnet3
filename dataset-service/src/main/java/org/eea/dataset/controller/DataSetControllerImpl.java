@@ -423,9 +423,7 @@ public class DataSetControllerImpl implements DatasetController {
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
-              datasetService.getTableFixedNumberOfRecords(datasetId,
-                  datasetService.findRecordSchemaIdById(datasetId, recordId),
-                  EntityTypeEnum.RECORD)));
+              datasetService.findRecordSchemaIdById(datasetId, recordId)));
     }
     try {
       updateRecordHelper.executeDeleteProcess(datasetId, recordId);

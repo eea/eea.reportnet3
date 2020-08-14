@@ -724,11 +724,8 @@ public class DataSetControllerImplTest {
 
       dataSetControllerImpl.deleteRecord(1L, recordId);
     } catch (ResponseStatusException e) {
-      assertEquals(
-          String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
-              datasetService.getTableFixedNumberOfRecords(1L,
-                  datasetService.findRecordSchemaIdById(1L, recordId), EntityTypeEnum.RECORD)),
-          e.getReason());
+      assertEquals(String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
+          datasetService.findRecordSchemaIdById(1L, recordId)), e.getReason());
       throw e;
     }
   }
