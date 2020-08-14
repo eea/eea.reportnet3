@@ -37,7 +37,7 @@ export const notificationReducer = (state, { type, payload }) => {
       };
 
     case 'HIDE':
-      return { ...state, hidden: [...state.hidden, payload.hidden] };
+      return { ...state, hidden: [...state.hidden, payload] };
 
     default:
       return state;

@@ -201,6 +201,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   }, [designerState.exportDatasetData]);
 
+  useEffect(() => {
+    const [thisNotification] = notificationContext.hidden.filter(
+      notification => notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT'
+    );
+
+    if (thisNotification) downloadExportFMEFile();
+  }, [notificationContext.hidden]);
+
   const callSetMetaData = async () => {
     const metaData = await getMetadata({ datasetId, dataflowId });
     designerDispatch({
@@ -227,7 +235,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const downloadExportFMEFile = async () => {
     try {
-      const [notification] = notificationContext.all.filter(
+      const [notification] = notificationContext.hidden.filter(
         notification => notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT'
       );
 
@@ -244,8 +252,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       isLoadingFile(false);
     }
   };
-
-  useCheckNotifications(['EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT'], downloadExportFMEFile);
 
   const filterActiveIndex = index => {
     if (!isNil(index) && isNaN(index)) {

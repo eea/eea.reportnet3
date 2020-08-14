@@ -613,12 +613,6 @@
         },
         {
           "key": "COPY_DATASET_SCHEMA_COMPLETED_EVENT"
-        },
-        {
-          "key": "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT"
-        },
-        {
-          "key": "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT"
         }
       ]
     },
@@ -658,5 +652,9 @@
       ]
     }
   ],
-  "hiddenNotifications": ["VALIDATED_QC_RULE_EVENT"]
+  "hiddenNotifications": [
+    "VALIDATED_QC_RULE_EVENT",
+    "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT",
+    "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT"
+  ]
 }
