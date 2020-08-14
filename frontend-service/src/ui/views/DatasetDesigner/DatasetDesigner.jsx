@@ -11,7 +11,6 @@ import styles from './DatasetDesigner.module.scss';
 import { config } from 'conf';
 import { DatasetSchemaRequesterEmptyHelpConfig } from 'conf/help/datasetSchema/requester/empty';
 import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchema/requester/withTabs';
-import { DatasetSchemaReporterHelpConfig } from 'conf/help/datasetSchema/reporter';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 
 import { Button } from 'ui/views/_components/Button';
@@ -66,7 +65,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
-  const [hasValidations, setHasValidations] = useState();
+  
+  const [hasValidations, setHasValidations] = useState();  
+  const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -200,6 +201,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       DownloadFile(designerState.exportDatasetData, designerState.exportDatasetDataName);
     }
   }, [designerState.exportDatasetData]);
+  
+  const refreshUniqueList = value => setNeedsRefreshUnique(value);
 
   useEffect(() => {
     const response = notificationContext.hidden.find(
@@ -388,6 +391,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
     designerDispatch({ type: 'LOAD_DATASET_SCHEMAS', payload: { schemas: inmDatasetSchemas } });
   };
+
+  const onCloseUniqueListModal = () => {
+    manageDialogs('isUniqueConstraintsListDialogVisible', false);
+    refreshUniqueList(true);
+  }
 
   const onConfirmValidate = async () => {
     manageDialogs('validateDialogVisible', false);
@@ -643,7 +651,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         <Dialog
           footer={renderUniqueConstraintsFooter}
           header={resources.messages['uniqueConstraints']}
-          onHide={() => manageDialogs('isUniqueConstraintsListDialogVisible', false)}
+          onHide={() => onCloseUniqueListModal()}
           style={{ width: '70%' }}
           visible={designerState.isUniqueConstraintsListDialogVisible}>
           <UniqueConstraints
@@ -651,8 +659,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             designerState={designerState}
             getManageUniqueConstraint={manageUniqueConstraint}
             getUniques={getUniqueConstraintsList}
-            setIsDuplicatedToManageUnique={setIsDuplicatedToManageUnique}
             manageDialogs={manageDialogs}
+            needsRefresh={needsRefreshUnique}
+            refreshList={refreshUniqueList}
+            setIsDuplicatedToManageUnique={setIsDuplicatedToManageUnique}
           />
         </Dialog>
       )}
@@ -673,7 +683,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
         label={resources.messages['close']}
-        onClick={() => manageDialogs('isUniqueConstraintsListDialogVisible', false)}
+        onClick={() => onCloseUniqueListModal()}
       />
     </Fragment>
   );
@@ -898,6 +908,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           dataflowId={dataflowId}
           designerState={designerState}
           manageDialogs={manageDialogs}
+          refreshList={refreshUniqueList}
           resetUniques={manageUniqueConstraint}
         />
 
