@@ -97,8 +97,7 @@ public class IntegrationControllerImpl implements IntegrationController {
   @ApiOperation(value = "Find EU Dataset Export Integration by its Schema Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = IntegrationVO.class)
   public IntegrationVO findExportEUDatasetIntegration(
-      @ApiParam(type = "Object",
-          value = "IntegrationVO Object") @RequestParam("datasetSchemaId") String datasetSchemaId) {
+      @ApiParam(value = "Schema Id") @RequestParam("datasetSchemaId") String datasetSchemaId) {
     return integrationService.getExportEUDatasetIntegration(datasetSchemaId);
   }
 
