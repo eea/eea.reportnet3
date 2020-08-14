@@ -81,6 +81,9 @@ const deleteTableDataById = async (datasetId, tableId) => await apiDataset.delet
 const deleteTableDesign = async (datasetId, tableSchemaId) =>
   await apiDataset.deleteTableDesign(datasetId, tableSchemaId);
 
+const downloadExportFile = async (datasetId, fileName, providerId) =>
+  await apiDataset.downloadExportFile(datasetId, fileName, providerId);
+
 const downloadFileData = async (datasetId, fieldId) => await apiDataset.downloadFileData(datasetId, fieldId);
 
 const errorsById = async (
@@ -215,6 +218,11 @@ const tableStatisticValuesWithErrors = tableStatisticValues => {
 
 const exportDataById = async (datasetId, fileType) => {
   const datasetData = await apiDataset.exportDataById(datasetId, fileType);
+  return datasetData;
+};
+
+const exportDatasetDataExternal = async (datasetId, fileExtension) => {
+  const datasetData = await apiDataset.exportDatasetDataExternal(datasetId, fileExtension);
   return datasetData;
 };
 
@@ -497,11 +505,13 @@ export const ApiDatasetRepository = {
   deleteSchemaById,
   deleteTableDataById,
   deleteTableDesign,
+  downloadExportFile,
   downloadFileData,
   errorPositionByObjectId,
   errorsById,
   errorStatisticsById,
   exportDataById,
+  exportDatasetDataExternal,
   exportTableDataById,
   getMetaData,
   getReferencedFieldValues,
