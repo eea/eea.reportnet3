@@ -74,6 +74,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
+  const [exportDatasetFileType, setExportDatasetFileType] = useState('');
   const [extensionsOperationsList, setExtensionsOperationsList] = useState({ export: [], import: [] });
   const [externalExportExtensions, setExternalExportExtensions] = useState([]);
   const [hasValidations, setHasValidations] = useState();
@@ -167,7 +168,15 @@ export const Dataset = withRouter(({ match, history }) => {
     getExportExtensions(extensionsOperationsList.export);
   }, [extensionsOperationsList]);
 
-  const parseUniqsExportExtensions = exportExtensionsOperationsList => {
+  useEffect(() => {
+    const response = notificationContext.hidden.find(
+      notification => notification.key === 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
+    );
+
+    if (response) downloadExportFMEFile();
+  }, [notificationContext.hidden]);
+
+  const parseUniqExportExtensions = exportExtensionsOperationsList => {
     return exportExtensionsOperationsList.map(uniqExportExtension => ({
       text: `${uniqExportExtension.toUpperCase()} (.${uniqExportExtension.toLowerCase()})`,
       code: uniqExportExtension.toLowerCase()
@@ -175,14 +184,14 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const getExportExtensions = exportExtensionsOperationsList => {
-    const uniqsExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
-    setExternalExportExtensions(parseUniqsExportExtensions(uniqsExportExtensions));
+    const uniqExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
+    setExternalExportExtensions(parseUniqExportExtensions(uniqExportExtensions));
   };
 
   const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => ({
     label: type.text,
     icon: config.icons['archive'],
-    command: () => onExportData(type.code)
+    command: () => onExportDataInternalExtension(type.code)
   }));
 
   const externalExtensions = [
@@ -191,7 +200,7 @@ export const Dataset = withRouter(({ match, history }) => {
       items: externalExportExtensions.map(type => ({
         label: type.text,
         icon: config.icons['archive'],
-        command: () => onExportData(type.code)
+        command: () => onExportDataExternalExtension(type.code)
       }))
     }
   ];
@@ -308,29 +317,65 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
 
+  const downloadExportFMEFile = async () => {
+    try {
+      const [notification] = notificationContext.hidden.filter(
+        notification => notification.key === 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
+      );
+
+      setExportDatasetDataName(createFileName(datasetName, exportDatasetFileType));
+
+      setExportDatasetData(
+        await DatasetService.downloadExportFile(
+          datasetId,
+          notification.content.fileName,
+          notification.content.providerId
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({
+        type: 'DOWNLOAD_FME_FILE_ERROR'
+      });
+    } finally {
+      setLoadingFile(false);
+    }
+  };
+
   const onLoadTableData = hasData => {
     setDatasetHasData(hasData);
   };
 
-  const onExportData = async fileType => {
+  const onExportError = async () => {
+    const {
+      dataflow: { name: dataflowName },
+      dataset: { name: datasetName }
+    } = await getMetadata({ dataflowId, datasetId });
+
+    notificationContext.add({
+      type: 'EXPORT_DATA_BY_ID_ERROR',
+      content: { dataflowId, datasetId, dataflowName, datasetName }
+    });
+  };
+
+  const onExportDataExternalExtension = async fileExtension => {
     setLoadingFile(true);
+    setExportDatasetFileType(fileExtension);
+    try {
+      await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
+    } catch (error) {
+      onExportError();
+    }
+  };
+
+  const onExportDataInternalExtension = async fileType => {
+    setLoadingFile(true);
+    setExportDatasetFileType(fileType);
     try {
       setExportDatasetDataName(createFileName(datasetName, fileType));
       setExportDatasetData(await DatasetService.exportDataById(datasetId, fileType));
     } catch (error) {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'EXPORT_DATA_BY_ID_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
-      });
+      onExportError();
     } finally {
       setLoadingFile(false);
     }

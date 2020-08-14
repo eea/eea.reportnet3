@@ -1,4 +1,5 @@
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
@@ -18,7 +19,9 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   datasetTableFieldDesign.codelistItems = datasetTableRecordField.codelistItems;
   datasetTableFieldDesign.description = datasetTableRecordField.description;
   datasetTableFieldDesign.idRecord = datasetTableRecordField.recordId;
-  datasetTableFieldDesign.maxSize = !isNull(datasetTableRecordField.maxSize) ? datasetTableRecordField.maxSize.toString() : null;
+  datasetTableFieldDesign.maxSize = !isNil(datasetTableRecordField.maxSize)
+    ? datasetTableRecordField.maxSize.toString()
+    : null;
   datasetTableFieldDesign.pk = datasetTableRecordField.pk;
   datasetTableFieldDesign.pkHasMultipleValues = datasetTableRecordField.pkHasMultipleValues;
   datasetTableFieldDesign.pkMustBeUsed = datasetTableRecordField.pkMustBeUsed;
@@ -77,6 +80,9 @@ const deleteTableDataById = async (datasetId, tableId) => await apiDataset.delet
 
 const deleteTableDesign = async (datasetId, tableSchemaId) =>
   await apiDataset.deleteTableDesign(datasetId, tableSchemaId);
+
+const downloadExportFile = async (datasetId, fileName, providerId) =>
+  await apiDataset.downloadExportFile(datasetId, fileName, providerId);
 
 const downloadFileData = async (datasetId, fieldId) => await apiDataset.downloadFileData(datasetId, fieldId);
 
@@ -212,6 +218,11 @@ const tableStatisticValuesWithErrors = tableStatisticValues => {
 
 const exportDataById = async (datasetId, fileType) => {
   const datasetData = await apiDataset.exportDataById(datasetId, fileType);
+  return datasetData;
+};
+
+const exportDatasetDataExternal = async (datasetId, fileExtension) => {
+  const datasetData = await apiDataset.exportDatasetDataExternal(datasetId, fileExtension);
   return datasetData;
 };
 
@@ -401,7 +412,7 @@ const updateRecordFieldDesign = async (datasetId, record) => {
   datasetTableFieldDesign.description = record.description;
   datasetTableFieldDesign.id = record.fieldSchemaId;
   datasetTableFieldDesign.idRecord = record.recordId;
-  datasetTableFieldDesign.maxSize = !isNull(record.maxSize) ? record.maxSize.toString() : null;
+  datasetTableFieldDesign.maxSize = !isNil(record.maxSize) ? record.maxSize.toString() : null;
   datasetTableFieldDesign.name = record.name;
   datasetTableFieldDesign.pk = record.pk;
   datasetTableFieldDesign.pkHasMultipleValues = record.pkHasMultipleValues;
@@ -494,11 +505,13 @@ export const ApiDatasetRepository = {
   deleteSchemaById,
   deleteTableDataById,
   deleteTableDesign,
+  downloadExportFile,
   downloadFileData,
   errorPositionByObjectId,
   errorsById,
   errorStatisticsById,
   exportDataById,
+  exportDatasetDataExternal,
   exportTableDataById,
   getMetaData,
   getReferencedFieldValues,

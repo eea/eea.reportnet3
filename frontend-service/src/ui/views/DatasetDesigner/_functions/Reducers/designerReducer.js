@@ -87,6 +87,9 @@ export const designerReducer = (state, { type, payload }) => {
         isValidationViewerVisible: false
       };
 
+    case 'SET_EXPORT_DATASET_FILE_TYPE':
+      return { ...state, exportDatasetFileType: payload.fileType };
+
     case 'SET_IS_VALIDATION_SELECTED':
       return {
         ...state,

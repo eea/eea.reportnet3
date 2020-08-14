@@ -806,6 +806,7 @@
     "datasetSchemaRequesterEmptyHelpConfig": "Here you have the tools to design your schema. Open me again when you have created your first table.",
     "release": "Release ",
     "notEmpty": "Mandatory table",
+    "downloadFmeFileError": "Error downloading FME file",
     "uploadAttachment": "Attach file",
     "supportedFileAttachmentsTooltip": "Supported file attachment extensions: ",
     "deleteAttachmentHeader": "Delete attachment",
