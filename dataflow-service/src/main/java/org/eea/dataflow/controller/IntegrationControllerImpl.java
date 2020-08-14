@@ -94,8 +94,11 @@ public class IntegrationControllerImpl implements IntegrationController {
   @Override
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
   @GetMapping("/findExportEUDatasetIntegration")
+  @ApiOperation(value = "Find EU Dataset Export Integration by its Schema Id",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = IntegrationVO.class)
   public IntegrationVO findExportEUDatasetIntegration(
-      @RequestParam("datasetSchemaId") String datasetSchemaId) {
+      @ApiParam(type = "Object",
+          value = "IntegrationVO Object") @RequestParam("datasetSchemaId") String datasetSchemaId) {
     return integrationService.getExportEUDatasetIntegration(datasetSchemaId);
   }
 

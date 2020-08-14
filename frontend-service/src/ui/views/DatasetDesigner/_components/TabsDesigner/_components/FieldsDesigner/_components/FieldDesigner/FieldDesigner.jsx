@@ -992,7 +992,6 @@ export const FieldDesigner = ({
         <Dialog
           blockScroll={false}
           contentStyle={{ overflow: 'auto' }}
-          closeOnEscape={false}
           footer={qcDialogFooter}
           header={resources.messages['qcManager']}
           modal={true}

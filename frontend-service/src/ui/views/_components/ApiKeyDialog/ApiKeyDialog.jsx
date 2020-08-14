@@ -85,7 +85,6 @@ const ApiKeyDialog = ({
   return (
     <Dialog
       blockScroll={false}
-      closeOnEscape={true}
       footer={footer}
       header={resources.messages['apiKeyDialogHead']}
       modal={true}
