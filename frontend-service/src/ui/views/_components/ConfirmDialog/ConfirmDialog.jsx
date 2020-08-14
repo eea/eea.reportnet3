@@ -22,7 +22,6 @@ const ConfirmDialog = forwardRef((props, _) => {
     disabledConfirm,
     labelCancel,
     labelConfirm,
-    maximizable,
     onConfirm,
     onHide,
     onPaste,

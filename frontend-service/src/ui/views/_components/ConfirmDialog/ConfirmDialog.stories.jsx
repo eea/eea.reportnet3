@@ -10,7 +10,6 @@ storiesOf('Confirm Dialog', module)
   .add('Default', () => (
     <ConfirmDialog
       header={'This is the confirm dialog header'}
-      maximizable={false}
       labelCancel={'Cancel'}
       labelConfirm={'Yes'}
       onConfirm={action('Confirm')}
@@ -19,22 +18,9 @@ storiesOf('Confirm Dialog', module)
       {'This is the Confirm dialog body'}
     </ConfirmDialog>
   ))
-  .add('Maximizable', () => (
-    <ConfirmDialog
-      header={'This is a maximizable dialog header'}
-      maximizable={true}
-      labelCancel={'Cancel'}
-      labelConfirm={'Yes'}
-      onConfirm={action('Confirm')}
-      onHide={action('hide')}
-      visible={true}>
-      {'This is the Confirm maximizable dialog body'}
-    </ConfirmDialog>
-  ))
   .add('With content', () => (
     <ConfirmDialog
       header={'This is a confirm dialog with content header'}
-      maximizable={true}
       labelCancel={'Cancel'}
       labelConfirm={'Yes'}
       onConfirm={action('Confirm')}

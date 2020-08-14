@@ -285,7 +285,7 @@ const TabsValidations = withRouter(
         onConfirm={() => onDeleteValidation()}
         onHide={() => onHideDeleteDialog()}
         visible={tabsValidationsState.isDeleteDialogVisible}
-        maximizable={false}>
+        >
         {resources.messages['deleteValidationConfirm']}
       </ConfirmDialog>
     );
@@ -360,10 +360,19 @@ const TabsValidations = withRouter(
       isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList);
 
     const validationList = () => {
+      if (tabsValidationsState.isLoading) {
+        return (
+        <div className={styles.validationsWithoutTable}>
+          <div className={styles.loadingSpinner}><Spinner style={{ top: 0, left: 0 }} /></div>
+        </div>);
+      }
+
       if (checkIsEmptyValidations()) {
         return (
-          <div>
-            <div className={styles.noValidations}>{resources.messages['emptyValidations']}</div>
+          <div className={styles.validationsWithoutTable}>
+            <div className={styles.noValidations}>
+              {resources.messages['emptyValidations']}
+            </div>
           </div>
         );
       }
@@ -371,7 +380,7 @@ const TabsValidations = withRouter(
       const paginatorRightText = `${resources.messages['fieldRecords']} ${tabsValidationsState.filteredData.length}`;
 
       return (
-        <Fragment>
+        <div className={styles.validations}>
           <div className={styles.searchInput}>
             <Filters
               className="filter-lines"
@@ -398,37 +407,17 @@ const TabsValidations = withRouter(
               {renderColumns(tabsValidationsState.validationList.validations)}
             </DataTable>
           ) : (
-            <div className={styles.noDataflows}>{resources.messages['noQCRulesWithSelectedParameters']}</div>
+            <div className={styles.emptyFilteredData}>{resources.messages['noQCRulesWithSelectedParameters']}</div>
           )}
-        </Fragment>
-
-        // <TabPanel header={entityType} key={entityType} rightIcon={null}>
-        //   <div className={null}>
-        //     <DataTable
-        //       autoLayout={true}
-        //       className={null}
-        //       loading={false}
-        //       paginator={true}
-        //       paginatorRight={paginatorRightText}
-        //       rows={10}
-        //       rowsPerPageOptions={[5, 10, 15]}
-        //       totalRecords={validationsFilteredByEntityType.length}
-        //       value={validationsFilteredByEntityType}>
-        //       {columns}
-        //     </DataTable>
-        //   </div>
-        // </TabPanel>
+        </div>
       );
-      // });
     };
 
-    if (tabsValidationsState.isLoading) return <Spinner className={styles.positioning} />;
-
     return (
-      <div className={checkIsEmptyValidations() ? styles.noValidations : styles.validations}>
+      <Fragment>
         {validationList()}
         {tabsValidationsState.isDeleteDialogVisible && deleteValidationDialog()}
-      </div>
+      </Fragment>
     );
   }
 );
