@@ -284,7 +284,7 @@ const TabsValidations = withRouter(
         onConfirm={() => onDeleteValidation()}
         onHide={() => onHideDeleteDialog()}
         visible={tabsValidationsState.isDeleteDialogVisible}
-        maximizable={false}>
+        >
         {resources.messages['deleteValidationConfirm']}
       </ConfirmDialog>
     );

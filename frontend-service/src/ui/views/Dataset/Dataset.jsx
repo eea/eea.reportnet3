@@ -757,7 +757,6 @@ export const Dataset = withRouter(({ match, history }) => {
           header={resources.messages['deleteDatasetHeader']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          maximizable={false}
           onConfirm={onConfirmDelete}
           onHide={() => onSetVisible(setDeleteDialogVisible, false)}
           visible={deleteDialogVisible}>
@@ -769,7 +768,6 @@ export const Dataset = withRouter(({ match, history }) => {
           header={resources.messages['validateDataset']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          maximizable={false}
           onConfirm={onConfirmValidate}
           onHide={() => onSetVisible(setValidateDialogVisible, false)}
           visible={validateDialogVisible}>

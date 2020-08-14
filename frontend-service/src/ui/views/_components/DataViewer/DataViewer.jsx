@@ -1265,7 +1265,6 @@ const DataViewer = withRouter(
         {records.isMapOpen && (
           <Dialog
             className={'map-data'}
-            // maximizable={true}
             blockScroll={false}
             dismissableMask={false}
             // contentStyle={

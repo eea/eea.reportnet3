@@ -21,7 +21,7 @@ export const Dialog = ({
   footer,
   header,
   id,
-  maximizable,
+  maximizable = false,
   modal,
   onHide,
   onShow,
