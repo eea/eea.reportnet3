@@ -486,19 +486,23 @@ const FieldValidation = ({ datasetId, tabs }) => {
   );
 
   const dialogLayout = children => (
-    <Dialog
-      className={styles.dialog}
-      footer={renderFieldQCsFooter}
-      header={
-        validationContext.ruleEdit
-          ? resourcesContext.messages.editFieldConstraint
-          : resourcesContext.messages.createFieldConstraintTitle
-      }
-      visible={validationContext.isVisible}
-      style={{ width: '975px' }}
-      onHide={e => onHide()}>
-      {children}
-    </Dialog>
+    <Fragment>
+      {validationContext.isVisible && (
+        <Dialog
+          className={styles.dialog}
+          footer={renderFieldQCsFooter}
+          header={
+            validationContext.ruleEdit
+              ? resourcesContext.messages.editFieldConstraint
+              : resourcesContext.messages.createFieldConstraintTitle
+          }
+          visible={validationContext.isVisible}
+          style={{ width: '975px' }}
+          onHide={e => onHide()}>
+          {children}
+        </Dialog>
+      )}
+    </Fragment>
   );
 
   return dialogLayout(

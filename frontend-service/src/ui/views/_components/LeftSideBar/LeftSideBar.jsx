@@ -1,12 +1,14 @@
 import React, { useState, useContext, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
-import { routes } from 'ui/routes';
-import Joyride, { ACTIONS, EVENTS, LIFECYCLE, STATUS } from 'react-joyride';
+
+import isEmpty from 'lodash/isEmpty';
+import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride';
 
 import styles from './LeftSideBar.module.scss';
 
+import { routes } from 'ui/routes';
+
 import { LeftSideBarButton } from './_components/LeftSideBarButton';
-import { getUrl } from 'core/infrastructure/CoreUtils';
 
 import { UserService } from 'core/services/User';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -15,9 +17,10 @@ import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarCont
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
-import { isEmpty } from 'lodash';
 
-const LeftSideBar = withRouter(({ history, style, setIsNotificationVisible }) => {
+import { getUrl } from 'core/infrastructure/CoreUtils';
+
+const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -28,7 +31,7 @@ const LeftSideBar = withRouter(({ history, style, setIsNotificationVisible }) =>
   const [helpIndex, setHelpIndex] = useState();
 
   const handleJoyrideCallback = data => {
-    const { action, index, status, type } = data;
+    const { action, status, type } = data;
 
     if ([ACTIONS.CLOSE].includes(action)) {
       setHelpIndex(0);
@@ -192,7 +195,7 @@ const LeftSideBar = withRouter(({ history, style, setIsNotificationVisible }) =>
               <div className={styles.leftSideBarElementWrapper}>{renderOpenClose()}</div>
             </div>
 
-            {userContext.userProps.showLogoutConfirmation && (
+            {userContext.userProps.showLogoutConfirmation && logoutConfirmVisible && (
               <ConfirmDialog
                 onConfirm={() => {
                   userLogout();

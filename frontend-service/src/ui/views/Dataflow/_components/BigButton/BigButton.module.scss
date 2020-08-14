@@ -118,6 +118,14 @@
     max-width: 100px;
     text-align: center;
     word-wrap: break-word;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 5;
+    overflow: hidden;
+  }
+
+  .tooltip {
+    max-width: 250px;
   }
 
   .inputText {

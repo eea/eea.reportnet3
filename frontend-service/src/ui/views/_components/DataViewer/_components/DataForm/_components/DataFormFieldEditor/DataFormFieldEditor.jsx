@@ -1,15 +1,15 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
-import isEmpty from 'lodash/isEmpty';
+// import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
-import { DatasetConfig } from 'conf/domain/model/Dataset';
+// import { DatasetConfig } from 'conf/domain/model/Dataset';
 
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
-import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
-import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
+// import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+// import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
@@ -20,7 +20,7 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-import { getUrl } from 'core/infrastructure/CoreUtils';
+// import { getUrl } from 'core/infrastructure/CoreUtils';
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
 const DataFormFieldEditor = ({
@@ -29,8 +29,10 @@ const DataFormFieldEditor = ({
   datasetId,
   field,
   fieldValue = '',
+  hasWritePermissions,
   isVisible,
   onChangeForm,
+  reporting,
   type
 }) => {
   const resources = useContext(ResourcesContext);
@@ -38,7 +40,7 @@ const DataFormFieldEditor = ({
   const inputRef = useRef(null);
 
   const [columnWithLinks, setColumnWithLinks] = useState([]);
-  const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
+  // const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
   const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [mapCoordinates, setMapCoordinates] = useState();
@@ -161,23 +163,27 @@ const DataFormFieldEditor = ({
     });
     return codelistItems;
   };
-
-  const renderCodelistDropdown = (field, fieldValue) => (
-    <Dropdown
-      appendTo={document.body}
-      onChange={e => {
-        onChangeForm(field, e.target.value.value);
-      }}
-      optionLabel="itemType"
-      options={getCodelistItemsWithEmptyOption()}
-      value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
-    />
-  );
+  
+  const renderCodelistDropdown = (field, fieldValue) => {
+    return (
+      <Dropdown
+        appendTo={document.body}
+        disabled={column.readOnly && reporting}
+        onChange={e => {
+          onChangeForm(field, e.target.value.value);
+        }}
+        optionLabel="itemType"
+        options={getCodelistItemsWithEmptyOption()}
+        value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
+      />
+    );
+  };
 
   const renderMultiselectCodelist = (field, fieldValue) => {
     return (
       <MultiSelect
         appendTo={document.body}
+        disabled={column.readOnly && reporting}
         maxSelectedLabels={10}
         onChange={e => onChangeForm(field, e.value)}
         options={column.codelistItems.sort().map(codelistItem => {
@@ -275,6 +281,7 @@ const DataFormFieldEditor = ({
       renderAttachment(field, fieldValue)
     ) : (
       <InputText
+        disabled={column.readOnly && reporting}
         id={field}
         keyfilter={getFilter(type)}
         maxLength={getMaxCharactersByType(type)}
@@ -336,6 +343,7 @@ const DataFormFieldEditor = ({
         appendTo={document.body}
         baseZIndex={9999}
         dateFormat="yy-mm-dd"
+        disabled={column.readOnly && reporting}
         monthNavigator={true}
         style={{ width: '60px' }}
         value={new Date(formatDate(fieldValue, isNil(fieldValue)))}
@@ -360,6 +368,7 @@ const DataFormFieldEditor = ({
         <MultiSelect
           appendTo={document.body}
           clearButton={false}
+          disabled={column.readOnly && reporting}
           filter={true}
           filterPlaceholder={resources.messages['linkFilterPlaceholder']}
           maxSelectedLabels={10}
@@ -378,6 +387,7 @@ const DataFormFieldEditor = ({
         <Dropdown
           appendTo={document.body}
           currentValue={fieldValue}
+          disabled={column.readOnly && reporting}
           filter={true}
           filterPlaceholder={resources.messages['linkFilterPlaceholder']}
           filterBy="itemType,value"
@@ -399,6 +409,7 @@ const DataFormFieldEditor = ({
   const renderMapType = (field, fieldValue) => (
     <div style={{ display: 'flex', alignItems: 'center' }}>
       <InputText
+        disabled={column.readOnly && reporting}
         keyfilter={getFilter(type)}
         // onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
         onChange={e => onChangeForm(field, e.target.value)}

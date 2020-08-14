@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { Fragment, useContext } from 'react';
 import styles from './userConfiguration.module.scss';
 
 import { Dropdown } from 'ui/views/_components/Dropdown';
@@ -30,7 +30,7 @@ const UserConfiguration = () => {
   };
 
   const themeSwitch = (
-    <React.Fragment>
+    <Fragment>
       <span className={styles.switchTextInput}>{resources.messages['light']}</span>
       <InputSwitch
         checked={userContext.userProps.visualTheme === 'dark'}
@@ -54,11 +54,11 @@ const UserConfiguration = () => {
         tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
       />
       <span className={styles.switchTextInput}>{resources.messages['dark']}</span>
-    </React.Fragment>
+    </Fragment>
   );
 
   const amPmSwitch = (
-    <React.Fragment>
+    <Fragment>
       <span className={styles.switchTextInput}>AM/PM</span>
       <InputSwitch
         checked={userContext.userProps.amPm24h}
@@ -76,11 +76,11 @@ const UserConfiguration = () => {
         }
       />
       <span className={styles.switchTextInput}>24H</span>
-    </React.Fragment>
+    </Fragment>
   );
 
   const confirmationLogoutSwitch = (
-    <React.Fragment>
+    <Fragment>
       <span className={styles.switchTextInput}>No popup</span>
       <InputSwitch
         checked={userContext.userProps.showLogoutConfirmation}
@@ -100,11 +100,11 @@ const UserConfiguration = () => {
         }
       />
       <span className={styles.switchTextInput}>Popup</span>
-    </React.Fragment>
+    </Fragment>
   );
 
   const chooseTypeViewSwitch = (
-    <React.Fragment>
+    <Fragment>
       <span className={styles.switchTextInput}>{`${resources.messages['magazineView']}`}</span>
       <InputSwitch
         checked={userContext.userProps.listView}
@@ -124,11 +124,11 @@ const UserConfiguration = () => {
         }
       />
       <span className={styles.switchTextInput}>{`${resources.messages['listView']}`}</span>
-    </React.Fragment>
+    </Fragment>
   );
 
   const rowsInPaginationDropdown = (
-    <React.Fragment>
+    <Fragment>
       <Dropdown
         id={`rowsPage`}
         name="rowPerPage"
@@ -147,11 +147,11 @@ const UserConfiguration = () => {
       <label htmlFor="rowsPage" className="srOnly">
         {resources.messages['defaultRowsPage']}
       </label>
-    </React.Fragment>
+    </Fragment>
   );
 
   const dateFormatDropdown = (
-    <React.Fragment>
+    <Fragment>
       <Dropdown
         name="dateFormat"
         options={resources.userParameters['dateFormat']}
@@ -166,7 +166,7 @@ const UserConfiguration = () => {
         placeholder="select"
         value={userContext.userProps.dateFormat}
       />
-    </React.Fragment>
+    </Fragment>
   );
 
   const themeConfiguration = (

@@ -10,6 +10,7 @@ export class DatasetTableField {
     pkHasMultipleValues,
     pkMustBeUsed,
     pkReferenced,
+    readOnly,
     recordId,
     referencedField,
     required,
@@ -29,6 +30,7 @@ export class DatasetTableField {
     this.pkHasMultipleValues = pkHasMultipleValues;
     this.pkMustBeUsed = pkMustBeUsed;
     this.pkReferenced = pkReferenced;
+    this.readOnly = readOnly;
     this.recordId = recordId;
     this.referencedField = referencedField;
     this.required = required;

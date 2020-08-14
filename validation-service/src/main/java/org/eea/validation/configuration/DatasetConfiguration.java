@@ -3,7 +3,7 @@ package org.eea.validation.configuration;
 import java.util.List;
 import java.util.Properties;
 import javax.sql.DataSource;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.validation.configuration.util.EeaDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,10 +96,10 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   private String password;
 
   /**
-   * The record store controller zull.
+   * The record store controller zuul.
    */
   @Autowired
-  private RecordStoreControllerZull recordStoreControllerZull;
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
 
   /**
@@ -111,7 +111,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
 
   @Bean
   public DataSource datasetDataSource() {
-    final List<ConnectionDataVO> connections = recordStoreControllerZull.getDataSetConnections();
+    final List<ConnectionDataVO> connections = recordStoreControllerZuul.getDataSetConnections();
     DataSource dataSource = null;
     if (null != connections && !connections.isEmpty()) {
       dataSource = dataSetsDataSource(connections.get(0));

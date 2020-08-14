@@ -40,8 +40,6 @@ import classNames from 'classnames';
 
 import './InputText.css';
 
-import logo from 'assets/images/logo.png';
-
 import KeyFilter from 'ui/views/_functions/PrimeReact/KeyFilter';
 import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';

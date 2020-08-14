@@ -204,6 +204,8 @@ public class CSVReaderStrategy implements ReaderStrategy {
         if (null != fieldSchema) {
           header.setId(fieldSchema.getId());
           header.setType(fieldSchema.getType());
+          header.setReadOnly(
+              fieldSchema.getReadOnly() == null ? Boolean.FALSE : fieldSchema.getReadOnly());
         }
       }
       header.setName(value);
@@ -277,6 +279,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
     final List<FieldVO> fields = new ArrayList<>();
     List<String> idSchema = new ArrayList<>();
     int contAux = 0;
+    boolean isDesignDataset = fileCommon.isDesignDataset(datasetId);
     for (String value : values) {
       // Trim the string if it is too large
       if (value.length() >= fieldMaxLength) {
@@ -287,7 +290,8 @@ public class CSVReaderStrategy implements ReaderStrategy {
         field.setIdFieldSchema(headers.get(contAux).getId());
         field.setType(headers.get(contAux).getType());
         field.setValue(value);
-        if (field.getIdFieldSchema() != null) {
+        if ((field.getIdFieldSchema() != null && !headers.get(contAux).getReadOnly()
+            && !isDesignDataset) || (field.getIdFieldSchema() != null && isDesignDataset)) {
           fields.add(field);
           idSchema.add(field.getIdFieldSchema());
         }

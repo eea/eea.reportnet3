@@ -42,6 +42,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -762,54 +763,6 @@ public class DataSetControllerImplTest {
   }
 
   /**
-   * Export file reporting.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void exportFileReporting() throws Exception {
-    Mockito.when(datasetService.exportFile(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn("".getBytes());
-    Mockito.when(datasetService.isReportingDataset(Mockito.any())).thenReturn(true);
-    dataSetControllerImpl.exportFile(1L, "id", "csv");
-    Mockito.verify(datasetService, times(1)).getFileName(Mockito.any(), Mockito.any(),
-        Mockito.any());
-  }
-
-  /**
-   * Export file design.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void exportFileDesign() throws Exception {
-    Mockito.when(datasetService.exportFile(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn("".getBytes());
-    Mockito.when(datasetService.isReportingDataset(Mockito.any())).thenReturn(false);
-    dataSetControllerImpl.exportFile(1L, "id", "csv");
-    Mockito.verify(designDatasetService, times(1)).getFileNameDesign(Mockito.any(), Mockito.any(),
-        Mockito.any());
-  }
-
-  /**
-   * Export file test.
-   *
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Test
-  public void exportFileTest() throws EEAException, IOException {
-    Mockito.when(datasetService.exportFile(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenThrow(EEAException.class);
-    try {
-      dataSetControllerImpl.exportFile(1L, "id", "csv");
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
-    }
-  }
-
-
-  /**
    * Testupdate field success.
    *
    * @throws Exception the exception
@@ -1260,5 +1213,61 @@ public class DataSetControllerImplTest {
     }
   }
 
+  @Test
+  public void exportFileTest() throws EEAException, IOException {
+    Mockito.when(datasetSchemaService.getTableSchemaName(Mockito.any(), Mockito.anyString()))
+        .thenReturn("tableName");
+    Mockito.when(datasetService.exportFile(Mockito.anyLong(), Mockito.any(), Mockito.any()))
+        .thenReturn(new byte[1]);
+    ResponseEntity<byte[]> result =
+        dataSetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", "csv");
+    Assert.assertEquals(1, result.getBody().length);
+  }
 
+  @Test(expected = ResponseStatusException.class)
+  public void exportFileExceptionInvalidSchemaTest() throws EEAException, IOException {
+    Mockito.when(datasetSchemaService.getTableSchemaName(Mockito.any(), Mockito.anyString()))
+        .thenReturn(null);
+    try {
+      dataSetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", "csv");
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(EEAErrorMessage.IDTABLESCHEMA_INCORRECT, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void exportFileExceptionExportingTest() throws EEAException, IOException {
+    Mockito.when(datasetSchemaService.getTableSchemaName(Mockito.any(), Mockito.anyString()))
+        .thenReturn("tableName");
+    Mockito.when(datasetService.exportFile(Mockito.anyLong(), Mockito.any(), Mockito.any()))
+        .thenThrow(EEAException.class);
+    try {
+      dataSetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", "csv");
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void exportFileThroughIntegrationTest() throws EEAException {
+    Mockito.doNothing().when(datasetService).exportFileThroughIntegration(Mockito.anyLong(),
+        Mockito.any());
+    dataSetControllerImpl.exportFileThroughIntegration(1L, "csv");
+    Mockito.verify(datasetService, times(1)).exportFileThroughIntegration(Mockito.anyLong(),
+        Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void exportFileThroughIntegrationExceptionTest() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(datasetService)
+        .exportFileThroughIntegration(Mockito.anyLong(), Mockito.any());
+    try {
+      dataSetControllerImpl.exportFileThroughIntegration(1L, "csv");
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
 }

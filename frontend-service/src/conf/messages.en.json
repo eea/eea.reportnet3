@@ -817,6 +817,8 @@
     "attachmentEditorSizeMessage": "Enter the maximum file size <strong>in megabytes</strong> (with decimals). <strong>Remember</strong>, <u><strong>the overall maximum value is 20 MB</strong></u> (value 0 is considered as default limit).",
     "maxFileSize": "Max file size:",
     "validExtensions": "Valid file extensions:",
+    "fixedNumber": "Fixed number of records",
+    "readOnly": "Read only",
     "supportedFileAttachmentsMaxSizeTooltip": "Maximum file size: ",
     "allAttachment": "All fields are attachment. Press 'Save' to add a record with empty attachments. You can upload them afterwards.",
     "createQCDisabled": "Can't create field QC on Attachment field",
@@ -829,6 +831,7 @@
     "copyDataCollectionToEuDatasetMessage": "Are you sure you want to copy Data Collections to EU Datasets?",
     "exportEuDatasetHeader": "Export EU Datasets",
     "exportEuDatasetMessage": "Are you sure you want to export EU Datasets?",
-    "updateConfigurations": "Update configurations"
+    "updateConfigurations": "Update configurations",
+    "tooLongSchemaNameError": "Schema name is too long"
   }
 }

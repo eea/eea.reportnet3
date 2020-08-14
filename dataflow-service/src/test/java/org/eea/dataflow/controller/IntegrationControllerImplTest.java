@@ -24,13 +24,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-
 /**
  * The Class IntegrationControllerImplTest.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class IntegrationControllerImplTest {
-
 
   /** The integration controller impl. */
   @InjectMocks
@@ -258,10 +256,10 @@ public class IntegrationControllerImplTest {
    */
   @Test
   public void findExporEUDatasetIntegrationByDatasetIdTest() {
-    Mockito.when(integrationService.getExporEUDatasetIntegrationByDatasetId(Mockito.anyString()))
+    Mockito.when(integrationService.getExportEUDatasetIntegration(Mockito.anyString()))
         .thenReturn(null);
-    Assert.assertNull(integrationControllerImpl
-        .findExporEUDatasetIntegrationByDatasetId("5ce524fad31fc52540abae73"));
+    Assert.assertNull(
+        integrationControllerImpl.findExportEUDatasetIntegration("5ce524fad31fc52540abae73"));
   }
 
   /**
@@ -296,5 +294,27 @@ public class IntegrationControllerImplTest {
       Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }
+  }
+
+  /**
+   * Find export integration test.
+   */
+  @Test
+  public void findExportIntegrationTest() {
+    IntegrationVO integrationVO = new IntegrationVO();
+    Mockito.when(integrationService.getExportIntegration(Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(integrationVO);
+    Assert.assertEquals(integrationVO,
+        integrationControllerImpl.findExportIntegration("5ce524fad31fc52540abae73", "csv"));
+  }
+
+  /**
+   * Delete schema integrations test.
+   */
+  @Test
+  public void deleteSchemaIntegrationsTest() {
+    Mockito.doNothing().when(integrationService).deleteSchemaIntegrations(Mockito.anyString());
+    integrationControllerImpl.deleteSchemaIntegrations("5ce524fad31fc52540abae73");
+    Mockito.verify(integrationService, times(1)).deleteSchemaIntegrations(Mockito.anyString());
   }
 }

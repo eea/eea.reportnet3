@@ -24,7 +24,9 @@ export const IntegrationsList = ({
   getUpdatedData,
   integrationsList,
   manageDialogs,
-  onUpdateDesignData
+  needsRefresh,
+  onUpdateDesignData,
+  refreshList,
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -39,8 +41,10 @@ export const IntegrationsList = ({
   });
 
   useEffect(() => {
-    onLoadIntegrations();
-  }, [integrationListState.isDataUpdated]);
+    if (!designerState.isIntegrationManageDialogVisible && needsRefresh) {
+      onLoadIntegrations();
+    }
+  }, [integrationListState.isDataUpdated, designerState.isIntegrationManageDialogVisible, needsRefresh]);
 
   const actionsTemplate = row => (
     <ActionsColumn
@@ -49,7 +53,7 @@ export const IntegrationsList = ({
         const filteredData = integrationListState.data.filter(
           integration => integration.integrationId === row.integrationId
         );
-        manageDialogs('isIntegrationManageDialogVisible', true, 'isIntegrationListDialogVisible', false);
+        manageDialogs('isIntegrationManageDialogVisible', true);
         if (!isEmpty(filteredData)) getUpdatedData(filteredData[0]);
       }}
     />
@@ -62,7 +66,7 @@ export const IntegrationsList = ({
   const isDeleteDialogVisible = value =>
     integrationListDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
 
-  const isLoading = value => integrationListDispatch({ type: 'IS_LOADING', payload: value });
+  const isLoading = value => integrationListDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onDeleteIntegration = async () => {
     try {
@@ -82,9 +86,11 @@ export const IntegrationsList = ({
 
   const onLoadIntegrations = async () => {
     try {
+      isLoading(true);
       const response = await IntegrationService.all(dataflowId, designerState.datasetSchemaId);
       integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response } });
       integrationsList(response);
+      refreshList(false);
     } catch (error) {
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
     } finally {
@@ -115,10 +121,19 @@ export const IntegrationsList = ({
     return fieldColumns;
   };
 
-  if (integrationListState.isLoading) return <Spinner style={{ top: 0 }} />;
+  if (integrationListState.isLoading) {
+    return (
+    <div className={styles.integrationsWithoutTable}>
+      <div className={styles.spinnerIntegrations}><Spinner style={{ top: 0, left: 0 }} /></div>
+    </div>);
+  }
 
-  return isEmpty(integrationListState.data) ? (
-    <div className={styles.noIntegrations}>{resources.messages['noIntegrations']}</div>
+  return isEmpty(false) ? (
+    <div className={styles.integrationsWithoutTable}>
+      <div className={styles.noIntegrations}>
+        {resources.messages['noIntegrations']}
+      </div>
+    </div>
   ) : (
     <div className={styles.integrations}>
       <Filters

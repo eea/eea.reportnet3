@@ -36,7 +36,7 @@ import org.eea.dataset.validate.commands.ValidationSchemaCommand;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -97,9 +97,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private TableSchemaMapper tableSchemaMapper;
 
-  /** The record store controller zull. */
+  /** The record store controller zuul. */
   @Autowired
-  private RecordStoreControllerZull recordStoreControllerZull;
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
   /** The rules controller zuul. */
   @Autowired
@@ -336,7 +336,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schemasRepository.save(schema);
     // Call to recordstores to make the restoring of the dataset data (table, records and fields
     // values)
-    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, 0L, DatasetTypeEnum.DESIGN,
+    recordStoreControllerZuul.restoreSnapshotData(idDataset, idSnapshot, 0L, DatasetTypeEnum.DESIGN,
         (String) ThreadPropertiesManager.getVariable("user"), true, true);
   }
 
@@ -526,6 +526,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         updateIsPkReferencedInFieldSchema(fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
             fieldSchemaVO.getReferencedField().getIdPk(), true);
       }
+      if (null == fieldSchemaVO.getReadOnly()) {
+        fieldSchemaVO.setReadOnly(false);
+      }
       // we create this if to clean blank space at begining and end of any codelistItem
       // n codelist and multiselect
       if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
@@ -651,6 +654,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (fieldSchemaVO.getMaxSize() != null) {
       fieldSchema.put("maxSize", fieldSchemaVO.getMaxSize());
     }
+
+    if (fieldSchemaVO.getReadOnly() != null) {
+      fieldSchema.put("readOnly", fieldSchemaVO.getReadOnly());
+    }
+
     if (fieldSchemaVO.getValidExtensions() != null) {
       String[] validExtensions = fieldSchemaVO.getValidExtensions();
       for (int i = 0; i < validExtensions.length; i++) {

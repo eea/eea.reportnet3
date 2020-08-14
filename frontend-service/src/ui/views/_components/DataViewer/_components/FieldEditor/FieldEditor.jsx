@@ -21,12 +21,14 @@ const FieldEditor = ({
   cells,
   colsSchema,
   datasetId,
+  hasWritePermissions,
   onEditorKeyChange,
   onEditorSubmitValue,
   onEditorValueChange,
   onEditorValueFocus,
   onMapOpen,
-  record
+  record,
+  reporting
 }) => {
   const resources = useContext(ResourcesContext);
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
@@ -45,8 +47,10 @@ const FieldEditor = ({
   }, []);
 
   let fieldType = {};
+
+  let isReadOnlyField = RecordUtils.getCellInfo(colsSchema, cells.field).readOnly;
   if (!isEmpty(record)) {
-    fieldType = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cells.field)[0].fieldData.type;
+    fieldType = RecordUtils.getCellInfo(colsSchema, cells.field).type;
   }
 
   const onFilter = async filter => {
@@ -136,11 +140,11 @@ const FieldEditor = ({
   const renderField = type => {
     const longCharacters = 20;
     const decimalCharacters = 40;
-    const dateCharacters = 10;
+    // const dateCharacters = 10;
     const textCharacters = 10000;
     const richTextCharacters = 10000;
     const emailCharacters = 256;
-    const phoneCharacters = 256;
+    // const phoneCharacters = 256;
     const urlCharacters = 5000;
 
     switch (type) {
@@ -446,7 +450,11 @@ const FieldEditor = ({
     }
   };
 
-  return !isEmpty(fieldType) ? renderField(fieldType) : null;
+  return !isEmpty(fieldType) && !isReadOnlyField
+    ? renderField(fieldType)
+    : !reporting
+    ? renderField(fieldType)
+    : RecordUtils.getCellValue(cells, cells.field);
 };
 
 export { FieldEditor };
