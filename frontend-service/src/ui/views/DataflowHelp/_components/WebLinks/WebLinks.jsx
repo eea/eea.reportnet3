@@ -324,7 +324,6 @@ export const WebLinks = ({
           header={resources.messages['delete']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          maximizable={false}
           onConfirm={e => onDeleteWeblink(e)}
           onHide={onHideDeleteDialog}
           visible={isConfirmDeleteVisible}>
