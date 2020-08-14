@@ -19,6 +19,7 @@ const parse = ({ type, content = {}, message, config, routes }) => {
   const notificationDTO = {};
   config.forEach(notificationGeneralTypeConfig => {
     const notificationTypeConfig = notificationGeneralTypeConfig.types.find(configType => configType.key === type);
+
     if (notificationTypeConfig) {
       const { key, fixed, lifeTime } = notificationGeneralTypeConfig;
       const { fixed: typeFixed, lifeTime: typeLifeTime, navigateTo } = notificationTypeConfig;
@@ -27,6 +28,7 @@ const parse = ({ type, content = {}, message, config, routes }) => {
       notificationDTO.fixed = !isUndefined(typeFixed) ? typeFixed : fixed;
       notificationDTO.lifeTime = typeLifeTime || lifeTime;
       notificationDTO.key = type;
+      notificationDTO.content = content;
       const contentKeys = Object.keys(content);
 
       if (!isUndefined(navigateTo) && !isNull(navigateTo)) {
@@ -55,17 +57,30 @@ const parse = ({ type, content = {}, message, config, routes }) => {
   });
   return new Notification(notificationDTO);
 };
+const parseHidden = ({ type, content = {}, config }) => {
+  const notificationDTO = {};
+  const notificationTypeConfig = config.filter(notificationGeneralTypeConfig => notificationGeneralTypeConfig === type);
+
+  if (notificationTypeConfig) {
+    notificationDTO.key = type;
+    notificationDTO.content = content;
+  }
+
+  return new Notification(notificationDTO);
+};
 
 const getSectionValidationRedirectionUrl = sectionDTO => {
   if (!isNil(sectionDTO)) {
     if (sectionDTO === 'REPORTING') {
       return 'DATASET';
-    } else if (sectionDTO === 'DESIGN') {
-      return 'DATASET_SCHEMA';
-    } else {
-      return 'EU_DATASET';
     }
+
+    if (sectionDTO === 'DESIGN') {
+      return 'DATASET_SCHEMA';
+    }
+
+    return 'EU_DATASET';
   }
 };
 
-export const ApiNotificationRepository = { all, parse, removeAll, removeById, readAll, readById };
+export const ApiNotificationRepository = { all, parse, parseHidden, removeAll, removeById, readAll, readById };

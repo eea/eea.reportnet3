@@ -6,21 +6,17 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 export const apiDocument = {
   all: async dataflowId => {
     const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON
-        ? '/jsons/list-of-documents.json'
-        : getUrl(DataflowConfig.loadDatasetsByDataflowId, {
-            dataflowId: dataflowId
-          })
+      url: getUrl(DataflowConfig.loadDatasetsByDataflowId, {
+        dataflowId: dataflowId
+      })
     });
     return response.data.documents;
   },
   downloadById: async documentId => {
     const response = await HTTPRequester.download({
-      url: window.env.REACT_APP_JSON
-        ? '/jsons/list-of-documents.json'
-        : getUrl(DocumentConfig.downloadDocumentById, {
-            documentId: documentId
-          }),
+      url: getUrl(DocumentConfig.downloadDocumentById, {
+        documentId: documentId
+      }),
       headers: {
         'Content-Type': 'application/octet-stream'
       }

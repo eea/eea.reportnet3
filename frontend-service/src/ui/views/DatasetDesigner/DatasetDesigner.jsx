@@ -86,6 +86,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     exportButtonsList: [],
     exportDatasetData: null,
     exportDatasetDataName: '',
+    exportDatasetFileType: '',
     extensionsOperationsList: { export: [], import: [] },
     hasWritePermissions: false,
     initialDatasetDescription: '',
@@ -203,6 +204,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   
   const refreshUniqueList = value => setNeedsRefreshUnique(value);
 
+  useEffect(() => {
+    const response = notificationContext.hidden.find(
+      notification => notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT'
+    );
+
+    if (response) downloadExportFMEFile();
+  }, [notificationContext.hidden]);
+
   const callSetMetaData = async () => {
     const metaData = await getMetadata({ datasetId, dataflowId });
     designerDispatch({
@@ -227,6 +236,26 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const createFileName = (fileName, fileType) => `${fileName}.${fileType}`;
 
+  const downloadExportFMEFile = async () => {
+    try {
+      const [notification] = notificationContext.hidden.filter(
+        notification => notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT'
+      );
+
+      const datasetName = createFileName(designerState.datasetSchemaName, designerState.exportDatasetFileType);
+      const datasetData = await DatasetService.downloadExportFile(datasetId, notification.content.fileName);
+
+      designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData, name: datasetName } });
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({
+        type: 'DOWNLOAD_FME_FILE_ERROR'
+      });
+    } finally {
+      isLoadingFile(false);
+    }
+  };
+
   const filterActiveIndex = index => {
     if (!isNil(index) && isNaN(index)) {
       const filteredTable = designerState.datasetSchema.tables.filter(table => table.tableSchemaId === index);
@@ -242,7 +271,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     const { extensionsOperationsList } = designerState;
 
     const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => ({
-      command: () => onExportData(type.code),
+      command: () => onExportDataInternalExtension(type.code),
       icon: config.icons['archive'],
       label: type.text
     }));
@@ -251,7 +280,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       {
         label: resources.messages['externalExtensions'],
         items: extensionsOperationsList.export.map(type => ({
-          command: () => onExportData(type.fileExtension.toUpperCase()),
+          command: () => onExportDataExternalExtension(type.fileExtension),
           icon: config.icons['archive'],
           label: `${type.fileExtension.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
         }))
@@ -394,22 +423,40 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const onExportData = async fileType => {
+  const onExportError = async () => {
+    const {
+      dataflow: { name: dataflowName },
+      dataset: { name: datasetName }
+    } = await getMetadata({ dataflowId, datasetId });
+
+    notificationContext.add({
+      type: 'EXPORT_DATA_BY_ID_ERROR',
+      content: { dataflowId, datasetId, dataflowName, datasetName }
+    });
+  };
+
+  const setFileType = fileType => designerDispatch({ type: 'SET_EXPORT_DATASET_FILE_TYPE', payload: { fileType } });
+
+  const onExportDataExternalExtension = async fileExtension => {
     isLoadingFile(true);
+    setFileType(fileExtension);
+    try {
+      await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
+    } catch (error) {
+      onExportError();
+    }
+  };
+
+  const onExportDataInternalExtension = async fileType => {
+    isLoadingFile(true);
+    setFileType(fileType);
     try {
       const datasetName = createFileName(designerState.datasetSchemaName, fileType);
       const datasetData = await DatasetService.exportDataById(datasetId, fileType);
 
       designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData, name: datasetName } });
     } catch (error) {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'EXPORT_DATA_BY_ID_ERROR',
-        content: { dataflowId, datasetId, dataflowName, datasetName }
-      });
+      onExportError();
     } finally {
       isLoadingFile(false);
     }

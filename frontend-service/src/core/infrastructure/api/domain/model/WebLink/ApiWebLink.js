@@ -6,11 +6,9 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 export const apiWebLink = {
   all: async dataflowId => {
     const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON
-        ? '/jsons/list-of-documents.json'
-        : getUrl(DataflowConfig.loadDatasetsByDataflowId, {
-            dataflowId: dataflowId
-          })
+      url: getUrl(DataflowConfig.loadDatasetsByDataflowId, {
+        dataflowId: dataflowId
+      })
     });
     return response.data.weblinks;
   },
