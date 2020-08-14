@@ -168,7 +168,15 @@ export const Dataset = withRouter(({ match, history }) => {
     getExportExtensions(extensionsOperationsList.export);
   }, [extensionsOperationsList]);
 
-  const parseUniqsExportExtensions = exportExtensionsOperationsList => {
+  useEffect(() => {
+    const [thisNotification] = notificationContext.hidden.filter(
+      notification => notification.key === 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
+    );
+
+    if (thisNotification) downloadExportFMEFile();
+  }, [notificationContext.hidden]);
+
+  const parseUniqExportExtensions = exportExtensionsOperationsList => {
     return exportExtensionsOperationsList.map(uniqExportExtension => ({
       text: `${uniqExportExtension.toUpperCase()} (.${uniqExportExtension.toLowerCase()})`,
       code: uniqExportExtension.toLowerCase()
@@ -176,8 +184,8 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const getExportExtensions = exportExtensionsOperationsList => {
-    const uniqsExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
-    setExternalExportExtensions(parseUniqsExportExtensions(uniqsExportExtensions));
+    const uniqExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
+    setExternalExportExtensions(parseUniqExportExtensions(uniqExportExtensions));
   };
 
   const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => ({
@@ -311,7 +319,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const downloadExportFMEFile = async () => {
     try {
-      const [notification] = notificationContext.all.filter(
+      const [notification] = notificationContext.hidden.filter(
         notification => notification.key === 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
       );
 
@@ -333,8 +341,6 @@ export const Dataset = withRouter(({ match, history }) => {
       setLoadingFile(false);
     }
   };
-
-  useCheckNotifications(['EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'], downloadExportFMEFile);
 
   const onLoadTableData = hasData => {
     setDatasetHasData(hasData);
