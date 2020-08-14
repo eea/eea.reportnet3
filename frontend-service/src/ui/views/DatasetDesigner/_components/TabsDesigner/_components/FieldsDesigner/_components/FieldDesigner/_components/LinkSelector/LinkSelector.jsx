@@ -163,7 +163,6 @@ const LinkSelector = withRouter(
         <Dialog
           blockScroll={false}
           contentStyle={{ overflow: 'auto' }}
-          closeOnEscape={false}
           footer={linkSelectorDialogFooter}
           header={resources.messages['linkSelector']}
           modal={true}
