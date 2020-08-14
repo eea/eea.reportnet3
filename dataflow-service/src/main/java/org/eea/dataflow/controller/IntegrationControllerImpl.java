@@ -70,7 +70,7 @@ public class IntegrationControllerImpl implements IntegrationController {
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ')")
   @PutMapping(value = "/listIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Find all Integrations by integration criteria",
+  @ApiOperation(value = "Find all Integrations by Integration Criteria",
       produces = MediaType.APPLICATION_JSON_VALUE, response = IntegrationVO.class,
       responseContainer = "List")
   @ApiResponse(code = 500, message = "Internal Server Error")
@@ -94,8 +94,10 @@ public class IntegrationControllerImpl implements IntegrationController {
   @Override
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
   @GetMapping("/findExportEUDatasetIntegration")
+  @ApiOperation(value = "Find EU Dataset Export Integration by its Schema Id",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = IntegrationVO.class)
   public IntegrationVO findExportEUDatasetIntegration(
-      @RequestParam("datasetSchemaId") String datasetSchemaId) {
+      @ApiParam(value = "Schema Id") @RequestParam("datasetSchemaId") String datasetSchemaId) {
     return integrationService.getExportEUDatasetIntegration(datasetSchemaId);
   }
 
@@ -108,7 +110,7 @@ public class IntegrationControllerImpl implements IntegrationController {
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#integration.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Create integration by integration Criteria")
+  @ApiOperation(value = "Create Integration")
   @ApiResponse(code = 500, message = "Internal Server Error")
   public void createIntegration(@ApiParam(type = "Object",
       value = "IntegrationVO Object") @RequestBody IntegrationVO integration) {
@@ -130,7 +132,7 @@ public class IntegrationControllerImpl implements IntegrationController {
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
   @DeleteMapping(value = "/{integrationId}/dataflow/{dataflowId}")
-  @ApiOperation(value = "Delete integration by integration Criteria")
+  @ApiOperation(value = "Delete Integration by its Integration Id")
   @ApiResponse(code = 500, message = "Internal Server Error")
   public void deleteIntegration(
       @ApiParam(value = "Integration id",
@@ -155,7 +157,7 @@ public class IntegrationControllerImpl implements IntegrationController {
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#integration.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Update integration by integration Criteria")
+  @ApiOperation(value = "Update Integration")
   @ApiResponse(code = 500, message = "Internal Server Error")
   public void updateIntegration(@ApiParam(type = "Object",
       value = "IntegrationVO Object") @RequestBody IntegrationVO integration) {
@@ -178,7 +180,7 @@ public class IntegrationControllerImpl implements IntegrationController {
   @HystrixCommand
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ')")
   @PutMapping(value = "/listExtensionsOperations", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Find integrations and Operations by integration Criteria",
+  @ApiOperation(value = "Find Integrations and Operations by Integration Criteria",
       produces = MediaType.APPLICATION_JSON_VALUE, response = IntegrationVO.class,
       responseContainer = "List")
   @ApiResponse(code = 500, message = "Internal Server Error")
@@ -207,7 +209,7 @@ public class IntegrationControllerImpl implements IntegrationController {
   @Override
   @HystrixCommand
   @PostMapping(value = "/private/executeIntegration")
-  @ApiOperation(value = "Find integrations and Operations by integration Criteria",
+  @ApiOperation(value = "Find Integrations and Operations by Integration Criteria",
       response = ExecutionResultVO.class, hidden = true)
   public ExecutionResultVO executeIntegrationProcess(@ApiParam(type = "Object",
       value = "IntegrationEnum Object") @RequestParam("integrationTool") IntegrationToolTypeEnum integrationToolTypeEnum,

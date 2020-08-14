@@ -1173,7 +1173,6 @@ const DataViewer = withRouter(
           <Dialog
             blockScroll={false}
             className="edit-table calendar-table"
-            closeOnEscape={false}
             footer={editRowDialogFooter}
             header={resources.messages['editRow']}
             modal={true}
