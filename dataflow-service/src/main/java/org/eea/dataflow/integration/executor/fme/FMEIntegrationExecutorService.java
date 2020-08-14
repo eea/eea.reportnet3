@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
+import org.eea.dataflow.integration.executor.fme.domain.NMDirectives;
 import org.eea.dataflow.integration.executor.fme.domain.PublishedParameter;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.integration.executor.service.AbstractIntegrationExecutorService;
@@ -175,6 +176,18 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     String paramDataProvider = null != providerId ? providerId.toString() : "design";
 
     List<PublishedParameter> parameters = new ArrayList<>();
+
+    NMDirectives nmDirectives = new NMDirectives();
+
+    List<String> successTopics = new ArrayList<>();
+    successTopics.add("Reportnet3_Success_Topic");
+    nmDirectives.setSuccessTopics(successTopics);
+
+    List<String> failureTopics = new ArrayList<>();
+    failureTopics.add("Reportnet3_Failure_Topic");
+    nmDirectives.setFailureTopics(failureTopics);
+
+    fmeAsyncJob.setNmDirectives(nmDirectives);
 
     // dataflowId
     parameters.add(saveParameter(IntegrationParams.DATAFLOW_ID,

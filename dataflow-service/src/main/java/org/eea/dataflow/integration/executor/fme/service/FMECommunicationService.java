@@ -120,6 +120,7 @@ public class FMECommunicationService {
 
     Map<String, String> headerInfo = new HashMap<>();
     headerInfo.put(CONTENT_TYPE, APPLICATION_JSON);
+    headerInfo.put(ACCEPT, APPLICATION_JSON);
 
     ResponseEntity<SubmitResult> checkResult = null;
     Integer result = 0;
