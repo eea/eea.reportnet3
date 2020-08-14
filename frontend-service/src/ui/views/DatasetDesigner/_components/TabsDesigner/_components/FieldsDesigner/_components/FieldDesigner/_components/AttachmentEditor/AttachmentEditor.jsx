@@ -84,7 +84,6 @@ const AttachmentEditor = ({
     <Dialog
       blockScroll={false}
       contentStyle={{ overflow: 'auto' }}
-      closeOnEscape={false}
       focusOnShow={false}
       footer={attachmentDialogFooter}
       header={resources.messages['validExtensionEditor']}

@@ -14,7 +14,7 @@ export const Dialog = ({
   children,
   className,
   closable,
-  closeOnEscape,
+  closeOnEscape = false,
   contentStyle,
   dismissableMask,
   focusOnShow = true,
