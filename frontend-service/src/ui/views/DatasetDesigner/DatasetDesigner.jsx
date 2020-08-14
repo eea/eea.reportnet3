@@ -202,11 +202,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, [designerState.exportDatasetData]);
 
   useEffect(() => {
-    const [thisNotification] = notificationContext.hidden.filter(
+    const response = notificationContext.hidden.find(
       notification => notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT'
     );
 
-    if (thisNotification) downloadExportFMEFile();
+    if (response) downloadExportFMEFile();
   }, [notificationContext.hidden]);
 
   const callSetMetaData = async () => {

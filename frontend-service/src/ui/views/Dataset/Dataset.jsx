@@ -169,11 +169,11 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [extensionsOperationsList]);
 
   useEffect(() => {
-    const [thisNotification] = notificationContext.hidden.filter(
+    const response = notificationContext.hidden.find(
       notification => notification.key === 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
     );
 
-    if (thisNotification) downloadExportFMEFile();
+    if (response) downloadExportFMEFile();
   }, [notificationContext.hidden]);
 
   const parseUniqExportExtensions = exportExtensionsOperationsList => {
