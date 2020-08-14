@@ -23,15 +23,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface DatasetSchemaController {
 
   /**
-   * The Interface DataSetSchemaControllerZuul.
+   * The Interface DatasetSchemaControllerZuul.
    */
   @FeignClient(value = "dataset", contextId = "dataschema", path = "/dataschema")
-  interface DataSetSchemaControllerZuul extends DatasetSchemaController {
+  interface DatasetSchemaControllerZuul extends DatasetSchemaController {
 
   }
 
   /**
-   * Creates the empty data schema.
+   * Creates the empty dataset schema.
    *
    * @param dataflowId the dataflow id
    * @param datasetSchemaName the dataset schema name
@@ -289,6 +289,4 @@ public interface DatasetSchemaController {
   SimpleDatasetSchemaVO getSimpleSchema(@PathVariable("datasetId") Long datasetId,
       @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
-
-
 }

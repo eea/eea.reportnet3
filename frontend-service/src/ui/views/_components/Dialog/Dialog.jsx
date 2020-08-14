@@ -1,8 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import uuid from 'uuid';
 
 import styles from './Dialog.module.scss';
 
 import { Dialog as PrimeDialog } from 'primereact/dialog';
+
+import { DialogContext } from 'ui/views/_functions/Contexts/DialogContext';
 
 export const Dialog = ({
   appendTo,
@@ -11,7 +14,7 @@ export const Dialog = ({
   children,
   className,
   closable,
-  closeOnEscape,
+  closeOnEscape = false,
   contentStyle,
   dismissableMask,
   focusOnShow = true,
@@ -26,30 +29,52 @@ export const Dialog = ({
   showHeader,
   style,
   visible,
-  zIndex
+  zIndex = 5000
 }) => {
-  const maskStyle = {
+  const dialogContext = useContext(DialogContext);
+  const [dialogId, setDialogId] = useState('');
+  const [maskStyle, setMaskStyle] = useState({
     display: visible ? 'flex' : 'none',
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex
-  };
+    zIndex: zIndex
+  });
 
   const dialogStyle = {
     top: 'auto',
     left: 'auto',
-    zIndex
+    zIndex: zIndex
   };
+
+  useEffect(() => {
+    const newDialogId = uuid.v4();
+    setDialogId(newDialogId);
+    dialogContext.add(newDialogId);
+    return () => {
+      dialogContext.remove(dialogId);
+    };
+  }, []);
 
   useEffect(() => {
     const body = document.querySelector('body');
     visible && (body.style.overflow = 'hidden');
 
     return () => {
-      body.style.overflow = 'hidden auto';
+      if (dialogContext.open.length === 0) {
+        body.style.overflow = 'hidden auto';
+      }
     };
   }, [visible]);
+
+  useEffect(() => {
+    if (dialogContext.open.indexOf(dialogId) >= 0) {
+      setMaskStyle({
+        ...maskStyle,
+        zIndex: zIndex + dialogContext.open.indexOf(dialogId)
+      });
+    }
+  }, [dialogContext.open]);
   return (
     <div className={styles.dialog_mask_wrapper} style={maskStyle}>
       <PrimeDialog

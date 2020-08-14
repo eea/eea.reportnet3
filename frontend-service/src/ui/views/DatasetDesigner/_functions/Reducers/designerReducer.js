@@ -1,5 +1,3 @@
-import { sample } from 'lodash';
-
 export const designerReducer = (state, { type, payload }) => {
   switch (type) {
     case 'GET_EXPORT_LIST':

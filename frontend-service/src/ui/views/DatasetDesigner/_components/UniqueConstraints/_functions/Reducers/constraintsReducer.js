@@ -13,7 +13,7 @@ export const constraintsReducer = (state, { type, payload }) => {
       return { ...state, isDeleteDialogVisible: payload.value };
 
     case 'IS_LOADING':
-      return { ...state, isLoading: payload };
+      return { ...state, isLoading: payload.value };
 
     case 'ON_LOAD_CONSTRAINT_ID':
       return { ...state, fieldId: payload.value };

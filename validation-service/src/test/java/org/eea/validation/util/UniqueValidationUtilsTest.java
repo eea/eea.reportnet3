@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController.DataSetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.validation.persistence.data.domain.DatasetValue;
@@ -40,7 +40,7 @@ public class UniqueValidationUtilsTest {
   private UniqueValidationUtils uniqueValidationUtils;
 
   @Mock
-  private DataSetSchemaControllerZuul dataSetSchemaControllerZuul;
+  private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
 
   @Mock
   private SchemasRepository schemasRepository;
@@ -63,8 +63,8 @@ public class UniqueValidationUtilsTest {
   @Before
   public void initMocks() {
 
-    ReflectionTestUtils.setField(uniqueValidationUtils, "dataSetSchemaControllerZuul",
-        dataSetSchemaControllerZuul);
+    ReflectionTestUtils.setField(uniqueValidationUtils, "datasetSchemaControllerZuul",
+        datasetSchemaControllerZuul);
     ReflectionTestUtils.setField(uniqueValidationUtils, "schemasRepository", schemasRepository);
     ReflectionTestUtils.setField(uniqueValidationUtils, "rulesRepository", rulesRepository);
     ReflectionTestUtils.setField(uniqueValidationUtils, "recordRepository", recordRepository);
@@ -119,7 +119,7 @@ public class UniqueValidationUtilsTest {
         .setReferencedFields(Arrays.asList("5ece3de73fd71093b81eb4e6", "5e44110d6a9e3a270ce13fac"));
     integrityVO.setIsDoubleReferenced(true);
 
-    when(dataSetSchemaControllerZuul.getUniqueConstraint(Mockito.any()))
+    when(datasetSchemaControllerZuul.getUniqueConstraint(Mockito.any()))
         .thenReturn(uniqueConstraintVO);
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(dataSetSchema);
     when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);

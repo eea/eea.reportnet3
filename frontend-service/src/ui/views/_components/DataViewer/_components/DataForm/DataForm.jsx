@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { Fragment, useContext } from 'react';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
@@ -16,16 +16,16 @@ const DataForm = ({
   editDialogVisible,
   formType,
   getTooltipMessage,
+  hasWritePermissions,
   onChangeForm,
   records,
+  reporting,
   onShowFieldInfo
 }) => {
   const resources = useContext(ResourcesContext);
 
   const allAttachments = () => {
-    console.log({ colsSchema });
     const notAttachment = colsSchema.filter(col => col.type && col.type.toUpperCase() !== 'ATTACHMENT');
-    console.log({ notAttachment });
     return notAttachment.length === 0;
   };
 
@@ -36,7 +36,7 @@ const DataForm = ({
         if (!isUndefined(records.editedRecord.dataRow)) {
           const field = records.editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
           return (
-            <React.Fragment key={column.field}>
+            <Fragment key={column.field}>
               {column.type.toUpperCase() !== 'ATTACHMENT' && (
                 <div className="p-col-4" style={{ padding: '.75em' }}>
                   <label htmlFor={column.field}>{`${column.header}${
@@ -76,11 +76,13 @@ const DataForm = ({
                       ? ''
                       : field.fieldData[column.field]
                   }
+                  hasWritePermissions={hasWritePermissions}
                   isVisible={editDialogVisible}
                   onChangeForm={onChangeForm}
-                  type={column.type}></DataFormFieldEditor>
+                  reporting={reporting}
+                  type={column.type} />
               </div>
-            </React.Fragment>
+            </Fragment>
           );
         }
       }
@@ -93,7 +95,7 @@ const DataForm = ({
         if (!isUndefined(records.newRecord.dataRow)) {
           const field = records.newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
           return (
-            <React.Fragment key={column.field}>
+            <Fragment key={column.field}>
               {!allAttachments() ? (
                 column.type.toUpperCase() !== 'ATTACHMENT' && (
                   <div className="p-col-4" style={{ padding: '.75em' }}>
@@ -134,11 +136,13 @@ const DataForm = ({
                       ? ''
                       : field.fieldData[column.field]
                   }
+                  hasWritePermissions={hasWritePermissions}
                   isVisible={addDialogVisible}
                   onChangeForm={onChangeForm}
-                  type={column.type}></DataFormFieldEditor>
+                  reporting={reporting}
+                  type={column.type} />
               </div>
-            </React.Fragment>
+            </Fragment>
           );
         }
       }

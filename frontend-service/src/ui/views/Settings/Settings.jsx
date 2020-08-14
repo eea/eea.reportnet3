@@ -27,8 +27,12 @@ const Settings = withRouter(({ history }) => {
   const renderUserOptions = () => {
     return (
       <>
-        <UserConfiguration />
-        <UserCard />
+        <div className={styles.userConfiguration}>
+          <UserConfiguration />
+        </div>
+        <div className={styles.userCard}>
+          <UserCard />
+        </div>
       </>
     );
   };

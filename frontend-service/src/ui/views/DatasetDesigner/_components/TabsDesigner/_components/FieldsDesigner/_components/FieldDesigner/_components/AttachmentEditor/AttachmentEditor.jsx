@@ -56,7 +56,6 @@ const AttachmentEditor = ({
   );
 
   const renderChips = () => {
-    console.log({ validExtensions });
     return (
       <div onPaste={onPasteChips} className={styles.validExtensionsWrapper}>
         <div className={styles.inputTitleWrapper}>
@@ -85,7 +84,6 @@ const AttachmentEditor = ({
     <Dialog
       blockScroll={false}
       contentStyle={{ overflow: 'auto' }}
-      closeOnEscape={false}
       focusOnShow={false}
       footer={attachmentDialogFooter}
       header={resources.messages['validExtensionEditor']}

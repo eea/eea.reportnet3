@@ -46,8 +46,10 @@ export const UniqueConstraints = ({
   });
 
   useEffect(() => {
-    onLoadConstraints();
-  }, [constraintsState.isDataUpdated]);
+    if (!designerState.isManageUniqueConstraintDialogVisible) {
+      onLoadConstraints();
+    }
+  }, [constraintsState.isDataUpdated, designerState.isManageUniqueConstraintDialogVisible]);
 
   useEffect(() => {
     if (getUniques) getUniques(constraintsState.data);
@@ -57,7 +59,7 @@ export const UniqueConstraints = ({
     <ActionsColumn
       onDeleteClick={() => isDeleteDialogVisible(true)}
       onEditClick={() => {
-        manageDialogs('isUniqueConstraintsListDialogVisible', false, 'isManageUniqueConstraintDialogVisible', true);
+        manageDialogs('isManageUniqueConstraintDialogVisible', true);
       }}
     />
   );
@@ -66,7 +68,7 @@ export const UniqueConstraints = ({
 
   const isDeleteDialogVisible = value => constraintsDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
 
-  const isLoading = value => constraintsDispatch({ type: 'IS_LOADING', payload: value });
+  const isLoading = value => constraintsDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onDeleteConstraint = async () => {
     try {
@@ -82,6 +84,7 @@ export const UniqueConstraints = ({
 
   const onLoadConstraints = async () => {
     try {
+      isLoading(true);
       const response = await UniqueConstraintsService.all(dataflowId, datasetSchemaId);
       constraintsDispatch({
         type: 'INITIAL_LOAD',
@@ -128,10 +131,18 @@ export const UniqueConstraints = ({
 
   const renderFieldBody = rowData => rowData.fieldData.map(field => field.name).join(', ');
 
-  if (constraintsState.isLoading) return <Spinner style={{ top: 0 }} />;
+  if (constraintsState.isLoading)
+  return (
+  <div className={styles.constraintsWithoutTable}>
+    <div className={styles.spinner}><Spinner style={{ top: 0, left: 0 }} /></div>
+  </div>);
 
   return isEmpty(constraintsState.data) ? (
-    <div className={styles.noConstraints}>{resources.messages['noConstraints']}</div>
+    <div className={styles.constraintsWithoutTable}>
+      <div className={styles.noConstraints}>
+        {resources.messages['noConstraints']}
+      </div>
+    </div>
   ) : (
     <div className={styles.constraints}>
       <Filters

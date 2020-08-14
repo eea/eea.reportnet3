@@ -66,6 +66,7 @@ const DataViewer = withRouter(
     },
     onLoadTableData,
     recordPositionId,
+    reporting,
     selectedRecordErrorId,
     setIsValidationSelected,
     showWriteButtons,
@@ -161,6 +162,7 @@ const DataViewer = withRouter(
           cells={cells}
           colsSchema={colsSchema}
           datasetId={datasetId}
+          hasWritePermissions={hasWritePermissions}
           onEditorKeyChange={onEditorKeyChange}
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
@@ -168,6 +170,7 @@ const DataViewer = withRouter(
           // onFileUploadOpen={onFileUploadOpen}
           onMapOpen={onMapOpen}
           record={record}
+          reporting={reporting}
         />
       );
     };
@@ -196,15 +199,9 @@ const DataViewer = withRouter(
       const fileContent = await DatasetService.downloadFileData(datasetId, fieldId);
 
       DownloadFile(fileContent, fileName);
-
-      // const a = document.createElement('a');
-      //   a.href = `data:text/plain;base64,${splittedFieldValue[2]}`;
-      //   a.download = splittedFieldValue[0];
-      //   a.click();
     };
 
     const onFileUploadVisible = (fieldId, fieldSchemaId, validExtensions, maxSize) => {
-      console.log(validExtensions, maxSize);
       dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId, validExtensions, maxSize } });
     };
 
@@ -628,15 +625,13 @@ const DataViewer = withRouter(
       if (event) {
         const clipboardData = event.clipboardData;
         const pastedData = clipboardData.getData('Text');
-        console.log({ pastedData });
-        dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
+        dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema, reporting } });
       }
     };
 
     const onPasteAsync = async () => {
       const pastedData = await navigator.clipboard.readText();
-      console.log('PASTE ASYNC');
-      dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
+      dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema, reporting } });
     };
 
     const onPasteAccept = async () => {
@@ -651,7 +646,6 @@ const DataViewer = withRouter(
           setIsTableDeleted(false);
         }
       } catch (error) {
-        console.log({ error });
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
@@ -1164,9 +1158,11 @@ const DataViewer = withRouter(
                   datasetId={datasetId}
                   formType="NEW"
                   getTooltipMessage={getTooltipMessage}
+                  hasWritePermissions={hasWritePermissions}
                   onChangeForm={onEditAddFormInput}
                   onShowFieldInfo={onShowFieldInfo}
                   records={records}
+                  reporting={reporting}
                 />
               </div>
             </Dialog>
@@ -1177,7 +1173,6 @@ const DataViewer = withRouter(
           <Dialog
             blockScroll={false}
             className="edit-table calendar-table"
-            closeOnEscape={false}
             footer={editRowDialogFooter}
             header={resources.messages['editRow']}
             modal={true}
@@ -1192,9 +1187,11 @@ const DataViewer = withRouter(
                 editDialogVisible={editDialogVisible}
                 formType="EDIT"
                 getTooltipMessage={getTooltipMessage}
+                hasWritePermissions={hasWritePermissions}
                 onChangeForm={onEditAddFormInput}
                 onShowFieldInfo={onShowFieldInfo}
                 records={records}
+                reporting={reporting}
               />
             </div>
           </Dialog>

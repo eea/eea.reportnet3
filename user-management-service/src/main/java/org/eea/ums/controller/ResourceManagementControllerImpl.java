@@ -36,7 +36,9 @@ import io.swagger.annotations.ApiResponse;
 @Api(tags = "Resources : Resources Manager")
 public class ResourceManagementControllerImpl implements ResourceManagementController {
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
@@ -55,7 +57,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @PreAuthorize("isAuthenticated()")
   @PostMapping(value = "/create")
   @ResponseStatus(HttpStatus.CREATED)
-  @ApiOperation(value = "Create one resource")
+  @ApiOperation(value = "Create a Resource")
   @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)
   public void createResource(@ApiParam(type = "Object",
       value = "ResourceInfoVO Object") @RequestBody ResourceInfoVO resourceInfoVO) {
@@ -79,7 +81,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @PreAuthorize("isAuthenticated()")
   @DeleteMapping(value = "/delete")
   @ResponseStatus(HttpStatus.OK)
-  @ApiOperation(value = "Delete one or more resource")
+  @ApiOperation(value = "Delete a list of Resources")
   public void deleteResource(@ApiParam(type = "List<Object>",
       value = "ResourceInfoVO Object List") @RequestBody List<ResourceInfoVO> resourceInfoVO) {
     securityProviderInterfaceService.deleteResourceInstances(resourceInfoVO);
@@ -95,7 +97,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @PreAuthorize("isAuthenticated()")
   @DeleteMapping(value = "/delete_by_name")
   @ResponseStatus(HttpStatus.OK)
-  @ApiOperation(value = "Delete one or more by its name")
+  @ApiOperation(value = "Delete a list of Resources by their Names")
   public void deleteResourceByName(@ApiParam(type = "List<String>",
       value = "Resource name String List ") @RequestParam("resourceNames") List<String> resourceName) {
     securityProviderInterfaceService.deleteResourceInstancesByName(resourceName);
@@ -110,7 +112,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/delete_by_dataset_id")
-  @ApiOperation(value = "Delete one by its dataset id")
+  @ApiOperation(value = "Delete a Resource its Dataset Id")
   public void deleteResourceByDatasetId(@ApiParam(type = "Object",
       value = "Dataset ids Long list") @RequestParam("datasetIds") List<Long> datasetIds) {
     securityProviderInterfaceService.deleteResourceInstancesByDatasetId(datasetIds);
@@ -128,7 +130,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/details")
-  @ApiOperation(value = "Get one resource Detail")
+  @ApiOperation(value = "Get a Resource details")
   public ResourceInfoVO getResourceDetail(
       @ApiParam(value = "Resource id", example = "0") @RequestParam("idResource") Long idResource,
       @ApiParam(type = "Object",
@@ -150,7 +152,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/getResourceInfoVOByResource")
-  @ApiOperation(value = "Get groups by resource type", response = ResourceInfoVO.class,
+  @ApiOperation(value = "Get Resources by their Type", response = ResourceInfoVO.class,
       responseContainer = "List")
   public List<ResourceInfoVO> getGroupsByIdResourceType(
       @ApiParam(value = "Resource id", example = "0") @RequestParam("idResource") Long idResource,
@@ -170,7 +172,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @PreAuthorize("isAuthenticated()")
   @PostMapping(value = "/createList")
   @ResponseStatus(HttpStatus.CREATED)
-  @ApiOperation(value = "Create one o more resources at same time")
+  @ApiOperation(value = "Create Resources at same time")
   @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)
   public void createResources(@ApiParam(type = "List<Objects>",
       value = "ResourceInfoVOs List objects") @RequestBody List<ResourceInfoVO> resourceInfoVOs) {

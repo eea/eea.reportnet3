@@ -38,28 +38,35 @@ import io.swagger.annotations.ApiResponse;
 @Api(tags = "FME : FME Manager")
 public class FMEControllerImpl implements FMEController {
 
-  /** The FME communication service. */
+  /**
+   * The FME communication service.
+   */
   @Autowired
   private FMECommunicationService fmeCommunicationService;
 
-  /** The streaming util. */
+  /**
+   * The streaming util.
+   */
   @Autowired
   StreamingUtil streamingUtil;
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Find repositories.
    *
    * @param datasetId the dataset id
+   *
    * @return the collection VO
    */
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE') OR (hasRole('DATA_CUSTODIAN')) OR (hasRole('DATA_STEWARD'))")
   @GetMapping(value = "/findRepositories", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Find FME repositories", produces = MediaType.APPLICATION_JSON_VALUE,
+  @ApiOperation(value = "Find FME Repositories", produces = MediaType.APPLICATION_JSON_VALUE,
       response = FMECollectionVO.class)
   public FMECollectionVO findRepositories(
       @ApiParam(value = "Dataset id", example = "0") @RequestParam("datasetId") Long datasetId) {
@@ -71,13 +78,14 @@ public class FMEControllerImpl implements FMEController {
    *
    * @param datasetId the dataset id
    * @param repository the repository
+   *
    * @return the collection VO
    */
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE') OR (hasRole('DATA_CUSTODIAN')) OR (hasRole('DATA_STEWARD'))")
   @GetMapping(value = "/findItems", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Find FME items", produces = MediaType.APPLICATION_JSON_VALUE,
+  @ApiOperation(value = "Find FME Items", produces = MediaType.APPLICATION_JSON_VALUE,
       response = FMECollectionVO.class)
   public FMECollectionVO findItems(
       @ApiParam(value = "Dataset id", example = "0") @RequestParam("datasetId") Long datasetId,
@@ -93,7 +101,7 @@ public class FMEControllerImpl implements FMEController {
   @Override
   @PostMapping("/operationFinished")
   @PreAuthorize("checkApiKey(#fmeOperationInfoVO.dataflowId, #fmeOperationInfoVO.providerId)")
-  @ApiOperation(value = "FME Operation finished")
+  @ApiOperation(value = "Notify a FME Operation finished")
   @ApiResponse(code = 400, message = "Internal Server Error")
   public void operationFinished(@ApiParam(value = "FME Operation info",
       type = "Object") @RequestBody FMEOperationInfoVO fmeOperationInfoVO) {
@@ -116,11 +124,13 @@ public class FMEControllerImpl implements FMEController {
    * @param datasetId the dataset id
    * @param providerId the provider id
    * @param fileName the file name
+   *
    * @return the response entity
    */
   @Override
   @GetMapping(value = "/downloadExportFile", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE') OR (hasRole('DATA_CUSTODIAN')) OR (hasRole('DATA_STEWARD'))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_EDITOR_WRITE', 'DATASCHEMA_CUSTODIAN', 'DATASET_CUSTODIAN', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER', 'DATASET_REPORTER_READ', 'DATASET_REPORTER_WRITE')")
+  @ApiOperation(value = "Download an exported data file from FME")
   public ResponseEntity<StreamingResponseBody> downloadExportFile(
       @RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "providerId", required = false) Long providerId,
@@ -135,9 +145,8 @@ public class FMEControllerImpl implements FMEController {
     HttpHeaders httpHeaders = new HttpHeaders();
     httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
 
-    return new ResponseEntity<StreamingResponseBody>(stream, httpHeaders, HttpStatus.OK);
+    return new ResponseEntity<>(stream, httpHeaders, HttpStatus.OK);
   }
-
 
 
 }
