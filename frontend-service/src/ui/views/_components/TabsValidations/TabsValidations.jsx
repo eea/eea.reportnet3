@@ -63,7 +63,8 @@ const TabsValidations = withRouter(
     }, [tabsValidationsState.isDataUpdated]);
 
     useEffect(() => {
-      const response = notificationContext.hidden.find(notification => notification === 'VALIDATED_QC_RULE_EVENT');
+      const response = notificationContext.hidden.find(notification => notification.key === 'VALIDATED_QC_RULE_EVENT');
+
       if (response) onUpdateData();
     }, [notificationContext]);
 

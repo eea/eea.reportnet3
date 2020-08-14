@@ -21,11 +21,9 @@ export const apiValidation = {
   },
   getAll: async datasetSchemaId => {
     const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON
-        ? `/dataschema/${datasetSchemaId}/fieldSchema`
-        : getUrl(ValidationConfig.getAll, {
-            datasetSchemaId
-          })
+      url: getUrl(ValidationConfig.getAll, {
+        datasetSchemaId
+      })
     });
     return response.data;
   },

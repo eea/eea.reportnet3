@@ -44,6 +44,7 @@ const NotificationProvider = ({ children }) => {
             type: 'NEW_NOTIFICATION_ADDED'
           });
         },
+
         read: notificationId => {
           dispatch({
             type: 'READ',
@@ -60,18 +61,30 @@ const NotificationProvider = ({ children }) => {
             }
           });
         },
+
         clearToShow: () => {
           dispatch({
             type: 'CLEAR_TO_SHOW',
             payload: {}
           });
         },
+
         deleteAll: () => {
           dispatch({
             type: 'DESTROY'
           });
         },
-        hide: notification => dispatch({ type: 'HIDE', payload: { hidden: notification.type } })
+
+        hide: notificationDTO => {
+          const { type, content } = notificationDTO;
+          const notification = NotificationService.parseHidden({
+            type,
+            content,
+            config: config.notifications.hiddenNotifications
+          });
+
+          dispatch({ type: 'HIDE', payload: notification });
+        }
       }}>
       {children}
     </NotificationContext.Provider>
