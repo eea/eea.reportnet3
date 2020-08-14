@@ -18,7 +18,7 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   datasetTableFieldDesign.codelistItems = datasetTableRecordField.codelistItems;
   datasetTableFieldDesign.description = datasetTableRecordField.description;
   datasetTableFieldDesign.idRecord = datasetTableRecordField.recordId;
-  datasetTableFieldDesign.maxSize = datasetTableRecordField.maxSize ? datasetTableRecordField.maxSize.toString() : null;
+  datasetTableFieldDesign.maxSize = !isNull(datasetTableRecordField.maxSize) ? datasetTableRecordField.maxSize.toString() : null;
   datasetTableFieldDesign.pk = datasetTableRecordField.pk;
   datasetTableFieldDesign.pkHasMultipleValues = datasetTableRecordField.pkHasMultipleValues;
   datasetTableFieldDesign.pkMustBeUsed = datasetTableRecordField.pkMustBeUsed;
@@ -401,7 +401,7 @@ const updateRecordFieldDesign = async (datasetId, record) => {
   datasetTableFieldDesign.description = record.description;
   datasetTableFieldDesign.id = record.fieldSchemaId;
   datasetTableFieldDesign.idRecord = record.recordId;
-  datasetTableFieldDesign.maxSize = record.maxSize ? record.maxSize.toString() : null;
+  datasetTableFieldDesign.maxSize = !isNull(record.maxSize) ? record.maxSize.toString() : null;
   datasetTableFieldDesign.name = record.name;
   datasetTableFieldDesign.pk = record.pk;
   datasetTableFieldDesign.pkHasMultipleValues = record.pkHasMultipleValues;
