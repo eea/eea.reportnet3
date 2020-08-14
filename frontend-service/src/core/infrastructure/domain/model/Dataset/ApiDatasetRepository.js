@@ -22,10 +22,11 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   datasetTableFieldDesign.maxSize = !isNil(datasetTableRecordField.maxSize)
     ? datasetTableRecordField.maxSize.toString()
     : null;
+  datasetTableFieldDesign.name = datasetTableRecordField.name;
   datasetTableFieldDesign.pk = datasetTableRecordField.pk;
   datasetTableFieldDesign.pkHasMultipleValues = datasetTableRecordField.pkHasMultipleValues;
   datasetTableFieldDesign.pkMustBeUsed = datasetTableRecordField.pkMustBeUsed;
-  datasetTableFieldDesign.name = datasetTableRecordField.name;
+  datasetTableFieldDesign.readOnly = datasetTableRecordField.readOnly;
   datasetTableFieldDesign.referencedField = datasetTableRecordField.referencedField;
   datasetTableFieldDesign.required = datasetTableRecordField.required;
   datasetTableFieldDesign.type = datasetTableRecordField.type;
