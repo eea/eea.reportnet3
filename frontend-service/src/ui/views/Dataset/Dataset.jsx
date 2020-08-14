@@ -580,9 +580,16 @@ export const Dataset = withRouter(({ match, history }) => {
     />
   );
 
-  if (loading) {
-    return layout(<Spinner />);
-  }
+  const renderDashboardFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => onSetVisible(setDashDialogVisible, false)}
+    />
+  )
+
+  if (loading) return layout(<Spinner />);
 
   return layout(
     <SnapshotContext.Provider
@@ -702,7 +709,7 @@ export const Dataset = withRouter(({ match, history }) => {
       </div>
       {dashDialogVisible && (
         <Dialog
-          dismissableMask={true}
+          footer={renderDashboardFooter}
           header={resources.messages['titleDashboard']}
           onHide={() => onSetVisible(setDashDialogVisible, false)}
           style={{ width: '70vw' }}
@@ -732,7 +739,6 @@ export const Dataset = withRouter(({ match, history }) => {
       {validationsVisible && (
         <Dialog
           className={styles.paginatorValidationViewer}
-          dismissableMask={true}
           header={resources.messages['titleValidations']}
           onHide={() => onSetVisible(setValidationsVisible, false)}
           style={{ width: '80%' }}
@@ -751,7 +757,6 @@ export const Dataset = withRouter(({ match, history }) => {
       {validationListDialogVisible && (
         <Dialog
           className={hasValidations ? styles.qcRulesDialog : styles.qcRulesDialogEmpty}
-          dismissableMask={true}
           footer={validationListFooter}
           header={resources.messages['qcRules']}
           onHide={() => onSetVisible(setValidationListDialogVisible, false)}
