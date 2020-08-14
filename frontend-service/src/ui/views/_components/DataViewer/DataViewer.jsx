@@ -894,8 +894,6 @@ const DataViewer = withRouter(
               icon={AwesomeIcons('check')}
               style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
             />
-          ) : rowData.field === 'Single select items' ? (
-            <Chips disabled={true} value={rowData.value}></Chips>
           ) : (
             rowData.value
           )}

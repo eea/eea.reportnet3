@@ -1,34 +1,24 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import capitalize from 'lodash/capitalize';
 import isUndefined from 'lodash/isUndefined';
 
-import styles from './Dashboard.module.css';
+import styles from './Dashboard.module.scss';
 
 import colors from 'conf/colors.json';
 
 import { Chart } from 'primereact/chart';
-import { ColorPicker } from 'ui/views/_components/ColorPicker';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { StatusList } from 'ui/views/_components/StatusList';
 
 import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 import { useStatusFilter } from 'ui/views/_components/StatusList/_hooks/useStatusFilter';
 
 import { ErrorUtils } from 'ui/views/_functions/Utils';
-
-const SEVERITY_CODE = {
-  CORRECT: 0,
-  INFO: 1,
-  WARNING: 2,
-  ERROR: 3,
-  BLOCKER: 4
-};
 
 const Dashboard = withRouter(
   React.memo(
@@ -39,13 +29,13 @@ const Dashboard = withRouter(
         params: { datasetId }
       }
     }) => {
-      const [dashboardColors, setDashboardColors] = useState({
+      const dashboardColors = {
         CORRECT: colors.correct,
         INFO: colors.info,
         WARNING: colors.warning,
         ERROR: colors.error,
         BLOCKER: colors.blocker
-      });
+      };
       const [dashboardData, setDashboardData] = useState({});
       const [dashboardTitle, setDashboardTitle] = useState('');
       const [isLoading, setIsLoading] = useState(false);
@@ -65,14 +55,6 @@ const Dashboard = withRouter(
           setDashboardData([]);
         };
       }, [refresh, datasetId]);
-
-      const onChangeColor = (color, type) => {
-        const inmDashboardColors = { ...dashboardColors };
-        inmDashboardColors[Object.keys(SEVERITY_CODE)[type - 1]] = `#${color}`;
-        setDashboardColors(inmDashboardColors);
-        chartRef.current.chart.data.datasets[type - 1].backgroundColor = `#${color}`;
-        chartRef.current.refresh();
-      };
 
       const getLevelErrorsOrdered = levelErrors => {
         return ErrorUtils.orderLevelErrors(levelErrors);
@@ -131,10 +113,6 @@ const Dashboard = withRouter(
             {
               stacked: true,
               gridLines: { display: false }
-              // gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#707070' },
-              // ticks: {
-              //   fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#707070'
-              // }
             }
           ],
           yAxes: [
@@ -143,16 +121,13 @@ const Dashboard = withRouter(
               scaleLabel: {
                 display: true,
                 labelString: resources.messages['percentage']
-                // fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#707070'
               },
               ticks: {
                 min: 0,
                 max: 100,
-                callback: (value, index, values) => `${value}%`
-                // fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#707070'
+                callback: (value) => `${value}%`
               },
               gridLines: { display: false }
-              // gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#707070' }
             }
           ]
         }
@@ -165,39 +140,49 @@ const Dashboard = withRouter(
           ![].concat.apply([], dashboardData.datasets[0].totalData).every(total => total === 0)
         ) {
           return (
-            <div className={styles.chartDiv}>
-              <StatusList
-                filterDispatch={statusDispatcher}
-                filteredStatusTypes={updatedState.filterStatus}
-                statusTypes={levelErrorTypes}
-              />
-              <Chart
-                data={updatedState.dashboardData}
-                height="95%"
-                options={dashboardOptions}
-                ref={chartRef}
-                type="bar"
-              />
-            </div>
+            <Fragment>
+              <span
+              className={styles.dashboardWarning}
+              dangerouslySetInnerHTML={{__html: resources.messages['dashboardWarning']}}></span>
+              <div className={styles.chartDiv}>
+                <StatusList
+                  filterDispatch={statusDispatcher}
+                  filteredStatusTypes={updatedState.filterStatus}
+                  statusTypes={levelErrorTypes}
+                />
+                <Chart
+                  data={updatedState.dashboardData}
+                  height="95%"
+                  options={dashboardOptions}
+                  ref={chartRef}
+                  type="bar"
+                />
+              </div>
+            </Fragment>
           );
         } else {
-          return <div className={styles.NoErrorData}>{resources.messages['noErrorData']}</div>;
+          return ( 
+          <div className={styles.dashboardWithoutData}>
+            <div className={styles.noDashboard}>
+              {resources.messages['noValidationDashboardData']}
+            </div>
+          </div>);
         }
       };
 
-      if (isLoading) return <Spinner className={styles.dashBoardSpinner} />;
+      if (isLoading) {
+        return (
+          <div className={styles.dashboardWithoutData}>
+            <div className={styles.spinner}><Spinner style={{ top: 0, left: 0 }} /></div>
+          </div>
+        );
+      }
 
       return (
-        <React.Fragment>
+        <Fragment>
           {dashboardTitle && <h1 className={styles.dashboardTitle}>{dashboardTitle}</h1>}
-          <span
-            className={styles.dashboardWarning}
-            dangerouslySetInnerHTML={{
-              __html: resources.messages['dashboardWarning']
-            }}></span>{' '}
           {renderDashboard()}
-          {/* {renderColorPicker()} */}
-        </React.Fragment>
+        </Fragment>
       );
     }
   )

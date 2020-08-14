@@ -112,6 +112,7 @@ export const FieldsDesigner = ({
     pkHasMultipleValues,
     pkMustBeUsed,
     name,
+    readOnly,
     recordId,
     referencedField,
     required,
@@ -128,6 +129,7 @@ export const FieldsDesigner = ({
       pkHasMultipleValues,
       pkMustBeUsed,
       name,
+      readOnly,
       recordId,
       referencedField,
       required,
@@ -155,6 +157,7 @@ export const FieldsDesigner = ({
     pkHasMultipleValues,
     pkMustBeUsed,
     name,
+    readOnly,
     referencedField,
     required,
     type,
@@ -173,6 +176,7 @@ export const FieldsDesigner = ({
       inmFields[fieldIndex].pkMustBeUsed = pkMustBeUsed;
       inmFields[fieldIndex].referencedField = referencedField;
       inmFields[fieldIndex].required = required;
+      inmFields[fieldIndex].readOnly = readOnly;
       inmFields[fieldIndex].type = type;
       inmFields[fieldIndex].validExtensions = validExtensions;
       onChangeFields(inmFields, isLinkChange, table.tableSchemaId);
