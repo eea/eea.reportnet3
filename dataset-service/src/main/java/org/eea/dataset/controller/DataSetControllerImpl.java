@@ -203,8 +203,8 @@ public class DataSetControllerImpl implements DatasetController {
             datasetService.getTableReadOnly(datasetId, idTableSchema, EntityTypeEnum.TABLE))) {
       datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
       LOG_ERROR.error(
-          "Error importing a file into a table of the dataset {}. The table is read only",
-          datasetId);
+          "Error importing the file {} into a table of the dataset {}. The table is read only",
+          file.getOriginalFilename(), datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
@@ -212,10 +212,10 @@ public class DataSetControllerImpl implements DatasetController {
             EntityTypeEnum.TABLE))) {
       datasetService.releaseLock(LockSignature.LOAD_TABLE.getValue(), datasetId, idTableSchema);
       LOG_ERROR.error(
-          "Error importing a file into a table of the dataset {}. The table has a fixed number of records",
-          datasetId);
+          "Error importing the file {} into a table of the dataset {}. The table has a fixed number of records",
+          file.getOriginalFilename(), datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.FIXED_NUMBER_OF_RECORDS);
+          String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, idTableSchema));
     }
     // extract the filename
     String fileName = file.getOriginalFilename();
@@ -422,7 +422,10 @@ public class DataSetControllerImpl implements DatasetController {
           "Error deleting record in the datasetId {}. The table has a fixed number of records",
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.FIXED_NUMBER_OF_RECORDS);
+          String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
+              datasetService.getTableFixedNumberOfRecords(datasetId,
+                  datasetService.findRecordSchemaIdById(datasetId, recordId),
+                  EntityTypeEnum.RECORD)));
     }
     try {
       updateRecordHelper.executeDeleteProcess(datasetId, recordId);
@@ -465,7 +468,7 @@ public class DataSetControllerImpl implements DatasetController {
           "Error inserting records in the datasetId {}. The table has a fixed number of records",
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.FIXED_NUMBER_OF_RECORDS);
+          String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, idTableSchema));
     }
     try {
       updateRecordHelper.executeCreateProcess(datasetId, records, idTableSchema);
@@ -513,7 +516,7 @@ public class DataSetControllerImpl implements DatasetController {
           "Error deleting the table values from the datasetId {}. The table has a fixed number of records",
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.FIXED_NUMBER_OF_RECORDS);
+          String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, tableSchemaId));
     }
 
     LOG.info("Executing delete table value with id {} from dataset {}", tableSchemaId, datasetId);

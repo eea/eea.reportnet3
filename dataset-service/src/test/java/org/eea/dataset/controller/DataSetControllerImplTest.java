@@ -249,7 +249,8 @@ public class DataSetControllerImplTest {
           new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), false);
       dataSetControllerImpl.loadTableData(1L, file, "example");
     } catch (ResponseStatusException e) {
-      assertEquals(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, e.getReason());
+      assertEquals(String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, "example"),
+          e.getReason());
       throw e;
     }
   }
@@ -597,9 +598,11 @@ public class DataSetControllerImplTest {
       Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
       Mockito.when(authentication.getName()).thenReturn("user");
 
-      dataSetControllerImpl.deleteImportTable(1L, "");
+      dataSetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190");
     } catch (ResponseStatusException e) {
-      assertEquals(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, e.getReason());
+      assertEquals(
+          String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, "5cf0e9b3b793310e9ceca190"),
+          e.getReason());
       throw e;
     }
   }
@@ -721,7 +724,11 @@ public class DataSetControllerImplTest {
 
       dataSetControllerImpl.deleteRecord(1L, recordId);
     } catch (ResponseStatusException e) {
-      assertEquals(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, e.getReason());
+      assertEquals(
+          String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
+              datasetService.getTableFixedNumberOfRecords(1L,
+                  datasetService.findRecordSchemaIdById(1L, recordId), EntityTypeEnum.RECORD)),
+          e.getReason());
       throw e;
     }
   }
@@ -825,7 +832,7 @@ public class DataSetControllerImplTest {
 
       dataSetControllerImpl.insertRecords(1L, "id", records);
     } catch (ResponseStatusException e) {
-      assertEquals(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, e.getReason());
+      assertEquals(String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, "id"), e.getReason());
       throw e;
     }
   }

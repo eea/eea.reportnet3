@@ -97,14 +97,14 @@ public interface RecordRepository
   void deleteByDataProviderCode(@Param("dataProviderCode") String dataProviderCode);
 
 
+
   /**
-   * Find id record schema by id.
+   * Find by id.
    *
    * @param id the id
-   * @return the string
+   * @return the record value
    */
-  @Query("SELECT r.idRecordSchema FROM RecordValue r WHERE r.id=:id")
-  String findIdRecordSchemaById(@Param("id") String id);
+  RecordValue findById(String id);
 
 
 }

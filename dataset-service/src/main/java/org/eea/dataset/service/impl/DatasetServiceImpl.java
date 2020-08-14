@@ -1497,7 +1497,8 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   public String findRecordSchemaIdById(Long datasetId, String idRecord) {
-    return recordRepository.findIdRecordSchemaById(idRecord);
+    RecordValue record = recordRepository.findById(idRecord);
+    return record.getIdRecordSchema();
   }
 
 

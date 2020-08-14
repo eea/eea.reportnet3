@@ -2399,8 +2399,10 @@ public class DatasetServiceTest {
 
   @Test
   public void testFindRecordSchemaById() {
-    Mockito.when(recordRepository.findIdRecordSchemaById(Mockito.anyString()))
-        .thenReturn("5cf0e9b3b793310e9ceca190");
+    RecordValue record = new RecordValue();
+    record.setId("0A07FD45F1CD7965A2B0F13E57948A13");
+    record.setIdRecordSchema("5cf0e9b3b793310e9ceca190");
+    Mockito.when(recordRepository.findById(Mockito.anyString())).thenReturn(record);
     assertEquals("5cf0e9b3b793310e9ceca190",
         datasetService.findRecordSchemaIdById(1L, "0A07FD45F1CD7965A2B0F13E57948A13"));
   }
