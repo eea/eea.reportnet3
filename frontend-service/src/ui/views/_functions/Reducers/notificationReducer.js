@@ -7,6 +7,7 @@ export const notificationReducer = (state, { type, payload }) => {
         all: [...state.all, payload],
         newNotification: true
       };
+
     case 'READ':
       return {
         ...state,
@@ -14,22 +15,26 @@ export const notificationReducer = (state, { type, payload }) => {
         all: [...state.all, payload],
         newNotification: false
       };
+
     case 'REMOVE':
       return {
         toShow: [...state.toShow, payload],
         all: [...state.all, payload]
       };
+
     case 'CLEAR_TO_SHOW':
       return {
         ...state,
         toShow: []
       };
+
     case 'DESTROY':
       return {
         ...state,
         toShow: [],
         all: []
       };
+
     case 'NEW_NOTIFICATION_ADDED':
       return {
         ...state,
@@ -37,7 +42,7 @@ export const notificationReducer = (state, { type, payload }) => {
       };
 
     case 'HIDE':
-      return { ...state, hidden: [...state.hidden, payload.hidden] };
+      return { ...state, hidden: [payload] };
 
     default:
       return state;

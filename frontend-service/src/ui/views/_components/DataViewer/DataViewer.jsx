@@ -894,8 +894,6 @@ const DataViewer = withRouter(
               icon={AwesomeIcons('check')}
               style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
             />
-          ) : rowData.field === 'Single select items' ? (
-            <Chips disabled={true} value={rowData.value}></Chips>
           ) : (
             rowData.value
           )}
@@ -1173,7 +1171,6 @@ const DataViewer = withRouter(
           <Dialog
             blockScroll={false}
             className="edit-table calendar-table"
-            closeOnEscape={false}
             footer={editRowDialogFooter}
             header={resources.messages['editRow']}
             modal={true}

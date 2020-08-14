@@ -1,5 +1,3 @@
-import { isUndefined } from 'lodash';
-
 export const fieldDesignerReducer = (state, { type, payload }) => {
   switch (type) {
     case 'CANCEL_SELECT_ATTACHMENT':
@@ -27,11 +25,12 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
       return {
         ...state,
         codelistItems: [],
-        fieldRequiredValue: false,
         fieldDesignerState: '',
         fieldLinkValue: null,
         fieldPkHasMultipleValues: false,
         fieldPkMustBeUsed: false,
+        fieldReadOnlyValue: false,
+        fieldRequiredValue: false,
         fieldTypeValue: '',
         fieldValue: '',
         fieldDescriptionValue: '',

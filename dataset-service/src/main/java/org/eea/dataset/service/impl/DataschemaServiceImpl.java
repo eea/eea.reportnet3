@@ -369,6 +369,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (null == tableSchemaVO.getReadOnly()) {
       tableSchemaVO.setReadOnly(false);
     }
+    if (null == tableSchemaVO.getFixedNumber()) {
+      tableSchemaVO.setFixedNumber(false);
+    }
 
     RecordSchema recordSchema = new RecordSchema();
     recordSchema.setIdRecordSchema(recordSchemaId);
@@ -416,6 +419,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
         if (tableSchemaVO.getToPrefill() != null) {
           tableSchema.put("toPrefill", tableSchemaVO.getToPrefill());
+        }
+        if (tableSchemaVO.getFixedNumber() != null) {
+          tableSchema.put("fixedNumber", tableSchemaVO.getFixedNumber());
         }
         if (tableSchemaVO.getNotEmpty() != null) {
           Boolean oldValue = tableSchema.getBoolean("notEmpty");

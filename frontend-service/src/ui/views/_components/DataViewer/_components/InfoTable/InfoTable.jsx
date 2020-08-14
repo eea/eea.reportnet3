@@ -102,9 +102,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
         !isNil(column.description) && column.description !== ''
           ? column.description
           : resources.messages['noDescription']
-      }<br/><span style="font-weight:bold">${
-          column.type === 'CODELIST' ? resources.messages['codelists'] : resources.messages['multiselectCodelists']
-        }: </span>
+      }<br/><span style="font-weight:bold">${column.type === 'CODELIST' ? resources.messages['codelists'] : resources.messages['multiselectCodelists']}: </span>
       ${column.codelistItems
         .map(codelistItem =>
           !isEmpty(codelistItem) && codelistItem.length > 15 ? `${codelistItem.substring(0, 15)}...` : codelistItem

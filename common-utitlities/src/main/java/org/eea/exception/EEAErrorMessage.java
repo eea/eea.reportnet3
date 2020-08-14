@@ -262,6 +262,10 @@ public final class EEAErrorMessage {
   /** The Constant OPERATION_TYPE_NOT_EDITABLE: {@value}. */
   public static final String OPERATION_TYPE_NOT_EDITABLE = "The operation type is not editable";
 
+  /** The Constant FIXED_NUMBER_OF_RECORDS: {@value}. */
+  public static final String FIXED_NUMBER_OF_RECORDS =
+      "The table with id schema %s has a fixed number of records";
+
   /**
    * Instantiates a new EEA error message.
    */

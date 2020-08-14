@@ -383,10 +383,11 @@ export const FieldDesigner = ({
           fieldId: response.data,
           fieldLinkValue: null,
           maxSize,
+          name,
           pk,
           pkHasMultipleValues,
           pkMustBeUsed,
-          name,
+          readOnly,
           recordId,
           referencedField,
           required,
@@ -992,7 +993,6 @@ export const FieldDesigner = ({
         <Dialog
           blockScroll={false}
           contentStyle={{ overflow: 'auto' }}
-          closeOnEscape={false}
           footer={qcDialogFooter}
           header={resources.messages['qcManager']}
           modal={true}

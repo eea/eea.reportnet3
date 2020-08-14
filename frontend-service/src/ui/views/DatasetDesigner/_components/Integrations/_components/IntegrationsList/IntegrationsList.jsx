@@ -88,7 +88,7 @@ export const IntegrationsList = ({
     try {
       isLoading(true);
       const response = await IntegrationService.all(dataflowId, designerState.datasetSchemaId);
-      integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response } });
+      integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response, filteredData: response } });
       integrationsList(response);
       refreshList(false);
     } catch (error) {
@@ -124,11 +124,11 @@ export const IntegrationsList = ({
   if (integrationListState.isLoading) {
     return (
     <div className={styles.integrationsWithoutTable}>
-      <div className={styles.spinnerIntegrations}><Spinner style={{ top: 0, left: 0 }} /></div>
+      <div className={styles.spinner}><Spinner style={{ top: 0, left: 0 }} /></div>
     </div>);
   }
 
-  return isEmpty(false) ? (
+  return isEmpty(integrationListState.data) ? (
     <div className={styles.integrationsWithoutTable}>
       <div className={styles.noIntegrations}>
         {resources.messages['noIntegrations']}
