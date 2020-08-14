@@ -1,7 +1,5 @@
 import React, { useContext } from 'react';
 
-import styles from './Validations.module.scss';
-
 import { DatasetValidation } from './_components/DatasetValidation';
 import { FieldValidation } from './_components/FieldValidation';
 import { RowValidation } from './_components/RowValidation';

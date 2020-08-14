@@ -40,7 +40,6 @@ const Snapshots = ({
           header={snapshotContext.snapshotState.dialogMessage}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          maximizable={false}
           onConfirm={snapshotContext.snapshotState.action}
           onHide={() => setIsSnapshotDialogVisible(false)}
           showHeader={false}
