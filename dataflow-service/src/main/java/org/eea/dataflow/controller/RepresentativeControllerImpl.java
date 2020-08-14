@@ -44,18 +44,26 @@ import io.swagger.annotations.ApiResponses;
 @Api(tags = "Representatives : Representatives Manager")
 public class RepresentativeControllerImpl implements RepresentativeController {
 
-  /** The representative service. */
+  /**
+   * The representative service.
+   */
   @Autowired
   private RepresentativeService representativeService;
 
-  /** The user management controller zull. */
+  /**
+   * The user management controller zull.
+   */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant EMAIL_REGEX: {@value}. */
+  /**
+   * The Constant EMAIL_REGEX: {@value}.
+   */
   private static final String EMAIL_REGEX =
       "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$";
 
@@ -64,6 +72,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    *
    * @param dataflowId the dataflow id
    * @param representativeVO the representative VO
+   *
    * @return the long
    */
   @Override
@@ -107,7 +116,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @HystrixCommand
   @GetMapping(value = "/dataProvider/{groupId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  @ApiOperation(value = "Find all DataProviders  by group iD",
+  @ApiOperation(value = "Find all DataProviders  by their Group Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataProviderVO.class,
       responseContainer = "List")
   @ApiResponse(code = 400, message = EEAErrorMessage.REPRESENTATIVE_TYPE_INCORRECT)
@@ -129,25 +138,25 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @HystrixCommand
   @GetMapping(value = "/dataProvider/types", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  @ApiOperation(value = "Find all DataProviders types", produces = MediaType.APPLICATION_JSON_VALUE,
+  @ApiOperation(value = "Find all DataProvider types", produces = MediaType.APPLICATION_JSON_VALUE,
       response = DataProviderVO.class, responseContainer = "List")
   public List<DataProviderCodeVO> findAllDataProviderTypes() {
     return representativeService.getAllDataProviderTypes();
   }
 
 
-
   /**
    * Find representatives by id data flow.
    *
    * @param dataflowId the dataflow id
+   *
    * @return the list
    */
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ')")
-  @ApiOperation(value = "Find representatives by dataflow id",
+  @ApiOperation(value = "Find Representatives by Dataflow Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = RepresentativeVO.class,
       responseContainer = "List")
   @ApiResponses(value = {@ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_NOTFOUND),
@@ -172,13 +181,14 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * Update representative.
    *
    * @param representativeVO the representative VO
+   *
    * @return the response entity
    */
   @Override
   @HystrixCommand
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
-  @ApiOperation(value = "Update representative by representative Object",
+  @ApiOperation(value = "Update a Representative",
       produces = MediaType.APPLICATION_JSON_VALUE, response = ResponseEntity.class)
   @ApiResponses(value = {@ApiResponse(code = 400, message = "Email field provider is not an email"),
       @ApiResponse(code = 404, message = "1-Representative not found \n 2-User request not found "),
@@ -252,13 +262,14 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * Find data provider by id.
    *
    * @param dataProviderId the data provider id
+   *
    * @return the data provider VO
    */
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataProvider/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("isAuthenticated()")
-  @ApiOperation(value = "Find DataProvider ")
+  @ApiOperation(value = "Find a DataProvider based on its Id")
   @ApiResponse(code = 404, message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND)
   public DataProviderVO findDataProviderById(
       @ApiParam(value = "Dataprovider id", example = "0") @PathVariable("id") Long dataProviderId) {
@@ -273,12 +284,13 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * Find data providers by ids.
    *
    * @param dataProviderIds the data provider ids
+   *
    * @return the list
    */
   @Override
   @GetMapping("/private/dataProvider")
-  @ApiOperation(value = "Find DataProviders", response = DataProviderVO.class,
-      responseContainer = "List")
+  @ApiOperation(value = "Find DataProviders based on a list of Id's", response = DataProviderVO.class,
+      responseContainer = "List", hidden = true)
   public List<DataProviderVO> findDataProvidersByIds(@ApiParam(value = "Dataproviders List",
       type = "Long List") @RequestParam("id") List<Long> dataProviderIds) {
     return representativeService.findDataProvidersByIds(dataProviderIds);

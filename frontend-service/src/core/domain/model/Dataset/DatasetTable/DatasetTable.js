@@ -2,12 +2,13 @@ export class DatasetTable {
   constructor({
     hasErrors,
     hasPKReferenced,
-    recordSchemaId,
     records,
+    recordSchemaId,
     recordsWithErrorsPercentage,
-    recordsWithWarningsPercentage,
     recordsWithoutErrorsPercentage,
+    recordsWithWarningsPercentage,
     tableSchemaDescription,
+    tableSchemaFixedNumber,
     tableSchemaId,
     tableSchemaName,
     tableSchemaNotEmpty,
@@ -19,15 +20,16 @@ export class DatasetTable {
     this.hasPKReferenced = hasPKReferenced;
     this.records = records;
     this.recordSchemaId = recordSchemaId;
-    this.recordsWithoutErrorsPercentage = recordsWithoutErrorsPercentage;
     this.recordsWithErrorsPercentage = recordsWithErrorsPercentage;
+    this.recordsWithoutErrorsPercentage = recordsWithoutErrorsPercentage;
     this.recordsWithWarningsPercentage = recordsWithWarningsPercentage;
     this.tableSchemaDescription = tableSchemaDescription;
-    this.tableSchemaToPrefill = tableSchemaToPrefill;
+    this.tableSchemaFixedNumber = tableSchemaFixedNumber;
     this.tableSchemaId = tableSchemaId;
     this.tableSchemaName = tableSchemaName;
     this.tableSchemaNotEmpty = tableSchemaNotEmpty;
     this.tableSchemaReadOnly = tableSchemaReadOnly;
+    this.tableSchemaToPrefill = tableSchemaToPrefill;
     this.totalRecords = totalRecords;
   }
 }

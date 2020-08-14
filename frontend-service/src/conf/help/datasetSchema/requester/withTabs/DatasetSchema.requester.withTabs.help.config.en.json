@@ -17,6 +17,10 @@
       "target": ".datasetSchema-pk-help-step"
     },
     {
+      "content": "Once clicked on the Read only, the reporter can't change data to that particular field",
+      "target": ".datasetSchema-readOnly-help-step"
+    },
+    {
       "content": "Manage table and field restrictions (QC rules) from this button",
       "target": ".datasetSchema-qcRules-help-step"
     },

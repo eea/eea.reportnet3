@@ -38,26 +38,40 @@ import io.swagger.annotations.ApiResponses;
 @RequestMapping("/contributor")
 public class ContributorControllerImpl implements ContributorController {
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(ContributorControllerImpl.class);
 
-  /** The Constant THE_EMAIL: {@value}. */
+  /**
+   * The Constant THE_EMAIL: {@value}.
+   */
   private static final String THE_EMAIL_NOT_EXISTS = "The email %s doesn't exist in repornet";
 
-  /** The Constant EDITOR: {@value}. */
+  /**
+   * The Constant EDITOR: {@value}.
+   */
   private static final String EDITOR = "EDITOR";
 
-  /** The Constant REPORTER: {@value}. */
+  /**
+   * The Constant REPORTER: {@value}.
+   */
   private static final String REPORTER = "REPORTER";
 
-  /** The contributor service. */
+  /**
+   * The contributor service.
+   */
   @Autowired
   private ContributorService contributorService;
 
-  /** The user management controller zull. */
+  /**
+   * The user management controller zull.
+   */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
@@ -70,7 +84,7 @@ public class ContributorControllerImpl implements ContributorController {
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   @DeleteMapping(value = "/editor/dataflow/{dataflowId}")
-  @ApiOperation(value = "Delete one Editor for One Dataflow")
+  @ApiOperation(value = "Delete one Editor in a Dataflow")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted editor"),
       @ApiResponse(code = 204, message = "Successfully deleted editor"),
       @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
@@ -107,7 +121,7 @@ public class ContributorControllerImpl implements ContributorController {
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
   @DeleteMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}")
-  @ApiOperation(value = "Delete one Reporter for One Dataflow")
+  @ApiOperation(value = "Delete one Reporter in a Dataflow")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted reporter"),
       @ApiResponse(code = 204, message = "Successfully deleted reporter"),
       @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
@@ -116,7 +130,7 @@ public class ContributorControllerImpl implements ContributorController {
   public void deleteReporter(
       @ApiParam(type = "Long", value = "Dataflow Id",
           example = "0") @PathVariable("dataflowId") Long dataflowId,
-      @ApiParam(type = "Long", value = "DataProvider Id",
+      @ApiParam(type = "Long", value = "Dataprovider Id",
           example = "0") @PathVariable("dataProviderId") Long dataProviderId,
       @ApiParam(type = "Object",
           value = "Contributors Properties") @RequestBody ContributorVO contributorVO) {
@@ -141,12 +155,13 @@ public class ContributorControllerImpl implements ContributorController {
    * Find editors by group.
    *
    * @param dataflowId the dataflow id
+   *
    * @return the list
    */
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   @GetMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Find all Editors in the Dataflow",
+  @ApiOperation(value = "Find all Editors in a Dataflow",
       produces = MediaType.APPLICATION_JSON_VALUE, response = ContributorVO.class,
       responseContainer = "List")
   public List<ContributorVO> findEditorsByGroup(@ApiParam(type = "Long", value = "Dataflow Id",
@@ -160,13 +175,14 @@ public class ContributorControllerImpl implements ContributorController {
    *
    * @param dataflowId the dataflow id
    * @param dataproviderId the dataprovider id
+   *
    * @return the list
    */
   @Override
   @GetMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataproviderId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
-  @ApiOperation(value = "Find all Reporters in the Dataflow",
+  @ApiOperation(value = "Find all Reporters in a Dataflow",
       produces = MediaType.APPLICATION_JSON_VALUE, response = ContributorVO.class,
       responseContainer = "List")
   public List<ContributorVO> findReportersByGroup(
@@ -183,16 +199,17 @@ public class ContributorControllerImpl implements ContributorController {
    *
    * @param dataflowId the dataflow id
    * @param contributorVO the contributor VO
+   *
    * @return the response entity
    */
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
   @PutMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Update one Editor in the Dataflow",
+  @ApiOperation(value = "Update one Editor in a Dataflow",
       produces = MediaType.APPLICATION_JSON_VALUE, response = ResponseEntity.class)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully update editor"),
-      @ApiResponse(code = 204, message = "Successfully update editor"),
+      @ApiResponse(code = 204, message = "Successfully updated editor"),
       @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
       @ApiResponse(code = 404, message = "The email doesn't exist in Repornet"),
       @ApiResponse(code = 500, message = "Internal Server Error")})
@@ -230,6 +247,7 @@ public class ContributorControllerImpl implements ContributorController {
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
    * @param contributorVO the contributor VO
+   *
    * @return the response entity
    */
   @Override
@@ -237,10 +255,10 @@ public class ContributorControllerImpl implements ContributorController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
   @PutMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Update one Reporter in the Dataflow",
+  @ApiOperation(value = "Update one Reporter in a Dataflow",
       produces = MediaType.APPLICATION_JSON_VALUE, response = ResponseEntity.class)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully update reporter"),
-      @ApiResponse(code = 204, message = "Successfully update reporter"),
+      @ApiResponse(code = 204, message = "Successfully updated reporter"),
       @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
       @ApiResponse(code = 404, message = "The email doesn't exist in Repornet"),
       @ApiResponse(code = 500, message = "Internal Server Error")})
@@ -280,9 +298,9 @@ public class ContributorControllerImpl implements ContributorController {
    */
   @Override
   @PostMapping("/private/dataflow/{dataflowId}/createAssociatedPermissions/{datasetId}")
-  @ApiOperation(value = "Create permissions for all datasetSchema in the  Dataflow")
+  @ApiOperation(value = "Create permissions for all Datasetschemas in a Dataflow", hidden = true)
   @ApiResponses(
-      value = {@ApiResponse(code = 200, message = "Successfully update reporter"), @ApiResponse(
+      value = {@ApiResponse(code = 200, message = "Successfully updated reporter"), @ApiResponse(
           code = 500, message = "Error creating  the associated permissions for editor role")})
   public void createAssociatedPermissions(
       @ApiParam(type = "Long", value = "Dataflow Id",
@@ -305,6 +323,7 @@ public class ContributorControllerImpl implements ContributorController {
    *
    * @param dataflowId the dataflow id
    * @param account the account
+   *
    * @throws EEAException
    */
   private void checkAccount(Long dataflowId, String account) throws EEAException {

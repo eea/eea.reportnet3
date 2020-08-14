@@ -27,7 +27,6 @@ axios.interceptors.response.use(
   },
   error => {
     const originalRequest = error.config;
-    console.log('error', error);
     if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       const { refreshToken } = userStorage.get();
