@@ -431,6 +431,9 @@
         },
         {
           "key": "ERROR_LOADING_PROCESSES"
+        },
+        {
+          "key": "DOWNLOAD_FME_FILE_ERROR"
         }
       ]
     },
@@ -649,5 +652,9 @@
       ]
     }
   ],
-  "hiddenNotifications": ["VALIDATED_QC_RULE_EVENT"]
+  "hiddenNotifications": [
+    "VALIDATED_QC_RULE_EVENT",
+    "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT",
+    "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT"
+  ]
 }

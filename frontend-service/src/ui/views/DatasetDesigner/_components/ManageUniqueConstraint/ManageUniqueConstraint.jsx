@@ -16,7 +16,7 @@ import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialogs, resetUniques }) => {
+export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialogs, refreshList, resetUniques }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -128,6 +128,7 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
       if (response.status >= 200 && response.status <= 299) {
         manageDialogs('isManageUniqueConstraintDialogVisible', false);
         onResetValues();
+        refreshList(true);
       }
     } catch (error) {
       notificationContext.add({ type: 'CREATE_UNIQUE_CONSTRAINT_ERROR' });
@@ -162,7 +163,8 @@ export const ManageUniqueConstraint = ({ dataflowId, designerState, manageDialog
         );
         if (response.status >= 200 && response.status <= 299) {
           manageDialogs('isManageUniqueConstraintDialogVisible', false);
-          onResetValues();
+          onResetValues();          
+          refreshList(true);
         }
       } catch (error) {
         notificationContext.add({ type: 'UPDATE_UNIQUE_CONSTRAINT_ERROR' });
