@@ -56,7 +56,7 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   @Override
   @HystrixCommand
   @GetMapping(value = "/document/{documentId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Find a Document its Id",
+  @ApiOperation(value = "Find a Document based on its Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DocumentVO.class)
   @ApiResponses(value = {@ApiResponse(code = 400, message = EEAErrorMessage.DOCUMENT_NOT_FOUND),
       @ApiResponse(code = 404, message = EEAErrorMessage.DOCUMENT_NOT_FOUND)})
