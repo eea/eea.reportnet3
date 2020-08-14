@@ -22,10 +22,7 @@ const getFieldValues = (columns, header, filterColumns) => {
   })[0];
 
   const filteredValues = pick(filteredColumn, ...filterColumns);
-  console.log({ filteredValues });
   return Object.keys(filteredValues).map(key => {
-    console.log(filteredValues[key]);
-    console.log(key);
     return {
       field:
         key === 'codelistItems'

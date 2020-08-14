@@ -18,7 +18,6 @@ import { Validations } from 'ui/views/DatasetDesigner/_components/Validations';
 
 import { DatasetService } from 'core/services/Dataset';
 
-import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 import isEmpty from 'lodash/isEmpty';
@@ -50,7 +49,6 @@ export const TabsDesigner = withRouter(
       params: { dataflowId, datasetId }
     } = match;
 
-    const leftSideBarContext = useContext(LeftSideBarContext);
     const validationContext = useContext(ValidationContext);
 
     // const [activeIndex, setActiveIndex] = useState(activeIdx);
@@ -494,7 +492,7 @@ export const TabsDesigner = withRouter(
     };
 
     return (
-      <React.Fragment>
+      <Fragment>
         {renderTabViews()}
         {renderErrors(errorMessageTitle, errorMessage)}
         {datasetSchema && tabs && validationContext.isVisible && (
@@ -505,7 +503,7 @@ export const TabsDesigner = withRouter(
             datasetId={datasetId}
           />
         )}
-      </React.Fragment>
+      </Fragment>
     );
   }
 );
