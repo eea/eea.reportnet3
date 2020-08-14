@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -26,6 +26,8 @@ export const UniqueConstraints = ({
   getManageUniqueConstraint,
   getUniques,
   manageDialogs,
+  needsRefresh = true,
+  refreshList,
   setIsDuplicatedToManageUnique
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -46,10 +48,10 @@ export const UniqueConstraints = ({
   });
 
   useEffect(() => {
-    if (!designerState.isManageUniqueConstraintDialogVisible) {
+    if (!designerState.isManageUniqueConstraintDialogVisible && needsRefresh) {
       onLoadConstraints();
     }
-  }, [constraintsState.isDataUpdated, designerState.isManageUniqueConstraintDialogVisible]);
+  }, [constraintsState.isDataUpdated, designerState.isManageUniqueConstraintDialogVisible, needsRefresh]);
 
   useEffect(() => {
     if (getUniques) getUniques(constraintsState.data);
@@ -58,9 +60,7 @@ export const UniqueConstraints = ({
   const actionsTemplate = () => (
     <ActionsColumn
       onDeleteClick={() => isDeleteDialogVisible(true)}
-      onEditClick={() => {
-        manageDialogs('isManageUniqueConstraintDialogVisible', true);
-      }}
+      onEditClick={() => manageDialogs('isManageUniqueConstraintDialogVisible', true)}
     />
   );
 
@@ -86,11 +86,13 @@ export const UniqueConstraints = ({
     try {
       isLoading(true);
       const response = await UniqueConstraintsService.all(dataflowId, datasetSchemaId);
+      const uniques = UniqueConstraintsUtils.parseConstraintsList(response, datasetSchemaAllTables);
       constraintsDispatch({
         type: 'INITIAL_LOAD',
-        payload: { data: UniqueConstraintsUtils.parseConstraintsList(response, datasetSchemaAllTables) }
+        payload: { data: uniques, filteredData: uniques }
       });
       setIsDuplicatedToManageUnique(false);
+      refreshList(false);
     } catch (error) {
       notificationContext.add({ type: 'LOAD_UNIQUE_CONSTRAINTS_ERROR' });
     } finally {
@@ -144,44 +146,44 @@ export const UniqueConstraints = ({
       </div>
     </div>
   ) : (
-    <div className={styles.constraints}>
-      <Filters
-        className={'uniqueConstraints'}
-        data={constraintsState.data}
-        getFilteredData={onLoadFilteredData}
-        matchMode={true}
-        selectList={{ fieldData: UniqueConstraintsUtils.getFieldsOptions(constraintsState.data) }}
-        selectOptions={['tableSchemaName', 'fieldData']}
-      />
+      <div className={styles.constraints}>
+        <Filters
+          className={'uniqueConstraints'}
+          data={constraintsState.data}
+          getFilteredData={onLoadFilteredData}
+          matchMode={true}
+          selectList={{ fieldData: UniqueConstraintsUtils.getFieldsOptions(constraintsState.data) }}
+          selectOptions={['tableSchemaName', 'fieldData']}
+        />
 
-      {!isEmpty(constraintsState.filteredData) ? (
-        <DataTable
-          autoLayout={true}
-          onRowClick={event => getManageUniqueConstraint(event.data)}
-          paginator={true}
-          paginatorRight={`${resources.messages['totalUniqueConstraints']} ${constraintsState.filteredData.length}`}
-          rows={10}
-          rowsPerPageOptions={[5, 10, 15]}
-          totalRecords={constraintsState.filteredData.length}
-          value={constraintsState.filteredData}>
-          {renderColumns(constraintsState.filteredData)}
-        </DataTable>
-      ) : (
-        <div className={styles.emptyFilteredData}>{resources.messages['noConstraintsWithSelectedParameters']}</div>
-      )}
+        {!isEmpty(constraintsState.filteredData) ? (
+          <DataTable
+            autoLayout={true}
+            onRowClick={event => getManageUniqueConstraint(event.data)}
+            paginator={true}
+            paginatorRight={`${resources.messages['totalUniqueConstraints']} ${constraintsState.filteredData.length}`}
+            rows={10}
+            rowsPerPageOptions={[5, 10, 15]}
+            totalRecords={constraintsState.filteredData.length}
+            value={constraintsState.filteredData}>
+            {renderColumns(constraintsState.filteredData)}
+          </DataTable>
+        ) : (
+          <div className={styles.emptyFilteredData}>{resources.messages['noConstraintsWithSelectedParameters']}</div>
+        )}
 
-      {constraintsState.isDeleteDialogVisible && (
-        <ConfirmDialog
-          classNameConfirm={'p-button-danger'}
-          header={resources.messages['deleteUniqueConstraintHeader']}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
-          onConfirm={() => onDeleteConstraint()}
-          onHide={() => isDeleteDialogVisible(false)}
-          visible={constraintsState.isDeleteDialogVisible}>
-          {resources.messages['deleteUniqueConstraintConfirm']}
-        </ConfirmDialog>
-      )}
-    </div>
+        {constraintsState.isDeleteDialogVisible && (
+          <ConfirmDialog
+            classNameConfirm={'p-button-danger'}
+            header={resources.messages['deleteUniqueConstraintHeader']}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            onConfirm={() => onDeleteConstraint()}
+            onHide={() => isDeleteDialogVisible(false)}
+            visible={constraintsState.isDeleteDialogVisible}>
+            {resources.messages['deleteUniqueConstraintConfirm']}
+          </ConfirmDialog>
+        )}
+      </div>
   );
 };
