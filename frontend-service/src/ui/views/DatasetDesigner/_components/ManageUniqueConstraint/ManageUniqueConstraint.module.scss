@@ -1,7 +1,7 @@
 .listBoxWrap {
   display: flex;
   flex-direction: row;
-  overflow-x: scroll;
+  overflow-x: auto;
   padding: 1rem 0;
 
   > div {
@@ -12,6 +12,9 @@
     max-width: 50%;
     min-width: 25%;
     height: 250px;
+  }
+  :global .p-listbox-title-wrapper {
+    overflow: hidden;
   }
 }
 
