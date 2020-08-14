@@ -121,7 +121,6 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
           className="edit-table"
           blockScroll={false}
           contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
-          closeOnEscape={false}
           header={resources.messages['notifications']}
           modal={true}
           onHide={() => setIsNotificationVisible(false)}

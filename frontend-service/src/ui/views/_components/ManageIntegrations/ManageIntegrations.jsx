@@ -330,7 +330,6 @@ export const ManageIntegrations = ({
     <Fragment>
       {isIntegrationManageDialogVisible && (
         <Dialog
-          closeOnEscape={false}
           footer={renderDialogFooter}
           header={
             !isEmpty(updatedData)
