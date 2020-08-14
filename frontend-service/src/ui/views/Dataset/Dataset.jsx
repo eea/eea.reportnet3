@@ -711,10 +711,10 @@ export const Dataset = withRouter(({ match, history }) => {
       )}
       {validationListDialogVisible && (
         <Dialog
-          className={hasValidations ? styles.qcRulesDialog : styles.qcRulesDialogEmpty}
           footer={validationListFooter}
           header={resources.messages['qcRules']}
           onHide={() => onSetVisible(setValidationListDialogVisible, false)}
+          style={{ width: '90%' }}
           visible={validationListDialogVisible}>
           <TabsValidations
             dataset={{ datasetId: datasetId, name: datasetSchemaName }}
