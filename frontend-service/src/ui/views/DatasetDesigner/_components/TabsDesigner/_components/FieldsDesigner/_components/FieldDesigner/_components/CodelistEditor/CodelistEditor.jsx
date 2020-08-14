@@ -87,7 +87,6 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
       <Dialog
         blockScroll={false}
         contentStyle={{ overflow: 'auto' }}
-        closeOnEscape={false}
         focusOnShow={false}
         footer={codelistDialogFooter}
         header={
