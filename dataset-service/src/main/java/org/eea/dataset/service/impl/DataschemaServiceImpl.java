@@ -654,6 +654,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (fieldSchemaVO.getMaxSize() != null) {
       fieldSchema.put("maxSize", fieldSchemaVO.getMaxSize());
     }
+
+    if (fieldSchemaVO.getReadOnly() != null) {
+      fieldSchema.put("readOnly", fieldSchemaVO.getReadOnly());
+    }
+
     if (fieldSchemaVO.getValidExtensions() != null) {
       String[] validExtensions = fieldSchemaVO.getValidExtensions();
       for (int i = 0; i < validExtensions.length; i++) {

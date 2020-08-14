@@ -56,7 +56,7 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   @Override
   @HystrixCommand
   @GetMapping(value = "/document/{documentId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Get one document by Document id",
+  @ApiOperation(value = "Find a Document its Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DocumentVO.class)
   @ApiResponses(value = {@ApiResponse(code = 400, message = EEAErrorMessage.DOCUMENT_NOT_FOUND),
       @ApiResponse(code = 404, message = EEAErrorMessage.DOCUMENT_NOT_FOUND)})
@@ -83,7 +83,7 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   @Override
   @HystrixCommand
   @PutMapping(value = "/update")
-  @ApiOperation(value = "Update one document")
+  @ApiOperation(value = "Update a Document")
   @ApiResponse(code = 400, message = EEAErrorMessage.DOCUMENT_NOT_FOUND)
   public void updateDocument(
       @ApiParam(type = "Object", value = "Document") @RequestBody DocumentVO document) {
@@ -100,12 +100,13 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
    * Insert document.
    *
    * @param document the document
+   *
    * @return the long
    */
   @Override
   @HystrixCommand
   @PostMapping
-  @ApiOperation(value = "Insert one document")
+  @ApiOperation(value = "Insert a Document")
   @ApiResponse(code = 400, message = EEAErrorMessage.DOCUMENT_NOT_FOUND)
   public Long insertDocument(
       @ApiParam(type = "Object", value = "Document") @RequestBody DocumentVO document) {
@@ -126,7 +127,7 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{documentId}")
-  @ApiOperation(value = "Delete one document")
+  @ApiOperation(value = "Delete a Document based on its Id")
   @ApiResponse(code = 400, message = EEAErrorMessage.DOCUMENT_NOT_FOUND)
   public void deleteDocument(
       @ApiParam(value = "Document id", example = "0") @PathVariable("documentId") Long documentId) {
