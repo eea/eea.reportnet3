@@ -20,7 +20,6 @@ const ValidationExpression = ({
   expressionValues,
   fieldType,
   isDisabled,
-  layout,
   onExpressionDelete,
   onExpressionFieldUpdate,
   onExpressionGroup,
@@ -58,7 +57,6 @@ const ValidationExpression = ({
 
   useEffect(() => {
     const options = [];
-    let operatorOfType = null;
     if (!isNil(fieldType)) {
       operatorByType[fieldType].forEach(key => {
         options.push(operatorTypesConf[key].option);
