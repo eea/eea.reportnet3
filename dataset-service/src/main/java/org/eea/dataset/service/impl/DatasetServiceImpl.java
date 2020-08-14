@@ -365,7 +365,8 @@ public class DatasetServiceImpl implements DatasetService {
     DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
     // Delete the records from the tables of the dataset that aren't marked as read only
     for (TableSchema tableSchema : schema.getTableSchemas()) {
-      if (tableSchema.getReadOnly() == null || !tableSchema.getReadOnly()) {
+      if ((tableSchema.getReadOnly() == null || !tableSchema.getReadOnly())
+          && (tableSchema.getFixedNumber() == null || !tableSchema.getFixedNumber())) {
         recordRepository.deleteRecordWithIdTableSchema(tableSchema.getIdTableSchema().toString());
       }
     }
@@ -1456,6 +1457,51 @@ public class DatasetServiceImpl implements DatasetService {
     fieldRepository.clearFieldValue(fieldSchemaId);
   }
 
+
+  /**
+   * Gets the table fixed number of records.
+   *
+   * @param datasetId the dataset id
+   * @param objectId the object id
+   * @param type the type
+   * @return the table fixed number of records
+   */
+  @Override
+  public Boolean getTableFixedNumberOfRecords(Long datasetId, String objectId,
+      EntityTypeEnum type) {
+    Boolean fixedNumber = false;
+    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
+
+    switch (type) {
+      case TABLE:
+        fixedNumber = tableForFixedNumberOfRecords(objectId, fixedNumber, schema);
+        break;
+      case RECORD:
+        fixedNumber = recordForFixedNumberOfRecords(objectId, fixedNumber, schema);
+        break;
+      case FIELD:
+      case DATASET:
+        break;
+    }
+    return fixedNumber;
+  }
+
+
+  /**
+   * Find record schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @param idRecord the id record
+   * @return the string
+   */
+  @Override
+  public String findRecordSchemaIdById(Long datasetId, String idRecord) {
+    RecordValue record = recordRepository.findById(idRecord);
+    return record.getIdRecordSchema();
+  }
+
+
   /**
    * Obtain partition.
    *
@@ -2058,6 +2104,26 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
+   * Table for fixed number of records.
+   *
+   * @param objectId the object id
+   * @param fixedNumber the fixed number
+   * @param schema the schema
+   * @return the boolean
+   */
+  private Boolean tableForFixedNumberOfRecords(String objectId, Boolean fixedNumber,
+      DataSetSchema schema) {
+    for (TableSchema tableSchema : schema.getTableSchemas()) {
+      if (objectId.equals(tableSchema.getIdTableSchema().toString())
+          && Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+        fixedNumber = true;
+        break;
+      }
+    }
+    return fixedNumber;
+  }
+
+  /**
    * Record for read only.
    *
    * @param objectId the object id
@@ -2075,6 +2141,28 @@ public class DatasetServiceImpl implements DatasetService {
     }
     return readOnly;
   }
+
+
+  /**
+   * Record for fixed number of records.
+   *
+   * @param objectId the object id
+   * @param fixedNumber the fixed number
+   * @param schema the schema
+   * @return the boolean
+   */
+  private Boolean recordForFixedNumberOfRecords(String objectId, Boolean fixedNumber,
+      DataSetSchema schema) {
+    for (TableSchema tableSchema : schema.getTableSchemas()) {
+      if (objectId.equals(tableSchema.getRecordSchema().getIdRecordSchema().toString())
+          && Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+        fixedNumber = true;
+        break;
+      }
+    }
+    return fixedNumber;
+  }
+
 
   /**
    * Field for read only.

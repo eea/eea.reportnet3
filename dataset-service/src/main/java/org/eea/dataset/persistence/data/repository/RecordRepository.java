@@ -96,4 +96,15 @@ public interface RecordRepository
   @Query("delete from RecordValue r where r.dataProviderCode = :dataProviderCode")
   void deleteByDataProviderCode(@Param("dataProviderCode") String dataProviderCode);
 
+
+
+  /**
+   * Find by id.
+   *
+   * @param id the id
+   * @return the record value
+   */
+  RecordValue findById(String id);
+
+
 }
