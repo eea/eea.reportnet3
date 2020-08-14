@@ -131,10 +131,18 @@ export const UniqueConstraints = ({
 
   const renderFieldBody = rowData => rowData.fieldData.map(field => field.name).join(', ');
 
-  if (constraintsState.isLoading) return <Spinner style={{ top: 0 }} />;
+  if (constraintsState.isLoading)
+  return (
+  <div className={styles.constraintsWithoutTable}>
+    <div className={styles.spinner}><Spinner style={{ top: 0, left: 0 }} /></div>
+  </div>);
 
   return isEmpty(constraintsState.data) ? (
-    <div className={styles.noConstraints}>{resources.messages['noConstraints']}</div>
+    <div className={styles.constraintsWithoutTable}>
+      <div className={styles.noConstraints}>
+        {resources.messages['noConstraints']}
+      </div>
+    </div>
   ) : (
     <div className={styles.constraints}>
       <Filters
