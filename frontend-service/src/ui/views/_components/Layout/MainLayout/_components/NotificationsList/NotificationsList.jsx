@@ -6,6 +6,7 @@ import isUndefined from 'lodash/isUndefined';
 
 import sanitizeHtml from 'sanitize-html';
 
+import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DataTable } from 'ui/views/_components/DataTable';
@@ -77,6 +78,17 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
             userContext.userProps.amPm24h ? '' : ' A'
           }`
         ),
+
+        downloadButton: notification.onClick ? (
+          <Button
+            // className={`p-button-animated-blink ${styles.downloadButton}`}
+            icon={'export'}
+            onClick={() => notification.onClick()}
+            label={resources.messages['downloadFile']}
+          />
+        ) : (
+          ''
+        ),
         redirectionUrl: !isNil(notification.redirectionUrl)
           ? `${window.location.protocol}//${window.location.hostname}${
               window.location.port !== '' && window.location.port.toString() !== '80' ? `:${window.location.port}` : ''
@@ -100,6 +112,10 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   };
 
   const linkTemplate = rowData => {
+    if (rowData.downloadButton) {
+      return rowData.downloadButton;
+    }
+
     return (
       rowData.redirectionUrl !== '' && (
         <a href={getValidUrl(rowData.redirectionUrl)} target="_self" rel="noopener noreferrer">
