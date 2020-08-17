@@ -2,6 +2,7 @@ package org.eea.interfaces.vo.integration.fme;
 
 import java.io.Serializable;
 import org.eea.interfaces.vo.integration.enums.FMEOperation;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
@@ -32,8 +33,10 @@ public class FMEOperationInfoVO implements Serializable {
   private String apiKey;
 
   /** The fme job id. */
-  private String fme_job_id;
+  @JsonProperty("fme_job_id")
+  private String fmeJobId;
 
   /** The fme job status. */
-  private String fme_job_status;
+  @JsonProperty("fme_job_status")
+  private String fmeJobStatus;
 }
