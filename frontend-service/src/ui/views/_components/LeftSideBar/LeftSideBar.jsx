@@ -50,17 +50,15 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
   };
 
   useEffect(() => {
-    const response = notificationContext.hidden.find(
+    if (findHiddenNotification()) downloadExportFMEFile();
+  }, [notificationContext.hidden]); 
+
+  const findHiddenNotification = () => {
+    return notificationContext.hidden.find(
       notification =>
         notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT' || 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
     );
-
-    if (response)
-      downloadExportFMEFile().finally(() => {
-        // isLoadingFile(false);
-        console.log('isLoadingFile CHANGE TO FALSE');
-      });
-  }, [notificationContext.hidden]);
+  };
 
   const downloadExportFMEFile = async () => {
     try {
@@ -76,21 +74,24 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
       };
 
       let datasetData;
-      notification.content.providerId
-        ? (datasetData = await DatasetService.downloadExportFile(
-            notification.content.datasetId,
-            notification.content.fileName,
-            notification.content.providerId
-          ))
-        : (datasetData = await DatasetService.downloadExportFile(
-            notification.content.datasetId,
-            notification.content.fileName
-          ));
 
-      notificationContext.add({
-        type: 'EXTERNAL_INTEGRATION_DOWNLOAD',
-        onClick: () => DownloadFile(datasetData, getFileName())
-      });
+      if (notification) {
+        notification.content.providerId
+          ? (datasetData = await DatasetService.downloadExportFile(
+              notification.content.datasetId,
+              notification.content.fileName,
+              notification.content.providerId
+            ))
+          : (datasetData = await DatasetService.downloadExportFile(
+              notification.content.datasetId,
+              notification.content.fileName
+            ));
+
+        notificationContext.add({
+          type: 'EXTERNAL_INTEGRATION_DOWNLOAD',
+          onClick: () => DownloadFile(datasetData, getFileName())
+        });
+      }
     } catch (error) {
       console.error(error);
       notificationContext.add({
@@ -128,6 +129,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
     };
     return <LeftSideBarButton {...userButtonProps} />;
   };
+
   const renderUserNotifications = () => {
     const userNotificationsProps = {
       buttonType: 'notifications',

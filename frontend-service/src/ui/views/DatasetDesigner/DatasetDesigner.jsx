@@ -289,7 +289,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     } catch (error) {
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     } finally {
-      isLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -318,9 +318,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     getImportExtensions.split(', ')
   ).join(', ')}`;
 
-  const isLoading = value => designerDispatch({ type: 'IS_LOADING', payload: { value } });
+  const setIsLoading = value => designerDispatch({ type: 'SET_IS_LOADING', payload: { value } });
 
-  const isLoadingFile = value => designerDispatch({ type: 'IS_LOADING_FILE', payload: { value } });
+  const setIsLoadingFile = value => designerDispatch({ type: 'SET_IS_LOADING_FILE', payload: { value } });
 
   const manageDialogs = (dialog, value, secondDialog, secondValue) => {
     designerDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value, secondDialog, secondValue } });
@@ -408,7 +408,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const setFileType = fileType => designerDispatch({ type: 'SET_EXPORT_DATASET_FILE_TYPE', payload: { fileType } });
 
   const onExportDataExternalExtension = async fileExtension => {
-    isLoadingFile(true);
+    setIsLoadingFile(true);
     setFileType(fileExtension);
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
@@ -418,7 +418,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const onExportDataInternalExtension = async fileType => {
-    isLoadingFile(true);
+    setIsLoadingFile(true);
     setFileType(fileType);
     try {
       const datasetName = createFileName(designerState.datasetSchemaName, fileType);
@@ -428,13 +428,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     } catch (error) {
       onExportError();
     } finally {
-      isLoadingFile(false);
+      setIsLoadingFile(false);
     }
   };
 
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
   useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
+  useCheckNotifications(['EXTERNAL_INTEGRATION_DOWNLOAD'], setIsLoadingFile, false);
 
   const onHideValidationsDialog = () => {
     if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener) {
@@ -456,7 +457,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     onHighlightRefresh(false);
 
     try {
-      isLoading(true);
+      setIsLoading(true);
       const getDatasetSchemaId = async () => {
         const dataset = await DatasetService.schemaById(datasetId);
         const tableSchemaNamesList = [];
@@ -467,7 +468,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           dataset.tables.map(tableSchema => tableSchema.tableSchemaName)
         );
 
-        isLoading(false);
+        setIsLoading(false);
         designerDispatch({
           type: 'GET_DATASET_DATA',
           payload: {

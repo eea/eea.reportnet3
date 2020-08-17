@@ -308,6 +308,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const onHighlightRefresh = value => setIsRefreshHighlighted(value);
 
   useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
+  useCheckNotifications(['EXTERNAL_INTEGRATION_DOWNLOAD'], setIsLoadingFile, false);
 
   const onLoadTableData = hasData => {
     setDatasetHasData(hasData);
