@@ -76,6 +76,8 @@ const NotificationProvider = ({ children }) => {
           });
         },
 
+        clearHiddenNotifications: () => dispatch({ type: 'CLEAR_HIDDEN' }),
+
         hide: notificationDTO => {
           const { type, content } = notificationDTO;
 

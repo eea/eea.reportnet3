@@ -28,9 +28,9 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
+  const [helpIndex, setHelpIndex] = useState();
   const [logoutConfirmVisible, setLogoutConfirmVisible] = useState(undefined);
   const [run, setRun] = useState(false);
-  const [helpIndex, setHelpIndex] = useState();
 
   const handleJoyrideCallback = data => {
     const { action, status, type } = data;
@@ -94,9 +94,9 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
       }
     } catch (error) {
       console.error(error);
-      notificationContext.add({
-        type: 'DOWNLOAD_FME_FILE_ERROR'
-      });
+      notificationContext.add({ type: 'DOWNLOAD_FME_FILE_ERROR' });
+    } finally {
+      notificationContext.clearHiddenNotifications();
     }
   };
 
@@ -209,7 +209,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
   };
 
   return (
-    <>
+    <Fragment>
       <Joyride
         callback={handleJoyrideCallback}
         continuous={true}
@@ -251,21 +251,19 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
 
             {userContext.userProps.showLogoutConfirmation && logoutConfirmVisible && (
               <ConfirmDialog
-                onConfirm={() => {
-                  userLogout();
-                }}
-                onHide={() => setLogoutConfirmVisible(false)}
-                visible={logoutConfirmVisible}
                 header={resources.messages['logout']}
+                labelCancel={resources.messages['no']}
                 labelConfirm={resources.messages['yes']}
-                labelCancel={resources.messages['no']}>
+                onConfirm={() => userLogout()}
+                onHide={() => setLogoutConfirmVisible(false)}
+                visible={logoutConfirmVisible}>
                 {resources.messages['userLogout']}
               </ConfirmDialog>
             )}
           </>
         }
       </div>
-    </>
+    </Fragment>
   );
 });
 
