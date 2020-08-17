@@ -27,10 +27,26 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
           class: styles.levelError,
           subClasses: [styles.blocker, styles.error, styles.warning, styles.info]
         },
+        properties: {
+          filtered: false,
+          groupable: true,
+          names: {
+            description: 'Description',
+            readOnly: 'Read only',
+            prefilled: 'Prefilled',
+            mandatory: 'Mandatory',
+            fixedNumber: 'Fixed number of rows'
+          }
+        },
         fields: {
           filtered: false,
           groupable: true,
-          names: { shortCode: 'Shortcode', codelistItems: 'Single select items', pk: 'Primary key' }
+          names: {
+            shortCode: 'Shortcode',
+            codelistItems: 'Single select items',
+            pk: 'Primary key',
+            readOnly: 'Read only'
+          }
         },
         extensionsOperations: {
           filtered: true,
@@ -145,13 +161,23 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
     parsedDataset.validations = validationList;
     if (!isUndefined(design.tables) && !isNull(design.tables) && design.tables.length > 0) {
       const tables = design.tables.map(tableDTO => {
+        console.log(tableDTO.tableSchemaDescription);
+        const tableProperties = [
+          {
+            description:
+              !isNil(tableDTO.tableSchemaDescription) && tableDTO.tableSchemaDescription !== ''
+                ? tableDTO.tableSchemaDescription
+                : '-',
+            readOnly: tableDTO.tableSchemaReadOnly,
+            prefilled: !isNil(tableDTO.tableSchemaToPrefill) ? tableDTO.tableSchemaToPrefill : false,
+            mandatory: tableDTO.tableSchemaNotEmpty,
+            fixedNumber: !isNil(tableDTO.tableSchemaFixedNumber) ? tableDTO.tableSchemaFixedNumber : false
+          }
+        ];
+
         const table = {};
         table.tableSchemaName = tableDTO.tableSchemaName;
-        table.tableSchemaDescription = tableDTO.tableSchemaDescription;
-        table.tableSchemaReadOnly = tableDTO.tableSchemaReadOnly;
-        table.tableSchemaToPrefill = !isNil(tableDTO.tableSchemaToPrefill) ? tableDTO.tableSchemaToPrefill : false;
-        table.tableSchemaNotEmpty = tableDTO.tableSchemaNotEmpty;
-        table.tableSchemaFixedNumber = !isNil(tableDTO.tableSchemaFixedNumber) ? tableDTO.tableSchemaFixedNumber : false;
+        table.properties = tableProperties;
         if (!isNull(tableDTO.records) && !isNil(tableDTO.records[0].fields) && tableDTO.records[0].fields.length > 0) {
           const containsCodelists = !isEmpty(
             tableDTO.records[0].fields.filter(
@@ -162,6 +188,7 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
             const field = {};
             field.pk = fieldDTO.pk;
             field.required = fieldDTO.required;
+            field.readOnly = fieldDTO.readOnly;
             field.name = fieldDTO.name;
             field.description = !isNull(fieldDTO.description) ? fieldDTO.description : '-';
             field.type = fieldDTO.type;
@@ -177,6 +204,7 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
           });
           table.fields = fields;
         }
+        console.log({ table });
         return table;
       });
       parsedDataset.tables = tables;
