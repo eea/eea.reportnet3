@@ -147,7 +147,7 @@ pipeline {
         stage('Push to EEA GitHub') {
             when {
                 expression {
-                   BRANCH_NAME == "release/3.0.0-OP"
+                   BRANCH_NAME == "release/3.0.0-OP-Bugfix-120791"
                 }
             }
             steps {
@@ -187,7 +187,7 @@ pipeline {
         stage('Build Docker Images') {
             when {
                 expression {
-                   BRANCH_NAME == "release/3.0.0-OP"
+                   BRANCH_NAME == "release/3.0.0-OP-Bugfix-120791"
                 }
             }
             parallel {
