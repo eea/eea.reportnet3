@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { Fragment, useState, useEffect, useContext, useRef, useReducer } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -24,8 +24,8 @@ import { ContextMenu } from 'ui/views/_components/ContextMenu';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataForm } from './_components/DataForm';
 import { DataTable } from 'ui/views/_components/DataTable';
-import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { FieldEditor } from './_components/FieldEditor';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Footer } from './_components/Footer';
@@ -45,13 +45,13 @@ import { recordReducer } from './_functions/Reducers/recordReducer';
 import { sortReducer } from './_functions/Reducers/sortReducer';
 
 import { DataViewerUtils } from './_functions/Utils/DataViewerUtils';
-import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
 import { ExtensionUtils, MetadataUtils, RecordUtils } from 'ui/views/_functions/Utils';
+import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
 import {
-  useLoadColsSchemasAndColumnOptions,
   useContextMenu,
-  useSetColumns,
-  useRecordErrorPosition
+  useLoadColsSchemasAndColumnOptions,
+  useRecordErrorPosition,
+  useSetColumns
 } from './_functions/Hooks/DataViewerHooks';
 
 const DataViewer = withRouter(

@@ -187,28 +187,37 @@ export const FieldsDesigner = ({
   const onChangeIsReadOnly = checked => {
     setIsReadOnlyTable(checked);
     if (checked) {
-      setToPrefill(checked);
+      setToPrefill(true);
     }
     updateTableDesign({
       readOnly: checked,
-      toPrefill: checked === false ? toPrefill : checked,
-      notEmpty: checked === false ? notEmpty : checked
+      toPrefill: checked === false ? toPrefill : true,
+      fixedNumber,
+      notEmpty
     });
   };
 
   const onChangeToPrefill = checked => {
     setToPrefill(checked);
-    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill: checked });
+    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill: checked, fixedNumber, notEmpty });
   };
 
   const onChangeFixedNumber = checked => {
     setFixedNumber(checked);
-    updateTableDesign({ toPrefill: checked, fixedNumber: checked });
+    if (checked) {
+      setToPrefill(true);
+    }
+    updateTableDesign({
+      readOnly: isReadOnlyTable,
+      toPrefill: checked === false ? toPrefill : true,
+      fixedNumber: checked,
+      notEmpty
+    });
   };
 
   const onChangeNotEmpty = checked => {
     setNotEmpty(checked);
-    updateTableDesign({ readOnly: isReadOnlyTable, notEmpty: checked });
+    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, fixedNumber, notEmpty: checked });
   };
 
   const onFieldDragAndDrop = (draggedFieldIdx, droppedFieldName) => {
