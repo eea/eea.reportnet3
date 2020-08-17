@@ -129,6 +129,11 @@ public class FMEControllerImpl implements FMEController {
     }
   }
 
+  /**
+   * Operation finished dummy.
+   *
+   * @param fmeOperationInfoVO the fme operation info VO
+   */
   @Override
   @PostMapping("/operationFinishedDummy")
   @ApiOperation(value = "PoC for operationFinished")
@@ -172,6 +177,12 @@ public class FMEControllerImpl implements FMEController {
     return new ResponseEntity<>(stream, httpHeaders, HttpStatus.OK);
   }
 
+  /**
+   * Authenticate.
+   *
+   * @param apiKey the api key
+   * @return the authentication
+   */
   private Authentication authenticate(String apiKey) {
     if (null != apiKey && !apiKey.isEmpty()) {
       TokenVO tokenVO = userManagementControllerZull.authenticateUserByApiKey(apiKey);
@@ -203,6 +214,13 @@ public class FMEControllerImpl implements FMEController {
     throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
   }
 
+  /**
+   * Authorize.
+   *
+   * @param authentication the authentication
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   */
   private void authorize(Authentication authentication, Long dataflowId, Long providerId) {
     EeaSecurityExpressionRoot eeaSecurityExpressionRoot =
         new EeaSecurityExpressionRoot(authentication, userManagementControllerZull);

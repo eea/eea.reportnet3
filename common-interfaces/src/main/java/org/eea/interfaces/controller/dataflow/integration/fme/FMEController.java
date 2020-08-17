@@ -63,6 +63,11 @@ public interface FMEController {
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam("fileName") String fileName);
 
+  /**
+   * Operation finished dummy.
+   *
+   * @param fmeOperationInfoVO the fme operation info VO
+   */
   @PostMapping("/operationFinishedDummy")
   void operationFinishedDummy(@RequestBody FMEOperationInfoVO fmeOperationInfoVO);
 }
