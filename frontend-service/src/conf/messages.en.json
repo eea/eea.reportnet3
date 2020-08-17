@@ -834,7 +834,7 @@
     "exportEuDatasetMessage": "Are you sure you want to export EU Datasets?",
     "updateConfigurations": "Update configurations",
     "tooLongSchemaNameError": "Schema name is too long",
-    "externalIntegrationDownload": "Export data at ",
+    "externalIntegrationDownload": "Export file is ready to be downloaded ",
     "minusFileSize": "Decrease maximum file size",
     "plusFileSize": "Increase maximum file size",
     "downloadFile": "Download file"
