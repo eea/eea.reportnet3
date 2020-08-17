@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './TabsSchema.module.css';
 
@@ -41,8 +41,8 @@ export const TabsSchema = ({
               <div className={styles.tabsSchema}>
                 <DataViewer
                   buttonsList={buttonsList}
-                  hasWritePermissions={hasWritePermissions}
                   hasCountryCode={hasCountryCode}
+                  hasWritePermissions={hasWritePermissions}
                   isDatasetDeleted={isDatasetDeleted}
                   isExportable={isExportable}
                   isValidationSelected={isValidationSelected}
@@ -51,6 +51,7 @@ export const TabsSchema = ({
                   onLoadTableData={onLoadTableData}
                   reporting={reporting}
                   showWriteButtons={showWriteButtons}
+                  tableFixedNumber={table.fixedNumber}
                   tableHasErrors={tableHasErrors}
                   tableId={table.id}
                   tableName={table.name}
