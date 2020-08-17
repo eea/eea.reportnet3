@@ -7,6 +7,10 @@ import lombok.Data;
 /**
  * Instantiates a new FME operation info VO.
  */
+
+/**
+ * Instantiates a new FME operation info VO.
+ */
 @Data
 public class FMEOperationInfoVO implements Serializable {
 
@@ -27,4 +31,13 @@ public class FMEOperationInfoVO implements Serializable {
 
   /** The fme operation. */
   private FMEOperation fmeOperation;
+
+  /** The api key. */
+  private String apiKey;
+
+  /** The fme job id. */
+  private String fme_job_id;
+
+  /** The fme job status. */
+  private String fme_job_status;
 }
