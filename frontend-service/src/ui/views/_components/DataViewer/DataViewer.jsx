@@ -70,6 +70,7 @@ const DataViewer = withRouter(
     selectedRecordErrorId,
     setIsValidationSelected,
     showWriteButtons,
+    tableFixedNumber,
     tableHasErrors,
     tableId,
     tableName,
@@ -141,7 +142,6 @@ const DataViewer = withRouter(
 
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
-    const snapshotContext = useContext(SnapshotContext);
 
     let contextMenuRef = useRef();
     let datatableRef = useRef();
@@ -152,6 +152,7 @@ const DataViewer = withRouter(
       resources,
       records,
       RecordUtils.allAttachments(colsSchema),
+      tableFixedNumber,
       setEditDialogVisible,
       setConfirmDeleteVisible
     );
@@ -177,6 +178,7 @@ const DataViewer = withRouter(
 
     const actionTemplate = () => (
       <ActionsColumn
+        hideDeletion={tableFixedNumber}
         hideEdition={RecordUtils.allAttachments(colsSchema)}
         onDeleteClick={() => setConfirmDeleteVisible(true)}
         onEditClick={() => setEditDialogVisible(true)}
@@ -955,15 +957,14 @@ const DataViewer = withRouter(
           colsSchema={colsSchema}
           dataflowId={dataflowId}
           datasetId={datasetId}
-          hasWritePermissions={hasWritePermissions}
-          showWriteButtons={showWriteButtons}
-          hideValidationFilter={hideValidationFilter}
           fileExtensions={extensionsOperationsList.export}
           hasCountryCode={hasCountryCode}
+          hasWritePermissions={hasWritePermissions && !tableFixedNumber && !tableReadOnly}
+          hideValidationFilter={hideValidationFilter}
           isExportable={isExportable}
           isFilterValidationsActive={isFilterValidationsActive}
-          isTableDeleted={isTableDeleted}
           isLoading={isLoading}
+          isTableDeleted={isTableDeleted}
           isValidationSelected={isValidationSelected}
           levelErrorTypesWithCorrects={levelErrorTypesWithCorrects}
           onRefresh={onRefresh}
@@ -976,10 +977,10 @@ const DataViewer = withRouter(
           setImportTableDialogVisible={setImportTableDialogVisible}
           setRecordErrorPositionId={setRecordErrorPositionId}
           showValidationFilter={showValidationFilter}
+          showWriteButtons={showWriteButtons && !tableFixedNumber && !tableReadOnly}
           tableHasErrors={tableHasErrors}
           tableId={tableId}
           tableName={tableName}
-          tableReadOnly={tableReadOnly}
         />
         <ContextMenu model={menu} ref={contextMenuRef} />
         <div className={styles.Table}>
@@ -990,7 +991,7 @@ const DataViewer = withRouter(
             id={tableId}
             first={records.firstPageRecord}
             footer={
-              hasWritePermissions && !tableReadOnly ? (
+              hasWritePermissions && !tableReadOnly && !tableFixedNumber ? (
                 <Footer
                   hasWritePermissions={hasWritePermissions && !tableReadOnly}
                   onAddClick={() => {

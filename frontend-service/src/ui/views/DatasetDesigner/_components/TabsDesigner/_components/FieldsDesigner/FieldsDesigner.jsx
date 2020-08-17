@@ -66,7 +66,7 @@ export const FieldsDesigner = ({
       setTableDescriptionValue(table.description || '');
       setIsReadOnlyTable(table.readOnly || false);
       setToPrefill(table.toPrefill || false);
-      setNotEmpty(table.notEmpty || false);
+      table.notEmpty === false ? setNotEmpty(false) : setNotEmpty(true);
       setFixedNumber(table.fixedNumber || false);
     }
   }, []);

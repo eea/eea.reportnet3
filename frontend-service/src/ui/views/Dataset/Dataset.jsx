@@ -451,6 +451,7 @@ export const Dataset = withRouter(({ match, history }) => {
             hasErrors: {
               ...datasetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
             }.hasErrors,
+            fixedNumber: tableSchema['tableSchemaFixedNumber'],
             readOnly: tableSchema['tableSchemaReadOnly']
           };
         })
@@ -587,7 +588,7 @@ export const Dataset = withRouter(({ match, history }) => {
       label={resources.messages['close']}
       onClick={() => onSetVisible(setDashDialogVisible, false)}
     />
-  )
+  );
 
   if (loading) return layout(<Spinner />);
 
@@ -715,8 +716,8 @@ export const Dataset = withRouter(({ match, history }) => {
           style={{ width: '70vw' }}
           visible={dashDialogVisible}>
           <Dashboard
-            refresh={dashDialogVisible}
             levelErrorTypes={levelErrorTypes}
+            refresh={dashDialogVisible}
             tableSchemaNames={tableSchemaNames}
           />
         </Dialog>
