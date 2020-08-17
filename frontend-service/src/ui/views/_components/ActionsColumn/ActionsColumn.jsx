@@ -6,7 +6,14 @@ import styles from './ActionsColumn.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 
-const ActionsColumn = ({ disabledButtons, hideEdition = false, isDeletingDocument, onDeleteClick, onEditClick }) => {
+const ActionsColumn = ({
+  disabledButtons,
+  hideDeletion = false,
+  hideEdition = false,
+  isDeletingDocument,
+  onDeleteClick,
+  onEditClick
+}) => {
   return (
     <div className={styles.actionTemplate}>
       {!isNil(onEditClick) && !hideEdition && (
@@ -18,7 +25,7 @@ const ActionsColumn = ({ disabledButtons, hideEdition = false, isDeletingDocumen
           type="button"
         />
       )}
-      {!isNil(onDeleteClick) && (
+      {!isNil(onDeleteClick) && !hideDeletion && (
         <Button
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
           disabled={isDeletingDocument || disabledButtons}
