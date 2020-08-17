@@ -77,6 +77,7 @@ const NotificationProvider = ({ children }) => {
 
         hide: notificationDTO => {
           const { type, content } = notificationDTO;
+
           const notification = NotificationService.parseHidden({
             type,
             content,
