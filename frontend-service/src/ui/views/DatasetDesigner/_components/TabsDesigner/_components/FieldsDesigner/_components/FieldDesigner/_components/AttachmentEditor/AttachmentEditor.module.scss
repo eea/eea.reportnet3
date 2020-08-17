@@ -9,9 +9,16 @@
 .inputTitleWrapper {
   margin-bottom: 1rem;
 }
-
+.maxSizeInput {
+  height: 36px;
+  width: 10%;
+}
 .maxSizeWrapper {
+  display: flex;
   margin-top: 0.5rem;
+}
+.maxSizeWrapper span {
+  margin-top: inherit;
 }
 .mbSpan {
   font-weight: bold;

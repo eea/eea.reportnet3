@@ -369,6 +369,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (null == tableSchemaVO.getReadOnly()) {
       tableSchemaVO.setReadOnly(false);
     }
+    if (null == tableSchemaVO.getFixedNumber()) {
+      tableSchemaVO.setFixedNumber(false);
+    }
 
     RecordSchema recordSchema = new RecordSchema();
     recordSchema.setIdRecordSchema(recordSchemaId);
@@ -416,6 +419,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
         if (tableSchemaVO.getToPrefill() != null) {
           tableSchema.put("toPrefill", tableSchemaVO.getToPrefill());
+        }
+        if (tableSchemaVO.getFixedNumber() != null) {
+          tableSchema.put("fixedNumber", tableSchemaVO.getFixedNumber());
         }
         if (tableSchemaVO.getNotEmpty() != null) {
           Boolean oldValue = tableSchema.getBoolean("notEmpty");
@@ -548,6 +554,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
         fieldSchemaVO.setValidExtensions(validExtensions);
       }
+      if (fieldSchemaVO.getMaxSize() == null || fieldSchemaVO.getMaxSize() == 0
+          || fieldSchemaVO.getMaxSize() > 20) {
+        fieldSchemaVO.setMaxSize(20f);
+      }
 
       return schemasRepository
           .createFieldSchema(datasetSchemaId, fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO))
@@ -651,10 +661,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (fieldSchemaVO.getPkHasMultipleValues() != null) {
       fieldSchema.put("pkHasMultipleValues", fieldSchemaVO.getPkHasMultipleValues());
     }
-    if (fieldSchemaVO.getMaxSize() != null) {
-      fieldSchema.put("maxSize", fieldSchemaVO.getMaxSize());
+    Float size = 20f;
+    if (fieldSchemaVO.getMaxSize() != null && fieldSchemaVO.getMaxSize() != 0
+        && fieldSchemaVO.getMaxSize() < 20) {
+      size = fieldSchemaVO.getMaxSize();
     }
-
+    fieldSchema.put("maxSize", size);
     if (fieldSchemaVO.getReadOnly() != null) {
       fieldSchema.put("readOnly", fieldSchemaVO.getReadOnly());
     }
@@ -1712,7 +1724,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       if (DataType.ATTACHMENT.equals(fieldSchemaVO.getType())
           && fieldSchemaVO.getType().getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
           && previousMaxSize != null && previousExtensions != null
-          && ((previousMaxSize.doubleValue() != fieldSchemaVO.getMaxSize().doubleValue())
+          && ((fieldSchemaVO.getMaxSize() != null
+              && (previousMaxSize != fieldSchemaVO.getMaxSize().doubleValue()))
               || !differentExtensions.isEmpty())) {
         hasToClean = true;
       }

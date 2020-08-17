@@ -44,6 +44,10 @@ public class TableSchema {
   @Field(value = "notEmpty")
   private Boolean notEmpty;
 
+  /** The fixed number. */
+  @Field(value = "fixedNumber")
+  private Boolean fixedNumber;
+
   /** The record schema. */
   @Field(value = "recordSchema")
   private RecordSchema recordSchema;

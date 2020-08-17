@@ -254,8 +254,7 @@ const TabsValidations = withRouter(
         <ActionsColumn
           onDeleteClick={() => onShowDeleteDialog()}
           onEditClick={() => {
-            validationContext.onOpenToEdit(row, 'validationsListDialog', rowType);
-            onHideValidationsDialog();
+            validationContext.onOpenToEdit(row, rowType);
           }}
         />
       );
@@ -267,8 +266,7 @@ const TabsValidations = withRouter(
       return (
         <ActionsColumn
           onEditClick={() => {
-            validationContext.onOpenToEdit(row, 'validationsListDialog', rowType);
-            onHideValidationsDialog();
+            validationContext.onOpenToEdit(row, rowType);
           }}
         />
       );
