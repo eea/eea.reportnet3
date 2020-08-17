@@ -834,8 +834,9 @@
     "exportEuDatasetMessage": "Are you sure you want to export EU Datasets?",
     "updateConfigurations": "Update configurations",
     "tooLongSchemaNameError": "Schema name is too long",
-    "externalIntegrationDownload": "Export data at <button class='p-button p-component p-button-secondary p-button-animated-blink  p-button-text-icon-left' onclick='console.log(clicked)'>  Click me </button>",
+    "externalIntegrationDownload": "Export data at ",
     "minusFileSize": "Decrease maximum file size",
-    "plusFileSize": "Increase maximum file size"
+    "plusFileSize": "Increase maximum file size",
+    "downloadFile": "Download file"
   }
 }

@@ -5,6 +5,7 @@ import isNil from 'lodash/isNil';
 import sanitizeHtml from 'sanitize-html';
 
 import { Growl } from 'primereact/growl';
+import { Button } from 'ui/views/_components/Button';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -44,18 +45,26 @@ const Notifications = () => {
 
   useEffect(() => {
     notificationContext.toShow.map(notification => {
-      const message = (
-        <div
-          dangerouslySetInnerHTML={{
-            __html: sanitizeHtml(notification.message, {
-              allowedTags: ['a', 'button', 'strong'],
-              allowedAttributes: {
-                a: ['href', 'title'],
-                button: ['class', 'onclick']
-              }
-            })
-          }}></div>
-      );
+      let message;
+      notification.onClick
+        ? (message = (
+            <div>
+              {notification.message}
+              <Button onClick={() => notification.onClick()} label={resourcesContext.messages['downloadFile']} />
+            </div>
+          ))
+        : (message = (
+            <div
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtml(notification.message, {
+                  allowedTags: ['a', 'strong'],
+                  allowedAttributes: {
+                    a: ['href', 'title']
+                  }
+                })
+              }}></div>
+          ));
+
       growlRef.current.show({
         severity: notification.type,
         summary: resourcesContext.messages[`notification${capitalize(notification.type)}Title`],
