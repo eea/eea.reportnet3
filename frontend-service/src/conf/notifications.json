@@ -618,7 +618,7 @@
     },
     {
       "key": "info",
-      "lifeTime": 50000,
+      "lifeTime": 5000,
       "fixed": false,
       "types": [
         {
@@ -651,7 +651,8 @@
           "key": "EXPORT_EU_DATASET_INIT"
         },
         {
-          "key": "EXTERNAL_INTEGRATION_DOWNLOAD"
+          "key": "EXTERNAL_INTEGRATION_DOWNLOAD",
+          "fixed": true
         }
       ]
     }

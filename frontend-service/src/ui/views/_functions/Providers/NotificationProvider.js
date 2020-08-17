@@ -29,12 +29,12 @@ const NotificationProvider = ({ children }) => {
         add: notificationDTO => {
           const { content, onClick, type } = notificationDTO;
           const notification = NotificationService.parse({
-            onClick,
-            type,
+            config: config.notifications.notificationSchema,
             content,
             message: resourcesContext.messages[camelCase(type)],
-            config: config.notifications.notificationSchema,
-            routes
+            onClick,
+            routes,
+            type
           });
 
           dispatch({
