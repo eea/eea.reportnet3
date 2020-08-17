@@ -23,7 +23,7 @@
     <indexsearch.version>3.0.0</indexsearch.version>
     <inspire.version>3.0.0</inspire.version>
     <recordstore.version>3.0.0</recordstore.version>
-    <ums.version>3.0.0</ums.version>
+    <ums.version>3.0.1</ums.version>
     <validation.version>3.0.0</validation.version>
     <common-interfaces.version>3.0.0</common-interfaces.version>
     <common-utitlities.version>3.0.0</common-utitlities.version>
