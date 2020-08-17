@@ -833,6 +833,8 @@
     "exportEuDatasetHeader": "Export EU Datasets",
     "exportEuDatasetMessage": "Are you sure you want to export EU Datasets?",
     "updateConfigurations": "Update configurations",
-    "tooLongSchemaNameError": "Schema name is too long"
+    "tooLongSchemaNameError": "Schema name is too long",
+    "minusFileSize": "Decrease maximum file size",
+    "plusFileSize": "Increase maximum file size"
   }
 }

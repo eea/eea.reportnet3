@@ -5,7 +5,7 @@ import styles from './AttachmentEditor.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { Chips } from 'ui/views/_components/Chips';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { InputNumber } from 'primereact/inputnumber';
+import { InputText } from 'ui/views/_components/InputText';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -20,6 +20,20 @@ const AttachmentEditor = ({
   const [maxSize, setMaxSize] = useState(selectedAttachment.maxSize || 0);
 
   const [isVisible, setIsVisible] = useState(isAttachmentEditorVisible);
+
+  const onMaxSizeChange = size => {
+    size = size.toString();
+    if ((size.match(/\./g) || []).length === 0) {
+      size = size.substring(0, 2);
+    } else if ((size.match(/\./g) || []).length === 1) {
+      const splittedNumber = size.split('.');
+      size = `${splittedNumber[0] === '' ? '0' : splittedNumber[0]}.${splittedNumber[1].substring(0, 2)}`;
+    } else {
+      size = size.substring(0, size.length - 1);
+    }
+
+    setMaxSize(size > 20 ? 20 : size < 0 ? 0 : size);
+  };
 
   const onPasteChips = event => {
     if (event) {
@@ -103,23 +117,33 @@ const AttachmentEditor = ({
           }}></span>
       }
       <div className={styles.maxSizeWrapper}>
-        <InputNumber
-          // placeholder={resourcesContext.messages.value}
-          buttonLayout="horizontal"
-          decrementButtonIcon="pi pi-minus"
-          format={false}
-          incrementButtonIcon="pi pi-plus"
-          max={20}
-          min={0}
-          // mode="decimal"
-          onChange={e => setMaxSize(e.target.value)}
-          showButtons
-          step={0.25}
+        <Button
+          className={`secondary`}
+          icon="minus"
+          onClick={() => onMaxSizeChange((Number(maxSize) - 0.25).toString())}
+          tooltip={resources.messages['minusFileSize']}
+          tooltipOptions={{ position: 'bottom' }}
+        />
+        <InputText
+          className={styles.maxSizeInput}
+          id="maxFileSize"
+          keyfilter="pnum"
+          onChange={e => onMaxSizeChange(e.target.value)}
           value={maxSize}
         />
-        <span className={styles.mbSpan}>{`${resources.messages['MB']} (${Number(maxSize) * 1024} ${
-          resources.messages['KB']
-        })`}</span>
+        <Button
+          className={`secondary`}
+          icon="plus"
+          onClick={() => onMaxSizeChange((Number(maxSize) + 0.25).toString())}
+          tooltip={resources.messages['plusFileSize']}
+          tooltipOptions={{ position: 'bottom' }}
+        />
+        <label htmlFor="maxFileSize" className="srOnly">
+          {resources.messages['supportedFileAttachmentsMaxSizeTooltip']}
+        </label>
+        <span className={styles.mbSpan}>{`${resources.messages['MB']} (${
+          isNaN(Number(maxSize)) ? 0 : Number(maxSize) * 1024
+        } ${resources.messages['KB']})`}</span>
       </div>
     </Dialog>
   );
