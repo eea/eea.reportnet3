@@ -86,8 +86,8 @@ export const Dataset = withRouter(({ match, history }) => {
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
   const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingFile, setLoadingFile] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [metaData, setMetaData] = useState({});
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
@@ -167,14 +167,6 @@ export const Dataset = withRouter(({ match, history }) => {
   useEffect(() => {
     getExportExtensions(extensionsOperationsList.export);
   }, [extensionsOperationsList]);
-
-  useEffect(() => {
-    const response = notificationContext.hidden.find(
-      notification => notification.key === 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
-    );
-
-    if (response) downloadExportFMEFile();
-  }, [notificationContext.hidden]);
 
   const parseUniqExportExtensions = exportExtensionsOperationsList => {
     return exportExtensionsOperationsList.map(uniqExportExtension => ({
@@ -317,31 +309,6 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
 
-  const downloadExportFMEFile = async () => {
-    try {
-      const [notification] = notificationContext.hidden.filter(
-        notification => notification.key === 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
-      );
-
-      setExportDatasetDataName(createFileName(datasetName, exportDatasetFileType));
-
-      setExportDatasetData(
-        await DatasetService.downloadExportFile(
-          datasetId,
-          notification.content.fileName,
-          notification.content.providerId
-        )
-      );
-    } catch (error) {
-      console.error(error);
-      notificationContext.add({
-        type: 'DOWNLOAD_FME_FILE_ERROR'
-      });
-    } finally {
-      setLoadingFile(false);
-    }
-  };
-
   const onLoadTableData = hasData => {
     setDatasetHasData(hasData);
   };
@@ -359,7 +326,7 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const onExportDataExternalExtension = async fileExtension => {
-    setLoadingFile(true);
+    setIsLoadingFile(true);
     setExportDatasetFileType(fileExtension);
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
@@ -369,7 +336,7 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const onExportDataInternalExtension = async fileType => {
-    setLoadingFile(true);
+    setIsLoadingFile(true);
     setExportDatasetFileType(fileType);
     try {
       setExportDatasetDataName(createFileName(datasetName, fileType));
@@ -377,7 +344,7 @@ export const Dataset = withRouter(({ match, history }) => {
     } catch (error) {
       onExportError();
     } finally {
-      setLoadingFile(false);
+      setIsLoadingFile(false);
     }
   };
 
@@ -404,7 +371,7 @@ export const Dataset = withRouter(({ match, history }) => {
         history.push(getUrl(routes.DATAFLOWS));
       }
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -433,7 +400,7 @@ export const Dataset = withRouter(({ match, history }) => {
     onHighlightRefresh(false);
 
     try {
-      setLoading(true);
+      setIsLoading(true);
       const datasetSchema = await getDataSchema();
       const datasetStatistics = await getStatisticsById(
         datasetId,
@@ -499,7 +466,7 @@ export const Dataset = withRouter(({ match, history }) => {
         history.push(getUrl(routes.DATAFLOW, { dataflowId }));
       }
     } finally {
-      setLoading(false);
+      setIsLoading(false);
       setIsDataLoaded(true);
     }
   };
@@ -590,7 +557,7 @@ export const Dataset = withRouter(({ match, history }) => {
     />
   );
 
-  if (loading) return layout(<Spinner />);
+  if (isLoading) return layout(<Spinner />);
 
   return layout(
     <SnapshotContext.Provider
@@ -624,7 +591,7 @@ export const Dataset = withRouter(({ match, history }) => {
             <Button
               id="buttonExportDataset"
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step`}
-              icon={loadingFile ? 'spinnerAnimate' : 'export'}
+              icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
               label={resources.messages['exportDataset']}
               onClick={event => exportMenuRef.current.show(event)}
             />
