@@ -4,6 +4,8 @@ import capitalize from 'lodash/capitalize';
 import isNil from 'lodash/isNil';
 import sanitizeHtml from 'sanitize-html';
 
+import styles from './Notifications.module.scss';
+
 import { Growl } from 'primereact/growl';
 import { Button } from 'ui/views/_components/Button';
 
@@ -51,7 +53,7 @@ const Notifications = () => {
             <div>
               {notification.message}
               <Button
-                className="p-button-animated-blink "
+                className={`p-button-animated-blink ${styles.downloadButton}`}
                 icon={'export'}
                 onClick={() => notification.onClick()}
                 label={resourcesContext.messages['downloadFile']}
