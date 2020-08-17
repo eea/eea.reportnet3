@@ -7,10 +7,6 @@ import lombok.Data;
 /**
  * Instantiates a new FME operation info VO.
  */
-
-/**
- * Instantiates a new FME operation info VO.
- */
 @Data
 public class FMEOperationInfoVO implements Serializable {
 
