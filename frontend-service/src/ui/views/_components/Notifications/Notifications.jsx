@@ -48,9 +48,10 @@ const Notifications = () => {
         <div
           dangerouslySetInnerHTML={{
             __html: sanitizeHtml(notification.message, {
-              allowedTags: ['a', 'strong'],
+              allowedTags: ['a', 'button', 'strong'],
               allowedAttributes: {
-                a: ['href', 'title']
+                a: ['href', 'title'],
+                button: ['class', 'onclick']
               }
             })
           }}></div>
@@ -63,6 +64,7 @@ const Notifications = () => {
         sticky: notification.fixed
       });
     });
+
     if (notificationContext.toShow.length > 0) {
       notificationContext.clearToShow();
     }

@@ -256,6 +256,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
       notificationContext.add({
         type: 'EXTERNAL_INTEGRATION_DOWNLOAD',
+        onClick: () => console.log('clicked')
 
         // navigateTo: () => DownloadFile(datasetData, getFileName())
       });

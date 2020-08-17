@@ -27,8 +27,9 @@ const NotificationProvider = ({ children }) => {
       value={{
         ...state,
         add: notificationDTO => {
-          const { type, content } = notificationDTO;
+          const { content, onClick, type } = notificationDTO;
           const notification = NotificationService.parse({
+            onClick,
             type,
             content,
             message: resourcesContext.messages[camelCase(type)],
