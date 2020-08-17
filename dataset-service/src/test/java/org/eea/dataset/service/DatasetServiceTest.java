@@ -1298,7 +1298,7 @@ public class DatasetServiceTest {
    */
   @Test
   public void createRecordsExceptionTest() throws EEAException {
-    thrown.expectMessage(EEAErrorMessage.TABLE_NOT_FOUND);
+    thrown.expectMessage(String.format(EEAErrorMessage.TABLE_NOT_FOUND, "", 1L));
     datasetService.createRecords(1L, new ArrayList<>(), "");
   }
 

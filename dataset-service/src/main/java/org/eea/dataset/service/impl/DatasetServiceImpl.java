@@ -1938,7 +1938,8 @@ public class DatasetServiceImpl implements DatasetService {
     }
     Long tableId = tableRepository.findIdByIdTableSchema(idTableSchema);
     if (null == tableId || tableId == 0) {
-      throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
+      throw new EEAException(
+          String.format(EEAErrorMessage.TABLE_NOT_FOUND, idTableSchema, datasetId));
     }
     return tableId;
   }
