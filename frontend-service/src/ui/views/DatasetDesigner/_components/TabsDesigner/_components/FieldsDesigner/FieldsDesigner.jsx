@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -66,7 +66,7 @@ export const FieldsDesigner = ({
       setTableDescriptionValue(table.description || '');
       setIsReadOnlyTable(table.readOnly || false);
       setToPrefill(table.toPrefill || false);
-      table.notEmpty === false ? setNotEmpty(false) : setNotEmpty(true);
+      setNotEmpty(table.notEmpty || false);
       setFixedNumber(table.fixedNumber || false);
     }
   }, []);
@@ -198,7 +198,7 @@ export const FieldsDesigner = ({
 
   const onChangeToPrefill = checked => {
     setToPrefill(checked);
-    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill: checked, fixedNumber: checked });
+    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill: checked });
   };
 
   const onChangeFixedNumber = checked => {
@@ -487,9 +487,6 @@ export const FieldsDesigner = ({
   );
 
   const updateTableDesign = async ({ fixedNumber, notEmpty, readOnly, toPrefill }) => {
-    // if (isUndefined(tableDescriptionValue)) {
-    //   return;
-    // }
     try {
       const tableUpdated = await DatasetService.updateTableDescriptionDesign(
         toPrefill,
@@ -511,7 +508,7 @@ export const FieldsDesigner = ({
   };
 
   return (
-    <React.Fragment>
+    <Fragment>
       <h4 className={styles.descriptionLabel}>{resources.messages['newTableDescriptionPlaceHolder']}</h4>
       <div className={styles.switchDivInput}>
         <InputTextarea
@@ -640,7 +637,7 @@ export const FieldsDesigner = ({
       {renderAllFields()}
       {renderErrors(errorMessageAndTitle.title, errorMessageAndTitle.message)}
       {!isErrorDialogVisible && isDeleteDialogVisible && renderConfirmDialog()}
-    </React.Fragment>
+    </Fragment>
   );
 };
 FieldsDesigner.propTypes = {};
