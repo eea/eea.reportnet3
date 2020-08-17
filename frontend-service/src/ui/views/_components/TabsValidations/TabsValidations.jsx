@@ -17,8 +17,6 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Filters } from 'ui/views/_components/Filters';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel'; // Do not delete
-import { TabView } from 'ui/views/_components/TabView'; // Do not delete
 
 import { ValidationService } from 'core/services/Validation';
 
