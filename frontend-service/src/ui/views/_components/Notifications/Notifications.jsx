@@ -50,7 +50,12 @@ const Notifications = () => {
         ? (message = (
             <div>
               {notification.message}
-              <Button onClick={() => notification.onClick()} label={resourcesContext.messages['downloadFile']} />
+              <Button
+                className="p-button-animated-blink "
+                icon={'export'}
+                onClick={() => notification.onClick()}
+                label={resourcesContext.messages['downloadFile']}
+              />
             </div>
           ))
         : (message = (
