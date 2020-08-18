@@ -1,10 +1,19 @@
 .Footer {
   background-color: var(--bg);
   border-top: var(--footer-border);
+  display: flex;
+  .blueBox {
+    display: block;
+    background-color: var(--leftSideBar-bg);
+    display: flex;
+    transition: 0.5s;
+  }
   .footerContent {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex: 1 auto;
+    padding: 0 4rem;
     .reportnetLogo {
       a {
         display: flex;
