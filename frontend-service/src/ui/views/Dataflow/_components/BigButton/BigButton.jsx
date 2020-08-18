@@ -201,9 +201,11 @@ export const BigButton = ({
             }>
             {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
           </p>
-          <ReactTooltip effect="solid" id={tooltipId} place="top" className={styles.tooltip}>
-            {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
-          </ReactTooltip>
+          {buttonsTitle.length > 60 && (
+            <ReactTooltip effect="solid" id={tooltipId} place="top" className={styles.tooltip}>
+              {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
+            </ReactTooltip>
+          )}
         </>
       )}
     </>

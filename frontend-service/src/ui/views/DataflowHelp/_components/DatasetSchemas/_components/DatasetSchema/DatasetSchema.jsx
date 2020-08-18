@@ -161,7 +161,6 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
     parsedDataset.validations = validationList;
     if (!isUndefined(design.tables) && !isNull(design.tables) && design.tables.length > 0) {
       const tables = design.tables.map(tableDTO => {
-        console.log(tableDTO.tableSchemaDescription);
         const tableProperties = [
           {
             description:
@@ -204,7 +203,7 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
           });
           table.fields = fields;
         }
-        console.log({ table });
+
         return table;
       });
       parsedDataset.tables = tables;
