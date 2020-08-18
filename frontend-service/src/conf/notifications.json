@@ -637,6 +637,7 @@
             "parameters": ["dataflowId", "datasetId"]
           }
         },
+
         {
           "key": "CREATE_DATA_COLLECTION_INIT"
         },
@@ -648,6 +649,10 @@
         },
         {
           "key": "EXPORT_EU_DATASET_INIT"
+        },
+        {
+          "key": "EXTERNAL_INTEGRATION_DOWNLOAD",
+          "fixed": true
         }
       ]
     }
