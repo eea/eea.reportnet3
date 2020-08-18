@@ -81,12 +81,14 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         ),
 
         downloadButton: notification.onClick ? (
-          <Button
-            className={`${styles.columnActionButton}`}
-            icon={'export'}
-            onClick={() => notification.onClick()}
-            label={resources.messages['downloadFile']}
-          />
+          <span className={styles.center}>
+            <Button
+              className={`${styles.columnActionButton}`}
+              icon={'export'}
+              onClick={() => notification.onClick()}
+              label={resources.messages['downloadFile']}
+            />
+          </span>
         ) : (
           ''
         ),
