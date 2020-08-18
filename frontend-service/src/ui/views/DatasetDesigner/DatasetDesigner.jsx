@@ -411,6 +411,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const onExportDataExternalExtension = async fileExtension => {
     setIsLoadingFile(true);
     setFileType(fileExtension);
+    notificationContext.add({
+      type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET'
+    });
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
     } catch (error) {

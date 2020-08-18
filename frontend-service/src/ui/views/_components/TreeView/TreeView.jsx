@@ -109,7 +109,6 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
 
   const renderColumns = fields =>
     Object.keys(fields[0]).map(field => {
-      console.log({ field });
       return (
         <Column
           body={

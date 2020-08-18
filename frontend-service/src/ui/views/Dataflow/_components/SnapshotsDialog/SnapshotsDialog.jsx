@@ -93,7 +93,7 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
 
   const onShowReleaseDialog = ({ isReleased }) => {
     setIsActiveReleaseSnapshotConfirmDialog(true);
-    manageDialogs('isSnapshotDialogVisible', false);
+    manageDialogs('isActiveReleaseSnapshotConfirmDialog', true);
     setIsReleased(isReleased);
   };
 
@@ -118,6 +118,7 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
         }}
         style={{ width: '30vw' }}
         visible={isSnapshotDialogVisible}>
+          
         <li className={styles.createAndReleaseItem}>
           <div className={styles.itemInner}>
             <div className={styles.itemData}>
