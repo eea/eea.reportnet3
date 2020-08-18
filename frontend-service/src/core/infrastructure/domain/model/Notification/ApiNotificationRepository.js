@@ -15,7 +15,7 @@ const removeById = async () => {};
 const removeAll = async () => {};
 const readById = async () => {};
 const readAll = async () => {};
-const parse = ({ type, content = {}, message, config, routes }) => {
+const parse = ({ config, content = {}, message, onClick, routes, type }) => {
   const notificationDTO = {};
   config.forEach(notificationGeneralTypeConfig => {
     const notificationTypeConfig = notificationGeneralTypeConfig.types.find(configType => configType.key === type);
@@ -23,12 +23,13 @@ const parse = ({ type, content = {}, message, config, routes }) => {
     if (notificationTypeConfig) {
       const { key, fixed, lifeTime } = notificationGeneralTypeConfig;
       const { fixed: typeFixed, lifeTime: typeLifeTime, navigateTo } = notificationTypeConfig;
-      notificationDTO.message = message;
-      notificationDTO.type = key;
-      notificationDTO.fixed = !isUndefined(typeFixed) ? typeFixed : fixed;
-      notificationDTO.lifeTime = typeLifeTime || lifeTime;
-      notificationDTO.key = type;
       notificationDTO.content = content;
+      notificationDTO.fixed = !isUndefined(typeFixed) ? typeFixed : fixed;
+      notificationDTO.key = type;
+      notificationDTO.lifeTime = typeLifeTime || lifeTime;
+      notificationDTO.message = message;
+      notificationDTO.onClick = onClick;
+      notificationDTO.type = key;
       const contentKeys = Object.keys(content);
 
       if (!isUndefined(navigateTo) && !isNull(navigateTo)) {
