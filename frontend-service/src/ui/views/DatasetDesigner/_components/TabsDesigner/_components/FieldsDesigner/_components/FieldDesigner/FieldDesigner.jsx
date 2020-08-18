@@ -1,5 +1,4 @@
-import React, { useContext, useEffect, useReducer, useRef } from 'react';
-
+import React, { useContext, useEffect, useReducer, useRef, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -127,6 +126,44 @@ export const FieldDesigner = ({
   const inputRef = useRef();
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [headerInitialHeight, setHeaderInitialHeight] = useState();
+
+  useEffect(() => {
+    const header = document.getElementById('header');
+    const observer = new ResizeObserver(entries =>
+      entries.forEach(entry => {
+        if (headerHeight !== entry.contentRect.height) {
+          setHeaderHeight(entry.contentRect.height);
+        }
+      })
+    );
+
+    if (!isNil(header)) {
+      observer.observe(header);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    const dropDowns = document.querySelectorAll('.p-dropdown-panel');
+    dropDowns.forEach(dropDown => {
+      const dropDownDisplay = dropDown.style.display;
+      if (dropDownDisplay) {
+        if (headerInitialHeight === 70 || headerInitialHeight === 180) {
+          dropDown.style.marginTop = `${headerHeight - headerInitialHeight}px`;
+        }
+      }
+    });
+  }, [headerHeight]);
+
+  const onSetInitHeaderHeight = () => {
+    const header = document.getElementById('header');
+    setHeaderInitialHeight(header.offsetHeight);
+  };
 
   useEffect(() => {
     dispatchFieldDesigner({ type: 'SET_PK_REFERENCED', payload: fieldPKReferenced });
@@ -903,6 +940,7 @@ export const FieldDesigner = ({
         onChange={e => onChangeFieldType(e.target.value)}
         onMouseDown={event => {
           event.preventDefault();
+          onSetInitHeaderHeight();
           event.stopPropagation();
         }}
         optionLabel="value"
