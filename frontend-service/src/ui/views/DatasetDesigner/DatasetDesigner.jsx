@@ -65,8 +65,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
-  
-  const [hasValidations, setHasValidations] = useState();  
+  const [hasValidations, setHasValidations] = useState();
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
@@ -201,16 +200,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       DownloadFile(designerState.exportDatasetData, designerState.exportDatasetDataName);
     }
   }, [designerState.exportDatasetData]);
-  
+
   const refreshUniqueList = value => setNeedsRefreshUnique(value);
-
-  useEffect(() => {
-    const response = notificationContext.hidden.find(
-      notification => notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT'
-    );
-
-    if (response) downloadExportFMEFile();
-  }, [notificationContext.hidden]);
 
   const callSetMetaData = async () => {
     const metaData = await getMetadata({ datasetId, dataflowId });
@@ -236,35 +227,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const createFileName = (fileName, fileType) => `${fileName}.${fileType}`;
 
-  const downloadExportFMEFile = async () => {
-    try {
-      const [notification] = notificationContext.hidden.filter(
-        notification => notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT'
-      );
-
-      const datasetName = createFileName(designerState.datasetSchemaName, designerState.exportDatasetFileType);
-      const datasetData = await DatasetService.downloadExportFile(datasetId, notification.content.fileName);
-
-      designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData, name: datasetName } });
-    } catch (error) {
-      console.error(error);
-      notificationContext.add({
-        type: 'DOWNLOAD_FME_FILE_ERROR'
-      });
-    } finally {
-      isLoadingFile(false);
-    }
-  };
-
   const filterActiveIndex = index => {
     if (!isNil(index) && isNaN(index)) {
       const filteredTable = designerState.datasetSchema.tables.filter(table => table.tableSchemaId === index);
       if (!isEmpty(filteredTable) && !isNil(filteredTable[0])) {
         return filteredTable[0].index;
       }
-    } else {
-      return index;
     }
+    return index;
   };
 
   const getExportList = () => {
@@ -319,7 +289,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     } catch (error) {
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     } finally {
-      isLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -348,9 +318,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     getImportExtensions.split(', ')
   ).join(', ')}`;
 
-  const isLoading = value => designerDispatch({ type: 'IS_LOADING', payload: { value } });
+  const setIsLoading = value => designerDispatch({ type: 'SET_IS_LOADING', payload: { value } });
 
-  const isLoadingFile = value => designerDispatch({ type: 'IS_LOADING_FILE', payload: { value } });
+  const setIsLoadingFile = value => designerDispatch({ type: 'SET_IS_LOADING_FILE', payload: { value } });
 
   const manageDialogs = (dialog, value, secondDialog, secondValue) => {
     designerDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value, secondDialog, secondValue } });
@@ -395,7 +365,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const onCloseUniqueListModal = () => {
     manageDialogs('isUniqueConstraintsListDialogVisible', false);
     refreshUniqueList(true);
-  }
+  };
 
   const onConfirmValidate = async () => {
     manageDialogs('validateDialogVisible', false);
@@ -438,7 +408,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const setFileType = fileType => designerDispatch({ type: 'SET_EXPORT_DATASET_FILE_TYPE', payload: { fileType } });
 
   const onExportDataExternalExtension = async fileExtension => {
-    isLoadingFile(true);
+    setIsLoadingFile(true);
     setFileType(fileExtension);
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
@@ -448,7 +418,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const onExportDataInternalExtension = async fileType => {
-    isLoadingFile(true);
+    setIsLoadingFile(true);
     setFileType(fileType);
     try {
       const datasetName = createFileName(designerState.datasetSchemaName, fileType);
@@ -458,13 +428,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     } catch (error) {
       onExportError();
     } finally {
-      isLoadingFile(false);
+      setIsLoadingFile(false);
     }
   };
 
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
   useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
+  useCheckNotifications(['EXTERNAL_INTEGRATION_DOWNLOAD'], setIsLoadingFile, false);
 
   const onHideValidationsDialog = () => {
     if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener) {
@@ -486,7 +457,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     onHighlightRefresh(false);
 
     try {
-      isLoading(true);
+      setIsLoading(true);
       const getDatasetSchemaId = async () => {
         const dataset = await DatasetService.schemaById(datasetId);
         const tableSchemaNamesList = [];
@@ -497,7 +468,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           dataset.tables.map(tableSchema => tableSchema.tableSchemaName)
         );
 
-        isLoading(false);
+        setIsLoading(false);
         designerDispatch({
           type: 'GET_DATASET_DATA',
           payload: {
@@ -636,7 +607,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       label={resources.messages['close']}
       onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
     />
-  )
+  );
 
   const renderSwitchView = () => (
     <div className={styles.switchDivInput}>
@@ -704,10 +675,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     if (designerState.validationListDialogVisible) {
       return (
         <Dialog
+          className={hasValidations ? styles.qcRulesDialog : styles.qcRulesDialogEmpty}
+          dismissableMask={true}
           footer={renderActionButtonsValidationDialog}
           header={resources.messages['qcRules']}
           onHide={() => onHideValidationsDialog()}
-          style={{ width: '90%' }}
           visible={designerState.validationListDialogVisible}>
           <TabsValidations
             dataset={designerState.metaData.dataset}
@@ -925,6 +897,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             header={resources.messages['validateDataset']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
+            maximizable={false}
             onConfirm={onConfirmValidate}
             onHide={() => manageDialogs('validateDialogVisible', false)}
             visible={designerState.validateDialogVisible}>
@@ -933,7 +906,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         )}
         {designerState.dashDialogVisible && (
           <Dialog
-            footer={renderDashboardFooter}
+            dismissableMask={true}
             header={resources.messages['titleDashboard']}
             onHide={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
             style={{ width: '70vw' }}
@@ -948,6 +921,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         {designerState.isValidationViewerVisible && (
           <Dialog
             className={styles.paginatorValidationViewer}
+            dismissableMask={true}
             header={resources.messages['titleValidations']}
             onHide={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: false })}
             style={{ width: '80%' }}

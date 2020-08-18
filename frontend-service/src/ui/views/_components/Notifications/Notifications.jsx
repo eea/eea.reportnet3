@@ -4,7 +4,10 @@ import capitalize from 'lodash/capitalize';
 import isNil from 'lodash/isNil';
 import sanitizeHtml from 'sanitize-html';
 
+import styles from './Notifications.module.scss';
+
 import { Growl } from 'primereact/growl';
+import { Button } from 'ui/views/_components/Button';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -44,17 +47,31 @@ const Notifications = () => {
 
   useEffect(() => {
     notificationContext.toShow.map(notification => {
-      const message = (
-        <div
-          dangerouslySetInnerHTML={{
-            __html: sanitizeHtml(notification.message, {
-              allowedTags: ['a', 'strong'],
-              allowedAttributes: {
-                a: ['href', 'title']
-              }
-            })
-          }}></div>
-      );
+      let message;
+      notification.onClick
+        ? (message = (
+            <div>
+              {notification.message}
+              <Button
+                className={`p-button-animated-blink ${styles.downloadButton}`}
+                icon={'export'}
+                onClick={() => notification.onClick()}
+                label={resourcesContext.messages['downloadFile']}
+              />
+            </div>
+          ))
+        : (message = (
+            <div
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtml(notification.message, {
+                  allowedTags: ['a', 'strong'],
+                  allowedAttributes: {
+                    a: ['href', 'title']
+                  }
+                })
+              }}></div>
+          ));
+
       growlRef.current.show({
         severity: notification.type,
         summary: resourcesContext.messages[`notification${capitalize(notification.type)}Title`],
@@ -63,6 +80,7 @@ const Notifications = () => {
         sticky: notification.fixed
       });
     });
+
     if (notificationContext.toShow.length > 0) {
       notificationContext.clearToShow();
     }
