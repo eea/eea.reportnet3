@@ -6,8 +6,8 @@ import sanitizeHtml from 'sanitize-html';
 
 import styles from './Notifications.module.scss';
 
-import { Growl } from 'primereact/growl';
 import { Button } from 'ui/views/_components/Button';
+import { Growl } from 'primereact/growl';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
