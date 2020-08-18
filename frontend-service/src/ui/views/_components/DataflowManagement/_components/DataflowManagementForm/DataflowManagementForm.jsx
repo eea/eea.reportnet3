@@ -46,7 +46,7 @@ const DataflowManagementForm = forwardRef(
     }));
 
     const dataflowCrudValidation = Yup.object().shape({
-      name: Yup.string().required(' '),
+      name: Yup.string().required(' ').max(255, resources.messages['dataflowNameValidationMax']),
       description: Yup.string().required(' ').max(255, resources.messages['dataflowDescriptionValidationMax']),
       obligation: Yup.object({ title: Yup.string().required(' ') })
     });
@@ -76,7 +76,7 @@ const DataflowManagementForm = forwardRef(
               const notification = isEditForm
                 ? { type: 'DATAFLOW_UPDATING_ERROR', content: { dataflowId: data.id, dataflowName: values.name } }
                 : { type: 'DATAFLOW_CREATION_ERROR', content: { dataflowName: values.name } };
-              
+
               notificationContext.add(notification);
             }
           } finally {
