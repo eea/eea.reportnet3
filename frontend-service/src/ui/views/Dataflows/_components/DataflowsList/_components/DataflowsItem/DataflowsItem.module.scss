@@ -130,6 +130,15 @@
     .title {
       margin: 0 0 0.5rem 0 !important;
       font-size: 1.62rem;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    .description {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
     }
   }
 
@@ -260,4 +269,9 @@
       }
     }
   }
+}
+
+.tooltip {
+  max-width: 300px;
+  word-break: break-all;
 }
