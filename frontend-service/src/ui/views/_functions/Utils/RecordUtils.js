@@ -89,7 +89,9 @@ const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirs
       emptyRecord = RecordUtils.changeRecordValue(
         emptyRecord,
         record.fieldData.fieldSchemaId,
-        readOnlyFieldsIndex.indexOf(i) > -1 && reporting ? '' : copiedCols[i]
+        (readOnlyFieldsIndex.indexOf(i) > -1 && reporting) || record.fieldData.type === 'ATTACHMENT'
+          ? ''
+          : copiedCols[i]
       );
     });
 

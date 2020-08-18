@@ -29,6 +29,10 @@ const getFieldValues = (columns, header, filterColumns) => {
           ? filteredValues.type === 'CODELIST'
             ? 'Single select items'
             : 'Multiple select items'
+          : key === 'validExtensions'
+          ? 'Valid extensions'
+          : key === 'maxSize'
+          ? 'Maximum file size'
           : capitalize(key),
       value:
         filteredValues[key] === 'CODELIST'

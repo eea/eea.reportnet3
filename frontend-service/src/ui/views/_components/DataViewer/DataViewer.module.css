@@ -46,3 +46,7 @@
 .fieldColumn {
   width: 95px;
 }
+.chips {
+  display: flex !important;
+  justify-content: center;
+}
