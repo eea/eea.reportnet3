@@ -93,7 +93,8 @@ export const useSetColumns = (
   resources,
   setIsAttachFileVisible,
   setIsColumnInfoVisible,
-  validationsTemplate
+  validationsTemplate,
+  isReporting
 ) => {
   const [columns, setColumns] = useState([]);
   const [originalColumns, setOriginalColumns] = useState([]);
@@ -121,7 +122,7 @@ export const useSetColumns = (
             onClick={() => onFileDownload(value, fieldId)}
           />
         )}
-        {hasWritePermissions && (
+        {hasWritePermissions && (!colSchema.readOnly || !isReporting) && (
           <Button
             className={`p-button-animated-blink p-button-secondary-transparent`}
             icon="import"
@@ -136,7 +137,7 @@ export const useSetColumns = (
             }}
           />
         )}
-        {hasWritePermissions && !isNil(value) && value !== '' && (
+        {hasWritePermissions && (!colSchema.readOnly || !isReporting) && !isNil(value) && value !== '' && (
           <Button
             className={`p-button-animated-blink p-button-secondary-transparent`}
             icon="trash"
