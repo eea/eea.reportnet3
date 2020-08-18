@@ -82,7 +82,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
 
         downloadButton: notification.onClick ? (
           <Button
-            className={`${styles.columnInfoButton} p-button-secondary-transparent`}
+            className={`${styles.columnActionButton} p-button-secondary-transparent`}
             icon={'export'}
             onClick={() => notification.onClick()}
             label={resources.messages['downloadFile']}
