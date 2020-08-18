@@ -1,5 +1,8 @@
 import React, { useContext } from 'react';
+import ReactTooltip from 'react-tooltip';
 import { Link } from 'react-router-dom';
+
+import uuid from 'uuid';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isNil from 'lodash/isNil';
@@ -77,6 +80,8 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
     );
   };
 
+  const idTooltip = uuid.v4();
+
   return layout(
     <>
       <div className={`${styles.icon}`}>
@@ -97,9 +102,17 @@ const DataflowsItem = ({ dataFetch, itemContent, type }) => {
       </div>
 
       <div className={`${styles.text} dataflowList-name-description-help-step`}>
-        <h3 className={`${styles.title}`}>{itemContent.name}</h3>
+        <h3 className={`${styles.title}`} data-tip data-for={idTooltip}>
+          {itemContent.name}
+        </h3>
         <p>{itemContent.description}</p>
+        {itemContent.name.length > 70 && (
+          <ReactTooltip className={styles.tooltip} effect="solid" id={idTooltip} place="top">
+            {itemContent.name}
+          </ReactTooltip>
+        )}
       </div>
+
       <div className={`${styles.status}  dataflowList-status-help-step`}>
         <p>
           <span>{`${resources.messages['status']}:`}</span> {itemContent.status}
