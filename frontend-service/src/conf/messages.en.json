@@ -837,6 +837,7 @@
     "minusFileSize": "Decrease maximum file size",
     "plusFileSize": "Increase maximum file size",
     "externalIntegrationDownload": "Export file is ready to be downloaded ",
-    "downloadFile": "Download file"
+    "downloadFile": "Download file",
+    "action": "Action"
   }
 }

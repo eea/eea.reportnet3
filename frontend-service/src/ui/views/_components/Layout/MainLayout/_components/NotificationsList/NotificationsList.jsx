@@ -43,7 +43,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       },
       {
         id: 'redirectionUrl',
-        header: resources.messages['url']
+        header: resources.messages['action']
       }
     ];
 
