@@ -3,7 +3,7 @@
   bottom: 0;
   background-color: var(--header-footer-bg);
   padding-top: 3rem;
-  border-top: 8px solid var(--c-corporate-blue);
+  border-top: var(--footer-border);
   .footerTop {
     display: flex;
     flex-wrap: wrap;
