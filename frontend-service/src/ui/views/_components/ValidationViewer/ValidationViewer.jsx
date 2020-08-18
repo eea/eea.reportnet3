@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
-import isNull from 'lodash/isNull';
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './ValidationViewer.module.css';
@@ -479,7 +479,7 @@ const ValidationViewer = React.memo(
             sortField={sortField}
             sortOrder={sortOrder}
             totalRecords={totalFilteredRecords}
-            value={!isNull(fetchedData[0]) ? fetchedData : []}>
+            value={!isNil(fetchedData[0]) ? fetchedData : []}>
             {columns}
           </DataTable>
         </>
