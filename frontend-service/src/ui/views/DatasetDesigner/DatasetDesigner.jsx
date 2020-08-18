@@ -65,8 +65,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
-  
-  const [hasValidations, setHasValidations] = useState();  
+
+  const [hasValidations, setHasValidations] = useState();
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
@@ -201,7 +201,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       DownloadFile(designerState.exportDatasetData, designerState.exportDatasetDataName);
     }
   }, [designerState.exportDatasetData]);
-  
+
   const refreshUniqueList = value => setNeedsRefreshUnique(value);
 
   useEffect(() => {
@@ -395,7 +395,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const onCloseUniqueListModal = () => {
     manageDialogs('isUniqueConstraintsListDialogVisible', false);
     refreshUniqueList(true);
-  }
+  };
 
   const onConfirmValidate = async () => {
     manageDialogs('validateDialogVisible', false);
@@ -636,7 +636,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       label={resources.messages['close']}
       onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
     />
-  )
+  );
 
   const renderSwitchView = () => (
     <div className={styles.switchDivInput}>
