@@ -93,7 +93,7 @@ export const SnapshotsDialog = ({ dataflowId, datasetId, datasetName, isSnapshot
 
   const onShowReleaseDialog = ({ isReleased }) => {
     setIsActiveReleaseSnapshotConfirmDialog(true);
-    manageDialogs('isSnapshotDialogVisible', false);
+    manageDialogs('isActiveReleaseSnapshotConfirmDialog', true);
     setIsReleased(isReleased);
   };
 
