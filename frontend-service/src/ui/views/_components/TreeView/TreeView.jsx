@@ -108,56 +108,67 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
   };
 
   const renderColumns = fields =>
-    Object.keys(fields[0]).map(field => (
-      <Column
-        body={
-          field === 'type'
-            ? typeTemplate
-            : field === 'automatic'
-            ? rowData => itemTemplate(rowData, 'automatic')
-            : field === 'enabled'
-            ? rowData => itemTemplate(rowData, 'enabled')
-            : field === 'codelistItems'
-            ? codelistTemplate
-            : field === 'pk'
-            ? rowData => itemTemplate(rowData, 'pk')
-            : field === 'required'
-            ? rowData => itemTemplate(rowData, 'required')
-            : field === 'levelError'
-            ? levelErrorTemplate
-            : null
-        }
-        key={field}
-        columnResizeMode="expand"
-        field={field}
-        filter={
-          !isUndefined(columnOptions) && !isUndefined(columnOptions[propertyName])
-            ? columnOptions[propertyName]['filtered']
-            : false
-        }
-        filterElement={getMultiselectFilter(field)}
-        filterMatchMode="contains"
-        header={
-          !isUndefined(
-            columnOptions[propertyName] &&
-              columnOptions[propertyName]['names'] &&
-              columnOptions[propertyName]['names'][field]
-          )
-            ? columnOptions[propertyName]['names'][field]
-            : capitalize(field)
-        }
-        sortable={true}
-        style={{
-          width: field.toUpperCase() === 'DESCRIPTION' ? '60%' : '20%',
-          display:
-            !isUndefined(columnOptions[propertyName]) &&
-            !isUndefined(columnOptions[propertyName]['invisible']) &&
-            columnOptions[propertyName]['invisible'].indexOf(field) === 0
-              ? 'none'
-              : 'auto'
-        }}
-      />
-    ));
+    Object.keys(fields[0]).map(field => {
+      console.log({ field });
+      return (
+        <Column
+          body={
+            field === 'type'
+              ? typeTemplate
+              : field === 'automatic'
+              ? rowData => itemTemplate(rowData, 'automatic')
+              : field === 'enabled'
+              ? rowData => itemTemplate(rowData, 'enabled')
+              : field === 'codelistItems'
+              ? codelistTemplate
+              : field === 'pk'
+              ? rowData => itemTemplate(rowData, 'pk')
+              : field === 'required'
+              ? rowData => itemTemplate(rowData, 'required')
+              : field === 'mandatory'
+              ? rowData => itemTemplate(rowData, 'mandatory')
+              : field === 'prefilled'
+              ? rowData => itemTemplate(rowData, 'prefilled')
+              : field === 'fixedNumber'
+              ? rowData => itemTemplate(rowData, 'fixedNumber')
+              : field === 'readOnly'
+              ? rowData => itemTemplate(rowData, 'readOnly')
+              : field === 'levelError'
+              ? levelErrorTemplate
+              : null
+          }
+          key={field}
+          columnResizeMode="expand"
+          field={field}
+          filter={
+            !isUndefined(columnOptions) && !isUndefined(columnOptions[propertyName])
+              ? columnOptions[propertyName]['filtered']
+              : false
+          }
+          filterElement={getMultiselectFilter(field)}
+          filterMatchMode="contains"
+          header={
+            !isUndefined(
+              columnOptions[propertyName] &&
+                columnOptions[propertyName]['names'] &&
+                columnOptions[propertyName]['names'][field]
+            )
+              ? columnOptions[propertyName]['names'][field]
+              : capitalize(field)
+          }
+          sortable={true}
+          style={{
+            width: field.toUpperCase() === 'DESCRIPTION' ? '60%' : '20%',
+            display:
+              !isUndefined(columnOptions[propertyName]) &&
+              !isUndefined(columnOptions[propertyName]['invisible']) &&
+              columnOptions[propertyName]['invisible'].indexOf(field) === 0
+                ? 'none'
+                : 'auto'
+          }}
+        />
+      );
+    });
 
   const multiselectItemTemplate = option => {
     if (!isNil(option.value)) {

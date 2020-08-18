@@ -65,6 +65,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
+
   const [hasValidations, setHasValidations] = useState();
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
 
