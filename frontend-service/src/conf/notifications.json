@@ -613,6 +613,9 @@
         },
         {
           "key": "COPY_DATASET_SCHEMA_COMPLETED_EVENT"
+        },
+        {
+          "key": "EXTERNAL_INTEGRATION_DOWNLOAD"
         }
       ]
     },
@@ -651,7 +654,7 @@
           "key": "EXPORT_EU_DATASET_INIT"
         },
         {
-          "key": "EXTERNAL_INTEGRATION_DOWNLOAD"
+          "key": "EXPORT_EXTERNAL_INTEGRATION_DATASET"
         }
       ]
     }
