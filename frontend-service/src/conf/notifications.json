@@ -651,8 +651,7 @@
           "key": "EXPORT_EU_DATASET_INIT"
         },
         {
-          "key": "EXTERNAL_INTEGRATION_DOWNLOAD",
-          "fixed": true
+          "key": "EXTERNAL_INTEGRATION_DOWNLOAD"
         }
       ]
     }
