@@ -121,7 +121,7 @@ export const useSetColumns = (
             onClick={() => onFileDownload(value, fieldId)}
           />
         )}
-        {hasWritePermissions && (
+        {hasWritePermissions && !colSchema.readOnly && (
           <Button
             className={`p-button-animated-blink p-button-secondary-transparent`}
             icon="import"
@@ -136,7 +136,7 @@ export const useSetColumns = (
             }}
           />
         )}
-        {hasWritePermissions && !isNil(value) && value !== '' && (
+        {hasWritePermissions && !colSchema.readOnly && !isNil(value) && value !== '' && (
           <Button
             className={`p-button-animated-blink p-button-secondary-transparent`}
             icon="trash"

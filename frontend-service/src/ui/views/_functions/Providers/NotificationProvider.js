@@ -27,13 +27,14 @@ const NotificationProvider = ({ children }) => {
       value={{
         ...state,
         add: notificationDTO => {
-          const { type, content } = notificationDTO;
+          const { content, onClick, type } = notificationDTO;
           const notification = NotificationService.parse({
-            type,
+            config: config.notifications.notificationSchema,
             content,
             message: resourcesContext.messages[camelCase(type)],
-            config: config.notifications.notificationSchema,
-            routes
+            onClick,
+            routes,
+            type
           });
 
           dispatch({
@@ -75,8 +76,11 @@ const NotificationProvider = ({ children }) => {
           });
         },
 
+        clearHiddenNotifications: () => dispatch({ type: 'CLEAR_HIDDEN' }),
+
         hide: notificationDTO => {
           const { type, content } = notificationDTO;
+
           const notification = NotificationService.parseHidden({
             type,
             content,

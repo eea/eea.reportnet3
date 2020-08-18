@@ -896,6 +896,12 @@ const DataViewer = withRouter(
               icon={AwesomeIcons('check')}
               style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
             />
+          ) : rowData.field === 'Single select items' ||
+            rowData.field === 'Multiple select items' ||
+            rowData.field === 'Valid extensions' ? (
+            <Chips disabled={true} value={rowData.value.split(',')} className={styles.chips}></Chips>
+          ) : rowData.field === 'Maximum file size' ? (
+            `${rowData.value} ${resources.messages['MB']}`
           ) : (
             rowData.value
           )}
@@ -1062,6 +1068,14 @@ const DataViewer = withRouter(
                 ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).codelistItems) &&
                 !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).codelistItems)
                   ? ['codelistItems']
+                  : []),
+                ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions) &&
+                !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions)
+                  ? ['validExtensions']
+                  : []),
+                ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions) &&
+                !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions)
+                  ? ['maxSize']
                   : [])
               ])}>
               {['field', 'value'].map((column, i) => (
