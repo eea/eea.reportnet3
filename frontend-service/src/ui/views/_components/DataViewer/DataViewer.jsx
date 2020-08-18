@@ -227,7 +227,8 @@ const DataViewer = withRouter(
       resources,
       setIsAttachFileVisible,
       setIsColumnInfoVisible,
-      validationsTemplate
+      validationsTemplate,
+      reporting
     );
 
     // useEffect(() => {
