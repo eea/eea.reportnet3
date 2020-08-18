@@ -3,8 +3,9 @@ import moment from 'moment';
 
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
-
 import sanitizeHtml from 'sanitize-html';
+
+import styles from './NotificationsList.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
@@ -81,7 +82,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
 
         downloadButton: notification.onClick ? (
           <Button
-            // className={`p-button-animated-blink ${styles.downloadButton}`}
+            className={`${styles.columnInfoButton} p-button-secondary-transparent`}
             icon={'export'}
             onClick={() => notification.onClick()}
             label={resources.messages['downloadFile']}
