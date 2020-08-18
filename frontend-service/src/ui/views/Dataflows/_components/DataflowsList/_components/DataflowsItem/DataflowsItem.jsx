@@ -22,11 +22,9 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-const DataflowsItem = ({ dataFetch, infoTooltip, itemContent, type }) => {
+const DataflowsItem = ({ dataFetch, itemContent, type }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
-
-  console.log('infoTooltip', infoTooltip);
 
   const onAccept = async () => {
     try {
@@ -108,9 +106,11 @@ const DataflowsItem = ({ dataFetch, infoTooltip, itemContent, type }) => {
           {itemContent.name}
         </h3>
         <p>{itemContent.description}</p>
-        <ReactTooltip effect="solid" id={idTooltip} place="top">
-          {itemContent.name}
-        </ReactTooltip>
+        {itemContent.name.length > 70 && (
+          <ReactTooltip className={styles.tooltip} effect="solid" id={idTooltip} place="top">
+            {itemContent.name}
+          </ReactTooltip>
+        )}
       </div>
 
       <div className={`${styles.status}  dataflowList-status-help-step`}>
