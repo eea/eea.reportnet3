@@ -34,7 +34,8 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
         fieldTypeValue: '',
         fieldValue: '',
         fieldDescriptionValue: '',
-        fieldPKValue: false
+        fieldPKValue: false,
+        fieldFileProperties: { validExtensions: [], maxSize: 0 }
       };
     case 'SET_ATTACHMENT_PROPERTIES':
       return { ...state, fieldFileProperties: { validExtensions: payload.validExtensions, maxSize: payload.maxSize } };

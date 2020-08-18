@@ -1,4 +1,4 @@
-import React, { useState, useContext, Fragment } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -8,10 +8,12 @@ import styles from './LeftSideBar.module.scss';
 
 import { routes } from 'ui/routes';
 
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { LeftSideBarButton } from './_components/LeftSideBarButton';
 
-import { UserService } from 'core/services/User';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { DatasetService } from 'core/services/Dataset';
+import { UserService } from 'core/services/User';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -26,9 +28,9 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
+  const [helpIndex, setHelpIndex] = useState();
   const [logoutConfirmVisible, setLogoutConfirmVisible] = useState(undefined);
   const [run, setRun] = useState(false);
-  const [helpIndex, setHelpIndex] = useState();
 
   const handleJoyrideCallback = data => {
     const { action, status, type } = data;
@@ -44,6 +46,57 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
           setRun(false);
         }
       }
+    }
+  };
+
+  useEffect(() => {
+    if (findHiddenNotification()) downloadExportFMEFile();
+  }, [notificationContext.hidden]); 
+
+  const findHiddenNotification = () => {
+    return notificationContext.hidden.find(
+      notification =>
+        notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT' || 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
+    );
+  };
+
+  const downloadExportFMEFile = async () => {
+    try {
+      const [notification] = notificationContext.hidden.filter(
+        notification =>
+          notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT' ||
+          notification.key === 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
+      );
+
+      const getFileName = () => {
+        const extension = notification.content.fileName.split('.').pop();
+        return `${notification.content.datasetName}.${extension}`;
+      };
+
+      let datasetData;
+
+      if (notification) {
+        notification.content.providerId
+          ? (datasetData = await DatasetService.downloadExportFile(
+              notification.content.datasetId,
+              notification.content.fileName,
+              notification.content.providerId
+            ))
+          : (datasetData = await DatasetService.downloadExportFile(
+              notification.content.datasetId,
+              notification.content.fileName
+            ));
+
+        notificationContext.add({
+          type: 'EXTERNAL_INTEGRATION_DOWNLOAD',
+          onClick: () => DownloadFile(datasetData, getFileName())
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({ type: 'DOWNLOAD_FME_FILE_ERROR' });
+    } finally {
+      notificationContext.clearHiddenNotifications();
     }
   };
 
@@ -76,6 +129,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
     };
     return <LeftSideBarButton {...userButtonProps} />;
   };
+
   const renderUserNotifications = () => {
     const userNotificationsProps = {
       buttonType: 'notifications',
@@ -155,7 +209,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
   };
 
   return (
-    <>
+    <Fragment>
       <Joyride
         callback={handleJoyrideCallback}
         continuous={true}
@@ -197,21 +251,19 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
 
             {userContext.userProps.showLogoutConfirmation && logoutConfirmVisible && (
               <ConfirmDialog
-                onConfirm={() => {
-                  userLogout();
-                }}
-                onHide={() => setLogoutConfirmVisible(false)}
-                visible={logoutConfirmVisible}
                 header={resources.messages['logout']}
+                labelCancel={resources.messages['no']}
                 labelConfirm={resources.messages['yes']}
-                labelCancel={resources.messages['no']}>
+                onConfirm={() => userLogout()}
+                onHide={() => setLogoutConfirmVisible(false)}
+                visible={logoutConfirmVisible}>
                 {resources.messages['userLogout']}
               </ConfirmDialog>
             )}
           </>
         }
       </div>
-    </>
+    </Fragment>
   );
 });
 
