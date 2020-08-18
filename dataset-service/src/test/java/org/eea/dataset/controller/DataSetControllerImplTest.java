@@ -1196,7 +1196,7 @@ public class DataSetControllerImplTest {
       dataSetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, e.getReason());
-      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }
   }
@@ -1214,7 +1214,7 @@ public class DataSetControllerImplTest {
       dataSetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND, e.getReason());
-      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }
   }
@@ -1261,7 +1261,7 @@ public class DataSetControllerImplTest {
     try {
       dataSetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }
   }

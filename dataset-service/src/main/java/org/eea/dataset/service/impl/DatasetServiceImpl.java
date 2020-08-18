@@ -1405,6 +1405,15 @@ public class DatasetServiceImpl implements DatasetService {
       throws EEAException, IOException {
 
     FieldValue field = fieldRepository.findById(fieldId);
+    // Check if the field is marked as read only
+    Document fieldSchema = schemasRepository.findFieldSchema(
+        field.getRecord().getTableValue().getDatasetId().getIdDatasetSchema(),
+        field.getIdFieldSchema());
+    if (!isDesignDataset(datasetId) && fieldSchema != null
+        && fieldSchema.get(LiteralConstants.READ_ONLY) != null
+        && fieldSchema.getBoolean(LiteralConstants.READ_ONLY)) {
+      throw new EEAException(EEAErrorMessage.FIELD_READ_ONLY);
+    }
     // Attachment table
     AttachmentValue attachment = attachmentRepository.findByFieldValueId(fieldId);
     if (null == attachment) {
@@ -1499,6 +1508,20 @@ public class DatasetServiceImpl implements DatasetService {
   public String findRecordSchemaIdById(Long datasetId, String idRecord) {
     RecordValue record = recordRepository.findById(idRecord);
     return record.getIdRecordSchema();
+  }
+
+
+  /**
+   * Find field schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @return the string
+   */
+  @Override
+  public String findFieldSchemaIdById(Long datasetId, String idField) {
+    FieldValue field = fieldRepository.findById(idField);
+    return field.getIdFieldSchema();
   }
 
 
@@ -2272,8 +2295,7 @@ public class DatasetServiceImpl implements DatasetService {
         fieldValuesOnlyValues.add(auxField);
         if (DataType.ATTACHMENT.equals(field.getType())) {
           for (AttachmentValue attach : attachments) {
-            if (attach.getFieldValue().getIdFieldSchema().equals(field.getIdFieldSchema())
-                && attach.getFileName().equals(field.getValue())
+            if (StringUtils.isNotBlank(attach.getFieldValue().getId())
                 && attach.getFieldValue().getId().equals(field.getId())) {
               attach.setFieldValue(auxField);
               attach.setId(null);
