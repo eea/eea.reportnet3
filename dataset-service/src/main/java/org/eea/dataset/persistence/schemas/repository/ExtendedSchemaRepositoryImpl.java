@@ -260,11 +260,17 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
    */
   @Override
   public Document findTableSchema(String datasetSchemaId, String tableSchemaId) {
-
-    Document document = mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA)
-        .find(new Document("_id", new ObjectId(datasetSchemaId)).append(TABLESCHEMAS_ID,
-            new ObjectId(tableSchemaId)))
-        .projection(new Document("_id", 0).append(TABLESCHEMAS, 1)).first();
+    Document document;
+    if (null != datasetSchemaId) {
+      document = mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA)
+          .find(new Document("_id", new ObjectId(datasetSchemaId)).append(TABLESCHEMAS_ID,
+              new ObjectId(tableSchemaId)))
+          .projection(new Document("_id", 0).append(TABLESCHEMAS, 1)).first();
+    } else {
+      document = mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA)
+          .find(new Document(TABLESCHEMAS_ID, new ObjectId(tableSchemaId)))
+          .projection(new Document("_id", 0).append(TABLESCHEMAS, 1)).first();
+    }
 
     if (document != null) {
       Object tableSchemas = document.get(LiteralConstants.TABLE_SCHEMAS);

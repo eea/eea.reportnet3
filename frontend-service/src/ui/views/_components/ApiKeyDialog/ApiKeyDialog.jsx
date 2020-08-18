@@ -6,7 +6,6 @@ import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { DataflowService } from 'core/services/Dataflow';
@@ -22,7 +21,6 @@ const ApiKeyDialog = ({
   }
 }) => {
   const resources = useContext(ResourcesContext);
-  const notificationContext = useContext(NotificationContext);
 
   const [apiKey, setApiKey] = useState('');
   const [isKeyLoading, setIsKeyLoading] = useState(false);
@@ -87,7 +85,6 @@ const ApiKeyDialog = ({
   return (
     <Dialog
       blockScroll={false}
-      closeOnEscape={true}
       footer={footer}
       header={resources.messages['apiKeyDialogHead']}
       modal={true}

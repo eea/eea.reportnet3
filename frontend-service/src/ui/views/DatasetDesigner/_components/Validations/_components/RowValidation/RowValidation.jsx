@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useContext, useState } from 'react';
+import React, { useEffect, useReducer, useContext, useState, Fragment } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -11,7 +11,6 @@ import styles from './RowValidation.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { ExpressionSelector } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionSelector';
-import { ExpressionsTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionsTab';
 import { InfoTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/InfoTab';
 import ReactTooltip from 'react-tooltip';
 import { TabView, TabPanel } from 'primereact/tabview';
@@ -691,19 +690,23 @@ export const RowValidation = ({ datasetId, tabs }) => {
   );
 
   const dialogLayout = children => (
-    <Dialog
-      className={styles.dialog}
-      footer={renderRowQCsFooter}
-      header={
-        validationContext.ruleEdit
-          ? resourcesContext.messages.editRowConstraint
-          : resourcesContext.messages.createRowConstraint
-      }
-      visible={validationContext.isVisible}
-      style={{ width: '975px' }}
-      onHide={() => onHide()}>
-      {children}
-    </Dialog>
+    <Fragment>
+      {validationContext.isVisible && (
+        <Dialog
+          className={styles.dialog}
+          footer={renderRowQCsFooter}
+          header={
+            validationContext.ruleEdit
+              ? resourcesContext.messages.editRowConstraint
+              : resourcesContext.messages.createRowConstraint
+          }
+          visible={validationContext.isVisible}
+          style={{ width: '975px' }}
+          onHide={() => onHide()}>
+          {children}
+        </Dialog>
+      )}
+    </Fragment>
   );
 
   return dialogLayout(

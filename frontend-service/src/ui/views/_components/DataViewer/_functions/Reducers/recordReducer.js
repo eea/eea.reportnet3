@@ -12,16 +12,6 @@ export const recordReducer = (state, { type, payload }) => {
 
   switch (type) {
     case 'COPY_RECORDS':
-      console.log(
-        RecordUtils.getClipboardData(
-          payload.pastedData,
-          !isUndefined(state.pastedRecords) ? [...state.pastedRecords] : [],
-          payload.colsSchema,
-          {
-            ...state.fetchedDataFirstRecord
-          }
-        )
-      );
       return {
         ...state,
         numCopiedRecords: RecordUtils.getNumCopiedRecords(payload.pastedData),
@@ -31,7 +21,8 @@ export const recordReducer = (state, { type, payload }) => {
           payload.colsSchema,
           {
             ...state.fetchedDataFirstRecord
-          }
+          },
+          payload.reporting
         )
       };
 

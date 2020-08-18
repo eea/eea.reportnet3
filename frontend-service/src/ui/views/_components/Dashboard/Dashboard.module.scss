@@ -1,27 +1,31 @@
-.NoErrorData {
+.dashboardWithoutData {
+  height: 56vh;
+}
+
+.noDashboard {
+  height: 100%;
   display: flex;
-  align-content: center;
+  align-items: center;
   justify-content: center;
-  font-size: 1.2em;
+  font-size: 1.2rem;
   font-weight: bold;
-  margin-bottom: 20px;
 }
 
-.dashBoardSpinner {
-  top: 0vh !important;
+.spinner {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* .colorPickerWrap {
-  border: 1px solid var(--gray-50);
-  padding: 20px;
-  width: 35%;
-} */
 .colorPicker {
   margin-left: 3px;
+
+  > input {
+    font-size: 12px !important;
+  }
 }
-.colorPicker > input {
-  font-size: 12px !important;
-}
+
 .colorPickerWrap {
   border: 1px solid var(--gray-50);
   padding: 20px;

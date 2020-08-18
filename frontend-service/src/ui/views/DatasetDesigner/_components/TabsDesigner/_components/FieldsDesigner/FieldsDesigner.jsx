@@ -1,6 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 
-import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -55,6 +54,7 @@ export const FieldsDesigner = ({
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [notEmpty, setNotEmpty] = useState(true);
+  const [fixedNumber, setFixedNumber] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
   const [tableDescriptionValue, setTableDescriptionValue] = useState('');
 
@@ -67,6 +67,7 @@ export const FieldsDesigner = ({
       setIsReadOnlyTable(table.readOnly || false);
       setToPrefill(table.toPrefill || false);
       table.notEmpty === false ? setNotEmpty(false) : setNotEmpty(true);
+      setFixedNumber(table.fixedNumber || false);
     }
   }, []);
 
@@ -111,6 +112,7 @@ export const FieldsDesigner = ({
     pkHasMultipleValues,
     pkMustBeUsed,
     name,
+    readOnly,
     recordId,
     referencedField,
     required,
@@ -127,6 +129,7 @@ export const FieldsDesigner = ({
       pkHasMultipleValues,
       pkMustBeUsed,
       name,
+      readOnly,
       recordId,
       referencedField,
       required,
@@ -154,6 +157,7 @@ export const FieldsDesigner = ({
     pkHasMultipleValues,
     pkMustBeUsed,
     name,
+    readOnly,
     referencedField,
     required,
     type,
@@ -172,6 +176,7 @@ export const FieldsDesigner = ({
       inmFields[fieldIndex].pkMustBeUsed = pkMustBeUsed;
       inmFields[fieldIndex].referencedField = referencedField;
       inmFields[fieldIndex].required = required;
+      inmFields[fieldIndex].readOnly = readOnly;
       inmFields[fieldIndex].type = type;
       inmFields[fieldIndex].validExtensions = validExtensions;
       onChangeFields(inmFields, isLinkChange, table.tableSchemaId);
@@ -182,23 +187,37 @@ export const FieldsDesigner = ({
   const onChangeIsReadOnly = checked => {
     setIsReadOnlyTable(checked);
     if (checked) {
-      setToPrefill(checked);
+      setToPrefill(true);
     }
     updateTableDesign({
       readOnly: checked,
-      toPrefill: checked === false ? toPrefill : checked,
-      notEmpty: checked === false ? notEmpty : checked
+      toPrefill: checked === false ? toPrefill : true,
+      fixedNumber,
+      notEmpty
     });
   };
 
   const onChangeToPrefill = checked => {
     setToPrefill(checked);
-    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill: checked });
+    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill: checked, fixedNumber, notEmpty });
+  };
+
+  const onChangeFixedNumber = checked => {
+    setFixedNumber(checked);
+    if (checked) {
+      setToPrefill(true);
+    }
+    updateTableDesign({
+      readOnly: isReadOnlyTable,
+      toPrefill: checked === false ? toPrefill : true,
+      fixedNumber: checked,
+      notEmpty
+    });
   };
 
   const onChangeNotEmpty = checked => {
     setNotEmpty(checked);
-    updateTableDesign({ readOnly: isReadOnlyTable, notEmpty: checked });
+    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, fixedNumber, notEmpty: checked });
   };
 
   const onFieldDragAndDrop = (draggedFieldIdx, droppedFieldName) => {
@@ -284,8 +303,10 @@ export const FieldsDesigner = ({
             description: field.description,
             field: field['fieldId'],
             header: field['name'],
+            pk: field['pk'],
             maxSize: field['maxSize'],
             pkHasMultipleValues: field['pkHasMultipleValues'],
+            readOnly: field['readOnly'],
             recordId: field['recordId'],
             referencedField: field['referencedField'],
             required: field.required,
@@ -308,6 +329,7 @@ export const FieldsDesigner = ({
           onLoadTableData={onLoadTableData}
           recordPositionId={-1}
           recordPositionId={recordPositionId}
+          reporting={false}
           selectedRecordErrorId={selectedRecordErrorId}
           setIsValidationSelected={setIsValidationSelected}
           tableHasErrors={table.hasErrors}
@@ -351,14 +373,16 @@ export const FieldsDesigner = ({
 
   const renderErrors = (errorTitle, error) => {
     return (
-      <Dialog
-        footer={errorDialogFooter}
-        header={errorTitle}
-        modal={true}
-        onHide={() => setIsErrorDialogVisible(false)}
-        visible={isErrorDialogVisible}>
-        <div className="p-grid p-fluid">{error}</div>
-      </Dialog>
+      isErrorDialogVisible && (
+        <Dialog
+          footer={errorDialogFooter}
+          header={errorTitle}
+          modal={true}
+          onHide={() => setIsErrorDialogVisible(false)}
+          visible={isErrorDialogVisible}>
+          <div className="p-grid p-fluid">{error}</div>
+        </Dialog>
+      )
     );
   };
 
@@ -376,6 +400,7 @@ export const FieldsDesigner = ({
           fieldLink={null}
           fieldHasMultipleValues={false}
           fieldMustBeUsed={false}
+          fieldReadOnly={false}
           fieldRequired={false}
           fieldType=""
           fieldValue=""
@@ -415,6 +440,7 @@ export const FieldsDesigner = ({
                 fieldMustBeUsed={field.pkMustBeUsed}
                 fieldPK={field.pk}
                 fieldPKReferenced={field.pkReferenced}
+                fieldReadOnly={Boolean(field.readOnly)}
                 fieldRequired={Boolean(field.required)}
                 fieldType={field.type}
                 fieldValue={field.value}
@@ -469,10 +495,7 @@ export const FieldsDesigner = ({
     </div>
   );
 
-  const updateTableDesign = async ({ notEmpty, readOnly, toPrefill }) => {
-    // if (isUndefined(tableDescriptionValue)) {
-    //   return;
-    // }
+  const updateTableDesign = async ({ fixedNumber, notEmpty, readOnly, toPrefill }) => {
     try {
       const tableUpdated = await DatasetService.updateTableDescriptionDesign(
         toPrefill,
@@ -480,12 +503,13 @@ export const FieldsDesigner = ({
         tableDescriptionValue,
         readOnly,
         datasetId,
-        notEmpty
+        notEmpty,
+        fixedNumber
       );
       if (!tableUpdated) {
         console.error('Error during table description update');
       } else {
-        onChangeTableProperties(table.tableSchemaId, tableDescriptionValue, readOnly, toPrefill, notEmpty);
+        onChangeTableProperties(table.tableSchemaId, tableDescriptionValue, readOnly, toPrefill, notEmpty, fixedNumber);
       }
     } catch (error) {
       console.error(`Error during table description update: ${error}`);
@@ -493,7 +517,7 @@ export const FieldsDesigner = ({
   };
 
   return (
-    <React.Fragment>
+    <Fragment>
       <h4 className={styles.descriptionLabel}>{resources.messages['newTableDescriptionPlaceHolder']}</h4>
       <div className={styles.switchDivInput}>
         <InputTextarea
@@ -503,7 +527,7 @@ export const FieldsDesigner = ({
           id="tableDescription"
           key="tableDescription"
           onChange={e => setTableDescriptionValue(e.target.value)}
-          onBlur={() => updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, notEmpty })}
+          onBlur={() => updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, notEmpty, fixedNumber })}
           onFocus={e => {
             setInitialTableDescription(e.target.value);
           }}
@@ -553,8 +577,8 @@ export const FieldsDesigner = ({
           <div>
             <span className={styles.switchTextInput}>{resources.messages['prefilled']}</span>
             <Checkbox
-              checked={toPrefill}
-              disabled={isReadOnlyTable}
+              checked={toPrefill || fixedNumber}
+              disabled={isReadOnlyTable || fixedNumber}
               // className={styles.checkRequired}
               id={`${table.tableSchemaId}_check_to_prefill`}
               inputId={`${table.tableSchemaId}_check_to_prefill`}
@@ -564,6 +588,21 @@ export const FieldsDesigner = ({
             />
             <label htmlFor={`${table.tableSchemaId}_check_to_prefill`} className="srOnly">
               {resources.messages['prefilled']}
+            </label>
+          </div>
+          <div>
+            <span className={styles.switchTextInput}>{resources.messages['fixedNumber']}</span>
+            <Checkbox
+              checked={fixedNumber}
+              // className={styles.checkRequired}
+              id={`${table.tableSchemaId}_check_fixed_number`}
+              inputId={`${table.tableSchemaId}_check_fixed_number`}
+              label="Default"
+              onChange={e => onChangeFixedNumber(e.checked)}
+              style={{ width: '70px' }}
+            />
+            <label htmlFor={`${table.tableSchemaId}_check_fixed_number`} className="srOnly">
+              {resources.messages['fixedNumber']}
             </label>
           </div>
           <div>
@@ -585,6 +624,7 @@ export const FieldsDesigner = ({
       </div>
       {!isPreviewModeOn && (
         <div className={styles.fieldsHeader}>
+          <label className={styles.readOnlyWrap}>{resources.messages['readOnly']}</label>
           <label className={styles.requiredWrap}>{resources.messages['required']}</label>
           <span className={styles.PKWrap}>
             <label>{resources.messages['pk']}</label>
@@ -606,7 +646,7 @@ export const FieldsDesigner = ({
       {renderAllFields()}
       {renderErrors(errorMessageAndTitle.title, errorMessageAndTitle.message)}
       {!isErrorDialogVisible && isDeleteDialogVisible && renderConfirmDialog()}
-    </React.Fragment>
+    </Fragment>
   );
 };
 FieldsDesigner.propTypes = {};

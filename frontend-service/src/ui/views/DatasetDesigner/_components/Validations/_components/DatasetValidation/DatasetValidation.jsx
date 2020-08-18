@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useContext, useState } from 'react';
+import React, { useEffect, useReducer, useContext, useState, Fragment } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -363,6 +363,9 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
 
       await ValidationService.createDatasetRule(datasetId, candidateRule);
       onHide();
+      notificationContext.hide({
+        type: 'VALIDATED_QC_RULE_EVENT'
+      });
     } catch (error) {
       notificationContext.add({
         type: 'QC_RULE_CREATION_ERROR'
@@ -387,6 +390,9 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
       await ValidationService.updateDatasetRule(datasetId, candidateRule);
       onHide();
+      notificationContext.hide({
+        type: 'VALIDATED_QC_RULE_EVENT'
+      });
     } catch (error) {
       notificationContext.add({
         type: 'QC_RULE_UPDATING_ERROR'
@@ -517,18 +523,22 @@ export const DatasetValidation = ({ datasetId, datasetSchema, datasetSchemas, ta
   };
 
   const dialogLayout = children => (
-    <Dialog
-      className={styles.dialog}
-      header={
-        validationContext.ruleEdit
-          ? resourcesContext.messages.editDatasetConstraint
-          : resourcesContext.messages.createDatasetConstraint
-      }
-      visible={validationContext.isVisible}
-      style={{ width: '975px' }}
-      onHide={() => onHide()}>
-      {children}
-    </Dialog>
+    <Fragment>
+      {validationContext.isVisible && (
+        <Dialog
+          className={styles.dialog}
+          header={
+            validationContext.ruleEdit
+              ? resourcesContext.messages.editDatasetConstraint
+              : resourcesContext.messages.createDatasetConstraint
+          }
+          visible={validationContext.isVisible}
+          style={{ width: '975px' }}
+          onHide={() => onHide()}>
+          {children}
+        </Dialog>
+      )}
+    </Fragment>
   );
 
   return dialogLayout(

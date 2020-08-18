@@ -34,6 +34,9 @@ public class TableSchemaVO {
   /** The not empty. */
   private Boolean notEmpty;
 
+  /** The fixed number. */
+  private Boolean fixedNumber;
+
   /**
    * Hash code.
    *

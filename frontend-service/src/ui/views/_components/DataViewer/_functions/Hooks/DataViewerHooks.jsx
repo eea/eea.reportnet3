@@ -1,6 +1,5 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
-import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -9,21 +8,16 @@ import styles from '../../DataViewer.module.css';
 
 import { config } from 'conf';
 
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
+
 import { DataViewerUtils } from '../Utils/DataViewerUtils';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { RecordUtils } from 'ui/views/_functions/Utils';
 
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-
 export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
-  const [columnOptions, setColumnOptions] = useState([{}]);
   const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
-
-  const resources = useContext(ResourcesContext);
+  const [columnOptions, setColumnOptions] = useState([{}]);
 
   useEffect(() => {
     let colOptions = [];
@@ -51,7 +45,14 @@ export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
   };
 };
 
-export const useContextMenu = (resources, records, hideEdition, setEditDialogVisible, setConfirmDeleteVisible) => {
+export const useContextMenu = (
+  resources,
+  records,
+  hideEdition,
+  hideDeletion,
+  setEditDialogVisible,
+  setConfirmDeleteVisible
+) => {
   const [menu, setMenu] = useState();
 
   useEffect(() => {
@@ -65,11 +66,13 @@ export const useContextMenu = (resources, records, hideEdition, setEditDialogVis
         }
       });
     }
-    menuItems.push({
-      label: resources.messages['delete'],
-      icon: config.icons['trash'],
-      command: () => setConfirmDeleteVisible(true)
-    });
+    if (!hideDeletion) {
+      menuItems.push({
+        label: resources.messages['delete'],
+        icon: config.icons['trash'],
+        command: () => setConfirmDeleteVisible(true)
+      });
+    }
     setMenu(menuItems);
   }, [records.selectedRecord]);
   return { menu };
@@ -115,12 +118,10 @@ export const useSetColumns = (
             icon="export"
             iconPos="right"
             label={value}
-            onClick={() => {
-              onFileDownload(value, fieldId);
-            }}
+            onClick={() => onFileDownload(value, fieldId)}
           />
         )}
-        {hasWritePermissions && (
+        {hasWritePermissions && !colSchema.readOnly && (
           <Button
             className={`p-button-animated-blink p-button-secondary-transparent`}
             icon="import"
@@ -135,7 +136,7 @@ export const useSetColumns = (
             }}
           />
         )}
-        {hasWritePermissions && !isNil(value) && value !== '' && (
+        {hasWritePermissions && !colSchema.readOnly && !isNil(value) && value !== '' && (
           <Button
             className={`p-button-animated-blink p-button-secondary-transparent`}
             icon="trash"

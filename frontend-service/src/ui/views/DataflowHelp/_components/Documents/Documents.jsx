@@ -29,7 +29,6 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 const Documents = ({
   dataflowId,
   documents,
-  isCustodian,
   isDeletingDocument,
   isToolbarVisible,
   setIsDeletingDocument,
@@ -49,7 +48,6 @@ const Documents = ({
   const [fileToDownload, setFileToDownload] = useState(undefined);
   const [downloadingId, setDownloadingId] = useState('');
   const [isEditForm, setIsEditForm] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   const [rowDataState, setRowDataState] = useState();
 
@@ -192,7 +190,6 @@ const Documents = ({
 
       <DataTable
         autoLayout={true}
-        loading={isLoading}
         onRowSelect={e => {
           setDocumentInitialValues(Object.assign({}, e.data));
         }}
@@ -303,20 +300,21 @@ const Documents = ({
         </Dialog>
       )}
 
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        header={resources.messages['delete']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        maximizable={false}
-        onConfirm={() => {
-          setIsDeletingDocument(true);
-          onDeleteDocument(rowDataState);
-        }}
-        onHide={onHideDeleteDialog}
-        visible={deleteDialogVisible}>
-        {resources.messages['deleteDocument']}
-      </ConfirmDialog>
+      {deleteDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={resources.messages['delete']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={() => {
+            setIsDeletingDocument(true);
+            onDeleteDocument(rowDataState);
+          }}
+          onHide={onHideDeleteDialog}
+          visible={deleteDialogVisible}>
+          {resources.messages['deleteDocument']}
+        </ConfirmDialog>
+      )}
     </Fragment>
   );
 };

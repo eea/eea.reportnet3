@@ -1,9 +1,11 @@
-import React, { useContext, useEffect, useReducer, useRef } from 'react';
+import React, { useContext, useEffect, useReducer, useRef, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './FieldDesigner.module.scss';
+
+import { config } from 'conf';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -14,32 +16,32 @@ import { Checkbox } from 'primereact/checkbox';
 import { CodelistEditor } from './_components/CodelistEditor';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
-import { LinkSelector } from './_components/LinkSelector';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
+import { LinkSelector } from './_components/LinkSelector';
+
+import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 import { fieldDesignerReducer } from './_functions/Reducers/fieldDesignerReducer';
 
-import { DatasetService } from 'core/services/Dataset';
-import { config } from 'conf';
-
 export const FieldDesigner = ({
   addField = false,
   checkDuplicates,
   codelistItems,
   datasetId,
-  fieldFileProperties,
-  fieldId,
   fieldDescription,
+  fieldFileProperties,
+  fieldHasMultipleValues,
+  fieldId,
+  fieldLink,
+  fieldMustBeUsed,
   fieldName,
   fieldPK,
   fieldPKReferenced,
-  fieldLink,
-  fieldHasMultipleValues,
-  fieldMustBeUsed,
+  fieldReadOnly,
   fieldRequired,
   fieldType,
   hasPK,
@@ -104,6 +106,7 @@ export const FieldDesigner = ({
     fieldPKReferencedValue: fieldPKReferenced || false,
     fieldPKValue: fieldPK,
     fieldPreviousTypeValue: getFieldTypeValue(fieldType) || '',
+    fieldReadOnlyValue: fieldReadOnly,
     fieldRequiredValue: fieldRequired,
     fieldTypeValue: getFieldTypeValue(fieldType),
     fieldValue: fieldName,
@@ -123,6 +126,44 @@ export const FieldDesigner = ({
   const inputRef = useRef();
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [headerInitialHeight, setHeaderInitialHeight] = useState();
+
+  useEffect(() => {
+    const header = document.getElementById('header');
+    const observer = new ResizeObserver(entries =>
+      entries.forEach(entry => {
+        if (headerHeight !== entry.contentRect.height) {
+          setHeaderHeight(entry.contentRect.height);
+        }
+      })
+    );
+
+    if (!isNil(header)) {
+      observer.observe(header);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    const dropDowns = document.querySelectorAll('.p-dropdown-panel');
+    dropDowns.forEach(dropDown => {
+      const dropDownDisplay = dropDown.style.display;
+      if (dropDownDisplay) {
+        if (headerInitialHeight === 70 || headerInitialHeight === 180) {
+          dropDown.style.marginTop = `${headerHeight - headerInitialHeight}px`;
+        }
+      }
+    });
+  }, [headerHeight]);
+
+  const onSetInitHeaderHeight = () => {
+    const header = document.getElementById('header');
+    setHeaderInitialHeight(header.offsetHeight);
+  };
 
   useEffect(() => {
     dispatchFieldDesigner({ type: 'SET_PK_REFERENCED', payload: fieldPKReferenced });
@@ -344,6 +385,7 @@ export const FieldDesigner = ({
     pkHasMultipleValues = fieldDesignerState.pkHasMultipleValues,
     pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
     name = fieldDesignerState.fieldValue,
+    readOnly = fieldDesignerState.fieldReadOnlyValue,
     recordId = recordSchemaId,
     referencedField = fieldDesignerState.fieldLinkValue,
     required = fieldDesignerState.fieldRequiredValue,
@@ -359,6 +401,7 @@ export const FieldDesigner = ({
         pkHasMultipleValues,
         pkMustBeUsed,
         name,
+        readOnly,
         recordId,
         referencedField: !isNil(referencedField)
           ? parseReferenceField(referencedField)
@@ -377,10 +420,11 @@ export const FieldDesigner = ({
           fieldId: response.data,
           fieldLinkValue: null,
           maxSize,
+          name,
           pk,
           pkHasMultipleValues,
           pkMustBeUsed,
-          name,
+          readOnly,
           recordId,
           referencedField,
           required,
@@ -484,6 +528,24 @@ export const FieldDesigner = ({
       }
     }
     dispatchFieldDesigner({ type: 'SET_PK', payload: checked });
+  };
+
+  const onReadOnlyChange = checked => {
+    if (!fieldDesignerState.isDragging) {
+      if (fieldId === '-1') {
+        if (
+          !isNil(fieldDesignerState.fieldTypeValue) &&
+          fieldDesignerState.fieldTypeValue !== '' &&
+          !isNil(fieldDesignerState.fieldValue) &&
+          fieldDesignerState.fieldValue !== ''
+        ) {
+          onFieldAdd({ readOnly: checked });
+        }
+      } else {
+        fieldUpdate({ readOnly: checked });
+      }
+    }
+    dispatchFieldDesigner({ type: 'SET_READONLY', payload: checked });
   };
 
   const onRequiredChange = checked => {
@@ -604,6 +666,7 @@ export const FieldDesigner = ({
     pkHasMultipleValues = fieldDesignerState.pkHasMultipleValues,
     pkMustBeUsed = fieldDesignerState.pkMustBeUsed,
     name = fieldDesignerState.fieldValue,
+    readOnly = fieldDesignerState.fieldReadOnlyValue,
     recordId = recordSchemaId,
     referencedField = fieldDesignerState.fieldLinkValue,
     required = fieldDesignerState.fieldRequiredValue,
@@ -620,6 +683,7 @@ export const FieldDesigner = ({
         pkHasMultipleValues,
         pkMustBeUsed,
         name,
+        readOnly,
         recordId,
         referencedField: !isNil(referencedField)
           ? parseReferenceField(referencedField)
@@ -679,6 +743,18 @@ export const FieldDesigner = ({
       ) : (
         <div style={{ marginLeft: '32px', display: 'inline-block' }}></div>
       )}
+      <Checkbox
+        checked={fieldDesignerState.fieldReadOnlyValue}
+        className={`${styles.checkReadOnly} datasetSchema-readOnly-help-step`}
+        id={`${fieldId}_check_readOnly`}
+        inputId={`${fieldId}_check_readOnly`}
+        label="Default"
+        onChange={e => onReadOnlyChange(e.checked)}
+        style={{ width: '70px' }}
+      />
+      <label htmlFor={`${fieldId}_check_required`} className="srOnly">
+        {resources.messages['readOnly']}
+      </label>
       <Checkbox
         checked={fieldDesignerState.fieldRequiredValue}
         className={`${styles.checkRequired} datasetSchema-required-help-step`}
@@ -864,6 +940,7 @@ export const FieldDesigner = ({
         onChange={e => onChangeFieldType(e.target.value)}
         onMouseDown={event => {
           event.preventDefault();
+          onSetInitHeaderHeight();
           event.stopPropagation();
         }}
         optionLabel="value"
@@ -954,7 +1031,6 @@ export const FieldDesigner = ({
         <Dialog
           blockScroll={false}
           contentStyle={{ overflow: 'auto' }}
-          closeOnEscape={false}
           footer={qcDialogFooter}
           header={resources.messages['qcManager']}
           modal={true}

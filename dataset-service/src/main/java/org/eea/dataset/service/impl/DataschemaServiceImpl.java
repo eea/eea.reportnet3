@@ -36,7 +36,7 @@ import org.eea.dataset.validate.commands.ValidationSchemaCommand;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -97,9 +97,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private TableSchemaMapper tableSchemaMapper;
 
-  /** The record store controller zull. */
+  /** The record store controller zuul. */
   @Autowired
-  private RecordStoreControllerZull recordStoreControllerZull;
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
   /** The rules controller zuul. */
   @Autowired
@@ -336,7 +336,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schemasRepository.save(schema);
     // Call to recordstores to make the restoring of the dataset data (table, records and fields
     // values)
-    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, 0L, DatasetTypeEnum.DESIGN,
+    recordStoreControllerZuul.restoreSnapshotData(idDataset, idSnapshot, 0L, DatasetTypeEnum.DESIGN,
         (String) ThreadPropertiesManager.getVariable("user"), true, true);
   }
 
@@ -368,6 +368,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
     if (null == tableSchemaVO.getReadOnly()) {
       tableSchemaVO.setReadOnly(false);
+    }
+    if (null == tableSchemaVO.getFixedNumber()) {
+      tableSchemaVO.setFixedNumber(false);
     }
 
     RecordSchema recordSchema = new RecordSchema();
@@ -416,6 +419,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
         if (tableSchemaVO.getToPrefill() != null) {
           tableSchema.put("toPrefill", tableSchemaVO.getToPrefill());
+        }
+        if (tableSchemaVO.getFixedNumber() != null) {
+          tableSchema.put("fixedNumber", tableSchemaVO.getFixedNumber());
         }
         if (tableSchemaVO.getNotEmpty() != null) {
           Boolean oldValue = tableSchema.getBoolean("notEmpty");
@@ -526,6 +532,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         updateIsPkReferencedInFieldSchema(fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
             fieldSchemaVO.getReferencedField().getIdPk(), true);
       }
+      if (null == fieldSchemaVO.getReadOnly()) {
+        fieldSchemaVO.setReadOnly(false);
+      }
       // we create this if to clean blank space at begining and end of any codelistItem
       // n codelist and multiselect
       if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
@@ -544,6 +553,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           validExtensions[i] = validExtensions[i].trim();
         }
         fieldSchemaVO.setValidExtensions(validExtensions);
+      }
+      if (fieldSchemaVO.getMaxSize() == null || fieldSchemaVO.getMaxSize() == 0
+          || fieldSchemaVO.getMaxSize() > 20) {
+        fieldSchemaVO.setMaxSize(20f);
       }
 
       return schemasRepository
@@ -648,9 +661,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (fieldSchemaVO.getPkHasMultipleValues() != null) {
       fieldSchema.put("pkHasMultipleValues", fieldSchemaVO.getPkHasMultipleValues());
     }
-    if (fieldSchemaVO.getMaxSize() != null) {
-      fieldSchema.put("maxSize", fieldSchemaVO.getMaxSize());
+    Float size = 20f;
+    if (fieldSchemaVO.getMaxSize() != null && fieldSchemaVO.getMaxSize() != 0
+        && fieldSchemaVO.getMaxSize() < 20) {
+      size = fieldSchemaVO.getMaxSize();
     }
+    fieldSchema.put("maxSize", size);
+    if (fieldSchemaVO.getReadOnly() != null) {
+      fieldSchema.put("readOnly", fieldSchemaVO.getReadOnly());
+    }
+
     if (fieldSchemaVO.getValidExtensions() != null) {
       String[] validExtensions = fieldSchemaVO.getValidExtensions();
       for (int i = 0; i < validExtensions.length; i++) {
@@ -1704,7 +1724,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       if (DataType.ATTACHMENT.equals(fieldSchemaVO.getType())
           && fieldSchemaVO.getType().getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
           && previousMaxSize != null && previousExtensions != null
-          && ((previousMaxSize.doubleValue() != fieldSchemaVO.getMaxSize().doubleValue())
+          && ((fieldSchemaVO.getMaxSize() != null
+              && (previousMaxSize != fieldSchemaVO.getMaxSize().doubleValue()))
               || !differentExtensions.isEmpty())) {
         hasToClean = true;
       }

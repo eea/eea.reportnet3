@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { Fragment, useState, useEffect, useContext, useRef, useReducer } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -24,8 +24,8 @@ import { ContextMenu } from 'ui/views/_components/ContextMenu';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataForm } from './_components/DataForm';
 import { DataTable } from 'ui/views/_components/DataTable';
-import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { FieldEditor } from './_components/FieldEditor';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Footer } from './_components/Footer';
@@ -45,13 +45,13 @@ import { recordReducer } from './_functions/Reducers/recordReducer';
 import { sortReducer } from './_functions/Reducers/sortReducer';
 
 import { DataViewerUtils } from './_functions/Utils/DataViewerUtils';
-import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
 import { ExtensionUtils, MetadataUtils, RecordUtils } from 'ui/views/_functions/Utils';
+import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
 import {
-  useLoadColsSchemasAndColumnOptions,
   useContextMenu,
-  useSetColumns,
-  useRecordErrorPosition
+  useLoadColsSchemasAndColumnOptions,
+  useRecordErrorPosition,
+  useSetColumns
 } from './_functions/Hooks/DataViewerHooks';
 
 const DataViewer = withRouter(
@@ -66,9 +66,11 @@ const DataViewer = withRouter(
     },
     onLoadTableData,
     recordPositionId,
+    reporting,
     selectedRecordErrorId,
     setIsValidationSelected,
     showWriteButtons,
+    tableFixedNumber,
     tableHasErrors,
     tableId,
     tableName,
@@ -140,7 +142,6 @@ const DataViewer = withRouter(
 
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
-    const snapshotContext = useContext(SnapshotContext);
 
     let contextMenuRef = useRef();
     let datatableRef = useRef();
@@ -151,6 +152,7 @@ const DataViewer = withRouter(
       resources,
       records,
       RecordUtils.allAttachments(colsSchema),
+      tableFixedNumber,
       setEditDialogVisible,
       setConfirmDeleteVisible
     );
@@ -161,6 +163,7 @@ const DataViewer = withRouter(
           cells={cells}
           colsSchema={colsSchema}
           datasetId={datasetId}
+          hasWritePermissions={hasWritePermissions}
           onEditorKeyChange={onEditorKeyChange}
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
@@ -168,12 +171,14 @@ const DataViewer = withRouter(
           // onFileUploadOpen={onFileUploadOpen}
           onMapOpen={onMapOpen}
           record={record}
+          reporting={reporting}
         />
       );
     };
 
     const actionTemplate = () => (
       <ActionsColumn
+        hideDeletion={tableFixedNumber}
         hideEdition={RecordUtils.allAttachments(colsSchema)}
         onDeleteClick={() => setConfirmDeleteVisible(true)}
         onEditClick={() => setEditDialogVisible(true)}
@@ -196,15 +201,9 @@ const DataViewer = withRouter(
       const fileContent = await DatasetService.downloadFileData(datasetId, fieldId);
 
       DownloadFile(fileContent, fileName);
-
-      // const a = document.createElement('a');
-      //   a.href = `data:text/plain;base64,${splittedFieldValue[2]}`;
-      //   a.download = splittedFieldValue[0];
-      //   a.click();
     };
 
     const onFileUploadVisible = (fieldId, fieldSchemaId, validExtensions, maxSize) => {
-      console.log(validExtensions, maxSize);
       dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId, validExtensions, maxSize } });
     };
 
@@ -628,15 +627,13 @@ const DataViewer = withRouter(
       if (event) {
         const clipboardData = event.clipboardData;
         const pastedData = clipboardData.getData('Text');
-        console.log({ pastedData });
-        dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
+        dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema, reporting } });
       }
     };
 
     const onPasteAsync = async () => {
       const pastedData = await navigator.clipboard.readText();
-      console.log('PASTE ASYNC');
-      dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema } });
+      dispatchRecords({ type: 'COPY_RECORDS', payload: { pastedData, colsSchema, reporting } });
     };
 
     const onPasteAccept = async () => {
@@ -651,7 +648,6 @@ const DataViewer = withRouter(
           setIsTableDeleted(false);
         }
       } catch (error) {
-        console.log({ error });
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
@@ -900,8 +896,12 @@ const DataViewer = withRouter(
               icon={AwesomeIcons('check')}
               style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
             />
-          ) : rowData.field === 'Single select items' ? (
-            <Chips disabled={true} value={rowData.value}></Chips>
+          ) : rowData.field === 'Single select items' ||
+            rowData.field === 'Multiple select items' ||
+            rowData.field === 'Valid extensions' ? (
+            <Chips disabled={true} value={rowData.value.split(',')} className={styles.chips}></Chips>
+          ) : rowData.field === 'Maximum file size' ? (
+            `${rowData.value} ${resources.messages['MB']}`
           ) : (
             rowData.value
           )}
@@ -963,15 +963,14 @@ const DataViewer = withRouter(
           colsSchema={colsSchema}
           dataflowId={dataflowId}
           datasetId={datasetId}
-          hasWritePermissions={hasWritePermissions}
-          showWriteButtons={showWriteButtons}
-          hideValidationFilter={hideValidationFilter}
           fileExtensions={extensionsOperationsList.export}
           hasCountryCode={hasCountryCode}
+          hasWritePermissions={hasWritePermissions && !tableFixedNumber && !tableReadOnly}
+          hideValidationFilter={hideValidationFilter}
           isExportable={isExportable}
           isFilterValidationsActive={isFilterValidationsActive}
-          isTableDeleted={isTableDeleted}
           isLoading={isLoading}
+          isTableDeleted={isTableDeleted}
           isValidationSelected={isValidationSelected}
           levelErrorTypesWithCorrects={levelErrorTypesWithCorrects}
           onRefresh={onRefresh}
@@ -984,10 +983,10 @@ const DataViewer = withRouter(
           setImportTableDialogVisible={setImportTableDialogVisible}
           setRecordErrorPositionId={setRecordErrorPositionId}
           showValidationFilter={showValidationFilter}
+          showWriteButtons={showWriteButtons && !tableFixedNumber && !tableReadOnly}
           tableHasErrors={tableHasErrors}
           tableId={tableId}
           tableName={tableName}
-          tableReadOnly={tableReadOnly}
         />
         <ContextMenu model={menu} ref={contextMenuRef} />
         <div className={styles.Table}>
@@ -998,7 +997,7 @@ const DataViewer = withRouter(
             id={tableId}
             first={records.firstPageRecord}
             footer={
-              hasWritePermissions && !tableReadOnly ? (
+              hasWritePermissions && !tableReadOnly && !tableFixedNumber ? (
                 <Footer
                   hasWritePermissions={hasWritePermissions && !tableReadOnly}
                   onAddClick={() => {
@@ -1069,6 +1068,14 @@ const DataViewer = withRouter(
                 ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).codelistItems) &&
                 !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).codelistItems)
                   ? ['codelistItems']
+                  : []),
+                ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions) &&
+                !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions)
+                  ? ['validExtensions']
+                  : []),
+                ...(!isNull(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions) &&
+                !isEmpty(DataViewerUtils.getColumnByHeader(colsSchema, selectedHeader).validExtensions)
+                  ? ['maxSize']
                   : [])
               ])}>
               {['field', 'value'].map((column, i) => (
@@ -1164,9 +1171,11 @@ const DataViewer = withRouter(
                   datasetId={datasetId}
                   formType="NEW"
                   getTooltipMessage={getTooltipMessage}
+                  hasWritePermissions={hasWritePermissions}
                   onChangeForm={onEditAddFormInput}
                   onShowFieldInfo={onShowFieldInfo}
                   records={records}
+                  reporting={reporting}
                 />
               </div>
             </Dialog>
@@ -1177,7 +1186,6 @@ const DataViewer = withRouter(
           <Dialog
             blockScroll={false}
             className="edit-table calendar-table"
-            closeOnEscape={false}
             footer={editRowDialogFooter}
             header={resources.messages['editRow']}
             modal={true}
@@ -1192,9 +1200,11 @@ const DataViewer = withRouter(
                 editDialogVisible={editDialogVisible}
                 formType="EDIT"
                 getTooltipMessage={getTooltipMessage}
+                hasWritePermissions={hasWritePermissions}
                 onChangeForm={onEditAddFormInput}
                 onShowFieldInfo={onShowFieldInfo}
                 records={records}
+                reporting={reporting}
               />
             </div>
           </Dialog>
@@ -1270,7 +1280,6 @@ const DataViewer = withRouter(
         {records.isMapOpen && (
           <Dialog
             className={'map-data'}
-            // maximizable={true}
             blockScroll={false}
             dismissableMask={false}
             // contentStyle={

@@ -74,6 +74,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
+  const [exportDatasetFileType, setExportDatasetFileType] = useState('');
   const [extensionsOperationsList, setExtensionsOperationsList] = useState({ export: [], import: [] });
   const [externalExportExtensions, setExternalExportExtensions] = useState([]);
   const [hasValidations, setHasValidations] = useState();
@@ -85,8 +86,8 @@ export const Dataset = withRouter(({ match, history }) => {
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
   const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingFile, setLoadingFile] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [metaData, setMetaData] = useState({});
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
@@ -167,7 +168,7 @@ export const Dataset = withRouter(({ match, history }) => {
     getExportExtensions(extensionsOperationsList.export);
   }, [extensionsOperationsList]);
 
-  const parseUniqsExportExtensions = exportExtensionsOperationsList => {
+  const parseUniqExportExtensions = exportExtensionsOperationsList => {
     return exportExtensionsOperationsList.map(uniqExportExtension => ({
       text: `${uniqExportExtension.toUpperCase()} (.${uniqExportExtension.toLowerCase()})`,
       code: uniqExportExtension.toLowerCase()
@@ -175,14 +176,14 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   const getExportExtensions = exportExtensionsOperationsList => {
-    const uniqsExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
-    setExternalExportExtensions(parseUniqsExportExtensions(uniqsExportExtensions));
+    const uniqExportExtensions = uniq(exportExtensionsOperationsList.map(element => element.fileExtension));
+    setExternalExportExtensions(parseUniqExportExtensions(uniqExportExtensions));
   };
 
   const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => ({
     label: type.text,
     icon: config.icons['archive'],
-    command: () => onExportData(type.code)
+    command: () => onExportDataInternalExtension(type.code)
   }));
 
   const externalExtensions = [
@@ -191,7 +192,7 @@ export const Dataset = withRouter(({ match, history }) => {
       items: externalExportExtensions.map(type => ({
         label: type.text,
         icon: config.icons['archive'],
-        command: () => onExportData(type.code)
+        command: () => onExportDataExternalExtension(type.code)
       }))
     }
   ];
@@ -307,32 +308,44 @@ export const Dataset = withRouter(({ match, history }) => {
   const onHighlightRefresh = value => setIsRefreshHighlighted(value);
 
   useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
+  useCheckNotifications(['EXTERNAL_INTEGRATION_DOWNLOAD'], setIsLoadingFile, false);
 
   const onLoadTableData = hasData => {
     setDatasetHasData(hasData);
   };
 
-  const onExportData = async fileType => {
-    setLoadingFile(true);
+  const onExportError = async () => {
+    const {
+      dataflow: { name: dataflowName },
+      dataset: { name: datasetName }
+    } = await getMetadata({ dataflowId, datasetId });
+
+    notificationContext.add({
+      type: 'EXPORT_DATA_BY_ID_ERROR',
+      content: { dataflowId, datasetId, dataflowName, datasetName }
+    });
+  };
+
+  const onExportDataExternalExtension = async fileExtension => {
+    setIsLoadingFile(true);
+    setExportDatasetFileType(fileExtension);
+    try {
+      await DatasetService.exportDatasetDataExternal(datasetId, fileExtension);
+    } catch (error) {
+      onExportError();
+    }
+  };
+
+  const onExportDataInternalExtension = async fileType => {
+    setIsLoadingFile(true);
+    setExportDatasetFileType(fileType);
     try {
       setExportDatasetDataName(createFileName(datasetName, fileType));
       setExportDatasetData(await DatasetService.exportDataById(datasetId, fileType));
     } catch (error) {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'EXPORT_DATA_BY_ID_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
-      });
+      onExportError();
     } finally {
-      setLoadingFile(false);
+      setIsLoadingFile(false);
     }
   };
 
@@ -359,7 +372,7 @@ export const Dataset = withRouter(({ match, history }) => {
         history.push(getUrl(routes.DATAFLOWS));
       }
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -388,7 +401,7 @@ export const Dataset = withRouter(({ match, history }) => {
     onHighlightRefresh(false);
 
     try {
-      setLoading(true);
+      setIsLoading(true);
       const datasetSchema = await getDataSchema();
       const datasetStatistics = await getStatisticsById(
         datasetId,
@@ -406,6 +419,7 @@ export const Dataset = withRouter(({ match, history }) => {
             hasErrors: {
               ...datasetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
             }.hasErrors,
+            fixedNumber: tableSchema['tableSchemaFixedNumber'],
             readOnly: tableSchema['tableSchemaReadOnly']
           };
         })
@@ -419,8 +433,10 @@ export const Dataset = withRouter(({ match, history }) => {
               description: field['description'],
               field: field['fieldId'],
               header: field['name'],
+              pk: field['pk'],
               maxSize: field['maxSize'],
               pkHasMultipleValues: field['pkHasMultipleValues'],
+              readOnly: field['readOnly'],
               recordId: field['recordId'],
               referencedField: field['referencedField'],
               table: table['tableSchemaName'],
@@ -451,7 +467,7 @@ export const Dataset = withRouter(({ match, history }) => {
         history.push(getUrl(routes.DATAFLOW, { dataflowId }));
       }
     } finally {
-      setLoading(false);
+      setIsLoading(false);
       setIsDataLoaded(true);
     }
   };
@@ -533,9 +549,16 @@ export const Dataset = withRouter(({ match, history }) => {
     />
   );
 
-  if (loading) {
-    return layout(<Spinner />);
-  }
+  const renderDashboardFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => onSetVisible(setDashDialogVisible, false)}
+    />
+  );
+
+  if (isLoading) return layout(<Spinner />);
 
   return layout(
     <SnapshotContext.Provider
@@ -569,7 +592,7 @@ export const Dataset = withRouter(({ match, history }) => {
             <Button
               id="buttonExportDataset"
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step`}
-              icon={loadingFile ? 'spinnerAnimate' : 'export'}
+              icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
               label={resources.messages['exportDataset']}
               onClick={event => exportMenuRef.current.show(event)}
             />
@@ -653,14 +676,20 @@ export const Dataset = withRouter(({ match, history }) => {
           </div>
         </Toolbar>
       </div>
-      <Dialog
-        dismissableMask={true}
-        header={resources.messages['titleDashboard']}
-        onHide={() => onSetVisible(setDashDialogVisible, false)}
-        style={{ width: '70vw' }}
-        visible={dashDialogVisible}>
-        <Dashboard refresh={dashDialogVisible} levelErrorTypes={levelErrorTypes} tableSchemaNames={tableSchemaNames} />
-      </Dialog>
+      {dashDialogVisible && (
+        <Dialog
+          footer={renderDashboardFooter}
+          header={resources.messages['titleDashboard']}
+          onHide={() => onSetVisible(setDashDialogVisible, false)}
+          style={{ width: '70vw' }}
+          visible={dashDialogVisible}>
+          <Dashboard
+            levelErrorTypes={levelErrorTypes}
+            refresh={dashDialogVisible}
+            tableSchemaNames={tableSchemaNames}
+          />
+        </Dialog>
+      )}
       <TabsSchema
         activeIndex={dataViewerOptions.activeIndex}
         hasWritePermissions={hasWritePermissions}
@@ -670,35 +699,36 @@ export const Dataset = withRouter(({ match, history }) => {
         onLoadTableData={onLoadTableData}
         onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
         recordPositionId={dataViewerOptions.recordPositionId}
+        reporting={true}
         selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
         setIsValidationSelected={setIsValidationSelected}
         tables={tableSchema}
         tableSchemaColumns={tableSchemaColumns}
       />
-      <Dialog
-        className={styles.paginatorValidationViewer}
-        dismissableMask={true}
-        header={resources.messages['titleValidations']}
-        onHide={() => onSetVisible(setValidationsVisible, false)}
-        style={{ width: '80%' }}
-        visible={validationsVisible}>
-        <ValidationViewer
-          datasetId={datasetId}
-          datasetName={datasetName}
-          hasWritePermissions={hasWritePermissions}
-          levelErrorTypes={levelErrorTypes}
-          onSelectValidation={onSelectValidation}
-          tableSchemaNames={tableSchemaNames}
-          visible={validationsVisible}
-        />
-      </Dialog>
+      {validationsVisible && (
+        <Dialog
+          className={styles.paginatorValidationViewer}
+          header={resources.messages['titleValidations']}
+          onHide={() => onSetVisible(setValidationsVisible, false)}
+          style={{ width: '80%' }}
+          visible={validationsVisible}>
+          <ValidationViewer
+            datasetId={datasetId}
+            datasetName={datasetName}
+            hasWritePermissions={hasWritePermissions}
+            levelErrorTypes={levelErrorTypes}
+            onSelectValidation={onSelectValidation}
+            tableSchemaNames={tableSchemaNames}
+            visible={validationsVisible}
+          />
+        </Dialog>
+      )}
       {validationListDialogVisible && (
         <Dialog
-          className={hasValidations ? styles.qcRulesDialog : styles.qcRulesDialogEmpty}
-          dismissableMask={true}
           footer={validationListFooter}
           header={resources.messages['qcRules']}
           onHide={() => onSetVisible(setValidationListDialogVisible, false)}
+          style={{ width: '90%' }}
           visible={validationListDialogVisible}>
           <TabsValidations
             dataset={{ datasetId: datasetId, name: datasetSchemaName }}
@@ -735,27 +765,29 @@ export const Dataset = withRouter(({ match, history }) => {
           />
         </Dialog>
       )}
-      <ConfirmDialog
-        classNameConfirm={'p-button-danger'}
-        header={resources.messages['deleteDatasetHeader']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        maximizable={false}
-        onConfirm={onConfirmDelete}
-        onHide={() => onSetVisible(setDeleteDialogVisible, false)}
-        visible={deleteDialogVisible}>
-        {resources.messages['deleteDatasetConfirm']}
-      </ConfirmDialog>
-      <ConfirmDialog
-        header={resources.messages['validateDataset']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        maximizable={false}
-        onConfirm={onConfirmValidate}
-        onHide={() => onSetVisible(setValidateDialogVisible, false)}
-        visible={validateDialogVisible}>
-        {resources.messages['validateDatasetConfirm']}
-      </ConfirmDialog>
+      {deleteDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={resources.messages['deleteDatasetHeader']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={onConfirmDelete}
+          onHide={() => onSetVisible(setDeleteDialogVisible, false)}
+          visible={deleteDialogVisible}>
+          {resources.messages['deleteDatasetConfirm']}
+        </ConfirmDialog>
+      )}
+      {validateDialogVisible && (
+        <ConfirmDialog
+          header={resources.messages['validateDataset']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={onConfirmValidate}
+          onHide={() => onSetVisible(setValidateDialogVisible, false)}
+          visible={validateDialogVisible}>
+          {resources.messages['validateDatasetConfirm']}
+        </ConfirmDialog>
+      )}
       <Snapshots
         snapshotListData={snapshotListData}
         isLoadingSnapshotListData={isLoadingSnapshotListData}
