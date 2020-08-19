@@ -88,11 +88,11 @@ export const ReleasedDatasetsDashboard = dataflowId => {
       display: false
     },
     responsive: true,
+    datasets: { bar: { maxBarThickness: 100 } },
     scales: {
       xAxes: [
         {
-          stacked: true,
-          maxBarThickness: 100,
+          stacked: true,         
           gridLines: { display: false }
           // gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#fff' },
           // ticks: {
