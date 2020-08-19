@@ -169,8 +169,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       } else {
         filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
       }
-      levelErrorList.stream().filter(errorType -> ErrorTypeEnum.CORRECT.equals(errorType))
-          .forEach(errorType -> errorList.add(errorType));
+      errorList.addAll(levelErrorList);
     }
     result.setTotalFilteredRecords(0L);
     // we put that condition because we wont to do any query if the filter is empty and return a new
