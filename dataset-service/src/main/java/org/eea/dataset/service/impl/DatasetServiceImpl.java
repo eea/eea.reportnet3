@@ -1199,7 +1199,7 @@ public class DatasetServiceImpl implements DatasetService {
     DatasetValue dataset = new DatasetValue();
     List<TableValue> tables = new ArrayList<>();
     List<String> readOnlyTables = new ArrayList<>();
-
+    List<String> fixedNumberTables = new ArrayList<>();
 
     // Loops to build the entity
     dataset.setId(datasetId);
@@ -1211,6 +1211,9 @@ public class DatasetServiceImpl implements DatasetService {
       if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getReadOnly())) {
         readOnlyTables.add(tableSchema.getIdTableSchema().toString());
       }
+      if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+        fixedNumberTables.add(tableSchema.getIdTableSchema().toString());
+      }
     }
     dataset.setTableValues(tables);
     dataset.setIdDatasetSchema(datasetSchemaId);
@@ -1221,7 +1224,16 @@ public class DatasetServiceImpl implements DatasetService {
       // Check if the table with idTableSchema has been populated already
       Long oldTableId = findTableIdByTableSchema(datasetId, tableValue.getIdTableSchema());
       fillTableId(tableValue.getIdTableSchema(), dataset.getTableValues(), oldTableId);
-      if (!readOnlyTables.contains(tableValue.getIdTableSchema())) {
+      if (!readOnlyTables.contains(tableValue.getIdTableSchema())
+          && !fixedNumberTables.contains(tableValue.getIdTableSchema())) {
+        // Put an empty value to the field if it's an attachment type
+        tableValue.getRecords().stream().forEach(r -> {
+          r.getFields().stream().forEach(f -> {
+            if (DataType.ATTACHMENT.equals(f.getType())) {
+              f.setValue("");
+            }
+          });
+        });
         allRecords.addAll(tableValue.getRecords());
       }
       if (null == oldTableId) {
