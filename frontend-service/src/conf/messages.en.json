@@ -839,6 +839,7 @@
     "externalIntegrationDownload": "Export file is ready to be downloaded ",
     "downloadFile": "Download file",
     "action": "Action",
-    "exportExternalIntegrationDataset": "Exporting dataset data"
+    "exportExternalIntegrationDataset": "Exporting dataset data",
+    "noNotifications": "There are no notifications yet"
   }
 }
