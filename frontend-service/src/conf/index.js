@@ -20,6 +20,7 @@ config.countries = countries;
 config.exportTypes = exportTypes;
 config.icons = icons;
 config.languages = languages;
+config.MAX_FILE_EXTENSION_LENGTH = 10;
 config.MAX_FILE_SIZE = 100000000;
 config.notifications = notifications;
 config.permissions = permissions;
