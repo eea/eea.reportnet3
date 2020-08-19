@@ -42,8 +42,8 @@ public enum LockSignature {
   /** DataCollectionControllerImpl.updateDataCollection(..) */
   UPDATE_DATA_COLLECTION("DataCollectionControllerImpl.updateDataCollection(..)"),
 
-  /** DataSetSchemaControllerImpl.copyDesignsFromDataflow(..) */
-  COPY_DATASET_SCHEMA("DataSetSchemaControllerImpl.copyDesignsFromDataflow(..)"),
+  /** DatasetSchemaControllerImpl.copyDesignsFromDataflow(..) */
+  COPY_DATASET_SCHEMA("DatasetSchemaControllerImpl.copyDesignsFromDataflow(..)"),
 
   /** EUDatasetControllerImpl.populateDataFromDataCollection(..) */
   POPULATE_EU_DATASET("EUDatasetControllerImpl.populateDataFromDataCollection(..)"),

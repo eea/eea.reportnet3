@@ -509,4 +509,14 @@ public interface DatasetService {
    */
   String findRecordSchemaIdById(@DatasetId Long datasetId, String idRecord);
 
+
+  /**
+   * Find field schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @return the string
+   */
+  String findFieldSchemaIdById(@DatasetId Long datasetId, String idField);
+
 }

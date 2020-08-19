@@ -1298,7 +1298,7 @@ public class DatasetServiceTest {
    */
   @Test
   public void createRecordsExceptionTest() throws EEAException {
-    thrown.expectMessage(EEAErrorMessage.TABLE_NOT_FOUND);
+    thrown.expectMessage(String.format(EEAErrorMessage.TABLE_NOT_FOUND, "", 1L));
     datasetService.createRecords(1L, new ArrayList<>(), "");
   }
 
@@ -2346,7 +2346,20 @@ public class DatasetServiceTest {
   public void testUpdateAttachment() throws EEAException, IOException {
     final MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "csv", "content".getBytes());
-    when(fieldRepository.findById(Mockito.anyString())).thenReturn(new FieldValue());
+    Document fieldSchema = new Document();
+    fieldSchema.put(LiteralConstants.READ_ONLY, Boolean.FALSE);
+    FieldValue field = new FieldValue();
+    field.setId("600B66C6483EA7C8B55891DA171A3E7F");
+    RecordValue record = new RecordValue();
+    TableValue table = new TableValue();
+    DatasetValue dataset = new DatasetValue();
+    dataset.setIdDatasetSchema("5ce524fad31fc52540abae73");
+    table.setDatasetId(dataset);
+    record.setTableValue(table);
+    field.setRecord(record);
+
+    when(fieldRepository.findById(Mockito.anyString())).thenReturn(field);
+    when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any())).thenReturn(fieldSchema);
     when(attachmentRepository.findByFieldValueId(Mockito.anyString()))
         .thenReturn(new AttachmentValue());
     datasetService.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file.getName(),
@@ -2406,4 +2419,15 @@ public class DatasetServiceTest {
     assertEquals("5cf0e9b3b793310e9ceca190",
         datasetService.findRecordSchemaIdById(1L, "0A07FD45F1CD7965A2B0F13E57948A13"));
   }
+
+  @Test
+  public void testFindFieldSchemaById() {
+    FieldValue field = new FieldValue();
+    field.setId("0A07FD45F1CD7965A2B0F13E57948A13");
+    field.setIdFieldSchema("5cf0e9b3b793310e9ceca190");
+    Mockito.when(fieldRepository.findById(Mockito.anyString())).thenReturn(field);
+    assertEquals("5cf0e9b3b793310e9ceca190",
+        datasetService.findFieldSchemaIdById(1L, "0A07FD45F1CD7965A2B0F13E57948A13"));
+  }
+
 }

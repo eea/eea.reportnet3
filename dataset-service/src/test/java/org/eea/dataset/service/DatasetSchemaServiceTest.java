@@ -681,9 +681,13 @@ public class DatasetSchemaServiceTest {
         .thenReturn(Optional.of(dataSetMetabase));
     Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(null);
     try {
-      dataSchemaServiceImpl.updateTableSchema(1L, new TableSchemaVO());
+      TableSchemaVO tableSchemaVO = new TableSchemaVO();
+      tableSchemaVO.setIdTableSchema("idTableSchema");
+      dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVO);
     } catch (EEAException e) {
-      Assert.assertEquals(EEAErrorMessage.TABLE_NOT_FOUND, e.getMessage());
+      Assert.assertEquals(
+          String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchemaVO.getIdTableSchema(), 1L),
+          e.getMessage());
       throw e;
     }
   }
@@ -729,12 +733,15 @@ public class DatasetSchemaServiceTest {
     Mockito.when(tableSchemaVO.getNameTableSchema()).thenReturn(null);
     Mockito.when(tableSchemaVO.getReadOnly()).thenReturn(null);
     Mockito.when(tableSchemaVO.getToPrefill()).thenReturn(null);
+    Mockito.when(tableSchemaVO.getFixedNumber()).thenReturn(null);
     Mockito.when(schemasRepository.updateTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
     try {
       dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVO);
     } catch (EEAException e) {
-      Assert.assertEquals(EEAErrorMessage.TABLE_NOT_FOUND, e.getMessage());
+      Assert.assertEquals(
+          String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA, tableSchema, 1L),
+          e.getMessage());
       throw e;
     }
   }

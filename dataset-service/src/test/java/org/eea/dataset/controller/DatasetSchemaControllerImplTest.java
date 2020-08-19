@@ -464,7 +464,9 @@ public class DatasetSchemaControllerImplTest {
     doThrow(EEAException.class).when(dataschemaService).updateTableSchema(Mockito.any(),
         Mockito.any());
     try {
-      dataSchemaControllerImpl.updateTableSchema(1L, new TableSchemaVO());
+      TableSchemaVO tableSchema = new TableSchemaVO();
+      tableSchema.setIdTableSchema("");
+      dataSchemaControllerImpl.updateTableSchema(1L, tableSchema);
     } catch (ResponseStatusException ex) {
       assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, ex.getReason());
       assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
