@@ -841,7 +841,7 @@ const DataViewer = withRouter(
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
           className="p-button-animated-blink"
-          icon={isSaving === true ? 'spinnerAnimate' : 'save'}
+          icon={isSaving === true ? 'spinnerAnimate' : 'check'}
           label={resources.messages['save']}
           onClick={() => {
             try {
