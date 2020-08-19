@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
+import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -23,6 +24,7 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
@@ -286,7 +288,14 @@ public class FileTreatmentHelper {
       DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
 
       listaGeneral.parallelStream().forEach(value -> {
-        value.stream().forEach(r -> r.setDataProviderCode(provider.getCode()));
+        value.stream().forEach(r -> {
+          r.setDataProviderCode(provider.getCode());
+          for (FieldValue f : r.getFields()) {
+            if (DataType.ATTACHMENT.equals(f.getType())) {
+              f.setValue("");
+            }
+          }
+        });
         datasetService.saveAllRecords(datasetId, value);
       });
 
