@@ -53,18 +53,19 @@ export const Dialog = ({
     dialogContext.add(newDialogId);
     return () => {
       dialogContext.remove(dialogId);
+      restoreBodyScroll();
     };
   }, []);
+
+  const restoreBodyScroll = () => {
+    if (dialogContext.open.length === 0) {
+      document.body.style.overflow = 'hidden auto';
+    }
+  };
 
   useEffect(() => {
     const body = document.querySelector('body');
     visible && (body.style.overflow = 'hidden');
-
-    return () => {
-      if (dialogContext.open.length === 0) {
-        body.style.overflow = 'hidden auto';
-      }
-    };
   }, [visible]);
 
   useEffect(() => {

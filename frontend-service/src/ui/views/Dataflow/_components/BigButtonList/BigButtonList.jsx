@@ -174,7 +174,6 @@ export const BigButtonList = ({
 
   const onCreateDataCollection = async date => {
     setIsConfirmCollectionDialog(false);
-    setDataCollectionDialog(false);
 
     notificationContext.add({ type: 'CREATE_DATA_COLLECTION_INIT', content: {} });
 
@@ -191,6 +190,8 @@ export const BigButtonList = ({
       notificationContext.add({ type: 'CREATE_DATA_COLLECTION_ERROR', content: { dataflowId, dataflowName } });
 
       setIsActiveButton(true);
+    } finally {
+      setDataCollectionDialog(false);
     }
   };
 
@@ -409,7 +410,7 @@ export const BigButtonList = ({
           visible={errorDialogData.isVisible}>
           <div className="p-grid p-fluid">{errorDialogData.message}</div>
         </Dialog>
-      )}   
+      )}
 
       {deleteDialogVisible && (
         <ConfirmDialog
