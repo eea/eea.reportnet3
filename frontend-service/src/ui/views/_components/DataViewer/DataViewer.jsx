@@ -805,13 +805,13 @@ const DataViewer = withRouter(
           className="p-button-animated-blink"
           disabled={isSaving}
           label={resources.messages['save']}
-          icon={!isSaving ? 'save' : 'spinnerAnimate'}
+          icon={!isSaving ? 'check' : 'spinnerAnimate'}
           onClick={() => {
             onSaveRecord(records.newRecord);
           }}
         />
         <Button
-          className="p-button-secondary p-button-animated-blink"
+          className="p-button-secondary"
           icon="cancel"
           label={resources.messages['cancel']}
           onClick={() => {
