@@ -151,11 +151,11 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, datasetSchemaName,
       display: false
     },
     responsive: true,
+    datasets: { bar: { maxBarThickness: 100 } },
     scales: {
       xAxes: [
         {
-          stacked: true,
-          maxBarThickness: 100,
+          stacked: true,        
           gridLines: { display: false }
         }
       ],
