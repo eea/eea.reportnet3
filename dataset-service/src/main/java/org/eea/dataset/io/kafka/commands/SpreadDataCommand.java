@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
@@ -224,8 +225,7 @@ public class SpreadDataCommand extends AbstractEEAEventHandlerCommand {
         fieldValuesOnlyValues.add(auxField);
         if (DataType.ATTACHMENT.equals(field.getType())) {
           for (AttachmentValue attach : attachments) {
-            if (attach.getFieldValue().getIdFieldSchema().equals(field.getIdFieldSchema())
-                && attach.getFileName().equals(field.getValue())
+            if (StringUtils.isNotBlank(attach.getFieldValue().getId())
                 && attach.getFieldValue().getId().equals(field.getId())) {
               attach.setFieldValue(auxField);
               attach.setId(null);
