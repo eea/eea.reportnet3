@@ -217,7 +217,7 @@ const DocumentFileUpload = ({
                     : styles.disabledButton
                 }
                 disabled={isSubmitting}
-                icon={isEditForm ? 'save' : 'add'}
+                icon={isEditForm ? 'check' : 'add'}
                 label={isEditForm ? resources.messages['save'] : resources.messages['upload']}
                 type={isSubmitting ? '' : 'submit'}
               />

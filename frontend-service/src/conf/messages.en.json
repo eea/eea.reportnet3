@@ -821,7 +821,7 @@
     "fixedNumber": "Fixed number of records",
     "readOnly": "Read only",
     "supportedFileAttachmentsMaxSizeTooltip": "Maximum file size: ",
-    "allAttachment": "All fields are attachment. Press 'Save' to add a record with empty attachments. You can upload them afterwards.",
+    "allAttachment": "There are only Attachment field types. Press 'Save' to add a record with empty attachments. You can upload them afterwards.",
     "createQCDisabled": "Can't create field QC on Attachment field",
     "createQC": "Create a QC over this field",
     "attachmentPaste": "Attachment fields will not be pasted",
@@ -838,6 +838,8 @@
     "plusFileSize": "Increase maximum file size",
     "externalIntegrationDownload": "Export file is ready to be downloaded ",
     "downloadFile": "Download file",
-    "action": "Action"
+    "action": "Action",
+    "exportExternalIntegrationDataset": "Exporting dataset data",
+    "noNotifications": "There are no notifications yet"
   }
 }

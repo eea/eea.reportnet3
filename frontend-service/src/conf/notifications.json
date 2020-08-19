@@ -612,7 +612,14 @@
           "key": "COPY_DATA_TO_EUDATASET_COMPLETED_EVENT"
         },
         {
-          "key": "COPY_DATASET_SCHEMA_COMPLETED_EVENT"
+          "key": "COPY_DATASET_SCHEMA_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
+        },
+        {
+          "key": "EXTERNAL_INTEGRATION_DOWNLOAD"
         }
       ]
     },
@@ -651,7 +658,7 @@
           "key": "EXPORT_EU_DATASET_INIT"
         },
         {
-          "key": "EXTERNAL_INTEGRATION_DOWNLOAD"
+          "key": "EXPORT_EXTERNAL_INTEGRATION_DATASET"
         }
       ]
     }

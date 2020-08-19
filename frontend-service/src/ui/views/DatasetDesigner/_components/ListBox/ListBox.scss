@@ -85,7 +85,8 @@
 }
 
 .p-listbox-title-wrapper {
-  height: 2rem;
+  height: auto;
+  min-height: 2rem;
   border-bottom: 1px solid var(--main-font-color);
   overflow: scroll;
 }

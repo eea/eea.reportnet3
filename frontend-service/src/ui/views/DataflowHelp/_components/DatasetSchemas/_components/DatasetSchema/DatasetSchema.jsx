@@ -161,7 +161,6 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
     parsedDataset.validations = validationList;
     if (!isUndefined(design.tables) && !isNull(design.tables) && design.tables.length > 0) {
       const tables = design.tables.map(tableDTO => {
-        console.log(tableDTO.tableSchemaDescription);
         const tableProperties = [
           {
             description:
@@ -170,8 +169,8 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
                 : '-',
             readOnly: tableDTO.tableSchemaReadOnly,
             prefilled: !isNil(tableDTO.tableSchemaToPrefill) ? tableDTO.tableSchemaToPrefill : false,
-            mandatory: tableDTO.tableSchemaNotEmpty,
-            fixedNumber: !isNil(tableDTO.tableSchemaFixedNumber) ? tableDTO.tableSchemaFixedNumber : false
+            fixedNumber: !isNil(tableDTO.tableSchemaFixedNumber) ? tableDTO.tableSchemaFixedNumber : false,
+            mandatory: tableDTO.tableSchemaNotEmpty
           }
         ];
 
@@ -187,8 +186,8 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
           const fields = tableDTO.records[0].fields.map(fieldDTO => {
             const field = {};
             field.pk = fieldDTO.pk;
-            field.required = fieldDTO.required;
             field.readOnly = fieldDTO.readOnly;
+            field.required = fieldDTO.required;
             field.name = fieldDTO.name;
             field.description = !isNull(fieldDTO.description) ? fieldDTO.description : '-';
             field.type = fieldDTO.type;
@@ -204,7 +203,7 @@ const DatasetSchema = ({ designDataset, index, extensionsOperationsList = [], un
           });
           table.fields = fields;
         }
-        console.log({ table });
+
         return table;
       });
       parsedDataset.tables = tables;
