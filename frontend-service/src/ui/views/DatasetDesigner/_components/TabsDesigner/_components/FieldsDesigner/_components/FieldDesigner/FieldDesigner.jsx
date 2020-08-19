@@ -330,7 +330,9 @@ export const FieldDesigner = ({
   const onCancelSaveAttachment = () => {
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
-        onFieldAdd({ validExtensions: fieldFileProperties.validExtensions, maxSize: fieldFileProperties.maxSize });
+        if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
+          onFieldAdd({ validExtensions: fieldFileProperties.validExtensions, maxSize: fieldFileProperties.maxSize });
+        }
       }
     }
     dispatchFieldDesigner({ type: 'CANCEL_SELECT_CODELIST' });
@@ -340,13 +342,15 @@ export const FieldDesigner = ({
     // onCodelistAndLinkShow(fieldId, { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' });
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
-        onFieldAdd({
-          codelistItems,
-          type: 'LINK',
-          referencedField: link,
-          pkMustBeUsed,
-          pkHasMultipleValues
-        });
+        if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
+          onFieldAdd({
+            codelistItems,
+            type: 'LINK',
+            referencedField: link,
+            pkMustBeUsed,
+            pkHasMultipleValues
+          });
+        }
       }
     }
     dispatchFieldDesigner({ type: 'CANCEL_SELECT_LINK' });
@@ -357,7 +361,9 @@ export const FieldDesigner = ({
 
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
-        onFieldAdd({ codelistItems });
+        if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
+          onFieldAdd({ codelistItems });
+        }
       }
     }
     dispatchFieldDesigner({ type: 'CANCEL_SELECT_CODELIST' });
@@ -706,6 +712,7 @@ export const FieldDesigner = ({
           pkHasMultipleValues,
           pkMustBeUsed,
           name,
+          readOnly,
           recordId,
           referencedField,
           required,
